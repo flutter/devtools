@@ -14,12 +14,15 @@ import 'vs_code/flutter_panel.dart';
 /// meaning that this screen will not be part of DevTools' normal navigation.
 /// The only way to access a standalone screen is directly from the url.
 enum StandaloneScreenType {
-  vsCodeFlutterPanel;
+  // editorSidebar,
+  vsCodeFlutterPanel; // Legacy postMessage version.
 
   Widget get screen {
     return switch (this) {
       StandaloneScreenType.vsCodeFlutterPanel =>
         VsCodePostMessageSidebarPanel(PostMessageToolApiImpl.postMessage()),
+      // TODO(dantup): Determine how to find DTD URL... QueryString? DevTools server?
+      // StandaloneScreenType.editorSidebar => DtdEditorSidebarPanel(),
     };
   }
 }

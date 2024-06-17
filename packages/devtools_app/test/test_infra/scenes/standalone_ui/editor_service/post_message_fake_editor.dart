@@ -70,7 +70,6 @@ class PostMessageFakeEditor extends EditorServer with FakeEditor {
   late final json_rpc_2.Peer client;
   late final json_rpc_2.Peer server;
 
-  @override
   late final Stream<String> log;
 
   /// Simulates executing a VS Code command requested by the embedded panel.

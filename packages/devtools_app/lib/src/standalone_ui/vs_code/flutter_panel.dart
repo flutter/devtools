@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
 import '../../service/editor/api_classes.dart';
@@ -17,7 +20,60 @@ import 'debug_sessions.dart';
 import 'devices.dart';
 import 'devtools.dart';
 
-/// A general Flutter sidebar panel for embedding inside IDEs.
+/// A general Flutter sidebar panel for embedding inside editors.
+///
+/// Provides some basic functionality to improve discoverability of features
+/// such as creation of new projects, device selection and DevTools features.
+class DtdEditorSidebarPanel extends StatefulWidget {
+  // TODO(dantup): Remove the Dtd prefix from these classes when the postMessage
+  //  versions are removed.
+  const DtdEditorSidebarPanel(
+    this.dtd, {
+    super.key,
+  });
+
+  final DartToolingDaemon dtd;
+
+  @override
+  State<DtdEditorSidebarPanel> createState() => _DtdEditorSidebarPanelState();
+}
+
+class _DtdEditorSidebarPanelState extends State<DtdEditorSidebarPanel> {
+  _DtdEditorSidebarPanelState();
+
+  Future<EditorClient>? _editor;
+
+  @override
+  void initState() {
+    super.initState();
+    ga.screen(gac.VsCodeFlutterSidebar.id);
+
+    final editor = DtdEditorClient(widget.dtd);
+    unawaited(_editor = editor.initialized.then((_) => editor));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        FutureBuilder(
+          future: _editor,
+          builder: (context, snapshot) =>
+              switch ((snapshot.connectionState, snapshot.data)) {
+            (ConnectionState.done, final editor?) =>
+              _EditorConnectedPanel(editor),
+            (ConnectionState.done, null) =>
+              const Text('Editor is not available'),
+            _ => const CenteredCircularProgressIndicator(),
+          },
+        ),
+      ],
+    );
+  }
+}
+
+/// A general Flutter sidebar panel for embedding inside postMessage-based
+/// editors.
 ///
 /// Provides some basic functionality to improve discoverability of features
 /// such as creation of new projects, device selection and DevTools features.
@@ -54,7 +110,7 @@ class _VsCodePostMessageSidebarPanelState
           builder: (context, snapshot) =>
               switch ((snapshot.connectionState, snapshot.data)) {
             (ConnectionState.done, final vsCodeApi?) =>
-              _VsCodeConnectedPanel(PostMessageEditorClient(vsCodeApi)),
+              _EditorConnectedPanel(PostMessageEditorClient(vsCodeApi)),
             (ConnectionState.done, null) =>
               const Text('VS Code is not available'),
             _ => const CenteredCircularProgressIndicator(),
@@ -65,18 +121,17 @@ class _VsCodePostMessageSidebarPanelState
   }
 }
 
-/// The panel shown once we know VS Code is available (the host has responded to
-/// the `vsCode.getCapabilities` request).
-class _VsCodeConnectedPanel extends StatefulWidget {
-  const _VsCodeConnectedPanel(this.editor);
+/// The panel shown once we know an editor is available.
+class _EditorConnectedPanel extends StatefulWidget {
+  const _EditorConnectedPanel(this.editor);
 
   final EditorClient editor;
 
   @override
-  State<_VsCodeConnectedPanel> createState() => _VsCodeConnectedPanelState();
+  State<_EditorConnectedPanel> createState() => _EditorConnectedPanelState();
 }
 
-class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel>
+class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
     with AutoDisposeMixin {
   var debugSessions = <String, EditorDebugSession>{};
   var devices = <String, EditorDevice>{};
