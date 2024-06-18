@@ -342,7 +342,7 @@ void main() {
           // Then get the details tree for the node in the summary tree:
           RemoteDiagnosticsNode nodeInDetailsTree =
               (await group.getDetailsSubtree(nodeInSummaryTree))!;
-          
+
           // When flutter rolls, this string may sometimes change due to
           // implementation details.
           expect(
