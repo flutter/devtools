@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +41,7 @@ class LoggingTableRow extends StatefulWidget {
     double width,
   ) {
     final text = log.asLogDetails();
-    final maxWidth = width - _padding * 2;
+    final maxWidth = max(0.0, width - _padding * 2);
 
     final row1Height = calculateTextSpanHeight(
       TextSpan(text: text, style: detailsStyle),
@@ -49,9 +51,10 @@ class LoggingTableRow extends StatefulWidget {
     // TODO(danchevalier): Improve row2 height by manually flowing metadas into another row
     // if theyoverflow.
     final row2Height = calculateTextSpanHeight(
-      TextSpan(text: text, style: metadataStyle),
+      TextSpan(text: 'short text for now', style: metadataStyle),
       maxWidth: maxWidth,
     );
+
     return row1Height + row2Height + _padding * 2;
   }
 }
@@ -76,6 +79,7 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
             padding: EdgeInsets.all(LoggingTableRow._padding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 RichText(
                   text: TextSpan(

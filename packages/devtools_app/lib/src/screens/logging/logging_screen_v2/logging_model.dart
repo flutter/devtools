@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 
@@ -32,9 +33,9 @@ class LoggingTableModel extends ChangeNotifier {
   }
 
   // Make sure this is right data type to facilitate deletions.
-  final _logs = <LogDataV2>[];
-  final _filteredLogs = <LogDataV2>[];
-  final _selectedLogs = <int>{};
+  final _logs = ListQueue<LogDataV2>();
+  final _filteredLogs = ListQueue<LogDataV2>();
+  final _selectedLogs = ListQueue<LogDataV2>();
   late int _retentionLimit;
 
   final cachedHeights = <int, double>{};
@@ -50,8 +51,14 @@ class LoggingTableModel extends ChangeNotifier {
 
   void _onRetentionLimitUpdate() {
     _retentionLimit = preferences.logging.retentionLimit.value;
-    _logs.removeRange(0, _logs.length - _retentionLimit);
-    _filteredLogs.replaceRange(0, _filteredLogs.length, _logs);
+    while (_logs.length > _retentionLimit) {
+      if (identical(_filteredLogs.first, _logs.first)) {
+        // Remove a filtered log if it is about to disapear from the _logs.
+        _filteredLogs.removeFirst();
+      }
+      _logs.removeFirst();
+    }
+
     notifyListeners();
   }
 
@@ -60,7 +67,10 @@ class LoggingTableModel extends ChangeNotifier {
     super.dispose();
     preferences.logging.retentionLimit.removeListener(_onRetentionLimitUpdate);
     _cacheLoadProgress.dispose();
+    _worker.dispose();
   }
+
+  double get tableWidth => _tableWidth;
 
   /// Update the width of the table.
   ///
@@ -76,7 +86,7 @@ class LoggingTableModel extends ChangeNotifier {
   }
 
   /// Get the filtered log at [index].
-  LogDataV2 filteredLogAt(int index) => _filteredLogs[index];
+  LogDataV2 filteredLogAt(int index) => _filteredLogs.elementAt(index);
 
   double _tableWidth = 0.0;
 
@@ -97,9 +107,11 @@ class LoggingTableModel extends ChangeNotifier {
     _filteredLogs.add(log);
     if (_logs.length > _retentionLimit) {
       if (identical(_logs.first, _filteredLogs.first)) {
-        _filteredLogs.removeAt(0);
+        // Remove a filtered log if it is about to go out of retention.
+        _filteredLogs.removeFirst();
       }
-      _logs.removeAt(0);
+      // Remove the log that has just gone out of retention.
+      _logs.removeFirst();
     }
 
     getFilteredLogHeight(
@@ -126,7 +138,7 @@ class LoggingTableModel extends ChangeNotifier {
     if (cachedHeight != null) return cachedHeight;
 
     return cachedHeights[index] = LoggingTableRow.calculateRowHeight(
-      _logs[index],
+      _logs.elementAt(index),
       _tableWidth,
     );
   }
