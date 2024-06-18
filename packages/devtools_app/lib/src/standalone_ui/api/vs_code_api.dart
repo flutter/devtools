@@ -55,10 +55,18 @@ abstract interface class VsCodeApi {
   ///
   /// Depending on user settings, this may open embedded (the default) or in an
   /// external browser window.
+  ///
+  /// If [debugSessionId] is `null` the [requiresDebugSession] flag will
+  /// determine whether the editor will select (or ask the user to select) a
+  /// debug session for the page. If [requiresDebugSession] is `null` (or if
+  /// the `openDevToolsWithRequiresDebugSessionFlag` capability is `false`) then
+  /// the editor will try to make this decision automatically (which may be
+  /// inaccurate for pages it does not know about, like extensions).
   Future<void> openDevToolsPage(
     String? debugSessionId, {
     String? page,
     bool? forceExternal,
+    bool? requiresDebugSession,
   });
 
   /// Sends a Hot Reload request to the debug session with ID [debugSessionId].
@@ -87,6 +95,7 @@ abstract interface class VsCodeApi {
   static const jsonForceExternalParameter = 'forceExternal';
   static const jsonDebugSessionIdParameter = 'debugSessionId';
   static const jsonPlatformTypeParameter = 'platformType';
+  static const jsonRequiresDebugSessionParameter = 'requiresDebugSession';
 }
 
 /// This class defines a device event sent by the Dart/Flutter extensions in VS
@@ -153,6 +162,11 @@ abstract interface class VsCodeCapabilities {
   /// regardless of user settings.
   bool get openDevToolsExternally;
 
+  /// Whether the `openDevToolsPage` method can be called with the
+  /// `requiresDebugSession` flag to indicate whether the editor should select/
+  /// prompt for a debug session if one was not provided.
+  bool get openDevToolsWithRequiresDebugSessionFlag;
+
   /// Whether the `hotReload` method is available call to hot reload a specific
   /// debug session.
   bool get hotReload;
@@ -164,6 +178,8 @@ abstract interface class VsCodeCapabilities {
   static const jsonSelectDeviceField = 'selectDevice';
   static const openDevToolsPageField = 'openDevToolsPage';
   static const openDevToolsExternallyField = 'openDevToolsExternally';
+  static const openDevToolsWithRequiresDebugSessionFlagField =
+      'openDevToolsWithRequiresDebugSessionFlag';
   static const hotReloadField = 'hotReload';
   static const hotRestartField = 'hotRestart';
 }
