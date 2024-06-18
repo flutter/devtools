@@ -115,6 +115,7 @@ mixin FakeEditor on EditorServer {
     String debugSessionId,
     String? page,
     bool forceExternal,
+    bool requiresDebugSession,
   ) {}
 }
 
