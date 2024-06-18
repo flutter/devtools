@@ -109,6 +109,8 @@ class DebugSessions extends StatelessWidget {
           tooltip: 'Hot Restart',
           icon: Icon(hotRestartIcon, size: actionsIconSize),
         ),
+        // TODO(kenz): remove DevTools menu when we runtime extensions are
+        // available from the DevTools extensions section.
         if (editor.supportsOpenDevToolsPage)
           _DevToolsMenu(
             editor: editor,

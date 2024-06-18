@@ -74,7 +74,7 @@ class Devices extends StatelessWidget {
     final backgroundColor = isSelected ? theme.colorScheme.secondary : null;
     final foregroundColor = isSelected
         ? theme.colorScheme.onSecondary
-        : theme.colorScheme.secondary;
+        : theme.colorScheme.onSurface;
 
     return TableRow(
       decoration: BoxDecoration(color: backgroundColor),
