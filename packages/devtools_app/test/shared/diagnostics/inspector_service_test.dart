@@ -328,18 +328,21 @@ void main() {
 
         test('details tree', () async {
           await env.setupEnvironment();
+
+          // First get a node in the summary tree:
           final group = inspectorService!.createObjectGroup('test-group');
           final RemoteDiagnosticsNode root = (await group.getRoot(
             FlutterTreeType.widget,
             isSummaryTree: true,
           ))!;
-
           RemoteDiagnosticsNode nodeInSummaryTree =
               findNodeMatching(root, 'MaterialApp')!;
           expect(nodeInSummaryTree, isNotNull);
 
+          // Then get the details tree for the node in the summary tree:
           RemoteDiagnosticsNode nodeInDetailsTree =
               (await group.getDetailsSubtree(nodeInSummaryTree))!;
+          
           // When flutter rolls, this string may sometimes change due to
           // implementation details.
           expect(
