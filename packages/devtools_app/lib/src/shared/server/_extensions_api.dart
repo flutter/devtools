@@ -8,6 +8,9 @@ part of 'server.dart';
 /// serve their assets on the server, and return the list of available
 /// extensions here.
 Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
+  // TODO(https://github.com/flutter/devtools/issues/7944): pass the URI to the
+  // package config file instead of passing the app root and rebulding the URI
+  // to the package config file.
   Uri? appRoot,
 ) async {
   _log.fine('refreshAvailableExtensions for app root: ${appRoot.toString()}');
