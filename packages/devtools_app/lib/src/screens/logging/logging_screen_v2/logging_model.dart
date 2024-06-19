@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../shared/globals.dart';
@@ -20,7 +21,7 @@ import 'logging_table_v2.dart';
 /// The [LoggingTableV2] table uses variable height rows. This model caches the
 /// relevant heights and offsets so that the row heights only need to be calculated
 /// once per parent width.
-class LoggingTableModel extends ChangeNotifier {
+class LoggingTableModel extends ChangeNotifier with DisposerMixin {
   LoggingTableModel() {
     _worker = InterruptableChunkWorker(
       callback: (index) => getFilteredLogHeight(
@@ -28,11 +29,15 @@ class LoggingTableModel extends ChangeNotifier {
       ),
       progressCallback: (progress) => _cacheLoadProgress.value = progress,
     );
-    preferences.logging.retentionLimit.addListener(_onRetentionLimitUpdate);
+
+    addAutoDisposeListener(
+      preferences.logging.retentionLimit,
+      _onRetentionLimitUpdate,
+    );
+
     _retentionLimit = preferences.logging.retentionLimit.value;
   }
 
-  // Make sure this is right data type to facilitate deletions.
   final _logs = ListQueue<LogDataV2>();
   final _filteredLogs = ListQueue<LogDataV2>();
   final _selectedLogs = ListQueue<LogDataV2>();
@@ -64,10 +69,9 @@ class LoggingTableModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    super.dispose();
-    preferences.logging.retentionLimit.removeListener(_onRetentionLimitUpdate);
     _cacheLoadProgress.dispose();
     _worker.dispose();
+    super.dispose();
   }
 
   double get tableWidth => _tableWidth;

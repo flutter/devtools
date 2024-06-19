@@ -25,7 +25,9 @@ typedef ContextMenuBuilder = Widget Function(
 
 /// A Widget for displaying logs with line wrapping, along with log metadata.
 class LoggingTableV2 extends StatefulWidget {
+  // TODO(danchevalier): Use SearchControllerMixin and FilterControllerMixin.
   const LoggingTableV2({super.key, required this.model});
+
   final LoggingTableModel model;
 
   @override
@@ -287,7 +289,8 @@ class _RententionLimitSetting extends StatefulWidget {
       _RententionLimitSettingState();
 }
 
-class _RententionLimitSettingState extends State<_RententionLimitSetting> {
+class _RententionLimitSettingState extends State<_RententionLimitSetting>
+    with AutoDisposeMixin {
   void updateRetentionLimit() {
     newRetentionLimit = preferences.logging.retentionLimit.value;
   }
