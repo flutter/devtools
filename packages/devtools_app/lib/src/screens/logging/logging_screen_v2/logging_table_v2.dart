@@ -297,10 +297,9 @@ class _RententionLimitSettingState extends State<_RententionLimitSetting>
 
   @override
   void initState() {
+    super.initState();
     preferences.logging.retentionLimit.addListener(updateRetentionLimit);
     updateRetentionLimit();
-
-    super.initState();
   }
 
   @override
