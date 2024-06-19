@@ -454,7 +454,7 @@ class InspectorController extends DisposableController
       final group = treeGroups.next;
       final node = await (detailsSubtree
           ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
-          : group.getRoot(treeType));
+          : group.getRoot(treeType, isSummaryTree: false));
       if (node == null || group.disposed || _disposed) {
         return;
       }
