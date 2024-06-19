@@ -6,11 +6,13 @@ part of 'preferences.dart';
 
 class LoggingPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
-  /// Number of references to request from vm service,
-  /// when browsing references in console.
-  final retentionLimitTitle = 'Limit for number of requested live instances.';
+  final retentionLimitTitle = 'Limit for the number of logs retained.';
+
+  /// The number of logs to retain on the logging table.
   final retentionLimit = ValueNotifier<int>(_defaultRetentionLimit);
+
   static const _defaultRetentionLimit = 3000;
+
   static const _retentionLimitStorageId = 'logging.retentionLimit';
 
   Future<void> init() async {
