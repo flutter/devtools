@@ -39,7 +39,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
   }
 
   void _onDragOver(MouseEvent event) {
-    dragOver(event.offsetX as double, event.offsetY as double);
+    dragOver(event.offsetX.toDouble(), event.offsetY.toDouble());
 
     // This is necessary to allow us to drop.
     event.preventDefault();
