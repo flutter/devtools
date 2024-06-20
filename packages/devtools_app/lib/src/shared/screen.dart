@@ -448,11 +448,18 @@ abstract class Screen {
 }
 
 /// Check whether a screen should be shown in the UI.
-bool shouldShowScreen(Screen screen) {
+({bool show, ScreenDisabledReason? disabledReason}) shouldShowScreen(
+  Screen screen,
+) {
   _log.finest('shouldShowScreen: ${screen.screenId}');
   if (offlineDataController.showingOfflineData.value) {
     _log.finest('for offline mode: returning ${screen.worksWithOfflineData}');
-    return screen.worksWithOfflineData;
+    return (
+      show: screen.worksWithOfflineData,
+      disabledReason: screen.worksWithOfflineData
+          ? null
+          : ScreenDisabledReason.offlineDataNotSupported,
+    );
   }
 
   final serviceReady = serviceConnection.serviceManager.isServiceAvailable &&
@@ -460,13 +467,16 @@ bool shouldShowScreen(Screen screen) {
   if (!serviceReady) {
     if (!screen.requiresConnection) {
       _log.finest('screen does not require connection: returning true');
-      return true;
+      return (show: true, disabledReason: null);
     } else {
       // All of the following checks require a connected vm service, so verify
       // that one exists. This also avoids odd edge cases where we could show
       // screens while the ServiceManager is still initializing.
       _log.finest('service not ready: returning false');
-      return false;
+      return (
+        show: false,
+        disabledReason: ScreenDisabledReason.serviceNotReady,
+      );
     }
   }
 
@@ -478,36 +488,47 @@ bool shouldShowScreen(Screen screen) {
       _log.finest(
         'screen requires library ${screen.requiresLibrary}: returning false',
       );
-      return false;
+      return (
+        show: false,
+        disabledReason: ScreenDisabledReason.requiresDartLibrary,
+        // 'The ${screen.title} screen requires library '
+        // '${screen.requiresLibrary}, but the library was not detected.',
+      );
     }
   }
   if (screen.requiresDartVm) {
     if (serviceConnection.serviceManager.connectedApp!.isRunningOnDartVM !=
         true) {
       _log.finest('screen requires Dart VM: returning false');
-      return false;
+      return (show: false, disabledReason: ScreenDisabledReason.requiresDartVm);
     }
   }
   if (screen.requiresFlutter &&
       serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == false) {
     _log.finest('screen requires Flutter: returning false');
-    return false;
+    return (show: false, disabledReason: ScreenDisabledReason.requiresFlutter);
   }
   if (screen.requiresDebugBuild) {
     if (serviceConnection.serviceManager.connectedApp!.isProfileBuildNow ==
         true) {
       _log.finest('screen requires debug build: returning false');
-      return false;
+      return (
+        show: false,
+        disabledReason: ScreenDisabledReason.requiresDebugBuild,
+      );
     }
   }
   if (screen.requiresVmDeveloperMode) {
     if (!preferences.vmDeveloperModeEnabled.value) {
       _log.finest('screen requires vm developer mode: returning false');
-      return false;
+      return (
+        show: false,
+        disabledReason: ScreenDisabledReason.requiresVmDeveloperMode,
+      );
     }
   }
   _log.finest('${screen.screenId} screen supported: returning true');
-  return true;
+  return (show: true, disabledReason: null);
 }
 
 class BadgePainter extends CustomPainter {
@@ -572,4 +593,18 @@ class ShortcutsConfiguration {
   final Map<Type, Action<Intent>> actions;
 
   bool get isEmpty => shortcuts.isEmpty && actions.isEmpty;
+}
+
+enum ScreenDisabledReason {
+  offlineDataNotSupported('does not support offline data'),
+  requiresDartLibrary(null),
+  requiresDartVm('requires the Dart VM, but it is not available.'),
+  requiresDebugBuild('only supports debug builds.'),
+  requiresFlutter('only supports Flutter applications.'),
+  requiresVmDeveloperMode('only works when VM Developer Mode is enabled'),
+  serviceNotReady('requires a connection but the VM service is not ready.');
+
+  const ScreenDisabledReason(this.message);
+
+  final String? message;
 }

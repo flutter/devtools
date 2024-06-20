@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/service/editor/api_classes.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/devtools.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -36,13 +37,13 @@ void main() {
 
   Future<void> pumpDevToolsSidebarOptions(
     WidgetTester tester, {
-    bool hasDebugSessions = false,
+    Map<String, EditorDebugSession> debugSessions = const {},
   }) async {
     await tester.pumpWidget(
       wrap(
         DevToolsSidebarOptions(
           editor: mockEditorClient,
-          hasDebugSessions: hasDebugSessions,
+          debugSessions: debugSessions,
         ),
       ),
     );
@@ -52,21 +53,19 @@ void main() {
 
   group('$DevToolsSidebarOptions', () {
     testWidgetsWithWindowSize(
-      'includes static DevTools screens',
+      'includes DevTools screens',
       windowSize,
       (tester) async {
         await pumpDevToolsSidebarOptions(tester);
         expect(find.text('DevTools'), findsOneWidget);
-        expect(find.text(ScreenMetaData.appSize.title!), findsOneWidget);
-        expect(find.text(ScreenMetaData.deepLinks.title!), findsOneWidget);
-        expect(find.text('Open in Browser'), findsOneWidget);
-        expect(
-          find.text(
-            'Begin a debug session to use tools that require a running '
-            'application.',
-          ),
-          findsOneWidget,
-        );
+        for (final screen in ScreenMetaData.values) {
+          final include = DevToolsSidebarOptions.includeInSidebar(screen);
+          expect(
+            find.text(screen.title!),
+            include ? findsOneWidget : findsNothing,
+          );
+        }
+        expect(find.byIcon(Icons.open_in_browser_outlined), findsOneWidget);
       },
     );
 
@@ -77,35 +76,6 @@ void main() {
         await pumpDevToolsSidebarOptions(tester);
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(find.text('bar'), findsOneWidget);
-        expect(
-          find.text(
-            'Begin a debug session to use extensions that require a running '
-            'application.',
-          ),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'changes runtime tool instructions with non-empty debug sessions',
-      windowSize,
-      (tester) async {
-        await pumpDevToolsSidebarOptions(tester, hasDebugSessions: true);
-        expect(
-          find.text(
-            'Open the tools menu for a debug session to access tools that '
-            'require a running application.',
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.text(
-            'Open the tools menu for a debug session to access extensions that '
-            'require a running application.',
-          ),
-          findsOneWidget,
-        );
       },
     );
   });

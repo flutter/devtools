@@ -32,13 +32,6 @@ class ExtensionsManager {
 
   final _extensionLocationsByIdentifier = <String, String?>{};
 
-  /// The depth to search the user's IDE workspace roots for projects with
-  /// DevTools extensions.
-  ///
-  /// We use a larger depth than the default to reduce the risk of missing
-  /// static extensions in the user's project.
-  static const _staticExtensionsSearchDepth = 8;
-
   /// Returns the absolute path of the assets for the extension with identifier
   /// [extensionIdentifier].
   ///
@@ -95,7 +88,7 @@ class ExtensionsManager {
       try {
         dartToolingDaemon = await DartToolingDaemon.connect(Uri.parse(dtdUri));
         final projectRoots = await dartToolingDaemon.getProjectRoots(
-          depth: _staticExtensionsSearchDepth,
+          depth: staticExtensionsSearchDepth,
         );
         for (final root in projectRoots.uris ?? const <Uri>[]) {
           // Skip the runtime app root. These extensions have already been

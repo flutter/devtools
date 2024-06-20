@@ -10,13 +10,14 @@ import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../../extensions/extension_screen.dart';
-import '../../extensions/extension_service.dart';
+import '../../service/editor/api_classes.dart';
 import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
+import 'devtools_extensions.dart';
 
 typedef _DevToolsButtonData = ({
   String label,
@@ -59,12 +60,12 @@ _DevToolsButtonData _buttonDataFromExtension(DevToolsExtensionConfig ext) {
 class DevToolsSidebarOptions extends StatelessWidget {
   const DevToolsSidebarOptions({
     required this.editor,
-    required this.hasDebugSessions,
+    required this.debugSessions,
     super.key,
   });
 
   final EditorClient editor;
-  final bool hasDebugSessions;
+  final Map<String, EditorDebugSession> debugSessions;
 
   static const _useSingleColumnThreshold = 245.0;
 
@@ -115,7 +116,7 @@ class DevToolsSidebarOptions extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             _DevToolsExtensions(
               editor: editor,
-              hasDebugSessions: hasDebugSessions,
+              debugSessions: debugSessions,
             ),
           ],
         );
@@ -125,7 +126,7 @@ class DevToolsSidebarOptions extends StatelessWidget {
 
   List<TableRow> generateRows(bool singleColumn) {
     final devtoolsScreens =
-        ScreenMetaData.values.where(_includeInSidebar).toList();
+        ScreenMetaData.values.where(includeInSidebar).toList();
     if (singleColumn) {
       return devtoolsScreens
           .map(
@@ -134,7 +135,7 @@ class DevToolsSidebarOptions extends StatelessWidget {
               dataRight: null,
               editor: editor,
               singleColumn: singleColumn,
-              hasDebugSessions: hasDebugSessions,
+              hasDebugSessions: debugSessions.isNotEmpty,
               onPressed: (data) => _openDevToolsScreen(
                 screenId: data.screenId,
                 requiresDebugSession: data.requiresDebugSession,
@@ -156,7 +157,7 @@ class DevToolsSidebarOptions extends StatelessWidget {
           dataRight: second != null ? _buttonDataFromScreen(second) : null,
           editor: editor,
           singleColumn: singleColumn,
-          hasDebugSessions: hasDebugSessions,
+          hasDebugSessions: debugSessions.isNotEmpty,
           onPressed: (data) => _openDevToolsScreen(
             screenId: data.screenId,
             requiresDebugSession: data.requiresDebugSession,
@@ -169,7 +170,8 @@ class DevToolsSidebarOptions extends StatelessWidget {
     return rows;
   }
 
-  bool _includeInSidebar(ScreenMetaData screen) {
+  @visibleForTesting
+  static bool includeInSidebar(ScreenMetaData screen) {
     return switch (screen) {
       ScreenMetaData.home ||
       ScreenMetaData.debugger ||
@@ -185,14 +187,15 @@ class DevToolsSidebarOptions extends StatelessWidget {
   }
 }
 
+// TODO(kenz): move this to devtools_extensions.dart in a follow up PR.
 class _DevToolsExtensions extends StatefulWidget {
   const _DevToolsExtensions({
     required this.editor,
-    required this.hasDebugSessions,
+    required this.debugSessions,
   });
 
   final EditorClient editor;
-  final bool hasDebugSessions;
+  final Map<String, EditorDebugSession> debugSessions;
 
   @override
   State<_DevToolsExtensions> createState() => _DevToolsExtensionsState();
@@ -200,41 +203,32 @@ class _DevToolsExtensions extends StatefulWidget {
 
 class _DevToolsExtensionsState extends State<_DevToolsExtensions>
     with AutoDisposeMixin {
-  ExtensionService? _extensionService;
-
-  var extensions = <DevToolsExtensionConfig>[];
+  final sidebarExtensionsController = SidebarDevToolsExtensionsController();
 
   @override
   void initState() {
     super.initState();
-    _initExtensions();
+    unawaited(sidebarExtensionsController.init(widget.debugSessions));
+    addAutoDisposeListener(sidebarExtensionsController.uniqueExtensions);
   }
 
-  void _initExtensions() {
-    // TODO(kenz): runtime extensions will not be shown here. We need to refresh
-    // extensions for new debug sessions and de-duplicate.
-    _extensionService = ExtensionService(ignoreServiceConnection: true);
-
-    cancelListeners();
-    extensions = _extensionService!.visibleExtensions;
-    addAutoDisposeListener(_extensionService!.currentExtensions, () {
-      setState(() {
-        extensions = _extensionService!.visibleExtensions;
-      });
-    });
-
-    unawaited(_extensionService!.initialize());
+  @override
+  void didUpdateWidget(_DevToolsExtensions oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    unawaited(
+      sidebarExtensionsController.updateForDebugSessions(widget.debugSessions),
+    );
   }
 
   @override
   void dispose() {
-    _extensionService?.dispose();
-    _extensionService = null;
+    sidebarExtensionsController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final extensions = sidebarExtensionsController.uniqueExtensions.value;
     if (extensions.isEmpty) return const SizedBox();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,13 +239,13 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions>
         ),
         Table(
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: generateRows(),
+          children: generateRows(extensions),
         ),
       ],
     );
   }
 
-  List<TableRow> generateRows() {
+  List<TableRow> generateRows(List<DevToolsExtensionConfig> extensions) {
     final rows = <TableRow>[];
     for (int i = 0; i < extensions.length; i++) {
       final ext = extensions[i];
@@ -265,7 +259,7 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions>
           // will be and we want to avoid ugly text wrapping.
           singleColumn: true,
           editor: widget.editor,
-          hasDebugSessions: widget.hasDebugSessions,
+          hasDebugSessions: widget.debugSessions.isNotEmpty,
           onPressed: (data) {
             ga.select(
               gac.VsCodeFlutterSidebar.id,
@@ -333,6 +327,9 @@ class _DevToolsScreenButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // TODO(kenz): consider also disabling tools based on the available debug
+    // sessions. For example, if the only debug session is a Web app, we know
+    // some tools are not available.
     final disableButton = data.requiresDebugSession && !hasDebugSessions;
     return SizedBox(
       width: double.infinity,

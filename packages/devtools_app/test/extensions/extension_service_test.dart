@@ -171,7 +171,10 @@ void main() {
         StubDevToolsExtensions.barExtension,
         StubDevToolsExtensions.bazExtension,
         StubDevToolsExtensions.someToolExtension,
-      ]..forEach(service.setExtensionIgnored);
+      ];
+      for (final e in extensionsToIgnore) {
+        service.setExtensionIgnored(e, ignore: true);
+      }
       for (final ext in StubDevToolsExtensions.extensions()) {
         expect(
           service.isExtensionIgnored(ext),
