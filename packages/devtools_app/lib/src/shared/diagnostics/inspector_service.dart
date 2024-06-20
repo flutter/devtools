@@ -948,21 +948,29 @@ class ObjectGroup extends InspectorObjectGroupBase {
   @override
   bool canSetSelectionInspector = true;
 
-  Future<RemoteDiagnosticsNode?> getRoot(FlutterTreeType type) {
+  Future<RemoteDiagnosticsNode?> getRoot(
+    FlutterTreeType type, {
+    required bool isSummaryTree,
+  }) {
     // There is no excuse to call this method on a disposed group.
     assert(!disposed);
     switch (type) {
       case FlutterTreeType.widget:
-        return getRootWidget();
+        return getRootWidgetTree(isSummaryTree: isSummaryTree);
     }
   }
 
-  Future<RemoteDiagnosticsNode?> getRootWidget() {
+  Future<RemoteDiagnosticsNode?> getRootWidgetTree({
+    required bool isSummaryTree,
+  }) {
     return parseDiagnosticsNodeDaemon(
       invokeServiceMethodDaemonParams(
-        WidgetInspectorServiceExtensions
-            .getRootWidgetSummaryTreeWithPreviews.name,
-        {'groupName': groupName},
+        WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+        {
+          'groupName': groupName,
+          'isSummaryTree': '$isSummaryTree',
+          'withPreviews': 'true',
+        },
       ),
     );
   }
