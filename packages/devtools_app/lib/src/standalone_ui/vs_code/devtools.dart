@@ -23,6 +23,7 @@ typedef _DevToolsButtonData = ({
   IconData icon,
   String screenId,
   bool requiresDebugSession,
+  bool prefersDebugSession,
 });
 
 _DevToolsButtonData _buttonDataFromScreen(ScreenMetaData screen) {
@@ -32,6 +33,8 @@ _DevToolsButtonData _buttonDataFromScreen(ScreenMetaData screen) {
     icon: screen.icon!,
     screenId: screen.id,
     requiresDebugSession: screen.requiresConnection,
+    // Only the app size screen does not care about the active debug session.
+    prefersDebugSession: screen != ScreenMetaData.appSize,
   );
 }
 
@@ -41,6 +44,12 @@ _DevToolsButtonData _buttonDataFromExtension(DevToolsExtensionConfig ext) {
     icon: ext.icon,
     screenId: ext.screenId,
     requiresDebugSession: ext.requiresConnection,
+    // TODO(https://github.com/flutter/devtools/issues/7955): let extensions
+    // declare the type of tool they are providing: 'static-only',
+    // 'runtime-only', or 'static-and-runtime'. The value for
+    // prefersDebugSession should be true when the state is 'runtime-only' or
+    // 'static-and-runtime'.
+    prefersDebugSession: true,
   );
 }
 
@@ -129,6 +138,7 @@ class DevToolsSidebarOptions extends StatelessWidget {
               onPressed: (data) => _openDevToolsScreen(
                 screenId: data.screenId,
                 requiresDebugSession: data.requiresDebugSession,
+                prefersDebugSession: data.prefersDebugSession,
                 editor: editor,
               ),
             ),
@@ -150,6 +160,7 @@ class DevToolsSidebarOptions extends StatelessWidget {
           onPressed: (data) => _openDevToolsScreen(
             screenId: data.screenId,
             requiresDebugSession: data.requiresDebugSession,
+            prefersDebugSession: data.prefersDebugSession,
             editor: editor,
           ),
         ),
@@ -354,6 +365,7 @@ class _DevToolsScreenButton extends StatelessWidget {
 void _openDevToolsScreen({
   required String screenId,
   required bool requiresDebugSession,
+  required bool prefersDebugSession,
   required EditorClient editor,
 }) {
   ga.select(
@@ -365,6 +377,7 @@ void _openDevToolsScreen({
       null,
       page: screenId,
       requiresDebugSession: requiresDebugSession,
+      prefersDebugSession: prefersDebugSession,
     ),
   );
 }
