@@ -12,7 +12,7 @@ import '../../../../../shared/globals.dart';
 /// The dialog keys for testing purposes.
 @visibleForTesting
 class MemorySettingDialogKeys {
-  static const Key showAndroidChartCheckBox = ValueKey('showAndroidChart');
+  static const showAndroidChartCheckBox = ValueKey('showAndroidChart');
 }
 
 class MemorySettingsDialog extends StatelessWidget {

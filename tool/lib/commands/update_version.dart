@@ -157,7 +157,7 @@ void writeVersionToPubspec(File pubspec, String version) {
 }
 
 void writeVersionToVersionFile(File versionFile, String version) {
-  const prefix = 'const String version = ';
+  const prefix = 'const version = ';
   final lines = versionFile.readAsLinesSync();
   final revisedLines = <String>[];
   for (var line in lines) {

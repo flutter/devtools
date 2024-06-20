@@ -34,22 +34,22 @@ class Chrome {
 
   static Chrome? locate() {
     if (Platform.isMacOS) {
-      const String defaultPath = '/Applications/Google Chrome.app';
-      const String bundlePath = 'Contents/MacOS/Google Chrome';
+      const defaultPath = '/Applications/Google Chrome.app';
+      const bundlePath = 'Contents/MacOS/Google Chrome';
 
       if (FileSystemEntity.isDirectorySync(defaultPath)) {
         return Chrome.from(path.join(defaultPath, bundlePath));
       }
     } else if (Platform.isLinux) {
-      const String defaultPath = '/usr/bin/google-chrome';
+      const defaultPath = '/usr/bin/google-chrome';
 
       if (FileSystemEntity.isFileSync(defaultPath)) {
         return Chrome.from(defaultPath);
       }
     } else if (Platform.isWindows) {
-      final String progFiles = Platform.environment['PROGRAMFILES(X86)']!;
-      final String chromeInstall = '$progFiles\\Google\\Chrome';
-      final String defaultPath = '$chromeInstall\\Application\\chrome.exe';
+      final progFiles = Platform.environment['PROGRAMFILES(X86)']!;
+      final chromeInstall = '$progFiles\\Google\\Chrome';
+      final defaultPath = '$chromeInstall\\Application\\chrome.exe';
 
       if (FileSystemEntity.isFileSync(defaultPath)) {
         return Chrome.from(defaultPath);
@@ -71,9 +71,8 @@ class Chrome {
   ///
   /// This method will create the directory if it does not exist.
   static String getCreateChromeDataDir() {
-    final Directory prefsDir = getDartPrefsDirectory();
-    final Directory chromeDataDir =
-        Directory(path.join(prefsDir.path, 'chrome'));
+    final prefsDir = getDartPrefsDirectory();
+    final chromeDataDir = Directory(path.join(prefsDir.path, 'chrome'));
     if (!chromeDataDir.existsSync()) {
       chromeDataDir.createSync(recursive: true);
     }
@@ -83,7 +82,7 @@ class Chrome {
   final String executable;
 
   Future<ChromeProcess> start({String? url, int debugPort = 9222}) {
-    final List<String> args = <String>[
+    final args = <String>[
       '--no-default-browser-check',
       '--no-first-run',
       '--user-data-dir=${getCreateChromeDataDir()}',
@@ -149,7 +148,7 @@ class ChromeProcess {
     required bool Function(wip.ChromeTab) tabFound,
     required Duration timeout,
   }) async {
-    final wip.ChromeTab? wipTab = await connection.getTab(
+    final wipTab = await connection.getTab(
       (wip.ChromeTab tab) {
         return tabFound(tab);
       },
@@ -181,18 +180,17 @@ class ChromeTab {
   final wip.ChromeTab wipTab;
   WipConnection? _wip;
 
-  final StreamController<LogEntry> _entryAddedController =
-      StreamController<LogEntry>.broadcast();
-  final StreamController<ConsoleAPIEvent> _consoleAPICalledController =
+  final _entryAddedController = StreamController<LogEntry>.broadcast();
+  final _consoleAPICalledController =
       StreamController<ConsoleAPIEvent>.broadcast();
-  final StreamController<ExceptionThrownEvent> _exceptionThrownController =
+  final _exceptionThrownController =
       StreamController<ExceptionThrownEvent>.broadcast();
 
   num? _lostConnectionTime;
 
   Future<WipConnection?> connect({bool verbose = false}) async {
     _wip = await wipTab.connect();
-    final WipConnection wipConnection = _wip!;
+    final wipConnection = _wip!;
 
     await wipConnection.log.enable();
     wipConnection.log.onEntryAdded.listen((LogEntry entry) {

@@ -12,7 +12,6 @@ import 'package:devtools_shared/service.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../devtools.dart' as devtools show version;
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service_manager.dart';
@@ -29,6 +28,7 @@ import '../shared/primitives/message_bus.dart';
 import '../shared/scripts/script_manager.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/survey.dart';
+import '../shared/utils.dart';
 import 'app_error_handling.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
@@ -47,7 +47,7 @@ abstract class FrameworkCore {
     await initializePlatform();
 
     // Print the version number at startup.
-    _log.info('DevTools version ${devtools.version}.');
+    _log.info('DevTools version $devToolsVersion.');
 
     await _initDTDConnection();
 
@@ -108,7 +108,7 @@ abstract class FrameworkCore {
       final finishedCompleter = Completer<void>();
 
       try {
-        final VmServiceWrapper service = await connect<VmServiceWrapper>(
+        final service = await connect<VmServiceWrapper>(
           uri: uri,
           finishedCompleter: finishedCompleter,
           serviceFactory: ({

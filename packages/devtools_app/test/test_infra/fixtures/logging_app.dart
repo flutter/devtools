@@ -9,7 +9,7 @@ import 'dart:developer';
 import 'dart:io';
 
 // Allow a test driver to communicate with this app through the controller.
-final Controller controller = Controller();
+final controller = Controller();
 
 void main() {
   print('starting logging app');

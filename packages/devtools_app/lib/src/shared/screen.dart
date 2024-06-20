@@ -364,7 +364,10 @@ abstract class Screen {
               if (title.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(left: denseSpacing),
-                  child: Text(title),
+                  child: Text(
+                    title,
+                    style: Theme.of(context).regularTextStyle,
+                  ),
                 ),
             ],
           ),

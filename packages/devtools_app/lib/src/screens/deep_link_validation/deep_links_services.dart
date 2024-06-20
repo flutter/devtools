@@ -9,36 +9,36 @@ import 'package:http/http.dart' as http;
 
 import 'deep_links_model.dart';
 
-const String _apiKey = 'AIzaSyCf_2E9N2AUZR-YSnZTQ72YbCNhKIskIsw';
-const String _assetLinksGenerationURL =
+const _apiKey = 'AIzaSyCf_2E9N2AUZR-YSnZTQ72YbCNhKIskIsw';
+const _assetLinksGenerationURL =
     'https://deeplinkassistant-pa.googleapis.com/android/generation/v1/assetlinks:generate?key=$_apiKey';
-const String _androidDomainValidationURL =
+const _androidDomainValidationURL =
     'https://deeplinkassistant-pa.googleapis.com/android/validation/v1/domains:batchValidate?key=$_apiKey';
 const postHeader = {'Content-Type': 'application/json'};
-const String _packageNameKey = 'package_name';
-const String _domainsKey = 'domains';
-const String _errorCodeKey = 'errorCode';
-const String _appLinkDomainsKey = 'app_link_domains';
-const String _fingerprintsKey = 'supplemental_sha256_cert_fingerprints';
-const String _validationResultKey = 'validationResult';
-const String _googlePlayFingerprintsAvailabilityKey =
+const _packageNameKey = 'package_name';
+const _domainsKey = 'domains';
+const _errorCodeKey = 'errorCode';
+const _appLinkDomainsKey = 'app_link_domains';
+const _fingerprintsKey = 'supplemental_sha256_cert_fingerprints';
+const _validationResultKey = 'validationResult';
+const _googlePlayFingerprintsAvailabilityKey =
     'googlePlayFingerprintsAvailability';
-const String _googlePlayFingerprintsAvailableValue = 'FINGERPRINTS_AVAILABLE';
-const String _domainNameKey = 'domainName';
-const String _checkNameKey = 'checkName';
-const String _failedChecksKey = 'failedChecks';
-const String _generatedContentKey = 'generatedContent';
-const int _domainBatchSize = 500;
+const _googlePlayFingerprintsAvailableValue = 'FINGERPRINTS_AVAILABLE';
+const _domainNameKey = 'domainName';
+const _checkNameKey = 'checkName';
+const _failedChecksKey = 'failedChecks';
+const _generatedContentKey = 'generatedContent';
+const _domainBatchSize = 500;
 
-const Map<String, DomainError> checkNameToDomainError = {
-  'EXISTENCE': DomainError.existence,
-  'APP_IDENTIFIER': DomainError.appIdentifier,
-  'FINGERPRINT': DomainError.fingerprints,
-  'CONTENT_TYPE': DomainError.contentType,
-  'HTTPS_ACCESSIBILITY': DomainError.httpsAccessibility,
-  'NON_REDIRECT': DomainError.nonRedirect,
-  'HOST_FORMED_PROPERLY': DomainError.hostForm,
-  'OTHER_CHECKS': DomainError.other,
+const checkNameToDomainError = <String, DomainError>{
+  'EXISTENCE': AndroidDomainError.existence,
+  'APP_IDENTIFIER': AndroidDomainError.appIdentifier,
+  'FINGERPRINT': AndroidDomainError.fingerprints,
+  'CONTENT_TYPE': AndroidDomainError.contentType,
+  'HTTPS_ACCESSIBILITY': AndroidDomainError.httpsAccessibility,
+  'NON_REDIRECT': AndroidDomainError.nonRedirect,
+  'HOST_FORMED_PROPERLY': AndroidDomainError.hostForm,
+  'OTHER_CHECKS': AndroidDomainError.other,
 };
 
 class GenerateAssetLinksResult {
@@ -67,7 +67,7 @@ class DeepLinksServices {
     };
 
     // The request can take 1000 domains at most, make a few calls in serial with a batch of _domainBatchSize.
-    final List<List<String>> domainsBybatch = List.generate(
+    final domainsBybatch = List.generate(
       (domains.length / _domainBatchSize).ceil(),
       (index) => domains.sublist(
         index * _domainBatchSize,
@@ -89,18 +89,19 @@ class DeepLinksServices {
         }),
       );
 
-      final Map<String, dynamic> result =
-          json.decode(response.body) as Map<String, dynamic>;
+      final result = json.decode(response.body) as Map<String, dynamic>;
 
-      final validationResult = result[_validationResultKey] as List;
+      final validationResult =
+          (result[_validationResultKey] as List).cast<Map<String, Object?>>();
       googlePlayFingerprintsAvailable =
           result[_googlePlayFingerprintsAvailabilityKey] ==
               _googlePlayFingerprintsAvailableValue;
-      for (final Map<String, dynamic> domainResult in validationResult) {
-        final String domainName = domainResult[_domainNameKey];
-        final List? failedChecks = domainResult[_failedChecksKey];
+      for (final domainResult in validationResult) {
+        final domainName = domainResult[_domainNameKey] as String;
+        final failedChecks = (domainResult[_failedChecksKey] as List?)
+            ?.cast<Map<String, Object?>>();
         if (failedChecks != null) {
-          for (final Map<String, dynamic> failedCheck in failedChecks) {
+          for (final failedCheck in failedChecks) {
             final checkName = failedCheck[_checkNameKey] as String;
             final domainError = checkNameToDomainError[checkName];
             if (domainError != null) {
@@ -133,9 +134,8 @@ class DeepLinksServices {
         },
       ),
     );
-    final Map<String, dynamic> result =
-        json.decode(response.body) as Map<String, dynamic>;
-    final String errorCode = result[_errorCodeKey] ?? '';
+    final result = json.decode(response.body) as Map<String, Object?>;
+    final errorCode = (result[_errorCodeKey] as String?) ?? '';
     String generatedContent = '';
 
     if (result[_domainsKey] != null) {

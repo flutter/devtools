@@ -411,7 +411,7 @@ class DebuggerController extends DisposableController
           ],
           truncated: true,
         );
-        ga.select(gac.debugger, gac.pausedWithNoFrames);
+        ga.select(gac.debugger, gac.DebuggerEvents.pausedWithNoFrames.name);
         return;
       }
       await _populateFrameInfo(

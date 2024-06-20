@@ -11,7 +11,7 @@ import '../test_infra/flutter_test_driver.dart';
 import '../test_infra/flutter_test_environment.dart';
 
 void main() {
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
+  final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 

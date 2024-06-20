@@ -85,7 +85,7 @@ base class FakeServiceExtensionManager extends Fake
   ) async {
     final extension = serviceExtensionsAllowlist[name];
     if (extension != null) {
-      final Object? value = _getExtensionValueFromJson(name, valueFromJson);
+      final value = _getExtensionValueFromJson(name, valueFromJson);
 
       final enabled = extension is ToggleableServiceExtension
           ? value == extension.enabledValue

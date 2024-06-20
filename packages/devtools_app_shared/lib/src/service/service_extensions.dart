@@ -225,14 +225,14 @@ final profilePlatformChannels = ToggleableServiceExtension<bool>(
 
 // This extensions below should never be displayed as a button so does not need
 // a ServiceExtensionDescription object.
-final String didSendFirstFrameEvent =
+final didSendFirstFrameEvent =
     '$flutterExtensionPrefix${WidgetsServiceExtensions.didSendFirstFrameEvent.name}';
 
 final serviceExtensionsAllowlist = <String, ServiceExtension<Object>>{
   for (var extension in _extensionDescriptions) extension.extension: extension,
 };
 
-final List<ServiceExtension<Object>> _extensionDescriptions = [
+final _extensionDescriptions = <ServiceExtension<Object>>[
   debugAllowBanner,
   debugPaint,
   debugPaintBaselines,
@@ -266,19 +266,20 @@ final List<ServiceExtension<Object>> _extensionDescriptions = [
 /// extensions are safe to run before the first frame as there is little harm
 /// in setting these extensions after one frame has rendered without the
 /// extension set.
-final Set<String> _unsafeBeforeFirstFrameFlutterExtensions =
-    <ServiceExtension<Object>>[
-  debugPaint,
-  debugPaintBaselines,
-  repaintRainbow,
-  performanceOverlay,
-  debugAllowBanner,
-  toggleOnDeviceWidgetInspector,
-  toggleSelectWidgetMode,
-  enableOnDeviceInspector,
-  togglePlatformMode,
-  slowAnimations,
-].map((extension) => extension.extension).toSet();
+final _unsafeBeforeFirstFrameFlutterExtensions = Set.of(
+  <ServiceExtension<Object>>[
+    debugPaint,
+    debugPaintBaselines,
+    repaintRainbow,
+    performanceOverlay,
+    debugAllowBanner,
+    toggleOnDeviceWidgetInspector,
+    toggleSelectWidgetMode,
+    enableOnDeviceInspector,
+    togglePlatformMode,
+    slowAnimations,
+  ].map((extension) => extension.extension),
+);
 
 bool isUnsafeBeforeFirstFlutterFrame(String? extensionName) {
   return _unsafeBeforeFirstFrameFlutterExtensions.contains(extensionName);

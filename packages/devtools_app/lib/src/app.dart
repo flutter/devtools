@@ -68,9 +68,6 @@ import 'standalone_ui/standalone_screen.dart';
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
 const debugEnableSampleScreen = false;
 
-// Disabled until VM developer mode functionality is added.
-const showVmDeveloperMode = false;
-
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
@@ -139,6 +136,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
+    setGlobal(GlobalKey<NavigatorState>, routerDelegate.navigatorKey);
 
     // TODO(https://github.com/flutter/devtools/issues/6018): Once
     // https://github.com/flutter/flutter/issues/129692 is fixed, disable the

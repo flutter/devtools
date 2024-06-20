@@ -37,16 +37,14 @@ final class IsolateManager with DisposerMixin {
 
   VmService? _service;
 
-  final StreamController<IsolateRef?> _isolateCreatedController =
-      StreamController<IsolateRef?>.broadcast();
-  final StreamController<IsolateRef?> _isolateExitedController =
-      StreamController<IsolateRef?>.broadcast();
+  final _isolateCreatedController = StreamController<IsolateRef?>.broadcast();
+  final _isolateExitedController = StreamController<IsolateRef?>.broadcast();
 
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
   final _selectedIsolate = ValueNotifier<IsolateRef?>(null);
 
   int _lastIsolateIndex = 0;
-  final Map<String?, int> _isolateIndexMap = {};
+  final _isolateIndexMap = <String?, int>{};
 
   ValueListenable<List<IsolateRef>> get isolates => _isolates;
   final _isolates = ListValueNotifier(const <IsolateRef>[]);
@@ -202,8 +200,7 @@ final class IsolateManager with DisposerMixin {
         _mainIsolate.value = null;
       }
       if (_selectedIsolate.value == event.isolate) {
-        _selectedIsolate.value =
-            _isolateStates.isEmpty ? null : _isolateStates.keys.first;
+        _selectedIsolate.value = _isolateStates.keys.firstOrNull;
       }
       _isolateRunnableCompleters.remove(event.isolate!.id);
     }
@@ -237,8 +234,7 @@ final class IsolateManager with DisposerMixin {
       }
     }
 
-    final IsolateRef? ref =
-        _isolateStates.keys.firstWhereOrNull((IsolateRef ref) {
+    final ref = _isolateStates.keys.firstWhereOrNull((IsolateRef ref) {
       // 'foo.dart:main()'
       return ref.name!.contains(':main(');
     });

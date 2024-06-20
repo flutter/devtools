@@ -16,14 +16,14 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
-import '../test_infra/flutter_test_environment.dart';
-import '../test_infra/matchers/matchers.dart';
+import '../../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
+import '../../test_infra/flutter_test_environment.dart';
+import '../../test_infra/matchers/matchers.dart';
 
 void main() {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
 
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
+  final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 
@@ -127,11 +127,12 @@ void main() {
               await inspectorServiceLocal.isWidgetCreationTracked(),
               isTrue,
             );
-            final rootLibrary =
-                await serviceConnection.mainIsolateRootLibraryUriAsString();
+            final rootLibrary = await serviceConnection.serviceManager
+                .mainIsolateRootLibraryUriAsString();
             await inspectorServiceLocal.addPubRootDirectories([rootLibrary!]);
-            final List<String> rootDirectories =
-                await inspectorServiceLocal.getPubRootDirectories() ?? [];
+            final rootDirectories =
+                await inspectorServiceLocal.getPubRootDirectories() ??
+                    <String>[];
             expect(rootDirectories.length, 1);
             expect(rootDirectories.first, endsWith('/fixtures/flutter_app'));
             final originalRootDirectories = rootDirectories.toList();
@@ -263,92 +264,134 @@ void main() {
         });
       });
 
-      test('widget tree', () async {
-        await env.setupEnvironment();
-        final group = inspectorService!.createObjectGroup('test-group');
-        final RemoteDiagnosticsNode root =
-            (await group.getRoot(FlutterTreeType.widget))!;
-        // Tree only contains widgets from local app.
-        expect(
-          treeToDebugString(root),
-          equalsIgnoringHashCodes(
-            '''
-[root]
- └─MyApp
-   └─MaterialApp
-     └─Scaffold
-       ├─Center
-       │ └─Text
-       ├─AppBar
-       │ └─Text
-       └─FloatingActionButton
-         └─Icon
-''',
-          ),
-        );
-        RemoteDiagnosticsNode nodeInSummaryTree =
-            findNodeMatching(root, 'MaterialApp')!;
-        expect(nodeInSummaryTree, isNotNull);
-        expect(
-          treeToDebugString(nodeInSummaryTree),
-          equalsIgnoringHashCodes(
-            '''
-MaterialApp
- └─Scaffold
-   ├─Center
-   │ └─Text
-   ├─AppBar
-   │ └─Text
-   └─FloatingActionButton
-     └─Icon
-''',
-          ),
-        );
-        RemoteDiagnosticsNode nodeInDetailsTree =
-            (await group.getDetailsSubtree(nodeInSummaryTree))!;
+      group('widget trees', () {
+        test('isSummaryTree = true', () async {
+          await env.setupEnvironment();
+          final group = inspectorService!.createObjectGroup('test-group');
+          final RemoteDiagnosticsNode root = (await group.getRoot(
+            FlutterTreeType.widget,
+            isSummaryTree: true,
+          ))!;
+          // Tree only contains widgets from local app.
+          expect(
+            treeToDebugString(root),
+            equals(
+              equalsGoldenIgnoringHashCodes(
+                'inspector_service_tree_summary.txt',
+              ),
+            ),
+          );
+          final nodeInSummaryTree = findNodeMatching(root, 'MaterialApp')!;
+          expect(nodeInSummaryTree, isNotNull);
 
-        // TODO(gspencergoog): revert the PR
-        // https://github.com/flutter/devtools/pull/7740 once Flutter PR
-        // https://github.com/flutter/flutter/pull/143259 lands, with an updated
-        // golden file for the test.
+          expect(
+            treeToDebugString(nodeInSummaryTree),
+            equals(
+              equalsGoldenIgnoringHashCodes(
+                'inspector_service_node_summary.txt',
+              ),
+            ),
+          );
 
-        nodeInSummaryTree = findNodeMatching(root, 'Text')!;
-        expect(nodeInSummaryTree, isNotNull);
-        expect(
-          treeToDebugString(nodeInSummaryTree),
-          equalsIgnoringHashCodes(
-            'Text\n',
-          ),
-        );
+          await group.dispose();
+        });
 
-        nodeInDetailsTree = (await group.getDetailsSubtree(nodeInSummaryTree))!;
+        test('isSummaryTree = false', () async {
+          await env.setupEnvironment();
+          final group = inspectorService!.createObjectGroup('test-group');
+          final RemoteDiagnosticsNode root = (await group.getRoot(
+            FlutterTreeType.widget,
+            isSummaryTree: false,
+          ))!;
+          // Tree contains all widgets.
+          expect(
+            treeToDebugString(root),
+            equals(
+              equalsGoldenIgnoringHashCodes(
+                'inspector_service_tree_no_summary.txt',
+              ),
+            ),
+          );
+          final nodeInTree = findNodeMatching(root, 'MaterialApp')!;
+          expect(nodeInTree, isNotNull);
+          expect(
+            treeToDebugString(nodeInTree),
+            equals(
+              equalsGoldenIgnoringHashCodes(
+                'inspector_service_node_no_summary.txt',
+              ),
+            ),
+          );
 
-        expect(
-          treeToDebugString(nodeInDetailsTree),
-          equalsGoldenIgnoringHashCodes(
-            'inspector_service_text_details_tree.txt',
-          ),
-        );
+          await group.dispose();
+        });
 
-        expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
+        test('details tree', () async {
+          await env.setupEnvironment();
 
-        await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
-        final selection = (await group.getSelection(
-          null,
-          FlutterTreeType.widget,
-          isSummaryTree: false,
-        ))!;
-        expect(selection, isNotNull);
-        expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
-        expect(
-          treeToDebugString(selection),
-          equalsIgnoringHashCodes(
-            'Text\n'
-            ' └─RichText\n',
-          ),
-        );
+          // First get a node in the summary tree:
+          final group = inspectorService!.createObjectGroup('test-group');
+          final RemoteDiagnosticsNode root = (await group.getRoot(
+            FlutterTreeType.widget,
+            isSummaryTree: true,
+          ))!;
+          RemoteDiagnosticsNode nodeInSummaryTree =
+              findNodeMatching(root, 'MaterialApp')!;
+          expect(nodeInSummaryTree, isNotNull);
 
-        await group.dispose();
+          // Then get the details tree for the node in the summary tree:
+          RemoteDiagnosticsNode nodeInDetailsTree =
+              (await group.getDetailsSubtree(nodeInSummaryTree))!;
+
+          // When flutter rolls, this string may sometimes change due to
+          // implementation details.
+          expect(
+            treeToDebugStringTruncated(nodeInDetailsTree, 30),
+            equalsGoldenIgnoringHashCodes('inspector_service_details_tree.txt'),
+          );
+
+          nodeInSummaryTree = findNodeMatching(root, 'Text')!;
+          expect(nodeInSummaryTree, isNotNull);
+          expect(
+            treeToDebugString(nodeInSummaryTree),
+            equalsIgnoringHashCodes(
+              'Text\n',
+            ),
+          );
+
+          nodeInDetailsTree =
+              (await group.getDetailsSubtree(nodeInSummaryTree))!;
+
+          expect(
+            treeToDebugString(nodeInDetailsTree),
+            equalsGoldenIgnoringHashCodes(
+              'inspector_service_text_details_tree.txt',
+            ),
+          );
+
+          expect(
+            nodeInDetailsTree.valueRef,
+            equals(nodeInSummaryTree.valueRef),
+          );
+
+          await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
+          final selection = (await group.getSelection(
+            null,
+            FlutterTreeType.widget,
+            isSummaryTree: false,
+          ))!;
+          expect(selection, isNotNull);
+          expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
+          expect(
+            treeToDebugString(selection),
+            equalsIgnoringHashCodes(
+              'Text\n'
+              ' └─RichText\n',
+            ),
+          );
+
+          await group.dispose();
+        });
       });
 
       test('enables hover eval mode by default', () async {

@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../../service/editor/api_classes.dart';
+import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../api/dart_tooling_api.dart';
-import '../api/vs_code_api.dart';
+import '../api/impl/dart_tooling_api.dart';
 import 'debug_sessions.dart';
 import 'devices.dart';
 import 'devtools.dart';
@@ -21,20 +21,28 @@ import 'devtools.dart';
 ///
 /// Provides some basic functionality to improve discoverability of features
 /// such as creation of new projects, device selection and DevTools features.
-class VsCodeFlutterPanel extends StatefulWidget {
-  const VsCodeFlutterPanel(this.api, {super.key});
+class VsCodePostMessageSidebarPanel extends StatefulWidget {
+  const VsCodePostMessageSidebarPanel(this.api, {super.key});
 
-  final DartToolingApi api;
+  final PostMessageToolApi api;
 
   @override
-  State<VsCodeFlutterPanel> createState() => _VsCodeFlutterPanelState();
+  State<VsCodePostMessageSidebarPanel> createState() =>
+      _VsCodePostMessageSidebarPanelState();
 }
 
-class _VsCodeFlutterPanelState extends State<VsCodeFlutterPanel> {
+class _VsCodePostMessageSidebarPanelState
+    extends State<VsCodePostMessageSidebarPanel> {
   @override
   void initState() {
     super.initState();
     ga.screen(gac.VsCodeFlutterSidebar.id);
+  }
+
+  @override
+  void dispose() {
+    widget.api.dispose();
+    super.dispose();
   }
 
   @override
@@ -46,7 +54,7 @@ class _VsCodeFlutterPanelState extends State<VsCodeFlutterPanel> {
           builder: (context, snapshot) =>
               switch ((snapshot.connectionState, snapshot.data)) {
             (ConnectionState.done, final vsCodeApi?) =>
-              _VsCodeConnectedPanel(vsCodeApi),
+              _VsCodeConnectedPanel(PostMessageEditorClient(vsCodeApi)),
             (ConnectionState.done, null) =>
               const Text('VS Code is not available'),
             _ => const CenteredCircularProgressIndicator(),
@@ -60,9 +68,9 @@ class _VsCodeFlutterPanelState extends State<VsCodeFlutterPanel> {
 /// The panel shown once we know VS Code is available (the host has responded to
 /// the `vsCode.getCapabilities` request).
 class _VsCodeConnectedPanel extends StatefulWidget {
-  const _VsCodeConnectedPanel(this.api);
+  const _VsCodeConnectedPanel(this.editor);
 
-  final VsCodeApi api;
+  final EditorClient editor;
 
   @override
   State<_VsCodeConnectedPanel> createState() => _VsCodeConnectedPanelState();
@@ -70,19 +78,35 @@ class _VsCodeConnectedPanel extends StatefulWidget {
 
 class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel>
     with AutoDisposeMixin {
-  var debugSessions = <VsCodeDebugSession>[];
+  var debugSessions = <String, EditorDebugSession>{};
+  var devices = <String, EditorDevice>{};
+  String? selectedDeviceId;
 
   @override
   void initState() {
     super.initState();
 
-    unawaited(widget.api.initialize());
-
     cancelStreamSubscriptions();
+    // Set up subscription to handle events when things change.
     autoDisposeStreamSubscription(
-      widget.api.debugSessionsChanged.listen((event) {
+      widget.editor.event.listen((event) {
         setState(() {
-          debugSessions = event.sessions;
+          switch (event) {
+            // Devices.
+            case DeviceAddedEvent(:final device):
+            case DeviceChangedEvent(:final device):
+              devices[device.id] = device;
+            case DeviceRemovedEvent(:final deviceId):
+              devices.remove(deviceId);
+            case DeviceSelectedEvent(:final deviceId):
+              selectedDeviceId = deviceId;
+            // Debug sessions.
+            case DebugSessionStartedEvent(:final debugSession):
+            case DebugSessionChangedEvent(:final debugSession):
+              debugSessions[debugSession.id] = debugSession;
+            case DebugSessionStoppedEvent(:final debugSessionId):
+              debugSessions.remove(debugSessionId);
+          }
         });
       }),
     );
@@ -98,38 +122,28 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel>
       // Debug sessions rely on devices too, because they look up the sessions
       // device for some capabilities (for example to know if the session is
       // running on a web device).
-      child: StreamBuilder(
-        stream: widget.api.devicesChanged,
-        builder: (context, devicesSnapshot) {
-          final devices = devicesSnapshot.data?.devices ?? const [];
-          final unsupportedDevices =
-              devicesSnapshot.data?.unsupportedDevices ?? const [];
-          final deviceMap = {for (final device in devices) device.id: device};
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DebugSessions(
-                api: widget.api,
-                sessions: debugSessions,
-                deviceMap: deviceMap,
-              ),
-              const SizedBox(height: defaultSpacing),
-              if (widget.api.capabilities.selectDevice) ...[
-                Devices(
-                  widget.api,
-                  devices: devices,
-                  unsupportedDevices: unsupportedDevices,
-                  selectedDeviceId: devicesSnapshot.data?.selectedDeviceId,
-                ),
-                const SizedBox(height: denseSpacing),
-              ],
-              DevToolsSidebarOptions(
-                api: widget.api,
-                hasDebugSessions: debugSessions.isNotEmpty,
-              ),
-            ],
-          );
-        },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DebugSessions(
+            editor: widget.editor,
+            sessions: debugSessions,
+            devices: devices,
+          ),
+          const SizedBox(height: defaultSpacing),
+          if (widget.editor.supportsSelectDevice) ...[
+            Devices(
+              editor: widget.editor,
+              devices: devices,
+              selectedDeviceId: selectedDeviceId,
+            ),
+            const SizedBox(height: denseSpacing),
+          ],
+          DevToolsSidebarOptions(
+            editor: widget.editor,
+            hasDebugSessions: debugSessions.isNotEmpty,
+          ),
+        ],
       ),
     );
   }

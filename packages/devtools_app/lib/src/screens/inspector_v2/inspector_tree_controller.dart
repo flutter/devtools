@@ -18,7 +18,7 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
 import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/console/eval/inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/console/widgets/description.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics_text_styles.dart';
@@ -118,7 +118,7 @@ class InspectorTreeController extends DisposableController
   }
 
   /// Clients the controller notifies to trigger changes to the UI.
-  final Set<InspectorControllerClient> _clients = {};
+  final _clients = <InspectorControllerClient>{};
 
   /// Identifier used when sending Google Analytics about events in this
   /// [InspectorTreeController].
@@ -258,7 +258,7 @@ class InspectorTreeController extends DisposableController
   }
 
   double getRowOffset(int index) {
-    return (getCachedRow(index)?.depth ?? 0) * inspectorColumnWidth;
+    return (getCachedRow(index)?.depth ?? 0) * inspectorColumnIndent;
   }
 
   List<InspectorTreeNode> getPathFromSelectedRowToRoot() {
@@ -349,8 +349,13 @@ class InspectorTreeController extends DisposableController
 
   double get horizontalPadding => 10.0;
 
+  /// Returns the indentation of a row at the given [depth] in the inspector.
+  ///
+  /// This indentation roughly corresponds to the center of the icon next to the
+  /// widget name.
   double getDepthIndent(int depth) {
-    return (depth + 1) * inspectorColumnWidth + horizontalPadding;
+    // Note: depth is 0-based, therefore add 1.
+    return (depth + 1) * inspectorColumnIndent + horizontalPadding;
   }
 
   double rowYTop(int index) {
@@ -416,7 +421,7 @@ class InspectorTreeController extends DisposableController
   InspectorTreeRow? getRow(Offset offset) {
     final rootLocal = root;
     if (rootLocal == null) return null;
-    final int row = getRowIndex(offset.dy);
+    final row = getRowIndex(offset.dy);
     return row < rootLocal.subtreeSize ? getCachedRow(row) : null;
   }
 
@@ -476,7 +481,7 @@ class InspectorTreeController extends DisposableController
   /// Width each row in the tree should have ignoring its indent.
   ///
   /// Content in rows should wrap if it exceeds this width.
-  final double rowWidth = 1200;
+  final rowWidth = 1200;
 
   /// Maximum indent of the tree in pixels.
   double? _maxIndent;
@@ -550,7 +555,7 @@ class InspectorTreeController extends DisposableController
     if (diagnosticsNode.hasChildren ||
         diagnosticsNode.inlineProperties.isNotEmpty) {
       if (diagnosticsNode.childrenReady || !diagnosticsNode.hasChildren) {
-        final bool styleIsMultiline =
+        final styleIsMultiline =
             expandPropertiesByDefault(diagnosticsNode.style);
         setupChildren(
           diagnosticsNode,
@@ -611,7 +616,7 @@ class InspectorTreeController extends DisposableController
   }
 
   Future<void> maybePopulateChildren(InspectorTreeNode treeNode) async {
-    final RemoteDiagnosticsNode? diagnostic = treeNode.diagnostic;
+    final diagnostic = treeNode.diagnostic;
     if (diagnostic != null &&
         diagnostic.hasChildren &&
         (treeNode.hasPlaceholderChildren || treeNode.children.isEmpty)) {
@@ -653,7 +658,7 @@ class InspectorTreeController extends DisposableController
     final matches = <InspectorTreeRow>[];
 
     if (searchPreviousMatches) {
-      final List<InspectorTreeRow> previousMatches = searchMatches.value;
+      final previousMatches = searchMatches.value;
       for (final previousMatch in previousMatches) {
         if (previousMatch.node.diagnostic!.searchValue
             .caseInsensitiveContains(search)) {
@@ -779,7 +784,7 @@ class _InspectorTreeState extends State<InspectorTree>
   late FocusNode _focusNode;
 
   /// When autoscrolling, the number of rows to pad the target location with.
-  static const int _scrollPadCount = 3;
+  static const _scrollPadCount = 3;
 
   @override
   void initState() {
@@ -812,7 +817,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   void didUpdateWidget(InspectorTree oldWidget) {
-    final InspectorTreeController? oldTreeController = oldWidget.treeController;
+    final oldTreeController = oldWidget.treeController;
     if (oldTreeController != widget.treeController) {
       oldTreeController?.removeClient(this);
 
@@ -946,7 +951,7 @@ class _InspectorTreeState extends State<InspectorTree>
     required double initialX,
     int padCount = _scrollPadCount,
   }) {
-    return initialX - inspectorColumnWidth * padCount;
+    return initialX - inspectorColumnIndent * padCount;
   }
 
   /// Pad [initialY] so that a row would be placed in the vertical center of
@@ -1020,7 +1025,7 @@ class _InspectorTreeState extends State<InspectorTree>
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
-        final Widget tree = Scrollbar(
+        final tree = Scrollbar(
           thumbVisibility: true,
           controller: _scrollControllerX,
           child: SingleChildScrollView(
@@ -1054,8 +1059,7 @@ class _InspectorTreeState extends State<InspectorTree>
                           if (index == treeControllerLocal.numRows) {
                             return SizedBox(height: inspectorRowHeight);
                           }
-                          final InspectorTreeRow row =
-                              treeControllerLocal.getCachedRow(index)!;
+                          final row = treeControllerLocal.getCachedRow(index)!;
                           final inspectorRef = row.node.diagnostic?.valueRef.id;
                           return _InspectorTreeRowWidget(
                             key: PageStorageKey(row.node),
@@ -1080,7 +1084,7 @@ class _InspectorTreeState extends State<InspectorTree>
           ),
         );
 
-        final bool shouldShowBreadcrumbs = !widget.isSummaryTree;
+        final shouldShowBreadcrumbs = !widget.isSummaryTree;
         if (shouldShowBreadcrumbs) {
           final inspectorTreeController = widget.summaryTreeController!;
 
@@ -1110,6 +1114,24 @@ Paint _defaultPaint(ColorScheme colorScheme) => Paint()
   ..color = colorScheme.treeGuidelineColor
   ..strokeWidth = chartLineStrokeWidth;
 
+/// The distance (on the x-axis) between the expand/collapse and the start of
+/// the row, as determined by a percentage of the [inspectorColumnIndent].
+const _expandCollapseToRowStartXDistancePercentage = 0.68;
+
+/// The distance (on the x-axis) between the center of the widget icon and the
+/// start of the row, as determined by a percentage of the
+/// [inspectorColumnIndent].
+const _iconCenterToRowStartXDistancePercentage = 0.15;
+
+/// The distance (on the y-axis) between the bottom of the widget icon and the
+/// top of the row, as determined by a percentage of the [inspectorRowHeight].
+const _iconBottomToRowTopYDistancePercentage = 0.75;
+
+/// The distance (on the y-axis) between the top of the child widget's icon and
+/// the top of the current row, as determined by a percentage of the
+/// [inspectorRowHeight].
+const _childIconTopToRowTopYDistancePercentage = 1.25;
+
 /// Custom painter that draws lines indicating how parent and child rows are
 /// connected to each other.
 ///
@@ -1128,37 +1150,59 @@ class _RowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    double currentX = 0;
     final paint = _defaultPaint(colorScheme);
 
-    final InspectorTreeNode node = row.node;
-    final bool showExpandCollapse = node.showExpandCollapse;
+    final node = row.node;
+    final showExpandCollapse = node.showExpandCollapse;
+    final distanceFromExpandCollapseToRowStart =
+        inspectorColumnIndent * _expandCollapseToRowStartXDistancePercentage;
     for (final tick in row.ticks) {
-      currentX = _controller.getDepthIndent(tick) - inspectorColumnWidth * 0.5;
+      final expandCollapseX = _controller.getDepthIndent(tick) -
+          distanceFromExpandCollapseToRowStart;
       // Draw a vertical line for each tick identifying a connection between
       // an ancestor of this node and some other node in the tree.
       canvas.drawLine(
-        Offset(currentX, 0.0),
-        Offset(currentX, inspectorRowHeight),
+        Offset(expandCollapseX, 0.0),
+        Offset(expandCollapseX, inspectorRowHeight),
         paint,
       );
     }
     // If this row is itself connected to a parent then draw the L shaped line
     // to make that connection.
     if (row.lineToParent) {
-      currentX = _controller.getDepthIndent(row.depth - 1) -
-          inspectorColumnWidth * 0.5;
-      final double width = showExpandCollapse
-          ? inspectorColumnWidth * 0.5
-          : inspectorColumnWidth;
+      final parentExpandCollapseX = _controller.getDepthIndent(row.depth - 1) -
+          distanceFromExpandCollapseToRowStart;
+      final width = showExpandCollapse
+          ? inspectorColumnIndent * 0.6
+          : inspectorColumnIndent;
       canvas.drawLine(
-        Offset(currentX, 0.0),
-        Offset(currentX, inspectorRowHeight * 0.5),
+        Offset(parentExpandCollapseX, 0.0),
+        Offset(parentExpandCollapseX, inspectorRowHeight * 0.5),
         paint,
       );
       canvas.drawLine(
-        Offset(currentX, inspectorRowHeight * 0.5),
-        Offset(currentX + width, inspectorRowHeight * 0.5),
+        Offset(parentExpandCollapseX, inspectorRowHeight * 0.5),
+        Offset(parentExpandCollapseX + width, inspectorRowHeight * 0.5),
+        paint,
+      );
+    }
+
+    if (row.hasSingleChild && node.isExpanded) {
+      final distanceFromIconCenterToRowStart =
+          inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
+      final iconCenterX = _controller.getDepthIndent(row.depth) -
+          distanceFromIconCenterToRowStart;
+      // Draw a line from the bottom of the current row's icon to the top of the
+      // child row's icon:
+      canvas.drawLine(
+        Offset(
+          iconCenterX,
+          inspectorRowHeight * _iconBottomToRowTopYDistancePercentage,
+        ),
+        Offset(
+          iconCenterX,
+          inspectorRowHeight * _childIconTopToRowTopYDistancePercentage,
+        ),
         paint,
       );
     }
@@ -1212,8 +1256,8 @@ class InspectorRowContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double currentX =
-        controller.getDepthIndent(row.depth) - inspectorColumnWidth;
+    final currentX =
+        controller.getDepthIndent(row.depth) - inspectorColumnIndent;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -1269,6 +1313,7 @@ class InspectorRowContent extends StatelessWidget {
                           isSelected: row.isSelected,
                           searchValue: searchValue,
                           errorText: error?.errorMessage,
+                          emphasizeNodesFromLocalProject: true,
                           nodeDescriptionHighlightStyle:
                               searchValue.isEmpty || !row.isSearchMatch
                                   ? DiagnosticsTextStyles.regular(

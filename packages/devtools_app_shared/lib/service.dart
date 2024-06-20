@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 export 'src/service/connected_app.dart';
+export 'src/service/constants.dart';
 export 'src/service/dtd_manager.dart';
 export 'src/service/eval_on_dart_library.dart';
 export 'src/service/flutter_version.dart';

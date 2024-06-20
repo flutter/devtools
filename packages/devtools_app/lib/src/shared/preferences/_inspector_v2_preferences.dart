@@ -212,8 +212,8 @@ class InspectorV2PreferencesController extends DisposableController
   /// directories are for the current project so we make a best guess based on
   /// the root library for the main isolate.
   Future<String?> _inferPubRootDirectory() async {
-    final fileUriString =
-        await serviceConnection.mainIsolateRootLibraryUriAsString();
+    final fileUriString = await serviceConnection.serviceManager
+        .mainIsolateRootLibraryUriAsString();
     if (fileUriString == null) {
       return null;
     }

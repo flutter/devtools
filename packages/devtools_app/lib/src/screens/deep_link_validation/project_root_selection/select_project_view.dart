@@ -63,8 +63,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
 
   Future<List<String>> _requestAndridVariants(String directory) async {
     ga.timeStart(gac.deeplink, gac.AnalyzeFlutterProject.loadVariants.name);
-    final List<String> androidVariants =
-        await server.requestAndroidBuildVariants(directory);
+    final androidVariants = await server.requestAndroidBuildVariants(directory);
     if (androidVariants.isEmpty || !mounted) {
       // If the project is not a Flutter project, cancel timing and return an empty list.
       ga.cancelTimingOperation(
@@ -83,8 +82,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
       gac.deeplink,
       gac.AnalyzeFlutterProject.loadIosBuildOptions.name,
     );
-    final XcodeBuildOptions iosBuildOptions =
-        await server.requestIosBuildOptions(directory);
+    final iosBuildOptions = await server.requestIosBuildOptions(directory);
     ga.timeEnd(
       gac.deeplink,
       gac.AnalyzeFlutterProject.loadIosBuildOptions.name,
@@ -124,8 +122,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
       return;
     }
 
-    final List<String> androidVariants =
-        await _requestAndridVariants(directory);
+    final androidVariants = await _requestAndridVariants(directory);
     if (!mounted) {
       return;
     }
@@ -164,7 +161,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
           child: Text(
             'Select a local flutter project to check the status of all deep links.',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
         if (!projectRoots.isNullOrEmpty) ...[
@@ -209,7 +206,7 @@ class _LoadingProjectView extends StatelessWidget {
             child: const LinearProgressIndicator(),
           ),
           Text(
-            'The first load will take longer than usual',
+            'Loading your project usually takes about a minute.',
             style: theme.subtleTextStyle,
           ),
         ],

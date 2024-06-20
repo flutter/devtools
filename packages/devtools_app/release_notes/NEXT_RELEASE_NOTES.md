@@ -34,7 +34,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Display query parameters for requests. - [#7825](https://github.com/flutter/devtools/pull/7825)
 
 ## Logging updates
 

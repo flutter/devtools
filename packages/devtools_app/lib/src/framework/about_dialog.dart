@@ -8,10 +8,10 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../devtools.dart' as devtools;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/utils.dart';
 import 'release_notes/release_notes.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {
@@ -30,7 +30,7 @@ class DevToolsAboutDialog extends StatelessWidget {
         children: [
           Wrap(
             children: [
-              const SelectableText('DevTools version ${devtools.version}'),
+              SelectableText('DevTools version $devToolsVersion'),
               const Text(' - '),
               InkWell(
                 child: Text(
@@ -114,7 +114,8 @@ class _ContributingLink extends StatelessWidget {
 class _DiscordLink extends StatelessWidget {
   const _DiscordLink();
 
-  static const _discordWikiUrl = 'https://github.com/flutter/flutter/wiki/Chat';
+  static const _discordDocsUrl =
+      'https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md';
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +123,7 @@ class _DiscordLink extends StatelessWidget {
       text: GaLinkTextSpan(
         link: const GaLink(
           display: 'Discord',
-          url: _discordWikiUrl,
+          url: _discordDocsUrl,
           gaScreenName: gac.devToolsMain,
           gaSelectedItemDescription: gac.discordLink,
         ),

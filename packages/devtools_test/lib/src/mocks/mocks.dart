@@ -7,6 +7,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
+// ignore: implementation_imports, required to separate V2 inspector imports.
+import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart'
+    as inspector_v2;
+// ignore: implementation_imports, required to separate V2 inspector imports.
+import 'package:devtools_app/src/shared/console/eval/inspector_tree_v2.dart'
+    as inspector_v2;
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -48,7 +54,7 @@ class FakeInspectorService extends Fake implements InspectorService {
   bool get useDaemonApi => true;
 
   @override
-  final Set<InspectorServiceClient> clients = {};
+  final clients = <InspectorServiceClient>{};
 
   @override
   void addClient(InspectorServiceClient client) {
@@ -69,10 +75,28 @@ class TestInspectorController extends Fake implements InspectorController {
 
   @override
   ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
-  final ValueNotifier<InspectorTreeNode?> _selectedNode = ValueNotifier(null);
+  final _selectedNode = ValueNotifier<InspectorTreeNode?>(null);
 
   @override
   void setSelectedNode(InspectorTreeNode? newSelection) {
+    _selectedNode.value = newSelection;
+  }
+
+  @override
+  InspectorService get inspectorService => service;
+}
+
+class TestInspectorV2Controller extends Fake
+    implements inspector_v2.InspectorController {
+  InspectorService service = FakeInspectorService();
+
+  @override
+  ValueListenable<inspector_v2.InspectorTreeNode?> get selectedNode =>
+      _selectedNode;
+  final _selectedNode = ValueNotifier<inspector_v2.InspectorTreeNode?>(null);
+
+  @override
+  void setSelectedNode(inspector_v2.InspectorTreeNode? newSelection) {
     _selectedNode.value = newSelection;
   }
 
@@ -179,7 +203,7 @@ void mockFlutterVersion(
 }
 
 // ignore: prefer_single_quotes, false positive.
-final Grammar mockGrammar = Grammar.fromJson(
+final mockGrammar = Grammar.fromJson(
   jsonDecode(
     '''
 {
@@ -210,11 +234,11 @@ final mockEmptyScriptRef = ScriptRef(
   id: 'mock-script-no-source',
 );
 
-final Script? mockScript = _loadScript('script.json');
+final mockScript = _loadScript('script.json');
 
-final Script? mockLargeScript = _loadScript('large_script.json');
+final mockLargeScript = _loadScript('large_script.json');
 
-final Script mockEmptyScript = Script(
+final mockEmptyScript = Script(
   uri: 'package:gallery/src/unknown.dart',
   id: 'mock-script-no-source',
 );

@@ -24,10 +24,11 @@ class _HeapObjects {
   ///
   /// CPU and memory heavy to calculate,
   /// so avoid calling this member unless necessary.
-  late final Set<int> codes = objects.indexes
-      .map((index) => heap.graph.objects[index].identityHashCode)
-      .where((code) => code > 0)
-      .toSet();
+  late final codes = Set<int>.of(
+    objects.indexes
+        .map((index) => heap.graph.objects[index].identityHashCode)
+        .where((code) => code > 0),
+  );
 }
 
 class LiveClassSampler {

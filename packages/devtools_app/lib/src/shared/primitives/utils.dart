@@ -32,9 +32,9 @@ bool collectionEquals(Object? e1, Object? e2, {bool ordered = true}) {
 }
 
 // 2^52 is the max int for dart2js.
-final int maxJsInt = pow(2, 52) as int;
+final maxJsInt = pow(2, 52) as int;
 
-final NumberFormat nf = NumberFormat.decimalPattern();
+final nf = NumberFormat.decimalPattern();
 
 String percent(double d, {int fractionDigits = 2}) =>
     '${(d * 100).toStringAsFixed(fractionDigits)}%';
@@ -283,7 +283,7 @@ Stream combineStreams(Stream a, Stream b, Stream c) {
 class Property<T> {
   Property(this._value);
 
-  final StreamController<T> _changeController = StreamController<T>.broadcast();
+  final _changeController = StreamController<T>.broadcast();
   T _value;
 
   T get value => _value;
@@ -573,7 +573,7 @@ double safeDivide(
 ///
 /// Only the object that created this reporter should call [notify].
 class Reporter implements Listenable {
-  final Set<VoidCallback> _listeners = {};
+  final _listeners = <VoidCallback>{};
 
   /// Adds [callback] to this reporter.
   ///
@@ -852,14 +852,14 @@ Color colorFromAnsi(List<int> ansiInput) {
 /// An extension on [LogicalKeySet] to provide user-facing names for key
 /// bindings.
 extension LogicalKeySetExtension on LogicalKeySet {
-  static final Set<LogicalKeyboardKey> _modifiers = {
+  static final _modifiers = <LogicalKeyboardKey>{
     LogicalKeyboardKey.alt,
     LogicalKeyboardKey.control,
     LogicalKeyboardKey.meta,
     LogicalKeyboardKey.shift,
   };
 
-  static final Map<LogicalKeyboardKey, String> _modifierNames = {
+  static final _modifierNames = <LogicalKeyboardKey, String>{
     LogicalKeyboardKey.alt: 'Alt',
     LogicalKeyboardKey.control: 'Control',
     LogicalKeyboardKey.meta: 'Meta',
@@ -870,7 +870,7 @@ extension LogicalKeySetExtension on LogicalKeySet {
   String describeKeys({bool isMacOS = false}) {
     // Put the modifiers first. If it has a synonym, then it's something like
     // shiftLeft, altRight, etc.
-    final List<LogicalKeyboardKey> sortedKeys = keys.toList()
+    final sortedKeys = keys.toList()
       ..sort((a, b) {
         final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
         final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
@@ -904,9 +904,7 @@ class DevToolsJsonFile extends DevToolsFile<Object> {
     required String name,
     required super.lastModifiedTime,
     required super.data,
-  }) : super(
-          path: name,
-        );
+  }) : super(path: name);
 }
 
 class DevToolsFile<T> {
@@ -1149,16 +1147,12 @@ extension UriExtension on Uri {
   }
 }
 
-Iterable<T> removeNullValues<T>(Iterable<T?> values) {
-  return values.whereType<T>();
-}
-
 // TODO(mtaylee): Prefer to use this helper method whenever a call to
 // .split('/').last is made on a String (usually on URIs).
 // See https://github.com/flutter/devtools/issues/4360.
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
-String? fileNameFromUri(String? uri) => uri?.split('/').last;
+String? fileNameFromUri(String? uri) => uri?.split('/').lastOrNull;
 
 /// Calculates subtraction of two maps.
 ///

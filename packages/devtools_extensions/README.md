@@ -46,7 +46,7 @@ for reference.
       - [Step 2: Configure your extension](#step-2-configure-your-extension)
       - [Step 3: Build your extension](#step-3-build-your-extension)
       - [Step 4: Debug your extension](#step-4-debug-your-extension)
-3. [Publish your package with a DevTools extension](#publish-your-package-with-a-DevTools-extension)
+3. [Publish your package with a DevTools extension](#publish-your-package-with-a-devTools-extension)
 4. [Resources and support](#resources-and-support)
 5. [Testimonies from extension authors](#testimonies-from-extension-authors)
 
@@ -392,7 +392,7 @@ popd
 
 ## Resources and support
 
-Please join the [Flutter Discord server](https://github.com/flutter/flutter/wiki/Chat) and then check out
+Please join the [Flutter Discord server](https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md) and then check out
 the [#devtools-extension-authors](https://discord.com/channels/608014603317936148/1159561514072690739)
 channel to connect with other DevTools extension authors and the DevTools team.
 

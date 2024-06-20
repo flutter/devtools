@@ -100,7 +100,7 @@ linter:
     - prefer_const_literals_to_create_immutables
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
-    # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
+    # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md#consider-using--for-short-functions-and-methods
     - prefer_final_fields
     - prefer_final_in_for_each
     - prefer_final_locals
@@ -157,6 +157,8 @@ dart_code_metrics:
   rules:
 #    - arguments-ordering Too strict
 #    - avoid-banned-imports # TODO(polina-c): add configuration
+    - avoid-importing-entrypoint-exports:
+        only-in-src: true
     - avoid-cascade-after-if-null
     - avoid-collection-methods-with-unrelated-types
     - avoid-duplicate-exports
@@ -179,6 +181,7 @@ dart_code_metrics:
     - avoid-unnecessary-type-casts
     - avoid-unrelated-type-assertions
     - avoid-unused-parameters
+    - avoid-explicit-type-declaration
     # - ban-name # TODO(polina-c): add configuration
     # - binary-expression-operand-order Some nice catches but too many false positives to enable.
     - double-literal-format
@@ -238,3 +241,5 @@ dart_code_metrics:
     # - prefer-extracting-callbacks I'm not clear this is always a good idea. Seems like a workaround.
     # - prefer-single-widget-per-file
     - prefer-using-list-view
+    - prefer-explicit-type-arguments
+    - prefer-explicit-function-type

@@ -20,7 +20,7 @@ class MemoryControlPaneController {
   final ControllerCreationMode mode;
   final MemoryTimeline? memoryTimeline;
   final VoidCallback exportData;
-  final ValueNotifier<bool> isChartVisible = preferences.memory.showChart;
+  final isChartVisible = preferences.memory.showChart;
 
   bool get isGcing => _gcing;
   bool _gcing = false;

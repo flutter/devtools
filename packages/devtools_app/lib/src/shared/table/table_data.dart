@@ -236,7 +236,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
 
   @override
   int compare(T a, T b) {
-    final int result = super.compare(a, b);
+    final result = super.compare(a, b);
     if (result == 0 && secondaryCompare != null) {
       return secondaryCompare!(a).compareTo(secondaryCompare!(b));
     }
@@ -320,7 +320,7 @@ abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
 
   @override
   int compare(T a, T b) {
-    final int result = super.compare(a, b);
+    final result = super.compare(a, b);
     if (result == 0 && secondaryCompare != null) {
       return secondaryCompare!(a).compareTo(secondaryCompare!(b));
     }

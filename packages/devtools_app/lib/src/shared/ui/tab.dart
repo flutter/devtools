@@ -61,7 +61,7 @@ class DevToolsTab extends Tab {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.titleSmall!,
+      style: Theme.of(context).textTheme.titleMedium!,
       child: super.build(context),
     );
   }
@@ -211,7 +211,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
           children: [
             Expanded(
               child: TabBar(
-                labelColor: Theme.of(context).textTheme.bodyLarge?.color,
+                labelColor: Theme.of(context).colorScheme.onSurface,
                 controller: _tabController,
                 tabs: widget.tabs.map((t) => t.tab).toList(),
                 isScrollable: true,

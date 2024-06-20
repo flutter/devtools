@@ -715,7 +715,7 @@ void main() {
     group('SafeAccess', () {
       test('safeFirst', () {
         final list = <int?>[];
-        final Iterable<int?> iterable = list;
+        final iterable = list;
         expect(list.safeFirst, isNull);
         expect(iterable.safeFirst, isNull);
         list.addAll([1, 2, 3]);

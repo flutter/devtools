@@ -71,6 +71,7 @@ ThemeData _baseTheme({
     tabBarTheme: theme.tabBarTheme.copyWith(
       tabAlignment: TabAlignment.start,
       dividerColor: Colors.transparent,
+      labelStyle: theme.regularTextStyle,
       labelPadding:
           const EdgeInsets.symmetric(horizontal: defaultTabBarPadding),
     ),
@@ -119,11 +120,37 @@ ThemeData _baseTheme({
     progressIndicatorTheme: ProgressIndicatorThemeData(
       linearMinHeight: defaultLinearProgressIndicatorHeight,
     ),
-    textTheme: theme.textTheme.copyWith(
-      bodySmall: theme.regularTextStyle,
-      bodyMedium: theme.regularTextStyle,
-      titleSmall: theme.regularTextStyle.copyWith(fontWeight: FontWeight.w400),
+    primaryTextTheme: _devToolsTextTheme(theme, theme.primaryTextTheme),
+    textTheme: _devToolsTextTheme(theme, theme.textTheme),
+  );
+}
+
+TextTheme _devToolsTextTheme(ThemeData theme, TextTheme textTheme) {
+  return textTheme.copyWith(
+    displayLarge: theme.boldTextStyle.copyWith(fontSize: 24),
+    displayMedium: theme.boldTextStyle.copyWith(fontSize: 22),
+    displaySmall: theme.boldTextStyle.copyWith(fontSize: 20),
+    headlineLarge: theme.regularTextStyle.copyWith(
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
     ),
+    headlineMedium: theme.regularTextStyle.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+    ),
+    headlineSmall: theme.regularTextStyle.copyWith(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+    ),
+    titleLarge: theme._largeText.copyWith(fontWeight: FontWeight.w500),
+    titleMedium: theme.regularTextStyle.copyWith(fontWeight: FontWeight.w500),
+    titleSmall: theme._smallText.copyWith(fontWeight: FontWeight.w500),
+    bodyLarge: theme._largeText,
+    bodyMedium: theme.regularTextStyle,
+    bodySmall: theme._smallText,
+    labelLarge: theme._largeText,
+    labelMedium: theme.regularTextStyle,
+    labelSmall: theme._smallText,
   );
 }
 
@@ -239,6 +266,7 @@ double get defaultHeaderHeight => scaleByFontFactor(28.0);
 double get defaultButtonHeight => scaleByFontFactor(26.0);
 double get defaultRowHeight => scaleByFontFactor(24.0);
 double get defaultLinearProgressIndicatorHeight => scaleByFontFactor(4.0);
+double get defaultLinearProgressIndicatorWidth => scaleByFontFactor(200.0);
 double get buttonMinWidth => scaleByFontFactor(26.0);
 
 const defaultIconSizeBeforeScaling = 14.0;
@@ -300,6 +328,8 @@ double get mediumProgressSize => scaleByFontFactor(24.0);
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
 // Font size constants:
+double get largeFontSize => scaleByFontFactor(unscaledLargeFontSize);
+const unscaledLargeFontSize = 14.0;
 
 double get defaultFontSize => scaleByFontFactor(unscaledDefaultFontSize);
 const unscaledDefaultFontSize = 12.0;
@@ -356,7 +386,7 @@ extension ThemeDataExtension on ThemeData {
   bool get isDarkTheme => brightness == Brightness.dark;
 
   TextStyle get regularTextStyle => fixBlurryText(
-        textTheme.bodySmall!.copyWith(
+        TextStyle(
           color: colorScheme.onSurface,
           fontSize: defaultFontSize,
         ),
@@ -364,6 +394,12 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle regularTextStyleWithColor(Color? color) =>
       regularTextStyle.copyWith(color: color);
+
+  TextStyle get _smallText =>
+      regularTextStyle.copyWith(fontSize: smallFontSize);
+
+  TextStyle get _largeText =>
+      regularTextStyle.copyWith(fontSize: largeFontSize);
 
   TextStyle get errorTextStyle => regularTextStyleWithColor(colorScheme.error);
 

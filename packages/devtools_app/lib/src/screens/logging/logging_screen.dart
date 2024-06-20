@@ -42,8 +42,7 @@ class LoggingScreen extends Screen {
 
   @override
   Widget buildStatus(BuildContext context) {
-    final LoggingController controller =
-        Provider.of<LoggingController>(context);
+    final controller = Provider.of<LoggingController>(context);
 
     return StreamBuilder<String>(
       initialData: controller.statusText,

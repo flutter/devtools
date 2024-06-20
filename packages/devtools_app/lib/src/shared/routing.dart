@@ -15,8 +15,6 @@ import 'globals.dart';
 import 'primitives/utils.dart';
 import 'query_parameters.dart';
 
-const memoryAnalysisScreenId = 'memoryanalysis';
-
 const homeScreenId = '';
 const snapshotScreenId = 'snapshot';
 
@@ -139,8 +137,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   final _routes = ListQueue<DevToolsRouteConfiguration>();
 
   @override
-  DevToolsRouteConfiguration? get currentConfiguration =>
-      _routes.isEmpty ? null : _routes.last;
+  DevToolsRouteConfiguration? get currentConfiguration => _routes.lastOrNull;
 
   @override
   Widget build(BuildContext context) {

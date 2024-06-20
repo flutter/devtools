@@ -87,7 +87,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
             child: DefaultTextStyle(
               maxLines: maxLines,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleSmall!,
+              style: theme.textTheme.titleMedium!,
               child: title,
             ),
           ),
@@ -389,9 +389,7 @@ class DevToolsButton extends StatelessWidget {
               : IconButton(
                   onPressed: onPressed,
                   iconSize: defaultIconSize,
-                  icon: Icon(
-                    icon,
-                  ),
+                  icon: Icon(icon),
                 ),
         ),
       );
@@ -546,7 +544,7 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
         fillColor: fillColor,
         selectedColor: selectedColor,
         borderColor: borderColor,
-        textStyle: theme.textTheme.bodySmall,
+        textStyle: theme.textTheme.bodyMedium,
         constraints: BoxConstraints(
           minWidth: defaultButtonHeight,
           minHeight: defaultButtonHeight,

@@ -6,7 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
-import '../../shared/console/eval/inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/diagnostics_text_styles.dart';
 import '../../shared/primitives/utils.dart';
 
@@ -61,7 +61,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
     List<InspectorTreeNode> nodes,
   ) {
     final lastNode = nodes.safeLast;
-    final List<_InspectorBreadcrumbData> items = nodes.map((node) {
+    final items = nodes.map((node) {
       return _InspectorBreadcrumbData.wrap(
         node: node,
         isSelected: node == lastNode,

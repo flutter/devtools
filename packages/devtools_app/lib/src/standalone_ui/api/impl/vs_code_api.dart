@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc_2;
 import 'package:meta/meta.dart';
 
+import '../../../service/editor/api_classes.dart';
 import '../vs_code_api.dart';
-import 'dart_tooling_api.dart';
 
-final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
-  VsCodeApiImpl._(super.rpc, Map<String, Object?> capabilities) {
+final class VsCodeApiImpl implements VsCodeApi {
+  VsCodeApiImpl._(this.rpc, Map<String, Object?> capabilities) {
     this.capabilities = VsCodeCapabilitiesImpl(capabilities);
     devicesChanged = events(VsCodeApi.jsonDevicesChangedEvent)
         .map(VsCodeDevicesEventImpl.fromJson);
@@ -20,15 +22,46 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
 
   static Future<VsCodeApi?> tryConnect(json_rpc_2.Peer rpc) async {
     final capabilities =
-        await ToolApiImpl.tryGetCapabilities(rpc, VsCodeApi.jsonApiName);
+        await VsCodeApiImpl.tryGetCapabilities(rpc, VsCodeApi.jsonApiName);
     return capabilities != null ? VsCodeApiImpl._(rpc, capabilities) : null;
+  }
+
+  static Future<Map<String, Object?>?> tryGetCapabilities(
+    json_rpc_2.Peer rpc,
+    String apiName,
+  ) async {
+    try {
+      final response = await rpc.sendRequest('$apiName.getCapabilities')
+          as Map<Object?, Object?>;
+      return response.cast<String, Object?>();
+    } catch (_) {
+      // Any error initializing should disable this functionality.
+      return null;
+    }
+  }
+
+  @protected
+  final json_rpc_2.Peer rpc;
+
+  @protected
+  Future<T> sendRequest<T>(String method, [Object? parameters]) async {
+    return (await rpc.sendRequest('$apiName.$method', parameters)) as T;
+  }
+
+  /// Listens for an event '[apiName].[name]' that has a Map for parameters.
+  @protected
+  Stream<Map<String, Object?>> events(String name) {
+    final streamController = StreamController<Map<String, Object?>>.broadcast();
+    unawaited(rpc.done.then((_) => streamController.close()));
+    rpc.registerMethod('$apiName.$name', (json_rpc_2.Parameters parameters) {
+      streamController.add(parameters.asMap.cast<String, Object?>());
+    });
+    return streamController.stream;
   }
 
   @override
   Future<void> initialize() => sendRequest(VsCodeApi.jsonInitializeMethod);
 
-  @override
-  @protected
   String get apiName => VsCodeApi.jsonApiName;
 
   @override
@@ -39,17 +72,6 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
 
   @override
   late final VsCodeCapabilities capabilities;
-
-  @override
-  Future<Object?> executeCommand(String command, [List<Object?>? arguments]) {
-    return sendRequest(
-      VsCodeApi.jsonExecuteCommandMethod,
-      {
-        VsCodeApi.jsonCommandParameter: command,
-        VsCodeApi.jsonArgumentsParameter: arguments,
-      },
-    );
-  }
 
   @override
   Future<bool> selectDevice(String id) {
@@ -72,6 +94,8 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
     String? debugSessionId, {
     String? page,
     bool? forceExternal,
+    bool? requiresDebugSession,
+    bool? prefersDebugSession,
   }) {
     return sendRequest(
       VsCodeApi.jsonOpenDevToolsPageMethod,
@@ -79,6 +103,8 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
         VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
         VsCodeApi.jsonPageParameter: page,
         VsCodeApi.jsonForceExternalParameter: forceExternal,
+        VsCodeApi.jsonRequiresDebugSessionParameter: requiresDebugSession,
+        VsCodeApi.jsonPrefersDebugSessionParameter: prefersDebugSession,
       },
     );
   }
@@ -104,124 +130,6 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   }
 }
 
-class VsCodeDeviceImpl implements VsCodeDevice {
-  VsCodeDeviceImpl({
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.emulator,
-    required this.emulatorId,
-    required this.ephemeral,
-    required this.platform,
-    required this.platformType,
-  });
-
-  VsCodeDeviceImpl.fromJson(Map<String, Object?> json)
-      : this(
-          id: json[VsCodeDevice.jsonIdField] as String,
-          name: json[VsCodeDevice.jsonNameField] as String,
-          category: json[VsCodeDevice.jsonCategoryField] as String?,
-          emulator: json[VsCodeDevice.jsonEmulatorField] as bool,
-          emulatorId: json[VsCodeDevice.jsonEmulatorIdField] as String?,
-          ephemeral: json[VsCodeDevice.jsonEphemeralField] as bool,
-          platform: json[VsCodeDevice.jsonPlatformField] as String,
-          platformType: json[VsCodeDevice.jsonPlatformTypeField] as String?,
-        );
-
-  @override
-  final String id;
-
-  @override
-  final String name;
-
-  @override
-  final String? category;
-
-  @override
-  final bool emulator;
-
-  @override
-  final String? emulatorId;
-
-  @override
-  final bool ephemeral;
-
-  @override
-  final String platform;
-
-  @override
-  final String? platformType;
-
-  Map<String, Object?> toJson() => {
-        VsCodeDevice.jsonIdField: id,
-        VsCodeDevice.jsonNameField: name,
-        VsCodeDevice.jsonCategoryField: category,
-        VsCodeDevice.jsonEmulatorField: emulator,
-        VsCodeDevice.jsonEmulatorIdField: emulatorId,
-        VsCodeDevice.jsonEphemeralField: ephemeral,
-        VsCodeDevice.jsonPlatformField: platform,
-        VsCodeDevice.jsonPlatformTypeField: platformType,
-      };
-}
-
-class VsCodeDebugSessionImpl implements VsCodeDebugSession {
-  VsCodeDebugSessionImpl({
-    required this.id,
-    required this.name,
-    required this.vmServiceUri,
-    required this.flutterMode,
-    required this.flutterDeviceId,
-    required this.debuggerType,
-    required this.projectRootPath,
-  });
-
-  VsCodeDebugSessionImpl.fromJson(Map<String, Object?> json)
-      : this(
-          id: json[VsCodeDebugSession.jsonIdField] as String,
-          name: json[VsCodeDebugSession.jsonNameField] as String,
-          vmServiceUri:
-              json[VsCodeDebugSession.jsonVmServiceUriField] as String?,
-          flutterMode: json[VsCodeDebugSession.jsonFlutterModeField] as String?,
-          flutterDeviceId:
-              json[VsCodeDebugSession.jsonFlutterDeviceIdField] as String?,
-          debuggerType:
-              json[VsCodeDebugSession.jsonDebuggerTypeField] as String?,
-          projectRootPath:
-              json[VsCodeDebugSession.jsonProjectRootPathField] as String?,
-        );
-
-  @override
-  final String id;
-
-  @override
-  final String name;
-
-  @override
-  final String? vmServiceUri;
-
-  @override
-  final String? flutterMode;
-
-  @override
-  final String? flutterDeviceId;
-
-  @override
-  final String? debuggerType;
-
-  @override
-  final String? projectRootPath;
-
-  Map<String, Object?> toJson() => {
-        VsCodeDebugSession.jsonIdField: id,
-        VsCodeDebugSession.jsonNameField: name,
-        VsCodeDebugSession.jsonVmServiceUriField: vmServiceUri,
-        VsCodeDebugSession.jsonFlutterModeField: flutterMode,
-        VsCodeDebugSession.jsonFlutterDeviceIdField: flutterDeviceId,
-        VsCodeDebugSession.jsonDebuggerTypeField: debuggerType,
-        VsCodeDebugSession.jsonProjectRootPathField: projectRootPath,
-      };
-}
-
 class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
   VsCodeDevicesEventImpl({
     required this.selectedDeviceId,
@@ -235,12 +143,22 @@ class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
               json[VsCodeDevicesEvent.jsonSelectedDeviceIdField] as String?,
           devices: (json[VsCodeDevicesEvent.jsonDevicesField] as List)
               .map((item) => Map<String, Object?>.from(item))
-              .map((map) => VsCodeDeviceImpl.fromJson(map))
+              .map(
+                (map) => EditorDevice.fromJson({
+                  'supported': true,
+                  ...map,
+                }),
+              )
               .toList(),
           unsupportedDevices:
               (json[VsCodeDevicesEvent.jsonUnsupportedDevicesField] as List?)
                   ?.map((item) => Map<String, Object?>.from(item))
-                  .map((map) => VsCodeDeviceImpl.fromJson(map))
+                  .map(
+                    (map) => EditorDevice.fromJson({
+                      'supported': false,
+                      ...map,
+                    }),
+                  )
                   .toList(),
         );
 
@@ -248,10 +166,10 @@ class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
   final String? selectedDeviceId;
 
   @override
-  final List<VsCodeDevice> devices;
+  final List<EditorDevice> devices;
 
   @override
-  final List<VsCodeDevice>? unsupportedDevices;
+  final List<EditorDevice>? unsupportedDevices;
 
   Map<String, Object?> toJson() => {
         VsCodeDevicesEvent.jsonSelectedDeviceIdField: selectedDeviceId,
@@ -269,12 +187,12 @@ class VsCodeDebugSessionsEventImpl implements VsCodeDebugSessionsEvent {
       : this(
           sessions: (json[VsCodeDebugSessionsEvent.jsonSessionsField] as List)
               .map((item) => Map<String, Object?>.from(item))
-              .map((map) => VsCodeDebugSessionImpl.fromJson(map))
+              .map((map) => EditorDebugSession.fromJson(map))
               .toList(),
         );
 
   @override
-  final List<VsCodeDebugSession> sessions;
+  final List<EditorDebugSession> sessions;
 
   Map<String, Object?> toJson() => {
         VsCodeDebugSessionsEvent.jsonSessionsField: sessions,
@@ -287,10 +205,6 @@ class VsCodeCapabilitiesImpl implements VsCodeCapabilities {
   final Map<String, Object?>? _raw;
 
   @override
-  bool get executeCommand =>
-      _raw?[VsCodeCapabilities.jsonExecuteCommandField] == true;
-
-  @override
   bool get selectDevice =>
       _raw?[VsCodeCapabilities.jsonSelectDeviceField] == true;
 
@@ -301,6 +215,12 @@ class VsCodeCapabilitiesImpl implements VsCodeCapabilities {
   @override
   bool get openDevToolsExternally =>
       _raw?[VsCodeCapabilities.openDevToolsExternallyField] == true;
+
+  @override
+  bool get openDevToolsWithOptionalDebugSessionFlags =>
+      _raw?[
+          VsCodeCapabilities.openDevToolsWithOptionalDebugSessionFlagsField] ==
+      true;
 
   @override
   bool get hotReload => _raw?[VsCodeCapabilities.hotReloadField] == true;

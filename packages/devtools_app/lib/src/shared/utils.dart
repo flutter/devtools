@@ -7,6 +7,7 @@
 // Utils, that do not have dependencies, should go to primitives/utils.dart.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -18,11 +19,14 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+// ignore: avoid-importing-entrypoint-exports, special case for getting version.
 import '../../devtools.dart' as devtools;
+
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
 import 'primitives/simple_items.dart';
+import 'primitives/utils.dart';
 
 final _log = Logger('lib/src/shared/utils');
 
@@ -116,7 +120,7 @@ List<String> issueLinkDetails() {
   final issueDescriptionItems = [
     '<-- Please describe your problem here. Be sure to include repro steps. -->',
     '___', // This will create a separator in the rendered markdown.
-    '**DevTools version**: ${devtools.version}',
+    '**DevTools version**: $devToolsVersion',
     if (ide != null) '**IDE**: $ide',
   ];
   final vm = serviceConnection.serviceManager.vm;
@@ -297,3 +301,70 @@ Future<void> launchUrlWithErrorHandling(String url) async {
     onError: () => notificationService.push('Unable to open $url.'),
   );
 }
+
+/// A worker that will run [callback] in groups of [chunkSize], when [doWork] is called.
+///
+/// [progressCallback] will be called with 0.0 progress when starting the work and any
+/// time a chunk finishes running, with a value that represents the proportion of
+/// indices that have been completed so far.
+///
+/// This class may be helpful when sets of work need to be done over a list, while
+/// avoiding blocking the UI thread.
+class InterruptableChunkWorker {
+  InterruptableChunkWorker({
+    int chunkSize = _defaultChunkSize,
+    required this.callback,
+    required this.progressCallback,
+  }) : _chunkSize = chunkSize;
+
+  static const _defaultChunkSize = 50;
+
+  final int _chunkSize;
+  int _workId = 0;
+  void Function(int) callback;
+  void Function(double progress) progressCallback;
+
+  /// Start doing the chunked work.
+  ///
+  /// [callback] will be called on every index from 0...[length-1], inclusive,
+  /// in chunks of [_chunkSize]
+  ///
+  /// If [doWork] is called again, then [callback] will no longer be called
+  /// on any remaining indices from previous [doWork] calls.
+  ///
+  Future<bool> doWork(int length) {
+    final completer = Completer<bool>();
+    final localWorkId = ++_workId;
+
+    Future<void> doChunkWork(int chunkStartingIndex) async {
+      if (chunkStartingIndex >= length) {
+        return completer.complete(true);
+      }
+
+      final chunkUpperIndexLimit = min(length, chunkStartingIndex + _chunkSize);
+
+      for (int indexIterator = chunkStartingIndex;
+          indexIterator < chunkUpperIndexLimit;
+          indexIterator++) {
+        // If our localWorkId is no longer active, then do not continue working
+        if (localWorkId != _workId) return completer.complete(false);
+        callback(indexIterator);
+      }
+
+      progressCallback(chunkUpperIndexLimit / length);
+      await delayToReleaseUiThread();
+      await doChunkWork(chunkStartingIndex + _chunkSize);
+    }
+
+    if (length <= 0) {
+      return Future.value(true);
+    }
+
+    progressCallback(0.0);
+    doChunkWork(0);
+
+    return completer.future;
+  }
+}
+
+String get devToolsVersion => devtools.version;

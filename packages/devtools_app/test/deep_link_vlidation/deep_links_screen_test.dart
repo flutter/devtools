@@ -25,36 +25,36 @@ final linkDatas = [
   LinkData(
     domain: 'www.domain1.com',
     path: '/',
-    os: [PlatformOS.android],
+    os: {PlatformOS.android},
   ),
   LinkData(
     domain: 'www.domain2.com',
     path: '/',
-    os: [PlatformOS.ios],
+    os: {PlatformOS.ios},
   ),
   LinkData(
     domain: 'www.google.com',
     path: '/',
-    os: [PlatformOS.android, PlatformOS.ios],
+    os: {PlatformOS.android, PlatformOS.ios},
   ),
   LinkData(
     domain: 'www.google.com',
     path: '/home',
-    os: [PlatformOS.android, PlatformOS.ios],
+    os: {PlatformOS.android, PlatformOS.ios},
   ),
 ];
 
 final domainErrorlinkData = LinkData(
   domain: 'www.google.com',
   path: '/',
-  os: [PlatformOS.android, PlatformOS.ios],
-  domainErrors: [DomainError.existence],
+  os: {PlatformOS.android, PlatformOS.ios},
+  domainErrors: [AndroidDomainError.existence],
 );
 
 final pathErrorlinkData = LinkData(
   domain: 'www.google.com',
   path: '/abcd',
-  os: [PlatformOS.android, PlatformOS.ios],
+  os: {PlatformOS.android, PlatformOS.ios},
   pathErrors: {
     PathError.intentFilterActionView,
     PathError.intentFilterDefault,
@@ -356,17 +356,17 @@ void main() {
           LinkData(
             domain: 'www.domain1.com',
             path: '/',
-            os: [PlatformOS.android],
+            os: {PlatformOS.android},
           ),
           LinkData(
             domain: 'www.domain2.com',
             path: '/',
-            os: [PlatformOS.ios],
+            os: {PlatformOS.ios},
           ),
           LinkData(
             domain: 'www.google.com',
             path: '/',
-            os: [PlatformOS.android, PlatformOS.ios],
+            os: {PlatformOS.android, PlatformOS.ios},
           ),
         ];
 
@@ -426,19 +426,19 @@ void main() {
           LinkData(
             domain: 'www.domain1.com',
             path: '/',
-            os: [PlatformOS.android],
-            domainErrors: [DomainError.existence],
+            os: {PlatformOS.android},
+            domainErrors: [AndroidDomainError.existence],
           ),
           LinkData(
             domain: 'www.domain2.com',
             path: '/path',
-            os: [PlatformOS.ios],
+            os: {PlatformOS.ios},
             pathErrors: {PathError.intentFilterActionView},
           ),
           LinkData(
             domain: 'www.google.com',
             path: '/',
-            os: [PlatformOS.android, PlatformOS.ios],
+            os: {PlatformOS.android, PlatformOS.ios},
           ),
         ];
 
@@ -493,18 +493,18 @@ void main() {
           LinkData(
             domain: 'www.domain1.com',
             path: '/',
-            os: [PlatformOS.android],
+            os: {PlatformOS.android},
           ),
           LinkData(
             domain: 'www.domain2.com',
             path: '/path',
-            os: [PlatformOS.ios],
-            domainErrors: [DomainError.existence],
+            os: {PlatformOS.ios},
+            domainErrors: [AndroidDomainError.existence],
           ),
           LinkData(
             domain: 'www.google.com',
             path: '/',
-            os: [PlatformOS.android, PlatformOS.ios],
+            os: {PlatformOS.android, PlatformOS.ios},
           ),
         ];
 
@@ -585,12 +585,12 @@ void main() {
           LinkData(
             domain: 'www.domain1.com',
             path: '/',
-            os: [PlatformOS.android],
+            os: {PlatformOS.android},
           ),
           LinkData(
             domain: 'www.domain2.com',
             path: '/',
-            os: [PlatformOS.ios],
+            os: {PlatformOS.ios},
             scheme: {'http'},
           ),
         ];
@@ -630,19 +630,19 @@ void main() {
           LinkData(
             domain: 'www.domain1.com',
             path: '/path1',
-            os: [PlatformOS.android],
-            domainErrors: [DomainError.existence],
+            os: {PlatformOS.android},
+            domainErrors: [AndroidDomainError.existence],
           ),
           LinkData(
             domain: 'www.domain2.com',
             path: '/path2',
-            os: [PlatformOS.ios],
+            os: {PlatformOS.ios},
             pathErrors: {PathError.intentFilterActionView},
           ),
           LinkData(
             domain: 'www.google.com',
             path: '/path3',
-            os: [PlatformOS.android, PlatformOS.ios],
+            os: {PlatformOS.android, PlatformOS.ios},
           ),
         ];
 

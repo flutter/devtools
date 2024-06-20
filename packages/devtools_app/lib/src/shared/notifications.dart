@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import 'globals.dart';
@@ -21,7 +22,7 @@ class NotificationMessage {
   });
 
   /// The default duration for notifications to show.
-  static const Duration defaultDuration = Duration(seconds: 7);
+  static const defaultDuration = Duration(seconds: 7);
 
   final String text;
   final List<Widget> actions;
@@ -37,7 +38,7 @@ class NotificationService {
   final toDismiss = Queue<NotificationMessage>();
 
   /// Notifies about added messages or dismissals.
-  final ValueNotifier<int> newTasks = ValueNotifier(0);
+  final newTasks = ValueNotifier<int>(0);
 
   /// Messages that are planned to be shown or are currently shown in UI.
   @visibleForTesting
@@ -73,8 +74,8 @@ class NotificationService {
     bool isReportable = true,
   }) {
     final reportErrorAction = NotificationAction(
-      'Report error',
-      () {
+      label: 'Report error',
+      onPressed: () {
         final additionalInfoParts = [
           if (reportExplanation != null) 'Explanation:\n$reportExplanation',
           if (stackTrace != null) 'Stack trace:\n$stackTrace',
@@ -152,30 +153,28 @@ class NotificationService {
 }
 
 class NotificationAction extends StatelessWidget {
-  const NotificationAction(
-    this.label,
-    this.onAction, {
+  const NotificationAction({
     super.key,
+    required this.label,
+    required this.onPressed,
     this.isPrimary = false,
   });
 
   final String label;
-
-  final VoidCallback onAction;
-
+  final VoidCallback onPressed;
   final bool isPrimary;
 
   @override
   Widget build(BuildContext context) {
-    final labelText = Text(label);
-    return isPrimary
-        ? ElevatedButton(
-            onPressed: onAction,
-            child: labelText,
-          )
-        : OutlinedButton(
-            onPressed: onAction,
-            child: labelText,
-          );
+    final theme = Theme.of(context);
+    return DevToolsButton(
+      label: label,
+      color: isPrimary
+          ? theme.colorScheme.onPrimary
+          : theme.colorScheme.onSecondaryContainer,
+      elevated: isPrimary,
+      outlined: !isPrimary,
+      onPressed: onPressed,
+    );
   }
 }

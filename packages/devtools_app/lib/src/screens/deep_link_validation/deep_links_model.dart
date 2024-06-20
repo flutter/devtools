@@ -15,11 +15,9 @@ import '../../shared/ui/search.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
 
-const kDeeplinkTableCellDefaultWidth = 200.0;
 const kToolTipWidth = 344.0;
 const metaDataDeepLinkingFlagTag =
     '<meta-data android:name="flutter_deeplinking_enabled" android:value="true" />';
-const missingDomain = 'missing domain';
 const missingScheme = 'missing scheme';
 
 enum PlatformOS {
@@ -39,9 +37,13 @@ class CommonError {
 
 class DomainError extends CommonError {
   const DomainError(super.title, super.explanation, super.fixDetails);
+}
+
+class AndroidDomainError extends DomainError {
+  const AndroidDomainError(super.title, super.explanation, super.fixDetails);
 
   /// Existence of an asset link file.
-  static const existence = DomainError(
+  static const existence = AndroidDomainError(
     'Digital Asset Links JSON file does not exist',
     'This test checks whether the assetlinks.json file, '
         'which is used to verify the association between the app and the '
@@ -52,7 +54,7 @@ class DomainError extends CommonError {
   );
 
   /// Asset link file should define a link to this app.
-  static const appIdentifier = DomainError(
+  static const appIdentifier = AndroidDomainError(
     'Package name not found',
     'The test checks your Digital Asset Links JSON file '
         'for package name validation, which the mobile device '
@@ -64,7 +66,7 @@ class DomainError extends CommonError {
   );
 
   /// Asset link file should contain the correct fingerprint.
-  static const fingerprints = DomainError(
+  static const fingerprints = AndroidDomainError(
     'Fingerprint validation failed',
     'This test checks your Digital Asset Links JSON file for '
         'sha256 fingerprint validation, which the mobile device uses '
@@ -76,7 +78,7 @@ class DomainError extends CommonError {
   );
 
   /// Asset link file should be served with the correct content type.
-  static const contentType = DomainError(
+  static const contentType = AndroidDomainError(
     'JSON content type incorrect',
     'This test checks your Digital Asset Links JSON file for content type '
         'validation, which defines the format of the JSON file. This allows '
@@ -85,7 +87,7 @@ class DomainError extends CommonError {
   );
 
   /// Asset link file should be accessible via https.
-  static const httpsAccessibility = DomainError(
+  static const httpsAccessibility = AndroidDomainError(
     'HTTPS accessibility check failed',
     'This test tries to access your Digital Asset Links '
         'JSON file over an HTTPS connection, which must be '
@@ -96,7 +98,7 @@ class DomainError extends CommonError {
   );
 
   /// Asset link file should be accessible with no redirects.
-  static const nonRedirect = DomainError(
+  static const nonRedirect = AndroidDomainError(
     'Domain non-redirect check failed',
     'This test checks that your domain is accessible without '
         'redirects. This domain must be directly accessible '
@@ -105,7 +107,7 @@ class DomainError extends CommonError {
   );
 
   /// Asset link domain should be valid/not malformed.
-  static const hostForm = DomainError(
+  static const hostForm = AndroidDomainError(
     'Host attribute is not formed properly',
     'This test checks that your android:host attribute has a valid domain URL pattern.',
     'Make sure the host is a properly formed web address such '
@@ -114,7 +116,19 @@ class DomainError extends CommonError {
 
   /// Issues that are not covered by other checks. An example that may be in this
   /// category is Android validation API failures.
-  static const other = DomainError('Check failed', '', '');
+  static const other = AndroidDomainError('Check failed', '', '');
+}
+
+class IosDomainError extends DomainError {
+  const IosDomainError(super.title, super.explanation, super.fixDetails);
+  // TODO: Add  domain errors for iOS.
+
+  /// Existence of an Apple-App-Site-Association file.
+  static const existence = IosDomainError(
+    'Apple-App-Site-Association file does not exist',
+    '',
+    '',
+  );
 }
 
 /// There are currently two types of path errors, errors from intent filters and path format errors.
@@ -201,9 +215,9 @@ class LinkData with SearchableDataMixin {
     this.associatedDomains = const <String>[],
   });
 
-  final String path;
+  final String? path;
   final String? domain;
-  final List<PlatformOS> os;
+  final Set<PlatformOS> os;
   final Set<String> scheme;
   final List<DomainError> domainErrors;
   Set<PathError> pathErrors;
@@ -214,11 +228,14 @@ class LinkData with SearchableDataMixin {
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return (domain?.caseInsensitiveContains(regExpSearch) ?? false) ||
-        path.caseInsensitiveContains(regExpSearch);
+        (path?.caseInsensitiveContains(regExpSearch) ?? false);
   }
 
   @override
   String toString() => 'LinkData($domain $path)';
+
+  String get safePath => path ?? '';
+  String get safeDomain => domain ?? '';
 }
 
 class _ErrorAwareText extends StatelessWidget {
@@ -392,7 +409,7 @@ class PathColumn extends ColumnData<LinkData>
   }
 
   @override
-  String getValue(LinkData dataObject) => dataObject.path;
+  String getValue(LinkData dataObject) => dataObject.safePath;
 
   @override
   Widget build(
@@ -405,7 +422,7 @@ class PathColumn extends ColumnData<LinkData>
     return _ErrorAwareText(
       isError: dataObject.pathErrors.isNotEmpty,
       controller: controller,
-      text: dataObject.path,
+      text: dataObject.safePath,
       link: dataObject,
     );
   }
@@ -730,12 +747,12 @@ int _compareLinkData(
       }
       return 0;
     case SortingOption.aToZ:
-      if (compareDomain) return (a.domain ?? '').compareTo(b.domain ?? '');
+      if (compareDomain) return a.safeDomain.compareTo(b.safeDomain);
 
-      return a.path.compareTo(b.path);
+      return a.safePath.compareTo(b.safePath);
     case SortingOption.zToA:
-      if (compareDomain) return (b.domain ?? '').compareTo(a.domain ?? '');
+      if (compareDomain) return b.safeDomain.compareTo(a.safeDomain);
 
-      return b.path.compareTo(a.path);
+      return b.safePath.compareTo(a.safePath);
   }
 }

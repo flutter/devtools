@@ -205,7 +205,7 @@ Future<void> _testCollapseEnvironmentPanel(
     matching: find.byType(SizedBox),
   );
 
-  final double environmentPanelSizedBoxWidth =
+  final environmentPanelSizedBoxWidth =
       tester.firstWidget<SizedBox>(environmentPanelSizedBox).width!;
 
   // Check that the [environmentPanelSizedBoxWidth] is the expected width.
@@ -224,10 +224,9 @@ Future<void> _testCollapseEnvironmentPanel(
   );
   await tester.pumpAndSettle();
 
-  final Rect simulatedDevToolsWrapperRect =
+  final simulatedDevToolsWrapperRect =
       tester.getRect(find.byType(SimulatedDevToolsWrapper));
-  final Rect environmentPanelRect =
-      tester.getRect(find.byWidget(environmentPanel));
+  final environmentPanelRect = tester.getRect(find.byWidget(environmentPanel));
 
   // Verify that the environment panel is off screen to the right of the
   // simulated devtools wrapper.

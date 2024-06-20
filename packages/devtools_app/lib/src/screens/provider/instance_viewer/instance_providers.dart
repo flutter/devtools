@@ -264,6 +264,7 @@ Setter? _parseSetter({
 /// Fetches informations related to an instance/provider at a given path
 ///
 /// The UI should not be used directly. Instead, use [instanceProvider].
+// ignore: avoid-explicit-type-declaration, required due to cyclic definition.
 final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
     instanceProvider =
     AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>(

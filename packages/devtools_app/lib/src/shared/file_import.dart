@@ -132,7 +132,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildImportInstructions(),
+                    CenteredMessage(widget.instructions),
                     _buildImportFileRow(),
                     if (widget.actionText != null && widget.onAction != null)
                       _buildActionButton(),
@@ -143,19 +143,6 @@ class _FileImportContainerState extends State<FileImportContainer> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildImportInstructions() {
-    return Padding(
-      padding: const EdgeInsets.all(defaultSpacing),
-      child: Text(
-        widget.instructions,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Theme.of(context).textTheme.displayLarge!.color,
-        ),
-      ),
     );
   }
 
@@ -194,9 +181,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
           child: Text(
             importedFile?.path ?? 'No File Selected',
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: Theme.of(context).textTheme.displayLarge!.color,
-            ),
+            style: Theme.of(context).regularTextStyle,
             textAlign: TextAlign.left,
           ),
         ),

@@ -6,7 +6,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/primitives/simple_items.dart';
-import '../../shared/primitives/trees.dart';
 import '../../shared/ui/search.dart';
 
 /// Whether to include properties surfaced through Diagnosticable objects as
@@ -242,131 +241,8 @@ class StackFrameAndSourcePosition {
   }
 }
 
-/// A node in a tree of scripts.
-///
-/// A node can either be a directory (a name with potentially some child nodes),
-/// a script reference (where [scriptRef] is non-null), or a combination of both
-/// (where the node has a non-null [scriptRef] but also contains child nodes).
-class FileNode extends TreeNode<FileNode> {
-  FileNode(this.name);
-
-  final String name;
-
-  ScriptRef? scriptRef;
-
-  /// This exists to allow for O(1) lookup of children when building the tree.
-  final Map<String, FileNode> _childrenAsMap = {};
-
-  /// Given a flat list of service protocol scripts, return a tree of scripts
-  /// representing the best hierarchical grouping.
-  static List<FileNode> createRootsFrom(List<ScriptRef> scripts) {
-    // The name of this node is not exposed to users.
-    final root = FileNode('<root>');
-
-    for (final script in scripts) {
-      final directoryParts = ScriptRefUtils.splitDirectoryParts(script);
-
-      FileNode node = root;
-
-      for (final name in directoryParts) {
-        node = node._getCreateChild(name);
-      }
-
-      node.scriptRef = script;
-    }
-
-    // Clear out the _childrenAsMap map.
-    root._trimChildrenAsMapEntries();
-
-    return root.children;
-  }
-
-  FileNode _getCreateChild(String name) {
-    return _childrenAsMap.putIfAbsent(name, () {
-      final child = FileNode(name);
-      child.parent = this;
-      children.add(child);
-      return child;
-    });
-  }
-
-  /// Clear the _childrenAsMap map recursively to save memory.
-  void _trimChildrenAsMapEntries() {
-    _childrenAsMap.clear();
-
-    for (final child in children) {
-      child._trimChildrenAsMapEntries();
-    }
-  }
-
-  @override
-  FileNode shallowCopy() {
-    throw UnimplementedError(
-      'This method is not implemented. Implement if you '
-      'need to call `shallowCopy` on an instance of this class.',
-    );
-  }
-
-  @override
-  int get hashCode => scriptRef?.hashCode ?? name.hashCode;
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! FileNode) return false;
-    final FileNode node = other;
-
-    if (scriptRef == null) {
-      return node.scriptRef != null ? false : name == node.name;
-    } else {
-      return node.scriptRef == null ? false : scriptRef == node.scriptRef;
-    }
-  }
-}
-
-// TODO(jacobr): refactor this code.
-// ignore: avoid_classes_with_only_static_members
-class ScriptRefUtils {
+// ignore: avoid_classes_with_only_static_members, fine for utility method.
+abstract class ScriptRefUtils {
   static String fileName(ScriptRef scriptRef) =>
       Uri.parse(scriptRef.uri!).path.split('/').last;
-
-  /// Return the Uri for the given ScriptRef split into path segments.
-  ///
-  /// This is useful for converting a flat list of scripts into a directory tree
-  /// structure.
-  static List<String> splitDirectoryParts(ScriptRef scriptRef) {
-    final uri = Uri.parse(scriptRef.uri!);
-    final scheme = uri.scheme;
-    var parts = uri.path.split('/');
-
-    // handle google3:///foo/bar
-    if (parts.first.isEmpty) {
-      parts = parts.where((part) => part.isNotEmpty).toList();
-      // Combine the first non-empty path segment with the scheme:
-      // 'google3:foo'.
-      parts = [
-        '$scheme:${parts.first}',
-        ...parts.sublist(1),
-      ];
-    } else if (parts.first.contains('.')) {
-      // Look for and handle dotted package names (package:foo.bar).
-      final dottedParts = parts.first.split('.');
-      parts = [
-        '$scheme:${dottedParts.first}',
-        ...dottedParts.sublist(1),
-        ...parts.sublist(1),
-      ];
-    } else {
-      parts = [
-        '$scheme:${parts.first}',
-        ...parts.sublist(1),
-      ];
-    }
-
-    return parts.length > 1
-        ? [
-            parts.first,
-            parts.sublist(1).join('/'),
-          ]
-        : parts;
-  }
 }

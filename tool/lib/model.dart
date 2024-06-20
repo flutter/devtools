@@ -78,12 +78,12 @@ class DevToolsRepo {
   void _collectPackages(Directory dir, List<Package> result) {
     // Do not collect packages from the Flutter SDK that is stored in the tool/
     // directory.
-    if (dir.path.contains('flutter-sdk/')) return;
+    if (dir.path.contains(path.join('tool', 'flutter-sdk'))) return;
 
     // Do not include the top level devtools/packages directory in the results
     // even though it has a pubspec.yaml file.
     if (_fileExists(dir, 'pubspec.yaml') &&
-        !dir.path.endsWith('/devtools/packages')) {
+        !dir.path.endsWith(path.join('devtools', 'packages'))) {
       result.add(Package._(this, dir.path));
     }
 
@@ -240,7 +240,7 @@ class Package {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
         _collectDartFiles(entity, result);
-      } else if (entity is File && name.endsWith('.dart')) {
+      } else if (entity is File && path.extension(name) == '.dart') {
         result.add(entity.path);
       }
     }

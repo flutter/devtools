@@ -101,7 +101,10 @@ void main() {
     });
 
     test('uri returns correct value', () {
-      expect(httpGet.uri, 'https://jsonplaceholder.typicode.com/albums/1');
+      expect(
+        httpGet.uri,
+        'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
+      );
       expect(httpGetWithError.uri, 'https://www.examplez.com/1');
       expect(httpPost.uri, 'https://jsonplaceholder.typicode.com/posts');
       expect(httpPut.uri, 'https://jsonplaceholder.typicode.com/posts/1');
@@ -235,7 +238,8 @@ void main() {
       expect(
         collectionEquals(httpGet.general, {
           'method': 'GET',
-          'uri': 'https://jsonplaceholder.typicode.com/albums/1',
+          'uri':
+              'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
           'connectionInfo': {
             'localPort': 45648,
             'remoteAddress': '2606:4700:3033::ac43:bdd9',
@@ -248,6 +252,7 @@ void main() {
           'reasonPhrase': 'OK',
           'redirects': <Object?>[],
           'statusCode': 200,
+          'queryParameters': {'userId': '1', 'title': 'myalbum'},
         }),
         isTrue,
       );
@@ -275,6 +280,7 @@ void main() {
           'reasonPhrase': 'Created',
           'redirects': <Object?>[],
           'statusCode': 201,
+          'queryParameters': {},
         }),
         isTrue,
       );
@@ -295,6 +301,7 @@ void main() {
           'reasonPhrase': 'OK',
           'redirects': <Object?>[],
           'statusCode': 200,
+          'queryParameters': {},
         }),
         isTrue,
       );
@@ -314,6 +321,7 @@ void main() {
           'reasonPhrase': 'OK',
           'redirects': <Object?>[],
           'statusCode': 200,
+          'queryParameters': {},
         }),
         isTrue,
       );
@@ -334,6 +342,7 @@ void main() {
           'reasonPhrase': 'Switching Protocols',
           'redirects': <Object?>[],
           'statusCode': 101,
+          'queryParameters': {},
         }),
         isTrue,
       );
@@ -442,6 +451,33 @@ void main() {
           'sec-websocket-accept': ['JF5SBCGrfyYAoLKzvj6A0ZVpk6c='],
         }),
         isTrue,
+      );
+    });
+
+    test('queryParameters returns correct value', () {
+      expect(
+        collectionEquals(httpGet.queryParameters, {
+          'userId': '1',
+          'title': 'myalbum',
+        }),
+        isTrue,
+      );
+      expect(httpGetWithError.queryParameters, isEmpty);
+      expect(
+        httpPost.queryParameters,
+        isEmpty,
+      );
+      expect(
+        httpPost.queryParameters,
+        isEmpty,
+      );
+      expect(
+        httpPost.queryParameters,
+        isEmpty,
+      );
+      expect(
+        httpPost.queryParameters,
+        isEmpty,
       );
     });
 

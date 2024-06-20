@@ -17,8 +17,7 @@ import '../../test_infra/test_data/performance/sample_performance_data.dart';
 
 void main() {
   late MockPerformanceController performanceController;
-  final ServiceConnectionManager fakeServiceManager =
-      FakeServiceConnectionManager(
+  final fakeServiceManager = FakeServiceConnectionManager(
     service: FakeServiceManager.createFakeService(
       timelineData: perfettoVmTimeline,
     ),

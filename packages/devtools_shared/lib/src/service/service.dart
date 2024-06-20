@@ -26,8 +26,7 @@ Future<T> _connectWithSse<T extends VmService>({
       ? uri.replace(scheme: 'http')
       : uri.replace(scheme: 'https');
   final client = SseClient('$uri', debugKey: 'DevToolsService');
-  final Stream<String> stream =
-      client.stream!.asBroadcastStream() as Stream<String>;
+  final stream = client.stream!.asBroadcastStream() as Stream<String>;
   final service = serviceFactory(
     inStream: stream,
     writeMessage: client.sink!.add,

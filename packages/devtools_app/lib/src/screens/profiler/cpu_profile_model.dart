@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -186,8 +184,7 @@ class CpuProfileData with Serializable {
 
     // Initialize all stack frames.
     final stackFrames = <String, CpuStackFrame>{};
-    final Map<String, Object?> stackFramesJson =
-        jsonDecode(jsonEncode(json.stackFrames ?? <String, Object?>{}));
+    final stackFramesJson = json.stackFrames ?? const <String, Object?>{};
     for (final entry in stackFramesJson.entries) {
       final stackFrameJson = entry.value as Map<String, Object?>;
       final resolvedUrl = (stackFrameJson[resolvedUrlKey] as String?) ?? '';
@@ -545,7 +542,7 @@ class CpuProfileData with Serializable {
     // The root ID is associated with an artificial frame / node that is the root
     // of all stacks, regardless of entrypoint. This should never be seen in the
     // final output from this method.
-    const int kRootId = 0;
+    const kRootId = 0;
     final traceObject = <String, Object?>{
       CpuProfileData._sampleCountKey: cpuSamples.sampleCount,
       CpuProfileData._samplePeriodKey: cpuSamples.samplePeriod,
@@ -922,7 +919,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// This is late and final, so it will only be created once for performance
   /// reasons. This method should only be called when the [CpuStackFrame] is
   /// part of a processed CPU profile.
-  late final Set<String> ancestorIds = {
+  // ignore: avoid-explicit-type-declaration, required due to cyclic definition.
+  late final Set<String> ancestorIds = <String>{
     if (parentId != null) parentId!,
     ...parent?.ancestorIds ?? {},
   };

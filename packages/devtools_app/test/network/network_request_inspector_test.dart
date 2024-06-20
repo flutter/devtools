@@ -22,8 +22,7 @@ void main() {
   group('NetworkRequestInspector', () {
     late NetworkController controller;
     late FakeServiceConnectionManager fakeServiceConnection;
-    final HttpProfileRequest? httpRequest =
-        HttpProfileRequest.parse(httpPostJson);
+    final httpRequest = HttpProfileRequest.parse(httpPostJson);
     String clipboardContents = '';
 
     setUp(() {
@@ -143,12 +142,11 @@ void main() {
         'drop down value should update when response view type changes',
         (tester) async {
           NetworkResponseViewType? getCurrentDropDownValue() {
-            final RoundedDropDownButton<NetworkResponseViewType>
-                dropDownWidget = find
-                    .byType(RoundedDropDownButton<NetworkResponseViewType>)
-                    .evaluate()
-                    .first
-                    .widget as RoundedDropDownButton<NetworkResponseViewType>;
+            final dropDownWidget = find
+                .byType(RoundedDropDownButton<NetworkResponseViewType>)
+                .evaluate()
+                .first
+                .widget as RoundedDropDownButton<NetworkResponseViewType>;
             return dropDownWidget.value;
           }
 
@@ -200,7 +198,7 @@ void main() {
             NetworkResponseViewType.auto,
           );
           String initial = 'Not changed';
-          const String afterOnChanged = 'changed';
+          const afterOnChanged = 'changed';
 
           await tester.pumpWidget(
             wrapWithControllers(

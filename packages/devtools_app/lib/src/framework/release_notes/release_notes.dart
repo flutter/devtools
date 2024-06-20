@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
-import '../../../devtools.dart' as devtools;
 import '../../shared/primitives/url_utils.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/side_panel.dart';
@@ -28,7 +27,7 @@ bool debugTestReleaseNotes = false;
 // from the flutter/website PR, which has a GitHub action that automatically
 // stages commits to firebase. Example:
 // https://flutter-docs-prod--pr8928-dt-notes-links-b0b33er1.web.app/tools/devtools/release-notes/release-notes-2.24.0-src.md.
-const String? _debugReleaseNotesUrl = null;
+String? _debugReleaseNotesUrl;
 
 const releaseNotesKey = Key('release_notes');
 final _baseUrlRelativeMarkdownLinkPattern = RegExp(
@@ -117,7 +116,7 @@ class ReleaseNotesController extends SidePanelController {
     // strip off any build metadata (any characters following a '+' character).
     // Release notes will be hosted on the Flutter website with a version number
     // that does not contain any build metadata.
-    final parsedVersion = SemanticVersion.parse(devtools.version);
+    final parsedVersion = SemanticVersion.parse(devToolsVersion);
     final notesVersion = latestVersionToCheckForReleaseNotes(parsedVersion);
 
     if (notesVersion <= versionFloor) {
