@@ -10,7 +10,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Improve messaging when a screen is unavailable for the platform of the
+connected app. - [#7958](https://github.com/flutter/devtools/pull/7958)
 
 ## Inspector updates
 
