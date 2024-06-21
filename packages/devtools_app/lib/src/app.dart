@@ -507,7 +507,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         // needs to be generated dynamically.
         disabledReason = 'The ${screen.title} screen requires library '
             '${screen.requiresLibrary}, but the library was not detected.';
-      } else if (reason?.message case String message) {
+      } else if (reason?.message case final String message) {
         disabledReason = 'The ${screen.title} screen $message';
       }
     }
