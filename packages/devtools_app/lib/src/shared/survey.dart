@@ -27,6 +27,13 @@ class SurveyService {
 
   static const _maxShowSurveyCount = 5;
 
+  /// The URL that we will fetch the DevTools survey metadata from.
+  ///
+  /// To run new surveys, update the content at
+  /// https://github.com/flutter/uxr/blob/master/surveys/devtools-survey-metadata.json.
+  ///
+  /// This content will be propagated to the storage.googleapis.com domain
+  /// automatically.
   static final _metadataUrl = Uri.https(
     'storage.googleapis.com',
     'flutter-uxr/surveys/devtools-survey-metadata.json',

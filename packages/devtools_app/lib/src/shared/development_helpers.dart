@@ -210,12 +210,12 @@ abstract class StubDevToolsExtensions {
 ///
 /// When this flag is true, [debugSurveyMetadata] will be used instead of what
 /// we normally fetch from
-/// 'docs.flutter.dev/f/dart-devtools-survey-metadata.json'.
+/// 'https://storage.googleapis.com/flutter-uxr/surveys/devtools-survey-metadata.json'.
 bool debugSurvey = false;
 
 /// The survey metadata that will be used instead of the live data from
-/// 'docs.flutter.dev/f/dart-devtools-survey-metadata.json' when [debugSurvey]
-/// is true;
+/// 'https://storage.googleapis.com/flutter-uxr/surveys/devtools-survey-metadata.json'
+/// when [debugSurvey] is true.
 final debugSurveyMetadata = DevToolsSurvey.fromJson(
   {
     '_comments': [
