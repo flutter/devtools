@@ -161,26 +161,23 @@ class SidebarDevToolsExtensionsController extends DisposableController
             fixedAppRoot: projectRootUri,
             ignoreServiceConnection: true,
           );
-
     assert(
       !_extensionServiceByRootUri.containsKey(projectRootUri),
       'The initialization for the ExtensionService for root uri '
       '$projectRootUri should only happen once.',
     );
-    _extensionServiceByRootUri[projectRootUri] = extensionService;
-
     await extensionService.initialize();
-    _extensionsByRootUri[projectRootUri] = extensionService.visibleExtensions;
 
-    void listener() {
+    void updateCallback() {
       _extensionsByRootUri[projectRootUri] = extensionService.visibleExtensions;
       _deduplicateAndUpdate();
     }
 
-    addAutoDisposeListener(extensionService.currentExtensions, listener);
+    updateCallback();
+    addAutoDisposeListener(extensionService.currentExtensions, updateCallback);
     _listenersByRootUri
         .putIfAbsent(projectRootUri, () => <VoidCallback>[])
-        .add(listener);
+        .add(updateCallback);
   }
 
   void _deduplicateAndUpdate() {

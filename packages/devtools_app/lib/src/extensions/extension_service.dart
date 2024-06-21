@@ -198,7 +198,10 @@ class ExtensionService extends DisposableController
         allExtensions.where((e) => !e.detectedFromStaticContext).toList();
     staticExtensions =
         allExtensions.where((e) => e.detectedFromStaticContext).toList();
-    _maybeIgnoreExtensions(connectedToApp: _appRoot != null);
+    _maybeIgnoreExtensions(
+      connectedToApp: _appRoot != null,
+      ignoreServiceConnection: ignoreServiceConnection,
+    );
     final available = [
       ...runtimeExtensions,
       ...staticExtensions.where((ext) => !isExtensionIgnored(ext)),
@@ -207,21 +210,27 @@ class ExtensionService extends DisposableController
     _refreshInProgress.value = false;
   }
 
-  void _maybeIgnoreExtensions({required bool connectedToApp}) {
+  void _maybeIgnoreExtensions({
+    required bool connectedToApp,
+    required bool ignoreServiceConnection,
+  }) {
     // TODO(kenz): consider handling duplicates in a way that gives the user a
     // choice of which version they want to use.
     _deduplicateStaticExtensions();
     _deduplicateStaticExtensionsWithRuntimeExtensions();
 
     // Some extensions detected from a static context may actually require a
-    // running application.
-    for (final ext in staticExtensions) {
-      if (!connectedToApp && ext.requiresConnection) {
-        _log.fine(
-          'ignoring static extension ${ext.identifier} at '
-          '${ext.devtoolsOptionsUri} because it requires a connected app.',
-        );
-        setExtensionIgnored(ext, ignore: true);
+    // running application. Ignore these extensions unless
+    // [ignoreServiceConnection] is true.
+    if (!ignoreServiceConnection) {
+      for (final ext in staticExtensions) {
+        if (!connectedToApp && ext.requiresConnection) {
+          _log.fine(
+            'ignoring static extension ${ext.identifier} at '
+            '${ext.devtoolsOptionsUri} because it requires a connected app.',
+          );
+          setExtensionIgnored(ext, ignore: true);
+        }
       }
     }
   }
