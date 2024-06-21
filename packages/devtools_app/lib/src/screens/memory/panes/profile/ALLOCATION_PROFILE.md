@@ -1,1 +1,1 @@
-Documentation: https://docs.flutter.dev/development/tools/devtools/memory#profile-tab
+Documentation: https://docs.flutter.dev/tools/devtools/memory#profile-memory-tab

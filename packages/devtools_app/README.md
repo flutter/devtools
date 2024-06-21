@@ -6,8 +6,8 @@ the devtools app is in package:devtools_app.
 
 ## Getting started
 
-For documentation on installing and trying out DevTools, please see our
-[docs](https://flutter.dev/docs/development/tools/devtools/).
+For documentation on installing and trying out DevTools, please
+visit the [DevTools docs](https://docs.flutter.dev/tools/devtools/).
 
 ## Feedback
 

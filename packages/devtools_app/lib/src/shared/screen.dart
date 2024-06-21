@@ -491,8 +491,6 @@ abstract class Screen {
       return (
         show: false,
         disabledReason: ScreenDisabledReason.requiresDartLibrary,
-        // 'The ${screen.title} screen requires library '
-        // '${screen.requiresLibrary}, but the library was not detected.',
       );
     }
   }
@@ -596,7 +594,7 @@ class ShortcutsConfiguration {
 }
 
 enum ScreenDisabledReason {
-  offlineDataNotSupported('does not support offline data'),
+  offlineDataNotSupported('does not support offline data.'),
   requiresDartLibrary(null),
   requiresDartVm('requires the Dart VM, but it is not available.'),
   requiresDebugBuild('only supports debug builds.'),

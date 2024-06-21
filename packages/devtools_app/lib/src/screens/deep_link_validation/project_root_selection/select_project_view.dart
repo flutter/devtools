@@ -206,7 +206,7 @@ class _LoadingProjectView extends StatelessWidget {
             child: const LinearProgressIndicator(),
           ),
           Text(
-            'The first load will take longer than usual',
+            'Loading your project usually takes about a minute.',
             style: theme.subtleTextStyle,
           ),
         ],
