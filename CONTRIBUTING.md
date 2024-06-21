@@ -45,12 +45,12 @@ You can do this online, and it only takes a minute.
 ### Set up your DevTools environment
 
 **Before setting up your DevTools environment**, please make sure you have
-[cloned the Flutter SDK from GitHub](https://docs.flutter.dev/get-started/install/macos#downloading-straight-from-github-instead-of-using-an-archive)
+[cloned the Flutter SDK from GitHub](https://github.com/flutter/flutter/blob/main/docs/contributing/Setting-up-the-Framework-development-environment.md)
 and added the included `flutter` and `dart` executables to your `PATH` environment variable (see Flutter
-instructions for how to [update your PATH](https://docs.flutter.dev/get-started/install/macos#update-your-path)).
+instructions for how to [update your PATH](https://flutter.dev/to/update-macos-path)).
 
 Typing `which flutter` and `which dart` (or `where.exe flutter` and `where.exe dart` for Windows)
-into your terminal should print the path to the binaries from Flutter SDK you cloned from Github.
+into your terminal should print the path to the binaries from Flutter SDK you cloned from GitHub.
 
 1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the DevTools repo to your
 own Github account, and then clone it using SSH. If you haven't already, you may need to

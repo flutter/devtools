@@ -1,1 +1,1 @@
-Documentation: https://docs.flutter.dev/development/tools/devtools/memory#trace-tab
+Documentation: https://docs.flutter.dev/tools/devtools/memory#trace-instances-tab

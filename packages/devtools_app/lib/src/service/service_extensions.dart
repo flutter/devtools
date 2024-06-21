@@ -227,7 +227,7 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>.from(
   tooltip:
       'Highlight images that are using too much memory by inverting colors and flipping them.',
   documentationUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#highlight-oversized-images',
+      'https://docs.flutter.dev/tools/devtools/inspector#highlight-oversized-images',
   gaDocsItem: gac.highlightOversizedImagesDocs,
 );
 
@@ -239,7 +239,7 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>.from(
   gaItem: gac.debugPaint,
   tooltip: 'Overlay guidelines to assist with fixing layout issues.',
   documentationUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#show-guidelines',
+      'https://docs.flutter.dev/tools/devtools/inspector#show-guidelines',
   gaDocsItem: gac.debugPaintDocs,
 );
 
@@ -252,7 +252,7 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>.from(
   tooltip:
       'Show baselines, which are used to position text. Can be useful for checking if text is aligned.',
   documentationUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#show-baselines',
+      'https://docs.flutter.dev/tools/devtools/inspector#show-baselines',
   gaDocsItem: gac.paintBaselineDocs,
 );
 
@@ -263,8 +263,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>.from(
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.performanceOverlay.name,
   tooltip: 'Overlay a performance chart on your app.',
-  documentationUrl:
-      'https://flutter.dev/docs/perf/rendering/ui-performance#the-performance-overlay',
+  documentationUrl: 'https://flutter.dev/to/performance-overlay',
   gaDocsItem: gac.PerformanceDocs.performanceOverlayDocs.name,
 );
 
@@ -277,7 +276,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   description: 'Adds an event to the timeline for every Widget built.',
   tooltip: '',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#track-widget-builds',
+      'https://docs.flutter.dev/tools/devtools/performance#track-widget-builds',
   gaDocsItem: gac.PerformanceDocs.trackWidgetBuildsDocs.name,
 );
 
@@ -303,7 +302,7 @@ final profileRenderObjectPaints =
   description: 'Adds an event to the timeline for every RenderObject painted.',
   tooltip: '',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#track-paints',
+      'https://docs.flutter.dev/tools/devtools/performance#track-paints',
   gaDocsItem: gac.PerformanceDocs.trackPaintsDocs.name,
 );
 
@@ -317,7 +316,7 @@ final profileRenderObjectLayouts =
   description: 'Adds an event to the timeline for every RenderObject layout.',
   tooltip: '',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#track-layouts',
+      'https://docs.flutter.dev/tools/devtools/performance#track-layouts',
   gaDocsItem: gac.PerformanceDocs.trackLayoutsDocs.name,
 );
 
@@ -330,7 +329,7 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>.from(
   tooltip:
       'Show borders that change color when elements repaint. Useful for finding unnecessary repaints.',
   documentationUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#highlight-repaints',
+      'https://docs.flutter.dev/tools/devtools/inspector#highlight-repaints',
   gaDocsItem: gac.repaintRainbowDocs,
 );
 
@@ -342,7 +341,7 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>.from(
   gaItem: gac.slowAnimation,
   tooltip: 'Run animations 5 times slower to help fine-tune them.',
   documentationUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#slow-animations',
+      'https://docs.flutter.dev/tools/devtools/inspector#slow-animations',
   gaDocsItem: gac.slowAnimationDocs,
 );
 
@@ -373,7 +372,7 @@ final disableClipLayers = ToggleableServiceExtensionDescription<bool>.from(
 affecting performance. If performance improves with this option
 disabled, try to reduce the use of clipping effects in your app.''',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
+      'https://docs.flutter.dev/tools/devtools/performance#more-debugging-options',
   gaDocsItem: gac.PerformanceDocs.disableClipLayersDocs.name,
 );
 
@@ -388,7 +387,7 @@ final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>.from(
 effects is affecting performance. If performance improves with this
 option disabled, try to reduce the use of opacity effects in your app.''',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
+      'https://docs.flutter.dev/tools/devtools/performance#more-debugging-options',
   gaDocsItem: gac.PerformanceDocs.disableOpacityLayersDocs.name,
 );
 
@@ -405,7 +404,7 @@ modeling effects is affecting performance (shadows, elevations, etc.).
 If performance improves with this option disabled, try to reduce the
 use of physical modeling effects in your app.''',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
+      'https://docs.flutter.dev/tools/devtools/performance#more-debugging-options',
   gaDocsItem: gac.PerformanceDocs.disablePhysicalShapeLayersDocs.name,
 );
 
@@ -501,7 +500,6 @@ final profilePlatformChannels =
       'apps with plugins). Also periodically prints platform channel '
       'statistics to console.',
   tooltip: '',
-  documentationUrl:
-      'https://docs.flutter.dev/platform-integration/platform-channels',
+  documentationUrl: 'https://flutter.dev/to/platform-channels',
   gaDocsItem: gac.PerformanceDocs.platformChannelsDocs.name,
 );

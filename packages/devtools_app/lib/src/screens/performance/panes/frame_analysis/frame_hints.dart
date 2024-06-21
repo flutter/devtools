@@ -250,7 +250,7 @@ class IntrinsicOperationsHint extends StatelessWidget {
   });
 
   static const _intrinsicOperationsDocs =
-      'https://docs.flutter.dev/perf/best-practices#minimize-layout-passes-caused-by-intrinsic-operations';
+      'https://flutter.dev/to/minimize-layout-passes';
 
   final int intrinsicOperationsCount;
 
@@ -293,8 +293,7 @@ class CanvasSaveLayerHint extends StatelessWidget {
     super.key,
   });
 
-  static const _saveLayerDocs =
-      'https://docs.flutter.dev/perf/best-practices#use-savelayer-thoughtfully';
+  static const _saveLayerDocs = 'https://flutter.dev/to/save-layer-perf';
 
   final int saveLayerCount;
 
