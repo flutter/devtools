@@ -51,7 +51,10 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-TODO: Remove this section if there are not any general updates.
+* Show all DevTools tools in the sidebar by default, even when there are no
+debug sessions available. - [#7947](https://github.com/flutter/devtools/pull/7947)
+
+![DevTools tools in the sidebar](images/devtools_in_sidebar.png "DevTools tools in the sidebar")
 
 ## DevTools Extension updates
 
