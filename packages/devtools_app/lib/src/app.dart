@@ -292,7 +292,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               embedMode: embedMode,
               child: ScreenUnavailable(
                 title: "The '$page' screen is unavailable.",
-                description: _screenUnavailableReason(page),
+                description: _screenDisabledReason(page),
                 routerDelegate: routerDelegate,
                 embedMode: embedMode,
               ),
@@ -495,7 +495,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     }
   }
 
-  String? _screenUnavailableReason(String screenId) {
+  String? _screenDisabledReason(String screenId) {
     final screenMetaData = ScreenMetaData.lookup(screenId);
     String? disabledReason;
     if (screenMetaData != null) {
@@ -507,8 +507,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         // needs to be generated dynamically.
         disabledReason = 'The ${screen.title} screen requires library '
             '${screen.requiresLibrary}, but the library was not detected.';
-      } else if (reason?.message != null) {
-        disabledReason = 'The ${screen.title} screen ${reason!.message!}';
+      } else if (reason?.message case String message) {
+        disabledReason = 'The ${screen.title} screen $message';
       }
     }
     return disabledReason;
