@@ -234,6 +234,14 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           onPressed: widget.controller.clear,
         ),
         const SizedBox(width: defaultSpacing),
+        DownloadButton(
+          minScreenWidthForTextBeforeScaling:
+              _NetworkProfilerControls._includeTextWidth,
+          onPressed: widget.controller.exportAsHarFile,
+          gaScreen: gac.network,
+          gaSelection: gac.NetworkEvent.networkDownloadHar,
+        ),
+        const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<NetworkController>(
