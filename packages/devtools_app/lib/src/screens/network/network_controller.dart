@@ -413,11 +413,15 @@ class NetworkController extends DisposableController
     final service = serviceConnection.serviceManager.service!;
     await service.forEachIsolate(
       (isolate) async {
-        final httpFuture =
-            service.httpEnableTimelineLoggingWrapper(isolate.id!);
+        final future = switch (type) {
+          _NetworkTrafficType.http =>
+            service.httpEnableTimelineLoggingWrapper(isolate.id!),
+          _NetworkTrafficType.socket =>
+            service.socketProfilingEnabledWrapper(isolate.id!),
+        };
         // The above call won't complete immediately if the isolate is paused,
         // so give up waiting after 500ms.
-        final state = await timeout(httpFuture, 500);
+        final state = await timeout(future, 500);
         if (state?.enabled != true) {
           enabled = false;
         }
