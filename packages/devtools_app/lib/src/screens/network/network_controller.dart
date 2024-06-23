@@ -3,22 +3,20 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../devtools_app.dart';
+import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
-import '../../shared/globals.dart';
-import '../../shared/http/http_request_data.dart';
 import '../../shared/http/http_service.dart' as http_service;
-import '../../shared/primitives/utils.dart';
-import '../../shared/ui/filter.dart';
-import '../../shared/ui/search.dart';
-import '../../shared/utils.dart';
-import 'network_model.dart';
-import 'network_screen.dart';
 import 'network_service.dart';
+
+final _exportController = ExportController();
+List<DartIOHttpRequestData>? httpRequests;
 
 /// Different types of Network Response which can be used to visualise response
 /// on Response tab
@@ -46,6 +44,7 @@ class NetworkController extends DisposableController
     with
         SearchControllerMixin<NetworkRequest>,
         FilterControllerMixin<NetworkRequest>,
+        OfflineScreenControllerMixin,
         AutoDisposeControllerMixin {
   NetworkController() {
     _networkService = NetworkService(this);
@@ -55,6 +54,154 @@ class NetworkController extends DisposableController
       _filterAndRefreshSearchMatches,
     );
     subscribeToFilterChanges();
+  }
+
+  String? exportAsHarFile() {
+    httpRequests =
+        filteredData.value.whereType<DartIOHttpRequestData>().toList();
+
+    if (httpRequests!.isEmpty) {
+      debugPrint('No valid request data to export');
+      return '';
+    }
+
+    try {
+      if (httpRequests!.isNotEmpty) {
+        final har = {
+          'log': {
+            'version': '1.2',
+            'creator': {
+              'name': 'flutter_tool',
+              'version': '0.0.2',
+            },
+            'pages': [
+              {
+                'startedDateTime': httpRequests?.first.startTimestamp
+                    .toUtc()
+                    .toIso8601String(),
+                'id': 'page_0',
+                'title': 'FlutterCapture',
+                'pageTimings': {
+                  'onContentLoad': -1,
+                  'onLoad': -1,
+                },
+              },
+            ],
+            'entries': httpRequests
+                ?.map(
+                  (e) => {
+                    'pageref': 'page_0',
+                    'startedDateTime':
+                        e.startTimestamp.toUtc().toIso8601String(),
+                    'time': e.duration?.inMilliseconds,
+                    'request': {
+                      'method': e.method.toUpperCase(),
+                      'url': e.uri.toString(),
+                      'httpVersion': 'HTTP/1.1',
+                      'cookies': e.requestCookies
+                          .map(
+                            (e) => {
+                              'name': e.name,
+                              'value': e.value,
+                              'path': e.path,
+                              'domain': e.domain,
+                              'expires': e.expires?.toUtc().toIso8601String(),
+                              'httpOnly': e.httpOnly,
+                              'secure': e.secure,
+                            },
+                          )
+                          .toList(),
+                      'headers': e.requestHeaders?.entries.map((h) {
+                        var value = h.value;
+                        if (value is List) {
+                          value = value.first;
+                        }
+                        return {
+                          'name': h.key,
+                          'value': value,
+                        };
+                      }).toList(),
+                      'queryString': Uri.parse(e.uri)
+                          .queryParameters
+                          .entries
+                          .map(
+                            (q) => {
+                              'name': q.key,
+                              'value': q.value,
+                            },
+                          )
+                          .toList(),
+                      'postData': {
+                        'mimeType': e.contentType,
+                        'text': e.requestBody,
+                      },
+                      'headersSize': -1,
+                      'bodySize': -1,
+                    },
+                    'response': {
+                      'status': e.status,
+                      'statusText': '',
+                      'httpVersion': 'http/2.0',
+                      'cookies': e.responseCookies
+                          .map(
+                            (e) => {
+                              'name': e.name,
+                              'value': e.value,
+                              'path': e.path,
+                              'domain': e.domain,
+                              'expires': e.expires?.toUtc().toIso8601String(),
+                              'httpOnly': e.httpOnly,
+                              'secure': e.secure,
+                            },
+                          )
+                          .toList(),
+                      'headers': e.responseHeaders?.entries.map((h) {
+                        var value = h.value;
+                        if (value is List) {
+                          value = value.first;
+                        }
+                        return {
+                          'name': h.key,
+                          'value': value,
+                        };
+                      }).toList(),
+                      'content': {
+                        'size': e.responseBody?.length,
+                        'mimeType': e.type,
+                        'text': e.responseBody,
+                      },
+                      'redirectURL': '',
+                      'headersSize': -1,
+                      'bodySize': -1,
+                    },
+                    'cache': {},
+                    'timings': {
+                      'blocked': -1,
+                      'dns': -1,
+                      'connect': -1,
+                      'send': 1,
+                      'wait': e.duration!.inMilliseconds - 2,
+                      'receive': 1,
+                      'ssl': -1,
+                    },
+                    'serverIPAddress': '10.0.0.1',
+                    'connection': e.hashCode.toString(),
+                    'comment': '',
+                  },
+                )
+                .toList(),
+          },
+        };
+        debugPrint('data is ${json.encode(har)}');
+        return _exportController.downloadFile(
+          json.encode(har),
+          type: ExportFileType.har,
+        );
+      }
+    } catch (ex) {
+      debugPrint('Exception in export $ex');
+    }
+    return null;
   }
 
   static const methodFilterId = 'network-method-filter';
@@ -266,15 +413,11 @@ class NetworkController extends DisposableController
     final service = serviceConnection.serviceManager.service!;
     await service.forEachIsolate(
       (isolate) async {
-        final future = switch (type) {
-          _NetworkTrafficType.http =>
-            service.httpEnableTimelineLoggingWrapper(isolate.id!),
-          _NetworkTrafficType.socket =>
-            service.socketProfilingEnabledWrapper(isolate.id!),
-        };
+        final httpFuture =
+            service.httpEnableTimelineLoggingWrapper(isolate.id!);
         // The above call won't complete immediately if the isolate is paused,
         // so give up waiting after 500ms.
-        final state = await timeout(future, 500);
+        final state = await timeout(httpFuture, 500);
         if (state?.enabled != true) {
           enabled = false;
         }
@@ -359,6 +502,16 @@ class NetworkController extends DisposableController
     if (r.didFail) {
       serviceConnection.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
     }
+  }
+
+  @override
+  OfflineScreenData prepareOfflineScreenData() {
+    debugPrint('offline data - httpRequests are $httpRequests');
+    return OfflineScreenData(
+      screenId: NetworkScreen.id,
+      //TODO deserialize har data and pass here
+      data: {},
+    );
   }
 }
 

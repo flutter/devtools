@@ -113,7 +113,8 @@ enum ExportFileType {
   json,
   csv,
   yaml,
-  data;
+  data,
+  har;
 
   @override
   String toString() => name;
