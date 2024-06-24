@@ -107,9 +107,7 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
 
     _trimOneOutOfRetentionLog();
 
-    getFilteredLogHeight(
-      _logs.length - 1,
-    );
+    getFilteredLogHeight(_logs.length - 1);
     notifyListeners();
   }
 

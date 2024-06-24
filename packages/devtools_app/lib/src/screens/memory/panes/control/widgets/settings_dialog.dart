@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/ui/utils.dart';
 
 /// The dialog keys for testing purposes.
 @visibleForTesting

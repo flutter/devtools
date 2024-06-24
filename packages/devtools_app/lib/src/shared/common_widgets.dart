@@ -10,6 +10,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/debugger/debugger_controller.dart';
@@ -2256,6 +2257,81 @@ class ContextMenuButton extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// A Widget for displaying a setting field, that sets and integer value.
+class PositiveIntegerSetting extends StatefulWidget {
+  const PositiveIntegerSetting({
+    super.key,
+    required this.title,
+    required this.subTitle,
+    required this.notifier,
+  });
+
+  final String title;
+  final String subTitle;
+  final ValueNotifier<int> notifier;
+
+  @override
+  State<PositiveIntegerSetting> createState() => _PositiveIntegerSettingState();
+}
+
+class _PositiveIntegerSettingState extends State<PositiveIntegerSetting> {
+  late final TextEditingController _textEditingController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textEditingController = TextEditingController()
+      ..text = widget.notifier.value.toString();
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.title),
+              Text(
+                widget.subTitle,
+                style: theme.subtleTextStyle,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: defaultSpacing),
+        SizedBox(
+          height: defaultTextFieldHeight,
+          width: defaultTextFieldNumberWidth,
+          child: TextField(
+            textAlignVertical: TextAlignVertical.top,
+            style: theme.regularTextStyle,
+            decoration: singleLineDialogTextFieldDecoration,
+            controller: _textEditingController,
+            inputFormatters: <TextInputFormatter>[
+              // Only positive integers.
+              FilteringTextInputFormatter.allow(
+                RegExp(r'^[1-9][0-9]*'),
+              ),
+            ],
+            onChanged: (String text) {
+              widget.notifier.value = int.parse(text);
+            },
+          ),
+        ),
+      ],
     );
   }
 }

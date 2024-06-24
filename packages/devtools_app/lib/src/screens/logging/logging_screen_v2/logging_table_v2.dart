@@ -14,7 +14,6 @@ import '../../../service/service_extension_widgets.dart';
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
-import '../../../shared/ui/utils.dart';
 import 'logging_model.dart';
 import 'logging_table_row.dart';
 
@@ -272,12 +271,7 @@ class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
       actions: [
         DialogApplyButton(
           onPressed: () {
-            if (newRetentionLimit.value !=
-                preferences.logging.retentionLimit.value) {
-              // Save the new retention limit to preferences.
-              preferences.logging.retentionLimit.value =
-                  newRetentionLimit.value;
-            }
+            preferences.logging.retentionLimit.value = newRetentionLimit.value;
           },
         ),
         const DialogCloseButton(),
