@@ -58,7 +58,7 @@ void main() {
       expect(ignoredRuntimeExtensions.length, 0);
     });
 
-    test('initialize when disconnected', () async {
+    test('initialize with ignoreServiceConnection', () async {
       when(mockServiceManager.connectedState)
           .thenReturn(ValueNotifier(const ConnectedState(false)));
 
@@ -70,15 +70,13 @@ void main() {
       await service.initialize();
       expect(service.staticExtensions.length, 4);
       expect(service.runtimeExtensions, isEmpty);
-      expect(service.availableExtensions.length, 1);
+      expect(service.availableExtensions.length, 3);
 
       final ignoredStaticExtensions =
           service.staticExtensions.where(service.isExtensionIgnored);
-      expect(ignoredStaticExtensions.length, 3);
+      expect(ignoredStaticExtensions.length, 1);
       expect(ignoredStaticExtensions.map((e) => e.identifier).toList(), [
         'bar_2.0.0', // Duplicate: older version of an existing extension.
-        'baz_1.0.0', // Requires a connected app.
-        'foo_1.0.0', // Requires a connected app.
       ]);
     });
 

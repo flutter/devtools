@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -231,7 +232,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         key: const Key('not-found'),
         embedMode: params.embedMode,
         child: ScreenUnavailable(
-          title: "The '$page' cannot be found.",
+          title: "The '$page' page cannot be found.",
           embedMode: params.embedMode,
           routerDelegate: routerDelegate,
         ),
@@ -267,7 +268,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           extensionService.currentExtensions,
         ],
         builder: (_, __, child) {
-          final screens = _visibleScreens()
+          final screensInScaffold = _visibleScreens()
               .where(
                 (s) => maybeIncludeOnlyEmbeddedScreen(
                   s,
@@ -277,27 +278,31 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               )
               .toList();
 
-          removeHiddenScreens(screens, queryParams);
+          removeHiddenScreens(screensInScaffold, queryParams);
 
           DevToolsScaffold scaffold;
 
+          final originalScreen =
+              _screens.firstWhereOrNull((s) => s.screenId == page);
+          final screenInOriginalScreens = originalScreen != null;
+          final screenInScaffoldScreens =
+              screensInScaffold.containsWhere((s) => s.screenId == page);
           if (page != null &&
-              ScreenMetaData.lookup(page) != null &&
-              !screens.containsWhere((s) => s.screenId == page)) {
-            // The requested [page] is one of the first-party DevTools screens,
-            // but is not available in list of available screens for this
-            // scaffold.
+              screenInOriginalScreens &&
+              !screenInScaffoldScreens) {
+            // The requested [page] is in the list of DevTools screens, but is
+            // not available in list of available screens for this scaffold.
             scaffold = DevToolsScaffold.withChild(
               key: const Key('screen-disabled'),
               embedMode: embedMode,
               child: ScreenUnavailable(
                 title: "The '$page' screen is unavailable.",
-                description: _screenUnavailableReason(page),
+                description: _screenDisabledMessage(originalScreen),
                 routerDelegate: routerDelegate,
                 embedMode: embedMode,
               ),
             );
-          } else if (screens.isEmpty) {
+          } else if (screensInScaffold.isEmpty) {
             // TODO(https://github.com/dart-lang/pub-dev/issues/7216): add an
             // extensions store or a link to a pub.dev query for packages with
             // extensions.
@@ -319,7 +324,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             scaffold = DevToolsScaffold(
               embedMode: embedMode,
               page: page,
-              screens: screens,
+              screens: screensInScaffold,
               actions: isEmbedded()
                   ? []
                   : [
@@ -394,6 +399,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     routerDelegate.refreshPages();
   }
 
+// TODO(kenz): consider showing all screens and displaying the reason why they
+  // are not available instead of hiding screens.
   List<Screen> _visibleScreens() =>
       _screens.where((screen) => shouldShowScreen(screen).show).toList();
 
@@ -495,23 +502,18 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     }
   }
 
-  String? _screenUnavailableReason(String screenId) {
-    final screenMetaData = ScreenMetaData.lookup(screenId);
-    String? disabledReason;
-    if (screenMetaData != null) {
-      final screen =
-          _originalScreens.firstWhere((s) => s.screenId == screenMetaData.id);
-      final reason = shouldShowScreen(screen).disabledReason;
-      if (reason == ScreenDisabledReason.requiresDartLibrary) {
-        // Special case for screens that require a library since the message
-        // needs to be generated dynamically.
-        disabledReason = 'The ${screen.title} screen requires library '
-            '${screen.requiresLibrary}, but the library was not detected.';
-      } else if (reason?.message != null) {
-        disabledReason = 'The ${screen.title} screen ${reason!.message!}';
-      }
+  String? _screenDisabledMessage(Screen screen) {
+    final reason = shouldShowScreen(screen).disabledReason;
+    String? disabledMessage;
+    if (reason == ScreenDisabledReason.requiresDartLibrary) {
+      // Special case for screens that require a library since the message
+      // needs to be generated dynamically.
+      disabledMessage = 'The ${screen.title} screen requires library '
+          '${screen.requiresLibrary}, but the library was not detected.';
+    } else if (reason?.message case final String message) {
+      disabledMessage = 'The ${screen.title} screen $message';
     }
-    return disabledReason;
+    return disabledMessage;
   }
 }
 
