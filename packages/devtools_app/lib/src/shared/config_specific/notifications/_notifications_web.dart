@@ -20,7 +20,7 @@ class Notification {
       // TODO(srujzs): This was needed in 0.4.0 as generics were not available.
       // This is no longer true 0.5.0 onwards.
       // ignore: unnecessary_cast
-      ((await web.Notification.requestPermission().toDart) as JSString).toDart;
+      (await web.Notification.requestPermission().toDart).toDart;
 
   void close() {
     _impl.close();
