@@ -24,8 +24,6 @@ import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
 
-List<DartIOHttpRequestData>? httpRequests;
-
 /// Different types of Network Response which can be used to visualise response
 /// on Response tab
 enum NetworkResponseViewType {
@@ -63,22 +61,23 @@ class NetworkController extends DisposableController
     );
     subscribeToFilterChanges();
   }
+  List<DartIOHttpRequestData>? _httpRequests;
 
   String? exportAsHarFile() {
     final exportController = ExportController();
 
-    httpRequests =
+    _httpRequests =
         filteredData.value.whereType<DartIOHttpRequestData>().toList();
 
-    if (httpRequests!.isEmpty) {
+    if (_httpRequests!.isEmpty) {
       debugPrint('No valid request data to export');
       return '';
     }
 
     try {
-      if (httpRequests != null && httpRequests!.isNotEmpty) {
+      if (_httpRequests != null && _httpRequests!.isNotEmpty) {
         // Build the HAR object
-        final har = buildHar(httpRequests!);
+        final har = buildHar(_httpRequests!);
         debugPrint('data is ${json.encode(har)}');
         return exportController.downloadFile(
           json.encode(har),
@@ -397,7 +396,7 @@ class NetworkController extends DisposableController
 
   @override
   OfflineScreenData prepareOfflineScreenData() {
-    debugPrint('offline data - httpRequests are $httpRequests');
+    debugPrint('offline data - httpRequests are $_httpRequests');
     return OfflineScreenData(
       screenId: NetworkScreen.id,
       //TODO deserialize har data and pass here
