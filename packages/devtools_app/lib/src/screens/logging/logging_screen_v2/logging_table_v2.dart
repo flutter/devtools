@@ -238,6 +238,7 @@ class LoggingSettingsDialogV2 extends StatefulWidget {
 
 class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
   int? retentionLimit;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -253,8 +254,7 @@ class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
           ),
           const StructuredErrorsToggle(),
           const SizedBox(height: defaultSpacing),
-          _RententionLimitSetting(
-            theme: theme,
+          _RetentionLimitSetting(
             onRetentionLimitChange: (newRetentionLimit) =>
                 retentionLimit = newRetentionLimit,
           ),
@@ -275,30 +275,29 @@ class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
   }
 }
 
-class _RententionLimitSetting extends StatefulWidget {
-  const _RententionLimitSetting({
-    required this.theme,
+class _RetentionLimitSetting extends StatefulWidget {
+  const _RetentionLimitSetting({
     required this.onRetentionLimitChange,
   });
 
-  final ThemeData theme;
   final void Function(int) onRetentionLimitChange;
 
   @override
-  State<_RententionLimitSetting> createState() =>
-      _RententionLimitSettingState();
+  State<_RetentionLimitSetting> createState() => _RetentionLimitSettingState();
 }
 
-class _RententionLimitSettingState extends State<_RententionLimitSetting>
+class _RetentionLimitSettingState extends State<_RetentionLimitSetting>
     with AutoDisposeMixin {
   void updateRetentionLimit() {
-    newRetentionLimit = preferences.logging.retentionLimit.value;
+    _textEditingController.text =
+        preferences.logging.retentionLimit.value.toString();
   }
 
   @override
   void initState() {
     super.initState();
     preferences.logging.retentionLimit.addListener(updateRetentionLimit);
+    _textEditingController = TextEditingController();
     updateRetentionLimit();
   }
 
@@ -308,10 +307,11 @@ class _RententionLimitSettingState extends State<_RententionLimitSetting>
     super.dispose();
   }
 
-  late int newRetentionLimit;
+  late final TextEditingController _textEditingController;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Expanded(
@@ -321,7 +321,7 @@ class _RententionLimitSettingState extends State<_RententionLimitSetting>
               Text(preferences.logging.retentionLimitTitle),
               Text(
                 'Used to limit the number of log messages retained.',
-                style: widget.theme.subtleTextStyle,
+                style: theme.subtleTextStyle,
               ),
             ],
           ),
@@ -331,11 +331,9 @@ class _RententionLimitSettingState extends State<_RententionLimitSetting>
           height: defaultTextFieldHeight,
           width: defaultTextFieldNumberWidth,
           child: TextField(
-            style: widget.theme.regularTextStyle,
+            style: theme.regularTextStyle,
             decoration: singleLineDialogTextFieldDecoration,
-            controller: TextEditingController(
-              text: newRetentionLimit.toString(),
-            ),
+            controller: _textEditingController,
             inputFormatters: <TextInputFormatter>[
               // Only positive integers.
               FilteringTextInputFormatter.allow(
@@ -343,9 +341,7 @@ class _RententionLimitSettingState extends State<_RententionLimitSetting>
               ),
             ],
             onChanged: (String text) {
-              final newValue = int.parse(text);
-              newRetentionLimit = newValue;
-              widget.onRetentionLimitChange(newValue);
+              widget.onRetentionLimitChange(int.parse(text));
             },
           ),
         ),

@@ -16,6 +16,10 @@ class LoggingPreferencesController extends DisposableController
   static const _retentionLimitStorageId = 'logging.retentionLimit';
 
   Future<void> init() async {
+    retentionLimit.value =
+        int.tryParse(await storage.getValue(_retentionLimitStorageId) ?? '') ??
+            _defaultRetentionLimit;
+
     addAutoDisposeListener(
       retentionLimit,
       () {
@@ -31,8 +35,5 @@ class LoggingPreferencesController extends DisposableController
         );
       },
     );
-    retentionLimit.value =
-        int.tryParse(await storage.getValue(_retentionLimitStorageId) ?? '') ??
-            _defaultRetentionLimit;
   }
 }

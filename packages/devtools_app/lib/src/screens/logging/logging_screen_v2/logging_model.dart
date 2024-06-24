@@ -9,7 +9,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../shared/globals.dart';
-
 import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';
 import 'logging_table_row.dart';
@@ -30,12 +29,12 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
       progressCallback: (progress) => _cacheLoadProgress.value = progress,
     );
 
+    _retentionLimit = preferences.logging.retentionLimit.value;
+
     addAutoDisposeListener(
       preferences.logging.retentionLimit,
       _onRetentionLimitUpdate,
     );
-
-    _retentionLimit = preferences.logging.retentionLimit.value;
   }
 
   final _logs = ListQueue<LogDataV2>();
@@ -57,11 +56,7 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
   void _onRetentionLimitUpdate() {
     _retentionLimit = preferences.logging.retentionLimit.value;
     while (_logs.length > _retentionLimit) {
-      if (identical(_filteredLogs.first, _logs.first)) {
-        // Remove a filtered log if it is about to disapear from the _logs.
-        _filteredLogs.removeFirst();
-      }
-      _logs.removeFirst();
+      _trimOneOutOfRetentionLog();
     }
 
     notifyListeners();
@@ -109,6 +104,16 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
 
     _logs.add(log);
     _filteredLogs.add(log);
+
+    _trimOneOutOfRetentionLog();
+
+    getFilteredLogHeight(
+      _logs.length - 1,
+    );
+    notifyListeners();
+  }
+
+  void _trimOneOutOfRetentionLog() {
     if (_logs.length > _retentionLimit) {
       if (identical(_logs.first, _filteredLogs.first)) {
         // Remove a filtered log if it is about to go out of retention.
@@ -117,11 +122,6 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
       // Remove the log that has just gone out of retention.
       _logs.removeFirst();
     }
-
-    getFilteredLogHeight(
-      _logs.length - 1,
-    );
-    notifyListeners();
   }
 
   /// Clears all of the logs from the model.

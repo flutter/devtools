@@ -36,7 +36,7 @@ void main() {
       testWidgets('can add logs', (WidgetTester tester) async {
         // A barebones widget is pumped to ensure that a style is available
         // for the LogTableModel to approximate widget sizes with
-        await tester.pumpWidget(wrap(const Text('')));
+        await tester.pumpWidget(wrap(const Placeholder()));
 
         expect(loggingTableModel.logCount, 0);
         expect(loggingTableModel.filteredLogCount, 0);
@@ -78,8 +78,9 @@ void main() {
           ),
         );
 
-        loggingTableModel.add(shortLog);
-        loggingTableModel.add(longLog);
+        loggingTableModel
+          ..add(shortLog)
+          ..add(longLog);
 
         final shortWidgetFinder = find.ancestor(
           of: find.richText(shortLog.details!),
@@ -115,14 +116,15 @@ void main() {
 
         // A barebones widget is pumped to ensure that a style is available
         // for the LogTableModel to approximate widget sizes with
-        await tester.pumpWidget(wrap(const Text('')));
+        await tester.pumpWidget(wrap(const Placeholder()));
 
         preferences.logging.retentionLimit.value = 2;
         await tester.pump();
 
-        loggingTableModel.add(log1);
-        loggingTableModel.add(log2);
-        loggingTableModel.add(log3);
+        loggingTableModel
+          ..add(log1)
+          ..add(log2)
+          ..add(log3);
 
         expect(loggingTableModel.logCount, 2);
         expect(loggingTableModel.filteredLogCount, 2);
