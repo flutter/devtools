@@ -38,6 +38,7 @@ void main() {
         ServiceConnectionManager,
         FakeServiceConnectionManager(),
       );
+      setGlobal(PreferencesController, PreferencesController());
       setGlobal(IdeTheme, getIdeTheme());
       setGlobal(MessageBus, MessageBus());
       TestWidgetsFlutterBinding.ensureInitialized();
