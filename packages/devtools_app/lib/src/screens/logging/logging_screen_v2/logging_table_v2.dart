@@ -14,6 +14,7 @@ import '../../../service/service_extension_widgets.dart';
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
+import '../../../shared/ui/utils.dart';
 import 'logging_model.dart';
 import 'logging_table_row.dart';
 
@@ -237,7 +238,14 @@ class LoggingSettingsDialogV2 extends StatefulWidget {
 }
 
 class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
-  int? retentionLimit;
+  late final ValueNotifier<int> newRetentionLimit;
+
+  @override
+  void initState() {
+    super.initState();
+    newRetentionLimit =
+        ValueNotifier<int>(preferences.logging.retentionLimit.value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -254,97 +262,25 @@ class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
           ),
           const StructuredErrorsToggle(),
           const SizedBox(height: defaultSpacing),
-          _RetentionLimitSetting(
-            onRetentionLimitChange: (newRetentionLimit) =>
-                retentionLimit = newRetentionLimit,
+          PositiveIntegerSetting(
+            title: preferences.logging.retentionLimitTitle,
+            subTitle: 'Used to limit the number of log messages retained.',
+            notifier: newRetentionLimit,
           ),
         ],
       ),
       actions: [
         DialogApplyButton(
           onPressed: () {
-            if (retentionLimit != null) {
+            if (newRetentionLimit.value !=
+                preferences.logging.retentionLimit.value) {
               // Save the new retention limit to preferences.
-              preferences.logging.retentionLimit.value = retentionLimit!;
+              preferences.logging.retentionLimit.value =
+                  newRetentionLimit.value;
             }
           },
         ),
         const DialogCloseButton(),
-      ],
-    );
-  }
-}
-
-class _RetentionLimitSetting extends StatefulWidget {
-  const _RetentionLimitSetting({
-    required this.onRetentionLimitChange,
-  });
-
-  final void Function(int) onRetentionLimitChange;
-
-  @override
-  State<_RetentionLimitSetting> createState() => _RetentionLimitSettingState();
-}
-
-class _RetentionLimitSettingState extends State<_RetentionLimitSetting>
-    with AutoDisposeMixin {
-  void updateRetentionLimit() {
-    _textEditingController.text =
-        preferences.logging.retentionLimit.value.toString();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    preferences.logging.retentionLimit.addListener(updateRetentionLimit);
-    _textEditingController = TextEditingController();
-    updateRetentionLimit();
-  }
-
-  @override
-  void dispose() {
-    preferences.logging.retentionLimit.removeListener(updateRetentionLimit);
-    super.dispose();
-  }
-
-  late final TextEditingController _textEditingController;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(preferences.logging.retentionLimitTitle),
-              Text(
-                'Used to limit the number of log messages retained.',
-                style: theme.subtleTextStyle,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: defaultSpacing),
-        SizedBox(
-          height: defaultTextFieldHeight,
-          width: defaultTextFieldNumberWidth,
-          child: TextField(
-            style: theme.regularTextStyle,
-            decoration: singleLineDialogTextFieldDecoration,
-            controller: _textEditingController,
-            inputFormatters: <TextInputFormatter>[
-              // Only positive integers.
-              FilteringTextInputFormatter.allow(
-                RegExp(r'^[1-9][0-9]*'),
-              ),
-            ],
-            onChanged: (String text) {
-              widget.onRetentionLimitChange(int.parse(text));
-            },
-          ),
-        ),
       ],
     );
   }
