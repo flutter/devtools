@@ -24,7 +24,6 @@ import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
 
-final _exportController = ExportController();
 List<DartIOHttpRequestData>? httpRequests;
 
 /// Different types of Network Response which can be used to visualise response
@@ -66,6 +65,8 @@ class NetworkController extends DisposableController
   }
 
   String? exportAsHarFile() {
+    final exportController = ExportController();
+
     httpRequests =
         filteredData.value.whereType<DartIOHttpRequestData>().toList();
 
@@ -79,7 +80,7 @@ class NetworkController extends DisposableController
         // Build the HAR object
         final har = buildHar(httpRequests!);
         debugPrint('data is ${json.encode(har)}');
-        return _exportController.downloadFile(
+        return exportController.downloadFile(
           json.encode(har),
           type: ExportFileType.har,
         );
