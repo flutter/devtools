@@ -4,7 +4,6 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
@@ -21,7 +20,6 @@ class MemorySettingsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return DevToolsDialog(
       title: const DialogTitleText('Memory Settings'),
       includeDivider: false,

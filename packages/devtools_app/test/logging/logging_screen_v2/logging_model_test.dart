@@ -4,9 +4,11 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_controller_v2.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_model.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_table_row.dart';
-import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_table_v2.dart';
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/preferences/preferences.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
