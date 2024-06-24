@@ -114,7 +114,7 @@ class DevToolsSidebarOptions extends StatelessWidget {
               children: generateRows(singleColumn),
             ),
             const SizedBox(height: denseSpacing),
-            _DevToolsExtensions(
+            DevToolsExtensions(
               editor: editor,
               debugSessions: debugSessions,
             ),
@@ -188,8 +188,9 @@ class DevToolsSidebarOptions extends StatelessWidget {
 }
 
 // TODO(kenz): move this to devtools_extensions.dart in a follow up PR.
-class _DevToolsExtensions extends StatefulWidget {
-  const _DevToolsExtensions({
+class DevToolsExtensions extends StatefulWidget {
+  const DevToolsExtensions({
+    super.key,
     required this.editor,
     required this.debugSessions,
   });
@@ -198,10 +199,10 @@ class _DevToolsExtensions extends StatefulWidget {
   final Map<String, EditorDebugSession> debugSessions;
 
   @override
-  State<_DevToolsExtensions> createState() => _DevToolsExtensionsState();
+  State<DevToolsExtensions> createState() => _DevToolsExtensionsState();
 }
 
-class _DevToolsExtensionsState extends State<_DevToolsExtensions>
+class _DevToolsExtensionsState extends State<DevToolsExtensions>
     with AutoDisposeMixin {
   final sidebarExtensionsController = SidebarDevToolsExtensionsController();
 
@@ -213,7 +214,7 @@ class _DevToolsExtensionsState extends State<_DevToolsExtensions>
   }
 
   @override
-  void didUpdateWidget(_DevToolsExtensions oldWidget) {
+  void didUpdateWidget(DevToolsExtensions oldWidget) {
     super.didUpdateWidget(oldWidget);
     unawaited(
       sidebarExtensionsController.updateForDebugSessions(widget.debugSessions),

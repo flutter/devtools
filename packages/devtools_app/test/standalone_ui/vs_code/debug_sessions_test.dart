@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/editor/api_classes.dart';
 import 'package:devtools_app/src/shared/constants.dart';
@@ -17,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../test_infra/scenes/standalone_ui/editor_service/fake_editor.dart';
+import '../../test_infra/utils/sidebar_utils.dart';
 
 void main() {
   const windowSize = Size(2000.0, 2000.0);
@@ -198,20 +197,3 @@ final _debugSessions = [
     deviceId: 'macos',
   ),
 ];
-
-EditorDebugSession generateDebugSession({
-  required String debuggerType,
-  required String deviceId,
-  String? flutterMode,
-}) {
-  return EditorDebugSession(
-    id: '$debuggerType-$deviceId-$flutterMode',
-    name: 'Session ($debuggerType) ($deviceId)',
-    vmServiceUri: 'ws://127.0.0.1:1234/ws',
-    flutterMode: flutterMode,
-    flutterDeviceId: deviceId,
-    debuggerType: debuggerType,
-    projectRootPath:
-        Platform.isWindows ? r'C:\mock\root\path' : '/mock/root/path',
-  );
-}
