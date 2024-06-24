@@ -72,6 +72,10 @@ class ExtensionsManager {
     // Find all runtime extensions for [rootFileUriString], if non-null and
     // non-empty.
     if (rootFileUriString != null && rootFileUriString.isNotEmpty) {
+      logs.add(
+        'ExtensionsManager.serveAvailableExtensions adding extensions for app '
+        'root.',
+      );
       await _addExtensionsForRoot(
         rootFileUriString,
         logs: logs,
@@ -90,6 +94,11 @@ class ExtensionsManager {
         final projectRoots = await dartToolingDaemon.getProjectRoots(
           depth: staticExtensionsSearchDepth,
         );
+        logs.add(
+          'ExtensionsManager.serveAvailableExtensions adding extensions for '
+          'DTD project roots: ${projectRoots.uris?.toString() ?? []}',
+        );
+
         for (final root in projectRoots.uris ?? const <Uri>[]) {
           // Skip the runtime app root. These extensions have already been
           // added to [devtoolsExtensions].
