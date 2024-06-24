@@ -26,6 +26,9 @@ final _log = Logger('dev_helpers');
 /// Without using this flag, you would need to run DevTools with the DevTools
 /// server (devtools_tool serve) in order to pass a DTD URI to the DevTools
 /// server, which is not convenient for development.
+/// 
+/// If you do need the DevTools server, then you should run
+/// `devtools_tool serve --dtd-uri=<uri>` instead of setting this debug flag.
 ///
 /// You can use a real DTD URI from an IDE (VS Code or IntelliJ / Android
 /// Studio) using the "Copy DTD URI" action, or you can run a Dart or Flutter

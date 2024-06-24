@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/globals.dart';
+import '../../shared/utils.dart';
 import '_view_desktop.dart' if (dart.library.js_interop) '_view_web.dart';
 import 'controller.dart';
 
@@ -39,6 +42,28 @@ class _EmbeddedExtensionViewState extends State<EmbeddedExtensionView> {
 
   @override
   Widget build(BuildContext context) {
+    if (isEmbedded() &&
+        widget.controller.extensionConfig.requiresConnection &&
+        !serviceConnection.serviceManager.connectedState.value.connected) {
+      final theme = Theme.of(context);
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'The ${widget.controller.extensionConfig.displayName} extension '
+              'requires a running applcation',
+              style: theme.textTheme.titleLarge,
+            ),
+            const SizedBox(height: denseSpacing),
+            Text(
+              'Start or connect to an active debug session to use this tool.',
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
+      );
+    }
     return EmbeddedExtension(controller: widget.controller);
   }
 }

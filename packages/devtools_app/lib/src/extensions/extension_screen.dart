@@ -12,6 +12,7 @@ import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/screen.dart';
+import '../shared/utils.dart';
 import 'embedded/controller.dart';
 import 'embedded/view.dart';
 import 'extension_screen_controls.dart';
@@ -23,7 +24,15 @@ class ExtensionScreen extends Screen {
           id: extensionConfig.screenId,
           title: extensionConfig.name,
           icon: extensionConfig.icon,
-          requiresConnection: extensionConfig.requiresConnection,
+          requiresConnection:
+              // We set this to false all the time when embedded because the
+              // available extensions are displayed in a tool window (IntelliJ
+              // and Android Studio) with or without any active debug sessions.
+              // This prevents a "DevTools Extensions" tool window in IntelliJ
+              // and Android Studio that appears to be missing extensions. When
+              // a connection is still required to use the extension, messaging
+              // for this is provided by the [EmbeddedExtensionView] widget.
+              isEmbedded() ? false : extensionConfig.requiresConnection,
         );
 
   final DevToolsExtensionConfig extensionConfig;
