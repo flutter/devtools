@@ -164,7 +164,7 @@ class InspectorTreeController extends DisposableController
   set root(InspectorTreeNode? node) {
     setState(() {
       if (node != null) {
-        final rows = node.buildRows();
+        final rows = _buildRows(node);
         _cachedRows.clear();
         _cachedRows.addAll(rows);
         // When root is set, all nodes are expanded so these are the same:
@@ -241,7 +241,7 @@ class InspectorTreeController extends DisposableController
 
   void _refreshCache() {
     if (root != null) {
-      final rows = root!.buildRows();
+      final rows = _buildRows(root!);
       _cachedRows.clear();
       _cachedRows.addAll(rows);
     }
@@ -313,15 +313,6 @@ class InspectorTreeController extends DisposableController
     }
   }
 
-  int getRowIndex(node) {
-    for (int i = 0; i <= _cachedRows.length; i++) {
-      if (_cachedRows[i]?.node == node) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
   void navigateRight() {
     // This logic is consistent with how IntelliJ handles tree navigation on
     // on right arrow key press.
@@ -347,10 +338,8 @@ class InspectorTreeController extends DisposableController
     }
 
     selection = getCachedRow(
-      (getRowIndex(selection!) + indexOffset)
-              .clamp(0, numRows - 1),
-        )
-        ?.node;
+      (_getRowIndex(selection!) + indexOffset).clamp(0, numRows - 1),
+    )?.node;
   }
 
   double get horizontalPadding => 10.0;
@@ -416,16 +405,77 @@ class InspectorTreeController extends DisposableController
 
   int get numRows => _cachedRows.length;
 
+  int _getRowIndex(node) {
+    for (int i = 0; i <= _cachedRows.length; i++) {
+      if (_cachedRows[i]?.node == node) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  List<InspectorTreeRow> _buildRows(InspectorTreeNode node) {
+    final rows = <InspectorTreeRow>[];
+
+    void buildRowsHelper(
+      InspectorTreeNode node, {
+      required int depth,
+      required List<int> ticks,
+    }) {
+      final currentIdx = rows.length;
+
+      rows.add(
+        InspectorTreeRow(
+          node: node,
+          index: currentIdx,
+          ticks: ticks,
+          depth: depth,
+          lineToParent: !node.isProperty &&
+              currentIdx != 0 &&
+              node.parent!.showLinesToChildren,
+          hasSingleChild: node.children.length == 1,
+        ),
+      );
+
+      final style = node.diagnostic?.style;
+      final indented = style != DiagnosticsTreeStyle.flat &&
+          style != DiagnosticsTreeStyle.error;
+
+      if (!node.isExpanded) return;
+      final children = node.children;
+      final parentDepth = depth;
+      final childrenDepth = children.length > 1 ? parentDepth + 1 : parentDepth;
+      for (final child in children) {
+        final shouldAddTick = children.length > 1 &&
+            children.last != child &&
+            !children.last.isProperty &&
+            indented;
+
+        buildRowsHelper(
+          child,
+          depth: childrenDepth,
+          ticks: [
+            ...ticks,
+            if (shouldAddTick) parentDepth,
+          ],
+        );
+      }
+    }
+
+    buildRowsHelper(node, depth: 0, ticks: <int>[]);
+    return rows;
+  }
+
   InspectorTreeRow? getRowForNode(InspectorTreeNode node) {
     final rootLocal = root;
     if (rootLocal == null) return null;
-    return getCachedRow(getRowIndex(node));
+    return getCachedRow(_getRowIndex(node));
   }
 
   InspectorTreeRow? getRow(Offset offset) {
     final rootLocal = root;
     if (rootLocal == null) return null;
-    final row = getRowIndex(offset.dy);
+    final row = _getRowIndex(offset.dy);
     return row < _cachedRows.length ? getCachedRow(row) : null;
   }
 

@@ -129,58 +129,6 @@ class InspectorTreeNode {
     isDirty = true;
   }
 
-  List<InspectorTreeRow> buildRows() {
-    final rows = <InspectorTreeRow>[];
-
-    void buildRowsHelper(
-      InspectorTreeNode node, {
-      required int depth,
-      required List<int> ticks,
-    }) {
-      final currentIdx = rows.length;
-
-      rows.add(
-        InspectorTreeRow(
-          node: node,
-          index: currentIdx,
-          ticks: ticks,
-          depth: depth,
-          lineToParent: !node.isProperty &&
-              currentIdx != 0 &&
-              node.parent!.showLinesToChildren,
-          hasSingleChild: node.children.length == 1,
-        ),
-      );
-
-      final style = node.diagnostic?.style;
-      final indented = style != DiagnosticsTreeStyle.flat &&
-          style != DiagnosticsTreeStyle.error;
-
-      if (!node.isExpanded) return;
-      final children = node.children;
-      final parentDepth = depth;
-      final childrenDepth = children.length > 1 ? parentDepth + 1 : parentDepth;
-      for (final child in children) {
-        final shouldAddTick = children.length > 1 &&
-            children.last != child &&
-            !children.last.isProperty &&
-            indented;
-
-        buildRowsHelper(
-          child,
-          depth: childrenDepth,
-          ticks: [
-            ...ticks,
-            if (shouldAddTick) parentDepth,
-          ],
-        );
-      }
-    }
-
-    buildRowsHelper(this, depth: 0, ticks: <int>[]);
-    return rows;
-  }
-
   bool get hasPlaceholderChildren {
     return children.length == 1 && children.first.diagnostic == null;
   }
