@@ -1,6 +1,20 @@
 import '../../../devtools_app.dart';
 import '../../shared/analytics/constants.dart';
 
+/// Builds a HAR (HTTP Archive) object from a list of HTTP requests.
+///
+/// The HAR format is a JSON-based format used for logging a web browser's
+/// interaction with a site. It is useful for web performance analysis and
+/// debugging. This function constructs the HAR object based on the 1.2
+/// specification.
+///
+/// For more details on the HAR format, see the [HAR 1.2 Specification](https://github.com/ahmadnassri/har-spec/blob/master/versions/1.2.md).
+///
+/// Parameters:
+/// - [httpRequests]: A list of DartIOHttpRequestData data.
+///
+/// Returns:
+/// - A Map representing the HAR object.
 Map<String, dynamic> buildHar(List<DartIOHttpRequestData> httpRequests) {
 // Build the creator
   final creator = {
