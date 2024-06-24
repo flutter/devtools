@@ -220,8 +220,9 @@ class ExtensionService extends DisposableController
     _deduplicateStaticExtensionsWithRuntimeExtensions();
 
     // Some extensions detected from a static context may actually require a
-    // running application. Ignore these extensions unless
-    // [ignoreServiceConnection] is true.
+    // running application. Ignore these extensions, but only when
+    // [ignoreServiceConnection] is false, because we should not be taking the
+    // service connection into account when [ignoreServiceConnection] is true.
     if (!ignoreServiceConnection) {
       for (final ext in staticExtensions) {
         if (!connectedToApp && ext.requiresConnection) {

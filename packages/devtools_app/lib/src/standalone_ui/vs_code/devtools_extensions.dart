@@ -89,15 +89,20 @@ class SidebarDevToolsExtensionsController extends DisposableController
   /// The current set of debug sessions available in the editor.
   late Map<String, EditorDebugSession> _debugSessions;
 
+  final _initialized = Completer<bool>();
+
   Future<void> init(Map<String, EditorDebugSession> debugSessions) async {
     _debugSessions = debugSessions;
     await _initExtensionsForWorkspace();
     await _initExtensionsForDebugSessions();
+    _initialized.complete(true);
   }
 
   Future<void> updateForDebugSessions(
     Map<String, EditorDebugSession> newDebugSessions,
   ) async {
+    await _initialized.future;
+
     // Cleanup state for debug sessions that are no longer available.
     final removed =
         _debugSessions.keys.toSet().difference(newDebugSessions.keys.toSet());
@@ -115,13 +120,15 @@ class SidebarDevToolsExtensionsController extends DisposableController
   Future<void> _initExtensionsForWorkspace() async {
     if (dtdManager.hasConnection) {
       _searchedProjectRoots = Set.of(
-        (await dtdManager.connection.value!.getProjectRoots(
+        (await dtdManager.projectRoots(
               depth: staticExtensionsSearchDepth,
+              forceRefresh: true,
             ))
-                .uris ??
+                ?.uris ??
             <Uri>[],
       );
     }
+
     // Pass a null project root URI to initialize the set of extensions
     // available for the entire workspace.
     await _detectExtensions(null);
@@ -222,8 +229,13 @@ class SidebarDevToolsExtensionsController extends DisposableController
 }
 
 extension on EditorDebugSession {
+  /// Returns the project root for the debug session as a file URI.
+  ///
+  /// The returned result will be transformed such that it ends with a trailing
+  /// slash. This is so that it can be easily compared with the project roots
+  /// returned from DTD, which do contain a trailing slash.
   Uri? get projectRootFileUri {
-    final rootPath = projectRootPath;
+    var rootPath = projectRootPath;
     if (rootPath == null) return null;
 
     // This file path might be a Windows path but because this code runs in
@@ -232,6 +244,14 @@ extension on EditorDebugSession {
     // Since all paths are absolute, assume that if the path contains `\` and
     // not `/` then it's Windows.
     final isWindows = rootPath.contains(r'\') && !rootPath.contains(r'/');
+
+    // Ensure the returned URI ends with a trailing slash to match the format of
+    // the project root URIs returned by DTD.
+    final endsWithSlash =
+        isWindows ? rootPath.endsWith(r'\') : rootPath.endsWith('/');
+    if (!endsWithSlash) {
+      rootPath = '$rootPath${isWindows ? r'\' : '/'}';
+    }
     final fileUri = Uri.file(rootPath, windows: isWindows);
     assert(fileUri.isScheme('file'));
     return fileUri;
