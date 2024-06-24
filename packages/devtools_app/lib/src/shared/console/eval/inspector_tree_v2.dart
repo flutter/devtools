@@ -54,11 +54,6 @@ class InspectorTreeNode {
     if (dirty) {
       _isDirty = true;
       _shouldShow = null;
-      if (_childrenCount == null) {
-        // Already dirty.
-        return;
-      }
-      _childrenCount = null;
       if (parent != null) {
         parent!.isDirty = true;
       }
@@ -134,212 +129,60 @@ class InspectorTreeNode {
     isDirty = true;
   }
 
-  void buildRows({
-    void Function(InspectorTreeNode node)? processNode,
-  }) {
-    var subTreeSize = 0;
-    final cachedRows = <InspectorTreeRow>[];
-    final ticks = <int>[];
-    int depth = 0;
+  List<InspectorTreeRow> buildRows() {
+    final rows = <InspectorTreeRow>[];
 
-    void _buildRows(InspectorTreeNode node) {
-      subTreeSize++;
+    void buildRowsHelper(
+      InspectorTreeNode node, {
+      required int depth,
+      required List<int> ticks,
+    }) {
+      final currentIdx = rows.length;
+
+      rows.add(
+        InspectorTreeRow(
+          node: node,
+          index: currentIdx,
+          ticks: ticks,
+          depth: depth,
+          lineToParent: !node.isProperty &&
+              currentIdx != 0 &&
+              node.parent!.showLinesToChildren,
+          hasSingleChild: node.children.length == 1,
+        ),
+      );
 
       final style = node.diagnostic?.style;
       final indented = style != DiagnosticsTreeStyle.flat &&
           style != DiagnosticsTreeStyle.error;
-    }
 
-    if (processNode != null) {
-      processNode(this);
-    }
-    if (!isExpanded) return;
-    for (final child in _children) {
-      if (_children.length > 1 && !children.last.isProperty) {
-        if (indented) {
-          ticks.add(depth);
-        }
+      if (!node.isExpanded) return;
+      final children = node.children;
+      final parentDepth = depth;
+      final childrenDepth = children.length > 1 ? parentDepth + 1 : parentDepth;
+      for (final child in children) {
+        final shouldAddTick = children.length > 1 &&
+            children.last != child &&
+            !children.last.isProperty &&
+            indented;
+
+        buildRowsHelper(
+          child,
+          depth: childrenDepth,
+          ticks: [
+            ...ticks,
+            if (shouldAddTick) parentDepth,
+          ],
+        );
       }
-      child.traverseTree(processNode: processNode);
     }
-  }
 
-  void traverseTree({
-    void Function(InspectorTreeNode node)? processNode,
-  }) {
-    final style = diagnostic?.style;
-    final indented = style != DiagnosticsTreeStyle.flat &&
-        style != DiagnosticsTreeStyle.error;
-
-    if (processNode != null) {
-      processNode(this);
-    }
-    if (!isExpanded) return;
-    for (final child in _children) {
-      if (_children.length > 1 && !children.last.isProperty) {
-        if (indented) {
-          ticks.add(depth);
-        }
-      }
-      child.traverseTree(processNode: processNode);
-    }
-  }
-
-  int get childrenCount {
-    if (!isExpanded) {
-      _childrenCount = 0;
-    }
-    final childrenCountLocal = _childrenCount;
-    if (childrenCountLocal != null) {
-      return childrenCountLocal;
-    }
-    int count = 0;
-    for (final child in _children) {
-      count += child.subtreeSize;
-    }
-    return _childrenCount = count;
+    buildRowsHelper(this, depth: 0, ticks: <int>[]);
+    return rows;
   }
 
   bool get hasPlaceholderChildren {
     return children.length == 1 && children.first.diagnostic == null;
-  }
-
-  int? _childrenCount;
-
-  int get subtreeSize => childrenCount + 1;
-
-  // TODO(jacobr): move getRowIndex to the InspectorTree class.
-  int getRowIndex(InspectorTreeNode node) {
-    int index = 0;
-    while (true) {
-      final parent = node.parent;
-      if (parent == null) {
-        break;
-      }
-      for (final sibling in parent._children) {
-        if (sibling == node) {
-          break;
-        }
-        index += sibling.subtreeSize;
-      }
-      index += 1; // For parent itself.
-      node = parent;
-    }
-    return index;
-  }
-
-  // TODO(jacobr): move this method to the InspectorTree class.
-  // TODO: optimize this method.
-  /// Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
-  /// performance problems.
-  InspectorTreeRow? getRow(int index) {
-    if (subtreeSize <= index) {
-      return null;
-    }
-
-    final ticks = <int>[];
-    InspectorTreeNode node = this;
-    int current = 0;
-    int depth = 0;
-
-    // Iterate till getting the result to return.
-    while (true) {
-      final style = node.diagnostic?.style;
-      final indented = style != DiagnosticsTreeStyle.flat &&
-          style != DiagnosticsTreeStyle.error;
-      if (current == index) {
-        return InspectorTreeRow(
-          node: node,
-          index: index,
-          ticks: ticks,
-          depth: depth,
-          lineToParent: !node.isProperty &&
-              index != 0 &&
-              node.parent!.showLinesToChildren,
-          hasSingleChild: node.children.length == 1,
-        );
-      }
-      assert(index > current);
-      current++;
-      final children = node._children;
-      int i;
-      for (i = 0; i < children.length; ++i) {
-        final child = children[i];
-        final subtreeSize = child.subtreeSize;
-        if (current + subtreeSize > index) {
-          node = child;
-          if (children.length > 1 &&
-              i + 1 != children.length &&
-              !children.last.isProperty) {
-            if (indented) {
-              ticks.add(depth);
-            }
-          }
-          break;
-        }
-        current += subtreeSize;
-      }
-      assert(i < children.length);
-      // Don't indent if a widget has only one child:
-      if (indented && children.length > 1) {
-        depth++;
-      }
-    }
-  }
-
-
-  // TODO(jacobr): move this method to the InspectorTree class.
-  // TODO: optimize this method.
-  /// Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
-  /// performance problems.
-  List<InspectorTreeRow> buildTree() {
-    final ticks = <int>[];
-    InspectorTreeNode node = this;
-    int currentIdx = 0;
-    int depth = 0;
-
-    // Iterate till getting the result to return.
-    while (true) {
-      final style = node.diagnostic?.style;
-      final indented = style != DiagnosticsTreeStyle.flat &&
-          style != DiagnosticsTreeStyle.error;
-
-      final row = InspectorTreeRow(
-        node: node,
-        index: currentIdx,
-        ticks: ticks,
-        depth: depth,
-        lineToParent: !node.isProperty &&
-            currentIdx != 0 &&
-            node.parent!.showLinesToChildren,
-        hasSingleChild: node.children.length == 1,
-      );
-
-      currentIdx++;
-      final children = node._children;
-      int i;
-      for (i = 0; i < children.length; ++i) {
-        currentIdx++;
-        final child = children[i];
-        if (current + subtreeSize > index) {
-          node = child;
-          if (children.length > 1 &&
-              i + 1 != children.length &&
-              !children.last.isProperty) {
-            if (indented) {
-              ticks.add(depth);
-            }
-          }
-          break;
-        }
-        current += subtreeSize;
-      }
-      assert(i < children.length);
-      // Don't indent if a widget has only one child:
-      if (indented && children.length > 1) {
-        depth++;
-      }
-    }
   }
 
   void removeChild(InspectorTreeNode child) {

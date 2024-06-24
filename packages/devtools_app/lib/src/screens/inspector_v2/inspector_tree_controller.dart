@@ -112,7 +112,7 @@ class InspectorTreeController extends DisposableController
       screenMetricsProvider: () => InspectorScreenMetrics.v2(
         inspectorTreeControllerId: gaId,
         rootSetCount: _rootSetCount,
-        rowCount: _root?.subtreeSize,
+        rowCount: _cachedRows.length,
       ),
     );
   }
@@ -163,9 +163,15 @@ class InspectorTreeController extends DisposableController
 
   set root(InspectorTreeNode? node) {
     setState(() {
+      if (node != null) {
+        final rows = node.buildRows();
+        _cachedRows.clear();
+        _cachedRows.addAll(rows);
+        // When root is set, all nodes are expanded so these are the same:
+        _searchableCachedRows.clear();
+        _searchableCachedRows.addAll(rows);
+      }
       _root = node;
-      _populateSearchableCachedRows();
-      _refreshCache();
 
       ga.select(
         gac.inspector,
@@ -174,7 +180,7 @@ class InspectorTreeController extends DisposableController
         screenMetricsProvider: () => InspectorScreenMetrics.v2(
           inspectorTreeControllerId: gaId,
           rootSetCount: ++_rootSetCount,
-          rowCount: _root?.subtreeSize,
+          rowCount: _cachedRows.length,
         ),
       );
     });
@@ -204,7 +210,6 @@ class InspectorTreeController extends DisposableController
 
   double? lastContentWidth;
 
-  final cachedRows = <InspectorTreeRow?>[];
   InspectorTreeRow? _cachedSelectedRow;
 
   /// All cached rows of the tree.
@@ -214,6 +219,8 @@ class InspectorTreeController extends DisposableController
   /// * items don't change when nodes are expanded or collapsed
   /// * items are populated only when root is changed
   final _searchableCachedRows = <InspectorTreeRow?>[];
+
+  final _cachedRows = <InspectorTreeRow?>[];
 
   void setSearchTarget(SearchTargetType searchTarget) {
     _searchTarget = searchTarget;
@@ -225,45 +232,18 @@ class InspectorTreeController extends DisposableController
   void _maybeClearCache() {
     final rootLocal = root;
     if (rootLocal != null && rootLocal.isDirty) {
-      cachedRows.clear();
       _cachedSelectedRow = null;
       rootLocal.isDirty = false;
       lastContentWidth = null;
+      _refreshCache();
     }
   }
 
   void _refreshCache() {
-    var subTreeSize = 0;
-    final cachedRows = <InspectorTreeRow>[];
     if (root != null) {
-      root!.traverseTree(
-        processNode: (node) {
-          subTreeSize++;
-
-          final row = InspectorTreeRow(
-            node: node,
-            index: subTreeSize,
-            ticks: ticks,
-            depth: depth,
-            lineToParent: !node.isProperty &&
-                index != 0 &&
-                node.parent!.showLinesToChildren,
-            hasSingleChild: node.children.length == 1,
-          );
-          cachedRows.add(node);
-          print('sub tree size is now: $subTreeSize');
-        },
-      );
-    }
-    print('===== DONE =======');
-    print('SUB TREE SIZE: $subTreeSize');
-    print('VS ${root?.subtreeSize}');
-  }
-
-  void _populateSearchableCachedRows() {
-    _searchableCachedRows.clear();
-    for (int i = 0; i < numRows; i++) {
-      _searchableCachedRows.add(getCachedRow(i));
+      final rows = root!.buildRows();
+      _cachedRows.clear();
+      _cachedRows.addAll(rows);
     }
   }
 
@@ -271,19 +251,10 @@ class InspectorTreeController extends DisposableController
     if (index < 0) return null;
 
     _maybeClearCache();
-    while (cachedRows.length <= index) {
-      cachedRows.add(null);
+    if (_cachedRows.length > index) {
+      return _cachedRows[index];
     }
-    cachedRows[index] ??= root?.getRow(index);
-
-    final cachedRow = cachedRows[index];
-    cachedRow?.isSearchMatch =
-        _searchableCachedRows.safeGet(index)?.isSearchMatch ?? false;
-
-    if (cachedRow?.isSelected == true) {
-      _cachedSelectedRow = cachedRow;
-    }
-    return cachedRow;
+    return null;
   }
 
   double getRowOffset(int index) {
@@ -342,6 +313,15 @@ class InspectorTreeController extends DisposableController
     }
   }
 
+  int getRowIndex(node) {
+    for (int i = 0; i <= _cachedRows.length; i++) {
+      if (_cachedRows[i]?.node == node) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   void navigateRight() {
     // This logic is consistent with how IntelliJ handles tree navigation on
     // on right arrow key press.
@@ -366,11 +346,8 @@ class InspectorTreeController extends DisposableController
       return;
     }
 
-    final rootLocal = root!;
-
-    selection = rootLocal
-        .getRow(
-          (rootLocal.getRowIndex(selection!) + indexOffset)
+    selection = getCachedRow(
+      (getRowIndex(selection!) + indexOffset)
               .clamp(0, numRows - 1),
         )
         ?.node;
@@ -437,21 +414,19 @@ class InspectorTreeController extends DisposableController
     root.children.forEach(_collapseAllNodes);
   }
 
-  int get numRows => root?.subtreeSize ?? 0;
-
-  int getRowIndex(double y) => max(0, y ~/ inspectorRowHeight);
+  int get numRows => _cachedRows.length;
 
   InspectorTreeRow? getRowForNode(InspectorTreeNode node) {
     final rootLocal = root;
     if (rootLocal == null) return null;
-    return getCachedRow(rootLocal.getRowIndex(node));
+    return getCachedRow(getRowIndex(node));
   }
 
   InspectorTreeRow? getRow(Offset offset) {
     final rootLocal = root;
     if (rootLocal == null) return null;
     final row = getRowIndex(offset.dy);
-    return row < rootLocal.subtreeSize ? getCachedRow(row) : null;
+    return row < _cachedRows.length ? getCachedRow(row) : null;
   }
 
   void onExpandRow(InspectorTreeRow row) {
