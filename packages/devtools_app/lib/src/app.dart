@@ -399,7 +399,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     routerDelegate.refreshPages();
   }
 
-// TODO(kenz): consider showing all screens and displaying the reason why they
+  // TODO(kenz): consider showing all screens and displaying the reason why they
   // are not available instead of hiding screens.
   List<Screen> _visibleScreens() =>
       _screens.where((screen) => shouldShowScreen(screen).show).toList();
