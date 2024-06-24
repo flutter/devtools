@@ -165,6 +165,7 @@ class InspectorTreeController extends DisposableController
     setState(() {
       _root = node;
       _populateSearchableCachedRows();
+      _refreshCache();
 
       ga.select(
         gac.inspector,
@@ -229,6 +230,34 @@ class InspectorTreeController extends DisposableController
       rootLocal.isDirty = false;
       lastContentWidth = null;
     }
+  }
+
+  void _refreshCache() {
+    var subTreeSize = 0;
+    final cachedRows = <InspectorTreeRow>[];
+    if (root != null) {
+      root!.traverseTree(
+        processNode: (node) {
+          subTreeSize++;
+
+          final row = InspectorTreeRow(
+            node: node,
+            index: subTreeSize,
+            ticks: ticks,
+            depth: depth,
+            lineToParent: !node.isProperty &&
+                index != 0 &&
+                node.parent!.showLinesToChildren,
+            hasSingleChild: node.children.length == 1,
+          );
+          cachedRows.add(node);
+          print('sub tree size is now: $subTreeSize');
+        },
+      );
+    }
+    print('===== DONE =======');
+    print('SUB TREE SIZE: $subTreeSize');
+    print('VS ${root?.subtreeSize}');
   }
 
   void _populateSearchableCachedRows() {

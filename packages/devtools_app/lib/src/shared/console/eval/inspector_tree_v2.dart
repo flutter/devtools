@@ -134,6 +134,57 @@ class InspectorTreeNode {
     isDirty = true;
   }
 
+  void buildRows({
+    void Function(InspectorTreeNode node)? processNode,
+  }) {
+    var subTreeSize = 0;
+    final cachedRows = <InspectorTreeRow>[];
+    final ticks = <int>[];
+    int depth = 0;
+
+    void _buildRows(InspectorTreeNode node) {
+      subTreeSize++;
+
+      final style = node.diagnostic?.style;
+      final indented = style != DiagnosticsTreeStyle.flat &&
+          style != DiagnosticsTreeStyle.error;
+    }
+
+    if (processNode != null) {
+      processNode(this);
+    }
+    if (!isExpanded) return;
+    for (final child in _children) {
+      if (_children.length > 1 && !children.last.isProperty) {
+        if (indented) {
+          ticks.add(depth);
+        }
+      }
+      child.traverseTree(processNode: processNode);
+    }
+  }
+
+  void traverseTree({
+    void Function(InspectorTreeNode node)? processNode,
+  }) {
+    final style = diagnostic?.style;
+    final indented = style != DiagnosticsTreeStyle.flat &&
+        style != DiagnosticsTreeStyle.error;
+
+    if (processNode != null) {
+      processNode(this);
+    }
+    if (!isExpanded) return;
+    for (final child in _children) {
+      if (_children.length > 1 && !children.last.isProperty) {
+        if (indented) {
+          ticks.add(depth);
+        }
+      }
+      child.traverseTree(processNode: processNode);
+    }
+  }
+
   int get childrenCount {
     if (!isExpanded) {
       _childrenCount = 0;
@@ -215,6 +266,61 @@ class InspectorTreeNode {
       for (i = 0; i < children.length; ++i) {
         final child = children[i];
         final subtreeSize = child.subtreeSize;
+        if (current + subtreeSize > index) {
+          node = child;
+          if (children.length > 1 &&
+              i + 1 != children.length &&
+              !children.last.isProperty) {
+            if (indented) {
+              ticks.add(depth);
+            }
+          }
+          break;
+        }
+        current += subtreeSize;
+      }
+      assert(i < children.length);
+      // Don't indent if a widget has only one child:
+      if (indented && children.length > 1) {
+        depth++;
+      }
+    }
+  }
+
+
+  // TODO(jacobr): move this method to the InspectorTree class.
+  // TODO: optimize this method.
+  /// Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
+  /// performance problems.
+  List<InspectorTreeRow> buildTree() {
+    final ticks = <int>[];
+    InspectorTreeNode node = this;
+    int currentIdx = 0;
+    int depth = 0;
+
+    // Iterate till getting the result to return.
+    while (true) {
+      final style = node.diagnostic?.style;
+      final indented = style != DiagnosticsTreeStyle.flat &&
+          style != DiagnosticsTreeStyle.error;
+
+      final row = InspectorTreeRow(
+        node: node,
+        index: currentIdx,
+        ticks: ticks,
+        depth: depth,
+        lineToParent: !node.isProperty &&
+            currentIdx != 0 &&
+            node.parent!.showLinesToChildren,
+        hasSingleChild: node.children.length == 1,
+      );
+
+      currentIdx++;
+      final children = node._children;
+      int i;
+      for (i = 0; i < children.length; ++i) {
+        currentIdx++;
+        final child = children[i];
         if (current + subtreeSize > index) {
           node = child;
           if (children.length > 1 &&
