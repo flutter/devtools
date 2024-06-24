@@ -191,7 +191,7 @@ Future<EnumInstance?> _tryParseEnum(
 
   InstanceRef? findPropertyWithName(String name) {
     return instance.fields
-        ?.firstWhereOrNull((element) => element.decl?.name == name)
+        ?.firstWhereOrNull((element) => element.name == name)
         ?.value;
   }
 
@@ -366,11 +366,10 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
             ref.watch(libraryEvalProvider(classInstance.library!.uri!).future);
 
         final appName = tryParsePackageName(eval.isolate!.rootLib!.uri!);
-
         final fields = await _parseFields(
+          classInstance,
           ref,
           eval,
-          instance,
           isAlive: isAlive,
           appName: appName,
         );
@@ -396,33 +395,32 @@ String? tryParsePackageName(String uri) {
 }
 
 Future<List<ObjectField>> _parseFields(
+  Class owner,
   AutoDisposeRef ref,
-  EvalOnDartLibrary eval,
-  Instance instance, {
+  EvalOnDartLibrary eval, {
   required Disposable isAlive,
   required String? appName,
 }) {
-  final fields = instance.fields!.map((field) async {
-    final fieldDeclaration = field.decl!;
-    final owner =
-        await eval.safeGetClass(fieldDeclaration.owner! as ClassRef, isAlive);
+  return owner.fields!
+      .map((field) async {
+        final owner =
+            await eval.safeGetClass(field.owner! as ClassRef, isAlive);
+        final ownerUri = field.location!.script!.uri!;
+        final ownerName = owner.mixin?.name ?? owner.name!;
+        final ownerPackageName = tryParsePackageName(ownerUri);
 
-    final ownerUri = fieldDeclaration.location!.script!.uri!;
-    final ownerName = owner.mixin?.name ?? owner.name!;
-    final ownerPackageName = tryParsePackageName(ownerUri);
-
-    return ObjectField(
-      name: fieldDeclaration.name!,
-      isFinal: fieldDeclaration.isFinal!,
-      ref: parseSentinel<InstanceRef>(field.value),
-      ownerName: ownerName,
-      ownerUri: ownerUri,
-      eval: await ref.watch(libraryEvalProvider(ownerUri).future),
-      isDefinedByDependency: ownerPackageName != appName,
-    );
-  }).toList();
-
-  return Future.wait(fields);
+        return ObjectField(
+          name: field.name!,
+          isFinal: field.isFinal!,
+          ref: parseSentinel<InstanceRef>(field),
+          ownerName: ownerName,
+          ownerUri: ownerUri,
+          eval: await ref.watch(libraryEvalProvider(ownerUri).future),
+          isDefinedByDependency: ownerPackageName != appName,
+        );
+      })
+      .toList(growable: false)
+      .wait;
 }
 
 final _providerChanged =

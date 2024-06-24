@@ -268,7 +268,7 @@ void main() {
         test('isSummaryTree = true', () async {
           await env.setupEnvironment();
           final group = inspectorService!.createObjectGroup('test-group');
-          final RemoteDiagnosticsNode root = (await group.getRoot(
+          final root = (await group.getRoot(
             FlutterTreeType.widget,
             isSummaryTree: true,
           ))!;
@@ -299,7 +299,7 @@ void main() {
         test('isSummaryTree = false', () async {
           await env.setupEnvironment();
           final group = inspectorService!.createObjectGroup('test-group');
-          final RemoteDiagnosticsNode root = (await group.getRoot(
+          final root = (await group.getRoot(
             FlutterTreeType.widget,
             isSummaryTree: false,
           ))!;
@@ -331,7 +331,7 @@ void main() {
 
           // First get a node in the summary tree:
           final group = inspectorService!.createObjectGroup('test-group');
-          final RemoteDiagnosticsNode root = (await group.getRoot(
+          final root = (await group.getRoot(
             FlutterTreeType.widget,
             isSummaryTree: true,
           ))!;

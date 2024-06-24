@@ -1,6 +1,6 @@
 ## What is this?
 
-This is a package containing test utilities for use when writing [Dart DevTools](https://docs.flutter.dev/development/tools/devtools/overview) tests.
+This is a package containing test utilities for use when writing [Dart DevTools](https://docs.flutter.dev/development/tools/devtools) tests.
 
 The package is separate from devtools_app, because it is used in g3.
 

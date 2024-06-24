@@ -1,6 +1,6 @@
 # DevTools style guide
 
-We fully follow [Effective Dart](https://dart.dev/guides/language/effective-dart)
+We fully follow [Effective Dart](https://dart.dev/effective-dart)
 and some items of
 [Style guide for Flutter repo](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md):
 

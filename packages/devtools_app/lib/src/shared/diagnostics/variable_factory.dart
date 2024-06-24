@@ -552,8 +552,8 @@ List<DartObjectNode> createVariablesForFields(
 }) {
   final result = <DartObjectNode>[];
   for (final field in instance.fields!) {
-    final name = field.decl?.name;
-    if (name == null) {
+    final name = field.name;
+    if (name is! String) {
       result.add(
         DartObjectNode.fromValue(
           value: field.value,
