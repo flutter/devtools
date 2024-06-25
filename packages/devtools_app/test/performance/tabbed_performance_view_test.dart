@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
-import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
 import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/perfetto.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
@@ -117,7 +116,6 @@ void main() {
 
           expect(find.text('Timeline Events'), findsOneWidget);
           expect(find.text('Frame Analysis'), findsOneWidget);
-          expect(find.text('Raster Stats'), findsOneWidget);
           expect(find.text('Rebuild Stats'), findsOneWidget);
         });
       },
@@ -162,27 +160,6 @@ void main() {
             find.text('Select a frame above to view analysis data.'),
             findsOneWidget,
           );
-        });
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'builds content for Raster Stats tab',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline();
-          await pumpView(tester);
-          await tester.pumpAndSettle();
-          expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(4));
-
-          await tester.tap(find.text('Raster Stats'));
-          await tester.pumpAndSettle();
-
-          expect(find.byType(RasterStatsView), findsOneWidget);
-          expect(find.text('Take Snapshot'), findsOneWidget);
-          expect(find.byType(ClearButton), findsOneWidget);
         });
       },
     );
@@ -249,7 +226,6 @@ void main() {
           expect(find.byType(DevToolsTab), findsOneWidget);
           expect(find.text('Timeline Events'), findsOneWidget);
           expect(find.text('Frame Analysis'), findsNothing);
-          expect(find.text('Raster Stats'), findsNothing);
         });
       },
     );
