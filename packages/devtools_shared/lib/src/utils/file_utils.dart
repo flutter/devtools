@@ -5,8 +5,6 @@
 import 'package:dtd/dtd.dart';
 import 'package:meta/meta.dart';
 
-import '../common.dart';
-
 const _fileUriPrefix = 'file://';
 
 /// Attempts to detect the package root of [fileUriString], which is expected to
@@ -54,7 +52,7 @@ Future<String> packageRootFromFileUriString(
       try {
         final directoryContents = await dtd.listDirectoryContents(uri);
         final containsDartToolDirectory = (directoryContents.uris ?? const [])
-            .any((uri) => uri.path.endsWith('$dartToolDirectoryName/'));
+            .any((uri) => uri.path.endsWith('.dart_tool/'));
         if (containsDartToolDirectory) {
           final uriAsString = uri.toString();
           return _assertUriFormatAndReturn(

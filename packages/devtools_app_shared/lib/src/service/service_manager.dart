@@ -11,6 +11,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../utils/utils.dart';
@@ -560,13 +561,15 @@ class ServiceManager<T extends VmService> {
       ))
           .valueAsString;
 
+      // TODO(https://github.com/flutter/devtools/issues/7944): return the
+      // unmodified package config location.
+      final packageConfigIdentifier =
+          path.join('.dart_tool', 'package_config.json');
       if (packageConfig?.endsWith(packageConfigIdentifier) ?? false) {
         _log.fine(
           '[connectedAppPackageRoot] detected test package config from root '
           'library eval: $packageConfig.',
         );
-        // TODO(https://github.com/flutter/devtools/issues/7944): return the
-        // unmodified package config location.
         return packageConfig!.substring(
           0,
           // Minus 1 to remove the trailing slash.

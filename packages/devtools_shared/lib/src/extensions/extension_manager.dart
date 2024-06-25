@@ -146,8 +146,8 @@ class ExtensionsManager {
       // which may be an incorrect assumption for pub workspaces.
       final packageConfigPath = path.posix.join(
         rootFileUriString,
-        dartToolDirectoryName,
-        packageConfigFileName,
+        '.dart_tool',
+        'package_config.json',
       );
       extensions = await findExtensions(
         'devtools',
