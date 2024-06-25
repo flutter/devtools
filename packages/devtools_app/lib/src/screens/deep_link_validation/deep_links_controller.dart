@@ -453,7 +453,7 @@ class DeepLinksController extends DisposableController
         .toList();
 
     late final Map<String, List<DomainError>> androidDomainErrors;
-    late final Map<String, List<DomainError>> iosDomainErrors;
+    Map<String, List<DomainError>> iosDomainErrors = {};
     try {
       final androidResult = await deepLinksServices.validateAndroidDomain(
         domains: domains,
@@ -463,12 +463,12 @@ class DeepLinksController extends DisposableController
       androidDomainErrors = androidResult.domainErrors;
       googlePlayFingerprintsAvailability.value =
           androidResult.googlePlayFingerprintsAvailability;
-
-      iosDomainErrors = await deepLinksServices.validateIosDomain(
-        domains: domains,
-        applicationId: applicationId,
-        localFingerprint: localFingerprint.value,
-      );
+      if (FeatureFlags.deepLinkIosCheck)
+        iosDomainErrors = await deepLinksServices.validateIosDomain(
+          domains: domains,
+          applicationId: applicationId,
+          localFingerprint: localFingerprint.value,
+        );
     } catch (_) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.validationErrorPage;
