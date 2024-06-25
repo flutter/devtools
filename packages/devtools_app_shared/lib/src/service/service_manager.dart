@@ -562,7 +562,8 @@ class ServiceManager<T extends VmService> {
           .valueAsString;
 
       // TODO(https://github.com/flutter/devtools/issues/7944): return the
-      // unmodified package config location.
+      // unmodified package config location. For this case, be sure to handle
+      // invalid values like the empty String or 'null'.
       final packageConfigIdentifier =
           path.join('.dart_tool', 'package_config.json');
       if (packageConfig?.endsWith(packageConfigIdentifier) ?? false) {
