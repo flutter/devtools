@@ -112,7 +112,7 @@ class InspectorTreeController extends DisposableController
       screenMetricsProvider: () => InspectorScreenMetrics.v2(
         inspectorTreeControllerId: gaId,
         rootSetCount: _rootSetCount,
-        rowCount: _cachedRows.value.length,
+        rowCount: _rowsInTree.value.length,
       ),
     );
   }
@@ -156,7 +156,7 @@ class InspectorTreeController extends DisposableController
 
   set root(InspectorTreeNode? node) {
     if (node != null) {
-      _updateCachedRows(
+      _updateRows(
         node,
         updateSearchableRows: true,
       );
@@ -170,7 +170,7 @@ class InspectorTreeController extends DisposableController
       screenMetricsProvider: () => InspectorScreenMetrics.v2(
         inspectorTreeControllerId: gaId,
         rootSetCount: ++_rootSetCount,
-        rowCount: _cachedRows.value.length,
+        rowCount: _rowsInTree.value.length,
       ),
     );
   }
@@ -201,28 +201,37 @@ class InspectorTreeController extends DisposableController
 
   /// All cached rows of the tree.
   ///
-  /// Similar to [cachedRows] but:
+  /// Similar to [rowsInTree] but:
   /// * contains every row in the tree (including collapsed rows)
   /// * items don't change when nodes are expanded or collapsed
   /// * items are populated only when root is changed
   final _searchableCachedRows = <InspectorTreeRow?>[];
 
-  ValueListenable<List<InspectorTreeRow?>> get cachedRows => _cachedRows;
-  final _cachedRows = ListValueNotifier<InspectorTreeRow?>([]);
+  /// All the rows that should be displayed in the tree.
+  ///
+  /// The rows are updated by [_handleDirtyNode] whenever an [InspectorTreeNode]
+  /// is marked as dirty.
+  ValueListenable<List<InspectorTreeRow?>> get rowsInTree => _rowsInTree;
+  final _rowsInTree = ListValueNotifier<InspectorTreeRow?>([]);
 
+  /// Map from node to the index for that node's row in [rowsInTree].
   final _nodeToRowIndex = <InspectorTreeNode, int>{};
 
-  void _updateCachedRows(
+  /// Rebuilds the tree and updates [rowsInTree] with the new values.
+  ///
+  /// If [updateSearchableRows] is true, also updates [_searchableCachedRows]
+  /// with the new values.
+  void _updateRows(
     InspectorTreeNode node, {
     bool updateSearchableRows = false,
   }) {
     final rows = _buildRows(node);
-    _cachedRows.replaceAll(rows);
-    _cachedRows.notifyListeners();
+    _rowsInTree.replaceAll(rows);
+    _rowsInTree.notifyListeners();
 
     // Build the reverse node-to-index map for faster lookups:
-    for (int i = 0; i < _cachedRows.value.length; i++) {
-      final row = _cachedRows.value[i];
+    for (int i = 0; i < _rowsInTree.value.length; i++) {
+      final row = _rowsInTree.value[i];
       final node = row?.node;
       if (node != null) {
         _nodeToRowIndex[node] = i;
@@ -230,15 +239,23 @@ class InspectorTreeController extends DisposableController
     }
 
     if (updateSearchableRows) {
-      // When root is set, all nodes are expanded so these are the same:
       _searchableCachedRows.clear();
       _searchableCachedRows.addAll(rows);
     }
   }
 
+  /// Rebuilds the entire tree when a node is marked as dirty.
+  ///
+  /// TODO(elliette): Consider rebuilding only the node's branch to improve
+  /// performance.
   void _handleDirtyNode(InspectorTreeNode node) {
+    if (node == root) {
+      _cachedSelectedRow = null;
+      lastContentWidth = null;
+    }
+
     if (root != null) {
-      _updateCachedRows(root!);
+      _updateRows(root!);
     }
   }
 
@@ -247,36 +264,17 @@ class InspectorTreeController extends DisposableController
     refreshSearchMatches();
   }
 
-  // TODO: we should add a listener instead that clears the cache when the
-  // root is marked as dirty.
-  void _maybeClearCache() {
-    final rootLocal = root;
-    if (rootLocal != null && rootLocal.isDirty) {
-      _cachedSelectedRow = null;
-      rootLocal.isDirty = false;
-      lastContentWidth = null;
-      _refreshCache();
-    }
-  }
-
-  void _refreshCache() {
-    if (root != null) {
-      _updateCachedRows(root!);
-    }
-  }
-
-  InspectorTreeRow? getCachedRow(int index) {
+  InspectorTreeRow? getRowAtIndex(int index) {
     if (index < 0) return null;
 
-    _maybeClearCache();
-    if (_cachedRows.value.length > index) {
-      return _cachedRows.value[index];
+    if (_rowsInTree.value.length > index) {
+      return _rowsInTree.value[index];
     }
     return null;
   }
 
   double getRowOffset(int index) {
-    return (getCachedRow(index)?.depth ?? 0) * inspectorColumnIndent;
+    return (getRowAtIndex(index)?.depth ?? 0) * inspectorColumnIndent;
   }
 
   List<InspectorTreeNode> getPathFromSelectedRowToRoot() {
@@ -351,7 +349,7 @@ class InspectorTreeController extends DisposableController
       return;
     }
 
-    selection = getCachedRow(
+    selection = getRowAtIndex(
       (_getRowIndexFromNode(selection!) + indexOffset).clamp(0, _numRows - 1),
     )?.node;
   }
@@ -407,9 +405,10 @@ class InspectorTreeController extends DisposableController
     root.children.forEach(_collapseAllNodes);
   }
 
-  int get _numRows => _cachedRows.value.length;
+  int get _numRows => _rowsInTree.value.length;
 
-  int _getRowIndexFromNode(node) => _nodeToRowIndex[node] ?? -1;
+  int _getRowIndexFromNode(InspectorTreeNode node) =>
+      _nodeToRowIndex[node] ?? -1;
 
   int _getRowIndexFromOffset(double y) => max(0, y ~/ inspectorRowHeight);
 
@@ -468,14 +467,14 @@ class InspectorTreeController extends DisposableController
   InspectorTreeRow? getRowForNode(InspectorTreeNode node) {
     final rootLocal = root;
     if (rootLocal == null) return null;
-    return getCachedRow(_getRowIndexFromNode(node));
+    return getRowAtIndex(_getRowIndexFromNode(node));
   }
 
-  InspectorTreeRow? getRow(Offset offset) {
+  InspectorTreeRow? getRowForOffset(Offset offset) {
     final rootLocal = root;
     if (rootLocal == null) return null;
     final row = _getRowIndexFromOffset(offset.dy);
-    return row < _cachedRows.value.length ? getCachedRow(row) : null;
+    return row < _rowsInTree.value.length ? getRowAtIndex(row) : null;
   }
 
   void onExpandRow(InspectorTreeRow row) {
@@ -539,7 +538,7 @@ class InspectorTreeController extends DisposableController
     if (lastContentWidth == null) {
       double maxIndent = 0;
       for (int i = 0; i < _numRows; i++) {
-        final row = getCachedRow(i);
+        final row = getRowAtIndex(i);
         if (row != null) {
           maxIndent = max(maxIndent, getDepthIndent(row.depth));
         }
@@ -1047,7 +1046,7 @@ class _InspectorTreeState extends State<InspectorTree>
     }
 
     return ValueListenableBuilder<List<InspectorTreeRow?>>(
-      valueListenable: treeControllerLocal.cachedRows,
+      valueListenable: treeControllerLocal.rowsInTree,
       builder: (context, rows, _) {
         if (rows.isEmpty) {
           // This works around a bug when Scrollbars are present on a short lived
@@ -1108,7 +1107,7 @@ class _InspectorTreeState extends State<InspectorTree>
                                 return SizedBox(height: inspectorRowHeight);
                               }
                               final row =
-                                  treeControllerLocal.getCachedRow(index)!;
+                                  treeControllerLocal.getRowAtIndex(index)!;
                               final inspectorRef =
                                   row.node.diagnostic?.valueRef.id;
                               return _InspectorTreeRowWidget(

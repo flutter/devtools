@@ -44,7 +44,7 @@ class InspectorTreeNode {
         _parent = parent,
         _isExpanded = expandChildren;
 
-  
+  /// Callback that is called when the node is marked as dirty.
   void Function(InspectorTreeNode node)? whenDirty;
 
   bool get showLinesToChildren {
