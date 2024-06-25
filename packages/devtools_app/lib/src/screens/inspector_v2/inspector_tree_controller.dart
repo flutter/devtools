@@ -242,6 +242,7 @@ class InspectorTreeController extends DisposableController
   void _refreshCache() {
     if (root != null) {
       final rows = _buildRows(root!);
+      print('==== ROWS ARE NOW ${rows.length}');
       _cachedRows.clear();
       _cachedRows.addAll(rows);
     }

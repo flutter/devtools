@@ -62,6 +62,7 @@ class InspectorController extends DisposableController
       onSelectionChange: selectionChanged,
       onExpand: _onExpand,
       onClientActiveChange: _onClientChange,
+      // onIsDirty: _onIsDirty,
     );
     details = isSummaryTree
         ? InspectorController(
@@ -172,6 +173,8 @@ class InspectorController extends DisposableController
   }
 
   int _clientCount = 0;
+
+  void onIsDirty(InspectorTreeNode node) {}
 
   /// Maximum frame rate to refresh the inspector at to avoid taxing the
   /// physical device with too many requests to recompute properties and trees.

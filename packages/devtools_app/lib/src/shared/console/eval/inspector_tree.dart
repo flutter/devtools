@@ -138,6 +138,8 @@ class InspectorTreeNode {
   }
 
   int get childrenCount {
+    print('GETTING CHILDREN COUNT');
+    // print(StackTrace.current);
     if (!isExpanded) {
       _childrenCount = 0;
     }

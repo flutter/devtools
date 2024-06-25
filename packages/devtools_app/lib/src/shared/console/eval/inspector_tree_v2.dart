@@ -187,12 +187,14 @@ class InspectorTreeConfig {
     this.onClientActiveChange,
     this.onSelectionChange,
     this.onExpand,
+    this.onIsDirty,
   });
 
   final NodeAddedCallback? onNodeAdded;
   final VoidCallback? onSelectionChange;
   final void Function(bool added)? onClientActiveChange;
   final TreeEventCallback? onExpand;
+  final void Function(InspectorTreeNode node)? onIsDirty;
 }
 
 enum SearchTargetType {
