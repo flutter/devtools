@@ -32,8 +32,6 @@ void main() {
     }
 
     setUp(() {
-      mockLoggingController = createMockLoggingControllerV2WithDefaults();
-
       final fakeServiceConnection = FakeServiceConnectionManager();
       when(
         fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
@@ -52,6 +50,8 @@ void main() {
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
+
+      mockLoggingController = createMockLoggingControllerV2WithDefaults();
 
       screen = LoggingScreenV2();
     });
