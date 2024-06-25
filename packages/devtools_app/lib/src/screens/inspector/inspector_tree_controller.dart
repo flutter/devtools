@@ -148,8 +148,8 @@ class InspectorTreeController extends DisposableController
   void setState(VoidCallback fn) {
     fn();
     for (final client in _clients) {
-      print('NOT CALLING ON CHANGED!!');
-      // client.onChanged();
+      // If this is removed, the tree does not update:
+      client.onChanged();
     }
   }
 
@@ -988,13 +988,12 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   void onChanged() {
-    print('ON CHANGE CALLED, SETTING EMPTY STATE.');
+    // If this is removed, the tree does not update.
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    print('triggered rebuilt');
     super.build(context);
     final treeControllerLocal = treeController;
     if (treeControllerLocal == null) {
