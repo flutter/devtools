@@ -8,10 +8,16 @@ import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/shared/development_helpers.dart';
 import 'package:devtools_app/src/shared/query_parameters.dart';
 import 'package:devtools_app_shared/shared.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  setUp(() {
+    setGlobal(IdeTheme, IdeTheme());
+  });
+
   group('ScreenMetaData', () {
     test('values matches order of screens', () {
       final enumOrder = ScreenMetaData.values.map((s) => s.id).toList();
