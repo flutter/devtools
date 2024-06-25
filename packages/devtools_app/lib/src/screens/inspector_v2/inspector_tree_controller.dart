@@ -157,7 +157,7 @@ class InspectorTreeController extends DisposableController
   set root(InspectorTreeNode? node) {
     if (node != null) {
       _updateRows(
-        node,
+        node: node,
         updateSearchableRows: true,
       );
     }
@@ -190,6 +190,7 @@ class InspectorTreeController extends DisposableController
     if (configLocal.onSelectionChange != null) {
       configLocal.onSelectionChange!();
     }
+    _updateRows();
   }
 
   InspectorTreeNode? get hover => _hover;
@@ -221,10 +222,16 @@ class InspectorTreeController extends DisposableController
   ///
   /// If [updateSearchableRows] is true, also updates [_searchableCachedRows]
   /// with the new values.
-  void _updateRows(
-    InspectorTreeNode node, {
+  ///
+  /// TODO(elliette): Consider only updating an [InspectorTreeNode]'s branch
+  /// when it is marked as dirty, instead of the entire tree.
+  void _updateRows({
+    InspectorTreeNode? node,
     bool updateSearchableRows = false,
   }) {
+    node ??= root;
+    if (node == null) return;
+
     final rows = _buildRows(node);
     _rowsInTree.replaceAll(rows);
     _rowsInTree.notifyListeners();
@@ -244,18 +251,12 @@ class InspectorTreeController extends DisposableController
     }
   }
 
-  /// Rebuilds the entire tree when a node is marked as dirty.
-  ///
-  /// TODO(elliette): Consider rebuilding only the node's branch to improve
-  /// performance.
+  /// Resets the state if the root has been marked as dirty.
   void _handleDirtyNode(InspectorTreeNode node) {
     if (node == root) {
       _cachedSelectedRow = null;
       lastContentWidth = null;
-    }
-
-    if (root != null) {
-      _updateRows(root!);
+      _updateRows();
     }
   }
 
@@ -319,6 +320,7 @@ class InspectorTreeController extends DisposableController
 
     if (selectionLocal.isExpanded) {
       selectionLocal.isExpanded = false;
+      _updateRows();
 
       return;
     }
@@ -339,6 +341,7 @@ class InspectorTreeController extends DisposableController
     }
 
     selectionLocal.isExpanded = true;
+    _updateRows();
   }
 
   void _navigateHelper(int indexOffset) {
@@ -371,18 +374,22 @@ class InspectorTreeController extends DisposableController
 
   void nodeChanged(InspectorTreeNode node) {
     node.isDirty = true;
+    _updateRows();
   }
 
   void removeNodeFromParent(InspectorTreeNode node) {
     node.parent?.removeChild(node);
+    _updateRows();
   }
 
   void appendChild(InspectorTreeNode node, InspectorTreeNode child) {
     node.appendChild(child);
+    _updateRows();
   }
 
   void expandPath(InspectorTreeNode? node) {
     _expandPath(node);
+    _updateRows();
   }
 
   void _expandPath(InspectorTreeNode? node) {
@@ -398,6 +405,7 @@ class InspectorTreeController extends DisposableController
     _collapseAllNodes(root!);
     if (selection == null) return;
     _expandPath(selection);
+    _updateRows();
   }
 
   void _collapseAllNodes(InspectorTreeNode root) {
@@ -483,10 +491,12 @@ class InspectorTreeController extends DisposableController
     if (onExpand != null) {
       onExpand(row.node);
     }
+    _updateRows();
   }
 
   void onCollapseRow(InspectorTreeRow row) {
     row.node.isExpanded = false;
+    _updateRows();
   }
 
   void onSelectRow(InspectorTreeRow row) {
