@@ -148,6 +148,7 @@ class InspectorTreeController extends DisposableController
   void setState(VoidCallback fn) {
     fn();
     for (final client in _clients) {
+      // If this is removed, the tree does not update.
       client.onChanged();
     }
   }
@@ -1047,6 +1048,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   void onChanged() {
+    // If this is removed, the tree does not update.
     setState(() {});
   }
 
