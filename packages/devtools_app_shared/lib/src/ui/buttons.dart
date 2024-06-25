@@ -423,7 +423,6 @@ final class RoundedDropDownButton<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bgColor = theme.colorScheme.backgroundColorSelected;
 
     Radius selectRadius(bool show) {
       return show ? defaultRadius : Radius.zero;
@@ -457,7 +456,7 @@ final class RoundedDropDownButton<T> extends StatelessWidget {
             style: style,
             selectedItemBuilder: selectedItemBuilder,
             items: items,
-            focusColor: bgColor,
+            focusColor: theme.colorScheme.surface,
           ),
         ),
       ),
