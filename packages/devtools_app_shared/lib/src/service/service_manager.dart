@@ -553,7 +553,7 @@ class ServiceManager<T extends VmService> {
     final evalDisposable = Disposable();
     try {
       final packageConfig = (await eval.evalInstance(
-        'packageConfigLocationn',
+        'packageConfigLocation',
         isAlive: evalDisposable,
       ))
           .valueAsString;
