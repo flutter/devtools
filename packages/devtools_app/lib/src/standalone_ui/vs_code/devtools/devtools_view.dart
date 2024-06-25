@@ -17,9 +17,8 @@ import '../../../shared/screen.dart';
 import 'extensions_view.dart';
 import 'shared.dart';
 
-/// A widget that displays DevTools options, including buttons to open static
-/// screens, and a list of static DevTools extensions available for the IDE
-/// workspace.
+/// A widget that displays DevTools options with buttons to open each DevTools
+/// screen or extension.
 class DevToolsSidebarOptions extends StatelessWidget {
   const DevToolsSidebarOptions({
     required this.editor,
