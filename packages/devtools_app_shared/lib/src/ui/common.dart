@@ -312,7 +312,6 @@ final class PaddedDivider extends StatelessWidget {
   }
 }
 
-
 /// A widget that provides a tooltip with a common delay before the tooltip is
 /// shown.
 final class DevToolsTooltip extends StatelessWidget {
