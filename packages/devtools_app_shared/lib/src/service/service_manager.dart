@@ -523,12 +523,14 @@ class ServiceManager<T extends VmService> {
     if (packageRootUriString?.endsWith('.dart') ?? false) {
       final rootLibrary = await _mainIsolateRootLibrary();
       if (rootLibrary != null) {
-        packageRootUriString =
-            (await _lookupPackageConfigByEval(rootLibrary)) ??
-                // TODO(kenz): remove this fallback once all test bootstrap
-                // generators include the `packageConfigLocation` constant we
-                // can evaluate.
-                await _lookupTestLibraryByPrefix(rootLibrary, dtdManager);
+        packageRootUriString = (await _lookupPackageRootByEval(rootLibrary)) ??
+            // TODO(kenz): remove this fallback once all test bootstrap
+            // generators include the `packageConfigLocation` constant we
+            // can evaluate.
+            await _lookupPackageRootByImportPrefix(
+              rootLibrary,
+              dtdManager,
+            );
       }
     }
     _log.fine(
@@ -540,7 +542,7 @@ class ServiceManager<T extends VmService> {
         : Uri.parse(packageRootUriString);
   }
 
-  Future<String?> _lookupPackageConfigByEval(Library rootLibrary) async {
+  Future<String?> _lookupPackageRootByEval(Library rootLibrary) async {
     final eval = EvalOnDartLibrary(
       rootLibrary.uri!,
       this.service! as VmService,
@@ -563,6 +565,8 @@ class ServiceManager<T extends VmService> {
           '[connectedAppPackageRoot] detected test package config from root '
           'library eval: $packageConfig.',
         );
+        // TODO(https://github.com/flutter/devtools/issues/7944): return the
+        // unmodified package config location.
         return packageConfig!.substring(
           0,
           // Minus 1 to remove the trailing slash.
@@ -577,7 +581,7 @@ class ServiceManager<T extends VmService> {
     return null;
   }
 
-  Future<String?> _lookupTestLibraryByPrefix(
+  Future<String?> _lookupPackageRootByImportPrefix(
     Library rootLibrary,
     DTDManager dtdManager,
   ) async {
@@ -591,6 +595,8 @@ class ServiceManager<T extends VmService> {
         '[connectedAppPackageRoot] detected test library from root library '
         'imports: $testTargetFileUriString',
       );
+      // TODO(https://github.com/flutter/devtools/issues/7944): return the
+      // unmodified package config location.
       return await packageRootFromFileUriString(
         testTargetFileUriString,
         dtd: dtdManager.connection.value,
