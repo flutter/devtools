@@ -112,7 +112,7 @@ void main() {
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(4));
+          expect(find.byType(DevToolsTab), findsNWidgets(3));
 
           expect(find.text('Timeline Events'), findsOneWidget);
           expect(find.text('Frame Analysis'), findsOneWidget);
@@ -136,7 +136,7 @@ void main() {
           await pumpView(tester, performanceController: controller);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(4));
+          expect(find.byType(DevToolsTab), findsNWidgets(3));
 
           // The frame analysis tab should be selected by default.
           expect(find.byType(FlutterFrameAnalysisView), findsOneWidget);
@@ -153,7 +153,7 @@ void main() {
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(4));
+          expect(find.byType(DevToolsTab), findsNWidgets(3));
 
           // The frame analysis tab should be selected by default.
           expect(
@@ -173,7 +173,7 @@ void main() {
           await pumpView(tester);
           await tester.pumpAndSettle();
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(4));
+          expect(find.byType(DevToolsTab), findsNWidgets(3));
 
           await tester.tap(find.text('Rebuild Stats'));
           await tester.pumpAndSettle();
@@ -192,7 +192,7 @@ void main() {
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(4));
+          expect(find.byType(DevToolsTab), findsNWidgets(3));
 
           await tester.tap(find.text('Timeline Events'));
           await tester.pumpAndSettle();
