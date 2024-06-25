@@ -7,6 +7,7 @@ import 'package:devtools_app/src/extensions/embedded/view.dart';
 import 'package:devtools_app/src/extensions/extension_screen.dart';
 import 'package:devtools_app/src/extensions/extension_screen_controls.dart';
 import 'package:devtools_app/src/shared/development_helpers.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
@@ -137,6 +138,7 @@ void main() {
         await _verifyContextMenuContents(tester);
         expect(find.byType(EnableExtensionPrompt), findsNothing);
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+        expect(find.byType(ExtensionRequiresConnection), findsNothing);
       },
     );
 
@@ -161,6 +163,39 @@ void main() {
         expect(_extensionContextMenuFinder, findsNothing);
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
         expect(find.byType(EmbeddedExtensionView), findsNothing);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders when embedded without a connected app',
+      windowSize,
+      (tester) async {
+        // The following state must be true for this test:
+        // * Embedded mode = true
+        // * Extension must require a connection (the fooExtension does)
+        // * The service manager must be in a disconnected state (this is true
+        //   after [setUp] runs above).
+
+        setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
+
+        await extensionService.setExtensionEnabledState(
+          StubDevToolsExtensions.fooExtension,
+          enable: true,
+        );
+
+        await tester.pumpWidget(wrap(Builder(builder: fooScreen.build)));
+        expect(find.byType(ExtensionView), findsOneWidget);
+        expect(find.byType(EmbeddedExtensionHeader), findsOneWidget);
+        expect(
+          find.richTextContaining('package:foo extension'),
+          findsOneWidget,
+        );
+        expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
+        expect(find.richTextContaining('Report an issue'), findsOneWidget);
+        await _verifyContextMenuContents(tester);
+        expect(find.byType(EnableExtensionPrompt), findsNothing);
+        expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+        expect(find.byType(ExtensionRequiresConnection), findsOneWidget);
       },
     );
 
@@ -196,6 +231,7 @@ void main() {
         );
         expect(find.byType(EnableExtensionPrompt), findsNothing);
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+        expect(find.byType(ExtensionRequiresConnection), findsNothing);
         await _verifyContextMenuContents(
           tester,
           autoDismiss: false,
