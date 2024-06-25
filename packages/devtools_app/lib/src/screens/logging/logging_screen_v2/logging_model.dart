@@ -9,6 +9,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../shared/globals.dart';
+
+import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/filter.dart';
 import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';
 import 'logging_table_row.dart';
@@ -20,10 +23,11 @@ import 'logging_table_v2.dart';
 /// The [LoggingTableV2] table uses variable height rows. This model caches the
 /// relevant heights and offsets so that the row heights only need to be calculated
 /// once per parent width.
-class LoggingTableModel extends ChangeNotifier with DisposerMixin {
+class LoggingTableModel extends DisposableController
+    with ChangeNotifier, DisposerMixin, FilterControllerMixin<LogDataV2> {
   LoggingTableModel() {
     _worker = InterruptableChunkWorker(
-      callback: (index) => getFilteredLogHeight(
+      callback: (index) => getLogHeight(
         index,
       ),
       progressCallback: (progress) => _cacheLoadProgress.value = progress,
@@ -35,15 +39,19 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
       preferences.logging.retentionLimit,
       _onRetentionLimitUpdate,
     );
+
+    _retentionLimit = preferences.logging.retentionLimit.value;
+    subscribeToFilterChanges();
   }
 
-  final _logs = ListQueue<LogDataV2>();
-  final _filteredLogs = ListQueue<LogDataV2>();
+  final _logs = ListQueue<_LogEntry>();
+  final _filteredLogs = ListQueue<_FilteredLogEntry>();
+
   final _selectedLogs = ListQueue<LogDataV2>();
   late int _retentionLimit;
 
-  final cachedHeights = <int, double>{};
-  final cachedOffets = <int, double>{};
+  Filter? _currentFilter;
+
   late final InterruptableChunkWorker _worker;
 
   /// Represents the state of reloading the height caches.
@@ -58,8 +66,16 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
     while (_logs.length > _retentionLimit) {
       _trimOneOutOfRetentionLog();
     }
-
+    _recalculateOffsets();
     notifyListeners();
+  }
+
+  void _recalculateOffsets() {
+    double runningOffset = 0.0;
+    for (var i = 0; i < _filteredLogs.length; i++) {
+      _filteredLogs.elementAt(i).offset = runningOffset;
+      runningOffset += getFilteredLogHeight(i);
+    }
   }
 
   @override
@@ -67,6 +83,58 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
     _cacheLoadProgress.dispose();
     _worker.dispose();
     super.dispose();
+  }
+
+  @override
+  void filterData(Filter<LogDataV2> filter) {
+    super.filterData(filter);
+
+    _currentFilter = filter;
+    _filteredLogs
+      ..clear()
+      ..addAll(
+        _logs.where(_filterCallback).map((e) => _FilteredLogEntry(e)).toList(),
+      );
+    notifyListeners();
+  }
+
+  bool _filterCallback(_LogEntry entry) {
+    final filter = _currentFilter;
+    // If there is no filter yet then all logs match.
+    if (filter == null) return true;
+
+    final log = entry.log;
+    final filteredOutByToggleFilters = filter.toggleFilters.any(
+      (toggleFilter) =>
+          toggleFilter.enabled.value && !toggleFilter.includeCallback(log),
+    );
+    if (filteredOutByToggleFilters) return false;
+
+    final queryFilter = filter.queryFilter;
+    if (!queryFilter.isEmpty) {
+      final filteredOutByQueryFilterArgument = queryFilter
+          .filterArguments.values
+          .any((argument) => !argument.matchesValue(log));
+      if (filteredOutByQueryFilterArgument) return false;
+
+      if (filter.queryFilter.substringExpressions.isNotEmpty) {
+        for (final substring in filter.queryFilter.substringExpressions) {
+          final matchesKind = log.kind.caseInsensitiveContains(substring);
+          if (matchesKind) return true;
+
+          final matchesSummary = log.summary != null &&
+              log.summary!.caseInsensitiveContains(substring);
+          if (matchesSummary) return true;
+
+          final matchesDetails = log.details != null &&
+              log.details!.caseInsensitiveContains(substring);
+          if (matchesDetails) return true;
+        }
+        return false;
+      }
+    }
+
+    return true;
   }
 
   double get tableWidth => _tableWidth;
@@ -78,14 +146,19 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
   set tableWidth(double width) {
     if (width != _tableWidth) {
       _tableWidth = width;
-      cachedHeights.clear();
-      cachedOffets.clear();
+      for (final e in _logs) {
+        e.height = null;
+      }
+      for (final e in _filteredLogs) {
+        e.offset = null;
+      }
       unawaited(_preFetchRowHeights());
     }
   }
 
   /// Get the filtered log at [index].
-  LogDataV2 filteredLogAt(int index) => _filteredLogs.elementAt(index);
+  LogDataV2 filteredLogAt(int index) =>
+      _filteredLogs.elementAt(index).logEntry.log;
 
   double _tableWidth = 0.0;
 
@@ -100,14 +173,18 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
 
   /// Add a log to the list of tracked logs.
   void add(LogDataV2 log) {
-    // TODO(danchevalier): ensure that search and filter lists are updated here.
+    final newEntry = _LogEntry(log);
+    _logs.add(newEntry);
+    getLogHeight(
+      _logs.length - 1,
+    );
 
-    _logs.add(log);
-    _filteredLogs.add(log);
-
+    if (!_filterCallback(newEntry)) {
+      // Only add the log to filtered logs if it matches the filter.
+      return;
+    }
+    _filteredLogs.add(_FilteredLogEntry(newEntry));
     _trimOneOutOfRetentionLog();
-
-    getFilteredLogHeight(_logs.length - 1);
     notifyListeners();
   }
 
@@ -134,15 +211,30 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
     throw Exception('Implement this when needed');
   }
 
-  /// Get the height of a filtered Log at [index].
-  double getFilteredLogHeight(int index) {
-    final cachedHeight = cachedHeights[index];
+  double getLogHeight(int index) {
+    final entry = _logs.elementAt(index);
+    final cachedHeight = entry.height;
     if (cachedHeight != null) return cachedHeight;
-
-    return cachedHeights[index] = LoggingTableRow.calculateRowHeight(
-      _logs.elementAt(index),
+    final height = LoggingTableRow.calculateRowHeight(
+      entry.log,
       _tableWidth,
     );
+    entry.height = height;
+    return height;
+  }
+
+  /// Get the height of a filtered Log at [index].
+  double getFilteredLogHeight(int index) {
+    final filteredLog = _filteredLogs.elementAt(index);
+    final cachedHeight = filteredLog.logEntry.height;
+    if (cachedHeight != null) return cachedHeight;
+
+    final height = LoggingTableRow.calculateRowHeight(
+      filteredLog.logEntry.log,
+      _tableWidth,
+    );
+    filteredLog.logEntry.height = height;
+    return height;
   }
 
   Future<bool> _preFetchRowHeights() async {
@@ -150,6 +242,19 @@ class LoggingTableModel extends ChangeNotifier with DisposerMixin {
     if (didComplete) {
       _cacheLoadProgress.value = null;
     }
+    _recalculateOffsets();
     return didComplete;
   }
+}
+
+class _LogEntry {
+  _LogEntry(this.log);
+  final LogDataV2 log;
+  double? height;
+}
+
+class _FilteredLogEntry {
+  _FilteredLogEntry(this.logEntry);
+  final _LogEntry logEntry;
+  double? offset;
 }

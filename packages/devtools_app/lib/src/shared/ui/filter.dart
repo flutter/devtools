@@ -463,3 +463,142 @@ extension PatternListExtension on List<Pattern> {
         : cast<String>();
   }
 }
+
+class FilterField<T> extends StatefulWidget {
+  const FilterField({
+    super.key,
+    required this.controller,
+  });
+
+  final FilterControllerMixin<T> controller;
+
+  @override
+  State<FilterField<T>> createState() => _FilterFieldState<T>();
+}
+
+class _FilterFieldState<T> extends State<FilterField<T>> with AutoDisposeMixin {
+  late final TextEditingController queryTextFieldController;
+  late bool useRegExp;
+
+  @override
+  void initState() {
+    super.initState();
+    queryTextFieldController = TextEditingController(
+      text: widget.controller.activeFilter.value.queryFilter.query,
+    );
+    useRegExp = widget.controller.useRegExp.value;
+    addAutoDisposeListener(widget.controller.useRegExp, () {
+      useRegExp = widget.controller.useRegExp.value;
+    });
+  }
+
+  @override
+  void dispose() {
+    queryTextFieldController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsClearableTextField(
+      autofocus: true,
+      labelText: 'Filter Query',
+      controller: queryTextFieldController,
+      additionalSuffixActions: [
+        DevToolsToggleButton(
+          icon: Codicons.regex,
+          message: 'Use regular expressions',
+          outlined: false,
+          isSelected: useRegExp,
+          onPressed: () => setState(() {
+            widget.controller.useRegExp.value = !useRegExp;
+            widget.controller.setActiveFilter(
+              query: queryTextFieldController.value.text,
+              toggleFilters: widget.controller._toggleFilters,
+            );
+          }),
+        ),
+      ],
+      onChanged: (_) {
+        widget.controller.setActiveFilter(
+          query: queryTextFieldController.value.text,
+          toggleFilters: widget.controller._toggleFilters,
+        );
+      },
+    );
+  }
+}
+
+class FilterOptionsDialog<T> extends StatefulWidget {
+  FilterOptionsDialog({
+    super.key,
+    required this.controller,
+    this.queryInstructions,
+  })  : assert(
+          queryInstructions == null || controller._queryFilterArgs.isNotEmpty,
+        ),
+        toggleFilterValuesAtOpen = List.generate(
+          controller.activeFilter.value.toggleFilters.length,
+          (index) =>
+              controller.activeFilter.value.toggleFilters[index].enabled.value,
+        );
+
+  final FilterControllerMixin<T> controller;
+
+  final String? queryInstructions;
+
+  final List<bool> toggleFilterValuesAtOpen;
+
+  @override
+  State<FilterOptionsDialog<T>> createState() => _FilterOptionsDialogState<T>();
+}
+
+class _FilterOptionsDialogState<T> extends State<FilterOptionsDialog<T>>
+    with AutoDisposeMixin {
+  @override
+  Widget build(BuildContext context) {
+    return StateUpdateDialog(
+      title: 'Filters',
+      onApply: _applyFilterChanges,
+      onCancel: _restoreOldValues,
+      onResetDefaults: _resetFilters,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...[
+            const SizedBox(height: defaultSpacing),
+            if (widget.queryInstructions != null) ...[
+              DialogHelpText(helpText: widget.queryInstructions!),
+              const SizedBox(height: defaultSpacing),
+            ],
+          ],
+          for (final toggleFilter in widget.controller._toggleFilters) ...[
+            ToggleFilterElement(filter: toggleFilter),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _applyFilterChanges() {
+    widget.controller.setActiveFilter(
+      // Keep the query the same, only update the toggle filters.
+      query: widget.controller.activeFilter.value.queryFilter.query,
+      toggleFilters: widget.controller._toggleFilters,
+    );
+  }
+
+  void _resetFilters() {
+    // TODO: is this correct.
+    // queryTextFieldController.clear();
+    widget.controller._resetToDefaultFilter();
+  }
+
+  void _restoreOldValues() {
+    for (var i = 0; i < widget.controller._toggleFilters.length; i++) {
+      final filter = widget.controller._toggleFilters[i];
+      filter.enabled.value = widget.toggleFilterValuesAtOpen[i];
+    }
+  }
+}
