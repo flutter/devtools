@@ -1352,7 +1352,7 @@ class _SearchFieldSuffix extends StatelessWidget {
     assert(supportsNavigation || onClose != null);
     return supportsNavigation
         ? SearchNavigationControls(controller, onClose: onClose)
-        : closeSearchDropdownButton(onClose);
+        : InputDecorationSuffixButton.close(onPressed: onClose);
   }
 }
 
@@ -1403,15 +1403,16 @@ class SearchNavigationControls extends StatelessWidget {
                     child: PaddedDivider.vertical(),
                   ),
                 ),
-                inputDecorationSuffixButton(
+                InputDecorationSuffixButton(
                   icon: Icons.keyboard_arrow_up,
                   onPressed: numMatches > 1 ? controller.previousMatch : null,
                 ),
-                inputDecorationSuffixButton(
+                InputDecorationSuffixButton(
                   icon: Icons.keyboard_arrow_down,
                   onPressed: numMatches > 1 ? controller.nextMatch : null,
                 ),
-                if (onClose != null) closeSearchDropdownButton(onClose),
+                if (onClose != null)
+                  InputDecorationSuffixButton.close(onPressed: onClose),
               ],
             );
           },
