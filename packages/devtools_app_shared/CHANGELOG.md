@@ -26,11 +26,11 @@ launching a URL in the browser, and includes special handling for launching
 URLs when in an embedded VS Code view.
 
 ## 0.1.1
-* Update `package:dtd` to `^2.1.0`
+* Update `package:dtd` to `^2.1.0`.
 * Add `DTDManager.projectRoots` method.
 * Bump the minimum Dart and Flutter SDK versions to `3.4.0-282.1.beta` and
 `3.22.0-0.1.pre` respectively.
-* Bump `devtools_shared` to ^8.1.1-dev.0
+* Bump `devtools_shared` to ^8.1.1-dev.0.
 
 ## 0.1.0
 * Remove deprecated `background` and `onBackground` values for `lightColorScheme`
