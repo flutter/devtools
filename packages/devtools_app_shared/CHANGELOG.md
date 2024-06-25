@@ -1,4 +1,9 @@
-## 0.2.0
+## 0.2.2-wip
+* Add `caseInsensitiveFuzzyMatch` extension method on `String`.
+* Add common widgets `DevToolsClearableTextField`, `InputDecorationSuffixButton`,
+and `RoundedDropDownButton`.
+
+## 0.2.1
 * Add `navigateToCode` utility method for jumping to code in IDEs.
 * Add `FlutterEvent` and `DeveloperServiceEvent` constants.
 * Add `connectedAppPackageRoot`, `rootPackageDirectoryForMainIsolate`, and

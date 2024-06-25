@@ -312,155 +312,6 @@ final class PaddedDivider extends StatelessWidget {
   }
 }
 
-/// A button with default DevTools styling and analytics handling.
-///
-/// * `onPressed`: The callback to be called upon pressing the button.
-/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
-///    omitted.
-class DevToolsButton extends StatelessWidget {
-  const DevToolsButton({
-    super.key,
-    required this.onPressed,
-    this.icon,
-    this.label,
-    this.tooltip,
-    this.color,
-    this.minScreenWidthForTextBeforeScaling,
-    this.elevated = false,
-    this.outlined = true,
-    this.tooltipPadding,
-  }) : assert(
-          label != null || icon != null,
-          'Either icon or label must be specified.',
-        );
-
-  factory DevToolsButton.iconOnly({
-    required IconData icon,
-    String? tooltip,
-    VoidCallback? onPressed,
-    bool outlined = true,
-  }) {
-    return DevToolsButton(
-      icon: icon,
-      outlined: outlined,
-      tooltip: tooltip,
-      onPressed: onPressed,
-    );
-  }
-
-  final IconData? icon;
-
-  final String? label;
-
-  final String? tooltip;
-
-  final Color? color;
-
-  final VoidCallback? onPressed;
-
-  final double? minScreenWidthForTextBeforeScaling;
-
-  /// Whether this icon label button should use an elevated button style.
-  final bool elevated;
-
-  /// Whether this icon label button should use an outlined button style.
-  final bool outlined;
-
-  final EdgeInsetsGeometry? tooltipPadding;
-
-  @override
-  Widget build(BuildContext context) {
-    var tooltip = this.tooltip;
-
-    if (label == null) {
-      return SizedBox(
-        // This is required to force the button size.
-        height: defaultButtonHeight,
-        width: defaultButtonHeight,
-        child: maybeWrapWithTooltip(
-          tooltip: tooltip,
-          tooltipPadding: tooltipPadding,
-          child: outlined
-              ? IconButton.outlined(
-                  onPressed: onPressed,
-                  iconSize: defaultIconSize,
-                  icon: Icon(icon),
-                )
-              : IconButton(
-                  onPressed: onPressed,
-                  iconSize: defaultIconSize,
-                  icon: Icon(icon),
-                ),
-        ),
-      );
-    }
-    final colorScheme = Theme.of(context).colorScheme;
-    var textColor = color;
-    if (textColor == null && elevated) {
-      textColor =
-          onPressed == null ? colorScheme.onSurface : colorScheme.onPrimary;
-    }
-    final iconLabel = MaterialIconLabel(
-      label: label!,
-      iconData: icon,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
-      color: textColor,
-    );
-
-    // If we hid the label due to a small screen width and the button does not
-    // have a tooltip, use the label as a tooltip.
-    final labelHidden =
-        !isScreenWiderThan(context, minScreenWidthForTextBeforeScaling);
-    if (labelHidden && tooltip == null) {
-      tooltip = label;
-    }
-
-    if (elevated) {
-      return SizedBox(
-        // This is required to force the button size.
-        height: defaultButtonHeight,
-        child: maybeWrapWithTooltip(
-          tooltip: tooltip,
-          tooltipPadding: tooltipPadding,
-          child: ElevatedButton(
-            onPressed: onPressed,
-            child: iconLabel,
-          ),
-        ),
-      );
-    }
-    // TODO(kenz): this SizedBox wrapper should be unnecessary once
-    // https://github.com/flutter/flutter/issues/79894 is fixed.
-    return maybeWrapWithTooltip(
-      tooltip: tooltip,
-      tooltipPadding: tooltipPadding,
-      child: SizedBox(
-        height: defaultButtonHeight,
-        width: !isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)
-            ? buttonMinWidth
-            : null,
-        child: outlined
-            ? OutlinedButton(
-                style: denseAwareOutlinedButtonStyle(
-                  context,
-                  minScreenWidthForTextBeforeScaling,
-                ),
-                onPressed: onPressed,
-                child: iconLabel,
-              )
-            : TextButton(
-                onPressed: onPressed,
-                style: denseAwareTextButtonStyle(
-                  context,
-                  minScreenWidthForTextBeforeScaling:
-                      minScreenWidthForTextBeforeScaling,
-                ),
-                child: iconLabel,
-              ),
-      ),
-    );
-  }
-}
 
 /// A widget, commonly used for icon buttons, that provides a tooltip with a
 /// common delay before the tooltip is shown.
@@ -922,4 +773,26 @@ class Link {
 
   final String display;
   final String url;
+}
+
+class RoundedCornerOptions {
+  const RoundedCornerOptions({
+    this.showTopLeft = true,
+    this.showTopRight = true,
+    this.showBottomLeft = true,
+    this.showBottomRight = true,
+  });
+
+  /// Static constant instance with all borders hidden
+  static const empty = RoundedCornerOptions(
+    showTopLeft: false,
+    showTopRight: false,
+    showBottomLeft: false,
+    showBottomRight: false,
+  );
+
+  final bool showTopLeft;
+  final bool showTopRight;
+  final bool showBottomLeft;
+  final bool showBottomRight;
 }
