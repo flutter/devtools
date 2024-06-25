@@ -121,7 +121,7 @@ class AndroidDomainError extends DomainError {
 
 class IosDomainError extends DomainError {
   const IosDomainError(super.title, super.explanation, super.fixDetails);
-  // TODO: Finalize strings for these domain errors.
+  // TODO(hangyujin): Finalize strings for these domain errors.
 
   /// Existence of an Apple-App-Site-Association file.
   static const existence = IosDomainError(
