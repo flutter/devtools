@@ -110,11 +110,6 @@ class SidebarDevToolsScreens extends StatelessWidget {
                 },
           children: generateRows(singleColumn),
         ),
-        const SizedBox(height: denseSpacing),
-        SidebarDevToolsExtensions(
-          editor: editor,
-          debugSessions: debugSessions,
-        ),
       ],
     );
   }
