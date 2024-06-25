@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import '../../../service/service_extension_widgets.dart';
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
+import '../../../shared/globals.dart';
 import 'logging_model.dart';
 import 'logging_table_row.dart';
 
@@ -114,9 +115,10 @@ class _LoggingTableProgress extends StatefulWidget {
 }
 
 class _LoggingTableProgressState extends State<_LoggingTableProgress> {
-  final _progressStopwatch = Stopwatch();
   static const _millisecondsUntilCacheProgressShows = 500;
   static const _millisecondsUntilCacheProgressHelperShows = 2000;
+
+  final _progressStopwatch = Stopwatch();
 
   @override
   Widget build(BuildContext context) {
@@ -226,8 +228,23 @@ class _LoggingTableRowsState extends State<_LoggingTableRows>
   }
 }
 
-class LoggingSettingsDialogV2 extends StatelessWidget {
+class LoggingSettingsDialogV2 extends StatefulWidget {
   const LoggingSettingsDialogV2({super.key});
+
+  @override
+  State<LoggingSettingsDialogV2> createState() =>
+      _LoggingSettingsDialogV2State();
+}
+
+class _LoggingSettingsDialogV2State extends State<LoggingSettingsDialogV2> {
+  late final ValueNotifier<int> newRetentionLimit;
+
+  @override
+  void initState() {
+    super.initState();
+    newRetentionLimit =
+        ValueNotifier<int>(preferences.logging.retentionLimit.value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -243,75 +260,22 @@ class LoggingSettingsDialogV2 extends StatelessWidget {
             'General',
           ),
           const StructuredErrorsToggle(),
+          const SizedBox(height: defaultSpacing),
+          PositiveIntegerSetting(
+            title: preferences.logging.retentionLimitTitle,
+            subTitle: 'Used to limit the number of log messages retained.',
+            notifier: newRetentionLimit,
+          ),
         ],
       ),
-      actions: const [
-        DialogCloseButton(),
+      actions: [
+        DialogApplyButton(
+          onPressed: () {
+            preferences.logging.retentionLimit.value = newRetentionLimit.value;
+          },
+        ),
+        const DialogCloseButton(),
       ],
-    );
-  }
-}
-
-/// Shows and hides the context menu based on user gestures.
-///
-/// By default, shows the menu on right clicks and long presses.
-class _ContextMenuRegion extends StatefulWidget {
-  /// Creates an instance of [_ContextMenuRegion].
-  const _ContextMenuRegion({
-    required this.child,
-    required this.contextMenuBuilder,
-  });
-
-  /// Builds the context menu.
-  final ContextMenuBuilder contextMenuBuilder;
-
-  /// The child widget that will be listened to for gestures.
-  final Widget child;
-
-  @override
-  State<_ContextMenuRegion> createState() => _ContextMenuRegionState();
-}
-
-class _ContextMenuRegionState extends State<_ContextMenuRegion> {
-  final _contextMenuController = ContextMenuController();
-
-  void _onSecondaryTapUp(TapUpDetails details) {
-    _show(details.globalPosition);
-  }
-
-  void _onTap() {
-    if (!_contextMenuController.isShown) {
-      return;
-    }
-    _hide();
-  }
-
-  void _show(Offset position) {
-    _contextMenuController.show(
-      context: context,
-      contextMenuBuilder: (BuildContext context) {
-        return widget.contextMenuBuilder(context, position);
-      },
-    );
-  }
-
-  void _hide() {
-    _contextMenuController.remove();
-  }
-
-  @override
-  void dispose() {
-    _hide();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onSecondaryTapUp: _onSecondaryTapUp,
-      onTap: _onTap,
-      child: widget.child,
     );
   }
 }
