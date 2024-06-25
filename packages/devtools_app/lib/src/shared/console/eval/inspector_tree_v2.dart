@@ -39,9 +39,13 @@ class InspectorTreeNode {
   InspectorTreeNode({
     InspectorTreeNode? parent,
     bool expandChildren = true,
+    this.whenDirty,
   })  : _children = <InspectorTreeNode>[],
         _parent = parent,
         _isExpanded = expandChildren;
+
+  
+  void Function(InspectorTreeNode node)? whenDirty;
 
   bool get showLinesToChildren {
     return _children.length > 1 && !_children.last.isProperty;
@@ -56,6 +60,9 @@ class InspectorTreeNode {
       _shouldShow = null;
       if (parent != null) {
         parent!.isDirty = true;
+      }
+      if (whenDirty != null) {
+        whenDirty!(this);
       }
     } else {
       _isDirty = false;
@@ -119,6 +126,8 @@ class InspectorTreeNode {
     _parent = value;
     _parent?.isDirty = true;
   }
+
+  InspectorTreeNode? lastLeaf;
 
   RemoteDiagnosticsNode? get diagnostic => _diagnostic;
 
