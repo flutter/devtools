@@ -127,8 +127,6 @@ class InspectorTreeNode {
     _parent?.isDirty = true;
   }
 
-  InspectorTreeNode? lastLeaf;
-
   RemoteDiagnosticsNode? get diagnostic => _diagnostic;
 
   set diagnostic(RemoteDiagnosticsNode? v) {

@@ -297,7 +297,6 @@ class InspectorTreeController extends DisposableController
     }
 
     _hover = node;
-    // TODO(jacobr): we could choose to repaint only a portion of the UI
   }
 
   void navigateUp() {
