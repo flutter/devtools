@@ -9,10 +9,10 @@ import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
-import '../../extensions/extension_service.dart';
-import '../../extensions/extension_service_helpers.dart';
-import '../../service/editor/api_classes.dart';
-import '../../shared/globals.dart';
+import '../../../extensions/extension_service.dart';
+import '../../../extensions/extension_service_helpers.dart';
+import '../../../service/editor/api_classes.dart';
+import '../../../shared/globals.dart';
 
 final _devToolsExtensionsLog = Logger('Flutter Sidebar - DevTools Extensions');
 
