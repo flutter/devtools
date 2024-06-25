@@ -247,11 +247,9 @@ extension on EditorDebugSession {
 
     // Ensure the returned URI ends with a trailing slash to match the format of
     // the project root URIs returned by DTD.
-    final endsWithSlash =
-        isWindows ? rootPath.endsWith(r'\') : rootPath.endsWith('/');
-    if (!endsWithSlash) {
-      rootPath = '$rootPath${isWindows ? r'\' : '/'}';
-    }
+    final slash = isWindows ? r'\' : '/';
+    if (!rootPath.endsWith(slash)) rootPath = '$rootPath$slash';
+
     final fileUri = Uri.file(rootPath, windows: isWindows);
     assert(fileUri.isScheme('file'));
     return fileUri;
