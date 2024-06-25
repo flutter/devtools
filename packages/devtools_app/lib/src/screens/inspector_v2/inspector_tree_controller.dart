@@ -210,8 +210,7 @@ class InspectorTreeController extends DisposableController
 
   /// All the rows that should be displayed in the tree.
   ///
-  /// The rows are updated by [_handleDirtyNode] whenever an [InspectorTreeNode]
-  /// is marked as dirty.
+  /// The rows can be updated with a call to [_updateRows].
   ValueListenable<List<InspectorTreeRow?>> get rowsInTree => _rowsInTree;
   final _rowsInTree = ListValueNotifier<InspectorTreeRow?>([]);
 
@@ -224,7 +223,8 @@ class InspectorTreeController extends DisposableController
   /// with the new values.
   ///
   /// TODO(elliette): Consider only updating an [InspectorTreeNode]'s branch
-  /// when it is marked as dirty, instead of the entire tree.
+  /// when it is marked as dirty, instead of the entire tree. See:
+  /// https://github.com/flutter/devtools/issues/7980
   void _updateRows({
     InspectorTreeNode? node,
     bool updateSearchableRows = false,
