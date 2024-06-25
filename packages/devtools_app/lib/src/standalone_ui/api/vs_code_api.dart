@@ -55,10 +55,23 @@ abstract interface class VsCodeApi {
   ///
   /// Depending on user settings, this may open embedded (the default) or in an
   /// external browser window.
+  ///
+  /// If [debugSessionId] is `null` the [requiresDebugSession] flag will
+  /// indicate whether the editor must select (or ask the user) for a debug
+  /// session. If [requiresDebugSession] is `false` but [prefersDebugSession] is
+  /// `true`, then the editor should use or prompt for a debug session if one
+  /// is available, but otherwise launch without a debug session.
+  ///
+  /// If [requiresDebugSession] is `null` (or if the
+  /// `openDevToolsWithOptionalDebugSessionFlags` capability is `false`) then
+  /// the editor will try to make this decision automatically (which may be
+  /// inaccurate for pages it does not know about, like extensions).
   Future<void> openDevToolsPage(
     String? debugSessionId, {
     String? page,
     bool? forceExternal,
+    bool? requiresDebugSession,
+    bool? prefersDebugSession,
   });
 
   /// Sends a Hot Reload request to the debug session with ID [debugSessionId].
@@ -87,6 +100,8 @@ abstract interface class VsCodeApi {
   static const jsonForceExternalParameter = 'forceExternal';
   static const jsonDebugSessionIdParameter = 'debugSessionId';
   static const jsonPlatformTypeParameter = 'platformType';
+  static const jsonRequiresDebugSessionParameter = 'requiresDebugSession';
+  static const jsonPrefersDebugSessionParameter = 'prefersDebugSession';
 }
 
 /// This class defines a device event sent by the Dart/Flutter extensions in VS
@@ -153,6 +168,12 @@ abstract interface class VsCodeCapabilities {
   /// regardless of user settings.
   bool get openDevToolsExternally;
 
+  /// Whether the `openDevToolsPage` method can be called with the
+  /// `requiresDebugSession` and `prefersDebugSession` flags to indicate
+  /// whether the editor should select/prompt for a debug session if one was not
+  /// provided.
+  bool get openDevToolsWithOptionalDebugSessionFlags;
+
   /// Whether the `hotReload` method is available call to hot reload a specific
   /// debug session.
   bool get hotReload;
@@ -164,6 +185,8 @@ abstract interface class VsCodeCapabilities {
   static const jsonSelectDeviceField = 'selectDevice';
   static const openDevToolsPageField = 'openDevToolsPage';
   static const openDevToolsExternallyField = 'openDevToolsExternally';
+  static const openDevToolsWithOptionalDebugSessionFlagsField =
+      'openDevToolsWithOptionalDebugSessionFlags';
   static const hotReloadField = 'hotReload';
   static const hotRestartField = 'hotRestart';
 }

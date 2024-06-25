@@ -1,7 +1,7 @@
 # Dart & Flutter DevTools Extensions
 
 Extend Dart & Flutter's developer tool suite,
-[Dart DevTools](https://docs.flutter.dev/tools/devtools/overview), with your own custom tool.
+[Dart DevTools](https://docs.flutter.dev/tools/devtools), with your own custom tool.
 DevTools' extension framework allows you to build tools that can leverage existing frameworks
 and utilities from DevTools (VM service connection, theming, shared widgets, utilities, etc.).
 

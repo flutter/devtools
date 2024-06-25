@@ -148,7 +148,7 @@ Find unexpected memory usage by comparing two heap snapshots:
 
 \v
 
-1. Understand [Dart memory concepts](https://docs.flutter.dev/development/tools/devtools/memory#basic-memory-concepts).
+1. Understand [Dart memory concepts](https://docs.flutter.dev/tools/devtools/memory#basic-memory-concepts).
 
 \v
 

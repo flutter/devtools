@@ -42,6 +42,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.multiline = false,
     this.style,
     this.nodeDescriptionHighlightStyle,
+    this.emphasizeNodesFromLocalProject = false,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -51,6 +52,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final bool multiline;
   final TextStyle? style;
   final TextStyle? nodeDescriptionHighlightStyle;
+  // TODO(https://github.com/flutter/devtools/issues/7860): Remove and default
+  // to true when turning on inspector V2. This is currently true for the V2
+  // inspector and false for the legacy inspector.
+  final bool emphasizeNodesFromLocalProject;
 
   static Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -264,7 +269,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         colorScheme,
       ),
     );
-    var descriptionTextStyle = textStyle;
     // TODO(jacobr): use TextSpans and SelectableText instead of Text.
     if (diagnosticLocal.isProperty) {
       // Display of inline properties.
@@ -280,8 +284,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         );
         // provide some contrast between the name and description if both are
         // present.
-        descriptionTextStyle =
-            descriptionTextStyle.merge(theme.subtleTextStyle);
+        textStyle = textStyle.merge(theme.subtleTextStyle);
       }
 
       if (diagnosticLocal.isCreatedByLocalProject) {
@@ -332,7 +335,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         Flexible(
           child: buildDescription(
             description: description,
-            textStyle: descriptionTextStyle,
+            textStyle: textStyle,
             colorScheme: colorScheme,
             diagnostic: diagnostic,
             searchValue: searchValue,
@@ -382,14 +385,25 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
       }
 
-      if (!diagnosticLocal.isSummaryTree &&
+      // TODO(https://github.com/flutter/devtools/issues/7860): Remove this
+      // if-block once the widget details tree is gone. This bolding is only
+      // used there.
+      if (!emphasizeNodesFromLocalProject &&
+          !diagnosticLocal.isSummaryTree &&
           diagnosticLocal.isCreatedByLocalProject) {
         textStyle = textStyle.merge(DiagnosticsTextStyles.regularBold);
       }
 
+      // Grey out nodes that were not created by the local project to emphasize
+      // those that were:
+      if (emphasizeNodesFromLocalProject &&
+          !diagnosticLocal.isCreatedByLocalProject) {
+        textStyle = textStyle.merge(theme.subtleTextStyle);
+      }
+
       var diagnosticDescription = buildDescription(
         description: diagnosticLocal.description ?? '',
-        textStyle: descriptionTextStyle,
+        textStyle: textStyle,
         colorScheme: colorScheme,
         diagnostic: diagnostic,
         searchValue: searchValue,

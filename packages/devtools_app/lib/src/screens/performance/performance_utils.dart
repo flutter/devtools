@@ -6,7 +6,7 @@ import '../../shared/globals.dart';
 
 const preCompileShadersDocsUrl = 'https://docs.flutter.dev/perf/shader';
 
-const impellerDocsUrl = 'https://docs.flutter.dev/perf/impeller';
+const impellerDocsUrl = 'https://flutter.dev/to/impeller';
 
 void pushNoTimelineEventsAvailableWarning() {
   notificationService.push(

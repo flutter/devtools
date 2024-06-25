@@ -2,7 +2,7 @@
 
 ## Set up ChromeDriver (one time only)
 
-1. Follow the instructions [here](https://docs.flutter.dev/cookbook/testing/integration/introduction#5b-web) to download ChromeDriver.
+1. Follow the instructions [here](https://flutter.dev/to/integration-test-on-web) to download ChromeDriver.
 
 2. Add `chromedriver` to your PATH by modifying your `.bash_profile` or `.zshrc`:
 

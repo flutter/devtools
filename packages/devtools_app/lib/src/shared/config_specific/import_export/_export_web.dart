@@ -32,10 +32,10 @@ class ExportControllerWeb extends ExportController {
       throw 'Unsupported content type: $T';
     }
 
-    element.setAttribute('href', URL.createObjectURL(blob as JSObject));
+    element.setAttribute('href', URL.createObjectURL(blob));
     element.setAttribute('download', fileName);
     element.style.display = 'none';
-    (document.body as HTMLBodyElement).append(element as JSAny);
+    (document.body as HTMLBodyElement).append(element);
     element.click();
     element.remove();
   }

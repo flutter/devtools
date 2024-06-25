@@ -45,6 +45,8 @@ abstract class EditorClient {
     String? debugSessionId, {
     String? page,
     bool? forceExternal,
+    bool? requiresDebugSession,
+    bool? prefersDebugSession,
   });
 
   /// Requests the editor enables a new platform (for example by running

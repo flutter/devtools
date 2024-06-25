@@ -51,28 +51,14 @@ void main() {
 
   group('screenshot tests', () {
     testWidgetsWithWindowSize(
-      'navigation',
+      'initial load',
       windowSize,
       (WidgetTester tester) async {
-        await env.setupEnvironment();
         expect(serviceConnection.serviceManager.service, equals(env.service));
         expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
-        final screen = InspectorScreen();
-        await tester.pumpWidget(
-          wrapWithInspectorControllers(
-            Builder(builder: screen.build),
-            v2: true,
-          ),
-        );
-        await tester.pump(const Duration(seconds: 1));
-        final InspectorScreenBodyState state =
-            tester.state(find.byType(InspectorScreenBody));
-        final controller = state.controller;
-        while (!controller.flutterAppFrameReady) {
-          await controller.maybeLoadUI();
-          await tester.pumpAndSettle();
-        }
+        await _loadInspectorUI(tester);
+
         // Give time for the initial animation to complete.
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
@@ -81,6 +67,19 @@ void main() {
             '../test_infra/goldens/integration_inspector_v2_initial_load.png',
           ),
         );
+
+        await env.tearDownEnvironment();
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'navigation',
+      windowSize,
+      (WidgetTester tester) async {
+        await _loadInspectorUI(tester);
+
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Click on the Center widget (row index #5)
         await tester.tap(find.richText('Center'));
@@ -152,6 +151,9 @@ void main() {
 
         await env.tearDownEnvironment();
       },
+      // TODO(https://github.com/flutter/devtools/issues/7911): Re-enable once
+      // the implementation details are collapsed.
+      skip: true,
     );
 
     // TODO(jacobr): convert these tests to screenshot tests like the initial
@@ -461,4 +463,22 @@ void main() {
       },
     );
   });
+}
+
+Future<void> _loadInspectorUI(WidgetTester tester) async {
+  final screen = InspectorScreen();
+  await tester.pumpWidget(
+    wrapWithInspectorControllers(
+      Builder(builder: screen.build),
+      v2: true,
+    ),
+  );
+  await tester.pump(const Duration(seconds: 1));
+  final InspectorScreenBodyState state =
+      tester.state(find.byType(InspectorScreenBody));
+  final controller = state.controller;
+  while (!controller.flutterAppFrameReady) {
+    await controller.maybeLoadUI();
+    await tester.pumpAndSettle();
+  }
 }

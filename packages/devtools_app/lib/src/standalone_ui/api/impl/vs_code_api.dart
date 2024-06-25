@@ -94,6 +94,8 @@ final class VsCodeApiImpl implements VsCodeApi {
     String? debugSessionId, {
     String? page,
     bool? forceExternal,
+    bool? requiresDebugSession,
+    bool? prefersDebugSession,
   }) {
     return sendRequest(
       VsCodeApi.jsonOpenDevToolsPageMethod,
@@ -101,6 +103,8 @@ final class VsCodeApiImpl implements VsCodeApi {
         VsCodeApi.jsonDebugSessionIdParameter: debugSessionId,
         VsCodeApi.jsonPageParameter: page,
         VsCodeApi.jsonForceExternalParameter: forceExternal,
+        VsCodeApi.jsonRequiresDebugSessionParameter: requiresDebugSession,
+        VsCodeApi.jsonPrefersDebugSessionParameter: prefersDebugSession,
       },
     );
   }
@@ -211,6 +215,12 @@ class VsCodeCapabilitiesImpl implements VsCodeCapabilities {
   @override
   bool get openDevToolsExternally =>
       _raw?[VsCodeCapabilities.openDevToolsExternallyField] == true;
+
+  @override
+  bool get openDevToolsWithOptionalDebugSessionFlags =>
+      _raw?[
+          VsCodeCapabilities.openDevToolsWithOptionalDebugSessionFlagsField] ==
+      true;
 
   @override
   bool get hotReload => _raw?[VsCodeCapabilities.hotReloadField] == true;

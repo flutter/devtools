@@ -38,6 +38,8 @@ abstract class EditorServer {
     String debugSessionId,
     String? page,
     bool forceExternal,
+    bool requiresDebugSession,
+    bool prefersDebugSession,
   ) {}
 
   /// Overridden by subclasses to provide an implementation of the

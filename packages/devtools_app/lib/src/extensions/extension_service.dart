@@ -4,13 +4,13 @@
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/server/server.dart' as server;
+import 'extension_service_helpers.dart';
 
 final _log = Logger('ExtensionService');
 
@@ -221,7 +221,7 @@ class ExtensionService extends DisposableController
           'ignoring static extension ${ext.identifier} at '
           '${ext.devtoolsOptionsUri} because it requires a connected app.',
         );
-        setExtensionIgnored(ext);
+        setExtensionIgnored(ext, ignore: true);
       }
     }
   }
@@ -229,39 +229,12 @@ class ExtensionService extends DisposableController
   /// De-duplicates static extensions from other static extensions by ignoring
   /// all that are not the latest version when there are duplicates.
   void _deduplicateStaticExtensions() {
-    final deduped = <String>{};
-    for (final staticExtension in staticExtensions) {
-      if (deduped.contains(staticExtension.name)) continue;
-      deduped.add(staticExtension.name);
-
-      // This includes [staticExtension] itself.
-      final matchingExtensions =
-          staticExtensions.where((e) => e.name == staticExtension.name);
-      if (matchingExtensions.length > 1) {
-        _log.fine(
-          'detected duplicate static extensions for ${staticExtension.name}',
-        );
-
-        // Ignore all matching extensions and then mark the [latest] as
-        // unignored after the loop is finished.
-        var latest = staticExtension;
-        for (final ext in matchingExtensions) {
-          setExtensionIgnored(ext);
-          latest = takeLatestExtension(latest, ext);
-        }
-        setExtensionIgnored(latest, ignore: false);
-
-        _log.fine(
-          'ignored ${matchingExtensions.length - 1} duplicate static '
-          '${pluralize('extension', matchingExtensions.length - 1)} in favor of '
-          '${latest.identifier} at ${latest.devtoolsOptionsUri}',
-        );
-      } else {
-        _log.fine(
-          'no duplicates found for static extension ${staticExtension.name}',
-        );
-      }
-    }
+    deduplicateExtensionsAndTakeLatest(
+      staticExtensions,
+      onSetIgnored: setExtensionIgnored,
+      logger: _log,
+      extensionType: 'static',
+    );
   }
 
   // De-duplicates unignored static extensions from runtime extensions by
@@ -282,7 +255,7 @@ class ExtensionService extends DisposableController
           'at ${staticExtension.devtoolsOptionsUri} in favor of a matching '
           'runtime extension.',
         );
-        setExtensionIgnored(staticExtension);
+        setExtensionIgnored(staticExtension, ignore: true);
       }
     }
   }
@@ -357,7 +330,10 @@ class ExtensionService extends DisposableController
   /// An extension may be ignored if it is a duplicate or if it is an older
   /// version of an existing extension, for example.
   @visibleForTesting
-  void setExtensionIgnored(DevToolsExtensionConfig ext, {bool ignore = true}) {
+  void setExtensionIgnored(
+    DevToolsExtensionConfig ext, {
+    required bool ignore,
+  }) {
     ignore
         ? _ignoredStaticExtensionsByHashCode.add(identityHashCode(ext))
         : _ignoredStaticExtensionsByHashCode.remove(identityHashCode(ext));
@@ -394,39 +370,4 @@ class ExtensionService extends DisposableController
     _refreshInProgress.dispose();
     super.dispose();
   }
-}
-
-/// Compares the versions of extension configurations [a] and [b] and returns
-/// the extension configuration with the latest version, following semantic
-/// versioning rules.
-@visibleForTesting
-DevToolsExtensionConfig takeLatestExtension(
-  DevToolsExtensionConfig a,
-  DevToolsExtensionConfig b,
-) {
-  bool exceptionParsingA = false;
-  bool exceptionParsingB = false;
-  SemanticVersion? versionA;
-  SemanticVersion? versionB;
-  try {
-    versionA = SemanticVersion.parse(a.version);
-  } catch (_) {
-    exceptionParsingA = true;
-  }
-
-  try {
-    versionB = SemanticVersion.parse(b.version);
-  } catch (_) {
-    exceptionParsingB = true;
-  }
-
-  if (exceptionParsingA || exceptionParsingB) {
-    if (exceptionParsingA) {
-      return b;
-    }
-    return a;
-  }
-
-  final versionCompare = versionA!.compareTo(versionB!);
-  return versionCompare >= 0 ? a : b;
 }

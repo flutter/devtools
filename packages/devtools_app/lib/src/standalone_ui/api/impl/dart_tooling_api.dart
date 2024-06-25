@@ -211,11 +211,15 @@ class PostMessageEditorClient implements EditorClient {
     String? debugSessionId, {
     String? page,
     bool? forceExternal,
+    bool? requiresDebugSession,
+    bool? prefersDebugSession,
   }) async {
     await _api.openDevToolsPage(
       debugSessionId,
       page: page,
       forceExternal: forceExternal,
+      requiresDebugSession: requiresDebugSession,
+      prefersDebugSession: prefersDebugSession,
     );
   }
 
