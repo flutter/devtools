@@ -141,7 +141,7 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel>
           ],
           DevToolsSidebarOptions(
             editor: widget.editor,
-            hasDebugSessions: debugSessions.isNotEmpty,
+            debugSessions: debugSessions,
           ),
         ],
       ),
