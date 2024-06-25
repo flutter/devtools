@@ -8,7 +8,7 @@ import 'common.dart';
 import 'theme/theme.dart';
 
 /// A DevTools-styled text field with a suffix action to clear the search field.
-class DevToolsClearableTextField extends StatelessWidget {
+final class DevToolsClearableTextField extends StatelessWidget {
   DevToolsClearableTextField({
     super.key,
     required this.labelText,
@@ -98,7 +98,7 @@ class DevToolsClearableTextField extends StatelessWidget {
 
 /// A DevTools-styled icon action button intended to be used as an
 /// [InputDecoration.suffix] widget.
-class InputDecorationSuffixButton extends StatelessWidget {
+final class InputDecorationSuffixButton extends StatelessWidget {
   const InputDecorationSuffixButton({
     super.key,
     required this.icon,
