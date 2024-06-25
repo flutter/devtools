@@ -2278,12 +2278,19 @@ class PositiveIntegerSetting extends StatefulWidget {
   State<PositiveIntegerSetting> createState() => _PositiveIntegerSettingState();
 }
 
-class _PositiveIntegerSettingState extends State<PositiveIntegerSetting> {
+class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
+    with AutoDisposeMixin {
   late final TextEditingController _textEditingController;
 
   @override
   void initState() {
     super.initState();
+
+    addAutoDisposeListener(
+      widget.notifier,
+      () => _textEditingController.text = widget.notifier.value.toString(),
+    );
+
     _textEditingController = TextEditingController()
       ..text = widget.notifier.value.toString();
   }
