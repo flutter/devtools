@@ -14,7 +14,7 @@ import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/screen.dart';
-import 'extensions.dart';
+import 'devtools_extensions.dart';
 import 'shared.dart';
 
 /// A widget that displays DevTools options, including buttons to open static

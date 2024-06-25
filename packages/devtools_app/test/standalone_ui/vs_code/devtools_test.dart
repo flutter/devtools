@@ -5,7 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/editor/api_classes.dart';
 import 'package:devtools_app/src/shared/development_helpers.dart';
-import 'package:devtools_app/src/standalone_ui/vs_code/devtools/devtools.dart';
+import 'package:devtools_app/src/standalone_ui/vs_code/devtools/devtools_view.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
