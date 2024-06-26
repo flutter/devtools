@@ -464,10 +464,11 @@ class DeepLinksController extends DisposableController
       androidDomainErrors = androidResult.domainErrors;
       googlePlayFingerprintsAvailability.value =
           androidResult.googlePlayFingerprintsAvailability;
-      if (FeatureFlags.deepLinkIosCheck)
+      if (FeatureFlags.deepLinkIosCheck) {
         iosDomainErrors = await deepLinksServices.validateIosDomain(
           domains: domains,
         );
+      }
     } catch (_) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.validationErrorPage;
