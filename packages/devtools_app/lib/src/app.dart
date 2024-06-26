@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
 import 'extensions/extension_screen.dart';
+import 'framework/disconnected_overlay.dart';
 import 'framework/framework_core.dart';
 import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
@@ -198,7 +199,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   ) {
     // `page` will initially be null while the router is set up, then we will
     // be called again with an empty string for the root.
-    if (FrameworkCore.initializationInProgress || page == null) {
+    if (FrameworkCore.vmServiceInitializationInProgress || page == null) {
       return const MaterialPage(child: CenteredCircularProgressIndicator());
     }
 
@@ -355,11 +356,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     }
 
     return connectedToVmService
-        ? Initializer(
-            url: vmServiceUri,
-            allowConnectionScreenOnDisconnect: !embedMode.embedded,
-            builder: (_) => scaffoldBuilder(),
-          )
+        ? Initializer(builder: (_) => scaffoldBuilder())
         : scaffoldBuilder();
   }
 
@@ -433,6 +430,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       builder: (context, child) {
+        if (child == null) {
+          return const CenteredMessage(
+            'Uh-oh, something went wrong. Please refresh the page.',
+          );
+        }
         return MultiProvider(
           providers: [
             Provider<AnalyticsController>.value(
@@ -448,7 +450,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           child: NotificationsView(
             child: ReleaseNotesViewer(
               controller: releaseNotesController,
-              child: child,
+              child: DisconnectManager(
+                routerDelegate: routerDelegate,
+                child: child,
+              ),
             ),
           ),
         );

@@ -308,7 +308,7 @@ class DeepLinksController extends DisposableController
   }
 
   Future<String?> packageDirectoryForMainIsolate() async {
-    if (!serviceConnection.serviceManager.hasConnection) {
+    if (!serviceConnection.serviceManager.connectedState.value.connected) {
       return null;
     }
     final packageUriString = await serviceConnection.serviceManager

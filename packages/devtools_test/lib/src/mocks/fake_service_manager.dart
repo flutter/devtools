@@ -33,7 +33,6 @@ class FakeServiceConnectionManager extends Fake
   }) {
     _serviceManager = FakeServiceManager(
       service: service,
-      hasConnection: hasConnection,
       connectedAppInitialized: connectedAppInitialized,
       availableLibraries: availableLibraries,
       availableServices: availableServices,
@@ -96,7 +95,6 @@ class FakeServiceManager extends Fake
     implements ServiceManager<VmServiceWrapper> {
   FakeServiceManager({
     VmServiceWrapper? service,
-    this.hasConnection = true,
     this.connectedAppInitialized = true,
     this.availableServices = const [],
     this.availableLibraries = const [],
@@ -173,10 +171,7 @@ class FakeServiceManager extends Fake
   Future<VmService> onServiceAvailable = Future.value(MockVmService());
 
   @override
-  bool get isServiceAvailable => hasConnection;
-
-  @override
-  bool hasConnection;
+  bool get isServiceAvailable => connectedState.value.connected;
 
   @override
   bool connectedAppInitialized;
@@ -241,7 +236,7 @@ class FakeServiceManager extends Fake
 
   @override
   Future<void> manuallyDisconnect() async {
-    changeState(false, manual: true);
+    setConnectedState(false, manual: true);
   }
 
   @override
@@ -250,8 +245,7 @@ class FakeServiceManager extends Fake
   final _connectedState =
       ValueNotifier<ConnectedState>(const ConnectedState(false));
 
-  void changeState(bool value, {bool manual = false}) {
-    hasConnection = value;
+  void setConnectedState(bool value, {bool manual = false}) {
     _connectedState.value =
         ConnectedState(value, userInitiatedConnectionState: manual);
   }

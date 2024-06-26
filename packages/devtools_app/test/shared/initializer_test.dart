@@ -33,7 +33,6 @@ void main() {
       await tester.pumpWidget(
         wrap(
           Initializer(
-            url: null,
             builder: (_) => const SizedBox(key: initializedKey),
           ),
         ),
@@ -62,13 +61,13 @@ void main() {
         setGlobal(ServiceConnectionManager, serviceConnection);
 
         // Expect standard connected state.
-        serviceConnection.serviceManager.changeState(true);
+        serviceConnection.serviceManager.setConnectedState(true);
         await pumpInitializer(tester);
         expect(find.byKey(initializedKey), findsOneWidget);
         expect(find.text('Disconnected'), findsNothing);
 
         // Trigger a disconnect.
-        serviceConnection.serviceManager.changeState(false);
+        serviceConnection.serviceManager.setConnectedState(false);
         await tester.pumpAndSettle(const Duration(microseconds: 1000));
 
         // Expect Disconnected overlay.
@@ -83,18 +82,18 @@ void main() {
         setGlobal(ServiceConnectionManager, serviceConnection);
 
         // Expect standard connected state.
-        serviceConnection.serviceManager.changeState(true);
+        serviceConnection.serviceManager.setConnectedState(true);
         await pumpInitializer(tester);
         expect(find.byKey(initializedKey), findsOneWidget);
         expect(find.text('Disconnected'), findsNothing);
 
         // Trigger a disconnect and ensure the overlay appears.
-        serviceConnection.serviceManager.changeState(false);
+        serviceConnection.serviceManager.setConnectedState(false);
         await tester.pumpAndSettle();
         expect(find.text('Disconnected'), findsOneWidget);
 
         // Trigger a reconnect
-        serviceConnection.serviceManager.changeState(true);
+        serviceConnection.serviceManager.setConnectedState(true);
         await tester.pumpAndSettle();
 
         // Expect no overlay.
