@@ -6,7 +6,7 @@ import 'dart:math' as math;
 
 import 'compare.dart';
 
-class SemanticVersion with CompareMixin {
+class SemanticVersion with CompareMixin<SemanticVersion> {
   SemanticVersion({
     this.major = 0,
     this.minor = 0,
@@ -117,12 +117,11 @@ class SemanticVersion with CompareMixin {
 
   bool get isPreRelease => preReleaseMajor != null || preReleaseMinor != null;
 
-  bool isSupported({required SemanticVersion supportedVersion}) =>
-      compareTo(supportedVersion) >= 0;
+  bool isSupported({required SemanticVersion minSupportedVersion}) =>
+      compareTo(minSupportedVersion) >= 0;
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  int compareTo(other) {
+  int compareTo(SemanticVersion other) {
     if (major == other.major &&
         minor == other.minor &&
         patch == other.patch &&
@@ -139,7 +138,7 @@ class SemanticVersion with CompareMixin {
       if (isPreRelease != other.isPreRelease) {
         return isPreRelease ? -1 : 1;
       }
-      if (preReleaseMajor! > other.preReleaseMajor ||
+      if (preReleaseMajor! > other.preReleaseMajor! ||
           (preReleaseMajor == other.preReleaseMajor &&
               (preReleaseMinor ?? 0) > (other.preReleaseMinor ?? 0))) {
         return 1;

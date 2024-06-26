@@ -6,37 +6,38 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_hints.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_time_visualizer.dart';
-import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats_model.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_infra/matchers/matchers.dart';
-import '../../test_infra/test_data/performance.dart';
+import '../../test_infra/test_data/performance/sample_performance_data.dart';
+
+// TODO(https://github.com/flutter/devtools/issues/4564): add tests here for
+// widget rebuild counts in the Frame Analysis view.
 
 void main() {
   const windowSize = Size(1500.0, 500.0);
 
   group('FlutterFrameAnalysisView', () {
     late FlutterFrame frame;
-    late FrameAnalysis frameAnalysis;
     late MockEnhanceTracingController mockEnhanceTracingController;
     late RebuildCountModel rebuildCountModel;
 
     setUp(() {
-      frame = testFrame0.shallowCopy()
-        ..setEventFlow(goldenUiTimelineEvent)
-        ..setEventFlow(goldenRasterTimelineEvent);
-      frameAnalysis = FrameAnalysis(frame);
+      frame = FlutterFrame4.frameWithExtras;
       mockEnhanceTracingController = MockEnhanceTracingController();
       rebuildCountModel = RebuildCountModel();
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(OfflineModeController, OfflineModeController());
-      final fakeServiceManager = FakeServiceManager();
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(OfflineDataController, OfflineDataController());
+      final fakeServiceConnection = FakeServiceConnectionManager();
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());
       mockConnectedApp(
-        fakeServiceManager.connectedApp!,
+        fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: true,
         isWebApp: false,
@@ -45,16 +46,17 @@ void main() {
 
     Future<void> pumpAnalysisView(
       WidgetTester tester,
-      FrameAnalysis? analysis,
+      FlutterFrame frame,
     ) async {
       await tester.pumpWidget(
-        wrapWithControllers(
+        wrapSimple(
           FlutterFrameAnalysisView(
-            frameAnalysis: analysis,
+            frame: frame,
             enhanceTracingController: mockEnhanceTracingController,
             rebuildCountModel: rebuildCountModel,
+            displayRefreshRateNotifier:
+                const FixedValueListenable<double>(defaultRefreshRate),
           ),
-          performance: PerformanceController(),
         ),
       );
       expect(find.byType(FlutterFrameAnalysisView), findsOneWidget);
@@ -64,10 +66,15 @@ void main() {
       'builds with null data',
       windowSize,
       (WidgetTester tester) async {
-        await pumpAnalysisView(tester, null);
+        await pumpAnalysisView(
+          tester,
+          FlutterFrame6.frameWithoutTimelineEvents,
+        );
 
         expect(
-          find.text('No analysis data available for this frame.'),
+          find.textContaining(
+            'No timeline event analysis data available for this frame.',
+          ),
           findsOneWidget,
         );
         expect(find.byType(FrameHints), findsNothing);
@@ -79,10 +86,12 @@ void main() {
       'builds with non-null data',
       windowSize,
       (WidgetTester tester) async {
-        await pumpAnalysisView(tester, frameAnalysis);
+        await pumpAnalysisView(tester, frame);
 
         expect(
-          find.text('No analysis data available for this frame.'),
+          find.textContaining(
+            'No timeline event  analysis data available for this frame.',
+          ),
           findsNothing,
         );
         expect(find.byType(FrameHints), findsOneWidget);
@@ -105,12 +114,15 @@ void main() {
         'builds successfully',
         windowSize,
         (WidgetTester tester) async {
-          await pumpVisualizer(tester, frameAnalysis);
+          await pumpVisualizer(tester, frame.frameAnalysis!);
 
           expect(find.text('UI phases:'), findsOneWidget);
           expect(find.textContaining('Build - '), findsOneWidget);
-          expect(find.textContaining('Layout - '), findsOneWidget);
-          expect(find.textContaining('Paint - '), findsOneWidget);
+
+          // The flex values are too small to show the text for these phases.
+          expect(find.textContaining('Layout - '), findsNothing);
+          expect(find.textContaining('Paint - '), findsNothing);
+
           expect(find.byIcon(Icons.build), findsOneWidget);
           expect(find.byIcon(Icons.auto_awesome_mosaic), findsOneWidget);
           expect(find.byIcon(Icons.format_paint), findsOneWidget);
@@ -127,7 +139,7 @@ void main() {
           await expectLater(
             find.byType(FrameTimeVisualizer),
             matchesDevToolsGolden(
-              'goldens/performance/frame_time_visualizer.png',
+              '../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer.png',
             ),
           );
         },
@@ -137,7 +149,7 @@ void main() {
         'builds with icons only for narrow screen',
         const Size(200.0, 500.0),
         (WidgetTester tester) async {
-          await pumpVisualizer(tester, frameAnalysis);
+          await pumpVisualizer(tester, frame.frameAnalysis!);
 
           expect(find.text('UI phases:'), findsOneWidget);
           expect(find.textContaining('Build - '), findsNothing);
@@ -159,7 +171,7 @@ void main() {
           await expectLater(
             find.byType(FrameTimeVisualizer),
             matchesDevToolsGolden(
-              'goldens/performance/frame_time_visualizer_icons_only.png',
+              '../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer_icons_only.png',
             ),
           );
         },
@@ -169,16 +181,17 @@ void main() {
         'builds for frame with shader compilation',
         windowSize,
         (WidgetTester tester) async {
-          frame = testFrame0.shallowCopy()
-            ..setEventFlow(goldenUiTimelineEvent)
-            ..setEventFlow(rasterTimelineEventWithSubtleShaderJank);
-          frameAnalysis = FrameAnalysis(frame);
+          frame = testFrameWithShaderJank;
+          final frameAnalysis = FrameAnalysis(frame);
           await pumpVisualizer(tester, frameAnalysis);
 
           expect(find.text('UI phases:'), findsOneWidget);
           expect(find.textContaining('Build - '), findsOneWidget);
-          expect(find.textContaining('Layout - '), findsOneWidget);
-          expect(find.textContaining('Paint - '), findsOneWidget);
+
+          // The flex values are too small to show the text for these phases.
+          expect(find.textContaining('Layout - '), findsNothing);
+          expect(find.textContaining('Paint - '), findsNothing);
+
           expect(find.byIcon(Icons.build), findsOneWidget);
           expect(find.byIcon(Icons.auto_awesome_mosaic), findsOneWidget);
           expect(find.byIcon(Icons.format_paint), findsOneWidget);
@@ -188,14 +201,18 @@ void main() {
           expect(find.byIcon(Icons.grid_on), findsOneWidget);
 
           expect(find.text('Raster phases:'), findsOneWidget);
-          expect(find.textContaining('Shader compilation - '), findsOneWidget);
-          expect(find.textContaining('Other raster - '), findsOneWidget);
+
+          // The flex value for this phase is too narrow for text, but the
+          // icon is visible.
+          expect(find.textContaining('Shader compilation - '), findsNothing);
           expect(find.byIcon(Icons.image_outlined), findsOneWidget);
+
+          expect(find.textContaining('Other raster - '), findsOneWidget);
 
           await expectLater(
             find.byType(FrameTimeVisualizer),
             matchesDevToolsGolden(
-              'goldens/performance/frame_time_visualizer_with_shader_compilation.png',
+              '../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer_with_shader_compilation.png',
             ),
           );
         },

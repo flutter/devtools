@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 
 class ChannelDemo extends StatefulWidget {
   @override
-  _ChannelDemoState createState() => _ChannelDemoState();
+  State<ChannelDemo> createState() => _ChannelDemoState();
 }
 
 class _ChannelDemoState extends State<ChannelDemo> {

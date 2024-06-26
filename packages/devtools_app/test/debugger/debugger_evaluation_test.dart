@@ -6,8 +6,9 @@ import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/console/eval/auto_complete.dart';
-import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
-import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_driver.dart';
@@ -17,7 +18,7 @@ import '../test_infra/flutter_test_storage.dart';
 void main() {
   setGlobal(Storage, FlutterTestStorage());
 
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
+  final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 
@@ -26,16 +27,21 @@ void main() {
   late EvalOnDartLibrary eval;
 
   setUp(() async {
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, EvalService());
+    setGlobal(NotificationService, NotificationService());
     isAlive = Disposable();
     await env.setupEnvironment();
     debuggerController = DebuggerController();
 
     eval = EvalOnDartLibrary(
       'package:flutter_app/src/autocomplete.dart',
-      serviceManager.service!,
+      serviceConnection.serviceManager.service!,
+      serviceManager: serviceConnection.serviceManager,
       disableBreakpoints: false,
     );
   });
@@ -163,28 +169,31 @@ void main() {
       );
       test(
         'returns privates only from library',
+        // TODO(https://github.com/flutter/devtools/issues/7099): unskip once
+        // this test flake is fixed.
+        skip: true,
         () async {
           await runMethodAndWaitForPause(
             'AnotherClass().pauseWithScopedVariablesMethod()',
           );
-          expect(
-            collectionEquals(
-              await autoCompleteResultsFor(
-                EditingParts(
-                  activeWord: '_',
-                  leftSide: '',
-                  rightSide: '',
-                ),
-                evalService,
+          await expectLater(
+            autoCompleteResultsFor(
+              EditingParts(
+                activeWord: '_',
+                leftSide: '',
+                rightSide: '',
               ),
-              [
-                '_privateField2',
-                '_privateField1',
-                '_PrivateClass',
-              ],
-              ordered: false,
+              evalService,
             ),
-            isTrue,
+            completion(
+              unorderedEquals(
+                [
+                  '_privateField2',
+                  '_privateField1',
+                  '_PrivateClass',
+                ],
+              ),
+            ),
           );
         },
         timeout: const Timeout.factor(8),

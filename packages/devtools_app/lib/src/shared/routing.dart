@@ -2,31 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../framework/framework_core.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
+import 'query_parameters.dart';
 
-/// The page ID (used in routing) for the standalone app-size page.
-///
-/// This must be different to the AppSizeScreen ID which is also used in routing when
-/// cnnected to a VM to ensure they have unique URLs.
-const appSizePageId = 'appsize';
-
-const homePageId = '';
-const snapshotPageId = 'snapshot';
+const homeScreenId = '';
+const snapshotScreenId = 'snapshot';
 
 /// Represents a Page/route for a DevTools screen.
 class DevToolsRouteConfiguration {
-  DevToolsRouteConfiguration(this.page, this.args, this.state);
+  DevToolsRouteConfiguration(this.page, this.params, this.state);
 
   final String page;
-  final Map<String, String?> args;
+  final DevToolsQueryParams params;
   final DevToolsNavigationState? state;
 }
 
@@ -38,30 +35,33 @@ class DevToolsRouteInformationParser
   DevToolsRouteInformationParser();
 
   @visibleForTesting
-  DevToolsRouteInformationParser.test(this._forceVmServiceUri);
+  DevToolsRouteInformationParser.test(this._testQueryParams);
 
-  /// The value for the 'uri' query parameter in a DevTools uri.
+  /// Query parameters that can be set on DevTools routes for testing purposes.
   ///
   /// This is to be used in a testing environment only and can be set via the
   /// [DevToolsRouteInformationParser.test] constructor.
-  String? _forceVmServiceUri;
+  DevToolsQueryParams? _testQueryParams;
 
   @override
   Future<DevToolsRouteConfiguration> parseRouteInformation(
     RouteInformation routeInformation,
-  ) {
+  ) async {
     var uri = routeInformation.uri;
-    if (_forceVmServiceUri != null) {
-      final newQueryParams = Map<String, dynamic>.from(uri.queryParameters);
-      newQueryParams['uri'] = _forceVmServiceUri;
-      uri = uri.copyWith(queryParameters: newQueryParams);
+    if (_testQueryParams != null) {
+      uri = uri.copyWith(queryParameters: _testQueryParams!.params);
     }
 
-    // If the uri has been modified and we do not have a vm service uri as a
-    // query parameter, ensure we manually disconnect from any previously
-    // connected applications.
-    if (uri.queryParameters['uri'] == null) {
-      serviceManager.manuallyDisconnect();
+    final uriFromParams = uri.queryParameters['uri'];
+    if (uriFromParams == null) {
+      // If the uri has been modified and we do not have a vm service uri as a
+      // query parameter, ensure we manually disconnect from any previously
+      // connected applications.
+      await serviceConnection.serviceManager.manuallyDisconnect();
+    } else if (_testQueryParams == null) {
+      // Otherwise, connect to the vm service from the query parameter before
+      // loading the route (but do not do this in a testing environment).
+      await FrameworkCore.initVmService(serviceUriAsString: uriFromParams);
     }
 
     // routeInformation.path comes from the address bar and (when not empty) is
@@ -70,7 +70,7 @@ class DevToolsRouteInformationParser
     final path = uri.path.isNotEmpty ? uri.path.substring(1) : '';
     final configuration = DevToolsRouteConfiguration(
       path,
-      uri.queryParameters,
+      DevToolsQueryParams(uri.queryParameters),
       _navigationStateFromRouteInformation(routeInformation),
     );
     return SynchronousFuture<DevToolsRouteConfiguration>(configuration);
@@ -84,7 +84,7 @@ class DevToolsRouteInformationParser
     // the opposite of what's done in [parseRouteInformation]).
     final path = '/${configuration.page}';
     // Create a new map in case the one we were given was unmodifiable.
-    final params = {...configuration.args};
+    final params = {...configuration.params.params};
     params.removeWhere((key, value) => value == null);
     return RouteInformation(
       uri: Uri(path: path, queryParameters: params),
@@ -120,13 +120,13 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
-  static String get currentPage => _currentPage;
-  static late String _currentPage;
+  static String? get currentPage => _currentPage;
+  static String? _currentPage;
 
   final Page Function(
     BuildContext,
     String?,
-    Map<String, String?>,
+    DevToolsQueryParams,
     DevToolsNavigationState?,
   ) _getPage;
 
@@ -134,32 +134,37 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ///
   /// This will usually only contain a single item (it's the visible stack,
   /// not the history).
-  final routes = ListQueue<DevToolsRouteConfiguration>();
+  final _routes = ListQueue<DevToolsRouteConfiguration>();
 
   @override
-  DevToolsRouteConfiguration? get currentConfiguration =>
-      routes.isEmpty ? null : routes.last;
+  DevToolsRouteConfiguration? get currentConfiguration => _routes.lastOrNull;
 
   @override
   Widget build(BuildContext context) {
     final routeConfig = currentConfiguration;
     final page = routeConfig?.page;
-    final args = routeConfig?.args ?? {};
+    final params = routeConfig?.params ?? DevToolsQueryParams.empty();
     final state = routeConfig?.state;
 
     return Navigator(
       key: navigatorKey,
-      pages: [_getPage(context, page, args, state)],
-      onPopPage: (_, __) {
-        if (routes.length <= 1) {
-          return false;
-        }
-
-        routes.removeLast();
+      pages: [_getPage(context, page, params, state)],
+      onDidRemovePage: (_) {
+        if (_routes.length <= 1) return;
+        _routes.removeLast();
         notifyListeners();
-        return true;
       },
     );
+  }
+
+  /// Refreshes the pages for the Navigator created in [build].
+  ///
+  /// Call this when the DevTools pages need to be regenerated from [_getPage].
+  /// This may happen when some condition changes that would cause a DevTools
+  /// page to be added or removed (e.g. a DevTools extension became available
+  /// or was disabled).
+  void refreshPages() {
+    notifyListeners();
   }
 
   /// Navigates to a new page, optionally updating arguments and state.
@@ -191,17 +196,18 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     Map<String, String?>? argUpdates,
     DevToolsNavigationState? state,
   ]) {
-    final newArgs = {...currentConfiguration?.args ?? {}, ...?argUpdates};
+    final newParams = currentConfiguration?.params.withUpdates(argUpdates) ??
+        DevToolsQueryParams.empty();
 
     // Ensure we disconnect from any previously connected applications if we do
     // not have a vm service uri as a query parameter, unless we are loading an
     // offline file.
-    if (page != snapshotPageId && newArgs['uri'] == null) {
-      serviceManager.manuallyDisconnect();
+    if (page != snapshotScreenId && newParams.vmServiceUri == null) {
+      unawaited(serviceConnection.serviceManager.manuallyDisconnect());
     }
 
     _replaceStack(
-      DevToolsRouteConfiguration(page, newArgs, state),
+      DevToolsRouteConfiguration(page, newParams, state),
     );
     notifyListeners();
   }
@@ -211,7 +217,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     required bool clearScreenParam,
   }) {
     navigate(
-      homePageId,
+      homeScreenId,
       {
         if (clearUriParam) 'uri': null,
         if (clearScreenParam) 'screen': null,
@@ -222,7 +228,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   /// Replaces the navigation stack with a new route.
   void _replaceStack(DevToolsRouteConfiguration configuration) {
     _currentPage = configuration.page;
-    routes
+    _routes
       ..clear()
       ..add(configuration);
   }
@@ -246,7 +252,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
     final currentConfig = currentConfiguration!;
     final currentPage = currentConfig.page;
-    final newArgs = {...currentConfig.args, ...argUpdates};
+    final newArgs = currentConfig.params.withUpdates(argUpdates);
     _replaceStack(
       DevToolsRouteConfiguration(
         currentPage,
@@ -262,14 +268,14 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     _replaceStack(
       DevToolsRouteConfiguration(
         currentConfig.page,
-        currentConfig.args,
+        currentConfig.params,
         state,
       ),
     );
 
     final path = '/${currentConfig.page}';
     // Create a new map in case the one we were given was unmodifiable.
-    final params = Map.of(currentConfig.args);
+    final params = Map.of(currentConfig.params.params);
     params.removeWhere((key, value) => value == null);
     await SystemNavigator.routeInformationUpdated(
       uri: Uri(path: path, queryParameters: params),
@@ -291,7 +297,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     _replaceStack(
       DevToolsRouteConfiguration(
         currentConfig.page,
-        currentConfig.args,
+        currentConfig.params,
         currentConfig.state?.merge(stateUpdate) ?? stateUpdate,
       ),
     );
@@ -304,8 +310,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   bool _changesArgs(Map<String, String?>? changes) {
     final currentConfig = currentConfiguration!;
     return !mapEquals(
-      {...currentConfig.args, ...?changes},
-      {...currentConfig.args},
+      currentConfig.params.withUpdates(changes).params,
+      currentConfig.params.params,
     );
   }
 
@@ -329,9 +335,6 @@ class DevToolsNavigationState {
           _kKind: kind,
           ...state,
         };
-
-  factory DevToolsNavigationState.fromJson(Map<String, dynamic> json) =>
-      DevToolsNavigationState._(json.cast<String, String?>());
 
   DevToolsNavigationState._(this._state) : kind = _state[_kKind]!;
 

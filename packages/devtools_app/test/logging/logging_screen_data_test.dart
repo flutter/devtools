@@ -3,11 +3,16 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -15,7 +20,7 @@ import 'package:mockito/mockito.dart';
 void main() {
   late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
-  final fakeServiceManager = FakeServiceManager();
+  final fakeServiceConnection = FakeServiceConnectionManager();
 
   Future<void> pumpLoggingScreen(WidgetTester tester) async {
     await tester.pumpWidget(
@@ -30,13 +35,18 @@ void main() {
     mockLoggingController =
         createMockLoggingControllerWithDefaults(data: fakeLogData);
 
-    when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
+    when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow)
+        .thenReturn(false);
+    when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
+        .thenReturn(false);
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('logging'))
         .thenReturn(ValueNotifier<int>(0));
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(NotificationService, NotificationService());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
   });
@@ -101,7 +111,7 @@ void main() {
 
       final textFieldFinder = find.byType(TextField);
       expect(textFieldFinder, findsOneWidget);
-      final TextField textField = tester.widget(textFieldFinder) as TextField;
+      final textField = tester.widget(textFieldFinder) as TextField;
       expect(textField.enabled, isTrue);
       await tester.enterText(find.byType(TextField), 'abc');
     },

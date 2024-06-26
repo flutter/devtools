@@ -4,15 +4,14 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../devtools.dart' as devtools;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/dialogs.dart';
 import '../shared/globals.dart';
-import '../shared/theme.dart';
+import '../shared/utils.dart';
 import 'release_notes/release_notes.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {
@@ -31,14 +30,15 @@ class DevToolsAboutDialog extends StatelessWidget {
         children: [
           Wrap(
             children: [
-              const SelectableText('DevTools version ${devtools.version}'),
+              SelectableText('DevTools version $devToolsVersion'),
               const Text(' - '),
               InkWell(
                 child: Text(
                   'release notes',
                   style: theme.linkTextStyle,
                 ),
-                onTap: () => releaseNotesController.toggleVisibility(true),
+                onTap: () =>
+                    unawaited(releaseNotesController.openLatestReleaseNotes()),
               ),
             ],
           ),
@@ -76,12 +76,12 @@ class DevToolsAboutDialog extends StatelessWidget {
 }
 
 class _FeedbackLink extends StatelessWidget {
-  const _FeedbackLink({Key? key}) : super(key: key);
+  const _FeedbackLink();
 
   @override
   Widget build(BuildContext context) {
     return RichText(
-      text: LinkTextSpan(
+      text: GaLinkTextSpan(
         link: devToolsExtensionPoints.issueTrackerLink(),
         context: context,
       ),
@@ -90,7 +90,7 @@ class _FeedbackLink extends StatelessWidget {
 }
 
 class _ContributingLink extends StatelessWidget {
-  const _ContributingLink({Key? key}) : super(key: key);
+  const _ContributingLink();
 
   static const _contributingGuideUrl =
       'https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md';
@@ -98,8 +98,8 @@ class _ContributingLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
-      text: LinkTextSpan(
-        link: const Link(
+      text: GaLinkTextSpan(
+        link: const GaLink(
           display: 'CONTRIBUTING',
           url: _contributingGuideUrl,
           gaScreenName: gac.devToolsMain,
@@ -112,17 +112,18 @@ class _ContributingLink extends StatelessWidget {
 }
 
 class _DiscordLink extends StatelessWidget {
-  const _DiscordLink({Key? key}) : super(key: key);
+  const _DiscordLink();
 
-  static const _discordWikiUrl = 'https://github.com/flutter/flutter/wiki/Chat';
+  static const _discordDocsUrl =
+      'https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md';
 
   @override
   Widget build(BuildContext context) {
     return RichText(
-      text: LinkTextSpan(
-        link: const Link(
+      text: GaLinkTextSpan(
+        link: const GaLink(
           display: 'Discord',
-          url: _discordWikiUrl,
+          url: _discordDocsUrl,
           gaScreenName: gac.devToolsMain,
           gaSelectedItemDescription: gac.discordLink,
         ),
@@ -132,33 +133,20 @@ class _DiscordLink extends StatelessWidget {
   }
 }
 
-class OpenAboutAction extends StatelessWidget {
-  const OpenAboutAction({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final releaseNotesController = Provider.of<ReleaseNotesController>(context);
-    return DevToolsTooltip(
-      message: 'About DevTools',
-      child: InkWell(
-        onTap: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => DevToolsAboutDialog(releaseNotesController),
-            ),
-          );
-        },
-        child: Container(
-          width: actionWidgetSize,
-          height: actionWidgetSize,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.help_outline,
-            size: actionsIconSize,
-          ),
-        ),
-      ),
-    );
-  }
+class OpenAboutAction extends ScaffoldAction {
+  OpenAboutAction({super.key, super.color})
+      : super(
+          icon: Icons.help_outline,
+          tooltip: 'About DevTools',
+          onPressed: (context) {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => DevToolsAboutDialog(
+                  Provider.of<ReleaseNotesController>(context),
+                ),
+              ),
+            );
+          },
+        );
 }

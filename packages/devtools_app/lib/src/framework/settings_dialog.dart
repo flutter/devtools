@@ -4,47 +4,33 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../shared/analytics/analytics_controller.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/config_specific/server/server.dart';
-import '../shared/dialogs.dart';
+import '../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../shared/globals.dart';
 import '../shared/log_storage.dart';
-import '../shared/theme.dart';
+import '../shared/server/server.dart';
 import '../shared/utils.dart';
 
-class OpenSettingsAction extends StatelessWidget {
-  const OpenSettingsAction({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      message: 'Settings',
-      child: InkWell(
-        onTap: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => const SettingsDialog(),
-            ),
-          );
-        },
-        child: Container(
-          width: actionWidgetSize,
-          height: actionWidgetSize,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.settings_outlined,
-            size: actionsIconSize,
-          ),
-        ),
-      ),
-    );
-  }
+class OpenSettingsAction extends ScaffoldAction {
+  OpenSettingsAction({super.key, super.color})
+      : super(
+          icon: Icons.settings_outlined,
+          tooltip: 'Settings',
+          onPressed: (context) {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => const SettingsDialog(),
+              ),
+            );
+          },
+        );
 }
 
 class SettingsDialog extends StatelessWidget {
@@ -59,22 +45,15 @@ class SettingsDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Flexible(
-            child: CheckboxSetting(
-              title: 'Use a dark theme',
-              notifier: preferences.darkModeTheme,
-              onChanged: preferences.toggleDarkModeTheme,
-              gaItem: gac.darkTheme,
+          if (!isEmbedded())
+            Flexible(
+              child: CheckboxSetting(
+                title: 'Use a dark theme',
+                notifier: preferences.darkModeTheme,
+                onChanged: preferences.toggleDarkModeTheme,
+                gaItem: gac.darkTheme,
+              ),
             ),
-          ),
-          Flexible(
-            child: CheckboxSetting(
-              title: 'Use dense mode',
-              notifier: preferences.denseModeEnabled,
-              onChanged: preferences.toggleDenseMode,
-              gaItem: gac.denseMode,
-            ),
-          ),
           if (isExternalBuild && isDevToolsServerAvailable)
             Flexible(
               child: CheckboxSetting(
@@ -108,6 +87,8 @@ class SettingsDialog extends StatelessWidget {
 class _VerboseLoggingSetting extends StatelessWidget {
   const _VerboseLoggingSetting();
 
+  static const _minScreenWidthForTextBeforeScaling = 500.0;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -123,11 +104,13 @@ class _VerboseLoggingSetting extends StatelessWidget {
               ),
             ),
             const SizedBox(width: defaultSpacing),
-            DevToolsButton(
+            GaDevToolsButton(
               label: 'Copy logs',
               icon: Icons.copy_outlined,
               gaScreen: gac.settingsDialog,
               gaSelection: gac.copyLogs,
+              minScreenWidthForTextBeforeScaling:
+                  _minScreenWidthForTextBeforeScaling,
               onPressed: () async => await copyToClipboard(
                 LogStorage.root.toString(),
                 'Successfully copied logs',
@@ -138,6 +121,8 @@ class _VerboseLoggingSetting extends StatelessWidget {
               label: 'Clear logs',
               gaScreen: gac.settingsDialog,
               gaSelection: gac.clearLogs,
+              minScreenWidthForTextBeforeScaling:
+                  _minScreenWidthForTextBeforeScaling,
               onPressed: LogStorage.root.clear,
             ),
           ],
@@ -146,12 +131,13 @@ class _VerboseLoggingSetting extends StatelessWidget {
         const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Spacer(),
             Icon(Icons.warning),
             SizedBox(width: defaultSpacing),
-            Text(
-              'Logs may contain sensitive information.\n'
-              'Always check their contents before sharing.',
+            Flexible(
+              child: Text(
+                'Logs may contain sensitive information.\n'
+                'Always check their contents before sharing.',
+              ),
             ),
           ],
         ),

@@ -8,16 +8,16 @@ void main() => runApp(const OverflowingApp());
 
 class OverflowingApp extends StatefulWidget {
   const OverflowingApp({
-    Key? key,
+    super.key,
     this.initialRoute,
     this.isTestMode = false,
-  }) : super(key: key);
+  });
 
   final bool isTestMode;
   final String? initialRoute;
 
   @override
-  _OverflowingAppState createState() => _OverflowingAppState();
+  State<OverflowingApp> createState() => _OverflowingAppState();
 }
 
 class _OverflowingAppState extends State<OverflowingApp> {

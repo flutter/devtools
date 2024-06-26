@@ -21,8 +21,8 @@ If you need help, consider asking for help on [Discord].
 
 <!-- Links -->
 [Contributor Guide]: https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md
-[Tree Hygiene]: https://github.com/flutter/flutter/wiki/Tree-hygiene
-[Flutter Style Guide]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
+[Tree Hygiene]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md
+[Flutter Style Guide]: https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md
 [CLA]: https://cla.developers.google.com/
-[Discord]: https://github.com/flutter/flutter/wiki/Chat
+[Discord]: https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md
 [build.yaml badge]: https://github.com/flutter/devtools/actions/workflows/build.yaml/badge.svg

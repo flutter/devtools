@@ -19,28 +19,12 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
+import 'byte_utils.dart';
 import 'simple_items.dart';
 
 final _log = Logger('utils');
 
-bool isPrivate(String member) => member.startsWith('_');
-
-/// Public properties first, then sort alphabetically
-int sortFieldsByName(String a, String b) {
-  final isAPrivate = isPrivate(a);
-  final isBPrivate = isPrivate(b);
-
-  if (isAPrivate && !isBPrivate) {
-    return 1;
-  }
-  if (!isAPrivate && isBPrivate) {
-    return -1;
-  }
-
-  return a.compareTo(b);
-}
-
-bool collectionEquals(e1, e2, {bool ordered = true}) {
+bool collectionEquals(Object? e1, Object? e2, {bool ordered = true}) {
   if (ordered) {
     return const DeepCollectionEquality().equals(e1, e2);
   }
@@ -48,100 +32,16 @@ bool collectionEquals(e1, e2, {bool ordered = true}) {
 }
 
 // 2^52 is the max int for dart2js.
-final int maxJsInt = pow(2, 52) as int;
+final maxJsInt = pow(2, 52) as int;
 
-String escape(String? text) => text == null ? '' : htmlEscape.convert(text);
-
-final NumberFormat nf = NumberFormat.decimalPattern();
+final nf = NumberFormat.decimalPattern();
 
 String percent(double d, {int fractionDigits = 2}) =>
     '${(d * 100).toStringAsFixed(fractionDigits)}%';
 
 /// Unifies printing of retained size to avoid confusion related to different rounding.
-String? prettyPrintRetainedSize(int? bites) => prettyPrintBytes(
-      bites,
-      includeUnit: true,
-      kbFractionDigits: 1,
-    );
-
-String? prettyPrintBytes(
-  num? bytes, {
-  int kbFractionDigits = 0,
-  int mbFractionDigits = 1,
-  int gbFractionDigits = 1,
-  bool includeUnit = false,
-  num roundingPoint = 1.0,
-  int maxBytes = 52,
-}) {
-  if (bytes == null) {
-    return null;
-  }
-  // TODO(peterdjlee): Generalize to handle different kbFractionDigits.
-  // Ensure a small number of bytes does not print as 0 KB.
-  // If bytes >= maxBytes and kbFractionDigits == 1, it will start rounding to 0.1 KB.
-  if (bytes.abs() < maxBytes && kbFractionDigits == 1) {
-    var output = bytes.toString();
-    if (includeUnit) {
-      output += ' B';
-    }
-    return output;
-  }
-  final sizeInKB = bytes.abs() / 1024.0;
-  final sizeInMB = sizeInKB / 1024.0;
-  final sizeInGB = sizeInMB / 1024.0;
-
-  if (sizeInGB >= roundingPoint) {
-    return printGB(
-      bytes,
-      fractionDigits: gbFractionDigits,
-      includeUnit: includeUnit,
-    );
-  } else if (sizeInMB >= roundingPoint) {
-    return printMB(
-      bytes,
-      fractionDigits: mbFractionDigits,
-      includeUnit: includeUnit,
-    );
-  } else {
-    return printKB(
-      bytes,
-      fractionDigits: kbFractionDigits,
-      includeUnit: includeUnit,
-    );
-  }
-}
-
-String printKB(num bytes, {int fractionDigits = 0, bool includeUnit = false}) {
-  final NumberFormat kbPattern = NumberFormat.decimalPattern()
-    ..maximumFractionDigits = fractionDigits;
-
-  // We add ((1024/2)-1) to the value before formatting so that a non-zero byte
-  // value doesn't round down to 0. If showing decimal points, let it round normally.
-  // TODO(peterdjlee): Round up to the respective digit when fractionDigits > 0.
-  final processedBytes = fractionDigits == 0 ? bytes + 511 : bytes;
-  var output = kbPattern.format(processedBytes / 1024);
-  if (includeUnit) {
-    output += ' KB';
-  }
-  return output;
-}
-
-String printMB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
-  var output = (bytes / (1024 * 1024.0)).toStringAsFixed(fractionDigits);
-  if (includeUnit) {
-    output += ' MB';
-  }
-  return output;
-}
-
-String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
-  var output =
-      (bytes / (1024 * 1024.0 * 1024.0)).toStringAsFixed(fractionDigits);
-  if (includeUnit) {
-    output += ' GB';
-  }
-  return output;
-}
+String? prettyPrintRetainedSize(int? bytes) =>
+    prettyPrintBytes(bytes, includeUnit: true);
 
 enum DurationDisplayUnit {
   micros('μs'),
@@ -333,14 +233,6 @@ String longestFittingSubstring(
 bool isLetter(int codeUnit) =>
     (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
 
-/// Pluralizes a word, following english rules (1, many).
-///
-/// Pass a custom named `plural` for irregular plurals:
-/// `pluralize('index', count, plural: 'indices')`
-/// So it returns `indices` and not `indexs`.
-String pluralize(String word, int count, {String? plural}) =>
-    count == 1 ? word : (plural ?? '${word}s');
-
 /// Returns a simplified version of a StackFrame name.
 ///
 /// Given an input such as
@@ -388,44 +280,10 @@ Stream combineStreams(Stream a, Stream b, Stream c) {
   return controller.stream;
 }
 
-/// Parses a 3 or 6 digit CSS Hex Color into a dart:ui Color.
-Color parseCssHexColor(String input) {
-  // Remove any leading # (and the escaped version to be lenient)
-  input = input.replaceAll('#', '').replaceAll('%23', '');
-
-  // Handle 3/4-digit hex codes (eg. #123 == #112233)
-  if (input.length == 3 || input.length == 4) {
-    input = input.split('').map((c) => '$c$c').join();
-  }
-
-  // Pad alpha with FF.
-  if (input.length == 6) {
-    input = '${input}ff';
-  }
-
-  // In CSS, alpha is in the lowest bits, but for Flutter's value, it's in the
-  // highest bits, so move the alpha from the end to the start before parsing.
-  if (input.length == 8) {
-    input = '${input.substring(6)}${input.substring(0, 6)}';
-  }
-  final value = int.parse(input, radix: 16);
-
-  return Color(value);
-}
-
-/// Converts a dart:ui Color into #RRGGBBAA format for use in CSS.
-String toCssHexColor(Color color) {
-  // In CSS Hex, Alpha comes last, but in Flutter's `value` field, alpha is
-  // in the high bytes, so just using `value.toRadixString(16)` will put alpha
-  // in the wrong position.
-  String hex(int val) => val.toRadixString(16).padLeft(2, '0');
-  return '#${hex(color.red)}${hex(color.green)}${hex(color.blue)}${hex(color.alpha)}';
-}
-
 class Property<T> {
   Property(this._value);
 
-  final StreamController<T> _changeController = StreamController<T>.broadcast();
+  final _changeController = StreamController<T>.broadcast();
   T _value;
 
   T get value => _value;
@@ -493,19 +351,6 @@ class JsonUtils {
 
   static int getIntMember(Map<String, Object?> json, String memberName) {
     return json[memberName] as int? ?? -1;
-  }
-
-  static List<String> getValues(Map<String, Object> json, String member) {
-    final values = json[member] as List<Object?>?;
-    if (values == null || values.isEmpty) {
-      return const [];
-    }
-
-    return values.cast();
-  }
-
-  static bool hasJsonData(String? data) {
-    return data != null && data.isNotEmpty && data != 'null';
   }
 }
 
@@ -679,8 +524,7 @@ class TimeRange {
   }
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is! TimeRange) return false;
     return start == other.start && end == other.end;
   }
@@ -691,17 +535,6 @@ class TimeRange {
 
 String formatDateTime(DateTime time) {
   return DateFormat('H:mm:ss.S').format(time);
-}
-
-bool isDebugBuild() {
-  bool debugBuild = false;
-  assert(
-    (() {
-      debugBuild = true;
-      return true;
-    })(),
-  );
-  return debugBuild;
 }
 
 /// Divides [numerator] by [denominator], not returning infinite, NaN, or null
@@ -740,7 +573,7 @@ double safeDivide(
 ///
 /// Only the object that created this reporter should call [notify].
 class Reporter implements Listenable {
-  final Set<VoidCallback> _listeners = {};
+  final _listeners = <VoidCallback>{};
 
   /// Adds [callback] to this reporter.
   ///
@@ -765,7 +598,7 @@ class Reporter implements Listenable {
   /// a notification callback leads to a change in the listeners,
   /// only the original listeners will be called.
   void notify() {
-    for (var callback in _listeners.toList()) {
+    for (final callback in _listeners.toList()) {
       callback();
     }
   }
@@ -804,20 +637,10 @@ String toStringAsFixed(double num, [int fractionDigit = 1]) {
   return num.toStringAsFixed(fractionDigit);
 }
 
-/// A value notifier that calls each listener immediately when registered.
-class ImmediateValueNotifier<T> extends ValueNotifier<T> {
-  ImmediateValueNotifier(T value) : super(value);
-
-  /// Adds a listener and calls the listener upon registration.
-  @override
-  void addListener(VoidCallback listener) {
-    super.addListener(listener);
-    listener();
-  }
-}
-
 extension SafeAccessList<T> on List<T> {
   T? safeGet(int index) => index < 0 || index >= length ? null : this[index];
+
+  T? safeRemoveLast() => isNotEmpty ? removeLast() : null;
 }
 
 extension SafeAccess<T> on Iterable<T> {
@@ -844,8 +667,7 @@ class Range {
   String toString() => 'Range($begin, $end)';
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is! Range) return false;
     return begin == other.begin && end == other.end;
   }
@@ -874,8 +696,7 @@ class LineRange {
   String toString() => 'LineRange($begin, $end)';
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is! LineRange) return false;
     return begin == other.begin && end == other.end;
   }
@@ -892,13 +713,13 @@ extension SortDirectionExtension on SortDirection {
   }
 }
 
-/// A small double value, used to ensure that comparisons between double are
-/// valid.
-const defaultEpsilon = 1 / 1000;
+// /// A small double value, used to ensure that comparisons between double are
+// /// valid.
+// const defaultEpsilon = 1 / 1000;
 
-bool equalsWithinEpsilon(double a, double b) {
-  return (a - b).abs() < defaultEpsilon;
-}
+// bool equalsWithinEpsilon(double a, double b) {
+//   return (a - b).abs() < defaultEpsilon;
+// }
 
 /// A dev time class to help trace DevTools application events.
 class DebugTimingLogger {
@@ -1031,14 +852,14 @@ Color colorFromAnsi(List<int> ansiInput) {
 /// An extension on [LogicalKeySet] to provide user-facing names for key
 /// bindings.
 extension LogicalKeySetExtension on LogicalKeySet {
-  static final Set<LogicalKeyboardKey> _modifiers = {
+  static final _modifiers = <LogicalKeyboardKey>{
     LogicalKeyboardKey.alt,
     LogicalKeyboardKey.control,
     LogicalKeyboardKey.meta,
     LogicalKeyboardKey.shift,
   };
 
-  static final Map<LogicalKeyboardKey, String> _modifierNames = {
+  static final _modifierNames = <LogicalKeyboardKey, String>{
     LogicalKeyboardKey.alt: 'Alt',
     LogicalKeyboardKey.control: 'Control',
     LogicalKeyboardKey.meta: 'Meta',
@@ -1049,7 +870,7 @@ extension LogicalKeySetExtension on LogicalKeySet {
   String describeKeys({bool isMacOS = false}) {
     // Put the modifiers first. If it has a synonym, then it's something like
     // shiftLeft, altRight, etc.
-    final List<LogicalKeyboardKey> sortedKeys = keys.toList()
+    final sortedKeys = keys.toList()
       ..sort((a, b) {
         final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
         final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
@@ -1076,21 +897,14 @@ extension LogicalKeySetExtension on LogicalKeySet {
   }
 }
 
-// Method to convert degrees to radians
-double degToRad(num deg) => deg * (pi / 180.0);
-
 typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
 
 class DevToolsJsonFile extends DevToolsFile<Object> {
   const DevToolsJsonFile({
     required String name,
-    required DateTime lastModifiedTime,
-    required Object data,
-  }) : super(
-          path: name,
-          lastModifiedTime: lastModifiedTime,
-          data: data,
-        );
+    required super.lastModifiedTime,
+    required super.data,
+  }) : super(path: name);
 }
 
 class DevToolsFile<T> {
@@ -1136,35 +950,21 @@ extension StringExtension on String {
     );
   }
 
-  /// Whether [query] is a case insensitive "fuzzy match" for this String.
+  /// Whether [other] is a case insensitive match for this String.
   ///
-  /// For example, the query "hwf" would be a fuzzy match for the String
-  /// "hello_world_file".
-  bool caseInsensitiveFuzzyMatch(String query) {
-    query = query.toLowerCase();
-    final lowercase = toLowerCase();
-    final it = query.characters.iterator;
-    var strIndex = 0;
-    while (it.moveNext()) {
-      final char = it.current;
-      var foundChar = false;
-      for (int i = strIndex; i < lowercase.length; i++) {
-        if (lowercase[i] == char) {
-          strIndex = i + 1;
-          foundChar = true;
-          break;
-        }
-      }
-      if (!foundChar) {
-        return false;
-      }
+  /// If [pattern] is a [RegExp], this method will return true if and only if
+  /// this String is a complete [RegExp] match, meaning that the regular
+  /// expression finds a match with starting index 0 and ending index
+  /// [this.length].
+  bool caseInsensitiveEquals(Pattern? pattern) {
+    if (pattern is RegExp) {
+      assert(!pattern.isCaseSensitive);
+      final completeMatch = pattern
+          .allMatches(this)
+          .firstWhereOrNull((match) => match.start == 0 && match.end == length);
+      return completeMatch != null;
     }
-    return true;
-  }
-
-  /// Whether [other] is a case insensitive match for this String
-  bool caseInsensitiveEquals(String? other) {
-    return toLowerCase() == other?.toLowerCase();
+    return toLowerCase() == pattern.toString().toLowerCase();
   }
 
   /// Find all case insensitive matches of query in this String
@@ -1180,43 +980,67 @@ extension StringExtension on String {
   }
 }
 
+extension IterableExtension<T> on Iterable<T> {
+  /// Joins the iterable with [separator], and also adds a trailing [separator].
+  String joinWithTrailing([String separator = '']) {
+    var result = join(separator);
+    if (length > 0) {
+      result += separator;
+    }
+    return result;
+  }
+}
+
 extension ListExtension<T> on List<T> {
-  List<T> joinWith(T separator) {
+  List<T> joinWith(
+    T separator, {
+    bool includeTrailing = false,
+    bool includeLeading = false,
+  }) {
     return [
+      if (includeLeading) separator,
       for (int i = 0; i < length; i++) ...[
         this[i],
         if (i != length - 1) separator,
       ],
+      if (includeTrailing) separator,
     ];
   }
 
-  Iterable<T> whereFromIndex(
-    bool Function(T element) test, {
-    int startIndex = 0,
-  }) {
-    final whereList = <T>[];
-    for (int i = startIndex; i < length; i++) {
-      final element = this[i];
-      if (test(element)) {
-        whereList.add(element);
-      }
-    }
-    return whereList;
-  }
-
   bool containsWhere(bool Function(T element) test) {
-    for (var e in this) {
+    for (final e in this) {
       if (test(e)) {
         return true;
       }
     }
     return false;
   }
+
+  T get second => this[1];
+
+  T get third => this[2];
+
+  List<int> allIndicesWhere(bool Function(T element) test) {
+    final indices = <int>[];
+    for (var i = 0; i < length; i++) {
+      if (test(this[i])) {
+        indices.add(i);
+      }
+    }
+    return indices;
+  }
+}
+
+extension NullableListExtension<T> on List<T>? {
+  bool get isNullOrEmpty {
+    final self = this;
+    return self == null || self.isEmpty;
+  }
 }
 
 extension SetExtension<T> on Set<T> {
   bool containsWhere(bool Function(T element) test) {
-    for (var e in this) {
+    for (final e in this) {
       if (test(e)) {
         return true;
       }
@@ -1225,7 +1049,7 @@ extension SetExtension<T> on Set<T> {
   }
 
   bool containsAny(Iterable<T> any) {
-    for (var e in any) {
+    for (final e in any) {
       if (contains(e)) {
         return true;
       }
@@ -1236,61 +1060,6 @@ extension SetExtension<T> on Set<T> {
 
 extension UiListExtension<T> on List<T> {
   int get numSpacers => max(0, length - 1);
-}
-
-Map<String, String> devToolsQueryParams(String url) {
-  // DevTools urls can have the form:
-  // http://localhost:123/?key=value
-  // http://localhost:123/#/?key=value
-  // http://localhost:123/#/page-id?key=value
-  // Since we just want the query params, we will modify the url to have an
-  // easy-to-parse form.
-  final modifiedUri = url.replaceFirst(RegExp(r'#\/(\w*)[?]'), '?');
-  final uri = Uri.parse(modifiedUri);
-  return uri.queryParameters;
-}
-
-/// Gets a VM Service URI from a query string.
-///
-/// We read from the 'uri' value if it exists; otherwise we create a uri from
-/// the from 'port' and 'token' values.
-Uri? getServiceUriFromQueryString(String? location) {
-  if (location == null) {
-    return null;
-  }
-
-  final queryParams = Uri.parse(location).queryParameters;
-
-  // First try to use uri.
-  if (queryParams['uri'] != null) {
-    final uri = Uri.tryParse(queryParams['uri']!);
-
-    // Lots of things are considered valid URIs (including empty strings
-    // and single letters) since they can be relative, so we need to do some
-    // extra checks.
-    if (uri != null &&
-        uri.isAbsolute &&
-        (uri.isScheme('ws') ||
-            uri.isScheme('wss') ||
-            uri.isScheme('http') ||
-            uri.isScheme('https') ||
-            uri.isScheme('sse') ||
-            uri.isScheme('sses'))) {
-      return uri;
-    }
-  }
-
-  // Otherwise try 'port', 'token', and 'host'.
-  final port = int.tryParse(queryParams['port'] ?? '');
-  final token = queryParams['token'];
-  final host = queryParams['host'] ?? 'localhost';
-  if (port != null) {
-    return token == null
-        ? Uri.parse('ws://$host:$port/ws')
-        : Uri.parse('ws://$host:$port/$token/ws');
-  }
-
-  return null;
 }
 
 double safePositiveDouble(double value) {
@@ -1314,270 +1083,12 @@ String prettyTimestamp(
   return DateFormat.Hms().format(timestampDT); // HH:mm:ss
 }
 
-/// A [ChangeNotifier] that holds a list of data.
-///
-/// This class also exposes methods to interact with the data. By default,
-/// listeners are notified whenever the data is modified, but notifying can be
-/// optionally disabled.
-class ListValueNotifier<T> extends ChangeNotifier
-    implements ValueListenable<List<T>> {
-  /// Creates a [ListValueNotifier] that wraps this value [_rawList].
-  ListValueNotifier(List<T> rawList) : _rawList = List<T>.of(rawList) {
-    _currentList = ImmutableList(_rawList);
-  }
-
-  List<T> _rawList;
-
-  late ImmutableList<T> _currentList;
-
-  @override
-  List<T> get value => _currentList;
-
-  @override
-  // This override is needed to change visibility of the method.
-  // ignore: unnecessary_overrides
-  void notifyListeners() {
-    super.notifyListeners();
-  }
-
-  void _listChanged() {
-    _currentList = ImmutableList(_rawList);
-    notifyListeners();
-  }
-
-  set last(T value) {
-    // TODO(jacobr): use a more sophisticated data structure such as
-    // https://en.wikipedia.org/wiki/Rope_(data_structure) to make last more
-    // efficient.
-    _rawList = _rawList.toList();
-    _rawList.last = value;
-    _listChanged();
-  }
-
-  /// Adds an element to the list and notifies listeners.
-  void add(T element) {
-    _rawList.add(element);
-    _listChanged();
-  }
-
-  /// Replaces the first occurrence of [value] in this list.
-  ///
-  /// Runtime is O(n).
-  bool replace(T existing, T replacement) {
-    final index = _rawList.indexOf(existing);
-    if (index == -1) return false;
-    _rawList = _rawList.toList();
-    _rawList.removeAt(index);
-    _rawList.insert(index, replacement);
-    _listChanged();
-    return true;
-  }
-
-  /// Replaces all elements in the list and notifies listeners. It's preferred
-  /// to calling .clear() then .addAll(), because it only notifies listeners
-  /// once.
-  void replaceAll(Iterable<T> elements) {
-    _rawList = <T>[];
-    _rawList.addAll(elements);
-    _listChanged();
-  }
-
-  /// Adds elements to the list and notifies listeners.
-  void addAll(Iterable<T> elements) {
-    _rawList.addAll(elements);
-    _listChanged();
-  }
-
-  void removeAll(Iterable<T> elements) {
-    elements.forEach(_rawList.remove);
-    _listChanged();
-  }
-
-  /// Clears the list and notifies listeners.
-  void clear() {
-    _rawList = <T>[];
-    _listChanged();
-  }
-
-  /// Truncates to just the elements between [start] and [end].
-  ///
-  /// If [end] is omitted, it defaults to the [length] of this list.
-  ///
-  /// The `start` and `end` positions must satisfy the relations
-  /// 0 ≤ `start` ≤ `end` ≤ [length]
-  /// If `end` is equal to `start`, then the returned list is empty.
-  void trimToSublist(int start, [int? end]) {
-    // TODO(jacobr): use a more sophisticated data structure such as
-    // https://en.wikipedia.org/wiki/Rope_(data_structure) to make the
-    // implementation of this method more efficient.
-    _rawList = _rawList.sublist(start, end);
-    _listChanged();
-  }
-
-  /// Removes the first occurrence of [value] from this list.
-  ///
-  /// Runtime is O(n).
-  bool remove(T value) {
-    final index = _rawList.indexOf(value);
-    if (index == -1) return false;
-    _rawList = _rawList.toList();
-    _rawList.removeAt(index);
-    _listChanged();
-    return true;
-  }
-
-  /// Removes a range of elements from the list.
-  ///
-  /// https://api.flutter.dev/flutter/dart-core/List/removeRange.html
-  void removeRange(int start, int end) {
-    _rawList = _rawList.toList();
-    _rawList.removeRange(start, end);
-    _listChanged();
-  }
-
-  /// Removes the object at position `index` from this list.
-  ///
-  /// https://api.flutter.dev/flutter/dart-core/List/removeAt.html
-  void removeAt(int index) {
-    _rawList = _rawList.toList();
-    _rawList.removeAt(index);
-    _listChanged();
-  }
-}
-
-/// Wrapper for a list that prevents any modification of the list's content.
-///
-/// This class should only be used as part of [ListValueNotifier].
-@visibleForTesting
-class ImmutableList<T> with ListMixin<T> implements List<T> {
-  ImmutableList(this._rawList) : length = _rawList.length;
-
-  final List<T> _rawList;
-
-  @override
-  int length;
-
-  @override
-  T operator [](int index) {
-    if (index >= 0 && index < length) {
-      return _rawList[index];
-    } else {
-      throw Exception('Index out of range [0-${length - 1}]: $index');
-    }
-  }
-
-  @override
-  void operator []=(int index, T value) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void add(T element) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void addAll(Iterable<T> iterable) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  bool remove(Object? element) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  T removeAt(int index) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  T removeLast() {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void removeRange(int start, int end) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void removeWhere(bool Function(T element) test) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void retainWhere(bool Function(T element) test) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void insert(int index, T element) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void insertAll(int index, Iterable<T> iterable) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void clear() {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void fillRange(int start, int end, [T? fill]) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void setRange(int start, int end, Iterable<T> iterable, [int skipCount = 0]) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void replaceRange(int start, int end, Iterable<T> newContents) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void setAll(int index, Iterable<T> iterable) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void sort([int Function(T a, T b)? compare]) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-
-  @override
-  void shuffle([Random? random]) {
-    throw Exception('Cannot modify the content of ImmutableList');
-  }
-}
-
 extension BoolExtension on bool {
   int boolCompare(bool other) {
     if ((this && other) || (!this && !other)) return 0;
     if (other) return 1;
     return -1;
   }
-}
-
-Future<T> whenValueNonNull<T>(ValueListenable<T> listenable) {
-  if (listenable.value != null) return Future.value(listenable.value);
-  final completer = Completer<T>();
-  void listener() {
-    final value = listenable.value;
-    if (value != null) {
-      completer.complete(value);
-      listenable.removeListener(listener);
-    }
-  }
-
-  listenable.addListener(listener);
-  return completer.future;
 }
 
 const connectToNewAppText = 'Connect to a new app';
@@ -1610,34 +1121,50 @@ extension UriExtension on Uri {
   }
 }
 
-Iterable<T> removeNullValues<T>(Iterable<T?> values) {
-  return values.whereType<T>();
-}
-
 // TODO(mtaylee): Prefer to use this helper method whenever a call to
 // .split('/').last is made on a String (usually on URIs).
 // See https://github.com/flutter/devtools/issues/4360.
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
-String? fileNameFromUri(String? uri) => uri?.split('/').last;
+String? fileNameFromUri(String? uri) => uri?.split('/').lastOrNull;
 
 /// Calculates subtraction of two maps.
 ///
-/// Result map keys is union of the imput maps' keys.
+/// Result map keys is union of the input maps' keys.
 Map<K, R> subtractMaps<K, F, S, R>({
-  required Map<K, S>? substract,
+  required Map<K, S>? subtract,
   required Map<K, F>? from,
   required R? Function({required S? subtract, required F? from}) subtractor,
 }) {
   from ??= <K, F>{};
-  substract ??= <K, S>{};
+  subtract ??= <K, S>{};
 
   final result = <K, R>{};
-  final unionOfKeys = from.keys.toSet().union(substract.keys.toSet());
+  final unionOfKeys = from.keys.toSet().union(subtract.keys.toSet());
 
-  for (var key in unionOfKeys) {
-    final diff = subtractor(from: from[key], subtract: substract[key]);
+  for (final key in unionOfKeys) {
+    final diff = subtractor(from: from[key], subtract: subtract[key]);
     if (diff != null) result[key] = diff;
   }
   return result;
+}
+
+/// Returns the url (as a string) where the DevTools assets are served.
+///
+/// For Flutter apps and when DevTools is served via the `dart devtools`
+/// command, this url should be equivalent to [html.window.location.origin].
+/// However, when DevTools is served directly from DDS via the --observe flag,
+/// the authentication token and 'devtools/' path part are also required.
+///
+/// Examples:
+/// * 'http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools/performance'
+///     ==> 'http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools'
+/// * 'http://127.0.0.1:61962/performance' ==> 'http://127.0.0.1:61962'
+String devtoolsAssetsBasePath({required String origin, required String path}) {
+  const separator = '/';
+  final pathParts = path.split(separator);
+  // The last path part is the DevTools page (e.g. 'performance' or 'snapshot'),
+  // which is not part of the hosted asset path.
+  pathParts.removeLast();
+  return '$origin${pathParts.join(separator)}';
 }

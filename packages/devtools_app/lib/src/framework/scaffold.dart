@@ -2,32 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
+import 'package:devtools_app_shared/shared.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../app.dart';
+import '../extensions/extension_settings.dart';
 import '../screens/debugger/debugger_screen.dart';
 import '../shared/analytics/prompt.dart';
 import '../shared/banner_messages.dart';
-import '../shared/common_widgets.dart';
 import '../shared/config_specific/drag_and_drop/drag_and_drop.dart';
-import '../shared/config_specific/ide_theme/ide_theme.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/console/widgets/console_pane.dart';
+import '../shared/feature_flags.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose.dart';
-import '../shared/primitives/simple_items.dart';
-import '../shared/primitives/utils.dart';
+import '../shared/query_parameters.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
-import '../shared/split.dart';
-import '../shared/theme.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
 import 'about_dialog.dart';
+import 'app_bar.dart';
 import 'report_feedback_button.dart';
 import 'settings_dialog.dart';
 import 'status_line.dart';
@@ -40,35 +38,32 @@ import 'status_line.dart';
 /// for different routes.
 class DevToolsScaffold extends StatefulWidget {
   DevToolsScaffold({
-    Key? key,
+    super.key,
     required this.screens,
     this.page,
     List<Widget>? actions,
-    this.embed = false,
-  })  : actions = actions ?? defaultActions(),
-        super(key: key);
+    this.embedMode = EmbedMode.none,
+  }) : actions = actions ?? (embedMode.embedded ? [] : defaultActions());
 
   DevToolsScaffold.withChild({
     Key? key,
     required Widget child,
-    required IdeTheme ideTheme,
+    EmbedMode embedMode = EmbedMode.none,
     List<Widget>? actions,
   }) : this(
           key: key,
           screens: [SimpleScreen(child)],
           actions: actions,
+          embedMode: embedMode,
         );
 
-  /// A [Key] that indicates the scaffold is showing in narrow-width mode.
-  static const Key narrowWidthKey = Key('Narrow Scaffold');
-
-  /// A [Key] that indicates the scaffold is showing in full-width mode.
-  static const Key fullWidthKey = Key('Full-width Scaffold');
-
-  static List<Widget> defaultActions() => const [
-        OpenSettingsAction(),
-        ReportFeedbackButton(),
-        OpenAboutAction(),
+  static List<Widget> defaultActions({Color? color}) => [
+        OpenSettingsAction(color: color),
+        if (FeatureFlags.devToolsExtensions &&
+            !DevToolsQueryParams.load().hideExtensions)
+          ExtensionSettingsAction(color: color),
+        ReportFeedbackButton(color: color),
+        OpenAboutAction(color: color),
       ];
 
   /// The padding around the content in the DevTools UI.
@@ -76,7 +71,7 @@ class DevToolsScaffold extends StatefulWidget {
         horizontalPadding.left,
         isEmbedded() ? 2.0 : intermediateSpacing,
         horizontalPadding.right,
-        isEmbedded() ? 0.0 : intermediateSpacing,
+        isEmbedded() ? 2.0 : intermediateSpacing,
       );
 
   // Note: when changing this value, also update `flameChartContainerOffset`
@@ -91,13 +86,16 @@ class DevToolsScaffold extends StatefulWidget {
   /// The page being rendered.
   final String? page;
 
-  /// Whether to render the embedded view (without the header).
-  final bool embed;
+  /// The type of embedding for DevTools.
+  ///
+  /// This may result in rendering the DevTools without the top level tab bar.
+  /// See [EmbedMode].
+  final EmbedMode embedMode;
 
   /// Actions that it's possible to perform in this Scaffold.
   ///
   /// These will generally be [RegisteredServiceExtensionButton]s.
-  final List<Widget>? actions;
+  final List<Widget> actions;
 
   @override
   State<StatefulWidget> createState() => DevToolsScaffoldState();
@@ -107,7 +105,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     with AutoDisposeMixin, TickerProviderStateMixin {
   /// A tag used for [Hero] widgets to keep the [AppBar] in the same place
   /// across route transitions.
-  static const Object _appBarTag = 'DevTools AppBar';
+  static const _appBarTag = 'DevTools AppBar';
 
   /// The controller for animating between tabs.
   ///
@@ -119,21 +117,18 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   late ImportController _importController;
 
-  late String scaffoldTitle;
-
   @override
   void initState() {
     super.initState();
 
-    addAutoDisposeListener(offlineController.offlineMode);
+    addAutoDisposeListener(devToolsTitle);
 
     _setupTabController();
 
+    addAutoDisposeListener(offlineDataController.showingOfflineData);
     autoDisposeStreamSubscription(
       frameworkController.onShowPageId.listen(_showPageById),
     );
-
-    _initTitle();
   }
 
   @override
@@ -149,14 +144,17 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             widget.screens.indexOf(oldWidget.screens[_tabController!.index]);
       }
       // Create a new tab controller to reflect the changed tabs.
-      _setupTabController();
-      _tabController!.index = newIndex;
+      _setupTabController(startingIndex: newIndex);
     } else if (widget.screens[_tabController!.index].screenId != widget.page) {
       // If the page changed (eg. the route was modified by pressing back in the
       // browser), animate to the new one.
-      final newIndex = widget.page == null
+      var newIndex = widget.page == null
           ? 0 // When there's no supplied page, we show the first one.
           : widget.screens.indexWhere((t) => t.screenId == widget.page);
+      // Ensure the returned index is in range, otherwise set to 0.
+      if (newIndex == -1) {
+        newIndex = 0;
+      }
       _tabController!.animateTo(newIndex);
     }
   }
@@ -165,9 +163,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _importController = ImportController(
-      _pushSnapshotScreenForImport,
-    );
+    _importController = ImportController(_pushSnapshotScreenForImport);
     // This needs to be called at the scaffold level because we need an instance
     // of Notifications above this context.
     surveyService.maybeShowSurveyPrompt();
@@ -179,18 +175,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     super.dispose();
   }
 
-  void _initTitle() {
-    scaffoldTitle = devToolsTitle.value;
-    addAutoDisposeListener(devToolsTitle, () {
-      setState(() {
-        scaffoldTitle = devToolsTitle.value;
-      });
-    });
-  }
-
-  void _setupTabController() {
+  void _setupTabController({int startingIndex = 0}) {
     _tabController?.dispose();
-    _tabController = TabController(length: widget.screens.length, vsync: this);
+    _tabController = TabController(
+      initialIndex: startingIndex,
+      length: widget.screens.length,
+      vsync: this,
+    );
 
     if (widget.page != null) {
       final initialIndex =
@@ -212,15 +203,17 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         // Send the page change info to the framework controller (it can then
         // send it on to the devtools server, if one is connected).
         frameworkController.notifyPageChange(
-          PageChangeEvent(screen.screenId, widget.embed),
+          PageChangeEvent(screen.screenId, widget.embedMode),
         );
 
         // Clear error count when navigating to a screen.
-        serviceManager.errorBadgeManager.clearErrors(screen.screenId);
+        serviceConnection.errorBadgeManager.clearErrors(screen.screenId);
 
         // Update routing with the change.
-        final routerDelegate = DevToolsRouterDelegate.of(context);
-        routerDelegate.navigateIfNotCurrent(screen.screenId);
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          final routerDelegate = DevToolsRouterDelegate.of(context);
+          routerDelegate.navigateIfNotCurrent(screen.screenId);
+        });
       }
     });
 
@@ -233,7 +226,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         Router.neglect(context, () {
           routerDelegate.navigateIfNotCurrent(
             _currentScreen.screenId,
-            routerDelegate.currentConfiguration?.args,
+            routerDelegate.currentConfiguration?.params.params,
             routerDelegate.currentConfiguration?.state,
           );
         });
@@ -242,7 +235,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     // Broadcast the initial page.
     frameworkController.notifyPageChange(
-      PageChangeEvent(_currentScreen.screenId, widget.embed),
+      PageChangeEvent(_currentScreen.screenId, widget.embedMode),
     );
   }
 
@@ -262,10 +255,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Pushes the snapshot screen for an offline import.
   void _pushSnapshotScreenForImport(String screenId) {
-    final args = {'screen': screenId};
+    final params = {DevToolsQueryParams.offlineScreenIdKey: screenId};
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    if (!offlineController.offlineMode.value) {
-      routerDelegate.navigate(snapshotPageId, args);
+    if (!offlineDataController.showingOfflineData.value) {
+      routerDelegate.navigate(snapshotScreenId, params);
     } else {
       // If we are already in offline mode, we need to replace the existing page
       // so clicking Back does not go through all of the old snapshots.
@@ -274,7 +267,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // history entry.
       Router.neglect(
         context,
-        () => routerDelegate.navigate(snapshotPageId, args),
+        () => routerDelegate.navigate(snapshotScreenId, params),
       );
     }
   }
@@ -283,7 +276,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   Widget build(BuildContext context) {
     // Build the screens for each tab and wrap them in the appropriate styling.
     final tabBodies = [
-      for (var screen in widget.screens)
+      for (final screen in widget.screens)
         Align(
           alignment: Alignment.topLeft,
           child: FocusScope(
@@ -303,9 +296,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           controller: _tabController,
           children: tabBodies,
         ),
-        if (serviceManager.connectedAppInitialized &&
-            !serviceManager.connectedApp!.isProfileBuildNow! &&
-            !offlineController.offlineMode.value &&
+        if (serviceConnection.serviceManager.connectedAppInitialized &&
+            !serviceConnection
+                .serviceManager.connectedApp!.isProfileBuildNow! &&
+            !offlineDataController.showingOfflineData.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
             alignment: Alignment.topCenter,
@@ -313,181 +307,77 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           ),
       ],
     );
-    final theme = Theme.of(context);
 
-    return Provider<BannerMessagesController>(
-      create: (_) => BannerMessagesController(),
-      child: Provider<ImportController>.value(
-        value: _importController,
-        builder: (context, _) {
-          final showConsole = serviceManager.connectedAppInitialized &&
-              !offlineController.offlineMode.value &&
-              _currentScreen.showConsole(widget.embed);
-
-          return DragAndDrop(
-            handleDrop: _importController.importData,
-            child: Title(
-              title: scaffoldTitle,
-              // Color is a required parameter but the color only appears to
-              // matter on Android and we do not care about Android.
-              // Using theme.primaryColor matches the default behavior of the
-              // title used by [WidgetsApp].
-              color: theme.primaryColor.withAlpha(255),
-              child: KeyboardShortcuts(
-                keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
-                  context,
-                ),
-                child: Scaffold(
-                  appBar: widget.embed
-                      ? null
-                      :
-                      // ignore: avoid-returning-widgets as that would make code more verbose for no clear benefit in this case.
-                      _buildAppBar(scaffoldTitle),
-                  body: OutlineDecoration.onlyTop(
-                    child: Padding(
-                      padding: widget.appPadding,
-                      child: showConsole
-                          ? Split(
-                              axis: Axis.vertical,
-                              splitters: [
-                                ConsolePaneHeader(
-                                  backgroundColor: theme.colorScheme.surface,
-                                ),
-                              ],
-                              initialFractions: const [0.8, 0.2],
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    bottom: intermediateSpacing,
-                                  ),
-                                  child: content,
-                                ),
-                                RoundedOutlinedBorder.onlyBottom(
-                                  child: const ConsolePane(),
-                                ),
-                              ],
-                            )
-                          : content,
-                    ),
-                  ),
-                  bottomNavigationBar: StatusLine(
-                    currentScreen: _currentScreen,
-                    isEmbedded: widget.embed,
-                  ),
+    return Provider<ImportController>.value(
+      value: _importController,
+      builder: (context, _) {
+        final showConsole =
+            serviceConnection.serviceManager.connectedAppInitialized &&
+                !offlineDataController.showingOfflineData.value &&
+                _currentScreen.showConsole(widget.embedMode);
+        final containsSingleSimpleScreen =
+            widget.screens.length == 1 && widget.screens.first is SimpleScreen;
+        final showAppBar = widget.embedMode == EmbedMode.none ||
+            (widget.embedMode == EmbedMode.embedMany &&
+                !containsSingleSimpleScreen);
+        return DragAndDrop(
+          handleDrop: _importController.importData,
+          child: KeyboardShortcuts(
+            keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
+              context,
+            ),
+            child: Scaffold(
+              appBar: showAppBar
+                  ? PreferredSize(
+                      preferredSize: Size.fromHeight(defaultToolbarHeight),
+                      // Place the AppBar inside of a Hero widget to keep it the same across
+                      // route transitions.
+                      child: Hero(
+                        tag: _appBarTag,
+                        child: DevToolsAppBar(
+                          tabController: _tabController,
+                          screens: widget.screens,
+                          actions: widget.actions,
+                        ),
+                      ),
+                    )
+                  : null,
+              body: OutlineDecoration.onlyTop(
+                child: Padding(
+                  padding: widget.appPadding,
+                  child: showConsole
+                      ? SplitPane(
+                          axis: Axis.vertical,
+                          splitters: [
+                            ConsolePaneHeader(),
+                          ],
+                          initialFractions: const [0.8, 0.2],
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: intermediateSpacing,
+                              ),
+                              child: content,
+                            ),
+                            RoundedOutlinedBorder.onlyBottom(
+                              child: const ConsolePane(),
+                            ),
+                          ],
+                        )
+                      : content,
                 ),
               ),
+              bottomNavigationBar: StatusLine(
+                currentScreen: _currentScreen,
+                isEmbedded: widget.embedMode.embedded,
+                isConnected: serviceConnection.serviceManager.hasConnection &&
+                    serviceConnection.serviceManager.connectedAppInitialized,
+              ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  /// Builds an [AppBar] with the [TabBar] placed on the side or the bottom,
-  /// depending on the screen width.
-  PreferredSizeWidget _buildAppBar(String title) {
-    Widget? flexibleSpace;
-    late final Size preferredSize;
-    TabBar tabBar;
-
-    final isNarrow =
-        MediaQuery.of(context).size.width <= _wideWidth(title, widget);
-
-    // Add a leading [VerticalLineSpacer] to the actions if the screen is not
-    // narrow.
-    final actions = List<Widget>.from(widget.actions ?? []);
-    if (!isNarrow && actions.isNotEmpty && widget.screens.length > 1) {
-      actions.insert(0, VerticalLineSpacer(height: defaultToolbarHeight));
-    }
-
-    final bool hasMultipleTabs = widget.screens.length > 1;
-
-    if (hasMultipleTabs) {
-      tabBar = TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        tabs: [for (var screen in widget.screens) screen.buildTab(context)],
-      );
-      preferredSize = isNarrow
-          ? Size.fromHeight(defaultToolbarHeight * 2 + densePadding)
-          : Size.fromHeight(defaultToolbarHeight);
-      final alignment = isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
-
-      final rightPadding = isNarrow
-          ? 0.0
-          : math.max(
-              0.0,
-              // Use [widget.actions] here instead of [actions] because we may
-              // have added a spacer element to [actions] above, which should be
-              // excluded from the width calculation.
-              actionWidgetSize * ((widget.actions ?? []).length) +
-                  (actions.safeFirst is VerticalLineSpacer
-                      ? VerticalLineSpacer.totalWidth
-                      : 0.0),
-            );
-
-      flexibleSpace = Align(
-        alignment: alignment,
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: isNarrow ? scaleByFontFactor(36.0) + 4.0 : 4.0,
-            right: rightPadding,
           ),
-          child: tabBar,
-        ),
-      );
-    }
-
-    final appBar = AppBar(
-      // Turn off the appbar's back button.
-      automaticallyImplyLeading: false,
-      title: Text(
-        title,
-        style: Theme.of(context).devToolsTitleStyle,
-      ),
-      centerTitle: false,
-      toolbarHeight: defaultToolbarHeight,
-      actions: actions,
-      flexibleSpace: flexibleSpace,
+        );
+      },
     );
-
-    if (!hasMultipleTabs) return appBar;
-
-    return PreferredSize(
-      key: isNarrow
-          ? DevToolsScaffold.narrowWidthKey
-          : DevToolsScaffold.fullWidthKey,
-      preferredSize: preferredSize,
-      // Place the AppBar inside of a Hero widget to keep it the same across
-      // route transitions.
-      child: Hero(
-        tag: _appBarTag,
-        child: appBar,
-      ),
-    );
-  }
-
-  /// Returns the width of the scaffold title, tabs and default icons.
-  double _wideWidth(String title, DevToolsScaffold widget) {
-    final textTheme = Theme.of(context).textTheme;
-    final painter = TextPainter(
-      text: TextSpan(
-        text: title,
-        style: textTheme.titleLarge,
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    // Approximate size of the title. Add [defaultSpacing] to account for
-    // title's leading padding.
-    double wideWidth = painter.width + defaultSpacing;
-    for (var tab in widget.screens) {
-      wideWidth += tab.approximateWidth(textTheme);
-    }
-    final actionsLength = widget.actions?.length ?? 0;
-    if (actionsLength > 0) {
-      wideWidth += actionsLength * actionWidgetSize;
-    }
-    return wideWidth;
   }
 }
 
@@ -548,7 +438,7 @@ class SimpleScreen extends Screen {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return child;
   }
 }

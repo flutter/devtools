@@ -4,7 +4,8 @@
 
 import 'dart:async';
 
-import 'package:devtools_shared/devtools_shared.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -14,10 +15,10 @@ import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/utils.dart';
+import '../shared/query_parameters.dart';
 import '../shared/routing.dart';
-import '../shared/theme.dart';
+import '../shared/ui/colors.dart';
 import 'framework_core.dart';
 
 final _log = Logger('initializer');
@@ -33,11 +34,11 @@ final _log = Logger('initializer');
 /// here.
 class Initializer extends StatefulWidget {
   const Initializer({
-    Key? key,
+    super.key,
     required this.url,
     required this.builder,
     this.allowConnectionScreenOnDisconnect = true,
-  }) : super(key: key);
+  });
 
   /// The builder for the widget's children.
   ///
@@ -62,7 +63,7 @@ class _InitializerState extends State<Initializer>
   ///
   /// This is a method and not a getter to communicate that its value may
   /// change between successive calls.
-  bool _checkLoaded() => serviceManager.hasConnection;
+  bool _checkLoaded() => serviceConnection.serviceManager.hasConnection;
 
   OverlayEntry? currentDisconnectedOverlay;
 
@@ -76,10 +77,12 @@ class _InitializerState extends State<Initializer>
 
     // If we become disconnected by means other than a manual disconnect action,
     // attempt to reconnect.
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      final connectionState = serviceManager.connectedState.value;
-      if (!connectionState.connected &&
-          !connectionState.userInitiatedConnectionState) {
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      final connectionState =
+          serviceConnection.serviceManager.connectedState.value;
+      if (connectionState.connected) {
+        setState(() {});
+      } else if (!connectionState.userInitiatedConnectionState) {
         // Try to reconnect (otherwise, will fall back to showing the
         // disconnected overlay).
         unawaited(
@@ -94,13 +97,6 @@ class _InitializerState extends State<Initializer>
         );
       }
     });
-
-    // Trigger a rebuild when the connection becomes available. This is done
-    // by onConnectionAvailable and not onStateChange because we also need
-    // to have queried what type of app this is before we load the UI.
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable.listen((_) => setState(() {})),
-    );
 
     unawaited(_attemptUrlConnection());
   }
@@ -134,14 +130,8 @@ class _InitializerState extends State<Initializer>
       return;
     }
 
-    errorReporter ??= (String message, Object error) {
-      notificationService.push('$message, $error');
-    };
-
-    final uri = normalizeVmServiceUri(widget.url!);
     final connected = await FrameworkCore.initVmService(
-      '',
-      explicitUri: uri,
+      serviceUriAsString: widget.url!,
       errorReporter: errorReporter,
       logException: logException,
     );
@@ -163,13 +153,17 @@ class _InitializerState extends State<Initializer>
         );
         Overlay.of(context).insert(_createDisconnectedOverlay());
 
-        addAutoDisposeListener(serviceManager.connectedState, () {
-          final connectedState = serviceManager.connectedState.value;
-          if (connectedState.connected) {
-            // Hide the overlay if we become reconnected.
-            hideDisconnectedOverlay();
-          }
-        });
+        addAutoDisposeListener(
+          serviceConnection.serviceManager.connectedState,
+          () {
+            final connectedState =
+                serviceConnection.serviceManager.connectedState.value;
+            if (connectedState.connected) {
+              // Hide the overlay if we become reconnected.
+              hideDisconnectedOverlay();
+            }
+          },
+        );
       }
     });
   }
@@ -182,21 +176,21 @@ class _InitializerState extends State<Initializer>
   }
 
   void _reviewHistory() {
-    assert(offlineController.offlineDataJson.isNotEmpty);
+    assert(offlineDataController.offlineDataJson.isNotEmpty);
 
-    offlineController.enterOfflineMode(
-      offlineApp: offlineController.previousConnectedApp!,
+    offlineDataController.startShowingOfflineData(
+      offlineApp: offlineDataController.previousConnectedApp!,
     );
     hideDisconnectedOverlay();
     final args = <String, String?>{
-      'uri': null,
-      'screen': offlineController
+      DevToolsQueryParams.vmServiceUriKey: null,
+      DevToolsQueryParams.offlineScreenIdKey: offlineDataController
           .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String,
     };
     final routerDelegate = DevToolsRouterDelegate.of(context);
     Router.neglect(
       context,
-      () => routerDelegate.navigate(snapshotPageId, args),
+      () => routerDelegate.navigate(snapshotScreenId, args),
     );
   }
 
@@ -209,7 +203,7 @@ class _InitializerState extends State<Initializer>
           child: Column(
             children: [
               const Spacer(),
-              Text('Disconnected', style: theme.textTheme.displaySmall),
+              Text('Disconnected', style: theme.textTheme.headlineMedium),
               const SizedBox(height: defaultSpacing),
               if (widget.allowConnectionScreenOnDisconnect)
                 ElevatedButton(
@@ -223,12 +217,9 @@ class _InitializerState extends State<Initializer>
                   child: const Text(connectToNewAppText),
                 )
               else
-                Text(
-                  'Run a new debug session to reconnect',
-                  style: theme.textTheme.bodyMedium,
-                ),
+                const Text('Run a new debug session to reconnect'),
               const Spacer(),
-              if (offlineController.offlineDataJson.isNotEmpty)
+              if (offlineDataController.offlineDataJson.isNotEmpty)
                 ElevatedButton(
                   onPressed: _reviewHistory,
                   child: const Text('Review recent data (offline)'),
@@ -244,7 +235,7 @@ class _InitializerState extends State<Initializer>
 
   @override
   Widget build(BuildContext context) {
-    return _checkLoaded() || offlineController.offlineMode.value
+    return _checkLoaded() || offlineDataController.showingOfflineData.value
         ? widget.builder(context)
         : Scaffold(
             body: currentDisconnectedOverlay != null

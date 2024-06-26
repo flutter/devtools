@@ -89,3 +89,12 @@ body {
 ::-webkit-scrollbar-thumb {
   border-radius: 5px !important;
 }
+
+.pf-header-bar {
+  padding-top: 2px 2px 2px 8px !important;
+}
+
+.pf-header-title,
+.pf-menu .pf-menu-item {
+  font-size: 14px !important;
+}

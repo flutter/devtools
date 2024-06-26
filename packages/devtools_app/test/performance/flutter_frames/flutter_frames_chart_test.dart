@@ -3,26 +3,34 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/shared/ui/colors.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../test_infra/test_data/performance.dart';
+import '../../test_infra/test_data/performance/sample_performance_data.dart';
 
 void main() {
   late FlutterFramesController framesController;
 
   Future<void> pumpChart(
     WidgetTester tester, {
-    bool offlineMode = false,
+    bool showingOfflineData = false,
+    bool impellerEnabled = false,
   }) async {
     await tester.pumpWidget(
-      wrapWithControllers(
-        FlutterFramesChart(framesController, offlineMode: offlineMode),
-        bannerMessages: BannerMessagesController(),
+      wrap(
+        FlutterFramesChart(
+          framesController,
+          showingOfflineData: showingOfflineData,
+          impellerEnabled: impellerEnabled,
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -31,18 +39,22 @@ void main() {
 
   group('FlutterFramesChart', () {
     setUp(() {
-      final fakeServiceManager = FakeServiceManager();
+      final fakeServiceConnection = FakeServiceConnectionManager();
       mockConnectedApp(
-        fakeServiceManager.connectedApp!,
+        fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: true,
         isWebApp: false,
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
+      setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(BannerMessagesController, BannerMessagesController());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       setGlobal(PreferencesController, PreferencesController());
 
       framesController = FlutterFramesController(
@@ -62,6 +74,7 @@ void main() {
       expect(find.byType(Legend), findsOneWidget);
       expect(find.byType(AverageFPS), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsNothing);
+      expect(find.textContaining('Engine: Skia'), findsOneWidget);
     });
 
     testWidgets(
@@ -78,6 +91,7 @@ void main() {
         expect(find.byType(Legend), findsNothing);
         expect(find.byType(AverageFPS), findsNothing);
         expect(find.byType(FlutterFramesChartItem), findsNothing);
+        expect(find.textContaining('Engine:'), findsNothing);
       },
     );
 
@@ -92,21 +106,34 @@ void main() {
       expect(find.byType(Legend), findsOneWidget);
       expect(find.byType(AverageFPS), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsNWidgets(2));
+      expect(find.textContaining('Engine: Skia'), findsOneWidget);
     });
 
     testWidgets('builds in offline mode', (WidgetTester tester) async {
       framesController.clearData();
-      await pumpChart(tester, offlineMode: true);
+      await pumpChart(tester, showingOfflineData: true);
       expect(find.byType(FramesChart), findsOneWidget);
       expect(find.byType(FramesChartControls), findsOneWidget);
       expect(find.byType(PauseResumeButtonGroup), findsNothing);
       expect(find.byType(Legend), findsOneWidget);
       expect(find.byType(AverageFPS), findsOneWidget);
+      expect(find.textContaining('Engine: Skia'), findsOneWidget);
+    });
+
+    testWidgets('builds with impeller enabled', (WidgetTester tester) async {
+      framesController.clearData();
+      await pumpChart(tester, impellerEnabled: true);
+      expect(find.byType(FramesChart), findsOneWidget);
+      expect(find.byType(FramesChartControls), findsOneWidget);
+      expect(find.byType(PauseResumeButtonGroup), findsOneWidget);
+      expect(find.byType(Legend), findsOneWidget);
+      expect(find.byType(AverageFPS), findsOneWidget);
+      expect(find.textContaining('Engine: Impeller'), findsOneWidget);
     });
 
     group('starting scroll position', () {
       const totalNumFrames = 50;
-      const totalFramesInView = 14;
+      const totalFramesInView = 15;
 
       setUp(() {
         var number = 0;
@@ -116,7 +143,7 @@ void main() {
         var rasterTime = 12000;
         for (var i = 0; i < totalNumFrames; i++) {
           framesController.addFrame(
-            FlutterFrame.parse({
+            FlutterFrame.fromJson({
               'number': number++,
               'startTime': startTime += 50000,
               'elapsed': elapsedTime += 50000,
@@ -129,8 +156,7 @@ void main() {
       });
 
       void verifyScrollOffset(WidgetTester tester, double expectedOffset) {
-        final Scrollbar scrollbar =
-            tester.widget<Scrollbar>(find.byType(Scrollbar));
+        final scrollbar = tester.widget<Scrollbar>(find.byType(Scrollbar));
         final scrollController = scrollbar.controller!;
         expect(scrollController.offset, equals(expectedOffset));
       }

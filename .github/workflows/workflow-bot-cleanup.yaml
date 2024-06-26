@@ -1,0 +1,53 @@
+name: Workflow Bot Cleanup
+on:
+  workflow_dispatch: # Allows for manual triggering if needed
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: "0 9 * * *" # Run every day
+permissions:
+  contents: write
+  pull-requests: write
+
+
+jobs:
+  clean-up-branches:
+    if: ${{ github.repository == 'flutter/devtools' }}
+    name: Clean up closed DartDevtoolWorkflowBot Branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sparse checkout of the repository
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+        with:
+          sparse-checkout: |
+            README.md
+      - name: Clean up closed DartDevtoolWorkflowBot branches
+        run: |
+          set -e
+
+          # Get list of branches that exist on the remote, then filter for the workflow bot branches
+          EXISTING_BRANCHES=$(git ls-remote --heads | grep refs/heads | awk  '{print $2}' |sed 's|refs/heads/\(.*\)$|\1|')
+          for EXISTING_BRANCH in $EXISTING_BRANCHES; do
+            set +e # Turn off exit on error, since "gh pr view" may fail if branch doesn't exist
+            PR_INFO=$(gh pr view --json closed,author "$EXISTING_BRANCH")
+            if [[ $? -ne 0 ]]; then
+              # If getting PR_INFO fails assume the PR does not exist
+              echo "SKIP: No PR exists for $EXISTING_BRANCH"
+              continue
+            fi
+            set -e # Turn exit on error back on
+
+            PR_IS_CLOSED=$(echo $PR_INFO | jq -r '.closed')
+            PR_AUTHOR=$(echo $PR_INFO | jq -r '.author.login')
+            if [[ "$PR_IS_CLOSED" == "true" ]] && [[ "$PR_AUTHOR" == "DartDevtoolWorkflowBot" ]]; then
+              # Delete branches where:
+              # - DartDevtoolWorkflowBot is the author 
+              # - the PR is closed
+              echo "Deleting $EXISTING_BRANCH"
+              gh api /repos/flutter/devtools/git/refs/heads/$EXISTING_BRANCH -X DELETE
+            else
+              echo "SKIP: Avoiding $EXISTING_BRANCH { is_closed:$PR_IS_CLOSED, author:$PR_AUTHOR }"
+            fi
+          done
+
+        env:
+          GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}

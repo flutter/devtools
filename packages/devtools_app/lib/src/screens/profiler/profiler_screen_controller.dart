@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
-import '../../shared/offline_mode.dart';
-import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/offline_data.dart';
 import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
@@ -36,21 +36,25 @@ class ProfilerScreenController extends DisposableController
   }
 
   Future<void> _initHelper() async {
-    initReviewHistoryOnDisconnectListener();
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       await allowedError(
-        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
+        serviceConnection.serviceManager.service!
+            .setProfilePeriod(mediumProfilePeriod),
         logError: false,
       );
 
-      _currentIsolate = serviceManager.isolateManager.selectedIsolate.value;
-      addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-        final selectedIsolate =
-            serviceManager.isolateManager.selectedIsolate.value;
-        if (selectedIsolate != null) {
-          switchToIsolate(selectedIsolate);
-        }
-      });
+      _currentIsolate =
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
+      addAutoDisposeListener(
+        serviceConnection.serviceManager.isolateManager.selectedIsolate,
+        () {
+          final selectedIsolate = serviceConnection
+              .serviceManager.isolateManager.selectedIsolate.value;
+          if (selectedIsolate != null) {
+            switchToIsolate(selectedIsolate);
+          }
+        },
+      );
 
       addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () async {
         if (preferences.vmDeveloperModeEnabled.value) {
@@ -74,18 +78,27 @@ class ProfilerScreenController extends DisposableController
         cpuProfilerController.updateViewForType(CpuProfilerViewType.function);
       });
     } else {
-      final shouldLoadOfflineData =
-          offlineController.shouldLoadOfflineData(ProfilerScreen.id);
-      if (shouldLoadOfflineData) {
-        final profilerJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[ProfilerScreen.id],
-        );
-        final offlineProfilerData = CpuProfileData.parse(profilerJson);
-        if (!offlineProfilerData.isEmpty) {
-          await loadOfflineData(offlineProfilerData);
-        }
-      }
+      await maybeLoadOfflineData(
+        ProfilerScreen.id,
+        createData: (json) => CpuProfileData.fromJson(json),
+        shouldLoad: (data) => !data.isEmpty,
+        loadData: _loadOfflineData,
+      );
     }
+  }
+
+  Future<void> _loadOfflineData(CpuProfileData data) async {
+    await cpuProfilerController.transformer.processData(
+      data,
+      processId: 'offline data processing',
+    );
+    cpuProfilerController.loadProcessedData(
+      CpuProfilePair(
+        functionProfile: data,
+        codeProfile: null,
+      ),
+      storeAsUserTagNone: true,
+    );
   }
 
   final cpuProfilerController = CpuProfilerController();
@@ -137,25 +150,10 @@ class ProfilerScreenController extends DisposableController
   }
 
   @override
-  OfflineScreenData screenDataForExport() => OfflineScreenData(
+  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
         screenId: ProfilerScreen.id,
-        data: cpuProfileData!.toJson,
+        data: cpuProfileData!.toJson(),
       );
-
-  @override
-  FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
-    await cpuProfilerController.transformer.processData(
-      offlineData,
-      processId: 'offline data processing',
-    );
-    cpuProfilerController.loadProcessedData(
-      CpuProfilePair(
-        functionProfile: offlineData,
-        codeProfile: null,
-      ),
-      storeAsUserTagNone: true,
-    );
-  }
 
   Future<void> clear() async {
     await cpuProfilerController.clear();

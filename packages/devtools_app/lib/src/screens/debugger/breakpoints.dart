@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart' hide Badge;
 
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
@@ -17,7 +17,7 @@ double get executableLineRadius => scaleByFontFactor(1.5);
 double get breakpointRadius => scaleByFontFactor(6.0);
 
 class Breakpoints extends StatefulWidget {
-  const Breakpoints({Key? key}) : super(key: key);
+  const Breakpoints({super.key});
 
   @override
   State<Breakpoints> createState() => _BreakpointsState();
@@ -33,11 +33,15 @@ class _BreakpointsState extends State<Breakpoints>
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<List<BreakpointAndSourcePosition>,
-        BreakpointAndSourcePosition?>(
-      firstListenable: breakpointManager.breakpointsWithLocation,
-      secondListenable: controller.selectedBreakpoint,
-      builder: (context, breakpoints, selectedBreakpoint, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        breakpointManager.breakpointsWithLocation,
+        controller.selectedBreakpoint,
+      ],
+      builder: (context, values, _) {
+        final breakpoints = values.first as List<BreakpointAndSourcePosition>;
+        final selectedBreakpoint =
+            values.second as BreakpointAndSourcePosition?;
         return ListView.builder(
           itemCount: breakpoints.length,
           itemExtent: defaultListItemHeight,
@@ -62,7 +66,7 @@ class _BreakpointsState extends State<Breakpoints>
     return Material(
       color: isSelected ? theme.colorScheme.selectedRowBackgroundColor : null,
       child: InkWell(
-        onTap: () => _onBreakpointSelected(bp),
+        onTap: () async => await _onBreakpointSelected(bp),
         child: Padding(
           padding: const EdgeInsets.all(borderPadding),
           child: Row(
@@ -102,8 +106,8 @@ class _BreakpointsState extends State<Breakpoints>
     );
   }
 
-  void _onBreakpointSelected(BreakpointAndSourcePosition bp) {
-    controller.selectBreakpoint(bp);
+  Future<void> _onBreakpointSelected(BreakpointAndSourcePosition bp) async {
+    await controller.selectBreakpoint(bp);
   }
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {

@@ -4,14 +4,19 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/shared.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
+import 'extensions/extension_screen.dart';
 import 'framework/framework_core.dart';
+import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
-import 'framework/landing_screen.dart';
 import 'framework/notifications_view.dart';
 import 'framework/release_notes/release_notes.dart';
 import 'framework/scaffold.dart';
@@ -19,13 +24,20 @@ import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
 import 'screens/debugger/debugger_screen.dart';
+import 'screens/deep_link_validation/deep_links_controller.dart';
+import 'screens/deep_link_validation/deep_links_screen.dart';
 import 'screens/inspector/inspector_controller.dart';
 import 'screens/inspector/inspector_screen.dart';
 import 'screens/inspector/inspector_tree_controller.dart';
+import 'screens/inspector_v2/inspector_controller.dart' as inspector_v2;
+import 'screens/inspector_v2/inspector_screen.dart' as inspector_v2;
+import 'screens/inspector_v2/inspector_tree_controller.dart' as inspector_v2;
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
-import 'screens/memory/memory_controller.dart';
-import 'screens/memory/memory_screen.dart';
+import 'screens/logging/logging_screen_v2/logging_controller_v2.dart';
+import 'screens/logging/logging_screen_v2/logging_screen_v2.dart';
+import 'screens/memory/framework/memory_controller.dart';
+import 'screens/memory/framework/memory_screen.dart';
 import 'screens/network/network_controller.dart';
 import 'screens/network/network_screen.dart';
 import 'screens/performance/performance_controller.dart';
@@ -41,35 +53,33 @@ import 'shared/analytics/analytics_controller.dart';
 import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
 import 'shared/console/primitives/simple_items.dart';
+import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
+import 'shared/offline_data.dart';
 import 'shared/offline_screen.dart';
-import 'shared/primitives/auto_dispose.dart';
 import 'shared/primitives/utils.dart';
+import 'shared/query_parameters.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
-import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
+import 'shared/utils.dart';
+import 'standalone_ui/standalone_screen.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
 const debugEnableSampleScreen = false;
 
-// Disabled until VM developer mode functionality is added.
-const showVmDeveloperMode = false;
-
 /// Top-level configuration for the app.
 @immutable
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
-    this.screens,
+    this.originalScreens,
     this.analyticsController, {
     super.key,
-    this.sampleData = const [],
   });
 
-  final List<DevToolsScreen> screens;
+  final List<DevToolsScreen> originalScreens;
   final AnalyticsController analyticsController;
-  final List<DevToolsJsonFile> sampleData;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -79,19 +89,44 @@ class DevToolsApp extends StatefulWidget {
 ///
 /// This manages the route generation, and marshals URL query parameters into
 /// flutter route parameters.
-// TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
-// navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
-  List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
+  List<Screen> get _screens {
+    if (FeatureFlags.devToolsExtensions) {
+      // TODO(https://github.com/flutter/devtools/issues/6273): stop special
+      // casing the package:provider extension.
+      final containsProviderExtension = extensionService
+          .currentExtensions.value.visibleExtensions
+          .where((e) => e.name == 'provider')
+          .isNotEmpty;
+      final devToolsScreens = containsProviderExtension
+          ? _originalScreens
+              .where((s) => s.screenId != ScreenMetaData.provider.id)
+              .toList()
+          : _originalScreens;
+      return [...devToolsScreens, ..._extensionScreens];
+    }
+    return _originalScreens;
+  }
 
-  bool get isDarkThemeEnabled => _isDarkThemeEnabled;
-  bool _isDarkThemeEnabled = true;
+  List<Screen> get _originalScreens =>
+      widget.originalScreens.map((s) => s.screen).toList();
 
-  bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
-  bool _vmDeveloperModeEnabled = false;
+  Iterable<Screen> get _extensionScreens =>
+      extensionService.visibleExtensions.map(
+        (e) => DevToolsScreen<void>(ExtensionScreen(e)).screen,
+      );
 
-  bool get denseModeEnabled => _denseModeEnabled;
-  bool _denseModeEnabled = false;
+  bool get isDarkThemeEnabled {
+    // We use user preference when not embedded. When embedded, we always use
+    // the IDE one (since the user can't access the preference, and the
+    // preference may have been set in an external window and differ from the
+    // IDE theme).
+    return isEmbedded() && ideTheme.ideSpecifiedTheme
+        ? ideTheme.isDarkMode
+        : _isDarkThemeEnabledPreference;
+  }
+
+  bool _isDarkThemeEnabledPreference = true;
 
   final hoverCardController = HoverCardController();
 
@@ -102,33 +137,40 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
+    setGlobal(GlobalKey<NavigatorState>, routerDelegate.navigatorKey);
+
+    // TODO(https://github.com/flutter/devtools/issues/6018): Once
+    // https://github.com/flutter/flutter/issues/129692 is fixed, disable the
+    // browser's native context menu on secondary-click, and instead use the
+    // menu provided by Flutter:
+    // if (kIsWeb) {
+    //   unawaited(BrowserContextMenu.disableContextMenu());
+    // }
 
     unawaited(ga.setupDimensions());
 
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
+    void clearRoutesAndSetState() {
       setState(() {
         _clearCachedRoutes();
       });
-    });
+    }
 
-    _isDarkThemeEnabled = preferences.darkModeTheme.value;
+    if (FeatureFlags.devToolsExtensions) {
+      addAutoDisposeListener(
+        extensionService.currentExtensions,
+        clearRoutesAndSetState,
+      );
+    }
+
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      clearRoutesAndSetState,
+    );
+
+    _isDarkThemeEnabledPreference = preferences.darkModeTheme.value;
     addAutoDisposeListener(preferences.darkModeTheme, () {
       setState(() {
-        _isDarkThemeEnabled = preferences.darkModeTheme.value;
-      });
-    });
-
-    _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
-    addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () {
-      setState(() {
-        _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
-      });
-    });
-
-    _denseModeEnabled = preferences.denseModeEnabled.value;
-    addAutoDisposeListener(preferences.denseModeEnabled, () {
-      setState(() {
-        _denseModeEnabled = preferences.denseModeEnabled.value;
+        _isDarkThemeEnabledPreference = preferences.darkModeTheme.value;
       });
     });
 
@@ -137,9 +179,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    // preferences is initialized in main() to avoid flash of content with
-    // incorrect theme.
-    preferences.dispose();
+    FrameworkCore.dispose();
     super.dispose();
   }
 
@@ -153,15 +193,21 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Page _getPage(
     BuildContext context,
     String? page,
-    Map<String, String?> args,
+    DevToolsQueryParams params,
     DevToolsNavigationState? state,
   ) {
+    // `page` will initially be null while the router is set up, then we will
+    // be called again with an empty string for the root.
+    if (FrameworkCore.initializationInProgress || page == null) {
+      return const MaterialPage(child: CenteredCircularProgressIndicator());
+    }
+
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
-      Widget widget = pages[page!]!(
+      Widget widget = pages[page]!(
         context,
         page,
-        args,
+        params,
         state,
       );
       assert(
@@ -170,7 +216,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             builder: (context) => pages[page]!(
               context,
               page,
-              args,
+              params,
               state,
             ),
           );
@@ -184,8 +230,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return MaterialPage(
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
-        ideTheme: ideTheme,
-        child: CenteredMessage("'$page' not found."),
+        embedMode: params.embedMode,
+        child: ScreenUnavailable(
+          title: "The '$page' page cannot be found.",
+          embedMode: params.embedMode,
+          routerDelegate: routerDelegate,
+        ),
       ),
     );
   }
@@ -193,99 +243,152 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Widget _buildTabbedPage(
     BuildContext _,
     String? page,
-    Map<String, String?> params,
+    DevToolsQueryParams queryParams,
     DevToolsNavigationState? __,
   ) {
-    final vmServiceUri = params['uri'];
-
-    // Always return the landing screen if there's no VM service URI.
-    if (vmServiceUri?.isEmpty ?? true) {
-      return DevToolsScaffold.withChild(
-        key: const Key('landing'),
-        ideTheme: ideTheme,
-        child: LandingScreenBody(sampleData: widget.sampleData),
-      );
-    }
+    final vmServiceUri = queryParams.vmServiceUri;
+    final embedMode = queryParams.embedMode;
 
     // TODO(dantup): We should be able simplify this a little, removing params['page']
     // and only supporting /inspector (etc.) instead of also &page=inspector if
     // all IDEs switch over to those URLs.
     if (page?.isEmpty ?? true) {
-      page = params['page'];
+      page = queryParams.legacyPage;
     }
-    final embed = params['embed'] == 'true';
-    final hide = {...?params['hide']?.split(',')};
-    return Initializer(
-      url: vmServiceUri,
-      allowConnectionScreenOnDisconnect: !embed,
-      builder: (_) {
-        // Force regeneration of visible screens when VM developer mode is
-        // enabled.
-        return ValueListenableBuilder<bool>(
-          valueListenable: preferences.vmDeveloperModeEnabled,
-          builder: (_, __, child) {
-            final screens = _visibleScreens()
-                .where((p) => embed && page != null ? p.screenId == page : true)
-                .where((p) => !hide.contains(p.screenId))
-                .toList();
-            if (screens.isEmpty) return child ?? const SizedBox.shrink();
-            return MultiProvider(
-              providers: _providedControllers(),
-              child: DevToolsScaffold(
-                embed: embed,
-                page: page,
-                screens: screens,
-                actions: [
-                  // TODO(https://github.com/flutter/devtools/issues/1941)
-                  if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
-                    const HotReloadButton(),
-                    const HotRestartButton(),
-                  ],
-                  ...DevToolsScaffold.defaultActions(),
-                ],
+
+    final connectedToVmService =
+        vmServiceUri != null && vmServiceUri.isNotEmpty;
+
+    Widget scaffoldBuilder() {
+      // Force regeneration of visible screens when VM developer mode is
+      // enabled and when the list of available extensions change.
+      return MultiValueListenableBuilder(
+        listenables: [
+          preferences.vmDeveloperModeEnabled,
+          extensionService.currentExtensions,
+        ],
+        builder: (_, __, child) {
+          final screensInScaffold = _visibleScreens()
+              .where(
+                (s) => maybeIncludeOnlyEmbeddedScreen(
+                  s,
+                  page: page,
+                  embedMode: embedMode,
+                ),
+              )
+              .toList();
+
+          removeHiddenScreens(screensInScaffold, queryParams);
+
+          DevToolsScaffold scaffold;
+
+          final originalScreen =
+              _screens.firstWhereOrNull((s) => s.screenId == page);
+          final screenInOriginalScreens = originalScreen != null;
+          final screenInScaffoldScreens =
+              screensInScaffold.containsWhere((s) => s.screenId == page);
+          if (page != null &&
+              screenInOriginalScreens &&
+              !screenInScaffoldScreens) {
+            // The requested [page] is in the list of DevTools screens, but is
+            // not available in list of available screens for this scaffold.
+            scaffold = DevToolsScaffold.withChild(
+              key: const Key('screen-disabled'),
+              embedMode: embedMode,
+              child: ScreenUnavailable(
+                title: "The '$page' screen is unavailable.",
+                description: _screenDisabledMessage(originalScreen),
+                routerDelegate: routerDelegate,
+                embedMode: embedMode,
               ),
             );
-          },
-          child: DevToolsScaffold.withChild(
-            ideTheme: ideTheme,
-            child: CenteredMessage(
-              page != null
-                  ? 'The "$page" screen is not available for this application.'
-                  : 'No tabs available for this application.',
-            ),
-          ),
-        );
-      },
-    );
+          } else if (screensInScaffold.isEmpty) {
+            // TODO(https://github.com/dart-lang/pub-dev/issues/7216): add an
+            // extensions store or a link to a pub.dev query for packages with
+            // extensions.
+            scaffold = DevToolsScaffold.withChild(
+              embedMode: embedMode,
+              child: CenteredMessage(
+                'No DevTools '
+                '${queryParams.hideAllExceptExtensions ? 'extensions' : 'screens'} '
+                'available for your project.',
+              ),
+            );
+          } else {
+            final connectedToFlutterApp = serviceConnection
+                    .serviceManager.connectedApp?.isFlutterAppNow ??
+                false;
+            final connectedToDartWebApp = serviceConnection
+                    .serviceManager.connectedApp?.isDartWebAppNow ??
+                false;
+            scaffold = DevToolsScaffold(
+              embedMode: embedMode,
+              page: page,
+              screens: screensInScaffold,
+              actions: isEmbedded()
+                  ? []
+                  : [
+                      if (connectedToVmService) ...[
+                        // Hide the hot reload button for Dart web apps, where the
+                        // hot reload service extension is not avilable and where the
+                        // [service.reloadServices] RPC is not implemented.
+                        // TODO(https://github.com/flutter/devtools/issues/6441): find
+                        // a way to show this for Dart web apps when supported.
+                        if (!connectedToDartWebApp)
+                          HotReloadButton(
+                            callOnVmServiceDirectly: !connectedToFlutterApp,
+                          ),
+                        // This button will hide itself based on whether the
+                        // hot restart service is available for the connected app.
+                        const HotRestartButton(),
+                      ],
+                      ...DevToolsScaffold.defaultActions(),
+                    ],
+            );
+          }
+          return MultiProvider(
+            providers: _providedControllers(),
+            child: scaffold,
+          );
+        },
+      );
+    }
+
+    return connectedToVmService
+        ? Initializer(
+            url: vmServiceUri,
+            allowConnectionScreenOnDisconnect: !embedMode.embedded,
+            builder: (_) => scaffoldBuilder(),
+          )
+        : scaffoldBuilder();
   }
 
   /// The pages that the app exposes.
   Map<String, UrlParametersBuilder> get pages {
     return _routes ??= {
-      homePageId: _buildTabbedPage,
-      for (final screen in widget.screens)
-        screen.screen.screenId: _buildTabbedPage,
-      snapshotPageId: (_, __, args, ___) {
-        final snapshotArgs = OfflineDataArguments.fromArgs(args);
+      homeScreenId: _buildTabbedPage,
+      for (final screen in _screens) screen.screenId: _buildTabbedPage,
+      snapshotScreenId: (_, __, params, ___) {
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
-          ideTheme: ideTheme,
+          embedMode: params.embedMode,
           child: MultiProvider(
             providers: _providedControllers(offline: true),
-            child: OfflineScreenBody(snapshotArgs, _screens),
+            child: OfflineScreenBody(params.offlineScreenId, _screens),
           ),
         );
       },
-      appSizePageId: (_, __, ___, ____) {
-        return DevToolsScaffold.withChild(
-          key: const Key('appsize'),
-          ideTheme: ideTheme,
-          child: MultiProvider(
-            providers: _providedControllers(),
-            child: const AppSizeBody(),
-          ),
-        );
-      },
+      ..._standaloneScreens,
+    };
+  }
+
+  Map<String, UrlParametersBuilder> get _standaloneScreens {
+    // TODO(dantup): Standalone screens do not use DevToolsScaffold which means
+    //  they do not currently send an initial "currentPage" event to inform
+    //  the server which page they are rendering.
+    return {
+      for (final type in StandaloneScreenType.values)
+        type.name: (_, __, args, ___) => type.screen,
     };
   }
 
@@ -293,14 +396,22 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   void _clearCachedRoutes() {
     _routes = null;
+    routerDelegate.refreshPages();
   }
 
-  List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
+  // TODO(kenz): consider showing all screens and displaying the reason why they
+  // are not available instead of hiding screens.
+  List<Screen> _visibleScreens() =>
+      _screens.where((screen) => shouldShowScreen(screen).show).toList();
 
   List<Provider> _providedControllers({bool offline = false}) {
-    return widget.screens
+    // We use [widget.originalScreens] here instead of [_screens] because
+    // extension screens do not provide a controller through this mechanism.
+    return widget.originalScreens
         .where(
-          (s) => s.providesController && (offline ? s.supportsOffline : true),
+          (s) =>
+              s.providesController &&
+              (offline ? s.screen.worksWithOfflineData : true),
         )
         .map((s) => s.controllerProvider(routerDelegate))
         .toList();
@@ -350,20 +461,69 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           const MaterialScrollBehavior().copyWith(scrollbars: !kIsWeb),
     );
   }
+
+  /// Helper function that will be used in a 'List.where' call to generate a
+  /// list of [Screen]s to pass to a [DevToolsScaffold].
+  ///
+  /// When [embedMode] is [EmbedMode.embedOne], this method will return true
+  /// only when [screen] matches the specified [page]. Otherwise, this method
+  /// will return true for any [screen].
+  @visibleForTesting
+  static bool maybeIncludeOnlyEmbeddedScreen(
+    Screen screen, {
+    required String? page,
+    required EmbedMode embedMode,
+  }) {
+    if (embedMode == EmbedMode.embedOne && page != null) {
+      return screen.screenId == page;
+    }
+    return true;
+  }
+
+  /// Helper function that removes any hidden screens from [screens] based on
+  /// the value of the 'hide' query parameter in [params].
+  @visibleForTesting
+  static void removeHiddenScreens(
+    List<Screen> screens,
+    DevToolsQueryParams params,
+  ) {
+    screens.removeWhere((s) => params.hiddenScreens.contains(s.screenId));
+
+    // When 'hide=extensions' is in the query parameters, this remove all
+    // extension screens.
+    if (params.hideExtensions) {
+      screens.removeWhere((s) => s is ExtensionScreen);
+    }
+
+    // When 'hide=all-except-extensions' is in the query parameters, remove all
+    // non-extension screens.
+    if (params.hideAllExceptExtensions) {
+      screens.removeWhere((s) => s is! ExtensionScreen);
+    }
+  }
+
+  String? _screenDisabledMessage(Screen screen) {
+    final reason = shouldShowScreen(screen).disabledReason;
+    String? disabledMessage;
+    if (reason == ScreenDisabledReason.requiresDartLibrary) {
+      // Special case for screens that require a library since the message
+      // needs to be generated dynamically.
+      disabledMessage = 'The ${screen.title} screen requires library '
+          '${screen.requiresLibrary}, but the library was not detected.';
+    } else if (reason?.message case final String message) {
+      disabledMessage = 'The ${screen.title} screen $message';
+    }
+    return disabledMessage;
+  }
 }
 
 /// DevTools screen wrapper that is responsible for creating and providing the
-/// screen's controller, as well as enabling offline support.
+/// screen's controller, if one exists, as well as enabling offline support.
 ///
 /// [C] corresponds to the type of the screen's controller, which is created by
-/// [createController] and provided by [controllerProvider].
-class DevToolsScreen<C> {
-  const DevToolsScreen(
-    this.screen, {
-    this.createController,
-    this.controller,
-    this.supportsOffline = false,
-  }) : assert(createController == null || controller == null);
+/// [createController] or provided by [controllerProvider].
+class DevToolsScreen<C extends Object?> {
+  const DevToolsScreen(this.screen, {this.createController});
 
   final Screen screen;
 
@@ -375,37 +535,30 @@ class DevToolsScreen<C> {
   ///
   /// If [createController] and [controller] are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
+  ///
+  /// In the controller initialization, if logic requires a connected [VmService]
+  /// object (`serviceConnection.serviceManager.service`), then the controller should first await
+  /// the `serviceConnection.serviceManager.onServiceAvailable` future to ensure the service has
+  /// been initialized.
+  /// The controller does not need to handle re-connection to the application. When reconnected,
+  /// DevTools will create a new controller. However, the controller should make sure
+  /// not to fail if the connection is lost.
   final C Function(DevToolsRouterDelegate)? createController;
-
-  /// A provided controller for this screen, if non-null.
-  ///
-  /// The controller will then be provided via [controllerProvider], and
-  /// widgets depending on this controller can access it by calling
-  /// `Provider<C>.of(context)`.
-  ///
-  /// If [createController] and [controller] are both null, [screen] will be
-  /// responsible for creating and maintaining its own controller.
-  final C? controller;
 
   /// Returns true if a controller was provided for [screen]. If false,
   /// [screen] is responsible for creating and maintaining its own controller.
-  bool get providesController => createController != null || controller != null;
-
-  /// Whether this screen has implemented offline support.
-  ///
-  /// Defaults to false.
-  final bool supportsOffline;
+  bool get providesController => createController != null;
 
   Provider<C> controllerProvider(DevToolsRouterDelegate routerDelegate) {
-    assert(
-      (createController != null && controller == null) ||
-          (createController == null && controller != null),
+    return Provider<C>(
+      create: (_) {
+        final controller = createController!(routerDelegate);
+        if (controller is OfflineScreenControllerMixin) {
+          controller.initReviewHistoryOnDisconnectListener();
+        }
+        return controller;
+      },
     );
-    final controllerLocal = controller;
-    if (controllerLocal != null) {
-      return Provider<C>.value(value: controllerLocal);
-    }
-    return Provider<C>(create: (_) => createController!(routerDelegate));
   }
 }
 
@@ -414,7 +567,7 @@ class DevToolsScreen<C> {
 typedef UrlParametersBuilder = Widget Function(
   BuildContext,
   String?,
-  Map<String, String?>,
+  DevToolsQueryParams,
   DevToolsNavigationState?,
 );
 
@@ -424,8 +577,7 @@ typedef UrlParametersBuilder = Widget Function(
 /// This avoids issues with widgets in the appbar being hidden by the banner
 /// in a web or desktop app.
 class _AlternateCheckedModeBanner extends StatelessWidget {
-  const _AlternateCheckedModeBanner({Key? key, required this.builder})
-      : super(key: key);
+  const _AlternateCheckedModeBanner({required this.builder});
   final WidgetBuilder builder;
 
   @override
@@ -441,6 +593,51 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
   }
 }
 
+class ScreenUnavailable extends StatelessWidget {
+  const ScreenUnavailable({
+    super.key,
+    required this.title,
+    required this.embedMode,
+    required this.routerDelegate,
+    this.description,
+  });
+
+  final String title;
+  final DevToolsRouterDelegate routerDelegate;
+  final EmbedMode embedMode;
+  final String? description;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.titleLarge,
+          ),
+          const SizedBox(height: denseSpacing),
+          if (description != null)
+            Text(
+              description!,
+              style: theme.regularTextStyle,
+            ),
+          if (embedMode == EmbedMode.none) ...[
+            const SizedBox(height: defaultSpacing),
+            ElevatedButton(
+              onPressed: () =>
+                  routerDelegate.navigateHome(clearScreenParam: true),
+              child: const Text('Go to Home screen'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 /// Screens to initialize DevTools with.
 ///
 /// If the screen depends on a provided controller, the provider should be
@@ -448,29 +645,45 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
 ///
 /// Conditional screens can be added to this list, and they will automatically
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
-List<DevToolsScreen> get defaultScreens {
+List<DevToolsScreen> defaultScreens({
+  List<DevToolsJsonFile> sampleData = const [],
+}) {
   return devtoolsScreens ??= <DevToolsScreen>[
-    DevToolsScreen<InspectorController>(
-      InspectorScreen(),
-      createController: (_) => InspectorController(
-        inspectorTree: InspectorTreeController(
-          gaId: InspectorScreenMetrics.summaryTreeGaId,
-        ),
-        detailsTree: InspectorTreeController(
-          gaId: InspectorScreenMetrics.detailsTreeGaId,
-        ),
-        treeType: FlutterTreeType.widget,
-      ),
-    ),
+    DevToolsScreen<void>(HomeScreen(sampleData: sampleData)),
+    // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
+    // Inspector V2 has been released.
+    FeatureFlags.inspectorV2
+        ? DevToolsScreen<inspector_v2.InspectorController>(
+            inspector_v2.InspectorScreen(),
+            createController: (_) => inspector_v2.InspectorController(
+              inspectorTree: inspector_v2.InspectorTreeController(
+                gaId: InspectorScreenMetrics.summaryTreeGaId,
+              ),
+              detailsTree: inspector_v2.InspectorTreeController(
+                gaId: InspectorScreenMetrics.detailsTreeGaId,
+              ),
+              treeType: FlutterTreeType.widget,
+            ),
+          )
+        : DevToolsScreen<InspectorController>(
+            InspectorScreen(),
+            createController: (_) => InspectorController(
+              inspectorTree: InspectorTreeController(
+                gaId: InspectorScreenMetrics.summaryTreeGaId,
+              ),
+              detailsTree: InspectorTreeController(
+                gaId: InspectorScreenMetrics.detailsTreeGaId,
+              ),
+              treeType: FlutterTreeType.widget,
+            ),
+          ),
     DevToolsScreen<PerformanceController>(
       PerformanceScreen(),
       createController: (_) => PerformanceController(),
-      supportsOffline: true,
     ),
     DevToolsScreen<ProfilerScreenController>(
       ProfilerScreen(),
       createController: (_) => ProfilerScreenController(),
-      supportsOffline: true,
     ),
     DevToolsScreen<MemoryController>(
       MemoryScreen(),
@@ -486,18 +699,25 @@ List<DevToolsScreen> get defaultScreens {
       NetworkScreen(),
       createController: (_) => NetworkController(),
     ),
-    DevToolsScreen<LoggingController>(
-      LoggingScreen(),
-      createController: (_) => LoggingController(),
-    ),
-    DevToolsScreen<void>(
-      ProviderScreen(),
-      createController: (_) {},
-    ),
+    FeatureFlags.loggingV2
+        ? DevToolsScreen<LoggingControllerV2>(
+            LoggingScreenV2(),
+            createController: (_) => LoggingControllerV2(),
+          )
+        : DevToolsScreen<LoggingController>(
+            LoggingScreen(),
+            createController: (_) => LoggingController(),
+          ),
+    DevToolsScreen<void>(ProviderScreen()),
     DevToolsScreen<AppSizeController>(
       AppSizeScreen(),
       createController: (_) => AppSizeController(),
     ),
+    if (FeatureFlags.deepLinkValidation)
+      DevToolsScreen<DeepLinksController>(
+        DeepLinksScreen(),
+        createController: (_) => DeepLinksController(),
+      ),
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(),
       createController: (_) => VMDeveloperToolsController(),
@@ -507,7 +727,6 @@ List<DevToolsScreen> get defaultScreens {
       DevToolsScreen<ExampleController>(
         const ExampleConditionalScreen(),
         createController: (_) => ExampleController(),
-        supportsOffline: true,
       ),
   ];
 }

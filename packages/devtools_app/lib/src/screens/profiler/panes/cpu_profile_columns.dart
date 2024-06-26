@@ -11,11 +11,10 @@ import '../cpu_profile_model.dart';
 
 class SelfTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
   SelfTimeColumn({
-    String? titleTooltip,
+    super.titleTooltip,
     RichTooltipBuilder<CpuStackFrame>? dataTooltipProvider,
   }) : super(
           title: 'Self Time',
-          titleTooltip: titleTooltip,
           timeProvider: (stackFrame) => stackFrame.selfTime,
           percentAsDoubleProvider: (stackFrame) => stackFrame.selfTimeRatio,
           richTooltipProvider: dataTooltipProvider,
@@ -25,11 +24,10 @@ class SelfTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
 
 class TotalTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
   TotalTimeColumn({
-    String? titleTooltip,
+    super.titleTooltip,
     RichTooltipBuilder<CpuStackFrame>? dataTooltipProvider,
   }) : super(
           title: 'Total Time',
-          titleTooltip: titleTooltip,
           timeProvider: (stackFrame) => stackFrame.totalTime,
           percentAsDoubleProvider: (stackFrame) => stackFrame.totalTimeRatio,
           richTooltipProvider: dataTooltipProvider,
@@ -58,20 +56,17 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(CpuStackFrame dataObject) => '';
-
-  @override
   Widget? build(
     BuildContext context,
     CpuStackFrame data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(
       methodName: data.name,
       packageUri: data.packageUri,
       sourceLine: data.sourceLine,
-      isSelected: isRowSelected,
     );
   }
 }

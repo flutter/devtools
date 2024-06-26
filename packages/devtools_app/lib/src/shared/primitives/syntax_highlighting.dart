@@ -15,9 +15,9 @@ final _log = Logger('syntax_highlighting');
 // https://macromates.com/manual/en/language_grammars
 
 void main() {
-  final String source = File('assets/syntax/dart.json').readAsStringSync();
+  final source = File('assets/syntax/dart.json').readAsStringSync();
 
-  final TextmateGrammar dartGrammar = TextmateGrammar(source);
+  final dartGrammar = TextmateGrammar(source);
   _log.info(dartGrammar);
 }
 
@@ -31,8 +31,8 @@ class TextmateGrammar {
     _parseRules();
   }
 
-  final List<Rule> _fileRules = [];
-  final Map<String, Rule> _ruleMap = {};
+  final _fileRules = <Rule>[];
+  final _ruleMap = <String, Rule>{};
 
   late final Map _definition;
 
@@ -45,11 +45,11 @@ class TextmateGrammar {
 
   void _parseRules() {
     final Map repository = _definition['repository'];
-    for (String name in repository.keys.cast<String>()) {
+    for (final name in repository.keys.cast<String>()) {
       _ruleMap[name] = Rule(name);
     }
 
-    for (String name in _ruleMap.keys) {
+    for (final name in _ruleMap.keys) {
       _ruleMap[name]!._parse(repository[name]);
     }
 
@@ -58,8 +58,8 @@ class TextmateGrammar {
 
   void _parseFileRules() {
     final List<Object?> patterns = _definition['patterns'];
-    for (Map info in patterns.cast<Map<Object?, Object?>>()) {
-      _fileRules.add(Rule(info['name']).._parse(info));
+    for (final info in patterns.cast<Map<Object?, Object?>>()) {
+      _fileRules.add(Rule(info['name'] as String?).._parse(info));
     }
     _log.info('fileRules: $_fileRules');
   }

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Code in this file should be able to be imported by both dart:html and
-// dart:io dependent libraries.
+// Code in this file should be able to be imported by both web and dart:io
+// dependent libraries.
 
 /// Base class for all screen metrics classes.
 ///

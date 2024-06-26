@@ -2,24 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
-import '../../shared/shared_memory_widgets.dart';
+import '../../shared/widgets/shared_memory_widgets.dart';
+import 'tracing_data.dart';
 import 'tracing_pane_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
-const _defaultNumberFieldWidth = 80.0;
+const _defaultNumberFieldWidth = 70.0;
 
 class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
@@ -28,11 +27,11 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
           'Trace',
           titleTooltip:
               'Enable or disable allocation tracing for a specific type',
-          fixedWidthPx: scaleByFontFactor(55.0),
+          fixedWidthPx: scaleByFontFactor(40.0),
           alignment: ColumnAlignment.left,
         );
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   @override
   bool get supportsSorting => false;
@@ -42,6 +41,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     BuildContext context,
     TracedClass item, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return Checkbox(
@@ -51,7 +51,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
           gac.memory,
           '${gac.MemoryEvent.tracingTraceCheck}-$value',
         );
-        await controller.setAllocationTracingForClass(item.cls, value!);
+        await controller.setAllocationTracingForClass(item.clazz, value!);
       },
     );
   }
@@ -69,14 +69,16 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
 
 class _ClassNameColumn extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
-  _ClassNameColumn() : super.wide('Class');
+  _ClassNameColumn({required this.rootPackage}) : super.wide('Class');
 
   @override
-  String? getValue(TracedClass stats) => stats.cls.name;
+  String? getValue(TracedClass stats) => stats.clazz.name;
 
   // We are removing the tooltip, because it is provided by [HeapClassView].
   @override
   String getTooltip(TracedClass dataObject) => '';
+
+  final String? rootPackage;
 
   @override
   bool get supportsSorting => true;
@@ -86,13 +88,14 @@ class _ClassNameColumn extends ColumnData<TracedClass>
     BuildContext context,
     TracedClass data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     return HeapClassView(
       theClass: data.name,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      rootPackage: serviceManager.rootInfoNow().package,
+      rootPackage: rootPackage,
     );
   }
 }
@@ -118,7 +121,7 @@ class _InstancesColumn extends ColumnData<TracedClass> {
 class AllocationTracingTable extends StatefulWidget {
   const AllocationTracingTable({super.key, required this.controller});
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   @override
   State<AllocationTracingTable> createState() => _AllocationTracingTableState();
@@ -126,7 +129,7 @@ class AllocationTracingTable extends StatefulWidget {
 
 class _AllocationTracingTableState extends State<AllocationTracingTable> {
   late final _TraceCheckBoxColumn _checkboxColumn;
-  static final _classNameColumn = _ClassNameColumn();
+  late final _ClassNameColumn _classNameColumn;
   static final _instancesColumn = _InstancesColumn();
 
   late final List<ColumnData<TracedClass>> columns;
@@ -134,6 +137,10 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
   @override
   void initState() {
     super.initState();
+
+    _classNameColumn =
+        _ClassNameColumn(rootPackage: widget.controller.rootPackage);
+
     _checkboxColumn = _TraceCheckBoxColumn(controller: widget.controller);
     columns = <ColumnData<TracedClass>>[
       _checkboxColumn,
@@ -172,21 +179,24 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
           ),
         ),
         Expanded(
-          child: DualValueListenableBuilder<bool, TracingIsolateState>(
-            firstListenable: widget.controller.refreshing,
-            secondListenable: widget.controller.stateForIsolate,
-            builder: (context, _, state, __) {
+          child: MultiValueListenableBuilder(
+            listenables: [
+              widget.controller.refreshing,
+              widget.controller.selection,
+            ],
+            builder: (context, values, __) {
+              final state = values.second as TracingIsolateState;
               return ValueListenableBuilder<List<TracedClass>>(
                 valueListenable: state.filteredClassList,
                 builder: (context, filteredClassList, _) {
                   return FlatTable<TracedClass>(
-                    keyFactory: (e) => Key(e.cls.id!),
+                    keyFactory: (e) => Key(e.clazz.id!),
                     data: filteredClassList,
                     dataKey: 'allocation-tracing',
                     columns: columns,
                     defaultSortColumn: _classNameColumn,
                     defaultSortDirection: SortDirection.ascending,
-                    selectionNotifier: state.selectedTracedClass,
+                    selectionNotifier: state.selectedClass,
                     pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
                   );
                 },

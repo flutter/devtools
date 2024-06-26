@@ -4,23 +4,22 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/utils.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
 
 double get _notificationHeight => scaleByFontFactor(175.0);
 final _notificationWidth = _notificationHeight * goldenRatio;
 
 /// Manager for notifications in the app.
 class NotificationsView extends StatelessWidget {
-  const NotificationsView({Key? key, required this.child}) : super(key: key);
+  const NotificationsView({super.key, required this.child});
 
   final Widget child;
 
@@ -44,7 +43,7 @@ class NotificationsView extends StatelessWidget {
 /// in _NotificationsState.build because there would be no Overlay in the tree
 /// at the time Overlay.of(context) is called.
 class _Notifications extends StatefulWidget {
-  const _Notifications({Key? key, required this.child}) : super(key: key);
+  const _Notifications({required this.child});
 
   final Widget child;
 
@@ -55,7 +54,7 @@ class _Notifications extends StatefulWidget {
 class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   OverlayEntry? _overlayEntry;
 
-  final List<_Notification> _notifications = [];
+  final _notifications = <_Notification>[];
 
   @override
   void didChangeDependencies() {
@@ -168,6 +167,7 @@ class _NotificationOverlay extends StatelessWidget {
           child: SingleChildScrollView(
             reverse: true,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: _notifications,
             ),
@@ -180,10 +180,9 @@ class _NotificationOverlay extends StatelessWidget {
 
 class _Notification extends StatefulWidget {
   const _Notification({
-    Key? key,
     required this.message,
     required this.remove,
-  }) : super(key: key);
+  });
 
   final NotificationMessage message;
   final void Function(_Notification) remove;
@@ -196,7 +195,7 @@ class _NotificationState extends State<_Notification>
     with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late CurvedAnimation curve;
-  late Timer _dismissTimer;
+  Timer? _dismissTimer;
 
   @override
   void initState() {
@@ -209,25 +208,28 @@ class _NotificationState extends State<_Notification>
       parent: controller,
       curve: Curves.easeInOutCirc,
     );
+
     // Set up a timer that reverses the entrance animation, and tells the widget
     // to remove itself when the exit animation is completed.
     // We can do this because the NotificationsState is directly controlling
     // the life cycle of each _Notification widget presented in the overlay.
-    _dismissTimer = Timer(widget.message.duration, () {
-      controller.addStatusListener((status) {
-        if (status == AnimationStatus.dismissed) {
-          widget.remove(widget);
-        }
+    if (!widget.message.isDismissible) {
+      _dismissTimer = Timer(widget.message.duration, () {
+        controller.addStatusListener((status) {
+          if (status == AnimationStatus.dismissed) {
+            widget.remove(widget);
+          }
+        });
+        controller.reverse();
       });
-      controller.reverse();
-    });
+    }
     controller.forward();
   }
 
   @override
   void dispose() {
     controller.dispose();
-    _dismissTimer.cancel();
+    _dismissTimer?.cancel();
     super.dispose();
   }
 
@@ -242,23 +244,40 @@ class _NotificationState extends State<_Notification>
           child: child,
         );
       },
-      child: Padding(
-        padding: const EdgeInsets.all(denseSpacing),
-        child: Card(
-          color: theme.snackBarTheme.backgroundColor,
-          child: DefaultTextStyle(
-            style: theme.snackBarTheme.contentTextStyle ??
-                theme.primaryTextTheme.titleMedium!,
-            child: Padding(
-              padding: const EdgeInsets.all(denseSpacing),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _NotificationMessage(widget: widget, context: context),
-                  const SizedBox(height: defaultSpacing),
-                  _NotificationActions(widget: widget),
-                ],
-              ),
+      child: Card(
+        color: theme.colorScheme.secondaryContainer,
+        margin: const EdgeInsets.only(bottom: densePadding),
+        child: DefaultTextStyle(
+          style: theme.snackBarTheme.contentTextStyle ??
+              theme.textTheme.titleMedium!,
+          child: Padding(
+            padding: const EdgeInsets.all(denseSpacing),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                widget.message.isDismissible
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Flexible(
+                            child: _NotificationMessage(
+                              widget: widget,
+                            ),
+                          ),
+                          _DismissAction(
+                            onPressed: () {
+                              widget.remove(widget);
+                            },
+                          ),
+                        ],
+                      )
+                    : _NotificationMessage(
+                        widget: widget,
+                      ),
+                const SizedBox(height: defaultSpacing),
+                _NotificationActions(actions: widget.message.actions),
+              ],
             ),
           ),
         ),
@@ -267,36 +286,64 @@ class _NotificationState extends State<_Notification>
   }
 }
 
-class _NotificationMessage extends StatelessWidget {
-  const _NotificationMessage({
-    required this.widget,
-    required this.context,
+class _DismissAction extends StatelessWidget {
+  const _DismissAction({
+    required this.onPressed,
   });
 
-  final _Notification widget;
-  final BuildContext context;
+  final void Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      widget.message.text,
-      style: Theme.of(context).textTheme.bodyMedium,
-      overflow: TextOverflow.visible,
-      maxLines: 10,
+    return Align(
+      alignment: Alignment.topRight,
+      child: IconButton(
+        icon: const Icon(
+          Icons.close,
+        ),
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class _NotificationMessage extends StatelessWidget {
+  const _NotificationMessage({
+    required this.widget,
+  });
+
+  final _Notification widget;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textStyle =
+        theme.regularTextStyleWithColor(theme.colorScheme.onSecondaryContainer);
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: denseSpacing,
+        top: denseSpacing,
+        right: denseSpacing,
+      ),
+      child: Text(
+        widget.message.text,
+        style: widget.message.isError
+            ? textStyle.copyWith(color: theme.colorScheme.error)
+            : textStyle,
+        overflow: TextOverflow.visible,
+        maxLines: 10,
+      ),
     );
   }
 }
 
 class _NotificationActions extends StatelessWidget {
-  const _NotificationActions({
-    required this.widget,
-  });
+  const _NotificationActions({required this.actions});
 
-  final _Notification widget;
+  final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) {
-    final actions = widget.message.actions;
     if (actions.isEmpty) return const SizedBox();
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,

@@ -8,7 +8,10 @@ import 'package:devtools_app/src/screens/profiler/panes/method_table/method_tabl
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_model.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -23,8 +26,12 @@ void main() {
 
   setUp(() async {
     setCharacterWidthForTables();
-    setGlobal(ServiceConnectionManager, MockServiceConnectionManager());
+    setGlobal(
+      ServiceConnectionManager,
+      createMockServiceConnectionWithDefaults(),
+    );
     setGlobal(IdeTheme, IdeTheme());
+    setGlobal(OfflineDataController, OfflineDataController());
     final mockScriptManager = MockScriptManager();
     when(mockScriptManager.sortedScripts).thenReturn(
       ValueNotifier<List<ScriptRef>>([]),
@@ -36,7 +43,7 @@ void main() {
       ),
     );
     setGlobal(ScriptManager, mockScriptManager);
-    final data = CpuProfileData.parse(simpleCpuProfile2);
+    final data = CpuProfileData.fromJson(simpleCpuProfile2);
     await CpuProfileTransformer().processData(data, processId: 'test');
     methodTableController = MethodTableController(
       dataNotifier: FixedValueListenable<CpuProfileData>(data),

@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
+import '../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
-import '../../../shared/theme.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_developer_tools_screen.dart';
 import '../vm_service_private_extensions.dart';
@@ -19,11 +20,9 @@ import 'vm_statistics_view_controller.dart';
 class VMStatisticsView extends VMDeveloperView {
   const VMStatisticsView()
       : super(
-          id,
           title: 'VM',
           icon: Icons.devices,
         );
-  static const id = 'vm-statistics';
 
   @override
   Widget build(BuildContext context) => VMStatisticsViewBody();
@@ -127,6 +126,7 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
     return OutlineDecoration(
       child: VMInfoCard(
         title: 'VM',
+        roundedTopBorder: false,
         rowKeyValues: [
           selectableTextBuilderMapEntry('Name', vm?.name),
           selectableTextBuilderMapEntry('Version', vm?.version),
@@ -172,6 +172,7 @@ class ProcessStatisticsWidget extends StatelessWidget {
       showTop: false,
       child: VMInfoCard(
         title: 'Process',
+        roundedTopBorder: false,
         rowKeyValues: [
           selectableTextBuilderMapEntry('PID', vm?.pid?.toString()),
           selectableTextBuilderMapEntry(
@@ -225,7 +226,7 @@ class _IsolateIDColumn extends ColumnData<Isolate> {
 }
 
 abstract class _IsolateMemoryColumn extends ColumnData<Isolate> {
-  _IsolateMemoryColumn(String title) : super.wide(title);
+  _IsolateMemoryColumn(super.title) : super.wide();
 
   int getCapacity(Isolate i);
   int getUsage(Isolate i);
@@ -306,6 +307,7 @@ class IsolatesPreviewWidget extends StatelessWidget {
       showTop: !systemIsolates,
       child: VMInfoCard(
         title: '$title (${isolates.length})',
+        roundedTopBorder: false,
         table: Flexible(
           child: FlatTable<Isolate>(
             keyFactory: (Isolate i) => ValueKey<String>(i.id!),

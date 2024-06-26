@@ -5,6 +5,9 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/shared.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -13,19 +16,14 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/connected_app.dart';
 import '../../shared/console/eval/inspector_tree.dart';
-import '../../shared/dialogs.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import 'inspector_controller.dart';
@@ -33,27 +31,20 @@ import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
-  InspectorScreen()
-      : super.conditional(
-          id: id,
-          requiresLibrary: flutterLibraryUri,
-          requiresDebugBuild: true,
-          title: ScreenMetaData.inspector.title,
-          icon: Octicons.deviceMobile,
-        );
+  InspectorScreen() : super.fromMetaData(ScreenMetaData.inspector);
 
   static final id = ScreenMetaData.inspector.id;
 
   // There is not enough room to safely show the console in the embed view of
   // the DevTools and IDEs have their own consoles.
   @override
-  bool showConsole(bool embed) => !embed;
+  bool showConsole(EmbedMode embedMode) => !embedMode.embedded;
 
   @override
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) => const InspectorScreenBody();
+  Widget buildScreenBody(BuildContext context) => const InspectorScreenBody();
 }
 
 class InspectorScreenBody extends StatefulWidget {
@@ -112,7 +103,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     super.didChangeDependencies();
     if (!initController()) return;
 
-    if (serviceManager.inspectorService == null) {
+    if (serviceConnection.inspectorService == null) {
       // The app must not be a Flutter app.
       return;
     }
@@ -137,8 +128,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
-    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
-      if (serviceManager.hasConnection &&
+    addAutoDisposeListener(preferences.inspector.pubRootDirectories, () {
+      if (serviceConnection.serviceManager.hasConnection &&
           controller.firstInspectorTreeLoadCompleted) {
         _refreshInspector();
       }
@@ -162,8 +153,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       screenId: InspectorScreen.id,
     );
 
-    final splitAxis = Split.axisFor(context, 0.85);
-    final widgetTrees = Split(
+    final splitAxis = SplitPane.axisFor(context, 0.85);
+    final widgetTrees = SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
@@ -180,8 +171,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ValueListenableBuilder<bool>(
-              valueListenable:
-                  serviceManager.serviceExtensionManager.hasServiceExtension(
+              valueListenable: serviceConnection
+                  .serviceManager.serviceExtensionManager
+                  .hasServiceExtension(
                 extensions.toggleSelectWidgetMode.extension,
               ),
               builder: (_, selectModeSupported, __) {
@@ -230,7 +222,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               ),
               Expanded(
                 child: ValueListenableBuilder(
-                  valueListenable: serviceManager.errorBadgeManager
+                  valueListenable: serviceConnection.errorBadgeManager
                       .erroredItemsForPage(InspectorScreen.id),
                   builder:
                       (_, LinkedHashMap<String, DevToolsError> errors, __) {
@@ -343,7 +335,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dialogHeight = scaleByFontFactor(400.0);
+    final dialogHeight = scaleByFontFactor(500.0);
     return DevToolsDialog(
       title: const DialogTitleText('Flutter Inspector Settings'),
       content: SizedBox(
@@ -366,13 +358,28 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               gaItem: gac.inspectorHoverEvalMode,
             ),
             const SizedBox(height: denseSpacing),
+            const InspectorDefaultDetailsViewOption(),
+            const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
-            Text(
-              'Widgets in these directories will show up in your summary tree.',
-              style: theme.subtleTextStyle,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Widgets in these directories will show up in your summary tree.',
+                    style: theme.subtleTextStyle,
+                  ),
+                ),
+                MoreInfoLink(
+                  url: DocLinks.inspectorPackageDirectories.value,
+                  gaScreenName: gac.inspector,
+                  gaSelectedItemDescription:
+                      gac.InspectorDocs.packageDirectoriesDocs.name,
+                ),
+              ],
             ),
             Text(
-              '(e.g. /absolute/path/to/myPackage)',
+              '(e.g. /absolute/path/to/myPackage/)',
               style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),
@@ -391,13 +398,13 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
 
 class InspectorSummaryTreeControls extends StatelessWidget {
   const InspectorSummaryTreeControls({
-    Key? key,
+    super.key,
     required this.constraints,
     required this.isSearchVisible,
     required this.onRefreshInspectorPressed,
     required this.onSearchVisibleToggle,
     required this.searchFieldBuilder,
-  }) : super(key: key);
+  });
 
   static const _searchBreakpoint = 375.0;
 
@@ -415,9 +422,12 @@ class InspectorSummaryTreeControls extends StatelessWidget {
           context,
           Row(
             children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: denseSpacing),
-                child: Text('Widget Tree'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                child: Text(
+                  'Widget Tree',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
               ...!isSearchVisible
                   ? [
@@ -474,17 +484,17 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
 class ErrorNavigator extends StatelessWidget {
   const ErrorNavigator({
-    Key? key,
+    super.key,
     required this.errors,
     required this.errorIndex,
     required this.onSelectError,
-  }) : super(key: key);
+  });
 
   final LinkedHashMap<String, InspectableWidgetError> errors;
 
   final int? errorIndex;
 
-  final Function(int) onSelectError;
+  final void Function(int) onSelectError;
 
   @override
   Widget build(BuildContext context) {
@@ -564,29 +574,90 @@ class _ErrorNavigatorButton extends StatelessWidget {
   }
 }
 
+class InspectorDefaultDetailsViewOption extends StatelessWidget {
+  const InspectorDefaultDetailsViewOption({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: preferences.inspector.defaultDetailsView,
+      builder: (context, selection, _) {
+        final theme = Theme.of(context);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select the default tab for the inspector.',
+              style: theme.subtleTextStyle,
+            ),
+            const SizedBox(height: denseSpacing),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Radio<InspectorDetailsViewType>(
+                  value: InspectorDetailsViewType.layoutExplorer,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  groupValue: selection,
+                  onChanged: _onChanged,
+                ),
+                Text(InspectorDetailsViewType.layoutExplorer.key),
+                const SizedBox(width: denseSpacing),
+                Radio<InspectorDetailsViewType>(
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  value: InspectorDetailsViewType.widgetDetailsTree,
+                  groupValue: selection,
+                  onChanged: _onChanged,
+                ),
+                Text(InspectorDetailsViewType.widgetDetailsTree.key),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _onChanged(InspectorDetailsViewType? value) {
+    if (value != null) {
+      preferences.inspector.setDefaultInspectorDetailsView(value);
+      final item = value.name == InspectorDetailsViewType.layoutExplorer.name
+          ? gac.defaultDetailsViewToLayoutExplorer
+          : gac.defaultDetailsViewToWidgetDetails;
+      ga.select(
+        gac.inspector,
+        item,
+      );
+    }
+  }
+}
+
 class PubRootDirectorySection extends StatelessWidget {
   const PubRootDirectorySection({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<IsolateRef?>(
-      valueListenable: serviceManager.isolateManager.mainIsolate,
+      valueListenable:
+          serviceConnection.serviceManager.isolateManager.mainIsolate,
       builder: (_, __, ___) {
         return SizedBox(
           height: 200.0,
           child: EditableList(
             gaScreen: gac.inspector,
             gaRefreshSelection: gac.refreshPubRoots,
-            entries: preferences.inspector.customPubRootDirectories,
+            entries: preferences.inspector.pubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
-            isRefreshing:
-                preferences.inspector.isRefreshingCustomPubRootDirectories,
-            onEntryAdded: (p0) =>
-                unawaited(preferences.inspector.addPubRootDirectories([p0])),
+            isRefreshing: preferences.inspector.isRefreshingPubRootDirectories,
+            onEntryAdded: (p0) => unawaited(
+              preferences.inspector.addPubRootDirectories(
+                [p0],
+                shouldCache: true,
+              ),
+            ),
             onEntryRemoved: (p0) =>
                 unawaited(preferences.inspector.removePubRootDirectories([p0])),
             onRefreshTriggered: () =>
-                unawaited(preferences.inspector.loadCustomPubRootDirectories()),
+                unawaited(preferences.inspector.loadPubRootDirectories()),
           ),
         );
       },

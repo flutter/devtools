@@ -4,12 +4,11 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/analytics/constants.dart' as gac;
+import '../../analytics/constants.dart' as gac;
 import '../../common_widgets.dart';
-import '../../dialogs.dart';
-import '../../theme.dart';
 
 const _documentationTopic = gac.console;
 
@@ -50,7 +49,7 @@ Example: ''',
           ),
           MoreInfoLink(
             // TODO(polina-c): create content and change url.
-            url: 'https://docs.flutter.dev/development/tools/devtools/console',
+            url: 'https://docs.flutter.dev/tools/devtools/console',
             gaScreenName: gac.console,
             gaSelectedItemDescription:
                 gac.topicDocumentationLink(_documentationTopic),
@@ -65,12 +64,13 @@ Example: ''',
 }
 
 class ConsoleHelpLink extends StatelessWidget {
-  const ConsoleHelpLink({Key? key}) : super(key: key);
+  const ConsoleHelpLink({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ToolbarAction(
       icon: Icons.help_outline,
+      size: defaultIconSize,
       tooltip: 'Console Help',
       onPressed: () {
         unawaited(

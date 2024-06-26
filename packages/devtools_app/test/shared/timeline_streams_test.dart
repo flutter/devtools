@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/screens/performance/timeline_streams.dart';
-import 'package:devtools_app/src/shared/globals.dart';
+library;
+
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,7 +13,7 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 
 void main() {
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
+  final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 
@@ -30,11 +31,14 @@ void main() {
         // initializing.
         await delay();
 
-        expect(serviceManager.service, equals(env.service));
-        expect(serviceManager.timelineStreamManager, isNotNull);
-        expect(serviceManager.timelineStreamManager.basicStreams, isNotEmpty);
+        expect(serviceConnection.serviceManager.service, equals(env.service));
+        expect(serviceConnection.timelineStreamManager, isNotNull);
         expect(
-          serviceManager.timelineStreamManager.advancedStreams,
+          serviceConnection.timelineStreamManager.basicStreams,
+          isNotEmpty,
+        );
+        expect(
+          serviceConnection.timelineStreamManager.advancedStreams,
           isNotEmpty,
         );
 
@@ -49,18 +53,19 @@ void main() {
         await env.setupEnvironment();
 
         final initialStreams =
-            serviceManager.timelineStreamManager.recordedStreams;
+            serviceConnection.timelineStreamManager.recordedStreams;
         expect(
           initialStreams.map((stream) => stream.name).toList(),
           equals(['Dart', 'Embedder', 'GC']),
         );
 
-        await serviceManager.service!.setVMTimelineFlags([
+        await serviceConnection.serviceManager.service!.setVMTimelineFlags([
           TimelineStreamManager.apiTimelineStream,
           TimelineStreamManager.compilerTimelineStream,
           TimelineStreamManager.isolateTimelineStream,
         ]);
-        final newStreams = serviceManager.timelineStreamManager.recordedStreams;
+        final newStreams =
+            serviceConnection.timelineStreamManager.recordedStreams;
         expect(
           newStreams.map((stream) => stream.name).toList(),
           equals(['API', 'Compiler', 'Isolate']),

@@ -8,13 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Test WidgetTheme', () {
     test('Correct asset from widget with a type', () {
-      const String widgetName = 'AnimatedBuilder<String>';
+      const widgetName = 'AnimatedBuilder<String>';
       final theme = WidgetTheme.fromName(widgetName);
       expect(theme.iconAsset, 'icons/inspector/widget_icons/animated.png');
     });
 
     test('Has default theme for custom widget', () {
-      const String widgetName = 'CustomWidget';
+      const widgetName = 'CustomWidget';
       final theme = WidgetTheme.fromName(widgetName);
       expect(theme.color, WidgetTheme.otherWidgetColor);
     });

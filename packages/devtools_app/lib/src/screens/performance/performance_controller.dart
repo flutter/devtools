@@ -4,17 +4,20 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../service/service_registrations.dart' as registrations;
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
-import '../../shared/offline_mode.dart';
-import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/offline_data.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/raster_stats/raster_stats_controller.dart';
+import 'panes/rebuild_stats/rebuild_stats_controller.dart';
 import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_model.dart';
@@ -35,11 +38,20 @@ class PerformanceController extends DisposableController
     flutterFramesController = FlutterFramesController(this);
     timelineEventsController = TimelineEventsController(this);
     rasterStatsController = RasterStatsController(this);
+    rebuildStatsController = RebuildStatsController(this);
     _featureControllers = [
       flutterFramesController,
       timelineEventsController,
       rasterStatsController,
+      rebuildStatsController,
     ];
+
+    if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
+        false) {
+      // Do not perform initialization for web apps.
+      return;
+    }
+
     // See https://github.com/dart-lang/linter/issues/3801
     // ignore: discarded_futures
     unawaited(_init());
@@ -50,6 +62,8 @@ class PerformanceController extends DisposableController
   late final TimelineEventsController timelineEventsController;
 
   late final RasterStatsController rasterStatsController;
+
+  late final RebuildStatsController rebuildStatsController;
 
   late List<PerformanceFeatureController> _featureControllers;
 
@@ -71,25 +85,17 @@ class PerformanceController extends DisposableController
 
   final enhanceTracingController = EnhanceTracingController();
 
-  /// Active timeline data.
+  /// Performance screen data loaded via import.
   ///
-  /// This is the true source of data for the UI. In the case of an offline
-  /// import, this will begin as a copy of [offlinePerformanceData] (the original
-  /// data from the imported file). If any modifications are made while the data
-  /// is displayed (e.g. change in selected timeline event, selected frame,
-  /// etc.), those changes will be tracked here.
-  PerformanceData? data;
-
-  /// Timeline data loaded via import.
-  ///
-  /// This is expected to be null when we are not in [offlineController.offlineMode].
+  /// This is expected to be null when we are not in
+  /// [OfflineDataController.showingOfflineData].
   ///
   /// This will contain the original data from the imported file, regardless of
-  /// any selection modifications that occur while the data is displayed. [data]
-  /// will start as a copy of offlineTimelineData in this case, and will track
-  /// any data modifications that occur while the data is displayed (e.g. change
-  /// in selected timeline event, selected frame, etc.).
-  PerformanceData? offlinePerformanceData;
+  /// any selection modifications that occur while the data is displayed.
+  OfflinePerformanceData? offlinePerformanceData;
+
+  bool get impellerEnabled => _impellerEnabled;
+  bool _impellerEnabled = false;
 
   final _initialized = Completer<void>();
 
@@ -101,35 +107,43 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> _initHelper() async {
-    initData();
-    initReviewHistoryOnDisconnectListener();
-
     await _applyToFeatureControllersAsync((c) => c.init());
-    if (!offlineController.offlineMode.value) {
-      await serviceManager.onServiceAvailable;
+    if (!offlineDataController.showingOfflineData.value) {
+      await serviceConnection.serviceManager.onServiceAvailable;
+
+      if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+          false) {
+        final impellerEnabledResponse = await serviceConnection.serviceManager
+            .callServiceExtensionOnMainIsolate(
+          registrations.isImpellerEnabled,
+        );
+        _impellerEnabled = impellerEnabledResponse.json?['enabled'] == true;
+      } else {
+        _impellerEnabled = false;
+      }
 
       enhanceTracingController.init();
 
       // Listen for Flutter.Frame events with frame timing data.
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
-        serviceManager.service!.onExtensionEventWithHistory.listen((event) {
-          if (event.extensionKind == 'Flutter.Frame') {
-            final frame = FlutterFrame.parse(event.extensionData!.data);
+        serviceConnection
+            .serviceManager.service!.onExtensionEventWithHistorySafe
+            .listen((event) {
+          if (event.extensionKind == FlutterEvent.frame) {
+            final frame = FlutterFrame.fromJson(event.extensionData!.data);
             enhanceTracingController.assignStateForFrame(frame);
             flutterFramesController.addFrame(frame);
-          } else if (event.extensionKind == 'Flutter.RebuiltWidgets' &&
-              FeatureFlags.widgetRebuildstats) {
-            final data = this.data!;
+          } else if (event.extensionKind == FlutterEvent.rebuiltWidgets &&
+              FeatureFlags.widgetRebuildStats) {
             if (_currentRebuildWidgetsIsolate != event.isolate) {
-              data.rebuildCountModel.clearFromRestart();
+              rebuildCountModel.clearFromRestart();
             }
             _currentRebuildWidgetsIsolate = event.isolate;
             // TODO(jacobr): need to make sure we don't get events from before
             // the last hot restart. Their data would be bogus.
-            data.rebuildCountModel
-                .processRebuildEvent(event.extensionData!.data);
-            if (!data.rebuildCountModel.locationMap.locationsResolved.value &&
+            rebuildCountModel.processRebuildEvent(event.extensionData!.data);
+            if (!rebuildCountModel.locationMap.locationsResolved.value &&
                 !_fetchMissingLocationsStarted) {
               _fetchMissingRebuildLocations();
             }
@@ -137,39 +151,33 @@ class PerformanceController extends DisposableController
         }),
       );
     } else {
-      final shouldLoadOfflineData = offlineController
-              .shouldLoadOfflineData(PerformanceScreen.id) &&
-          offlineController.offlineDataJson[PerformanceData.traceEventsKey] !=
-              null;
-      if (shouldLoadOfflineData) {
-        // This is a workaround to guarantee that DevTools exports are compatible
-        // with other trace viewers (catapult, perfetto, chrome://tracing), which
-        // require a top level field named "traceEvents". See how timeline data is
-        // encoded in [ExportController.encode].
-        final timelineJson = Map<String, dynamic>.from(
-          offlineController.offlineDataJson[PerformanceScreen.id],
-        )..addAll({
-            PerformanceData.traceEventsKey: offlineController
-                .offlineDataJson[PerformanceData.traceEventsKey],
-          });
-        final offlinePerformanceData =
-            OfflinePerformanceData.parse(timelineJson);
-        if (!offlinePerformanceData.isEmpty) {
-          await loadOfflineData(offlinePerformanceData);
-        }
-      }
+      await maybeLoadOfflineData(
+        PerformanceScreen.id,
+        // TODO(kenz): make sure DevTools exports can be loaded into the full
+        // Perfetto trace viewer (ui.perfetto.dev).
+        createData: (json) => OfflinePerformanceData.fromJson(json),
+        shouldLoad: (data) => !data.isEmpty,
+        loadData: _loadOfflineData,
+      );
     }
   }
 
+  Future<void> _loadOfflineData(OfflinePerformanceData data) async {
+    await clearData();
+    offlinePerformanceData = data;
+    await _applyToFeatureControllersAsync(
+      (c) => c.setOfflineData(offlinePerformanceData!),
+    );
+  }
+
   void _fetchMissingRebuildLocations() async {
-    final data = this.data!;
     if (_fetchMissingLocationsStarted) return;
     // Some locations are missing. This occurs if rebuilds were
     // enabled before DevTools connected because rebuild events only
     // include locations that have not yet been sent with an event.
     _fetchMissingLocationsStarted = true;
     final inspectorService =
-        serviceManager.inspectorService! as InspectorService;
+        serviceConnection.inspectorService! as InspectorService;
     final expectedIsolate = _currentRebuildWidgetsIsolate;
     final json = await inspectorService.widgetLocationIdMap();
     // Don't apply the json if the isolate has been restarted
@@ -178,20 +186,12 @@ class PerformanceController extends DisposableController
       // It is strange if unresolved Locations have resolved on their
       // own. This wouldn't be a big deal but suggests a logic bug
       // somewhere.
-      assert(
-        !data.rebuildCountModel.locationMap.locationsResolved.value,
-      );
-      data.rebuildCountModel.locationMap.processLocationMap(json);
+      assert(!rebuildCountModel.locationMap.locationsResolved.value);
+      rebuildCountModel.locationMap.processLocationMap(json);
       // Only one call to fetch missing locations should ever be
       // needed as rebuild events include all associated locations.
-      assert(
-        data.rebuildCountModel.locationMap.locationsResolved.value,
-      );
+      assert(rebuildCountModel.locationMap.locationsResolved.value);
     }
-  }
-
-  void initData() {
-    data ??= PerformanceData();
   }
 
   /// Calls [callback] for each feature controller in [_featureControllers].
@@ -236,12 +236,11 @@ class PerformanceController extends DisposableController
   /// Clears the timeline data currently stored by the controller as well the
   /// VM timeline if a connected app is present.
   Future<void> clearData() async {
-    if (serviceManager.connectedAppInitialized) {
-      await serviceManager.service!.clearVMTimeline();
+    if (serviceConnection.serviceManager.connectedAppInitialized) {
+      await serviceConnection.serviceManager.service!.clearVMTimeline();
     }
     offlinePerformanceData = null;
-    data?.clear();
-    serviceManager.errorBadgeManager.clearErrors(PerformanceScreen.id);
+    serviceConnection.errorBadgeManager.clearErrors(PerformanceScreen.id);
     await _applyToFeatureControllersAsync((c) => c.clearData());
   }
 
@@ -253,27 +252,23 @@ class PerformanceController extends DisposableController
   }
 
   @override
-  OfflineScreenData screenDataForExport() =>
-      OfflineScreenData(screenId: PerformanceScreen.id, data: data!.toJson());
-
-  @override
-  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await clearData();
-    offlinePerformanceData = offlineData.shallowClone();
-    data = offlineData.shallowClone();
-
-    await _applyToFeatureControllersAsync(
-      (c) => c.setOfflineData(offlinePerformanceData!),
-    );
-  }
+  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
+        screenId: PerformanceScreen.id,
+        data: OfflinePerformanceData(
+          perfettoTraceBinary: timelineEventsController.fullPerfettoTrace,
+          frames: flutterFramesController.flutterFrames.value,
+          selectedFrame: flutterFramesController.selectedFrame.value,
+          rasterStats: rasterStatsController.rasterStats.value,
+          rebuildCountModel: rebuildCountModel,
+          displayRefreshRate: flutterFramesController.displayRefreshRate.value,
+        ).toJson(),
+      );
 }
 
 abstract class PerformanceFeatureController extends DisposableController {
   PerformanceFeatureController(this.performanceController);
 
   final PerformanceController performanceController;
-
-  PerformanceData? get data => performanceController.data;
 
   /// Whether this feature is active and visible to the user.
   bool get isActiveFeature => _isActiveFeature;
@@ -293,7 +288,7 @@ abstract class PerformanceFeatureController extends DisposableController {
 
   Future<void> init();
 
-  Future<void> setOfflineData(PerformanceData offlineData);
+  Future<void> setOfflineData(OfflinePerformanceData offlineData);
 
   FutureOr<void> clearData();
 

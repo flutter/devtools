@@ -5,18 +5,19 @@
 /// HeapSpace of Dart VM collected heap data.
 class HeapSpace {
   HeapSpace._fromJson(this.json)
-      : avgCollectionPeriodMillis = json['avgCollectionPeriodMillis'],
-        capacity = json['capacity'],
-        collections = json['collections'],
-        external = json['external'],
-        name = json['name'],
-        time = json['time'],
-        used = json['used'];
+      : avgCollectionPeriodMillis =
+            json['avgCollectionPeriodMillis'] as double?,
+        capacity = json['capacity'] as int?,
+        collections = json['collections'] as int?,
+        external = json['external'] as int?,
+        name = json['name'] as String?,
+        time = json['time'] as double?,
+        used = json['used'] as int?;
 
-  static HeapSpace? parse(Map<String, dynamic>? json) =>
+  static HeapSpace? parse(Map<String, Object?>? json) =>
       json == null ? null : HeapSpace._fromJson(json);
 
-  final Map<String, dynamic> json;
+  final Map<String, Object?> json;
 
   final double? avgCollectionPeriodMillis;
 
@@ -32,20 +33,16 @@ class HeapSpace {
 
   final int? used;
 
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
-    json['type'] = 'HeapSpace';
-    json.addAll({
-      'avgCollectionPeriodMillis': avgCollectionPeriodMillis,
-      'capacity': capacity,
-      'collections': collections,
-      'external': external,
-      'name': name,
-      'time': time,
-      'used': used,
-    });
-    return json;
-  }
+  Map<String, dynamic> toJson() => <String, Object?>{
+        'type': 'HeapSpace',
+        'avgCollectionPeriodMillis': avgCollectionPeriodMillis,
+        'capacity': capacity,
+        'collections': collections,
+        'external': external,
+        'name': name,
+        'time': time,
+        'used': used,
+      };
 
   @override
   String toString() => '[HeapSpace]';

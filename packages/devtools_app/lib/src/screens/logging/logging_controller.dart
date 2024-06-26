@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -14,11 +16,10 @@ import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
-import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
@@ -30,9 +31,9 @@ final _log = Logger('logging_controller');
 
 // For performance reasons, we drop old logs in batches, so the log will grow
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
-const int kMaxLogItemsLowerBound = 5000;
-const int kMaxLogItemsUpperBound = 5500;
-final DateFormat timeFormat = DateFormat('HH:mm:ss.SSS');
+const kMaxLogItemsLowerBound = 5000;
+const kMaxLogItemsUpperBound = 5500;
+final timeFormat = DateFormat('HH:mm:ss.SSS');
 
 bool _verboseDebugging = false;
 
@@ -63,99 +64,24 @@ Future<String> _retrieveFullStringValue(
       Future.value(fallback);
 }
 
-class LoggingDetailsController {
-  LoggingDetailsController({
-    required this.onShowInspector,
-    required this.onShowDetails,
-    required this.createLoggingTree,
-  });
+const _gcLogKind = 'gc';
 
-  static const JsonEncoder jsonEncoder = JsonEncoder.withIndent('  ');
+final _verboseFlutterFrameworkLogKinds = [
+  FlutterEvent.firstFrame,
+  FlutterEvent.frameworkInitialization,
+  FlutterEvent.frame,
+  FlutterEvent.imageSizesForFrame,
+];
 
-  late LogData data;
+final _verboseFlutterServiceLogKinds = [
+  FlutterEvent.serviceExtensionStateChanged,
+];
 
-  /// Callback to execute to show the inspector.
-  final VoidCallback onShowInspector;
-
-  /// Callback to execute to show the data from the details tree in the view.
-  final OnShowDetails onShowDetails;
-
-  /// Callback to create an inspectorTree for the logging view of the correct
-  /// type.
-  final CreateLoggingTree createLoggingTree;
-
-  InspectorTreeController? tree;
-
-  void setData(LogData data) {
-    this.data = data;
-
-    tree = null;
-
-    if (data.node != null) {
-      tree = createLoggingTree(
-        onSelectionChange: () {
-          final InspectorTreeNode node = tree!.selection!;
-          unawaited(tree!.maybePopulateChildren(node));
-
-          // TODO(jacobr): node.diagnostic.isDiagnosticableValue isn't quite
-          // right.
-          final diagnosticLocal = node.diagnostic!;
-          if (diagnosticLocal.isDiagnosticableValue) {
-            // TODO(jacobr): warn if the selection can't be set as the node is
-            // stale which is likely if this is an old log entry.
-            onShowInspector();
-            unawaited(diagnosticLocal.setSelectionInspector(false));
-          }
-        },
-      );
-
-      final InspectorTreeNode root = tree!.setupInspectorTreeNode(
-        tree!.createNode(),
-        data.node!,
-        expandChildren: true,
-        expandProperties: true,
-      );
-      // No sense in collapsing the root node.
-      root.allowExpandCollapse = false;
-      tree!.root = root;
-      onShowDetails(tree: tree);
-
-      return;
-    }
-
-    // See if we need to asynchronously compute the log entry details.
-    if (data.needsComputing) {
-      onShowDetails(text: '');
-
-      unawaited(
-        data.compute().then((_) {
-          // If we're still displaying the same log entry, then update the UI with
-          // the calculated value.
-          if (this.data == data) {
-            _updateUIFromData();
-          }
-        }),
-      );
-    } else {
-      _updateUIFromData();
-    }
-  }
-
-  void _updateUIFromData() {
-    if (data.details?.startsWith('{') == true &&
-        data.details?.endsWith('}') == true) {
-      try {
-        // If the string decodes properly, then format the json.
-        final result = jsonDecode(data.details!);
-        onShowDetails(text: jsonEncoder.convert(result));
-      } catch (e) {
-        onShowDetails(text: data.details);
-      }
-    } else {
-      onShowDetails(text: data.details);
-    }
-  }
-}
+/// Log kinds to show without a summary in the table.
+final _hideSummaryLogKinds = <String>{
+  FlutterEvent.firstFrame,
+  FlutterEvent.frameworkInitialization,
+};
 
 class LoggingController extends DisposableController
     with
@@ -163,28 +89,69 @@ class LoggingController extends DisposableController
         FilterControllerMixin<LogData>,
         AutoDisposeControllerMixin {
   LoggingController() {
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
-    );
-    if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager.service!);
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        _handleConnectionStart(serviceConnection.serviceManager.service!);
+
+        autoDisposeStreamSubscription(
+          serviceConnection.serviceManager.service!.onIsolateEvent
+              .listen((event) {
+            messageBus.addEvent(
+              BusEvent(
+                'debugger',
+                data: event,
+              ),
+            );
+          }),
+        );
+      }
+    });
+    if (serviceConnection.serviceManager.connectedAppInitialized) {
+      _handleConnectionStart(serviceConnection.serviceManager.service!);
     }
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen(_handleConnectionStop),
-    );
     _handleBusEvents();
     subscribeToFilterChanges();
   }
 
+  /// The toggle filters available for the Logging screen.
+  @override
+  List<ToggleFilter<LogData>> createToggleFilters() => [
+        if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+            true) ...[
+          ToggleFilter<LogData>(
+            name: 'Hide verbose Flutter framework logs (initialization, frame '
+                'times, image sizes)',
+            includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
+                .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+            enabledByDefault: true,
+          ),
+          ToggleFilter<LogData>(
+            name: 'Hide verbose Flutter service logs (service extension state '
+                'changes)',
+            includeCallback: (log) => !_verboseFlutterServiceLogKinds
+                .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+            enabledByDefault: true,
+          ),
+        ],
+        ToggleFilter<LogData>(
+          name: 'Hide garbage collection logs',
+          includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
+          enabledByDefault: true,
+        ),
+      ];
+
   static const kindFilterId = 'logging-kind-filter';
 
   @override
-  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
-        kindFilterId: QueryFilterArgument(keys: ['kind', 'k']),
+  Map<String, QueryFilterArgument<LogData>> createQueryFilterArgs() => {
+        kindFilterId: QueryFilterArgument<LogData>(
+          keys: ['kind', 'k'],
+          dataValueProvider: (log) => log.kind,
+          substringMatch: true,
+        ),
       };
 
-  final StreamController<String> _logStatusController =
-      StreamController.broadcast();
+  final _logStatusController = StreamController<String>.broadcast();
 
   /// A stream of events for the textual description of the log contents.
   ///
@@ -206,7 +173,7 @@ class LoggingController extends DisposableController
   void _updateSelection() {
     final selected = selectedLog.value;
     if (selected != null) {
-      final List<LogData> logs = filteredData.value;
+      final logs = filteredData.value;
       if (!logs.contains(selected)) {
         selectedLog.value = null;
       }
@@ -214,11 +181,11 @@ class LoggingController extends DisposableController
   }
 
   ObjectGroup get objectGroup =>
-      serviceManager.consoleService.objectGroup as ObjectGroup;
+      serviceConnection.consoleService.objectGroup as ObjectGroup;
 
   String get statusText {
-    final int totalCount = data.length;
-    final int showingCount = filteredData.value.length;
+    final totalCount = data.length;
+    final showingCount = filteredData.value.length;
 
     String label;
 
@@ -239,22 +206,20 @@ class LoggingController extends DisposableController
   void clear() {
     resetFilter();
     _updateData([]);
-    serviceManager.errorBadgeManager.clearErrors(LoggingScreen.id);
+    serviceConnection.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {
     // Log stdout events.
-    final _StdoutEventHandler stdoutHandler =
-        _StdoutEventHandler(this, 'stdout');
+    final stdoutHandler = _StdoutEventHandler(this, 'stdout');
     autoDisposeStreamSubscription(
-      service.onStdoutEventWithHistory.listen(stdoutHandler.handle),
+      service.onStdoutEventWithHistorySafe.listen(stdoutHandler.handle),
     );
 
     // Log stderr events.
-    final _StdoutEventHandler stderrHandler =
-        _StdoutEventHandler(this, 'stderr', isError: true);
+    final stderrHandler = _StdoutEventHandler(this, 'stderr', isError: true);
     autoDisposeStreamSubscription(
-      service.onStderrEventWithHistory.listen(stderrHandler.handle),
+      service.onStderrEventWithHistorySafe.listen(stderrHandler.handle),
     );
 
     // Log GC events.
@@ -262,38 +227,22 @@ class LoggingController extends DisposableController
 
     // Log `dart:developer` `log` events.
     autoDisposeStreamSubscription(
-      service.onLoggingEventWithHistory.listen(_handleDeveloperLogEvent),
+      service.onLoggingEventWithHistorySafe.listen(_handleDeveloperLogEvent),
     );
 
     // Log Flutter extension events.
     autoDisposeStreamSubscription(
-      service.onExtensionEventWithHistory.listen(_handleExtensionEvent),
+      service.onExtensionEventWithHistorySafe.listen(_handleExtensionEvent),
     );
   }
 
-  void _handleExtensionEvent(Event e) async {
-    // Events to show without a summary in the table.
-    const Set<String> untitledEvents = {
-      'Flutter.FirstFrame',
-      'Flutter.FrameworkInitialization',
-    };
+  void _handleExtensionEvent(Event e) {
+    if (e.extensionKind == FlutterEvent.frame) {
+      final frame = FrameInfo(e.extensionData!.data);
 
-    // TODO(jacobr): make the list of filtered events configurable.
-    const Set<String> filteredEvents = {
-      // Suppress these events by default as they just add noise to the log
-      ServiceExtensionStateChangedInfo.eventName,
-    };
-
-    if (filteredEvents.contains(e.extensionKind)) {
-      return;
-    }
-
-    if (e.extensionKind == FrameInfo.eventName) {
-      final FrameInfo frame = FrameInfo.from(e.extensionData!.data);
-
-      final String frameId = '#${frame.number}';
-      final String frameInfoText =
-          '$frameId ${frame.elapsedMs!.toStringAsFixed(1).padLeft(4)}ms ';
+      final frameId = '#${frame.number}';
+      final frameInfoText =
+          '$frameId ${frame.elapsedMs.toStringAsFixed(1).padLeft(4)}ms ';
 
       log(
         LogData(
@@ -303,21 +252,21 @@ class LoggingController extends DisposableController
           summary: frameInfoText,
         ),
       );
-    } else if (e.extensionKind == ImageSizesForFrame.eventName) {
+    } else if (e.extensionKind == FlutterEvent.imageSizesForFrame) {
       final images = ImageSizesForFrame.from(e.extensionData!.data);
 
       for (final image in images) {
         log(
           LogData(
             e.extensionKind!.toLowerCase(),
-            jsonEncode(image.rawJson),
+            jsonEncode(image.json),
             e.timestamp,
             summary: image.summary,
           ),
         );
       }
-    } else if (e.extensionKind == NavigationInfo.eventName) {
-      final NavigationInfo navInfo = NavigationInfo.from(e.extensionData!.data);
+    } else if (e.extensionKind == FlutterEvent.navigation) {
+      final navInfo = NavigationInfo.from(e.extensionData!.data);
 
       log(
         LogData(
@@ -327,7 +276,7 @@ class LoggingController extends DisposableController
           summary: navInfo.routeDescription,
         ),
       );
-    } else if (untitledEvents.contains(e.extensionKind)) {
+    } else if (_hideSummaryLogKinds.contains(e.extensionKind)) {
       log(
         LogData(
           e.extensionKind!.toLowerCase(),
@@ -336,8 +285,8 @@ class LoggingController extends DisposableController
           summary: '',
         ),
       );
-    } else if (e.extensionKind == ServiceExtensionStateChangedInfo.eventName) {
-      final ServiceExtensionStateChangedInfo changedInfo =
+    } else if (e.extensionKind == FlutterEvent.serviceExtensionStateChanged) {
+      final changedInfo =
           ServiceExtensionStateChangedInfo.from(e.extensionData!.data);
 
       log(
@@ -348,10 +297,10 @@ class LoggingController extends DisposableController
           summary: '${changedInfo.extension}: ${changedInfo.value}',
         ),
       );
-    } else if (e.extensionKind == 'Flutter.Error') {
+    } else if (e.extensionKind == FlutterEvent.error) {
       // TODO(pq): add tests for error extension handling once framework changes
       // are landed.
-      final RemoteDiagnosticsNode node = RemoteDiagnosticsNode(
+      final node = RemoteDiagnosticsNode(
         e.extensionData!.data,
         objectGroup,
         false,
@@ -364,7 +313,7 @@ class LoggingController extends DisposableController
         _log.info('node toStringDeep:######\n${node.toStringDeep()}\n###');
       }
 
-      final RemoteDiagnosticsNode summary = _findFirstSummary(node) ?? node;
+      final summary = _findFirstSummary(node) ?? node;
       log(
         LogData(
           e.extensionKind!.toLowerCase(),
@@ -386,18 +335,19 @@ class LoggingController extends DisposableController
   }
 
   void _handleGCEvent(Event e) {
-    final HeapSpace newSpace = HeapSpace.parse(e.json!['new'])!;
-    final HeapSpace oldSpace = HeapSpace.parse(e.json!['old'])!;
-    final isolateRef = e.json!['isolate'];
+    final newSpace = HeapSpace.parse(e.json!['new'])!;
+    final oldSpace = HeapSpace.parse(e.json!['old'])!;
+    final isolateRef = (e.json!['isolate'] as Map).cast<String, Object?>();
 
-    final int usedBytes = newSpace.used! + oldSpace.used!;
-    final int capacityBytes = newSpace.capacity! + oldSpace.capacity!;
+    final usedBytes = newSpace.used! + oldSpace.used!;
+    final capacityBytes = newSpace.capacity! + oldSpace.capacity!;
 
-    final int time = ((newSpace.time! + oldSpace.time!) * 1000).round();
+    final time = ((newSpace.time! + oldSpace.time!) * 1000).round();
 
-    final String summary = '${isolateRef['name']} • '
+    final summary = '${isolateRef['name']} • '
         '${e.json!['reason']} collection in $time ms • '
-        '${printMB(usedBytes, includeUnit: true)} used of ${printMB(capacityBytes, includeUnit: true)}';
+        '${printBytes(usedBytes, unit: ByteUnit.mb, includeUnit: true)} used of '
+        '${printBytes(capacityBytes, unit: ByteUnit.mb, includeUnit: true)}';
 
     final event = <String, Object>{
       'reason': e.json!['reason'],
@@ -406,30 +356,30 @@ class LoggingController extends DisposableController
       'isolate': isolateRef,
     };
 
-    final String message = jsonEncode(event);
+    final message = jsonEncode(event);
     log(LogData('gc', message, e.timestamp, summary: summary));
   }
 
   void _handleDeveloperLogEvent(Event e) {
-    final VmServiceWrapper? service = serviceManager.service;
+    final service = serviceConnection.serviceManager.service;
 
-    final logRecord = e.json!['logRecord'];
+    final logRecord = _LogRecord(e.json!['logRecord']);
 
     String? loggerName =
-        _valueAsString(InstanceRef.parse(logRecord['loggerName']));
+        _valueAsString(InstanceRef.parse(logRecord.loggerName));
     if (loggerName == null || loggerName.isEmpty) {
       loggerName = 'log';
     }
-    final int? level = logRecord['level'];
-    final InstanceRef messageRef = InstanceRef.parse(logRecord['message'])!;
+    final level = logRecord.level;
+    final messageRef = InstanceRef.parse(logRecord.message)!;
     String? summary = _valueAsString(messageRef);
     if (messageRef.valueAsStringIsTruncated == true) {
       summary = '${summary!}...';
     }
-    final InstanceRef? error = InstanceRef.parse(logRecord['error']);
-    final InstanceRef? stackTrace = InstanceRef.parse(logRecord['stackTrace']);
+    final error = InstanceRef.parse(logRecord.error);
+    final stackTrace = InstanceRef.parse(logRecord.stackTrace);
 
-    final String? details = summary;
+    final details = summary;
     Future<String> Function()? detailsComputer;
 
     // If the message string was truncated by the VM, or the error object or
@@ -449,7 +399,7 @@ class LoggingController extends DisposableController
         // field, encoded as a json encoded string, so handle that case.
         if (_isNotNull(error)) {
           if (error!.valueAsString != null) {
-            final String errorString =
+            final errorString =
                 await _retrieveFullStringValue(service, e.isolate!, error);
             result += '\n\n$errorString';
           } else {
@@ -463,10 +413,10 @@ class LoggingController extends DisposableController
             );
 
             if (toStringResult is ErrorRef) {
-              final String? errorString = _valueAsString(error);
+              final errorString = _valueAsString(error);
               result += '\n\n$errorString';
             } else if (toStringResult is InstanceRef) {
-              final String str = await _retrieveFullStringValue(
+              final str = await _retrieveFullStringValue(
                 service,
                 e.isolate!,
                 toStringResult,
@@ -485,8 +435,8 @@ class LoggingController extends DisposableController
       };
     }
 
-    const int severeIssue = 1000;
-    final bool isError = level != null && level >= severeIssue ? true : false;
+    const severeIssue = 1000;
+    final isError = level != null && level >= severeIssue ? true : false;
 
     log(
       LogData(
@@ -499,8 +449,6 @@ class LoggingController extends DisposableController
       ),
     );
   }
-
-  void _handleConnectionStop(Object? _) {}
 
   void log(LogData log) {
     List<LogData> currentLogs = List.of(data);
@@ -529,12 +477,12 @@ class LoggingController extends DisposableController
       return node;
     }
     RemoteDiagnosticsNode? summary;
-    for (var property in node.inlineProperties) {
+    for (final property in node.inlineProperties) {
       summary = _findFirstSummary(property);
       if (summary != null) return summary;
     }
 
-    for (RemoteDiagnosticsNode child in node.childrenNow) {
+    for (final child in node.childrenNow) {
       summary = _findFirstSummary(child);
       if (summary != null) return summary;
     }
@@ -589,7 +537,7 @@ class LoggingController extends DisposableController
   }
 
   void _handleDebuggerEvent(BusEvent event) {
-    final Event debuggerEvent = event.data as Event;
+    final debuggerEvent = event.data as Event;
 
     // Filter ServiceExtensionAdded events as they're pretty noisy.
     if (debuggerEvent.kind == EventKind.kServiceExtensionAdded) {
@@ -632,42 +580,59 @@ class LoggingController extends DisposableController
   @override
   void filterData(Filter<LogData> filter) {
     super.filterData(filter);
-    final queryFilter = filter.queryFilter;
-    if (queryFilter.isEmpty) {
-      filteredData
-        ..clear()
-        ..addAll(data);
-      return;
+
+    bool filterCallback(LogData log) {
+      final filteredOutByToggleFilters = filter.toggleFilters.any(
+        (toggleFilter) =>
+            toggleFilter.enabled.value && !toggleFilter.includeCallback(log),
+      );
+      if (filteredOutByToggleFilters) return false;
+
+      final queryFilter = filter.queryFilter;
+      if (!queryFilter.isEmpty) {
+        final filteredOutByQueryFilterArgument = queryFilter
+            .filterArguments.values
+            .any((argument) => !argument.matchesValue(log));
+        if (filteredOutByQueryFilterArgument) return false;
+
+        if (filter.queryFilter.substringExpressions.isNotEmpty) {
+          for (final substring in filter.queryFilter.substringExpressions) {
+            final matchesKind = log.kind.caseInsensitiveContains(substring);
+            if (matchesKind) return true;
+
+            final matchesSummary = log.summary != null &&
+                log.summary!.caseInsensitiveContains(substring);
+            if (matchesSummary) return true;
+
+            final matchesDetails = log.details != null &&
+                log.details!.caseInsensitiveContains(substring);
+            if (matchesDetails) return true;
+          }
+          return false;
+        }
+      }
+
+      return true;
     }
+
     filteredData
       ..clear()
       ..addAll(
-        data.where((log) {
-          final kindArg = filter.queryFilter.filterArguments[kindFilterId];
-          if (kindArg != null &&
-              !kindArg.matchesValue(log.kind.toLowerCase())) {
-            return false;
-          }
-
-          if (filter.queryFilter.substrings.isNotEmpty) {
-            for (final substring in filter.queryFilter.substrings) {
-              final matchesKind = log.kind.caseInsensitiveContains(substring);
-              if (matchesKind) return true;
-
-              final matchesSummary = log.summary != null &&
-                  log.summary!.caseInsensitiveContains(substring);
-              if (matchesSummary) return true;
-
-              final matchesDetails = log.details != null &&
-                  log.summary!.caseInsensitiveContains(substring);
-              if (matchesDetails) return true;
-            }
-            return false;
-          }
-          return true;
-        }).toList(),
+        data.where(filterCallback).toList(),
       );
   }
+}
+
+extension type _LogRecord(Map<String, dynamic> json) {
+  int? get level => json['level'];
+
+  Map<String, Object?> get loggerName => json['loggerName'];
+
+  Map<String, Object?> get message => json['message'];
+
+  Map<String, Object?> get error => json['error'];
+
+  Map<String, Object?> get stackTrace => json['stackTrace'];
 }
 
 /// Receive and log stdout / stderr events from the VM.
@@ -691,7 +656,7 @@ class _StdoutEventHandler {
   Timer? timer;
 
   void handle(Event e) {
-    final String message = decodeBase64(e.bytes!);
+    final message = decodeBase64(e.bytes!);
 
     if (buffer != null) {
       timer?.cancel();
@@ -721,7 +686,7 @@ class _StdoutEventHandler {
       summary = message.substring(0, maxLength);
     }
 
-    final LogData data = LogData(
+    final data = LogData(
       name,
       message,
       e.timestamp,
@@ -787,7 +752,7 @@ class LogData with SearchableDataMixin {
   String? _details;
   Future<String> Function()? detailsComputer;
 
-  static const JsonEncoder prettyPrinter = JsonEncoder.withIndent('  ');
+  static const prettyPrinter = JsonEncoder.withIndent('  ');
 
   String? get details => _details;
 
@@ -812,25 +777,10 @@ class LogData with SearchableDataMixin {
     }
   }
 
-  bool matchesFilter(String filter) {
-    if (kind.toLowerCase().contains(filter)) {
-      return true;
-    }
-
-    if (summary != null && summary!.toLowerCase().contains(filter)) {
-      return true;
-    }
-
-    if (_details != null && _details!.toLowerCase().contains(filter)) {
-      return true;
-    }
-
-    return false;
-  }
-
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
-    return (summary?.caseInsensitiveContains(regExpSearch) == true) ||
+    return kind.caseInsensitiveContains(regExpSearch) ||
+        (summary?.caseInsensitiveContains(regExpSearch) == true) ||
         (details?.caseInsensitiveContains(regExpSearch) == true);
   }
 
@@ -838,40 +788,19 @@ class LogData with SearchableDataMixin {
   String toString() => 'LogData($kind, $timestamp)';
 }
 
-class FrameInfo {
-  FrameInfo(this.number, this.elapsedMs, this.startTimeMs);
-
-  static const String eventName = 'Flutter.Frame';
-
-  static const double kTargetMaxFrameTimeMs = 1000.0 / 60;
-
-  static FrameInfo from(Map<String, dynamic> data) {
-    return FrameInfo(
-      data['number'],
-      data['elapsed'] / 1000,
-      data['startTime'] / 1000,
-    );
-  }
-
-  final int? number;
-  final num? elapsedMs;
-  final num? startTimeMs;
-
-  @override
-  String toString() => 'frame $number ${elapsedMs!.toStringAsFixed(1)}ms';
+// TODO(https://github.com/flutter/devtools/issues/7703): make this private once
+// Logging V2 lands.
+extension type FrameInfo(Map<String, dynamic> _json) {
+  int? get number => _json['number'];
+  num get elapsedMs => (_json['elapsed'] as num) / 1000;
 }
 
-class ImageSizesForFrame {
-  ImageSizesForFrame(
-    this.source,
-    this.displaySize,
-    this.imageSize,
-    this.rawJson,
-  );
-
-  static const String eventName = 'Flutter.ImageSizesForFrame';
-
+// TODO(https://github.com/flutter/devtools/issues/7703): make this private once
+// Logging V2 lands.
+extension type ImageSizesForFrame(Map<String, dynamic> json) {
   static List<ImageSizesForFrame> from(Map<String, dynamic> data) {
+    // Example payload:
+    //
     //     "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png": {
     //       "source": "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png",
     //       "displaySize": {
@@ -885,47 +814,43 @@ class ImageSizesForFrame {
     //       "displaySizeInBytes": 21845,
     //       "decodedSizeInBytes": 87381
     //     }
-
-    return data.values.map((entry) {
-      return ImageSizesForFrame(
-        entry['source'],
-        entry['displaySize'],
-        entry['imageSize'],
-        entry,
-      );
-    }).toList();
+    return data.values.map((entry_) => ImageSizesForFrame(entry_)).toList();
   }
 
-  final String? source;
-  final Map<String, Object?>? displaySize;
-  final Map<String, Object?>? imageSize;
-  final Map<String, Object?>? rawJson;
+  String get source => json['source'];
+
+  ImageSize get displaySize => ImageSize(json['displaySize']);
+
+  ImageSize get imageSize => ImageSize(json['imageSize']);
+
+  int? get displaySizeInBytes => json['displaySizeInBytes'];
+
+  int? get decodedSizeInBytes => json['decodedSizeInBytes'];
 
   String get summary {
-    final file = path.basename(source!);
+    final file = path.basename(source);
 
-    final int? displaySizeInBytes = rawJson!['displaySizeInBytes'] as int?;
-    final int? decodedSizeInBytes = rawJson!['decodedSizeInBytes'] as int?;
-
-    final double expansion =
+    final expansion =
         math.sqrt(decodedSizeInBytes ?? 0) / math.sqrt(displaySizeInBytes ?? 1);
 
     return 'Image $file • displayed at '
-        '${(displaySize!['width'] as double).round()}x${(displaySize!['height'] as double).round()}'
+        '${displaySize.width.round()}x${displaySize.height.round()}'
         ' • created at '
-        '${(imageSize!['width'] as double).round()}x${(imageSize!['height'] as double).round()}'
+        '${imageSize.width.round()}x${imageSize.height.round()}'
         ' • ${expansion.toStringAsFixed(1)}x';
   }
+}
 
-  @override
-  String toString() =>
-      '$source ${displaySize!['width']}x${displaySize!['height']}';
+// TODO(https://github.com/flutter/devtools/issues/7703): make this private once
+// Logging V2 lands.
+extension type ImageSize(Map<String, dynamic> json) {
+  double get width => json['width'];
+
+  double get height => json['height'];
 }
 
 class NavigationInfo {
   NavigationInfo(this._route);
-
-  static const String eventName = 'Flutter.Navigation';
 
   static NavigationInfo from(Map<String, dynamic> data) {
     return NavigationInfo(data['route']);
@@ -933,14 +858,11 @@ class NavigationInfo {
 
   final Map<String, dynamic>? _route;
 
-  String? get routeDescription =>
-      _route == null ? null : _route!['description'];
+  String? get routeDescription => _route == null ? null : _route['description'];
 }
 
 class ServiceExtensionStateChangedInfo {
   ServiceExtensionStateChangedInfo(this.extension, this.value);
-
-  static const String eventName = 'Flutter.ServiceExtensionStateChanged';
 
   static ServiceExtensionStateChangedInfo from(Map<String, dynamic> data) {
     return ServiceExtensionStateChangedInfo(data['extension'], data['value']);

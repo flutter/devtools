@@ -4,12 +4,13 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app_shared/service.dart' show FlutterEvent;
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/theme.dart';
 import 'logging_controller.dart';
 
 @visibleForTesting
@@ -26,8 +27,8 @@ class MessageColumn extends ColumnData<LogData>
 
   @override
   int compare(LogData a, LogData b) {
-    final String valueA = getValue(a);
-    final String valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     // Matches frame descriptions (e.g. '#12  11.4ms ')
     final regex = RegExp(r'#(\d+)\s+\d+.\d+ms\s*');
     final valueAIsFrameLog = valueA.startsWith(regex);
@@ -49,20 +50,19 @@ class MessageColumn extends ColumnData<LogData>
     BuildContext context,
     LogData data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    final textStyle = Theme.of(context).fixedFontStyle;
-    if (data.kind == 'flutter.frame') {
-      const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
-      final Text text = Text(
+    if (data.kind.caseInsensitiveEquals(FlutterEvent.frame)) {
+      const color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
+      final text = Text(
         getDisplayValue(data),
         overflow: TextOverflow.ellipsis,
-        style: textStyle,
       );
 
       double frameLength = 0.0;
       try {
-        final int micros = jsonDecode(data.details!)['elapsed'];
+        final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
         frameLength = micros * 3.0 / 1000.0;
       } catch (e) {
         // ignore
@@ -87,7 +87,7 @@ class MessageColumn extends ColumnData<LogData>
             // TODO(helin24): Recompute summary length considering ansi codes.
             //  The current summary is generally the first 200 chars of details.
             getDisplayValue(data),
-            textStyle,
+            Theme.of(context).regularTextStyle,
           ),
         ),
         overflow: TextOverflow.ellipsis,

@@ -25,36 +25,13 @@ class PackagePrefixes {
   static const dartUi = 'dart:ui';
 }
 
-enum ScreenMetaData {
-  inspector('inspector', 'Flutter Inspector'),
-  performance('performance', 'Performance'),
-  cpuProfiler('cpu-profiler', 'CPU Profiler'),
-  memory('memory', 'Memory'),
-  debugger('debugger', 'Debugger'),
-  network('network', 'Network'),
-  logging('logging', 'Logging'),
-  provider('provider', 'Provider'),
-  appSize('app-size', 'App Size'),
-  vmTools('vm-tools', 'VM Tools'),
-  simple('simple', '');
-
-  const ScreenMetaData(this.id, this.title);
-
-  final String id;
-
-  final String title;
-}
-
-const String traceEventsFieldName = 'traceEvents';
-
 const closureName = '<closure>';
 
 const anonymousClosureName = '<anonymous closure>';
 
-const _memoryDocUrl =
-    'https://docs.flutter.dev/development/tools/devtools/memory';
-const _consoleDocUrl =
-    'https://docs.flutter.dev/development/tools/devtools/console';
+const _memoryDocUrl = 'https://docs.flutter.dev/tools/devtools/memory';
+const _consoleDocUrl = 'https://docs.flutter.dev/tools/devtools/console';
+const _inspectorDocUrl = 'https://docs.flutter.dev/tools/devtools/inspector';
 
 /// Some links to documentation.
 ///
@@ -65,7 +42,7 @@ enum DocLinks {
   diff(_memoryDocUrl, 'diff-snapshots-tab'),
   trace(_memoryDocUrl, 'trace-instances-tab'),
   console(_consoleDocUrl, null),
-  ;
+  inspectorPackageDirectories(_inspectorDocUrl, 'package-directories');
 
   const DocLinks(this.url, this.hash);
 
@@ -75,4 +52,16 @@ enum DocLinks {
     if (hash == null) return url;
     return '$url#$hash';
   }
+}
+
+/// The DevTools mode in which a controller object was created.
+enum ControllerCreationMode {
+  /// Not interacting with app or data from a previous session.
+  disconnected,
+
+  /// Interacting with a connected application.
+  connected,
+
+  /// Showing data saved from a previous session and ignoring connection status.
+  offlineData,
 }

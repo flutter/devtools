@@ -5,20 +5,20 @@
 import 'dart:async';
 
 import 'package:codicon/codicon.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/label.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/utils.dart';
 import 'debugger_controller.dart';
 
 class DebuggingControls extends StatefulWidget {
-  const DebuggingControls({Key? key}) : super(key: key);
+  const DebuggingControls({super.key});
 
   static const minWidthBeforeScaling = 1750.0;
 
@@ -35,7 +35,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
     super.didChangeDependencies();
     if (!initController()) return;
     addAutoDisposeListener(
-      serviceManager.isolateManager.mainIsolateState?.isPaused,
+      serviceConnection
+          .serviceManager.isolateManager.mainIsolateState?.isPaused,
     );
     addAutoDisposeListener(controller.resuming);
     addAutoDisposeListener(controller.stackFramesWithLocation);
@@ -46,17 +47,19 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
-    final canStep = serviceManager.isMainIsolatePaused &&
+    final canStep = serviceConnection.serviceManager.isMainIsolatePaused &&
         !resuming &&
         hasStackFrames &&
         !isSystemIsolate;
-    final isVmApp = serviceManager.connectedApp?.isRunningOnDartVM ?? false;
+    final isVmApp =
+        serviceConnection.serviceManager.connectedApp?.isRunningOnDartVM ??
+            false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
         children: [
           _pauseAndResumeButtons(
-            isPaused: serviceManager.isMainIsolatePaused,
+            isPaused: serviceConnection.serviceManager.isMainIsolatePaused,
             resuming: resuming,
           ),
           const SizedBox(width: denseSpacing),
@@ -79,59 +82,51 @@ class _DebuggingControlsState extends State<DebuggingControls>
     required bool resuming,
   }) {
     final isSystemIsolate = controller.isSystemIsolate;
-    return RoundedOutlinedBorder(
-      child: Row(
-        children: [
-          DebuggerButton(
-            title: 'Pause',
-            icon: Codicons.debugPause,
-            autofocus: true,
-            // Disable when paused or selected isolate is a system isolate.
-            onPressed: (isPaused || isSystemIsolate)
-                ? null
-                : () => unawaited(controller.pause()),
-          ),
-          LeftBorder(
-            child: DebuggerButton(
-              title: 'Resume',
-              icon: Codicons.debugContinue,
-              // Enable while paused + not resuming and selected isolate is not
-              // a system isolate.
-              onPressed: ((isPaused && !resuming) && !isSystemIsolate)
-                  ? () => unawaited(controller.resume())
-                  : null,
-            ),
-          ),
-        ],
-      ),
+    return RoundedButtonGroup(
+      items: [
+        ButtonGroupItemData(
+          tooltip: 'Pause',
+          icon: Codicons.debugPause,
+          autofocus: true,
+          // Disable when paused or selected isolate is a system isolate.
+          onPressed: (isPaused || isSystemIsolate)
+              ? null
+              : () => unawaited(controller.pause()),
+        ),
+        ButtonGroupItemData(
+          tooltip: 'Resume',
+          icon: Codicons.debugContinue,
+          // Enable while paused + not resuming and selected isolate is not
+          // a system isolate.
+          onPressed: ((isPaused && !resuming) && !isSystemIsolate)
+              ? () => unawaited(controller.resume())
+              : null,
+        ),
+      ],
     );
   }
 
   Widget _stepButtons({required bool canStep}) {
-    return RoundedOutlinedBorder(
-      child: Row(
-        children: [
-          DebuggerButton(
-            title: 'Step Over',
-            icon: Codicons.debugStepOver,
-            onPressed: canStep ? () => unawaited(controller.stepOver()) : null,
-          ),
-          LeftBorder(
-            child: DebuggerButton(
-              title: 'Step In',
-              icon: Codicons.debugStepInto,
-              onPressed: canStep ? () => unawaited(controller.stepIn()) : null,
-            ),
-          ),
-          LeftBorder(
-            child: DebuggerButton(
-              title: 'Step Out',
-              icon: Codicons.debugStepOut,
-              onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
-            ),
-          ),
-        ],
-      ),
+    return RoundedButtonGroup(
+      items: [
+        ButtonGroupItemData(
+          label: 'Step Over',
+          icon: Codicons.debugStepOver,
+          onPressed: canStep ? () => unawaited(controller.stepOver()) : null,
+        ),
+        ButtonGroupItemData(
+          label: 'Step In',
+          icon: Codicons.debugStepInto,
+          onPressed: canStep ? () => unawaited(controller.stepIn()) : null,
+        ),
+        ButtonGroupItemData(
+          label: 'Step Out',
+          icon: Codicons.debugStepOut,
+          onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
+        ),
+      ],
+      minScreenWidthForTextBeforeScaling:
+          DebuggingControls.minWidthBeforeScaling,
     );
   }
 
@@ -139,12 +134,14 @@ class _DebuggingControlsState extends State<DebuggingControls>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.codeViewController.fileExplorerVisible,
       builder: (context, visible, _) {
-        return DevToolsButton(
+        return GaDevToolsButton(
           icon: Icons.folder_outlined,
           label: 'File Explorer',
           onPressed: controller.codeViewController.toggleLibrariesVisible,
           gaScreen: gac.debugger,
-          gaSelection: visible ? gac.hideFileExplorer : gac.showFileExplorer,
+          gaSelection: visible
+              ? gac.DebuggerEvents.hideFileExplorer.name
+              : gac.DebuggerEvents.showFileExplorer.name,
           minScreenWidthForTextBeforeScaling:
               DebuggingControls.minWidthBeforeScaling,
         );
@@ -163,10 +160,14 @@ class CodeStatisticsControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: controller.codeViewController.showCodeCoverage,
-      secondListenable: controller.codeViewController.showProfileInformation,
-      builder: (context, showCodeCoverage, showProfileInformation, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.codeViewController.showCodeCoverage,
+        controller.codeViewController.showProfileInformation,
+      ],
+      builder: (context, values, _) {
+        final showCodeCoverage = values.first as bool;
+        final showProfileInformation = values.second as bool;
         return Row(
           children: [
             // TODO(kenz): clean up this button group when records are
@@ -196,7 +197,7 @@ class CodeStatisticsControls extends StatelessWidget {
               iconOnly: true,
               tooltip: 'Refresh statistics',
               gaScreen: gac.debugger,
-              gaSelection: gac.refreshStatistics,
+              gaSelection: gac.DebuggerEvents.refreshStatistics.name,
               onPressed: showCodeCoverage || showProfileInformation
                   ? () => unawaited(
                         controller.codeViewController.refreshCodeStatistics(),
@@ -236,9 +237,9 @@ class _CodeStatsControl extends StatelessWidget {
 
 class BreakOnExceptionsControl extends StatelessWidget {
   const BreakOnExceptionsControl({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final DebuggerController controller;
 
@@ -259,7 +260,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
                 },
           isDense: true,
           items: [
-            for (var mode in ExceptionMode.modes)
+            for (final mode in ExceptionMode.modes)
               DropdownMenuItem<ExceptionMode>(
                 value: mode,
                 child: Text(
@@ -304,41 +305,4 @@ class ExceptionMode {
   final String id;
   final String name;
   final String description;
-}
-
-@visibleForTesting
-class DebuggerButton extends StatelessWidget {
-  const DebuggerButton({
-    super.key,
-    required this.title,
-    required this.icon,
-    required this.onPressed,
-    this.autofocus = false,
-  });
-
-  final String title;
-  final IconData icon;
-  final VoidCallback? onPressed;
-  final bool autofocus;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      message: title,
-      child: OutlinedButton(
-        autofocus: autofocus,
-        style: OutlinedButton.styleFrom(
-          side: BorderSide.none,
-          shape: const ContinuousRectangleBorder(),
-        ),
-        onPressed: onPressed,
-        child: MaterialIconLabel(
-          label: title,
-          iconData: icon,
-          minScreenWidthForTextBeforeScaling:
-              DebuggingControls.minWidthBeforeScaling,
-        ),
-      ),
-    );
-  }
 }

@@ -6,13 +6,13 @@ MaterialApp
    │
    └─HeroControllerScope
      └─Focus
+       │ dependencies: [_FocusInheritedScope]
        │ state: _FocusState#00000
        │
        └─_FocusInheritedScope
          └─Semantics
            │ container: false
            │ properties: SemanticsProperties
-           │ tooltip: null
            │ renderObject: RenderSemanticsAnnotations#00000
            │
            └─WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]

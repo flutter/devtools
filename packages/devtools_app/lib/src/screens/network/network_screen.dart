@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,32 +13,24 @@ import 'package:provider/provider.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
+import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
 
 class NetworkScreen extends Screen {
-  NetworkScreen()
-      : super.conditional(
-          id: id,
-          requiresDartVm: true,
-          title: ScreenMetaData.network.title,
-          icon: Icons.network_check,
-        );
+  NetworkScreen() : super.fromMetaData(ScreenMetaData.network);
 
   static final id = ScreenMetaData.network.id;
 
@@ -44,19 +38,22 @@ class NetworkScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget build(BuildContext context) => const NetworkScreenBody();
+  Widget buildScreenBody(BuildContext context) => const NetworkScreenBody();
 
   @override
   Widget buildStatus(BuildContext context) {
     final networkController = Provider.of<NetworkController>(context);
-    final color = Theme.of(context).textTheme.bodyMedium!.color!;
-
-    return DualValueListenableBuilder<NetworkRequests, List<NetworkRequest>>(
-      firstListenable: networkController.requests,
-      secondListenable: networkController.filteredData,
-      builder: (context, networkRequests, filteredRequests, child) {
+    final color = Theme.of(context).colorScheme.onPrimary;
+    return MultiValueListenableBuilder(
+      listenables: [
+        networkController.requests,
+        networkController.filteredData,
+      ],
+      builder: (context, values, child) {
+        final networkRequests = values.first as List<NetworkRequest>;
+        final filteredRequests = values.second as List<NetworkRequest>;
         final filteredCount = filteredRequests.length;
-        final totalCount = networkRequests.requests.length;
+        final totalCount = networkRequests.length;
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -130,19 +127,23 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 
     cancelListeners();
 
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      if (serviceManager.isolateManager.mainIsolate.value != null) {
-        unawaited(controller.startRecording());
-      }
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
+            null) {
+          unawaited(controller.startRecording());
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
     // TODO(kenz): this won't work well if we eventually have multiple clients
     // that want to listen to network data.
-    controller.stopRecording();
     super.dispose();
+    unawaited(controller.stopRecording());
   }
 
   @override
@@ -163,9 +164,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 /// clear, search, filter, etc.).
 class _NetworkProfilerControls extends StatefulWidget {
   const _NetworkProfilerControls({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   static const _includeTextWidth = 810.0;
 
@@ -178,7 +178,7 @@ class _NetworkProfilerControls extends StatefulWidget {
 
 class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     with AutoDisposeMixin {
-  late NetworkRequests _requests;
+  late List<NetworkRequest> _requests;
 
   late List<NetworkRequest> _filteredRequests;
 
@@ -210,27 +210,20 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = ScreenSize(context).width;
     final hasRequests = _filteredRequests.isNotEmpty;
     return Row(
       children: [
-        PauseButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          tooltip: 'Pause recording network traffic',
+        StartStopRecordingButton(
+          recording: _recording,
+          onPressed: () async =>
+              await widget.controller.togglePolling(!_recording),
+          tooltipOverride: _recording
+              ? 'Stop recording network traffic'
+              : 'Resume recording network traffic',
+          minScreenWidthForTextBeforeScaling: double.infinity,
           gaScreen: gac.network,
-          gaSelection: gac.pause,
-          onPressed:
-              _recording ? () => widget.controller.togglePolling(false) : null,
-        ),
-        const SizedBox(width: denseSpacing),
-        ResumeButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          tooltip: 'Resume recording network traffic',
-          gaScreen: gac.network,
-          gaSelection: gac.resume,
-          onPressed:
-              _recording ? null : () => widget.controller.togglePolling(true),
+          gaSelection: _recording ? gac.pause : gac.resume,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
@@ -246,12 +239,14 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         SearchField<NetworkController>(
           searchController: widget.controller,
           searchFieldEnabled: hasRequests,
-          searchFieldWidth: wideSearchFieldWidth,
+          searchFieldWidth: screenWidth <= MediaSize.xs
+              ? defaultSearchFieldWidth
+              : wideSearchFieldWidth,
         ),
         const SizedBox(width: denseSpacing),
-        FilterButton(
+        DevToolsFilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: _filteredRequests.length != _requests.requests.length,
+          isFilterActive: _filteredRequests.length != _requests.length,
         ),
       ],
     );
@@ -271,46 +266,43 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 }
 
 class _NetworkProfilerBody extends StatelessWidget {
-  const _NetworkProfilerBody({Key? key, required this.controller})
-      : super(key: key);
+  const _NetworkProfilerBody({required this.controller});
 
   final NetworkController controller;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: Split(
-        initialFractions: const [0.5, 0.5],
-        minSizes: const [200, 200],
-        axis: Axis.horizontal,
-        children: [
-          ValueListenableBuilder<List<NetworkRequest>>(
-            valueListenable: controller.filteredData,
-            builder: (context, filteredRequests, _) {
-              return NetworkRequestsTable(
-                networkController: controller,
-                requests: filteredRequests,
-                searchMatchesNotifier: controller.searchMatches,
-                activeSearchMatchNotifier: controller.activeSearchMatch,
-              );
-            },
-          ),
-          NetworkRequestInspector(controller),
-        ],
-      ),
+    final splitAxis = SplitPane.axisFor(context, 1.0);
+    return SplitPane(
+      initialFractions: splitAxis == Axis.horizontal ? [0.6, 0.4] : [0.5, 0.5],
+      minSizes: const [200, 200],
+      axis: splitAxis,
+      children: [
+        ValueListenableBuilder<List<NetworkRequest>>(
+          valueListenable: controller.filteredData,
+          builder: (context, filteredRequests, _) {
+            return NetworkRequestsTable(
+              networkController: controller,
+              requests: filteredRequests,
+              searchMatchesNotifier: controller.searchMatches,
+              activeSearchMatchNotifier: controller.activeSearchMatch,
+            );
+          },
+        ),
+        NetworkRequestInspector(controller),
+      ],
     );
   }
 }
 
 class NetworkRequestsTable extends StatelessWidget {
   const NetworkRequestsTable({
-    Key? key,
+    super.key,
     required this.networkController,
     required this.requests,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
-  }) : super(key: key);
+  });
 
   static final methodColumn = MethodColumn();
   static final addressColumn = UriColumn();
@@ -353,6 +345,7 @@ class NetworkRequestsTable extends StatelessWidget {
         onItemSelected: (item) {
           if (item is DartIOHttpRequestData) {
             unawaited(item.getFullRequestData());
+            networkController.resetDropDown();
           }
         },
       ),
@@ -365,7 +358,8 @@ class UriColumn extends ColumnData<NetworkRequest>
   UriColumn()
       : super.wide(
           'Uri',
-          minWidthPx: scaleByFontFactor(100.0),
+          minWidthPx: scaleByFontFactor(isEmbedded() ? 100 : 150.0),
+          showTooltip: true,
         );
 
   @override
@@ -378,6 +372,7 @@ class UriColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final value = getDisplayValue(data);
@@ -395,7 +390,7 @@ class UriColumn extends ColumnData<NetworkRequest>
 }
 
 class MethodColumn extends ColumnData<NetworkRequest> {
-  MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(70));
+  MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(60));
 
   @override
   String getValue(NetworkRequest dataObject) {
@@ -459,6 +454,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final options = _buildOptions(data);
@@ -483,7 +479,8 @@ class StatusColumn extends ColumnData<NetworkRequest>
       : super(
           'Status',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(62),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(50),
         );
 
   @override
@@ -501,6 +498,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
     BuildContext context,
     NetworkRequest data, {
     bool isRowSelected = false,
+    bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
     final theme = Theme.of(context);
@@ -518,7 +516,8 @@ class TypeColumn extends ColumnData<NetworkRequest> {
       : super(
           'Type',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(62),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(50),
         );
 
   @override
@@ -537,7 +536,8 @@ class DurationColumn extends ColumnData<NetworkRequest> {
       : super(
           'Duration',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(80),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(75),
         );
 
   @override
@@ -562,7 +562,8 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
       : super(
           'Timestamp',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(135),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(115),
         );
 
   @override

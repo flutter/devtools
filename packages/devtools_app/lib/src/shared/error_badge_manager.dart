@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -17,9 +19,8 @@ import '../service/service_extensions.dart' as extensions;
 import '../service/vm_service_wrapper.dart';
 import 'diagnostics/diagnostics_node.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose.dart';
 import 'primitives/listenable.dart';
-import 'primitives/utils.dart';
+import 'query_parameters.dart';
 
 class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {
@@ -38,7 +39,8 @@ class ErrorBadgeManager extends DisposableController
   void vmServiceOpened(VmServiceWrapper service) {
     // Ensure structured errors are enabled.
     unawaited(
-      serviceManager.serviceExtensionManager.setServiceExtensionState(
+      serviceConnection.serviceManager.serviceExtensionManager
+          .setServiceExtensionState(
         extensions.structuredErrors.extension,
         enabled: true,
         value: true,
@@ -47,17 +49,17 @@ class ErrorBadgeManager extends DisposableController
 
     // Log Flutter extension events.
     autoDisposeStreamSubscription(
-      service.onExtensionEventWithHistory.listen(_handleExtensionEvent),
+      service.onExtensionEventWithHistorySafe.listen(_handleExtensionEvent),
     );
 
     // Log stderr events.
     autoDisposeStreamSubscription(
-      service.onStderrEventWithHistory.listen(_handleStdErr),
+      service.onStderrEventWithHistorySafe.listen(_handleStdErr),
     );
   }
 
   void _handleExtensionEvent(Event e) {
-    if (e.extensionKind == 'Flutter.Error') {
+    if (e.extensionKind == FlutterEvent.error) {
       incrementBadgeCount(LoggingScreen.id);
 
       final inspectableError = _extractInspectableError(e);
@@ -91,8 +93,8 @@ class ErrorBadgeManager extends DisposableController
     }
 
     final queryParams =
-        devToolsQueryParams(devToolsUrlNode.getStringMember('value')!);
-    final inspectorRef = queryParams['inspectorRef'] ?? '';
+        DevToolsQueryParams.fromUrl(devToolsUrlNode.getStringMember('value')!);
+    final inspectorRef = queryParams.inspectorRef ?? '';
 
     return InspectableWidgetError(errorMessage, inspectorRef);
   }
@@ -110,8 +112,7 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void appendError(String screenId, DevToolsError error) {
-    final ValueNotifier<LinkedHashMap<String?, DevToolsError>>? errors =
-        _activeErrors[screenId];
+    final errors = _activeErrors[screenId];
     if (errors == null) return;
 
     // Build a new map with the new error. Adding to the existing map
@@ -186,10 +187,7 @@ class DevToolsError {
 }
 
 class InspectableWidgetError extends DevToolsError {
-  InspectableWidgetError(String errorMessage, String id, {bool read = false})
-      : super(errorMessage, id, read: read);
-
-  String get inspectorRef => id;
+  InspectableWidgetError(super.errorMessage, super.id, {super.read});
 
   @override
   InspectableWidgetError asRead() =>

@@ -4,14 +4,13 @@
 
 // ignore_for_file: avoid_print
 
-library matchers;
-
 import 'dart:io' as io;
 
 import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '_golden_matcher_io.dart'
-    if (dart.library.html) '_golden_matcher_web.dart' as golden_matcher;
+    if (dart.library.js_interop) '_golden_matcher_web.dart' as golden_matcher;
 
 RemoteDiagnosticsNode? findNodeMatching(
   RemoteDiagnosticsNode node,
@@ -21,7 +20,7 @@ RemoteDiagnosticsNode? findNodeMatching(
       node.description?.startsWith(text) == true) {
     return node;
   }
-  for (var child in node.childrenNow) {
+  for (final child in node.childrenNow) {
     final match = findNodeMatching(child, text);
     if (match != null) {
       return match;
@@ -65,7 +64,7 @@ Matcher equalsGoldenIgnoringHashCodes(String path) {
 
 class _EqualsGoldenIgnoringHashCodes extends Matcher {
   _EqualsGoldenIgnoringHashCodes(String pathWithinGoldenDirectory) {
-    path = 'test/test_infra/goldens$_goldensSuffix/$pathWithinGoldenDirectory';
+    path = 'test/test_infra/goldens/$pathWithinGoldenDirectory';
     try {
       _value = _normalize(io.File(path).readAsStringSync());
     } catch (e) {
@@ -75,10 +74,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   late String path;
   late String _value;
 
-  static final Object _mismatchedValueKey = Object();
-
-  static final String _goldensSuffix =
-      io.Platform.environment['DEVTOOLS_GOLDENS_SUFFIX'] ?? '';
+  static final _mismatchedValueKey = Object();
 
   static bool get updateGoldens => autoUpdateGoldenFiles;
 
@@ -88,7 +84,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   @override
   bool matches(Object? object, Map<dynamic, dynamic> matchState) {
-    final String description = _normalize(object as String);
+    final description = _normalize(object as String);
     if (_value != description) {
       if (updateGoldens) {
         io.File(path).writeAsStringSync(description);
@@ -128,9 +124,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
         .add('expected golden file \'$path\' with normalized value\n  ')
         .addDescriptionOf(_value)
         .add('\nbut got\n  ')
-        .addDescriptionOf(actualValue)
-        .add('\nTo update golden files run:\n')
-        .add('  tool/update_goldens.sh"\n');
+        .addDescriptionOf(actualValue);
   }
 }
 

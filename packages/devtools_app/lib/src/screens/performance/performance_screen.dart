@@ -2,18 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_shared/devtools_shared.dart';
+import 'dart:async';
+
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/config_specific/import_export/import_export.dart';
+import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
 import 'panes/controls/performance_controls.dart';
 import 'panes/flutter_frames/flutter_frames_chart.dart';
@@ -24,14 +28,7 @@ import 'tabbed_performance_view.dart';
 // where applicable.
 
 class PerformanceScreen extends Screen {
-  PerformanceScreen()
-      : super.conditional(
-          id: id,
-          requiresDartVm: true,
-          worksOffline: true,
-          title: ScreenMetaData.performance.title,
-          icon: Octicons.pulse,
-        );
+  PerformanceScreen() : super.fromMetaData(ScreenMetaData.performance);
 
   static final id = ScreenMetaData.performance.id;
 
@@ -39,7 +36,18 @@ class PerformanceScreen extends Screen {
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) => const PerformanceScreenBody();
+  Widget buildScreenBody(BuildContext context) {
+    if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
+        false) {
+      return const WebPerformanceScreenBody();
+    }
+    return const PerformanceScreenBody();
+  }
+
+  @override
+  Widget buildDisconnectedScreenBody(BuildContext context) {
+    return const DisconnectedPerformanceScreenBody();
+  }
 }
 
 class PerformanceScreenBody extends StatefulWidget {
@@ -57,32 +65,18 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   void initState() {
     super.initState();
     ga.screen(PerformanceScreen.id);
-    addAutoDisposeListener(offlineController.offlineMode);
+    addAutoDisposeListener(offlineDataController.showingOfflineData);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushUnsupportedFlutterVersionWarning(
-      context,
-      PerformanceScreen.id,
-      supportedFlutterVersion: SemanticVersion(
-        major: 2,
-        minor: 3,
-        // Specifying patch makes the version number more readable.
-        // ignore: avoid_redundant_argument_values
-        patch: 0,
-        preReleaseMajor: 16,
-        preReleaseMinor: 0,
-      ),
-    );
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
 
     if (!initController()) return;
 
     cancelListeners();
     addAutoDisposeListener(controller.loadingOfflineData);
-    addAutoDisposeListener(controller.flutterFramesController.selectedFrame);
   }
 
   @override
@@ -98,8 +92,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
           );
         }
 
-        final offlineMode = offlineController.offlineMode.value;
-        final isOfflineFlutterApp = offlineMode &&
+        final showingOfflineData =
+            offlineDataController.showingOfflineData.value;
+        final isOfflineFlutterApp = showingOfflineData &&
             controller.offlinePerformanceData != null &&
             controller.offlinePerformanceData!.frames.isNotEmpty;
         return Column(
@@ -110,10 +105,13 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             ),
             const SizedBox(height: intermediateSpacing),
             if (isOfflineFlutterApp ||
-                (!offlineMode && serviceManager.connectedApp!.isFlutterAppNow!))
+                (!showingOfflineData &&
+                    serviceConnection
+                        .serviceManager.connectedApp!.isFlutterAppNow!))
               FlutterFramesChart(
                 controller.flutterFramesController,
-                offlineMode: offlineMode,
+                showingOfflineData: showingOfflineData,
+                impellerEnabled: controller.impellerEnabled,
               ),
             const Expanded(child: TabbedPerformanceView()),
           ],
@@ -122,3 +120,97 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     );
   }
 }
+
+class WebPerformanceScreenBody extends StatelessWidget {
+  const WebPerformanceScreenBody({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isFlutterWebApp =
+        serviceConnection.serviceManager.connectedApp?.isFlutterWebAppNow ??
+            false;
+    return Markdown(
+      data: isFlutterWebApp ? flutterWebInstructionsMd : dartWebInstructionsMd,
+      onTapLink: (_, url, __) {
+        if (url != null) {
+          unawaited(launchUrlWithErrorHandling(url));
+        }
+      },
+    );
+  }
+}
+
+class DisconnectedPerformanceScreenBody extends StatelessWidget {
+  const DisconnectedPerformanceScreenBody({super.key});
+
+  static const importInstructions =
+      'Open a performance data file that was previously saved from DevTools.';
+
+  @override
+  Widget build(BuildContext context) {
+    return FileImportContainer(
+      instructions: importInstructions,
+      actionText: 'Load data',
+      gaScreen: gac.performance,
+      gaSelectionImport: gac.PerformanceEvents.openDataFile.name,
+      gaSelectionAction: gac.PerformanceEvents.loadDataFromFile.name,
+      onAction: (jsonFile) {
+        Provider.of<ImportController>(context, listen: false)
+            .importData(jsonFile, expectedScreenId: PerformanceScreen.id);
+      },
+    );
+  }
+}
+
+const timelineLink =
+    'https://api.flutter.dev/flutter/dart-developer/Timeline-class.html';
+const timelineTaskLink =
+    'https://api.flutter.dev/flutter/dart-developer/TimelineTask-class.html';
+const debugBuildsLink =
+    'https://api.flutter.dev/flutter/widgets/debugProfileBuildsEnabled.html';
+const debugUserBuildsLink =
+    'https://api.flutter.dev/flutter/widgets/debugProfileBuildsEnabledUserWidgets.html';
+const debugLayoutsLink =
+    'https://api.flutter.dev/flutter/rendering/debugProfileLayoutsEnabled.html';
+const debugPaintsLink =
+    'https://api.flutter.dev/flutter/rendering/debugProfilePaintsEnabled.html';
+const profileModeLink = 'https://flutter.dev/to/profile-mode';
+const performancePanelLink =
+    'https://developer.chrome.com/docs/devtools/performance';
+
+const flutterWebInstructionsMd = '''
+## How to use Chrome DevTools for performance profiling
+
+The Flutter framework emits timeline events as it works to build frames, draw
+scenes, and track other activity such as garbage collections. These events are
+exposed in the Chrome DevTools performance panel for debugging.
+
+You can also emit your own timeline events using the `dart:developer`
+[Timeline]($timelineLink) and [TimelineTask]($timelineTaskLink) APIs for further
+performance analysis.
+
+### Optional flags to enhance tracing
+
+- [debugProfileBuildsEnabled]($debugBuildsLink): Adds Timeline events for every Widget built.
+- [debugProfileBuildsEnabledUserWidgets]($debugUserBuildsLink): Adds Timeline events for every user-created Widget built.
+- [debugProfileLayoutsEnabled]($debugLayoutsLink): Adds Timeline events for every RenderObject layout.
+- [debugProfilePaintsEnabled]($debugPaintsLink): Adds Timeline events for every RenderObject painted.
+
+### Instructions
+
+1. *[Optional]* Set any desired tracing flags to true from your app's main method.
+2. Run your Flutter web app in [profile mode]($profileModeLink).
+3. Open up the [Chrome DevTools' Performance panel]($performancePanelLink) for
+your application, and start recording to capture timeline events.
+''';
+
+const dartWebInstructionsMd = '''
+## How to use Chrome DevTools for performance profiling
+
+Any events emitted using the `dart:developer` [Timeline]($timelineLink) and
+[TimelineTask]($timelineTaskLink) APIs are exposed in the Chrome DevTools
+performance panel.
+
+Open up the [Chrome DevTools' Performance panel]($performancePanelLink) for
+your application, and start recording to capture timeline events.
+''';

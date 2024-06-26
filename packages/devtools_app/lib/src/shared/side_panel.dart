@@ -2,26 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import 'common_widgets.dart';
-import 'config_specific/launch_url/launch_url.dart';
-import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
-import 'theme.dart';
+import 'utils.dart';
 
 class SidePanelViewer extends StatefulWidget {
   const SidePanelViewer({
-    Key? key,
+    super.key,
     required this.controller,
     this.title,
     this.textIfMarkdownDataEmpty,
     this.child,
-  }) : super(key: key);
+  });
 
   final SidePanelController controller;
   final String? title;
@@ -127,14 +127,14 @@ class SidePanelViewerState extends State<SidePanelViewer>
 
 class SidePanel extends AnimatedWidget {
   const SidePanel({
-    Key? key,
+    super.key,
     required this.sidePanelController,
     required Animation<double> visibilityAnimation,
     this.title,
     this.markdownData,
     this.textIfMarkdownDataEmpty,
     required this.width,
-  }) : super(key: key, listenable: visibilityAnimation);
+  }) : super(listenable: visibilityAnimation);
 
   final SidePanelController sidePanelController;
 
@@ -159,7 +159,7 @@ class SidePanel extends AnimatedWidget {
         color: theme.scaffoldBackgroundColor,
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(defaultBorderRadius),
+          borderRadius: defaultBorderRadius,
           side: BorderSide(
             color: theme.focusColor,
           ),
@@ -182,8 +182,8 @@ class SidePanel extends AnimatedWidget {
                 : Expanded(
                     child: Markdown(
                       data: markdownData!,
-                      onTapLink: (text, url, title) async =>
-                          await launchUrl(url!),
+                      onTapLink: (text, url, title) =>
+                          unawaited(launchUrlWithErrorHandling(url!)),
                     ),
                   ),
           ],
@@ -194,9 +194,7 @@ class SidePanel extends AnimatedWidget {
 }
 
 class SidePanelController {
-  ValueListenable<String?> get markdown => _markdown;
-
-  final _markdown = ValueNotifier<String?>(null);
+  final markdown = ValueNotifier<String?>(null);
 
   ValueListenable<bool> get isVisible => _isVisible;
 
@@ -204,9 +202,5 @@ class SidePanelController {
 
   void toggleVisibility(bool visible) {
     _isVisible.value = visible;
-  }
-
-  set markdownText(String? markdownText) {
-    _markdown.value = markdownText;
   }
 }

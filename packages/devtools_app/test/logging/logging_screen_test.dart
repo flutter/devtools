@@ -3,15 +3,22 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';
 import 'package:devtools_app/src/screens/logging/_message_column.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+import '../test_infra/utils/test_utils.dart';
 
 void main() {
   late LoggingScreen screen;
@@ -31,17 +38,22 @@ void main() {
     setUp(() {
       mockLoggingController = createMockLoggingControllerWithDefaults();
 
-      final FakeServiceManager fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp!.isFlutterWebAppNow)
+      final fakeServiceConnection = FakeServiceConnectionManager();
+      when(
+        fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
+      ).thenReturn(false);
+      when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
           .thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isProfileBuildNow)
-          .thenReturn(false);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
-          .thenReturn(ValueNotifier<int>(0));
+      when(
+        fakeServiceConnection.errorBadgeManager.errorCountNotifier('logging'),
+      ).thenReturn(ValueNotifier<int>(0));
       setGlobal(NotificationService, NotificationService());
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       setGlobal(PreferencesController, PreferencesController());
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
 
       screen = LoggingScreen();
@@ -53,6 +65,41 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
+      'copy log contents',
+      windowSize,
+      (WidgetTester tester) async {
+        final logA = LogData('TEST A', 'Log A', 123);
+        final logB = LogData('TEST B', 'Log B', 124);
+        mockLoggingController = createMockLoggingControllerWithDefaults(
+          data: [
+            logA,
+            logB,
+          ],
+        );
+
+        String clipboardContents = '';
+        setupClipboardCopyListener(
+          clipboardContentsCallback: (contents) {
+            clipboardContents = contents ?? '';
+          },
+        );
+
+        await pumpLoggingScreen(tester);
+        await tester.tap(find.byTooltip('Copy filtered logs'));
+
+        expect(
+          clipboardContents,
+          equals(
+            [
+              '${logA.timestamp} [${logA.kind}] ${logA.details}',
+              '${logB.timestamp} [${logB.kind}] ${logB.details}',
+            ].joinWithTrailing('\n'),
+          ),
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize(
       'builds with no data',
       windowSize,
       (WidgetTester tester) async {
@@ -62,8 +109,8 @@ void main() {
         expect(find.byType(LogDetails), findsOneWidget);
         expect(find.byType(ClearButton), findsOneWidget);
         expect(find.byType(TextField), findsOneWidget);
-        expect(find.byType(FilterButton), findsOneWidget);
-        expect(find.byType(StructuredErrorsToggle), findsOneWidget);
+        expect(find.byType(DevToolsFilterButton), findsOneWidget);
+        expect(find.byType(SettingsOutlinedButton), findsOneWidget);
       },
     );
 
@@ -87,7 +134,7 @@ void main() {
 
         final textFieldFinder = find.byType(TextField);
         expect(textFieldFinder, findsOneWidget);
-        final TextField textField = tester.widget(textFieldFinder) as TextField;
+        final textField = tester.widget(textFieldFinder) as TextField;
         expect(textField.enabled, isFalse);
       },
     );
@@ -96,18 +143,29 @@ void main() {
       'can toggle structured errors',
       windowSize,
       (WidgetTester tester) async {
-        final serviceManager = FakeServiceManager();
-        when(serviceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
-        when(serviceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+        final serviceConnection = FakeServiceConnectionManager();
+        when(serviceConnection.serviceManager.connectedApp!.isFlutterWebAppNow)
+            .thenReturn(false);
+        when(serviceConnection.serviceManager.connectedApp!.isProfileBuildNow)
+            .thenReturn(false);
         setGlobal(
           ServiceConnectionManager,
-          serviceManager,
+          serviceConnection,
         );
         await pumpLoggingScreen(tester);
-        Switch toggle = tester.widget(find.byType(Switch));
+
+        await tester.tap(find.byType(SettingsOutlinedButton));
+        await tester.pump();
+        Switch toggle = tester.widget(
+          find.descendant(
+            of: find.byType(StructuredErrorsToggle),
+            matching: find.byType(Switch),
+          ),
+        );
         expect(toggle.value, false);
 
-        serviceManager.serviceExtensionManager.fakeServiceExtensionStateChanged(
+        serviceConnection.serviceManager.serviceExtensionManager
+            .fakeServiceExtensionStateChanged(
           structuredErrors.extension,
           'true',
         );

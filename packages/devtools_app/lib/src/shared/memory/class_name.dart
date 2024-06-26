@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -71,27 +72,65 @@ enum ClassType {
       CircleIcon(color: color, text: label, textColor: Colors.white);
 }
 
-class HeapClassName {
-  HeapClassName({required this.className, required library})
+class _Json {
+  static const className = 'n';
+  static const library = 'l';
+}
+
+/// Fully qualified Class name.
+///
+/// Equal class names are not stored twice in memory.
+class HeapClassName with Serializable {
+  @visibleForTesting
+  HeapClassName({required String? library, required this.className})
       : library = _normalizeLibrary(library);
 
-  HeapClassName.fromClassRef(ClassRef? classRef)
-      : this(
-          library: _library(
-            classRef?.library?.name,
-            classRef?.library?.uri,
-          ),
-          className: classRef?.name ?? '',
-        );
+  factory HeapClassName.fromJson(Map<String, dynamic> json) {
+    return HeapClassName(
+      library: json[_Json.library] as String?,
+      className: json[_Json.className] as String,
+    );
+  }
 
-  HeapClassName.fromHeapSnapshotClass(HeapSnapshotClass? theClass)
-      : this(
-          library: _library(
-            theClass?.libraryName,
-            theClass?.libraryUri.toString(),
-          ),
-          className: theClass?.name ?? '',
-        );
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      _Json.className: className,
+      _Json.library: library,
+    };
+  }
+
+  static final _instances = <HeapClassName>{};
+
+  static HeapClassName fromPath({
+    required String? library,
+    required String className,
+  }) {
+    final newInstance = HeapClassName(library: library, className: className);
+
+    final existingInstance = _instances.lookup(newInstance);
+    if (existingInstance != null) return existingInstance;
+
+    _instances.add(newInstance);
+    return newInstance;
+  }
+
+  static HeapClassName fromClassRef(ClassRef? classRef) => fromPath(
+        library: _library(
+          classRef?.library?.name,
+          classRef?.library?.uri,
+        ),
+        className: classRef?.name ?? '',
+      );
+
+  static HeapClassName fromHeapSnapshotClass(HeapSnapshotClass? theClass) =>
+      fromPath(
+        library: _library(
+          theClass?.libraryName,
+          theClass?.libraryUri.toString(),
+        ),
+        className: theClass?.name ?? '',
+      );
 
   static String _library(String? libName, String? libUrl) {
     if (libName != null && libName.isNotEmpty) return libName;
@@ -101,21 +140,20 @@ class HeapClassName {
   final String className;
   final String library;
 
-  late final String fullName =
-      library.isNotEmpty ? '$library/$shortName' : shortName;
+  late final fullName = library.isNotEmpty ? '$library/$shortName' : shortName;
 
   late final isSentinel = className == 'Sentinel' && library.isEmpty;
 
   late final isRoot = className == 'Root' && library.isEmpty;
 
-  late final bool isNull = className == 'Null' && library == 'dart:core';
+  late final isNull = className == 'Null' && library == 'dart:core';
 
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
-  late final bool isWeakEntry = _isWeakEntry(className, library);
+  late final isWeak = _isWeak(className, library);
 
-  /// See [isWeakEntry].
-  static bool _isWeakEntry(String className, String library) {
+  /// See [isWeak].
+  static bool _isWeak(String className, String library) {
     // Classes that hold reference to an object without preventing
     // its collection.
     const weakHolders = {
@@ -157,7 +195,7 @@ class HeapClassName {
     return ClassType.dependency;
   }
 
-  late final bool isCreatedByGoogle = isPackageless || isDartOrFlutter;
+  bool get isCreatedByGoogle => isPackageless || isDartOrFlutter;
 
   /// True, if the library does not belong to a package.
   ///
@@ -165,11 +203,11 @@ class HeapClassName {
   /// `dart:` or `package:`.
   /// Examples of such classes: Code, Function, Class, Field,
   /// number_symbols/NumberSymbols, vector_math_64/Matrix4.
-  late final bool isPackageless = library.isEmpty ||
+  late final isPackageless = library.isEmpty ||
       (!library.startsWith(PackagePrefixes.dart) &&
           !library.startsWith(PackagePrefixes.genericDartPackage));
 
-  /// True, if the package has prefix `dart:` or has perfix `package:` and is
+  /// True, if the package has prefix `dart:` or has prefix `package:` and is
   /// published by Dart or Flutter org.
   late final isDartOrFlutter = _isDartOrFlutter(library);
 
@@ -200,14 +238,18 @@ class HeapClassName {
   @override
   late final hashCode = fullName.hashCode;
 
-  static String _normalizeLibrary(String library) =>
-      library.trim().replaceFirst(
+  static String _normalizeLibrary(String? library) =>
+      (library ?? '').trim().replaceFirst(
             RegExp('^${PackagePrefixes.dartInSnapshot}'),
             PackagePrefixes.dart,
           );
 
   bool matches(ClassRef ref) {
     return HeapClassName.fromClassRef(ref) == this;
+  }
+
+  static void dispose() {
+    _instances.clear();
   }
 }
 

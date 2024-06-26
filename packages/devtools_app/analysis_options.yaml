@@ -11,10 +11,6 @@ analyzer:
     # expected.
     - test/test_infra/test_data/syntax_highlighting/**
 
-linter:
-  rules:
-    - avoid_print
-
 dart_code_metrics:
   metrics-exclude:
     - test/**

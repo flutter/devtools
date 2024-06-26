@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -14,8 +16,7 @@ import '../diagnostics/generic_instance_reference.dart';
 import '../diagnostics/inspector_service.dart';
 import '../diagnostics/tree_builder.dart';
 import '../globals.dart';
-import '../memory/adapted_heap_data.dart';
-import '../primitives/auto_dispose.dart';
+import '../memory/heap_object.dart';
 import '../primitives/utils.dart';
 
 /// A line in the console.
@@ -73,27 +74,26 @@ class VariableConsoleLine extends ConsoleLine {
 
 /// Source of truth for the state of the Console including both events from the
 /// VM and events emitted from other UI.
-class ConsoleService extends Disposer {
-  void appendBrowsableInstance({
+class ConsoleService with DisposerMixin {
+  Future<void> appendBrowsableInstance({
     required InstanceRef? instanceRef,
     required IsolateRef? isolateRef,
-    required HeapObjectSelection? heapSelection,
+    required HeapObject? heapSelection,
   }) async {
     if (instanceRef == null) {
-      final object = heapSelection?.object;
-      if (object == null || isolateRef == null) {
-        serviceManager.consoleService.appendStdio(
+      if (heapSelection?.index == null || isolateRef == null) {
+        serviceConnection.consoleService.appendStdio(
           'Not enough information to browse the instance.',
         );
         return;
       }
 
-      instanceRef = await evalService.findObject(object, isolateRef);
+      instanceRef = await evalService.findObject(heapSelection!, isolateRef);
     }
 
     // If instanceRef is null at this point, user will see static references.
 
-    appendInstanceRef(
+    await appendInstanceRef(
       value: instanceRef,
       diagnostic: null,
       isolateRef: isolateRef,
@@ -102,14 +102,14 @@ class ConsoleService extends Disposer {
     );
   }
 
-  void appendInstanceRef({
+  Future<void> appendInstanceRef({
     String? name,
     required InstanceRef? value,
     required RemoteDiagnosticsNode? diagnostic,
     required IsolateRef? isolateRef,
     bool forceScrollIntoView = false,
     bool expandAll = false,
-    HeapObjectSelection? heapSelection,
+    HeapObject? heapSelection,
   }) async {
     _stdioTrailingNewline = false;
     final variable = DartObjectNode.fromValue(
@@ -135,8 +135,8 @@ class ConsoleService extends Disposer {
   final _stdio = ListValueNotifier<ConsoleLine>([]);
   bool _stdioTrailingNewline = false;
 
-  ObjectGroupBase get objectGroup {
-    final inspectorService = serviceManager.inspectorService!;
+  InspectorObjectGroupBase get objectGroup {
+    final inspectorService = serviceConnection.inspectorService!;
     if (_objectGroup?.inspectorService == inspectorService) {
       return _objectGroup!;
     }
@@ -145,7 +145,7 @@ class ConsoleService extends Disposer {
     return _objectGroup!;
   }
 
-  ObjectGroupBase? _objectGroup;
+  InspectorObjectGroupBase? _objectGroup;
 
   /// Clears the contents of stdio.
   void clearStdio() {
@@ -165,8 +165,8 @@ class ConsoleService extends Disposer {
 
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
-    const int kMaxLogItemsLowerBound = 5000;
-    const int kMaxLogItemsUpperBound = 5500;
+    const kMaxLogItemsLowerBound = 5000;
+    const kMaxLogItemsUpperBound = 5500;
 
     // Parse out the new lines and append to the end of the existing lines.
 
@@ -211,12 +211,12 @@ class ConsoleService extends Disposer {
   }
 
   void _handleStdoutEvent(Event event) {
-    final String text = decodeBase64(event.bytes!);
+    final text = decodeBase64(event.bytes!);
     appendStdio(text);
   }
 
   void _handleStderrEvent(Event event) {
-    final String text = decodeBase64(event.bytes!);
+    final text = decodeBase64(event.bytes!);
     // TODO(devoncarew): Change to reporting stdio along with information about
     // whether the event was stdout or stderr.
     appendStdio(text);
@@ -231,9 +231,12 @@ class ConsoleService extends Disposer {
     autoDisposeStreamSubscription(
       service.onDebugEvent.listen(_handleDebugEvent),
     );
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      clearStdio();
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        clearStdio();
+      },
+    );
   }
 
   /// Whether the console service has been initialized.
@@ -251,18 +254,20 @@ class ConsoleService extends Disposer {
   /// low-end devices, as well as when DevTools pages that don't need the
   /// [ConsoleService] are being used.
   void ensureServiceInitialized() {
-    assert(serviceManager.isServiceAvailable);
-    if (!_serviceInitialized && serviceManager.isServiceAvailable) {
+    assert(serviceConnection.serviceManager.isServiceAvailable);
+    if (!_serviceInitialized &&
+        serviceConnection.serviceManager.isServiceAvailable) {
       autoDisposeStreamSubscription(
-        serviceManager.service!.onStdoutEventWithHistory
+        serviceConnection.serviceManager.service!.onStdoutEventWithHistorySafe
             .listen(_handleStdoutEvent),
       );
       autoDisposeStreamSubscription(
-        serviceManager.service!.onStderrEventWithHistory
+        serviceConnection.serviceManager.service!.onStderrEventWithHistorySafe
             .listen(_handleStderrEvent),
       );
       autoDisposeStreamSubscription(
-        serviceManager.service!.onExtensionEventWithHistory
+        serviceConnection
+            .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen(_handleExtensionEvent),
       );
       _serviceInitialized = true;
@@ -270,15 +275,16 @@ class ConsoleService extends Disposer {
   }
 
   void _handleExtensionEvent(Event e) async {
-    if (e.extensionKind == 'Flutter.Error' ||
-        e.extensionKind == 'Flutter.Print') {
-      if (serviceManager.connectedApp?.isProfileBuildNow != true) {
+    if (e.extensionKind == FlutterEvent.error ||
+        e.extensionKind == FlutterEvent.print) {
+      if (serviceConnection.serviceManager.connectedApp?.isProfileBuildNow !=
+          true) {
         // The app isn't a debug build.
         return;
       }
       // TODO(jacobr): events may be out of order. Use unique ids to ensure
       // consistent order of regular print statements and structured messages.
-      appendInstanceRef(
+      await appendInstanceRef(
         value: null,
         diagnostic: RemoteDiagnosticsNode(
           e.extensionData!.data,
@@ -297,7 +303,7 @@ class ConsoleService extends Disposer {
     _serviceInitialized = false;
   }
 
-  void _handleDebugEvent(Event event) async {
+  Future<void> _handleDebugEvent(Event event) async {
     // TODO(jacobr): keep events in order by tracking the original time and
     // sorting.
     if (event.kind == EventKind.kInspect) {
@@ -327,7 +333,7 @@ class ConsoleService extends Disposer {
           // returned getting the inspector ref.
         }
       }
-      appendInstanceRef(
+      await appendInstanceRef(
         value: event.inspectee,
         isolateRef: event.isolate,
         diagnostic: null,

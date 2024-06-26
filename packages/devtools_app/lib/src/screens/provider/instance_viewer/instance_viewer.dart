@@ -7,16 +7,16 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/diagnostics_text_styles.dart';
-import '../../../shared/eval_on_dart_library.dart';
-import '../../../shared/primitives/sliver_iterable_child_delegate.dart';
-import '../../../shared/primitives/utils.dart';
-import '../../../shared/theme.dart';
+import '../sliver_iterable_child_delegate.dart';
 import 'instance_details.dart';
 import 'instance_providers.dart';
 
@@ -26,7 +26,7 @@ const nullColor = boolColor;
 const numColor = Color.fromARGB(255, 181, 206, 168);
 const stringColor = Color.fromARGB(255, 206, 145, 120);
 
-const double rowHeight = 20.0;
+const rowHeight = 20.0;
 
 final isExpandedProvider = StateProviderFamily<bool, InstancePath>((ref, path) {
   // expands the root by default, but not children
@@ -95,10 +95,10 @@ void showErrorSnackBar(BuildContext context, Object error) {
 
 class InstanceViewer extends ConsumerStatefulWidget {
   const InstanceViewer({
-    Key? key,
+    super.key,
     required this.rootPath,
     required this.showInternalProperties,
-  }) : super(key: key);
+  });
 
   final InstancePath rootPath;
   final bool showInternalProperties;
@@ -428,13 +428,12 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
 
 class _ObjectHeader extends StatelessWidget {
   const _ObjectHeader({
-    Key? key,
     this.type,
     required this.hash,
     required this.meta,
     required this.startToken,
     required this.endToken,
-  }) : super(key: key);
+  });
 
   final String? type;
   final int hash;
@@ -469,11 +468,10 @@ class _ObjectHeader extends StatelessWidget {
 
 class _EditableField extends StatefulWidget {
   const _EditableField({
-    Key? key,
     required this.setter,
     required this.child,
     required this.initialEditString,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final String initialEditString;
@@ -515,6 +513,7 @@ class _EditableFieldState extends State<_EditableField> {
           final setter = widget.setter;
           if (setter != null) await setter(value);
         } catch (err) {
+          if (!context.mounted) return;
           showErrorSnackBar(context, err);
         }
       },
@@ -539,9 +538,7 @@ class _EditableFieldState extends State<_EditableField> {
             right: -5,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(defaultBorderRadius),
-                ),
+                borderRadius: defaultBorderRadius,
                 border: Border.all(color: colorScheme.surface),
               ),
             ),
@@ -573,8 +570,8 @@ class _EditableFieldState extends State<_EditableField> {
 
         return Focus(
           focusNode: focusNode,
-          onKey: (node, key) {
-            if (key.data.physicalKey == PhysicalKeyboardKey.escape) {
+          onKeyEvent: (node, key) {
+            if (key.physicalKey == PhysicalKeyboardKey.escape) {
               focusNode.unfocus();
               return KeyEventResult.handled;
             }
@@ -594,11 +591,11 @@ class _EditableFieldState extends State<_EditableField> {
 
 class _Expandable extends StatelessWidget {
   const _Expandable({
-    Key? key,
+    super.key,
     required this.isExpanded,
     required this.isExpandable,
     required this.title,
-  }) : super(key: key);
+  });
 
   final StateController<bool>? isExpanded;
   final bool isExpandable;

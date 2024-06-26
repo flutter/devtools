@@ -2,38 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Inspector specific tree rendering support designed to be extendable to work
-/// either directly with dart:html or with Hummingbird.
+/// Inspector specific tree rendering support.
 ///
-/// This library must not have direct dependencies on dart:html.
+/// This library must not have direct dependencies on web-only libraries.
 ///
-/// This allows tests of the complicated logic in this class to run on the VM
-/// and will help simplify porting this code to work with Hummingbird.
+/// This allows tests of the complicated logic in this class to run on the VM.
+library;
 
-library inspector_tree;
-
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../diagnostics/diagnostics_node.dart';
 import '../../ui/search.dart';
-import '../../utils.dart';
-import '../primitives/simple_items.dart';
 
 /// Split text into two groups, word characters at the start of a string and all
 /// other characters.
-final RegExp treeNodePrimaryDescriptionPattern = RegExp(r'^([\w ]+)(.*)$');
+final treeNodePrimaryDescriptionPattern = RegExp(r'^([\w ]+)(.*)$');
 // TODO(jacobr): temporary workaround for missing structure from assertion thrown building
 // widget errors.
-final RegExp assertionThrownBuildingError = RegExp(
+final assertionThrownBuildingError = RegExp(
   r'^(The following assertion was thrown building [a-zA-Z]+)(\(.*\))(:)$',
 );
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
 
-const double iconPadding = 4.0;
-const double chartLineStrokeWidth = 1.0;
-double get columnWidth => scaleByFontFactor(isDense() ? 12.0 : 16.0);
-double get rowHeight => scaleByFontFactor(isDense() ? 20.0 : 24.0);
+const iconPadding = 4.0;
+const chartLineStrokeWidth = 1.0;
+double get inspectorColumnWidth => scaleByFontFactor(12.0);
+double get inspectorRowHeight => scaleByFontFactor(16.0);
 
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
@@ -75,7 +71,7 @@ class InspectorTreeNode {
   void updateShouldShow(bool value) {
     if (value != _shouldShow) {
       _shouldShow = value;
-      for (var child in children) {
+      for (final child in children) {
         child.updateShouldShow(value);
       }
     }
@@ -97,8 +93,6 @@ class InspectorTreeNode {
 
   Iterable<InspectorTreeNode> get children => _children;
 
-  bool get isCreatedByLocalProject => _diagnostic!.isCreatedByLocalProject;
-
   bool get isProperty {
     final diagnosticLocal = diagnostic;
     return diagnosticLocal == null || diagnosticLocal.isProperty;
@@ -119,7 +113,7 @@ class InspectorTreeNode {
       _isExpanded = value;
       isDirty = true;
       if (_shouldShow ?? false) {
-        for (var child in children) {
+        for (final child in children) {
           child.updateShouldShow(value);
         }
       }
@@ -152,7 +146,7 @@ class InspectorTreeNode {
       return childrenCountLocal;
     }
     int count = 0;
-    for (InspectorTreeNode child in _children) {
+    for (final child in _children) {
       count += child.subtreeSize;
     }
     return _childrenCount = count;
@@ -166,17 +160,15 @@ class InspectorTreeNode {
 
   int get subtreeSize => childrenCount + 1;
 
-  bool get isLeaf => _children.isEmpty;
-
   // TODO(jacobr): move getRowIndex to the InspectorTree class.
   int getRowIndex(InspectorTreeNode node) {
     int index = 0;
     while (true) {
-      final InspectorTreeNode? parent = node.parent;
+      final parent = node.parent;
       if (parent == null) {
         break;
       }
-      for (InspectorTreeNode sibling in parent._children) {
+      for (final sibling in parent._children) {
         if (sibling == node) {
           break;
         }
@@ -197,7 +189,7 @@ class InspectorTreeNode {
       return null;
     }
 
-    final List<int> ticks = <int>[];
+    final ticks = <int>[];
     InspectorTreeNode node = this;
     int current = 0;
     int depth = 0;
@@ -205,7 +197,7 @@ class InspectorTreeNode {
     // Iterate till getting the result to return.
     while (true) {
       final style = node.diagnostic?.style;
-      final bool indented = style != DiagnosticsTreeStyle.flat &&
+      final indented = style != DiagnosticsTreeStyle.flat &&
           style != DiagnosticsTreeStyle.error;
       if (current == index) {
         return InspectorTreeRow(
@@ -220,7 +212,7 @@ class InspectorTreeNode {
       }
       assert(index > current);
       current++;
-      final List<InspectorTreeNode> children = node._children;
+      final children = node._children;
       int i;
       for (i = 0; i < children.length; ++i) {
         final child = children[i];
@@ -293,35 +285,19 @@ typedef NodeAddedCallback = void Function(
 
 class InspectorTreeConfig {
   InspectorTreeConfig({
-    required this.summaryTree,
-    required this.treeType,
     this.onNodeAdded,
     this.onClientActiveChange,
     this.onSelectionChange,
     this.onExpand,
-    this.onHover,
   });
 
-  final bool summaryTree;
-  final FlutterTreeType treeType;
   final NodeAddedCallback? onNodeAdded;
   final VoidCallback? onSelectionChange;
   final void Function(bool added)? onClientActiveChange;
   final TreeEventCallback? onExpand;
-  final TreeEventCallback? onHover;
 }
 
 enum SearchTargetType {
   widget,
   // TODO(https://github.com/flutter/devtools/issues/3489) implement other search scopes: details, all etc
-}
-
-extension SearchTargetTypeExtension on SearchTargetType {
-  String get name {
-    switch (this) {
-      case SearchTargetType.widget:
-      default:
-        return 'Widget';
-    }
-  }
 }

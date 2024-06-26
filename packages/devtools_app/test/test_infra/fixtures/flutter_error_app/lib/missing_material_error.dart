@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class MissingMaterialError extends StatelessWidget {
+  const MissingMaterialError({super.key});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -21,15 +23,15 @@ class MissingMaterialError extends StatelessWidget {
 
 /// Opens an [AlertDialog] showing what the user typed.
 class ExampleWidget extends StatefulWidget {
-  const ExampleWidget({Key? key}) : super(key: key);
+  const ExampleWidget({super.key});
 
   @override
-  _ExampleWidgetState createState() => _ExampleWidgetState();
+  State<ExampleWidget> createState() => _ExampleWidgetState();
 }
 
 /// State for [ExampleWidget] widgets.
 class _ExampleWidgetState extends State<ExampleWidget> {
-  final TextEditingController _controller = TextEditingController();
+  final _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {

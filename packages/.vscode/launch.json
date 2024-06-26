@@ -22,7 +22,10 @@
             "type": "dart",
             "program": "devtools_app/lib/main.dart",
             "args": [
-                "--dart-define=enable_experiments=true"
+                "--dart-define",
+                "memory_offline_experiment=true",
+                "--dart-define",
+                "enable_experiments=true",
             ],
         },
         {
@@ -31,6 +34,13 @@
             "type": "dart",
             "program": "devtools_app/lib/main.dart",
             "flutterMode": "profile",
+        },
+        {
+            "name": "devtools + release",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "flutterMode": "release",
         },
         {
             "name": "devtools + profile + experiments",
@@ -43,28 +53,35 @@
             ],
         },
         {
+            "name": "devtools + release",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "flutterMode": "release",
+        },
+        {
             "name": "memory/default",
             "request": "launch",
             "type": "dart",
-            "program": "devtools_app/test/test_infra/scenes/memory/default.stager_app.dart",
+            "program": "devtools_app/test/test_infra/scenes/memory/default.stager_app.g.dart",
         },
         {
             "name": "memory/diff_snapshot",
             "request": "launch",
             "type": "dart",
-            "program": "devtools_app/test/test_infra/scenes/memory/diff_snapshot.stager_app.dart",
+            "program": "devtools_app/test/test_infra/scenes/memory/diff_snapshot.stager_app.g.dart",
         },
         {
             "name": "performance/default",
             "request": "launch",
             "type": "dart",
-            "program": "devtools_app/test/test_infra/scenes/performance/default.stager_app.dart",
+            "program": "devtools_app/test/test_infra/scenes/performance/default.stager_app.g.dart",
         },
         {
             "name": "profiler/default",
             "request": "launch",
             "type": "dart",
-            "program": "devtools_app/test/test_infra/scenes/cpu_profiler/default.stager_app.dart",
+            "program": "devtools_app/test/test_infra/scenes/cpu_profiler/default.stager_app.g.dart",
         },
         {
             "name": "fixtures/flutter_app",
@@ -79,9 +96,54 @@
             "program": "devtools_app/test/test_infra/fixtures/memory_app/lib/main.dart",
         },
         {
+            "name": "standalone_ui/vs_code",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart",
+        },
+        {
+            "name": "devtools_extensions: foo + sim",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_extensions/example/packages_with_extensions/foo/packages/foo_devtools_extension/lib/main.dart",
+            "args": [
+                "--dart-define=use_simulated_environment=true"
+            ],
+        },
+        {
+            "name": "devtools_extensions: dart_foo + sim",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_extensions/example/packages_with_extensions/dart_foo/packages/dart_foo_devtools_extension/lib/main.dart",
+            "args": [
+                "--dart-define=use_simulated_environment=true"
+            ],
+        },
+        {
+            "name": "devtools_extensions: app_that_uses_foo",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_extensions/example/app_that_uses_foo/lib/main.dart",
+        },
+        {
+            "name": "devtools_extensions: app_that_uses_foo - bin",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_extensions/example/app_that_uses_foo/bin/script.dart",
+        },
+        {
             "name": "attach",
             "type": "dart",
             "request": "attach",
+        },
+        {
+            "name": "foo_devtools_extension example + simulated environment",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_extensions/example/foo/packages/foo_devtools_extension/lib/main.dart",
+            "args": [
+                "--dart-define=use_simulated_environment=true"
+            ],
         },
     ]
 }

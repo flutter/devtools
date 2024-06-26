@@ -5,13 +5,12 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
-import '../table/table.dart';
-import '../theme.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of
 /// [span].
@@ -28,7 +27,7 @@ TextSpan truncateTextSpan(TextSpan span, int length) {
     }
     if (span.children != null) {
       children = <TextSpan>[];
-      for (var child in span.children!) {
+      for (final child in span.children!) {
         if (available <= 0) break;
         children.add(truncateHelper(child as TextSpan));
       }
@@ -60,21 +59,24 @@ double calculateTextSpanWidth(TextSpan? span) {
 }
 
 /// Returns the height in pixels of the [span].
-double calculateTextSpanHeight(TextSpan span) {
+double calculateTextSpanHeight(TextSpan span, {double? maxWidth}) {
   final textPainter = TextPainter(
     text: span,
     textAlign: TextAlign.left,
     textDirection: TextDirection.ltr,
-  )..layout();
+  )..layout(maxWidth: maxWidth ?? double.infinity);
 
-  return textPainter.height;
+  final height = textPainter.height;
+  textPainter.dispose();
+
+  return height;
 }
 
 TextSpan? findLongestTextSpan(List<TextSpan> spans) {
   int longestLength = 0;
   TextSpan? longestSpan;
   for (final span in spans) {
-    final int currentLength = span.toPlainText().length;
+    final currentLength = span.toPlainText().length;
     if (currentLength > longestLength) {
       longestLength = currentLength;
       longestSpan = span;
@@ -97,14 +99,14 @@ TextSpan? findLongestTextSpan(List<TextSpan> spans) {
 /// [offsetController].
 class OffsetScrollbar extends StatefulWidget {
   const OffsetScrollbar({
-    Key? key,
+    super.key,
     this.isAlwaysShown = false,
     required this.axis,
     required this.controller,
     required this.offsetController,
     required this.child,
     required this.offsetControllerViewportDimension,
-  }) : super(key: key);
+  });
 
   final bool isAlwaysShown;
   final Axis axis;
@@ -216,6 +218,7 @@ class ColorPair {
 class ThemedColorPair {
   const ThemedColorPair({required this.background, required this.foreground});
 
+  @visibleForTesting
   factory ThemedColorPair.from(ColorPair colorPair) {
     return ThemedColorPair(
       foreground: ThemedColor.fromSingle(colorPair.foreground),
@@ -251,12 +254,20 @@ class ThemedColor {
 }
 
 enum MediaSize with EnumIndexOrdering {
-  xxs,
-  xs,
-  s,
-  m,
-  l,
-  xl,
+  xxs(widthThreshold: 300.0, heightThreshold: 300),
+  xs(widthThreshold: 600.0, heightThreshold: 450),
+  s(widthThreshold: 900.0, heightThreshold: 600),
+  m(widthThreshold: 1200.0, heightThreshold: 750),
+  l(widthThreshold: 1500.0, heightThreshold: 900),
+  xl(widthThreshold: double.infinity, heightThreshold: double.infinity);
+
+  const MediaSize({
+    required this.widthThreshold,
+    required this.heightThreshold,
+  });
+
+  final double widthThreshold;
+  final double heightThreshold;
 }
 
 class ScreenSize {
@@ -272,21 +283,17 @@ class ScreenSize {
 
   MediaSize _calculateWidth(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    if (width < 300) return MediaSize.xxs;
-    if (width < 600) return MediaSize.xs;
-    if (width < 900) return MediaSize.s;
-    if (width < 1200) return MediaSize.m;
-    if (width < 1500) return MediaSize.l;
-    return MediaSize.xl;
+    return MediaSize.values.firstWhere(
+      (size) => width < size.widthThreshold,
+      orElse: () => MediaSize.xl,
+    );
   }
 
   MediaSize _calculateHeight(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    if (height < 300) return MediaSize.xxs;
-    if (height < 450) return MediaSize.xs;
-    if (height < 600) return MediaSize.s;
-    if (height < 750) return MediaSize.m;
-    if (height < 900) return MediaSize.l;
-    return MediaSize.xl;
+    return MediaSize.values.firstWhere(
+      (size) => height < size.heightThreshold,
+      orElse: () => MediaSize.xl,
+    );
   }
 }

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../shared/theme.dart';
 import 'provider_nodes.dart';
 
 const _tilePadding = EdgeInsets.only(
@@ -15,8 +15,7 @@ const _tilePadding = EdgeInsets.only(
   bottom: densePadding,
 );
 
-final AutoDisposeStateNotifierProvider<StateController<String?>, String?>
-    selectedProviderIdProvider =
+final selectedProviderIdProvider =
     AutoDisposeStateNotifierProvider<StateController<String?>, String?>(
   (ref) {
     final controller = StateController<String?>(null);
@@ -50,7 +49,7 @@ final AutoDisposeStateNotifierProvider<StateController<String?>, String?>
 );
 
 class ProviderList extends ConsumerStatefulWidget {
-  const ProviderList({Key? key}) : super(key: key);
+  const ProviderList({super.key});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _ProviderListState();
@@ -99,9 +98,9 @@ class _ProviderListState extends ConsumerState<ProviderList> {
 
 class ProviderNodeItem extends ConsumerWidget {
   const ProviderNodeItem({
-    Key? key,
+    super.key,
     required this.node,
-  }) : super(key: key);
+  });
 
   final ProviderNode node;
 

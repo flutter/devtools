@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../diagnostics/dart_object_node.dart';
 import '../../diagnostics/diagnostics_node.dart';
 import '../../diagnostics/tree_builder.dart';
 import '../../diagnostics_text_styles.dart';
+import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
-import '../../theme.dart';
 import '../../ui/hover.dart';
 import '../../ui/icons.dart';
 import '../../ui/utils.dart';
@@ -41,6 +42,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.multiline = false,
     this.style,
     this.nodeDescriptionHighlightStyle,
+    this.emphasizeNodesFromLocalProject = false,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -50,6 +52,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final bool multiline;
   final TextStyle? style;
   final TextStyle? nodeDescriptionHighlightStyle;
+  // TODO(https://github.com/flutter/devtools/issues/7860): Remove and default
+  // to true when turning on inspector V2. This is currently true for the V2
+  // inspector and false for the legacy inspector.
+  final bool emphasizeNodesFromLocalProject;
 
   static Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -181,12 +187,17 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
 
     final diagnosticLocal = diagnostic!;
-    final inspectorService = serviceManager.inspectorService!;
+    final inspectorService = serviceConnection.inspectorService!;
 
     return HoverCardTooltip.async(
       enabled: () =>
-          preferences.inspector.hoverEvalModeEnabled.value &&
-          diagnosticLocal.inspectorService != null,
+          // TODO(https://github.com/flutter/devtools/issues/7860) Clean up
+          // after Inspector V2 release.
+          FeatureFlags.inspectorV2
+              ? preferences.inspectorV2.hoverEvalModeEnabled.value &&
+                  diagnosticLocal.objectGroupApi != null
+              : preferences.inspector.hoverEvalModeEnabled.value &&
+                  diagnosticLocal.objectGroupApi != null,
       asyncGenerateHoverCardData: ({
         required event,
         required isHoverStale,
@@ -206,7 +217,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         if (isHoverStale()) return Future.value();
         await buildVariablesTree(variable);
         final tasks = <Future<void>>[];
-        for (var child in variable.children) {
+        for (final child in variable.children) {
           tasks.add(() async {
             if (!isHoverStale()) await buildVariablesTree(child);
           }());
@@ -258,7 +269,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         colorScheme,
       ),
     );
-    var descriptionTextStyle = textStyle;
     // TODO(jacobr): use TextSpans and SelectableText instead of Text.
     if (diagnosticLocal.isProperty) {
       // Display of inline properties.
@@ -274,8 +284,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         );
         // provide some contrast between the name and description if both are
         // present.
-        descriptionTextStyle =
-            descriptionTextStyle.merge(theme.subtleTextStyle);
+        textStyle = textStyle.merge(theme.subtleTextStyle);
       }
 
       if (diagnosticLocal.isCreatedByLocalProject) {
@@ -287,24 +296,23 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         switch (propertyType) {
           case 'Color':
             {
-              final int alpha = JsonUtils.getIntMember(properties, 'alpha');
-              final int red = JsonUtils.getIntMember(properties, 'red');
-              final int green = JsonUtils.getIntMember(properties, 'green');
-              final int blue = JsonUtils.getIntMember(properties, 'blue');
+              final alpha = JsonUtils.getIntMember(properties, 'alpha');
+              final red = JsonUtils.getIntMember(properties, 'red');
+              final green = JsonUtils.getIntMember(properties, 'green');
+              final blue = JsonUtils.getIntMember(properties, 'blue');
               String radix(int chan) => chan.toRadixString(16).padLeft(2, '0');
               description = alpha == 255
                   ? '#${radix(red)}${radix(green)}${radix(blue)}'
                   : '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
 
-              final Color color = Color.fromARGB(alpha, red, green, blue);
+              final color = Color.fromARGB(alpha, red, green, blue);
               children.add(_paddedIcon(_colorIconMaker.getCustomIcon(color)));
               break;
             }
 
           case 'IconData':
             {
-              final int codePoint =
-                  JsonUtils.getIntMember(properties, 'codePoint');
+              final codePoint = JsonUtils.getIntMember(properties, 'codePoint');
               if (codePoint > 0) {
                 final icon = FlutterMaterialIcons.getIconForCodePoint(
                   codePoint,
@@ -327,7 +335,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         Flexible(
           child: buildDescription(
             description: description,
-            textStyle: descriptionTextStyle,
+            textStyle: textStyle,
             colorScheme: colorScheme,
             diagnostic: diagnostic,
             searchValue: searchValue,
@@ -377,14 +385,25 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
       }
 
-      if (!diagnosticLocal.isSummaryTree &&
+      // TODO(https://github.com/flutter/devtools/issues/7860): Remove this
+      // if-block once the widget details tree is gone. This bolding is only
+      // used there.
+      if (!emphasizeNodesFromLocalProject &&
+          !diagnosticLocal.isSummaryTree &&
           diagnosticLocal.isCreatedByLocalProject) {
         textStyle = textStyle.merge(DiagnosticsTextStyles.regularBold);
       }
 
+      // Grey out nodes that were not created by the local project to emphasize
+      // those that were:
+      if (emphasizeNodesFromLocalProject &&
+          !diagnosticLocal.isCreatedByLocalProject) {
+        textStyle = textStyle.merge(theme.subtleTextStyle);
+      }
+
       var diagnosticDescription = buildDescription(
         description: diagnosticLocal.description ?? '',
-        textStyle: descriptionTextStyle,
+        textStyle: textStyle,
         colorScheme: colorScheme,
         diagnostic: diagnostic,
         searchValue: searchValue,

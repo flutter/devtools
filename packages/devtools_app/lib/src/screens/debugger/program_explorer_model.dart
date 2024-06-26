@@ -83,9 +83,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       // We'll need to search for the library URI that is a prefix of the
       // script's URI.
       if (libNode == null) {
-        final service = serviceManager.service!;
-        final isolate = serviceManager.isolateManager.selectedIsolate.value!;
-        final libRef = serviceManager.isolateManager
+        final service = serviceConnection.serviceManager.service!;
+        final isolate = serviceConnection
+            .serviceManager.isolateManager.selectedIsolate.value!;
+        final libRef = serviceConnection.serviceManager.isolateManager
             .isolateState(isolate)
             .isolateNow!
             .libraries!
@@ -96,7 +97,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       } else {
         lib = libNode.object as Library;
       }
-      final ScriptRef s = (object is ScriptRef) ? object as ScriptRef : script!;
+      final s = (object is ScriptRef) ? object as ScriptRef : script!;
       uri = s.uri ?? '';
     }
 
@@ -193,8 +194,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // Place the root library's parent node at the top of the explorer if it's
     // part of a package. Otherwise, it's a file path and its directory should
     // appear near the top of the list anyway.
-    final rootLibUri = serviceManager
-        .isolateManager.mainIsolateState?.isolateNow?.rootLib?.uri;
+    final rootLibUri = serviceConnection.serviceManager.isolateManager
+        .mainIsolateState?.isolateNow?.rootLib?.uri;
     if (rootLibUri != null) {
       if (rootLibUri.startsWith('package:') ||
           rootLibUri.startsWith('google3:')) {
@@ -202,7 +203,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         final path = parts.join('/');
         for (int i = 0; i < root.children.length; ++i) {
           if (root.children[i].name.startsWith(path)) {
-            final VMServiceObjectNode rootLibNode = root.removeChildAtIndex(i);
+            final rootLibNode = root.removeChildAtIndex(i);
             root.addChild(rootLibNode, index: 0);
             break;
           }
@@ -300,7 +301,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
   VMServiceObjectNode _collapseSingleChildDirectoryNodes() {
     if (children.length == 1) {
-      final VMServiceObjectNode child = children.first;
+      final child = children.first;
       if (child.isDirectory) {
         final collapsed = VMServiceObjectNode(
           controller,
@@ -329,7 +330,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         final node = _createChild(function.name, function);
         _buildCodeNodes(function, node);
       }
-      for (final field in object.fields ?? []) {
+      for (final field in object.fields ?? <FieldRef>[]) {
         _createChild(field.name, field);
       }
       _sortEntriesByType();
@@ -345,11 +346,11 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     int? tokenPos = 0;
     final object = this.object;
 
-    final SourceLocation? sourceLocation = switch (object) {
-      // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
-      FieldRef(:final location) => location,
-      FuncRef(:final location) => location,
-      ClassRef(:final location) => location,
+    final sourceLocation = switch (object) {
+      FieldRef(:final location) ||
+      FuncRef(:final location) ||
+      ClassRef(:final location) =>
+        location,
       _ => null,
     };
 
@@ -375,7 +376,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   void _trimChildrenAsMapEntries() {
     _childrenAsMap.clear();
 
-    for (var child in children) {
+    for (final child in children) {
       child._trimChildrenAsMapEntries();
     }
   }
@@ -404,12 +405,12 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         }
       } else {
         switch (child.object.runtimeType) {
-          case ScriptRef:
-          case Script:
+          case const (ScriptRef):
+          case const (Script):
             scriptNodes.add(child);
             break;
-          case LibraryRef:
-          case Library:
+          case const (LibraryRef):
+          case const (Library):
             final obj = child.object as LibraryRef;
             if (obj.uri!.startsWith(dartPrefix) ||
                 obj.uri!.startsWith(packagePrefix)) {
@@ -418,20 +419,20 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
               userLibraryNodes.add(child);
             }
             break;
-          case ClassRef:
-          case Class:
+          case const (ClassRef):
+          case const (Class):
             classNodes.add(child);
             break;
-          case FuncRef:
-          case Func:
+          case const (FuncRef):
+          case const (Func):
             functionNodes.add(child);
             break;
-          case FieldRef:
-          case Field:
+          case const (FieldRef):
+          case const (Field):
             variableNodes.add(child);
             break;
-          case CodeRef:
-          case Code:
+          case const (CodeRef):
+          case const (Code):
             codeNodes.add(child);
             break;
           default:
@@ -503,7 +504,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
   @override
   bool operator ==(Object other) {
     if (other is! VMServiceObjectNode) return false;
-    final VMServiceObjectNode node = other;
+    final node = other;
 
     return node.name == name &&
         node.object == object &&

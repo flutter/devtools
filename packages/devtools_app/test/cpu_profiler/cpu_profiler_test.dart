@@ -14,13 +14,15 @@ import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_controller.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../test_infra/matchers/matchers.dart';
 import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
 import '../test_infra/utils/test_utils.dart';
 
@@ -29,8 +31,8 @@ void main() {
   late CpuProfileData cpuProfileData;
   late CpuProfilerController controller;
 
-  final ServiceConnectionManager fakeServiceManager = FakeServiceManager();
-  final app = fakeServiceManager.connectedApp!;
+  final fakeServiceManager = FakeServiceConnectionManager();
+  final app = fakeServiceManager.serviceManager.connectedApp!;
   when(app.isFlutterNativeAppNow).thenReturn(false);
   when(app.isFlutterAppNow).thenReturn(false);
   when(app.isDebugFlutterAppNow).thenReturn(false);
@@ -41,15 +43,19 @@ void main() {
 
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
-    cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
+    cpuProfileData = CpuProfileData.fromJson(goldenCpuProfileDataJson);
     await transformer.processData(
       cpuProfileData,
       processId: 'test',
     );
 
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     final mockScriptManager = MockScriptManager();
@@ -72,20 +78,18 @@ void main() {
       'builds for empty cpuProfileData',
       windowSize,
       (WidgetTester tester) async {
-        cpuProfileData = CpuProfileData.parse(emptyCpuProfileDataJson);
+        cpuProfileData = CpuProfileData.fromJson(emptyCpuProfileDataJson);
         cpuProfiler = CpuProfiler(
           data: cpuProfileData,
           controller: controller,
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
         expect(find.byType(CpuProfileFlameChart), findsNothing);
         expect(find.byType(CpuProfileStats), findsOneWidget);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsOneWidget);
         expect(find.byType(CollapseAllButton), findsOneWidget);
@@ -115,10 +119,8 @@ void main() {
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuProfileStats), findsOneWidget);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsOneWidget);
         expect(find.byType(CollapseAllButton), findsOneWidget);
@@ -173,7 +175,8 @@ void main() {
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
-        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        cpuProfileData =
+            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
       });
 
       testWidgetsWithWindowSize(
@@ -292,13 +295,11 @@ void main() {
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
         expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(FilterButton), findsOneWidget);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
+        expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsOneWidget);
         expect(find.byType(CollapseAllButton), findsOneWidget);
@@ -319,8 +320,7 @@ void main() {
         expect(find.byType(CpuCallTreeTable), findsOneWidget);
         expect(find.byType(CpuMethodTable), findsNothing);
         expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(FilterButton), findsOneWidget);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
+        expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsOneWidget);
         expect(find.byType(CollapseAllButton), findsOneWidget);
@@ -341,8 +341,7 @@ void main() {
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsOneWidget);
         expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(FilterButton), findsOneWidget);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
+        expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
@@ -363,8 +362,7 @@ void main() {
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
         expect(find.byType(CpuProfileFlameChart), findsOneWidget);
-        expect(find.byType(FilterButton), findsOneWidget);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
+        expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
@@ -415,89 +413,6 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize(
-      'can enable and disable guidelines',
-      windowSize,
-      (WidgetTester tester) async {
-        cpuProfiler = CpuProfiler(
-          data: cpuProfileData,
-          controller: controller,
-        );
-        await tester.pumpWidget(wrap(cpuProfiler));
-        await tester.tap(find.text('Call Tree'));
-        await tester.pumpAndSettle();
-
-        expect(cpuProfileData.cpuProfileRoot.isExpanded, isFalse);
-        await tester.tap(find.byType(ExpandAllButton));
-        await tester.pumpAndSettle();
-
-        expect(cpuProfiler.callTreeRoots.first.isExpanded, isTrue);
-        expect(preferences.cpuProfiler.displayTreeGuidelines.value, false);
-        await expectLater(
-          find.byType(CpuProfiler),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler/call_tree_no_guidelines.png',
-          ),
-        );
-        await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
-        await tester.pumpAndSettle();
-
-        expect(preferences.cpuProfiler.displayTreeGuidelines.value, true);
-        await expectLater(
-          find.byType(CpuProfiler),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler/call_tree_guidelines.png',
-          ),
-        );
-        await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
-        await tester.pumpAndSettle();
-
-        expect(preferences.cpuProfiler.displayTreeGuidelines.value, false);
-        await expectLater(
-          find.byType(CpuProfiler),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler/call_tree_no_guidelines.png',
-          ),
-        );
-
-        await tester.tap(find.text('Bottom Up'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.byType(ExpandAllButton));
-        for (final root in cpuProfiler.bottomUpRoots) {
-          expect(root.isExpanded, isTrue);
-        }
-        await tester.pumpAndSettle();
-
-        expect(preferences.cpuProfiler.displayTreeGuidelines.value, false);
-        await expectLater(
-          find.byType(CpuProfiler),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler/bottom_up_no_guidelines.png',
-          ),
-        );
-        await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
-        await tester.pumpAndSettle();
-
-        expect(preferences.cpuProfiler.displayTreeGuidelines.value, true);
-        await expectLater(
-          find.byType(CpuProfiler),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler/bottom_up_guidelines.png',
-          ),
-        );
-        await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
-        await tester.pumpAndSettle();
-
-        expect(preferences.cpuProfiler.displayTreeGuidelines.value, false);
-        await expectLater(
-          find.byType(CpuProfiler),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler/bottom_up_no_guidelines.png',
-          ),
-        );
-      },
-    );
-
     group('UserTag filters', () {
       late ProfilerScreenController controller;
 
@@ -508,7 +423,8 @@ void main() {
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
-        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        cpuProfileData =
+            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
         await controller.cpuProfilerController.transformer.processData(
           cpuProfileData,
           processId: 'test',
@@ -680,7 +596,8 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         preferences.toggleVmDeveloperMode(true);
-        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        cpuProfileData =
+            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
         for (final filter in controller
             .cpuProfilerController.activeFilter.value.toggleFilters) {
           filter.enabled.value = false;

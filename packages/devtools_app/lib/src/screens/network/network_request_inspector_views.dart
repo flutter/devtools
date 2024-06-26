@@ -2,25 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
+import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 
 import '../../shared/common_widgets.dart';
 import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';
+import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/table/table.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
+import 'network_controller.dart';
 import 'network_model.dart';
 
 // Approximately double the indent of the expandable tile's title.
-const double _rowIndentPadding = 30;
+const _rowIndentPadding = 30.0;
 
 // No padding between the last element and the divider of a expandable tile.
-const double _rowSpacingPadding = 15;
+const _rowSpacingPadding = 15.0;
 
-const EdgeInsets _rowPadding =
+const _rowPadding =
     EdgeInsets.only(left: _rowIndentPadding, bottom: _rowSpacingPadding);
 
 /// Helper to build ExpansionTile widgets for inspector views.
@@ -60,35 +64,41 @@ class HttpRequestHeadersView extends StatelessWidget {
     final requestHeaders = data.requestHeaders;
     return LayoutBuilder(
       builder: (context, constraints) {
-        return ListView(
-          children: [
-            _buildTile(
-              'General',
-              [
-                for (final entry in general.entries)
-                  _Row(entry: entry, constraints: constraints),
-              ],
-              key: generalKey,
-            ),
-            _buildTile(
-              'Response Headers',
-              [
-                if (responseHeaders != null)
-                  for (final entry in responseHeaders.entries)
-                    _Row(entry: entry, constraints: constraints),
-              ],
-              key: responseHeadersKey,
-            ),
-            _buildTile(
-              'Request Headers',
-              [
-                if (requestHeaders != null)
-                  for (final entry in requestHeaders.entries)
-                    _Row(entry: entry, constraints: constraints),
-              ],
-              key: requestHeadersKey,
-            ),
-          ],
+        return SelectionArea(
+          child: ListView(
+            children: [
+              _buildTile(
+                'General',
+                [
+                  for (final entry in general.entries)
+                    _Row(
+                      entry: entry,
+                      constraints: constraints,
+                      isErrorValue: data.didFail && entry.key == 'statusCode',
+                    ),
+                ],
+                key: generalKey,
+              ),
+              _buildTile(
+                'Response Headers',
+                [
+                  if (responseHeaders != null)
+                    for (final entry in responseHeaders.entries)
+                      _Row(entry: entry, constraints: constraints),
+                ],
+                key: responseHeadersKey,
+              ),
+              _buildTile(
+                'Request Headers',
+                [
+                  if (requestHeaders != null)
+                    for (final entry in requestHeaders.entries)
+                      _Row(entry: entry, constraints: constraints),
+                ],
+                key: requestHeadersKey,
+              ),
+            ],
+          ),
         );
       },
     );
@@ -99,27 +109,30 @@ class _Row extends StatelessWidget {
   const _Row({
     required this.entry,
     required this.constraints,
+    this.isErrorValue = false,
   });
 
   final MapEntry<String, Object?> entry;
   final BoxConstraints constraints;
+  final bool isErrorValue;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: constraints.minWidth,
       padding: _rowPadding,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SelectableText(
+          Text(
             '${entry.key}: ',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: theme.textTheme.titleMedium,
           ),
           Expanded(
-            child: SelectableText(
+            child: Text(
+              style: isErrorValue ? theme.errorTextStyle : null,
               '${entry.value}',
-              minLines: 1,
             ),
           ),
         ],
@@ -135,9 +148,9 @@ class HttpRequestView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         final theme = Theme.of(context);
         final requestHeaders = data.requestHeaders;
         final requestContentType = requestHeaders?['content-type'] ?? '';
@@ -148,15 +161,21 @@ class HttpRequestView extends StatelessWidget {
           );
         }
 
-        final isJson = requestContentType is List
-            ? requestContentType.any((element) => element.contains('json'))
-            : requestContentType.contains('json');
+        final isJson = switch (requestContentType) {
+          List() =>
+            requestContentType.any((e) => (e as String).contains('json')),
+          String() => requestContentType.contains('json'),
+          _ => throw StateError(
+              "Expected 'content-type' to be a List or String, but got: "
+              '$requestContentType',
+            ),
+        };
 
         Widget child;
         child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
-            : Text(
-                data.requestBody!,
+            : TextViewer(
+                text: data.requestBody!,
                 style: theme.fixedFontStyle,
               );
         return Padding(
@@ -181,9 +200,9 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         final dataToCopy = dataSelector(data);
         final isLoading = data.isFetchingFullData;
         if (dataToCopy == null || dataToCopy.isEmpty || isLoading) {
@@ -201,16 +220,92 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
   }
 }
 
-class HttpResponseView extends StatelessWidget {
-  const HttpResponseView(this.data, {super.key});
+/// A DropDownButton for selecting [NetworkResponseViewType].
+///
+/// If there is no content to visualise, the drop down will not show. Drop down
+/// values will update as the request's data is updated.
+class HttpResponseTrailingDropDown extends StatelessWidget {
+  const HttpResponseTrailingDropDown(
+    this.data, {
+    super.key,
+    required this.currentResponseViewType,
+    required this.onChanged,
+  });
 
+  final ValueListenable<NetworkResponseViewType> currentResponseViewType;
   final DartIOHttpRequestData data;
+  final ValueChanged<NetworkResponseViewType> onChanged;
+
+  bool isJsonDecodable() {
+    try {
+      json.decode(data.responseBody!);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: data.requestUpdatedNotifier,
-      builder: (context, __, ___) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (_, __) {
+        final visible = (data.contentType != null &&
+                !data.contentType!.contains('image')) &&
+            data.responseBody!.isNotEmpty;
+
+        final availableResponseTypes = <NetworkResponseViewType>[
+          NetworkResponseViewType.auto,
+          if (isJsonDecodable()) NetworkResponseViewType.json,
+          NetworkResponseViewType.text,
+        ];
+
+        return Visibility(
+          visible: visible,
+          replacement: const SizedBox(),
+          child: ValueListenableBuilder<NetworkResponseViewType>(
+            valueListenable: currentResponseViewType,
+            builder: (_, currentType, __) {
+              return RoundedDropDownButton<NetworkResponseViewType>(
+                value: currentType,
+                items: availableResponseTypes
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(e.toString()),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  onChanged(value);
+                },
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class HttpResponseView extends StatelessWidget {
+  const HttpResponseView(
+    this.data, {
+    super.key,
+    required this.currentResponseViewType,
+  });
+
+  final DartIOHttpRequestData data;
+  final ValueListenable<NetworkResponseViewType> currentResponseViewType;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: data,
+      builder: (context, __) {
         Widget child;
         final theme = Theme.of(context);
         // We shouldn't try and display an image response view when using the
@@ -226,20 +321,62 @@ class HttpResponseView extends StatelessWidget {
         }
         if (contentType != null && contentType.contains('image')) {
           child = ImageResponseView(data);
-        } else if (contentType != null &&
-            contentType.contains('json') &&
-            responseBody.isNotEmpty) {
-          child = JsonViewer(encodedJson: responseBody);
         } else {
-          child = Text(
-            responseBody,
-            style: theme.fixedFontStyle,
+          child = HttpTextResponseViewer(
+            contentType: contentType,
+            responseBody: responseBody,
+            currentResponseNotifier: currentResponseViewType,
+            textStyle: theme.fixedFontStyle,
           );
         }
         return Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(child: child),
         );
+      },
+    );
+  }
+}
+
+class HttpTextResponseViewer extends StatelessWidget {
+  const HttpTextResponseViewer({
+    super.key,
+    required this.contentType,
+    required this.responseBody,
+    required this.currentResponseNotifier,
+    required this.textStyle,
+  });
+
+  final String? contentType;
+  final String responseBody;
+  final ValueListenable<NetworkResponseViewType> currentResponseNotifier;
+  final TextStyle textStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: currentResponseNotifier,
+      builder: (_, currentResponseType, __) {
+        NetworkResponseViewType currentLocalResponseType = currentResponseType;
+
+        if (currentResponseType == NetworkResponseViewType.auto) {
+          if (contentType != null &&
+              contentType!.contains('json') &&
+              responseBody.isNotEmpty) {
+            currentLocalResponseType = NetworkResponseViewType.json;
+          } else {
+            currentLocalResponseType = NetworkResponseViewType.text;
+          }
+        }
+
+        return switch (currentLocalResponseType) {
+          NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
+          NetworkResponseViewType.text => TextViewer(
+              text: responseBody,
+              style: textStyle,
+            ),
+          _ => const SizedBox(),
+        };
       },
     );
   }
@@ -308,18 +445,14 @@ class ImageResponseView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SelectableText(
+          Text(
             '$key: ',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           Expanded(
-            child: SelectableText(
+            child: Text(
               value,
-              // TODO(kenz): use top level overflow parameter if
-              // https://github.com/flutter/flutter/issues/82722 is fixed.
-              // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
-              // added in commit 65388ee2eeaf0d2cf087eaa4a325e3689020c46a.
-              // style: const TextStyle(overflow: TextOverflow.ellipsis),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -359,7 +492,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     );
   }
 
-  DataCell _buildCell(String? value) => DataCell(SelectableText(value ?? '--'));
+  DataCell _buildCell(String? value) => DataCell(Text(value ?? '--'));
 
   DataCell _buildIconCell(IconData icon) =>
       DataCell(Icon(icon, size: defaultIconSize));
@@ -379,7 +512,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     }) {
       return DataColumn(
         label: Expanded(
-          child: SelectableText(
+          child: Text(
             title,
             // TODO(kenz): use top level overflow parameter if
             // https://github.com/flutter/flutter/issues/82722 is fixed.
@@ -501,16 +634,18 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(defaultSpacing),
-      children: [
-        ..._buildGeneralRows(context),
-        if (data is WebSocket) ..._buildSocketOverviewRows(context),
-        const PaddedDivider(
-          padding: EdgeInsets.only(bottom: denseRowSpacing),
-        ),
-        ..._buildTimingOverview(context),
-      ],
+    return SelectionArea(
+      child: ListView(
+        padding: const EdgeInsets.all(defaultSpacing),
+        children: [
+          ..._buildGeneralRows(context),
+          if (data is WebSocket) ..._buildSocketOverviewRows(context),
+          const PaddedDivider(
+            padding: EdgeInsets.only(bottom: denseRowSpacing),
+          ),
+          ..._buildTimingOverview(context),
+        ],
+      ),
     );
   }
 
@@ -532,7 +667,12 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Status',
-        child: _valueText(data.status ?? '--'),
+        child: _valueText(
+          data.status ?? '--',
+          data.didFail
+              ? TextStyle(color: Theme.of(context).colorScheme.error)
+              : null,
+        ),
       ),
       const SizedBox(height: defaultSpacing),
       if (data.port != null) ...[
@@ -645,8 +785,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     }
     final duration = Duration(
       microseconds: data.endTimestamp!.microsecondsSinceEpoch -
-          data.instantEvents.last.timestampMicros -
-          data.timelineMicrosecondsSinceEpoch(0),
+          data.instantEvents.last.timestamp.microsecondsSinceEpoch,
     );
     timingWidgets.add(
       _buildTimingRow(nextColor(), 'Response', duration),
@@ -763,9 +902,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
       children: [
         SizedBox(
           width: _keyWidth,
-          child: SelectableText(
+          child: Text(
             title.isEmpty ? '' : '$title: ',
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
         Expanded(
@@ -775,10 +914,10 @@ class NetworkRequestOverviewView extends StatelessWidget {
     );
   }
 
-  Widget _valueText(String value) {
-    return SelectableText(
+  Widget _valueText(String value, [TextStyle? style]) {
+    return Text(
+      style: style,
       value,
-      minLines: 1,
     );
   }
 }

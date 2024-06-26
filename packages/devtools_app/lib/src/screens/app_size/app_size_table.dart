@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/charts/treemap.dart';
+import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/ui/colors.dart';
-import '../../shared/utils.dart';
 import 'app_size_controller.dart';
 
 class AppSizeAnalysisTable extends StatelessWidget {
@@ -90,8 +91,7 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(TreemapNode dataObject) =>
-      dataObject.displayText().toPlainText();
+  String getTooltip(TreemapNode dataObject) => dataObject.displayText();
 
   @override
   double getNodeIndentPx(TreemapNode dataObject) {
@@ -113,11 +113,7 @@ class _SizeColumn extends ColumnData<TreemapNode> {
 
   @override
   String getDisplayValue(TreemapNode dataObject) {
-    return prettyPrintBytes(
-      dataObject.byteSize,
-      kbFractionDigits: 1,
-      includeUnit: true,
-    )!;
+    return prettyPrintBytes(dataObject.byteSize, includeUnit: true)!;
   }
 
   @override
@@ -125,8 +121,8 @@ class _SizeColumn extends ColumnData<TreemapNode> {
 
   @override
   int compare(TreemapNode a, TreemapNode b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 }
@@ -154,8 +150,8 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 
   @override
   int compare(TreemapNode a, TreemapNode b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 }
@@ -230,8 +226,8 @@ class _DiffColumn extends ColumnData<TreemapNode> {
 
   @override
   int compare(TreemapNode a, TreemapNode b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 

@@ -4,12 +4,12 @@
 
 import 'dart:ui';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
 import '../../inspector_data_models.dart';
 import 'overflow_indicator_painter.dart';
 import 'theme.dart';
@@ -22,7 +22,7 @@ import 'widgets_theme.dart';
 @immutable
 class BorderLayout extends StatelessWidget {
   const BorderLayout({
-    Key? key,
+    super.key,
     this.left,
     this.leftWidth,
     this.top,
@@ -32,14 +32,13 @@ class BorderLayout extends StatelessWidget {
     this.bottom,
     this.bottomHeight,
     this.center,
-  })  : assert(
+  }) : assert(
           left != null ||
               top != null ||
               right != null ||
               bottom != null ||
               center != null,
-        ),
-        super(key: key);
+        );
 
   final Widget? center;
   final Widget? top;
@@ -94,8 +93,7 @@ class BorderLayout extends StatelessWidget {
 
 @immutable
 class Truncateable extends StatelessWidget {
-  const Truncateable({Key? key, this.truncate = false, required this.child})
-      : super(key: key);
+  const Truncateable({super.key, this.truncate = false, required this.child});
 
   final Widget child;
   final bool truncate;
@@ -114,7 +112,7 @@ class Truncateable extends StatelessWidget {
 /// [textColor] color for title text
 class WidgetVisualizer extends StatelessWidget {
   const WidgetVisualizer({
-    Key? key,
+    super.key,
     required this.title,
     this.hint,
     required this.isSelected,
@@ -122,7 +120,7 @@ class WidgetVisualizer extends StatelessWidget {
     required this.child,
     this.overflowSide,
     this.largeTitle = false,
-  }) : super(key: key);
+  });
 
   final LayoutProperties layoutProperties;
   final String title;
@@ -217,8 +215,8 @@ class WidgetVisualizer extends StatelessWidget {
                                 child: Center(
                                   child: Text(
                                     title,
-                                    style: TextStyle(
-                                      color: colorScheme.widgetNameColor,
+                                    style: theme.regularTextStyleWithColor(
+                                      colorScheme.widgetNameColor,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -420,9 +418,9 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
 class LayoutExplorerBackground extends StatelessWidget {
   const LayoutExplorerBackground({
-    Key? key,
+    super.key,
     required this.colorScheme,
-  }) : super(key: key);
+  });
 
   final ColorScheme colorScheme;
 

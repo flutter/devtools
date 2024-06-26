@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-final Map<String, dynamic> simpleCpuProfile2 = {
+final simpleCpuProfile2 = <String, Object?>{
   'type': '_CpuProfileTimeline',
   'samplePeriod': 50,
   'stackDepth': 128,
@@ -13,7 +13,7 @@ final Map<String, dynamic> simpleCpuProfile2 = {
   'traceEvents': _profileTraceEvents,
 };
 
-final _profileStackFrames = {
+final _profileStackFrames = <String, Object?>{
   '140357727781376-1': {
     'category': 'Dart',
     'name': 'A',
@@ -88,7 +88,7 @@ final _profileStackFrames = {
   },
 };
 
-final List<Map<String, dynamic>> _profileTraceEvents = [
+final _profileTraceEvents = <Map<String, Object?>>[
   {
     'ph': 'P',
     'name': '',
@@ -221,7 +221,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
   },
 ];
 
-const String simpleProfile2Golden = '''
+const simpleProfile2Golden = '''
   A - children: 3 - excl: 1 - incl: 10
     B - children: 1 - excl: 1 - incl: 4
       C - children: 0 - excl: 3 - incl: 3
@@ -233,7 +233,7 @@ const String simpleProfile2Golden = '''
         C - children: 0 - excl: 1 - incl: 1
 ''';
 
-const String simpleProfile2MethodTableGolden = '''
+const simpleProfile2MethodTableGolden = '''
 A - (package:my_app/src/a.dart:111) (10 samples)
   Callers:
     C - (package:my_app/src/c.dart:333) - 100.00%

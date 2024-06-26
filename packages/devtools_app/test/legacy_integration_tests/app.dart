@@ -23,27 +23,25 @@ void appTests() {
   });
 
   test('can switch pages', () async {
-    final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
+    final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('logging');
 
-    final String? currentPageId = await tools.currentPageId();
+    final currentPageId = await tools.currentPageId();
     expect(currentPageId, 'logging');
   });
 
   test('connect dialog displays', () async {
     // start with no port
-    final Uri baseAppUri = webBuildFixture.baseUri.resolve('index.html');
-    final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
+    final baseAppUri = webBuildFixture.baseUri.resolve('index.html');
+    final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(
       appFixture,
       overrideUri: baseAppUri,
       waitForConnection: false,
     );
 
-    final ConnectDialogManager connectDialog = ConnectDialogManager(tools);
+    final connectDialog = ConnectDialogManager(tools);
 
     // make sure the connect dialog displays
     await waitFor(() async => await connectDialog.isVisible());
@@ -62,8 +60,7 @@ class ConnectDialogManager {
   final DevtoolsManager tools;
 
   Future<bool> isVisible() async {
-    final AppResponse response =
-        await tools.tabInstance.send('connectDialog.isVisible');
+    final response = await tools.tabInstance.send('connectDialog.isVisible');
     return response.result as bool;
   }
 

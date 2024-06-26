@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
 /// To run:
-/// flutter run -t test/scenes/hello.stager_app.dart -d macos
+/// flutter run -t test/scenes/hello.stager_app.g.dart -d macos
 class HelloScene extends Scene {
   @override
   Widget build(BuildContext context) {

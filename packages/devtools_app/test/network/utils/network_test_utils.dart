@@ -26,6 +26,6 @@ HttpProfile loadHttpProfile() {
       HttpProfileRequest.parse(httpWsHandshakeJson)!,
       HttpProfileRequest.parse(httpGetPendingJson)!,
     ],
-    timestamp: 0,
+    timestamp: DateTime.fromMicrosecondsSinceEpoch(0),
   );
 }

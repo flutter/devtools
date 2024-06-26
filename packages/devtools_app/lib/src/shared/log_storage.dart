@@ -6,11 +6,13 @@ import 'dart:collection';
 import 'dart:convert';
 import 'package:logging/logging.dart';
 
+import 'primitives/utils.dart';
+
 /// Class for storing a limited number string messages.
 class LogStorage {
-  static const int maxLogEntries = 4000;
+  static const maxLogEntries = 4000;
 
-  final Queue<LogRecord> _logs = Queue<LogRecord>();
+  final _logs = Queue<LogRecord>();
 
   /// Adds [message] to the end of the log queue.
   ///
@@ -45,9 +47,9 @@ class LogStorage {
             if (e.stackTrace != null) 'stackTrace': e.stackTrace.toString(),
           }),
         )
-        .join('\n');
+        .joinWithTrailing('\n');
   }
 
   /// Static instance for storing the app's logs.
-  static final LogStorage root = LogStorage();
+  static final root = LogStorage();
 }

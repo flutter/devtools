@@ -4,13 +4,13 @@ on:
   pull_request:
     types: [synchronize, opened, reopened, labeled, unlabeled]
     paths:
-      - '**/*.dart'
+      - "**/*.dart"
 
 env:
   CURRENT_RELEASE_FILE_PATH: packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md
 jobs:
   release-preparedness:
-    if: ${{ !contains(github.event.*.labels.*.name, 'release-notes-not-required') }}
+    if: ${{ !contains(github.event.*.labels.*.name, 'release-notes-not-required') && github.event.pull_request.user.login != 'DartDevtoolWorkflowBot' }}
     runs-on: ubuntu-latest
     name: Verify PR Release Note Requirements
     steps:

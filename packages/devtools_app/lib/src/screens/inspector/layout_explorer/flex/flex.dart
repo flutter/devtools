@@ -5,14 +5,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../shared/common_widgets.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/diagnostics/inspector_service.dart';
 import '../../../../shared/primitives/math_utils.dart';
-import '../../../../shared/theme.dart';
-import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../ui/arrow.dart';
 import '../ui/free_space.dart';
@@ -22,11 +21,18 @@ import '../ui/utils.dart';
 import '../ui/widget_constraints.dart';
 import 'utils.dart';
 
+// TODO(kenz): clean up this file so that we use helper widgets instead of
+// methods that pass around build context.
+
+// TODO(kenz): densify the layout explorer visualization for flex widgets.
+
+double get alignmentDropdownMaxSize => scaleByFontFactor(140.0);
+
 class FlexLayoutExplorerWidget extends LayoutExplorerWidget {
   const FlexLayoutExplorerWidget(
-    InspectorController inspectorController, {
-    Key? key,
-  }) : super(inspectorController, key: key);
+    super.inspectorController, {
+    super.key,
+  });
 
   static bool shouldDisplay(RemoteDiagnosticsNode node) {
     return (node.isFlex) || (node.parent?.isFlex ?? false);
@@ -44,7 +50,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   Axis get direction => properties!.direction;
 
   ObjectGroup? get objectGroup =>
-      properties!.node.inspectorService as ObjectGroup?;
+      properties!.node.objectGroupApi as ObjectGroup?;
 
   Color horizontalColor(ColorScheme colorScheme) =>
       properties!.isMainAxisHorizontal
@@ -112,11 +118,12 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     });
   }
 
-  Widget _buildAxisAlignmentDropdown(Axis axis, ColorScheme colorScheme) {
+  Widget _buildAxisAlignmentDropdown(Axis axis, ThemeData theme) {
+    final colorScheme = theme.colorScheme;
     final color = axis == direction
         ? colorScheme.mainAxisTextColor
         : colorScheme.crossAxisTextColor;
-    List<Object> alignmentEnumEntries;
+    List<Enum> alignmentEnumEntries;
     Object? selected;
     final propertiesLocal = properties!;
     if (axis == direction) {
@@ -134,11 +141,12 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
       quarterTurns: axis == Axis.vertical ? 3 : 0,
       child: Container(
         constraints: BoxConstraints(
-          maxWidth: dropdownMaxSize,
-          maxHeight: dropdownMaxSize,
+          maxWidth: alignmentDropdownMaxSize,
+          maxHeight: defaultButtonHeight,
         ),
         child: DropdownButton(
           value: selected,
+          isDense: true,
           isExpanded: true,
           // Avoid showing an underline for the main axis and cross-axis drop downs.
           underline: const SizedBox(),
@@ -147,20 +155,21 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               : colorScheme.crossAxisColor,
           selectedItemBuilder: (context) {
             return [
-              for (var alignment in alignmentEnumEntries)
+              for (final alignment in alignmentEnumEntries)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
-                      flex: 2,
                       child: Text(
-                        describeEnum(alignment),
-                        style: TextStyle(color: color),
+                        alignment.name,
+                        style: theme.regularTextStyleWithColor(color),
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Flexible(
+                    SizedBox(
+                      height: actionsIconSize,
+                      width: actionsIconSize,
                       child: Image.asset(
                         (axis == direction)
                             ? mainAxisAssetImageUrl(
@@ -181,7 +190,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             ];
           },
           items: [
-            for (var alignment in alignmentEnumEntries)
+            for (final alignment in alignmentEnumEntries)
               DropdownMenuItem(
                 value: alignment,
                 child: Container(
@@ -191,13 +200,15 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     children: [
                       Expanded(
                         child: Text(
-                          describeEnum(alignment),
-                          style: TextStyle(color: color),
+                          alignment.name,
+                          style: theme.regularTextStyleWithColor(color),
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Flexible(
+                      SizedBox(
+                        height: actionsIconSize,
+                        width: actionsIconSize,
                         child: Image.asset(
                           (axis == direction)
                               ? mainAxisAssetImageUrl(
@@ -259,7 +270,8 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 
   Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final maxHeight = constraints.maxHeight;
     final maxWidth = constraints.maxWidth;
     final propertiesLocal = properties!;
@@ -281,11 +293,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               padding: const EdgeInsets.all(4.0),
               child: Text(
                 'Total Flex Factor: ${propertiesLocal.totalFlex.toInt()}',
-                textScaleFactor: largeTextScaleFactor,
-                style: const TextStyle(
-                  color: emphasizedTextColor,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: theme.regularTextStyleWithColor(emphasizedTextColor),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -321,9 +329,8 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                       propertiesLocal.verticalDirectionDescription,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      textScaleFactor: largeTextScaleFactor,
-                      style: TextStyle(
-                        color: verticalTextColor(colorScheme),
+                      style: theme.regularTextStyleWithColor(
+                        verticalTextColor(colorScheme),
                       ),
                     ),
                   ),
@@ -332,7 +339,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             ),
             Truncateable(
               truncate: maxHeight <= minHeightToAllowTruncating,
-              child: _buildAxisAlignmentDropdown(Axis.vertical, colorScheme),
+              child: _buildAxisAlignmentDropdown(Axis.vertical, theme),
             ),
           ],
         ),
@@ -356,15 +363,16 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     propertiesLocal.horizontalDirectionDescription,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    textScaleFactor: largeTextScaleFactor,
-                    style: TextStyle(color: horizontalTextColor(colorScheme)),
+                    style: theme.regularTextStyleWithColor(
+                      horizontalTextColor(colorScheme),
+                    ),
                   ),
                 ),
               ),
             ),
             Truncateable(
               truncate: maxWidth <= minWidthToAllowTruncating,
-              child: _buildAxisAlignmentDropdown(Axis.horizontal, colorScheme),
+              child: _buildAxisAlignmentDropdown(Axis.horizontal, theme),
             ),
           ],
         ),
@@ -386,14 +394,14 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
 class VisualizeFlexChildren extends StatefulWidget {
   const VisualizeFlexChildren({
-    Key? key,
+    super.key,
     required this.state,
     required this.properties,
     required this.children,
     required this.highlighted,
     required this.scrollController,
     required this.direction,
-  }) : super(key: key);
+  });
 
   final FlexLayoutProperties properties;
   final List<LayoutProperties> children;
@@ -433,7 +441,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
     }
 
     if (!widget.properties.hasChildren) {
-      return const Center(child: Text('No Children'));
+      return const CenteredMessage('No Children');
     }
 
     final theme = Theme.of(context);
@@ -502,7 +510,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
           }
 
           final freeSpacesWidgets = [
-            for (var renderProperties in [
+            for (final renderProperties in [
               ...mainAxisSpaces,
               ...crossAxisSpaces,
             ])
@@ -554,12 +562,12 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
 /// Widget that represents and visualize a direct child of Flex widget.
 class FlexChildVisualizer extends StatelessWidget {
   const FlexChildVisualizer({
-    Key? key,
+    super.key,
     required this.state,
     required this.layoutProperties,
     required this.renderProperties,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   final FlexLayoutExplorerWidgetState state;
 
@@ -576,7 +584,7 @@ class FlexChildVisualizer extends StatelessWidget {
   LayoutProperties get properties => renderProperties.layoutProperties!;
 
   ObjectGroup? get objectGroup =>
-      properties.node.inspectorService as ObjectGroup?;
+      properties.node.objectGroupApi as ObjectGroup?;
 
   void onChangeFlexFactor(int? newFlexFactor) async {
     state.markAsDirty();
@@ -594,18 +602,18 @@ class FlexChildVisualizer extends StatelessWidget {
     );
   }
 
-  Widget _buildFlexFactorChangerDropdown(int maximumFlexFactor) {
+  Widget _buildFlexFactorChangerDropdown(
+    int maximumFlexFactor,
+    ThemeData theme,
+  ) {
     final propertiesLocal = properties;
 
     Widget buildMenuitemChild(int? flexFactor) {
       return Text(
         'flex: $flexFactor',
         style: flexFactor == propertiesLocal.flexFactor
-            ? const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: emphasizedTextColor,
-              )
-            : const TextStyle(color: emphasizedTextColor),
+            ? theme.boldTextStyle.copyWith(color: emphasizedTextColor)
+            : theme.regularTextStyleWithColor(emphasizedTextColor),
       );
     }
 
@@ -628,10 +636,10 @@ class FlexChildVisualizer extends StatelessWidget {
     );
   }
 
-  Widget _buildFlexFitChangerDropdown() {
+  Widget _buildFlexFitChangerDropdown(ThemeData theme) {
     Widget flexFitDescription(FlexFit flexFit) => Text(
-          'fit: ${describeEnum(flexFit)}',
-          style: const TextStyle(color: emphasizedTextColor),
+          'fit: ${flexFit.name}',
+          style: theme.regularTextStyleWithColor(emphasizedTextColor),
         );
 
     final propertiesLocal = properties;
@@ -661,7 +669,7 @@ class FlexChildVisualizer extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(ColorScheme colorScheme) {
+  Widget _buildContent(ThemeData theme) {
     // TODO(https://github.com/flutter/devtools/issues/4058) allow more dynamic
     // flex factor input
     final currentFlexFactor = properties.flexFactor?.toInt() ?? 0;
@@ -677,22 +685,22 @@ class FlexChildVisualizer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Flexible(
-            child: _buildFlexFactorChangerDropdown(currentMaxFlexFactor),
+            child: _buildFlexFactorChangerDropdown(currentMaxFlexFactor, theme),
           ),
           if (!properties.hasFlexFactor)
             Text(
               'unconstrained ${root.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',
-              style: TextStyle(
-                color: colorScheme.unconstrainedColor,
+              style: theme.regularTextStyle.copyWith(
+                color: theme.colorScheme.unconstrainedColor,
                 fontStyle: FontStyle.italic,
               ),
               maxLines: 2,
               softWrap: true,
               overflow: TextOverflow.ellipsis,
-              textScaleFactor: smallTextScaleFactor,
+              textScaler: const TextScaler.linear(smallTextScaleFactor),
               textAlign: TextAlign.center,
             ),
-          _buildFlexFitChangerDropdown(),
+          _buildFlexFitChangerDropdown(theme),
         ],
       ),
     );
@@ -732,8 +740,6 @@ class FlexChildVisualizer extends StatelessWidget {
       );
     }
 
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Positioned(
       top: renderOffset.dy,
       left: renderOffset.dx,
@@ -757,7 +763,7 @@ class FlexChildVisualizer extends StatelessWidget {
                 properties: propertiesLocal,
                 child: Align(
                   alignment: Alignment.topRight,
-                  child: _buildContent(colorScheme),
+                  child: _buildContent(Theme.of(context)),
                 ),
               ),
             ),

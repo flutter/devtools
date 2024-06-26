@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/shared.dart';
+
 import 'globals.dart';
 
 /// This controller is used by the connection to the DevTools server to receive
@@ -14,15 +16,11 @@ class FrameworkController {
     _init();
   }
 
-  final StreamController<String> _showPageIdController =
-      StreamController.broadcast();
-  final StreamController<ConnectVmEvent> _connectVmController =
-      StreamController.broadcast();
-  final StreamController<Uri> _connectedController =
-      StreamController.broadcast();
-  final StreamController _disconnectedController = StreamController.broadcast();
-  final StreamController<PageChangeEvent> _pageChangeController =
-      StreamController.broadcast();
+  final _showPageIdController = StreamController<String>.broadcast();
+  final _connectVmController = StreamController<ConnectVmEvent>.broadcast();
+  final _connectedController = StreamController<String>.broadcast();
+  final _disconnectedController = StreamController<void>.broadcast();
+  final _pageChangeController = StreamController<PageChangeEvent>.broadcast();
 
   /// Show the indicated page.
   Stream<String> get onShowPageId => _showPageIdController.stream;
@@ -49,7 +47,7 @@ class FrameworkController {
   ///
   /// The returned URI value is the VM service protocol URI of the device
   /// connection.
-  Stream<Uri> get onConnected => _connectedController.stream;
+  Stream<String> get onConnected => _connectedController.stream;
 
   /// Notifies when the current page changes.
   Stream<PageChangeEvent> get onPageChange => _pageChangeController.stream;
@@ -63,10 +61,11 @@ class FrameworkController {
   Stream get onDisconnected => _disconnectedController.stream;
 
   void _init() {
-    serviceManager.connectedState.addListener(() {
-      final connectionState = serviceManager.connectedState.value;
+    serviceConnection.serviceManager.connectedState.addListener(() {
+      final connectionState =
+          serviceConnection.serviceManager.connectedState.value;
       if (connectionState.connected) {
-        _connectedController.add(serviceManager.service!.connectedUri);
+        _connectedController.add(serviceConnection.serviceManager.serviceUri!);
       } else {
         _disconnectedController.add(null);
       }
@@ -82,8 +81,8 @@ class ConnectVmEvent {
 }
 
 class PageChangeEvent {
-  PageChangeEvent(this.id, this.embedded);
+  PageChangeEvent(this.id, this.embedMode);
 
   final String id;
-  final bool embedded;
+  final EmbedMode embedMode;
 }

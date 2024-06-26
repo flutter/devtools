@@ -2,21 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: invalid_use_of_visible_for_testing_member, devtools_test is a in testing only package.
+
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
+import 'fake_isolate_manager.dart';
+import 'fake_service_extension_manager.dart';
 import 'generated.mocks.dart';
 
 MockPerformanceController createMockPerformanceControllerWithDefaults() {
   final controller = MockPerformanceController();
   final timelineEventsController = MockTimelineEventsController();
-  final legacyTimelineEventsController = MockLegacyTimelineEventsController();
   final flutterFramesController = MockFlutterFramesController();
-  when(controller.data).thenReturn(PerformanceData());
   when(controller.enhanceTracingController)
       .thenReturn(EnhanceTracingController());
   when(controller.offlinePerformanceData).thenReturn(null);
@@ -30,7 +34,7 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(flutterFramesController.recordingFrames)
       .thenReturn(const FixedValueListenable<bool>(true));
   when(flutterFramesController.displayRefreshRate)
-      .thenReturn(ValueNotifier<double>(60.0));
+      .thenReturn(ValueNotifier<double>(defaultRefreshRate));
 
   // Stubs for Raster Stats feature.
   when(controller.rasterStatsController)
@@ -39,19 +43,14 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   // Stubs for Timeline Events feature.
   when(controller.timelineEventsController)
       .thenReturn(timelineEventsController);
-  when(timelineEventsController.useLegacyTraceViewer)
-      .thenReturn(ValueNotifier<bool>(true));
-  when(timelineEventsController.legacyController)
-      .thenReturn(legacyTimelineEventsController);
   when(timelineEventsController.status).thenReturn(
     ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty),
   );
-  when(legacyTimelineEventsController.searchMatches)
-      .thenReturn(const FixedValueListenable<List<TimelineEvent>>([]));
-  when(legacyTimelineEventsController.searchInProgressNotifier)
-      .thenReturn(const FixedValueListenable<bool>(false));
-  when(legacyTimelineEventsController.matchIndex)
-      .thenReturn(ValueNotifier<int>(0));
+
+  // Stubs for Rebuild Count feature
+  when(controller.rebuildCountModel).thenReturn(RebuildCountModel());
+  when(controller.rebuildStatsController)
+      .thenReturn(RebuildStatsController(controller));
 
   return controller;
 }
@@ -94,13 +93,19 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   );
   when(codeViewController.showCodeCoverage).thenReturn(ValueNotifier(false));
   when(codeViewController.focusLine).thenReturn(ValueNotifier(-1));
+  when(codeViewController.navigationInProgress).thenReturn(false);
 
   return codeViewController;
 }
 
 MockDebuggerController createMockDebuggerControllerWithDefaults({
-  MockCodeViewController? mockCodeViewController,
+  // ignore: avoid-dynamic, can be either a real or mock controller.
+  dynamic codeViewController,
 }) {
+  assert(
+    codeViewController is MockCodeViewController? ||
+        codeViewController is CodeViewController?,
+  );
   final debuggerController = MockDebuggerController();
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
   when(debuggerController.isSystemIsolate).thenReturn(false);
@@ -113,9 +118,9 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.exceptionPauseMode)
       .thenReturn(ValueNotifier('Unhandled'));
 
-  mockCodeViewController ??= createMockCodeViewControllerWithDefaults();
+  codeViewController ??= createMockCodeViewControllerWithDefaults();
   when(debuggerController.codeViewController).thenReturn(
-    mockCodeViewController,
+    codeViewController,
   );
 
   return debuggerController;
@@ -141,21 +146,45 @@ MockVmServiceWrapper createMockVmServiceWrapperWithDefaults() {
   when(service.onStderrEvent).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onStdoutEventWithHistory).thenAnswer((_) {
+  when(service.onStdoutEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onStderrEventWithHistory).thenAnswer((_) {
+  when(service.onStderrEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
-  when(service.onExtensionEventWithHistory).thenAnswer((_) {
+  when(service.onExtensionEventWithHistorySafe).thenAnswer((_) {
     return const Stream.empty();
   });
   return service;
 }
 
+MockServiceConnectionManager createMockServiceConnectionWithDefaults() {
+  final mockServiceConnection = MockServiceConnectionManager();
+  final mockServiceManager = _createMockServiceManagerWithDefaults();
+  when(mockServiceConnection.serviceManager).thenReturn(mockServiceManager);
+
+  return mockServiceConnection;
+}
+
+MockServiceManager<VmServiceWrapper> _createMockServiceManagerWithDefaults() {
+  final mockServiceManager = MockServiceManager<VmServiceWrapper>();
+
+  final fakeIsolateManager = FakeIsolateManager();
+  provideDummy<IsolateManager>(fakeIsolateManager);
+
+  final fakeServiceExtensionManager = FakeServiceExtensionManager();
+  provideDummy<ServiceExtensionManager>(fakeServiceExtensionManager);
+
+  when(mockServiceManager.isolateManager).thenReturn(fakeIsolateManager);
+  when(mockServiceManager.serviceExtensionManager)
+      .thenReturn(fakeServiceExtensionManager);
+  return mockServiceManager;
+}
+
 MockLoggingController createMockLoggingControllerWithDefaults({
   List<LogData> data = const [],
 }) {
+  provideDummy<ListValueNotifier<LogData>>(ListValueNotifier<LogData>(data));
   final mockLoggingController = MockLoggingController();
   when(mockLoggingController.data).thenReturn(data);
   when(mockLoggingController.filteredData)
@@ -173,5 +202,17 @@ MockLoggingController createMockLoggingControllerWithDefaults({
   when(mockLoggingController.searchInProgressNotifier)
       .thenReturn(const FixedValueListenable(false));
   when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
+  return mockLoggingController;
+}
+
+MockLoggingControllerV2 createMockLoggingControllerV2WithDefaults() {
+  provideDummy<ListValueNotifier<LogDataV2>>(
+    ListValueNotifier<LogDataV2>([]),
+  );
+  final mockLoggingController = MockLoggingControllerV2();
+  when(mockLoggingController.isFilterActive).thenReturn(false);
+  when(mockLoggingController.loggingModel).thenReturn(LoggingTableModel());
+  when(mockLoggingController.selectedLog)
+      .thenReturn(ValueNotifier<LogDataV2?>(null));
   return mockLoggingController;
 }

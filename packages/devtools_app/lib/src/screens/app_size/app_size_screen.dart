@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
@@ -13,17 +15,11 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/treemap.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
-import '../../shared/config_specific/server/server.dart' as server;
-import '../../shared/config_specific/url/url.dart';
 import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
+import '../../shared/server/server.dart' as server;
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
 import 'app_size_controller.dart';
@@ -34,21 +30,11 @@ const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
 
 class AppSizeScreen extends Screen {
-  AppSizeScreen()
-      : super.conditional(
-          id: id,
-          requiresDartVm: true,
-          title: ScreenMetaData.appSize.title,
-          icon: Octicons.fileZip,
-        );
+  AppSizeScreen() : super.fromMetaData(ScreenMetaData.appSize);
 
   static const analysisTabKey = Key('Analysis Tab');
   static const diffTabKey = Key('Diff Tab');
 
-  /// The ID (used in routing) for the tabbed app-size page.
-  ///
-  /// This must be different to the top-level appSizePageId which is also used
-  /// in routing when to ensure they have unique URLs.
   static final id = ScreenMetaData.appSize.id;
 
   @visibleForTesting
@@ -70,7 +56,7 @@ class AppSizeScreen extends Screen {
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     // Since `handleDrop` is not specified for this [DragAndDrop] widget, drag
     // and drop events will be absorbed by it, meaning drag and drop actions
     // will be a no-op if they occur over this area. [DragAndDrop] widgets
@@ -161,7 +147,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
   }
 
   void _pushErrorMessage(String error) {
-    if (mounted) notificationService.push(error);
+    if (mounted) notificationService.pushError(error);
   }
 
   @override
@@ -205,7 +191,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TabBar(
-                    labelColor: Theme.of(context).textTheme.bodyLarge!.color,
+                    labelColor: Theme.of(context).regularTextStyle.color,
                     isScrollable: true,
                     controller: _tabController,
                     tabs: tabs,
@@ -372,40 +358,30 @@ class _AnalysisViewState extends State<AnalysisView>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.processingNotifier,
       builder: (context, processing, _) {
-        if (processing) {
-          return Center(
-            child: Text(
-              AppSizeScreen.loadingMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.displayLarge!.color,
-              ),
-            ),
-          );
-        } else {
-          return Column(
-            children: [
-              Flexible(
-                child: FileImportContainer(
-                  title: 'Size analysis',
-                  instructions: AnalysisView.importInstructions,
-                  actionText: 'Analyze Size',
-                  gaScreen: gac.appSize,
-                  gaSelectionImport: gac.importFileSingle,
-                  gaSelectionAction: gac.analyzeSingle,
-                  onAction: (jsonFile) {
-                    controller.loadTreeFromJsonFile(
-                      jsonFile: jsonFile,
-                      onError: (error) {
-                        if (mounted) notificationService.push(error);
+        return processing
+            ? const CenteredMessage(AppSizeScreen.loadingMessage)
+            : Column(
+                children: [
+                  Flexible(
+                    child: FileImportContainer(
+                      title: 'Size analysis',
+                      instructions: AnalysisView.importInstructions,
+                      actionText: 'Analyze Size',
+                      gaScreen: gac.appSize,
+                      gaSelectionImport: gac.importFileSingle,
+                      gaSelectionAction: gac.analyzeSingle,
+                      onAction: (jsonFile) {
+                        controller.loadTreeFromJsonFile(
+                          jsonFile: jsonFile,
+                          onError: (error) {
+                            if (mounted) notificationService.push(error);
+                          },
+                        );
                       },
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        }
+                    ),
+                  ),
+                ],
+              );
       },
     );
   }
@@ -487,48 +463,34 @@ class _DiffViewState extends State<DiffView>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.processingNotifier,
       builder: (context, processing, _) {
-        if (processing) {
-          return _buildLoadingMessage();
-        } else {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: DualFileImportContainer(
-                  firstFileTitle: 'Old',
-                  secondFileTitle: 'New',
-                  // TODO(kenz): perhaps bold "original" and "modified".
-                  firstInstructions: DiffView.importOldInstructions,
-                  secondInstructions: DiffView.importNewInstructions,
-                  actionText: 'Analyze Diff',
-                  gaScreen: gac.appSize,
-                  gaSelectionImportFirst: gac.importFileDiffFirst,
-                  gaSelectionImportSecond: gac.importFileDiffSecond,
-                  gaSelectionAction: gac.analyzeDiff,
-                  onAction: (oldFile, newFile, onError) =>
-                      controller.loadDiffTreeFromJsonFiles(
-                    oldFile: oldFile,
-                    newFile: newFile,
-                    onError: onError,
+        return processing
+            ? const CenteredMessage(AppSizeScreen.loadingMessage)
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: DualFileImportContainer(
+                      firstFileTitle: 'Old',
+                      secondFileTitle: 'New',
+                      // TODO(kenz): perhaps bold "original" and "modified".
+                      firstInstructions: DiffView.importOldInstructions,
+                      secondInstructions: DiffView.importNewInstructions,
+                      actionText: 'Analyze Diff',
+                      gaScreen: gac.appSize,
+                      gaSelectionImportFirst: gac.importFileDiffFirst,
+                      gaSelectionImportSecond: gac.importFileDiffSecond,
+                      gaSelectionAction: gac.analyzeDiff,
+                      onAction: (oldFile, newFile, onError) =>
+                          controller.loadDiffTreeFromJsonFiles(
+                        oldFile: oldFile,
+                        newFile: newFile,
+                        onError: onError,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          );
-        }
+                ],
+              );
       },
-    );
-  }
-
-  Widget _buildLoadingMessage() {
-    return Center(
-      child: Text(
-        AppSizeScreen.loadingMessage,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Theme.of(context).textTheme.displayLarge!.color,
-        ),
-      ),
     );
   }
 }
@@ -549,7 +511,7 @@ class _AppSizeView extends StatelessWidget {
 
   final TreemapNode treemapRoot;
 
-  final Function(TreemapNode?) onRootChangedCallback;
+  final void Function(TreemapNode?) onRootChangedCallback;
 
   final Widget analysisTable;
 
@@ -570,7 +532,7 @@ class _AppSizeView extends StatelessWidget {
               includeTopBorder: false,
             ),
             Expanded(
-              child: Split(
+              child: SplitPane(
                 axis: Axis.vertical,
                 initialFractions: const [
                   initialFractionForTreemap,

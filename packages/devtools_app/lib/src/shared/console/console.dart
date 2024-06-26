@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../common_widgets.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import 'console_service.dart';
 import 'widgets/expandable_variable.dart';
 
@@ -73,10 +73,9 @@ class ConsoleFrame extends StatelessWidget {
 /// This is a ListView of text lines, with a monospace font and a border.
 class _ConsoleOutput extends StatefulWidget {
   const _ConsoleOutput({
-    Key? key,
     required this.lines,
     this.footer,
-  }) : super(key: key);
+  });
 
   final ValueListenable<List<ConsoleLine>> lines;
 
@@ -90,7 +89,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
     with AutoDisposeMixin<_ConsoleOutput> {
   // The scroll controller must survive ConsoleOutput re-renders
   // to work as intended, so it must be part of the "state".
-  final ScrollController _scroll = ScrollController();
+  final _scroll = ScrollController();
 
   static const _scrollBarKey = Key('console-scrollbar');
 
@@ -179,45 +178,48 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
       key: _scrollBarKey,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-        child: ListView.separated(
-          padding: const EdgeInsets.all(denseSpacing),
-          itemCount: _currentLines.length + (widget.footer != null ? 1 : 0),
-          controller: _scroll,
-          // Scroll physics to try to keep content within view and avoid bouncing.
-          physics: const ClampingScrollPhysics(
-            parent: RangeMaintainingScrollPhysics(),
-          ),
-          separatorBuilder: (_, __) {
-            return const Divider();
-          },
-          itemBuilder: (context, index) {
-            if (index == _currentLines.length && widget.footer != null) {
-              return widget.footer!;
-            }
-            final line = _currentLines[index];
-            if (line is TextConsoleLine) {
-              return SelectableText.rich(
-                TextSpan(
-                  // TODO(jacobr): consider caching the processed ansi terminal
-                  // codes.
-                  children: processAnsiTerminalCodes(
-                    line.text,
-                    theme.fixedFontStyle,
+        child: SelectionArea(
+          child: ListView.separated(
+            padding: const EdgeInsets.all(denseSpacing),
+            itemCount: _currentLines.length + (widget.footer != null ? 1 : 0),
+            controller: _scroll,
+            // Scroll physics to try to keep content within view and avoid bouncing.
+            physics: const ClampingScrollPhysics(
+              parent: RangeMaintainingScrollPhysics(),
+            ),
+            separatorBuilder: (_, __) {
+              return const PaddedDivider.noPadding();
+            },
+            itemBuilder: (context, index) {
+              if (index == _currentLines.length && widget.footer != null) {
+                return widget.footer!;
+              }
+              final line = _currentLines[index];
+              if (line is TextConsoleLine) {
+                return Text.rich(
+                  TextSpan(
+                    // TODO(jacobr): consider caching the processed ansi terminal
+                    // codes.
+                    children: processAnsiTerminalCodes(
+                      line.text,
+                      theme.regularTextStyle,
+                    ),
                   ),
-                ),
-              );
-            } else if (line is VariableConsoleLine) {
-              return ExpandableVariable(
-                variable: line.variable,
-              );
-            } else {
-              assert(
-                false,
-                'ConsoleLine of unsupported type ${line.runtimeType} encountered',
-              );
-              return const SizedBox();
-            }
-          },
+                );
+              } else if (line is VariableConsoleLine) {
+                return ExpandableVariable(
+                  variable: line.variable,
+                  isSelectable: false,
+                );
+              } else {
+                assert(
+                  false,
+                  'ConsoleLine of unsupported type ${line.runtimeType} encountered',
+                );
+                return const SizedBox();
+              }
+            },
+          ),
         ),
       ),
     );
@@ -246,6 +248,7 @@ class DeleteControl extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolbarAction(
       icon: Icons.delete,
+      size: defaultIconSize,
       tooltip: tooltip,
       onPressed: onPressed,
       key: buttonKey,

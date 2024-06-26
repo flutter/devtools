@@ -91,10 +91,11 @@
 >
 >  @override
 #  ^^^^^^^^^ storage.type.annotation.dart
->  bool operator ==(other) {
+>  bool operator ==(Object other) {
 #  ^^^^ support.class.dart
 #       ^^^^^^^^ keyword.declaration.dart
 #                ^^ keyword.operator.comparison.dart
+#                   ^^^^^^ support.class.dart
 >    return false;
 #    ^^^^^^ keyword.control.dart
 #           ^^^^^ constant.language.dart

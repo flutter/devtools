@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -17,15 +19,11 @@ import '../../shared/console/widgets/expandable_variable.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/diagnostics/tree_builder.dart';
-import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
 import '../../shared/history_viewport.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/colors.dart';
 import '../../shared/ui/hover.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
@@ -48,7 +46,7 @@ final debuggerCodeViewFileOpenerKey =
 // controller.
 class CodeView extends StatefulWidget {
   const CodeView({
-    Key? key,
+    super.key,
     required this.codeViewController,
     required this.scriptRef,
     required this.parsedScript,
@@ -56,10 +54,8 @@ class CodeView extends StatefulWidget {
     this.lineRange,
     this.initialPosition,
     this.onSelected,
-    this.enableFileExplorer = true,
-    this.enableSearch = true,
     this.enableHistory = true,
-  }) : super(key: key);
+  });
 
   static const debuggerCodeViewHorizontalScrollbarKey =
       Key('debuggerCodeViewHorizontalScrollbarKey');
@@ -67,8 +63,7 @@ class CodeView extends StatefulWidget {
   static const debuggerCodeViewVerticalScrollbarKey =
       Key('debuggerCodeViewVerticalScrollbarKey');
 
-  static double get rowHeight =>
-      isDense() ? scaleByFontFactor(16.0) : scaleByFontFactor(20.0);
+  static double get rowHeight => scaleByFontFactor(16.0);
 
   final CodeViewController codeViewController;
   final DebuggerController? debuggerController;
@@ -80,8 +75,6 @@ class CodeView extends StatefulWidget {
   // the script's source in its entirety, with lines outside of the range being
   // rendered as if they have been greyed out.
   final LineRange? lineRange;
-  final bool enableFileExplorer;
-  final bool enableSearch;
   final bool enableHistory;
 
   final void Function(ScriptRef scriptRef, int line)? onSelected;
@@ -168,7 +161,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     }
 
     if (oldWidget.scriptRef != widget.scriptRef) {
-      verticalController.resetScroll();
+      _updateScrollPosition();
     }
   }
 
@@ -232,8 +225,9 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       final lineCount = parsedScript?.lineCount;
       if (lineCount != null && lineCount * CodeView.rowHeight > extent) {
         final lineIndex = line - 1;
-        final scrollPosition = lineIndex * CodeView.rowHeight -
+        var scrollPosition = lineIndex * CodeView.rowHeight -
             ((extent - CodeView.rowHeight) / 2);
+        scrollPosition = scrollPosition.clamp(0.0, position.extentTotal);
         if (animate) {
           unawaited(
             verticalController.animateTo(
@@ -358,13 +352,13 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                 final pausedFrame =
                     frame?.scriptRef == scriptRef ? frame : null;
 
-                return Row(
-                  children: [
-                    ValueListenableBuilder<bool>(
-                      valueListenable:
-                          widget.codeViewController.showProfileInformation,
-                      builder: (context, showProfileInformation, _) {
-                        return Gutters(
+                return ValueListenableBuilder<bool>(
+                  valueListenable:
+                      widget.codeViewController.showProfileInformation,
+                  builder: (context, showProfileInformation, _) {
+                    return Row(
+                      children: [
+                        Gutters(
                           scriptRef: script,
                           gutterController: gutterController,
                           profileController: profileController,
@@ -376,49 +370,53 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                           pausedFrame: pausedFrame,
                           parsedScript: parsedScript,
                           showProfileInformation: showProfileInformation,
-                        );
-                      },
-                    ),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final double fileWidth = calculateTextSpanWidth(
-                            findLongestTextSpan(lines),
-                          );
+                        ),
+                        Expanded(
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final fileWidth = calculateTextSpanWidth(
+                                findLongestTextSpan(lines),
+                              );
 
-                          return Scrollbar(
-                            key:
-                                CodeView.debuggerCodeViewHorizontalScrollbarKey,
-                            thumbVisibility: true,
-                            controller: horizontalController,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              controller: horizontalController,
-                              child: SizedBox(
-                                height: constraints.maxHeight,
-                                width: math.max(
-                                  constraints.maxWidth,
-                                  fileWidth,
+                              return Scrollbar(
+                                key: CodeView
+                                    .debuggerCodeViewHorizontalScrollbarKey,
+                                thumbVisibility: true,
+                                controller: horizontalController,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  controller: horizontalController,
+                                  child: SizedBox(
+                                    height: constraints.maxHeight,
+                                    width: math.max(
+                                      constraints.maxWidth,
+                                      fileWidth,
+                                    ),
+                                    child: Lines(
+                                      height: constraints.maxHeight,
+                                      codeViewController:
+                                          widget.codeViewController,
+                                      scrollController: textController,
+                                      lines: lines,
+                                      selectedFrameNotifier: widget
+                                          .debuggerController
+                                          ?.selectedStackFrame,
+                                      searchMatchesNotifier: widget
+                                          .codeViewController.searchMatches,
+                                      activeSearchMatchNotifier: widget
+                                          .codeViewController.activeSearchMatch,
+                                      showProfileInformation:
+                                          showProfileInformation,
+                                    ),
+                                  ),
                                 ),
-                                child: Lines(
-                                  height: constraints.maxHeight,
-                                  codeViewController: widget.codeViewController,
-                                  scrollController: textController,
-                                  lines: lines,
-                                  selectedFrameNotifier: widget
-                                      .debuggerController?.selectedStackFrame,
-                                  searchMatchesNotifier:
-                                      widget.codeViewController.searchMatches,
-                                  activeSearchMatchNotifier: widget
-                                      .codeViewController.activeSearchMatch,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -450,8 +448,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
           ScriptPopupMenu(widget.codeViewController),
           ScriptHistoryPopupMenu(
             itemBuilder: _buildScriptMenuFromHistory,
-            onSelected: (scriptRef) {
-              widget.codeViewController
+            onSelected: (scriptRef) async {
+              await widget.codeViewController
                   .showScriptLocation(ScriptLocation(scriptRef));
             },
             enabled: widget.codeViewController.scriptsHistory.hasScripts,
@@ -670,9 +668,9 @@ class _ProfileInformationGutterHeader extends StatelessWidget {
 
 class ProfileInformationGutterItem extends StatelessWidget {
   const ProfileInformationGutterItem({
-    Key? key,
+    super.key,
     required this.profilerData,
-  }) : super(key: key);
+  });
 
   final ProfileReportEntry profilerData;
 
@@ -713,7 +711,11 @@ class ProfilePercentageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textStyle = theme.regularTextStyleWithColor(
+      colorScheme.coverageAndPerformanceTextColor,
+    );
     Color? color;
     if (percentage > 5) {
       color = colorScheme.performanceHighImpactColor;
@@ -732,6 +734,7 @@ class ProfilePercentageItem extends StatelessWidget {
         child: Text(
           '${percentage.toStringAsFixed(2)} %',
           textAlign: TextAlign.end,
+          style: textStyle,
         ),
       ),
     );
@@ -787,10 +790,15 @@ class Gutters extends StatelessWidget {
 
     return Row(
       children: [
-        DualValueListenableBuilder<List<BreakpointAndSourcePosition>, bool>(
-          firstListenable: breakpointManager.breakpointsWithLocation,
-          secondListenable: codeViewController.showCodeCoverage,
-          builder: (context, breakpoints, showCodeCoverage, _) {
+        MultiValueListenableBuilder(
+          listenables: [
+            breakpointManager.breakpointsWithLocation,
+            codeViewController.showCodeCoverage,
+          ],
+          builder: (context, values, _) {
+            final breakpoints =
+                values.first as List<BreakpointAndSourcePosition>;
+            final showCodeCoverage = values.second as bool;
             return Gutter(
               gutterWidth: gutterWidth,
               scrollController: gutterController,
@@ -805,12 +813,12 @@ class Gutters extends StatelessWidget {
               // Disable dots for possible breakpoint locations.
               allowInteraction: !(debuggerController?.isSystemIsolate ?? false),
               showCodeCoverage: showCodeCoverage,
+              showProfileInformation: showProfileInformation,
             );
           },
         ),
-        const SizedBox(width: denseSpacing),
         !showProfileInformation
-            ? const SizedBox()
+            ? const SizedBox(width: denseSpacing)
             : Padding(
                 padding: const EdgeInsets.only(right: denseSpacing),
                 child: ProfileInformationGutter(
@@ -847,6 +855,7 @@ class Gutter extends StatelessWidget {
     required this.allowInteraction,
     required this.sourceReport,
     required this.showCodeCoverage,
+    required this.showProfileInformation,
   });
 
   final double gutterWidth;
@@ -860,13 +869,20 @@ class Gutter extends StatelessWidget {
   final IntCallback onPressed;
   final bool allowInteraction;
   final bool showCodeCoverage;
+  final bool showProfileInformation;
 
   @override
   Widget build(BuildContext context) {
-    final bpLineSet = Set.from(breakpoints.map((bp) => bp.line));
+    final bpLineSet = Set.of(breakpoints.map((bp) => bp.line));
     final theme = Theme.of(context);
     final coverageLines =
         sourceReport.coverageHitLines.union(sourceReport.coverageMissedLines);
+    // Used to account for the presence of `_ProfileInformationGutterHeader` at
+    // the top of the profiler gutter columns. Everything needs to be shifted
+    // down a single line so profiling information for line 1 isn't hidden by
+    // the header.
+    final profileInformationHeaderOffset = showProfileInformation ? 1 : 0;
+
     return Container(
       width: gutterWidth,
       decoration: BoxDecoration(
@@ -876,9 +892,13 @@ class Gutter extends StatelessWidget {
         controller: scrollController,
         physics: const ClampingScrollPhysics(),
         itemExtent: CodeView.rowHeight,
-        itemCount: lineCount,
+        itemCount: lineCount + profileInformationHeaderOffset,
         itemBuilder: (context, index) {
-          final lineNum = lineOffset + index + 1;
+          if (showProfileInformation && index == 0) {
+            return SizedBox(height: CodeView.rowHeight);
+          }
+          final lineNum =
+              lineOffset - profileInformationHeaderOffset + index + 1;
           bool? coverageHit;
           if (showCodeCoverage && coverageLines.contains(lineNum)) {
             coverageHit = sourceReport.coverageHitLines.contains(lineNum);
@@ -900,7 +920,7 @@ class Gutter extends StatelessWidget {
 
 class GutterItem extends StatelessWidget {
   const GutterItem({
-    Key? key,
+    super.key,
     required this.lineNumber,
     required this.isBreakpoint,
     required this.isExecutable,
@@ -908,7 +928,7 @@ class GutterItem extends StatelessWidget {
     required this.onPressed,
     required this.allowInteraction,
     required this.coverageHit,
-  }) : super(key: key);
+  });
 
   final int lineNumber;
 
@@ -929,17 +949,21 @@ class GutterItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final breakpointColor = theme.colorScheme.breakpointColor;
+    final breakpointColor = theme.colorScheme.primary;
     final subtleColor = theme.unselectedWidgetColor;
 
     final bpBoxSize = breakpointRadius * 2;
     final executionPointIndent = scaleByFontFactor(10.0);
     Color? color;
+    TextStyle? coverageTextStyleOverride;
     final hasCoverage = coverageHit;
-    if (hasCoverage != null && isExecutable) {
+    if (hasCoverage != null) {
       color = hasCoverage
           ? theme.colorScheme.coverageHitColor
           : theme.colorScheme.coverageMissColor;
+      coverageTextStyleOverride = theme.regularTextStyleWithColor(
+        theme.colorScheme.coverageAndPerformanceTextColor,
+      );
     }
     return InkWell(
       onTap: onPressed,
@@ -968,7 +992,11 @@ class GutterItem extends StatelessWidget {
                   ),
                 ),
               ),
-            Text('$lineNumber', textAlign: TextAlign.end),
+            Text(
+              '$lineNumber',
+              textAlign: TextAlign.end,
+              style: coverageTextStyleOverride,
+            ),
             Container(
               padding: EdgeInsets.only(left: executionPointIndent),
               alignment: Alignment.centerLeft,
@@ -992,7 +1020,7 @@ class GutterItem extends StatelessWidget {
 
 class Lines extends StatefulWidget {
   const Lines({
-    Key? key,
+    super.key,
     required this.height,
     required this.codeViewController,
     required this.scrollController,
@@ -1000,7 +1028,8 @@ class Lines extends StatefulWidget {
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
     required this.selectedFrameNotifier,
-  }) : super(key: key);
+    required this.showProfileInformation,
+  });
 
   final double height;
   final CodeViewController codeViewController;
@@ -1009,6 +1038,7 @@ class Lines extends StatefulWidget {
   final ValueListenable<List<SourceToken>> searchMatchesNotifier;
   final ValueListenable<SourceToken?> activeSearchMatchNotifier;
   final ValueListenable<StackFrameAndSourcePosition?>? selectedFrameNotifier;
+  final bool showProfileInformation;
 
   @override
   State<Lines> createState() => _LinesState();
@@ -1052,30 +1082,45 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     final pausedFrame = widget.selectedFrameNotifier?.value;
     final pausedLine = pausedFrame?.line;
+    // Used to account for the presence of `_ProfileInformationGutterHeader` at
+    // the top of the profiler gutter columns. Everything needs to be shifted
+    // down a single line so profiling information for line 1 isn't hidden by
+    // the header.
+    final profileInformationHeaderOffset =
+        widget.showProfileInformation ? 1 : 0;
 
-    return ListView.builder(
-      controller: widget.scrollController,
-      physics: const ClampingScrollPhysics(),
-      itemExtent: CodeView.rowHeight,
-      itemCount: widget.lines.length,
-      itemBuilder: (context, index) {
-        final lineNum = index + 1;
-        final isPausedLine = pausedLine == lineNum;
-        return ValueListenableBuilder<int>(
-          valueListenable: widget.codeViewController.focusLine,
-          builder: (context, focusLine, _) {
-            final isFocusedLine = focusLine == lineNum;
-            return LineItem(
-              lineContents: widget.lines[index],
-              pausedFrame: isPausedLine ? pausedFrame : null,
-              focused: isPausedLine || isFocusedLine,
-              searchMatches: _searchMatchesForLine(index),
-              activeSearchMatch:
-                  activeSearch?.position.line == index ? activeSearch : null,
-            );
-          },
-        );
-      },
+    return SelectionArea(
+      child: ListView.builder(
+        controller: widget.scrollController,
+        physics: const ClampingScrollPhysics(),
+        itemExtent: CodeView.rowHeight,
+        itemCount: widget.lines.length + profileInformationHeaderOffset,
+        itemBuilder: (context, index) {
+          if (widget.showProfileInformation && index == 0) {
+            return SizedBox(height: CodeView.rowHeight);
+          }
+          final dataIndex = index - profileInformationHeaderOffset;
+          final lineNum = dataIndex + 1;
+          final isPausedLine = pausedLine == lineNum;
+          return ValueListenableBuilder<int>(
+            valueListenable: widget.codeViewController.focusLine,
+            builder: (context, focusLine, _) {
+              final isFocusedLine = focusLine == lineNum;
+              return LineItem(
+                lineContents: widget.lines[dataIndex],
+                pausedFrame: isPausedLine ? pausedFrame : null,
+                focused: isPausedLine || isFocusedLine,
+                searchMatches: _searchMatchesForLine(
+                  dataIndex,
+                ),
+                activeSearchMatch: activeSearch?.position.line == dataIndex
+                    ? activeSearch
+                    : null,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -1112,13 +1157,13 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
 
 class LineItem extends StatefulWidget {
   const LineItem({
-    Key? key,
+    super.key,
     required this.lineContents,
     this.pausedFrame,
     this.focused = false,
     this.searchMatches,
     this.activeSearchMatch,
-  }) : super(key: key);
+  });
 
   static double get _hoverWidth => scaleByFontFactor(400.0);
 
@@ -1138,7 +1183,7 @@ class _LineItemState extends State<LineItem>
     required PointerEvent event,
     required bool Function() isHoverStale,
   }) async {
-    if (!serviceManager.isMainIsolatePaused) return null;
+    if (!serviceConnection.serviceManager.isMainIsolatePaused) return null;
 
     final word = wordForHover(
       event.localPosition.dx,
@@ -1148,7 +1193,8 @@ class _LineItemState extends State<LineItem>
     if (word != '') {
       try {
         final response = await evalService.evalAtCurrentFrame(word);
-        final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+        final isolateRef = serviceConnection
+            .serviceManager.isolateManager.selectedIsolate.value;
         if (response is! InstanceRef) return null;
         final variable = DartObjectNode.fromValue(
           value: response,
@@ -1190,7 +1236,7 @@ class _LineItemState extends State<LineItem>
     Widget child;
     final column = widget.pausedFrame?.column;
     if (column != null) {
-      final breakpointColor = theme.colorScheme.breakpointColor;
+      final breakpointColor = theme.colorScheme.primary;
       final widthToCurrentColumn = calculateTextSpanWidth(
         truncateTextSpan(widget.lineContents, column - 1),
       );
@@ -1242,9 +1288,8 @@ class _LineItemState extends State<LineItem>
         enabled: () => true,
         asyncTimeout: 100,
         asyncGenerateHoverCardData: _generateHoverCardData,
-        child: SelectableText.rich(
+        child: Text.rich(
           searchAwareLineContents(),
-          scrollPhysics: const NeverScrollableScrollPhysics(),
           maxLines: 1,
         ),
       );
@@ -1494,17 +1539,20 @@ Future<String?> fetchScriptLocationFullFilePath(
   String? filePath;
   final packagePath = controller.scriptLocation.value!.scriptRef.uri;
   if (packagePath != null) {
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
-    filePath = serviceManager.resolvedUriManager.lookupFileUri(
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id!;
+    filePath =
+        serviceConnection.serviceManager.resolvedUriManager.lookupFileUri(
       isolateId,
       packagePath,
     );
     if (filePath == null) {
-      await serviceManager.resolvedUriManager.fetchFileUris(
+      await serviceConnection.serviceManager.resolvedUriManager.fetchFileUris(
         isolateId,
         [packagePath],
       );
-      filePath = serviceManager.resolvedUriManager.lookupFileUri(
+      filePath =
+          serviceConnection.serviceManager.resolvedUriManager.lookupFileUri(
         isolateId,
         packagePath,
       );
@@ -1553,13 +1601,13 @@ class GoToLineDialog extends StatelessWidget {
         children: [
           TextField(
             autofocus: true,
-            onSubmitted: (value) {
+            onSubmitted: (value) async {
               final scriptRef =
                   _codeViewController.scriptLocation.value?.scriptRef;
               if (value.isNotEmpty && scriptRef != null) {
                 Navigator.of(context).pop(dialogDefaultContext);
                 final line = int.parse(value);
-                _codeViewController.showScriptLocation(
+                await _codeViewController.showScriptLocation(
                   ScriptLocation(
                     scriptRef,
                     location: SourcePosition(line: line, column: 0),
@@ -1617,4 +1665,17 @@ class PositionedPopup extends StatelessWidget {
       },
     );
   }
+}
+
+extension CodeViewColorScheme on ColorScheme {
+  Color get performanceLowImpactColor => const Color(0xFF5CB246);
+  Color get performanceMediumImpactColor => const Color(0xFFF7AC2A);
+  Color get performanceHighImpactColor => const Color(0xFFC94040);
+
+  Color get coverageHitColor => performanceLowImpactColor;
+  Color get coverageMissColor => performanceHighImpactColor;
+
+  // The default text color for dark mode is difficult to read when drawn on
+  // top of the profiler and coverage gutter items.
+  Color get coverageAndPerformanceTextColor => lightColorScheme.onSurface;
 }

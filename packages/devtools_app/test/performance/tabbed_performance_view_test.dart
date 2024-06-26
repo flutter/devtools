@@ -5,33 +5,33 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
+import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/perfetto.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
-import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/ui/tab.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../test_infra/test_data/performance.dart';
+import '../test_infra/test_data/performance/sample_performance_data.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late MockPerformanceController controller;
-  late MockFlutterFramesController mockFlutterFramesController;
-  late MockTimelineEventsController mockTimelineEventsController;
 
-  Future<void> setUpServiceManagerWithTimeline(
-    Map<String, dynamic> timelineJson,
-  ) async {
-    fakeServiceManager = FakeServiceManager(
+  Future<void> setUpServiceManagerWithTimeline() async {
+    fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
-        timelineData: vm_service.Timeline.parse(timelineJson)!,
+        timelineData: perfettoVmTimeline,
       ),
     );
-    final app = fakeServiceManager.connectedApp!;
+    final app = fakeServiceConnection.serviceManager.connectedApp!;
     mockConnectedApp(
       app,
       isFlutterApp: true,
@@ -39,45 +39,43 @@ void main() {
       isWebApp: false,
     );
     when(app.flutterVersionNow).thenReturn(
-      FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
+      FlutterVersion.parse(
+        (await fakeServiceConnection.serviceManager.flutterVersion).json!,
+      ),
     );
 
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(OfflineModeController, OfflineModeController());
-    when(serviceManager.connectedApp!.isDartWebApp)
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
+    setGlobal(OfflineDataController, OfflineDataController());
+    when(serviceConnection.serviceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
   }
 
   group('TabbedPerformanceView', () {
     setUp(() async {
-      await setUpServiceManagerWithTimeline(testTimelineJson);
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      await setUpServiceManagerWithTimeline();
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(NotificationService, NotificationService());
       controller = createMockPerformanceControllerWithDefaults();
-      mockTimelineEventsController = MockTimelineEventsController();
-      when(mockTimelineEventsController.data).thenReturn(controller.data);
-      when(mockTimelineEventsController.useLegacyTraceViewer)
-          .thenReturn(ValueNotifier<bool>(true));
+
+      final mockTimelineEventsController =
+          controller.timelineEventsController as MockTimelineEventsController;
       when(mockTimelineEventsController.status).thenReturn(
         const FixedValueListenable<EventsControllerStatus>(
           EventsControllerStatus.ready,
         ),
       );
-      when(mockTimelineEventsController.legacyController)
-          .thenReturn(LegacyTimelineEventsController(controller));
-      when(controller.timelineEventsController)
-          .thenReturn(mockTimelineEventsController);
       when(mockTimelineEventsController.isActiveFeature).thenReturn(false);
-      mockFlutterFramesController = MockFlutterFramesController();
-      when(mockFlutterFramesController.displayRefreshRate)
-          .thenReturn(const FixedValueListenable<double>(defaultRefreshRate));
+
+      final mockFlutterFramesController =
+          controller.flutterFramesController as MockFlutterFramesController;
       when(mockFlutterFramesController.selectedFrame)
           .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
       when(mockFlutterFramesController.isActiveFeature).thenReturn(false);
-      when(controller.flutterFramesController)
-          .thenReturn(mockFlutterFramesController);
     });
 
     Future<void> pumpView(
@@ -111,15 +109,16 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline({});
+          await setUpServiceManagerWithTimeline();
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
 
           expect(find.text('Timeline Events'), findsOneWidget);
           expect(find.text('Frame Analysis'), findsOneWidget);
           expect(find.text('Raster Stats'), findsOneWidget);
+          expect(find.text('Rebuild Stats'), findsOneWidget);
         });
       },
     );
@@ -129,18 +128,17 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline({});
-          final frame0 = testFrame0.shallowCopy()
-            ..setEventFlow(animatorBeginFrameEvent)
-            ..setEventFlow(goldenRasterTimelineEvent);
-
-          when(mockFlutterFramesController.selectedFrame)
-              .thenReturn(FixedValueListenable<FlutterFrame?>(frame0));
+          await setUpServiceManagerWithTimeline();
+          final frame = FlutterFrame6.frame;
+          final framesController =
+              controller.flutterFramesController as MockFlutterFramesController;
+          when(framesController.selectedFrame)
+              .thenReturn(FixedValueListenable<FlutterFrame?>(frame));
 
           await pumpView(tester, performanceController: controller);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
 
           // The frame analysis tab should be selected by default.
           expect(find.byType(FlutterFrameAnalysisView), findsOneWidget);
@@ -153,11 +151,11 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline({});
+          await setUpServiceManagerWithTimeline();
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
 
           // The frame analysis tab should be selected by default.
           expect(
@@ -173,11 +171,11 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline({});
+          await setUpServiceManagerWithTimeline();
           await pumpView(tester);
           await tester.pumpAndSettle();
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
 
           await tester.tap(find.text('Raster Stats'));
           await tester.pumpAndSettle();
@@ -190,27 +188,42 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
+      'builds content for Rebuild Stats tab',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.runAsync(() async {
+          await setUpServiceManagerWithTimeline();
+          await pumpView(tester);
+          await tester.pumpAndSettle();
+          expect(find.byType(AnalyticsTabbedView), findsOneWidget);
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
+
+          await tester.tap(find.text('Rebuild Stats'));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(RebuildStatsView), findsOneWidget);
+        });
+      },
+    );
+
+    testWidgetsWithWindowSize(
       'builds content for Timeline Events tab',
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline({});
+          await setUpServiceManagerWithTimeline();
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+          expect(find.byType(DevToolsTab), findsNWidgets(4));
 
           await tester.tap(find.text('Timeline Events'));
           await tester.pumpAndSettle();
 
-          expect(find.byType(TraceCategoriesButton), findsOneWidget);
+          expect(find.byType(TimelineSettingsButton), findsOneWidget);
           expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
-          expect(find.byType(FlameChartHelpButton), findsOneWidget);
-          expect(
-            find.byType(SearchField<LegacyTimelineEventsController>),
-            findsOneWidget,
-          );
           expect(find.byType(TimelineEventsTabView), findsOneWidget);
+          expect(find.byType(EmbeddedPerfetto), findsOneWidget);
         });
       },
     );
@@ -220,8 +233,8 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline({});
-          final app = fakeServiceManager.connectedApp!;
+          await setUpServiceManagerWithTimeline();
+          final app = fakeServiceConnection.serviceManager.connectedApp!;
           mockConnectedApp(
             app,
             isFlutterApp: false,

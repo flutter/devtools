@@ -5,16 +5,19 @@
 // ignore_for_file: avoid_print
 
 @TestOn('vm')
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     show ConsoleAPIEvent, RemoteObject;
 
-const bool verboseTesting = false;
+const verboseTesting = false;
 
 late WebBuildFixture webBuildFixture;
 late BrowserManager browserManager;
@@ -30,7 +33,7 @@ class DevtoolsManager {
     Uri? overrideUri,
     bool waitForConnection = true,
   }) async {
-    final Uri baseAppUri = baseUri.resolve(
+    final baseAppUri = baseUri.resolve(
       'index.html?uri=${Uri.encodeQueryComponent(appFixture.serviceUri.toString())}',
     );
     await tabInstance.tab.navigate('${overrideUri ?? baseAppUri}');
@@ -40,7 +43,7 @@ class DevtoolsManager {
       waitForConnection
           ? tabInstance.onEvent
               .firstWhere((msg) => msg.event == 'app.devToolsReady')
-          : Future.value(),
+          : Future<void>.value(),
       tabInstance.getBrowserChannel(),
     ]);
   }
@@ -50,7 +53,7 @@ class DevtoolsManager {
   }
 
   Future<String?> currentPageId() async {
-    final AppResponse response = await tabInstance.send('currentPageId');
+    final response = await tabInstance.send('currentPageId');
     return response.result as String?;
   }
 }
@@ -59,13 +62,13 @@ class BrowserManager {
   BrowserManager._(this.chromeProcess, this.tab);
 
   static Future<BrowserManager> create() async {
-    final Chrome? chrome = Chrome.locate();
+    final chrome = Chrome.locate();
     if (chrome == null) {
       throw 'unable to locate Chrome';
     }
 
-    final ChromeProcess chromeProcess = await chrome.start();
-    final ChromeTab tab = (await chromeProcess.getFirstTab())!;
+    final chromeProcess = await chrome.start();
+    final tab = (await chromeProcess.getFirstTab())!;
 
     await tab.connect();
 
@@ -76,12 +79,11 @@ class BrowserManager {
   final ChromeTab tab;
 
   Future<BrowserTabInstance> createNewTab() async {
-    final String targetId = await this.tab.createNewTarget();
+    final targetId = await this.tab.createNewTarget();
 
     await delay();
 
-    final ChromeTab tab =
-        (await chromeProcess.connectToTabId('localhost', targetId))!;
+    final tab = (await chromeProcess.connectToTabId('localhost', targetId))!;
     await tab.connect(verbose: true);
 
     await delay();
@@ -104,8 +106,8 @@ class BrowserTabInstance {
         .where((ConsoleAPIEvent event) => event.type == 'log')
         .listen((ConsoleAPIEvent event) {
       if (event.args.isNotEmpty) {
-        final RemoteObject message = event.args.first;
-        final String value = '${message.value}';
+        final message = event.args.first;
+        final value = '${message.value}';
         if (value.startsWith('[') && value.endsWith(']')) {
           try {
             final msg = jsonDecode(value.substring(1, value.length - 1));
@@ -125,15 +127,15 @@ class BrowserTabInstance {
   RemoteObject? _remote;
 
   Future<RemoteObject> getBrowserChannel() async {
-    final DateTime start = DateTime.now();
-    final DateTime end = start.add(const Duration(seconds: 30));
+    final start = DateTime.now();
+    final end = start.add(const Duration(seconds: 30));
 
     while (true) {
       try {
         return await _getAppChannelObject();
       } catch (e) {
         if (end.isBefore(DateTime.now())) {
-          final Duration duration = DateTime.now().difference(start);
+          final duration = DateTime.now().difference(start);
           print('timeout getting the browser channel object ($duration)');
           rethrow;
         }
@@ -149,20 +151,18 @@ class BrowserTabInstance {
 
   int _nextId = 1;
 
-  final Map<int, Completer<AppResponse>> _completers =
-      <int, Completer<AppResponse>>{};
+  final _completers = <int, Completer<AppResponse>>{};
 
-  final StreamController<AppEvent> _eventStream =
-      StreamController<AppEvent>.broadcast();
+  final _eventStream = StreamController<AppEvent>.broadcast();
 
   Stream<AppEvent> get onEvent => _eventStream.stream;
 
   Future<AppResponse> send(String method, [Object? params]) async {
     _remote ??= await _getAppChannelObject();
 
-    final int id = _nextId++;
+    final id = _nextId++;
 
-    final Completer<AppResponse> completer = Completer<AppResponse>();
+    final completer = Completer<AppResponse>();
     _completers[id] = completer;
 
     try {
@@ -197,8 +197,8 @@ class BrowserTabInstance {
 
     if (message.containsKey('id')) {
       // handle a response: {id: 1}
-      final AppResponse response = AppResponse(message);
-      final Completer<AppResponse> completer = _completers.remove(response.id)!;
+      final response = AppResponse(message);
+      final completer = _completers.remove(response.id)!;
       if (response.hasError) {
         completer.completeError(response.error);
       } else {
@@ -263,7 +263,7 @@ class WebBuildFixture {
     bool release = false,
     bool verbose = false,
   }) async {
-    final List<String> cliArgs = [
+    final cliArgs = <String>[
       'pub',
       'run',
       'build_runner',
@@ -277,7 +277,7 @@ class WebBuildFixture {
 
     final process = await _runFlutter(cliArgs);
 
-    final Completer<String> hasUrl = Completer<String>();
+    final hasUrl = Completer<String>();
 
     _toLines(process.stderr).listen((String line) {
       if (verbose || hasUrl.isCompleted) {
@@ -302,16 +302,16 @@ class WebBuildFixture {
 
       // Serving `web` on http://localhost:8080
       if (line.contains('Serving `web`')) {
-        if (!hasUrl.isCompleted) {
-          final String url = line.substring(line.indexOf('http://'));
-          hasUrl.complete(url);
-        } else {
-          print('Ignoring "Serving..." notification because already completed');
-        }
+        hasUrl.safeComplete(
+          line.substring(line.indexOf('http://')),
+          () => print(
+            'Ignoring "Serving..." notification because already completed',
+          ),
+        );
       }
     });
 
-    final String url = await hasUrl.future;
+    final url = await hasUrl.future;
 
     await delay();
 
@@ -326,7 +326,7 @@ class WebBuildFixture {
     final pubGet = await _runFlutter(['pub', 'get']);
     expect(await pubGet.exitCode, 0);
 
-    final List<String> cliArgs = [];
+    final cliArgs = <String>[];
     String commandName;
     commandName = 'flutter build web';
     cliArgs.addAll([
@@ -339,7 +339,7 @@ class WebBuildFixture {
 
     final process = await _runFlutter(cliArgs, verbose: verbose);
 
-    final Completer<void> buildFinished = Completer<void>();
+    final buildFinished = Completer<void>();
 
     _toLines(process.stderr).listen((String line) {
       // TODO(https://github.com/flutter/devtools/issues/2477): this is a
@@ -385,7 +385,7 @@ class WebBuildFixture {
       }),
     );
 
-    await buildFinished.future.catchError((e) {
+    await buildFinished.future.catchError((Object? e) {
       fail('Build failed: $e');
     });
 
@@ -413,8 +413,7 @@ class WebBuildFixture {
     // Remove the DART_VM_OPTIONS env variable from the child process, so the
     // Dart VM doesn't try and open a service protocol port if
     // 'DART_VM_OPTIONS: --enable-vm-service:63990' was passed in.
-    final Map<String, String> environment =
-        Map<String, String>.from(Platform.environment);
+    final environment = Map<String, String>.from(Platform.environment);
     if (environment.containsKey('DART_VM_OPTIONS')) {
       environment['DART_VM_OPTIONS'] = '';
     }
@@ -424,7 +423,7 @@ class WebBuildFixture {
     // directly to prevent Windows-based test runs getting killed but leaving
     // the pub process behind. Something similar might be needed here.
     // See here for more information:
-    // https://github.com/flutter/flutter/wiki/The-flutter-tool#debugging-the-flutter-command-line-tool
+    // https://github.com/flutter/flutter/blob/master/docs/tool/README.md#debugging-the-flutter-command-line-tool
     final executable = Platform.isWindows ? 'flutter.bat' : 'flutter';
 
     if (verbose) {

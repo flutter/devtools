@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 /// This library contains code pulled from dart:io that is not platform specific.
-
-library http;
+library;
 
 part '_http_cookies.dart';
 part '_http_date.dart';

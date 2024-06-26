@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-final Map<String, dynamic> simpleCpuProfile1 = {
+final simpleCpuProfile1 = <String, Object?>{
   'type': '_CpuProfileTimeline',
   'samplePeriod': 50,
   'stackDepth': 128,
@@ -13,7 +13,7 @@ final Map<String, dynamic> simpleCpuProfile1 = {
   'traceEvents': _profileTraceEvents,
 };
 
-final _profileStackFrames = {
+final _profileStackFrames = <String, Object?>{
   '140357727781376-1': {
     'category': 'Dart',
     'name': 'A',
@@ -56,7 +56,7 @@ final _profileStackFrames = {
   },
 };
 
-final List<Map<String, dynamic>> _profileTraceEvents = [
+final _profileTraceEvents = <Map<String, Object?>>[
   {
     'ph': 'P',
     'name': '',
@@ -189,7 +189,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
   },
 ];
 
-const String simpleProfile1Golden = '''
+const simpleProfile1Golden = '''
   A - children: 2 - excl: 1 - incl: 10
     B - children: 1 - excl: 3 - incl: 7
       C - children: 0 - excl: 4 - incl: 4
@@ -197,7 +197,7 @@ const String simpleProfile1Golden = '''
       C - children: 0 - excl: 2 - incl: 2
 ''';
 
-const String simpleProfile1GroupedByTagGolden = '''
+const simpleProfile1GroupedByTagGolden = '''
   all - children: 2 - excl: 0 - incl: 10
     userTagA - children: 1 - excl: 0 - incl: 3
       A - children: 1 - excl: 1 - incl: 3
@@ -209,7 +209,7 @@ const String simpleProfile1GroupedByTagGolden = '''
           C - children: 0 - excl: 4 - incl: 4
 ''';
 
-const String simpleProfile1MethodTableGolden = '''
+const simpleProfile1MethodTableGolden = '''
 A - (package:my_app/src/a.dart:111) (10 samples)
   Callers:
     []

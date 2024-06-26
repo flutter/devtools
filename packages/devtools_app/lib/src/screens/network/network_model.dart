@@ -2,17 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
-abstract class NetworkRequest with SearchableDataMixin {
-  NetworkRequest(this._timelineMicrosBase);
-
-  final int _timelineMicrosBase;
-
+abstract class NetworkRequest with ChangeNotifier, SearchableDataMixin {
   String get method;
 
   String get uri;
@@ -49,10 +45,6 @@ abstract class NetworkRequest with SearchableDataMixin {
     return 'Duration: $text';
   }
 
-  int timelineMicrosecondsSinceEpoch(int micros) {
-    return _timelineMicrosBase + micros;
-  }
-
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return uri.caseInsensitiveContains(regExpSearch);
@@ -62,7 +54,7 @@ abstract class NetworkRequest with SearchableDataMixin {
   String toString() => '$method $uri';
 
   @override
-  bool operator ==(Object? other) {
+  bool operator ==(Object other) {
     return other is NetworkRequest &&
         runtimeType == other.runtimeType &&
         startTimestamp == other.startTimestamp &&
@@ -91,9 +83,22 @@ abstract class NetworkRequest with SearchableDataMixin {
 }
 
 class WebSocket extends NetworkRequest {
-  WebSocket(this._socket, int timelineMicrosBase) : super(timelineMicrosBase);
+  WebSocket(this._socket, this._timelineMicrosBase);
 
-  final SocketStatistic _socket;
+  int _timelineMicrosBase;
+
+  SocketStatistic _socket;
+
+  int timelineMicrosecondsSinceEpoch(int micros) {
+    return _timelineMicrosBase + micros;
+  }
+
+  void update(WebSocket other) {
+    _socket = other._socket;
+    _timelineMicrosBase = other._timelineMicrosBase;
+    notifyListeners();
+  }
+
   @override
   String get id => _socket.id;
 
@@ -175,31 +180,8 @@ class WebSocket extends NetworkRequest {
   bool get inProgress => false;
 
   @override
-  bool operator ==(Object? other) => other is WebSocket && id == other.id;
+  bool operator ==(Object other) => other is WebSocket && id == other.id;
 
   @override
   int get hashCode => id.hashCode;
-}
-
-/// Contains all state relevant to completed and in-progress network requests.
-class NetworkRequests {
-  NetworkRequests({
-    this.requests = const [],
-    this.invalidHttpRequests = const [],
-  });
-
-  /// A list of network requests.
-  ///
-  /// Individual requests in this list can be either completed or in-progress.
-  List<NetworkRequest> requests;
-
-  /// A list of invalid HTTP requests received.
-  ///
-  /// These are requests that have completed but do not contain all the required
-  /// information to display normally in the UI.
-  List<DartIOHttpRequestData> invalidHttpRequests;
-
-  void clear() {
-    requests.clear();
-  }
 }

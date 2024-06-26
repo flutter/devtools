@@ -3,15 +3,26 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
+import 'package:io/io.dart';
 
 import '../model.dart';
 import '../utils.dart';
 
+const _fatalInfosArg = 'fatal-infos';
+
 class AnalyzeCommand extends Command {
+  AnalyzeCommand() {
+    argParser.addFlag(
+      'fatal-infos',
+      help: 'Sets the "fatal-infos" flag for the dart analyze command',
+      defaultsTo: true,
+      negatable: true,
+    );
+  }
+
   @override
   String get name => 'analyze';
 
@@ -20,53 +31,39 @@ class AnalyzeCommand extends Command {
 
   @override
   Future run() async {
-    final sdk = FlutterSdk.getSdk();
-    if (sdk == null) {
-      print('Unable to locate a Flutter sdk.');
-      return 1;
-    }
-
     final log = Logger.standard();
-    final repo = DevToolsRepo.getInstance()!;
+    final repo = DevToolsRepo.getInstance();
+    final processManager = ProcessManager();
     final packages = repo.getPackages();
+    final fatalInfos = argResults![_fatalInfosArg] as bool;
 
     log.stdout('Running flutter analyze...');
 
     int failureCount = 0;
 
-    for (Package p in packages) {
+    for (final p in packages) {
       if (!p.hasAnyDartCode) {
         continue;
       }
 
       final progress = log.progress('  ${p.relativePath}');
 
-      final process = await Process.start(
-        sdk.dartToolPath,
-        ['analyze', '--fatal-infos'],
+      final process = await processManager.runProcess(
+        CliCommand.dart(
+          ['analyze', if (fatalInfos) '--fatal-infos'],
+          // Run all so we can see the full set of results instead of stopping
+          // on the first error.
+          throwOnException: false,
+        ),
         workingDirectory: p.packagePath,
       );
-      final Stream<List<int>> stdout = process.stdout;
-      final Stream<List<int>> stderr = process.stderr;
 
-      final int exitCode = await process.exitCode;
-
-      if (exitCode == 0) {
+      if (process.exitCode == 0) {
         progress.finish(showTiming: true);
       } else {
         failureCount++;
 
-        // Display stderr when there's an error.
-        final List<List<int>> out = await stdout.toList();
-        final stdOutput = convertProcessOutputToString(out, '    ');
-
-        final List<List<int>> err = await stderr.toList();
-        final errorOutput = convertProcessOutputToString(err, '    ');
-
         progress.finish(message: 'failed');
-
-        log.stderr(stdOutput);
-        log.stderr(log.ansi.error(errorOutput));
       }
     }
 

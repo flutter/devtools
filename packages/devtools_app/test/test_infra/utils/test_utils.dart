@@ -7,18 +7,42 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
-SyncTimelineEvent testSyncTimelineEvent(TraceEventWrapper eventWrapper) =>
-    SyncTimelineEvent(eventWrapper);
+/// Creates a [FlutterTimelineEvent] for testing that mocks the
+/// contained [PerfettoTrackEvents].
+FlutterTimelineEvent testTimelineEvent({
+  required String name,
+  required TimelineEventType type,
+  required int startMicros,
+  required int endMicros,
+  required Map<String, Object?> args,
+  required Map<String, Object?> endArgs,
+}) {
+  final mockFirstTrackEvent = MockPerfettoTrackEvent();
+  when(mockFirstTrackEvent.name).thenReturn(name);
+  when(mockFirstTrackEvent.timelineEventType).thenReturn(type);
+  when(mockFirstTrackEvent.args).thenReturn(args);
+  when(mockFirstTrackEvent.timestampMicros).thenReturn(startMicros);
+  final frameNumberAsString =
+      args[PerfettoTrackEvent.frameNumberArg] as String?;
+  final frameNumber =
+      frameNumberAsString != null ? int.tryParse(frameNumberAsString) : null;
+  when(mockFirstTrackEvent.flutterFrameNumber).thenReturn(frameNumber);
+  final devToolsTag = args[PerfettoTrackEvent.devtoolsTagArg] as String?;
+  final isShaderEvent = devToolsTag == PerfettoTrackEvent.shadersArg;
+  when(mockFirstTrackEvent.isShaderEvent).thenReturn(isShaderEvent);
 
-TraceEvent testTraceEvent(Map<String, dynamic> json) =>
-    TraceEvent(jsonDecode(jsonEncode(json)));
+  final mockEndTrackEvent = MockPerfettoTrackEvent();
+  when(mockEndTrackEvent.timelineEventType).thenReturn(type);
+  when(mockEndTrackEvent.args).thenReturn(endArgs);
+  when(mockEndTrackEvent.timestampMicros).thenReturn(endMicros);
 
-int _testTimeReceived = 0;
-TraceEventWrapper testTraceEventWrapper(Map<String, dynamic> json) {
-  return TraceEventWrapper(testTraceEvent(json), _testTimeReceived++);
+  return FlutterTimelineEvent(mockFirstTrackEvent)
+    ..addEndTrackEvent(mockEndTrackEvent);
 }
 
 /// Overrides the system's clipboard behaviour so that strings sent to the
@@ -27,7 +51,7 @@ TraceEventWrapper testTraceEventWrapper(Map<String, dynamic> json) {
 /// [clipboardContentsCallback]  when Clipboard.setData is triggered, the text
 /// contents will be passed to [clipboardContentsCallback]
 void setupClipboardCopyListener({
-  required Function(String?) clipboardContentsCallback,
+  required void Function(String?) clipboardContentsCallback,
 }) {
   // This intercepts the Clipboard.setData SystemChannel message,
   // and stores the contents that were (attempted) to be copied.
@@ -37,7 +61,7 @@ void setupClipboardCopyListener({
     (MethodCall call) {
       switch (call.method) {
         case 'Clipboard.setData':
-          clipboardContentsCallback(call.arguments['text']);
+          clipboardContentsCallback((call.arguments as Map)['text']);
           break;
         case 'Clipboard.getData':
           return Future.value(<String, Object?>{});

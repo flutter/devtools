@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 
 import 'missing_material_error.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -23,12 +25,12 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -47,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
               makeDemoEntry(
                 context,
                 'Missing Material Example',
-                MissingMaterialError(),
+                const MissingMaterialError(),
               ),
             ],
           ),
@@ -57,12 +59,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget makeDemoEntry(BuildContext context, String title, Widget nextScreen) {
-    final navigateToDemo = () async {
+    void navigateToDemo() async {
       await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => nextScreen),
       );
-    };
+    }
+
     navigateCallbacks[title] = navigateToDemo;
     return Row(
       children: <Widget>[
@@ -79,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-Map<String, Function> navigateCallbacks = {};
+Map<String, void Function()> navigateCallbacks = {};
 
 // Hook to navigate to a specific screen.
 void navigateToScreen(String title) {

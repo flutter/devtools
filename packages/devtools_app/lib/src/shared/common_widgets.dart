@@ -6,69 +6,33 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/debugger/debugger_controller.dart';
-import '../screens/inspector/layout_explorer/ui/theme.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
-import 'config_specific/launch_url/launch_url.dart';
+import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import 'console/widgets/expandable_variable.dart';
 import 'diagnostics/dart_object_node.dart';
 import 'diagnostics/tree_builder.dart';
-import 'dialogs.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose.dart';
 import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
-import 'theme.dart';
-import 'ui/label.dart';
 import 'utils.dart';
-
-const tooltipWait = Duration(milliseconds: 500);
-const tooltipWaitLong = Duration(milliseconds: 1000);
-
-/// The width of the package:flutter_test debugger device.
-const debuggerDeviceWidth = 800.0;
-
-const defaultDialogRadius = 20.0;
-double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
 
 double get assumedMonospaceCharacterWidth =>
     scaleByFontFactor(_assumedMonospaceCharacterWidth);
 double _assumedMonospaceCharacterWidth = 9.0;
+
 @visibleForTesting
 void setAssumedMonospaceCharacterWidth(double width) {
   _assumedMonospaceCharacterWidth = width;
-}
-
-/// Convenience [Divider] with [Padding] that provides a good divider in forms.
-class PaddedDivider extends StatelessWidget {
-  const PaddedDivider({
-    Key? key,
-    this.padding = const EdgeInsets.only(bottom: 10.0),
-  }) : super(key: key);
-
-  const PaddedDivider.thin({super.key})
-      : padding = const EdgeInsets.only(bottom: 4.0);
-
-  PaddedDivider.vertical({super.key, double padding = densePadding})
-      : padding = EdgeInsets.symmetric(vertical: padding);
-
-  /// The padding to place around the divider.
-  final EdgeInsets padding;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: const Divider(thickness: 1.0),
-    );
-  }
 }
 
 /// Creates a semibold version of [style].
@@ -101,28 +65,30 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
   );
 }
 
-/// A button with default DevTools styling and analytics handling.
-///
-/// * `onPressed`: The callback to be called upon pressing the button.
-/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
-///    omitted.
-class DevToolsButton extends StatelessWidget {
-  const DevToolsButton({
-    Key? key,
-    required this.icon,
-    required this.onPressed,
-    required this.gaScreen,
-    required this.gaSelection,
-    this.label,
-    this.color,
-    this.minScreenWidthForTextBeforeScaling,
-    this.elevatedButton = false,
-    this.tooltip,
-    this.tooltipPadding,
-    this.outlined = true,
-  }) : super(key: key);
+class GaDevToolsButton extends DevToolsButton {
+  GaDevToolsButton({
+    super.key,
+    required VoidCallback? onPressed,
+    required String gaScreen,
+    required String gaSelection,
+    super.icon,
+    super.label,
+    super.tooltip,
+    super.color,
+    super.minScreenWidthForTextBeforeScaling,
+    super.elevated,
+    super.outlined,
+    super.tooltipPadding,
+  }) : super(
+          onPressed: onPressed != null
+              ? () {
+                  ga.select(gaScreen, gaSelection);
+                  onPressed();
+                }
+              : null,
+        );
 
-  factory DevToolsButton.iconOnly({
+  factory GaDevToolsButton.iconOnly({
     required IconData icon,
     required String gaScreen,
     required String gaSelection,
@@ -130,128 +96,19 @@ class DevToolsButton extends StatelessWidget {
     VoidCallback? onPressed,
     bool outlined = true,
   }) {
-    return DevToolsButton(
+    return GaDevToolsButton(
       icon: icon,
-      outlined: outlined,
       gaScreen: gaScreen,
       gaSelection: gaSelection,
+      outlined: outlined,
       tooltip: tooltip,
       onPressed: onPressed,
     );
   }
-
-  // TODO(kenz): allow icon to be nullable if this is a text only button.
-  final IconData icon;
-
-  final String? label;
-
-  final double? minScreenWidthForTextBeforeScaling;
-
-  final VoidCallback? onPressed;
-
-  final Color? color;
-
-  /// Whether this icon label button should use an elevated button style.
-  final bool elevatedButton;
-
-  final String? tooltip;
-
-  final EdgeInsetsGeometry? tooltipPadding;
-
-  final bool outlined;
-
-  final String gaScreen;
-
-  final String gaSelection;
-
-  @override
-  Widget build(BuildContext context) {
-    final onPressedHandler = onPressed != null
-        ? () {
-            ga.select(gaScreen, gaSelection);
-            onPressed!();
-          }
-        : null;
-
-    if (label == null) {
-      return SizedBox(
-        // This is required to force the button size.
-        height: defaultButtonHeight,
-        width: defaultButtonHeight,
-        child: maybeWrapWithTooltip(
-          tooltip: tooltip,
-          child: outlined
-              ? IconButton.outlined(
-                  onPressed: onPressedHandler,
-                  iconSize: actionsIconSize,
-                  icon: Icon(icon),
-                )
-              : IconButton(
-                  onPressed: onPressedHandler,
-                  iconSize: actionsIconSize,
-                  icon: Icon(
-                    icon,
-                  ),
-                ),
-        ),
-      );
-    }
-    final colorScheme = Theme.of(context).colorScheme;
-    var textColor = color;
-    if (textColor == null && elevatedButton) {
-      textColor =
-          onPressed == null ? colorScheme.onSurface : colorScheme.onPrimary;
-    }
-    final iconLabel = MaterialIconLabel(
-      label: label!,
-      iconData: icon,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
-      color: textColor,
-    );
-    if (elevatedButton) {
-      return maybeWrapWithTooltip(
-        tooltip: tooltip,
-        tooltipPadding: tooltipPadding,
-        child: ElevatedButton(
-          onPressed: onPressedHandler,
-          child: iconLabel,
-        ),
-      );
-    }
-    // TODO(kenz): this SizedBox wrapper should be unnecessary once
-    // https://github.com/flutter/flutter/issues/79894 is fixed.
-    return maybeWrapWithTooltip(
-      tooltip: tooltip,
-      tooltipPadding: tooltipPadding,
-      child: SizedBox(
-        height: defaultButtonHeight,
-        width: !includeText(context, minScreenWidthForTextBeforeScaling)
-            ? buttonMinWidth
-            : null,
-        child: outlined
-            ? OutlinedButton(
-                style: denseAwareOutlinedButtonStyle(
-                  context,
-                  minScreenWidthForTextBeforeScaling,
-                ),
-                onPressed: onPressedHandler,
-                child: iconLabel,
-              )
-            : TextButton(
-                onPressed: onPressedHandler,
-                style: denseAwareTextButtonStyle(
-                  context,
-                  minScreenWidthForTextBeforeScaling,
-                ),
-                child: iconLabel,
-              ),
-      ),
-    );
-  }
 }
 
-class PauseButton extends DevToolsButton {
-  const PauseButton({
+class PauseButton extends GaDevToolsButton {
+  PauseButton({
     super.key,
     required super.tooltip,
     required super.onPressed,
@@ -266,8 +123,8 @@ class PauseButton extends DevToolsButton {
         );
 }
 
-class ResumeButton extends DevToolsButton {
-  const ResumeButton({
+class ResumeButton extends GaDevToolsButton {
+  ResumeButton({
     super.key,
     required super.tooltip,
     required super.onPressed,
@@ -337,8 +194,8 @@ class PauseResumeButtonGroup extends StatelessWidget {
   }
 }
 
-class ClearButton extends DevToolsButton {
-  const ClearButton({
+class ClearButton extends GaDevToolsButton {
+  ClearButton({
     super.key,
     super.color,
     super.tooltip = 'Clear',
@@ -352,8 +209,8 @@ class ClearButton extends DevToolsButton {
   }) : super(icon: Icons.block, label: iconOnly ? null : label);
 }
 
-class RefreshButton extends DevToolsButton {
-  const RefreshButton({
+class RefreshButton extends GaDevToolsButton {
+  RefreshButton({
     super.key,
     String label = 'Refresh',
     super.tooltip,
@@ -376,6 +233,38 @@ class ToolbarRefresh extends ToolbarAction {
   });
 }
 
+class StartStopRecordingButton extends GaDevToolsButton {
+  StartStopRecordingButton({
+    super.key,
+    required this.recording,
+    required super.onPressed,
+    required super.gaScreen,
+    required super.gaSelection,
+    super.minScreenWidthForTextBeforeScaling,
+    String? tooltipOverride,
+    Color? colorOverride,
+    String? labelOverride,
+  }) : super(
+          icon: _icon(recording),
+          label: labelOverride ?? _label(recording),
+          color: colorOverride ?? _color(recording),
+          tooltip: tooltipOverride ?? _tooltip(recording),
+        );
+
+  static IconData _icon(bool recording) =>
+      recording ? Icons.stop : Icons.fiber_manual_record;
+
+  static String _label(bool recording) =>
+      recording ? 'Stop recording' : 'Start recording';
+
+  static String _tooltip(bool recording) =>
+      recording ? 'Stop recording' : 'Start recording';
+
+  static Color? _color(bool recording) => recording ? Colors.red : null;
+
+  final bool recording;
+}
+
 /// Button to start recording data.
 ///
 /// * `recording`: Whether recording is in progress.
@@ -383,8 +272,8 @@ class ToolbarRefresh extends ToolbarAction {
 ///    omitted.
 /// * `labelOverride`: Optional alternative text to use for the button.
 /// * `onPressed`: The callback to be called upon pressing the button.
-class RecordButton extends DevToolsButton {
-  const RecordButton({
+class RecordButton extends GaDevToolsButton {
+  RecordButton({
     super.key,
     required bool recording,
     required VoidCallback onPressed,
@@ -406,8 +295,8 @@ class RecordButton extends DevToolsButton {
 /// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-class StopRecordingButton extends DevToolsButton {
-  const StopRecordingButton({
+class StopRecordingButton extends GaDevToolsButton {
+  StopRecordingButton({
     super.key,
     required bool recording,
     required VoidCallback? onPressed,
@@ -422,8 +311,8 @@ class StopRecordingButton extends DevToolsButton {
         );
 }
 
-class SettingsOutlinedButton extends DevToolsButton {
-  const SettingsOutlinedButton({
+class SettingsOutlinedButton extends GaDevToolsButton {
+  SettingsOutlinedButton({
     super.key,
     required super.onPressed,
     required super.gaScreen,
@@ -432,34 +321,17 @@ class SettingsOutlinedButton extends DevToolsButton {
   }) : super(outlined: true, icon: Icons.settings_outlined);
 }
 
-class HelpButton extends StatelessWidget {
-  const HelpButton({
+class HelpButton extends GaDevToolsButton {
+  HelpButton({
     super.key,
-    required this.gaScreen,
-    required this.gaSelection,
-    required this.onPressed,
-    this.outlined = true,
-  });
-
-  final VoidCallback onPressed;
-
-  final String gaScreen;
-
-  final String gaSelection;
-
-  final bool outlined;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsButton(
-      icon: Icons.help_outline,
-      onPressed: onPressed,
-      tooltip: 'Help',
-      gaScreen: gaScreen,
-      gaSelection: gaSelection,
-      outlined: outlined,
-    );
-  }
+    required super.gaScreen,
+    required super.gaSelection,
+    required super.onPressed,
+    super.outlined = true,
+  }) : super(
+          icon: Icons.help_outline,
+          tooltip: 'Help',
+        );
 }
 
 class ExpandAllButton extends StatelessWidget {
@@ -481,7 +353,7 @@ class ExpandAllButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton(
+    return GaDevToolsButton(
       icon: Icons.unfold_more,
       label: 'Expand All',
       tooltip: 'Expand All',
@@ -512,7 +384,7 @@ class CollapseAllButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton(
+    return GaDevToolsButton(
       icon: Icons.unfold_less,
       label: 'Collapse All',
       tooltip: 'Collapse All',
@@ -556,7 +428,7 @@ class VisibilityButton extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: show,
       builder: (_, show, __) {
-        return DevToolsButton(
+        return GaDevToolsButton(
           key: key,
           tooltip: tooltip,
           icon: show ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
@@ -590,7 +462,7 @@ class DevToolsSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: defaultSwitchHeight,
+      height: defaultButtonHeight,
       padding: padding,
       child: FittedBox(
         fit: BoxFit.fill,
@@ -605,10 +477,10 @@ class DevToolsSwitch extends StatelessWidget {
 
 class ProcessingInfo extends StatelessWidget {
   const ProcessingInfo({
-    Key? key,
+    super.key,
     required this.progressValue,
     required this.processedObject,
-  }) : super(key: key);
+  });
 
   final double? progressValue;
 
@@ -646,14 +518,14 @@ class ExitOfflineButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    return DevToolsButton(
+    return GaDevToolsButton(
       key: const Key('exit offline button'),
       label: 'Exit offline mode',
       icon: Icons.clear,
       gaScreen: gaScreen,
-      gaSelection: gac.exitOfflineMode,
+      gaSelection: gac.stopShowingOfflineData,
       onPressed: () {
-        offlineController.exitOfflineMode();
+        offlineDataController.stopShowingOfflineData();
         // Use Router.neglect to replace the current history entry with
         // the homepage so that clicking Back will not return here.
         Router.neglect(
@@ -678,11 +550,11 @@ class OfflineAwareControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: offlineController.offlineMode,
+      valueListenable: offlineDataController.showingOfflineData,
       builder: (context, offline, _) {
         return Row(
           children: [
-            if (offlineController.offlineMode.value)
+            if (offlineDataController.showingOfflineData.value)
               Padding(
                 padding: const EdgeInsets.only(right: defaultSpacing),
                 child: ExitOfflineButton(gaScreen: gaScreen),
@@ -710,7 +582,8 @@ class Badge extends StatelessWidget {
 
     // These constants are sized to give 1 digit badges a circular look.
     const badgeCornerRadius = 12.0;
-    const badgePadding = 6.0;
+    const verticalBadgePadding = 1.0;
+    const horizontalBadgePadding = 6.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -718,8 +591,8 @@ class Badge extends StatelessWidget {
         borderRadius: BorderRadius.circular(badgeCornerRadius),
       ),
       padding: const EdgeInsets.symmetric(
-        vertical: borderPadding,
-        horizontal: badgePadding,
+        vertical: verticalBadgePadding,
+        horizontal: horizontalBadgePadding,
       ),
       child: Text(
         text,
@@ -732,53 +605,6 @@ class Badge extends StatelessWidget {
   }
 }
 
-/// A widget, commonly used for icon buttons, that provides a tooltip with a
-/// common delay before the tooltip is shown.
-class DevToolsTooltip extends StatelessWidget {
-  const DevToolsTooltip({
-    Key? key,
-    this.message,
-    this.richMessage,
-    required this.child,
-    this.waitDuration = tooltipWait,
-    this.preferBelow = false,
-    this.padding = const EdgeInsets.all(defaultSpacing),
-    this.decoration,
-    this.textStyle,
-  })  : assert((message == null) != (richMessage == null)),
-        super(key: key);
-
-  final String? message;
-  final InlineSpan? richMessage;
-  final Widget child;
-  final Duration waitDuration;
-  final bool preferBelow;
-  final EdgeInsetsGeometry? padding;
-  final Decoration? decoration;
-  final TextStyle? textStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    TextStyle? style = textStyle;
-    if (richMessage == null) {
-      style ??= TextStyle(
-        color: Theme.of(context).colorScheme.tooltipTextColor,
-        fontSize: defaultFontSize,
-      );
-    }
-    return Tooltip(
-      message: message,
-      richMessage: richMessage,
-      waitDuration: waitDuration,
-      preferBelow: preferBelow,
-      padding: padding,
-      textStyle: style,
-      decoration: decoration,
-      child: child,
-    );
-  }
-}
-
 /// A wrapper around a TextButton, an Icon, and an optional Tooltip; used for
 /// small toolbar actions.
 class ToolbarAction extends StatelessWidget {
@@ -786,16 +612,17 @@ class ToolbarAction extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.tooltip,
-    Key? key,
+    super.key,
     this.size,
     this.style,
+    this.color,
     this.gaScreen,
     this.gaSelection,
-  })  : assert((gaScreen == null) == (gaSelection == null)),
-        super(key: key);
+  }) : assert((gaScreen == null) == (gaSelection == null));
 
   final TextStyle? style;
   final IconData icon;
+  final Color? color;
   final String? tooltip;
   final VoidCallback? onPressed;
   final double? size;
@@ -819,7 +646,7 @@ class ToolbarAction extends StatelessWidget {
       child: Icon(
         icon,
         size: size ?? actionsIconSize,
-        color: style?.color ?? Theme.of(context).colorScheme.onSurface,
+        color: color ?? Theme.of(context).colorScheme.onSurface,
       ),
     );
 
@@ -832,173 +659,43 @@ class ToolbarAction extends StatelessWidget {
   }
 }
 
-/// A blank, drop-in replacement for [AreaPaneHeader].
-///
-/// Acts as an empty header widget with zero size that is compatible with
-/// interfaces that expect a [PreferredSizeWidget].
-class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
-  const BlankHeader({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-
-  @override
-  Size get preferredSize => Size.zero;
-}
-
-/// Create a bordered, fixed-height header area with a title and optional child
-/// on the right-hand side.
-///
-/// This is typically used as a title for a logical area of the screen.
-class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
-  const AreaPaneHeader({
-    Key? key,
-    required this.title,
-    this.maxLines = 1,
-    this.actions = const [],
-    this.leftPadding = defaultSpacing,
-    this.rightPadding = densePadding,
-    this.tall = false,
-    this.roundedTopBorder = true,
-    this.includeTopBorder = true,
-    this.includeBottomBorder = true,
-    this.includeLeftBorder = false,
-    this.includeRightBorder = false,
-  }) : super(key: key);
-
-  final Widget title;
-  final int maxLines;
-  final List<Widget> actions;
-  final double leftPadding;
-  final double rightPadding;
-  final bool tall;
-
-  // TODO(kenz): add support for a non uniform border to allow for
-  // rounded corners when some border sides are missing. This is a
-  // challenge for Flutter since it is not supported out of the box:
-  // https://github.com/flutter/flutter/issues/12583.
-
-  /// Whether to use a full border with rounded top corners consistent with
-  /// material 3 styling.
-  ///
-  /// When true, the rounded border will take precedence over any value
-  /// specified by [includeTopBorder], [includeBottomBorder],
-  /// [includeLeftBorder], and [includeRightBorder].
-  final bool roundedTopBorder;
-
-  final bool includeTopBorder;
-  final bool includeBottomBorder;
-  final bool includeLeftBorder;
-  final bool includeRightBorder;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final borderSide = defaultBorderSide(theme);
-    final decoration = !roundedTopBorder
-        ? BoxDecoration(
-            border: Border(
-              top: includeTopBorder ? borderSide : BorderSide.none,
-              bottom: includeBottomBorder ? borderSide : BorderSide.none,
-              left: includeLeftBorder ? borderSide : BorderSide.none,
-              right: includeRightBorder ? borderSide : BorderSide.none,
-            ),
-            color: theme.colorScheme.surface,
-          )
-        : null;
-    Widget container = Container(
-      decoration: decoration,
-      padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
-      alignment: Alignment.centerLeft,
-      child: Row(
-        children: [
-          Expanded(
-            child: DefaultTextStyle(
-              maxLines: maxLines,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleSmall!,
-              child: title,
-            ),
-          ),
-          ...actions,
-        ],
-      ),
-    );
-    if (roundedTopBorder) {
-      container = RoundedOutlinedBorder.onlyTop(child: container);
-    }
-    return SizedBox.fromSize(
-      size: preferredSize,
-      child: container,
-    );
-  }
-
-  @override
-  Size get preferredSize {
-    return Size.fromHeight(
-      tall ? areaPaneHeaderHeight + 2 * densePadding : defaultHeaderHeight,
-    );
-  }
-}
-
-BorderSide defaultBorderSide(ThemeData theme) {
-  return BorderSide(color: theme.focusColor);
-}
-
-class DevToolsToggleButtonGroup extends StatelessWidget {
-  const DevToolsToggleButtonGroup({
-    Key? key,
-    required this.children,
-    required this.selectedStates,
-    required this.onPressed,
-  }) : super(key: key);
-
-  final List<Widget> children;
-
-  final List<bool> selectedStates;
-
-  final void Function(int)? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SizedBox(
-      height: defaultButtonHeight,
-      child: ToggleButtons(
-        borderRadius:
-            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
-        textStyle: theme.textTheme.bodyMedium,
-        constraints: BoxConstraints(
-          minWidth: defaultButtonHeight,
-          minHeight: defaultButtonHeight,
-        ),
-        isSelected: selectedStates,
-        onPressed: onPressed,
-        children: children,
-      ),
-    );
-  }
-}
-
-/// Button to export data.
-///
-/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
-///    omitted.
-/// * `onPressed`: The callback to be called upon pressing the button.
-class ExportButton extends DevToolsButton {
-  const ExportButton({
-    required super.gaScreen,
+/// Icon action button used in the main DevTools toolbar or footer.
+abstract class ScaffoldAction extends StatelessWidget {
+  const ScaffoldAction({
     super.key,
-    super.onPressed,
-    super.minScreenWidthForTextBeforeScaling,
-    super.tooltip = 'Export data',
-  }) : super(
-          icon: Icons.file_download,
-          label: 'Export',
-          gaSelection: gac.export,
-        );
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.color,
+  });
+
+  final IconData icon;
+
+  final String tooltip;
+
+  final void Function(BuildContext) onPressed;
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: () => onPressed(context),
+        child: Container(
+          width: actionWidgetSize,
+          height: actionWidgetSize,
+          alignment: Alignment.center,
+          child: Icon(
+            icon,
+            size: actionsIconSize,
+            color: color,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Button to open related information / documentation.
@@ -1007,10 +704,10 @@ class ExportButton extends DevToolsButton {
 /// [link] is the link that should be opened when the button is clicked.
 class InformationButton extends StatelessWidget {
   const InformationButton({
-    Key? key,
+    super.key,
     required this.tooltip,
     required this.link,
-  }) : super(key: key);
+  });
 
   final String tooltip;
 
@@ -1022,204 +719,10 @@ class InformationButton extends StatelessWidget {
       message: tooltip,
       child: IconButton(
         icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrl(link),
+        onPressed: () async => await launchUrlWithErrorHandling(link),
       ),
     );
   }
-}
-
-class ToggleButton extends StatelessWidget {
-  const ToggleButton({
-    Key? key,
-    required this.onPressed,
-    required this.isSelected,
-    required this.message,
-    required this.icon,
-    this.outlined = true,
-    this.label,
-    this.shape,
-  }) : super(key: key);
-
-  final String message;
-
-  final VoidCallback onPressed;
-
-  final bool isSelected;
-
-  final IconData icon;
-
-  final String? label;
-
-  final OutlinedBorder? shape;
-
-  final bool outlined;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsToggleButtonGroup(
-      selectedStates: [isSelected],
-      onPressed: (_) => onPressed(),
-      children: [
-        DevToolsTooltip(
-          message: message,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-            child: MaterialIconLabel(
-              iconData: icon,
-              label: label,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class FilterButton extends StatelessWidget {
-  const FilterButton({
-    Key? key,
-    required this.onPressed,
-    required this.isFilterActive,
-    this.message = 'Filter',
-    this.outlined = true,
-  }) : super(key: key);
-
-  final VoidCallback onPressed;
-  final bool isFilterActive;
-  final String message;
-  final bool outlined;
-
-  @override
-  Widget build(BuildContext context) {
-    return ToggleButton(
-      onPressed: onPressed,
-      isSelected: isFilterActive,
-      message: message,
-      icon: Icons.filter_list,
-      outlined: outlined,
-    );
-  }
-}
-
-class RoundedDropDownButton<T> extends StatelessWidget {
-  const RoundedDropDownButton({
-    Key? key,
-    this.value,
-    this.onChanged,
-    this.isDense = false,
-    this.style,
-    this.selectedItemBuilder,
-    this.items,
-  }) : super(key: key);
-
-  final T? value;
-
-  final ValueChanged<T?>? onChanged;
-
-  final bool isDense;
-
-  final TextStyle? style;
-
-  final DropdownButtonBuilder? selectedItemBuilder;
-
-  final List<DropdownMenuItem<T>>? items;
-
-  @override
-  Widget build(BuildContext context) {
-    final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
-
-    return RoundedOutlinedBorder(
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.only(
-            left: defaultSpacing,
-            right: borderPadding,
-          ),
-          height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              value: value,
-              onChanged: onChanged,
-              isDense: isDense,
-              style: style,
-              selectedItemBuilder: selectedItemBuilder,
-              items: items,
-              focusColor: bgColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class DevToolsClearableTextField extends StatelessWidget {
-  DevToolsClearableTextField({
-    Key? key,
-    required this.labelText,
-    TextEditingController? controller,
-    this.hintText,
-    this.onChanged,
-    this.autofocus = false,
-  })  : controller = controller ?? TextEditingController(),
-        super(key: key);
-
-  final TextEditingController controller;
-  final String? hintText;
-  final String labelText;
-  final Function(String)? onChanged;
-  final bool autofocus;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      autofocus: autofocus,
-      controller: controller,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.all(denseSpacing),
-        constraints: BoxConstraints(
-          minHeight: defaultTextFieldHeight,
-          maxHeight: defaultTextFieldHeight,
-        ),
-        border: const OutlineInputBorder(),
-        labelText: labelText,
-        hintText: hintText,
-        suffixIcon: IconButton(
-          tooltip: 'Clear',
-          icon: const Icon(Icons.clear),
-          onPressed: () {
-            controller.clear();
-            onChanged?.call('');
-          },
-        ),
-        isDense: true,
-      ),
-    );
-  }
-}
-
-Widget clearInputButton(VoidCallback onPressed) {
-  return inputDecorationSuffixButton(Icons.clear, onPressed);
-}
-
-Widget closeSearchDropdownButton(VoidCallback? onPressed) {
-  return inputDecorationSuffixButton(Icons.close, onPressed);
-}
-
-Widget inputDecorationSuffixButton(IconData icon, VoidCallback? onPressed) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: densePadding),
-    height: inputDecorationElementHeight,
-    width: defaultIconSize + denseSpacing,
-    child: IconButton(
-      padding: const EdgeInsets.all(0.0),
-      onPressed: onPressed,
-      iconSize: defaultIconSize,
-      splashRadius: defaultIconSize,
-      icon: Icon(icon),
-    ),
-  );
 }
 
 class OutlinedRowGroup extends StatelessWidget {
@@ -1255,77 +758,10 @@ class OutlinedRowGroup extends StatelessWidget {
   }
 }
 
-class OutlineDecoration extends StatelessWidget {
-  const OutlineDecoration({
-    Key? key,
-    this.child,
-    this.showTop = true,
-    this.showBottom = true,
-    this.showLeft = true,
-    this.showRight = true,
-  }) : super(key: key);
-
-  factory OutlineDecoration.onlyBottom({required Widget? child}) =>
-      OutlineDecoration(
-        showTop: false,
-        showLeft: false,
-        showRight: false,
-        child: child,
-      );
-
-  factory OutlineDecoration.onlyTop({required Widget? child}) =>
-      OutlineDecoration(
-        showBottom: false,
-        showLeft: false,
-        showRight: false,
-        child: child,
-      );
-
-  factory OutlineDecoration.onlyLeft({required Widget? child}) =>
-      OutlineDecoration(
-        showBottom: false,
-        showTop: false,
-        showRight: false,
-        child: child,
-      );
-
-  factory OutlineDecoration.onlyRight({required Widget? child}) =>
-      OutlineDecoration(
-        showBottom: false,
-        showTop: false,
-        showLeft: false,
-        child: child,
-      );
-
-  final bool showTop;
-  final bool showBottom;
-  final bool showLeft;
-  final bool showRight;
-
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).focusColor;
-    final border = BorderSide(color: color);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          left: showLeft ? border : BorderSide.none,
-          right: showRight ? border : BorderSide.none,
-          top: showTop ? border : BorderSide.none,
-          bottom: showBottom ? border : BorderSide.none,
-        ),
-      ),
-      child: child,
-    );
-  }
-}
-
 class ThickDivider extends StatelessWidget {
   const ThickDivider({super.key});
 
-  static const double thickDividerHeight = 5;
+  static const thickDividerHeight = 5.0;
 
   @override
   Widget build(BuildContext context) {
@@ -1336,90 +772,9 @@ class ThickDivider extends StatelessWidget {
   }
 }
 
-class RoundedOutlinedBorder extends StatelessWidget {
-  const RoundedOutlinedBorder({
-    super.key,
-    this.showTopLeft = true,
-    this.showTopRight = true,
-    this.showBottomLeft = true,
-    this.showBottomRight = true,
-    this.clip = false,
-    required this.child,
-  });
-
-  factory RoundedOutlinedBorder.onlyTop({
-    required Widget? child,
-    bool clip = false,
-  }) =>
-      RoundedOutlinedBorder(
-        showBottomLeft: false,
-        showBottomRight: false,
-        clip: clip,
-        child: child,
-      );
-
-  factory RoundedOutlinedBorder.onlyBottom({
-    required Widget? child,
-    bool clip = false,
-  }) =>
-      RoundedOutlinedBorder(
-        showTopLeft: false,
-        showTopRight: false,
-        clip: clip,
-        child: child,
-      );
-
-  final bool showTopLeft;
-  final bool showTopRight;
-  final bool showBottomLeft;
-  final bool showBottomRight;
-
-  /// Whether we should clip [child].
-  ///
-  /// This should be used sparingly and only where necessary for performance
-  /// reasons.
-  final bool clip;
-
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    final borderRadius = BorderRadius.only(
-      topLeft: showTopLeft
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      topRight: showTopRight
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      bottomLeft: showBottomLeft
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      bottomRight: showBottomRight
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-    );
-
-    var child = this.child;
-    if (clip) {
-      child = ClipRRect(
-        borderRadius: borderRadius,
-        clipBehavior: Clip.hardEdge,
-        child: child,
-      );
-    }
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).focusColor),
-        borderRadius: borderRadius,
-      ),
-      child: child,
-    );
-  }
-}
-
 BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
       border: Border.all(color: Theme.of(context).focusColor),
-      borderRadius: BorderRadius.circular(defaultBorderRadius),
+      borderRadius: defaultBorderRadius,
     );
 
 class LeftBorder extends StatelessWidget {
@@ -1444,6 +799,7 @@ class LeftBorder extends StatelessWidget {
 /// Makes for nice-looking rectangles.
 final goldenRatio = 1 + sqrt(5) / 2;
 
+/// A centered text widget with the default DevTools text style applied.
 class CenteredMessage extends StatelessWidget {
   const CenteredMessage(this.message, {super.key});
 
@@ -1454,7 +810,8 @@ class CenteredMessage extends StatelessWidget {
     return Center(
       child: Text(
         message,
-        style: Theme.of(context).textTheme.titleLarge,
+        textAlign: TextAlign.center,
+        style: Theme.of(context).regularTextStyle,
       ),
     );
   }
@@ -1478,37 +835,6 @@ class CenteredCircularProgressIndicator extends StatelessWidget {
       height: size,
       child: indicator,
     );
-  }
-}
-
-/// An extension on [ScrollController] to facilitate having the scrolling widget
-/// auto scroll to the bottom on new content.
-extension ScrollControllerAutoScroll on ScrollController {
-// TODO(devoncarew): We lose dock-to-bottom when we receive content when we're
-// off screen.
-
-  /// Return whether the view is currently scrolled to the bottom.
-  bool get atScrollBottom {
-    final pos = position;
-    return pos.pixels == pos.maxScrollExtent;
-  }
-
-  /// Scroll the content to the bottom using the app's default animation
-  /// duration and curve..
-  Future<void> autoScrollToBottom() async {
-    await animateTo(
-      position.maxScrollExtent,
-      duration: rapidDuration,
-      curve: defaultCurve,
-    );
-
-    // Scroll again if we've received new content in the interim.
-    if (hasClients) {
-      final pos = position;
-      if (pos.pixels != pos.maxScrollExtent) {
-        jumpTo(pos.maxScrollExtent);
-      }
-    }
   }
 }
 
@@ -1575,13 +901,6 @@ extension ColorExtension on Color {
   }
 }
 
-/// Gets an alternating color to use for indexed UI elements.
-Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
-  return index % 2 == 1
-      ? colorScheme.alternatingBackgroundColor1
-      : colorScheme.alternatingBackgroundColor2;
-}
-
 class BreadcrumbNavigator extends StatelessWidget {
   const BreadcrumbNavigator.builder({
     super.key,
@@ -1615,7 +934,7 @@ class Breadcrumb extends StatelessWidget {
     required this.onPressed,
   });
 
-  static const height = 28.0;
+  static const height = 24.0;
 
   static const caretWidth = 4.0;
 
@@ -1635,8 +954,8 @@ class Breadcrumb extends StatelessWidget {
     final textPainter = TextPainter(
       text: TextSpan(
         text: text,
-        style: TextStyle(
-          color: theme.colorScheme.chartTextColor,
+        style: theme.regularTextStyle.copyWith(
+          color: theme.colorScheme.contrastTextColor,
           decoration: TextDecoration.underline,
         ),
       ),
@@ -1719,30 +1038,35 @@ class _BreadcrumbPainter extends CustomPainter {
   }
 }
 
-// TODO(bkonyi): replace uses of this class with `JsonViewer`.
-class FormattedJson extends StatelessWidget {
-  const FormattedJson({
+/// A wrapper for a Text widget, which allows for concatenating text if it
+/// becomes too long.
+class TextViewer extends StatelessWidget {
+  const TextViewer({
     super.key,
-    this.json,
-    this.formattedString,
-    this.useSubtleStyle = false,
-  }) : assert((json == null) != (formattedString == null));
+    required this.text,
+    this.maxLength = 65536, //2^16
+    this.style,
+  });
 
-  static const encoder = JsonEncoder.withIndent('  ');
+  final String text;
 
-  final Map<String, dynamic>? json;
-
-  final String? formattedString;
-
-  final bool useSubtleStyle;
+  // TODO: change the maxLength if we determine a more appropriate limit
+  // in https://github.com/flutter/devtools/issues/6263.
+  final int maxLength;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    // TODO(kenz): we could consider using a prettier format like YAML.
+    final String displayText;
+    // Limit the length of the displayed text to maxLength
+    if (text.length > maxLength) {
+      displayText = '${text.substring(0, min(maxLength, text.length))}...';
+    } else {
+      displayText = text;
+    }
     return SelectableText(
-      json != null ? encoder.convert(json) : formattedString!,
-      style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
+      displayText,
+      style: style,
     );
   }
 }
@@ -1763,6 +1087,7 @@ class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
+  static const jsonEncoder = JsonEncoder.withIndent('  ');
 
   Future<void> _buildAndExpand(
     DartObjectNode variable,
@@ -1781,8 +1106,8 @@ class _JsonViewerState extends State<JsonViewer>
     final responseJson = json.decode(widget.encodedJson);
     // Insert the JSON data into the fake service cache so we can use it with
     // the `ExpandableVariable` widget.
-    final root =
-        serviceManager.service!.fakeServiceCache.insertJsonObject(responseJson);
+    final root = serviceConnection.serviceManager.service!.fakeServiceCache
+        .insertJsonObject(responseJson);
     variable = DartObjectNode.fromValue(
       name: '[root]',
       value: root,
@@ -1816,7 +1141,7 @@ class _JsonViewerState extends State<JsonViewer>
     super.dispose();
     // Remove the JSON object from the fake service cache to avoid holding on
     // to large objects indefinitely.
-    serviceManager.service!.fakeServiceCache
+    serviceConnection.serviceManager.service!.fakeServiceCache
         .removeJsonObject(variable.value as Instance);
   }
 
@@ -1833,19 +1158,33 @@ class _JsonViewerState extends State<JsonViewer>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(denseSpacing),
-      child: SingleChildScrollView(
-        child: FutureBuilder(
-          future: _initializeTree,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Container();
-            }
-            return ExpandableVariable(
-              variable: variable,
-            );
-          },
+    return SelectionArea(
+      child: Padding(
+        padding: const EdgeInsets.all(denseSpacing),
+        child: SingleChildScrollView(
+          child: FutureBuilder(
+            future: _initializeTree,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return Container();
+              }
+              return ExpandableVariable(
+                variable: variable,
+                onCopy: (copiedVariable) {
+                  unawaited(
+                    copyToClipboard(
+                      jsonEncoder.convert(
+                        serviceConnection
+                            .serviceManager.service!.fakeServiceCache
+                            .instanceToJson(copiedVariable.value as Instance),
+                      ),
+                      'JSON copied to clipboard',
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1854,12 +1193,12 @@ class _JsonViewerState extends State<JsonViewer>
 
 class MoreInfoLink extends StatelessWidget {
   const MoreInfoLink({
-    Key? key,
+    super.key,
     required this.url,
     required this.gaScreenName,
     required this.gaSelectedItemDescription,
     this.padding,
-  }) : super(key: key);
+  });
 
   final String url;
 
@@ -1874,7 +1213,7 @@ class MoreInfoLink extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       onTap: _onLinkTap,
-      borderRadius: BorderRadius.circular(defaultBorderRadius),
+      borderRadius: defaultBorderRadius,
       child: Padding(
         padding: padding ?? const EdgeInsets.all(denseSpacing),
         child: Row(
@@ -1898,70 +1237,95 @@ class MoreInfoLink extends StatelessWidget {
   }
 
   void _onLinkTap() {
-    unawaited(launchUrl(url));
+    unawaited(launchUrlWithErrorHandling(url));
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
 
-class LinkTextSpan extends TextSpan {
-  LinkTextSpan({
-    required Link link,
-    required BuildContext context,
+class LinkIconLabel extends StatelessWidget {
+  const LinkIconLabel({
+    super.key,
+    required this.icon,
+    required this.link,
+    required this.color,
+  });
+
+  final IconData icon;
+  final GaLink link;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: _onLinkTap,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: defaultIconSize,
+            color: color,
+          ),
+          const SizedBox(width: densePadding),
+          Padding(
+            padding: const EdgeInsets.only(bottom: densePadding),
+            child: RichText(
+              text: TextSpan(
+                text: link.display,
+                style: Theme.of(context).linkTextStyle.copyWith(color: color),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onLinkTap() {
+    unawaited(launchUrlWithErrorHandling(link.url));
+    if (link.gaScreenName != null && link.gaSelectedItemDescription != null) {
+      ga.select(link.gaScreenName!, link.gaSelectedItemDescription!);
+    }
+  }
+}
+
+class GaLinkTextSpan extends LinkTextSpan {
+  GaLinkTextSpan({
+    required GaLink link,
+    required super.context,
     TextStyle? style,
   }) : super(
-          text: link.display,
-          style: style ?? Theme.of(context).linkTextStyle,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
+          link: link,
+          onTap: () {
+            if (link.gaScreenName != null &&
+                link.gaSelectedItemDescription != null) {
               ga.select(
-                link.gaScreenName,
-                link.gaSelectedItemDescription,
+                link.gaScreenName!,
+                link.gaSelectedItemDescription!,
               );
-              await launchUrl(link.url);
-            },
+            }
+          },
         );
 }
 
-class Link {
-  const Link({
-    required this.display,
-    required this.url,
-    required this.gaScreenName,
-    required this.gaSelectedItemDescription,
+class GaLink extends Link {
+  const GaLink({
+    required super.display,
+    required super.url,
+    this.gaScreenName,
+    this.gaSelectedItemDescription,
   });
 
-  final String display;
-
-  final String url;
-
-  final String gaScreenName;
-
-  final String gaSelectedItemDescription;
-}
-
-/// Helper that will wrap [child] in a [DevToolsTooltip] widget if [tooltip] is
-/// non-null.
-Widget maybeWrapWithTooltip({
-  required String? tooltip,
-  EdgeInsetsGeometry? tooltipPadding,
-  required Widget child,
-}) {
-  if (tooltip != null && tooltip.isNotEmpty) {
-    return DevToolsTooltip(
-      message: tooltip,
-      padding: tooltipPadding,
-      child: child,
-    );
-  }
-  return child;
+  final String? gaScreenName;
+  final String? gaSelectedItemDescription;
 }
 
 class Legend extends StatelessWidget {
   const Legend({
-    Key? key,
+    super.key,
     required this.entries,
     this.dense = false,
-  }) : super(key: key);
+  });
 
   double get legendSquareSize =>
       dense ? scaleByFontFactor(12.0) : scaleByFontFactor(16.0);
@@ -1973,7 +1337,7 @@ class Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = dense ? Theme.of(context).legendTextStyle : null;
-    final List<Widget> legendItems = entries
+    final legendItems = entries
         .map(
           (entry) => _legendItem(
             entry.description,
@@ -2031,10 +1395,8 @@ class CopyToClipboardControl extends StatelessWidget {
     this.size,
     this.gaScreen,
     this.gaItem,
-    this.style,
   });
 
-  final TextStyle? style;
   final ClipboardDataProvider? dataProvider;
   final String? successMessage;
   final String tooltip;
@@ -2055,14 +1417,16 @@ class CopyToClipboardControl extends StatelessWidget {
               copyToClipboard(dataProvider!() ?? '', successMessage),
             );
           };
-
-    return ToolbarAction(
-      icon: Icons.content_copy,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      key: buttonKey,
-      size: size,
-      style: style,
+    final size = this.size ?? defaultIconSize;
+    return SizedBox(
+      height: size,
+      child: ToolbarAction(
+        icon: Icons.content_copy,
+        tooltip: tooltip,
+        onPressed: onPressed,
+        key: buttonKey,
+        size: size,
+      ),
     );
   }
 }
@@ -2080,12 +1444,12 @@ class CopyToClipboardControl extends StatelessWidget {
 /// [ValueNotifier] and changes to the [ValueNotifier] updating the checkbox.
 class NotifierCheckbox extends StatelessWidget {
   const NotifierCheckbox({
-    Key? key,
+    super.key,
     required this.notifier,
     this.onChanged,
     this.enabled = true,
     this.checkboxKey,
-  }) : super(key: key);
+  });
 
   /// The notifier this [NotifierCheckbox] is responsible for listening to and
   /// updating.
@@ -2129,9 +1493,11 @@ class NotifierCheckbox extends StatelessWidget {
   }
 }
 
+/// A widget that represents a check box setting and automatically updates for
+/// value changes to [notifier].
 class CheckboxSetting extends StatelessWidget {
   const CheckboxSetting({
-    Key? key,
+    super.key,
     required this.notifier,
     required this.title,
     this.description,
@@ -2141,7 +1507,7 @@ class CheckboxSetting extends StatelessWidget {
     this.gaScreenName,
     this.gaItem,
     this.checkboxKey,
-  }) : super(key: key);
+  });
 
   final ValueNotifier<bool?> notifier;
 
@@ -2165,34 +1531,8 @@ class CheckboxSetting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    Widget textContent = RichText(
-      overflow: TextOverflow.visible,
-      text: TextSpan(
-        text: title,
-        style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
-      ),
-    );
-
-    if (description != null) {
-      textContent = Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          textContent,
-          Expanded(
-            child: RichText(
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                text: ' • $description',
-                style: theme.subtleTextStyle,
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-    final content = Row(
+    Widget checkboxAndTitle = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         NotifierCheckbox(
           notifier: notifier,
@@ -2211,27 +1551,63 @@ class CheckboxSetting extends StatelessWidget {
           checkboxKey: checkboxKey,
         ),
         Flexible(
-          child: textContent,
+          child: RichText(
+            overflow: TextOverflow.visible,
+            maxLines: 3,
+            text: TextSpan(
+              text: title,
+              style: enabled ? theme.regularTextStyle : theme.subtleTextStyle,
+            ),
+          ),
         ),
       ],
     );
-    if (tooltip != null && tooltip!.isNotEmpty) {
-      return DevToolsTooltip(
-        message: tooltip,
-        child: content,
-      );
+    if (description == null) {
+      checkboxAndTitle = Expanded(child: checkboxAndTitle);
     }
-    return content;
+    return maybeWrapWithTooltip(
+      tooltip: tooltip,
+      child: Row(
+        children: [
+          checkboxAndTitle,
+          if (description != null) ...[
+            Expanded(
+              child: Row(
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      text: ' • ',
+                      style: theme.subtleTextStyle,
+                    ),
+                  ),
+                  Flexible(
+                    child: RichText(
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                      text: TextSpan(
+                        text: description,
+                        style: theme.subtleTextStyle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 
 class PubWarningText extends StatelessWidget {
-  const PubWarningText({Key? key}) : super(key: key);
+  const PubWarningText({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow == true;
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == true;
     final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
     final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
     return SelectableText.rich(
@@ -2263,11 +1639,11 @@ class PubWarningText extends StatelessWidget {
 
 class BlinkingIcon extends StatefulWidget {
   const BlinkingIcon({
-    Key? key,
+    super.key,
     required this.icon,
     required this.color,
     required this.size,
-  }) : super(key: key);
+  });
 
   final IconData icon;
 
@@ -2321,56 +1697,51 @@ class _BlinkingIconState extends State<BlinkingIcon> {
   }
 }
 
-// TODO(https://github.com/flutter/devtools/issues/2989): investigate if we can
-// modify this widget to be a 'MultiValueListenableBuilder' that can take an
-// arbitrary number of listenables.
-/// A widget that listens for changes to two different [ValueListenable]s and
-/// rebuilds for change notifications to either.
+/// A widget that listens for changes to multiple different [ValueListenable]s
+/// and rebuilds for change notifications from any of them.
 ///
-/// This widget is preferred over nesting two [ValueListenableBuilder]s in a
+/// The current value of each [ValueListenable] is provided by the `values`
+/// parameter in [builder], where the index of each value in the list is equal
+/// to the index of its parent [ValueListenable] in [listenables].
+///
+/// This widget is preferred over nesting many [ValueListenableBuilder]s in a
 /// single build method.
-class DualValueListenableBuilder<T, U> extends StatefulWidget {
-  const DualValueListenableBuilder({
-    Key? key,
-    required this.firstListenable,
-    required this.secondListenable,
+class MultiValueListenableBuilder extends StatefulWidget {
+  const MultiValueListenableBuilder({
+    super.key,
+    required this.listenables,
     required this.builder,
     this.child,
-  }) : super(key: key);
+  });
 
-  final ValueListenable<T> firstListenable;
-
-  final ValueListenable<U> secondListenable;
+  final List<ValueListenable> listenables;
 
   final Widget Function(
     BuildContext context,
-    T firstValue,
-    U secondValue,
+    List<Object?> values,
     Widget? child,
   ) builder;
 
   final Widget? child;
 
   @override
-  State<DualValueListenableBuilder<T, U>> createState() =>
-      _DualValueListenableBuilderState<T, U>();
+  State<MultiValueListenableBuilder> createState() =>
+      _MultiValueListenableBuilderState();
 }
 
-class _DualValueListenableBuilderState<T, U>
-    extends State<DualValueListenableBuilder<T, U>> with AutoDisposeMixin {
+class _MultiValueListenableBuilderState
+    extends State<MultiValueListenableBuilder> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
-    addAutoDisposeListener(widget.firstListenable);
-    addAutoDisposeListener(widget.secondListenable);
+    widget.listenables.forEach(addAutoDisposeListener);
   }
 
   @override
   Widget build(BuildContext context) {
     return widget.builder(
       context,
-      widget.firstListenable.value,
-      widget.secondListenable.value,
+      [for (final listenable in widget.listenables) listenable.value],
       widget.child,
     );
   }
@@ -2378,9 +1749,9 @@ class _DualValueListenableBuilderState<T, U>
 
 class SmallCircularProgressIndicator extends StatelessWidget {
   const SmallCircularProgressIndicator({
-    Key? key,
+    super.key,
     required this.valueColor,
-  }) : super(key: key);
+  });
 
   final Animation<Color?> valueColor;
 
@@ -2395,12 +1766,12 @@ class SmallCircularProgressIndicator extends StatelessWidget {
 
 class ElevatedCard extends StatelessWidget {
   const ElevatedCard({
-    Key? key,
+    super.key,
     required this.child,
     this.width,
     this.height,
     this.padding,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final double? width;
@@ -2413,7 +1784,7 @@ class ElevatedCard extends StatelessWidget {
       elevation: defaultElevation,
       color: Theme.of(context).scaffoldBackgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
+        borderRadius: defaultBorderRadius,
       ),
       child: Container(
         width: width,
@@ -2434,7 +1805,7 @@ class ElevatedCard extends StatelessWidget {
 ///
 /// See [AutomaticKeepAliveClientMixin] for more information.
 class KeepAliveWrapper extends StatefulWidget {
-  const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
+  const KeepAliveWrapper({super.key, required this.child});
 
   final Widget child;
 
@@ -2462,6 +1833,7 @@ class HelpButtonWithDialog extends StatelessWidget {
     required this.gaSelection,
     required this.dialogTitle,
     required this.child,
+    this.actions = const <Widget>[],
     this.outlined = true,
   });
 
@@ -2473,25 +1845,19 @@ class HelpButtonWithDialog extends StatelessWidget {
 
   final Widget child;
 
+  final List<Widget> actions;
+
   final bool outlined;
 
   @override
   Widget build(BuildContext context) {
     return HelpButton(
       onPressed: () {
-        ga.select(gaScreen, gaSelection);
-        unawaited(
-          showDialog(
-            context: context,
-            builder: (context) => DevToolsDialog(
-              title: DialogTitleText(dialogTitle),
-              includeDivider: false,
-              content: child,
-              actions: const [
-                DialogCloseButton(),
-              ],
-            ),
-          ),
+        showDevToolsDialog(
+          context: context,
+          title: dialogTitle,
+          content: child,
+          actions: actions,
         );
       },
       gaScreen: gaScreen,
@@ -2504,31 +1870,23 @@ class HelpButtonWithDialog extends StatelessWidget {
 /// Display a single bullet character in order to act as a stylized spacer
 /// component.
 class BulletSpacer extends StatelessWidget {
-  const BulletSpacer({super.key, this.useAccentColor = false});
+  const BulletSpacer({super.key, this.color});
 
-  final bool useAccentColor;
+  final Color? color;
 
   static double get width => actionWidgetSize / 2;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    late TextStyle? textStyle;
-    textStyle = useAccentColor
-        ? theme.appBarTheme.toolbarTextStyle ??
-            theme.primaryTextTheme.bodyMedium
-        : theme.textTheme.bodyMedium;
-
-    final mutedColor = textStyle?.color?.withAlpha(0x90);
-
+    final theme = Theme.of(context);
+    final mutedColor = theme.colorScheme.onSurface.withAlpha(0x90);
     return Container(
       width: width,
       height: actionWidgetSize,
       alignment: Alignment.center,
       child: Text(
         '•',
-        style: textStyle?.copyWith(color: mutedColor),
+        style: theme.regularTextStyle.copyWith(color: color ?? mutedColor),
       ),
     );
   }
@@ -2558,26 +1916,28 @@ class VerticalLineSpacer extends StatelessWidget {
   }
 }
 
-class ToCsvButton extends StatelessWidget {
-  const ToCsvButton({
-    Key? key,
+class DownloadButton extends StatelessWidget {
+  const DownloadButton({
+    super.key,
     this.onPressed,
-    this.tooltip = 'Download data in CSV format',
+    this.tooltip = 'Download data',
+    this.label = 'Download',
     required this.minScreenWidthForTextBeforeScaling,
     required this.gaScreen,
     required this.gaSelection,
-  }) : super(key: key);
+  });
 
   final VoidCallback? onPressed;
   final String? tooltip;
+  final String label;
   final double minScreenWidthForTextBeforeScaling;
   final String gaScreen;
   final String gaSelection;
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton(
-      label: 'CSV',
+    return GaDevToolsButton(
+      label: label,
       icon: Icons.file_download,
       tooltip: tooltip,
       gaScreen: gaScreen,
@@ -2624,33 +1984,38 @@ class RadioButton<T> extends StatelessWidget {
 class ContextMenuButton extends StatelessWidget {
   ContextMenuButton({
     super.key,
-    required this.menu,
-    this.style,
+    required this.menuChildren,
+    this.color,
     this.gaScreen,
     this.gaItem,
-    double? size,
-  }) : size = size ?? tableIconSize;
+    this.buttonWidth = defaultWidth,
+    this.icon = Icons.more_vert,
+    double? iconSize,
+  }) : iconSize = iconSize ?? tableIconSize;
 
-  static const double width = 14;
+  static const defaultWidth = 14.0;
+  static const densePadding = 2.0;
 
-  final TextStyle? style;
+  final Color? color;
   final String? gaScreen;
   final String? gaItem;
-  final List<Widget> menu;
-  final double size;
+  final List<Widget> menuChildren;
+  final IconData icon;
+  final double iconSize;
+  final double buttonWidth;
 
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
-      menuChildren: menu,
+      menuChildren: menuChildren,
       builder:
           (BuildContext context, MenuController controller, Widget? child) {
         return SizedBox(
-          width: width,
+          width: buttonWidth,
           child: ToolbarAction(
-            icon: Icons.more_vert,
-            size: size,
-            style: style,
+            icon: icon,
+            size: iconSize,
+            color: color,
             onPressed: () {
               if (gaScreen != null && gaItem != null) {
                 ga.select(gaScreen!, gaItem!);
@@ -2664,6 +2029,88 @@ class ContextMenuButton extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// A Widget for displaying a setting field, that sets and integer value.
+class PositiveIntegerSetting extends StatefulWidget {
+  const PositiveIntegerSetting({
+    super.key,
+    required this.title,
+    required this.subTitle,
+    required this.notifier,
+  });
+
+  final String title;
+  final String subTitle;
+  final ValueNotifier<int> notifier;
+
+  @override
+  State<PositiveIntegerSetting> createState() => _PositiveIntegerSettingState();
+}
+
+class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
+    with AutoDisposeMixin {
+  late final TextEditingController _textEditingController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    addAutoDisposeListener(
+      widget.notifier,
+      () => _textEditingController.text = widget.notifier.value.toString(),
+    );
+
+    _textEditingController = TextEditingController()
+      ..text = widget.notifier.value.toString();
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.title),
+              Text(
+                widget.subTitle,
+                style: theme.subtleTextStyle,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: defaultSpacing),
+        SizedBox(
+          height: defaultTextFieldHeight,
+          width: defaultTextFieldNumberWidth,
+          child: TextField(
+            textAlignVertical: TextAlignVertical.top,
+            style: theme.regularTextStyle,
+            decoration: singleLineDialogTextFieldDecoration,
+            controller: _textEditingController,
+            inputFormatters: <TextInputFormatter>[
+              // Only positive integers.
+              FilteringTextInputFormatter.allow(
+                RegExp(r'^[1-9][0-9]*'),
+              ),
+            ],
+            onChanged: (String text) {
+              widget.notifier.value = int.parse(text);
+            },
+          ),
+        ),
+      ],
     );
   }
 }

@@ -6,18 +6,19 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:async/async.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
 import '../common_widgets.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
+import 'colors.dart';
 
 // TODO(https://github.com/flutter/devtools/issues/5416): break this file up
 // into managable pieces.
@@ -325,11 +326,11 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final isMaxWidth = autoComplete.isMaxWidth;
     final searchAutoComplete = controller.searchAutoComplete;
 
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     final autoCompleteTextStyle = Theme.of(context)
         .regularTextStyle
-        .copyWith(color: colorScheme.autoCompleteTextColor);
+        .copyWith(color: colorScheme.contrastTextColor);
 
     final autoCompleteHighlightedTextStyle =
         Theme.of(context).regularTextStyle.copyWith(
@@ -357,8 +358,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
     // the ListTile height, position above (if bottom is false).
-    final RenderBox box =
-        searchFieldKey.currentContext!.findRenderObject() as RenderBox;
+    final box = searchFieldKey.currentContext!.findRenderObject() as RenderBox;
 
     // Compute to global coordinates.
     final offset = box.localToGlobal(Offset.zero);
@@ -396,7 +396,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     // Compute the Y position of the popup (auto-complete list). Its bottom
     // will be positioned at the top of the text field. Add 1 includes
     // the TextField border.
-    final double yCoord =
+    final yCoord =
         bottom ? 0.0 : -((count * tileEntryHeight) + box.size.height + 1);
 
     final xCoord = controller.xPosition;
@@ -406,7 +406,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
       width: isMaxWidth
           ? box.size.width
           : AutoCompleteSearchControllerMixin.minPopupWidth,
-      height: bottom ? null : count * tileEntryHeight,
+      height: count * tileEntryHeight,
       child: CompositedTransformFollower(
         link: controller.autoCompleteLayerLink,
         showWhenUnlinked: false,
@@ -417,7 +417,6 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
           child: TextFieldTapRegion(
             child: ListView(
               padding: EdgeInsets.zero,
-              shrinkWrap: true,
               itemExtent: tileEntryHeight,
               children: autoCompleteTiles,
             ),
@@ -552,7 +551,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
       searchAutoComplete;
 
   /// Layer links autoComplete popup to the search TextField widget.
-  final LayerLink autoCompleteLayerLink = LayerLink();
+  final autoCompleteLayerLink = LayerLink();
 
   OverlayEntry? autoCompleteOverlay;
 
@@ -579,20 +578,20 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
 
   /// [FocusNode] for the keyboard listener responsible for handling auto
   /// complete search.
-  FocusNode get rawKeyboardFocusNode => _rawKeyboardFocusNode!;
-  FocusNode? _rawKeyboardFocusNode;
+  FocusNode get autocompleteFocusNode => _autocompleteFocusNode!;
+  FocusNode? _autocompleteFocusNode;
 
   @override
   void initSearch() {
     super.initSearch();
-    _rawKeyboardFocusNode?.dispose();
-    _rawKeyboardFocusNode = FocusNode(debugLabel: 'search-raw-keyboard');
+    _autocompleteFocusNode?.dispose();
+    _autocompleteFocusNode = FocusNode(debugLabel: 'search-keyboard');
   }
 
   @override
   void disposeSearch() {
-    _rawKeyboardFocusNode?.dispose();
-    _rawKeyboardFocusNode = null;
+    _autocompleteFocusNode?.dispose();
+    _autocompleteFocusNode = null;
     super.disposeSearch();
   }
 
@@ -762,14 +761,6 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     );
   }
 
-  void selectFromSearchField(String selection) {
-    searchTextFieldController.clear();
-    search = selection;
-    clearSearchField(force: true);
-    selectTheSearch = true;
-    closeAutoCompleteOverlay();
-  }
-
   void clearSearchField({bool force = false}) {
     if (force || search.isNotEmpty) {
       resetSearch();
@@ -794,19 +785,13 @@ mixin SearchableMixin<T> {
 }
 
 /// Callback when item in the drop-down list is selected.
-typedef SelectAutoComplete = Function(String selection);
+typedef SelectAutoComplete = void Function(String selection);
 
 /// Callback to handle highlighting item in the drop-down list.
-typedef HighlightAutoComplete = Function(
+typedef HighlightAutoComplete = void Function(
   AutoCompleteSearchControllerMixin controller,
   bool directionDown,
 );
-
-/// Callback for clearing the search field.
-typedef ClearSearchField = Function(
-  AutoCompleteSearchControllerMixin controller, {
-  bool force,
-});
 
 /// Provided by clients to specify where the autocomplete overlay should be
 /// positioned relative to the input text.
@@ -1043,7 +1028,8 @@ class StatelessSearchField<T extends SearchableDataMixin>
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = style ?? Theme.of(context).textTheme.bodyMedium;
+    final theme = Theme.of(context);
+    final textStyle = style ?? theme.regularTextStyle;
 
     final searchField = TextField(
       key: searchFieldKey,
@@ -1055,6 +1041,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
       onChanged: (value) {
         onChanged?.call(value);
         controller.search = value;
+        controller.searchFieldFocusNode.requestFocus();
       },
       onEditingComplete: () {
         controller.searchFieldFocusNode.requestFocus();
@@ -1073,6 +1060,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
             ),
             border: const OutlineInputBorder(),
             labelText: label,
+            labelStyle: theme.subtleTextStyle,
             // TODO(kenz): add the search icon to the search field.
             prefix: prefix != null
                 ? Row(
@@ -1175,7 +1163,7 @@ class AutoCompleteSearchField extends StatefulWidget {
   final bool clearFieldOnEscapeWhenOverlayHidden;
 
   /// Handler called when either [controller.searchFieldFocusNode] or
-  /// [controller.rawKeyboardFocusNode] has lost focus.
+  /// [controller.autocompleteFocusNode] has lost focus.
   final VoidCallback? onFocusLost;
 
   @override
@@ -1185,24 +1173,6 @@ class AutoCompleteSearchField extends StatefulWidget {
 
 class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
     with AutoDisposeMixin {
-  /// Platform independent (Mac or Linux).
-  int get arrowDown =>
-      LogicalKeyboardKey.arrowDown.keyId & LogicalKeyboardKey.valueMask;
-
-  int get arrowUp =>
-      LogicalKeyboardKey.arrowUp.keyId & LogicalKeyboardKey.valueMask;
-
-  int get enter =>
-      LogicalKeyboardKey.enter.keyId & LogicalKeyboardKey.valueMask;
-
-  int get escape =>
-      LogicalKeyboardKey.escape.keyId & LogicalKeyboardKey.valueMask;
-
-  int get tab => LogicalKeyboardKey.tab.keyId & LogicalKeyboardKey.valueMask;
-
-  int get arrowRight =>
-      LogicalKeyboardKey.arrowRight.keyId & LogicalKeyboardKey.valueMask;
-
   HighlightAutoComplete get _highlightDropdown =>
       widget.onHighlightDropdown != null
           ? widget.onHighlightDropdown as HighlightAutoComplete
@@ -1217,16 +1187,16 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
       _handleLostFocus,
     );
     addAutoDisposeListener(
-      widget.controller.rawKeyboardFocusNode,
+      widget.controller.autocompleteFocusNode,
       _handleLostFocus,
     );
-    widget.controller.rawKeyboardFocusNode.onKey = _handleKeyStrokes;
+    widget.controller.autocompleteFocusNode.onKeyEvent = _handleKeyStrokes;
   }
 
   @override
   Widget build(BuildContext context) {
-    return RawKeyboardListener(
-      focusNode: widget.controller.rawKeyboardFocusNode,
+    return Focus.withExternalFocusNode(
+      focusNode: widget.controller.autocompleteFocusNode,
       child: CompositedTransformTarget(
         link: widget.controller.autoCompleteLayerLink,
         child: StatelessSearchField(
@@ -1240,7 +1210,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
             if (widget.overlayXPositionBuilder != null) {
               widget.controller.xPosition = widget.overlayXPositionBuilder!(
                 value,
-                widget.style ?? Theme.of(context).textTheme.titleMedium,
+                widget.style ?? Theme.of(context).regularTextStyle,
               );
             }
           },
@@ -1253,7 +1223,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
 
   void _handleLostFocus() {
     if (widget.controller.searchFieldFocusNode.hasPrimaryFocus ||
-        widget.controller.rawKeyboardFocusNode.hasPrimaryFocus) {
+        widget.controller.autocompleteFocusNode.hasPrimaryFocus) {
       return;
     }
 
@@ -1264,78 +1234,78 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
     }
   }
 
-  KeyEventResult _handleKeyStrokes(FocusNode _, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
-      final key = event.data.logicalKey.keyId & LogicalKeyboardKey.valueMask;
+  KeyEventResult _handleKeyStrokes(FocusNode _, KeyEvent event) {
+    if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
+    final key = event.logicalKey;
 
-      if (key == escape) {
-        // TODO(kenz): Enable this once we find a way around the navigation
-        // this causes. This triggers a "back" navigation.
-        // ESCAPE key pressed clear search TextField.c
-        if (widget.controller.autoCompleteOverlay != null) {
-          widget.controller.closeAutoCompleteOverlay();
-        } else if (widget.clearFieldOnEscapeWhenOverlayHidden) {
-          // If pop-up closed ESCAPE will clean the TextField.
-          widget.controller.clearSearchField(force: true);
+    if (key == LogicalKeyboardKey.escape) {
+      // TODO(kenz): Enable this once we find a way around the navigation
+      // this causes. This triggers a "back" navigation.
+      // ESCAPE key pressed clear search TextField.
+      if (widget.controller.autoCompleteOverlay != null) {
+        widget.controller.closeAutoCompleteOverlay();
+      } else if (widget.clearFieldOnEscapeWhenOverlayHidden) {
+        // If pop-up closed ESCAPE will clean the TextField.
+        widget.controller.clearSearchField(force: true);
+      }
+      return _determineKeyEventResult(key);
+    } else if (widget.controller.autoCompleteOverlay != null) {
+      if (key == LogicalKeyboardKey.enter ||
+          key == LogicalKeyboardKey.tab ||
+          (key == LogicalKeyboardKey.arrowRight &&
+              widget.controller.searchTextFieldController.isAtEnd)) {
+        // Enter / Tab pressed OR right arrow pressed while text field is at the end.
+        String? foundExact;
+
+        // What the user has typed in so far.
+        final searchToMatch = widget.controller.search.toLowerCase();
+        // Find exact match in autocomplete list - use that as our search value.
+        for (final autoEntry in widget.controller.searchAutoComplete.value) {
+          if (searchToMatch == autoEntry.text.toLowerCase()) {
+            foundExact = autoEntry.text;
+            break;
+          }
         }
-        return _determineKeyEventResult(key);
-      } else if (widget.controller.autoCompleteOverlay != null) {
-        if (key == enter ||
-            key == tab ||
-            (key == arrowRight &&
-                widget.controller.searchTextFieldController.isAtEnd)) {
-          // Enter / Tab pressed OR right arrow pressed while text field is at the end
-          String? foundExact;
+        // Nothing found, pick item selected in dropdown.
+        final autoCompleteList = widget.controller.searchAutoComplete.value;
+        if (foundExact == null ||
+            autoCompleteList[widget.controller.currentHoveredIndex.value]
+                    .text !=
+                foundExact) {
+          if (autoCompleteList.isNotEmpty) {
+            foundExact =
+                autoCompleteList[widget.controller.currentHoveredIndex.value]
+                    .text;
+          }
+        }
 
-          // What the user has typed in so far.
-          final searchToMatch = widget.controller.search.toLowerCase();
-          // Find exact match in autocomplete list - use that as our search value.
-          for (final autoEntry in widget.controller.searchAutoComplete.value) {
-            if (searchToMatch == autoEntry.text.toLowerCase()) {
-              foundExact = autoEntry.text;
-              break;
-            }
-          }
-          // Nothing found, pick item selected in dropdown.
-          final autoCompleteList = widget.controller.searchAutoComplete.value;
-          if (foundExact == null ||
-              autoCompleteList[widget.controller.currentHoveredIndex.value]
-                      .text !=
-                  foundExact) {
-            if (autoCompleteList.isNotEmpty) {
-              foundExact =
-                  autoCompleteList[widget.controller.currentHoveredIndex.value]
-                      .text;
-            }
-          }
-
-          if (foundExact != null) {
-            widget.controller
-              ..selectTheSearch = true
-              ..search = foundExact;
-            widget.onSelection(foundExact);
-            return _determineKeyEventResult(key);
-          }
-        } else if (key == arrowDown || key == arrowUp) {
-          _highlightDropdown(widget.controller, key == arrowDown);
+        if (foundExact != null) {
+          widget.controller
+            ..selectTheSearch = true
+            ..search = foundExact;
+          widget.onSelection(foundExact);
           return _determineKeyEventResult(key);
         }
-      }
-
-      // We don't support tabs in the search input. Swallow to prevent a
-      // change of focus.
-      if (key == tab) {
-        _determineKeyEventResult(key);
+      } else if (key == LogicalKeyboardKey.arrowDown ||
+          key == LogicalKeyboardKey.arrowUp) {
+        _highlightDropdown(
+          widget.controller,
+          key == LogicalKeyboardKey.arrowDown,
+        );
+        return _determineKeyEventResult(key);
       }
     }
 
+    // We don't support tabs in the search input. Swallow to prevent a
+    // change of focus.
+    if (key == LogicalKeyboardKey.tab) {
+      _determineKeyEventResult(key);
+    }
     return KeyEventResult.ignored;
   }
 
-  KeyEventResult _determineKeyEventResult(int keyEventId) {
-    final shouldIgnoreKeyEvent = widget.keyEventsToIgnore
-        .any((key) => key.keyId & LogicalKeyboardKey.valueMask == keyEventId);
-    return shouldIgnoreKeyEvent
+  KeyEventResult _determineKeyEventResult(LogicalKeyboardKey keyToIgnore) {
+    return widget.keyEventsToIgnore.contains(keyToIgnore)
         ? KeyEventResult.ignored
         : KeyEventResult.handled;
   }
@@ -1382,7 +1352,7 @@ class _SearchFieldSuffix extends StatelessWidget {
     assert(supportsNavigation || onClose != null);
     return supportsNavigation
         ? SearchNavigationControls(controller, onClose: onClose)
-        : closeSearchDropdownButton(onClose);
+        : InputDecorationSuffixButton.close(onPressed: onClose);
   }
 }
 
@@ -1418,7 +1388,7 @@ class SearchNavigationControls extends StatelessWidget {
                     child: isSearchInProgress
                         ? SmallCircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color?>(
-                              Theme.of(context).textTheme.bodyMedium!.color,
+                              Theme.of(context).regularTextStyle.color,
                             ),
                           )
                         : const SizedBox(),
@@ -1433,15 +1403,16 @@ class SearchNavigationControls extends StatelessWidget {
                     child: PaddedDivider.vertical(),
                   ),
                 ),
-                inputDecorationSuffixButton(
-                  Icons.keyboard_arrow_up,
-                  numMatches > 1 ? controller.previousMatch : null,
+                InputDecorationSuffixButton(
+                  icon: Icons.keyboard_arrow_up,
+                  onPressed: numMatches > 1 ? controller.previousMatch : null,
                 ),
-                inputDecorationSuffixButton(
-                  Icons.keyboard_arrow_down,
-                  numMatches > 1 ? controller.nextMatch : null,
+                InputDecorationSuffixButton(
+                  icon: Icons.keyboard_arrow_down,
+                  onPressed: numMatches > 1 ? controller.nextMatch : null,
                 ),
-                if (onClose != null) closeSearchDropdownButton(onClose),
+                if (onClose != null)
+                  InputDecorationSuffixButton.close(onPressed: onClose),
               ],
             );
           },
@@ -1548,4 +1519,10 @@ class AutoCompleteMatch {
     assert(segments.isNotEmpty);
     return combineSegments(segments);
   }
+}
+
+// TODO(kenz): try to use colors from the DevTools color schemes instead
+extension AutoCompleteColorExtension on ColorScheme {
+  Color get autoCompleteHighlightColor =>
+      isLight ? Colors.grey[300]! : Colors.grey[700]!;
 }

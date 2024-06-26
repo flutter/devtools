@@ -14,4 +14,14 @@ extension StagerTestExtensions on WidgetTester {
       ),
     );
   }
+
+  Future<void> pumpSceneAsync(Scene scene) async {
+    await runAsync(() async {
+      await pumpWidget(
+        Builder(
+          builder: (BuildContext context) => scene.build(context),
+        ),
+      );
+    });
+  }
 }

@@ -5,17 +5,17 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider show Provider;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/dialogs.dart';
-import '../../shared/primitives/simple_items.dart';
+import '../../shared/globals.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
+import 'instance_viewer/eval.dart';
 import 'instance_viewer/instance_details.dart';
 import 'instance_viewer/instance_providers.dart';
 import 'instance_viewer/instance_viewer.dart';
@@ -47,35 +47,38 @@ final _selectedProviderNode = AutoDisposeProvider<ProviderNode?>((ref) {
 final _showInternals = StateProvider<bool>((ref) => false);
 
 class ProviderScreen extends Screen {
-  ProviderScreen()
-      : super.conditional(
-          id: id,
-          requiresLibrary: 'package:provider/',
-          title: ScreenMetaData.provider.title,
-          requiresDebugBuild: true,
-          icon: Icons.attach_file,
-        );
+  ProviderScreen() : super.fromMetaData(ScreenMetaData.provider);
 
   static final id = ScreenMetaData.provider.id;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildScreenBody(BuildContext context) {
     return const ProviderScreenWrapper();
   }
 }
 
 class ProviderScreenWrapper extends StatefulWidget {
-  const ProviderScreenWrapper({Key? key}) : super(key: key);
+  const ProviderScreenWrapper({super.key});
 
   @override
   State<ProviderScreenWrapper> createState() => _ProviderScreenWrapperState();
 }
 
-class _ProviderScreenWrapperState extends State<ProviderScreenWrapper> {
+class _ProviderScreenWrapperState extends State<ProviderScreenWrapper>
+    with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
     ga.screen(ProviderScreen.id);
+
+    cancelListeners();
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        setServiceConnectionForProviderScreen(
+          serviceConnection.serviceManager.service!,
+        );
+      }
+    });
   }
 
   @override
@@ -85,11 +88,11 @@ class _ProviderScreenWrapperState extends State<ProviderScreenWrapper> {
 }
 
 class ProviderScreenBody extends ConsumerWidget {
-  const ProviderScreenBody({Key? key}) : super(key: key);
+  const ProviderScreenBody({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final splitAxis = Split.axisFor(context, 0.85);
+    final splitAxis = SplitPane.axisFor(context, 0.85);
 
     // A provider will automatically be selected as soon as one is detected
     final selectedProviderId = ref.watch(selectedProviderIdProvider);
@@ -98,10 +101,10 @@ class ProviderScreenBody extends ConsumerWidget {
         : '[No provider selected]';
 
     ref.listen<bool>(_hasErrorProvider, (_, hasError) {
-      if (hasError) showProviderErrorBanner(context);
+      if (hasError) showProviderErrorBanner();
     });
 
-    return Split(
+    return SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
@@ -157,11 +160,8 @@ class ProviderScreenBody extends ConsumerWidget {
   }
 }
 
-void showProviderErrorBanner(BuildContext context) {
-  provider.Provider.of<BannerMessagesController>(
-    context,
-    listen: false,
-  ).addMessage(
+void showProviderErrorBanner() {
+  bannerMessages.addMessage(
     ProviderUnknownErrorBanner(screenId: ProviderScreen.id).build(),
   );
 }

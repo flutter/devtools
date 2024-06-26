@@ -4,16 +4,15 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../devtools.dart';
-import '../../connected_app.dart';
 import '../../globals.dart';
-import '../../primitives/simple_items.dart';
+import '../../primitives/encoding.dart';
 import '../../primitives/utils.dart';
-import '_export_stub.dart'
-    if (dart.library.html) '_export_web.dart'
-    if (dart.library.io) '_export_desktop.dart';
+import '../../screen.dart';
+import '../../utils.dart';
+import '_export_desktop.dart' if (dart.library.js_interop) '_export_web.dart';
 
 const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
@@ -34,7 +33,6 @@ enum DevToolsExportKeys {
   activeScreenId,
 }
 
-// TODO(kenz): we should support a file picker import for desktop.
 class ImportController {
   ImportController(
     this._pushSnapshotScreenForImport,
@@ -47,9 +45,7 @@ class ImportController {
   DateTime? previousImportTime;
 
   // TODO(kenz): improve error handling here or in snapshot_screen.dart.
-  void importData(DevToolsJsonFile jsonFile) {
-    final json = jsonFile.data;
-
+  void importData(DevToolsJsonFile jsonFile, {String? expectedScreenId}) {
     // Do not allow two different imports within 500 ms of each other. This is a
     // workaround for the fact that we get two drop events for the same file.
     final now = DateTime.now();
@@ -62,6 +58,7 @@ class ImportController {
     }
     previousImportTime = now;
 
+    final json = jsonFile.data;
     final isDevToolsSnapshot = json is Map<String, dynamic> &&
         json[DevToolsExportKeys.devToolsSnapshot.name] == true;
     if (!isDevToolsSnapshot) {
@@ -69,40 +66,57 @@ class ImportController {
       return;
     }
 
-    final devToolsSnapshot = json;
+    final devToolsSnapshot = _DevToolsSnapshot(json);
     // TODO(kenz): support imports for more than one screen at a time.
-    final activeScreenId =
-        devToolsSnapshot[DevToolsExportKeys.activeScreenId.name];
+    final activeScreenId = devToolsSnapshot.activeScreenId;
+    if (expectedScreenId != null && activeScreenId != expectedScreenId) {
+      notificationService.push(
+        'Expected a data file for screen \'$expectedScreenId\' but received one'
+        ' for screen \'$activeScreenId\'. Please open a file for screen \'$expectedScreenId\'.',
+      );
+      return;
+    }
+
+    if (activeScreenId == ScreenMetaData.performance.id) {
+      if (devToolsSnapshot.json.containsKey('traceEvents')) {
+        notificationService.push(
+          'It looks like you are trying to load data that was saved from an '
+          'old version of DevTools. This data uses a legacy format that is no '
+          'longer supported. To load this file in DevTools, you will need to '
+          'downgrade your Flutter version to < 3.22.',
+        );
+        return;
+      }
+    }
+
     final connectedApp =
-        (devToolsSnapshot[DevToolsExportKeys.connectedApp.name] ??
-                <String, Object>{})
-            .cast<String, Object>();
-    offlineController
-      ..enterOfflineMode(offlineApp: OfflineConnectedApp.parse(connectedApp))
-      ..offlineDataJson = devToolsSnapshot;
+        OfflineConnectedApp.parse(devToolsSnapshot.connectedApp);
+    offlineDataController
+      ..startShowingOfflineData(offlineApp: connectedApp)
+      ..offlineDataJson = devToolsSnapshot.json;
     notificationService.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
   }
 }
 
+extension type _DevToolsSnapshot(Map<String, Object?> json) {
+  Map<String, Object?> get connectedApp {
+    final connectedApp = json[DevToolsExportKeys.connectedApp.name] as Map?;
+    return connectedApp == null ? {} : connectedApp.cast<String, Object?>();
+  }
+
+  String get activeScreenId =>
+      json[DevToolsExportKeys.activeScreenId.name] as String;
+}
+
 enum ExportFileType {
   json,
   csv,
-  yaml;
+  yaml,
+  data;
 
   @override
-  String toString() {
-    switch (this) {
-      case json:
-        return 'json';
-      case csv:
-        return 'csv';
-      case yaml:
-        return 'yaml';
-      default:
-        throw UnimplementedError('Unable to convert $this to a string');
-    }
-  }
+  String toString() => name;
 }
 
 abstract class ExportController {
@@ -123,26 +137,23 @@ abstract class ExportController {
     return '${prefix}_$timestamp$postfix.$type';
   }
 
-  /// Downloads a file with [contents]
+  /// Downloads a file with [content]
   /// and pushes notification about success if [notify] is true.
-  String downloadFile(
-    String content, {
+  String downloadFile<T>(
+    T content, {
     String? fileName,
     ExportFileType type = ExportFileType.json,
     bool notify = true,
   }) {
     fileName ??= ExportController.generateFileName(type: type);
-    saveFile(
-      content: content,
-      fileName: fileName,
-    );
+    saveFile<T>(content: content, fileName: fileName);
     notificationService.push(successfulExportMessage(fileName));
     return fileName;
   }
 
   /// Saves [content] to the [fileName].
-  void saveFile({
-    required String content,
+  void saveFile<T>({
+    required T content,
     required String fileName,
   });
 
@@ -152,28 +163,21 @@ abstract class ExportController {
   }) {
     final contents = {
       DevToolsExportKeys.devToolsSnapshot.name: true,
-      DevToolsExportKeys.devToolsVersion.name: version,
-      DevToolsExportKeys.connectedApp.name:
-          connectedApp?.toJson() ?? serviceManager.connectedApp!.toJson(),
+      DevToolsExportKeys.devToolsVersion.name: devToolsVersion,
+      DevToolsExportKeys.connectedApp.name: connectedApp?.toJson() ??
+          serviceConnection.serviceManager.connectedApp!.toJson(),
       ...offlineScreenData,
     };
-    final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];
-
-    // This is a workaround to guarantee that DevTools exports are compatible
-    // with other trace viewers (catapult, perfetto, chrome://tracing), which
-    // require a top level field named "traceEvents".
-    if (activeScreenId == ScreenMetaData.performance.id) {
-      final traceEvents = List<Map<String, dynamic>>.from(
-        contents[activeScreenId][traceEventsFieldName],
-      );
-      contents[traceEventsFieldName] = traceEvents;
-      contents[activeScreenId].remove(traceEventsFieldName);
-    }
+    // TODO(kenz): ensure that performance page exports can be loaded properly
+    // into the Perfetto UI (ui.perfetto.dev).
     return contents;
   }
 
   String encode(Map<String, dynamic> offlineScreenData) {
     final data = generateDataForExport(offlineScreenData: offlineScreenData);
-    return jsonEncode(data);
+    return jsonEncode(
+      data,
+      toEncodable: toEncodable,
+    );
   }
 }

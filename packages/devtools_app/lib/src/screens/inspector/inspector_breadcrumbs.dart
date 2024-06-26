@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/common_widgets.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/diagnostics_text_styles.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
-import '../../shared/utils.dart';
 
 class InspectorBreadcrumbNavigator extends StatelessWidget {
   const InspectorBreadcrumbNavigator({
-    Key? key,
+    super.key,
     required this.items,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   /// Max number of visible breadcrumbs including root item but not 'more' item.
   /// E.g. value 5 means root and 4 breadcrumbs can be displayed, other
@@ -23,7 +23,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
   static const _maxNumberOfBreadcrumbs = 5;
 
   final List<InspectorTreeNode> items;
-  final Function(InspectorTreeNode?) onTap;
+  final void Function(InspectorTreeNode?) onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
 
     final breadcrumbs = _generateBreadcrumbs(items);
     return SizedBox(
-      height: isDense() ? 24 : 28,
+      height: Breadcrumb.height,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Row(
@@ -61,7 +61,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
     List<InspectorTreeNode> nodes,
   ) {
     final lastNode = nodes.safeLast;
-    final List<_InspectorBreadcrumbData> items = nodes.map((node) {
+    final items = nodes.map((node) {
       return _InspectorBreadcrumbData.wrap(
         node: node,
         isSelected: node == lastNode,
@@ -85,13 +85,9 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
 
 class _InspectorBreadcrumb extends StatelessWidget {
   const _InspectorBreadcrumb({
-    Key? key,
     required this.data,
     required this.onTap,
-  }) : super(key: key);
-
-  static const BorderRadius _borderRadius =
-      BorderRadius.all(Radius.circular(defaultBorderRadius));
+  });
 
   static const _iconScale = 0.75;
 
@@ -120,14 +116,14 @@ class _InspectorBreadcrumb extends StatelessWidget {
 
     return InkWell(
       onTap: data.isClickable ? onTap : null,
-      borderRadius: _borderRadius,
+      borderRadius: defaultBorderRadius,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: densePadding,
           vertical: borderPadding,
         ),
         decoration: BoxDecoration(
-          borderRadius: _borderRadius,
+          borderRadius: defaultBorderRadius,
           color: data.isSelected
               ? Theme.of(context).colorScheme.selectedRowBackgroundColor
               : Colors.transparent,

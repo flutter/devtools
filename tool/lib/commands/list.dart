@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:path/path.dart' as path;
 
 import '../model.dart';
 
@@ -17,15 +18,15 @@ class ListCommand extends Command {
 
   @override
   Future run() async {
-    final repo = DevToolsRepo.getInstance()!;
+    final repo = DevToolsRepo.getInstance();
     print('DevTools repo at ${repo.repoPath}.');
 
     final packages = repo.getPackages();
 
     print('\n${packages.length} packages:');
 
-    for (Package p in packages) {
-      print('  ${p.relativePath}/');
+    for (final p in packages) {
+      print('  ${p.relativePath}${path.separator}');
     }
   }
 }

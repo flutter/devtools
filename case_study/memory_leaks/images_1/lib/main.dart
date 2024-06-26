@@ -10,7 +10,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
   // This widget is the root of your application.
 
   @override
@@ -29,12 +29,12 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, this.title = ""}) : super(key: key);
+  const MyHomePage({super.key, this.title = ""});
 
   final String title;
 
   @override
-  MyHomePageState createState() => MyHomePageState();
+  State<MyHomePage> createState() => MyHomePageState();
 }
 
 int globalObjectId = 0;
@@ -97,7 +97,7 @@ class MyHomePageState extends State<MyHomePage>
 
     developer.log('$loadingState, $imageUrl');
 
-    // Progress spinnger.
+    // Progress spinner.
     return Center(
       child: CircularProgressIndicator(
         value: expectedTotalBytes != null
@@ -176,7 +176,7 @@ class MyHomePageState extends State<MyHomePage>
 }
 
 class SecondScreen extends MyHomePage {
-  const SecondScreen({Key? key}) : super(key: key);
+  const SecondScreen({super.key});
 }
 
 // Loaded images. key is ImageUrl and value is the ImageChunkEvent (total and cumulative bytes loaded).

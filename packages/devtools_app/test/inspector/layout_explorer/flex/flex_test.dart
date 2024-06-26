@@ -8,7 +8,7 @@ import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dar
 import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
 import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:devtools_test/devtools_test.dart';
-import 'package:flutter/foundation.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -125,7 +125,7 @@ void main() {
             "defaultLevel": "info"
           },
           {
-            "description": "${describeEnum(axis)}",
+            "description": "${axis.name}",
             "type": "EnumProperty<Axis>",
             "name": "direction",
             "style": "singleLine",
@@ -242,9 +242,9 @@ void main() {
   Future<void> pump(WidgetTester tester, Widget w) async {
     await tester.runAsync(() async {
       await tester.pumpWidget(w);
-      for (var element in find.byType(Image).evaluate()) {
-        final Image widget = element.widget as Image;
-        final ImageProvider image = widget.image;
+      for (final element in find.byType(Image).evaluate()) {
+        final widget = element.widget as Image;
+        final image = widget.image;
         await precacheImage(image, element);
         await tester.pumpAndSettle();
       }

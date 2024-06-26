@@ -3,40 +3,65 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:devtools_shared/devtools_shared.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../screens/performance/performance_utils.dart';
 import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
+import 'http/http_service.dart' as http_service;
 import 'primitives/utils.dart';
 import 'screen.dart';
-import 'theme.dart';
-import 'version.dart';
 
-const _runInProfileModeDocsUrl =
-    'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
+const _runInProfileModeDocsUrl = 'https://flutter.dev/to/use-profile-mode';
 
 const _cpuSamplingRateDocsUrl =
-    'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
+    'https://docs.flutter.dev/tools/devtools/cpu-profiler#cpu-sampling-rate';
 
 class BannerMessagesController {
   final _messages = <String, ListValueNotifier<BannerMessage>>{};
   final _dismissedMessageKeys = <Key?>{};
 
-  void addMessage(BannerMessage message) {
-    // We push the banner message in a post frame callback because otherwise,
-    // we'd be trying to call setState while the parent widget `BannerMessages`
-    // is in the middle of `build`.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (isMessageDismissed(message) || isMessageVisible(message)) return;
+  /// Adds a banner message to top of DevTools.
+  ///
+  /// If the message is already visible, or if this message has already been
+  /// dismissed once and [ignoreIfAlreadyDismissed] is true, this method call
+  /// will be a no-op.
+  ///
+  /// [callInPostFrameCallback] determines whether the message will be added in
+  /// a post frame callback. This should be true (default) whenever this method
+  /// is called from a Flutter lifecycle method (initState,
+  /// didChangeDependencies, etc.). Set this value to false when the banner
+  /// message is being added from outside of the Flutter widget lifecycle.
+  void addMessage(
+    BannerMessage message, {
+    bool callInPostFrameCallback = true,
+    bool ignoreIfAlreadyDismissed = true,
+  }) {
+    void add() {
+      if ((ignoreIfAlreadyDismissed && isMessageDismissed(message)) ||
+          isMessageVisible(message)) {
+        return;
+      }
       final messages = _messagesForScreen(message.screenId);
       messages.add(message);
-    });
+    }
+
+    if (callInPostFrameCallback) {
+      // We push the banner message in a post frame callback because otherwise,
+      // we'd be trying to call setState while the parent widget `BannerMessages`
+      // is in the middle of `build`.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        add();
+      });
+    } else {
+      add();
+    }
   }
 
   void removeMessage(BannerMessage message, {bool dismiss = false}) {
@@ -88,15 +113,14 @@ class BannerMessagesController {
 }
 
 class BannerMessages extends StatelessWidget {
-  const BannerMessages({Key? key, required this.screen}) : super(key: key);
+  const BannerMessages({super.key, required this.screen});
 
   final Screen screen;
 
   // TODO(kenz): use an AnimatedList for message changes.
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<BannerMessagesController>(context);
-    final messagesForScreen = controller.messagesForScreen(screen.screenId);
+    final messagesForScreen = bannerMessages.messagesForScreen(screen.screenId);
     return Column(
       children: [
         ValueListenableBuilder<List<BannerMessage>>(
@@ -115,9 +139,17 @@ class BannerMessages extends StatelessWidget {
   }
 }
 
+// TODO(kenz): add an 'info' type.
 enum BannerMessageType {
   warning,
-  error,
+  error;
+
+  static BannerMessageType? parse(String? value) {
+    for (final type in BannerMessageType.values) {
+      if (type.name == value) return type;
+    }
+    return null;
+  }
 }
 
 @visibleForTesting
@@ -135,14 +167,18 @@ class BannerMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Card(
       color: messageType == BannerMessageType.error
           ? colorScheme.errorContainer
           : colorScheme.warningContainer,
       margin: const EdgeInsets.only(bottom: intermediateSpacing),
       child: Padding(
-        padding: const EdgeInsets.all(defaultSpacing),
+        padding: const EdgeInsets.symmetric(
+          vertical: densePadding,
+          horizontal: denseSpacing,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,6 +192,7 @@ class BannerMessage extends StatelessWidget {
                     messageType == BannerMessageType.error
                         ? Icons.error_outline
                         : Icons.warning_amber_outlined,
+                    size: actionsIconSize,
                     color: messageType == BannerMessageType.error
                         ? colorScheme.onErrorContainer
                         : colorScheme.onWarningContainer,
@@ -164,7 +201,7 @@ class BannerMessage extends StatelessWidget {
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      style: TextStyle(
+                      style: theme.regularTextStyle.copyWith(
                         color: messageType == BannerMessageType.error
                             ? colorScheme.onErrorContainer
                             : colorScheme.onWarningContainer,
@@ -177,14 +214,13 @@ class BannerMessage extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.close,
+                    size: actionsIconSize,
                     color: messageType == BannerMessageType.error
                         ? colorScheme.onErrorContainer
                         : colorScheme.onWarningContainer,
                   ),
-                  onPressed: () => Provider.of<BannerMessagesController>(
-                    context,
-                    listen: false,
-                  ).removeMessage(this, dismiss: true),
+                  onPressed: () =>
+                      bannerMessages.removeMessage(this, dismiss: true),
                 ),
               ],
             ),
@@ -197,13 +233,10 @@ class BannerMessage extends StatelessWidget {
 
 class _BannerError extends BannerMessage {
   const _BannerError({
-    required Key key,
-    required List<TextSpan> textSpans,
-    required String screenId,
+    required Key super.key,
+    required List<TextSpan> super.textSpans,
+    required super.screenId,
   }) : super(
-          key: key,
-          textSpans: textSpans,
-          screenId: screenId,
           messageType: BannerMessageType.error,
         );
 }
@@ -302,8 +335,8 @@ class ShaderJankMessage {
               '$jankDurationText spent in shader compilation. To pre-compile '
               'shaders, see the instructions at ',
         ),
-        LinkTextSpan(
-          link: Link(
+        GaLinkTextSpan(
+          link: GaLink(
             display: preCompileShadersDocsUrl,
             url: preCompileShadersDocsUrl,
             gaScreenName: screenId,
@@ -314,18 +347,18 @@ class ShaderJankMessage {
           style: theme.errorMessageLinkStyle,
         ),
         const TextSpan(text: '.'),
-        if (serviceManager.connectedApp!.isIosApp) ...[
+        if (serviceConnection.serviceManager.connectedApp!.isIosApp) ...[
           const TextSpan(
             text: '\n\nNote: this is a legacy solution with many pitfalls. '
                 'Try ',
           ),
-          LinkTextSpan(
-            link: Link(
+          GaLinkTextSpan(
+            link: GaLink(
               display: 'Impeller',
-              url: impellerWikiUrl,
+              url: impellerDocsUrl,
               gaScreenName: screenId,
               gaSelectedItemDescription:
-                  gac.PerformanceDocs.impellerWikiLink.name,
+                  gac.PerformanceDocs.impellerDocsLink.name,
             ),
             context: context,
             style: theme.errorMessageLinkStyle,
@@ -357,8 +390,8 @@ class HighCpuSamplingRateMessage {
           text: '''
 You are opting in to a high CPU sampling rate. This may affect the performance of your application. Please read our ''',
         ),
-        LinkTextSpan(
-          link: Link(
+        GaLinkTextSpan(
+          link: GaLink(
             display: 'documentation',
             url: _cpuSamplingRateDocsUrl,
             gaScreenName: screenId,
@@ -374,6 +407,47 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
       ],
       screenId: screenId,
     );
+  }
+}
+
+class HttpLoggingEnabledMessage {
+  HttpLoggingEnabledMessage(this.screenId)
+      : key = Key('HttpLoggingEnabledMessage - $screenId');
+
+  final Key key;
+
+  final String screenId;
+
+  BannerMessage build(BuildContext context) {
+    final theme = Theme.of(context);
+    late final BannerWarning message;
+    message = BannerWarning(
+      key: key,
+      textSpans: [
+        const TextSpan(
+          text: '''
+HTTP traffic is being logged for debugging purposes. This may result in increased memory usage for your app. If this is not intentional, consider ''',
+        ),
+        TextSpan(
+          text: 'disabling http logging',
+          style: theme.warningMessageLinkStyle,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              await http_service.toggleHttpRequestLogging(false).then((_) {
+                if (!http_service.httpLoggingEnabled) {
+                  notificationService.push('Http logging disabled.');
+                  bannerMessages.removeMessage(message);
+                }
+              });
+            },
+        ),
+        const TextSpan(
+          text: ' before profiling the memory of your application.',
+        ),
+      ],
+      screenId: screenId,
+    );
+    return message;
   }
 }
 
@@ -405,67 +479,14 @@ For the most accurate absolute memory stats, relaunch your application in ''',
   }
 }
 
-class UnsupportedFlutterVersionWarning {
-  const UnsupportedFlutterVersionWarning({
-    required this.screenId,
-    required this.currentFlutterVersion,
-    required this.supportedFlutterVersion,
-  });
-
-  final String screenId;
-
-  final FlutterVersion currentFlutterVersion;
-
-  final SemanticVersion supportedFlutterVersion;
-
-  BannerMessage build() {
-    return BannerWarning(
-      key: Key('UnsupportedFlutterVersionWarning - $screenId'),
-      textSpans: [
-        TextSpan(
-          text: 'This version of DevTools expects the connected app to be run'
-              ' on Flutter >= $supportedFlutterVersion, but the connected app'
-              ' is running on Flutter $currentFlutterVersion. Some'
-              ' functionality may not work. If this causes issues, try'
-              ' upgrading your Flutter version.',
-          style: TextStyle(fontSize: defaultFontSize),
-        ),
-      ],
-      screenId: screenId,
-    );
-  }
-}
-
-void maybePushUnsupportedFlutterVersionWarning(
-  BuildContext context,
-  String screenId, {
-  required SemanticVersion supportedFlutterVersion,
-}) {
-  final isFlutterApp = serviceManager.connectedApp?.isFlutterAppNow;
-  if (offlineController.offlineMode.value ||
-      isFlutterApp == null ||
-      !isFlutterApp) {
-    return;
-  }
-  final currentVersion = serviceManager.connectedApp!.flutterVersionNow!;
-  if (currentVersion < supportedFlutterVersion) {
-    Provider.of<BannerMessagesController>(context).addMessage(
-      UnsupportedFlutterVersionWarning(
-        screenId: screenId,
-        currentFlutterVersion: currentVersion,
-        supportedFlutterVersion: supportedFlutterVersion,
-      ).build(),
-    );
-  }
-}
-
 void maybePushDebugModePerformanceMessage(
   BuildContext context,
   String screenId,
 ) {
-  if (offlineController.offlineMode.value) return;
-  if (serviceManager.connectedApp?.isDebugFlutterAppNow ?? false) {
-    Provider.of<BannerMessagesController>(context).addMessage(
+  if (offlineDataController.showingOfflineData.value) return;
+  if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
+      false) {
+    bannerMessages.addMessage(
       DebugModePerformanceMessage(screenId).build(context),
     );
   }
@@ -475,10 +496,21 @@ void maybePushDebugModeMemoryMessage(
   BuildContext context,
   String screenId,
 ) {
-  if (offlineController.offlineMode.value) return;
-  if (serviceManager.connectedApp?.isDebugFlutterAppNow ?? false) {
-    Provider.of<BannerMessagesController>(context)
-        .addMessage(DebugModeMemoryMessage(screenId).build(context));
+  if (offlineDataController.showingOfflineData.value) return;
+  if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
+      false) {
+    bannerMessages.addMessage(DebugModeMemoryMessage(screenId).build(context));
+  }
+}
+
+void maybePushHttpLoggingMessage(
+  BuildContext context,
+  String screenId,
+) {
+  if (http_service.httpLoggingEnabled) {
+    bannerMessages.addMessage(
+      HttpLoggingEnabledMessage(screenId).build(context),
+    );
   }
 }
 
@@ -494,13 +526,13 @@ extension BannerMessageThemeExtension on ThemeData {
       );
 }
 
-LinkTextSpan _runInProfileModeTextSpan(
+GaLinkTextSpan _runInProfileModeTextSpan(
   BuildContext context, {
   required String screenId,
   required TextStyle style,
 }) {
-  return LinkTextSpan(
-    link: Link(
+  return GaLinkTextSpan(
+    link: GaLink(
       display: 'profile mode',
       url: _runInProfileModeDocsUrl,
       gaScreenName: screenId,

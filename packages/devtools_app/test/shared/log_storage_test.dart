@@ -39,7 +39,7 @@ void main() {
           expect(logStorage.toString(), contains(logRecord.message));
           logStorage.clear();
 
-          expect(logStorage.toString(), '');
+          expect(logStorage.toString(), equals(''));
         },
       );
 
@@ -53,7 +53,8 @@ void main() {
           }
 
           expect(
-            logStorage.toString().split('\n').length,
+            // subtract 1 since last line has a newline
+            logStorage.toString().split('\n').length - 1,
             equals(LogStorage.maxLogEntries),
           );
 
@@ -62,7 +63,8 @@ void main() {
           logStorage.addLog(extraLogRecord);
 
           expect(
-            logStorage.toString().split('\n').length,
+            // subtract 1 since last line has a newline
+            logStorage.toString().split('\n').length - 1,
             equals(LogStorage.maxLogEntries),
           );
           expect(logStorage.toString(), contains(extraLogRecord.level.name));

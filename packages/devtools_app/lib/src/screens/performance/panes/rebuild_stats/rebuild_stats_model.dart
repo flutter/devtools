@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-
-import '../../../../shared/primitives/utils.dart';
 
 // An example of a widget rebuild count event:
 
@@ -95,10 +93,10 @@ class LocationMap {
   Map<String, Object> toJson() {
     final json = <String, Object>{};
     final pathToLocations = <String, List<Location>>{};
-    for (var location in _locationMap.values) {
+    for (final location in _locationMap.values) {
       if (location.isResolved) {
         pathToLocations
-            .putIfAbsent(location.path!, () => <Location>[])
+            .putIfAbsent(location.fileUriString!, () => <Location>[])
             .add(location);
       }
     }
@@ -107,7 +105,7 @@ class LocationMap {
       final lines = <int>[];
       final columns = <int>[];
       final names = <String>[];
-      for (var location in locations) {
+      for (final location in locations) {
         ids.add(location.id);
         lines.add(location.line!);
         columns.add(location.column!);
@@ -124,7 +122,7 @@ class LocationMap {
   }
 
   void processLocationMap(Map<String, dynamic> json) {
-    for (final String path in json.keys) {
+    for (final path in json.keys) {
       final entries = (json[path]! as Map).cast<String, List<Object?>>();
 
       final ids = entries[_idsKey]!.cast<int>();
@@ -136,10 +134,10 @@ class LocationMap {
         final id = ids[i];
         final existing = _locationMap[id];
         if (existing != null) {
-          if (existing.path == null) {
+          if (existing.fileUriString == null) {
             // Fill in the empty placeholder location in _locationsMap for this
             // location id. The empty placeholder entry must be completely empty.
-            existing.path = path;
+            existing.fileUriString = path;
             assert(existing.line == null);
             existing.line = lines[i];
             assert(existing.column == null);
@@ -151,7 +149,7 @@ class LocationMap {
             // Existing entry already has a path. Ensure it is consistent.
             // Data could become inconsistent if we had a bug and comingled data
             // from before and after a hot restart.
-            assert(existing.path == path);
+            assert(existing.fileUriString == path);
             assert(existing.line == lines[i]);
             assert(existing.column == columns[i]);
             assert(existing.name == names[i]);
@@ -159,7 +157,7 @@ class LocationMap {
         } else {
           final location = Location(
             id: id,
-            path: path,
+            fileUriString: path,
             line: lines[i],
             column: columns[i],
             name: names[i],
@@ -177,7 +175,7 @@ class LocationMap {
 class RebuildCountModel {
   RebuildCountModel();
 
-  RebuildCountModel.parse(Map<String, Object?> json) {
+  RebuildCountModel.fromJson(Map<String, Object?> json) {
     if (json.isEmpty) return;
     locationMap.processLocationMap(json[_locationsKey] as Map<String, Object?>);
     final frames =
@@ -187,7 +185,7 @@ class RebuildCountModel {
 
   // Maximum number of historic frames to keep rebuild counts to ensure memory
   // usage from rebuild counts is not excessive.
-  static const int rebuildFrameCacheSize = 10000;
+  static const rebuildFrameCacheSize = 10000;
 
   /// Source of truth for all resolution fo location ids to [Location] objects.
   final locationMap = LocationMap();
@@ -216,7 +214,7 @@ class RebuildCountModel {
 
     _rebuildsForFrame.forEach((id, rebuilds) {
       final events = <int>[];
-      for (RebuildLocation rebuild in rebuilds) {
+      for (final rebuild in rebuilds) {
         events
           ..add(rebuild.location.id)
           ..add(rebuild.buildCount);
@@ -260,7 +258,7 @@ class RebuildCountModel {
 
     final int frameNumber = json[_frameNumberKey];
     // parse events
-    final List<int> events = (json[_eventsKey] as List).cast<int>();
+    final events = (json[_eventsKey] as List).cast<int>();
     final rebuildsForFrame = <RebuildLocation>[];
     for (int i = 0; i < events.length; i += 2) {
       final id = events[i];
@@ -278,17 +276,23 @@ class RebuildCountModel {
 }
 
 class Location {
-  Location({required this.id, this.path, this.line, this.column, this.name});
+  Location({
+    required this.id,
+    this.fileUriString,
+    this.line,
+    this.column,
+    this.name,
+  });
 
   final int id;
 
   /// Either all of path, line, column, and name are null or none are.
-  String? path;
+  String? fileUriString;
   int? line;
   int? column;
   String? name;
 
-  bool get isResolved => path != null;
+  bool get isResolved => fileUriString != null;
 }
 
 class RebuildLocation {
@@ -315,7 +319,7 @@ List<RebuildLocationStats> combineStats(
   final output = <Location, RebuildLocationStats>{};
   for (int i = 0; i < rebuildStats.length; i++) {
     final statsForIndex = rebuildStats[i];
-    for (var entry in statsForIndex) {
+    for (final entry in statsForIndex) {
       output
           .putIfAbsent(
             entry.location,

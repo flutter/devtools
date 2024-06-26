@@ -4,19 +4,19 @@
 
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/ui/utils.dart';
 import 'frame_analysis_model.dart';
 
 class FrameTimeVisualizer extends StatefulWidget {
   const FrameTimeVisualizer({
-    Key? key,
+    super.key,
     required this.frameAnalysis,
-  }) : super(key: key);
+  });
 
   final FrameAnalysis frameAnalysis;
 
@@ -52,7 +52,7 @@ class _FrameTimeVisualizerState extends State<FrameTimeVisualizer> {
 }
 
 class _UiPhases extends StatelessWidget {
-  const _UiPhases({Key? key, required this.frameAnalysis}) : super(key: key);
+  const _UiPhases({required this.frameAnalysis});
 
   final FrameAnalysis frameAnalysis;
 
@@ -93,8 +93,7 @@ class _UiPhases extends StatelessWidget {
 }
 
 class _RasterPhases extends StatelessWidget {
-  const _RasterPhases({Key? key, required this.frameAnalysis})
-      : super(key: key);
+  const _RasterPhases({required this.frameAnalysis});
 
   final FrameAnalysis frameAnalysis;
 
@@ -140,11 +139,10 @@ class _RasterPhases extends StatelessWidget {
 
 class _FrameBlockGroup extends StatelessWidget {
   const _FrameBlockGroup({
-    Key? key,
     required this.title,
     required this.data,
     required this.hasData,
-  }) : super(key: key);
+  });
 
   final String title;
 
@@ -232,12 +230,11 @@ class _FrameBlockGroup extends StatelessWidget {
 
 class _FramePhaseBlock extends StatelessWidget {
   const _FramePhaseBlock({
-    Key? key,
     required this.blockData,
     required this.width,
-  }) : super(key: key);
+  });
 
-  static const _height = 30.0;
+  static const _height = 24.0;
 
   static const minBlockWidth = defaultIconSizeBeforeScaling + densePadding * 8;
 

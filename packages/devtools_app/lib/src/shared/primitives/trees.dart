@@ -17,7 +17,7 @@ import 'dart:math';
 abstract class TreeNode<T extends TreeNode<T>> {
   T? parent;
 
-  final List<T> children = [];
+  final children = <T>[];
 
   // TODO(jacobr) should impact depth.
   bool indentChildren = true;
@@ -33,7 +33,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
     if (_depth != 0) {
       return _depth;
     }
-    for (T child in children) {
+    for (final child in children) {
       _depth = max(_depth, child.depth);
     }
     return _depth = _depth + 1;
@@ -156,10 +156,6 @@ abstract class TreeNode<T extends TreeNode<T>> {
         node.collapse();
       },
     );
-  }
-
-  void removeLastChild() {
-    children.removeLast();
   }
 
   bool subtreeHasNodeWithCondition(bool Function(T node) condition) {
@@ -343,7 +339,6 @@ T? breadthFirstTraversal<T extends TreeNode<T>>(
 }) {
   return _treeTraversal(
     root,
-    bfs: true,
     returnCondition: returnCondition,
     action: action,
   );
@@ -404,7 +399,7 @@ List<T> buildFlatList<T extends TreeNode<T>>(
   void Function(T node)? onTraverse,
 }) {
   final flatList = <T>[];
-  for (T root in roots) {
+  for (final root in roots) {
     _traverse(root, (T n) {
       if (onTraverse != null) onTraverse(n);
       flatList.add(n);
@@ -420,7 +415,7 @@ void _traverse<T extends TreeNode<T>>(
 ) {
   final shouldContinue = callback(node);
   if (shouldContinue) {
-    for (var child in node.children) {
+    for (final child in node.children) {
       _traverse(child, callback);
     }
   }

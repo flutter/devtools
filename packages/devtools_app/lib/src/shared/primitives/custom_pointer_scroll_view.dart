@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid-explicit-type-declaration, forked code from Flutter framework.
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -21,33 +23,20 @@ abstract class CustomPointerScrollView extends BoxScrollView {
   ///
   /// If the [primary] argument is true, the [controller] must be null.
   const CustomPointerScrollView({
-    Key? key,
-    Axis scrollDirection = Axis.vertical,
-    bool reverse = false,
-    ScrollController? controller,
-    bool? primary,
-    ScrollPhysics? physics,
-    bool shrinkWrap = false,
-    EdgeInsetsGeometry? padding,
-    double? cacheExtent,
-    int? semanticChildCount,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    super.key,
+    super.scrollDirection,
+    super.reverse,
+    super.controller,
+    super.primary,
+    super.physics,
+    super.shrinkWrap,
+    super.padding,
+    super.cacheExtent,
+    super.semanticChildCount,
+    super.dragStartBehavior,
     this.customPointerSignalHandler,
-  })  : _primary = primary ??
-            controller == null && identical(scrollDirection, Axis.vertical),
-        super(
-          key: key,
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          controller: controller,
-          padding: padding,
-          primary: primary,
-          physics: physics,
-          shrinkWrap: shrinkWrap,
-          cacheExtent: cacheExtent,
-          semanticChildCount: semanticChildCount,
-          dragStartBehavior: dragStartBehavior,
-        );
+  }) : _primary = primary ??
+            controller == null && identical(scrollDirection, Axis.vertical);
 
   final void Function(PointerSignalEvent event)? customPointerSignalHandler;
 
@@ -90,7 +79,7 @@ abstract class CustomPointerScrollView extends BoxScrollView {
 /// pointer signal event handling via [customPointerSignalHandler].
 class CustomPointerScrollable extends StatefulWidget {
   const CustomPointerScrollable({
-    Key? key,
+    super.key,
     this.axisDirection = AxisDirection.down,
     this.controller,
     this.physics,
@@ -100,8 +89,7 @@ class CustomPointerScrollable extends StatefulWidget {
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.customPointerSignalHandler,
-  })  : assert(semanticChildCount == null || semanticChildCount >= 0),
-        super(key: key);
+  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// The direction in which this widget scrolls.
   ///
@@ -264,29 +252,6 @@ class CustomPointerScrollable extends StatefulWidget {
     final _ScrollableScope? widget =
         context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
-  }
-
-  /// Provides a heuristic to determine if expensive frame-bound tasks should be
-  /// deferred for the [context] at a specific point in time.
-  ///
-  /// Calling this method does _not_ create a dependency on any other widget.
-  /// This also means that the value returned is only good for the point in time
-  /// when it is called, and callers will not get updated if the value changes.
-  ///
-  /// The heuristic used is determined by the [physics] of this [Scrollable]
-  /// via [ScrollPhysics.recommendDeferredScrolling]. That method is called with
-  /// the current [activity]'s [ScrollActivity.velocity].
-  ///
-  /// If there is no [Scrollable] in the widget tree above the [context], this
-  /// method returns false.
-  static bool recommendDeferredLoadingForContext(BuildContext context) {
-    final _ScrollableScope? widget = context
-        .getElementForInheritedWidgetOfExactType<_ScrollableScope>()
-        ?.widget as _ScrollableScope?;
-    if (widget == null) {
-      return false;
-    }
-    return widget.position.recommendDeferredLoading(context);
   }
 
   /// Scrolls the scrollables that enclose the given context so as to make the
@@ -701,11 +666,10 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
 // _ScrollableScope.
 class _ScrollableScope extends InheritedWidget {
   const _ScrollableScope({
-    Key? key,
     required this.scrollable,
     required this.position,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   final CustomPointerScrollableState scrollable;
   final ScrollPosition position;
@@ -732,13 +696,12 @@ class _ScrollableScope extends InheritedWidget {
 /// scrollable children.
 class _ScrollSemantics extends SingleChildRenderObjectWidget {
   const _ScrollSemantics({
-    Key? key,
+    super.key,
     required this.position,
     required this.allowImplicitScrolling,
     required this.semanticChildCount,
-    Widget? child,
-  })  : assert(semanticChildCount == null || semanticChildCount >= 0),
-        super(key: key, child: child);
+    super.child,
+  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;
@@ -834,15 +797,12 @@ class _RenderScrollSemantics extends RenderProxyBox {
       return;
     }
 
-    _innerNode ??= SemanticsNode(showOnScreen: showOnScreen);
-    _innerNode!
-      ..isMergedIntoParent = node.isPartOfNodeMerging
-      ..rect = Offset.zero & node.rect.size;
+    (_innerNode ??= SemanticsNode(showOnScreen: showOnScreen)).rect = node.rect;
 
     int? firstVisibleIndex;
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode!];
     final List<SemanticsNode> included = <SemanticsNode>[];
-    for (final SemanticsNode child in children) {
+    for (final child in children) {
       assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);

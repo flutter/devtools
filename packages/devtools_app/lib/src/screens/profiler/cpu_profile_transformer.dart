@@ -129,7 +129,7 @@ class CpuProfileTransformer {
   }
 
   void _setExclusiveSampleCountsAndTags(CpuProfileData cpuProfileData) {
-    for (CpuSampleEvent sample in cpuProfileData.cpuSamples) {
+    for (final sample in cpuProfileData.cpuSamples) {
       final leafId = sample.leafId;
       final stackFrame = cpuProfileData.stackFrames[leafId];
       assert(

@@ -6,25 +6,24 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 
-const double rowPadding = 2.0;
+const rowPadding = 2.0;
 // Flame chart rows contain text so are not readable if they do not scale with
 // the font factor.
 double get chartRowHeight => scaleByFontFactor(22.0);
@@ -35,8 +34,8 @@ double get rowHeightWithPadding => chartRowHeight + rowPadding;
 // on the font size scale factor. TODO(jacobr): clean up the section spacing so
 // it is not used in a case where it is not really spacing.
 double get sectionSpacing => scaleByFontFactor(16.0);
-const double sideInset = 70.0;
-const double sideInsetSmall = 60.0;
+const sideInset = 70.0;
+const sideInsetSmall = 60.0;
 
 double get baseTimelineGridIntervalPx => scaleByFontFactor(150.0);
 
@@ -70,7 +69,7 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   ///
   /// This isn't really needed but is a reasonable for safety in case we
   /// aren't handling some mouse based scroll wheel behavior well, etc.
-  static const double maxScrollWheelDelta = 20.0;
+  static const maxScrollWheelDelta = 20.0;
 
   final T data;
 
@@ -108,9 +107,9 @@ abstract class FlameChartState<T extends FlameChart,
   // each node is positioned inside its own list.
   final flameChartNodeTop = 0.0;
 
-  final List<FlameChartRow<V>> rows = [];
+  final rows = <FlameChartRow<V>>[];
 
-  final List<FlameChartSection> sections = [];
+  final sections = <FlameChartSection>[];
 
   final focusNode = FocusNode(debugLabel: 'flame-chart');
 
@@ -289,7 +288,7 @@ abstract class FlameChartState<T extends FlameChart,
         child: Focus(
           autofocus: true,
           focusNode: focusNode,
-          onKey: (node, event) => _handleKeyEvent(event),
+          onKeyEvent: (node, event) => _handleKeyEvent(event),
           // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
           // rendered on top of the custom painters defined in [buildCustomPaints]
           child: Scrollbar(
@@ -454,48 +453,47 @@ abstract class FlameChartState<T extends FlameChart,
     );
   }
 
-  KeyEventResult _handleKeyEvent(RawKeyEvent event) {
+  KeyEventResult _handleKeyEvent(KeyEvent event) {
+    if (!event.isKeyDownOrRepeat) return KeyEventResult.ignored;
     // Only handle down events so logic is not duplicated on key up.
-    if (event is RawKeyDownEvent) {
-      // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
-      // if the key is held currently.
+    // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
+    // if the key is held currently.
 
-      // Handle zooming / navigation from WASD keys. Use physical keys to match
-      // other keyboard mappings like Dvorak, for which these keys would
-      // translate to ,AOE keys. See
-      // https://api.flutter.dev/flutter/services/RawKeyEvent/physicalKey.html.
-      final eventKey = event.physicalKey;
-      if (eventKey == PhysicalKeyboardKey.keyW) {
-        unawaited(
-          zoomTo(
-            math.min(
-              maxZoomLevel,
-              currentZoom + keyboardZoomInUnit,
-            ),
+    // Handle zooming / navigation from WASD keys. Use physical keys to match
+    // other keyboard mappings like Dvorak, for which these keys would
+    // translate to ,AOE keys. See
+    // https://api.flutter.dev/flutter/services/KeyEvent/physicalKey.html.
+    final eventKey = event.physicalKey;
+    if (eventKey == PhysicalKeyboardKey.keyW) {
+      unawaited(
+        zoomTo(
+          math.min(
+            maxZoomLevel,
+            currentZoom + keyboardZoomInUnit,
           ),
-        );
-        return KeyEventResult.handled;
-      } else if (eventKey == PhysicalKeyboardKey.keyS) {
-        unawaited(
-          zoomTo(
-            math.max(
-              FlameChart.minZoomLevel,
-              currentZoom - keyboardZoomOutUnit,
-            ),
+        ),
+      );
+      return KeyEventResult.handled;
+    } else if (eventKey == PhysicalKeyboardKey.keyS) {
+      unawaited(
+        zoomTo(
+          math.max(
+            FlameChart.minZoomLevel,
+            currentZoom - keyboardZoomOutUnit,
           ),
-        );
-        return KeyEventResult.handled;
-      } else if (eventKey == PhysicalKeyboardKey.keyA) {
-        // `unawaited` does not work for FutureOr
-        // ignore: discarded_futures
-        scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
-        return KeyEventResult.handled;
-      } else if (eventKey == PhysicalKeyboardKey.keyD) {
-        // `unawaited` does not work for FutureOr
-        // ignore: discarded_futures
-        scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
-        return KeyEventResult.handled;
-      }
+        ),
+      );
+      return KeyEventResult.handled;
+    } else if (eventKey == PhysicalKeyboardKey.keyA) {
+      // `unawaited` does not work for FutureOr
+      // ignore: discarded_futures
+      scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
+      return KeyEventResult.handled;
+    } else if (eventKey == PhysicalKeyboardKey.keyD) {
+      // `unawaited` does not work for FutureOr
+      // ignore: discarded_futures
+      scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
+      return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
   }
@@ -825,7 +823,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
 
 class FlameChartNodeWidget extends StatelessWidget {
   const FlameChartNodeWidget({
-    Key? key,
+    super.key,
     required this.index,
     required this.nodes,
     required this.zoom,
@@ -833,7 +831,7 @@ class FlameChartNodeWidget extends StatelessWidget {
     required this.chartWidth,
     required this.selected,
     required this.hovered,
-  }) : super(key: key);
+  });
 
   final int index;
 
@@ -875,7 +873,7 @@ class FlameChartNodeWidget extends StatelessWidget {
         searchMatch: node.data.isSearchMatch,
         activeSearchMatch: node.data.isActiveSearchMatch,
         zoom: FlameChartUtils.zoomForNode(node, zoom),
-        colorScheme: Theme.of(context).colorScheme,
+        theme: Theme.of(context),
       ),
     );
   }
@@ -1007,7 +1005,7 @@ class FlameChartSection {
 class FlameChartRow<T extends FlameChartDataMixin<T>> {
   FlameChartRow(this.index);
 
-  final List<FlameChartNode<T>> nodes = [];
+  final nodes = <FlameChartNode<T>>[];
 
   final int index;
 
@@ -1069,7 +1067,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     required bool searchMatch,
     required bool activeSearchMatch,
     required double zoom,
-    required ColorScheme colorScheme,
+    required ThemeData theme,
   }) {
     // This math.max call prevents using a rect with negative width for
     // small events that have padding.
@@ -1096,19 +1094,19 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
         selected: selected,
         searchMatch: searchMatch,
         activeSearchMatch: activeSearchMatch,
-        colorScheme: colorScheme,
+        colorScheme: theme.colorScheme,
       ),
       child: zoomedWidth >= _minWidthForText
           ? Text(
               text,
               textAlign: TextAlign.left,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: _textColor(
+              style: theme.regularTextStyleWithColor(
+                _textColor(
                   selected: selected,
                   searchMatch: searchMatch,
                   activeSearchMatch: activeSearchMatch,
-                  colorScheme: colorScheme,
+                  colorScheme: theme.colorScheme,
                 ),
               ),
             )
@@ -1315,23 +1313,16 @@ abstract class FlameChartPainter extends CustomPainter {
 
 class TimelineGridPainter extends FlameChartPainter {
   TimelineGridPainter({
-    required double zoom,
-    required BoxConstraints constraints,
-    required double verticalScrollOffset,
-    required double horizontalScrollOffset,
-    required double chartStartInset,
+    required super.zoom,
+    required super.constraints,
+    required super.verticalScrollOffset,
+    required super.horizontalScrollOffset,
+    required super.chartStartInset,
     required this.chartEndInset,
     required this.flameChartWidth,
     required this.duration,
-    required ColorScheme colorScheme,
-  }) : super(
-          zoom: zoom,
-          constraints: constraints,
-          verticalScrollOffset: verticalScrollOffset,
-          horizontalScrollOffset: horizontalScrollOffset,
-          chartStartInset: chartStartInset,
-          colorScheme: colorScheme,
-        );
+    required super.colorScheme,
+  });
 
   static const timestampOffset = 6.0;
 
@@ -1388,7 +1379,7 @@ class TimelineGridPainter extends FlameChartPainter {
       text: TextSpan(
         text: timestampText,
         style: TextStyle(
-          color: colorScheme.chartTextColor,
+          color: colorScheme.contrastTextColor,
           fontSize: defaultFontSize,
         ),
       ),
@@ -1445,8 +1436,7 @@ class TimelineGridPainter extends FlameChartPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => this != oldDelegate;
 
   @override
-  // ignore: avoid-dynamic, necessary here.
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is! TimelineGridPainter) return false;
     return zoom == other.zoom &&
         constraints == other.constraints &&
@@ -1469,11 +1459,11 @@ class TimelineGridPainter extends FlameChartPainter {
 
 class FlameChartHelpButton extends StatelessWidget {
   const FlameChartHelpButton({
-    Key? key,
+    super.key,
     required this.gaScreen,
     required this.gaSelection,
     this.additionalInfo = const <Widget>[],
-  }) : super(key: key);
+  });
 
   final String gaScreen;
   final String gaSelection;
@@ -1481,7 +1471,7 @@ class FlameChartHelpButton extends StatelessWidget {
 
   /// A fixed width for the first column in the help dialog to ensure that the
   /// subsections are aligned.
-  double get firstColumnWidth => scaleByFontFactor(190.0);
+  double get firstColumnWidth => scaleByFontFactor(120.0);
 
   @override
   Widget build(BuildContext context) {

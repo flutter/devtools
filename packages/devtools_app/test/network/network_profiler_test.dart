@@ -3,12 +3,17 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector_views.dart';
 import 'package:devtools_app/src/shared/http/http.dart';
+import 'package:devtools_app/src/shared/ui/tab.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -38,7 +43,7 @@ Future<void> clearTimeouts(WidgetTester tester) async {
 }
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late SocketProfile socketProfile;
   late HttpProfile httpProfile;
 
@@ -48,7 +53,10 @@ void main() {
     socketProfile = loadSocketProfile();
     httpProfile = loadHttpProfile();
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
@@ -56,13 +64,13 @@ void main() {
 
   group('Network Profiler', () {
     setUp(() {
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           socketProfile: socketProfile,
           httpProfile: httpProfile,
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
     });
 
     testWidgetsWithWindowSize('starts and stops', windowSize, (
@@ -82,8 +90,8 @@ void main() {
       expect(controller.recordingNotifier.value, true);
 
       // Pause recording.
-      expect(find.byType(PauseButton), findsOneWidget);
-      await tester.tap(find.byType(PauseButton));
+      expect(find.byType(StartStopRecordingButton), findsOneWidget);
+      await tester.tap(find.byType(StartStopRecordingButton));
       await tester.pumpAndSettle();
 
       // Check that we've stopped polling.
@@ -94,16 +102,15 @@ void main() {
     });
 
     Future<void> loadRequestsAndCheck(WidgetTester tester) async {
-      expect(find.byType(ResumeButton), findsOneWidget);
-      expect(find.byType(PauseButton), findsOneWidget);
+      expect(find.byType(StartStopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
-      expect(find.byType(Split), findsOneWidget);
+      expect(find.byType(SplitPane), findsOneWidget);
 
       // Advance the clock to populate the network requests table.
       await tester.pump(const Duration(seconds: 2));
       expect(find.byType(CircularProgressIndicator), findsNothing);
 
-      expect(controller.requests.value.requests, isNotEmpty);
+      expect(controller.requests.value, isNotEmpty);
     }
 
     // We should see the list of requests and the inspector, but have no
@@ -111,10 +118,7 @@ void main() {
     void expectNoSelection() {
       expect(find.byType(NetworkRequestsTable), findsOneWidget);
       expect(find.byType(NetworkRequestInspector), findsOneWidget);
-      expect(
-        find.byKey(NetworkRequestInspector.noRequestSelectedKey),
-        findsOneWidget,
-      );
+      expect(find.text('No request selected'), findsOneWidget);
       expect(controller.selectedRequest.value, isNull);
     }
 
@@ -131,7 +135,12 @@ void main() {
 
         Future<void> validateHeadersTab(DartIOHttpRequestData data) async {
           // Switch to headers tab.
-          await tester.tap(find.byKey(NetworkRequestInspector.headersTabKey));
+          await tester.tap(
+            find.descendant(
+              of: find.byType(DevToolsTab),
+              matching: find.text('Headers'),
+            ),
+          );
           await tester.pumpAndSettle();
 
           expect(find.byType(NetworkRequestOverviewView), findsNothing);
@@ -169,10 +178,16 @@ void main() {
         Future<void> validateResponseTab(DartIOHttpRequestData data) async {
           if (data.responseBody != null) {
             // Switch to response tab.
-            await tester
-                .tap(find.byKey(NetworkRequestInspector.responseTabKey));
+            await tester.tap(
+              find.descendant(
+                of: find.byType(DevToolsTab),
+                matching: find.text('Response'),
+              ),
+            );
             await tester.pumpAndSettle();
 
+            expect(find.byType(HttpResponseTrailingDropDown), findsOneWidget);
+            expect(find.byType(HttpViewTrailingCopyButton), findsOneWidget);
             expect(find.byType(NetworkRequestOverviewView), findsNothing);
             expect(find.byType(HttpRequestHeadersView), findsNothing);
             expect(find.byType(HttpResponseView), findsOneWidget);
@@ -182,7 +197,12 @@ void main() {
 
         Future<void> validateOverviewTab() async {
           // Switch to overview tab.
-          await tester.tap(find.byKey(NetworkRequestInspector.overviewTabKey));
+          await tester.tap(
+            find.descendant(
+              of: find.byType(DevToolsTab),
+              matching: find.text('Overview'),
+            ),
+          );
           await tester.pumpAndSettle();
 
           expect(find.byType(NetworkRequestOverviewView), findsOneWidget);
@@ -198,7 +218,12 @@ void main() {
 
           if (hasCookies) {
             // Switch to cookies tab.
-            await tester.tap(find.byKey(NetworkRequestInspector.cookiesTabKey));
+            await tester.tap(
+              find.descendant(
+                of: find.byType(DevToolsTab),
+                matching: find.text('Cookies'),
+              ),
+            );
             await tester.pumpAndSettle();
 
             expect(find.byType(NetworkRequestOverviewView), findsNothing);
@@ -241,19 +266,19 @@ void main() {
             // The cookies tab shouldn't be displayed if there are no cookies
             // associated with the request.
             expect(
-              find.byKey(NetworkRequestInspector.cookiesTabKey),
+              find.descendant(
+                of: find.byType(DevToolsTab),
+                matching: find.text('Cookies'),
+              ),
               findsNothing,
             );
           }
         }
 
-        for (final request in controller.requests.value.requests) {
+        for (final request in controller.requests.value) {
           controller.selectedRequest.value = request;
           await tester.pumpAndSettle();
-          expect(
-            find.byKey(NetworkRequestInspector.noRequestSelectedKey),
-            findsNothing,
-          );
+          expect(find.text('No request selected'), findsNothing);
 
           final selection = controller.selectedRequest.value!;
           if (selection is DartIOHttpRequestData) {
@@ -265,7 +290,7 @@ void main() {
         }
 
         // Pause recording.
-        await tester.tap(find.byType(PauseButton));
+        await tester.tap(find.byType(StartStopRecordingButton));
         await tester.pump();
 
         await clearTimeouts(tester);
@@ -287,7 +312,11 @@ void main() {
         expectNoSelection();
 
         final textElement = tester.element(
-          find.text('https://jsonplaceholder.typicode.com/albums/1').first,
+          find
+              .text(
+                'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
+              )
+              .first,
         );
         final selectableTextWidget =
             textElement.findAncestorWidgetOfExactType<SelectableText>()!;
@@ -295,10 +324,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(controller.selectedRequest.value, isNotNull);
-        expect(
-          find.byKey(NetworkRequestInspector.noRequestSelectedKey),
-          findsNothing,
-        );
+        expect(find.text('No request selected'), findsNothing);
       },
     );
 
@@ -314,7 +340,7 @@ void main() {
         await loadRequestsAndCheck(tester);
 
         // Pause the profiler.
-        await tester.tap(find.byType(PauseButton));
+        await tester.tap(find.byType(StartStopRecordingButton));
         await tester.pumpAndSettle();
 
         // Clear the results.
@@ -343,7 +369,9 @@ void main() {
         // Verify general information.
         expect(find.text('Request uri: '), findsOneWidget);
         expect(
-          find.text('https://jsonplaceholder.typicode.com/albums/1'),
+          find.text(
+            'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
+          ),
           findsOneWidget,
         );
         expect(find.text('Method: '), findsOneWidget);

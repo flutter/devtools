@@ -5,13 +5,13 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
@@ -58,12 +58,13 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
   @override
   Widget build(BuildContext context) {
-    final isOffline = offlineController.offlineMode.value;
-    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow!;
+    final isOffline = offlineDataController.showingOfflineData.value;
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!;
 
     var showFrameAnalysis = isFlutterApp;
     var showRasterStats = isFlutterApp;
-    var showRebuildStats = FeatureFlags.widgetRebuildstats && isFlutterApp;
+    var showRebuildStats = FeatureFlags.widgetRebuildStats && isFlutterApp;
     final offlineData = controller.offlinePerformanceData;
     if (isOffline) {
       final hasOfflineData = offlineData != null;
@@ -73,23 +74,19 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           showRasterStats && hasOfflineData && offlineData.rasterStats != null;
       showRebuildStats = showRebuildStats &&
           hasOfflineData &&
-          offlineData.rebuildCountModel.isNotEmpty;
+          offlineData.rebuildCountModel != null;
     }
-    final tabRecords = <_PerformanceTabRecord>[
-      if (showFrameAnalysis) _frameAnalysisRecord(),
-      if (showRasterStats) _rasterStatsRecord(),
-      if (showRebuildStats) _rebuildStatsRecord(),
-      _timelineEventsRecord(),
-    ];
 
-    final tabs = <DevToolsTab>[];
-    final tabViews = <Widget>[];
-    final featureControllers = <PerformanceFeatureController?>[];
-    for (final record in tabRecords) {
-      tabs.add(record.tab);
-      tabViews.add(record.tabView);
-      featureControllers.add(record.featureController);
-    }
+    final tabsAndControllers = _generateTabs(
+      showFrameAnalysis: showFrameAnalysis,
+      showRasterStats: showRasterStats,
+      showRebuildStats: showRebuildStats,
+    );
+    final tabs = tabsAndControllers
+        .map((t) => (tab: t.tab, tabView: t.tabView))
+        .toList();
+    final featureControllers =
+        tabsAndControllers.map((t) => t.featureController).toList();
 
     // If there is not an active feature, activate the first.
     if (featureControllers.firstWhereOrNull(
@@ -101,7 +98,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
     return AnalyticsTabbedView(
       tabs: tabs,
-      tabViews: tabViews,
       initialSelectedIndex: controller.selectedFeatureTabIndex,
       gaScreen: gac.performance,
       onTabChanged: (int index) {
@@ -118,71 +114,76 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     unawaited(controller.setActiveFeature(featureController));
   }
 
-  _PerformanceTabRecord _frameAnalysisRecord() {
-    assert(serviceManager.connectedApp!.isFlutterAppNow!);
-    Widget frameAnalysisView;
-    final selectedFrame = _selectedFlutterFrame;
-    frameAnalysisView = selectedFrame != null
-        ? FlutterFrameAnalysisView(
-            frameAnalysis: selectedFrame.frameAnalysis,
-            enhanceTracingController: controller.enhanceTracingController,
-            rebuildCountModel: controller.data!.rebuildCountModel,
-          )
-        : const Center(
-            child: Text('Select a frame above to view analysis data.'),
-          );
-    return _PerformanceTabRecord(
-      tab: _buildTab(tabName: 'Frame Analysis'),
-      tabView: KeepAliveWrapper(
-        child: frameAnalysisView,
-      ),
-      featureController: null,
-    );
-  }
-
-  _PerformanceTabRecord _rebuildStatsRecord() {
-    final rebuildStatsView = RebuildStatsView(
-      model: controller.data!.rebuildCountModel,
-      selectedFrame: controller.flutterFramesController.selectedFrame,
-    );
-
-    return _PerformanceTabRecord(
-      tab: _buildTab(tabName: 'Rebuild Stats'),
-      tabView: KeepAliveWrapper(
-        child: rebuildStatsView,
-      ),
-      featureController: null,
-    );
-  }
-
-  _PerformanceTabRecord _rasterStatsRecord() {
-    assert(serviceManager.connectedApp!.isFlutterAppNow!);
-    return _PerformanceTabRecord(
-      tab: _buildTab(tabName: 'Raster Stats'),
-      tabView: KeepAliveWrapper(
-        child: Center(
-          child: RasterStatsView(
-            rasterStatsController: controller.rasterStatsController,
+  List<
+      ({
+        DevToolsTab tab,
+        Widget tabView,
+        PerformanceFeatureController? featureController,
+      })> _generateTabs({
+    required bool showFrameAnalysis,
+    required bool showRasterStats,
+    required bool showRebuildStats,
+  }) {
+    if (showFrameAnalysis || showRasterStats || showRebuildStats) {
+      assert(serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!);
+    }
+    return [
+      if (showFrameAnalysis)
+        (
+          tab: _buildTab(tabName: 'Frame Analysis'),
+          tabView: KeepAliveWrapper(
+            child: _selectedFlutterFrame != null
+                ? FlutterFrameAnalysisView(
+                    frame: _selectedFlutterFrame!,
+                    enhanceTracingController:
+                        controller.enhanceTracingController,
+                    rebuildCountModel: controller.rebuildCountModel,
+                    displayRefreshRateNotifier:
+                        controller.flutterFramesController.displayRefreshRate,
+                  )
+                : const CenteredMessage(
+                    'Select a frame above to view analysis data.',
+                  ),
+          ),
+          featureController: null,
+        ),
+      if (showRebuildStats)
+        (
+          tab: _buildTab(tabName: 'Rebuild Stats'),
+          tabView: KeepAliveWrapper(
+            child: RebuildStatsView(
+              model: controller.rebuildCountModel,
+              selectedFrame: controller.flutterFramesController.selectedFrame,
+            ),
+          ),
+          featureController: controller.rebuildStatsController,
+        ),
+      if (showRasterStats)
+        (
+          tab: _buildTab(tabName: 'Raster Stats'),
+          tabView: KeepAliveWrapper(
+            child: Center(
+              child: RasterStatsView(
+                rasterStatsController: controller.rasterStatsController,
+                impellerEnabled: controller.impellerEnabled,
+              ),
+            ),
+          ),
+          featureController: controller.rasterStatsController,
+        ),
+      (
+        tab: _buildTab(
+          tabName: 'Timeline Events',
+          trailing: TimelineEventsTabControls(
+            controller: controller.timelineEventsController,
           ),
         ),
-      ),
-      featureController: controller.rasterStatsController,
-    );
-  }
-
-  _PerformanceTabRecord _timelineEventsRecord() {
-    return _PerformanceTabRecord(
-      tab: _buildTab(
-        tabName: 'Timeline Events',
-        trailing: TimelineEventsTabControls(
+        tabView: TimelineEventsTabView(
           controller: controller.timelineEventsController,
         ),
+        featureController: controller.timelineEventsController,
       ),
-      tabView: TimelineEventsTabView(
-        controller: controller.timelineEventsController,
-      ),
-      featureController: controller.timelineEventsController,
-    );
+    ];
   }
 
   DevToolsTab _buildTab({required String tabName, Widget? trailing}) {
@@ -192,14 +193,4 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       trailing: trailing,
     );
   }
-}
-
-class _PerformanceTabRecord extends TabRecord {
-  _PerformanceTabRecord({
-    required super.tab,
-    required super.tabView,
-    required this.featureController,
-  });
-
-  final PerformanceFeatureController? featureController;
 }

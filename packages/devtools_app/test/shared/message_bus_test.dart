@@ -12,33 +12,31 @@ void main() {
 void defineTests() {
   group('message_bus', () {
     test('fire one event', () async {
-      final MessageBus bus = MessageBus();
-      final Future<List<BusEvent>> future =
-          bus.onEvent(type: 'app.restart').toList();
+      final bus = MessageBus();
+      final future = bus.onEvent(type: 'app.restart').toList();
       _fireEvents(bus);
       bus.close();
-      final List<BusEvent> list = await future;
+      final list = await future;
       expect(list, hasLength(1));
     });
 
     test('fire two events', () async {
-      final MessageBus bus = MessageBus();
-      final Future<List<BusEvent>> future =
-          bus.onEvent(type: 'file.saved').toList();
+      final bus = MessageBus();
+      final future = bus.onEvent(type: 'file.saved').toList();
       _fireEvents(bus);
       bus.close();
-      final List<BusEvent> list = await future;
+      final list = await future;
       expect(list, hasLength(2));
       expect(list[0].data, 'foo.dart');
       expect(list[1].data, 'bar.dart');
     });
 
     test('receive all events', () async {
-      final MessageBus bus = MessageBus();
-      final Future<List<BusEvent>> future = bus.onEvent().toList();
+      final bus = MessageBus();
+      final future = bus.onEvent().toList();
       _fireEvents(bus);
       bus.close();
-      final List<BusEvent> list = await future;
+      final list = await future;
       expect(list, hasLength(3));
     });
   });

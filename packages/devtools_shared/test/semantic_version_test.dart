@@ -81,27 +81,27 @@ void main() {
     test('isVersionSupported', () {
       final supportedVersion = SemanticVersion(major: 1, minor: 1, patch: 1);
       expect(
-        SemanticVersion().isSupported(supportedVersion: SemanticVersion()),
+        SemanticVersion().isSupported(minSupportedVersion: SemanticVersion()),
         isTrue,
       );
       expect(
         SemanticVersion(major: 1, minor: 1, patch: 2)
-            .isSupported(supportedVersion: supportedVersion),
+            .isSupported(minSupportedVersion: supportedVersion),
         isTrue,
       );
       expect(
         SemanticVersion(major: 1, minor: 2, patch: 1)
-            .isSupported(supportedVersion: supportedVersion),
+            .isSupported(minSupportedVersion: supportedVersion),
         isTrue,
       );
       expect(
         SemanticVersion(major: 2, minor: 1, patch: 1)
-            .isSupported(supportedVersion: supportedVersion),
+            .isSupported(minSupportedVersion: supportedVersion),
         isTrue,
       );
       expect(
         SemanticVersion(major: 2, minor: 1, patch: 1).isSupported(
-          supportedVersion: SemanticVersion(major: 2, minor: 2, patch: 1),
+          minSupportedVersion: SemanticVersion(major: 2, minor: 2, patch: 1),
         ),
         isFalse,
       );

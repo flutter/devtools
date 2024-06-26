@@ -4,26 +4,31 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats_model.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/test_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_infra/test_data/performance_raster_stats.dart';
-
 void main() {
   group('$RasterStatsController', () {
     late RasterStatsController controller;
-    late MockServiceConnectionManager mockServiceManager;
+    late MockServiceConnectionManager mockServiceConnection;
 
     setUp(() {
-      mockServiceManager = MockServiceConnectionManager();
-      when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
+      mockServiceConnection = createMockServiceConnectionWithDefaults();
+      when(mockServiceConnection.renderFrameWithRasterStats).thenAnswer(
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(NotificationService, NotificationService());
 
       controller =
           RasterStatsController(createMockPerformanceControllerWithDefaults());
@@ -49,7 +54,7 @@ void main() {
         var rasterStats = controller.rasterStats.value;
         expect(rasterStats, isNull);
 
-        when(mockServiceManager.renderFrameWithRasterStats)
+        when(mockServiceConnection.renderFrameWithRasterStats)
             .thenAnswer((_) => throw Exception('something went wrong'));
         await controller.collectRasterStats();
 
@@ -74,12 +79,12 @@ void main() {
     });
 
     test('setOfflineData', () async {
-      final rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
+      final rasterStats = RasterStats.fromJson(rasterStatsFromServiceJson);
 
       // Ensure we are starting in a null state.
       expect(controller.rasterStats.value, isNull);
 
-      final offlineData = PerformanceData(rasterStats: rasterStats);
+      final offlineData = OfflinePerformanceData(rasterStats: rasterStats);
       await controller.setOfflineData(offlineData);
 
       expect(controller.rasterStats.value, isNotNull);

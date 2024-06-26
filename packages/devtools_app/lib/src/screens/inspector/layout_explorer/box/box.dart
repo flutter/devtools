@@ -5,13 +5,12 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/math_utils.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
-import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../ui/free_space.dart';
 import '../ui/layout_explorer_widget.dart';
@@ -22,9 +21,9 @@ import '../ui/widgets_theme.dart';
 
 class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
   const BoxLayoutExplorerWidget(
-    InspectorController inspectorController, {
-    Key? key,
-  }) : super(inspectorController, key: key);
+    super.inspectorController, {
+    super.key,
+  });
 
   static bool shouldDisplay(RemoteDiagnosticsNode _) {
     // Pretend this layout explorer is always available. This layout explorer
@@ -87,10 +86,18 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
   @override
   Widget build(BuildContext context) {
-    if (properties == null) return const SizedBox();
+    if (properties == null) {
+      final selectedNodeLocal = selectedNode;
+      return Center(
+        child: Text(
+          '${selectedNodeLocal?.description ?? 'Widget'} has no layout properties to display.',
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.clip,
+        ),
+      );
+    }
     return Container(
-      margin: const EdgeInsets.all(margin),
-      padding: const EdgeInsets.only(bottom: margin, right: margin),
+      margin: const EdgeInsets.all(denseSpacing),
       child: AnimatedBuilder(
         animation: changeController,
         builder: (context, _) {
@@ -128,7 +135,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final length = sizes.length;
     double total = 1.0; // This isn't set to zero to avoid divide by zero bugs.
     final fractions = minFractions.toList();
-    for (var size in sizes) {
+    for (final size in sizes) {
       if (size != null) {
         total += math.max(0, size);
       }
@@ -150,7 +157,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
       }
     }
     final output = <double>[];
-    for (var fraction in fractions) {
+    for (final fraction in fractions) {
       output.add(fraction * availableSize);
     }
     return output;
@@ -365,12 +372,12 @@ String describeBoxName(LayoutProperties properties) {
 /// Widget that represents and visualize a direct child of Flex widget.
 class BoxChildVisualizer extends StatelessWidget {
   const BoxChildVisualizer({
-    Key? key,
+    super.key,
     required this.state,
     required this.layoutProperties,
     required this.renderProperties,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   final BoxLayoutExplorerWidgetState state;
 

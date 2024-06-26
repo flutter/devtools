@@ -1,43 +1,66 @@
 This is draft for future release notes, that are going to land on
-[the Flutter website](https://docs.flutter.dev/development/tools/devtools/release-notes).
+[the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.24.0 release notes
+# DevTools 2.37.0 release notes
 
-Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
+The 2.37.0 release of the Dart and Flutter DevTools
+includes the following changes among other general improvements.
+To learn more about DevTools, check out the
+[DevTools overview](/tools/devtools/overview).
 
 ## General updates
-* Improve the overal performance of DevTools tables - [#5664](https://github.com/flutter/devtools/pull/5664), [#5696](https://github.com/flutter/devtools/pull/5696)
+
+* Improve messaging when a screen is unavailable for the platform of the
+connected app. - [#7958](https://github.com/flutter/devtools/pull/7958)
 
 ## Inspector updates
+
 TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
+
 TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
-* Fix bug with CPU flame chart selection and tooltips - [#5676](https://github.com/flutter/devtools/pull/5676)
+
+TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
+
 TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
-* Improve support for inspecting `UserTag` and `MirrorReferent` instances - [#5490](https://github.com/flutter/devtools/pull/5490)
-* Fixes expression evaluation bug where selecting an autocomplete result for a field would clear the current input - [#5717](https://github.com/flutter/devtools/pull/5717)
-* Selecting a stack frame scrolls to the frame location in the source code - [#5722](https://github.com/flutter/devtools/pull/5722)
-* Performance improvements when searching in a file, or searching for a file - [#5733](https://github.com/flutter/devtools/pull/5733)
-* Disables syntax highlighting for files with more than 100,000 characters due to performance constraints - [#5743](https://github.com/flutter/devtools/pull/5743)
-* Fix bug where source code wasn't visible if syntax highlighting for a file was disabled - [#5743](https://github.com/flutter/devtools/pull/5743)
 
-
-## Network profiler updates
 TODO: Remove this section if there are not any general updates.
 
+## Network profiler updates
+
+* Display query parameters for requests. - [#7825](https://github.com/flutter/devtools/pull/7825)
+
 ## Logging updates
+
 TODO: Remove this section if there are not any general updates.
 
 ## App size tool updates
+
+TODO: Remove this section if there are not any general updates.
+
+## Deep links tool updates
+
+TODO: Remove this section if there are not any general updates.
+
+## VS Code Sidebar updates
+
+* Show all DevTools tools in the sidebar by default, even when there are no
+debug sessions available. - [#7947](https://github.com/flutter/devtools/pull/7947)
+
+![DevTools tools in the sidebar](images/devtools_in_sidebar.png "DevTools tools in the sidebar")
+
+## DevTools Extension updates
+
 TODO: Remove this section if there are not any general updates.
 
 ## Full commit history
-More details about changes and fixes are available from the
-[DevTools git log.](https://github.com/flutter/devtools/commits/master).
+
+To find a complete list of changes in this release, check out the
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.37.0).

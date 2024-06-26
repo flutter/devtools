@@ -1,0 +1,5 @@
+name: standalone_extension
+version: 1.0.0
+issueTracker: https://www.google.com/
+materialIconCodePoint: "0xe50a"
+requiresConnection: false

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -10,13 +11,17 @@ import 'package:mockito/mockito.dart';
 void main() {
   group('ProfilerScreenController', () {
     late ProfilerScreenController controller;
-    final fakeServiceManager = FakeServiceManager();
-    when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(false);
+    final fakeServiceConnection = FakeServiceConnectionManager();
+    when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterAppNow)
+        .thenReturn(false);
 
     setUp(() {
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
+      setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(PreferencesController, PreferencesController());
       controller = ProfilerScreenController();
     });

@@ -11,11 +11,11 @@ import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
-import '../memory/adapted_heap_data.dart';
+import '../memory/heap_object.dart';
 import '../vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
-import 'inspector_service.dart';
+import 'object_group_api.dart';
 import 'primitives/record_fields.dart';
 
 List<DartObjectNode> createVariablesForStackTrace(
@@ -302,11 +302,11 @@ List<DartObjectNode> createVariablesForRegExp(
 
 Future<DartObjectNode> _buildVariable(
   RemoteDiagnosticsNode diagnostic,
-  ObjectGroupBase inspectorService,
+  InspectorObjectGroupApi<RemoteDiagnosticsNode> objectGroup,
   IsolateRef? isolateRef,
 ) async {
   final instanceRef =
-      await inspectorService.toObservatoryInstanceRef(diagnostic.valueRef);
+      await objectGroup.toObservatoryInstanceRef(diagnostic.valueRef);
   return DartObjectNode.fromValue(
     name: diagnostic.name,
     value: instanceRef,
@@ -316,15 +316,15 @@ Future<DartObjectNode> _buildVariable(
 }
 
 Future<List<DartObjectNode>> createVariablesForDiagnostics(
-  ObjectGroupBase inspectorService,
+  InspectorObjectGroupApi<RemoteDiagnosticsNode> objectGroupApi,
   List<RemoteDiagnosticsNode> diagnostics,
   IsolateRef isolateRef,
 ) async {
   final variables = <Future<DartObjectNode>>[];
-  for (var diagnostic in diagnostics) {
+  for (final diagnostic in diagnostics) {
     // Omit hidden properties.
     if (diagnostic.level == DiagnosticLevel.hidden) continue;
-    variables.add(_buildVariable(diagnostic, inspectorService, isolateRef));
+    variables.add(_buildVariable(diagnostic, objectGroupApi, isolateRef));
   }
   return variables.isNotEmpty ? await Future.wait(variables) : const [];
 }
@@ -334,7 +334,7 @@ List<DartObjectNode> createVariablesForMap(
   IsolateRef? isolateRef,
 ) {
   final variables = <DartObjectNode>[];
-  final associations = instance.associations ?? [];
+  final associations = instance.associations ?? <MapAssociation>[];
 
   // If the key type for the provided associations is not primitive, we want to
   // allow for users to drill down into the key object's properties. If we're
@@ -342,18 +342,19 @@ List<DartObjectNode> createVariablesForMap(
   // representation.
   final hasPrimitiveKey = associations.fold<bool>(
     false,
-    (p, e) => p || isPrimitiveInstanceKind(e.key.kind),
+    (p, e) => p || isPrimitiveInstanceKind((e.key as InstanceRef).kind),
   );
   for (var i = 0; i < associations.length; i++) {
     final association = associations[i];
+    final associationKey = association.key;
 
-    if (association.key is! InstanceRef) {
+    if (associationKey is! InstanceRef) {
       continue;
     }
     if (hasPrimitiveKey) {
       variables.add(
         DartObjectNode.fromValue(
-          name: association.key.valueAsString,
+          name: associationKey.valueAsString,
           value: association.value,
           isolateRef: isolateRef,
         ),
@@ -361,7 +362,7 @@ List<DartObjectNode> createVariablesForMap(
     } else {
       final key = DartObjectNode.fromValue(
         name: '[key]',
-        value: association.key,
+        value: associationKey,
         isolateRef: isolateRef,
         artificialName: true,
       );
@@ -478,7 +479,7 @@ List<DartObjectNode> createVariablesForSets(
 List<DartObjectNode> createVariablesForList(
   Instance instance,
   IsolateRef? isolateRef,
-  HeapObjectSelection? heapSelection,
+  HeapObject? heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];
@@ -550,9 +551,9 @@ List<DartObjectNode> createVariablesForFields(
   Set<String>? existingNames,
 }) {
   final result = <DartObjectNode>[];
-  for (var field in instance.fields!) {
-    final name = field.decl?.name;
-    if (name == null) {
+  for (final field in instance.fields!) {
+    final name = field.name;
+    if (name is! String) {
       result.add(
         DartObjectNode.fromValue(
           value: field.value,

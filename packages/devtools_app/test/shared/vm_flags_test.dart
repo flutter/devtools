@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,7 +12,7 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 
 void main() {
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
+  final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 
@@ -24,9 +26,9 @@ void main() {
       () async {
         await env.setupEnvironment();
 
-        expect(serviceManager.service, equals(env.service));
-        expect(serviceManager.vmFlagManager, isNotNull);
-        expect(serviceManager.vmFlagManager.flags.value, isNotNull);
+        expect(serviceConnection.serviceManager.service, equals(env.service));
+        expect(serviceConnection.vmFlagManager, isNotNull);
+        expect(serviceConnection.vmFlagManager.flags.value, isNotNull);
 
         await env.tearDownEnvironment();
       },
@@ -39,12 +41,13 @@ void main() {
         await env.setupEnvironment();
         const profiler = 'profiler';
 
-        final flagManager = serviceManager.vmFlagManager;
+        final flagManager = serviceConnection.vmFlagManager;
         final initialFlags = flagManager.flags.value;
         final profilerFlagNotifier = flagManager.flag(profiler)!;
         expect(profilerFlagNotifier.value.valueAsString, equals('true'));
 
-        await serviceManager.service!.setFlag(profiler, 'false');
+        await serviceConnection.serviceManager.service!
+            .setFlag(profiler, 'false');
         expect(profilerFlagNotifier.value.valueAsString, equals('false'));
 
         // Await a delay so the new flags have time to be pulled and set.

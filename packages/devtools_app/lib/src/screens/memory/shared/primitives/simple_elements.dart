@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const String nonGcableInstancesColumnTooltip =
-    'Number of instances of the class,\n'
+const nonGcableInstancesColumnTooltip = 'Number of instances of the class,\n'
     'that are reachable, i.e. have a retaining path from the root\n'
     "and therefore can't be garbage collected.";
 
 /// When to have verbose Dropdown based on media width.
-const memoryControlsMinVerboseWidth = 950.0;
+const memoryControlsMinVerboseWidth = 240.0;
 
 enum SizeType {
   shallow(

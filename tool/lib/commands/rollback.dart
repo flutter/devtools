@@ -9,9 +9,11 @@ import 'package:args/command_runner.dart';
 
 import '../model.dart';
 
+const _toVersionArg = 'to-version';
+
 class RollbackCommand extends Command {
   RollbackCommand() : super() {
-    argParser.addOption('to-version');
+    argParser.addOption(_toVersionArg, mandatory: true);
   }
 
   @override
@@ -22,7 +24,7 @@ class RollbackCommand extends Command {
 
   @override
   Future run() async {
-    final repo = DevToolsRepo.getInstance()!;
+    final repo = DevToolsRepo.getInstance();
     print('DevTools repo at ${repo.repoPath}.');
 
     final tempDir =
@@ -35,11 +37,14 @@ class RollbackCommand extends Command {
     final extractDir =
         await io.Directory('${tempDir.path}/extract/').absolute.create();
     final client = io.HttpClient();
-    final version = argResults!['to-version'];
+    final version = argResults![_toVersionArg] as String;
     print('downloading tarball to ${tarball.path}');
-    final tarballRequest = await client.getUrl(Uri.http(
+    final tarballRequest = await client.getUrl(
+      Uri.http(
         'storage.googleapis.com',
-        'pub-packages/packages/devtools-$version.tar.gz'));
+        'pub-packages/packages/devtools-$version.tar.gz',
+      ),
+    );
     final tarballResponse = await tarballRequest.close();
     await tarballResponse.pipe(tarball.openWrite());
     print('Tarball written; unzipping.');

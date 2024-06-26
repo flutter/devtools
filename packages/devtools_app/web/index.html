@@ -19,14 +19,18 @@
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script>
-    const GA_DEVTOOLS_PROPERTY = 'UA-26406144-34'; // Dart DevTools GA Property UA.
+    // The value of DEVTOOLS_GOOGLE_TAG_ID here must match the value of the '?id='
+    // query parameter below in the 'https://www.googletagmanager.com' script.
+    // This is the value of the "Dart DevTools - GA4" Google Tag, which is linked
+    // to the DevTools GA4 analytics property.
+    const DEVTOOLS_GOOGLE_TAG_ID = 'G-69MPZE94D5'; // 
 
     function getDevToolsPropertyID() {
-      return GA_DEVTOOLS_PROPERTY;
+      return DEVTOOLS_GOOGLE_TAG_ID;
     }
   </script>
-  <!-- The below URI ?id= must match the GA_DEVTOOLS_PROPERTY above. -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26406144-34"></script>
+  <!-- The below URI ?id= must match the DEVTOOLS_GOOGLE_TAG_ID above. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-69MPZE94D5"></script>
   <script src="devtools_analytics.js"></script>
   <!-- End of DevTools Google Analytics -->
 
@@ -46,83 +50,13 @@
     }
   </script>
 
-  <script>
-    // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = null;
-  </script>
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script> 
-
   <!-- TODO(elliette): Remove once https://github.com/flutter/flutter/issues/122541 is fixed. -->
   <link rel="stylesheet" href="styles.css">
 
 </head>
 
 <body>
-
-  <script>
-    // Unregister the old custom DevTools service worker (if it exists). It was
-    // removed in: https://github.com/flutter/devtools/pull/5331
-    function unregisterDevToolsServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        const DEVTOOLS_SW = 'service_worker.js';
-        const FLUTTER_SW = 'flutter_service_worker.js';
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for (let registration of registrations) {
-                const activeWorker = registration.active;
-                if (activeWorker != null) {
-                    const url = activeWorker.scriptURL;
-                    if (url.includes(DEVTOOLS_SW) && !url.includes(FLUTTER_SW)) {
-                        registration.unregister();
-                    }
-                }
-            }
-        });
-      }
-    }
-
-    // Bootstrap app for 3P environments:
-    function bootstrapAppFor3P() {
-      window.addEventListener('load', function(ev) {
-        // Download main.dart.js
-        _flutter.loader.loadEntrypoint({
-          serviceWorker: {
-            serviceWorkerVersion: serviceWorkerVersion,
-          },
-          onEntrypointLoaded: function(engineInitializer) {
-            engineInitializer.initializeEngine({
-              renderer: 'canvaskit',
-              canvasKitBaseUrl: 'canvaskit/'
-            })
-            .then(function(appRunner) {
-              appRunner.runApp();
-            });
-          }
-        });
-      });
-    }
-
-    // Bootstrap app for 1P environments:
-    function bootstrapAppFor1P() {
-      window.addEventListener('load', function(ev) {
-        // Download main.dart.js
-        _flutter.loader.loadEntrypoint({
-          entrypointUrl: 'main.dart.js',
-          onEntrypointLoaded: function(engineInitializer) {
-            engineInitializer.initializeEngine({
-              renderer: 'canvaskit',
-            })
-            .then(function(appRunner) {
-              appRunner.runApp();
-            });
-          }
-        });
-      });
-    }
-
-    unregisterDevToolsServiceWorker();
-    bootstrapAppFor3P();
-  </script>
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 
 </html>

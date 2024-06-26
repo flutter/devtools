@@ -5,7 +5,10 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/app_size/code_size_attribution.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
@@ -17,8 +20,11 @@ void main() {
   late CallGraph callGraph;
 
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     callGraph = generateCallGraphWithDominators(
@@ -160,7 +166,7 @@ void main() {
       expect(root.isExpanded, isTrue);
       expect(root.children.length, equals(18));
 
-      for (DominatorTreeNode child in root.children.cast<DominatorTreeNode>()) {
+      for (final child in root.children.cast<DominatorTreeNode>()) {
         expect(child.isExpanded, isFalse);
       }
     });
@@ -183,7 +189,7 @@ void main() {
       expect(root.children.length, equals(18));
 
       // Only the selected node should be expanded.
-      for (DominatorTreeNode child in root.children.cast<DominatorTreeNode>()) {
+      for (final child in root.children.cast<DominatorTreeNode>()) {
         expect(
           child.isExpanded,
           child.callGraphNode.display == 'package:code_size_package',
@@ -198,7 +204,7 @@ void main() {
       );
       expect(selectedNode.children.length, equals(3));
 
-      for (DominatorTreeNode child in selectedNode.children) {
+      for (final child in selectedNode.children) {
         expect(child.isExpanded, isFalse);
       }
     });

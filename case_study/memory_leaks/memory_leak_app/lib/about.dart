@@ -8,7 +8,7 @@ import 'common.dart';
 
 class About extends StatefulWidget {
   @override
-  AboutState createState() => AboutState();
+  State<About> createState() => AboutState();
 }
 
 class AboutState extends State<About> {

@@ -4,22 +4,73 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'analytics/analytics.dart' as ga;
+import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'config_specific/drag_and_drop/drag_and_drop.dart';
+import 'config_specific/import_export/import_export.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
-import 'theme.dart';
-import 'utils.dart';
+
+class OpenSaveButtonGroup extends StatelessWidget {
+  const OpenSaveButtonGroup({
+    super.key,
+    required this.screenId,
+    required this.onSave,
+  });
+
+  final String screenId;
+
+  final VoidCallback? onSave;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedButtonGroup(
+      items: [
+        ButtonGroupItemData(
+          icon: Icons.file_upload,
+          tooltip: 'Open a file that was previously saved from DevTools',
+          onPressed: () async {
+            ga.select(screenId, gac.openFile);
+            final importedFile =
+                await importFileFromPicker(acceptedTypes: const ['json']);
+            if (importedFile != null) {
+              // ignore: use_build_context_synchronously, intentional use.
+              Provider.of<ImportController>(context, listen: false)
+                  .importData(importedFile, expectedScreenId: screenId);
+            } else {
+              notificationService.push(
+                'Something went wrong. Could not open selected file.',
+              );
+            }
+          },
+        ),
+        ButtonGroupItemData(
+          icon: Icons.file_download,
+          tooltip: 'Save this screen\'s data for offline viewing',
+          onPressed: onSave != null
+              ? () {
+                  ga.select(screenId, gac.saveFile);
+                  onSave!.call();
+                }
+              : null,
+        ),
+      ],
+    );
+  }
+}
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
-    required this.title,
     required this.instructions,
     required this.gaScreen,
     required this.gaSelectionImport,
+    this.title,
     this.gaSelectionAction,
     this.actionText,
     this.onAction,
@@ -29,7 +80,7 @@ class FileImportContainer extends StatefulWidget {
     super.key,
   });
 
-  final String title;
+  final String? title;
 
   final String instructions;
 
@@ -60,13 +111,16 @@ class _FileImportContainerState extends State<FileImportContainer> {
 
   @override
   Widget build(BuildContext context) {
+    final title = widget.title;
     return Column(
       children: [
-        Text(
-          widget.title,
-          style: TextStyle(fontSize: scaleByFontFactor(18.0)),
-        ),
-        const SizedBox(height: defaultSpacing),
+        if (title != null) ...[
+          Text(
+            title,
+            style: TextStyle(fontSize: scaleByFontFactor(18.0)),
+          ),
+          const SizedBox(height: defaultSpacing),
+        ],
         Expanded(
           // TODO(kenz): improve drag over highlight.
           child: DragAndDrop(
@@ -78,7 +132,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildImportInstructions(),
+                    CenteredMessage(widget.instructions),
                     _buildImportFileRow(),
                     if (widget.actionText != null && widget.onAction != null)
                       _buildActionButton(),
@@ -89,19 +143,6 @@ class _FileImportContainerState extends State<FileImportContainer> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildImportInstructions() {
-    return Padding(
-      padding: const EdgeInsets.all(defaultSpacing),
-      child: Text(
-        widget.instructions,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Theme.of(context).textTheme.displayLarge!.color,
-        ),
-      ),
     );
   }
 
@@ -140,13 +181,12 @@ class _FileImportContainerState extends State<FileImportContainer> {
           child: Text(
             importedFile?.path ?? 'No File Selected',
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: Theme.of(context).textTheme.displayLarge!.color,
-            ),
+            style: Theme.of(context).regularTextStyle,
             textAlign: TextAlign.left,
           ),
         ),
-        if (importedFile != null) clearInputButton(_clearFile),
+        if (importedFile != null)
+          InputDecorationSuffixButton.clear(onPressed: _clearFile),
       ],
     );
   }
@@ -162,12 +202,11 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            DevToolsButton(
+            GaDevToolsButton(
               gaScreen: widget.gaScreen,
               gaSelection: widget.gaSelectionAction!,
               label: widget.actionText!,
-              icon: Icons.highlight,
-              elevatedButton: true,
+              elevated: true,
               onPressed: importedFile != null
                   ? () => widget.onAction!(importedFile!)
                   : null,
@@ -218,7 +257,17 @@ Future<DevToolsJsonFile?> importFileFromPicker({
   final acceptedTypeGroups = [XTypeGroup(extensions: acceptedTypes)];
   final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
   if (file == null) return null;
+  return await _toDevToolsFile(file);
+}
 
+Future<List<XFile>> importRawFilesFromPicker({
+  List<String>? acceptedTypes,
+}) async {
+  final acceptedTypeGroups = [XTypeGroup(extensions: acceptedTypes)];
+  return await openFiles(acceptedTypeGroups: acceptedTypeGroups);
+}
+
+Future<DevToolsJsonFile> _toDevToolsFile(XFile file) async {
   final data = jsonDecode(await file.readAsString());
   final lastModifiedTime = await file.lastModified();
   // TODO(kenz): this will need to be modified if we need to support other file
@@ -246,13 +295,13 @@ class FileImportButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton(
+    return GaDevToolsButton(
       onPressed: onPressed,
       icon: Icons.file_upload,
-      label: 'Import File',
+      label: 'Open file',
       gaScreen: gaScreen,
       gaSelection: gaSelection,
-      elevatedButton: elevatedButton,
+      elevated: elevatedButton,
     );
   }
 }
@@ -284,7 +333,7 @@ class DualFileImportContainer extends StatefulWidget {
   /// The title of the action button.
   final String actionText;
 
-  final Function(
+  final void Function(
     DevToolsJsonFile firstImportedFile,
     DevToolsJsonFile secondImportedFile,
     void Function(String error) onError,
@@ -372,12 +421,12 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            DevToolsButton(
+            GaDevToolsButton(
               gaScreen: widget.gaScreen,
               gaSelection: widget.gaSelectionAction,
               label: widget.actionText,
               icon: Icons.highlight,
-              elevatedButton: true,
+              elevated: true,
               onPressed: firstImportedFile != null && secondImportedFile != null
                   ? () => widget.onAction(
                         firstImportedFile!,

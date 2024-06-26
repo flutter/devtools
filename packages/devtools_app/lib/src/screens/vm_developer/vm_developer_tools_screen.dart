@@ -2,27 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
-import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'isolate_statistics/isolate_statistics_view.dart';
 import 'object_inspector/object_inspector_view.dart';
+import 'process_memory/process_memory_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics/vm_statistics_view.dart';
 
 abstract class VMDeveloperView {
-  const VMDeveloperView(
-    this.screenId, {
+  const VMDeveloperView({
     required this.title,
     required this.icon,
   });
-
-  final String screenId;
 
   /// The user-facing name of the page.
   final String title;
@@ -40,13 +37,7 @@ abstract class VMDeveloperView {
 }
 
 class VMDeveloperToolsScreen extends Screen {
-  VMDeveloperToolsScreen()
-      : super.conditional(
-          id: id,
-          title: ScreenMetaData.vmTools.title,
-          icon: Icons.settings_applications,
-          requiresVmDeveloperMode: true,
-        );
+  VMDeveloperToolsScreen() : super.fromMetaData(ScreenMetaData.vmTools);
 
   static final id = ScreenMetaData.vmTools.id;
 
@@ -55,16 +46,18 @@ class VMDeveloperToolsScreen extends Screen {
       VMDeveloperToolsController.showIsolateSelector;
 
   @override
-  Widget build(BuildContext context) => const VMDeveloperToolsScreenBody();
+  Widget buildScreenBody(BuildContext context) =>
+      const VMDeveloperToolsScreenBody();
 }
 
 class VMDeveloperToolsScreenBody extends StatefulWidget {
   const VMDeveloperToolsScreenBody({super.key});
 
-  static List<VMDeveloperView> views = [
+  static final views = <VMDeveloperView>[
     const VMStatisticsView(),
     const IsolateStatisticsView(),
     ObjectInspectorView(),
+    const VMProcessMemoryView(),
   ];
 
   @override
@@ -93,7 +86,6 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
             if (VMDeveloperToolsScreenBody.views.length > 1)
               NavigationRail(
                 selectedIndex: selectedIndex,
-                elevation: 10.0,
                 labelType: NavigationRailLabelType.all,
                 onDestinationSelected: controller.selectIndex,
                 destinations: [

@@ -2,18 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:codicon/codicon.dart';
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/debugger/controls.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/test_data/debugger/vm_service_object_tree.dart';
+import '../test_infra/utils/debugger_utils.dart';
+import '../test_infra/utils/test_utils.dart';
 import '../test_infra/utils/tree_utils.dart';
 
 void main() {
@@ -27,27 +32,30 @@ void main() {
   late VMServiceObjectNode libraryNode;
 
   setUp(() async {
-    final fakeServiceManager = FakeServiceManager();
+    final fakeServiceConnection = FakeServiceConnectionManager();
     final scriptManager = MockScriptManager();
     when(scriptManager.getScript(any)).thenAnswer(
       (_) => Future<Script>.value(testScript),
     );
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: false,
       isWebApp: false,
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, MockEvalService());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
 
     programExplorerController = TestProgramExplorerController(
@@ -68,7 +76,7 @@ void main() {
     when(codeViewController.fileExplorerVisible)
         .thenReturn(ValueNotifier(true));
     debuggerController = createMockDebuggerControllerWithDefaults(
-      mockCodeViewController: codeViewController,
+      codeViewController: codeViewController,
     );
   });
 
@@ -98,25 +106,16 @@ void main() {
     'has Console / stdio area',
     windowSize,
     (WidgetTester tester) async {
-      serviceManager.consoleService.appendStdio('test stdio');
+      serviceConnection.consoleService.appendStdio('test stdio');
 
       await pumpConsole(tester, debuggerController);
 
       expect(find.text('Console'), findsOneWidget);
 
       // test for stdio output.
-      expect(find.selectableText('test stdio'), findsOneWidget);
+      expect(find.text('test stdio'), findsOneWidget);
     },
   );
-
-  WidgetPredicate createDebuggerButtonPredicate(String title) {
-    return (Widget widget) {
-      if (widget is DebuggerButton && widget.title == title) {
-        return true;
-      }
-      return false;
-    };
-  }
 
   testWidgetsWithWindowSize(
     'debugger controls running',
@@ -130,21 +129,21 @@ void main() {
       );
 
       expect(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+        findDebuggerButtonWithIcon(Codicons.debugPause),
         findsOneWidget,
       );
-      final pause = _getWidgetFromFinder(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-      ) as DebuggerButton;
+      final pause = getWidgetFromFinder<OutlinedButton>(
+        findDebuggerButtonWithIcon(Codicons.debugPause),
+      );
       expect(pause.onPressed, isNotNull);
 
       expect(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+        findDebuggerButtonWithIcon(Codicons.debugContinue),
         findsOneWidget,
       );
-      final resume = _getWidgetFromFinder(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-      ) as DebuggerButton;
+      final resume = getWidgetFromFinder<OutlinedButton>(
+        findDebuggerButtonWithIcon(Codicons.debugContinue),
+      );
       expect(resume.onPressed, isNull);
     },
   );
@@ -246,8 +245,4 @@ void main() {
       expect(state.line, testClassRef.location!.line);
     },
   );
-}
-
-Widget _getWidgetFromFinder(Finder finder) {
-  return finder.first.evaluate().first.widget;
 }

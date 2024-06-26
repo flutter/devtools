@@ -23,8 +23,9 @@
 #  ^^^^^ entity.name.function.dart
 #        ^^^^^^^^^^^^^^ string.interpolated.single.dart
 #                      ^^ string.interpolated.single.dart constant.character.escape.dart
-#                        ^^^^^^ string.interpolated.single.dart
-#                              ^ string.interpolated.single.dart variable.parameter.dart
+#                        ^^^^^ string.interpolated.single.dart
+#                             ^ string.interpolated.single.dart string.interpolated.expression.dart
+#                              ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
 #                               ^ string.interpolated.single.dart
 #                                 ^ punctuation.terminator.dart
 >  print('the value after \$i is ${i + 1}');

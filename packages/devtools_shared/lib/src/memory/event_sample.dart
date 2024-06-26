@@ -4,14 +4,17 @@
 
 import 'dart:convert';
 
-/// Monitor heap object allocations (in the VM).  The allocation monitor will
-/// cause 'start' event exist in the HeapSample. Immediately afterwards a
-/// 'continues' event is added on each subsequent timestamp tick (HeapSample)
-/// until another monitor start event.  A 'reset' event stops the 'continues'
-/// event for one timestamp tick with a 'reset' event. Immediately after the
-/// reset event a 'continues' event will again appear in the HeapSample's
-/// MemoryEventInfo - until a new monitor is started. One monitor exists per
-/// VM connection.
+import '../utils/serialization.dart';
+
+/// Monitor heap object allocations (in the VM).
+///
+/// The allocation monitor will cause 'start' event exist in the `HeapSample`.
+/// Immediately afterwards a 'continues' event is added on each
+/// subsequent timestamp tick (`HeapSample`) until another monitor start event.
+/// A 'reset' event stops the 'continues' event for one timestamp tick
+/// with a 'reset' event. Immediately after the reset event a 'continues' event
+/// will again appear in the HeapSample's `MemoryEventInfo` - until
+/// a new monitor is started. One monitor exists per VM connection.
 class AllocationAccumulator {
   AllocationAccumulator(this._start, this._continues, this._reset);
 
@@ -28,14 +31,14 @@ class AllocationAccumulator {
         _continues = false,
         _reset = true;
 
-  factory AllocationAccumulator.fromJson(Map<String, dynamic> json) =>
+  factory AllocationAccumulator.fromJson(Map<String, Object?> json) =>
       AllocationAccumulator(
         json['start'] as bool,
         json['continues'] as bool,
         json['reset'] as bool,
       );
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  Map<String, dynamic> toJson() => <String, Object?>{
         'start': _start,
         'continues': _continues,
         'reset': _reset,
@@ -76,7 +79,7 @@ class ExtensionEvent {
     this.data,
   );
 
-  factory ExtensionEvent.fromJson(Map<String, dynamic> json) =>
+  factory ExtensionEvent.fromJson(Map<String, Object?> json) =>
       ExtensionEvent.custom(
         json['timestamp'] as int?,
         json['eventKind'] as String?,
@@ -84,7 +87,7 @@ class ExtensionEvent {
         (json['data'] as Map?)?.cast<String, Object>(),
       );
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  Map<String, dynamic> toJson() => <String, Object?>{
         'timestamp': timestamp,
         'eventKind': eventKind,
         'data': data,
@@ -115,32 +118,24 @@ class ExtensionEvent {
 
 class ExtensionEvents {
   ExtensionEvents(List<ExtensionEvent> events) {
-    theEvents.addAll(events);
+    this.events.addAll(events);
   }
 
   factory ExtensionEvents.fromJson(Map<String, Object> json) {
-    final List<ExtensionEvent> events = [];
+    final events = <ExtensionEvent>[];
 
     json.forEach((key, value) {
-      final event = ExtensionEvent.fromJson(value as Map<String, dynamic>);
+      final event = ExtensionEvent.fromJson(value as Map<String, Object?>);
       events.add(event);
     });
 
     return ExtensionEvents(events);
   }
 
-  final theEvents = <ExtensionEvent>[];
-
-  bool get isEmpty => theEvents.isEmpty;
-
-  bool get isNotEmpty => theEvents.isNotEmpty;
-
-  void clear() => theEvents.clear();
-
   Map<String, dynamic> toJson() {
-    final eventsAsJson = <String, dynamic>{};
+    final eventsAsJson = <String, Object?>{};
     var index = 0;
-    for (var event in theEvents) {
+    for (final event in events) {
       eventsAsJson['$index'] = event.toJson();
       index++;
     }
@@ -148,12 +143,20 @@ class ExtensionEvents {
     return eventsAsJson;
   }
 
+  final events = <ExtensionEvent>[];
+
+  bool get isEmpty => events.isEmpty;
+
+  bool get isNotEmpty => events.isNotEmpty;
+
+  void clear() => events.clear();
+
   @override
   String toString() => '[ExtensionEvents = '
       '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }
 
-class EventSample {
+class EventSample with Serializable {
   EventSample(
     this.timestamp,
     this.isEventGC,
@@ -172,7 +175,7 @@ class EventSample {
 
   EventSample.snapshotEvent(
     this.timestamp, {
-    snapshotAuto = false,
+    bool snapshotAuto = false,
     ExtensionEvents? events,
   })  : isEventGC = false,
         isEventSnapshot = !snapshotAuto,
@@ -213,7 +216,7 @@ class EventSample {
         isEventSnapshotAuto = false,
         allocationAccumulator = null;
 
-  factory EventSample.fromJson(Map<String, dynamic> json) {
+  factory EventSample.fromJson(Map<String, Object?> json) {
     final extensionEvents =
         (json['extensionEvents'] as Map?)?.cast<String, Object>();
 
@@ -223,7 +226,9 @@ class EventSample {
       (json['snapshotEvent'] as bool?) ?? false,
       (json['snapshotAutoEvent'] as bool?) ?? false,
       json['allocationAccumulatorEvent'] != null
-          ? AllocationAccumulator.fromJson(json['allocationAccumulatorEvent'])
+          ? AllocationAccumulator.fromJson(
+              json['allocationAccumulatorEvent'] as Map<String, Object?>,
+            )
           : null,
       extensionEvents != null
           ? ExtensionEvents.fromJson(extensionEvents)
@@ -231,7 +236,8 @@ class EventSample {
     );
   }
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  @override
+  Map<String, dynamic> toJson() => <String, Object?>{
         'timestamp': timestamp,
         'gcEvent': isEventGC,
         'snapshotEvent': isEventSnapshot,
@@ -250,7 +256,7 @@ class EventSample {
         extensionEvents,
       );
 
-  /// Create an empty event (all values are nothing)
+  /// Create an empty event (all values are nothing).
   static EventSample empty() => EventSample(
         -1,
         false,
@@ -262,7 +268,7 @@ class EventSample {
 
   bool get isEmpty => timestamp == -1;
 
-  /// Version of EventSample JSON payload.
+  /// The version of the [EventSample] JSON payload.
   static const version = 1;
 
   final int timestamp;
@@ -287,26 +293,27 @@ class EventSample {
 }
 
 /// Engine's Raster Cache estimates.
-class RasterCache {
+class RasterCache with Serializable {
   RasterCache._({required this.layerBytes, required this.pictureBytes});
 
-  factory RasterCache.fromJson(Map<String, dynamic> json) {
+  factory RasterCache.fromJson(Map<String, Object?> json) {
     return RasterCache._(
-      layerBytes: json['layerBytes'],
-      pictureBytes: json['pictureBytes'],
+      layerBytes: json['layerBytes'] as int,
+      pictureBytes: json['pictureBytes'] as int,
     );
   }
 
   static RasterCache empty() => RasterCache._(layerBytes: 0, pictureBytes: 0);
 
-  static RasterCache? parse(Map<String, dynamic>? json) =>
+  static RasterCache? parse(Map<String, Object?>? json) =>
       json == null ? null : RasterCache.fromJson(json);
 
   int layerBytes;
 
   int pictureBytes;
 
-  Map<String, dynamic> toJson() => {
+  @override
+  Map<String, dynamic> toJson() => <String, Object?>{
         'layerBytes': layerBytes,
         'pictureBytes': pictureBytes,
       };

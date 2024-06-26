@@ -6,17 +6,19 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_tree.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../test_infra/scenes/memory/default.dart';
-import '../../test_infra/scenes/scene_test_extensions.dart';
 import '../../test_infra/utils/test_utils.dart';
 
 // TODO(bkonyi): add tests for multi-isolate support.
@@ -35,7 +37,7 @@ void main() {
   /// Clears the class filter text field.
   Future<void> clearFilter(
     WidgetTester tester,
-    TracingPaneController controller,
+    TracePaneController controller,
   ) async {
     final originalClassCount = classList.classes!.length;
     final clearFilterButton = find.byIcon(Icons.clear);
@@ -43,7 +45,7 @@ void main() {
     await tester.tap(clearFilterButton);
     await tester.pumpAndSettle();
     expect(
-      controller.stateForIsolate.value.filteredClassList.value.length,
+      controller.selection.value.filteredClassList.value.length,
       originalClassCount,
     );
   }
@@ -57,12 +59,9 @@ void main() {
     late final CpuSamples allocationTracingProfile;
 
     Future<void> pumpScene(WidgetTester tester) async {
-      await tester.pumpScene(scene);
-      // Delay to ensure the memory profiler has collected data.
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-      expect(find.byType(MemoryBody), findsOneWidget);
+      await scene.pump(tester);
       await tester.tap(
-        find.byKey(MemoryScreenKeys.dartHeapAllocationTracingTab),
+        find.byKey(MemoryScreenKeys.traceTab),
       );
       await tester.pumpAndSettle();
     }
@@ -80,7 +79,7 @@ void main() {
       scene = MemoryDefaultScene();
       await scene.setUp(classList: classList);
       mockConnectedApp(
-        scene.fakeServiceManager.connectedApp!,
+        scene.fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: false,
         isWebApp: false,
@@ -109,13 +108,13 @@ void main() {
       (WidgetTester tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.controllers.tracing;
-        final state = controller.stateForIsolate.value;
+        final controller = scene.controller.trace!;
+        final state = controller.selection.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
         expect(controller.refreshing.value, isFalse);
-        expect(state.selectedTracedClass.value, isNull);
-        expect(state.selectedTracedClassAllocationData, isNull);
+        expect(state.selectedClass.value, isNull);
+        expect(state.selectedClassProfile, isNull);
 
         final refresh = find.text('Refresh');
         expect(refresh, findsOneWidget);
@@ -127,7 +126,7 @@ void main() {
         // There should be classes in the example class list.
         expect(find.byType(Checkbox), findsNWidgets(classList.classes!.length));
         for (final cls in state.filteredClassList.value) {
-          expect(find.byKey(Key(cls.cls.id!)), findsOneWidget);
+          expect(find.byKey(Key(cls.clazz.id!)), findsOneWidget);
         }
 
         // Enable allocation tracing for one of them.
@@ -147,7 +146,7 @@ void main() {
         );
 
         expect(find.byType(TracingTable), findsNothing);
-        final traceElement = find.byKey(Key(selectedTrace.cls.id!));
+        final traceElement = find.byKey(Key(selectedTrace.clazz.id!));
         expect(traceElement, findsOneWidget);
 
         // Select the list item for the traced class and refresh to fetch data.
@@ -157,17 +156,18 @@ void main() {
         await tester.pumpAndSettle();
 
         // No allocations have occurred, so the trace viewer shows an error message.
-        expect(state.selectedTracedClass.value, selectedTrace);
-        expect(state.selectedTracedClassAllocationData, isNotNull);
+        expect(state.selectedClass.value, selectedTrace);
+        expect(state.selectedClassProfile, isNotNull);
         expect(
           find.text(
-            'No allocation samples have been collected for class ${selectedTrace.cls.name}.\n',
+            'No allocation samples have been collected for class ${selectedTrace.clazz.name}.\n',
           ),
           findsOneWidget,
         );
 
         // Set fake sample data and refresh to populate the trace view.
-        final fakeService = serviceManager.service as FakeVmServiceWrapper;
+        final fakeService =
+            serviceConnection.serviceManager.service as FakeVmServiceWrapper;
         fakeService.allocationSamples = allocationTracingProfile;
 
         await tester.tap(refresh);
@@ -187,10 +187,8 @@ void main() {
         expect(find.text('Exclusive'), findsOneWidget);
         expect(find.text('Method'), findsOneWidget);
 
-        final bottomUpRoots =
-            state.selectedTracedClassAllocationData!.bottomUpRoots;
-        final callTreeRoots =
-            state.selectedTracedClassAllocationData!.callTreeRoots;
+        final bottomUpRoots = state.selectedClassProfile!.bottomUpRoots;
+        final callTreeRoots = state.selectedClassProfile!.callTreeRoots;
         for (final root in bottomUpRoots) {
           expect(root.isExpanded, false);
         }
@@ -273,13 +271,13 @@ void main() {
       (WidgetTester tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.controllers.tracing;
-        final state = controller.stateForIsolate.value;
+        final controller = scene.controller.trace!;
+        final state = controller.selection.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
         expect(controller.refreshing.value, isFalse);
-        expect(state.selectedTracedClass.value, isNull);
-        expect(state.selectedTracedClassAllocationData, isNull);
+        expect(state.selectedClass.value, isNull);
+        expect(state.selectedClassProfile, isNull);
 
         final refresh = find.text('Refresh');
         expect(refresh, findsOneWidget);
@@ -291,7 +289,7 @@ void main() {
         // There should be classes in the example class list.
         expect(find.byType(Checkbox), findsNWidgets(classList.classes!.length));
         for (final cls in state.filteredClassList.value) {
-          expect(find.byKey(Key(cls.cls.id!)), findsOneWidget);
+          expect(find.byKey(Key(cls.clazz.id!)), findsOneWidget);
         }
 
         // Enable allocation tracing for one of them.
@@ -311,7 +309,7 @@ void main() {
         );
 
         expect(find.byType(TracingTable), findsNothing);
-        final traceElement = find.byKey(Key(selectedTrace.cls.id!));
+        final traceElement = find.byKey(Key(selectedTrace.clazz.id!));
         expect(traceElement, findsOneWidget);
 
         // Select the list item for the traced class and refresh to fetch data.
@@ -321,17 +319,18 @@ void main() {
         await tester.pumpAndSettle();
 
         // No allocations have occurred, so the trace viewer shows an error message.
-        expect(state.selectedTracedClass.value, selectedTrace);
-        expect(state.selectedTracedClassAllocationData, isNotNull);
+        expect(state.selectedClass.value, selectedTrace);
+        expect(state.selectedClassProfile, isNotNull);
         expect(
           find.text(
-            'No allocation samples have been collected for class ${selectedTrace.cls.name}.\n',
+            'No allocation samples have been collected for class ${selectedTrace.clazz.name}.\n',
           ),
           findsOneWidget,
         );
 
         // Set fake sample data and refresh to populate the trace view.
-        final fakeService = serviceManager.service as FakeVmServiceWrapper;
+        final fakeService =
+            serviceConnection.serviceManager.service as FakeVmServiceWrapper;
         fakeService.allocationSamples = allocationTracingProfile;
 
         await tester.tap(refresh);
@@ -347,7 +346,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Clearing should zero out all the instance counts.
-        expect(state.selectedTracedClass.value, isNotNull);
+        expect(state.selectedClass.value, isNotNull);
         for (final cls in state.filteredClassList.value) {
           expect(cls.instances, 0);
         }
@@ -365,7 +364,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Expect no new samples.
-        expect(state.selectedTracedClass.value, isNotNull);
+        expect(state.selectedClass.value, isNotNull);
         for (final cls in state.filteredClassList.value) {
           expect(cls.instances, 0);
         }
@@ -376,8 +375,8 @@ void main() {
       testWidgetsWithWindowSize('simple', windowSize, (tester) async {
         await pumpScene(tester);
 
-        final controller = scene.controller.controllers.tracing;
-        final state = controller.stateForIsolate.value;
+        final controller = scene.controller.trace!;
+        final state = controller.selection.value;
 
         final filterTextField = find.byType(DevToolsClearableTextField);
         expect(filterTextField, findsOneWidget);
@@ -386,7 +385,7 @@ void main() {
         await tester.enterText(filterTextField, 'F');
         await tester.pumpAndSettle();
         expect(state.filteredClassList.value.length, 1);
-        expect(state.filteredClassList.value.first.cls.name, 'Foo');
+        expect(state.filteredClassList.value.first.clazz.name, 'Foo');
 
         // Filter for 'Fooo'
         await tester.enterText(filterTextField, 'Fooo');
@@ -403,8 +402,8 @@ void main() {
         (tester) async {
           await pumpScene(tester);
 
-          final controller = scene.controller.controllers.tracing;
-          final state = controller.stateForIsolate.value;
+          final controller = scene.controller.trace!;
+          final state = controller.selection.value;
 
           final checkboxes = find.byType(Checkbox);
           expect(checkboxes, findsNWidgets(classList.classes!.length));
@@ -417,7 +416,7 @@ void main() {
               .where((e) => e.traceAllocations)
               .toList();
           expect(tracedClassList.length, 1);
-          expect(tracedClassList.first.cls, classList.classes!.first);
+          expect(tracedClassList.first.clazz, classList.classes!.first);
 
           // Filter out all classes and then clear the filter
           final filterTextField = find.byType(DevToolsClearableTextField);
@@ -444,10 +443,10 @@ void main() {
         (tester) async {
           await pumpScene(tester);
 
-          final controller = scene.controller.controllers.tracing;
-          final state = controller.stateForIsolate.value;
+          final controller = scene.controller.trace!;
+          final state = controller.selection.value;
 
-          expect(state.selectedTracedClass.value, isNull);
+          expect(state.selectedClass.value, isNull);
 
           // Select one of the class entries.
           final selection = find.richTextContaining(
@@ -458,8 +457,8 @@ void main() {
           await tester.tap(selection);
           await tester.pumpAndSettle();
 
-          expect(state.selectedTracedClass.value, isNotNull);
-          final originalSelection = state.selectedTracedClass.value;
+          expect(state.selectedClass.value, isNotNull);
+          final originalSelection = state.selectedClass.value;
 
           // Filter out all classes, ensure the selection is still valid, then
           // clear the filter and check again.
@@ -470,11 +469,11 @@ void main() {
           await tester.pumpAndSettle();
           expect(state.filteredClassList.value.isEmpty, true);
 
-          expect(state.selectedTracedClass.value, originalSelection);
+          expect(state.selectedClass.value, originalSelection);
 
           await clearFilter(tester, controller);
 
-          expect(state.selectedTracedClass.value, originalSelection);
+          expect(state.selectedClass.value, originalSelection);
         },
       );
     });

@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -18,7 +20,7 @@ void main() {
     // ignore: dead_code
     if (false) {
       setUpAll(() async {
-        final bool testInReleaseMode =
+        final testInReleaseMode =
             Platform.environment['WEBDEV_RELEASE'] == 'true';
 
         webBuildFixture = await WebBuildFixture.serve(

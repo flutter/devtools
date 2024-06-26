@@ -6,8 +6,8 @@ import 'dart:convert';
 
 import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -71,7 +71,7 @@ void main() {
 
   group('DartIOHttpRequestData', () {
     NetworkController controller;
-    FakeServiceManager fakeServiceManager;
+    FakeServiceConnectionManager fakeServiceConnection;
     SocketProfile socketProfile;
     HttpProfile httpProfile;
 
@@ -80,13 +80,13 @@ void main() {
       httpProfile = loadHttpProfile();
       // DartIOHttpRequestData.getFullRequestData relies on a call to serviceManager to
       // retrieve request details.
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           socketProfile: socketProfile,
           httpProfile: httpProfile,
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       controller = NetworkController();
       await controller.startRecording();
     });
@@ -101,7 +101,10 @@ void main() {
     });
 
     test('uri returns correct value', () {
-      expect(httpGet.uri, 'https://jsonplaceholder.typicode.com/albums/1');
+      expect(
+        httpGet.uri,
+        'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
+      );
       expect(httpGetWithError.uri, 'https://www.examplez.com/1');
       expect(httpPost.uri, 'https://jsonplaceholder.typicode.com/posts');
       expect(httpPut.uri, 'https://jsonplaceholder.typicode.com/posts/1');
@@ -235,7 +238,8 @@ void main() {
       expect(
         collectionEquals(httpGet.general, {
           'method': 'GET',
-          'uri': 'https://jsonplaceholder.typicode.com/albums/1',
+          'uri':
+              'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
           'connectionInfo': {
             'localPort': 45648,
             'remoteAddress': '2606:4700:3033::ac43:bdd9',
@@ -246,8 +250,9 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'OK',
-          'redirects': [],
+          'redirects': <Object?>[],
           'statusCode': 200,
+          'queryParameters': {'userId': '1', 'title': 'myalbum'},
         }),
         isTrue,
       );
@@ -273,8 +278,9 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'Created',
-          'redirects': [],
+          'redirects': <Object?>[],
           'statusCode': 201,
+          'queryParameters': {},
         }),
         isTrue,
       );
@@ -293,8 +299,9 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'OK',
-          'redirects': [],
+          'redirects': <Object?>[],
           'statusCode': 200,
+          'queryParameters': {},
         }),
         isTrue,
       );
@@ -312,8 +319,9 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'OK',
-          'redirects': [],
+          'redirects': <Object?>[],
           'statusCode': 200,
+          'queryParameters': {},
         }),
         isTrue,
       );
@@ -332,8 +340,9 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'Switching Protocols',
-          'redirects': [],
+          'redirects': <Object?>[],
           'statusCode': 101,
+          'queryParameters': {},
         }),
         isTrue,
       );
@@ -358,19 +367,19 @@ void main() {
       expect(httpGetWithError.requestHeaders, isNull);
       expect(
         collectionEquals(httpPost.requestHeaders, {
-          'transfer-encoding': [],
+          'transfer-encoding': <Object?>[],
         }),
         isTrue,
       );
       expect(
         collectionEquals(httpPut.requestHeaders, {
-          'transfer-encoding': [],
+          'transfer-encoding': <Object?>[],
         }),
         isTrue,
       );
       expect(
         collectionEquals(httpPatch.requestHeaders, {
-          'transfer-encoding': [],
+          'transfer-encoding': <Object?>[],
         }),
         isTrue,
       );
@@ -442,6 +451,33 @@ void main() {
           'sec-websocket-accept': ['JF5SBCGrfyYAoLKzvj6A0ZVpk6c='],
         }),
         isTrue,
+      );
+    });
+
+    test('queryParameters returns correct value', () {
+      expect(
+        collectionEquals(httpGet.queryParameters, {
+          'userId': '1',
+          'title': 'myalbum',
+        }),
+        isTrue,
+      );
+      expect(httpGetWithError.queryParameters, isEmpty);
+      expect(
+        httpPost.queryParameters,
+        isEmpty,
+      );
+      expect(
+        httpPost.queryParameters,
+        isEmpty,
+      );
+      expect(
+        httpPost.queryParameters,
+        isEmpty,
+      );
+      expect(
+        httpPost.queryParameters,
+        isEmpty,
       );
     });
 

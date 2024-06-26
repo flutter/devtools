@@ -2,7 +2,7 @@
 
 ## Set up ChromeDriver (one time only)
 
-1. Follow the instructions [here](https://docs.flutter.dev/cookbook/testing/integration/introduction#5b-web) to download ChromeDriver.
+1. Follow the instructions [here](https://flutter.dev/to/integration-test-on-web) to download ChromeDriver.
 
 2. Add `chromedriver` to your PATH by modifying your `.bash_profile` or `.zshrc`:
 
@@ -18,6 +18,20 @@ chromedriver --port=4444
 
 If you get the error "'chromedriver' cannot be opened because it is from an unidentified developer.", run the following command with your path to the `chromedriver` executable:
 
+```
+xattr -d com.apple.quarantine ~/path/to/chromedriver
+```
+
+### Updating ChromeDriver
+
+If you update your Chrome version (or it updates automatically), you may need to update your `chromedriver`
+executable as well. To do this, delete your existing `chromedriver` executable (you can find this by
+running `which chromedriver`). Then, download the proper `chromedriver` zip file from
+[here](https://googlechromelabs.github.io/chrome-for-testing/#stable) based on your platform. Copy the
+link for your platform, open in a new tab, and then the zip file will be downloaded. Unzip the
+folder, and move the executable to the same location that you just deleted the previous executable from.
+
+If you are on Mac, you will likely need to run this command again on the new executable:
 ```
 xattr -d com.apple.quarantine ~/path/to/chromedriver
 ```
@@ -39,10 +53,6 @@ updating the golden images to the results produced by the test run.
 The following flags are available, but should not be used manually. To run a test with offline data
 or with experiments enabled, place the test in the proper directory, and the `run_tests.dart` script
 will propagate the proper flag values automatically (see [instructions below](#where-to-add-an-integration-test))
-
-* `--offline`: indicates that we do not need to start a test app to run this test. This will take precedence
-if both --offline and --test-app-uri are present.
-* `--enable_experiments`: enables experiments for DevTools within the integration test environment
 
 # Where to add an integration test
 
@@ -67,6 +77,14 @@ loading offline data allows for screenshot testing without flakiness.
 
 # In-file test arguments
 
-Some test arguments located in the test file as specifically formatted comments.
-See list of such arguments and example of
-usage in [tests](../test/integration_test/in_file_args_test.dart).
+Some test arguments are set in the test file directly as specifically formatted comments.
+
+For example:
+```dart
+// Do not delete these arguments. They are parsed by test runner.
+// test-argument:appPath="test/test_infra/fixtures/memory_app"
+// test-argument:experimentsOn=true
+```
+
+For a list of such arguments, see [_in_file_args.dart](test_infra/run/_in_file_args.dart). For an example of
+usage, see [eval_and_browse_test.dart](test/live_connection/eval_and_browse_test.dart).

@@ -5,18 +5,16 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/split.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
+import '../../performance_utils.dart';
 import 'raster_stats_controller.dart';
 import 'raster_stats_model.dart';
 
@@ -24,15 +22,43 @@ class RasterStatsView extends StatelessWidget {
   const RasterStatsView({
     super.key,
     required this.rasterStatsController,
+    required this.impellerEnabled,
   });
 
   final RasterStatsController rasterStatsController;
 
+  final bool impellerEnabled;
+
   @override
   Widget build(BuildContext context) {
+    if (impellerEnabled) {
+      return Center(
+        child: RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            text: 'The Raster Stats tool is not currently available for the '
+                'Impeller backend.\nLearn more about the status of ',
+            style: Theme.of(context).regularTextStyle,
+            children: [
+              GaLinkTextSpan(
+                link: GaLink(
+                  display: 'Impeller',
+                  url: impellerDocsUrl,
+                  gaScreenName: gac.performance,
+                  gaSelectedItemDescription:
+                      gac.PerformanceDocs.impellerDocsLinkFromRasterStats.name,
+                ),
+                context: context,
+              ),
+              const TextSpan(text: '.'),
+            ],
+          ),
+        ),
+      );
+    }
     return Column(
       children: [
-        if (!offlineController.offlineMode.value)
+        if (!offlineDataController.showingOfflineData.value)
           _RasterStatsControls(
             rasterStatsController: rasterStatsController,
           ),
@@ -58,7 +84,7 @@ class _RasterStatsControls extends StatelessWidget {
         padding: const EdgeInsets.all(denseSpacing),
         child: Row(
           children: [
-            DevToolsButton(
+            GaDevToolsButton(
               tooltip: 'Take a snapshot of the rendering layers on the current'
                   ' screen',
               icon: Icons.camera_outlined,
@@ -87,10 +113,14 @@ class _LayerVisualizer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<RasterStats?, bool>(
-      firstListenable: rasterStatsController.rasterStats,
-      secondListenable: rasterStatsController.loadingSnapshot,
-      builder: (context, rasterStats, loading, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        rasterStatsController.rasterStats,
+        rasterStatsController.loadingSnapshot,
+      ],
+      builder: (context, values, _) {
+        final rasterStats = values.first as RasterStats?;
+        final loading = values.second as bool;
         if (loading) {
           return const CenteredCircularProgressIndicator();
         }
@@ -101,7 +131,7 @@ class _LayerVisualizer extends StatelessWidget {
             ),
           );
         }
-        return Split(
+        return SplitPane(
           axis: Axis.horizontal,
           initialFractions: const [0.5, 0.5],
           children: [
@@ -129,10 +159,10 @@ class _LayerVisualizer extends StatelessWidget {
 @visibleForTesting
 class LayerSnapshotTable extends StatelessWidget {
   const LayerSnapshotTable({
-    Key? key,
+    super.key,
     required this.controller,
     required this.snapshots,
-  }) : super(key: key);
+  });
 
   static final _layerColumn = _LayerColumn();
   static final _timeColumn = _RenderingTimeColumn();
@@ -220,11 +250,11 @@ class _RenderingTimePercentageColumn extends ColumnData<LayerSnapshot> {
 @visibleForTesting
 class LayerImage extends StatelessWidget {
   const LayerImage({
-    Key? key,
+    super.key,
     required this.snapshot,
     required this.originalFrameSize,
     this.includeFullScreenButton = false,
-  }) : super(key: key);
+  });
 
   final LayerSnapshot? snapshot;
 
@@ -267,9 +297,16 @@ class LayerImage extends StatelessWidget {
                 );
                 final scaledSize = _scaledLayerSize(scaleFactor);
                 final scaledOffset = _scaledLayerOffset(scaleFactor);
+                final theme = Theme.of(context);
                 return Stack(
                   children: [
-                    Image.memory(snapshot.bytes),
+                    CustomPaint(
+                      painter: _CheckerBoardBackgroundPainter(
+                        theme.colorScheme.surface,
+                        theme.colorScheme.outlineVariant,
+                      ),
+                      child: Image.memory(snapshot.bytes),
+                    ),
                     Positioned(
                       left: scaledOffset.dx,
                       top: scaledOffset.dy,
@@ -325,10 +362,9 @@ class LayerImage extends StatelessWidget {
 
 class _FullScreenButton extends StatelessWidget {
   const _FullScreenButton({
-    Key? key,
     required this.snapshot,
     required this.originalFrameSize,
-  }) : super(key: key);
+  });
 
   final LayerSnapshot snapshot;
 
@@ -342,7 +378,7 @@ class _FullScreenButton extends StatelessWidget {
         right: denseSpacing,
       ),
       alignment: Alignment.bottomRight,
-      child: DevToolsButton.iconOnly(
+      child: GaDevToolsButton.iconOnly(
         icon: Icons.fullscreen,
         outlined: false,
         gaScreen: gac.performance,
@@ -365,10 +401,9 @@ class _FullScreenButton extends StatelessWidget {
 
 class _LayerImageDialog extends StatelessWidget {
   const _LayerImageDialog({
-    Key? key,
     required this.snapshot,
     required this.originalFrameSize,
-  }) : super(key: key);
+  });
 
   final LayerSnapshot snapshot;
 
@@ -396,5 +431,52 @@ class _LayerImageDialog extends StatelessWidget {
         DialogCloseButton(),
       ],
     );
+  }
+}
+
+class _CheckerBoardBackgroundPainter extends CustomPainter {
+  _CheckerBoardBackgroundPainter(Color color1, Color color2)
+      : _color1 = color1,
+        _color2 = color2;
+
+  final Color _color1;
+  final Color _color2;
+  final _squareSize = 20.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    final backgroundPaint = Paint()
+      ..color = _color1
+      ..style = PaintingStyle.fill;
+    final checkerPaint = Paint()
+      ..color = _color2
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      backgroundPaint,
+    );
+
+    bool flipper = true;
+
+    for (var x = 0.0; x < size.width; x += _squareSize) {
+      for (var y = 0.0; y < size.height; y += _squareSize * 2) {
+        double dy = y;
+        if (flipper) {
+          dy += _squareSize;
+        }
+        canvas.drawRect(
+          Rect.fromLTWH(x, dy, _squareSize, _squareSize),
+          checkerPaint,
+        );
+      }
+      flipper = !flipper;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }

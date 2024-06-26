@@ -5,7 +5,10 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_field_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -24,11 +27,15 @@ void main() {
 
   setUp(() {
     setUpMockScriptManager();
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(NotificationService, NotificationService());
 
     mockFieldObject = MockFieldObject();
 
@@ -69,17 +76,20 @@ void main() {
         expect(find.text('Field'), findsOneWidget);
         expect(find.text('256 B'), findsOneWidget);
         expect(find.text('Owner:'), findsOneWidget);
-        expect(find.text('fooLib'), findsOneWidget);
-        expect(find.text('fooScript.dart:10:4'), findsOneWidget);
+        expect(find.text('fooLib', findRichText: true), findsOneWidget);
+        expect(
+          find.text('fooScript.dart:10:4', findRichText: true),
+          findsOneWidget,
+        );
         expect(find.text('Observed types not found'), findsOneWidget);
         expect(find.text('Static Value:'), findsOneWidget);
-        expect(find.text('100'), findsOneWidget);
+        expect(find.text('100', findRichText: true), findsOneWidget);
 
         expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
         expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-        expect(find.byType(InboundReferencesWidget), findsOneWidget);
+        expect(find.byType(InboundReferencesTree), findsOneWidget);
       },
     );
 

@@ -17,7 +17,7 @@
 // ignore_for_file: unused_local_variable
 // ignore_for_file: avoid-throw-in-catch-block
 
-part of http;
+part of 'http.dart';
 
 // TODO(jacobr): cleanup this class with only static members.
 // ignore: avoid_classes_with_only_static_members
@@ -25,7 +25,7 @@ part of http;
 class HttpDate {
   // Parse a cookie date string.
   static DateTime _parseCookieDate(String date) {
-    const List monthsLowerCase = const [
+    const monthsLowerCase = const <String>[
       "jan",
       "feb",
       "mar",
@@ -89,7 +89,7 @@ class HttpDate {
       return int.parse(s.substring(0, index));
     }
 
-    var tokens = [];
+    var tokens = <String>[];
     while (!isEnd()) {
       while (!isEnd() && isDelimiter(date[position])) {
         position++;
@@ -109,7 +109,7 @@ class HttpDate {
     String? monthStr;
     String? yearStr;
 
-    for (var token in tokens) {
+    for (final token in tokens) {
       if (token.length < 1) continue;
       if (timeStr == null &&
           token.length >= 5 &&
