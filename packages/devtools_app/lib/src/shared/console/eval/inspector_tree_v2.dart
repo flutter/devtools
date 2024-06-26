@@ -102,7 +102,9 @@ class InspectorTreeNode {
   bool _isExpanded;
 
   bool get showExpandCollapse {
-    return diagnostic?.hasChildren == true || children.isNotEmpty;
+    final hasChildren = diagnostic?.hasChildren == true || children.isNotEmpty;
+    final isHideableGroupLeader = diagnostic?.isHideableGroupLeader ?? false;
+    return hasChildren && !isHideableGroupLeader;
   }
 
   set isExpanded(bool value) {
@@ -116,6 +118,10 @@ class InspectorTreeNode {
       }
     }
   }
+
+  bool get inHideableGroup => diagnostic?.inHideableGroup ?? false;
+
+  bool get isHideableGroupLeader => diagnostic?.isHideableGroupLeader ?? false;
 
   InspectorTreeNode? get parent => _parent;
   InspectorTreeNode? _parent;

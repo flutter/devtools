@@ -568,6 +568,25 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _children ?? [];
   }
 
+  bool get inHideableGroup {
+    final hasAtMostOneChild = childrenNow.length <= 1;
+    final isOnlyChild = (parent?.childrenNow ?? []).length == 1;
+    return !isCreatedByLocalProject && hasAtMostOneChild && isOnlyChild;
+  }
+
+  bool get isHideableGroupLeader {
+    return inHideableGroup && _hideableGroupSubordinates != null;
+  }
+
+  List<RemoteDiagnosticsNode>? get hideableGroupSubordinates =>
+      _hideableGroupSubordinates;
+  List<RemoteDiagnosticsNode>? _hideableGroupSubordinates;
+
+  void addHideableGroupSubordinate(RemoteDiagnosticsNode subordinate) {
+    _hideableGroupSubordinates ??= [];
+    _hideableGroupSubordinates!.add(subordinate);
+  }
+
   Future<void> _computeChildren() async {
     _maybePopulateChildren();
     if (!hasChildren || _children != null) {
@@ -641,7 +660,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Widget? get icon {
     if (isProperty) return null;
 
-    return iconMaker.fromWidgetName(widgetRuntimeType);
+    return iconMaker.fromWidgetName(
+      widgetRuntimeType,
+      isHideableGroupLeader: isHideableGroupLeader,
+    );
   }
 
   /// Returns true if two diagnostic nodes are indistinguishable from

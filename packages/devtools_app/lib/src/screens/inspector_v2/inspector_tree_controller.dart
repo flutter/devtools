@@ -593,11 +593,16 @@ class InspectorTreeController extends DisposableController
     RemoteDiagnosticsNode diagnosticsNode, {
     required bool expandChildren,
     required bool expandProperties,
+    RemoteDiagnosticsNode? hideableGroupLeader,
   }) {
     node.diagnostic = diagnosticsNode;
     final configLocal = config;
     if (configLocal.onNodeAdded != null) {
       configLocal.onNodeAdded!(node, diagnosticsNode);
+    }
+    final inHideableGroup = diagnosticsNode.inHideableGroup;
+    if (inHideableGroup && hideableGroupLeader != null) {
+      hideableGroupLeader.addHideableGroupSubordinate(diagnosticsNode);
     }
 
     if (diagnosticsNode.hasChildren ||
@@ -611,6 +616,8 @@ class InspectorTreeController extends DisposableController
           node.diagnostic!.childrenNow,
           expandChildren: expandChildren && styleIsMultiline,
           expandProperties: expandProperties && styleIsMultiline,
+          hideableGroupLeader:
+              inHideableGroup ? (hideableGroupLeader ?? diagnosticsNode) : null,
         );
       } else {
         node.clearChildren();
@@ -626,6 +633,7 @@ class InspectorTreeController extends DisposableController
     List<RemoteDiagnosticsNode>? children, {
     required bool expandChildren,
     required bool expandProperties,
+    RemoteDiagnosticsNode? hideableGroupLeader,
   }) {
     treeNode.isExpanded = expandChildren;
     if (treeNode.children.isNotEmpty) {
@@ -657,6 +665,8 @@ class InspectorTreeController extends DisposableController
             child,
             expandChildren: expandChildren,
             expandProperties: expandProperties,
+            hideableGroupLeader:
+                child.inHideableGroup ? hideableGroupLeader : null,
           ),
         );
       }
@@ -1238,7 +1248,12 @@ class _RowPainter extends CustomPainter {
       );
     }
 
-    if (row.hasSingleChild && node.isExpanded) {
+    final expandedWithSingleChild = row.hasSingleChild && node.isExpanded;
+    final subordinates = node.diagnostic?.hideableGroupSubordinates ?? [];
+    final lastSubordinateHasNoChildren =
+        subordinates.isNotEmpty && subordinates.last.childrenNow.isEmpty;
+
+    if (expandedWithSingleChild && !lastSubordinateHasNoChildren) {
       final distanceFromIconCenterToRowStart =
           inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
       final iconCenterX = _controller.getDepthIndent(row.depth) -
@@ -1343,7 +1358,8 @@ class InspectorRowContent extends StatelessWidget {
                         ),
                       )
                     : const SizedBox(
-                        width: defaultSpacing,
+                        width: defaultSpacing +
+                            2, // TODO: figure out a better way to pad this.
                         height: defaultSpacing,
                       ),
                 Expanded(
