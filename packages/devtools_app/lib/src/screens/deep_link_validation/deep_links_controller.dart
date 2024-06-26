@@ -441,30 +441,34 @@ class DeepLinksController extends DisposableController
     }
   }
 
-  Future<List<LinkData>> _validateAndroidDomain(
+  Future<List<LinkData>> _validateDomain(
     List<LinkData> linkdatas,
   ) async {
     final domains = linkdatas
         .where(
-          (linkdata) =>
-              linkdata.os.contains(PlatformOS.android) &&
-              linkdata.domain != null,
+          (linkdata) => linkdata.domain != null,
         )
         .map((linkdata) => linkdata.domain!)
         .toSet()
         .toList();
 
-    late final Map<String, List<DomainError>> domainErrors;
-
+    late final Map<String, List<DomainError>> androidDomainErrors;
+    Map<String, List<DomainError>> iosDomainErrors =
+        <String, List<DomainError>>{};
     try {
-      final result = await deepLinksServices.validateAndroidDomain(
+      final androidResult = await deepLinksServices.validateAndroidDomain(
         domains: domains,
         applicationId: applicationId,
         localFingerprint: localFingerprint.value,
       );
-      domainErrors = result.domainErrors;
+      androidDomainErrors = androidResult.domainErrors;
       googlePlayFingerprintsAvailability.value =
-          result.googlePlayFingerprintsAvailability;
+          androidResult.googlePlayFingerprintsAvailability;
+      if (FeatureFlags.deepLinkIosCheck) {
+        iosDomainErrors = await deepLinksServices.validateIosDomain(
+          domains: domains,
+        );
+      }
     } catch (_) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.validationErrorPage;
@@ -472,8 +476,11 @@ class DeepLinksController extends DisposableController
     }
 
     return linkdatas.map((linkdata) {
-      final errors = domainErrors[linkdata.domain];
-      if (errors != null && errors.isNotEmpty) {
+      final errors = <DomainError>[
+        ...(androidDomainErrors[linkdata.domain] ?? []),
+        ...(iosDomainErrors[linkdata.domain] ?? []),
+      ];
+      if (errors.isNotEmpty) {
         return LinkData(
           domain: linkdata.domain,
           domainErrors: errors,
@@ -535,7 +542,7 @@ class DeepLinksController extends DisposableController
       gac.deeplink,
       gac.AnalyzeFlutterProject.flutterHasAppLinks.name,
     );
-    linkdata = await _validateAndroidDomain(linkdata);
+    linkdata = await _validateDomain(linkdata);
     if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
     }
