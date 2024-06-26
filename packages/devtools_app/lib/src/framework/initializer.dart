@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
+import '../shared/connection_info.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/routing.dart';
@@ -24,10 +29,7 @@ import '../shared/routing.dart';
 /// connected. As we require additional services to be available, add them
 /// here.
 class Initializer extends StatefulWidget {
-  const Initializer({
-    super.key,
-    required this.builder,
-  });
+  const Initializer({super.key, required this.builder});
 
   /// The builder for the widget's children.
   ///
@@ -40,12 +42,30 @@ class Initializer extends StatefulWidget {
 
 class _InitializerState extends State<Initializer>
     with SingleTickerProviderStateMixin, AutoDisposeMixin {
+  static const _waitForConnectionTimeout = Duration(seconds: 2);
+
+  Timer? _timer;
+
+  bool _showConnectToNewAppButton = false;
+
   @override
   void initState() {
     super.initState();
     autoDisposeStreamSubscription(
       frameworkController.onConnectVmEvent.listen(_connectVm),
     );
+
+    _timer = Timer(_waitForConnectionTimeout, () {
+      setState(() {
+        _showConnectToNewAppButton = true;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   /// Connects to the VM with the given URI.
@@ -69,7 +89,26 @@ class _InitializerState extends State<Initializer>
             offlineDataController.showingOfflineData.value) {
           return widget.builder(context);
         }
-        return const CenteredMessage('Waiting for VM service connection...');
+        // TODO(kenz): this should be more sophisticated logic.
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Spacer(),
+            CenteredMessage(
+              _showConnectToNewAppButton
+                  ? 'Cannot connect to VM service.'
+                  : 'Waiting for VM service connection...',
+            ),
+            if (_showConnectToNewAppButton) ...[
+              const SizedBox(height: defaultSpacing),
+              ConnectToNewAppButton(
+                routerDelegate: DevToolsRouterDelegate.of(context),
+                gaScreen: gac.devToolsMain,
+              ),
+            ],
+            const Spacer(),
+          ],
+        );
       },
     );
   }

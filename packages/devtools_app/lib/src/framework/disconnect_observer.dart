@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/config_specific/import_export/import_export.dart';
+import '../shared/connection_info.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/query_parameters.dart';
 import '../shared/routing.dart';
 import '../shared/ui/colors.dart';
@@ -126,15 +126,10 @@ class _DisconnectObserverState extends State<DisconnectObserver>
               Text('Disconnected', style: theme.textTheme.headlineMedium),
               const SizedBox(height: defaultSpacing),
               if (!isEmbedded())
-                ElevatedButton(
-                  onPressed: () {
-                    hideDisconnectedOverlay();
-                    widget.routerDelegate.navigateHome(
-                      clearUriParam: true,
-                      clearScreenParam: true,
-                    );
-                  },
-                  child: const Text(connectToNewAppText),
+                ConnectToNewAppButton(
+                  routerDelegate: widget.routerDelegate,
+                  onPressed: hideDisconnectedOverlay,
+                  gaScreen: gac.devToolsMain,
                 )
               else
                 const Text('Run a new debug session to reconnect'),

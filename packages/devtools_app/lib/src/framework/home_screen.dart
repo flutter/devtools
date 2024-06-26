@@ -103,6 +103,9 @@ class ConnectionSection extends StatelessWidget {
             gaScreen: gac.home,
             minScreenWidthForTextBeforeScaling:
                 _primaryMinScreenWidthForTextBeforeScaling,
+            routerDelegate: DevToolsRouterDelegate.of(context),
+            onPressed: () =>
+                Navigator.of(context, rootNavigator: true).pop('dialog'),
           ),
         ],
         child: const ConnectedAppSummary(narrowView: false),

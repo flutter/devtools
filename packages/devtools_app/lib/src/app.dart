@@ -257,7 +257,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       page = queryParams.legacyPage;
     }
 
-    final connectedToVmService =
+    final paramsContainVmServiceUri =
         vmServiceUri != null && vmServiceUri.isNotEmpty;
 
     Widget scaffoldBuilder() {
@@ -329,7 +329,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               actions: isEmbedded()
                   ? []
                   : [
-                      if (connectedToVmService) ...[
+                      if (paramsContainVmServiceUri) ...[
                         // Hide the hot reload button for Dart web apps, where the
                         // hot reload service extension is not avilable and where the
                         // [service.reloadServices] RPC is not implemented.
@@ -355,7 +355,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       );
     }
 
-    return connectedToVmService
+    return paramsContainVmServiceUri
         ? Initializer(builder: (_) => scaffoldBuilder())
         : scaffoldBuilder();
   }
