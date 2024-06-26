@@ -50,8 +50,6 @@ class LoggingTableModel extends DisposableController
   final _selectedLogs = ListQueue<LogDataV2>();
   late int _retentionLimit;
 
-  Filter? _currentFilter;
-
   late final InterruptableChunkWorker _worker;
 
   /// Represents the state of reloading the height caches.
@@ -89,7 +87,6 @@ class LoggingTableModel extends DisposableController
   void filterData(Filter<LogDataV2> filter) {
     super.filterData(filter);
 
-    _currentFilter = filter;
     _filteredLogs
       ..clear()
       ..addAll(
@@ -99,9 +96,7 @@ class LoggingTableModel extends DisposableController
   }
 
   bool _filterCallback(_LogEntry entry) {
-    final filter = _currentFilter;
-    // If there is no filter yet then all logs match.
-    if (filter == null) return true;
+    final filter = activeFilter.value;
 
     final log = entry.log;
     final filteredOutByToggleFilters = filter.toggleFilters.any(
@@ -178,22 +173,23 @@ class LoggingTableModel extends DisposableController
     getLogHeight(
       _logs.length - 1,
     );
+    _trimOneOutOfRetentionLog();
 
     if (!_filterCallback(newEntry)) {
       // Only add the log to filtered logs if it matches the filter.
       return;
     }
     _filteredLogs.add(_FilteredLogEntry(newEntry));
-    _trimOneOutOfRetentionLog();
     notifyListeners();
   }
 
   void _trimOneOutOfRetentionLog() {
     if (_logs.length > _retentionLimit) {
-      if (identical(_logs.first, _filteredLogs.first)) {
+      if (identical(_logs.first.log, _filteredLogs.first.logEntry.log)) {
         // Remove a filtered log if it is about to go out of retention.
         _filteredLogs.removeFirst();
       }
+
       // Remove the log that has just gone out of retention.
       _logs.removeFirst();
     }
