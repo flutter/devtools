@@ -14,7 +14,7 @@ import '../utils.dart';
 const _updateOnPath = 'update-on-path';
 const _useCacheFlag = 'use-cache';
 
-const _flutterPreReleaseTagRegExp = RegExp(r'[0-9]+.[0-9]+.0-[0-9]+.0.pre');
+final _flutterPreReleaseTagRegExp = RegExp(r'[0-9]+.[0-9]+.0-[0-9]+.0.pre');
 
 /// This command updates the the Flutter SDK contained in the 'tool/' directory
 /// to the latest Flutter candidate branch.
