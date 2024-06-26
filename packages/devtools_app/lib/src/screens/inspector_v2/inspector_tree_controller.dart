@@ -212,7 +212,7 @@ class InspectorTreeController extends DisposableController
   ///
   /// The rows can be updated with a call to [_updateRows].
   ValueListenable<List<InspectorTreeRow?>> get rowsInTree => _rowsInTree;
-  final _rowsInTree = ListValueNotifier<InspectorTreeRow?>([]);
+  final _rowsInTree = ValueNotifier<List<InspectorTreeRow>>([]);
 
   /// Map from node to the index for that node's row in [rowsInTree].
   final _nodeToRowIndex = <InspectorTreeNode, int>{};
@@ -232,15 +232,13 @@ class InspectorTreeController extends DisposableController
     if (node == null) return;
 
     final rows = _buildRows(node);
-    _rowsInTree.replaceAll(rows);
+    _rowsInTree.value = rows;
 
     // Build the reverse node-to-index map for faster lookups:
     for (int i = 0; i < _rowsInTree.value.length; i++) {
       final row = _rowsInTree.value[i];
-      final node = row?.node;
-      if (node != null) {
-        _nodeToRowIndex[node] = i;
-      }
+      final node = row.node;
+      _nodeToRowIndex[node] = i;
     }
 
     if (updateSearchableRows) {
