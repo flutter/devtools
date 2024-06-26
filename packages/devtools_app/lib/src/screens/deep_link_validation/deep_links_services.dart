@@ -120,8 +120,6 @@ class DeepLinksServices {
 
   Future<Map<String, List<DomainError>>> validateIosDomain({
     required List<String> domains,
-    required String applicationId,
-    required String? localFingerprint,
   }) async {
     //TODO(hangyujin): This is just a fake response, implement the iOS domain validation when the API is available.
     final domainErrors = <String, List<DomainError>>{

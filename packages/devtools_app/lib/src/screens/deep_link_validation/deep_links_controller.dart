@@ -467,8 +467,6 @@ class DeepLinksController extends DisposableController
       if (FeatureFlags.deepLinkIosCheck)
         iosDomainErrors = await deepLinksServices.validateIosDomain(
           domains: domains,
-          applicationId: applicationId,
-          localFingerprint: localFingerprint.value,
         );
     } catch (_) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
