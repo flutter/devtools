@@ -12,7 +12,7 @@ set -e
 
 # TODO(https://github.com/flutter/devtools/issues/7939): Switch back to using the
 # commented out git command below once Flutter rolls are tagged again:
-LATEST_FLUTTER_CANDIDATE=$(./flutter-candidate.txt)
+LATEST_FLUTTER_CANDIDATE=`cat ./flutter-candidate.txt`
 
 # LATEST_FLUTTER_CANDIDATE=$(git ls-remote --tags --sort='-v:refname' https://flutter.googlesource.com/mirrors/flutter/ \
 #   | grep -E "refs/tags/[0-9]+.[0-9]+.0-[0-9]+.0.pre" \
