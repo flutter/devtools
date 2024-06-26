@@ -43,12 +43,14 @@ void main() {
     logStatus(
       'verify static extensions are available before connecting to an app',
     );
-    expect(extensionService.availableExtensions.length, 1);
-    expect(extensionService.visibleExtensions.length, 1);
+    expect(extensionService.availableExtensions.length, 3);
+    expect(extensionService.visibleExtensions.length, 3);
     await _verifyExtensionsSettingsMenu(
       tester,
       [
         ExtensionEnabledState.none, // bar
+        ExtensionEnabledState.none, // baz
+        ExtensionEnabledState.none, // foo
       ],
     );
 
