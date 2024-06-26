@@ -476,7 +476,7 @@ class DeepLinksController extends DisposableController
     }
 
     return linkdatas.map((linkdata) {
-      final errors = [
+      final errors = <DomainError>[
         ...(androidDomainErrors[linkdata.domain] ?? []),
         ...(iosDomainErrors[linkdata.domain] ?? []),
       ];
