@@ -221,20 +221,18 @@ class InspectorTreeController extends DisposableController
   ///
   /// If [updateSearchableRows] is true, also updates [_searchableCachedRows]
   /// with the new values.
-  ///
-  /// TODO(elliette): Consider only updating an [InspectorTreeNode]'s branch
-  /// when it is marked as dirty, instead of the entire tree. See:
-  /// https://github.com/flutter/devtools/issues/7980
   void _updateRows({
     InspectorTreeNode? node,
     bool updateSearchableRows = false,
   }) {
+    // TODO(elliette): Consider only updating an [InspectorTreeNode]'s branch
+    // when it is marked as dirty, instead of the entire tree. See:
+    // https://github.com/flutter/devtools/issues/7980
     node ??= root;
     if (node == null) return;
 
     final rows = _buildRows(node);
     _rowsInTree.replaceAll(rows);
-    _rowsInTree.notifyListeners();
 
     // Build the reverse node-to-index map for faster lookups:
     for (int i = 0; i < _rowsInTree.value.length; i++) {
@@ -246,8 +244,9 @@ class InspectorTreeController extends DisposableController
     }
 
     if (updateSearchableRows) {
-      _searchableCachedRows.clear();
-      _searchableCachedRows.addAll(rows);
+      _searchableCachedRows
+        ..clear()
+        ..addAll(rows);
     }
   }
 
@@ -265,17 +264,10 @@ class InspectorTreeController extends DisposableController
     refreshSearchMatches();
   }
 
-  InspectorTreeRow? getRowAtIndex(int index) {
-    if (index < 0) return null;
+  InspectorTreeRow? rowAtIndex(int index) => _rowsInTree.value.safeGet(index);
 
-    if (_rowsInTree.value.length > index) {
-      return _rowsInTree.value[index];
-    }
-    return null;
-  }
-
-  double getRowOffset(int index) {
-    return (getRowAtIndex(index)?.depth ?? 0) * inspectorColumnIndent;
+  double rowOffset(int index) {
+    return (rowAtIndex(index)?.depth ?? 0) * inspectorColumnIndent;
   }
 
   List<InspectorTreeNode> getPathFromSelectedRowToRoot() {
@@ -351,8 +343,8 @@ class InspectorTreeController extends DisposableController
       return;
     }
 
-    selection = getRowAtIndex(
-      (_getRowIndexFromNode(selection!) + indexOffset).clamp(0, _numRows - 1),
+    selection = rowAtIndex(
+      (_rowIndexFromNode(selection!) + indexOffset).clamp(0, _numRows - 1),
     )?.node;
   }
 
@@ -414,10 +406,9 @@ class InspectorTreeController extends DisposableController
 
   int get _numRows => _rowsInTree.value.length;
 
-  int _getRowIndexFromNode(InspectorTreeNode node) =>
-      _nodeToRowIndex[node] ?? -1;
+  int _rowIndexFromNode(InspectorTreeNode node) => _nodeToRowIndex[node] ?? -1;
 
-  int _getRowIndexFromOffset(double y) => max(0, y ~/ inspectorRowHeight);
+  int _rowIndexFromOffset(double y) => max(0, y ~/ inspectorRowHeight);
 
   List<InspectorTreeRow> _buildRows(InspectorTreeNode node) {
     final rows = <InspectorTreeRow>[];
@@ -474,14 +465,14 @@ class InspectorTreeController extends DisposableController
   InspectorTreeRow? getRowForNode(InspectorTreeNode node) {
     final rootLocal = root;
     if (rootLocal == null) return null;
-    return getRowAtIndex(_getRowIndexFromNode(node));
+    return rowAtIndex(_rowIndexFromNode(node));
   }
 
-  InspectorTreeRow? getRowForOffset(Offset offset) {
+  InspectorTreeRow? rowForOffset(Offset offset) {
     final rootLocal = root;
     if (rootLocal == null) return null;
-    final row = _getRowIndexFromOffset(offset.dy);
-    return row < _rowsInTree.value.length ? getRowAtIndex(row) : null;
+    final row = _rowIndexFromOffset(offset.dy);
+    return row < _rowsInTree.value.length ? rowAtIndex(row) : null;
   }
 
   void onExpandRow(InspectorTreeRow row) {
@@ -547,7 +538,7 @@ class InspectorTreeController extends DisposableController
     if (lastContentWidth == null) {
       double maxIndent = 0;
       for (int i = 0; i < _numRows; i++) {
-        final row = getRowAtIndex(i);
+        final row = rowAtIndex(i);
         if (row != null) {
           maxIndent = max(maxIndent, getDepthIndent(row.depth));
         }
@@ -1116,7 +1107,7 @@ class _InspectorTreeState extends State<InspectorTree>
                                 return SizedBox(height: inspectorRowHeight);
                               }
                               final row =
-                                  treeControllerLocal.getRowAtIndex(index)!;
+                                  treeControllerLocal.rowAtIndex(index)!;
                               final inspectorRef =
                                   row.node.diagnostic?.valueRef.id;
                               return _InspectorTreeRowWidget(

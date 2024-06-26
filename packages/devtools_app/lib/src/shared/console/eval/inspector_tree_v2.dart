@@ -61,9 +61,7 @@ class InspectorTreeNode {
       if (parent != null) {
         parent!.isDirty = true;
       }
-      if (whenDirty != null) {
-        whenDirty!(this);
-      }
+      whenDirty?.call(this);
     } else {
       _isDirty = false;
     }

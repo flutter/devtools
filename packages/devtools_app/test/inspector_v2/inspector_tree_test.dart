@@ -89,21 +89,21 @@ void main() {
           );
         await pumpInspectorTree(tester, treeController: treeController);
 
-        expect(treeController.getRowForOffset(const Offset(0, -100.0)), isNull);
-        expect(treeController.getRowOffset(-1), equals(0));
+        expect(treeController.rowForOffset(const Offset(0, -100.0)), isNull);
+        expect(treeController.rowOffset(-1), equals(0));
 
-        expect(treeController.getRowForOffset(const Offset(0, 0.0)), isNull);
-        expect(treeController.getRowOffset(0), equals(0));
+        expect(treeController.rowForOffset(const Offset(0, 0.0)), isNull);
+        expect(treeController.rowOffset(0), equals(0));
 
         treeController.root = InspectorTreeNode()
           ..appendChild(InspectorTreeNode());
 
         await pumpInspectorTree(tester, treeController: treeController);
 
-        expect(treeController.getRowForOffset(const Offset(0, -20))!.index, 0);
-        expect(treeController.getRowOffset(-1), equals(0));
-        expect(treeController.getRowForOffset(const Offset(0, 0.0)), isNotNull);
-        expect(treeController.getRowOffset(0), equals(0));
+        expect(treeController.rowForOffset(const Offset(0, -20))!.index, 0);
+        expect(treeController.rowOffset(-1), equals(0));
+        expect(treeController.rowForOffset(const Offset(0, 0.0)), isNotNull);
+        expect(treeController.rowOffset(0), equals(0));
 
         // This operation would previously throw an exception in debug builds
         // and infinite loop in release builds.
