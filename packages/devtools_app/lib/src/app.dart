@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
 import 'extensions/extension_screen.dart';
-import 'framework/disconnected_overlay.dart';
+import 'framework/disconnect_observer.dart';
 import 'framework/framework_core.dart';
 import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
@@ -450,7 +450,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           child: NotificationsView(
             child: ReleaseNotesViewer(
               controller: releaseNotesController,
-              child: DisconnectManager(
+              child: DisconnectObserver(
                 routerDelegate: routerDelegate,
                 child: child,
               ),

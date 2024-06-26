@@ -17,8 +17,8 @@ import '../shared/routing.dart';
 import '../shared/ui/colors.dart';
 import '../shared/utils.dart';
 
-class DisconnectManager extends StatefulWidget {
-  const DisconnectManager({
+class DisconnectObserver extends StatefulWidget {
+  const DisconnectObserver({
     super.key,
     required this.routerDelegate,
     required this.child,
@@ -28,10 +28,10 @@ class DisconnectManager extends StatefulWidget {
   final DevToolsRouterDelegate routerDelegate;
 
   @override
-  State<DisconnectManager> createState() => _DisconnectManagerState();
+  State<DisconnectObserver> createState() => _DisconnectObserverState();
 }
 
-class _DisconnectManagerState extends State<DisconnectManager>
+class _DisconnectObserverState extends State<DisconnectObserver>
     with AutoDisposeMixin {
   OverlayEntry? currentDisconnectedOverlay;
 
