@@ -321,6 +321,8 @@ class InterruptableChunkWorker {
 
   final int _chunkSize;
   int _workId = 0;
+  bool _disposed = false;
+
   void Function(int) callback;
   void Function(double progress) progressCallback;
 
@@ -337,6 +339,9 @@ class InterruptableChunkWorker {
     final localWorkId = ++_workId;
 
     Future<void> doChunkWork(int chunkStartingIndex) async {
+      if (_disposed) {
+        return completer.complete(false);
+      }
       if (chunkStartingIndex >= length) {
         return completer.complete(true);
       }
@@ -364,6 +369,10 @@ class InterruptableChunkWorker {
     doChunkWork(0);
 
     return completer.future;
+  }
+
+  void dispose() {
+    _disposed = true;
   }
 }
 
