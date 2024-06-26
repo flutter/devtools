@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_app_shared/web_utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart';
 
@@ -288,14 +289,11 @@ class _PerfettoViewController extends DisposableController
   void _handleMessage(Event e) {
     if (e.isMessageEvent) {
       final messageData = ((e as MessageEvent).data as JSString).toDart;
-      if (messageData == EmbeddedPerfettoEvent.pong.event &&
-          !_perfettoHandlerReady.isCompleted) {
-        _perfettoHandlerReady.complete();
+      if (messageData == EmbeddedPerfettoEvent.pong.event) {
+        _perfettoHandlerReady.safeComplete();
       }
-
-      if (messageData == EmbeddedPerfettoEvent.devtoolsThemePong.event &&
-          !_devtoolsThemeHandlerReady.isCompleted) {
-        _devtoolsThemeHandlerReady.complete();
+      if (messageData == EmbeddedPerfettoEvent.devtoolsThemePong.event) {
+        _devtoolsThemeHandlerReady.safeComplete();
       }
     }
   }

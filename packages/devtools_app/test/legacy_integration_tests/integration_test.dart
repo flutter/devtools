@@ -20,7 +20,7 @@ void main() {
     // ignore: dead_code
     if (false) {
       setUpAll(() async {
-        final bool testInReleaseMode =
+        final testInReleaseMode =
             Platform.environment['WEBDEV_RELEASE'] == 'true';
 
         webBuildFixture = await WebBuildFixture.serve(

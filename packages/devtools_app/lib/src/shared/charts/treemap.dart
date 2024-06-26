@@ -78,7 +78,7 @@ class Treemap extends StatefulWidget {
 
   final void Function(TreemapNode? node) onRootChangedCallback;
 
-  static const PivotType pivotType = PivotType.pivotByMiddle;
+  static const pivotType = PivotType.pivotByMiddle;
 
   static const treeMapHeaderHeight = 20.0;
 

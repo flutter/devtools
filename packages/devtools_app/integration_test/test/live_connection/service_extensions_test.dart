@@ -356,7 +356,7 @@ Future<void> _verifyExtensionStateInServiceManager(
       .getServiceExtensionState(extensionName);
 
   // Wait for the service extension state to match the expected value.
-  final Completer<ServiceExtensionState> stateCompleter = Completer();
+  final stateCompleter = Completer<ServiceExtensionState>();
   void stateListener() {
     if (stateListenable.value.value == value) {
       stateCompleter.complete(stateListenable.value);
@@ -366,7 +366,7 @@ Future<void> _verifyExtensionStateInServiceManager(
   stateListenable.addListener(stateListener);
   stateListener();
 
-  final ServiceExtensionState state = await stateCompleter.future;
+  final state = await stateCompleter.future;
   stateListenable.removeListener(stateListener);
   expect(
     state.enabled,

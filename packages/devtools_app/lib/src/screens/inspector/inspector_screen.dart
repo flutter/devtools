@@ -426,7 +426,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
                 child: Text(
                   'Widget Tree',
-                  style: Theme.of(context).textTheme.titleSmall,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
               ...!isSearchVisible

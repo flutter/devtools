@@ -121,8 +121,8 @@ class _SizeColumn extends ColumnData<TreemapNode> {
 
   @override
   int compare(TreemapNode a, TreemapNode b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 }
@@ -150,8 +150,8 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 
   @override
   int compare(TreemapNode a, TreemapNode b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 }
@@ -226,8 +226,8 @@ class _DiffColumn extends ColumnData<TreemapNode> {
 
   @override
   int compare(TreemapNode a, TreemapNode b) {
-    final Comparable valueA = getValue(a);
-    final Comparable valueB = getValue(b);
+    final valueA = getValue(a);
+    final valueB = getValue(b);
     return valueA.compareTo(valueB);
   }
 

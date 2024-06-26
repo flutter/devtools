@@ -192,7 +192,7 @@ class UpdatePerfettoCommand extends Command {
     String newVersionNumber = '';
     final versionRegExp = RegExp(r'v\d+[.]\d+-[0-9a-fA-F]+');
     final entities = perfettoDistDir.listSync();
-    for (FileSystemEntity entity in entities) {
+    for (final entity in entities) {
       final path = entity.path;
       final match = versionRegExp.firstMatch(path);
       if (match != null) {

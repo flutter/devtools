@@ -17,7 +17,7 @@ import '../../../profiler/panes/cpu_profile_columns.dart';
 import 'tracing_data.dart';
 import 'tracing_pane_controller.dart';
 
-const double _countColumnWidth = 100;
+const _countColumnWidth = 100.0;
 
 /// Displays an allocation profile as a tree of stack frames, displaying
 /// inclusive and exclusive allocation counts.
@@ -175,7 +175,6 @@ class _TracingTreeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
     return AreaPaneHeader(
       title: Text.rich(
@@ -196,7 +195,7 @@ class _TracingTreeHeader extends StatelessWidget {
       actions: [
         const Spacer(),
         TabBar(
-          labelColor: textTheme.bodyLarge?.color ?? colorScheme.primary,
+          labelColor: colorScheme.primary,
           tabs: tabs,
           isScrollable: true,
           controller: tabController,
@@ -253,7 +252,7 @@ class _InclusiveCountColumn extends ColumnData<CpuStackFrame> {
 
   @override
   int compare(CpuStackFrame a, CpuStackFrame b) {
-    final int result = super.compare(a, b);
+    final result = super.compare(a, b);
     if (result == 0) {
       return a.name.compareTo(b.name);
     }
@@ -286,7 +285,7 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 
   @override
   int compare(CpuStackFrame a, CpuStackFrame b) {
-    final int result = super.compare(a, b);
+    final result = super.compare(a, b);
     if (result == 0) {
       return a.name.compareTo(b.name);
     }

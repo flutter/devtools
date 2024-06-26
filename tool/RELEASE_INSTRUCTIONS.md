@@ -1,4 +1,4 @@
-> [!NOTE] 
+> [!NOTE]
 > There are parts of this release process that can only be completed by Googlers
 on the Dash team. If you are not a Googler on the Dash team, please reach out on the
 [#hackers-devtools](https://discord.com/channels/608014603317936148/1106667330093723668)
@@ -69,6 +69,8 @@ Make sure:
    git checkout main; git rebase-update
    ```
 
+> Note: Until https://github.com/flutter/devtools/issues/7939, skip this step.
+
 2. Your Flutter SDK in `devtools/tool/flutter-sdk` and the one on PATH are updated to the latest candidate release branch:
    ```shell
    devtools_tool update-flutter-sdk --update-on-path
@@ -90,6 +92,15 @@ This command will automatically:
    - create a new branch using the tip of master and check out locally
    - create a PR for release changes
    - update your local version of flutter to the latest flutter candidate
+
+**The following is required until https://github.com/flutter/devtools/issues/7939 is fixed:**
+
+1. Update the `flutter-candidate.txt` to the latest Flutter candidate in g3 (see instructions in DevTools Release Rotation email). This change should get committed with the DevTools release PR so that we know which version it was released with.
+
+2. Update your Flutter SDK in `devtools/tool/flutter-sdk` and the one on PATH to the latest Flutter candidate:
+   ```shell
+   devtools_tool update-flutter-sdk --update-on-path --use-cache
+   ```
 
 #### Verify the version changes for the Release PR
 
@@ -370,7 +381,7 @@ onto the `flutter/devtools` protected branch (`master`).
 
 ### Additional resources
 - `dart-lang/sdk` cherry-pick [Wiki](https://github.com/dart-lang/sdk/wiki/Cherry-picks-to-a-release-channel)
-- Flutter cherry-pick [Wiki](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process)
+- Flutter cherry-pick [docs](https://github.com/flutter/flutter/blob/master/docs/releases/Flutter-Cherrypick-Process.md)
 - Example cherry-pick cl: https://dart-review.googlesource.com/c/sdk/+/336827
 - Example cherry-pick issue: https://github.com/dart-lang/sdk/issues/54085
 - Example merge commit on `flutter/devtools`: https://github.com/flutter/devtools/pull/6812

@@ -150,7 +150,7 @@ class ChartPainter extends CustomPainter {
 
   final ColorScheme colorScheme;
 
-  static const double axisWidth = 2;
+  static const axisWidth = 2.0;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -384,7 +384,7 @@ class ChartPainter extends CustomPainter {
         chartController.zeroYPosition + 1,
         (canvas) {
           // Draw the X-axis labels.
-          for (var timestamp in chartController.labelTimestamps) {
+          for (final timestamp in chartController.labelTimestamps) {
             final xCoord = chartController.timestampToXCanvasCoord(timestamp);
             drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
           }

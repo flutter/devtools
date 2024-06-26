@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../service/editor/api_classes.dart';
+
 /// This class defines the API exposed by the Dart/Flutter extensions in VS
 /// Code (and must match the implementation there).
 ///
@@ -32,15 +34,6 @@ abstract interface class VsCodeApi {
   /// An event with initial sessions is sent after [initialize] is called.
   Stream<VsCodeDebugSessionsEvent> get debugSessionsChanged;
 
-  /// Executes a VS Code command.
-  ///
-  /// Commands can be native VS Code commands or commands registered by the
-  /// Dart/Flutter extensions.
-  ///
-  /// Which commands are available is not part of the API contract so callers
-  /// should take care when calling APIs that might evolve over time.
-  Future<Object?> executeCommand(String command, [List<Object?>? arguments]);
-
   /// Changes the current Flutter device.
   ///
   /// The selected device is the same one shown in the status bar in VS Code.
@@ -62,10 +55,23 @@ abstract interface class VsCodeApi {
   ///
   /// Depending on user settings, this may open embedded (the default) or in an
   /// external browser window.
+  ///
+  /// If [debugSessionId] is `null` the [requiresDebugSession] flag will
+  /// indicate whether the editor must select (or ask the user) for a debug
+  /// session. If [requiresDebugSession] is `false` but [prefersDebugSession] is
+  /// `true`, then the editor should use or prompt for a debug session if one
+  /// is available, but otherwise launch without a debug session.
+  ///
+  /// If [requiresDebugSession] is `null` (or if the
+  /// `openDevToolsWithOptionalDebugSessionFlags` capability is `false`) then
+  /// the editor will try to make this decision automatically (which may be
+  /// inaccurate for pages it does not know about, like extensions).
   Future<void> openDevToolsPage(
     String? debugSessionId, {
     String? page,
     bool? forceExternal,
+    bool? requiresDebugSession,
+    bool? prefersDebugSession,
   });
 
   /// Sends a Hot Reload request to the debug session with ID [debugSessionId].
@@ -77,7 +83,6 @@ abstract interface class VsCodeApi {
   static const jsonApiName = 'vsCode';
 
   static const jsonInitializeMethod = 'initialize';
-  static const jsonExecuteCommandMethod = 'executeCommand';
 
   static const jsonSelectDeviceMethod = 'selectDevice';
   static const jsonOpenDevToolsPageMethod = 'openDevToolsPage';
@@ -95,84 +100,8 @@ abstract interface class VsCodeApi {
   static const jsonForceExternalParameter = 'forceExternal';
   static const jsonDebugSessionIdParameter = 'debugSessionId';
   static const jsonPlatformTypeParameter = 'platformType';
-}
-
-/// This class defines a device exposed by the Dart/Flutter extensions in VS
-/// Code (and must match the implementation there).
-///
-/// All changes to this file should be backwards-compatible and use
-/// [VsCodeCapabilities] to advertise which capabilities are available and
-/// handle any changes in behaviour.
-abstract interface class VsCodeDevice {
-  String get id;
-  String get name;
-  String? get category;
-  bool get emulator;
-  String? get emulatorId;
-  bool get ephemeral;
-  String get platform;
-  String? get platformType;
-
-  static const jsonIdField = 'id';
-  static const jsonNameField = 'name';
-  static const jsonCategoryField = 'category';
-  static const jsonEmulatorField = 'emulator';
-  static const jsonEmulatorIdField = 'emulatorId';
-  static const jsonEphemeralField = 'ephemeral';
-  static const jsonPlatformField = 'platform';
-  static const jsonPlatformTypeField = 'platformType';
-}
-
-/// This class defines a debug session exposed by the Dart/Flutter extensions in
-/// VS Code (and must match the implementation there).
-///
-/// All changes to this file should be backwards-compatible and use
-/// [VsCodeCapabilities] to advertise which capabilities are available and
-/// handle any changes in behaviour.
-abstract interface class VsCodeDebugSession {
-  String get id;
-  String get name;
-  String? get vmServiceUri;
-
-  /// The mode the app is running in.
-  ///
-  /// These values are defined by Flutter and at the time of writing can include
-  /// 'debug', 'profile', 'release' and 'jit_release'.
-  ///
-  /// This value may be unavailable (`null`) for Dart/Test sessions or those
-  /// that have not fully started yet.
-  String? get flutterMode;
-
-  /// The ID of the device the Flutter app is running on, if available.
-  String? get flutterDeviceId;
-
-  /// The type of debugger session. If available, this is usually one of:
-  ///
-  /// - Dart        (dart run)
-  /// - DartTest    (dart test)
-  /// - Flutter     (flutter run)
-  /// - FlutterTest (flutter test)
-  /// - Web         (webdev serve)
-  /// - WebTest     (webdev test)
-  String? get debuggerType;
-
-  /// The full path to the root of this project (the folder that contains the
-  /// `pubspec.yaml`).
-  ///
-  /// This path might not always be available, for example:
-  ///
-  /// - When the version of Dart-Code is from before this field was added
-  /// - When a debug session was an attach and we didn't know the source
-  /// - When the program being run is a lose file without any pubspec
-  String? get projectRootPath;
-
-  static const jsonIdField = 'id';
-  static const jsonNameField = 'name';
-  static const jsonVmServiceUriField = 'vmServiceUri';
-  static const jsonFlutterModeField = 'flutterMode';
-  static const jsonFlutterDeviceIdField = 'flutterDeviceId';
-  static const jsonDebuggerTypeField = 'debuggerType';
-  static const jsonProjectRootPathField = 'projectRootPath';
+  static const jsonRequiresDebugSessionParameter = 'requiresDebugSession';
+  static const jsonPrefersDebugSessionParameter = 'prefersDebugSession';
 }
 
 /// This class defines a device event sent by the Dart/Flutter extensions in VS
@@ -189,7 +118,7 @@ abstract interface class VsCodeDevicesEvent {
   String? get selectedDeviceId;
 
   /// A list of the devices that are available to select.
-  List<VsCodeDevice> get devices;
+  List<EditorDevice> get devices;
 
   /// A list of the devices that are unavailable to select because the platform
   /// is not enabled.
@@ -199,7 +128,7 @@ abstract interface class VsCodeDevicesEvent {
   ///
   /// This field is nullable because it was not in the initial sidebar API so
   /// older versions of VS Code might not provide it.
-  List<VsCodeDevice>? get unsupportedDevices;
+  List<EditorDevice>? get unsupportedDevices;
 
   static const jsonSelectedDeviceIdField = 'selectedDeviceId';
   static const jsonDevicesField = 'devices';
@@ -214,7 +143,7 @@ abstract interface class VsCodeDevicesEvent {
 /// handle any changes in behaviour.
 abstract interface class VsCodeDebugSessionsEvent {
   /// A list of debug sessions that are currently active in VS Code.
-  List<VsCodeDebugSession> get sessions;
+  List<EditorDebugSession> get sessions;
 
   static const jsonSessionsField = 'sessions';
 }
@@ -226,10 +155,6 @@ abstract interface class VsCodeDebugSessionsEvent {
 /// [VsCodeCapabilities] to advertise which capabilities are available and
 /// handle any changes in behaviour.
 abstract interface class VsCodeCapabilities {
-  /// Whether the `executeCommand` method is available to call to execute VS
-  /// Code commands.
-  bool get executeCommand;
-
   /// Whether the `selectDevice` method is available to call to change the
   /// selected Flutter device.
   bool get selectDevice;
@@ -243,6 +168,12 @@ abstract interface class VsCodeCapabilities {
   /// regardless of user settings.
   bool get openDevToolsExternally;
 
+  /// Whether the `openDevToolsPage` method can be called with the
+  /// `requiresDebugSession` and `prefersDebugSession` flags to indicate
+  /// whether the editor should select/prompt for a debug session if one was not
+  /// provided.
+  bool get openDevToolsWithOptionalDebugSessionFlags;
+
   /// Whether the `hotReload` method is available call to hot reload a specific
   /// debug session.
   bool get hotReload;
@@ -251,10 +182,11 @@ abstract interface class VsCodeCapabilities {
   /// debug session.
   bool get hotRestart;
 
-  static const jsonExecuteCommandField = 'executeCommand';
   static const jsonSelectDeviceField = 'selectDevice';
   static const openDevToolsPageField = 'openDevToolsPage';
   static const openDevToolsExternallyField = 'openDevToolsExternally';
+  static const openDevToolsWithOptionalDebugSessionFlagsField =
+      'openDevToolsWithOptionalDebugSessionFlags';
   static const hotReloadField = 'hotReload';
   static const hotRestartField = 'hotRestart';
 }

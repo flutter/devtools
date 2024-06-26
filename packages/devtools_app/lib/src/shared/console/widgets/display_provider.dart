@@ -313,7 +313,7 @@ class InteractivityWrapper extends StatefulWidget {
 }
 
 class _InteractivityWrapperState extends State<InteractivityWrapper> {
-  final ContextMenuController _contextMenuController = ContextMenuController();
+  final _contextMenuController = ContextMenuController();
 
   void _onTap() {
     ContextMenuController.removeAny();

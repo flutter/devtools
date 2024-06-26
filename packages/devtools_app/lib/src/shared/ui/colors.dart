@@ -149,6 +149,5 @@ extension DevToolsColorExtension on ColorScheme {
       isLight ? const Color(0xFF006B5F) : const Color(0xFF54DBC8);
 
   Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
-  Color get deeplinkUnavailableColor => const Color(0xFFFE7C04);
   Color get deeplinkTableHeaderColor => isLight ? Colors.white : Colors.black;
 }

@@ -44,20 +44,6 @@ Future<Response?> request(String url) async {
   return response;
 }
 
-// currently unused
-/// Requests all .devtools properties to be reset to their default values in the
-/// file '~/.flutter-devtools/.devtools'.
-Future<void> resetDevToolsFile() async {
-  if (isDevToolsServerAvailable) {
-    final resp = await request(apiResetDevTools);
-    if (resp?.statusOk ?? false) {
-      assert(json.decode(resp!.body));
-    } else {
-      logWarning(resp, apiResetDevTools);
-    }
-  }
-}
-
 Future<DevToolsJsonFile?> requestFile({
   required String api,
   required String fileKey,

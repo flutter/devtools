@@ -4,7 +4,6 @@
 
 // Do not delete these arguments. They are parsed by test runner.
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
-// test-argument:experimentsOn=true
 
 // ignore_for_file: avoid_print
 

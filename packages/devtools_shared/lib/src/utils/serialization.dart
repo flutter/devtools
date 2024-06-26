@@ -9,7 +9,7 @@ typedef FromJson<T> = T Function(Map<String, dynamic> json);
 /// Classes that implement this mixin should also implement [toJson] method.
 /// See https://docs.flutter.dev/data-and-backend/serialization/json#serializing-json-inside-model-classes.
 mixin Serializable {
-  Map<String, dynamic> toJson();
+  Map<String, Object?> toJson();
 }
 
 /// Deserializes an object if it is serialized.

@@ -43,7 +43,9 @@ class BuildCommand extends Command {
       ..addUpdateFlutterFlag()
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
-      ..addBulidModeOption();
+      ..addBulidModeOption()
+      ..addWasmFlag()
+      ..addNoStripWasmFlag();
   }
 
   @override
@@ -56,14 +58,15 @@ class BuildCommand extends Command {
   Future run() async {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
-
+    final results = argResults!;
     final updateFlutter =
-        argResults![BuildCommandArgs.updateFlutter.flagName] as bool;
+        results[BuildCommandArgs.updateFlutter.flagName] as bool;
     final updatePerfetto =
-        argResults![BuildCommandArgs.updatePerfetto.flagName] as bool;
-    final runPubGet = argResults![BuildCommandArgs.pubGet.flagName] as bool;
-    final buildMode =
-        argResults![BuildCommandArgs.buildMode.flagName] as String;
+        results[BuildCommandArgs.updatePerfetto.flagName] as bool;
+    final runPubGet = results[BuildCommandArgs.pubGet.flagName] as bool;
+    final buildMode = results[BuildCommandArgs.buildMode.flagName] as String;
+    final useWasm = results[BuildCommandArgs.wasm.flagName] as bool;
+    final noStripWasm = results[BuildCommandArgs.noStripWasm.flagName] as bool;
 
     final webBuildDir =
         Directory(path.join(repo.devtoolsAppDirectoryPath, 'build', 'web'));
@@ -87,7 +90,10 @@ class BuildCommand extends Command {
       workingDirectory: repo.devtoolsAppDirectoryPath,
     );
 
-    logStatus('building DevTools in $buildMode mode');
+    logStatus(
+      'building DevTools in $buildMode mode with '
+      '${useWasm ? 'dart2wasm' : 'dart2js'}',
+    );
     await processManager.runAll(
       commands: [
         if (runPubGet) CliCommand.tool(['pub-get', '--only-main']),
@@ -95,12 +101,17 @@ class BuildCommand extends Command {
           [
             'build',
             'web',
-            '--web-renderer',
-            'canvaskit',
+            if (useWasm) ...[
+              BuildCommandArgs.wasm.asArg(),
+              if (noStripWasm) BuildCommandArgs.noStripWasm.asArg(),
+            ] else ...[
+              '--web-renderer',
+              'canvaskit',
+              // Do not minify stack traces in debug mode.
+              if (buildMode == 'debug') '--dart2js-optimization=O1',
+              if (buildMode != 'debug') '--$buildMode',
+            ],
             '--pwa-strategy=offline-first',
-            // Do not minify stack traces in debug mode.
-            if (buildMode == 'debug') '--dart2js-optimization=O1',
-            if (buildMode != 'debug') '--$buildMode',
             '--no-tree-shake-icons',
           ],
         ),

@@ -20,8 +20,8 @@ String classesToCsv(Iterable<ClassData> classes) {
     ].map((e) => '"$e"').join(','),
   );
 
-  for (var classData in classes) {
-    for (var pathStats in classData.byPath.entries) {
+  for (final classData in classes) {
+    for (final pathStats in classData.byPath.entries) {
       csvBuffer.writeln(
         [
           classData.className.className,

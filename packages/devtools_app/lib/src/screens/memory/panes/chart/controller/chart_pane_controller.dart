@@ -50,11 +50,9 @@ class MemoryChartPaneController extends DisposableController
 
   ChartVmConnection? _chartConnection;
 
-  late final EventChartController event =
-      EventChartController(data.timeline, paused: paused);
-  late final VMChartController vm =
-      VMChartController(data.timeline, paused: paused);
-  late final AndroidChartController android = AndroidChartController(
+  late final event = EventChartController(data.timeline, paused: paused);
+  late final vm = VMChartController(data.timeline, paused: paused);
+  late final android = AndroidChartController(
     data.timeline,
     sharedLabels: vm.labelTimestamps,
     paused: paused,

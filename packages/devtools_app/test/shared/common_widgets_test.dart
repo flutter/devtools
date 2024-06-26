@@ -61,7 +61,7 @@ void main() {
 
   group('NotifierCheckbox', () {
     bool? findCheckboxValue() {
-      final Checkbox checkboxWidget =
+      final checkboxWidget =
           find.byType(Checkbox).evaluate().first.widget as Checkbox;
       return checkboxWidget.value;
     }

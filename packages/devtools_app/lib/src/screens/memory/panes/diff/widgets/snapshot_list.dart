@@ -417,9 +417,19 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
                     if (_editIndex.value == index) {
                       _editIndex.value = null;
                     }
+                    ga.select(
+                      gac.memory,
+                      gac.MemoryEvent.diffSnapshotDelete,
+                    );
                     widget.controller.deleteCurrentSnapshot();
                   },
-                  onExport: widget.controller.exportCurrentItem,
+                  onExport: () {
+                    ga.select(
+                      gac.memory,
+                      gac.MemoryEvent.diffSnapshotExport,
+                    );
+                    widget.controller.exportCurrentItem();
+                  },
                 ),
               ),
             );

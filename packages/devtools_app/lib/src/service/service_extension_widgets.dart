@@ -79,9 +79,9 @@ class _ServiceExtensionButtonGroupState
   void _onMainIsolateChanged() => _initExtensionState();
 
   void _initExtensionState() {
-    _extensionStates = [for (var e in widget.extensions) ExtensionState(e)];
+    _extensionStates = [for (final e in widget.extensions) ExtensionState(e)];
 
-    for (var extension in _extensionStates) {
+    for (final extension in _extensionStates) {
       // Listen for changes to the state of each service extension using the
       // VMServiceManager.
       final extensionName = extension.description.extension;
@@ -128,10 +128,10 @@ class _ServiceExtensionButtonGroupState
     return SizedBox(
       height: defaultButtonHeight,
       child: DevToolsToggleButtonGroup(
-        selectedStates: [for (var e in _extensionStates) e.isSelected],
+        selectedStates: [for (final e in _extensionStates) e.isSelected],
         onPressed: available ? _onPressed : null,
         children: <Widget>[
-          for (var extensionState in _extensionStates)
+          for (final extensionState in _extensionStates)
             ServiceExtensionButton(
               extensionState: extensionState,
               minScreenWidthForTextBeforeScaling:
@@ -299,17 +299,17 @@ Future<void> _wrapReloadCall(
   Future<void> Function() reloadCall,
 ) async {
   try {
-    final Stopwatch timer = Stopwatch()..start();
+    final timer = Stopwatch()..start();
     messageBus.addEvent(BusEvent('$name.start'));
     await reloadCall();
     timer.stop();
     // 'restarted in 1.6s'
-    final String message = '${name}ed in ${durationText(timer.elapsed)}';
+    final message = '${name}ed in ${durationText(timer.elapsed)}';
     messageBus.addEvent(BusEvent('$name.end', data: message));
     // TODO(devoncarew): Add analytics.
     //ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);
   } catch (_) {
-    final String message = 'error performing $name';
+    final message = 'error performing $name';
     messageBus.addEvent(BusEvent('$name.end', data: message));
     rethrow;
   }
@@ -1027,7 +1027,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
   final ToggleableServiceExtensionDescription description;
   final Widget child;
 
-  static const double _tooltipWidth = 300.0;
+  static const _tooltipWidth = 300.0;
 
   @override
   Widget build(BuildContext context) {

@@ -38,7 +38,6 @@ class FlutterTestEnvironment {
   }
 
   FlutterRunConfiguration _runConfig;
-  FlutterRunConfiguration get runConfig => _runConfig;
   FlutterRunTestDriver? _flutter;
   FlutterRunTestDriver? get flutter => _flutter;
   late VmServiceWrapper _service;

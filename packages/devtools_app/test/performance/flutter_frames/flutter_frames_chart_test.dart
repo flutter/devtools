@@ -156,8 +156,7 @@ void main() {
       });
 
       void verifyScrollOffset(WidgetTester tester, double expectedOffset) {
-        final Scrollbar scrollbar =
-            tester.widget<Scrollbar>(find.byType(Scrollbar));
+        final scrollbar = tester.widget<Scrollbar>(find.byType(Scrollbar));
         final scrollController = scrollbar.controller!;
         expect(scrollController.offset, equals(expectedOffset));
       }

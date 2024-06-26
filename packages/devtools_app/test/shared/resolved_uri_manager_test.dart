@@ -14,7 +14,7 @@ void main() {
   late ResolvedUriManager resolvedUriManager;
   late MockVmServiceWrapper service;
 
-  const String isolateId = 'anIsolateId';
+  const isolateId = 'anIsolateId';
   const uri1 = 'this/is/a/uri1';
   const uri2 = 'this/is/a/uri2';
   const packageUri1 = 'uri/am/i1';
@@ -111,9 +111,8 @@ void main() {
     });
 
     test('caches different mappings between different isolates', () async {
-      const String isolateId2 = 'anIsolateId2';
-      const String packageUriFromDifferentIsolate =
-          'this/is/a/third/packageUri3';
+      const isolateId2 = 'anIsolateId2';
+      const packageUriFromDifferentIsolate = 'this/is/a/third/packageUri3';
       when(service.lookupPackageUris(isolateId, [uri1])).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [packageUri1])),
       );
@@ -213,9 +212,8 @@ void main() {
     });
 
     test('caches different mappings between different isolates', () async {
-      const String isolateId2 = 'anIsolateId2';
-      const String fileUriFromDifferentIsolate =
-          'file:///this/is/a/third/fileUri3';
+      const isolateId2 = 'anIsolateId2';
+      const fileUriFromDifferentIsolate = 'file:///this/is/a/third/fileUri3';
       when(service.lookupResolvedPackageUris(isolateId, [packageUri1]))
           .thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [uri1])),

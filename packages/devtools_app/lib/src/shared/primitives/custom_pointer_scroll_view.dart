@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid-explicit-type-declaration, forked code from Flutter framework.
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -800,7 +802,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
     int? firstVisibleIndex;
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode!];
     final List<SemanticsNode> included = <SemanticsNode>[];
-    for (final SemanticsNode child in children) {
+    for (final child in children) {
       assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);

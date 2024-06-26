@@ -118,6 +118,3 @@ const event2 =
     '{"startTime":21386348,"frameNumber":2,"events":[7,1,9,11,10,11,11,11,12,11]}';
 const event3 =
     '{"startTime":22385849,"frameNumber":3,"events":[7,1,9,11,10,11,11,11,12,11]}';
-
-const locationJson =
-    '{"file:///Users/devoncarew/projects/devoncarew/planets/lib/main.dart":{"ids":[1,2,3,4,6,7,9,10,11,12],"lines":[23,32,35,85,106,111,132,247,251,258],"columns":[10,12,13,12,18,20,18,12,14,16],"names":["PlanetsApp","MaterialApp","SolarSystemWidget","Scaffold","CustomPaint","ValueListenableBuilder","PlanetWidget","Positioned","GestureDetector","Container"]}}';

@@ -150,7 +150,7 @@ class ClassFilter with Serializable {
     }
   }
 
-  late final Set<String> filters = _filtersAsSet();
+  late final filters = _filtersAsSet();
 
   /// Task to be applied when filter changed.
   @visibleForTesting
@@ -194,7 +194,7 @@ class ClassFilter with Serializable {
 
     if (filterType == ClassFilterType.showAll) return true;
 
-    for (var filter in filters) {
+    for (final filter in filters) {
       if (_isMatch(className, filter, rootPackage)) {
         return filterType == ClassFilterType.only;
       }

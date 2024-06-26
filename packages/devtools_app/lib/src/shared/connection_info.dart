@@ -4,7 +4,6 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
@@ -22,7 +21,7 @@ class ConnectedAppSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final manager = serviceConnection.serviceManager;
-    final VM? vm = manager.vm;
+    final vm = manager.vm;
     final connectedApp = manager.connectedApp;
     if (vm == null ||
         connectedApp == null ||
@@ -70,7 +69,7 @@ class _ConnectionDescriptionColumn extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (var entry in entries)
+        for (final entry in entries)
           Padding(
             padding: EdgeInsets.only(
               bottom: entry == entries.last ? 0.0 : denseRowSpacing,

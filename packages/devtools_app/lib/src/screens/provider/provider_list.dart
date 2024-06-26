@@ -15,8 +15,7 @@ const _tilePadding = EdgeInsets.only(
   bottom: densePadding,
 );
 
-final AutoDisposeStateNotifierProvider<StateController<String?>, String?>
-    selectedProviderIdProvider =
+final selectedProviderIdProvider =
     AutoDisposeStateNotifierProvider<StateController<String?>, String?>(
   (ref) {
     final controller = StateController<String?>(null);

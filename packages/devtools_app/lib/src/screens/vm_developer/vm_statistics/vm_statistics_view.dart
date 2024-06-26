@@ -23,7 +23,6 @@ class VMStatisticsView extends VMDeveloperView {
           title: 'VM',
           icon: Icons.devices,
         );
-  static const id = 'vm-statistics';
 
   @override
   Widget build(BuildContext context) => VMStatisticsViewBody();

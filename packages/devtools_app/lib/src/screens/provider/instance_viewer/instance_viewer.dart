@@ -26,7 +26,7 @@ const nullColor = boolColor;
 const numColor = Color.fromARGB(255, 181, 206, 168);
 const stringColor = Color.fromARGB(255, 206, 145, 120);
 
-const double rowHeight = 20.0;
+const rowHeight = 20.0;
 
 final isExpandedProvider = StateProviderFamily<bool, InstancePath>((ref, path) {
   // expands the root by default, but not children

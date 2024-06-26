@@ -336,7 +336,7 @@ class DominatorTreeNode extends TreeNode<DominatorTreeNode> {
 
   factory DominatorTreeNode.from(CallGraphNode cgNode) {
     final domNode = DominatorTreeNode._(cgNode);
-    for (var dominated in cgNode.dominated) {
+    for (final dominated in cgNode.dominated) {
       domNode.addChild(DominatorTreeNode.from(dominated));
     }
     return domNode;

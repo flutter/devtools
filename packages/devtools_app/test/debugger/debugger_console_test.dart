@@ -61,7 +61,7 @@ void main() {
     final stdio = ['First line', _ansiCodesOutput(), 'Third line'];
 
     void appendStdioLines() {
-      for (var line in stdio) {
+      for (final line in stdio) {
         serviceConnection.consoleService.appendStdio('$line\n');
       }
     }

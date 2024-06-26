@@ -76,7 +76,7 @@ class DevToolsServerConnection {
   int _nextRequestId = 0;
   Notification? _lastNotification;
 
-  final Map<String, Completer<Object?>> _completers = {};
+  final _completers = <String, Completer<Object?>>{};
 
   /// Tie the DevTools server connection to the framework controller.
   ///
@@ -152,7 +152,7 @@ class DevToolsServerConnection {
     switch (method) {
       case 'connectToVm':
         final String uri = params['uri'];
-        final bool notify = params['notify'] == true;
+        final notify = params['notify'] == true;
         frameworkController.notifyConnectToVmEvent(
           Uri.parse(uri),
           notify: notify,

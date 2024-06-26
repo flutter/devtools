@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
-import '../../shared/table/table_data.dart';
 import '_kind_column.dart';
 import '_message_column.dart';
 import '_when_column.dart';
@@ -27,10 +26,10 @@ class LogsTable extends StatelessWidget {
   final ValueListenable<List<LogData>> searchMatchesNotifier;
   final ValueListenable<LogData?> activeSearchMatchNotifier;
 
-  static final ColumnData<LogData> when = WhenColumn();
-  static final ColumnData<LogData> kind = KindColumn();
-  static final ColumnData<LogData> message = MessageColumn();
-  static final List<ColumnData<LogData>> columns = [when, kind, message];
+  static final when = WhenColumn();
+  static final kind = KindColumn();
+  static final message = MessageColumn();
+  static final columns = [when, kind, message];
 
   @override
   Widget build(BuildContext context) {

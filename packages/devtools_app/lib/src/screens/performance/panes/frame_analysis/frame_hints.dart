@@ -67,7 +67,7 @@ class FrameHints extends StatelessWidget {
             if (frame.hasShaderTime)
               ShaderCompilationHint(shaderTime: frame.shaderDuration),
             const SizedBox(height: denseSpacing),
-            const RasterStatsHint(),
+            const GeneralRasterJankHint(),
           ]
         : <Widget>[];
 
@@ -250,7 +250,7 @@ class IntrinsicOperationsHint extends StatelessWidget {
   });
 
   static const _intrinsicOperationsDocs =
-      'https://docs.flutter.dev/perf/best-practices#minimize-layout-passes-caused-by-intrinsic-operations';
+      'https://flutter.dev/to/minimize-layout-passes';
 
   final int intrinsicOperationsCount;
 
@@ -293,8 +293,7 @@ class CanvasSaveLayerHint extends StatelessWidget {
     super.key,
   });
 
-  static const _saveLayerDocs =
-      'https://docs.flutter.dev/perf/best-practices#use-savelayer-thoughtfully';
+  static const _saveLayerDocs = 'https://flutter.dev/to/save-layer-perf';
 
   final int saveLayerCount;
 
@@ -387,8 +386,8 @@ class ShaderCompilationHint extends StatelessWidget {
 }
 
 @visibleForTesting
-class RasterStatsHint extends StatelessWidget {
-  const RasterStatsHint({super.key});
+class GeneralRasterJankHint extends StatelessWidget {
+  const GeneralRasterJankHint({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -398,16 +397,22 @@ class RasterStatsHint extends StatelessWidget {
         text: TextSpan(
           children: [
             TextSpan(
-              text: 'Consider using the',
+              text: 'To learn about rendering performance in Flutter, check '
+                  'out the Flutter documentation on ',
               style: theme.regularTextStyle,
             ),
-            TextSpan(
-              text: ' Raster Stats ',
-              style: theme.subtleFixedFontStyle,
+            GaLinkTextSpan(
+              link: GaLink(
+                display: 'Performance & Optimization',
+                url: flutterPerformanceDocsUrl,
+                gaScreenName: gac.performance,
+                gaSelectedItemDescription:
+                    gac.PerformanceDocs.flutterPerformanceDocs.name,
+              ),
+              context: context,
             ),
             TextSpan(
-              text: 'tab to identify rendering layers that are expensive to '
-                  'rasterize.',
+              text: '.',
               style: theme.regularTextStyle,
             ),
           ],

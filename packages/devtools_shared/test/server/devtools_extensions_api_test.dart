@@ -146,7 +146,7 @@ void main() {
 
   group(ExtensionsApi.apiExtensionEnabledState, () {
     late File optionsFile;
-    late final String optionsFileUriString = p.join(
+    late final optionsFileUriString = p.join(
       extensionTestManager.runtimeAppRoot,
       devtoolsOptionsFileName,
     );

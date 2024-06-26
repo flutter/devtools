@@ -193,7 +193,7 @@ void main() {
 
       expect(
         command.toString(),
-        "curl --location --request GET 'https://jsonplaceholder.typicode.com/albums/1' \\\n--header 'content-length: 0'",
+        "curl --location --request GET 'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum' \\\n--header 'content-length: 0'",
       );
     });
 

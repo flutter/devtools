@@ -122,7 +122,7 @@ void main() {
     test('layout test - rounding error', () {
       // These heights are ignored as the FixedExtentDelegate determines the
       // size.
-      final List<RenderBox> children = <RenderBox>[
+      final children = <RenderBox>[
         RenderSizedBox(const Size(400.0, 100.0)),
         RenderSizedBox(const Size(400.0, 100.0)),
         RenderSizedBox(const Size(400.0, 100.0)),
@@ -135,12 +135,11 @@ void main() {
         computeExtent: (index) => (index + 1) * extentFactor,
         computeLength: () => children.length,
       );
-      final TestRenderSliverBoxChildManager childManager =
-          TestRenderSliverBoxChildManager(
+      final childManager = TestRenderSliverBoxChildManager(
         children: children,
         extentDelegate: extentDelegate,
       );
-      final RenderViewport root = RenderViewport(
+      final root = RenderViewport(
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),
         cacheExtent: 0,

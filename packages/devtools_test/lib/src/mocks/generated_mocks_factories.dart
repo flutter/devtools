@@ -36,10 +36,6 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(flutterFramesController.displayRefreshRate)
       .thenReturn(ValueNotifier<double>(defaultRefreshRate));
 
-  // Stubs for Raster Stats feature.
-  when(controller.rasterStatsController)
-      .thenReturn(RasterStatsController(controller));
-
   // Stubs for Timeline Events feature.
   when(controller.timelineEventsController)
       .thenReturn(timelineEventsController);
@@ -205,17 +201,13 @@ MockLoggingController createMockLoggingControllerWithDefaults({
   return mockLoggingController;
 }
 
-MockLoggingControllerV2 createMockLoggingControllerV2WithDefaults({
-  List<LogDataV2> data = const [],
-}) {
+MockLoggingControllerV2 createMockLoggingControllerV2WithDefaults() {
   provideDummy<ListValueNotifier<LogDataV2>>(
-    ListValueNotifier<LogDataV2>(data),
+    ListValueNotifier<LogDataV2>([]),
   );
   final mockLoggingController = MockLoggingControllerV2();
-  when(mockLoggingController.data).thenReturn(data);
-  when(mockLoggingController.filteredData)
-      .thenReturn(ListValueNotifier<LogDataV2>(data));
   when(mockLoggingController.isFilterActive).thenReturn(false);
+  when(mockLoggingController.loggingModel).thenReturn(LoggingTableModel());
   when(mockLoggingController.selectedLog)
       .thenReturn(ValueNotifier<LogDataV2?>(null));
   return mockLoggingController;

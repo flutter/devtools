@@ -108,7 +108,7 @@ class CodeViewController extends DisposableController
 
   final programExplorerController = ProgramExplorerController();
 
-  final ScriptsHistory scriptsHistory = ScriptsHistory();
+  final scriptsHistory = ScriptsHistory();
   late VoidCallback _scriptHistoryListener;
 
   ValueListenable<bool> get showCodeCoverage => _showCodeCoverage;
@@ -382,8 +382,9 @@ class CodeViewController extends DisposableController
     final enableSourceMapsLink = devToolsExtensionPoints.enableSourceMapsLink();
     if (isWebApp && enableSourceMapsLink != null) {
       final enableSourceMapsAction = NotificationAction(
-        'Enable sourcemaps',
-        () => unawaited(launchUrlWithErrorHandling(enableSourceMapsLink.url)),
+        label: 'Enable sourcemaps',
+        onPressed: () =>
+            unawaited(launchUrlWithErrorHandling(enableSourceMapsLink.url)),
       );
       notificationService.pushNotification(
         NotificationMessage(

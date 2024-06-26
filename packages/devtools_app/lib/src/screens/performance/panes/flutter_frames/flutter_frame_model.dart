@@ -78,7 +78,7 @@ class FlutterFrame {
   final Duration vsyncOverheadTime;
 
   /// Timeline event data for this [FlutterFrame].
-  final FrameTimelineEventData timelineEventData = FrameTimelineEventData();
+  final timelineEventData = FrameTimelineEventData();
 
   /// The [EnhanceTracingState] at the time that this frame object was created
   /// (e.g. when the 'Flutter.Frame' event for this frame was received).
@@ -187,6 +187,7 @@ class FrameTimelineEventData {
   FlutterTimelineEvent? get rasterEvent =>
       _eventFlows[TimelineEventType.raster.index];
 
+  // ignore: avoid-explicit-type-declaration, necessary here.
   final List<FlutterTimelineEvent?> _eventFlows = List.generate(2, (_) => null);
 
   bool get wellFormed => uiEvent != null && rasterEvent != null;

@@ -191,7 +191,7 @@ class DebuggerWindows extends StatelessWidget {
               actions: [
                 CopyToClipboardControl(
                   dataProvider: () {
-                    final List<String> callStackList = controller
+                    final callStackList = controller
                         .stackFramesWithLocation.value
                         .map((frame) => frame.callStackDisplay)
                         .toList();

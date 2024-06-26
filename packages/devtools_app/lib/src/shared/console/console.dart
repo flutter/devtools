@@ -89,7 +89,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
     with AutoDisposeMixin<_ConsoleOutput> {
   // The scroll controller must survive ConsoleOutput re-renders
   // to work as intended, so it must be part of the "state".
-  final ScrollController _scroll = ScrollController();
+  final _scroll = ScrollController();
 
   static const _scrollBarKey = Key('console-scrollbar');
 

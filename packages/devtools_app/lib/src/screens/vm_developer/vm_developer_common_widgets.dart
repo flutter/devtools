@@ -301,14 +301,11 @@ class VmExpansionTile extends StatelessWidget {
           data: theme.copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
             title: DefaultTextStyle(
-              style: theme.textTheme.titleSmall!,
+              style: theme.textTheme.titleMedium!,
               child: Text(title),
             ),
             onExpansionChanged: onExpanded,
-            tilePadding: const EdgeInsets.only(
-              left: defaultSpacing,
-              right: defaultSpacing,
-            ),
+            tilePadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
             children: children,
           ),
         ),
@@ -442,7 +439,7 @@ class RetainingPathWidget extends StatelessWidget {
         ],
       ),
       if (retainingPath.elements!.length > 1)
-        for (RetainingObject object in retainingPath.elements!.sublist(1))
+        for (final object in retainingPath.elements!.sublist(1))
           Row(
             children: [
               Flexible(

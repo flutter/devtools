@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/primitives/utils.dart';
@@ -243,8 +242,7 @@ class ClassesTableDiffColumns {
 
   late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeType);
 
-  late final List<ColumnData<DiffClassData>> columnList =
-      <ColumnData<DiffClassData>>[
+  late final columnList = <ColumnData<DiffClassData>>[
     _ClassNameColumn(diffData),
     _InstanceColumn(_DataPart.created, diffData),
     _InstanceColumn(_DataPart.deleted, diffData),
@@ -303,7 +301,7 @@ class ClassesTableDiff extends StatelessWidget {
     required this.diffData,
   }) {
     _columns = {
-      for (var sizeType in SizeType.values)
+      for (final sizeType in SizeType.values)
         sizeType: ClassesTableDiffColumns(sizeType, diffData),
     };
   }

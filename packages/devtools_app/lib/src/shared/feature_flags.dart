@@ -23,7 +23,7 @@ bool get enableExperiments =>
 ///   "args": [
 ///     "--dart-define=enable_experiments=true"
 ///   ]
-const bool _experimentsEnabledByEnvironment =
+const _experimentsEnabledByEnvironment =
     bool.fromEnvironment('enable_experiments');
 
 bool _experimentsEnabledFromMain = false;
@@ -59,8 +59,13 @@ abstract class FeatureFlags {
   /// Flag to enable offline data on memory screen.
   ///
   /// https://github.com/flutter/devtools/issues/5606
-  static const bool memoryOffline =
-      _kMemoryOfflineExperiment; // requires special handling because it needs to be const
+  static const memoryOffline = _kMemoryOfflineExperiment;
+
+  /// Flag to enable offline data on memory screen.
+  ///
+  /// https://github.com/flutter/devtools/issues/5606
+  static bool memorySaveLoad =
+      enableExperiments; // requires special handling because it needs to be const
 
   /// Flag to enable the deep link validation tooling in DevTools, both for the
   /// DevTools screen and the standalone tool for IDE embedding.

@@ -14,7 +14,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/connection_info.dart';
 import '../shared/globals.dart';
@@ -137,7 +136,7 @@ class LandingScreenSection extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: textTheme.titleMedium,
+                style: textTheme.headlineMedium,
               ),
             ),
             ...actions,
@@ -238,7 +237,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
         children: [
           Text(
             'Connect to a Running App',
-            style: textTheme.titleSmall,
+            style: textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
@@ -297,44 +296,6 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
         'The link was not valid.',
       );
     }
-  }
-}
-
-@visibleForTesting
-class MemoryAnalysisInstructions extends StatelessWidget {
-  const MemoryAnalysisInstructions({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return LandingScreenSection(
-      title: 'Memory Analysis',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Analyze and diff the saved memory snapshots',
-            style: textTheme.titleMedium,
-          ),
-          const SizedBox(height: denseRowSpacing),
-          Text(
-            // TODO(polina-c): make package:leak_tracker a link.
-            // https://github.com/flutter/devtools/issues/5606
-            'Analyze heap snapshots that were previously saved from DevTools or package:leak_tracker.',
-            style: textTheme.bodySmall,
-          ),
-          const SizedBox(height: defaultSpacing),
-          ElevatedButton(
-            child: const Text('Open memory analysis tool'),
-            onPressed: () => _onOpen(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _onOpen(BuildContext context) {
-    DevToolsRouterDelegate.of(context).navigate(memoryAnalysisScreenId);
   }
 }
 

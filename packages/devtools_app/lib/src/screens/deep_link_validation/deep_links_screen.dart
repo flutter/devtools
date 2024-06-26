@@ -22,11 +22,8 @@ class DeepLinksScreen extends Screen {
   // @override
   // String get docPageId => id;
 
-  // TODO(https://github.com/flutter/devtools/issues/6013): consider removing
-  // this docs url override when documentation is written specifically for the
-  // deep links tool.
   @override
-  String get docsUrl => 'https://docs.flutter.dev/ui/navigation/deep-linking';
+  String get docsUrl => 'https://flutter.dev/to/deep-link-tool';
 
   @override
   Widget buildScreenBody(BuildContext context) {

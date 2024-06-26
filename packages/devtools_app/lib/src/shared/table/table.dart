@@ -181,14 +181,14 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     if (selectionNotifier != null) {
       addAutoDisposeListener(selectionNotifier, () {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          final Selection<T?> selection = selectionNotifier.value;
+          final selection = selectionNotifier.value;
           final T? node = selection.node;
           final int? Function(T?)? nodeIndexCalculator =
               selection.nodeIndexCalculator;
-          final int? nodeIndex = selection.nodeIndex;
+          final nodeIndex = selection.nodeIndex;
 
           if (selection.scrollIntoView && node != null) {
-            final int selectedDisplayRow = nodeIndexCalculator != null
+            final selectedDisplayRow = nodeIndexCalculator != null
                 ? nodeIndexCalculator(node)!
                 : nodeIndex!;
 
@@ -255,7 +255,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
         widget.tableController.columns.numSpacers - numColumnGroupSpacers;
     tableWidth += numColumnSpacers * columnSpacing;
     tableWidth += numColumnGroupSpacers * columnGroupSpacingWithPadding;
-    for (var columnWidth in widget.columnWidths) {
+    for (final columnWidth in widget.columnWidths) {
       tableWidth += columnWidth;
     }
     return tableWidth;

@@ -203,7 +203,7 @@ class _InitializerState extends State<Initializer>
           child: Column(
             children: [
               const Spacer(),
-              Text('Disconnected', style: theme.textTheme.displaySmall),
+              Text('Disconnected', style: theme.textTheme.headlineMedium),
               const SizedBox(height: defaultSpacing),
               if (widget.allowConnectionScreenOnDisconnect)
                 ElevatedButton(

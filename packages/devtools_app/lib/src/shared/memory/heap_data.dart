@@ -36,7 +36,7 @@ class HeapData {
   /// Object index with the given identityHashCode.
   ///
   /// This field is calculated only for console evaluations.
-  late final Map<int, int> indexByCode = {
+  late final indexByCode = <int, int>{
     for (var i = 0; i < graph.objects.length; i++)
       if (graph.objects[i].identityHashCode > 0)
         graph.objects[i].identityHashCode: i,

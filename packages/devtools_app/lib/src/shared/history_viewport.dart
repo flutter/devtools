@@ -80,8 +80,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
         final title = widget.generateTitle == null
             ? '  '
             : widget.generateTitle!(current);
-        final defaultTitleStyle =
-            theme.textTheme.titleSmall ?? const TextStyle();
+        final defaultTitleStyle = theme.textTheme.titleMedium!;
         final titleWidget = debuggerSectionTitle(
           theme,
           child: Row(
@@ -151,8 +150,8 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                               Expanded(
                                 child: Text(
                                   title,
-                                  style:
-                                      _titleStyle ?? theme.textTheme.titleSmall,
+                                  style: _titleStyle ??
+                                      theme.textTheme.titleMedium,
                                 ),
                               ),
                             ],

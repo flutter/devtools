@@ -274,6 +274,6 @@ void main() {
 
 List<Type> get visibleScreenTypes => defaultScreens()
     .map((s) => s.screen)
-    .where(shouldShowScreen)
+    .where((s) => shouldShowScreen(s).show)
     .map((s) => s.runtimeType)
     .toList();

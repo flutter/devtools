@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(kenz): see if this class can be removed now that advanced enums are
+// supported in Dart.
+
 /// Class that converts enum value names to enum entries and vice versa.
 ///
 /// Example usage:
@@ -15,15 +18,15 @@
 /// ```
 class EnumUtils<T extends Enum> {
   EnumUtils(List<T> enumValues) {
-    for (var val in enumValues) {
+    for (final val in enumValues) {
       final enumDescription = val.name;
       _lookupTable[enumDescription] = val;
       _reverseLookupTable[val] = enumDescription;
     }
   }
 
-  final Map<String, T> _lookupTable = {};
-  final Map<T, String> _reverseLookupTable = {};
+  final _lookupTable = <String, T>{};
+  final _reverseLookupTable = <T, String>{};
 
   T? enumEntry(String? enumName) =>
       enumName != null ? _lookupTable[enumName] : null;

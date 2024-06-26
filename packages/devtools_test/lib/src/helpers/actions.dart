@@ -59,7 +59,7 @@ List<String> generateVisibleScreenIds() {
   final availableScreenIds = <String>[];
   // ignore: invalid_use_of_visible_for_testing_member, valid use from package:devtools_test
   for (final screen in devtoolsScreens!) {
-    if (shouldShowScreen(screen.screen)) {
+    if (shouldShowScreen(screen.screen).show) {
       availableScreenIds.add(screen.screen.screenId);
     }
   }

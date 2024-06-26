@@ -374,7 +374,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                         Expanded(
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              final double fileWidth = calculateTextSpanWidth(
+                              final fileWidth = calculateTextSpanWidth(
                                 findLongestTextSpan(lines),
                               );
 

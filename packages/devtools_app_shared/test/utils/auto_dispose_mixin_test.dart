@@ -201,7 +201,7 @@ void main() {
     });
 
     group('callOnceWhenReady', () {
-      for (bool isReady in [false, true]) {
+      for (final isReady in [false, true]) {
         group('isReady=$isReady', () {
           test('triggers callback and cancels listeners when ready ', () async {
             final disposer = Disposer();

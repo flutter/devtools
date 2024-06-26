@@ -137,7 +137,7 @@ class SimulatedDevToolsWrapperState extends State<SimulatedDevToolsWrapper>
                             children: [
                               Text(
                                 'Simulated DevTools Environment',
-                                style: theme.textTheme.titleMedium,
+                                style: theme.textTheme.headlineSmall,
                               ),
                               const PaddedDivider(),
                               VmServiceConnectionDisplay(

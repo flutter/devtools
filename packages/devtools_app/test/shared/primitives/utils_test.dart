@@ -715,7 +715,7 @@ void main() {
     group('SafeAccess', () {
       test('safeFirst', () {
         final list = <int?>[];
-        final Iterable<int?> iterable = list;
+        final iterable = list;
         expect(list.safeFirst, isNull);
         expect(iterable.safeFirst, isNull);
         list.addAll([1, 2, 3]);
@@ -1144,22 +1144,6 @@ void main() {
     });
 
     group('StringExtension', () {
-      test('fuzzyMatch', () {
-        const str = 'hello_world_file';
-        expect(str.caseInsensitiveFuzzyMatch('h'), isTrue);
-        expect(str.caseInsensitiveFuzzyMatch('o_'), isTrue);
-        expect(str.caseInsensitiveFuzzyMatch('hw'), isTrue);
-        expect(str.caseInsensitiveFuzzyMatch('hwf'), isTrue);
-        expect(str.caseInsensitiveFuzzyMatch('_e'), isTrue);
-        expect(str.caseInsensitiveFuzzyMatch('HWF'), isTrue);
-        expect(str.caseInsensitiveFuzzyMatch('_E'), isTrue);
-
-        expect(str.caseInsensitiveFuzzyMatch('hwfh'), isFalse);
-        expect(str.caseInsensitiveFuzzyMatch('hfw'), isFalse);
-        expect(str.caseInsensitiveFuzzyMatch('gello'), isFalse);
-        expect(str.caseInsensitiveFuzzyMatch('files'), isFalse);
-      });
-
       test('caseInsensitiveContains', () {
         const str = 'This is a test string with a path/to/uri';
         expect(str.caseInsensitiveContains('test'), isTrue);

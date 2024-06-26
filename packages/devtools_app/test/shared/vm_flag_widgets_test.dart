@@ -14,7 +14,6 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
@@ -217,16 +216,12 @@ void main() {
       await tester.pumpWidget(wrap(const VMFlagsDialog()));
       expect(find.richText('VM Flags'), findsOneWidget);
       expect(find.richText('flag 1 name'), findsOneWidget);
-      final Text commentText = tester.firstWidget<Text>(
+      final commentText = tester.firstWidget<Text>(
         findSubstring('flag 1 comment'),
       );
       expect(commentText, isNotNull);
     });
   });
-}
-
-BannerMessagesController bannerMessagesController(BuildContext context) {
-  return Provider.of<BannerMessagesController>(context, listen: false);
 }
 
 Future<Flag?> getProfileGranularityFlag(

@@ -312,7 +312,11 @@ void main() {
         expectNoSelection();
 
         final textElement = tester.element(
-          find.text('https://jsonplaceholder.typicode.com/albums/1').first,
+          find
+              .text(
+                'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
+              )
+              .first,
         );
         final selectableTextWidget =
             textElement.findAncestorWidgetOfExactType<SelectableText>()!;
@@ -365,7 +369,9 @@ void main() {
         // Verify general information.
         expect(find.text('Request uri: '), findsOneWidget);
         expect(
-          find.text('https://jsonplaceholder.typicode.com/albums/1'),
+          find.text(
+            'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
+          ),
           findsOneWidget,
         );
         expect(find.text('Method: '), findsOneWidget);

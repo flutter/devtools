@@ -1011,9 +1011,6 @@ class ProfileReportRange {
         .toList();
     for (int i = 0; i < lines.length; ++i) {
       final line = lines[i];
-      // In a `Map<int, ProfileReportEntry>`, we're mapping an `int` to a
-      // `ProfileReportEntry`. No bug.
-      // ignore: avoid-collection-methods-with-unrelated-types
       entries[line] = ProfileReportEntry(
         sampleCount: json.sampleCount,
         line: line,

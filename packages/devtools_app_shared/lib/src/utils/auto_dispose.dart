@@ -104,8 +104,8 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
 /// * [AutoDisposeMixin], which integrates this functionality with [State]
 ///   objects.
 mixin DisposerMixin {
-  final List<StreamSubscription> _subscriptions = [];
-  final List<FocusNode> _focusNodes = [];
+  final _subscriptions = <StreamSubscription>[];
+  final _focusNodes = <FocusNode>[];
 
   @protected
   @visibleForTesting
@@ -117,8 +117,8 @@ mixin DisposerMixin {
   @visibleForTesting
   List<void Function()> get listeners => _listeners;
 
-  final List<Listenable> _listenables = [];
-  final List<VoidCallback> _listeners = [];
+  final _listenables = <Listenable>[];
+  final _listeners = <VoidCallback>[];
 
   /// An [Expando] that tracks listener ids when [addAutoDisposeListener] is
   /// called with a non-null [id] parameter.
@@ -156,7 +156,7 @@ mixin DisposerMixin {
   ///
   /// It is fine to call this method and then add additional subscriptions.
   void cancelStreamSubscriptions() {
-    for (StreamSubscription subscription in _subscriptions) {
+    for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
     }
     _subscriptions.clear();
@@ -203,7 +203,7 @@ mixin DisposerMixin {
   ///
   /// It is fine to call this method and then add additional focus nodes.
   void cancelFocusNodes() {
-    for (FocusNode focusNode in _focusNodes) {
+    for (final focusNode in _focusNodes) {
       focusNode.dispose();
     }
     _focusNodes.clear();
@@ -340,7 +340,7 @@ extension _AutoDisposeListExtension<T> on List<T> {
   /// If any index in [indices] is out of range, an exception will be thrown.
   void removeAllExceptIndices(List<int> indices) {
     final tmp = [
-      for (int index in indices) this[index],
+      for (final index in indices) this[index],
     ];
     clear();
     addAll(tmp);

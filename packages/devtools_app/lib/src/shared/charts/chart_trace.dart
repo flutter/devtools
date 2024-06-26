@@ -89,8 +89,8 @@ class PaintCharacteristics {
 
 class Trace {
   Trace(this.controller, this._chartType, this.characteristics) {
-    final double minY = characteristics.fixedMinY ?? 0.0;
-    final double maxY = characteristics.fixedMaxY ?? 0.0;
+    final minY = characteristics.fixedMinY ?? 0.0;
+    final maxY = characteristics.fixedMaxY ?? 0.0;
     yAxis = AxisScale(minY, maxY, 30);
   }
 

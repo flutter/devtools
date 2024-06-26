@@ -20,6 +20,3 @@ Future<HeapSnapshotGraph?> snapshotMemoryInSelectedIsolate() async {
 
 String? get selectedIsolateName =>
     serviceConnection.serviceManager.isolateManager.selectedIsolate.value?.name;
-
-String? get selectedIsolateId =>
-    serviceConnection.serviceManager.isolateManager.selectedIsolate.value?.id;

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart' show FlutterEvent;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -49,10 +50,10 @@ class MemoryTracker {
   Timer? _monitorContinues;
 
   void onGCEvent(Event event) {
-    final HeapSpace newHeap = HeapSpace.parse(event.json!['new'])!;
-    final HeapSpace oldHeap = HeapSpace.parse(event.json!['old'])!;
+    final newHeap = HeapSpace.parse(event.json!['new'])!;
+    final oldHeap = HeapSpace.parse(event.json!['old'])!;
 
-    final MemoryUsage memoryUsage = MemoryUsage(
+    final memoryUsage = MemoryUsage(
       externalUsage: newHeap.external! + oldHeap.external!,
       heapCapacity: newHeap.capacity! + oldHeap.capacity!,
       heapUsage: newHeap.used! + oldHeap.used!,
@@ -70,7 +71,7 @@ class MemoryTracker {
     }
     final jsonData = data.extensionData!.data.cast<String, Object>();
     switch (extensionEventKind) {
-      case 'Flutter.ImageSizesForFrame':
+      case FlutterEvent.imageSizesForFrame:
         timeline.addExtensionEvent(
           data.timestamp,
           data.extensionKind,
@@ -90,7 +91,7 @@ class MemoryTracker {
 
   Future<void> pollMemory() async {
     final isolateMemory = <IsolateRef, MemoryUsage>{};
-    for (IsolateRef isolateRef
+    for (final isolateRef
         in serviceConnection.serviceManager.isolateManager.isolates.value) {
       if (await _isIsolateLive(isolateRef.id!)) {
         isolateMemory[isolateRef] = await serviceConnection
@@ -122,7 +123,7 @@ class MemoryTracker {
       await service.getIsolate(isolateId);
     } catch (e) {
       if (e is SentinelException) {
-        final SentinelException sentinelErr = e;
+        final sentinelErr = e;
         final message = 'isIsolateLive: Isolate sentinel $isolateId '
             '${sentinelErr.sentinel.kind}';
         debugLogger(message);
@@ -137,7 +138,7 @@ class MemoryTracker {
 
     _isolateHeaps.clear();
 
-    for (IsolateRef isolateRef in isolateMemory.keys) {
+    for (final isolateRef in isolateMemory.keys) {
       _isolateHeaps[isolateRef.id!] = isolateMemory[isolateRef]!;
     }
 
@@ -232,7 +233,7 @@ class MemoryTracker {
       );
     }
 
-    final HeapSample sample = HeapSample(
+    final sample = HeapSample(
       time,
       _processRss,
       // Displaying capacity dashed line on top of stacked (used + external).

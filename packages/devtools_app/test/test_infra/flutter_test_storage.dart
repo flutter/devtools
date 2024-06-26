@@ -8,7 +8,7 @@ import 'package:devtools_app/src/shared/primitives/storage.dart';
 ///
 /// This ephemeral implementation is meant to help keep unit tests segregated
 class FlutterTestStorage implements Storage {
-  late final Map<String, dynamic> values = {};
+  late final values = <String, dynamic>{};
 
   @override
   Future<String?> getValue(String key) async {

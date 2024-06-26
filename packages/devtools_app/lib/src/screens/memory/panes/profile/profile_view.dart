@@ -541,7 +541,7 @@ class _AllocationProfileTable extends StatelessWidget {
     heap: HeapGeneration.total,
   );
 
-  late final List<ColumnData<ProfileRecord>> _columns = [
+  late final _columns = <ColumnData<ProfileRecord>>[
     _FieldClassNameColumn(
       ClassFilterData(
         filter: controller.classFilter,

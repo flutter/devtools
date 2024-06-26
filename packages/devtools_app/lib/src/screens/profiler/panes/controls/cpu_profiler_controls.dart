@@ -7,15 +7,11 @@ import 'dart:developer';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/ui/filter.dart';
 import '../../cpu_profile_model.dart';
 import '../../cpu_profiler_controller.dart';
 import '../../profiler_screen_controller.dart';
-
-final profilerScreenSearchFieldKey =
-    GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
 
 class CpuProfileFilterDialog extends StatelessWidget {
   const CpuProfileFilterDialog({required this.controller, super.key});

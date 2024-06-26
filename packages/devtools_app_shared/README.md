@@ -1,7 +1,7 @@
 # Shared DevTools Components
 
 This package contains UI, utility, and service components from
-[Dart & Flutter DevTools](https://docs.flutter.dev/tools/devtools/overview) that can
+[Dart & Flutter DevTools](https://docs.flutter.dev/tools/devtools) that can
 be shared between DevTools, DevTools extensions, and other tooling surfaces that need
 the same logic or styling.
 

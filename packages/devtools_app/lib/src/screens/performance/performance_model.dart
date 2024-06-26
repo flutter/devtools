@@ -9,7 +9,6 @@ import '../../service/service_manager.dart';
 import '../../shared/primitives/trees.dart';
 import '../../shared/primitives/utils.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
-import 'panes/raster_stats/raster_stats_model.dart';
 import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/perfetto/tracing/model.dart';
 
@@ -18,7 +17,6 @@ class OfflinePerformanceData {
     this.perfettoTraceBinary,
     this.frames = const <FlutterFrame>[],
     this.selectedFrame,
-    this.rasterStats,
     this.rebuildCountModel,
     double? displayRefreshRate,
   }) : displayRefreshRate = displayRefreshRate ?? defaultRefreshRate;
@@ -35,22 +33,18 @@ class OfflinePerformanceData {
       perfettoTraceBinary: json.traceBinary,
       frames: frames,
       selectedFrame: selectedFrame,
-      rasterStats: json.rasterStats,
       rebuildCountModel: json.rebuildCountModel,
       displayRefreshRate: json.displayRefreshRate,
     );
   }
 
   static const traceBinaryKey = 'traceBinary';
-  static const rasterStatsKey = 'rasterStats';
   static const rebuildCountModelKey = 'rebuildCountModel';
   static const displayRefreshRateKey = 'displayRefreshRate';
   static const flutterFramesKey = 'flutterFrames';
   static const selectedFrameIdKey = 'selectedFrameId';
 
   final Uint8List? perfettoTraceBinary;
-
-  final RasterStats? rasterStats;
 
   final RebuildCountModel? rebuildCountModel;
 
@@ -68,7 +62,6 @@ class OfflinePerformanceData {
         flutterFramesKey: frames.map((frame) => frame.json).toList(),
         selectedFrameIdKey: selectedFrame?.id,
         displayRefreshRateKey: displayRefreshRate,
-        rasterStatsKey: rasterStats?.json,
         rebuildCountModelKey: rebuildCountModel?.toJson(),
       };
 }
@@ -80,19 +73,13 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
     return value == null ? null : Uint8List.fromList(value);
   }
 
-  RasterStats? get rasterStats {
-    final raw = (json[OfflinePerformanceData.rasterStatsKey] as Map? ?? {})
-        .cast<String, Object>();
-    return raw.isNotEmpty ? RasterStats.fromJson(raw) : null;
-  }
-
   int? get selectedFrameId =>
       json[OfflinePerformanceData.selectedFrameIdKey] as int?;
 
   List<FlutterFrame> get frames =>
       (json[OfflinePerformanceData.flutterFramesKey] as List? ?? [])
           .cast<Map>()
-          .map((f) => f.cast<String, dynamic>())
+          .map((f) => f.cast<String, Object?>())
           .map((f) => FlutterFrame.fromJson(f))
           .toList();
 
@@ -104,7 +91,7 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
   RebuildCountModel? get rebuildCountModel {
     final raw =
         (json[OfflinePerformanceData.rebuildCountModelKey] as Map? ?? {})
-            .cast<String, dynamic>();
+            .cast<String, Object?>();
     return raw.isNotEmpty ? RebuildCountModel.fromJson(raw) : null;
   }
 }
@@ -160,7 +147,7 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
   FlutterTimelineEvent deepCopy() {
     final copy = shallowCopy();
     copy.parent = parent;
-    for (FlutterTimelineEvent child in children) {
+    for (final child in children) {
       copy.addChild(child.deepCopy());
     }
     return copy;
@@ -177,7 +164,7 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
     final begin = trackEvents.first;
     final end = trackEvents.safeLast;
     buf.writeln(begin.toString());
-    for (FlutterTimelineEvent child in children) {
+    for (final child in children) {
       child.writeTrackEventsToBuffer(buf);
     }
     if (end != null) {
@@ -187,7 +174,7 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
 
   void format(StringBuffer buf, String indent) {
     buf.writeln('$indent$name $time');
-    for (FlutterTimelineEvent child in children) {
+    for (final child in children) {
       child.format(buf, '  $indent');
     }
   }

@@ -384,6 +384,8 @@ class FramesChartControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = ScreenSize(context).width;
+    final terse = screenWidth <= MediaSize.xs;
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,9 +409,18 @@ class FramesChartControls extends StatelessWidget {
         Legend(
           dense: true,
           entries: [
-            const LegendEntry('Frame Time (UI)', mainUiColor),
-            const LegendEntry('Frame Time (Raster)', mainRasterColor),
-            const LegendEntry('Jank (slow frame)', uiJankColor),
+            LegendEntry(
+              terse ? 'UI' : 'Frame Time (UI)',
+              mainUiColor,
+            ),
+            LegendEntry(
+              terse ? 'Raster' : 'Frame Time (Raster)',
+              mainRasterColor,
+            ),
+            LegendEntry(
+              terse ? 'Jank' : 'Jank (slow frame)',
+              uiJankColor,
+            ),
             if (!impellerEnabled)
               LegendEntry(
                 'Shader Compilation',
@@ -420,6 +431,7 @@ class FramesChartControls extends StatelessWidget {
         AverageFPS(
           frames: frames,
           displayRefreshRate: displayRefreshRate,
+          terse: terse,
         ),
       ],
     );
@@ -477,9 +489,9 @@ class FlutterFramesChartItem extends StatelessWidget {
     final themeData = Theme.of(context);
     final colorScheme = themeData.colorScheme;
 
-    final bool uiJanky = frame.isUiJanky(displayRefreshRate);
-    final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
-    final bool hasShaderJank = frame.hasShaderJank(displayRefreshRate);
+    final uiJanky = frame.isUiJanky(displayRefreshRate);
+    final rasterJanky = frame.isRasterJanky(displayRefreshRate);
+    final hasShaderJank = frame.hasShaderJank(displayRefreshRate);
 
     var uiColor = uiJanky ? uiJankColor : mainUiColor;
     var rasterColor = rasterJanky ? rasterJankColor : mainRasterColor;
@@ -630,7 +642,7 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   final bool hasShaderJank;
 
-  static const double _moreInfoLinkWidth = 100.0;
+  static const _moreInfoLinkWidth = 100.0;
 
   static const _textMeasurementBuffer = 8.0;
 
@@ -724,11 +736,14 @@ class AverageFPS extends StatelessWidget {
     super.key,
     required this.frames,
     required this.displayRefreshRate,
+    this.terse = false,
   });
 
   final List<FlutterFrame> frames;
 
   final double displayRefreshRate;
+
+  final bool terse;
 
   @override
   Widget build(BuildContext context) {
@@ -753,7 +768,7 @@ class AverageFPS extends StatelessWidget {
       fpsText = '$avgFps';
     }
     return Text(
-      '$fpsText FPS (average)',
+      '$fpsText FPS (${terse ? 'avg' : 'average'})',
       maxLines: 2,
       style: Theme.of(context).legendTextStyle,
     );
@@ -823,7 +838,7 @@ class ChartAxisPainter extends CustomPainter {
     final totalMs = msPerPx * constraints.maxHeight;
 
     // Subtract 1 because one of the labels will be 0.0 ms.
-    final int timeUnitMs = totalMs ~/ (yAxisLabelCount - 1);
+    final timeUnitMs = totalMs ~/ (yAxisLabelCount - 1);
 
     // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
     final targetMsPerFrame = 1 / displayRefreshRate * 1000;

@@ -28,5 +28,5 @@ extension type const UniversalLinkSettings._(Map<String, Object?> _json) {
 
   /// The associated domains of the iOS build of this Flutter project.
   List<String> get associatedDomains =>
-      _json[_kAssociatedDomainsKey] as List<String>;
+      (_json[_kAssociatedDomainsKey] as List).cast<String>().toList();
 }

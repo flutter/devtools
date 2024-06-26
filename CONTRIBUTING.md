@@ -2,10 +2,10 @@
 
 ![GitHub contributors](https://img.shields.io/github/contributors/flutter/devtools.svg)
 
-_tl;dr: join [Discord](https://github.com/flutter/flutter/wiki/Chat), be
+_tl;dr: join [Discord](https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md), be
 [courteous](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md), follow the steps below
 to set up a development environment; if you stick around and contribute, you can
-[join the team](https://github.com/flutter/flutter/wiki/Contributor-access) and get commit access._
+[join the team](https://github.com/flutter/flutter/blob/master/docs/contributing/Contributor-access.md) and get commit access._
 
 > If you are here because you just want to test the bleeding-edge (unreleased) DevTools functionality,
 follow our [beta testing guidance](https://github.com/flutter/devtools/blob/master/BETA_TESTING.md).
@@ -17,7 +17,7 @@ We gladly accept contributions via GitHub pull requests! We encourage you to rea
 framework's contributing guide, as all of that information applies to contributing to the `flutter/devtools`
 repo as well.
 
-We communicate primarily over GitHub and [Discord](https://github.com/flutter/flutter/wiki/Chat) on the
+We communicate primarily over GitHub and [Discord](https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md) on the
 [#hackers-devtools](https://discord.com/channels/608014603317936148/1106667330093723668) channel.
 
 Before contributing code:
@@ -45,12 +45,12 @@ You can do this online, and it only takes a minute.
 ### Set up your DevTools environment
 
 **Before setting up your DevTools environment**, please make sure you have
-[cloned the Flutter SDK from GitHub](https://docs.flutter.dev/get-started/install/macos#downloading-straight-from-github-instead-of-using-an-archive)
+[cloned the Flutter SDK from GitHub](https://github.com/flutter/flutter/blob/main/docs/contributing/Setting-up-the-Framework-development-environment.md)
 and added the included `flutter` and `dart` executables to your `PATH` environment variable (see Flutter
-instructions for how to [update your PATH](https://docs.flutter.dev/get-started/install/macos#update-your-path)).
+instructions for how to [update your PATH](https://flutter.dev/to/update-macos-path)).
 
 Typing `which flutter` and `which dart` (or `where.exe flutter` and `where.exe dart` for Windows)
-into your terminal should print the path to the binaries from Flutter SDK you cloned from Github.
+into your terminal should print the path to the binaries from Flutter SDK you cloned from GitHub.
 
 1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the DevTools repo to your
 own Github account, and then clone it using SSH. If you haven't already, you may need to
@@ -89,6 +89,10 @@ of launch configurations for running and debugging DevTools:
 ### Workflow for making changes
 
 1. Change your local Flutter SDK to the latest flutter candidate branch: `devtools_tool update-flutter-sdk --from-path`
+
+> Note: Until  https://github.com/flutter/devtools/issues/7939 is fixed, run
+`devtools_tool update-flutter-sdk --use-cache` instead.
+
 2. Create a branch from your cloned DevTools repo: `git checkout -b myBranch`
 3. Ensure your branch, dependencies, and generated code are up-to-date: `devtools_tool sync`
 4. Implement your changes, and commit to your branch: `git commit -m “description”`

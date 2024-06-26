@@ -120,7 +120,7 @@ void main() {
 class TestTimelineEventsController extends TimelineEventsController {
   TestTimelineEventsController(super.performanceController);
 
-  final List<FlutterTimelineEvent> events = [];
+  final events = <FlutterTimelineEvent>[];
 
   @override
   void addTimelineEvent(FlutterTimelineEvent event) {

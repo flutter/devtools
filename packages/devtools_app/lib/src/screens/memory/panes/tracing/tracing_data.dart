@@ -111,7 +111,7 @@ class TracingIsolateState with Serializable {
     String? selectedClass,
   }) {
     this.classes = classes ?? [];
-    classesById = {for (var e in this.classes) e.clazz.id!: e};
+    classesById = {for (final e in this.classes) e.clazz.id!: e};
     this.profiles = profiles ?? {};
   }
 

@@ -591,7 +591,7 @@ class AppSizeController {
     required ProgramInfoNode parent,
     required Map<String, dynamic> json,
   }) {
-    final bool isLeafNode = json['children'] == null;
+    final isLeafNode = json['children'] == null;
     final node = program.makeNode(
       name: json['n'],
       parent: parent,
@@ -682,12 +682,13 @@ class AppSizeController {
     bool skipNodesWithNoByteSizeChange = true,
   }) {
     assert(showDiff ? diffTreeType != null : true);
-    final rawChildren = treeJson['children'];
+    final rawChildren =
+        (treeJson['children'] as List).cast<Map<String, dynamic>>();
     final treemapNodeChildren = <TreemapNode>[];
     int totalByteSize = 0;
 
     // Given a child, build its subtree.
-    for (Map<String, dynamic> child in rawChildren) {
+    for (final child in rawChildren) {
       final childTreemapNode = showDiff
           ? generateDiffTree(child, diffTreeType!)
           : generateTree(child);
@@ -721,12 +722,11 @@ class AppSizeController {
     }
     final childrenMap = <String, TreemapNode>{};
 
-    for (TreemapNode child in children) {
+    for (final child in children) {
       childrenMap[child.name] = child;
     }
 
-    final bool isDeferred =
-        treeJson['isDeferred'] != null && treeJson['isDeferred'];
+    final isDeferred = treeJson['isDeferred'] != null && treeJson['isDeferred'];
 
     return TreemapNode(
       name: name,

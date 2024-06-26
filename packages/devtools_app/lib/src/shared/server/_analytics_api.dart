@@ -57,22 +57,17 @@ Future<void> setAnalyticsEnabled([bool value = true]) async {
 // '/api/devToolsEnabled' returns the value (identical VM service) and
 // '/api/devToolsEnabled?value=true' sets the value.
 
-/// Request Flutter tool stored property value enabled (GA enabled) stored in
-/// the file '~\.flutter'.
+/// Whether GA is enabled in the Flutter store file ~\.flutter.
 ///
-/// Return bool.
-/// Return value of false implies either GA is disabled or the Flutter Tool has
-/// never been run (null returned from the server).
+/// A return value of false implies either GA is disabled or the Flutter Tool
+/// has never been run.
 Future<bool> _isFlutterGAEnabled() async {
   bool enabled = false;
 
   if (isDevToolsServerAvailable) {
     final resp = await request(apiGetFlutterGAEnabled);
     if (resp?.statusOk ?? false) {
-      // A return value of 'null' implies Flutter tool has never been run so
-      // return false for Flutter GA enabled.
-      final responseValue = json.decode(resp!.body);
-      enabled = responseValue ?? false;
+      enabled = json.decode(resp!.body) as bool;
     } else {
       logWarning(resp, apiGetFlutterGAEnabled);
     }
@@ -81,12 +76,12 @@ Future<bool> _isFlutterGAEnabled() async {
   return enabled;
 }
 
-/// Request Flutter tool stored property value clientID (GA enabled) stored in
-/// the file '~\.flutter'.
+/// Requests the Flutter client id from the Flutter store file ~\.flutter.
 ///
-/// Return as a String, empty string implies Flutter Tool has never been run.
+/// If an empty String is returned, this means that Flutter Tool has never been
+/// run.
 Future<String> flutterGAClientID() async {
-  // Default empty string, Flutter tool never run.
+  // Default empty string, Flutter tool never ran.
   String clientId = '';
 
   if (isDevToolsServerAvailable) {
@@ -97,9 +92,6 @@ Future<String> flutterGAClientID() async {
       if (resp?.statusOk ?? false) {
         clientId = json.decode(resp!.body);
         if (clientId.isEmpty) {
-          // Requested value of 'null' (Flutter tool never ran). Server request
-          // apiGetFlutterGAClientId should not happen because the
-          // isFlutterGAEnabled test should have been false.
           _log.warning('$apiGetFlutterGAClientId is empty');
         }
       } else {

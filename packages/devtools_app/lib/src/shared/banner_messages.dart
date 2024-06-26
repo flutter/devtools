@@ -18,11 +18,10 @@ import 'http/http_service.dart' as http_service;
 import 'primitives/utils.dart';
 import 'screen.dart';
 
-const _runInProfileModeDocsUrl =
-    'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
+const _runInProfileModeDocsUrl = 'https://flutter.dev/to/use-profile-mode';
 
 const _cpuSamplingRateDocsUrl =
-    'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
+    'https://docs.flutter.dev/tools/devtools/cpu-profiler#cpu-sampling-rate';
 
 class BannerMessagesController {
   final _messages = <String, ListValueNotifier<BannerMessage>>{};

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -15,7 +16,6 @@ import '../../shared/offline_data.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
-import 'panes/raster_stats/raster_stats_controller.dart';
 import 'panes/rebuild_stats/rebuild_stats_controller.dart';
 import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
@@ -36,12 +36,10 @@ class PerformanceController extends DisposableController
     // only create a controller when it is needed,
     flutterFramesController = FlutterFramesController(this);
     timelineEventsController = TimelineEventsController(this);
-    rasterStatsController = RasterStatsController(this);
     rebuildStatsController = RebuildStatsController(this);
     _featureControllers = [
       flutterFramesController,
       timelineEventsController,
-      rasterStatsController,
       rebuildStatsController,
     ];
 
@@ -59,8 +57,6 @@ class PerformanceController extends DisposableController
   late final FlutterFramesController flutterFramesController;
 
   late final TimelineEventsController timelineEventsController;
-
-  late final RasterStatsController rasterStatsController;
 
   late final RebuildStatsController rebuildStatsController;
 
@@ -129,11 +125,11 @@ class PerformanceController extends DisposableController
         serviceConnection
             .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen((event) {
-          if (event.extensionKind == 'Flutter.Frame') {
+          if (event.extensionKind == FlutterEvent.frame) {
             final frame = FlutterFrame.fromJson(event.extensionData!.data);
             enhanceTracingController.assignStateForFrame(frame);
             flutterFramesController.addFrame(frame);
-          } else if (event.extensionKind == 'Flutter.RebuiltWidgets' &&
+          } else if (event.extensionKind == FlutterEvent.rebuiltWidgets &&
               FeatureFlags.widgetRebuildStats) {
             if (_currentRebuildWidgetsIsolate != event.isolate) {
               rebuildCountModel.clearFromRestart();
@@ -257,7 +253,6 @@ class PerformanceController extends DisposableController
           perfettoTraceBinary: timelineEventsController.fullPerfettoTrace,
           frames: flutterFramesController.flutterFrames.value,
           selectedFrame: flutterFramesController.selectedFrame.value,
-          rasterStats: rasterStatsController.rasterStats.value,
           rebuildCountModel: rebuildCountModel,
           displayRefreshRate: flutterFramesController.displayRefreshRate.value,
         ).toJson(),

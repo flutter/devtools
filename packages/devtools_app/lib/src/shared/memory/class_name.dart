@@ -140,18 +140,17 @@ class HeapClassName with Serializable {
   final String className;
   final String library;
 
-  late final String fullName =
-      library.isNotEmpty ? '$library/$shortName' : shortName;
+  late final fullName = library.isNotEmpty ? '$library/$shortName' : shortName;
 
   late final isSentinel = className == 'Sentinel' && library.isEmpty;
 
   late final isRoot = className == 'Root' && library.isEmpty;
 
-  late final bool isNull = className == 'Null' && library == 'dart:core';
+  late final isNull = className == 'Null' && library == 'dart:core';
 
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
-  late final bool isWeak = _isWeak(className, library);
+  late final isWeak = _isWeak(className, library);
 
   /// See [isWeak].
   static bool _isWeak(String className, String library) {
@@ -204,7 +203,7 @@ class HeapClassName with Serializable {
   /// `dart:` or `package:`.
   /// Examples of such classes: Code, Function, Class, Field,
   /// number_symbols/NumberSymbols, vector_math_64/Matrix4.
-  late final bool isPackageless = library.isEmpty ||
+  late final isPackageless = library.isEmpty ||
       (!library.startsWith(PackagePrefixes.dart) &&
           !library.startsWith(PackagePrefixes.genericDartPackage));
 

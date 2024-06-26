@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -67,9 +68,6 @@ import 'standalone_ui/standalone_screen.dart';
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
 const debugEnableSampleScreen = false;
-
-// Disabled until VM developer mode functionality is added.
-const showVmDeveloperMode = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -139,6 +137,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
+    setGlobal(GlobalKey<NavigatorState>, routerDelegate.navigatorKey);
 
     // TODO(https://github.com/flutter/devtools/issues/6018): Once
     // https://github.com/flutter/flutter/issues/129692 is fixed, disable the
@@ -232,8 +231,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
         embedMode: params.embedMode,
-        child: PageNotFound(
-          page: page,
+        child: ScreenUnavailable(
+          title: "The '$page' page cannot be found.",
+          embedMode: params.embedMode,
           routerDelegate: routerDelegate,
         ),
       ),
@@ -268,7 +268,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           extensionService.currentExtensions,
         ],
         builder: (_, __, child) {
-          final screens = _visibleScreens()
+          final screensInScaffold = _visibleScreens()
               .where(
                 (s) => maybeIncludeOnlyEmbeddedScreen(
                   s,
@@ -278,10 +278,31 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               )
               .toList();
 
-          removeHiddenScreens(screens, queryParams);
+          removeHiddenScreens(screensInScaffold, queryParams);
 
           DevToolsScaffold scaffold;
-          if (screens.isEmpty) {
+
+          final originalScreen =
+              _screens.firstWhereOrNull((s) => s.screenId == page);
+          final screenInOriginalScreens = originalScreen != null;
+          final screenInScaffoldScreens =
+              screensInScaffold.containsWhere((s) => s.screenId == page);
+          if (page != null &&
+              screenInOriginalScreens &&
+              !screenInScaffoldScreens) {
+            // The requested [page] is in the list of DevTools screens, but is
+            // not available in list of available screens for this scaffold.
+            scaffold = DevToolsScaffold.withChild(
+              key: const Key('screen-disabled'),
+              embedMode: embedMode,
+              child: ScreenUnavailable(
+                title: "The '$page' screen is unavailable.",
+                description: _screenDisabledMessage(originalScreen),
+                routerDelegate: routerDelegate,
+                embedMode: embedMode,
+              ),
+            );
+          } else if (screensInScaffold.isEmpty) {
             // TODO(https://github.com/dart-lang/pub-dev/issues/7216): add an
             // extensions store or a link to a pub.dev query for packages with
             // extensions.
@@ -303,7 +324,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             scaffold = DevToolsScaffold(
               embedMode: embedMode,
               page: page,
-              screens: screens,
+              screens: screensInScaffold,
               actions: isEmbedded()
                   ? []
                   : [
@@ -378,7 +399,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     routerDelegate.refreshPages();
   }
 
-  List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
+  // TODO(kenz): consider showing all screens and displaying the reason why they
+  // are not available instead of hiding screens.
+  List<Screen> _visibleScreens() =>
+      _screens.where((screen) => shouldShowScreen(screen).show).toList();
 
   List<Provider> _providedControllers({bool offline = false}) {
     // We use [widget.originalScreens] here instead of [_screens] because
@@ -477,6 +501,20 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       screens.removeWhere((s) => s is! ExtensionScreen);
     }
   }
+
+  String? _screenDisabledMessage(Screen screen) {
+    final reason = shouldShowScreen(screen).disabledReason;
+    String? disabledMessage;
+    if (reason == ScreenDisabledReason.requiresDartLibrary) {
+      // Special case for screens that require a library since the message
+      // needs to be generated dynamically.
+      disabledMessage = 'The ${screen.title} screen requires library '
+          '${screen.requiresLibrary}, but the library was not detected.';
+    } else if (reason?.message case final String message) {
+      disabledMessage = 'The ${screen.title} screen $message';
+    }
+    return disabledMessage;
+  }
 }
 
 /// DevTools screen wrapper that is responsible for creating and providing the
@@ -555,30 +593,45 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
   }
 }
 
-class PageNotFound extends StatelessWidget {
-  const PageNotFound({
+class ScreenUnavailable extends StatelessWidget {
+  const ScreenUnavailable({
     super.key,
-    required this.page,
+    required this.title,
+    required this.embedMode,
     required this.routerDelegate,
+    this.description,
   });
 
-  final String page;
-
+  final String title;
   final DevToolsRouterDelegate routerDelegate;
+  final EmbedMode embedMode;
+  final String? description;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("'$page' not found."),
-          const SizedBox(height: defaultSpacing),
-          ElevatedButton(
-            onPressed: () =>
-                routerDelegate.navigateHome(clearScreenParam: true),
-            child: const Text('Go to Home screen'),
+          Text(
+            title,
+            style: theme.textTheme.titleLarge,
           ),
+          const SizedBox(height: denseSpacing),
+          if (description != null)
+            Text(
+              description!,
+              style: theme.regularTextStyle,
+            ),
+          if (embedMode == EmbedMode.none) ...[
+            const SizedBox(height: defaultSpacing),
+            ElevatedButton(
+              onPressed: () =>
+                  routerDelegate.navigateHome(clearScreenParam: true),
+              child: const Text('Go to Home screen'),
+            ),
+          ],
         ],
       ),
     );

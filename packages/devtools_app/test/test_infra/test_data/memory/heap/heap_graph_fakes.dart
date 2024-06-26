@@ -23,13 +23,15 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
   FakeHeapSnapshotGraph();
 
   @override
-  final List<HeapSnapshotClass> classes = [
+  // ignore: avoid-explicit-type-declaration, required to override base class.
+  final List<HeapSnapshotClass> classes = <HeapSnapshotClass>[
     _FakeHeapSnapshotClass(),
     _FakeHeapSnapshotClass.weak(),
   ];
 
   @override
-  final List<FakeSnapshotObject> objects = [
+  // ignore: avoid-explicit-type-declaration, required to override base class.
+  final List<FakeSnapshotObject> objects = <FakeSnapshotObject>[
     _sentinelObject,
     FakeSnapshotObject(shallowSize: 1), // root
   ];
@@ -63,7 +65,7 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
   /// Returns index of the object.
   int addChain(List<String> path) {
     var referrer = heapRootIndex;
-    for (var name in path) {
+    for (final name in path) {
       final classId =
           maybeAddClass(HeapClassName(library: _library, className: name));
       final index = add();

@@ -69,10 +69,10 @@ mixin FilterControllerMixin<T> on DisposableController
 
   List<ToggleFilter<T>> createToggleFilters() => [];
 
-  late final Map<String, QueryFilterArgument> _queryFilterArgs =
-      createQueryFilterArgs();
+  late final _queryFilterArgs = createQueryFilterArgs();
 
-  Map<String, QueryFilterArgument> createQueryFilterArgs() => {};
+  Map<String, QueryFilterArgument> createQueryFilterArgs() =>
+      <String, QueryFilterArgument>{};
 
   bool get isFilterActive {
     final filter = activeFilter.value;
@@ -343,7 +343,7 @@ class QueryFilter {
       if (querySeparatorIndex != -1) {
         final value = part.substring(querySeparatorIndex + 1).trim();
         if (value.isNotEmpty) {
-          for (var arg in args.values) {
+          for (final arg in args.values) {
             if (arg.matchesKey(part)) {
               arg.isNegative =
                   part.startsWith(QueryFilterArgument.negativePrefix);

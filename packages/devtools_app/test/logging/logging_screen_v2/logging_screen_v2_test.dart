@@ -6,6 +6,7 @@
 library;
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_table_v2.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -18,6 +19,7 @@ void main() {
   late LoggingScreenV2 screen;
   late MockLoggingControllerV2 mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Logging Screen', () {
     Future<void> pumpLoggingScreen(WidgetTester tester) async {
@@ -30,8 +32,6 @@ void main() {
     }
 
     setUp(() {
-      mockLoggingController = createMockLoggingControllerV2WithDefaults();
-
       final fakeServiceConnection = FakeServiceConnectionManager();
       when(
         fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
@@ -41,6 +41,7 @@ void main() {
       when(
         fakeServiceConnection.errorBadgeManager.errorCountNotifier('logging'),
       ).thenReturn(ValueNotifier<int>(0));
+      setGlobal(GlobalKey<NavigatorState>, GlobalKey<NavigatorState>());
       setGlobal(NotificationService, NotificationService());
       setGlobal(
         DevToolsEnvironmentParameters,
@@ -49,6 +50,8 @@ void main() {
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
+
+      mockLoggingController = createMockLoggingControllerV2WithDefaults();
 
       screen = LoggingScreenV2();
     });
@@ -64,7 +67,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         expect(find.byType(LoggingScreenBodyV2), findsOneWidget);
-        expect(find.byType(LogsTableV2), findsOneWidget);
+        expect(find.byType(LoggingTableV2), findsOneWidget);
       },
     );
   });

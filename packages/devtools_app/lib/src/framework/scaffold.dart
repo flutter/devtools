@@ -105,7 +105,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     with AutoDisposeMixin, TickerProviderStateMixin {
   /// A tag used for [Hero] widgets to keep the [AppBar] in the same place
   /// across route transitions.
-  static const Object _appBarTag = 'DevTools AppBar';
+  static const _appBarTag = 'DevTools AppBar';
 
   /// The controller for animating between tabs.
   ///
@@ -276,7 +276,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   Widget build(BuildContext context) {
     // Build the screens for each tab and wrap them in the appropriate styling.
     final tabBodies = [
-      for (var screen in widget.screens)
+      for (final screen in widget.screens)
         Align(
           alignment: Alignment.topLeft,
           child: FocusScope(

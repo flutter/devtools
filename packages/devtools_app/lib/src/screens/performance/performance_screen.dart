@@ -174,7 +174,7 @@ const debugLayoutsLink =
     'https://api.flutter.dev/flutter/rendering/debugProfileLayoutsEnabled.html';
 const debugPaintsLink =
     'https://api.flutter.dev/flutter/rendering/debugProfilePaintsEnabled.html';
-const profileModeLink = 'https://docs.flutter.dev/testing/build-modes#profile';
+const profileModeLink = 'https://flutter.dev/to/profile-mode';
 const performancePanelLink =
     'https://developer.chrome.com/docs/devtools/performance';
 

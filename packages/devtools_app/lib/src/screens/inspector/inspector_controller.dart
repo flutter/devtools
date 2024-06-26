@@ -180,7 +180,7 @@ class InspectorController extends DisposableController
   /// debugging highly interactive cases particularly when the user is on a
   /// simulator or high powered native device. The frame rate is set low
   /// for now mainly to minimize risk.
-  static const double refreshFramesPerSecond = 5.0;
+  static const refreshFramesPerSecond = 5.0;
 
   final bool isSummaryTree;
 
@@ -225,14 +225,13 @@ class InspectorController extends DisposableController
   bool programmaticSelectionChangeInProgress = false;
 
   ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
-  final ValueNotifier<InspectorTreeNode?> _selectedNode = ValueNotifier(null);
+  final _selectedNode = ValueNotifier<InspectorTreeNode?>(null);
 
   InspectorTreeNode? lastExpanded;
 
   bool isActive = false;
 
-  final Map<InspectorInstanceRef, InspectorTreeNode> valueToInspectorTreeNode =
-      {};
+  final valueToInspectorTreeNode = <InspectorInstanceRef, InspectorTreeNode>{};
 
   /// When visibleToUser is false we should dispose all allocated objects and
   /// not perform any actions.
@@ -245,7 +244,7 @@ class InspectorController extends DisposableController
   RemoteDiagnosticsNode? get selectedDiagnostic =>
       selectedNode.value?.diagnostic;
 
-  final ValueNotifier<int?> _selectedErrorIndex = ValueNotifier<int?>(null);
+  final _selectedErrorIndex = ValueNotifier<int?>(null);
 
   ValueListenable<int?> get selectedErrorIndex => _selectedErrorIndex;
 
@@ -455,7 +454,7 @@ class InspectorController extends DisposableController
       final group = treeGroups.next;
       final node = await (detailsSubtree
           ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
-          : group.getRoot(treeType));
+          : group.getRoot(treeType, isSummaryTree: true));
       if (node == null || group.disposed || _disposed) {
         return;
       }
@@ -465,7 +464,7 @@ class InspectorController extends DisposableController
       treeGroups.promoteNext();
       _clearValueToInspectorTreeNodeMapping();
 
-      final InspectorTreeNode rootNode = inspectorTree.setupInspectorTreeNode(
+      final rootNode = inspectorTree.setupInspectorTreeNode(
         inspectorTree.createNode(),
         node,
         expandChildren: true,
@@ -646,12 +645,12 @@ class InspectorController extends DisposableController
       isSummaryTree: isSummaryTree,
     );
 
-    final Future<RemoteDiagnosticsNode?>? pendingDetailsFuture = isSummaryTree
+    final pendingDetailsFuture = isSummaryTree
         ? group.getSelection(selectedDiagnostic, treeType, isSummaryTree: false)
         : null;
 
     try {
-      final RemoteDiagnosticsNode? newSelection = await pendingSelectionFuture;
+      final newSelection = await pendingSelectionFuture;
       if (_disposed || group.disposed) return;
       RemoteDiagnosticsNode? detailsSelection;
 
@@ -685,8 +684,7 @@ class InspectorController extends DisposableController
     RemoteDiagnosticsNode? detailsSelection,
     bool setSubtreeRoot,
   ) {
-    final InspectorTreeNode? nodeInTree =
-        findMatchingInspectorTreeNode(newSelection);
+    final nodeInTree = findMatchingInspectorTreeNode(newSelection);
 
     if (nodeInTree == null) {
       // The tree has probably changed since we last updated. Do a full refresh
@@ -803,7 +801,7 @@ class InspectorController extends DisposableController
       return;
     }
 
-    final InspectorTreeNode? node = inspectorTree.selection;
+    final node = inspectorTree.selection;
     if (node != null) {
       unawaited(inspectorTree.maybePopulateChildren(node));
     }
@@ -815,7 +813,7 @@ class InspectorController extends DisposableController
       unawaited(_addNodeToConsole(node));
 
       // Don't reroot if the selected value is already visible in the details tree.
-      final bool maybeReroot = isSummaryTree &&
+      final maybeReroot = isSummaryTree &&
           details != null &&
           selectedDiagnostic != null &&
           !details!.hasDiagnosticsValue(selectedDiagnostic!.valueRef);
@@ -915,7 +913,7 @@ class InspectorController extends DisposableController
     InspectorTreeNode node,
     RemoteDiagnosticsNode diagnosticsNode,
   ) {
-    final InspectorInstanceRef valueRef = diagnosticsNode.valueRef;
+    final valueRef = diagnosticsNode.valueRef;
     // Properties do not have unique values so should not go in the valueToInspectorTreeNode map.
     if (valueRef.id != null && !diagnosticsNode.isProperty) {
       valueToInspectorTreeNode[valueRef] = node;

@@ -28,7 +28,7 @@ class MemoryFootprint {
 
 /// Value for rootIndex is taken from the doc:
 /// https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/heap_snapshot.md#object-ids
-const int heapRootIndex = 1;
+const heapRootIndex = 1;
 
 extension HeapSnapshotGraphSerialization on HeapSnapshotGraph {
   static Future<HeapSnapshotGraph> load(XFile file) async {
@@ -43,7 +43,7 @@ extension HeapSnapshotGraphSerialization on HeapSnapshotGraph {
   /// See https://api.flutter.dev/flutter/dart-developer/NativeRuntime/writeHeapSnapshotToFile.html
   Uint8List toUint8List() {
     final b = BytesBuilder();
-    for (var chunk in toChunks()) {
+    for (final chunk in toChunks()) {
       b.add(chunk.buffer.asUint8List());
     }
     return b.toBytes();

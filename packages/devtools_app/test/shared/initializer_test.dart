@@ -18,7 +18,7 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   group('Initializer', () {
-    const Key initializedKey = Key('initialized');
+    const initializedKey = Key('initialized');
     setUp(() {
       final serviceManager = FakeServiceConnectionManager();
       when(serviceManager.serviceManager.connectedApp!.isDartWebApp)

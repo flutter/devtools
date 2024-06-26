@@ -8,9 +8,11 @@ import '../preferences/preferences.dart';
 import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
+part 'constants/_debugger_constants.dart';
 part 'constants/_deep_links_constants.dart';
 part 'constants/_extension_constants.dart';
 part 'constants/_memory_constants.dart';
+part 'constants/_logging_constants.dart';
 part 'constants/_performance_constants.dart';
 part 'constants/_vs_code_sidebar_constants.dart';
 part 'constants/_inspector_constants.dart';
@@ -90,12 +92,6 @@ enum HomeScreenEvents {
   viewVmFlags,
 }
 
-// Debugger UX actions:
-const refreshStatistics = 'refreshStatistics';
-const showFileExplorer = 'showFileExplorer';
-const hideFileExplorer = 'hideFileExplorer';
-const pausedWithNoFrames = 'pausedWithNoFrames';
-
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
 const trackRebuildWidgets = 'trackRebuildWidgets';
@@ -116,7 +112,6 @@ const requestSize = 'requestSize';
 // Settings actions:
 const settingsDialog = 'settings';
 const darkTheme = 'darkTheme';
-const denseMode = 'denseMode';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
 const verboseLogging = 'verboseLogging';
@@ -163,6 +158,6 @@ String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 /// Analytic event constants specific for console.
 class ConsoleEvent {
   static const helpInline = 'consoleHelpInline';
-  static const String evalInStoppedApp = 'consoleEvalInStoppedApp';
-  static const String evalInRunningApp = 'consoleEvalInRunningApp';
+  static const evalInStoppedApp = 'consoleEvalInStoppedApp';
+  static const evalInRunningApp = 'consoleEvalInRunningApp';
 }

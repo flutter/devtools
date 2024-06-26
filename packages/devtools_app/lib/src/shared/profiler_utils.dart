@@ -89,7 +89,7 @@ mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
               '$exclusiveSampleCount - incl: $inclusiveSampleCount'
           .trimRight(),
     );
-    for (T child in children) {
+    for (final child in children) {
       (child as ProfilableDataMixin<T>)._format(buf, '  $indent');
     }
   }

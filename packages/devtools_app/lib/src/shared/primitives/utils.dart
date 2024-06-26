@@ -32,9 +32,9 @@ bool collectionEquals(Object? e1, Object? e2, {bool ordered = true}) {
 }
 
 // 2^52 is the max int for dart2js.
-final int maxJsInt = pow(2, 52) as int;
+final maxJsInt = pow(2, 52) as int;
 
-final NumberFormat nf = NumberFormat.decimalPattern();
+final nf = NumberFormat.decimalPattern();
 
 String percent(double d, {int fractionDigits = 2}) =>
     '${(d * 100).toStringAsFixed(fractionDigits)}%';
@@ -283,7 +283,7 @@ Stream combineStreams(Stream a, Stream b, Stream c) {
 class Property<T> {
   Property(this._value);
 
-  final StreamController<T> _changeController = StreamController<T>.broadcast();
+  final _changeController = StreamController<T>.broadcast();
   T _value;
 
   T get value => _value;
@@ -573,7 +573,7 @@ double safeDivide(
 ///
 /// Only the object that created this reporter should call [notify].
 class Reporter implements Listenable {
-  final Set<VoidCallback> _listeners = {};
+  final _listeners = <VoidCallback>{};
 
   /// Adds [callback] to this reporter.
   ///
@@ -598,7 +598,7 @@ class Reporter implements Listenable {
   /// a notification callback leads to a change in the listeners,
   /// only the original listeners will be called.
   void notify() {
-    for (var callback in _listeners.toList()) {
+    for (final callback in _listeners.toList()) {
       callback();
     }
   }
@@ -852,14 +852,14 @@ Color colorFromAnsi(List<int> ansiInput) {
 /// An extension on [LogicalKeySet] to provide user-facing names for key
 /// bindings.
 extension LogicalKeySetExtension on LogicalKeySet {
-  static final Set<LogicalKeyboardKey> _modifiers = {
+  static final _modifiers = <LogicalKeyboardKey>{
     LogicalKeyboardKey.alt,
     LogicalKeyboardKey.control,
     LogicalKeyboardKey.meta,
     LogicalKeyboardKey.shift,
   };
 
-  static final Map<LogicalKeyboardKey, String> _modifierNames = {
+  static final _modifierNames = <LogicalKeyboardKey, String>{
     LogicalKeyboardKey.alt: 'Alt',
     LogicalKeyboardKey.control: 'Control',
     LogicalKeyboardKey.meta: 'Meta',
@@ -870,7 +870,7 @@ extension LogicalKeySetExtension on LogicalKeySet {
   String describeKeys({bool isMacOS = false}) {
     // Put the modifiers first. If it has a synonym, then it's something like
     // shiftLeft, altRight, etc.
-    final List<LogicalKeyboardKey> sortedKeys = keys.toList()
+    final sortedKeys = keys.toList()
       ..sort((a, b) {
         final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
         final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
@@ -904,9 +904,7 @@ class DevToolsJsonFile extends DevToolsFile<Object> {
     required String name,
     required super.lastModifiedTime,
     required super.data,
-  }) : super(
-          path: name,
-        );
+  }) : super(path: name);
 }
 
 class DevToolsFile<T> {
@@ -950,32 +948,6 @@ extension StringExtension on String {
       'Unhandled pattern type ${pattern.runtimeType} from '
       '`caseInsensitiveContains`',
     );
-  }
-
-  /// Whether [query] is a case insensitive "fuzzy match" for this String.
-  ///
-  /// For example, the query "hwf" would be a fuzzy match for the String
-  /// "hello_world_file".
-  bool caseInsensitiveFuzzyMatch(String query) {
-    query = query.toLowerCase();
-    final lowercase = toLowerCase();
-    final it = query.characters.iterator;
-    var strIndex = 0;
-    while (it.moveNext()) {
-      final char = it.current;
-      var foundChar = false;
-      for (int i = strIndex; i < lowercase.length; i++) {
-        if (lowercase[i] == char) {
-          strIndex = i + 1;
-          foundChar = true;
-          break;
-        }
-      }
-      if (!foundChar) {
-        return false;
-      }
-    }
-    return true;
   }
 
   /// Whether [other] is a case insensitive match for this String.
@@ -1036,7 +1008,7 @@ extension ListExtension<T> on List<T> {
   }
 
   bool containsWhere(bool Function(T element) test) {
-    for (var e in this) {
+    for (final e in this) {
       if (test(e)) {
         return true;
       }
@@ -1068,7 +1040,7 @@ extension NullableListExtension<T> on List<T>? {
 
 extension SetExtension<T> on Set<T> {
   bool containsWhere(bool Function(T element) test) {
-    for (var e in this) {
+    for (final e in this) {
       if (test(e)) {
         return true;
       }
@@ -1077,7 +1049,7 @@ extension SetExtension<T> on Set<T> {
   }
 
   bool containsAny(Iterable<T> any) {
-    for (var e in any) {
+    for (final e in any) {
       if (contains(e)) {
         return true;
       }
@@ -1149,20 +1121,16 @@ extension UriExtension on Uri {
   }
 }
 
-Iterable<T> removeNullValues<T>(Iterable<T?> values) {
-  return values.whereType<T>();
-}
-
 // TODO(mtaylee): Prefer to use this helper method whenever a call to
 // .split('/').last is made on a String (usually on URIs).
 // See https://github.com/flutter/devtools/issues/4360.
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
-String? fileNameFromUri(String? uri) => uri?.split('/').last;
+String? fileNameFromUri(String? uri) => uri?.split('/').lastOrNull;
 
 /// Calculates subtraction of two maps.
 ///
-/// Result map keys is union of the imput maps' keys.
+/// Result map keys is union of the input maps' keys.
 Map<K, R> subtractMaps<K, F, S, R>({
   required Map<K, S>? subtract,
   required Map<K, F>? from,
@@ -1174,7 +1142,7 @@ Map<K, R> subtractMaps<K, F, S, R>({
   final result = <K, R>{};
   final unionOfKeys = from.keys.toSet().union(subtract.keys.toSet());
 
-  for (var key in unionOfKeys) {
+  for (final key in unionOfKeys) {
     final diff = subtractor(from: from[key], subtract: subtract[key]);
     if (diff != null) result[key] = diff;
   }

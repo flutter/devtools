@@ -48,7 +48,7 @@ class DevToolsRepo {
     final result = <Package>[];
     final repoDir = Directory(repoPath);
 
-    for (FileSystemEntity entity in repoDir.listSync()) {
+    for (final entity in repoDir.listSync()) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.')) {
         _collectPackages(entity, result);
@@ -78,16 +78,16 @@ class DevToolsRepo {
   void _collectPackages(Directory dir, List<Package> result) {
     // Do not collect packages from the Flutter SDK that is stored in the tool/
     // directory.
-    if (dir.path.contains('flutter-sdk/')) return;
+    if (dir.path.contains(path.join('tool', 'flutter-sdk'))) return;
 
     // Do not include the top level devtools/packages directory in the results
     // even though it has a pubspec.yaml file.
     if (_fileExists(dir, 'pubspec.yaml') &&
-        !dir.path.endsWith('/devtools/packages')) {
+        !dir.path.endsWith(path.join('devtools', 'packages'))) {
       result.add(Package._(this, dir.path));
     }
 
-    for (FileSystemEntity entity in dir.listSync(followLinks: false)) {
+    for (final entity in dir.listSync(followLinks: false)) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
         _collectPackages(entity, result);
@@ -206,8 +206,7 @@ class FlutterSdk {
   static String get dartWrapperExecutableName =>
       Platform.isWindows ? 'dart.bat' : 'dart';
 
-  String get flutterExePath =>
-      path.join(sdkPath, 'bin', flutterExecutableName);
+  String get flutterExePath => path.join(sdkPath, 'bin', flutterExecutableName);
 
   String get dartExePath =>
       path.join(sdkPath, 'bin', dartWrapperExecutableName);
@@ -237,11 +236,11 @@ class Package {
   }
 
   void _collectDartFiles(Directory dir, List<String> result) {
-    for (FileSystemEntity entity in dir.listSync(followLinks: false)) {
+    for (final entity in dir.listSync(followLinks: false)) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
         _collectDartFiles(entity, result);
-      } else if (entity is File && name.endsWith('.dart')) {
+      } else if (entity is File && path.extension(name) == '.dart') {
         result.add(entity.path);
       }
     }

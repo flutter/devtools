@@ -85,7 +85,7 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
 
   String get name => event.name;
 
-  late final Map<String, Object?> args = Map<String, Object?>.fromEntries(
+  late final args = Map<String, Object?>.fromEntries(
     <MapEntry<String, Object?>?>[
       ...event.debugAnnotations.map((a) {
         final hasStringValue = a.hasStringValue();
@@ -97,7 +97,7 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
         }
         return null;
       }),
-    ].whereNotNull(),
+    ].nonNulls,
   );
 
   List<String> get categories => event.categories;

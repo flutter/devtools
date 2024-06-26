@@ -200,7 +200,7 @@ void main() {
     });
 
     test('filterTree', () {
-      final List<TestTreeNode> filteredTreeRoots =
+      final filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id.isEven);
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
@@ -221,7 +221,7 @@ void main() {
     });
 
     test('filterTree when root should be filtered out', () {
-      final List<TestTreeNode> filteredTreeRoots =
+      final filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id.isOdd);
       expect(filteredTreeRoots.length, equals(3));
       final firstRoot = filteredTreeRoots[0];
@@ -258,13 +258,13 @@ void main() {
     });
 
     test('filterTree when zero nodes match', () {
-      final List<TestTreeNode> filteredTreeRoots =
+      final filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id > 15);
       expect(filteredTreeRoots, isEmpty);
     });
 
     test('filterTree when all nodes match', () {
-      final List<TestTreeNode> filteredTreeRoots =
+      final filteredTreeRoots =
           testTreeNode.filterWhere((node) => node.id < 10);
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
@@ -446,7 +446,7 @@ final treeNode9 = TestTreeNode(9, tag: 'test-tag');
 final treeNode10 = TestTreeNode(10);
 final treeNode11 = TestTreeNode(11);
 final treeNode12 = TestTreeNode(12);
-final TestTreeNode testTreeNode = treeNode0
+final testTreeNode = treeNode0
   ..addAllChildren([
     treeNode1,
     treeNode2

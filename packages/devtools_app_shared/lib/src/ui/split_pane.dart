@@ -115,7 +115,7 @@ final class _SplitPaneState extends State<SplitPane> {
       if (widget.minSizes == null) return 0.0;
 
       double totalMinSize = 0;
-      for (var minSize in widget.minSizes!) {
+      for (final minSize in widget.minSizes!) {
         totalMinSize += minSize;
       }
 
@@ -285,7 +285,7 @@ final class _SplitPaneState extends State<SplitPane> {
       return numSplitters * DefaultSplitter.splitterWidth;
     } else {
       var totalSize = 0.0;
-      for (var splitter in widget.splitters!) {
+      for (final splitter in widget.splitters!) {
         totalSize += isHorizontal
             ? splitter.preferredSize.width
             : splitter.preferredSize.height;
@@ -298,8 +298,8 @@ final class _SplitPaneState extends State<SplitPane> {
 final class DefaultSplitter extends StatelessWidget {
   const DefaultSplitter({super.key, required this.isHorizontal});
 
-  static const double iconSize = 24.0;
-  static const double splitterWidth = 12.0;
+  static const iconSize = 24.0;
+  static const splitterWidth = 12.0;
 
   final bool isHorizontal;
 
@@ -322,7 +322,7 @@ final class DefaultSplitter extends StatelessWidget {
 
 void _verifyFractionsSumTo1(List<double> fractions) {
   var sumFractions = 0.0;
-  for (var fraction in fractions) {
+  for (final fraction in fractions) {
     sumFractions += fraction;
   }
   assert(

@@ -134,11 +134,11 @@ class _TableOfThingsState extends State<TableOfThings> {
                   children: <Widget>[
                     _GridEntry(
                       text: 'Id',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                     _GridEntry(
                       text: 'Thing',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ],
                 ),
