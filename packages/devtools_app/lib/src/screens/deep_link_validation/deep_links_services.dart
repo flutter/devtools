@@ -123,7 +123,7 @@ class DeepLinksServices {
     required String applicationId,
     required String? localFingerprint,
   }) async {
-    //TODO: This is just a fake response, implement the iOS domain validation when the API is available.
+    //TODO(hangyujin): This is just a fake response, implement the iOS domain validation when the API is available.
     final domainErrors = <String, List<DomainError>>{
       for (final domain in domains)
         domain: <DomainError>[IosDomainError.existence],

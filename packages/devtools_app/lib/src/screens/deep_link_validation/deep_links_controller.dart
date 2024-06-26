@@ -453,7 +453,8 @@ class DeepLinksController extends DisposableController
         .toList();
 
     late final Map<String, List<DomainError>> androidDomainErrors;
-    Map<String, List<DomainError>> iosDomainErrors = {};
+    Map<String, List<DomainError>> iosDomainErrors =
+        <String, List<DomainError>>{};
     try {
       final androidResult = await deepLinksServices.validateAndroidDomain(
         domains: domains,
@@ -476,8 +477,10 @@ class DeepLinksController extends DisposableController
     }
 
     return linkdatas.map((linkdata) {
-      final errors = (androidDomainErrors[linkdata.domain] ?? []) +
-          (iosDomainErrors[linkdata.domain] ?? []);
+      final errors = [
+        ...(androidDomainErrors[linkdata.domain] ?? []),
+        ...(iosDomainErrors[linkdata.domain] ?? []),
+      ];
       if (errors.isNotEmpty) {
         return LinkData(
           domain: linkdata.domain,
