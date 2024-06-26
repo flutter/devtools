@@ -1,10 +1,15 @@
-import '../../../devtools_app.dart';
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import '../../shared/analytics/constants.dart';
+
+import '../../shared/http/http_request_data.dart';
 
 /// Builds a HAR (HTTP Archive) object from a list of HTTP requests.
 ///
 /// The HAR format is a JSON-based format used for logging a web browser's
-/// interaction with a site. It is useful for web performance analysis and
+/// interaction with a site. It is useful for performance analysis and
 /// debugging. This function constructs the HAR object based on the 1.2
 /// specification.
 ///
@@ -15,31 +20,31 @@ import '../../shared/analytics/constants.dart';
 ///
 /// Returns:
 /// - A Map representing the HAR object.
-Map<String, dynamic> buildHar(List<DartIOHttpRequestData> httpRequests) {
-// Build the creator
-  final creator = {
+Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
+  // Build the creator
+  final creator = <String, Object?>{
     NetworkEventKeys.name: NetworkEventDefaults.creatorName,
     NetworkEventKeys.creatorVersion: NetworkEventDefaults.creatorVersion,
   };
 
-// Build the pages
-  final pages = [
+  // Build the pages
+  final pages = <Map<String, Object?>>[
     {
       NetworkEventKeys.startedDateTime:
           httpRequests.first.startTimestamp.toUtc().toIso8601String(),
       NetworkEventKeys.id: NetworkEventDefaults.id,
       NetworkEventKeys.title: NetworkEventDefaults.title,
-      NetworkEventKeys.pageTimings: {
+      NetworkEventKeys.pageTimings: <String, Object?>{
         NetworkEventKeys.onContentLoad: NetworkEventDefaults.onContentLoad,
         NetworkEventKeys.onLoad: NetworkEventDefaults.onLoad,
       },
     },
   ];
 
-// Build the entries
+  // Build the entries
   final entries = httpRequests.map((e) {
     final requestCookies = e.requestCookies.map((cookie) {
-      return {
+      return <String, Object?>{
         NetworkEventKeys.name: cookie.name,
         NetworkEventKeys.value: cookie.value,
         'path': cookie.path,
@@ -55,21 +60,21 @@ Map<String, dynamic> buildHar(List<DartIOHttpRequestData> httpRequests) {
       if (value is List) {
         value = value.first;
       }
-      return {
+      return <String, Object?>{
         NetworkEventKeys.name: header.key,
         NetworkEventKeys.value: value,
       };
     }).toList();
 
     final queryString = Uri.parse(e.uri).queryParameters.entries.map((param) {
-      return {
+      return <String, Object?>{
         NetworkEventKeys.name: param.key,
         NetworkEventKeys.value: param.value,
       };
     }).toList();
 
     final responseCookies = e.responseCookies.map((cookie) {
-      return {
+      return <String, Object?>{
         NetworkEventKeys.name: cookie.name,
         NetworkEventKeys.value: cookie.value,
         'path': cookie.path,
@@ -85,38 +90,38 @@ Map<String, dynamic> buildHar(List<DartIOHttpRequestData> httpRequests) {
       if (value is List) {
         value = value.first;
       }
-      return {
+      return <String, Object?>{
         NetworkEventKeys.name: header.key,
         NetworkEventKeys.value: value,
       };
     }).toList();
 
-    return {
+    return <String, Object?>{
       NetworkEventKeys.pageref: NetworkEventDefaults.id,
       NetworkEventKeys.startedDateTime:
           e.startTimestamp.toUtc().toIso8601String(),
       NetworkEventKeys.time: e.duration?.inMilliseconds,
-      NetworkEventKeys.request: {
+      NetworkEventKeys.request: <String, Object?>{
         NetworkEventKeys.method: e.method.toUpperCase(),
         NetworkEventKeys.url: e.uri.toString(),
         NetworkEventKeys.httpVersion: NetworkEventDefaults.httpVersion,
         NetworkEventKeys.cookies: requestCookies,
         NetworkEventKeys.headers: requestHeaders,
         NetworkEventKeys.queryString: queryString,
-        NetworkEventKeys.postData: {
+        NetworkEventKeys.postData: <String, Object?>{
           NetworkEventKeys.mimeType: e.contentType,
           NetworkEventKeys.text: e.requestBody,
         },
         NetworkEventKeys.headersSize: NetworkEventDefaults.headersSize,
         NetworkEventKeys.bodySize: NetworkEventDefaults.bodySize,
       },
-      NetworkEventKeys.response: {
+      NetworkEventKeys.response: <String, Object?>{
         NetworkEventKeys.status: e.status,
         NetworkEventKeys.statusText: '',
         NetworkEventKeys.httpVersion: NetworkEventDefaults.responseHttpVersion,
         NetworkEventKeys.cookies: responseCookies,
         NetworkEventKeys.headers: responseHeaders,
-        NetworkEventKeys.content: {
+        NetworkEventKeys.content: <String, Object?>{
           NetworkEventKeys.size: e.responseBody?.length,
           NetworkEventKeys.mimeType: e.type,
           NetworkEventKeys.text: e.responseBody,
@@ -125,8 +130,8 @@ Map<String, dynamic> buildHar(List<DartIOHttpRequestData> httpRequests) {
         NetworkEventKeys.headersSize: NetworkEventDefaults.headersSize,
         NetworkEventKeys.bodySize: NetworkEventDefaults.bodySize,
       },
-      NetworkEventKeys.cache: {},
-      NetworkEventKeys.timings: {
+      NetworkEventKeys.cache: <String, Object?>{},
+      NetworkEventKeys.timings: <String, Object?>{
         NetworkEventKeys.blocked: NetworkEventDefaults.blocked,
         NetworkEventKeys.dns: NetworkEventDefaults.dns,
         NetworkEventKeys.connect: NetworkEventDefaults.connect,
@@ -141,9 +146,9 @@ Map<String, dynamic> buildHar(List<DartIOHttpRequestData> httpRequests) {
     };
   }).toList();
 
-// Assemble the final HAR object
-  return {
-    NetworkEventKeys.log: {
+  // Assemble the final HAR object
+  return <String, Object?>{
+    NetworkEventKeys.log: <String, Object?>{
       NetworkEventKeys.version: NetworkEventDefaults.logVersion,
       NetworkEventKeys.creator: creator,
       NetworkEventKeys.pages: pages,
