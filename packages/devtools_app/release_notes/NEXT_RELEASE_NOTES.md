@@ -19,7 +19,11 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+* Removed the "Raster Stats" feature. This tool did not work for the Impeller rendering
+engine, and the information it gave for the SKIA rendering engine was misleading and
+inactionable. Users should follow official Flutter guidance for
+[Performance & Optimization](https://docs.flutter.dev/perf) when debugging the
+rendering performance of their Flutter apps. - [#7981](https://github.com/flutter/devtools/pull/7981).
 
 ## CPU profiler updates
 

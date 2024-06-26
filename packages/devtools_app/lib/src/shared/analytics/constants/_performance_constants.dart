@@ -41,6 +41,7 @@ enum PerformanceEvents {
 }
 
 enum PerformanceDocs {
+  flutterPerformanceDocs,
   performanceOverlayDocs,
   trackWidgetBuildsDocs,
   trackPaintsDocs,
