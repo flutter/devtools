@@ -418,18 +418,21 @@ class InspectorTreeController extends DisposableController
     }) {
       final currentIdx = rows.length;
 
-      rows.add(
-        InspectorTreeRow(
-          node: node,
-          index: currentIdx,
-          ticks: ticks,
-          depth: depth,
-          lineToParent: !node.isProperty &&
-              currentIdx != 0 &&
-              node.parent!.showLinesToChildren,
-          hasSingleChild: node.children.length == 1,
-        ),
-      );
+
+      if (!node.inHideableGroup || node.isHideableGroupLeader) {
+        rows.add(
+          InspectorTreeRow(
+            node: node,
+            index: currentIdx,
+            ticks: ticks,
+            depth: depth,
+            lineToParent: !node.isProperty &&
+                currentIdx != 0 &&
+                node.parent!.showLinesToChildren,
+            hasSingleChild: node.children.length == 1,
+          ),
+        );
+      }
 
       final style = node.diagnostic?.style;
       final indented = style != DiagnosticsTreeStyle.flat &&

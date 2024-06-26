@@ -213,7 +213,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// `parentConfiguration` specifies how the parent is rendered as text art.
   /// For example, if the parent does not line break between properties, the
   /// description of a property should also be a single line if possible.
-  String? get description => getStringMember('description');
+  String? get description {
+    if (hideableGroupSubordinates != null) {
+      return '<${hideableGroupSubordinates!.length + 1} more widgets>';
+    }
+    return getStringMember('description');
+  }
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
