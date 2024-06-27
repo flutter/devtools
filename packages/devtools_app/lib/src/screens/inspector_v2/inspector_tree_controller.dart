@@ -391,8 +391,9 @@ class InspectorTreeController extends DisposableController
   }
 
   void toggleHiddenGroup(InspectorTreeNode? node) {
-    if (node != null) {
-      node.toggleHiddenGroup();
+    final diagnostic = node?.diagnostic;
+    if (diagnostic != null) {
+      diagnostic.toggleHiddenGroup();
       _updateRows();
     }
   }
@@ -424,8 +425,8 @@ class InspectorTreeController extends DisposableController
       required List<int> ticks,
     }) {
       final currentIdx = rows.length;
-
-      if (!node.nodeIsHidden) {
+      final isHidden = node.diagnostic?.isHidden ?? false;
+      if (!isHidden) {
         rows.add(
           InspectorTreeRow(
             node: node,
@@ -1344,6 +1345,7 @@ class InspectorRowContent extends StatelessWidget {
     }
 
     final node = row.node;
+    final diagnostic = node.diagnostic;
 
     Widget rowWidget = Padding(
       padding: EdgeInsets.only(left: currentX),
@@ -1398,8 +1400,9 @@ class InspectorRowContent extends StatelessWidget {
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,
-                          actionLabel: node.isHideableGroupLeader
-                              ? node.groupIsHidden
+                          actionLabel: diagnostic != null &&
+                                  diagnostic.isHideableGroupLeader
+                              ? diagnostic.groupIsHidden
                                   ? '(expand)'
                                   : '(collapse)'
                               : null,

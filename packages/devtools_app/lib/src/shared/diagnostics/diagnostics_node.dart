@@ -581,7 +581,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     _groupIsHidden = newValue;
   }
 
-  bool get nodeIsHidden =>
+  bool get isHidden =>
       inHideableGroup && !isHideableGroupLeader && groupIsHidden;
 
   bool get inHideableGroup {
@@ -604,8 +604,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   void toggleHiddenGroup() {
-    // can only be called on the hideable group leader.
-    if (!isHideableGroupLeader) return;
+    // Only the hideable group leader can change the group's hidden state:
+    assert(isHideableGroupLeader);
+
     final newHiddenValue = !_groupIsHidden;
     _groupIsHidden = newHiddenValue;
     if (isHideableGroupLeader) {
