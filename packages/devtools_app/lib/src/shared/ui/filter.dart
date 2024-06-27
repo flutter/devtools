@@ -606,8 +606,6 @@ class _FilterOptionsDialogState<T> extends State<FilterOptionsDialog<T>>
   }
 
   void _resetFilters() {
-    // TODO: is this correct.
-    // queryTextFieldController.clear();
     widget.controller._resetToDefaultFilter();
   }
 

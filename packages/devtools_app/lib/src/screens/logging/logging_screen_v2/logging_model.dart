@@ -20,22 +20,23 @@ import 'logging_table_v2.dart';
 
 const _gcLogKind = 'gc';
 
-final _verboseFlutterFrameworkLogKinds = [
+final _verboseFlutterFrameworkLogKinds = <String>{
   FlutterEvent.firstFrame,
   FlutterEvent.frameworkInitialization,
   FlutterEvent.frame,
   FlutterEvent.imageSizesForFrame,
-];
-
-final _verboseFlutterServiceLogKinds = [
-  FlutterEvent.serviceExtensionStateChanged,
-];
-
-/// Log kinds to show without a summary in the table.
-final _hideSummaryLogKinds = <String>{
-  FlutterEvent.firstFrame,
-  FlutterEvent.frameworkInitialization,
 };
+
+final _verboseFlutterServiceLogKinds = <String>{
+  FlutterEvent.serviceExtensionStateChanged,
+};
+
+// TODO(danchevalier): Implement auxiliary log connections
+/// Log kinds to show without a summary in the table.
+// final _hideSummaryLogKinds = <String>{
+//   FlutterEvent.firstFrame,
+//   FlutterEvent.frameworkInitialization,
+// };
 
 /// A class for holding state and state changes relevant to [LoggingControllerV2]
 /// and [LoggingTableV2].
@@ -65,6 +66,14 @@ class LoggingTableModel extends DisposableController
   }
 
   final _logs = ListQueue<_LogEntry>();
+
+  /// [FilterControllerMixin] uses [ListValueNotifier] which isn't well optimized to the
+  /// retention limit behavior that [LoggingTableModel] uses. So we use
+  /// [ListQueue] here to facilitate those actions. Then instead of
+  /// using [FilterControllerMixin.filteredLogs] in [FilterControllerMixin.filterData],
+  /// we use [_filteredLogs]. After any changes are done to [_filteredLogs], [notifyListeners]
+  /// must be manually triggered, since the listener behaviour is accomplished by the
+  /// [LoggingTableModel] being a [ChangeNotifier].
   final _filteredLogs = ListQueue<_FilteredLogEntry>();
 
   final _selectedLogs = ListQueue<LogDataV2>();
@@ -161,11 +170,11 @@ class LoggingTableModel extends DisposableController
   set tableWidth(double width) {
     if (width != _tableWidth) {
       _tableWidth = width;
-      for (final e in _logs) {
-        e.height = null;
+      for (final log in _logs) {
+        log.height = null;
       }
-      for (final e in _filteredLogs) {
-        e.offset = null;
+      for (final log in _filteredLogs) {
+        log.offset = null;
       }
       unawaited(_preFetchRowHeights());
     }
@@ -190,9 +199,7 @@ class LoggingTableModel extends DisposableController
   void add(LogDataV2 log) {
     final newEntry = _LogEntry(log);
     _logs.add(newEntry);
-    getLogHeight(
-      _logs.length - 1,
-    );
+    getLogHeight(_logs.length - 1);
     _trimOneOutOfRetentionLog();
 
     if (!_filterCallback(newEntry)) {
@@ -231,12 +238,10 @@ class LoggingTableModel extends DisposableController
     final entry = _logs.elementAt(index);
     final cachedHeight = entry.height;
     if (cachedHeight != null) return cachedHeight;
-    final height = LoggingTableRow.calculateRowHeight(
+    return entry.height ??= LoggingTableRow.calculateRowHeight(
       entry.log,
       _tableWidth,
     );
-    entry.height = height;
-    return height;
   }
 
   /// Get the height of a filtered Log at [index].
@@ -245,12 +250,10 @@ class LoggingTableModel extends DisposableController
     final cachedHeight = filteredLog.logEntry.height;
     if (cachedHeight != null) return cachedHeight;
 
-    final height = LoggingTableRow.calculateRowHeight(
+    return filteredLog.logEntry.height ??= LoggingTableRow.calculateRowHeight(
       filteredLog.logEntry.log,
       _tableWidth,
     );
-    filteredLog.logEntry.height = height;
-    return height;
   }
 
   Future<bool> _preFetchRowHeights() async {
