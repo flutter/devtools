@@ -1369,8 +1369,7 @@ class InspectorRowContent extends StatelessWidget {
                         ),
                       )
                     : const SizedBox(
-                        width: defaultSpacing +
-                            2, // TODO: figure out a better way to pad this.
+                        width: extraSpacing,
                         height: defaultSpacing,
                       ),
                 Expanded(

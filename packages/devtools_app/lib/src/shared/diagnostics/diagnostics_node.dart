@@ -214,9 +214,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// For example, if the parent does not line break between properties, the
   /// description of a property should also be a single line if possible.
   String? get description {
-    if (groupIsHidden && hideableGroupSubordinates != null) {
-      return '${hideableGroupSubordinates!.length + 1} more widgets...';
+    if (customDescription != null) {
+      return customDescription;
     }
+
     return getStringMember('description');
   }
 
@@ -614,6 +615,15 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           ?.forEach((node) => node.groupIsHidden = newHiddenValue);
     }
   }
+
+  String? get customDescription {
+    if (groupIsHidden && hideableGroupSubordinates != null) {
+      return '${hideableGroupSubordinates!.length + 1} more widgets...';
+    }
+
+    return null;
+  }
+
 
   Future<void> _computeChildren() async {
     _maybePopulateChildren();

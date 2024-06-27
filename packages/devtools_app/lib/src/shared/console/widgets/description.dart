@@ -557,12 +557,17 @@ class DescriptionDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     if (multiline) {
+      // We don't currently support including an action button for multiline
+      // descriptions. We can update this if it's needed later.
+      assert(actionLabel != null && actionCallback != null);
       return SelectableText.rich(text);
     }
 
+    final theme = Theme.of(context);
+
     if (actionLabel != null) {
+      assert(actionCallback != null);
       return Row(
         children: [
           RichText(
