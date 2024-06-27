@@ -32,29 +32,38 @@ class OfflineMemoryData with Serializable {
   });
 
   factory OfflineMemoryData.fromJson(Map<String, dynamic> json) {
-    return OfflineMemoryData(
-      deserialize<DiffPaneController>(
-        json[Json.diffData.name],
-        DiffPaneController.fromJson,
-      ),
-      deserializeNullable<ProfilePaneController>(
-        json[Json.profileData.name],
-        ProfilePaneController.fromJson,
-      ),
-      deserializeNullable<ChartData>(
-        json[Json.chartData.name],
-        ChartData.fromJson,
-      ),
-      deserializeNullable<TracePaneController>(
-        json[Json.trace.name],
-        TracePaneController.fromJson,
-      ),
-      deserialize<ClassFilter>(
-        json[Json.classFilter.name],
-        ClassFilter.fromJson,
-      ),
-      selectedTab: json[Json.selectedTab.name] as int? ?? 0,
+    print('!!! OfflineMemoryData.fromJson');
+    final diffJson = json[Json.diffData.name];
+    final diff = deserialize<DiffPaneController>(
+      diffJson,
+      DiffPaneController.fromJson,
     );
+    final profile = deserializeNullable<ProfilePaneController>(
+      json[Json.profileData.name],
+      ProfilePaneController.fromJson,
+    );
+    final chart = deserializeNullable<ChartData>(
+      json[Json.chartData.name],
+      ChartData.fromJson,
+    );
+    final trace = deserializeNullable<TracePaneController>(
+      json[Json.trace.name],
+      TracePaneController.fromJson,
+    );
+    final filter = deserialize<ClassFilter>(
+      json[Json.classFilter.name],
+      ClassFilter.fromJson,
+    );
+    final tab = json[Json.selectedTab.name] as int? ?? 0;
+    final result = OfflineMemoryData(
+      diff,
+      profile,
+      chart,
+      trace,
+      filter,
+      selectedTab: tab,
+    );
+    return result;
   }
 
   @override
