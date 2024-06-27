@@ -482,15 +482,6 @@ class InspectorTreeController extends DisposableController
     return row < _rowsInTree.value.length ? rowAtIndex(row) : null;
   }
 
-  void onToggleHiddenGroup(InspectorTreeRow row) {
-    final onExpand = config.onExpand;
-    row.node.isExpanded = true;
-    if (onExpand != null) {
-      onExpand(row.node);
-    }
-    _updateRows();
-  }
-
   void onExpandRow(InspectorTreeRow row) {
     final onExpand = config.onExpand;
     row.node.isExpanded = true;
@@ -1266,10 +1257,12 @@ class _RowPainter extends CustomPainter {
 
     final expandedWithSingleChild = row.hasSingleChild && node.isExpanded;
     final subordinates = node.diagnostic?.hideableGroupSubordinates ?? [];
-    final lastSubordinateHasNoChildren =
-        subordinates.isNotEmpty && subordinates.last.childrenNow.isEmpty;
+    final groupIsHidden = node.diagnostic?.groupIsHidden ?? false;
+    final lastHiddenSubordinateHasNoChildren = groupIsHidden &&
+        subordinates.isNotEmpty &&
+        subordinates.last.childrenNow.isEmpty;
 
-    if (expandedWithSingleChild && !lastSubordinateHasNoChildren) {
+    if (expandedWithSingleChild && !lastHiddenSubordinateHasNoChildren) {
       final distanceFromIconCenterToRowStart =
           inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
       final iconCenterX = _controller.getDepthIndent(row.depth) -
