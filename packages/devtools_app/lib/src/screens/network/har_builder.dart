@@ -27,20 +27,6 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
     NetworkEventKeys.creatorVersion: NetworkEventDefaults.creatorVersion,
   };
 
-  // Build the pages
-  final pages = <Map<String, Object?>>[
-    {
-      NetworkEventKeys.startedDateTime:
-          httpRequests.first.startTimestamp.toUtc().toIso8601String(),
-      NetworkEventKeys.id: NetworkEventDefaults.id,
-      NetworkEventKeys.title: NetworkEventDefaults.title,
-      NetworkEventKeys.pageTimings: <String, Object?>{
-        NetworkEventKeys.onContentLoad: NetworkEventDefaults.onContentLoad,
-        NetworkEventKeys.onLoad: NetworkEventDefaults.onLoad,
-      },
-    },
-  ];
-
   // Build the entries
   final entries = httpRequests.map((e) {
     final requestCookies = e.requestCookies.map((cookie) {
@@ -97,7 +83,6 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
     }).toList();
 
     return <String, Object?>{
-      NetworkEventKeys.pageref: NetworkEventDefaults.id,
       NetworkEventKeys.startedDateTime:
           e.startTimestamp.toUtc().toIso8601String(),
       NetworkEventKeys.time: e.duration?.inMilliseconds,
@@ -140,7 +125,6 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
         NetworkEventKeys.receive: NetworkEventDefaults.receive,
         NetworkEventKeys.ssl: NetworkEventDefaults.ssl,
       },
-      NetworkEventKeys.serverIPAddress: NetworkEventDefaults.serverIPAddress,
       NetworkEventKeys.connection: e.hashCode.toString(),
       NetworkEventKeys.comment: '',
     };
@@ -151,7 +135,6 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
     NetworkEventKeys.log: <String, Object?>{
       NetworkEventKeys.version: NetworkEventDefaults.logVersion,
       NetworkEventKeys.creator: creator,
-      NetworkEventKeys.pages: pages,
       NetworkEventKeys.entries: entries,
     },
   };
