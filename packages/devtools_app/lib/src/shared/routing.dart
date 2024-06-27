@@ -244,7 +244,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ///
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
-  void updateArgsIfChanged(Map<String, String> argUpdates) {
+  void updateArgsIfChanged(Map<String, String?> argUpdates) {
     final argsChanged = _changesArgs(argUpdates);
     if (!argsChanged) {
       return;
@@ -261,6 +261,10 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       ),
     );
     notifyListeners();
+  }
+
+  void clearUriParameter() {
+    updateArgsIfChanged({'uri': null});
   }
 
   Future<void> replaceState(DevToolsNavigationState state) async {

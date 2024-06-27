@@ -12,6 +12,8 @@ To learn more about DevTools, check out the
 
 * Improve messaging when a screen is unavailable for the platform of the
 connected app. - [#7958](https://github.com/flutter/devtools/pull/7958)
+* Fix a bug where an infinite spinner was shown upon app
+disconnect. - [#7992](https://github.com/flutter/devtools/pull/7992)
 
 ## Inspector updates
 

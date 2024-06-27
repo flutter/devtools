@@ -129,7 +129,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       }
     });
     addAutoDisposeListener(preferences.inspector.pubRootDirectories, () {
-      if (serviceConnection.serviceManager.hasConnection &&
+      if (serviceConnection.serviceManager.connectedState.value.connected &&
           controller.firstInspectorTreeLoadCompleted) {
         _refreshInspector();
       }

@@ -2,6 +2,8 @@
 * Add `caseInsensitiveFuzzyMatch` extension method on `String`.
 * Add common widgets `DevToolsClearableTextField`, `InputDecorationSuffixButton`,
 and `RoundedDropDownButton`.
+* Deprecate `ServiceManager.hasConnection` in favor of
+`ServiceManager.connectedState.value.connected`.
 
 ## 0.2.1
 * Add `navigateToCode` utility method for jumping to code in IDEs.

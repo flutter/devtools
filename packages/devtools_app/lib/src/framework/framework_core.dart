@@ -88,15 +88,16 @@ abstract class FrameworkCore {
     setGlobal(DTDManager, DTDManager());
   }
 
-  static bool initializationInProgress = false;
+  static bool vmServiceInitializationInProgress = false;
 
-  /// Returns true if we're able to connect to a device and false otherwise.
+  /// Attempts to initialize a VM service connection and return whether the
+  /// connection attempt succeeded.
   static Future<bool> initVmService({
     required String serviceUriAsString,
     ErrorReporter? errorReporter = _defaultErrorReporter,
     bool logException = true,
   }) async {
-    if (serviceConnection.serviceManager.hasConnection) {
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
       // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
       // this multiple times?
       return true;
@@ -104,7 +105,7 @@ abstract class FrameworkCore {
 
     final uri = normalizeVmServiceUri(serviceUriAsString);
     if (uri != null) {
-      initializationInProgress = true;
+      vmServiceInitializationInProgress = true;
       final finishedCompleter = Completer<void>();
 
       try {
@@ -145,7 +146,7 @@ abstract class FrameworkCore {
         errorReporter!('Unable to connect to VM service at $uri: $e', e);
         return false;
       } finally {
-        initializationInProgress = false;
+        vmServiceInitializationInProgress = false;
       }
     } else {
       // Don't report an error here because we do not have a URI to connect to.

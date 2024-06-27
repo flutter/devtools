@@ -157,7 +157,7 @@ class ExtensionManager {
     // TODO(kenz): investigate. this is weird but `vmServiceUri` != null even
     // when the `toString()` representation is 'null'.
     if (vmServiceUri == null || vmServiceUri == 'null') {
-      if (serviceManager.hasConnection) {
+      if (serviceManager.connectedState.value.connected) {
         await serviceManager.manuallyDisconnect();
       }
       if (loadQueryParams().containsKey(_vmServiceQueryParameter)) {

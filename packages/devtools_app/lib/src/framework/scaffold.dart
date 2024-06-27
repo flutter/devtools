@@ -370,7 +370,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               bottomNavigationBar: StatusLine(
                 currentScreen: _currentScreen,
                 isEmbedded: widget.embedMode.embedded,
-                isConnected: serviceConnection.serviceManager.hasConnection &&
+                isConnected: serviceConnection
+                        .serviceManager.connectedState.value.connected &&
                     serviceConnection.serviceManager.connectedAppInitialized,
               ),
             ),

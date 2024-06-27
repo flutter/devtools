@@ -415,8 +415,9 @@ abstract class Screen {
   /// [Screen] subclass.
   Widget build(BuildContext context) {
     if (!requiresConnection) {
-      final connected = serviceConnection.serviceManager.hasConnection &&
-          serviceConnection.serviceManager.connectedAppInitialized;
+      final connected =
+          serviceConnection.serviceManager.connectedState.value.connected &&
+              serviceConnection.serviceManager.connectedAppInitialized;
       // Do not use the disconnected body in offline mode, because the default
       // [buildScreenBody] should be used for offline states.
       if (!connected && !offlineDataController.showingOfflineData.value) {
