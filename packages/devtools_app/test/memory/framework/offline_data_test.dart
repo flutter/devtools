@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
