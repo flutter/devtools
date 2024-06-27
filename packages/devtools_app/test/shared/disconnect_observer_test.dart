@@ -74,7 +74,7 @@ void main() {
     }
 
     testWidgets(
-      'initiailized in a disconnected state',
+      'initialized in a disconnected state',
       (WidgetTester tester) async {
         fakeServiceConnectionManager.serviceManager.setConnectedState(false);
         await pumpDisconnectObserver(tester);
@@ -83,7 +83,7 @@ void main() {
     );
 
     testWidgets(
-      'initiailized in a connected state',
+      'initialized in a connected state',
       (WidgetTester tester) async {
         await pumpDisconnectObserver(tester);
         verifyObserverState(tester, connected: true, showingOverlay: false);
