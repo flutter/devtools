@@ -60,20 +60,14 @@ class NetworkEventKeys {
 class NetworkEventDefaults {
   static const logVersion = '1.2';
   static const creatorName = 'devtools';
-  static const creatorVersion = '0.0.2';
-  static const id = 'page_0';
-  static const title = 'FlutterCapture';
   static const onContentLoad = -1;
   static const onLoad = -1;
   static const httpVersion = 'HTTP/1.1';
   static const responseHttpVersion = 'http/2.0';
-  static const headersSize = -1;
-  static const bodySize = -1;
   static const blocked = -1;
   static const dns = -1;
   static const connect = -1;
   static const send = 1;
   static const receive = 1;
   static const ssl = -1;
-  static const serverIPAddress = '10.0.0.1';
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import '../../shared/utils.dart';
 import '../../shared/analytics/constants.dart';
 
 import '../../shared/http/http_request_data.dart';
@@ -24,7 +26,7 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
   // Build the creator
   final creator = <String, Object?>{
     NetworkEventKeys.name: NetworkEventDefaults.creatorName,
-    NetworkEventKeys.creatorVersion: NetworkEventDefaults.creatorVersion,
+    NetworkEventKeys.creatorVersion: devToolsVersion,
   };
 
   // Build the entries
@@ -86,6 +88,7 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
       NetworkEventKeys.startedDateTime:
           e.startTimestamp.toUtc().toIso8601String(),
       NetworkEventKeys.time: e.duration?.inMilliseconds,
+      // Request
       NetworkEventKeys.request: <String, Object?>{
         NetworkEventKeys.method: e.method.toUpperCase(),
         NetworkEventKeys.url: e.uri.toString(),
@@ -97,9 +100,10 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
           NetworkEventKeys.mimeType: e.contentType,
           NetworkEventKeys.text: e.requestBody,
         },
-        NetworkEventKeys.headersSize: NetworkEventDefaults.headersSize,
-        NetworkEventKeys.bodySize: NetworkEventDefaults.bodySize,
+        NetworkEventKeys.headersSize: _calculateHeadersSize(e.requestHeaders),
+        NetworkEventKeys.bodySize: _calculateBodySize(e.requestBody),
       },
+      // Response
       NetworkEventKeys.response: <String, Object?>{
         NetworkEventKeys.status: e.status,
         NetworkEventKeys.statusText: '',
@@ -112,9 +116,10 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
           NetworkEventKeys.text: e.responseBody,
         },
         NetworkEventKeys.redirectURL: '',
-        NetworkEventKeys.headersSize: NetworkEventDefaults.headersSize,
-        NetworkEventKeys.bodySize: NetworkEventDefaults.bodySize,
+        NetworkEventKeys.headersSize: _calculateHeadersSize(e.responseHeaders),
+        NetworkEventKeys.bodySize: _calculateBodySize(e.responseBody),
       },
+      // Cache
       NetworkEventKeys.cache: <String, Object?>{},
       NetworkEventKeys.timings: <String, Object?>{
         NetworkEventKeys.blocked: NetworkEventDefaults.blocked,
@@ -138,4 +143,32 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
       NetworkEventKeys.entries: entries,
     },
   };
+}
+
+int _calculateHeadersSize(Map<String, dynamic>? headers) {
+  if (headers == null) return -1;
+
+  // Combine headers into a single string with CRLF endings
+  String headersString = headers.entries.map((entry) {
+    final key = entry.key;
+    var value = entry.value;
+    // If the value is a List, join it with a comma
+    if (value is List<String>) {
+      value = value.join(', ');
+    }
+    return '$key: $value\r\n';
+  }).join();
+
+  // Add final CRLF to indicate end of headers
+  headersString += '\r\n';
+
+  // Calculate the byte length of the headers string
+  return utf8.encode(headersString).length;
+}
+
+int _calculateBodySize(String? requestBody) {
+  if (requestBody == null || requestBody.isEmpty) {
+    return 0;
+  }
+  return utf8.encode(requestBody).length;
 }
