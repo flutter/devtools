@@ -163,8 +163,7 @@ class IosDomainError extends DomainError {
     'Ensure your domain is accessible without any redirects.',
   );
 
-  // TODO(hangyujin): There are sub checkes of this check, add them and add links when finalized.
-
+  /// TODO(hangyujin): There are sub checkes of this check, add them and add links when finalized.
   /// AASA file format follows guidelines.
   static const fileFormat = IosDomainError(
     'Apple-App-Site-Association file format is incorrect',
