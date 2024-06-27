@@ -193,6 +193,7 @@ class WidgetTheme {
     'PageView': WidgetTheme(iconAsset: WidgetIcons.pageView),
     'Material': WidgetTheme(iconAsset: WidgetIcons.material),
     'AppBar': WidgetTheme(iconAsset: WidgetIcons.appBar),
+    'HiddenGroup': WidgetTheme(iconAsset: WidgetIcons.hidden),
   };
 }
 

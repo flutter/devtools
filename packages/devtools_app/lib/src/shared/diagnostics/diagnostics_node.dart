@@ -688,8 +688,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (isProperty) return null;
 
     return iconMaker.fromWidgetName(
-      widgetRuntimeType,
-      isHidden: isHideableGroupLeader && groupIsHidden,
+      isHideableGroupLeader && groupIsHidden
+          ? 'HiddenGroup'
+          : widgetRuntimeType,
     );
   }
 

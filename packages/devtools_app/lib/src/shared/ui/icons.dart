@@ -114,10 +114,7 @@ class CustomIconMaker {
     });
   }
 
-  Widget? fromWidgetName(
-    String? name, {
-    isHidden = false,
-  }) {
+  Widget? fromWidgetName(String? name) {
     if (name == null) {
       return null;
     }
@@ -131,13 +128,10 @@ class CustomIconMaker {
     }
 
     final widgetTheme = WidgetTheme.fromName(name);
-    var icon = widgetTheme.iconAsset;
-    if (isHidden) {
-      icon = WidgetIcons.hidden;
-    }
+    final icon = widgetTheme.iconAsset;
     if (icon != null) {
       return iconCache.putIfAbsent(name, () {
-        return AssetImageIcon(asset: icon!);
+        return AssetImageIcon(asset: icon);
       });
     }
 
