@@ -28,10 +28,10 @@ class DisconnectObserver extends StatefulWidget {
   final DevToolsRouterDelegate routerDelegate;
 
   @override
-  State<DisconnectObserver> createState() => _DisconnectObserverState();
+  State<DisconnectObserver> createState() => DisconnectObserverState();
 }
 
-class _DisconnectObserverState extends State<DisconnectObserver>
+class DisconnectObserverState extends State<DisconnectObserver>
     with AutoDisposeMixin {
   OverlayEntry? currentDisconnectedOverlay;
 

@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('vm')
-library;
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/initializer.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
@@ -26,9 +23,9 @@ void main() {
 
     setUp(() {
       fakeServiceConnectionManager = FakeServiceConnectionManager();
-      when(fakeServiceConnectionManager
-              .serviceManager.connectedApp!.isDartWebApp)
-          .thenAnswer((_) => Future.value(false));
+      when(
+        fakeServiceConnectionManager.serviceManager.connectedApp!.isDartWebApp,
+      ).thenAnswer((_) => Future.value(false));
       setGlobal(ServiceConnectionManager, fakeServiceConnectionManager);
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(OfflineDataController, OfflineDataController());
