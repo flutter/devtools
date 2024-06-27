@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:math';
 import 'dart:ui';
 
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_data.dart';
 import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_data.dart'
     as offline_data show Json;
@@ -42,6 +44,28 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await scene.pump(tester);
+
+        await scene.tapAndSettle(tester, find.text('Memory chart'));
+        expect(find.text('Legend'), findsOneWidget);
+
+        await scene.tapAndSettle(
+          tester,
+          find.byKey(MemoryScreenKeys.profileTab),
+        );
+        expect(find.text('_MyHomePageState'), findsOneWidget);
+
+        await scene.tapAndSettle(
+          tester,
+          find.byKey(MemoryScreenKeys.diffTab),
+          pause: const Duration(seconds: 2),
+        );
+        expect(find.text('Class type legend:'), findsOneWidget);
+
+        await scene.tapAndSettle(
+          tester,
+          find.byKey(MemoryScreenKeys.traceTab),
+        );
+        expect(find.text('_MyClass'), findsOneWidget);
       },
     );
   });

@@ -84,13 +84,15 @@ class MemoryOfflineScene extends Scene {
   @override
   String get title => '$MemoryOfflineScene';
 
-  Future<void> goToDiffTab(WidgetTester tester) async {
-    await tester.tap(find.byKey(MemoryScreenKeys.diffTab));
-    await tester.pumpAndSettle();
-  }
-
-  Future<void> goToTraceTab(WidgetTester tester) async {
-    await tester.tap(find.byKey(MemoryScreenKeys.traceTab));
+  Future<void> tapAndSettle(
+    WidgetTester tester,
+    Finder finder, {
+    Duration? pause,
+  }) async {
+    await tester.tap(finder);
+    if (pause != null) {
+      await tester.runAsync(() => Future.delayed(pause));
+    }
     await tester.pumpAndSettle();
   }
 

@@ -37,7 +37,6 @@ class MemoryController extends DisposableController
     @visibleForTesting ProfilePaneController? connectedProfile,
     @visibleForTesting OfflineMemoryData? data,
   }) {
-    print('!!! MemoryController');
     if (data != null) {
       mode = ControllerCreationMode.offlineData;
     } else if (connectedDiff != null || connectedProfile != null) {
@@ -98,7 +97,6 @@ class MemoryController extends DisposableController
     @visibleForTesting OfflineMemoryData? data,
   }) async {
     assert(!_dataInitialized.isCompleted);
-    print('!!! MemoryController _init $mode');
     switch (mode) {
       case ControllerCreationMode.disconnected:
         // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972

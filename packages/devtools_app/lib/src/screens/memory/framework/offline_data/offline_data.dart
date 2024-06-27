@@ -32,10 +32,8 @@ class OfflineMemoryData with Serializable {
   });
 
   factory OfflineMemoryData.fromJson(Map<String, dynamic> json) {
-    print('!!! OfflineMemoryData.fromJson');
-    final diffJson = json[Json.diffData.name];
     final diff = deserialize<DiffPaneController>(
-      diffJson,
+      json[Json.diffData.name],
       DiffPaneController.fromJson,
     );
     final profile = deserializeNullable<ProfilePaneController>(
