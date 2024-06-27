@@ -48,12 +48,13 @@ class SecondaryControls extends StatelessWidget {
           ),
           const SizedBox(width: denseSpacing),
         ],
-        SettingsOutlinedButton(
-          gaScreen: gac.memory,
-          gaSelection: gac.MemoryEvent.settings,
-          onPressed: () => _openSettingsDialog(context),
-          tooltip: 'Open memory settings',
-        ),
+        if (controller.mode != ControllerCreationMode.disconnected)
+          SettingsOutlinedButton(
+            gaScreen: gac.memory,
+            gaSelection: gac.MemoryEvent.settings,
+            onPressed: () => _openSettingsDialog(context),
+            tooltip: 'Open memory settings',
+          ),
       ],
     );
   }
