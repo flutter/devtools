@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
 import 'extensions/extension_screen.dart';
+import 'framework/disconnect_observer.dart';
 import 'framework/framework_core.dart';
 import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
@@ -198,7 +199,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   ) {
     // `page` will initially be null while the router is set up, then we will
     // be called again with an empty string for the root.
-    if (FrameworkCore.initializationInProgress || page == null) {
+    if (FrameworkCore.vmServiceInitializationInProgress || page == null) {
       return const MaterialPage(child: CenteredCircularProgressIndicator());
     }
 
@@ -256,7 +257,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       page = queryParams.legacyPage;
     }
 
-    final connectedToVmService =
+    final paramsContainVmServiceUri =
         vmServiceUri != null && vmServiceUri.isNotEmpty;
 
     Widget scaffoldBuilder() {
@@ -328,7 +329,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               actions: isEmbedded()
                   ? []
                   : [
-                      if (connectedToVmService) ...[
+                      if (paramsContainVmServiceUri) ...[
                         // Hide the hot reload button for Dart web apps, where the
                         // hot reload service extension is not avilable and where the
                         // [service.reloadServices] RPC is not implemented.
@@ -354,12 +355,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       );
     }
 
-    return connectedToVmService
-        ? Initializer(
-            url: vmServiceUri,
-            allowConnectionScreenOnDisconnect: !embedMode.embedded,
-            builder: (_) => scaffoldBuilder(),
-          )
+    return paramsContainVmServiceUri
+        ? Initializer(builder: (_) => scaffoldBuilder())
         : scaffoldBuilder();
   }
 
@@ -433,6 +430,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       builder: (context, child) {
+        if (child == null) {
+          return const CenteredMessage(
+            'Uh-oh, something went wrong. Please refresh the page.',
+          );
+        }
         return MultiProvider(
           providers: [
             Provider<AnalyticsController>.value(
@@ -448,7 +450,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           child: NotificationsView(
             child: ReleaseNotesViewer(
               controller: releaseNotesController,
-              child: child,
+              child: DisconnectObserver(
+                routerDelegate: routerDelegate,
+                child: child,
+              ),
             ),
           ),
         );

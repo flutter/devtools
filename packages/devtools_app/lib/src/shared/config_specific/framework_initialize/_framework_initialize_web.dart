@@ -66,7 +66,7 @@ void _sendKeyPressToParent(KeyboardEvent event) {
   // because we can't use targetOrigin in postMessage as only the scheme is fixed
   // for VS Code (vscode-webview://[some guid]).
   if (globals.containsKey(ServiceConnectionManager) &&
-      !serviceConnection.serviceManager.hasConnection) {
+      !serviceConnection.serviceManager.connectedState.value.connected) {
     return;
   }
   if (!window.navigator.userAgent.contains('Electron')) return;

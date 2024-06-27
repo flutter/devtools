@@ -22,7 +22,7 @@ void main() {
         fakeServiceConnection = FakeServiceConnectionManager(),
       );
       setGlobal(IdeTheme, IdeTheme());
-      fakeServiceConnection.serviceManager.hasConnection = false;
+      fakeServiceConnection.serviceManager.setConnectedState(false);
     });
 
     testWidgetsWithWindowSize(

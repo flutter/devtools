@@ -118,6 +118,17 @@ class DeepLinksServices {
     );
   }
 
+  Future<Map<String, List<DomainError>>> validateIosDomain({
+    required List<String> domains,
+  }) async {
+    //TODO(hangyujin): This is just a fake response, implement the iOS domain validation when the API is available.
+    final domainErrors = <String, List<DomainError>>{
+      for (final domain in domains)
+        domain: <DomainError>[IosDomainError.existence],
+    };
+    return domainErrors;
+  }
+
   Future<GenerateAssetLinksResult> generateAssetLinks({
     required String applicationId,
     required String domain,
