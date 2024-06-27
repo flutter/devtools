@@ -33,6 +33,8 @@ const _enablePostMessageVerboseLogging = false;
 
 final _log = Logger('tooling_api');
 
+/// *** LEGACY API for postMessage, replaced by DTD version (`EditorClient`) ***
+///
 /// An API used by Dart tooling surfaces to interact with Dart tools that expose
 /// APIs such as Dart-Code and the LSP server.
 class PostMessageToolApiImpl implements PostMessageToolApi {

@@ -9,6 +9,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import 'editor_service/fake_editor.dart';
+import 'editor_service/post_message_fake_editor.dart';
 
 /// A simple UI that acts as a stand-in host editor to simplify the development
 /// workflow when working on embedded tooling.
@@ -54,12 +55,17 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
   void initState() {
     super.initState();
 
-    logUpdated = editor.log.map((log) {
-      logRing.add(log);
-      while (logRing.length > maxLogEvents) {
-        logRing.removeFirst();
-      }
-    });
+    // Listen to the log stream to maintain our buffer and trigger rebuilds.
+    // TODO(dantup): Support this for DTD.
+    final editor = this.editor;
+    if (editor is PostMessageFakeEditor) {
+      logUpdated = editor.log.map((log) {
+        logRing.add(log);
+        while (logRing.length > maxLogEvents) {
+          logRing.removeFirst();
+        }
+      });
+    }
   }
 
   @override

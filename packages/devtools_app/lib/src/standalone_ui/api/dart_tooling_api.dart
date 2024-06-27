@@ -4,6 +4,8 @@
 
 import 'vs_code_api.dart';
 
+/// *** LEGACY API for postMessage, replaced by DTD version (`EditorClient`) ***
+///
 /// An API exposed to Dart tooling surfaces.
 ///
 /// APIs are grouped into child APIs that are exposed as fields. Each field is a
