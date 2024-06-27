@@ -8,6 +8,7 @@ import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_d
 import 'package:devtools_app/src/shared/file_import.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -69,6 +70,7 @@ class MemoryOfflineScene extends Scene {
       PreferencesController,
       PreferencesController()..memory.showChart.value = false,
     );
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     print('!!! MemoryOfflineScene setUp2');
 
     final file = XFile(
