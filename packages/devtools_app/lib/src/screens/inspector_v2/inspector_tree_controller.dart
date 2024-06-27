@@ -1390,6 +1390,12 @@ class InspectorRowContent extends StatelessWidget {
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,
+                          actionLabel:
+                              node.diagnostic?.isHideableGroupLeader ?? false
+                                  ? node.diagnostic?.groupIsHidden ?? true
+                                      ? '(expand)'
+                                      : '(collapse)'
+                                  : null,
                         ),
                       ),
                     ),

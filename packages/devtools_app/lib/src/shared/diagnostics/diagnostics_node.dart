@@ -215,7 +215,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// description of a property should also be a single line if possible.
   String? get description {
     if (hideableGroupSubordinates != null) {
-      return '<${hideableGroupSubordinates!.length + 1} more widgets>';
+      return '${hideableGroupSubordinates!.length + 1} more widgets...';
     }
     return getStringMember('description');
   }
@@ -573,6 +573,11 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _children ?? [];
   }
 
+  bool groupIsHidden = true;
+
+  bool get isHidden =>
+      inHideableGroup && !isHideableGroupLeader && groupIsHidden;
+
   bool get inHideableGroup {
     final hasAtMostOneChild = childrenNow.length <= 1;
     final isOnlyChild = (parent?.childrenNow ?? []).length == 1;
@@ -581,6 +586,15 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   bool get isHideableGroupLeader {
     return inHideableGroup && _hideableGroupSubordinates != null;
+  }
+
+  void toggleHiddenGroup() {
+    if (!inHideableGroup) return;
+    final newHiddenValue = !groupIsHidden;
+    groupIsHidden = newHiddenValue;
+    if (isHideableGroupLeader) {
+      _hideableGroupSubordinates?.forEach((node) => node.toggleHiddenGroup());
+    }
   }
 
   List<RemoteDiagnosticsNode>? get hideableGroupSubordinates =>
