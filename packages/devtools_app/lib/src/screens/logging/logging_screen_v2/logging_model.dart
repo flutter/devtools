@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
@@ -16,6 +17,25 @@ import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';
 import 'logging_table_row.dart';
 import 'logging_table_v2.dart';
+
+const _gcLogKind = 'gc';
+
+final _verboseFlutterFrameworkLogKinds = [
+  FlutterEvent.firstFrame,
+  FlutterEvent.frameworkInitialization,
+  FlutterEvent.frame,
+  FlutterEvent.imageSizesForFrame,
+];
+
+final _verboseFlutterServiceLogKinds = [
+  FlutterEvent.serviceExtensionStateChanged,
+];
+
+/// Log kinds to show without a summary in the table.
+final _hideSummaryLogKinds = <String>{
+  FlutterEvent.firstFrame,
+  FlutterEvent.frameworkInitialization,
+};
 
 /// A class for holding state and state changes relevant to [LoggingControllerV2]
 /// and [LoggingTableV2].
@@ -241,6 +261,33 @@ class LoggingTableModel extends DisposableController
     _recalculateOffsets();
     return didComplete;
   }
+
+  /// The toggle filters available for the Logging screen.
+  @override
+  List<ToggleFilter<LogDataV2>> createToggleFilters() => [
+        if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+            true) ...[
+          ToggleFilter<LogDataV2>(
+            name: 'Hide verbose Flutter framework logs (initialization, frame '
+                'times, image sizes)',
+            includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
+                .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+            enabledByDefault: true,
+          ),
+          ToggleFilter<LogDataV2>(
+            name: 'Hide verbose Flutter service logs (service extension state '
+                'changes)',
+            includeCallback: (log) => !_verboseFlutterServiceLogKinds
+                .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+            enabledByDefault: true,
+          ),
+        ],
+        ToggleFilter<LogDataV2>(
+          name: 'Hide garbage collection logs',
+          includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
+          enabledByDefault: true,
+        ),
+      ];
 }
 
 class _LogEntry {

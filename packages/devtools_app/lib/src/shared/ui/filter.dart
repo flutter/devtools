@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:codicon/codicon.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -500,31 +502,52 @@ class _FilterFieldState<T> extends State<FilterField<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsClearableTextField(
-      autofocus: true,
-      labelText: 'Filter Query',
-      controller: queryTextFieldController,
-      additionalSuffixActions: [
-        DevToolsToggleButton(
-          icon: Codicons.regex,
-          message: 'Use regular expressions',
-          outlined: false,
-          isSelected: useRegExp,
-          onPressed: () => setState(() {
-            widget.controller.useRegExp.value = !useRegExp;
-            widget.controller.setActiveFilter(
-              query: queryTextFieldController.value.text,
-              toggleFilters: widget.controller._toggleFilters,
+    return Row(
+      children: [
+        Expanded(
+          child: DevToolsClearableTextField(
+            autofocus: true,
+            labelText: 'Filter',
+            controller: queryTextFieldController,
+            additionalSuffixActions: [
+              DevToolsToggleButton(
+                icon: Codicons.regex,
+                message: 'Use regular expressions',
+                outlined: false,
+                isSelected: useRegExp,
+                onPressed: () => setState(() {
+                  widget.controller.useRegExp.value = !useRegExp;
+                  widget.controller.setActiveFilter(
+                    query: queryTextFieldController.value.text,
+                    toggleFilters: widget.controller._toggleFilters,
+                  );
+                }),
+              ),
+            ],
+            onChanged: (_) {
+              widget.controller.setActiveFilter(
+                query: queryTextFieldController.value.text,
+                toggleFilters: widget.controller._toggleFilters,
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: defaultSpacing),
+        DevToolsFilterButton(
+          message: 'Filter Settings',
+          onPressed: () {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => FilterOptionsDialog(
+                  controller: widget.controller,
+                ),
+              ),
             );
-          }),
+          },
+          isFilterActive: false,
         ),
       ],
-      onChanged: (_) {
-        widget.controller.setActiveFilter(
-          query: queryTextFieldController.value.text,
-          toggleFilters: widget.controller._toggleFilters,
-        );
-      },
     );
   }
 }
@@ -558,7 +581,7 @@ class _FilterOptionsDialogState<T> extends State<FilterOptionsDialog<T>>
   @override
   Widget build(BuildContext context) {
     return StateUpdateDialog(
-      title: 'Filters',
+      title: 'Filter Settings',
       onApply: _applyFilterChanges,
       onCancel: _restoreOldValues,
       onResetDefaults: _resetFilters,
@@ -566,13 +589,6 @@ class _FilterOptionsDialogState<T> extends State<FilterOptionsDialog<T>>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...[
-            const SizedBox(height: defaultSpacing),
-            if (widget.queryInstructions != null) ...[
-              DialogHelpText(helpText: widget.queryInstructions!),
-              const SizedBox(height: defaultSpacing),
-            ],
-          ],
           for (final toggleFilter in widget.controller._toggleFilters) ...[
             ToggleFilterElement(filter: toggleFilter),
           ],

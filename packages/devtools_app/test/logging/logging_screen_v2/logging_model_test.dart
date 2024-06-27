@@ -248,5 +248,59 @@ void main() {
       expect(loggingTableModel.selectedLogCount, 0);
       expect(loggingTableModel.filteredLogAt(0), equals(log3));
     });
+
+    testWidgets('works with regexp', (WidgetTester tester) async {
+      final log1 = LogDataV2(
+        'test1',
+        '456',
+        464564,
+        summary: 'Summary 7',
+      );
+      final log2 = LogDataV2(
+        'test2',
+        '789',
+        464564,
+        summary: 'Summary 8',
+      );
+      final log3 = LogDataV2(
+        'test3',
+        '476',
+        464564,
+        summary: 'Summary 9',
+      );
+
+      // A barebones widget is pumped to ensure that a style is available
+      // for the LogTableModel to approximate widget sizes with
+      await tester.pumpWidget(wrap(const Placeholder()));
+      preferences.logging.retentionLimit.value = 20;
+
+      loggingTableModel
+        ..add(log1)
+        ..add(log2)
+        ..add(log3);
+
+      expect(loggingTableModel.logCount, 3);
+      expect(loggingTableModel.filteredLogCount, 3);
+      expect(loggingTableModel.selectedLogCount, 0);
+
+      loggingTableModel.setActiveFilter(
+        query: '4.6',
+      );
+
+      expect(loggingTableModel.logCount, 3);
+      expect(loggingTableModel.filteredLogCount, 0);
+      expect(loggingTableModel.selectedLogCount, 0);
+
+      loggingTableModel.useRegExp.value = true;
+      loggingTableModel.setActiveFilter(
+        query: '4.6',
+      );
+
+      expect(loggingTableModel.logCount, 3);
+      expect(loggingTableModel.filteredLogCount, 2);
+      expect(loggingTableModel.selectedLogCount, 0);
+      expect(loggingTableModel.filteredLogAt(0), equals(log1));
+      expect(loggingTableModel.filteredLogAt(1), equals(log3));
+    });
   });
 }
