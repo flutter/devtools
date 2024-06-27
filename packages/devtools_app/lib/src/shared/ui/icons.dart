@@ -116,7 +116,7 @@ class CustomIconMaker {
 
   Widget? fromWidgetName(
     String? name, {
-    isHideableGroupLeader = false,
+    isHidden = false,
   }) {
     if (name == null) {
       return null;
@@ -132,7 +132,7 @@ class CustomIconMaker {
 
     final widgetTheme = WidgetTheme.fromName(name);
     var icon = widgetTheme.iconAsset;
-    if (isHideableGroupLeader) {
+    if (isHidden) {
       icon = WidgetIcons.hidden;
     }
     if (icon != null) {

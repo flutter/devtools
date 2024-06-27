@@ -393,6 +393,7 @@ class InspectorTreeController extends DisposableController
   void toggleHiddenGroup(InspectorTreeNode? node) {
     if (node != null) {
       node.toggleHiddenGroup();
+      _updateRows();
     }
   }
 
@@ -424,8 +425,7 @@ class InspectorTreeController extends DisposableController
     }) {
       final currentIdx = rows.length;
 
-
-      if (!node.inHideableGroup || node.isHideableGroupLeader) {
+      if (!node.nodeIsHidden) {
         rows.add(
           InspectorTreeRow(
             node: node,
@@ -1405,12 +1405,13 @@ class InspectorRowContent extends StatelessWidget {
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,
-                          actionLabel:
-                              node.diagnostic?.isHideableGroupLeader ?? false
-                                  ? node.diagnostic?.groupIsHidden ?? true
-                                      ? '(expand)'
-                                      : '(collapse)'
-                                  : null,
+                          actionLabel: node.isHideableGroupLeader
+                              ? node.groupIsHidden
+                                  ? '(expand)'
+                                  : '(collapse)'
+                              : null,
+                          actionCallback: () =>
+                              controller.toggleHiddenGroup(node),
                         ),
                       ),
                     ),

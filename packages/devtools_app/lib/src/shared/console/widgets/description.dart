@@ -61,7 +61,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? actionCallback;
 
-
   static Widget _paddedIcon(Widget icon) {
     return Padding(
       padding: const EdgeInsets.only(right: iconPadding),
@@ -542,7 +541,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   }
 }
 
-
 class DescriptionDisplay extends StatelessWidget {
   const DescriptionDisplay({
     super.key,
@@ -575,10 +573,7 @@ class DescriptionDisplay extends StatelessWidget {
             style: TextButton.styleFrom(
               textStyle: theme.regularTextStyle,
             ),
-            onPressed: actionCallback ??
-                () {
-                  print('clicked!');
-                },
+            onPressed: actionCallback,
             child: Text(
               actionLabel!,
             ),

@@ -214,7 +214,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// For example, if the parent does not line break between properties, the
   /// description of a property should also be a single line if possible.
   String? get description {
-    if (hideableGroupSubordinates != null) {
+    if (groupIsHidden && hideableGroupSubordinates != null) {
       return '${hideableGroupSubordinates!.length + 1} more widgets...';
     }
     return getStringMember('description');
@@ -689,7 +689,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
     return iconMaker.fromWidgetName(
       widgetRuntimeType,
-      isHideableGroupLeader: isHideableGroupLeader,
+      isHidden: isHideableGroupLeader && groupIsHidden,
     );
   }
 
