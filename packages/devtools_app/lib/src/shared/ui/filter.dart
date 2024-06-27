@@ -130,12 +130,12 @@ mixin FilterControllerMixin<T> on DisposableController
   }
 }
 
-/// Dialog to manage filter settings.
+/// Dialog to manage toggleable filter settings.
 ///
 /// This dialog interacts with a [FilterControllerMixin] to manage and preserve
-/// the filter state managed by the dialog.
-class FilterDialog<T> extends StatefulWidget {
-  FilterDialog({
+/// the toggleable filter state managed by the dialog.
+class ToggleFilterDialog<T> extends StatefulWidget {
+  ToggleFilterDialog({
     super.key,
     required this.controller,
     this.includeQueryFilter = true,
@@ -160,10 +160,10 @@ class FilterDialog<T> extends StatefulWidget {
   final List<bool> toggleFilterValuesAtOpen;
 
   @override
-  State<FilterDialog<T>> createState() => _FilterDialogState<T>();
+  State<ToggleFilterDialog<T>> createState() => _ToggleFilterDialogState<T>();
 }
 
-class _FilterDialogState<T> extends State<FilterDialog<T>>
+class _ToggleFilterDialogState<T> extends State<ToggleFilterDialog<T>>
     with AutoDisposeMixin {
   late final TextEditingController queryTextFieldController;
   late bool useRegExp;
@@ -466,8 +466,8 @@ extension PatternListExtension on List<Pattern> {
   }
 }
 
-class FilterField<T> extends StatefulWidget {
-  const FilterField({
+class StandaloneFilterField<T> extends StatefulWidget {
+  const StandaloneFilterField({
     super.key,
     required this.controller,
   });
@@ -475,10 +475,12 @@ class FilterField<T> extends StatefulWidget {
   final FilterControllerMixin<T> controller;
 
   @override
-  State<FilterField<T>> createState() => _FilterFieldState<T>();
+  State<StandaloneFilterField<T>> createState() =>
+      _StandaloneFilterFieldState<T>();
 }
 
-class _FilterFieldState<T> extends State<FilterField<T>> with AutoDisposeMixin {
+class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
+    with AutoDisposeMixin {
   late final TextEditingController queryTextFieldController;
   late bool useRegExp;
 
@@ -490,7 +492,9 @@ class _FilterFieldState<T> extends State<FilterField<T>> with AutoDisposeMixin {
     );
     useRegExp = widget.controller.useRegExp.value;
     addAutoDisposeListener(widget.controller.useRegExp, () {
-      useRegExp = widget.controller.useRegExp.value;
+      setState(() {
+        useRegExp = widget.controller.useRegExp.value;
+      });
     });
   }
 

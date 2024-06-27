@@ -58,12 +58,12 @@ class _LoggingTableV2State extends State<LoggingTableV2>
           children: [
             Expanded(
               child: DevToolsClearableTextField(
-                labelText: 'Search',
+                labelText: 'Search', // TODO(danchevalier): use SearchField
               ),
             ),
             const SizedBox(width: defaultSpacing),
             Expanded(
-              child: FilterField<LogDataV2>(
+              child: StandaloneFilterField<LogDataV2>(
                 controller: widget.model,
               ),
             ), // TODO for some reason the controller isn't hooking up correctly to the one over in the model. It is not getting notified of the changes?

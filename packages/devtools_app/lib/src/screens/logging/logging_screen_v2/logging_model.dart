@@ -121,6 +121,7 @@ class LoggingTableModel extends DisposableController
       ..addAll(
         _logs.where(_filterCallback).map((e) => _FilteredLogEntry(e)).toList(),
       );
+    _recalculateOffsets();
     notifyListeners();
   }
 
@@ -207,6 +208,9 @@ class LoggingTableModel extends DisposableController
       return;
     }
     _filteredLogs.add(_FilteredLogEntry(newEntry));
+
+    // TODO(danchevalier): Calculate the new offset here
+
     notifyListeners();
   }
 
