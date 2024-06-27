@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import '../../shared/utils.dart';
-import '../../shared/analytics/constants.dart';
 
+import '../../shared/analytics/constants.dart';
 import '../../shared/http/http_request_data.dart';
+import '../../shared/utils.dart';
 
 /// Builds a HAR (HTTP Archive) object from a list of HTTP requests.
 ///
