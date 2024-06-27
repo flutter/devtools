@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
-import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_data.dart';
 import 'package:devtools_app/src/shared/file_import.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -57,7 +56,6 @@ class MemoryOfflineScene extends Scene {
     ClassList? classList,
     List<HeapProvider>? heapProviders,
   }) async {
-    print('!!! MemoryOfflineScene setUp1');
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
@@ -71,22 +69,15 @@ class MemoryOfflineScene extends Scene {
       PreferencesController()..memory.showChart.value = false,
     );
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
-    print('!!! MemoryOfflineScene setUp2');
 
     final file = XFile(
       'test/test_infra/test_data/memory/offline/memory_offline_data.json',
     );
     final importedFile = await toDevToolsFile(file);
 
-    // // Provider.of<ImportController>(context, listen: false)
-    // //     .importData(importedFile, expectedScreenId: screenId);
-
-    print('!!! MemoryOfflineScene setUp3');
     final json = importedFile.data as Map<String, dynamic>;
     final data = MemoryController.createData(json[ScreenMetaData.memory.id]);
-    print('!!! MemoryOfflineScene setUp4');
     controller.value = MemoryController(data: data);
-    print('!!! MemoryOfflineScene setUp, controller');
     await controller.value!.initialized;
   }
 
