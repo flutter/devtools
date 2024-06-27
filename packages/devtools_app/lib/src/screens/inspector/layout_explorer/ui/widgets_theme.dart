@@ -247,6 +247,5 @@ class WidgetIcons {
   static const materialApp = 'icons/inspector/widget_icons/materialapp.png';
   static const bottomNavigationBar =
       'icons/inspector/widget_icons/bottomnavigationbar.png';
-  static const hidden =
-      'icons/inspector/widget_icons/onedot.png';
+  static const hidden = 'icons/inspector/widget_icons/onedot.png';
 }

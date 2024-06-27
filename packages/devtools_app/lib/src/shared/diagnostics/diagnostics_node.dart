@@ -624,7 +624,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return null;
   }
 
-
   Future<void> _computeChildren() async {
     _maybePopulateChildren();
     if (!hasChildren || _children != null) {
