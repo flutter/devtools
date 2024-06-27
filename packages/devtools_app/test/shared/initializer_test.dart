@@ -19,11 +19,17 @@ import 'package:mockito/mockito.dart';
 void main() {
   group('Initializer', () {
     const initializedKey = Key('initialized');
+    const waitingText = 'Waiting for VM service connection...';
+    const cannotConnectText = 'Cannot connect to VM service.';
+
+    late FakeServiceConnectionManager fakeServiceConnectionManager;
+
     setUp(() {
-      final serviceManager = FakeServiceConnectionManager();
-      when(serviceManager.serviceManager.connectedApp!.isDartWebApp)
+      fakeServiceConnectionManager = FakeServiceConnectionManager();
+      when(fakeServiceConnectionManager
+              .serviceManager.connectedApp!.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
-      setGlobal(ServiceConnectionManager, serviceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnectionManager);
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(IdeTheme, IdeTheme());
@@ -40,64 +46,73 @@ void main() {
       await tester.pump();
     }
 
+    Future<void> advanceTimer(WidgetTester tester) async {
+      // Wait a short delay to let the initializer timer advance.
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+    }
+
     testWidgets(
-      'shows disconnected overlay if not connected',
+      'immediately calls builder when connection exists',
       (WidgetTester tester) async {
-        setGlobal(
-          ServiceConnectionManager,
-          FakeServiceConnectionManager(
-            hasConnection: false,
-          ),
-        );
         await pumpInitializer(tester);
-        expect(find.text('Disconnected'), findsOneWidget);
+        expect(find.text(waitingText), findsNothing);
+        expect(find.text(cannotConnectText), findsNothing);
+        expect(find.byType(ConnectToNewAppButton), findsNothing);
+        expect(find.byKey(initializedKey), findsOneWidget);
+
+        // Verify expectations are still true after the timer advances.
+        await advanceTimer(tester);
+        expect(find.text(waitingText), findsNothing);
+        expect(find.text(cannotConnectText), findsNothing);
+        expect(find.byType(ConnectToNewAppButton), findsNothing);
+        expect(find.byKey(initializedKey), findsOneWidget);
       },
     );
 
     testWidgets(
-      'shows disconnected overlay upon disconnect',
+      'calls builder late if connection is established late',
       (WidgetTester tester) async {
-        final serviceConnection = FakeServiceConnectionManager();
-        setGlobal(ServiceConnectionManager, serviceConnection);
+        fakeServiceConnectionManager.serviceManager.setConnectedState(false);
 
-        // Expect standard connected state.
-        serviceConnection.serviceManager.setConnectedState(true);
         await pumpInitializer(tester);
+        expect(find.text(waitingText), findsOneWidget);
+        expect(find.text(cannotConnectText), findsNothing);
+        expect(find.byType(ConnectToNewAppButton), findsNothing);
+        expect(find.byKey(initializedKey), findsNothing);
+
+        fakeServiceConnectionManager.serviceManager.setConnectedState(true);
+        await tester.pump();
+
+        expect(find.text(waitingText), findsNothing);
+        expect(find.text(cannotConnectText), findsNothing);
+        expect(find.byType(ConnectToNewAppButton), findsNothing);
         expect(find.byKey(initializedKey), findsOneWidget);
-        expect(find.text('Disconnected'), findsNothing);
 
-        // Trigger a disconnect.
-        serviceConnection.serviceManager.setConnectedState(false);
-        await tester.pumpAndSettle(const Duration(microseconds: 1000));
-
-        // Expect Disconnected overlay.
-        expect(find.text('Disconnected'), findsOneWidget);
+        // Verify expectations are still true after the timer advances.
+        await advanceTimer(tester);
+        expect(find.text(waitingText), findsNothing);
+        expect(find.text(cannotConnectText), findsNothing);
+        expect(find.byType(ConnectToNewAppButton), findsNothing);
+        expect(find.byKey(initializedKey), findsOneWidget);
       },
     );
 
     testWidgets(
-      'closes disconnected overlay upon reconnect',
+      'shows cannot connect message if connection is not established',
       (WidgetTester tester) async {
-        final serviceConnection = FakeServiceConnectionManager();
-        setGlobal(ServiceConnectionManager, serviceConnection);
+        fakeServiceConnectionManager.serviceManager.setConnectedState(false);
 
-        // Expect standard connected state.
-        serviceConnection.serviceManager.setConnectedState(true);
         await pumpInitializer(tester);
-        expect(find.byKey(initializedKey), findsOneWidget);
-        expect(find.text('Disconnected'), findsNothing);
+        expect(find.text(waitingText), findsOneWidget);
+        expect(find.text(cannotConnectText), findsNothing);
+        expect(find.byType(ConnectToNewAppButton), findsNothing);
+        expect(find.byKey(initializedKey), findsNothing);
 
-        // Trigger a disconnect and ensure the overlay appears.
-        serviceConnection.serviceManager.setConnectedState(false);
-        await tester.pumpAndSettle();
-        expect(find.text('Disconnected'), findsOneWidget);
-
-        // Trigger a reconnect
-        serviceConnection.serviceManager.setConnectedState(true);
-        await tester.pumpAndSettle();
-
-        // Expect no overlay.
-        expect(find.text('Disconnected'), findsNothing);
+        await advanceTimer(tester);
+        expect(find.text(waitingText), findsNothing);
+        expect(find.text(cannotConnectText), findsOneWidget);
+        expect(find.byType(ConnectToNewAppButton), findsOneWidget);
+        expect(find.byKey(initializedKey), findsNothing);
       },
     );
   });

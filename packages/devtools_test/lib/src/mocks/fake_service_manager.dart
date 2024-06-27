@@ -34,6 +34,7 @@ class FakeServiceConnectionManager extends Fake
     _serviceManager = FakeServiceManager(
       service: service,
       connectedAppInitialized: connectedAppInitialized,
+      hasConnection: hasConnection,
       availableLibraries: availableLibraries,
       availableServices: availableServices,
       rootLibrary: rootLibrary,
@@ -101,6 +102,7 @@ class FakeServiceManager extends Fake
     this.onVmServiceOpened,
     Map<String, Response>? serviceExtensionResponses,
     String? rootLibrary,
+    bool hasConnection = true,
   })  : serviceExtensionResponses =
             serviceExtensionResponses ?? _defaultServiceExtensionResponses,
         _isolateManager = FakeIsolateManager(rootLibrary: rootLibrary) {
@@ -112,6 +114,7 @@ class FakeServiceManager extends Fake
       isProfileBuild: false,
       isWebApp: false,
     );
+    setConnectedState(hasConnection);
 
     when(vm.operatingSystem).thenReturn('macos');
     unawaited(vmServiceOpened(this.service!, onClosed: Future.value()));
