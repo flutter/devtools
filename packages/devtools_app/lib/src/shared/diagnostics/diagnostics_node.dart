@@ -573,9 +573,15 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _children ?? [];
   }
 
-  bool groupIsHidden = true;
+  bool _groupIsHidden = true;
 
-  bool get isHidden =>
+  bool get groupIsHidden => inHideableGroup && _groupIsHidden;
+
+  set groupIsHidden(bool newValue) {
+    _groupIsHidden = newValue;
+  }
+
+  bool get nodeIsHidden =>
       inHideableGroup && !isHideableGroupLeader && groupIsHidden;
 
   bool get inHideableGroup {
@@ -588,15 +594,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return inHideableGroup && _hideableGroupSubordinates != null;
   }
 
-  void toggleHiddenGroup() {
-    if (!inHideableGroup) return;
-    final newHiddenValue = !groupIsHidden;
-    groupIsHidden = newHiddenValue;
-    if (isHideableGroupLeader) {
-      _hideableGroupSubordinates?.forEach((node) => node.toggleHiddenGroup());
-    }
-  }
-
   List<RemoteDiagnosticsNode>? get hideableGroupSubordinates =>
       _hideableGroupSubordinates;
   List<RemoteDiagnosticsNode>? _hideableGroupSubordinates;
@@ -604,6 +601,17 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   void addHideableGroupSubordinate(RemoteDiagnosticsNode subordinate) {
     _hideableGroupSubordinates ??= [];
     _hideableGroupSubordinates!.add(subordinate);
+  }
+
+  void toggleHiddenGroup() {
+    // can only be called on the hideable group leader.
+    if (!isHideableGroupLeader) return;
+    final newHiddenValue = !_groupIsHidden;
+    _groupIsHidden = newHiddenValue;
+    if (isHideableGroupLeader) {
+      _hideableGroupSubordinates
+          ?.forEach((node) => node.groupIsHidden = newHiddenValue);
+    }
   }
 
   Future<void> _computeChildren() async {

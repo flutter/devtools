@@ -390,6 +390,12 @@ class InspectorTreeController extends DisposableController
     }
   }
 
+  void toggleHiddenGroup(InspectorTreeNode? node) {
+    if (node != null) {
+      node.toggleHiddenGroup();
+    }
+  }
+
   void collapseToSelected() {
     _collapseAllNodes(root!);
     if (selection == null) return;
@@ -474,6 +480,15 @@ class InspectorTreeController extends DisposableController
     if (rootLocal == null) return null;
     final row = _rowIndexFromOffset(offset.dy);
     return row < _rowsInTree.value.length ? rowAtIndex(row) : null;
+  }
+
+  void onToggleHiddenGroup(InspectorTreeRow row) {
+    final onExpand = config.onExpand;
+    row.node.isExpanded = true;
+    if (onExpand != null) {
+      onExpand(row.node);
+    }
+    _updateRows();
   }
 
   void onExpandRow(InspectorTreeRow row) {

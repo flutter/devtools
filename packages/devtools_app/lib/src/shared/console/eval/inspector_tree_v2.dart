@@ -123,6 +123,16 @@ class InspectorTreeNode {
 
   bool get isHideableGroupLeader => diagnostic?.isHideableGroupLeader ?? false;
 
+  bool get groupIsHidden => diagnostic?.groupIsHidden ?? false;
+
+  bool get nodeIsHidden => diagnostic?.nodeIsHidden ?? false;
+
+  void toggleHiddenGroup() {
+    if (diagnostic != null) {
+      diagnostic!.toggleHiddenGroup();
+    }
+  }
+
   InspectorTreeNode? get parent => _parent;
   InspectorTreeNode? _parent;
 
