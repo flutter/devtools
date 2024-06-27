@@ -95,8 +95,10 @@ class ConnectToNewAppButton extends StatelessWidget {
   const ConnectToNewAppButton({
     super.key,
     required this.gaScreen,
+    required this.routerDelegate,
     this.elevated = false,
     this.minScreenWidthForTextBeforeScaling,
+    this.onPressed,
   });
 
   final String gaScreen;
@@ -104,6 +106,10 @@ class ConnectToNewAppButton extends StatelessWidget {
   final bool elevated;
 
   final double? minScreenWidthForTextBeforeScaling;
+
+  final DevToolsRouterDelegate routerDelegate;
+
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -115,11 +121,11 @@ class ConnectToNewAppButton extends StatelessWidget {
       gaSelection: gac.HomeScreenEvents.connectToNewApp.name,
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
       onPressed: () {
-        DevToolsRouterDelegate.of(context).navigateHome(
+        routerDelegate.navigateHome(
           clearUriParam: true,
           clearScreenParam: true,
         );
-        Navigator.of(context, rootNavigator: true).pop('dialog');
+        onPressed?.call();
       },
     );
   }

@@ -39,9 +39,13 @@ class InspectorTreeNode {
   InspectorTreeNode({
     InspectorTreeNode? parent,
     bool expandChildren = true,
+    this.whenDirty,
   })  : _children = <InspectorTreeNode>[],
         _parent = parent,
         _isExpanded = expandChildren;
+
+  /// Callback that is called when the node is marked as dirty.
+  void Function(InspectorTreeNode node)? whenDirty;
 
   bool get showLinesToChildren {
     return _children.length > 1 && !_children.last.isProperty;
@@ -54,14 +58,10 @@ class InspectorTreeNode {
     if (dirty) {
       _isDirty = true;
       _shouldShow = null;
-      if (_childrenCount == null) {
-        // Already dirty.
-        return;
-      }
-      _childrenCount = null;
       if (parent != null) {
         parent!.isDirty = true;
       }
+      whenDirty?.call(this);
     } else {
       _isDirty = false;
     }
@@ -134,106 +134,8 @@ class InspectorTreeNode {
     isDirty = true;
   }
 
-  int get childrenCount {
-    if (!isExpanded) {
-      _childrenCount = 0;
-    }
-    final childrenCountLocal = _childrenCount;
-    if (childrenCountLocal != null) {
-      return childrenCountLocal;
-    }
-    int count = 0;
-    for (final child in _children) {
-      count += child.subtreeSize;
-    }
-    return _childrenCount = count;
-  }
-
   bool get hasPlaceholderChildren {
     return children.length == 1 && children.first.diagnostic == null;
-  }
-
-  int? _childrenCount;
-
-  int get subtreeSize => childrenCount + 1;
-
-  // TODO(jacobr): move getRowIndex to the InspectorTree class.
-  int getRowIndex(InspectorTreeNode node) {
-    int index = 0;
-    while (true) {
-      final parent = node.parent;
-      if (parent == null) {
-        break;
-      }
-      for (final sibling in parent._children) {
-        if (sibling == node) {
-          break;
-        }
-        index += sibling.subtreeSize;
-      }
-      index += 1; // For parent itself.
-      node = parent;
-    }
-    return index;
-  }
-
-  // TODO(jacobr): move this method to the InspectorTree class.
-  // TODO: optimize this method.
-  /// Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
-  /// performance problems.
-  InspectorTreeRow? getRow(int index) {
-    if (subtreeSize <= index) {
-      return null;
-    }
-
-    final ticks = <int>[];
-    InspectorTreeNode node = this;
-    int current = 0;
-    int depth = 0;
-
-    // Iterate till getting the result to return.
-    while (true) {
-      final style = node.diagnostic?.style;
-      final indented = style != DiagnosticsTreeStyle.flat &&
-          style != DiagnosticsTreeStyle.error;
-      if (current == index) {
-        return InspectorTreeRow(
-          node: node,
-          index: index,
-          ticks: ticks,
-          depth: depth,
-          lineToParent: !node.isProperty &&
-              index != 0 &&
-              node.parent!.showLinesToChildren,
-          hasSingleChild: node.children.length == 1,
-        );
-      }
-      assert(index > current);
-      current++;
-      final children = node._children;
-      int i;
-      for (i = 0; i < children.length; ++i) {
-        final child = children[i];
-        final subtreeSize = child.subtreeSize;
-        if (current + subtreeSize > index) {
-          node = child;
-          if (children.length > 1 &&
-              i + 1 != children.length &&
-              !children.last.isProperty) {
-            if (indented) {
-              ticks.add(depth);
-            }
-          }
-          break;
-        }
-        current += subtreeSize;
-      }
-      assert(i < children.length);
-      // Don't indent if a widget has only one child:
-      if (indented && children.length > 1) {
-        depth++;
-      }
-    }
   }
 
   void removeChild(InspectorTreeNode child) {

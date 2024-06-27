@@ -290,7 +290,7 @@ class DebounceTimer {
 ControllerCreationMode get devToolsMode {
   return offlineDataController.showingOfflineData.value
       ? ControllerCreationMode.offlineData
-      : serviceConnection.serviceManager.hasConnection
+      : serviceConnection.serviceManager.connectedState.value.connected
           ? ControllerCreationMode.connected
           : ControllerCreationMode.disconnected;
 }

@@ -36,10 +36,6 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(flutterFramesController.displayRefreshRate)
       .thenReturn(ValueNotifier<double>(defaultRefreshRate));
 
-  // Stubs for Raster Stats feature.
-  when(controller.rasterStatsController)
-      .thenReturn(RasterStatsController(controller));
-
   // Stubs for Timeline Events feature.
   when(controller.timelineEventsController)
       .thenReturn(timelineEventsController);

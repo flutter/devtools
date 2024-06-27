@@ -304,7 +304,9 @@ class InspectorV2PreferencesController extends DisposableController
       (element) => RegExp('^[/\\s]*\$').firstMatch(element) != null,
     );
 
-    if (!serviceConnection.serviceManager.hasConnection) return;
+    if (!serviceConnection.serviceManager.connectedState.value.connected) {
+      return;
+    }
     await _pubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;
@@ -320,7 +322,9 @@ class InspectorV2PreferencesController extends DisposableController
   Future<void> removePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    if (!serviceConnection.serviceManager.hasConnection) return;
+    if (!serviceConnection.serviceManager.connectedState.value.connected) {
+      return;
+    }
     await _pubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;

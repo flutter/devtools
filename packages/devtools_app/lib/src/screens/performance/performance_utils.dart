@@ -8,6 +8,8 @@ const preCompileShadersDocsUrl = 'https://docs.flutter.dev/perf/shader';
 
 const impellerDocsUrl = 'https://flutter.dev/to/impeller';
 
+const flutterPerformanceDocsUrl = 'https://docs.flutter.dev/perf';
+
 void pushNoTimelineEventsAvailableWarning() {
   notificationService.push(
     'No timeline events available for the selected frame. Timeline '

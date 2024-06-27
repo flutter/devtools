@@ -6,8 +6,6 @@
 // ignore_for_file: prefer-trailing-comma
 // ignore_for_file: require_trailing_commas
 
-import '_performance_raster_stats.dart';
-
 final samplePerformanceData = <String, Object?>{
   "devToolsSnapshot": true,
   "devToolsVersion": "2.34.0",
@@ -108243,7 +108241,6 @@ final samplePerformanceData = <String, Object?>{
       }
     ],
     "displayRefreshRate": 60,
-    "rasterStats": rasterStatsFromDevToolsJson,
     "rebuildCountModel": null,
   }
 };

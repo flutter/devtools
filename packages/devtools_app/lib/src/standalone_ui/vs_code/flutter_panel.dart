@@ -15,7 +15,7 @@ import '../api/dart_tooling_api.dart';
 import '../api/impl/dart_tooling_api.dart';
 import 'debug_sessions.dart';
 import 'devices.dart';
-import 'devtools.dart';
+import 'devtools/devtools_view.dart';
 
 /// A general Flutter sidebar panel for embedding inside IDEs.
 ///
@@ -141,7 +141,7 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel>
           ],
           DevToolsSidebarOptions(
             editor: widget.editor,
-            hasDebugSessions: debugSessions.isNotEmpty,
+            debugSessions: debugSessions,
           ),
         ],
       ),

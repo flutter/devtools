@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/common_widgets.dart';
 import '../../../shared/ui/drop_down_button.dart';
 import '../../debugger/program_explorer.dart';
 import '../../debugger/program_explorer_model.dart';

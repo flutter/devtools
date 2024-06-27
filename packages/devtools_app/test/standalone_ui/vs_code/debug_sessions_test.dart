@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/editor/api_classes.dart';
 import 'package:devtools_app/src/shared/constants.dart';
@@ -12,12 +10,12 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../test_infra/scenes/standalone_ui/editor_service/fake_editor.dart';
+import '../../test_infra/utils/sidebar_utils.dart';
 
 void main() {
   const windowSize = Size(2000.0, 2000.0);
@@ -74,7 +72,6 @@ void main() {
       required int debugSessionIndex,
       required String sessionDisplayText,
       required bool hotButtonsEnabled,
-      required bool devtoolsButtonEnabled,
     }) {
       expect(find.text(sessionDisplayText), findsOneWidget);
 
@@ -82,18 +79,13 @@ void main() {
           iconButtonFinder(hotReloadIcon, index: debugSessionIndex);
       final hotRestartButtonFinder =
           iconButtonFinder(hotRestartIcon, index: debugSessionIndex);
-      final devtoolsButtonFinder =
-          iconButtonFinder(Icons.construction, index: debugSessionIndex);
       expect(hotReloadButtonFinder, findsOneWidget);
       expect(hotRestartButtonFinder, findsOneWidget);
-      expect(devtoolsButtonFinder, findsOneWidget);
 
       final hotReloadButton =
           tester.widget(hotReloadButtonFinder) as IconButton;
       final hotRestartButton =
           tester.widget(hotRestartButtonFinder) as IconButton;
-      final devtoolsMenuButton =
-          tester.widget(devtoolsButtonFinder) as IconButton;
       expect(
         hotReloadButton.onPressed,
         hotButtonsEnabled ? isNotNull : isNull,
@@ -102,52 +94,40 @@ void main() {
         hotRestartButton.onPressed,
         hotButtonsEnabled ? isNotNull : isNull,
       );
-      expect(
-        devtoolsMenuButton.onPressed,
-        devtoolsButtonEnabled ? isNotNull : isNull,
-      );
     }
 
     final tests = [
       (
         sessionDisplay: 'Session (Flutter) (macos) (debug)',
         hotButtonsEnabled: true,
-        devtoolsButtonEnabled: true,
       ),
       (
         sessionDisplay: 'Session (Flutter) (macos) (profile)',
         hotButtonsEnabled: false,
-        devtoolsButtonEnabled: true,
       ),
       (
         sessionDisplay: 'Session (Flutter) (macos) (release)',
         hotButtonsEnabled: false,
-        devtoolsButtonEnabled: false,
       ),
       (
         sessionDisplay: 'Session (Flutter) (macos) (jit_release)',
         hotButtonsEnabled: false,
-        devtoolsButtonEnabled: false,
       ),
       (
         sessionDisplay: 'Session (Flutter) (chrome) (debug)',
         hotButtonsEnabled: true,
-        devtoolsButtonEnabled: true,
       ),
       (
         sessionDisplay: 'Session (Flutter) (chrome) (profile)',
         hotButtonsEnabled: false,
-        devtoolsButtonEnabled: true,
       ),
       (
         sessionDisplay: 'Session (Flutter) (chrome) (release)',
         hotButtonsEnabled: false,
-        devtoolsButtonEnabled: false,
       ),
       (
         sessionDisplay: 'Session (Dart) (macos)',
         hotButtonsEnabled: true,
-        devtoolsButtonEnabled: true,
       ),
     ];
 
@@ -166,48 +146,8 @@ void main() {
             debugSessionIndex: i,
             sessionDisplayText: test.sessionDisplay,
             hotButtonsEnabled: test.hotButtonsEnabled,
-            devtoolsButtonEnabled: test.devtoolsButtonEnabled,
           );
         }
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'DevTools dropdown contains extensions submenu',
-      windowSize,
-      (tester) async {
-        await pumpDebugSessions(tester);
-        await tester.pump(const Duration(milliseconds: 500));
-
-        // Index 0 so that we are checking a debug desktop session, where the
-        // DevTools button is enabled.
-        final devtoolsButtonFinder =
-            iconButtonFinder(Icons.construction, index: 0);
-        expect(devtoolsButtonFinder, findsOneWidget);
-        await tester.tap(devtoolsButtonFinder);
-        await tester.pumpAndSettle();
-
-        final extensionsSubmenuButtonFinder = find.text('Extensions');
-        expect(extensionsSubmenuButtonFinder, findsOneWidget);
-
-        // We should not see the extensions in the dropdown menu at this point.
-        expect(find.text('bar'), findsNothing);
-        expect(find.text('baz'), findsNothing);
-        expect(find.text('foo'), findsNothing);
-        expect(find.text('provider'), findsNothing);
-        expect(find.text('some_tool'), findsNothing);
-
-        final hoverLocation = tester.getCenter(extensionsSubmenuButtonFinder);
-        await tester.startGesture(hoverLocation, kind: PointerDeviceKind.mouse);
-        await tester.pumpAndSettle();
-
-        // We should now see the extensions in the dropdown menu.
-
-        expect(find.text('bar'), findsOneWidget);
-        expect(find.text('baz'), findsOneWidget);
-        expect(find.text('foo'), findsOneWidget);
-        expect(find.text('provider'), findsOneWidget);
-        expect(find.text('some_tool'), findsOneWidget);
       },
     );
   });
@@ -257,20 +197,3 @@ final _debugSessions = [
     deviceId: 'macos',
   ),
 ];
-
-EditorDebugSession generateDebugSession({
-  required String debuggerType,
-  required String deviceId,
-  String? flutterMode,
-}) {
-  return EditorDebugSession(
-    id: '$debuggerType-$deviceId-$flutterMode',
-    name: 'Session ($debuggerType) ($deviceId)',
-    vmServiceUri: 'ws://127.0.0.1:1234/ws',
-    flutterMode: flutterMode,
-    flutterDeviceId: deviceId,
-    debuggerType: debuggerType,
-    projectRootPath:
-        Platform.isWindows ? r'C:\mock\root\path' : '/mock/root/path',
-  );
-}
