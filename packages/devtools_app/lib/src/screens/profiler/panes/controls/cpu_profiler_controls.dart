@@ -33,7 +33,7 @@ Example queries:
 
   @override
   Widget build(BuildContext context) {
-    return FilterDialog<CpuStackFrame>(
+    return ToggleFilterDialog<CpuStackFrame>(
       controller: controller,
       queryInstructions: filterQueryInstructions,
     );
