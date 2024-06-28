@@ -488,7 +488,6 @@ class StandaloneFilterField<T> extends StatefulWidget {
 class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
     with AutoDisposeMixin {
   late final TextEditingController queryTextFieldController;
-  late bool useRegExp;
 
   @override
   void initState() {
@@ -496,12 +495,6 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
     queryTextFieldController = TextEditingController(
       text: widget.controller.activeFilter.value.queryFilter.query,
     );
-    useRegExp = widget.controller.useRegExp.value;
-    addAutoDisposeListener(widget.controller.useRegExp, () {
-      setState(() {
-        useRegExp = widget.controller.useRegExp.value;
-      });
-    });
   }
 
   @override
@@ -515,29 +508,34 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
     return Row(
       children: [
         Expanded(
-          child: DevToolsClearableTextField(
-            autofocus: true,
-            labelText: 'Filter',
-            controller: queryTextFieldController,
-            additionalSuffixActions: [
-              DevToolsToggleButton(
-                icon: Codicons.regex,
-                message: 'Use regular expressions',
-                outlined: false,
-                isSelected: useRegExp,
-                onPressed: () => setState(() {
-                  widget.controller.useRegExp.value = !useRegExp;
+          child: ValueListenableBuilder<bool>(
+            valueListenable: widget.controller.useRegExp,
+            builder: (context, useRegExp, _) {
+              return DevToolsClearableTextField(
+                autofocus: true,
+                labelText: 'Filter',
+                controller: queryTextFieldController,
+                additionalSuffixActions: [
+                  DevToolsToggleButton(
+                    icon: Codicons.regex,
+                    message: 'Use regular expressions',
+                    outlined: false,
+                    isSelected: useRegExp,
+                    onPressed: () => setState(() {
+                      widget.controller.useRegExp.value = !useRegExp;
+                      widget.controller.setActiveFilter(
+                        query: queryTextFieldController.value.text,
+                        toggleFilters: widget.controller._toggleFilters,
+                      );
+                    }),
+                  ),
+                ],
+                onChanged: (_) {
                   widget.controller.setActiveFilter(
                     query: queryTextFieldController.value.text,
                     toggleFilters: widget.controller._toggleFilters,
                   );
-                }),
-              ),
-            ],
-            onChanged: (_) {
-              widget.controller.setActiveFilter(
-                query: queryTextFieldController.value.text,
-                toggleFilters: widget.controller._toggleFilters,
+                },
               );
             },
           ),
@@ -602,9 +600,8 @@ class _ToggleFilterOptionsDialogState<T>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final toggleFilter in widget.controller._toggleFilters) ...[
+          for (final toggleFilter in widget.controller._toggleFilters)
             ToggleFilterElement(filter: toggleFilter),
-          ],
         ],
       ),
     );
