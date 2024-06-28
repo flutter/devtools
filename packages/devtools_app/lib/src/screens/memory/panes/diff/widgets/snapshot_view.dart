@@ -36,10 +36,7 @@ class SnapshotView extends StatelessWidget {
 
         final classes = controller.derived.classesBeforeFiltering.value;
         if (classes == null) {
-          final current = controller.core.selectedItem as SnapshotDataItem;
-          return current.isProcessed
-              ? const SizedBox.shrink()
-              : const Center(child: Text('Could not take snapshot.'));
+          return const Center(child: Text('Processing snapshot...'));
         }
 
         assert((singleClasses == null) != (diffClasses == null));
