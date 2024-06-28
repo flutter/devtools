@@ -300,6 +300,7 @@ double get inputDecorationElementHeight => scaleByFontFactor(20.0);
 // Padding / spacing constants:
 const extraLargeSpacing = 32.0;
 const largeSpacing = 16.0;
+const extraSpacing = 14.0;
 const defaultSpacing = 12.0;
 const intermediateSpacing = 10.0;
 const denseSpacing = 8.0;

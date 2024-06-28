@@ -390,6 +390,14 @@ class InspectorTreeController extends DisposableController
     }
   }
 
+  void toggleHiddenGroup(InspectorTreeNode? node) {
+    final diagnostic = node?.diagnostic;
+    if (diagnostic != null) {
+      diagnostic.toggleHiddenGroup();
+      _updateRows();
+    }
+  }
+
   void collapseToSelected() {
     _collapseAllNodes(root!);
     if (selection == null) return;
@@ -417,19 +425,21 @@ class InspectorTreeController extends DisposableController
       required List<int> ticks,
     }) {
       final currentIdx = rows.length;
-
-      rows.add(
-        InspectorTreeRow(
-          node: node,
-          index: currentIdx,
-          ticks: ticks,
-          depth: depth,
-          lineToParent: !node.isProperty &&
-              currentIdx != 0 &&
-              node.parent!.showLinesToChildren,
-          hasSingleChild: node.children.length == 1,
-        ),
-      );
+      final isHidden = node.diagnostic?.isHidden ?? false;
+      if (!isHidden) {
+        rows.add(
+          InspectorTreeRow(
+            node: node,
+            index: currentIdx,
+            ticks: ticks,
+            depth: depth,
+            lineToParent: !node.isProperty &&
+                currentIdx != 0 &&
+                node.parent!.showLinesToChildren,
+            hasSingleChild: node.children.length == 1,
+          ),
+        );
+      }
 
       final style = node.diagnostic?.style;
       final indented = style != DiagnosticsTreeStyle.flat &&
@@ -591,11 +601,16 @@ class InspectorTreeController extends DisposableController
     RemoteDiagnosticsNode diagnosticsNode, {
     required bool expandChildren,
     required bool expandProperties,
+    RemoteDiagnosticsNode? hideableGroupLeader,
   }) {
     node.diagnostic = diagnosticsNode;
     final configLocal = config;
     if (configLocal.onNodeAdded != null) {
       configLocal.onNodeAdded!(node, diagnosticsNode);
+    }
+    final inHideableGroup = diagnosticsNode.inHideableGroup;
+    if (inHideableGroup && hideableGroupLeader != null) {
+      hideableGroupLeader.addHideableGroupSubordinate(diagnosticsNode);
     }
 
     if (diagnosticsNode.hasChildren ||
@@ -609,6 +624,8 @@ class InspectorTreeController extends DisposableController
           node.diagnostic!.childrenNow,
           expandChildren: expandChildren && styleIsMultiline,
           expandProperties: expandProperties && styleIsMultiline,
+          hideableGroupLeader:
+              inHideableGroup ? (hideableGroupLeader ?? diagnosticsNode) : null,
         );
       } else {
         node.clearChildren();
@@ -624,6 +641,7 @@ class InspectorTreeController extends DisposableController
     List<RemoteDiagnosticsNode>? children, {
     required bool expandChildren,
     required bool expandProperties,
+    RemoteDiagnosticsNode? hideableGroupLeader,
   }) {
     treeNode.isExpanded = expandChildren;
     if (treeNode.children.isNotEmpty) {
@@ -655,6 +673,8 @@ class InspectorTreeController extends DisposableController
             child,
             expandChildren: expandChildren,
             expandProperties: expandProperties,
+            hideableGroupLeader:
+                child.inHideableGroup ? hideableGroupLeader : null,
           ),
         );
       }
@@ -1236,7 +1256,14 @@ class _RowPainter extends CustomPainter {
       );
     }
 
-    if (row.hasSingleChild && node.isExpanded) {
+    final expandedWithSingleChild = row.hasSingleChild && node.isExpanded;
+    final subordinates = node.diagnostic?.hideableGroupSubordinates ?? [];
+    final groupIsHidden = node.diagnostic?.groupIsHidden ?? false;
+    final lastHiddenSubordinateHasNoChildren = groupIsHidden &&
+        subordinates.isNotEmpty &&
+        subordinates.last.childrenNow.isEmpty;
+
+    if (expandedWithSingleChild && !lastHiddenSubordinateHasNoChildren) {
       final distanceFromIconCenterToRowStart =
           inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
       final iconCenterX = _controller.getDepthIndent(row.depth) -
@@ -1318,6 +1345,7 @@ class InspectorRowContent extends StatelessWidget {
     }
 
     final node = row.node;
+    final diagnostic = node.diagnostic;
 
     Widget rowWidget = Padding(
       padding: EdgeInsets.only(left: currentX),
@@ -1341,7 +1369,7 @@ class InspectorRowContent extends StatelessWidget {
                         ),
                       )
                     : const SizedBox(
-                        width: defaultSpacing,
+                        width: extraSpacing,
                         height: defaultSpacing,
                       ),
                 Expanded(
@@ -1371,6 +1399,14 @@ class InspectorRowContent extends StatelessWidget {
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,
+                          actionLabel: diagnostic != null &&
+                                  diagnostic.isHideableGroupLeader
+                              ? diagnostic.groupIsHidden
+                                  ? '(expand)'
+                                  : '(collapse)'
+                              : null,
+                          actionCallback: () =>
+                              controller.toggleHiddenGroup(node),
                         ),
                       ),
                     ),

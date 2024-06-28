@@ -43,6 +43,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.style,
     this.nodeDescriptionHighlightStyle,
     this.emphasizeNodesFromLocalProject = false,
+    this.actionLabel,
+    this.actionCallback,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -56,6 +58,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   // to true when turning on inspector V2. This is currently true for the V2
   // inspector and false for the legacy inspector.
   final bool emphasizeNodesFromLocalProject;
+  final String? actionLabel;
+  final VoidCallback? actionCallback;
 
   static Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -170,6 +174,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     RemoteDiagnosticsNode? diagnostic,
     String? searchValue,
     TextStyle? nodeDescriptionHighlightStyle,
+    String? actionLabel,
+    VoidCallback? actionCallback,
   }) {
     // Store the textStyle of the built widget so that it can be used in
     // [approximateNodeWidth] later.
@@ -234,12 +240,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           ),
         );
       },
-      child: multiline
-          ? SelectableText.rich(textSpan)
-          : RichText(
-              overflow: TextOverflow.ellipsis,
-              text: textSpan,
-            ),
+      child: DescriptionDisplay(
+        text: textSpan,
+        multiline: multiline,
+        actionLabel: actionLabel,
+        actionCallback: actionCallback,
+      ),
     );
   }
 
@@ -408,6 +414,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         diagnostic: diagnostic,
         searchValue: searchValue,
         nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
+        actionLabel: actionLabel,
+        actionCallback: actionCallback,
       );
 
       if (errorText != null) {
@@ -530,5 +538,58 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     spans.add(quoteSpan);
 
     return TextSpan(children: spans);
+  }
+}
+
+class DescriptionDisplay extends StatelessWidget {
+  const DescriptionDisplay({
+    super.key,
+    required this.text,
+    this.multiline = false,
+    this.actionLabel,
+    this.actionCallback,
+  });
+
+  final TextSpan text;
+  final bool multiline;
+  final String? actionLabel;
+  final VoidCallback? actionCallback;
+
+  @override
+  Widget build(BuildContext context) {
+    if (multiline) {
+      // We don't currently support including an action button for multiline
+      // descriptions. We can update this if it's needed later.
+      assert(actionLabel != null && actionCallback != null);
+      return SelectableText.rich(text);
+    }
+
+    final theme = Theme.of(context);
+
+    if (actionLabel != null) {
+      assert(actionCallback != null);
+      return Row(
+        children: [
+          RichText(
+            overflow: TextOverflow.ellipsis,
+            text: text,
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: theme.regularTextStyle,
+            ),
+            onPressed: actionCallback,
+            child: Text(
+              actionLabel!,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return RichText(
+      overflow: TextOverflow.ellipsis,
+      text: text,
+    );
   }
 }

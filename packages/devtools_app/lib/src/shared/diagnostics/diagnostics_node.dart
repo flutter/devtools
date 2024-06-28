@@ -213,7 +213,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// `parentConfiguration` specifies how the parent is rendered as text art.
   /// For example, if the parent does not line break between properties, the
   /// description of a property should also be a single line if possible.
-  String? get description => getStringMember('description');
+  String? get description {
+    if (customDescription != null) {
+      return customDescription;
+    }
+
+    return getStringMember('description');
+  }
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
@@ -568,6 +574,56 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _children ?? [];
   }
 
+  bool _groupIsHidden = true;
+
+  bool get groupIsHidden => inHideableGroup && _groupIsHidden;
+
+  set groupIsHidden(bool newValue) {
+    _groupIsHidden = newValue;
+  }
+
+  bool get isHidden =>
+      inHideableGroup && !isHideableGroupLeader && groupIsHidden;
+
+  bool get inHideableGroup {
+    final hasAtMostOneChild = childrenNow.length <= 1;
+    final isOnlyChild = (parent?.childrenNow ?? []).length == 1;
+    return !isCreatedByLocalProject && hasAtMostOneChild && isOnlyChild;
+  }
+
+  bool get isHideableGroupLeader {
+    return inHideableGroup && _hideableGroupSubordinates != null;
+  }
+
+  List<RemoteDiagnosticsNode>? get hideableGroupSubordinates =>
+      _hideableGroupSubordinates;
+  List<RemoteDiagnosticsNode>? _hideableGroupSubordinates;
+
+  void addHideableGroupSubordinate(RemoteDiagnosticsNode subordinate) {
+    _hideableGroupSubordinates ??= [];
+    _hideableGroupSubordinates!.add(subordinate);
+  }
+
+  void toggleHiddenGroup() {
+    // Only the hideable group leader can change the group's hidden state:
+    assert(isHideableGroupLeader);
+
+    final newHiddenValue = !_groupIsHidden;
+    _groupIsHidden = newHiddenValue;
+    if (isHideableGroupLeader) {
+      _hideableGroupSubordinates
+          ?.forEach((node) => node.groupIsHidden = newHiddenValue);
+    }
+  }
+
+  String? get customDescription {
+    if (groupIsHidden && hideableGroupSubordinates != null) {
+      return '${hideableGroupSubordinates!.length + 1} more widgets...';
+    }
+
+    return null;
+  }
+
   Future<void> _computeChildren() async {
     _maybePopulateChildren();
     if (!hasChildren || _children != null) {
@@ -641,7 +697,11 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Widget? get icon {
     if (isProperty) return null;
 
-    return iconMaker.fromWidgetName(widgetRuntimeType);
+    return iconMaker.fromWidgetName(
+      isHideableGroupLeader && groupIsHidden
+          ? 'HiddenGroup'
+          : widgetRuntimeType,
+    );
   }
 
   /// Returns true if two diagnostic nodes are indistinguishable from
