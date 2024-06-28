@@ -466,6 +466,12 @@ extension PatternListExtension on List<Pattern> {
   }
 }
 
+// TODO:: Change screens that use [DevtoolsFilterButton] to use a [StandaloneFilterField]
+// instead.
+/// A text field for controlling the filter query for a [FilterControllerMixin].
+///
+/// This text field has a button to open a dialog for toggling any toggleable
+/// text filters.
 class StandaloneFilterField<T> extends StatefulWidget {
   const StandaloneFilterField({
     super.key,
@@ -543,7 +549,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
             unawaited(
               showDialog(
                 context: context,
-                builder: (context) => FilterOptionsDialog(
+                builder: (context) => ToggleFilterOptionsDialog(
                   controller: widget.controller,
                 ),
               ),
@@ -556,8 +562,10 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
   }
 }
 
-class FilterOptionsDialog<T> extends StatefulWidget {
-  FilterOptionsDialog({
+/// A dialog for editing settings for only the toggleFilters associated with a
+/// [FilterControllerMixin].
+class ToggleFilterOptionsDialog<T> extends StatefulWidget {
+  ToggleFilterOptionsDialog({
     super.key,
     required this.controller,
     this.queryInstructions,
@@ -577,11 +585,12 @@ class FilterOptionsDialog<T> extends StatefulWidget {
   final List<bool> toggleFilterValuesAtOpen;
 
   @override
-  State<FilterOptionsDialog<T>> createState() => _FilterOptionsDialogState<T>();
+  State<ToggleFilterOptionsDialog<T>> createState() =>
+      _ToggleFilterOptionsDialogState<T>();
 }
 
-class _FilterOptionsDialogState<T> extends State<FilterOptionsDialog<T>>
-    with AutoDisposeMixin {
+class _ToggleFilterOptionsDialogState<T>
+    extends State<ToggleFilterOptionsDialog<T>> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     return StateUpdateDialog(
