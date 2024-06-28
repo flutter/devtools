@@ -521,13 +521,13 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                     message: 'Use regular expressions',
                     outlined: false,
                     isSelected: useRegExp,
-                    onPressed: () => setState(() {
+                    onPressed: () {
                       widget.controller.useRegExp.value = !useRegExp;
                       widget.controller.setActiveFilter(
                         query: queryTextFieldController.value.text,
                         toggleFilters: widget.controller._toggleFilters,
                       );
-                    }),
+                    },
                   ),
                 ],
                 onChanged: (_) {

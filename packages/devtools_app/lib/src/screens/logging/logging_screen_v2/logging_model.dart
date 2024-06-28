@@ -295,7 +295,7 @@ class LoggingTableModel extends DisposableController
       ];
 }
 
-/// A class for holding a [LogDataV2] and it's current estimated [height].
+/// A class for holding a [LogDataV2] and its current estimated [height].
 ///
 /// The [log] and its [height] have similar lifecycles, so it is helpful to keep
 /// them tied together.
