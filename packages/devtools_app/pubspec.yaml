@@ -89,6 +89,7 @@ flutter:
   assets:
     - assets/
     - assets/img/
+    - assets/img/doc/
     - assets/img/layout_explorer/
     - assets/img/layout_explorer/cross_axis_alignment/
     - assets/img/layout_explorer/main_axis_alignment/

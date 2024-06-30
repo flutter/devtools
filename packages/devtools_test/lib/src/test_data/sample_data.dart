@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:devtools_app/devtools_app.dart';
 
 import '_cpu_profiler_data.dart';
+import '_memory_data.dart';
 import '_performance_data.dart';
 import '_performance_data_large.dart';
 
@@ -16,6 +17,7 @@ import '_performance_data_large.dart';
 const cpuProfilerFileName = 'cpu_profile_data.json';
 const performanceFileName = 'performance_data.json';
 const performanceLargeFileName = 'performance_large_data.json';
+const memoryFileName = 'memory_data.json';
 
 final sampleData = <DevToolsJsonFile>[
   DevToolsJsonFile(
@@ -32,5 +34,10 @@ final sampleData = <DevToolsJsonFile>[
     name: cpuProfilerFileName,
     lastModifiedTime: DateTime.now(),
     data: jsonDecode(jsonEncode(sampleCpuProfilerData)),
+  ),
+  DevToolsJsonFile(
+    name: memoryFileName,
+    lastModifiedTime: DateTime.now(),
+    data: jsonDecode(jsonEncode(sampleMemoryData)),
   ),
 ];

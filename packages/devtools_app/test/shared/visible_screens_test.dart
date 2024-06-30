@@ -232,7 +232,7 @@ void main() {
           // InspectorScreen,
           PerformanceScreen, // Works offline, so appears regardless of web flag
           ProfilerScreen, // Works offline, so appears regardless of web flag
-          // MemoryScreen,
+          MemoryScreen,
           // DebuggerScreen,
           // NetworkScreen,
           // LoggingScreen,

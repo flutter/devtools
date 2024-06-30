@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:ui';
 
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_data.dart';
 import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_data.dart'
     as offline_data show Json;
@@ -15,9 +17,58 @@ import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_contr
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../test_infra/scenes/memory/offline.dart';
+
+// Set a wide enough screen width that we do not run into overflow.
+const windowSize = Size(2225.0, 1000.0);
+
 void main() {
+  group('Load', () {
+    late MemoryOfflineScene scene;
+
+    setUp(() async {
+      scene = MemoryOfflineScene();
+      await scene.setUp();
+    });
+
+    tearDown(() {
+      scene.tearDown();
+    });
+
+    testWidgetsWithWindowSize(
+      'of saved data is successful',
+      windowSize,
+      (WidgetTester tester) async {
+        await scene.pump(tester);
+
+        await scene.tapAndSettle(tester, find.text('Memory chart'));
+        expect(find.text('Legend'), findsOneWidget);
+
+        await scene.tapAndSettle(
+          tester,
+          find.byKey(MemoryScreenKeys.profileTab),
+        );
+        expect(find.text('_MyHomePageState'), findsOneWidget);
+
+        await scene.tapAndSettle(
+          tester,
+          find.byKey(MemoryScreenKeys.diffTab),
+          pause: const Duration(seconds: 2),
+        );
+        expect(find.text('Class type legend:'), findsOneWidget);
+
+        await scene.tapAndSettle(
+          tester,
+          find.byKey(MemoryScreenKeys.traceTab),
+        );
+        expect(find.text('_MyClass'), findsOneWidget);
+      },
+    );
+  });
+
   for (final encode in [true, false]) {
     test(
       '$OfflineMemoryData serializes and deserializes correctly, encode: $encode',
