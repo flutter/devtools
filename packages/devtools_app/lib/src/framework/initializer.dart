@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/connection_info.dart';
-import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/routing.dart';
 
@@ -51,9 +50,6 @@ class _InitializerState extends State<Initializer>
   @override
   void initState() {
     super.initState();
-    autoDisposeStreamSubscription(
-      frameworkController.onConnectVmEvent.listen(_connectVm),
-    );
 
     _timer = Timer(_waitForConnectionTimeout, () {
       setState(() {
@@ -66,18 +62,6 @@ class _InitializerState extends State<Initializer>
   void dispose() {
     _timer?.cancel();
     super.dispose();
-  }
-
-  /// Connects to the VM with the given URI.
-  ///
-  /// This request usually comes from the IDE via the server API to reuse the
-  /// DevTools window after being disconnected (for example if the user stops
-  /// a debug session then launches a new one).
-  void _connectVm(ConnectVmEvent event) {
-    DevToolsRouterDelegate.of(context).updateArgsIfChanged({
-      'uri': event.serviceProtocolUri.toString(),
-      if (event.notify) 'notify': 'true',
-    });
   }
 
   @override
