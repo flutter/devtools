@@ -199,20 +199,17 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final newParams = currentConfiguration?.params.withUpdates(argUpdates) ??
         DevToolsQueryParams.empty();
 
-    // Handle VM service connection (ignored if we are loading an offline file):
     if (page != snapshotScreenId) {
+      // Handle changing the VM service connection (ignored if we are loading an
+      // offline file):
       final vmServiceUri = newParams.vmServiceUri;
-      final connectedToVmService =
-          serviceConnection.serviceManager.connectedState.value.connected;
-      // Disconnect from any previously connected applications if we do not have
-      // a vm service uri as a query parameter.
+
       if (vmServiceUri == null) {
+        // Disconnect from any previously connected applications if we do not
+        // have a vm service uri as a query parameter.
         unawaited(serviceConnection.serviceManager.manuallyDisconnect());
-      } else if (!connectedToVmService) {
-        // Connect to the VM Service if we are not already.
-        unawaited(
-          FrameworkCore.initVmService(serviceUriAsString: vmServiceUri),
-        );
+      } else {
+        unawaited(_maybeConnectToVmService(vmServiceUri));
       }
     }
 
@@ -337,6 +334,15 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       return changes != null;
     }
     return currentState.hasChanges(changes);
+  }
+
+  /// Connects to the VM Service if it is not already connected.
+  Future<void> _maybeConnectToVmService(String vmServiceUri) async {
+    final alreadyConnected =
+        serviceConnection.serviceManager.connectedState.value.connected;
+    if (!alreadyConnected) {
+      await FrameworkCore.initVmService(serviceUriAsString: vmServiceUri);
+    }
   }
 }
 
