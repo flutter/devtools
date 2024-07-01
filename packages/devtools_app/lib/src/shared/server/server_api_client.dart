@@ -34,7 +34,6 @@ class DevToolsServerConnection {
         notify: true,
       );
     });
-
   }
 
   /// Returns a URI for the backend ./api folder for a DevTools page being hosted
