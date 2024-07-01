@@ -26,6 +26,15 @@ class DevToolsServerConnection {
       _handleMessage(msg);
     });
     initFrameworkController();
+
+    // TODO - Remove. Makes it easier to test the fix.
+    Timer.periodic(const Duration(seconds: 10), (Timer _) {
+      frameworkController.notifyConnectToVmEvent(
+        Uri.parse('http://127.0.0.1:54374/C615s6AE1qU='),
+        notify: true,
+      );
+    });
+
   }
 
   /// Returns a URI for the backend ./api folder for a DevTools page being hosted
