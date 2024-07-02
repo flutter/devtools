@@ -8,7 +8,7 @@ You are also expected to monitor the DevTools discord [channel](https://discord.
 
 ## DevTools Issues
 
-Queue: https://github.com/flutter/devtools/issues?q=is%3Aopen+is%3Aissue+-label%3AP0%2CP1%2CP2%2CP3%2CP4%2CP5%2CP6 
+Queue: https://github.com/flutter/devtools/issues?q=is%3Aopen+is%3Aissue+-label%3AP0%2CP1%2CP2%2CP3
 
 For each new issue that comes in, perform all of these tasks that apply:
 
@@ -16,7 +16,7 @@ For each new issue that comes in, perform all of these tasks that apply:
 * Add labels for its proper category or categories ( “Inspector page”, “debugger page”, “bug”, etc.)
 * Add label “waiting for customer response” if you requested more details from reporter
 * Add label “fix it friday” if the issue should be fixed and looks easy to fix
-* Add to project [go/dart-devtools-ux-issues](https://github.com/orgs/flutter/projects/54/settings) if the issue is cross-screen issue
+* Add label "good first issue" if the issue looks like an easy starter bug for a new contributor
 
 ### Prioritize the issue. 
 
