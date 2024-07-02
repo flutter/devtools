@@ -200,14 +200,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   /// This request usually comes from the IDE via the server API to reuse the
   /// DevTools window after being disconnected (for example if the user stops
   /// a debug session then launches a new one).
-  void _connectVm(ConnectVmEvent event) {
-    routerDelegate.navigate(
-      DevToolsRouterDelegate.currentPage ?? homeScreenId,
-      {
-        'uri': event.serviceProtocolUri.toString(),
-        if (event.notify) 'notify': 'true',
-      },
-    );
+  Future<void> _connectVm(ConnectVmEvent event) async {
+    await routerDelegate.updateArgsIfChanged({
+      'uri': event.serviceProtocolUri.toString(),
+      if (event.notify) 'notify': 'true',
+    });
   }
 
   /// Gets the page for a given page/path and args.

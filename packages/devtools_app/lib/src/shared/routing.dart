@@ -52,18 +52,6 @@ class DevToolsRouteInformationParser
       uri = uri.copyWith(queryParameters: _testQueryParams!.params);
     }
 
-    final uriFromParams = uri.queryParameters['uri'];
-    if (uriFromParams == null) {
-      // If the uri has been modified and we do not have a vm service uri as a
-      // query parameter, ensure we manually disconnect from any previously
-      // connected applications.
-      await serviceConnection.serviceManager.manuallyDisconnect();
-    } else if (_testQueryParams == null) {
-      // Otherwise, connect to the vm service from the query parameter before
-      // loading the route (but do not do this in a testing environment).
-      await FrameworkCore.initVmService(serviceUriAsString: uriFromParams);
-    }
-
     // routeInformation.path comes from the address bar and (when not empty) is
     // prefixed with a leading slash. Internally we use "page IDs" that do not
     // start with slashes but match the screenId for each screen.
@@ -112,10 +100,22 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
         ChangeNotifier,
         PopNavigatorRouterDelegateMixin<DevToolsRouteConfiguration> {
   DevToolsRouterDelegate(this._getPage, [GlobalKey<NavigatorState>? key])
-      : navigatorKey = key ?? GlobalKey<NavigatorState>();
+      : navigatorKey = key ?? GlobalKey<NavigatorState>(),
+        _isTestMode = false;
+
+  @visibleForTesting
+  DevToolsRouterDelegate.test(this._getPage, [GlobalKey<NavigatorState>? key])
+      : navigatorKey = key ?? GlobalKey<NavigatorState>(),
+        _isTestMode = true;
 
   static DevToolsRouterDelegate of(BuildContext context) =>
       Router.of(context).routerDelegate as DevToolsRouterDelegate;
+
+  /// Whether or not the router is being used for testing purposes.
+  ///
+  /// This is to be used in a testing environment only and can be set via the
+  /// [DevToolsRouterDelegate.test] constructor.
+  final bool _isTestMode;
 
   @override
   final GlobalKey<NavigatorState> navigatorKey;
@@ -199,22 +199,10 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final newParams = currentConfiguration?.params.withUpdates(argUpdates) ??
         DevToolsQueryParams.empty();
 
-    if (page != snapshotScreenId) {
-      // Handle changing the VM service connection (ignored if we are loading an
-      // offline file):
-      final vmServiceUri = newParams.vmServiceUri;
-
-      if (vmServiceUri == null) {
-        // Disconnect from any previously connected applications if we do not
-        // have a vm service uri as a query parameter.
-        unawaited(serviceConnection.serviceManager.manuallyDisconnect());
-      } else {
-        unawaited(_maybeConnectToVmService(vmServiceUri));
-      }
-    }
-
-    _replaceStack(
-      DevToolsRouteConfiguration(page, newParams, state),
+    unawaited(
+      _replaceStack(
+        DevToolsRouteConfiguration(page, newParams, state),
+      ),
     );
     notifyListeners();
   }
@@ -233,16 +221,30 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   }
 
   /// Replaces the navigation stack with a new route.
-  void _replaceStack(DevToolsRouteConfiguration configuration) {
+  Future<void> _replaceStack(DevToolsRouteConfiguration configuration) async {
     _currentPage = configuration.page;
     _routes
       ..clear()
       ..add(configuration);
+
+    if (configuration.page != snapshotScreenId) {
+      // Handle changing the VM service connection (ignored if we are loading an
+      // offline file):
+      final vmServiceUri = configuration.params.vmServiceUri;
+
+      if (vmServiceUri == null) {
+        // Disconnect from any previously connected applications if we do not
+        // have a vm service uri as a query parameter.
+        await serviceConnection.serviceManager.manuallyDisconnect();
+      } else {
+        await _maybeConnectToVmService(vmServiceUri);
+      }
+    }
   }
 
   @override
-  Future<void> setNewRoutePath(DevToolsRouteConfiguration configuration) {
-    _replaceStack(configuration);
+  Future<void> setNewRoutePath(DevToolsRouteConfiguration configuration) async {
+    await _replaceStack(configuration);
     notifyListeners();
     return SynchronousFuture<void>(null);
   }
@@ -251,7 +253,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ///
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
-  void updateArgsIfChanged(Map<String, String?> argUpdates) {
+  Future<void> updateArgsIfChanged(Map<String, String?> argUpdates) async {
     final argsChanged = _changesArgs(argUpdates);
     if (!argsChanged) {
       return;
@@ -260,7 +262,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final currentConfig = currentConfiguration!;
     final currentPage = currentConfig.page;
     final newArgs = currentConfig.params.withUpdates(argUpdates);
-    _replaceStack(
+
+    await _replaceStack(
       DevToolsRouteConfiguration(
         currentPage,
         newArgs,
@@ -270,13 +273,13 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     notifyListeners();
   }
 
-  void clearUriParameter() {
-    updateArgsIfChanged({'uri': null});
+  Future<void> clearUriParameter() async {
+    await updateArgsIfChanged({'uri': null});
   }
 
   Future<void> replaceState(DevToolsNavigationState state) async {
     final currentConfig = currentConfiguration!;
-    _replaceStack(
+    await _replaceStack(
       DevToolsRouteConfiguration(
         currentConfig.page,
         currentConfig.params,
@@ -305,11 +308,13 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     }
 
     final currentConfig = currentConfiguration!;
-    _replaceStack(
-      DevToolsRouteConfiguration(
-        currentConfig.page,
-        currentConfig.params,
-        currentConfig.state?.merge(stateUpdate) ?? stateUpdate,
+    unawaited(
+      _replaceStack(
+        DevToolsRouteConfiguration(
+          currentConfig.page,
+          currentConfig.params,
+          currentConfig.state?.merge(stateUpdate) ?? stateUpdate,
+        ),
       ),
     );
     // Add the new state to the browser history.
@@ -340,7 +345,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   Future<void> _maybeConnectToVmService(String vmServiceUri) async {
     final alreadyConnected =
         serviceConnection.serviceManager.connectedState.value.connected;
-    if (!alreadyConnected) {
+    // Skip connecting if we are already connected or in a test environment.
+    if (!alreadyConnected && !_isTestMode) {
       await FrameworkCore.initVmService(serviceUriAsString: vmServiceUri);
     }
   }
