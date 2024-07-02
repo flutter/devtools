@@ -134,8 +134,8 @@ mixin FilterControllerMixin<T> on DisposableController
 ///
 /// This dialog interacts with a [FilterControllerMixin] to manage and preserve
 /// the toggleable filter state managed by the dialog.
-class ToggleFilterDialog<T> extends StatefulWidget {
-  ToggleFilterDialog({
+class FilterDialog<T> extends StatefulWidget {
+  FilterDialog({
     super.key,
     required this.controller,
     this.includeQueryFilter = true,
@@ -160,10 +160,10 @@ class ToggleFilterDialog<T> extends StatefulWidget {
   final List<bool> toggleFilterValuesAtOpen;
 
   @override
-  State<ToggleFilterDialog<T>> createState() => _ToggleFilterDialogState<T>();
+  State<FilterDialog<T>> createState() => _FilterDialogState<T>();
 }
 
-class _ToggleFilterDialogState<T> extends State<ToggleFilterDialog<T>>
+class _FilterDialogState<T> extends State<FilterDialog<T>>
     with AutoDisposeMixin {
   late final TextEditingController queryTextFieldController;
   late bool useRegExp;
