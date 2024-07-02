@@ -127,6 +127,10 @@ class _SelectProjectViewState extends State<SelectProjectView>
       return;
     }
     if (androidVariants.isEmpty) {
+      ga.select(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.flutterInvalidAndroidProjectSelected.name,
+      );
       await showNonFlutterProjectDialog();
     }
     XcodeBuildOptions iosBuildOptions = XcodeBuildOptions.empty;

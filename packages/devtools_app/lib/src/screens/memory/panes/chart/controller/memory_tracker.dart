@@ -102,7 +102,8 @@ class MemoryTracker {
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    _adbMemoryInfo = serviceConnection.serviceManager.hasConnection &&
+    _adbMemoryInfo = serviceConnection
+                .serviceManager.connectedState.value.connected &&
             serviceConnection.serviceManager.vm!.operatingSystem == 'android' &&
             isAndroidChartVisible.value
         ? await _fetchAdbInfo()
