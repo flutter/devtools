@@ -35,9 +35,9 @@ class MemoryController extends DisposableController
   MemoryController({
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
-    @visibleForTesting OfflineMemoryData? data,
+    @visibleForTesting OfflineMemoryData? offlineData,
   }) {
-    if (data != null) {
+    if (offlineData != null) {
       mode = ControllerCreationMode.offlineData;
     } else if (connectedDiff != null || connectedProfile != null) {
       mode = ControllerCreationMode.connected;
@@ -48,7 +48,7 @@ class MemoryController extends DisposableController
       _init(
         connectedDiff: connectedDiff,
         connectedProfile: connectedProfile,
-        data: data,
+        offlineData: offlineData,
       ),
     );
   }
@@ -94,7 +94,7 @@ class MemoryController extends DisposableController
   Future<void> _init({
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
-    @visibleForTesting OfflineMemoryData? data,
+    @visibleForTesting OfflineMemoryData? offlineData,
   }) async {
     assert(!_dataInitialized.isCompleted);
     switch (mode) {
@@ -119,7 +119,7 @@ class MemoryController extends DisposableController
         //  so ensure we still call [_initializedData] if it has not been called.
         assert(loaded == _dataInitialized.isCompleted);
         if (!_dataInitialized.isCompleted) {
-          _initializeData(offlineData: data);
+          _initializeData(offlineData: offlineData);
         }
     }
     assert(_dataInitialized.isCompleted);

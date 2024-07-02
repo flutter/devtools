@@ -76,7 +76,7 @@ class MemoryOfflineScene extends Scene {
 
     final json = importedFile.data as Map<String, dynamic>;
     final data = MemoryController.createData(json[ScreenMetaData.memory.id]);
-    controller.value = MemoryController(data: data);
+    controller.value = MemoryController(offlineData: data);
     await controller.value!.initialized;
   }
 
