@@ -39,7 +39,7 @@ Widget wrap(Widget widget, {DevToolsQueryParams? queryParams}) {
         colorScheme: lightColorScheme,
       ),
     ),
-    routerDelegate: DevToolsRouterDelegate(
+    routerDelegate: DevToolsRouterDelegate.test(
       (context, page, args, state) => MaterialPage(
         child: Material(
           child: Directionality(
