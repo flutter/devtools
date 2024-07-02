@@ -346,9 +346,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final alreadyConnected =
         serviceConnection.serviceManager.connectedState.value.connected;
     // Skip connecting if we are already connected or in a test environment.
-    if (!alreadyConnected && !_isTestMode) {
-      await FrameworkCore.initVmService(serviceUriAsString: vmServiceUri);
-    }
+    if (alreadyConnected || _isTestMode) return;
+    await FrameworkCore.initVmService(serviceUriAsString: vmServiceUri);
   }
 }
 
