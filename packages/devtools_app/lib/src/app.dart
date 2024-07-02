@@ -202,7 +202,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   /// a debug session then launches a new one).
   void _connectVm(ConnectVmEvent event) {
     routerDelegate.navigate(
-      homeScreenId,
+      DevToolsRouterDelegate.currentPage ?? homeScreenId,
       {
         'uri': event.serviceProtocolUri.toString(),
         if (event.notify) 'notify': 'true',
