@@ -547,8 +547,9 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
             unawaited(
               showDialog(
                 context: context,
-                builder: (context) => ToggleFilterOptionsDialog(
+                builder: (context) => FilterDialog(
                   controller: widget.controller,
+                  includeQueryFilter: false,
                 ),
               ),
             );
@@ -557,72 +558,5 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
         ),
       ],
     );
-  }
-}
-
-/// A dialog for editing settings for only the toggleFilters associated with a
-/// [FilterControllerMixin].
-class ToggleFilterOptionsDialog<T> extends StatefulWidget {
-  ToggleFilterOptionsDialog({
-    super.key,
-    required this.controller,
-    this.queryInstructions,
-  })  : assert(
-          queryInstructions == null || controller._queryFilterArgs.isNotEmpty,
-        ),
-        toggleFilterValuesAtOpen = List.generate(
-          controller.activeFilter.value.toggleFilters.length,
-          (index) =>
-              controller.activeFilter.value.toggleFilters[index].enabled.value,
-        );
-
-  final FilterControllerMixin<T> controller;
-
-  final String? queryInstructions;
-
-  final List<bool> toggleFilterValuesAtOpen;
-
-  @override
-  State<ToggleFilterOptionsDialog<T>> createState() =>
-      _ToggleFilterOptionsDialogState<T>();
-}
-
-class _ToggleFilterOptionsDialogState<T>
-    extends State<ToggleFilterOptionsDialog<T>> with AutoDisposeMixin {
-  @override
-  Widget build(BuildContext context) {
-    return StateUpdateDialog(
-      title: 'Filter Settings',
-      onApply: _applyFilterChanges,
-      onCancel: _restoreOldValues,
-      onResetDefaults: _resetFilters,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final toggleFilter in widget.controller._toggleFilters)
-            ToggleFilterElement(filter: toggleFilter),
-        ],
-      ),
-    );
-  }
-
-  void _applyFilterChanges() {
-    widget.controller.setActiveFilter(
-      // Keep the query the same, only update the toggle filters.
-      query: widget.controller.activeFilter.value.queryFilter.query,
-      toggleFilters: widget.controller._toggleFilters,
-    );
-  }
-
-  void _resetFilters() {
-    widget.controller._resetToDefaultFilter();
-  }
-
-  void _restoreOldValues() {
-    for (var i = 0; i < widget.controller._toggleFilters.length; i++) {
-      final filter = widget.controller._toggleFilters[i];
-      filter.enabled.value = widget.toggleFilterValuesAtOpen[i];
-    }
   }
 }
