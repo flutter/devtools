@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:codicon/codicon.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -128,10 +130,10 @@ mixin FilterControllerMixin<T> on DisposableController
   }
 }
 
-/// Dialog to manage filter settings.
+/// Dialog to manage toggleable filter settings.
 ///
 /// This dialog interacts with a [FilterControllerMixin] to manage and preserve
-/// the filter state managed by the dialog.
+/// the toggleable filter state managed by the dialog.
 class FilterDialog<T> extends StatefulWidget {
   FilterDialog({
     super.key,
@@ -461,5 +463,100 @@ extension PatternListExtension on List<Pattern> {
     return safeFirst is RegExp
         ? cast<RegExp>().map((v) => v.pattern).toList()
         : cast<String>();
+  }
+}
+
+// TODO:: Change screens that use [DevtoolsFilterButton] to use a [StandaloneFilterField]
+// instead.
+/// A text field for controlling the filter query for a [FilterControllerMixin].
+///
+/// This text field has a button to open a dialog for toggling any toggleable
+/// text filters.
+class StandaloneFilterField<T> extends StatefulWidget {
+  const StandaloneFilterField({
+    super.key,
+    required this.controller,
+  });
+
+  final FilterControllerMixin<T> controller;
+
+  @override
+  State<StandaloneFilterField<T>> createState() =>
+      _StandaloneFilterFieldState<T>();
+}
+
+class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
+    with AutoDisposeMixin {
+  late final TextEditingController queryTextFieldController;
+
+  @override
+  void initState() {
+    super.initState();
+    queryTextFieldController = TextEditingController(
+      text: widget.controller.activeFilter.value.queryFilter.query,
+    );
+  }
+
+  @override
+  void dispose() {
+    queryTextFieldController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: ValueListenableBuilder<bool>(
+            valueListenable: widget.controller.useRegExp,
+            builder: (context, useRegExp, _) {
+              return DevToolsClearableTextField(
+                autofocus: true,
+                labelText: 'Filter',
+                controller: queryTextFieldController,
+                additionalSuffixActions: [
+                  DevToolsToggleButton(
+                    icon: Codicons.regex,
+                    message: 'Use regular expressions',
+                    outlined: false,
+                    isSelected: useRegExp,
+                    onPressed: () {
+                      widget.controller.useRegExp.value = !useRegExp;
+                      widget.controller.setActiveFilter(
+                        query: queryTextFieldController.value.text,
+                        toggleFilters: widget.controller._toggleFilters,
+                      );
+                    },
+                  ),
+                ],
+                onChanged: (_) {
+                  widget.controller.setActiveFilter(
+                    query: queryTextFieldController.value.text,
+                    toggleFilters: widget.controller._toggleFilters,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: defaultSpacing),
+        DevToolsFilterButton(
+          message: 'Filter Settings',
+          onPressed: () {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => FilterDialog(
+                  controller: widget.controller,
+                  includeQueryFilter: false,
+                ),
+              ),
+            );
+          },
+          isFilterActive: false,
+        ),
+      ],
+    );
   }
 }
