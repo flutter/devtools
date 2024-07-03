@@ -25,7 +25,25 @@ For each issue, perform all of these tasks that apply:
 
 Follow the prioritization rubric [here](https://github.com/flutter/flutter/blob/master/docs/contributing/issue_hygiene/README.md#priorities).
 
-Tag the area owner in a comment if the issue requires specific expertise. Assign to an owner if the issue is a work in process or if the issue needs immediate / almost-immediate attention (P0, P1).
+If the issue requires specific expertise, tag a product area owner (see below) in a comment and ask them to take a look. 
+If the issue is actively being worked on or if it needs immediate / almost-immediate attention (P0, P1), assign the issue
+to a product area owner.
+
+Here are some suggested owners by product area:
+* **Flutter Inspector**: @elliette
+* **Performance**: @kenzieschmoll
+* **CPU Profiler**: @kenzieschmoll or @bkonyi
+* **Memory**: @kenzieschmoll or @bkonyi
+* **Network**: @elliette or @bkonyi
+* **Logging**: @elliette or @bkonyi
+* **VM Tools**: @bkonyi
+* **Debugger**: @elliette
+* **DevTools extensions**: @kenzieschmoll
+* **Tooling integrations with VS Code**: @DanTup
+* **Tooling integrations with IntelliJ or Android Studio**: @helin24 or @jwren
+
+For anything else that requires immediate attention but does not fit into one of
+the above areas, please tag @kenzieschmoll or @elliette.
 
 ## Related Flutter Issues
 
