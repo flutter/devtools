@@ -61,11 +61,10 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/5606
   static const memoryOffline = _kMemoryOfflineExperiment;
 
-  /// Flag to enable offline data on memory screen.
+  /// Flag to enable save/load.
   ///
-  /// https://github.com/flutter/devtools/issues/5606
-  static bool memorySaveLoad =
-      enableExperiments; // requires special handling because it needs to be const
+  /// https://github.com/flutter/devtools/issues/8019
+  static bool memorySaveLoad = enableExperiments;
 
   /// Flag to enable the deep link validation tooling in DevTools, both for the
   /// DevTools screen and the standalone tool for IDE embedding.
