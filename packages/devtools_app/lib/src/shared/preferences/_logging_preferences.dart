@@ -30,7 +30,7 @@ class LoggingPreferencesController extends DisposableController
 
         ga.select(
           gac.logging,
-          gac.LoggingEvent.changeRetentionLimit,
+          gac.LoggingEvent.changeRetentionLimit.name,
           value: retentionLimit.value,
         );
       },

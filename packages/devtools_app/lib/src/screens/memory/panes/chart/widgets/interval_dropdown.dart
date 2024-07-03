@@ -42,7 +42,7 @@ class _IntervalDropdownState extends State<IntervalDropdown> {
         setState(() {
           ga.select(
             gac.memory,
-            '${gac.MemoryEvent.chartInterval}-${value.displayName}',
+            '${gac.MemoryEvents.chartInterval.name}-${value.displayName}',
           );
           widget.chartController.data.displayInterval = value;
           final duration = value.duration;

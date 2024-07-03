@@ -54,7 +54,7 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
     return HeapClassView(
       theClass: data.className,
       showCopyButton: isRowSelected,
-      copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
+      copyGaItem: gac.MemoryEvents.diffClassSingleCopy.name,
       rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
     );
   }
@@ -203,7 +203,7 @@ class ClassesTableSingle extends StatelessWidget {
       selectionNotifier: classesData.selection,
       onItemSelected: (_) => ga.select(
         gac.memory,
-        gac.MemoryEvent.diffClassSingleSelect,
+        gac.MemoryEvents.diffClassSingleSelect.name,
       ),
       defaultSortColumn: _columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
