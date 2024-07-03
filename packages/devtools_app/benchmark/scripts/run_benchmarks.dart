@@ -31,12 +31,9 @@ Future<void> main(List<String> args) async {
       await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
         entryPoint: 'benchmark/test_infra/client.dart',
-        compilationOptions: CompilationOptions(
-          useWasm: benchmarkArgs.useWasm,
-          renderer: benchmarkArgs.useSkwasm
-              ? WebRenderer.skwasm
-              : WebRenderer.canvaskit,
-        ),
+        compilationOptions: benchmarkArgs.useWasm
+            ? const CompilationOptions.wasm()
+            : const CompilationOptions.js(),
         treeShakeIcons: false,
         initialPage: benchmarkInitialPage,
         headless: !benchmarkArgs.useBrowser,
