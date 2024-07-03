@@ -20,6 +20,12 @@ import '../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/message_bus.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/search.dart';
+import '../logging_controller.dart'
+    show
+        FrameInfo,
+        ImageSizesForFrame,
+        NavigationInfo,
+        ServiceExtensionStateChangedInfo;
 import '../logging_screen.dart';
 import 'logging_model.dart';
 

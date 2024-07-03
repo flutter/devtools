@@ -5,15 +5,12 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:math' as math;
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
@@ -25,25 +22,19 @@ import '../../../shared/primitives/message_bus.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/filter.dart';
 import '../../../shared/utils.dart';
-import '../../inspector/inspector_tree_controller.dart';
+import '../logging_controller.dart'
+    show
+        FrameInfo,
+        ImageSizesForFrame,
+        NavigationInfo,
+        ServiceExtensionStateChangedInfo;
 import 'logging_controller_v2.dart';
 import 'logging_table_row.dart';
 import 'logging_table_v2.dart';
 
 final _log = Logger('logging_model');
 
-final timeFormat = DateFormat('HH:mm:ss.SSS');
-
 bool _verboseDebugging = false;
-
-typedef OnShowDetails = void Function({
-  String? text,
-  InspectorTreeController? tree,
-});
-
-typedef CreateLoggingTree = InspectorTreeController Function({
-  VoidCallback? onSelectionChange,
-});
 
 Future<String> _retrieveFullStringValue(
   VmServiceWrapper? service,
@@ -852,90 +843,6 @@ String? _valueAsString(InstanceRef? ref) {
   return ref.valueAsStringIsTruncated == true
       ? '${ref.valueAsString}...'
       : ref.valueAsString;
-}
-
-// TODO(https://github.com/flutter/devtools/issues/7703): make this private once
-// Logging V2 lands.
-extension type FrameInfo(Map<String, dynamic> _json) {
-  int? get number => _json['number'];
-  num get elapsedMs => (_json['elapsed'] as num) / 1000;
-}
-
-// TODO(https://github.com/flutter/devtools/issues/7703): make this private once
-// Logging V2 lands.
-extension type ImageSizesForFrame(Map<String, dynamic> json) {
-  static List<ImageSizesForFrame> from(Map<String, dynamic> data) {
-    // Example payload:
-    //
-    //     "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png": {
-    //       "source": "packages/flutter_gallery_assets/assets/icons/material/2.0x/material.png",
-    //       "displaySize": {
-    //         "width": 64.0,
-    //         "height": 63.99999999999999
-    //       },
-    //       "imageSize": {
-    //         "width": 128.0,
-    //         "height": 128.0
-    //       },
-    //       "displaySizeInBytes": 21845,
-    //       "decodedSizeInBytes": 87381
-    //     }
-    return data.values.map((entry_) => ImageSizesForFrame(entry_)).toList();
-  }
-
-  String get source => json['source'];
-
-  ImageSize get displaySize => ImageSize(json['displaySize']);
-
-  ImageSize get imageSize => ImageSize(json['imageSize']);
-
-  int? get displaySizeInBytes => json['displaySizeInBytes'];
-
-  int? get decodedSizeInBytes => json['decodedSizeInBytes'];
-
-  String get summary {
-    final file = path.basename(source);
-
-    final expansion =
-        math.sqrt(decodedSizeInBytes ?? 0) / math.sqrt(displaySizeInBytes ?? 1);
-
-    return 'Image $file • displayed at '
-        '${displaySize.width.round()}x${displaySize.height.round()}'
-        ' • created at '
-        '${imageSize.width.round()}x${imageSize.height.round()}'
-        ' • ${expansion.toStringAsFixed(1)}x';
-  }
-}
-
-// TODO(https://github.com/flutter/devtools/issues/7703): make this private once
-// Logging V2 lands.
-extension type ImageSize(Map<String, dynamic> json) {
-  double get width => json['width'];
-
-  double get height => json['height'];
-}
-
-class NavigationInfo {
-  NavigationInfo(this._route);
-
-  static NavigationInfo from(Map<String, dynamic> data) {
-    return NavigationInfo(data['route']);
-  }
-
-  final Map<String, dynamic>? _route;
-
-  String? get routeDescription => _route == null ? null : _route['description'];
-}
-
-class ServiceExtensionStateChangedInfo {
-  ServiceExtensionStateChangedInfo(this.extension, this.value);
-
-  static ServiceExtensionStateChangedInfo from(Map<String, dynamic> data) {
-    return ServiceExtensionStateChangedInfo(data['extension'], data['value']);
-  }
-
-  final String? extension;
-  final Object value;
 }
 
 class _LogEntry {
