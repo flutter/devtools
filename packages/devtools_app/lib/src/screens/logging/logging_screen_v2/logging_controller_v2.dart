@@ -19,6 +19,7 @@ import '../../../shared/globals.dart';
 import '../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/message_bus.dart';
 import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/filter.dart';
 import '../../../shared/ui/search.dart';
 import '../logging_controller.dart'
     show
@@ -61,7 +62,7 @@ final _hideSummaryLogKinds = <String>{
 };
 
 class LoggingControllerV2 extends DisposableController
-    with AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin, FilterControllerMixin<LogDataV2> {
   LoggingControllerV2() {
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
@@ -101,7 +102,7 @@ class LoggingControllerV2 extends DisposableController
   void _updateSelection() {
     final selected = selectedLog.value;
     if (selected != null) {
-      final logs = loggingModel.filteredData.value;
+      final logs = filteredData.value;
       if (!logs.contains(selected)) {
         selectedLog.value = null;
       }
@@ -113,7 +114,7 @@ class LoggingControllerV2 extends DisposableController
 
   String get statusText {
     final totalCount = loggingModel.logCount;
-    final showingCount = loggingModel.filteredData.value.length;
+    final showingCount = filteredData.value.length;
 
     String label;
 

@@ -51,14 +51,7 @@ void main() {
       expect(controller.loggingModel.logCount, 0);
       expect(controller.loggingModel.filteredLogCount, 0);
       expect(controller.loggingModel.selectedLogCount, 0);
-      expect(
-        controller.loggingModel.activeFilter.value.toggleFilters.length,
-        3,
-      );
-      expect(
-        controller.loggingModel.activeFilter.value.queryFilter.isEmpty,
-        isTrue,
-      );
+      expect(controller.activeFilter.value.isEmpty, isTrue);
     });
 
     testWidgets('receives data', (WidgetTester tester) async {

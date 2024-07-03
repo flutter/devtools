@@ -6,17 +6,22 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../service/service_extension_widgets.dart';
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
-import '../../../shared/ui/filter.dart';
-import '../../../shared/utils.dart';
-import 'logging_controller_v2.dart';
 import 'logging_model.dart';
 import 'logging_table_row.dart';
+
+/// A builder that includes an Offset to draw the context menu at.
+typedef ContextMenuBuilder = Widget Function(
+  BuildContext context,
+  Offset offset,
+);
 
 /// A Widget for displaying logs with line wrapping, along with log metadata.
 class LoggingTableV2 extends StatefulWidget {
@@ -29,17 +34,28 @@ class LoggingTableV2 extends StatefulWidget {
   State<LoggingTableV2> createState() => _LoggingTableV2State();
 }
 
-class _LoggingTableV2State extends State<LoggingTableV2>
-    with ProvidedControllerMixin<LoggingControllerV2, LoggingTableV2> {
+class _LoggingTableV2State extends State<LoggingTableV2> {
   final selections = <int>{};
   final cachedOffets = <int, double>{};
   String lastSearch = '';
   double maxWidth = 0.0;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
+  void initState() {
+    super.initState();
+    // On web, disable the browser's context menu since this example uses a custom
+    // Flutter-rendered context menu.
+    if (kIsWeb) {
+      unawaited(BrowserContextMenu.disableContextMenu());
+    }
+  }
+
+  @override
+  void dispose() {
+    if (kIsWeb) {
+      unawaited(BrowserContextMenu.enableContextMenu());
+    }
+    super.dispose();
   }
 
   @override
@@ -50,15 +66,16 @@ class _LoggingTableV2State extends State<LoggingTableV2>
           children: [
             Expanded(
               child: DevToolsClearableTextField(
-                labelText: 'Search', // TODO(danchevalier): use SearchField
+                labelText: 'Filter',
+                onSubmitted: (value) {},
               ),
             ),
             const SizedBox(width: defaultSpacing),
             Expanded(
-              child: StandaloneFilterField<LogDataV2>(
-                controller: widget.model,
+              child: DevToolsClearableTextField(
+                labelText: 'Search',
               ),
-            ), // TODO for some reason the controller isn't hooking up correctly to the one over in the model. It is not getting notified of the changes?
+            ),
             const SizedBox(width: defaultSpacing),
             SettingsOutlinedButton(
               gaScreen: gac.logging,

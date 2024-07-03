@@ -72,10 +72,10 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
 
     cancelListeners();
 
-    filteredLogs = controller.loggingModel.filteredData.value;
-    addAutoDisposeListener(controller.loggingModel.filteredData, () {
+    filteredLogs = controller.filteredData.value;
+    addAutoDisposeListener(controller.filteredData, () {
       setState(() {
-        filteredLogs = controller.loggingModel.filteredData.value;
+        filteredLogs = controller.filteredData.value;
       });
     });
   }
