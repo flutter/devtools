@@ -13,6 +13,9 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/matchers/matchers.dart';
 
+// Note: This tests uses packages/devtools_app/test/test_infra/fixtures/flutter_app
+// running on the flutter-tester device.
+
 // This is a bit conservative to ensure we do not get flakes due to
 // slow interactions with the VM Service. This delay could likely be
 // reduced to under 1 second without introducing flakes.
@@ -81,7 +84,7 @@ void main() {
         // Give time for the initial animation to complete.
         await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-        // Click on the Center widget (row index #5)
+        // Click on the Center widget (row index #16)
         await tester.tap(find.richText('Center'));
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
@@ -151,9 +154,6 @@ void main() {
 
         await env.tearDownEnvironment();
       },
-      // TODO(https://github.com/flutter/devtools/issues/7911): Re-enable once
-      // the implementation details are collapsed.
-      skip: true,
     );
 
     // TODO(jacobr): convert these tests to screenshot tests like the initial
