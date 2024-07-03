@@ -41,6 +41,7 @@ void main() {
     when(mockEditorClient.supportsHotRestart).thenReturn(true);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
 
     final mockDtdManager = MockDTDManager();
     when(
