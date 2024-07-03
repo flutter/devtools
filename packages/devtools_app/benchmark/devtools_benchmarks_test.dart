@@ -31,7 +31,7 @@ final valueList = <String>[
 void main() {
   for (final useWasm in [true, false]) {
     test(
-      'Can run web benchmarks with ${useWasm ? 'JS' : 'WASM'}',
+      'Can run web benchmarks with ${useWasm ? 'WASM' : 'JS'}',
       () async {
         await _runBenchmarks(useWasm: useWasm);
       },
