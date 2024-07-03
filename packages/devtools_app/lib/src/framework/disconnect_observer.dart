@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -61,7 +63,7 @@ class DisconnectObserverState extends State<DisconnectObserver>
           // We became disconnected by means other than a manual disconnect
           // action, so show the overlay and ensure the 'uri' query paraemter
           // has been cleared.
-          widget.routerDelegate.clearUriParameter();
+          unawaited(widget.routerDelegate.clearUriParameter());
           showDisconnectedOverlay();
         }
       }

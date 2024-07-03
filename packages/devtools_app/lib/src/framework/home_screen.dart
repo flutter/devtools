@@ -291,7 +291,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
     if (connected) {
       final connectedUri =
           Uri.parse(serviceConnection.serviceManager.serviceUri!);
-      routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
+      await routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');
     } else if (normalizeVmServiceUri(uri) == null) {

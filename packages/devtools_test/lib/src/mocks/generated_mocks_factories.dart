@@ -174,6 +174,8 @@ MockServiceManager<VmServiceWrapper> _createMockServiceManagerWithDefaults() {
   when(mockServiceManager.isolateManager).thenReturn(fakeIsolateManager);
   when(mockServiceManager.serviceExtensionManager)
       .thenReturn(fakeServiceExtensionManager);
+  when(mockServiceManager.connectedState)
+      .thenReturn(ValueNotifier(const ConnectedState(true)));
   return mockServiceManager;
 }
 

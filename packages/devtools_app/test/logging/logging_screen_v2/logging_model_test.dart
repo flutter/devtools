@@ -30,7 +30,11 @@ void main() {
       setGlobal(IdeTheme, getIdeTheme());
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(GlobalKey<NavigatorState>, GlobalKey<NavigatorState>());
+<<<<<<< HEAD
 
+=======
+      setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+>>>>>>> upstream/master
       TestWidgetsFlutterBinding.ensureInitialized();
       loggingTableModel = LoggingTableModel();
     });
