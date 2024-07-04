@@ -9,7 +9,6 @@ import '../../service/service_manager.dart';
 import '../../shared/primitives/trees.dart';
 import '../../shared/primitives/utils.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
-import 'panes/raster_stats/raster_stats_model.dart';
 import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/perfetto/tracing/model.dart';
 
@@ -18,7 +17,6 @@ class OfflinePerformanceData {
     this.perfettoTraceBinary,
     this.frames = const <FlutterFrame>[],
     this.selectedFrame,
-    this.rasterStats,
     this.rebuildCountModel,
     double? displayRefreshRate,
   }) : displayRefreshRate = displayRefreshRate ?? defaultRefreshRate;
@@ -35,22 +33,18 @@ class OfflinePerformanceData {
       perfettoTraceBinary: json.traceBinary,
       frames: frames,
       selectedFrame: selectedFrame,
-      rasterStats: json.rasterStats,
       rebuildCountModel: json.rebuildCountModel,
       displayRefreshRate: json.displayRefreshRate,
     );
   }
 
   static const traceBinaryKey = 'traceBinary';
-  static const rasterStatsKey = 'rasterStats';
   static const rebuildCountModelKey = 'rebuildCountModel';
   static const displayRefreshRateKey = 'displayRefreshRate';
   static const flutterFramesKey = 'flutterFrames';
   static const selectedFrameIdKey = 'selectedFrameId';
 
   final Uint8List? perfettoTraceBinary;
-
-  final RasterStats? rasterStats;
 
   final RebuildCountModel? rebuildCountModel;
 
@@ -68,7 +62,6 @@ class OfflinePerformanceData {
         flutterFramesKey: frames.map((frame) => frame.json).toList(),
         selectedFrameIdKey: selectedFrame?.id,
         displayRefreshRateKey: displayRefreshRate,
-        rasterStatsKey: rasterStats?.json,
         rebuildCountModelKey: rebuildCountModel?.toJson(),
       };
 }
@@ -78,12 +71,6 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
     final value =
         (json[OfflinePerformanceData.traceBinaryKey] as List?)?.cast<int>();
     return value == null ? null : Uint8List.fromList(value);
-  }
-
-  RasterStats? get rasterStats {
-    final raw = (json[OfflinePerformanceData.rasterStatsKey] as Map? ?? {})
-        .cast<String, Object>();
-    return raw.isNotEmpty ? RasterStats.fromJson(raw) : null;
   }
 
   int? get selectedFrameId =>

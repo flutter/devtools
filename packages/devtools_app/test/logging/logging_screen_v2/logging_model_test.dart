@@ -26,9 +26,12 @@ void main() {
   final log1 = LogDataV2('test', 'The details', 464564);
 
   setUp(() {
+    final fakeServiceConnection = FakeServiceConnectionManager();
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, getIdeTheme());
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(GlobalKey<NavigatorState>, GlobalKey<NavigatorState>());
+
     TestWidgetsFlutterBinding.ensureInitialized();
     loggingTableModel = LoggingTableModel();
   });

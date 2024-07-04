@@ -7,7 +7,6 @@ import 'dart:developer';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/ui/filter.dart';
 import '../../cpu_profile_model.dart';
@@ -34,7 +33,7 @@ Example queries:
 
   @override
   Widget build(BuildContext context) {
-    return ToggleFilterDialog<CpuStackFrame>(
+    return FilterDialog<CpuStackFrame>(
       controller: controller,
       queryInstructions: filterQueryInstructions,
     );

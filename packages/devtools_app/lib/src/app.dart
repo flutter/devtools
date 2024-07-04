@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
 import 'extensions/extension_screen.dart';
+import 'framework/disconnect_observer.dart';
 import 'framework/framework_core.dart';
 import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
@@ -54,6 +55,7 @@ import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
 import 'shared/console/primitives/simple_items.dart';
 import 'shared/feature_flags.dart';
+import 'shared/framework_controller.dart';
 import 'shared/globals.dart';
 import 'shared/offline_data.dart';
 import 'shared/offline_screen.dart';
@@ -139,6 +141,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     super.initState();
     setGlobal(GlobalKey<NavigatorState>, routerDelegate.navigatorKey);
 
+    autoDisposeStreamSubscription(
+      frameworkController.onConnectVmEvent.listen(_connectVm),
+    );
+
     // TODO(https://github.com/flutter/devtools/issues/6018): Once
     // https://github.com/flutter/flutter/issues/129692 is fixed, disable the
     // browser's native context menu on secondary-click, and instead use the
@@ -189,6 +195,18 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     _clearCachedRoutes();
   }
 
+  /// Connects to the VM with the given URI.
+  ///
+  /// This request usually comes from the IDE via the server API to reuse the
+  /// DevTools window after being disconnected (for example if the user stops
+  /// a debug session then launches a new one).
+  Future<void> _connectVm(ConnectVmEvent event) async {
+    await routerDelegate.updateArgsIfChanged({
+      'uri': event.serviceProtocolUri.toString(),
+      if (event.notify) 'notify': 'true',
+    });
+  }
+
   /// Gets the page for a given page/path and args.
   Page _getPage(
     BuildContext context,
@@ -198,7 +216,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   ) {
     // `page` will initially be null while the router is set up, then we will
     // be called again with an empty string for the root.
-    if (FrameworkCore.initializationInProgress || page == null) {
+    if (FrameworkCore.vmServiceInitializationInProgress || page == null) {
       return const MaterialPage(child: CenteredCircularProgressIndicator());
     }
 
@@ -256,7 +274,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       page = queryParams.legacyPage;
     }
 
-    final connectedToVmService =
+    final paramsContainVmServiceUri =
         vmServiceUri != null && vmServiceUri.isNotEmpty;
 
     Widget scaffoldBuilder() {
@@ -328,7 +346,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               actions: isEmbedded()
                   ? []
                   : [
-                      if (connectedToVmService) ...[
+                      if (paramsContainVmServiceUri) ...[
                         // Hide the hot reload button for Dart web apps, where the
                         // hot reload service extension is not avilable and where the
                         // [service.reloadServices] RPC is not implemented.
@@ -354,12 +372,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       );
     }
 
-    return connectedToVmService
-        ? Initializer(
-            url: vmServiceUri,
-            allowConnectionScreenOnDisconnect: !embedMode.embedded,
-            builder: (_) => scaffoldBuilder(),
-          )
+    return paramsContainVmServiceUri
+        ? Initializer(builder: (_) => scaffoldBuilder())
         : scaffoldBuilder();
   }
 
@@ -433,6 +447,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       builder: (context, child) {
+        if (child == null) {
+          return const CenteredMessage(
+            'Uh-oh, something went wrong. Please refresh the page.',
+          );
+        }
         return MultiProvider(
           providers: [
             Provider<AnalyticsController>.value(
@@ -448,7 +467,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           child: NotificationsView(
             child: ReleaseNotesViewer(
               controller: releaseNotesController,
-              child: child,
+              child: DisconnectObserver(
+                routerDelegate: routerDelegate,
+                child: child,
+              ),
             ),
           ),
         );

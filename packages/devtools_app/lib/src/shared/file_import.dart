@@ -185,7 +185,8 @@ class _FileImportContainerState extends State<FileImportContainer> {
             textAlign: TextAlign.left,
           ),
         ),
-        if (importedFile != null) clearInputButton(_clearFile),
+        if (importedFile != null)
+          InputDecorationSuffixButton.clear(onPressed: _clearFile),
       ],
     );
   }

@@ -134,8 +134,8 @@ mixin FilterControllerMixin<T> on DisposableController
 ///
 /// This dialog interacts with a [FilterControllerMixin] to manage and preserve
 /// the toggleable filter state managed by the dialog.
-class ToggleFilterDialog<T> extends StatefulWidget {
-  ToggleFilterDialog({
+class FilterDialog<T> extends StatefulWidget {
+  FilterDialog({
     super.key,
     required this.controller,
     this.includeQueryFilter = true,
@@ -160,10 +160,10 @@ class ToggleFilterDialog<T> extends StatefulWidget {
   final List<bool> toggleFilterValuesAtOpen;
 
   @override
-  State<ToggleFilterDialog<T>> createState() => _ToggleFilterDialogState<T>();
+  State<FilterDialog<T>> createState() => _FilterDialogState<T>();
 }
 
-class _ToggleFilterDialogState<T> extends State<ToggleFilterDialog<T>>
+class _FilterDialogState<T> extends State<FilterDialog<T>>
     with AutoDisposeMixin {
   late final TextEditingController queryTextFieldController;
   late bool useRegExp;
@@ -466,6 +466,12 @@ extension PatternListExtension on List<Pattern> {
   }
 }
 
+// TODO:: Change screens that use [DevtoolsFilterButton] to use a [StandaloneFilterField]
+// instead.
+/// A text field for controlling the filter query for a [FilterControllerMixin].
+///
+/// This text field has a button to open a dialog for toggling any toggleable
+/// text filters.
 class StandaloneFilterField<T> extends StatefulWidget {
   const StandaloneFilterField({
     super.key,
@@ -482,7 +488,6 @@ class StandaloneFilterField<T> extends StatefulWidget {
 class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
     with AutoDisposeMixin {
   late final TextEditingController queryTextFieldController;
-  late bool useRegExp;
 
   @override
   void initState() {
@@ -490,12 +495,6 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
     queryTextFieldController = TextEditingController(
       text: widget.controller.activeFilter.value.queryFilter.query,
     );
-    useRegExp = widget.controller.useRegExp.value;
-    addAutoDisposeListener(widget.controller.useRegExp, () {
-      setState(() {
-        useRegExp = widget.controller.useRegExp.value;
-      });
-    });
   }
 
   @override
@@ -509,29 +508,34 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
     return Row(
       children: [
         Expanded(
-          child: DevToolsClearableTextField(
-            autofocus: true,
-            labelText: 'Filter',
-            controller: queryTextFieldController,
-            additionalSuffixActions: [
-              DevToolsToggleButton(
-                icon: Codicons.regex,
-                message: 'Use regular expressions',
-                outlined: false,
-                isSelected: useRegExp,
-                onPressed: () => setState(() {
-                  widget.controller.useRegExp.value = !useRegExp;
+          child: ValueListenableBuilder<bool>(
+            valueListenable: widget.controller.useRegExp,
+            builder: (context, useRegExp, _) {
+              return DevToolsClearableTextField(
+                autofocus: true,
+                labelText: 'Filter',
+                controller: queryTextFieldController,
+                additionalSuffixActions: [
+                  DevToolsToggleButton(
+                    icon: Codicons.regex,
+                    message: 'Use regular expressions',
+                    outlined: false,
+                    isSelected: useRegExp,
+                    onPressed: () {
+                      widget.controller.useRegExp.value = !useRegExp;
+                      widget.controller.setActiveFilter(
+                        query: queryTextFieldController.value.text,
+                        toggleFilters: widget.controller._toggleFilters,
+                      );
+                    },
+                  ),
+                ],
+                onChanged: (_) {
                   widget.controller.setActiveFilter(
                     query: queryTextFieldController.value.text,
                     toggleFilters: widget.controller._toggleFilters,
                   );
-                }),
-              ),
-            ],
-            onChanged: (_) {
-              widget.controller.setActiveFilter(
-                query: queryTextFieldController.value.text,
-                toggleFilters: widget.controller._toggleFilters,
+                },
               );
             },
           ),
@@ -543,8 +547,9 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
             unawaited(
               showDialog(
                 context: context,
-                builder: (context) => FilterOptionsDialog(
+                builder: (context) => FilterDialog(
                   controller: widget.controller,
+                  includeQueryFilter: false,
                 ),
               ),
             );
@@ -553,70 +558,5 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
         ),
       ],
     );
-  }
-}
-
-class FilterOptionsDialog<T> extends StatefulWidget {
-  FilterOptionsDialog({
-    super.key,
-    required this.controller,
-    this.queryInstructions,
-  })  : assert(
-          queryInstructions == null || controller._queryFilterArgs.isNotEmpty,
-        ),
-        toggleFilterValuesAtOpen = List.generate(
-          controller.activeFilter.value.toggleFilters.length,
-          (index) =>
-              controller.activeFilter.value.toggleFilters[index].enabled.value,
-        );
-
-  final FilterControllerMixin<T> controller;
-
-  final String? queryInstructions;
-
-  final List<bool> toggleFilterValuesAtOpen;
-
-  @override
-  State<FilterOptionsDialog<T>> createState() => _FilterOptionsDialogState<T>();
-}
-
-class _FilterOptionsDialogState<T> extends State<FilterOptionsDialog<T>>
-    with AutoDisposeMixin {
-  @override
-  Widget build(BuildContext context) {
-    return StateUpdateDialog(
-      title: 'Filter Settings',
-      onApply: _applyFilterChanges,
-      onCancel: _restoreOldValues,
-      onResetDefaults: _resetFilters,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final toggleFilter in widget.controller._toggleFilters) ...[
-            ToggleFilterElement(filter: toggleFilter),
-          ],
-        ],
-      ),
-    );
-  }
-
-  void _applyFilterChanges() {
-    widget.controller.setActiveFilter(
-      // Keep the query the same, only update the toggle filters.
-      query: widget.controller.activeFilter.value.queryFilter.query,
-      toggleFilters: widget.controller._toggleFilters,
-    );
-  }
-
-  void _resetFilters() {
-    widget.controller._resetToDefaultFilter();
-  }
-
-  void _restoreOldValues() {
-    for (var i = 0; i < widget.controller._toggleFilters.length; i++) {
-      final filter = widget.controller._toggleFilters[i];
-      filter.enabled.value = widget.toggleFilterValuesAtOpen[i];
-    }
   }
 }

@@ -197,7 +197,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     unawaited(
       showDialog(
         context: context,
-        builder: (context) => ToggleFilterDialog<LogData>(
+        builder: (context) => FilterDialog<LogData>(
           controller: controller,
           queryInstructions: LoggingScreenBody.filterQueryInstructions,
         ),

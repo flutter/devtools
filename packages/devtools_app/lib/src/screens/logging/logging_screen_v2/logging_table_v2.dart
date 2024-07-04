@@ -6,9 +6,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../service/service_extension_widgets.dart';
 import '../../../shared/analytics/constants.dart' as gac;
@@ -19,12 +17,6 @@ import '../../../shared/utils.dart';
 import 'logging_controller_v2.dart';
 import 'logging_model.dart';
 import 'logging_table_row.dart';
-
-/// A builder that includes an Offset to draw the context menu at.
-typedef ContextMenuBuilder = Widget Function(
-  BuildContext context,
-  Offset offset,
-);
 
 /// A Widget for displaying logs with line wrapping, along with log metadata.
 class LoggingTableV2 extends StatefulWidget {

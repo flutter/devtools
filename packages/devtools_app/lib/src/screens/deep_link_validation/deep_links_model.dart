@@ -121,13 +121,55 @@ class AndroidDomainError extends DomainError {
 
 class IosDomainError extends DomainError {
   const IosDomainError(super.title, super.explanation, super.fixDetails);
-  // TODO: Add  domain errors for iOS.
+  // TODO(hangyujin): Finalize strings for these domain errors.
 
   /// Existence of an Apple-App-Site-Association file.
   static const existence = IosDomainError(
     'Apple-App-Site-Association file does not exist',
-    '',
-    '',
+    'This test checks whether the Apple-App-Site-Association file, '
+        'which is required to verify the association between the app and the '
+        'domain name, exists under your domain.',
+    'Add an Apple-App-Side-Association file to all of the '
+        'failed website domains at the following location: '
+        'https://[domain.name]/apple-app-site-association.',
+  );
+
+  /// AASA file should define a link to this app.
+  static const appIdentifier = IosDomainError(
+    'App identifier not found',
+    'This test checks your Apple-App-Site-Association file '
+        'for App identifier validation, which the mobile device '
+        'uses to verify ownership of the app.',
+    'Ensure your Apple-App-Site-Association file declares the '
+        'correct app identifier.',
+  );
+
+  /// AASA file should be accessible via https.
+  static const httpsAccessibility = IosDomainError(
+    'HTTPS accessibility check failed',
+    'This test tries to access your Apple-App-Site-Association '
+        'file over an HTTPS connection, which must be '
+        'accessible to verify ownership of the app.',
+    'Ensure your Apple-App-Site-Association file is accessible '
+        'over an HTTPS connection for all of the failed website domains.',
+  );
+
+  /// AASA file should be accessible with no redirects.
+  static const nonRedirect = IosDomainError(
+    'Domain non-redirect check failed',
+    'This test checks that your domain is accessible without '
+        'redirects. Your domain must be accessible without '
+        'redirects to verify ownership of the app.',
+    'Ensure your domain is accessible without any redirects.',
+  );
+
+  /// TODO(hangyujin): There are sub checkes of this check, add them and add links when finalized.
+  /// AASA file format follows guidelines.
+  static const fileFormat = IosDomainError(
+    'Apple-App-Site-Association file format is incorrect',
+    'This test checks that your Apple-App-Site-Association file '
+        'follows the correct format guidelines.',
+    'Ensure your Apple-App-Site-Association file follows the correct format guidelines.',
   );
 }
 

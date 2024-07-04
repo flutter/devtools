@@ -23,7 +23,6 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<TimelineEventsController>(),
   MockSpec<LoggingController>(),
   MockSpec<LoggingControllerV2>(),
-  MockSpec<RasterStatsController>(),
   MockSpec<ProgramExplorerController>(),
   MockSpec<ScriptManager>(),
   MockSpec<ServiceConnectionManager>(),

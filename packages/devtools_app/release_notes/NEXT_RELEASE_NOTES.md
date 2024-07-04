@@ -1,9 +1,9 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.37.0 release notes
+# DevTools 2.37.1 release notes
 
-The 2.37.0 release of the Dart and Flutter DevTools
+The 2.37.1 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](/tools/devtools/overview).
@@ -12,6 +12,10 @@ To learn more about DevTools, check out the
 
 * Improve messaging when a screen is unavailable for the platform of the
 connected app. - [#7958](https://github.com/flutter/devtools/pull/7958)
+* Fix a bug where an infinite spinner was shown upon app
+disconnect. - [#7992](https://github.com/flutter/devtools/pull/7992)
+* Fix a bug where trying to reuse a disconnected DevTools instance would
+fail. - [#8009](https://github.com/flutter/devtools/pull/8009)
 
 ## Inspector updates
 
@@ -19,7 +23,11 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+* Removed the "Raster Stats" feature. This tool did not work for the Impeller rendering
+engine, and the information it gave for the SKIA rendering engine was misleading and
+inactionable. Users should follow official Flutter guidance for
+[Performance & Optimization](https://docs.flutter.dev/perf) when debugging the
+rendering performance of their Flutter apps. - [#7981](https://github.com/flutter/devtools/pull/7981).
 
 ## CPU profiler updates
 

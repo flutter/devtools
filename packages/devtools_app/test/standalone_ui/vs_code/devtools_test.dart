@@ -5,7 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/editor/api_classes.dart';
 import 'package:devtools_app/src/shared/development_helpers.dart';
-import 'package:devtools_app/src/standalone_ui/vs_code/devtools.dart';
+import 'package:devtools_app/src/standalone_ui/vs_code/devtools/devtools_view.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -41,6 +41,7 @@ void main() {
     when(mockEditorClient.supportsHotRestart).thenReturn(true);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
 
     final mockDtdManager = MockDTDManager();
     when(
@@ -96,7 +97,7 @@ void main() {
 
           expect(find.text('DevTools'), findsOneWidget);
           for (final screen in ScreenMetaData.values) {
-            final include = DevToolsSidebarOptions.includeInSidebar(screen);
+            final include = SidebarDevToolsScreens.includeInSidebar(screen);
             // Do not check the 'simple' or 'home' screens because they do not
             // have a title we can verify against.
             if (screen != ScreenMetaData.simple &&

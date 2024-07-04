@@ -845,14 +845,28 @@ String? _valueAsString(InstanceRef? ref) {
       : ref.valueAsString;
 }
 
+/// A class for holding a [LogDataV2] and its current estimated [height].
+///
+/// The [log] and its [height] have similar lifecycles, so it is helpful to keep
+/// them tied together.
 class _LogEntry {
   _LogEntry(this.log);
   final LogDataV2 log;
+
+  /// The current calculated height [log].
   double? height;
 }
 
+/// A class for holding a [logEntry] and its [offset] from the top of a list of
+/// filtered entries.
+///
+/// The [logEntry] and its [offset] have similar lifecycles, so it is helpful to keep
+/// them tied together.
 class _FilteredLogEntry {
   _FilteredLogEntry(this.logEntry);
+
   final _LogEntry logEntry;
+
+  /// The offset of this log entry in a view.
   double? offset;
 }

@@ -5,5 +5,4 @@
 export 'src/test_data/_cpu_profiler_data.dart';
 export 'src/test_data/_performance_data.dart';
 export 'src/test_data/_performance_data_large.dart';
-export 'src/test_data/_performance_raster_stats.dart';
 export 'src/test_data/sample_data.dart';

@@ -256,7 +256,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     unawaited(
       showDialog(
         context: context,
-        builder: (context) => ToggleFilterDialog<NetworkRequest>(
+        builder: (context) => FilterDialog<NetworkRequest>(
           controller: widget.controller,
           queryInstructions: NetworkScreenBody.filterQueryInstructions,
         ),

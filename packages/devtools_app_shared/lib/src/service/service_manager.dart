@@ -138,10 +138,11 @@ class ServiceManager<T extends VmService> {
   VM? vm;
   String? sdkVersion;
 
-  bool get hasConnection => service != null && connectedApp != null;
+  @Deprecated('Check connectedState.value.connected instead.')
+  bool get hasConnection => connectedState.value.connected;
 
   bool get connectedAppInitialized =>
-      hasConnection && connectedApp!.connectedAppInitialized;
+      connectedApp?.connectedAppInitialized ?? false;
 
   ValueListenable<ConnectedState> get connectedState => _connectedState;
 
@@ -428,7 +429,7 @@ class ServiceManager<T extends VmService> {
   }
 
   Future<void> manuallyDisconnect() async {
-    if (hasConnection) {
+    if (connectedState.value.connected) {
       await vmServiceClosed(
         connectionState:
             const ConnectedState(false, userInitiatedConnectionState: true),
