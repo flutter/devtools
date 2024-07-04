@@ -66,6 +66,12 @@
             "program": "devtools_app/test/test_infra/scenes/memory/default.stager_app.g.dart",
         },
         {
+            "name": "memory/offline",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/scenes/memory/offline.stager_app.g.dart",
+        },
+        {
             "name": "memory/diff_snapshot",
             "request": "launch",
             "type": "dart",
