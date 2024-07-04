@@ -25,7 +25,7 @@ void main() {
   late LoggingTableModel loggingTableModel;
   final log1 = LogDataV2('test', 'The details', 464564);
 
-  Future<void> _pumpForContext(WidgetTester tester) async {
+  Future<void> pumpForContext(WidgetTester tester) async {
     // A barebones widget is pumped to ensure that a style is available
     // for the LogTableModel to approximate widget sizes with
     await tester.pumpWidget(wrap(const Placeholder()));
@@ -47,7 +47,7 @@ void main() {
   });
   group('LoggingModel', () {
     testWidgets('can add logs', (WidgetTester tester) async {
-      await _pumpForContext(tester);
+      await pumpForContext(tester);
 
       expect(loggingTableModel.logCount, 0);
       expect(loggingTableModel.filteredLogCount, 0);
@@ -123,7 +123,7 @@ void main() {
       final log2 = LogDataV2('test', 'The details 2', 464564);
       final log3 = LogDataV2('test', 'The details 3', 464564);
 
-      await _pumpForContext(tester);
+      await pumpForContext(tester);
 
       preferences.logging.retentionLimit.value = 2;
       await tester.pump();
@@ -152,7 +152,7 @@ void main() {
       final log2 = LogDataV2('test', 'The details 456', 464564);
       final log3 = LogDataV2('test', 'The details 476', 464564);
 
-      await _pumpForContext(tester);
+      await pumpForContext(tester);
 
       preferences.logging.retentionLimit.value = 20;
 
@@ -211,7 +211,7 @@ void main() {
         summary: 'Summary 9',
       );
 
-      await _pumpForContext(tester);
+      await pumpForContext(tester);
 
       preferences.logging.retentionLimit.value = 20;
 
@@ -275,7 +275,7 @@ void main() {
         summary: 'Summary 9',
       );
 
-      await _pumpForContext(tester);
+      await pumpForContext(tester);
 
       preferences.logging.retentionLimit.value = 20;
 
@@ -353,7 +353,7 @@ void main() {
     });
 
     testWidgets('receives data', (WidgetTester tester) async {
-      await _pumpForContext(tester);
+      await pumpForContext(tester);
 
       expect(loggingTableModel.logCount, 0);
 
@@ -366,7 +366,7 @@ void main() {
     });
 
     testWidgets('clear', (WidgetTester tester) async {
-      await _pumpForContext(tester);
+      await pumpForContext(tester);
       addStdoutData('Abc.');
 
       expect(loggingTableModel.logCount, greaterThan(0));
@@ -424,7 +424,7 @@ void main() {
     // });
 
     testWidgets('filterData', (WidgetTester tester) async {
-      await _pumpForContext(tester);
+      await pumpForContext(tester);
 
       addStdoutData('abc');
       addStdoutData('def');
