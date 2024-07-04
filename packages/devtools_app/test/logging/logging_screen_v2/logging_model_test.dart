@@ -25,6 +25,12 @@ void main() {
   late LoggingTableModel loggingTableModel;
   final log1 = LogDataV2('test', 'The details', 464564);
 
+  Future<void> _pumpForContext(WidgetTester tester) async {
+    // A barebones widget is pumped to ensure that a style is available
+    // for the LogTableModel to approximate widget sizes with
+    await tester.pumpWidget(wrap(const Placeholder()));
+  }
+
   setUp(() {
     final fakeServiceConnection = FakeServiceConnectionManager();
     setGlobal(PreferencesController, PreferencesController());
@@ -41,9 +47,7 @@ void main() {
   });
   group('LoggingModel', () {
     testWidgets('can add logs', (WidgetTester tester) async {
-      // A barebones widget is pumped to ensure that a style is available
-      // for the LogTableModel to approximate widget sizes with
-      await tester.pumpWidget(wrap(const Placeholder()));
+      await _pumpForContext(tester);
 
       expect(loggingTableModel.logCount, 0);
       expect(loggingTableModel.filteredLogCount, 0);
@@ -119,9 +123,7 @@ void main() {
       final log2 = LogDataV2('test', 'The details 2', 464564);
       final log3 = LogDataV2('test', 'The details 3', 464564);
 
-      // A barebones widget is pumped to ensure that a style is available
-      // for the LogTableModel to approximate widget sizes with
-      await tester.pumpWidget(wrap(const Placeholder()));
+      await _pumpForContext(tester);
 
       preferences.logging.retentionLimit.value = 2;
       await tester.pump();
@@ -150,9 +152,8 @@ void main() {
       final log2 = LogDataV2('test', 'The details 456', 464564);
       final log3 = LogDataV2('test', 'The details 476', 464564);
 
-      // A barebones widget is pumped to ensure that a style is available
-      // for the LogTableModel to approximate widget sizes with
-      await tester.pumpWidget(wrap(const Placeholder()));
+      await _pumpForContext(tester);
+
       preferences.logging.retentionLimit.value = 20;
 
       loggingTableModel
@@ -210,9 +211,8 @@ void main() {
         summary: 'Summary 9',
       );
 
-      // A barebones widget is pumped to ensure that a style is available
-      // for the LogTableModel to approximate widget sizes with
-      await tester.pumpWidget(wrap(const Placeholder()));
+      await _pumpForContext(tester);
+
       preferences.logging.retentionLimit.value = 20;
 
       loggingTableModel
@@ -275,9 +275,8 @@ void main() {
         summary: 'Summary 9',
       );
 
-      // A barebones widget is pumped to ensure that a style is available
-      // for the LogTableModel to approximate widget sizes with
-      await tester.pumpWidget(wrap(const Placeholder()));
+      await _pumpForContext(tester);
+
       preferences.logging.retentionLimit.value = 20;
 
       loggingTableModel
@@ -349,31 +348,34 @@ void main() {
 
     test('initial state', () {
       expect(loggingTableModel.logCount, 0);
-      expect(loggingTableModel.filteredData.value, isEmpty);
+      expect(loggingTableModel.filteredLogCount, 0);
       expect(loggingTableModel.activeFilter.value.isEmpty, isFalse);
     });
 
-    test('receives data', () {
-      expect(loggingTableModel.logCount, isEmpty);
+    testWidgets('receives data', (WidgetTester tester) async {
+      await _pumpForContext(tester);
+
+      expect(loggingTableModel.logCount, 0);
 
       addStdoutData('Abc.');
 
-      expect(loggingTableModel.logCount, isNotEmpty);
-      expect(loggingTableModel.filteredData.value, isNotEmpty);
+      expect(loggingTableModel.logCount, greaterThan(0));
+      expect(loggingTableModel.filteredLogCount, greaterThan(0));
 
       expect(loggingTableModel.filteredLogAt(0).summary, contains('Abc'));
     });
 
-    test('clear', () {
+    testWidgets('clear', (WidgetTester tester) async {
+      await _pumpForContext(tester);
       addStdoutData('Abc.');
 
-      expect(loggingTableModel.logCount, isNotEmpty);
-      expect(loggingTableModel.filteredData.value, isNotEmpty);
+      expect(loggingTableModel.logCount, greaterThan(0));
+      expect(loggingTableModel.filteredLogCount, greaterThan(0));
 
       loggingTableModel.clear();
 
-      expect(loggingTableModel.logCount, isEmpty);
-      expect(loggingTableModel.filteredData.value, isEmpty);
+      expect(loggingTableModel.logCount, 0);
+      expect(loggingTableModel.filteredLogCount, 0);
     });
 
     // test('matchesForSearch', () {
@@ -421,7 +423,9 @@ void main() {
     //   verifyIsSearchMatch(loggingTableModel.filteredData.value, matches);
     // });
 
-    test('filterData', () {
+    testWidgets('filterData', (WidgetTester tester) async {
+      await _pumpForContext(tester);
+
       addStdoutData('abc');
       addStdoutData('def');
       addStdoutData('abc ghi');
@@ -439,7 +443,7 @@ void main() {
 
       // At this point data is filtered by the default toggle filter values.
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 5);
+      expect(loggingTableModel.filteredLogCount, 5);
 
       // Test query filters assuming default toggle filters are all enabled.
       for (final filter in loggingTableModel.activeFilter.value.toggleFilters) {
@@ -448,35 +452,35 @@ void main() {
 
       loggingTableModel.setActiveFilter(query: 'abc');
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 2);
+      expect(loggingTableModel.filteredLogCount, 2);
 
       loggingTableModel.setActiveFilter(query: 'def');
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 1);
+      expect(loggingTableModel.filteredLogCount, 1);
 
       loggingTableModel.setActiveFilter(query: 'abc def');
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 3);
+      expect(loggingTableModel.filteredLogCount, 3);
 
       loggingTableModel.setActiveFilter(query: 'k:stdout');
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 3);
+      expect(loggingTableModel.filteredLogCount, 3);
 
       loggingTableModel.setActiveFilter(query: '-k:stdout');
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 2);
+      expect(loggingTableModel.filteredLogCount, 2);
 
       loggingTableModel.setActiveFilter(query: 'k:stdout abc');
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 2);
+      expect(loggingTableModel.filteredLogCount, 2);
 
       loggingTableModel.setActiveFilter(query: 'k:stdout,flutter.navigation');
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 4);
+      expect(loggingTableModel.filteredLogCount, 4);
 
       loggingTableModel.setActiveFilter();
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 5);
+      expect(loggingTableModel.filteredLogCount, 5);
 
       // Test toggle filters.
       final verboseFlutterFrameworkFilter =
@@ -488,17 +492,17 @@ void main() {
       verboseFlutterFrameworkFilter.enabled.value = false;
       loggingTableModel.setActiveFilter();
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 9);
+      expect(loggingTableModel.filteredLogCount, 9);
 
       verboseFlutterServiceFilter.enabled.value = false;
       loggingTableModel.setActiveFilter();
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 10);
+      expect(loggingTableModel.filteredLogCount, 10);
 
       gcFilter.enabled.value = false;
       loggingTableModel.setActiveFilter();
       expect(loggingTableModel.logCount, 12);
-      expect(loggingTableModel.filteredData.value, 12);
+      expect(loggingTableModel.filteredLogCount, 12);
     });
   });
 }
