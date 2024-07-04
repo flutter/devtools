@@ -62,8 +62,9 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    final connected = serviceConnection.serviceManager.hasConnection &&
-        serviceConnection.serviceManager.connectedAppInitialized;
+    final connected =
+        serviceConnection.serviceManager.connectedState.value.connected &&
+            serviceConnection.serviceManager.connectedAppInitialized;
     return Scrollbar(
       child: ListView(
         children: [
@@ -102,6 +103,9 @@ class ConnectionSection extends StatelessWidget {
             gaScreen: gac.home,
             minScreenWidthForTextBeforeScaling:
                 _primaryMinScreenWidthForTextBeforeScaling,
+            routerDelegate: DevToolsRouterDelegate.of(context),
+            onPressed: () =>
+                Navigator.of(context, rootNavigator: true).pop('dialog'),
           ),
         ],
         child: const ConnectedAppSummary(narrowView: false),
@@ -287,7 +291,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
     if (connected) {
       final connectedUri =
           Uri.parse(serviceConnection.serviceManager.serviceUri!);
-      routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
+      await routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');
     } else if (normalizeVmServiceUri(uri) == null) {

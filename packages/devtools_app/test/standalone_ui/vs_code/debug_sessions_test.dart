@@ -26,6 +26,7 @@ void main() {
   setUpAll(() {
     // Set test mode so that the debug list of extensions will be used.
     setTestMode();
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
 
     final devices = stubbedDevices.map((d) => MapEntry(d.id, d));
     deviceMap = {for (final d in devices) d.key: d.value};

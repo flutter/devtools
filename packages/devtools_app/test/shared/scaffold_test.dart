@@ -29,7 +29,6 @@ void main() {
     when(mockServiceManager.connectedState).thenReturn(
       ValueNotifier<ConnectedState>(const ConnectedState(false)),
     );
-    when(mockServiceManager.hasConnection).thenReturn(false);
 
     final mockErrorBadgeManager = MockErrorBadgeManager();
     when(mockServiceConnection.errorBadgeManager)

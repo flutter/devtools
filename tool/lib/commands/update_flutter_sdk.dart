@@ -14,6 +14,8 @@ import '../utils.dart';
 const _updateOnPath = 'update-on-path';
 const _useCacheFlag = 'use-cache';
 
+final _flutterPreReleaseTagRegExp = RegExp(r'[0-9]+.[0-9]+.0-[0-9]+.0.pre');
+
 /// This command updates the the Flutter SDK contained in the 'tool/' directory
 /// to the latest Flutter candidate branch.
 ///
@@ -79,12 +81,18 @@ class UpdateFlutterSdkCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final String flutterTag;
+    final String? flutterVersion;
+
     if (useCachedVersion) {
-      flutterTag =
-          'tags/${repo.readFile(Uri.parse('flutter-candidate.txt')).trim()}';
+      final versionStr =
+          repo.readFile(Uri.parse('flutter-candidate.txt')).trim();
+      // If the version string doesn't match the expected pattern for a
+      // pre-release tag, then assume it's a commit hash:
+      flutterVersion = _flutterPreReleaseTagRegExp.hasMatch(versionStr)
+          ? 'tags/$versionStr'
+          : versionStr;
     } else {
-      flutterTag = (await processManager.runProcess(
+      flutterVersion = (await processManager.runProcess(
         CliCommand('sh', ['latest_flutter_candidate.sh']),
         workingDirectory: repo.toolDirectoryPath,
       ))
@@ -95,7 +103,7 @@ class UpdateFlutterSdkCommand extends Command {
 
     log.stdout(
       'Updating to Flutter version '
-      '${useCachedVersion ? 'from cache' : 'from upstream'}: $flutterTag ',
+      '${useCachedVersion ? 'from cache' : 'from upstream'}: $flutterVersion',
     );
 
     final flutterSdkDirName = repo.sdkDirectoryName;
@@ -120,7 +128,7 @@ class UpdateFlutterSdkCommand extends Command {
           CliCommand.git(['fetch', 'upstream']),
           CliCommand.git(['checkout', 'upstream/master']),
           CliCommand.git(['reset', '--hard', 'upstream/master']),
-          CliCommand.git(['checkout', flutterTag, '-f']),
+          CliCommand.git(['checkout', flutterVersion, '-f']),
           CliCommand.flutter(['--version']),
         ],
         workingDirectory: pathSdk.sdkPath,
@@ -134,7 +142,7 @@ class UpdateFlutterSdkCommand extends Command {
       await processManager.runAll(
         commands: [
           CliCommand.git(['fetch']),
-          CliCommand.git(['checkout', flutterTag, '-f']),
+          CliCommand.git(['checkout', flutterVersion, '-f']),
           CliCommand.flutter(['--version']),
         ],
         workingDirectory: toolSdkPath,
@@ -149,7 +157,7 @@ class UpdateFlutterSdkCommand extends Command {
       );
       await processManager.runAll(
         commands: [
-          CliCommand.git(['checkout', flutterTag, '-f']),
+          CliCommand.git(['checkout', flutterVersion, '-f']),
           CliCommand.flutter(['--version']),
         ],
         workingDirectory: toolSdkPath,

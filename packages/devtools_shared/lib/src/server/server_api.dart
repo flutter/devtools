@@ -189,11 +189,9 @@ class ServerApi {
         if (queryParams.containsKey(lastReleaseNotesVersionPropertyName)) {
           _devToolsStore.lastReleaseNotesVersion =
               queryParams[lastReleaseNotesVersionPropertyName]!;
+          return _encodeResponse(true, api: api);
         }
-        return _encodeResponse(
-          _devToolsStore.lastReleaseNotesVersion,
-          api: api,
-        );
+        return _encodeResponse(false, api: api);
 
       // ----- App size api. -----
 
