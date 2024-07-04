@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_controller_v2.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_model.dart';
@@ -10,6 +11,7 @@ import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_table
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/preferences/preferences.dart';
+import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -18,31 +20,34 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const windowSize = Size(500.0, 500.0);
+
+  late LoggingTableModel loggingTableModel;
+  final log1 = LogDataV2('test', 'The details', 464564);
+
+  Future<void> pumpForContext(WidgetTester tester) async {
+    // A barebones widget is pumped to ensure that a style is available
+    // for the LogTableModel to approximate widget sizes with
+    await tester.pumpWidget(wrap(const Placeholder()));
+  }
+
+  setUp(() {
+    final fakeServiceConnection = FakeServiceConnectionManager();
+    setGlobal(PreferencesController, PreferencesController());
+    setGlobal(IdeTheme, getIdeTheme());
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
+    setGlobal(GlobalKey<NavigatorState>, GlobalKey<NavigatorState>());
+
+    TestWidgetsFlutterBinding.ensureInitialized();
+    loggingTableModel = LoggingTableModel();
+  });
+
+  tearDown(() {
+    loggingTableModel.dispose();
+  });
   group('LoggingModel', () {
-    const windowSize = Size(500.0, 500.0);
-
-    late LoggingTableModel loggingTableModel;
-    final log1 = LogDataV2('test', 'The details', 464564);
-
-    setUp(() {
-      final fakeServiceConnection = FakeServiceConnectionManager();
-      setGlobal(PreferencesController, PreferencesController());
-      setGlobal(IdeTheme, getIdeTheme());
-      setGlobal(ServiceConnectionManager, fakeServiceConnection);
-      setGlobal(GlobalKey<NavigatorState>, GlobalKey<NavigatorState>());
-
-      TestWidgetsFlutterBinding.ensureInitialized();
-      loggingTableModel = LoggingTableModel();
-    });
-
-    tearDown(() {
-      loggingTableModel.dispose();
-    });
-
     testWidgets('can add logs', (WidgetTester tester) async {
-      // A barebones widget is pumped to ensure that a style is available
-      // for the LogTableModel to approximate widget sizes with
-      await tester.pumpWidget(wrap(const Placeholder()));
+      await pumpForContext(tester);
 
       expect(loggingTableModel.logCount, 0);
       expect(loggingTableModel.filteredLogCount, 0);
@@ -118,9 +123,7 @@ void main() {
       final log2 = LogDataV2('test', 'The details 2', 464564);
       final log3 = LogDataV2('test', 'The details 3', 464564);
 
-      // A barebones widget is pumped to ensure that a style is available
-      // for the LogTableModel to approximate widget sizes with
-      await tester.pumpWidget(wrap(const Placeholder()));
+      await pumpForContext(tester);
 
       preferences.logging.retentionLimit.value = 2;
       await tester.pump();
@@ -149,9 +152,8 @@ void main() {
       final log2 = LogDataV2('test', 'The details 456', 464564);
       final log3 = LogDataV2('test', 'The details 476', 464564);
 
-      // A barebones widget is pumped to ensure that a style is available
-      // for the LogTableModel to approximate widget sizes with
-      await tester.pumpWidget(wrap(const Placeholder()));
+      await pumpForContext(tester);
+
       preferences.logging.retentionLimit.value = 20;
 
       loggingTableModel
@@ -209,9 +211,8 @@ void main() {
         summary: 'Summary 9',
       );
 
-      // A barebones widget is pumped to ensure that a style is available
-      // for the LogTableModel to approximate widget sizes with
-      await tester.pumpWidget(wrap(const Placeholder()));
+      await pumpForContext(tester);
+
       preferences.logging.retentionLimit.value = 20;
 
       loggingTableModel
@@ -274,9 +275,8 @@ void main() {
         summary: 'Summary 9',
       );
 
-      // A barebones widget is pumped to ensure that a style is available
-      // for the LogTableModel to approximate widget sizes with
-      await tester.pumpWidget(wrap(const Placeholder()));
+      await pumpForContext(tester);
+
       preferences.logging.retentionLimit.value = 20;
 
       loggingTableModel
@@ -306,6 +306,203 @@ void main() {
       expect(loggingTableModel.selectedLogCount, 0);
       expect(loggingTableModel.filteredLogAt(0), equals(log1));
       expect(loggingTableModel.filteredLogAt(1), equals(log3));
+    });
+  });
+
+  group('Original LoggingController tests', () {
+    setGlobal(MessageBus, MessageBus());
+
+    void addStdoutData(String message) {
+      loggingTableModel.add(
+        LogDataV2(
+          'stdout',
+          jsonEncode({'kind': 'stdout', 'message': message}),
+          0,
+          summary: message,
+        ),
+      );
+    }
+
+    void addGcData(String message) {
+      loggingTableModel.add(
+        LogDataV2(
+          'gc',
+          jsonEncode({'kind': 'gc', 'message': message}),
+          0,
+          summary: message,
+        ),
+      );
+    }
+
+    void addLogWithKind(String kind) {
+      loggingTableModel
+          .add(LogDataV2(kind, jsonEncode({'foo': 'test_data'}), 0));
+    }
+
+    setUp(() {
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceConnectionManager(),
+      );
+    });
+
+    test('initial state', () {
+      expect(loggingTableModel.logCount, 0);
+      expect(loggingTableModel.filteredLogCount, 0);
+      expect(loggingTableModel.activeFilter.value.isEmpty, isFalse);
+    });
+
+    testWidgets('receives data', (WidgetTester tester) async {
+      await pumpForContext(tester);
+
+      expect(loggingTableModel.logCount, 0);
+
+      addStdoutData('Abc.');
+
+      expect(loggingTableModel.logCount, greaterThan(0));
+      expect(loggingTableModel.filteredLogCount, greaterThan(0));
+
+      expect(loggingTableModel.filteredLogAt(0).summary, contains('Abc'));
+    });
+
+    testWidgets('clear', (WidgetTester tester) async {
+      await pumpForContext(tester);
+      addStdoutData('Abc.');
+
+      expect(loggingTableModel.logCount, greaterThan(0));
+      expect(loggingTableModel.filteredLogCount, greaterThan(0));
+
+      loggingTableModel.clear();
+
+      expect(loggingTableModel.logCount, 0);
+      expect(loggingTableModel.filteredLogCount, 0);
+    });
+
+    // test('matchesForSearch', () {
+    //   addStdoutData('abc');
+    //   addStdoutData('def');
+    //   addStdoutData('abc ghi');
+    //   addLogWithKind('Flutter.Navigation');
+    //   addLogWithKind('Flutter.Error');
+    //   addGcData('gc1');
+    //   addGcData('gc2');
+    //
+    //   expect(loggingTableModel.filteredData.value, 5);
+    //   expect(loggingTableModel.matchesForSearch('abc').length, equals(2));
+    //   expect(loggingTableModel.matchesForSearch('ghi').length, equals(1));
+    //   expect(loggingTableModel.matchesForSearch('abcd').length, equals(0));
+    //   expect(loggingTableModel.matchesForSearch('Flutter*').length, equals(2));
+    //   expect(loggingTableModel.matchesForSearch('').length, equals(0));
+    //
+    //   // Search by event kind.
+    //   expect(loggingTableModel.matchesForSearch('stdout').length, equals(3));
+    //   expect(loggingTableModel.matchesForSearch('flutter.*').length, equals(2));
+    //
+    //   // Search with incorrect case.
+    //   expect(loggingTableModel.matchesForSearch('STDOUT').length, equals(3));
+    // });
+    //
+    // test('matchesForSearch sets isSearchMatch property', () {
+    //   addStdoutData('abc');
+    //   addStdoutData('def');
+    //   addStdoutData('abc ghi');
+    //   addLogWithKind('Flutter.Navigation');
+    //   addLogWithKind('Flutter.Error');
+    //   addGcData('gc1');
+    //   addGcData('gc2');
+    //
+    //   expect(loggingTableModel.filteredData.value, 5);
+    //   loggingTableModel.search = 'abc';
+    //   var matches = loggingTableModel.searchMatches.value;
+    //   expect(matches.length, equals(2));
+    //   verifyIsSearchMatch(loggingTableModel.filteredData.value, matches);
+    //
+    //   loggingTableModel.search = 'Flutter.';
+    //   matches = loggingTableModel.searchMatches.value;
+    //   expect(matches.length, equals(2));
+    //   verifyIsSearchMatch(loggingTableModel.filteredData.value, matches);
+    // });
+
+    testWidgets('filterData', (WidgetTester tester) async {
+      await pumpForContext(tester);
+
+      addStdoutData('abc');
+      addStdoutData('def');
+      addStdoutData('abc ghi');
+      addLogWithKind('Flutter.Navigation');
+      addLogWithKind('Flutter.Error');
+
+      // The following logs should all be filtered by default.
+      addGcData('gc1');
+      addGcData('gc2');
+      addLogWithKind('Flutter.FirstFrame');
+      addLogWithKind('Flutter.FrameworkInitialization');
+      addLogWithKind('Flutter.Frame');
+      addLogWithKind('Flutter.ImageSizesForFrame');
+      addLogWithKind('Flutter.ServiceExtensionStateChanged');
+
+      // At this point data is filtered by the default toggle filter values.
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 5);
+
+      // Test query filters assuming default toggle filters are all enabled.
+      for (final filter in loggingTableModel.activeFilter.value.toggleFilters) {
+        filter.enabled.value = true;
+      }
+
+      loggingTableModel.setActiveFilter(query: 'abc');
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 2);
+
+      loggingTableModel.setActiveFilter(query: 'def');
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 1);
+
+      loggingTableModel.setActiveFilter(query: 'abc def');
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 3);
+
+      loggingTableModel.setActiveFilter(query: 'k:stdout');
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 3);
+
+      loggingTableModel.setActiveFilter(query: '-k:stdout');
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 2);
+
+      loggingTableModel.setActiveFilter(query: 'k:stdout abc');
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 2);
+
+      loggingTableModel.setActiveFilter(query: 'k:stdout,flutter.navigation');
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 4);
+
+      loggingTableModel.setActiveFilter();
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 5);
+
+      // Test toggle filters.
+      final verboseFlutterFrameworkFilter =
+          loggingTableModel.activeFilter.value.toggleFilters[0];
+      final verboseFlutterServiceFilter =
+          loggingTableModel.activeFilter.value.toggleFilters[1];
+      final gcFilter = loggingTableModel.activeFilter.value.toggleFilters[2];
+
+      verboseFlutterFrameworkFilter.enabled.value = false;
+      loggingTableModel.setActiveFilter();
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 9);
+
+      verboseFlutterServiceFilter.enabled.value = false;
+      loggingTableModel.setActiveFilter();
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 10);
+
+      gcFilter.enabled.value = false;
+      loggingTableModel.setActiveFilter();
+      expect(loggingTableModel.logCount, 12);
+      expect(loggingTableModel.filteredLogCount, 12);
     });
   });
 }
