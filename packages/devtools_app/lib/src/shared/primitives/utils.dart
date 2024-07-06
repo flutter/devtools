@@ -454,6 +454,12 @@ enum TimeUnit {
 class TimeRange {
   TimeRange({this.singleAssignment = true});
 
+  factory TimeRange.fromJson(Map<String, dynamic> json) {
+    return TimeRange(
+      singleAssignment: true,
+    );
+  }
+
   factory TimeRange.offset({
     required TimeRange original,
     required Duration offset,

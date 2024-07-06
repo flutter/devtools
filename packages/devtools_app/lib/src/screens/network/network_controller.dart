@@ -61,23 +61,22 @@ class NetworkController extends DisposableController
     );
     subscribeToFilterChanges();
   }
-  List<DartIOHttpRequestData>? _httpRequests;
+  List<DartIOHttpRequestData>? httpRequests;
 
   String? exportAsHarFile() {
     final exportController = ExportController();
-
-    _httpRequests =
+    httpRequests =
         filteredData.value.whereType<DartIOHttpRequestData>().toList();
 
-    if (_httpRequests!.isEmpty) {
+    if (httpRequests!.isEmpty) {
       debugPrint('No valid request data to export');
       return '';
     }
 
     try {
-      if (_httpRequests != null && _httpRequests!.isNotEmpty) {
+      if (httpRequests != null && httpRequests!.isNotEmpty) {
         // Build the HAR object
-        final har = buildHar(_httpRequests!);
+        final har = buildHar(httpRequests!);
         debugPrint('data is ${json.encode(har)}');
         return exportController.downloadFile(
           json.encode(har),
@@ -396,13 +395,22 @@ class NetworkController extends DisposableController
 
   @override
   OfflineScreenData prepareOfflineScreenData() {
-    debugPrint('offline data - httpRequests are $_httpRequests');
+    final requests =
+        filteredData.value.whereType<DartIOHttpRequestData>().toList();
     return OfflineScreenData(
       screenId: NetworkScreen.id,
-      //TODO deserialize har data and pass here
-      data: {},
+      data: convertRequestsToMap(requests),
     );
   }
+}
+
+Map<String, Object> convertRequestsToMap(
+  List<DartIOHttpRequestData>? requests,
+) {
+  if (requests == null) return {};
+  return {
+    'requests': requests.map((request) => request.toMap()).toList(),
+  };
 }
 
 /// Class for managing the set of all current websocket requests, and

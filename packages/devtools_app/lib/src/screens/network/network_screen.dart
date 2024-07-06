@@ -10,24 +10,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../devtools_app.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
-import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
-import '../../shared/http/http_request_data.dart';
-import '../../shared/primitives/utils.dart';
-import '../../shared/screen.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/ui/filter.dart';
-import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
-import '../../shared/utils.dart';
-import 'network_controller.dart';
-import 'network_model.dart';
 import 'network_request_inspector.dart';
+import 'network_singleton.dart';
 
 class NetworkScreen extends Screen {
   NetworkScreen() : super.fromMetaData(ScreenMetaData.network);
@@ -116,6 +108,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   @override
   void initState() {
     super.initState();
+    addAutoDisposeListener(offlineDataController.showingOfflineData);
     ga.screen(NetworkScreen.id);
   }
 
@@ -123,19 +116,41 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    unawaited(controller.startRecording());
+    try {
+      if (offlineDataController.showingOfflineData.value == true) {
+        loadOfflineData(offlineDataController.offlineDataJson);
+      }
+      if (!offlineDataController.showingOfflineData.value) {
+        debugPrint('started recording');
+        unawaited(controller.startRecording());
+      }
+      cancelListeners();
+      if (!offlineDataController.showingOfflineData.value) {
+        debugPrint('started recording');
+        addAutoDisposeListener(
+          serviceConnection.serviceManager.isolateManager.mainIsolate,
+          () {
+            if (serviceConnection
+                    .serviceManager.isolateManager.mainIsolate.value !=
+                null) {
+              unawaited(controller.startRecording());
+            }
+          },
+        );
+      }
+    } catch (ex) {
+      debugPrint('caught ex $ex');
+    }
+  }
 
-    cancelListeners();
-
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.isolateManager.mainIsolate,
-      () {
-        if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
-            null) {
-          unawaited(controller.startRecording());
-        }
-      },
-    );
+  void loadOfflineData(Map<String, dynamic> offlineData) {
+    final requestsMap = offlineData['network']['requests'] as List<dynamic>;
+    final requests = requestsMap
+        .map((e) => DartIOHttpRequestData.fromJson(e as Map<String, dynamic>))
+        .toList();
+    controller.filteredData
+      ..clear()
+      ..addAll(requests);
   }
 
   @override
@@ -143,7 +158,10 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     // TODO(kenz): this won't work well if we eventually have multiple clients
     // that want to listen to network data.
     super.dispose();
-    unawaited(controller.stopRecording());
+    if (!(NetworkSingleton.instance.offlineMode ?? false)) {
+      debugPrint('stopped recording');
+      unawaited(controller.stopRecording());
+    }
   }
 
   @override
@@ -200,10 +218,12 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         _requests = widget.controller.requests.value;
       });
     });
-    _filteredRequests = widget.controller.filteredData.value;
+    NetworkSingleton.instance.filteredData =
+        widget.controller.filteredData.value;
     addAutoDisposeListener(widget.controller.filteredData, () {
       setState(() {
-        _filteredRequests = widget.controller.filteredData.value;
+        NetworkSingleton.instance.filteredData =
+            widget.controller.filteredData.value;
       });
     });
   }
@@ -211,7 +231,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
   @override
   Widget build(BuildContext context) {
     final screenWidth = ScreenSize(context).width;
-    final hasRequests = _filteredRequests.isNotEmpty;
+    final hasRequests = NetworkSingleton.instance.filteredData?.isNotEmpty;
     return Row(
       children: [
         StartStopRecordingButton(
@@ -234,19 +254,20 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           onPressed: widget.controller.clear,
         ),
         const SizedBox(width: defaultSpacing),
-        DownloadButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          onPressed: widget.controller.exportAsHarFile,
-          gaScreen: gac.network,
-          gaSelection: gac.NetworkEvent.networkDownloadHar,
-        ),
+        if (!offlineDataController.showingOfflineData.value)
+          DownloadButton(
+            minScreenWidthForTextBeforeScaling:
+                _NetworkProfilerControls._includeTextWidth,
+            onPressed: widget.controller.exportAsHarFile,
+            gaScreen: gac.network,
+            gaSelection: gac.NetworkEvent.networkDownloadHar,
+          ),
         const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<NetworkController>(
           searchController: widget.controller,
-          searchFieldEnabled: hasRequests,
+          searchFieldEnabled: hasRequests ?? false,
           searchFieldWidth: screenWidth <= MediaSize.xs
               ? defaultSearchFieldWidth
               : wideSearchFieldWidth,
@@ -254,7 +275,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         const SizedBox(width: denseSpacing),
         DevToolsFilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: _filteredRequests.length != _requests.length,
+          isFilterActive: NetworkSingleton.instance.filteredData?.length !=
+              _requests.length,
         ),
       ],
     );

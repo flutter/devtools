@@ -19,6 +19,17 @@ final _log = Logger('http_request_data');
 
 /// Used to represent an instant event emitted during an HTTP request.
 class DartIOHttpInstantEvent {
+  factory DartIOHttpInstantEvent.fromJson(Map<String, dynamic> json) {
+    final event = HttpProfileRequestEvent(
+      event: json['event'] ?? '',
+      timestamp: DateTime.parse(json['timestamp']),
+      // Populate other necessary fields
+    );
+
+    final instantEvent = DartIOHttpInstantEvent._(event);
+    instantEvent._timeRange = TimeRange.fromJson(json['timeRange']);
+    return instantEvent;
+  }
   DartIOHttpInstantEvent._(this._event);
 
   final HttpProfileRequestEvent _event;
@@ -37,6 +48,26 @@ class DartIOHttpInstantEvent {
 
 /// An abstraction of an HTTP request made through dart:io.
 class DartIOHttpRequestData extends NetworkRequest {
+  factory DartIOHttpRequestData.fromJson(Map<String, dynamic> json) {
+    final request = HttpProfileRequestRef(
+      id: json['id'],
+      method: json['method'],
+      uri: Uri.parse(json['uri']),
+      isolateId: '123',
+      events: [],
+      startTime: DateTime.now(),
+    );
+
+    final data = DartIOHttpRequestData(request);
+    data._responseBody = json['responseBody'] ?? '';
+    data._requestBody = json['requestBody'] ?? '';
+    // data._instantEvents = (json['instantEvents'] as List<dynamic>)
+    //     .map((e) => DartIOHttpInstantEvent.fromJson(e as Map<String, dynamic>))
+    //     .toList();
+
+    // Populate other fields as needed
+    return data;
+  }
   DartIOHttpRequestData(
     this._request, {
     bool requestFullDataFromVmService = true,
@@ -319,4 +350,27 @@ class DartIOHttpRequestData extends NetworkRequest {
         port,
         startTimestamp,
       );
+
+  Map<String, Object> toMap() {
+    return {
+      'id': id,
+      'method': method,
+      'uri': uri,
+      'status': 'status',
+      'type': type,
+      'duration': 'duration?.inMilliseconds',
+      'startTimestamp': startTimestamp.toIso8601String(),
+      'endTimestamp': endTimestamp!,
+      'requestHeaders': requestHeaders ?? {},
+      'responseHeaders': responseHeaders ?? {},
+      'requestBody': requestBody ?? '',
+      'responseBody': responseBody ?? '',
+      'inProgress': inProgress,
+      'didFail': didFail,
+      'general': general,
+      'requestCookies': requestCookies.map((c) => c.toString()).toList(),
+      'responseCookies': responseCookies.map((c) => c.toString()).toList(),
+      'instantEvents': 'instantEvents.map((e) => ()).toList()',
+    };
+  }
 }
