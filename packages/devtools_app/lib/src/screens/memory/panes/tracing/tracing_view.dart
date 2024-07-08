@@ -98,20 +98,22 @@ class _TracingControls extends StatelessWidget {
       padding: const EdgeInsets.all(denseSpacing),
       child: Row(
         children: [
-          RefreshButton(
-            tooltip: 'Request the set of updated allocation traces',
-            gaScreen: gac.memory,
-            gaSelection: gac.MemoryEvents.tracingRefresh.name,
-            onPressed: isProfileMode ? null : controller.refresh,
-          ),
-          const SizedBox(width: denseSpacing),
-          ClearButton(
-            tooltip: 'Clear the set of previously collected traces',
-            gaScreen: gac.memory,
-            gaSelection: gac.MemoryEvents.tracingClear.name,
-            onPressed: isProfileMode ? null : controller.clear,
-          ),
-          const SizedBox(width: denseSpacing),
+          if (controller.mode == ControllerCreationMode.connected) ...[
+            RefreshButton(
+              tooltip: 'Request the set of updated allocation traces',
+              gaScreen: gac.memory,
+              gaSelection: gac.MemoryEvents.tracingRefresh.name,
+              onPressed: isProfileMode ? null : controller.refresh,
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              tooltip: 'Clear the set of previously collected traces',
+              gaScreen: gac.memory,
+              gaSelection: gac.MemoryEvents.tracingClear.name,
+              onPressed: isProfileMode ? null : controller.clear,
+            ),
+            const SizedBox(width: denseSpacing),
+          ],
           const _ProfileHelpLink(),
         ],
       ),
