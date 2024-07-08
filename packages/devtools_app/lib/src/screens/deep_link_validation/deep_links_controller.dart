@@ -226,7 +226,23 @@ class DeepLinksController extends DisposableController
   late final selectedIosConfigurationIndex = ValueNotifier<int>(0);
   late final selectedIosTargetIndex = ValueNotifier<int>(0);
 
+    void _firstLoad() async {
+
+    pagePhase.value = PagePhase.linksLoading;
+    await loadIosLinks();
+    if (pagePhase.value == PagePhase.validationErrorPage) {
+      return;
+    }
+    await validateLinks();
+    }
+
+    
   void _handleAndroidConfigurationChanged() async {
+
+    if(pagePhase.value ==PagePhase.emptyState){
+      return;
+    }
+
     pagePhase.value = PagePhase.linksLoading;
     await loadAndroidAppLinks();
     if (pagePhase.value == PagePhase.validationErrorPage) {
@@ -236,6 +252,7 @@ class DeepLinksController extends DisposableController
   }
 
   void _handleIosConfigurationChanged() async {
+
     pagePhase.value = PagePhase.linksLoading;
     await loadIosLinks();
     if (pagePhase.value == PagePhase.validationErrorPage) {
