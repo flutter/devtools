@@ -560,7 +560,7 @@ class DescriptionDisplay extends StatelessWidget {
     if (multiline) {
       // We don't currently support including an action button for multiline
       // descriptions. We can update this if it's needed later.
-      assert(actionLabel != null && actionCallback != null);
+      assert(actionLabel == null);
       return SelectableText.rich(text);
     }
 
