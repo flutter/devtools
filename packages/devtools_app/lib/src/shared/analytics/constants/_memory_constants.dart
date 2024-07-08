@@ -64,8 +64,7 @@ enum MemoryEvents {
   tracingTraceCheck,
   tracingTreeExpandAll,
   tracingTreeCollapseAll,
-  tracingHelp,
-  ;
+  tracingHelp;
 
   static String dropOneLiveVariable({required String sourceFeature}) =>
       'dropOneLiveVariable_$sourceFeature';
