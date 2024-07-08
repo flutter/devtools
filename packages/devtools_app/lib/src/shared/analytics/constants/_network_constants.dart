@@ -5,7 +5,7 @@
 part of '../constants.dart';
 
 class NetworkEvent {
-  static const networkDownloadHar = 'networkDownloadHar';
+  static const downloadAsHar = 'downloadAsHar';
 }
 
 class NetworkEventKeys {

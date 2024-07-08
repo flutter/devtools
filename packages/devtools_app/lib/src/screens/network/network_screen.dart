@@ -239,7 +239,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               _NetworkProfilerControls._includeTextWidth,
           onPressed: widget.controller.exportAsHarFile,
           gaScreen: gac.network,
-          gaSelection: gac.NetworkEvent.networkDownloadHar,
+          gaSelection: gac.NetworkEvent.downloadAsHar,
         ),
         const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),
