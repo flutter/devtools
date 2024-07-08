@@ -32,7 +32,7 @@ const _thirdPartyPathSegment = 'third_party';
 class PreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   /// Whether the user preference for DevTools theme is set to dark mode.
-  /// 
+  ///
   /// To check whether DevTools is using a light or dark theme, other parts of
   /// the DevTools codebase should always check [isDarkThemeEnabled] instead of
   /// directly checking the value of this notifier. This is because
