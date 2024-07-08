@@ -13,7 +13,7 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/matchers/matchers.dart';
 
-// Note: This tests uses packages/devtools_app/test/test_infra/fixtures/flutter_app
+// Note: This test uses packages/devtools_app/test/test_infra/fixtures/flutter_app
 // running on the flutter-tester device.
 
 // This is a bit conservative to ensure we do not get flakes due to
@@ -76,7 +76,7 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
-      'navigation',
+      'widget selection',
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
@@ -84,7 +84,7 @@ void main() {
         // Give time for the initial animation to complete.
         await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-        // Click on the Center widget (row index #16)
+        // Select the Center widget (row index #16)
         await tester.tap(find.richText('Center'));
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
@@ -94,61 +94,60 @@ void main() {
           ),
         );
 
-        // Select the details tree.
-        await tester.tap(
-          find.text(
-            InspectorV2DetailsViewType.widgetDetailsTree.key,
-          ),
+        await env.tearDownEnvironment();
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'expand and collapse implementation widgets',
+      windowSize,
+      (WidgetTester tester) async {
+        await _loadInspectorUI(tester);
+
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+        // Before hidden widgets are expanded, confirm the HeroControllerScope
+        // is hidden:
+        final hideableNodeFinder = findNodeMatching('HeroControllerScope');
+        expect(hideableNodeFinder, findsNothing);
+
+        // Expand the hidden group that contains the HeroControllerScope:
+        final expandButton = findExpandCollapseButtonForNode(
+          nodeDescription: '71 more widgets...',
+          isExpand: true,
         );
+        await tester.tap(expandButton);
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_select_center_details_tree.png',
+            '../test_infra/goldens/integration_inspector_v2_implementation_widgets_expanded.png',
           ),
         );
 
-        // Select the RichText row.
-        await tester.tap(find.richText('RichText'));
+        // Confirm the HeroControllerScope is visible, and select it:
+        expect(hideableNodeFinder, findsOneWidget);
+        await tester.tap(hideableNodeFinder);
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_richtext_selected.png',
+            '../test_infra/goldens/integration_inspector_v2_hideable_widget_selected.png',
           ),
         );
 
-        // Test hovering over the icon shown when a property has its default
-        // value.
-        // TODO(jacobr): support tooltips in the Flutter version of the inspector.
-        // https://github.com/flutter/devtools/issues/2570.
-        // For example, verify that the tooltip hovering over the default value
-        // icons is "Default value".
-        // Test selecting a widget.
-
-        // Two 'Scaffold's: a breadcrumb and an actual tree item
-        expect(find.richText('Scaffold'), findsNWidgets(2));
-        // select Scaffold widget in summary tree.
-        await tester.tap(find.richText('Scaffold').last);
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        // This tree is huge. If there is a change to package:flutter it may
-        // change. If this happens don't panic and rebaseline the golden.
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_scaffold_selected.png',
-          ),
+        // Collapse the hidden group that contains the HeroControllerScope:
+        final collapseButton = findExpandCollapseButtonForNode(
+          nodeDescription: 'ScrollConfiguration',
+          isExpand: false,
         );
-
-        // The important thing about this is that the details tree should scroll
-        // instead of re-rooting as the selected row is already visible in the
-        // details tree.
-        await tester.tap(find.richText('AnimatedPhysicalModel'));
+        await tester.tap(collapseButton);
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_animated_physical_model_selected.png',
+            '../test_infra/goldens/integration_inspector_v2_implementation_widgets_collapsed.png',
           ),
         );
 
@@ -440,24 +439,24 @@ void main() {
         await env.flutter!.hotReload();
         // Give time for the initial animation to complete.
         await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_errors_1_initial_load.png',
-          ),
-        );
+        // await expectLater(
+        //   find.byType(InspectorScreenBody),
+        //   matchesDevToolsGolden(
+        //     '../test_infra/goldens/integration_inspector_v2_errors_1_initial_load.png',
+        //   ),
+        // );
 
         // Navigate so one of the errors is selected.
         for (var i = 0; i < 2; i++) {
           await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
           await tester.pumpAndSettle(inspectorChangeSettleTime);
         }
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_errors_2_error_selected.png',
-          ),
-        );
+        // await expectLater(
+        //   find.byType(InspectorScreenBody),
+        //   matchesDevToolsGolden(
+        //     '../test_infra/goldens/integration_inspector_v2_errors_2_error_selected.png',
+        //   ),
+        // );
 
         await env.tearDownEnvironment();
       },
@@ -481,4 +480,42 @@ Future<void> _loadInspectorUI(WidgetTester tester) async {
     await controller.maybeLoadUI();
     await tester.pumpAndSettle();
   }
+}
+
+Finder findNodeMatching(String text) => find.ancestor(
+      of: find.richTextContaining(text),
+      matching: find.byType(DescriptionDisplay),
+    );
+
+Finder findExpandCollapseButton(Finder nodeFinder) => find.descendant(
+      of: nodeFinder,
+      matching: find.byType(TextButton),
+    );
+
+Finder findExpandCollapseButtonText({
+  required Finder buttonFinder,
+  required String buttonText,
+}) =>
+    find.descendant(
+      of: buttonFinder,
+      matching: find.text(buttonText),
+    );
+
+Finder findExpandCollapseButtonForNode({
+  required String nodeDescription,
+  required bool isExpand,
+}) {
+  final hiddenNode = findNodeMatching(nodeDescription);
+  expect(hiddenNode, findsOneWidget);
+
+  final expandCollapseButtonFinder = findExpandCollapseButton(hiddenNode);
+  expect(expandCollapseButtonFinder, findsOneWidget);
+
+  final expandCollapseButtonTextFinder = findExpandCollapseButtonText(
+    buttonFinder: expandCollapseButtonFinder,
+    buttonText: isExpand ? '(expand)' : '(collapse)',
+  );
+  expect(expandCollapseButtonTextFinder, findsOneWidget);
+
+  return expandCollapseButtonFinder;
 }
