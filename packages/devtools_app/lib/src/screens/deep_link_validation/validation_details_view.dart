@@ -607,7 +607,7 @@ class _CrossCheckTable extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
                 child: Text(
-                    'This domain has an Asset link json file but it\'s missing in android manifest file. '
+                    'This domain has an Asset link json file but it\'s missing in the android manifest file. '
                     'If you want to set up deep linking for Android, you need to add this domain '
                     'to your AndroidManifest.xml file.'),
               ),
