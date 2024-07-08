@@ -155,7 +155,7 @@ class RetainingPathTable extends StatelessWidget {
       selectionNotifier: selection,
       onItemSelected: (_) => ga.select(
         gac.memory,
-        '${gac.MemoryEvent.diffPathSelect}-${isDiff ? "diff" : "single"}',
+        '${gac.MemoryEvents.diffPathSelect.name}-${isDiff ? "diff" : "single"}',
       ),
       defaultSortColumn: columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,

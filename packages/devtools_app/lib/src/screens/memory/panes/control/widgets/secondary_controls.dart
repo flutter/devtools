@@ -37,7 +37,7 @@ class SecondaryControls extends StatelessWidget {
             tooltip: 'Trigger full garbage collection.',
             minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
             gaScreen: gac.memory,
-            gaSelection: gac.MemoryEvent.gc,
+            gaSelection: gac.MemoryEvents.gc.name,
           ),
           const SizedBox(width: denseSpacing),
         ],
@@ -51,7 +51,7 @@ class SecondaryControls extends StatelessWidget {
         if (controller.mode != ControllerCreationMode.disconnected)
           SettingsOutlinedButton(
             gaScreen: gac.memory,
-            gaSelection: gac.MemoryEvent.settings,
+            gaSelection: gac.MemoryEvents.settings.name,
             onPressed: () => _openSettingsDialog(context),
             tooltip: 'Open memory settings',
           ),

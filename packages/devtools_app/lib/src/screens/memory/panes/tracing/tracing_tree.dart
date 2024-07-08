@@ -203,7 +203,7 @@ class _TracingTreeHeader extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         ExpandAllButton(
           gaScreen: gac.memory,
-          gaSelection: gac.MemoryEvent.tracingTreeExpandAll,
+          gaSelection: gac.MemoryEvents.tracingTreeExpandAll.name,
           onPressed: () => updateTreeStateCallback(
             () {
               for (final root in _currentDataRoots) {
@@ -215,7 +215,7 @@ class _TracingTreeHeader extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         CollapseAllButton(
           gaScreen: gac.memory,
-          gaSelection: gac.MemoryEvent.tracingTreeCollapseAll,
+          gaSelection: gac.MemoryEvents.tracingTreeCollapseAll.name,
           onPressed: () => updateTreeStateCallback(
             () {
               for (final root in _currentDataRoots) {

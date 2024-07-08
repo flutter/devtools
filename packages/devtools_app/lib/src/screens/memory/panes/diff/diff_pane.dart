@@ -51,7 +51,7 @@ class _SnapshotItemContent extends StatelessWidget {
 
   final DiffPaneController controller;
 
-  static const _documentationTopic = gac.MemoryEvent.diffHelp;
+  static final _documentationTopic = gac.MemoryEvents.diffHelp.name;
 
   @override
   Widget build(BuildContext context) {

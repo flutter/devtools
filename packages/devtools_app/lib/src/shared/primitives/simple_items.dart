@@ -48,6 +48,7 @@ enum DocLinks {
 
   final String url;
   final String? hash;
+
   String get value {
     if (hash == null) return url;
     return '$url#$hash';

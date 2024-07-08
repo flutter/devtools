@@ -102,14 +102,14 @@ class _TracingControls extends StatelessWidget {
             RefreshButton(
               tooltip: 'Request the set of updated allocation traces',
               gaScreen: gac.memory,
-              gaSelection: gac.MemoryEvent.tracingRefresh,
+              gaSelection: gac.MemoryEvents.tracingRefresh.name,
               onPressed: isProfileMode ? null : controller.refresh,
             ),
             const SizedBox(width: denseSpacing),
             ClearButton(
               tooltip: 'Clear the set of previously collected traces',
               gaScreen: gac.memory,
-              gaSelection: gac.MemoryEvent.tracingClear,
+              gaSelection: gac.MemoryEvents.tracingClear.name,
               onPressed: isProfileMode ? null : controller.clear,
             ),
             const SizedBox(width: denseSpacing),
@@ -124,7 +124,7 @@ class _TracingControls extends StatelessWidget {
 class _ProfileHelpLink extends StatelessWidget {
   const _ProfileHelpLink();
 
-  static const _documentationTopic = gac.MemoryEvent.tracingHelp;
+  static final _documentationTopic = gac.MemoryEvents.tracingHelp.name;
 
   @override
   Widget build(BuildContext context) {
