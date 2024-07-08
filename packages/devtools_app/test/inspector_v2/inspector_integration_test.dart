@@ -439,24 +439,24 @@ void main() {
         await env.flutter!.hotReload();
         // Give time for the initial animation to complete.
         await tester.pumpAndSettle(inspectorChangeSettleTime);
-        // await expectLater(
-        //   find.byType(InspectorScreenBody),
-        //   matchesDevToolsGolden(
-        //     '../test_infra/goldens/integration_inspector_v2_errors_1_initial_load.png',
-        //   ),
-        // );
+        await expectLater(
+          find.byType(InspectorScreenBody),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/integration_inspector_v2_errors_1_initial_load.png',
+          ),
+        );
 
         // Navigate so one of the errors is selected.
         for (var i = 0; i < 2; i++) {
           await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
           await tester.pumpAndSettle(inspectorChangeSettleTime);
         }
-        // await expectLater(
-        //   find.byType(InspectorScreenBody),
-        //   matchesDevToolsGolden(
-        //     '../test_infra/goldens/integration_inspector_v2_errors_2_error_selected.png',
-        //   ),
-        // );
+        await expectLater(
+          find.byType(InspectorScreenBody),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/integration_inspector_v2_errors_2_error_selected.png',
+          ),
+        );
 
         await env.tearDownEnvironment();
       },

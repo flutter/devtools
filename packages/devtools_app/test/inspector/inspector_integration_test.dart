@@ -56,15 +56,6 @@ void main() {
         expect(serviceConnection.serviceManager.service, equals(env.service));
         expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
-        final inspectorService = InspectorService();
-
-        final group = inspectorService.createObjectGroup('test-group');
-        final root = (await group.getRoot(
-          FlutterTreeType.widget,
-          isSummaryTree: true,
-        ))!;
-        print(treeToDebugString(root));
-
         final screen = InspectorScreen();
         await tester.pumpWidget(
           wrapWithInspectorControllers(Builder(builder: screen.build)),
