@@ -72,7 +72,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     );
   }
 
-  /// Returns the custom description is specified, or the default description
+  /// Returns the custom description if specified, or the default description
   /// for the diagnostic node.
   String get descriptionText =>
       customDescription ?? diagnostic?.description ?? '';
