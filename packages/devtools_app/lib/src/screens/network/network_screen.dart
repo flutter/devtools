@@ -25,6 +25,7 @@ import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
+import 'constants.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
@@ -239,7 +240,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               _NetworkProfilerControls._includeTextWidth,
           onPressed: widget.controller.exportAsHarFile,
           gaScreen: gac.network,
-          gaSelection: gac.NetworkEvent.downloadAsHar,
+          gaSelection: NetworkEvent.downloadAsHar.name,
         ),
         const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),

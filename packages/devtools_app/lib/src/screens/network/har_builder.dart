@@ -4,9 +4,9 @@
 
 import 'dart:convert';
 
-import '../../shared/analytics/constants.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/utils.dart';
+import 'constants.dart';
 
 /// Builds a HAR (HTTP Archive) object from a list of HTTP requests.
 ///
@@ -25,16 +25,16 @@ import '../../shared/utils.dart';
 Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
   // Build the creator
   final creator = <String, Object?>{
-    NetworkEventKeys.name: NetworkEventDefaults.creatorName,
-    NetworkEventKeys.creatorVersion: devToolsVersion,
+    NetworkEventKeys.name.name: NetworkEventDefaults.creatorName,
+    NetworkEventKeys.creatorVersion.name: devToolsVersion,
   };
 
   // Build the entries
   final entries = httpRequests.map((e) {
     final requestCookies = e.requestCookies.map((cookie) {
       return <String, Object?>{
-        NetworkEventKeys.name: cookie.name,
-        NetworkEventKeys.value: cookie.value,
+        NetworkEventKeys.name.name: cookie.name,
+        NetworkEventKeys.value.name: cookie.value,
         'path': cookie.path,
         'domain': cookie.domain,
         'expires': cookie.expires?.toUtc().toIso8601String(),
@@ -49,22 +49,22 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
         value = value.first;
       }
       return <String, Object?>{
-        NetworkEventKeys.name: header.key,
-        NetworkEventKeys.value: value,
+        NetworkEventKeys.name.name: header.key,
+        NetworkEventKeys.value.name: value,
       };
     }).toList();
 
     final queryString = Uri.parse(e.uri).queryParameters.entries.map((param) {
       return <String, Object?>{
-        NetworkEventKeys.name: param.key,
-        NetworkEventKeys.value: param.value,
+        NetworkEventKeys.name.name: param.key,
+        NetworkEventKeys.value.name: param.value,
       };
     }).toList();
 
     final responseCookies = e.responseCookies.map((cookie) {
       return <String, Object?>{
-        NetworkEventKeys.name: cookie.name,
-        NetworkEventKeys.value: cookie.value,
+        NetworkEventKeys.name.name: cookie.name,
+        NetworkEventKeys.value.name: cookie.value,
         'path': cookie.path,
         'domain': cookie.domain,
         'expires': cookie.expires?.toUtc().toIso8601String(),
@@ -79,68 +79,71 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
         value = value.first;
       }
       return <String, Object?>{
-        NetworkEventKeys.name: header.key,
-        NetworkEventKeys.value: value,
+        NetworkEventKeys.name.name: header.key,
+        NetworkEventKeys.value.name: value,
       };
     }).toList();
 
     return <String, Object?>{
-      NetworkEventKeys.startedDateTime:
+      NetworkEventKeys.startedDateTime.name:
           e.startTimestamp.toUtc().toIso8601String(),
-      NetworkEventKeys.time: e.duration?.inMilliseconds,
+      NetworkEventKeys.time.name: e.duration?.inMilliseconds,
       // Request
-      NetworkEventKeys.request: <String, Object?>{
-        NetworkEventKeys.method: e.method.toUpperCase(),
-        NetworkEventKeys.url: e.uri.toString(),
-        NetworkEventKeys.httpVersion: NetworkEventDefaults.httpVersion,
-        NetworkEventKeys.cookies: requestCookies,
-        NetworkEventKeys.headers: requestHeaders,
-        NetworkEventKeys.queryString: queryString,
-        NetworkEventKeys.postData: <String, Object?>{
-          NetworkEventKeys.mimeType: e.contentType,
-          NetworkEventKeys.text: e.requestBody,
+      NetworkEventKeys.request.name: <String, Object?>{
+        NetworkEventKeys.method.name: e.method.toUpperCase(),
+        NetworkEventKeys.url.name: e.uri.toString(),
+        NetworkEventKeys.httpVersion.name: NetworkEventDefaults.httpVersion,
+        NetworkEventKeys.cookies.name: requestCookies,
+        NetworkEventKeys.headers.name: requestHeaders,
+        NetworkEventKeys.queryString.name: queryString,
+        NetworkEventKeys.postData.name: <String, Object?>{
+          NetworkEventKeys.mimeType.name: e.contentType,
+          NetworkEventKeys.text.name: e.requestBody,
         },
-        NetworkEventKeys.headersSize: _calculateHeadersSize(e.requestHeaders),
-        NetworkEventKeys.bodySize: _calculateBodySize(e.requestBody),
+        NetworkEventKeys.headersSize.name:
+            _calculateHeadersSize(e.requestHeaders),
+        NetworkEventKeys.bodySize.name: _calculateBodySize(e.requestBody),
       },
       // Response
-      NetworkEventKeys.response: <String, Object?>{
-        NetworkEventKeys.status: e.status,
-        NetworkEventKeys.statusText: '',
-        NetworkEventKeys.httpVersion: NetworkEventDefaults.responseHttpVersion,
-        NetworkEventKeys.cookies: responseCookies,
-        NetworkEventKeys.headers: responseHeaders,
-        NetworkEventKeys.content: <String, Object?>{
-          NetworkEventKeys.size: e.responseBody?.length,
-          NetworkEventKeys.mimeType: e.type,
-          NetworkEventKeys.text: e.responseBody,
+      NetworkEventKeys.response.name: <String, Object?>{
+        NetworkEventKeys.status.name: e.status,
+        NetworkEventKeys.statusText.name: '',
+        NetworkEventKeys.httpVersion.name:
+            NetworkEventDefaults.responseHttpVersion,
+        NetworkEventKeys.cookies.name: responseCookies,
+        NetworkEventKeys.headers.name: responseHeaders,
+        NetworkEventKeys.content.name: <String, Object?>{
+          NetworkEventKeys.size.name: e.responseBody?.length,
+          NetworkEventKeys.mimeType.name: e.type,
+          NetworkEventKeys.text.name: e.responseBody,
         },
-        NetworkEventKeys.redirectURL: '',
-        NetworkEventKeys.headersSize: _calculateHeadersSize(e.responseHeaders),
-        NetworkEventKeys.bodySize: _calculateBodySize(e.responseBody),
+        NetworkEventKeys.redirectURL.name: '',
+        NetworkEventKeys.headersSize.name:
+            _calculateHeadersSize(e.responseHeaders),
+        NetworkEventKeys.bodySize.name: _calculateBodySize(e.responseBody),
       },
       // Cache
-      NetworkEventKeys.cache: <String, Object?>{},
-      NetworkEventKeys.timings: <String, Object?>{
-        NetworkEventKeys.blocked: NetworkEventDefaults.blocked,
-        NetworkEventKeys.dns: NetworkEventDefaults.dns,
-        NetworkEventKeys.connect: NetworkEventDefaults.connect,
-        NetworkEventKeys.send: NetworkEventDefaults.send,
-        NetworkEventKeys.wait: e.duration!.inMilliseconds - 2,
-        NetworkEventKeys.receive: NetworkEventDefaults.receive,
-        NetworkEventKeys.ssl: NetworkEventDefaults.ssl,
+      NetworkEventKeys.cache.name: <String, Object?>{},
+      NetworkEventKeys.timings.name: <String, Object?>{
+        NetworkEventKeys.blocked.name: NetworkEventDefaults.blocked,
+        NetworkEventKeys.dns.name: NetworkEventDefaults.dns,
+        NetworkEventKeys.connect.name: NetworkEventDefaults.connect,
+        NetworkEventKeys.send.name: NetworkEventDefaults.send,
+        NetworkEventKeys.wait.name: e.duration!.inMilliseconds - 2,
+        NetworkEventKeys.receive.name: NetworkEventDefaults.receive,
+        NetworkEventKeys.ssl.name: NetworkEventDefaults.ssl,
       },
-      NetworkEventKeys.connection: e.hashCode.toString(),
-      NetworkEventKeys.comment: '',
+      NetworkEventKeys.connection.name: e.hashCode.toString(),
+      NetworkEventKeys.comment.name: '',
     };
   }).toList();
 
   // Assemble the final HAR object
   return <String, Object?>{
-    NetworkEventKeys.log: <String, Object?>{
-      NetworkEventKeys.version: NetworkEventDefaults.logVersion,
-      NetworkEventKeys.creator: creator,
-      NetworkEventKeys.entries: entries,
+    NetworkEventKeys.log.name: <String, Object?>{
+      NetworkEventKeys.version.name: NetworkEventDefaults.logVersion,
+      NetworkEventKeys.creator.name: creator,
+      NetworkEventKeys.entries.name: entries,
     },
   };
 }
