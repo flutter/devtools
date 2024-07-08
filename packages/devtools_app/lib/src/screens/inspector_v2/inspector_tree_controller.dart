@@ -1346,6 +1346,8 @@ class InspectorRowContent extends StatelessWidget {
 
     final node = row.node;
     final diagnostic = node.diagnostic;
+    final isHideableGroupLeader =
+        diagnostic != null && diagnostic.isHideableGroupLeader;
 
     Widget rowWidget = Padding(
       padding: EdgeInsets.only(left: currentX),
@@ -1399,14 +1401,22 @@ class InspectorRowContent extends StatelessWidget {
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,
-                          actionLabel: diagnostic != null &&
-                                  diagnostic.isHideableGroupLeader
+                          actionLabel: isHideableGroupLeader
                               ? diagnostic.groupIsHidden
                                   ? '(expand)'
                                   : '(collapse)'
                               : null,
-                          actionCallback: () =>
-                              controller.toggleHiddenGroup(node),
+                          actionCallback: isHideableGroupLeader
+                              ? () => controller.toggleHiddenGroup(node)
+                              : null,
+                          customDescription: isHideableGroupLeader &&
+                                  diagnostic.groupIsHidden
+                              ? '${diagnostic.hideableGroupSubordinates!.length + 1} more widgets...'
+                              : null,
+                          customIconName:
+                              isHideableGroupLeader && diagnostic.groupIsHidden
+                                  ? 'HiddenGroup'
+                                  : null,
                         ),
                       ),
                     ),

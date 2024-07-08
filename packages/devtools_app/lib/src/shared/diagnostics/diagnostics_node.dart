@@ -213,13 +213,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// `parentConfiguration` specifies how the parent is rendered as text art.
   /// For example, if the parent does not line break between properties, the
   /// description of a property should also be a single line if possible.
-  String? get description {
-    if (customDescription != null) {
-      return customDescription;
-    }
-
-    return getStringMember('description');
-  }
+  String? get description => getStringMember('description');
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
@@ -616,14 +610,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     }
   }
 
-  String? get customDescription {
-    if (groupIsHidden && hideableGroupSubordinates != null) {
-      return '${hideableGroupSubordinates!.length + 1} more widgets...';
-    }
-
-    return null;
-  }
-
   Future<void> _computeChildren() async {
     _maybePopulateChildren();
     if (!hasChildren || _children != null) {
@@ -697,11 +683,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Widget? get icon {
     if (isProperty) return null;
 
-    return iconMaker.fromWidgetName(
-      isHideableGroupLeader && groupIsHidden
-          ? 'HiddenGroup'
-          : widgetRuntimeType,
-    );
+    return iconMaker.fromWidgetName(widgetRuntimeType);
   }
 
   /// Returns true if two diagnostic nodes are indistinguishable from

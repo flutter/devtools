@@ -45,6 +45,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.emphasizeNodesFromLocalProject = false,
     this.actionLabel,
     this.actionCallback,
+    this.customDescription,
+    this.customIconName,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -60,6 +62,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final bool emphasizeNodesFromLocalProject;
   final String? actionLabel;
   final VoidCallback? actionCallback;
+  final String? customDescription;
+  final String? customIconName;
 
   static Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -67,6 +71,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       child: icon,
     );
   }
+
+  /// Returns the custom description is specified, or the default description
+  /// for the diagnostic node.
+  String get descriptionText =>
+      customDescription ?? diagnostic?.description ?? '';
 
   /// Approximates the width of the elements inside a [RemoteDiagnosticsNode]
   /// widget.
@@ -259,7 +268,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final icon = diagnosticLocal.icon;
+    final icon = customIconName != null
+        ? RemoteDiagnosticsNode.iconMaker.fromWidgetName(customIconName)
+        : diagnosticLocal.icon;
+
+    diagnosticLocal.icon;
     final children = <Widget>[];
 
     if (icon != null) {
@@ -297,7 +310,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         textStyle = textStyle.merge(DiagnosticsTextStyles.regularBold);
       }
 
-      String description = diagnosticLocal.description ?? '';
+      String description = descriptionText;
       if (propertyType != null && properties != null) {
         switch (propertyType) {
           case 'Color':
@@ -379,8 +392,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               style: textStyle,
             ),
           );
-          if (diagnosticLocal.separator != ' ' &&
-              (diagnosticLocal.description?.isNotEmpty ?? false)) {
+          if (diagnosticLocal.separator != ' ' && descriptionText.isNotEmpty) {
             children.add(
               Text(
                 ' ',
@@ -408,7 +420,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       var diagnosticDescription = buildDescription(
-        description: diagnosticLocal.description ?? '',
+        description: descriptionText,
         textStyle: textStyle,
         colorScheme: colorScheme,
         diagnostic: diagnostic,
