@@ -40,7 +40,29 @@ void debugLogger(String message) {
   );
 }
 
+/// Whether DevTools is in embedded mode, as determined by the [ideTheme] parsed
+/// from query parameters.
 bool isEmbedded() => ideTheme.embedded;
+
+/// Whether DevTools is using a dark theme.
+/// 
+/// When DevTools is in embedded mode, we first check if the [ideTheme] has
+/// specified a light or dark theme, and if it has we use this value. This is
+/// safe to do because the user cannot access the dark theme DevTools setting
+/// when in embedded mode, which is intentional so that the embedded DevTools
+/// matches the theme of its surrounding window (the IDE).
+/// 
+/// When DevTools is not embedded, we use the user preference to determine
+/// whether DevTools is using a light or dark theme.
+/// 
+/// This utility method should be used in favor of checking
+/// [preferences.darkModeTheme.value] so that the embedded case is always
+/// handled properly.
+bool isDarkThemeEnabled() {
+  return isEmbedded() && ideTheme.ideSpecifiedTheme
+      ? ideTheme.isDarkMode
+      : preferences.darkModeEnabled.value;
+}
 
 extension VmExtension on VM {
   List<IsolateRef> isolatesForDevToolsMode() {

@@ -34,7 +34,7 @@ final class IdeTheme {
 
   bool get embedded => embedMode.embedded;
 
-  bool get isDarkMode => _isDarkMode ?? true;
+  bool get isDarkMode => _isDarkMode ?? useDarkThemeAsDefault;
 
   /// Whether the IDE specified the DevTools color theme.
   ///

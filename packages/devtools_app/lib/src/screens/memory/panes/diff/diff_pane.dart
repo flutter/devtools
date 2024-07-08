@@ -11,7 +11,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/utils.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
@@ -70,7 +69,7 @@ class _SnapshotItemContent extends StatelessWidget {
                       Expanded(
                         child: Markdown(
                           data: _snapshotDocumentation(
-                            preferences.darkModeTheme.value,
+                            isDark: isDarkThemeEnabled(),
                           ),
                           styleSheet: MarkdownStyleSheet(
                             p: Theme.of(context).regularTextStyle,
@@ -139,7 +138,7 @@ class SnapshotInstanceItemPane extends StatelessWidget {
   }
 }
 
-String _snapshotDocumentation(bool isDark) {
+String _snapshotDocumentation({required bool isDark}) {
   final filePostfix = isDark ? 'dark' : 'light';
 
   // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/149866
