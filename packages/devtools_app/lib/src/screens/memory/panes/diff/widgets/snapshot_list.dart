@@ -95,7 +95,7 @@ class _ListControlPane extends StatelessWidget {
                   ? () {
                       ga.select(
                         gac.memory,
-                        gac.MemoryEvent.diffClearSnapshots,
+                        gac.MemoryEvents.diffClearSnapshots.name,
                       );
                       controller.clearSnapshots();
                     }
@@ -419,14 +419,14 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
                     }
                     ga.select(
                       gac.memory,
-                      gac.MemoryEvent.diffSnapshotDelete,
+                      gac.MemoryEvents.diffSnapshotDelete.name,
                     );
                     widget.controller.deleteCurrentSnapshot();
                   },
                   onExport: () {
                     ga.select(
                       gac.memory,
-                      gac.MemoryEvent.diffSnapshotExport,
+                      gac.MemoryEvents.diffSnapshotExport.name,
                     );
                     widget.controller.exportCurrentItem();
                   },

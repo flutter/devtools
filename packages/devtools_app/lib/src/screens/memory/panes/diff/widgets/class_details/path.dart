@@ -82,7 +82,7 @@ class _PathControlPane extends StatelessWidget {
           // while message is here.
           successMessage: null,
           gaScreen: gac.memory,
-          gaItem: gac.MemoryEvent.diffPathCopy,
+          gaItem: gac.MemoryEvents.diffPathCopy.name,
         ),
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
@@ -91,7 +91,7 @@ class _PathControlPane extends StatelessWidget {
             onPressed: () {
               ga.select(
                 gac.memory,
-                '${gac.MemoryEvent.diffPathFilter}-$hideStandard',
+                '${gac.MemoryEvents.diffPathFilter.name}-$hideStandard',
               );
               controller.hideStandard.value = !controller.hideStandard.value;
             },
@@ -106,7 +106,7 @@ class _PathControlPane extends StatelessWidget {
             onPressed: () {
               ga.select(
                 gac.memory,
-                '${gac.MemoryEvent.diffPathInvert}-$invert',
+                '${gac.MemoryEvents.diffPathInvert.name}-$invert',
               );
               controller.invert.value = !controller.invert.value;
             },
