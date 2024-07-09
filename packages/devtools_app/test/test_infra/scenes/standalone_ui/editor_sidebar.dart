@@ -1,30 +1,33 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/standalone_ui/api/impl/dart_tooling_api.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/flutter_panel.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
-import 'editor_service/post_message_fake_editor.dart';
+import 'editor_service/fake_editor.dart';
 import 'mock_editor_widget.dart';
+import 'utils.dart';
 
-/// To run, use the "standalone_ui/vs_code" launch configuration with the
+/// To run, use the "standalone_ui/editor_sidebar" launch configuration with the
 /// `devtools/packages/` folder open in VS Code, or run:
 ///
-///   flutter run -t test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart --dart-define=enable_experiments=true -d chrome
-class VsCodeScene extends Scene {
-  late PostMessageFakeEditor editor;
-  late PostMessageToolApiImpl api;
+///   flutter run -t test/test_infra/scenes/standalone_ui/editor_sidebar.stager_app.g.dart --dart-define=enable_experiments=true -d chrome
+class EditorSidebarScene extends Scene {
+  late PerformanceController controller;
+  late Stream<String> clientLog;
+  late DartToolingDaemon clientDtd;
+  late FakeDtdEditor editor;
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +45,8 @@ class VsCodeScene extends Scene {
       home: Scaffold(
         body: MockEditorWidget(
           editor: editor,
-          clientLog: const Stream<String>.empty(),
-          child: VsCodePostMessageSidebarPanel(api),
+          clientLog: clientLog,
+          child: DtdEditorSidebarPanel(clientDtd),
         ),
       ),
     );
@@ -59,7 +62,7 @@ class VsCodeScene extends Scene {
   }
 
   @override
-  String get title => '$VsCodeScene';
+  String get title => '$EditorSidebarScene';
 
   @override
   Future<void> setUp() async {
@@ -72,7 +75,12 @@ class VsCodeScene extends Scene {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
 
-    editor = PostMessageFakeEditor();
-    api = PostMessageToolApiImpl.rpc(editor.client);
+    // We assume a DTD is available on 8500. There's a VS Code task that
+    // launches this as part of the standalone_ui/editor_sidebar config.
+    final dtdUri = Uri.parse('ws://127.0.0.1:8500/');
+    final connection = await createLoggedWebSocketChannel(dtdUri);
+    clientLog = connection.log;
+    clientDtd = DartToolingDaemon.fromStreamChannel(connection.channel);
+    editor = FakeDtdEditor(dtdUri);
   }
 }

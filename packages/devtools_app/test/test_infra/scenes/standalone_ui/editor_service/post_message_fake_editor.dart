@@ -78,6 +78,20 @@ class PostMessageFakeEditor extends EditorServer with FakeEditor {
     connectDevices();
   }
 
+  @override
+  // Always connected for postMessage.
+  bool get connected => true;
+
+  @override
+  Future<void> connectEditor() async {
+    // Not supported for postMessage.
+  }
+
+  @override
+  Future<void> disconnectEditor() async {
+    // Not supported for postMessage.
+  }
+
   /// Simulates changing the selected device to [id] as requested by the
   /// embedded panel.
   Future<bool> _selectDevice(json_rpc_2.Parameters parameters) async {

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
@@ -19,11 +20,15 @@ class MockEditorWidget extends StatefulWidget {
   const MockEditorWidget({
     super.key,
     required this.editor,
+    required this.clientLog,
     this.child,
   });
 
   /// The fake editor API we can use to simulate an editor.
   final FakeEditor editor;
+
+  /// A stream of protocol traffic between the sidebar and DTD.
+  final Stream<String> clientLog;
 
   final Widget? child;
 
@@ -34,16 +39,28 @@ class MockEditorWidget extends StatefulWidget {
 class _MockEditorWidgetState extends State<MockEditorWidget> {
   FakeEditor get editor => widget.editor;
 
-  /// The number of communication messages to keep in the log.
+  Stream<String> get clientLog => widget.clientLog;
+
+  Stream<String> get editorLog => editor.log;
+
+  /// The number of communication messages to keep in the logs.
   static const maxLogEvents = 20;
 
-  /// The last [maxLogEvents] communication messages sent between the panel
-  /// and the "host IDE".
-  final logRing = ListQueue<String>();
+  /// The last [maxLogEvents] communication messages sent between the sidebar
+  /// and DTD.
+  final clientLogRing = ListQueue<String>();
 
-  /// A stream that emits each time the log is updated to allow the log widget
-  /// to be rebuilt.
-  Stream<void>? logUpdated;
+  /// The last [maxLogEvents] communication messages sent between the editor
+  /// and DTD.
+  final editorLogRing = ListQueue<String>();
+
+  /// A stream that emits each time the client log is updated to allow the log
+  /// widget to be rebuilt.
+  Stream<void>? clientLogUpdated;
+
+  /// A stream that emits each time the editor log is updated to allow the log
+  /// widget to be rebuilt.
+  Stream<void>? editorLogUpdated;
 
   /// Flutter icon for the sidebar.
   final sidebarImageBytes = base64Decode(
@@ -54,12 +71,19 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
   void initState() {
     super.initState();
 
-    logUpdated = editor.log.map((log) {
-      logRing.add(log);
-      while (logRing.length > maxLogEvents) {
-        logRing.removeFirst();
+    // Listen to the log streams to maintain our buffer and trigger rebuilds.
+    clientLogUpdated = clientLog.map((log) {
+      clientLogRing.add(log);
+      while (clientLogRing.length > maxLogEvents) {
+        clientLogRing.removeFirst();
       }
-    });
+    }).asBroadcastStream();
+    editorLogUpdated = editorLog.map((log) {
+      editorLogRing.add(log);
+      while (editorLogRing.length > maxLogEvents) {
+        editorLogRing.removeFirst();
+      }
+    }).asBroadcastStream();
   }
 
   @override
@@ -109,6 +133,24 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
                   const SizedBox(height: defaultSpacing),
                   const Text(
                     'Use these buttons to simulate actions that would usually occur in the IDE.',
+                  ),
+                  const SizedBox(height: defaultSpacing),
+                  Row(
+                    children: [
+                      const Text('Editor: '),
+                      ElevatedButton(
+                        onPressed: editor.connected
+                            ? null
+                            : _withUpdate(editor.connectEditor),
+                        child: const Text('Connect'),
+                      ),
+                      ElevatedButton(
+                        onPressed: editor.connected
+                            ? _withUpdate(editor.disconnectEditor)
+                            : null,
+                        child: const Text('Disconnect'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: defaultSpacing),
                   Row(
@@ -222,39 +264,94 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
                 ],
               ),
             ),
-            Container(
-              color: editorTheme.editorBackgroundColor,
-              padding: const EdgeInsets.all(10),
-              child: StreamBuilder(
-                stream: logUpdated,
-                builder: (context, snapshot) {
-                  return SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (final log in logRing)
-                          OutlineDecoration.onlyBottom(
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: denseSpacing,
-                              ),
-                              child: Text(
-                                log,
-                                style: Theme.of(context).fixedFontStyle,
-                              ),
-                            ),
-                          ),
+            DefaultTabController(
+              length: 2,
+              child: Container(
+                color: editorTheme.editorBackgroundColor,
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    const TabBar(
+                      isScrollable: true,
+                      tabs: [
+                        Tab(text: 'Client/Sidebar Log'),
+                        Tab(text: 'Server Log'),
                       ],
                     ),
-                  );
-                },
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          StreamBuilder(
+                            stream: clientLogUpdated,
+                            builder: (context, snapshot) {
+                              return SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    for (final log in clientLogRing)
+                                      OutlineDecoration.onlyBottom(
+                                        child: Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: denseSpacing,
+                                          ),
+                                          child: Text(
+                                            log,
+                                            style: Theme.of(context)
+                                                .fixedFontStyle,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                          StreamBuilder(
+                            stream: editorLogUpdated,
+                            builder: (context, snapshot) {
+                              return SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    for (final log in editorLogRing)
+                                      OutlineDecoration.onlyBottom(
+                                        child: Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: denseSpacing,
+                                          ),
+                                          child: Text(
+                                            log,
+                                            style: Theme.of(context)
+                                                .fixedFontStyle,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
       ],
     );
+  }
+
+  /// Returns a function that calls [f] and then once it completes, [setState].
+  Future<void> Function() _withUpdate<T>(FutureOr<T> Function() f) {
+    return () async {
+      await f();
+      setState(() {});
+    };
   }
 }
 

@@ -37,7 +37,7 @@ void main() {
     when(mockEditorClient.supportsGetDevices).thenReturn(true);
     when(mockEditorClient.supportsSelectDevice).thenReturn(true);
     when(mockEditorClient.supportsOpenDevToolsPage).thenReturn(true);
-    when(mockEditorClient.supportsOpenDevToolsExternally).thenReturn(true);
+    when(mockEditorClient.supportsOpenDevToolsForceExternal).thenReturn(true);
     when(mockEditorClient.supportsHotReload).thenReturn(true);
     when(mockEditorClient.supportsHotRestart).thenReturn(true);
     setGlobal(IdeTheme, IdeTheme());

@@ -33,6 +33,8 @@ const _enablePostMessageVerboseLogging = false;
 
 final _log = Logger('tooling_api');
 
+/// *** LEGACY API for postMessage, replaced by DTD version (`EditorClient`) ***
+///
 /// An API used by Dart tooling surfaces to interact with Dart tools that expose
 /// APIs such as Dart-Code and the LSP server.
 class PostMessageToolApiImpl implements PostMessageToolApi {
@@ -187,13 +189,19 @@ class PostMessageEditorClient implements EditorClient {
   Stream<EditorEvent> get event => _eventController.stream;
 
   @override
-  Future<List<EditorDevice>> getDevices() async {
-    return _currentDevices;
+  Stream<String> get editorServiceChanged => const Stream.empty();
+
+  @override
+  Future<GetDevicesResult> getDevices() async {
+    return GetDevicesResult(
+      devices: _currentDevices,
+      selectedDeviceId: _currentSelectedDeviceId,
+    );
   }
 
   @override
-  Future<List<EditorDebugSession>> getDebugSessions() async {
-    return _currentDebugSessions;
+  Future<GetDebugSessionsResult> getDebugSessions() async {
+    return GetDebugSessionsResult(debugSessions: _currentDebugSessions);
   }
 
   @override
@@ -232,6 +240,10 @@ class PostMessageEditorClient implements EditorClient {
   bool get supportsGetDevices => true; // Always true because we handle locally.
 
   @override
+  bool get supportsGetDebugSessions =>
+      true; // Always true because we handle locally.
+
+  @override
   bool get supportsSelectDevice => _api.capabilities.selectDevice;
 
   @override
@@ -241,7 +253,7 @@ class PostMessageEditorClient implements EditorClient {
   bool get supportsHotRestart => _api.capabilities.hotRestart;
 
   @override
-  bool get supportsOpenDevToolsExternally =>
+  bool get supportsOpenDevToolsForceExternal =>
       _api.capabilities.openDevToolsExternally;
 
   @override

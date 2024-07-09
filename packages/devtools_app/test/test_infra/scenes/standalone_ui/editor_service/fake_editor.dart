@@ -8,6 +8,13 @@ import 'package:devtools_app/src/service/editor/api_classes.dart';
 
 import 'editor_server.dart';
 
+class FakeDtdEditor extends DtdEditorServer with FakeEditor {
+  FakeDtdEditor(super.dtdUri) {
+    // Start with some existing devices.
+    connectDevices();
+  }
+}
+
 /// A mixin for [EditorServer]s that provides some useful mock editor
 /// functionality to allow working on the sidebar with a Stager app without
 /// needing to be connected to a real editor.
@@ -24,7 +31,14 @@ mixin FakeEditor on EditorServer {
   /// The current device simulated as selected.
   String? selectedDeviceId;
 
-  Stream<String> get log;
+  /// Whether the editor is currently connected to DTD.
+  bool get connected;
+
+  /// Simulates an editor being connected.
+  Future<void> connectEditor();
+
+  /// Simulates an editor being discconnected.
+  Future<void> disconnectEditor();
 
   /// Simulates devices being connected in the IDE by notifying the embedded
   /// panel about a set of test devices.
@@ -76,8 +90,18 @@ mixin FakeEditor on EditorServer {
   }
 
   @override
-  FutureOr<List<EditorDevice>> getDevices() {
-    return devices.values.toList();
+  FutureOr<GetDevicesResult> getDevices() {
+    return GetDevicesResult(
+      devices: devices.values.toList(),
+      selectedDeviceId: selectedDeviceId,
+    );
+  }
+
+  @override
+  FutureOr<GetDebugSessionsResult> getDebugSessions() {
+    return GetDebugSessionsResult(
+      debugSessions: debugSessions.values.toList(),
+    );
   }
 
   @override
@@ -112,7 +136,7 @@ mixin FakeEditor on EditorServer {
 
   @override
   FutureOr<void> openDevToolsPage(
-    String debugSessionId,
+    String? debugSessionId,
     String? page,
     bool forceExternal,
     bool requiresDebugSession,

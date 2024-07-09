@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:dtd/dtd.dart';
+
 import 'api_classes.dart';
 
 /// An interface to services provided by an editor.
@@ -12,21 +14,40 @@ import 'api_classes.dart';
 /// ensure they are not breaking changes to already-shipped editors.
 abstract class EditorClient {
   Future<void> close();
+
+  /// Whether the connected editor supports the `getDevices` method.
   bool get supportsGetDevices;
+
+  /// Whether the connected editor supports the `getDebugSessions` method.
+  bool get supportsGetDebugSessions;
+
+  /// Whether the connected editor supports the `selectDevice` method.
   bool get supportsSelectDevice;
+
+  /// Whether the connected editor supports the `hotReload` method.
   bool get supportsHotReload;
+
+  /// Whether the connected editor supports the `hotRestart` method.
   bool get supportsHotRestart;
+
+  /// Whether the connected editor supports the `openDevToolsPage` method.
   bool get supportsOpenDevToolsPage;
-  bool get supportsOpenDevToolsExternally;
+
+  /// Whether the connected editor supports the `forceExternal` flag in the
+  /// params for `openDevToolsPage`.
+  bool get supportsOpenDevToolsForceExternal;
 
   /// A stream of [EditorEvent]s from the editor.
   Stream<EditorEvent> get event;
 
+  /// A stream of events of when editor service methods/capabilities change.
+  Stream<String> get editorServiceChanged;
+
   /// Gets the set of currently available devices from the editor.
-  Future<List<EditorDevice>> getDevices();
+  Future<GetDevicesResult> getDevices();
 
   /// Gets the set of currently active debug sessions from the editor.
-  Future<List<EditorDebugSession>> getDebugSessions();
+  Future<GetDebugSessionsResult> getDebugSessions();
 
   /// Requests the editor selects a specific device.
   ///
@@ -56,4 +77,209 @@ abstract class EditorClient {
   /// this method succeeds (if it does, a `deviceChanged` event will provide
   /// the appropriate updates).
   Future<void> enablePlatformType(String platformType);
+}
+
+/// An implementation of [EditorClient] that connects to an editor over DTD.
+///
+/// Changes made to the editor services/events should be considered carefully to
+/// ensure they are not breaking changes to already-shipped editors.
+class DtdEditorClient extends EditorClient {
+  // TODO(dantup): Merge this into EditorClient once the postMessage version
+  //  is removed.
+
+  DtdEditorClient(this._dtd) {
+    unawaited(initialized); // Trigger async initialization.
+  }
+
+  final DartToolingDaemon _dtd;
+  late final initialized = _initialize();
+
+  Future<void> _initialize() async {
+    _dtd.onEvent('Service').listen((data) {
+      final kind = data.kind;
+      if (kind != 'ServiceRegistered' && kind != 'ServiceUnregistered') {
+        return;
+      }
+
+      final service = data.data['service'] as String?;
+      if (service == null || service != editorServiceName) {
+        return;
+      }
+
+      final isRegistered = kind == 'ServiceRegistered';
+      final method = data.data['method'] as String;
+      final capabilities = data.data['capabilities'] as Map<String, Object?>?;
+
+      if (method == EditorMethod.getDevices.name) {
+        _supportsGetDevices = isRegistered;
+      } else if (method == EditorMethod.getDebugSessions.name) {
+        _supportsGetDebugSessions = isRegistered;
+      } else if (method == EditorMethod.selectDevice.name) {
+        _supportsSelectDevice = isRegistered;
+      } else if (method == EditorMethod.hotReload.name) {
+        _supportsHotReload = isRegistered;
+      } else if (method == EditorMethod.hotRestart.name) {
+        _supportsHotRestart = isRegistered;
+      } else if (method == EditorMethod.openDevToolsPage.name) {
+        _supportsOpenDevToolsPage = isRegistered;
+        _supportsOpenDevToolsForceExternal =
+            capabilities?['supportsForceExternal'] == true;
+      } else {
+        return;
+      }
+      _editorServiceChangedController.add(method);
+    });
+
+    final editorKindMap = EditorEventKind.values.asNameMap();
+    _dtd.onEvent(editorStreamName).listen((data) {
+      final kind = editorKindMap[data.kind];
+      switch (kind) {
+        case null:
+          // Unknown event. Use null here so we get exhaustiveness checking for
+          // the rest.
+          break;
+        case EditorEventKind.deviceAdded:
+          _eventController.add(DeviceAddedEvent.fromJson(data.data));
+        case EditorEventKind.deviceRemoved:
+          _eventController.add(DeviceRemovedEvent.fromJson(data.data));
+        case EditorEventKind.deviceChanged:
+          _eventController.add(DeviceChangedEvent.fromJson(data.data));
+        case EditorEventKind.deviceSelected:
+          _eventController.add(DeviceSelectedEvent.fromJson(data.data));
+        case EditorEventKind.debugSessionStarted:
+          _eventController.add(DebugSessionStartedEvent.fromJson(data.data));
+        case EditorEventKind.debugSessionChanged:
+          _eventController.add(DebugSessionChangedEvent.fromJson(data.data));
+        case EditorEventKind.debugSessionStopped:
+          _eventController.add(DebugSessionStoppedEvent.fromJson(data.data));
+      }
+    });
+    await Future.wait([
+      _dtd.streamListen('Service'),
+      _dtd.streamListen(editorServiceName),
+    ]);
+  }
+
+  /// Close the connection to DTD.
+  @override
+  Future<void> close() => _dtd.close();
+
+  @override
+  bool get supportsGetDevices => _supportsGetDevices;
+  @override
+  bool get supportsGetDebugSessions => _supportsGetDebugSessions;
+  @override
+  bool get supportsSelectDevice => _supportsSelectDevice;
+  @override
+  bool get supportsHotReload => _supportsHotReload;
+  @override
+  bool get supportsHotRestart => _supportsHotRestart;
+  @override
+  bool get supportsOpenDevToolsPage => _supportsOpenDevToolsPage;
+  @override
+  bool get supportsOpenDevToolsForceExternal =>
+      _supportsOpenDevToolsForceExternal;
+
+  var _supportsGetDevices = false;
+  var _supportsGetDebugSessions = false;
+  var _supportsSelectDevice = false;
+  var _supportsHotReload = false;
+  var _supportsHotRestart = false;
+  var _supportsOpenDevToolsPage = false;
+  var _supportsOpenDevToolsForceExternal = false;
+
+  /// A stream of [EditorEvent]s from the editor.
+  @override
+  Stream<EditorEvent> get event => _eventController.stream;
+  final _eventController = StreamController<EditorEvent>();
+
+  /// A stream of events of when editor services are registrered or
+  /// unregistered.
+  ///
+  /// The values represent the method names that were registered or
+  /// unregistered.
+  @override
+  Stream<String> get editorServiceChanged =>
+      _editorServiceChangedController.stream;
+  final _editorServiceChangedController = StreamController<String>();
+
+  @override
+  Future<GetDevicesResult> getDevices() async {
+    final response = await _call(EditorMethod.getDevices);
+    return GetDevicesResult.fromJson(response.result);
+  }
+
+  /// Gets the set of currently active debug sessions from the editor.
+  @override
+  Future<GetDebugSessionsResult> getDebugSessions() async {
+    final response = await _call(EditorMethod.getDevices);
+    return GetDebugSessionsResult.fromJson(response.result);
+  }
+
+  /// Requests the editor selects a specific device.
+  ///
+  /// It should not be assumed that calling this method succeeds (if it does, a
+  /// `deviceSelected` event will provide the appropriate update).
+  @override
+  Future<void> selectDevice(EditorDevice? device) async {
+    await _call(
+      EditorMethod.selectDevice,
+      params: {'deviceId': device?.id},
+    );
+  }
+
+  @override
+  Future<void> hotReload(String debugSessionId) async {
+    await _call(
+      EditorMethod.hotReload,
+      params: {'debugSessionId': debugSessionId},
+    );
+  }
+
+  @override
+  Future<void> hotRestart(String debugSessionId) async {
+    await _call(
+      EditorMethod.hotRestart,
+      params: {'debugSessionId': debugSessionId},
+    );
+  }
+
+  @override
+  Future<void> openDevToolsPage(
+    String? debugSessionId, {
+    String? page,
+    bool? forceExternal,
+    bool? requiresDebugSession,
+    bool? prefersDebugSession,
+  }) async {
+    await _call(
+      EditorMethod.openDevToolsPage,
+      params: {
+        'debugSessionId': debugSessionId,
+        'page': page,
+        'forceExternal': forceExternal,
+        'requiresDebugSession': requiresDebugSession,
+        'prefersDebugSession': prefersDebugSession,
+      },
+    );
+  }
+
+  @override
+  Future<void> enablePlatformType(String platformType) async {
+    await _call(
+      EditorMethod.enablePlatformType,
+      params: {'platformType': platformType},
+    );
+  }
+
+  Future<DTDResponse> _call(
+    EditorMethod method, {
+    Map<String, Object?>? params,
+  }) {
+    return _dtd.call(
+      editorServiceName,
+      method.name,
+      params: params,
+    );
+  }
 }
