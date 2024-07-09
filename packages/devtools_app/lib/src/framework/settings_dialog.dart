@@ -49,7 +49,7 @@ class SettingsDialog extends StatelessWidget {
             Flexible(
               child: CheckboxSetting(
                 title: 'Use a dark theme',
-                notifier: preferences.darkModeTheme,
+                notifier: preferences.darkModeEnabled,
                 onChanged: preferences.toggleDarkModeTheme,
                 gaItem: gac.darkTheme,
               ),
