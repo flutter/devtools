@@ -1,4 +1,8 @@
 ## 0.2.2-wip
+* Lookup the connected app package root from an expression evaluation when
+the connected app is a Dart or Flutter test.
+* Added a field `logExceptions` to `EvalOnDartLibrary` that defaults to true but
+can be disabled to prevent exceptions from being logged to console.
 * Add `caseInsensitiveFuzzyMatch` extension method on `String`.
 * Add common widgets `DevToolsClearableTextField`, `InputDecorationSuffixButton`,
 and `RoundedDropDownButton`.
