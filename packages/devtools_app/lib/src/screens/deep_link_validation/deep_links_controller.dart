@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
@@ -154,9 +155,45 @@ class DeepLinksController extends DisposableController
         selectedIosConfigurationIndex,
         _handleIosConfigurationChanged,
       );
+      addAutoDisposeListener(
+        selectedIosTargetIndex,
+        _handleIosConfigurationChanged,
+      );
     }
   }
 
+  void firstLoadWithDefaultConfigurations() async {
+    firstLoadWithDefaultConfigurationsCompleted = false;
+    selectedAndroidVariantIndex.value = _getDefaultConfigurationIndex(
+      selectedProject.value!.androidVariants,
+      containsString: 'release',
+    );
+    if (FeatureFlags.deepLinkIosCheck) {
+      selectedIosConfigurationIndex.value = _getDefaultConfigurationIndex(
+        selectedProject.value!.iosBuildOptions.configurations,
+        containsString: 'release',
+      );
+      selectedIosTargetIndex.value = _getDefaultConfigurationIndex(
+        selectedProject.value!.iosBuildOptions.configurations,
+        containsString: 'runner',
+      );
+    }
+    await loadLinksAndValidate();
+    firstLoadWithDefaultConfigurationsCompleted = true;
+  }
+
+  int _getDefaultConfigurationIndex(
+    List<String> configurations, {
+    required String containsString,
+  }) {
+    final index = configurations.indexWhere(
+      (config) => config.caseInsensitiveContains(containsString),
+    );
+    // If not found, default to 0.
+    return max(index, 0);
+  }
+
+  bool firstLoadWithDefaultConfigurationsCompleted = false;
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
   String get applicationId =>
       _androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
@@ -226,23 +263,10 @@ class DeepLinksController extends DisposableController
   late final selectedIosConfigurationIndex = ValueNotifier<int>(0);
   late final selectedIosTargetIndex = ValueNotifier<int>(0);
 
-    void _firstLoad() async {
-
-    pagePhase.value = PagePhase.linksLoading;
-    await loadIosLinks();
-    if (pagePhase.value == PagePhase.validationErrorPage) {
-      return;
-    }
-    await validateLinks();
-    }
-
-    
   void _handleAndroidConfigurationChanged() async {
-
-    if(pagePhase.value ==PagePhase.emptyState){
+    if (!firstLoadWithDefaultConfigurationsCompleted) {
       return;
     }
-
     pagePhase.value = PagePhase.linksLoading;
     await loadAndroidAppLinks();
     if (pagePhase.value == PagePhase.validationErrorPage) {
@@ -252,7 +276,9 @@ class DeepLinksController extends DisposableController
   }
 
   void _handleIosConfigurationChanged() async {
-
+    if (!firstLoadWithDefaultConfigurationsCompleted) {
+      return;
+    }
     pagePhase.value = PagePhase.linksLoading;
     await loadIosLinks();
     if (pagePhase.value == PagePhase.validationErrorPage) {

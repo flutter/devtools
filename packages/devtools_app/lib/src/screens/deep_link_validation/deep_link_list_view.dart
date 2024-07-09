@@ -45,22 +45,7 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
     super.didChangeDependencies();
     initController();
     callWhenControllerReady((_) {
-      controller.selectedAndroidVariantIndex.value =
-          _getDefaultConfigurationIndex(
-        controller.selectedProject.value!.androidVariants,
-        containsString: 'release',
-      );
-      if (FeatureFlags.deepLinkIosCheck) {
-        controller.selectedIosConfigurationIndex.value =
-            _getDefaultConfigurationIndex(
-          controller.selectedProject.value!.iosBuildOptions.configurations,
-          containsString: 'release',
-        );
-        controller.selectedIosTargetIndex.value = _getDefaultConfigurationIndex(
-          controller.selectedProject.value!.iosBuildOptions.configurations,
-          containsString: 'runner',
-        );
-      }
+      controller.firstLoadWithDefaultConfigurations();
     });
   }
 
