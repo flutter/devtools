@@ -130,7 +130,7 @@ class SurveyService {
       }
       final response = await get(_metadataUrl);
       if (response.statusCode == 200) {
-        final contents = json.decode(response.body) as Map<String, Object>;
+        final contents = json.decode(response.body) as Map<String, Object?>;
         return DevToolsSurvey.fromJson(contents);
       }
     } on Error catch (e, st) {
