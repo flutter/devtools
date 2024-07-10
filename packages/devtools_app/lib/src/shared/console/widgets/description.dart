@@ -43,6 +43,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.style,
     this.nodeDescriptionHighlightStyle,
     this.emphasizeNodesFromLocalProject = false,
+    this.actionLabel,
+    this.actionCallback,
+    this.customDescription,
+    this.customIconName,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -56,6 +60,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   // to true when turning on inspector V2. This is currently true for the V2
   // inspector and false for the legacy inspector.
   final bool emphasizeNodesFromLocalProject;
+  final String? actionLabel;
+  final VoidCallback? actionCallback;
+  final String? customDescription;
+  final String? customIconName;
 
   static Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -63,6 +71,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       child: icon,
     );
   }
+
+  /// Returns the custom description if specified, or the default description
+  /// for the diagnostic node.
+  String get descriptionText =>
+      customDescription ?? diagnostic?.description ?? '';
 
   /// Approximates the width of the elements inside a [RemoteDiagnosticsNode]
   /// widget.
@@ -170,6 +183,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     RemoteDiagnosticsNode? diagnostic,
     String? searchValue,
     TextStyle? nodeDescriptionHighlightStyle,
+    String? actionLabel,
+    VoidCallback? actionCallback,
   }) {
     // Store the textStyle of the built widget so that it can be used in
     // [approximateNodeWidth] later.
@@ -234,12 +249,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           ),
         );
       },
-      child: multiline
-          ? SelectableText.rich(textSpan)
-          : RichText(
-              overflow: TextOverflow.ellipsis,
-              text: textSpan,
-            ),
+      child: DescriptionDisplay(
+        text: textSpan,
+        multiline: multiline,
+        actionLabel: actionLabel,
+        actionCallback: actionCallback,
+      ),
     );
   }
 
@@ -253,7 +268,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final icon = diagnosticLocal.icon;
+    final icon = customIconName != null
+        ? RemoteDiagnosticsNode.iconMaker.fromWidgetName(customIconName)
+        : diagnosticLocal.icon;
+
     final children = <Widget>[];
 
     if (icon != null) {
@@ -291,7 +309,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         textStyle = textStyle.merge(DiagnosticsTextStyles.regularBold);
       }
 
-      String description = diagnosticLocal.description ?? '';
+      String description = descriptionText;
       if (propertyType != null && properties != null) {
         switch (propertyType) {
           case 'Color':
@@ -373,8 +391,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               style: textStyle,
             ),
           );
-          if (diagnosticLocal.separator != ' ' &&
-              (diagnosticLocal.description?.isNotEmpty ?? false)) {
+          if (diagnosticLocal.separator != ' ' && descriptionText.isNotEmpty) {
             children.add(
               Text(
                 ' ',
@@ -402,12 +419,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       var diagnosticDescription = buildDescription(
-        description: diagnosticLocal.description ?? '',
+        description: descriptionText,
         textStyle: textStyle,
         colorScheme: colorScheme,
         diagnostic: diagnostic,
         searchValue: searchValue,
         nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
+        actionLabel: actionLabel,
+        actionCallback: actionCallback,
       );
 
       if (errorText != null) {
@@ -530,5 +549,62 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     spans.add(quoteSpan);
 
     return TextSpan(children: spans);
+  }
+}
+
+class DescriptionDisplay extends StatelessWidget {
+  DescriptionDisplay({
+    super.key,
+    required this.text,
+    this.multiline = false,
+    this.actionLabel,
+    this.actionCallback,
+  }) {
+    if (multiline) {
+      // We don't currently support including an action button for multiline
+      // descriptions. We can update this if it's needed later.
+      assert(actionLabel == null);
+    }
+    if (actionLabel != null) {
+      // Actions require both a label and a callback.
+      assert(actionCallback != null);
+    }
+  }
+
+  final TextSpan text;
+  final bool multiline;
+  final String? actionLabel;
+  final VoidCallback? actionCallback;
+
+  @override
+  Widget build(BuildContext context) {
+    if (multiline) {
+      return SelectableText.rich(text);
+    }
+
+    if (actionLabel != null) {
+      return Row(
+        children: [
+          RichText(
+            overflow: TextOverflow.ellipsis,
+            text: text,
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).regularTextStyle,
+            ),
+            onPressed: actionCallback,
+            child: Text(
+              actionLabel!,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return RichText(
+      overflow: TextOverflow.ellipsis,
+      text: text,
+    );
   }
 }
