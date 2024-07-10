@@ -188,7 +188,7 @@ void main() {
           expect(node.hideableGroupSubordinates![1].isHidden, isFalse);
         });
 
-        test('subordinates cannot change change hideable state', () {
+        test('subordinates cannot change hideable state', () {
           final node = buildHideableGroupLeaderWithNSubordinates(2);
 
           expect(
@@ -207,24 +207,20 @@ Map<String, dynamic> buildNodeJson({
   required String description,
   required bool createdByLocalProject,
   required List<Map<String, dynamic>> children,
-}) {
-  final nodeJson = <String, dynamic>{
-    'description': description,
-    'createdByLocalProject': createdByLocalProject,
-    'hasChildren': children.isNotEmpty,
-    'children': children,
-  };
-  return nodeJson;
-}
-
+}) =>
+    <String, dynamic>{
+      'description': description,
+      'createdByLocalProject': createdByLocalProject,
+      'hasChildren': children.isNotEmpty,
+      'children': children,
+    };
 RemoteDiagnosticsNode buildNode(
   Map<String, dynamic> nodeJson, {
   RemoteDiagnosticsNode? parent,
-}) {
-  return RemoteDiagnosticsNode(
-    nodeJson,
-    MockInspectorObjectGroupBase(),
-    false,
-    parent,
-  );
-}
+}) =>
+    RemoteDiagnosticsNode(
+      nodeJson,
+      MockInspectorObjectGroupBase(),
+      false,
+      parent,
+    );
