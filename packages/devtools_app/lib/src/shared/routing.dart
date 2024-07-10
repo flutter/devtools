@@ -394,7 +394,7 @@ class DevToolsNavigationState {
   @override
   String toString() => _state.toString();
 
-  Map<String, dynamic> toJson() => _state;
+  Map<String, Object?> toJson() => _state;
 }
 
 /// Mixin that gives controllers the ability to respond to changes in router

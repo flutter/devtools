@@ -400,7 +400,7 @@ class InspectorService extends InspectorServiceBase {
   /// Requests the full mapping of widget ids to source locations.
   ///
   /// See [LocationMap] which provides support to parse this JSON.
-  Future<Map<String, dynamic>> widgetLocationIdMap() async {
+  Future<Map<String, Object?>> widgetLocationIdMap() async {
     await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
     final response = await invokeServiceMethodDaemonNoGroupArgs(
@@ -411,7 +411,7 @@ class InspectorService extends InspectorServiceBase {
       return {};
     }
 
-    return response as Map<String, dynamic>;
+    return response as Map<String, Object?>;
   }
 
   RemoteDiagnosticsNode? _currentSelection;

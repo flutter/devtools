@@ -32,7 +32,7 @@ class OfflineDataController {
   ///
   /// This value is set from [ImportController.importData] when offline data is
   /// imported to DevTools.
-  var offlineDataJson = <String, dynamic>{};
+  var offlineDataJson = <String, Object?>{};
 
   /// Stores the [ConnectedApp] instance temporarily while switching between
   /// offline and online modes.
@@ -158,8 +158,12 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
     required FutureOr<void> Function(T data) loadData,
   }) async {
     if (offlineDataController.shouldLoadOfflineData(screenId)) {
+      // TODO(kenz): investigate this line of code. Do we need to be creating a
+      // second copy of the Map from offlineDataController.offlineDataJson or
+      // can we use it directly to save this `Map.from` call?
       final json = Map<String, Object?>.from(
-        offlineDataController.offlineDataJson[screenId],
+        (offlineDataController.offlineDataJson[screenId] as Map)
+            .cast<String, Object?>(),
       );
       final screenData = createData(json);
       if (shouldLoad(screenData)) {

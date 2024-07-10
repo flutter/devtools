@@ -379,6 +379,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     };
   }
 
+  Map<String, UrlParametersBuilder>? _routes;
+
+  void _clearCachedRoutes() {
+    _routes = null;
+    routerDelegate.refreshPages();
+  }
+
   Map<String, UrlParametersBuilder> get _standaloneScreens {
     // TODO(dantup): Standalone screens do not use DevToolsScaffold which means
     //  they do not currently send an initial "currentPage" event to inform
@@ -387,13 +394,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       for (final type in StandaloneScreenType.values)
         type.name: (_, __, args, ___) => type.screen,
     };
-  }
-
-  Map<String, UrlParametersBuilder>? _routes;
-
-  void _clearCachedRoutes() {
-    _routes = null;
-    routerDelegate.refreshPages();
   }
 
   // TODO(kenz): consider showing all screens and displaying the reason why they
