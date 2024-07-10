@@ -1256,13 +1256,20 @@ class _RowPainter extends CustomPainter {
       );
     }
 
+    // Draw a straight vertical line from current node's icon to the icon below
+    // it if either the current node:
+    // 1. is expanded (meaning its child is visible) and it only has one child
+    //    (because multiple children get indented).
+    // 2. is NOT the first node in a hidden group of which the last hidden node
+    //    in that group is childless (meaning that last node is at the end of a
+    //    branch and therefore has nothing below it).
     final expandedWithSingleChild = row.hasSingleChild && node.isExpanded;
-    final subordinates = node.diagnostic?.hideableGroupSubordinates ?? [];
+    final subordinates =
+        node.diagnostic?.hideableGroupSubordinates ?? <RemoteDiagnosticsNode>[];
     final groupIsHidden = node.diagnostic?.groupIsHidden ?? false;
     final lastHiddenSubordinateHasNoChildren = groupIsHidden &&
         subordinates.isNotEmpty &&
         subordinates.last.childrenNow.isEmpty;
-
     if (expandedWithSingleChild && !lastHiddenSubordinateHasNoChildren) {
       final distanceFromIconCenterToRowStart =
           inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
@@ -1346,9 +1353,8 @@ class InspectorRowContent extends StatelessWidget {
 
     final node = row.node;
     final diagnostic = node.diagnostic;
-    final isHideableGroupLeader =
-        diagnostic != null && diagnostic.isHideableGroupLeader;
-
+    final isHideableGroupLeader = diagnostic?.isHideableGroupLeader ?? false;
+    const expandCollapseWidth = 14.0;
     Widget rowWidget = Padding(
       padding: EdgeInsets.only(left: currentX),
       child: ValueListenableBuilder<String>(
@@ -1371,7 +1377,7 @@ class InspectorRowContent extends StatelessWidget {
                         ),
                       )
                     : const SizedBox(
-                        width: extraSpacing,
+                        width: expandCollapseWidth,
                         height: defaultSpacing,
                       ),
                 Expanded(
@@ -1402,7 +1408,7 @@ class InspectorRowContent extends StatelessWidget {
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,
                           actionLabel: isHideableGroupLeader
-                              ? diagnostic.groupIsHidden
+                              ? diagnostic!.groupIsHidden
                                   ? '(expand)'
                                   : '(collapse)'
                               : null,
@@ -1410,11 +1416,11 @@ class InspectorRowContent extends StatelessWidget {
                               ? () => controller.toggleHiddenGroup(node)
                               : null,
                           customDescription: isHideableGroupLeader &&
-                                  diagnostic.groupIsHidden
+                                  diagnostic!.groupIsHidden
                               ? '${diagnostic.hideableGroupSubordinates!.length + 1} more widgets...'
                               : null,
                           customIconName:
-                              isHideableGroupLeader && diagnostic.groupIsHidden
+                              isHideableGroupLeader && diagnostic!.groupIsHidden
                                   ? 'HiddenGroup'
                                   : null,
                         ),

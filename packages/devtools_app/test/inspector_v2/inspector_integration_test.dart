@@ -487,33 +487,22 @@ Finder findNodeMatching(String text) => find.ancestor(
       matching: find.byType(DescriptionDisplay),
     );
 
-Finder findExpandCollapseButton(Finder nodeFinder) => find.descendant(
-      of: nodeFinder,
-      matching: find.byType(TextButton),
-    );
-
-Finder findExpandCollapseButtonText({
-  required Finder buttonFinder,
-  required String buttonText,
-}) =>
-    find.descendant(
-      of: buttonFinder,
-      matching: find.text(buttonText),
-    );
-
 Finder findExpandCollapseButtonForNode({
   required String nodeDescription,
   required bool isExpand,
 }) {
-  final hiddenNode = findNodeMatching(nodeDescription);
-  expect(hiddenNode, findsOneWidget);
+  final hiddenNodeFinder = findNodeMatching(nodeDescription);
+  expect(hiddenNodeFinder, findsOneWidget);
 
-  final expandCollapseButtonFinder = findExpandCollapseButton(hiddenNode);
+  final expandCollapseButtonFinder = find.descendant(
+    of: hiddenNodeFinder,
+    matching: find.byType(TextButton),
+  );
   expect(expandCollapseButtonFinder, findsOneWidget);
 
-  final expandCollapseButtonTextFinder = findExpandCollapseButtonText(
-    buttonFinder: expandCollapseButtonFinder,
-    buttonText: isExpand ? '(expand)' : '(collapse)',
+  final expandCollapseButtonTextFinder = find.descendant(
+    of: expandCollapseButtonFinder,
+    matching: find.text(isExpand ? '(expand)' : '(collapse)'),
   );
   expect(expandCollapseButtonTextFinder, findsOneWidget);
 

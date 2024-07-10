@@ -272,7 +272,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         ? RemoteDiagnosticsNode.iconMaker.fromWidgetName(customIconName)
         : diagnosticLocal.icon;
 
-    diagnosticLocal.icon;
     final children = <Widget>[];
 
     if (icon != null) {
@@ -554,13 +553,23 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 }
 
 class DescriptionDisplay extends StatelessWidget {
-  const DescriptionDisplay({
+  DescriptionDisplay({
     super.key,
     required this.text,
     this.multiline = false,
     this.actionLabel,
     this.actionCallback,
-  });
+  }) {
+    if (multiline) {
+      // We don't currently support including an action button for multiline
+      // descriptions. We can update this if it's needed later.
+      assert(actionLabel == null);
+    }
+    if (actionLabel != null) {
+      // Actions require both a label and a callback.
+      assert(actionCallback != null);
+    }
+  }
 
   final TextSpan text;
   final bool multiline;
@@ -570,16 +579,10 @@ class DescriptionDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (multiline) {
-      // We don't currently support including an action button for multiline
-      // descriptions. We can update this if it's needed later.
-      assert(actionLabel == null);
       return SelectableText.rich(text);
     }
 
-    final theme = Theme.of(context);
-
     if (actionLabel != null) {
-      assert(actionCallback != null);
       return Row(
         children: [
           RichText(
@@ -588,7 +591,7 @@ class DescriptionDisplay extends StatelessWidget {
           ),
           TextButton(
             style: TextButton.styleFrom(
-              textStyle: theme.regularTextStyle,
+              textStyle: Theme.of(context).regularTextStyle,
             ),
             onPressed: actionCallback,
             child: Text(
