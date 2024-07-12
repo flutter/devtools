@@ -553,23 +553,20 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 }
 
 class DescriptionDisplay extends StatelessWidget {
-  DescriptionDisplay({
+  const DescriptionDisplay({
     super.key,
     required this.text,
     this.multiline = false,
     this.actionLabel,
     this.actionCallback,
-  }) {
-    if (multiline) {
-      // We don't currently support including an action button for multiline
-      // descriptions. We can update this if it's needed later.
-      assert(actionLabel == null);
-    }
-    if (actionLabel != null) {
-      // Actions require both a label and a callback.
-      assert(actionCallback != null);
-    }
-  }
+  })  : assert(
+          multiline ? actionLabel == null : true,
+          'Action labels are not supported for multiline descriptions',
+        ),
+        assert(
+          (actionLabel == null) == (actionCallback == null),
+          'Actions require both a label and a callback',
+        );
 
   final TextSpan text;
   final bool multiline;
