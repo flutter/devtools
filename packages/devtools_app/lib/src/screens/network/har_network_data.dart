@@ -8,8 +8,6 @@ class HarNetworkData {
   HarNetworkData(this.requests);
 
   factory HarNetworkData.fromJson(Map<String, dynamic> json) {
-    count++;
-    debugPrint('count is $count');
     final entries = (json['log']?['entries'] as List<dynamic>? ?? [])
         .map(
           (entryJson) =>
@@ -19,7 +17,6 @@ class HarNetworkData {
 
     return HarNetworkData(entries);
   }
-  static int count = 0;
 
   final List<DartIOHttpRequestData> requests;
 
