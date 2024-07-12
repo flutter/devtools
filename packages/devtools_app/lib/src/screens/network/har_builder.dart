@@ -129,12 +129,20 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
         NetworkEventKeys.dns.name: NetworkEventDefaults.dns,
         NetworkEventKeys.connect.name: NetworkEventDefaults.connect,
         NetworkEventKeys.send.name: NetworkEventDefaults.send,
-        NetworkEventKeys.wait.name: e.duration!.inMilliseconds - 2,
+        NetworkEventKeys.wait.name: e.duration?.inMilliseconds ?? 0 - 2,
         NetworkEventKeys.receive.name: NetworkEventDefaults.receive,
         NetworkEventKeys.ssl.name: NetworkEventDefaults.ssl,
       },
       NetworkEventKeys.connection.name: e.hashCode.toString(),
       NetworkEventKeys.comment.name: '',
+
+      // Custom fields
+      // har spec requires underscore to be added for custom fields, hence removing them
+      NetworkEventCustomFieldKeys.isolateId: '',
+      NetworkEventCustomFieldKeys.id: e.id,
+      NetworkEventCustomFieldKeys.startTime:
+          e.startTimestamp.microsecondsSinceEpoch,
+      NetworkEventCustomFieldKeys.events: [],
     };
   }).toList();
 

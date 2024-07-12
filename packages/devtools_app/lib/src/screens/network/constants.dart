@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-enum NetworkEvent {
-  downloadAsHar,
-}
-
 enum NetworkEventKeys {
   log,
   version,
@@ -68,4 +64,18 @@ class NetworkEventDefaults {
   static const send = 1;
   static const receive = 1;
   static const ssl = -1;
+}
+
+class NetworkEventCustomFieldKeys {
+  static const isolateId = '_isolateId';
+  static const id = '_id';
+  static const startTime = '_startTime';
+  static const events = '_events';
+}
+
+class NetworkEventCustomFieldRemappedKeys {
+  static const isolateId = 'isolateId';
+  static const id = 'id';
+  static const startTime = 'startTime';
+  static const events = 'events';
 }
