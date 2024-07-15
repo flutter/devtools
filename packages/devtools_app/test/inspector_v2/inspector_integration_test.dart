@@ -169,7 +169,11 @@ void main() {
         expect(hideableNodeFinder, findsNothing);
 
         // Search for the HeroControllerScope:
-        await tester.tap(findSearchButton());
+        final searchButtonFinder = find.ancestor(
+          of: find.byIcon(Icons.search),
+          matching: find.byType(ToolbarAction),
+        );
+        await tester.tap(searchButtonFinder);
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await tester.enterText(find.byType(TextField), 'HeroControllerScope');
         await tester.pumpAndSettle(inspectorChangeSettleTime);
@@ -541,12 +545,4 @@ Finder findExpandCollapseButtonForNode({
   expect(expandCollapseButtonTextFinder, findsOneWidget);
 
   return expandCollapseButtonFinder;
-}
-
-Finder findSearchButton() {
-  final searchIconFinder = find.byIcon(Icons.search);
-  return find.ancestor(
-    of: searchIconFinder,
-    matching: find.byType(ToolbarAction),
-  );
 }

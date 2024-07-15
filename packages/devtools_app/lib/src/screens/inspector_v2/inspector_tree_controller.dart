@@ -517,8 +517,9 @@ class InspectorTreeController extends DisposableController
       gac.inspector,
       gac.treeNodeSelection,
     );
-    if (node?.diagnostic?.groupIsHidden ?? false) {
-      node?.diagnostic?.hideableGroupLeader?.toggleHiddenGroup();
+    final diagnostic = node?.diagnostic;
+    if (diagnostic != null && diagnostic.groupIsHidden) {
+      diagnostic.hideableGroupLeader?.toggleHiddenGroup();
     }
     expandPath(node);
   }
