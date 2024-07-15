@@ -67,7 +67,7 @@ void main() {
         showingOverlay && !isEmbedded() ? findsOneWidget : findsNothing,
       );
       expect(
-        find.text('Run a new debug session to reconnect'),
+        find.text('Run a new debug session to reconnect.'),
         showingOverlay && isEmbedded() ? findsOneWidget : findsNothing,
       );
       expect(
@@ -151,8 +151,8 @@ void main() {
           await pumpDisconnectObserver(
             tester,
             child: Container(
-              height: 200.0,
-              width: 200.0,
+              height: 100.0,
+              width: 100.0,
               color: Colors.red,
             ),
           );
