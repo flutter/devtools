@@ -16,7 +16,6 @@ import '../shared/connection_info.dart';
 import '../shared/globals.dart';
 import '../shared/query_parameters.dart';
 import '../shared/routing.dart';
-import '../shared/ui/colors.dart';
 import '../shared/utils.dart';
 
 class DisconnectObserver extends StatefulWidget {
@@ -119,31 +118,33 @@ class DisconnectObserverState extends State<DisconnectObserver>
   OverlayEntry _createDisconnectedOverlay() {
     final theme = Theme.of(context);
     currentDisconnectedOverlay = OverlayEntry(
-      builder: (context) => Container(
-        color: theme.colorScheme.overlayShadowColor,
-        child: Center(
-          child: Column(
-            children: [
-              const Spacer(),
-              Text('Disconnected', style: theme.textTheme.headlineMedium),
-              const SizedBox(height: defaultSpacing),
-              if (!isEmbedded())
-                ConnectToNewAppButton(
-                  routerDelegate: widget.routerDelegate,
-                  onPressed: hideDisconnectedOverlay,
-                  gaScreen: gac.devToolsMain,
-                )
-              else
-                const Text('Run a new debug session to reconnect'),
-              const Spacer(),
-              if (offlineDataController.offlineDataJson.isNotEmpty) ...[
-                ElevatedButton(
-                  onPressed: _reviewHistory,
-                  child: const Text('Review recent data (offline)'),
-                ),
+      builder: (context) => Material(
+        child: Container(
+          color: theme.colorScheme.surface,
+          child: Center(
+            child: Column(
+              children: [
                 const Spacer(),
+                Text('Disconnected', style: theme.textTheme.headlineMedium),
+                const SizedBox(height: defaultSpacing),
+                if (!isEmbedded())
+                  ConnectToNewAppButton(
+                    routerDelegate: widget.routerDelegate,
+                    onPressed: hideDisconnectedOverlay,
+                    gaScreen: gac.devToolsMain,
+                  )
+                else
+                  const Text('Run a new debug session to reconnect.'),
+                const Spacer(),
+                if (offlineDataController.offlineDataJson.isNotEmpty) ...[
+                  ElevatedButton(
+                    onPressed: _reviewHistory,
+                    child: const Text('Review recent data (offline)'),
+                  ),
+                  const Spacer(),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
