@@ -437,7 +437,6 @@ class InspectorController extends DisposableController
         inspectorTree.createNode(),
         node,
         expandChildren: true,
-        expandProperties: false,
       );
       inspectorTree.root = rootNode;
 

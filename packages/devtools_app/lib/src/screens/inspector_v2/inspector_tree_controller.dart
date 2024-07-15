@@ -600,7 +600,6 @@ class InspectorTreeController extends DisposableController
     InspectorTreeNode node,
     RemoteDiagnosticsNode diagnosticsNode, {
     required bool expandChildren,
-    required bool expandProperties,
     RemoteDiagnosticsNode? hideableGroupLeader,
   }) {
     node.diagnostic = diagnosticsNode;
@@ -623,7 +622,6 @@ class InspectorTreeController extends DisposableController
           node,
           node.diagnostic!.childrenNow,
           expandChildren: expandChildren && styleIsMultiline,
-          expandProperties: expandProperties && styleIsMultiline,
           hideableGroupLeader:
               inHideableGroup ? (hideableGroupLeader ?? diagnosticsNode) : null,
         );
@@ -640,7 +638,6 @@ class InspectorTreeController extends DisposableController
     InspectorTreeNode treeNode,
     List<RemoteDiagnosticsNode>? children, {
     required bool expandChildren,
-    required bool expandProperties,
     RemoteDiagnosticsNode? hideableGroupLeader,
   }) {
     treeNode.isExpanded = expandChildren;
@@ -659,8 +656,7 @@ class InspectorTreeController extends DisposableController
           property,
           // We are inside a property so only expand children if
           // expandProperties is true.
-          expandChildren: expandProperties,
-          expandProperties: expandProperties,
+          expandChildren: false,
         ),
       );
     }
@@ -672,7 +668,6 @@ class InspectorTreeController extends DisposableController
             createNode(),
             child,
             expandChildren: expandChildren,
-            expandProperties: expandProperties,
             hideableGroupLeader:
                 child.inHideableGroup ? hideableGroupLeader : null,
           ),
@@ -694,7 +689,6 @@ class InspectorTreeController extends DisposableController
             treeNode,
             children,
             expandChildren: true,
-            expandProperties: false,
           );
           nodeChanged(treeNode);
           if (treeNode == selection) {
