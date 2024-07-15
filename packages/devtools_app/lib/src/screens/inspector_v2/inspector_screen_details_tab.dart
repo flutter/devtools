@@ -10,63 +10,32 @@ import 'package:flutter/material.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/globals.dart';
-import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
-import '../../shared/ui/tab.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
 import 'layout_explorer/layout_explorer.dart';
 
 class InspectorDetails extends StatelessWidget {
   const InspectorDetails({
-    required this.detailsTree,
     required this.controller,
     super.key,
   });
 
-  final Widget detailsTree;
   final InspectorController controller;
 
   @override
   Widget build(BuildContext context) {
-    final tabs = [
-      (
-        tab: _buildTab(tabName: InspectorV2DetailsViewType.layoutExplorer.key),
-        tabView: LayoutExplorerTab(controller: controller),
+    return RoundedOutlinedBorder(
+      clip: true,
+      child: Column(
+        children: [
+          Expanded(
+            child: LayoutExplorerTab(
+              controller: controller,
+            ),
+          ),
+        ],
       ),
-      (
-        tab: _buildTab(
-          tabName: InspectorV2DetailsViewType.widgetDetailsTree.key,
-          trailing: InspectorExpandCollapseButtons(controller: controller),
-        ),
-        tabView: detailsTree,
-      ),
-    ];
-    return ValueListenableBuilder(
-      valueListenable: preferences.inspectorV2.defaultDetailsView,
-      builder: (BuildContext context, value, Widget? child) {
-        int defaultInspectorViewIndex = 0;
-
-        if (preferences.inspectorV2.defaultDetailsView.value ==
-            InspectorV2DetailsViewType.widgetDetailsTree) {
-          defaultInspectorViewIndex = 1;
-        }
-
-        return AnalyticsTabbedView(
-          tabs: tabs,
-          gaScreen: gac.inspector,
-          initialSelectedIndex: defaultInspectorViewIndex,
-        );
-      },
-    );
-  }
-
-  DevToolsTab _buildTab({required String tabName, Widget? trailing}) {
-    return DevToolsTab.create(
-      tabName: tabName,
-      gaPrefix: 'inspectorDetailsTab',
-      trailing: trailing,
     );
   }
 }
@@ -135,7 +104,6 @@ class _InspectorExpandCollapseButtonsState
     unawaited(
       blockWhileInProgress(() async {
         ga.select(gac.inspector, gac.expandAll);
-        await widget.controller.expandAllNodesInDetailsTree();
       }),
     );
   }
@@ -145,6 +113,5 @@ class _InspectorExpandCollapseButtonsState
       gac.inspector,
       gac.collapseAll,
     );
-    widget.controller.collapseDetailsToSelected();
   }
 }

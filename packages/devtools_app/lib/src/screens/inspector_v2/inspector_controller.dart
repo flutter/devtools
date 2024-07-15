@@ -44,17 +44,14 @@ class InspectorController extends DisposableController
     implements InspectorServiceClient {
   InspectorController({
     required this.inspectorTree,
-    InspectorTreeController? detailsTree,
     required this.treeType,
     this.parent,
     this.isSummaryTree = true,
-  }) : assert((detailsTree != null) == isSummaryTree) {
-    unawaited(_init(detailsTree: detailsTree));
+  }) {
+    unawaited(_init());
   }
 
-  Future<void> _init({
-    InspectorTreeController? detailsTree,
-  }) async {
+  Future<void> _init() async {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
     inspectorTree.config = InspectorTreeConfig(
@@ -63,15 +60,6 @@ class InspectorController extends DisposableController
       onExpand: _onExpand,
       onClientActiveChange: _onClientChange,
     );
-    details = isSummaryTree
-        ? InspectorController(
-            inspectorTree: detailsTree!,
-            treeType: treeType,
-            parent: this,
-            isSummaryTree: false,
-          )
-        : null;
-
     await serviceConnection.serviceManager.onServiceAvailable;
 
     if (inspectorService is InspectorService) {
@@ -187,8 +175,6 @@ class InspectorController extends DisposableController
   /// Parent InspectorController if this is a details subtree.
   InspectorController? parent;
 
-  InspectorController? details;
-
   InspectorTreeController inspectorTree;
   final FlutterTreeType treeType;
 
@@ -238,8 +224,6 @@ class InspectorController extends DisposableController
   bool visibleToUser = false;
 
   bool highlightNodesShownInBothTrees = false;
-
-  bool get detailsSubtree => parent != null;
 
   RemoteDiagnosticsNode? get selectedDiagnostic =>
       selectedNode.value?.diagnostic;
@@ -325,14 +309,7 @@ class InspectorController extends DisposableController
       return Future.value();
     }
 
-    // TODO(jacobr): refresh the tree as well as just the properties.
-    final detailsLocal = details;
-    if (detailsLocal == null) return _waitForPendingUpdateDone();
-
-    return Future.wait([
-      _waitForPendingUpdateDone(),
-      detailsLocal._waitForPendingUpdateDone(),
-    ]);
+    return _waitForPendingUpdateDone();
   }
 
   // Note that this may be called after the controller is disposed.  We need to handle nulls in the fields.
@@ -367,7 +344,7 @@ class InspectorController extends DisposableController
     if (!visibleToUser || _disposed) {
       return;
     }
-    await _recomputeTreeRoot(null, null, false);
+    await _recomputeTreeRoot(null);
     if (_disposed) {
       return;
     }
@@ -421,7 +398,6 @@ class InspectorController extends DisposableController
           ? queryParams[inspectorRefQueryParam]
           : null;
       await updateSelectionFromService(
-        firstFrame: true,
         inspectorRef: inspectorRef,
       );
     } else {
@@ -437,12 +413,7 @@ class InspectorController extends DisposableController
     }
   }
 
-  Future<void> _recomputeTreeRoot(
-    RemoteDiagnosticsNode? newSelection,
-    RemoteDiagnosticsNode? detailsSelection,
-    bool setSubtreeRoot, {
-    int subtreeDepth = 2,
-  }) async {
+  Future<void> _recomputeTreeRoot(RemoteDiagnosticsNode? newSelection) async {
     assert(!_disposed);
     final treeGroups = _treeGroups;
     if (_disposed || treeGroups == null) {
@@ -452,9 +423,7 @@ class InspectorController extends DisposableController
     treeGroups.cancelNext();
     try {
       final group = treeGroups.next;
-      final node = await (detailsSubtree
-          ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
-          : group.getRoot(treeType, isSummaryTree: false));
+      final node = await group.getRoot(treeType, isSummaryTree: false);
       if (node == null || group.disposed || _disposed) {
         return;
       }
@@ -472,7 +441,7 @@ class InspectorController extends DisposableController
       );
       inspectorTree.root = rootNode;
 
-      refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
+      refreshSelection(newSelection);
     } catch (error, st) {
       _log.shout(error, error, st);
       treeGroups.cancelNext();
@@ -484,25 +453,14 @@ class InspectorController extends DisposableController
     valueToInspectorTreeNode.clear();
   }
 
-  /// Show the details subtree starting with node subtreeRoot highlighting
-  /// node subtreeSelection.
-  void _showDetailSubtrees(
-    RemoteDiagnosticsNode? subtreeRoot,
-    RemoteDiagnosticsNode? subtreeSelection,
-  ) {
-    this.subtreeRoot = subtreeRoot;
-    details?.setSubtreeRoot(subtreeRoot, subtreeSelection);
-  }
-
   void setSubtreeRoot(
     RemoteDiagnosticsNode? node,
     RemoteDiagnosticsNode? selection,
   ) {
-    assert(detailsSubtree);
     selection ??= node;
     if (node != null && node == subtreeRoot) {
       //  Select the new node in the existing subtree.
-      applyNewSelection(selection, null, false);
+      applyNewSelection(selection);
       return;
     }
     subtreeRoot = node;
@@ -514,7 +472,7 @@ class InspectorController extends DisposableController
 
     // Clear now to eliminate frame of highlighted nodes flicker.
     _clearValueToInspectorTreeNodeMapping();
-    unawaited(_recomputeTreeRoot(selection, null, false));
+    unawaited(_recomputeTreeRoot(selection));
   }
 
   InspectorTreeNode? getSubtreeRootNode() {
@@ -526,24 +484,13 @@ class InspectorController extends DisposableController
 
   void refreshSelection(
     RemoteDiagnosticsNode? newSelection,
-    RemoteDiagnosticsNode? detailsSelection,
-    bool setSubtreeRoot,
   ) {
     newSelection ??= selectedDiagnostic;
     setSelectedNode(findMatchingInspectorTreeNode(newSelection));
     syncSelectionHelper(
-      maybeRerootDetailsTree: setSubtreeRoot,
       selection: newSelection,
-      detailsSelection: detailsSelection,
     );
 
-    final detailsLocal = details;
-    if (detailsLocal != null) {
-      if (subtreeRoot != null && getSubtreeRootNode() == null) {
-        subtreeRoot = newSelection;
-        detailsLocal.setSubtreeRoot(newSelection, detailsSelection);
-      }
-    }
     syncTreeSelection();
   }
 
@@ -605,15 +552,10 @@ class InspectorController extends DisposableController
       // Don't do anything. We will update the view once it is visible again.
       return;
     }
-    if (detailsSubtree) {
-      // Wait for the master to update.
-      return;
-    }
-    unawaited(updateSelectionFromService(firstFrame: false));
+    unawaited(updateSelectionFromService());
   }
 
   Future<void> updateSelectionFromService({
-    required bool firstFrame,
     String? inspectorRef,
   }) async {
     if (parent != null) {
@@ -645,32 +587,15 @@ class InspectorController extends DisposableController
       isSummaryTree: isSummaryTree,
     );
 
-    final pendingDetailsFuture = isSummaryTree
-        ? group.getSelection(selectedDiagnostic, treeType, isSummaryTree: false)
-        : null;
-
     try {
       final newSelection = await pendingSelectionFuture;
       if (_disposed || group.disposed) return;
-      RemoteDiagnosticsNode? detailsSelection;
 
-      if (pendingDetailsFuture != null) {
-        detailsSelection = await pendingDetailsFuture;
-        if (_disposed || group.disposed) return;
-      }
-
-      if (!firstFrame &&
-          detailsSelection?.valueRef == details?.selectedDiagnostic?.valueRef &&
-          newSelection?.valueRef == selectedDiagnostic?.valueRef) {
-        // No need to change the selection as it didn't actually change.
-        selectionGroups.cancelNext();
-        return;
-      }
       selectionGroups.promoteNext();
 
       subtreeRoot = newSelection;
 
-      applyNewSelection(newSelection, detailsSelection, true);
+      applyNewSelection(newSelection);
     } catch (error, st) {
       if (selectionGroups.next == group) {
         _log.shout(error, error, st);
@@ -681,8 +606,6 @@ class InspectorController extends DisposableController
 
   void applyNewSelection(
     RemoteDiagnosticsNode? newSelection,
-    RemoteDiagnosticsNode? detailsSelection,
-    bool setSubtreeRoot,
   ) {
     final nodeInTree = findMatchingInspectorTreeNode(newSelection);
 
@@ -690,11 +613,11 @@ class InspectorController extends DisposableController
       // The tree has probably changed since we last updated. Do a full refresh
       // so that the tree includes the new node we care about.
       unawaited(
-        _recomputeTreeRoot(newSelection, detailsSelection, setSubtreeRoot),
+        _recomputeTreeRoot(newSelection),
       );
     }
 
-    refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
+    refreshSelection(newSelection);
   }
 
   void animateTo(InspectorTreeNode? node) {
@@ -714,11 +637,8 @@ class InspectorController extends DisposableController
 
     lastExpanded = null; // New selected node takes precedence.
     endShowNode();
-    final detailsLocal = details;
     final parantLocal = parent;
-    if (detailsLocal != null) {
-      detailsLocal.endShowNode();
-    } else if (parantLocal != null) {
+    if (parantLocal != null) {
       parantLocal.endShowNode();
     }
 
@@ -769,7 +689,6 @@ class InspectorController extends DisposableController
 
     unawaited(
       updateSelectionFromService(
-        firstFrame: false,
         inspectorRef: errors.keys.elementAt(index),
       ),
     );
@@ -812,28 +731,9 @@ class InspectorController extends DisposableController
       setSelectedNode(node);
       unawaited(_addNodeToConsole(node));
 
-      // Don't reroot if the selected value is already visible in the details tree.
-      final maybeReroot = isSummaryTree &&
-          details != null &&
-          selectedDiagnostic != null &&
-          !details!.hasDiagnosticsValue(selectedDiagnostic!.valueRef);
       syncSelectionHelper(
-        maybeRerootDetailsTree: maybeReroot,
         selection: selectedDiagnostic,
-        detailsSelection: selectedDiagnostic,
       );
-
-      if (!maybeReroot) {
-        final parantLocal = parent;
-        final detailsLocal = details;
-
-        if (isSummaryTree && detailsLocal != null) {
-          detailsLocal.selectAndShowNode(selectedDiagnostic);
-        } else if (parantLocal != null) {
-          parantLocal
-              .selectAndShowNode(firstAncestorInParentTree(selectedNode.value));
-        }
-      }
     }
   }
 
@@ -855,33 +755,15 @@ class InspectorController extends DisposableController
   }
 
   void syncSelectionHelper({
-    required bool maybeRerootDetailsTree,
     required RemoteDiagnosticsNode? selection,
-    required RemoteDiagnosticsNode? detailsSelection,
   }) {
     if (selection != null) {
       if (selection.isCreatedByLocalProject) {
         _navigateTo(selection);
       }
     }
-    if (detailsSubtree || details == null) {
-      if (selection != null) {
-        var toSelect = selectedNode.value;
 
-        while (toSelect != null && toSelect.diagnostic!.isProperty) {
-          toSelect = toSelect.parent;
-        }
-
-        if (toSelect != null) {
-          final diagnosticToSelect = toSelect.diagnostic!;
-          unawaited(diagnosticToSelect.setSelectionInspector(true));
-        }
-      }
-    }
-
-    if (maybeRerootDetailsTree) {
-      _showDetailSubtrees(selection, detailsSelection);
-    } else if (selection != null) {
+    if (selection != null) {
       // We can't rely on the details tree to update the selection on the server in this case.
       unawaited(selection.setSelectionInspector(true));
     }
@@ -905,7 +787,6 @@ class InspectorController extends DisposableController
     _treeGroups = null;
     _selectionGroups?.clear(false);
     _selectionGroups = null;
-    details?.dispose();
     super.dispose();
   }
 
@@ -918,22 +799,5 @@ class InspectorController extends DisposableController
     if (valueRef.id != null && !diagnosticsNode.isProperty) {
       valueToInspectorTreeNode[valueRef] = node;
     }
-  }
-
-  Future<void> expandAllNodesInDetailsTree() async {
-    final detailsLocal = details!;
-    await detailsLocal._recomputeTreeRoot(
-      inspectorTree.selection?.diagnostic,
-      detailsLocal.inspectorTree.selection?.diagnostic ??
-          detailsLocal.inspectorTree.root?.diagnostic,
-      false,
-      subtreeDepth: maxJsInt,
-    );
-  }
-
-  void collapseDetailsToSelected() {
-    final detailsLocal = details!;
-    detailsLocal.inspectorTree.collapseToSelected();
-    detailsLocal.animateTo(detailsLocal.inspectorTree.selection);
   }
 }

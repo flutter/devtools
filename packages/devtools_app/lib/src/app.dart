@@ -664,9 +664,6 @@ List<DevToolsScreen> defaultScreens({
               inspectorTree: inspector_v2.InspectorTreeController(
                 gaId: InspectorScreenMetrics.summaryTreeGaId,
               ),
-              detailsTree: inspector_v2.InspectorTreeController(
-                gaId: InspectorScreenMetrics.detailsTreeGaId,
-              ),
               treeType: FlutterTreeType.widget,
             ),
           )

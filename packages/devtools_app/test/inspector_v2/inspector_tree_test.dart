@@ -51,7 +51,6 @@ void main() {
 
     inspectorController = InspectorController(
       inspectorTree: InspectorTreeController(),
-      detailsTree: InspectorTreeController(),
       treeType: FlutterTreeType.widget,
     )..firstInspectorTreeLoadCompleted = true;
   });
