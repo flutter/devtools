@@ -198,6 +198,28 @@ void main() {
             throwsAssertionError,
           );
         });
+
+        test('hideable group subordinates have correct leader', () {
+          final node = buildHideableGroupLeaderWithNSubordinates(2);
+
+          expect(
+            node.hideableGroupSubordinates![0].hideableGroupLeader,
+            equals(node),
+          );
+          expect(
+            node.hideableGroupSubordinates![1].hideableGroupLeader,
+            equals(node),
+          );
+        });
+
+        test('hideable group leader of leader is itself', () {
+          final node = buildHideableGroupLeaderWithNSubordinates(2);
+
+          expect(
+            node.hideableGroupLeader,
+            equals(node),
+          );
+        });
       });
     });
   });
