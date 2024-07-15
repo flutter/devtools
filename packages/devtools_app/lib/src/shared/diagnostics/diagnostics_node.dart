@@ -568,6 +568,15 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _children ?? [];
   }
 
+  RemoteDiagnosticsNode? get hideableGroupLeader =>
+      isHideableGroupLeader ? this : _hideableGroupLeader;
+
+  RemoteDiagnosticsNode? _hideableGroupLeader;
+
+  set hideableGroupLeader(RemoteDiagnosticsNode? newLeader) {
+    _hideableGroupLeader = newLeader;
+  }
+
   bool get groupIsHidden => inHideableGroup && _groupIsHidden;
 
   bool _groupIsHidden = true;
@@ -593,9 +602,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       _hideableGroupSubordinates;
   List<RemoteDiagnosticsNode>? _hideableGroupSubordinates;
 
-  void addHideableGroupSubordinate(RemoteDiagnosticsNode subordinate) =>
-      (_hideableGroupSubordinates ??= <RemoteDiagnosticsNode>[])
-          .add(subordinate);
+  void addHideableGroupSubordinate(RemoteDiagnosticsNode subordinate) {
+    (_hideableGroupSubordinates ??= <RemoteDiagnosticsNode>[]).add(subordinate);
+    subordinate.hideableGroupLeader = this;
+  }
 
   void toggleHiddenGroup() {
     // Only the hideable group leader can change the group's hidden state:

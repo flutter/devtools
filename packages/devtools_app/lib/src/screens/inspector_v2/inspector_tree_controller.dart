@@ -242,9 +242,15 @@ class InspectorTreeController extends DisposableController
     }
 
     if (updateSearchableRows) {
+      final searchableRows = _buildRows(
+        node,
+        includeHiddenRows: true,
+        includeCollapsedRows: true,
+      );
+
       _searchableCachedRows
         ..clear()
-        ..addAll(rows);
+        ..addAll(searchableRows);
     }
   }
 
@@ -416,7 +422,11 @@ class InspectorTreeController extends DisposableController
 
   int _rowIndexFromOffset(double y) => max(0, y ~/ inspectorRowHeight);
 
-  List<InspectorTreeRow> _buildRows(InspectorTreeNode node) {
+  List<InspectorTreeRow> _buildRows(
+    InspectorTreeNode node, {
+    bool includeHiddenRows = false,
+    bool includeCollapsedRows = false,
+  }) {
     final rows = <InspectorTreeRow>[];
 
     void buildRowsHelper(
@@ -426,7 +436,7 @@ class InspectorTreeController extends DisposableController
     }) {
       final currentIdx = rows.length;
       final isHidden = node.diagnostic?.isHidden ?? false;
-      if (!isHidden) {
+      if (!isHidden || includeHiddenRows) {
         rows.add(
           InspectorTreeRow(
             node: node,
@@ -445,7 +455,7 @@ class InspectorTreeController extends DisposableController
       final indented = style != DiagnosticsTreeStyle.flat &&
           style != DiagnosticsTreeStyle.error;
 
-      if (!node.isExpanded) return;
+      if (!node.isExpanded && !includeCollapsedRows) return;
       final children = node.children;
       final parentDepth = depth;
       final childrenDepth = children.length > 1 ? parentDepth + 1 : parentDepth;
@@ -507,6 +517,10 @@ class InspectorTreeController extends DisposableController
       gac.inspector,
       gac.treeNodeSelection,
     );
+    final diagnostic = node?.diagnostic;
+    if (diagnostic != null && diagnostic.groupIsHidden) {
+      diagnostic.hideableGroupLeader?.toggleHiddenGroup();
+    }
     expandPath(node);
   }
 
