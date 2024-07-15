@@ -149,7 +149,6 @@ Widget wrapWithInspectorControllers(Widget widget, {bool v2 = false}) {
   if (v2) {
     final inspectorV2Controller = inspector_v2.InspectorController(
       inspectorTree: inspector_v2.InspectorTreeController(),
-      detailsTree: inspector_v2.InspectorTreeController(),
       treeType: FlutterTreeType.widget,
     );
     return wrapWithControllers(
