@@ -8,6 +8,7 @@ can be disabled to prevent exceptions from being logged to console.
 and `RoundedDropDownButton`.
 * Deprecate `ServiceManager.hasConnection` in favor of
 `ServiceManager.connectedState.value.connected`.
+* Correct the dartdoc for the `ListValueNotifier` class.
 
 ## 0.2.1
 * Add `navigateToCode` utility method for jumping to code in IDEs.
