@@ -601,7 +601,9 @@ enum ScreenDisabledReason {
   requiresDebugBuild('only supports debug builds.'),
   requiresFlutter('only supports Flutter applications.'),
   requiresVmDeveloperMode('only works when VM Developer Mode is enabled'),
-  serviceNotReady('requires a connection but the VM service is not ready.');
+  serviceNotReady(
+    'requires a connected application, but there is no connection available.',
+  );
 
   const ScreenDisabledReason(this.message);
 

@@ -155,6 +155,44 @@ void main() {
       },
     );
 
+    testWidgetsWithWindowSize(
+      'search for implementation widgets',
+      windowSize,
+      (WidgetTester tester) async {
+        await _loadInspectorUI(tester);
+
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+        // Before searching, confirm the HeroControllerScope is hidden:
+        final hideableNodeFinder = findNodeMatching('HeroControllerScope');
+        expect(hideableNodeFinder, findsNothing);
+
+        // Search for the HeroControllerScope:
+        final searchButtonFinder = find.ancestor(
+          of: find.byIcon(Icons.search),
+          matching: find.byType(ToolbarAction),
+        );
+        await tester.tap(searchButtonFinder);
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+        await tester.enterText(find.byType(TextField), 'HeroControllerScope');
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+        await tester.tap(find.byIcon(Icons.close));
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+        // Confirm the HeroControllerScope is visible and selected:
+        expect(hideableNodeFinder, findsOneWidget);
+        await expectLater(
+          find.byType(InspectorScreenBody),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/integration_inspector_v2_hideable_widget_selected_from_search.png',
+          ),
+        );
+
+        await env.tearDownEnvironment();
+      },
+    );
+
     // TODO(jacobr): convert these tests to screenshot tests like the initial
     // state test.
     /*
