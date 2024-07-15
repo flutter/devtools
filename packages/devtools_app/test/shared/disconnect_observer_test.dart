@@ -159,7 +159,7 @@ void main() {
           verifyObserverState(tester, connected: true, showingOverlay: false);
           // At this point the red container should be visible.
           await expectLater(
-            find.byType(DisconnectObserver),
+            find.byType(MaterialApp),
             matchesDevToolsGolden(
               '../test_infra/goldens/shared/disconnect_observer_connected.png',
             ),
@@ -173,7 +173,7 @@ void main() {
           // Once the disconnect overlay is showing, the red container should
           // be hidden.
           await expectLater(
-            find.byType(DisconnectObserver),
+            find.byType(MaterialApp),
             matchesDevToolsGolden(
               '../test_infra/goldens/shared/disconnect_observer_disconnected.png',
             ),
