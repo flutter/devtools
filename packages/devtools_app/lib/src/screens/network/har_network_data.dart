@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:devtools_shared/devtools_shared.dart';
+import '../../shared/http/http_request_data.dart';
 
-import '../../../devtools_app.dart';
 import 'har_builder.dart';
 // ignore_for_file: avoid_dynamic_calls
 
-class HarNetworkData {
+class HarNetworkData with Serializable {
   HarNetworkData(this.requests);
 
   factory HarNetworkData.fromJson(Map<String, dynamic> json) {
@@ -20,6 +20,7 @@ class HarNetworkData {
 
   final List<DartIOHttpRequestData> requests;
 
+  @override
   Map<String, Object?> toJson() {
     return buildHar(requests);
   }
