@@ -54,27 +54,32 @@ enum EditorEventKind {
 
 /// Constants for all fields used in JSON maps to avoid literal strings that
 /// may have typos sprinkled throughout the API classes.
-abstract class _Field {
+abstract class Field {
   static const category = 'category';
   static const debuggerType = 'debuggerType';
   static const debugSession = 'debugSession';
   static const debugSessionId = 'debugSessionId';
   static const debugSessions = 'debugSessions';
   static const device = 'device';
-  static const devices = 'devices';
   static const deviceId = 'deviceId';
+  static const devices = 'devices';
   static const emulator = 'emulator';
   static const emulatorId = 'emulatorId';
   static const ephemeral = 'ephemeral';
   static const flutterDeviceId = 'flutterDeviceId';
   static const flutterMode = 'flutterMode';
+  static const forceExternal = 'forceExternal';
   static const id = 'id';
   static const name = 'name';
+  static const page = 'page';
   static const platform = 'platform';
   static const platformType = 'platformType';
+  static const prefersDebugSession = 'prefersDebugSession';
   static const projectRootPath = 'projectRootPath';
+  static const requiresDebugSession = 'requiresDebugSession';
   static const selectedDeviceId = 'selectedDeviceId';
   static const supported = 'supported';
+  static const supportsForceExternal = 'supportsForceExternal';
   static const vmServiceUri = 'vmServiceUri';
 }
 
@@ -94,7 +99,7 @@ class DeviceAddedEvent extends EditorEvent {
   DeviceAddedEvent.fromJson(Map<String, Object?> map)
       : this(
           device:
-              EditorDevice.fromJson(map[_Field.device] as Map<String, Object?>),
+              EditorDevice.fromJson(map[Field.device] as Map<String, Object?>),
         );
 
   @override
@@ -104,7 +109,7 @@ class DeviceAddedEvent extends EditorEvent {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.device: device,
+        Field.device: device,
       };
 }
 
@@ -118,7 +123,7 @@ class DeviceChangedEvent extends EditorEvent {
   DeviceChangedEvent.fromJson(Map<String, Object?> map)
       : this(
           device:
-              EditorDevice.fromJson(map[_Field.device] as Map<String, Object?>),
+              EditorDevice.fromJson(map[Field.device] as Map<String, Object?>),
         );
 
   @override
@@ -128,7 +133,7 @@ class DeviceChangedEvent extends EditorEvent {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.device: device,
+        Field.device: device,
       };
 }
 
@@ -138,7 +143,7 @@ class DeviceRemovedEvent extends EditorEvent {
 
   DeviceRemovedEvent.fromJson(Map<String, Object?> map)
       : this(
-          deviceId: map[_Field.deviceId] as String,
+          deviceId: map[Field.deviceId] as String,
         );
 
   @override
@@ -148,7 +153,7 @@ class DeviceRemovedEvent extends EditorEvent {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.deviceId: deviceId,
+        Field.deviceId: deviceId,
       };
 }
 
@@ -163,7 +168,7 @@ class DeviceSelectedEvent extends EditorEvent {
 
   DeviceSelectedEvent.fromJson(Map<String, Object?> map)
       : this(
-          deviceId: map[_Field.deviceId] as String?,
+          deviceId: map[Field.deviceId] as String?,
         );
 
   @override
@@ -175,7 +180,7 @@ class DeviceSelectedEvent extends EditorEvent {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.deviceId: deviceId,
+        Field.deviceId: deviceId,
       };
 }
 
@@ -186,7 +191,7 @@ class DebugSessionStartedEvent extends EditorEvent {
   DebugSessionStartedEvent.fromJson(Map<String, Object?> map)
       : this(
           debugSession: EditorDebugSession.fromJson(
-            map[_Field.debugSession] as Map<String, Object?>,
+            map[Field.debugSession] as Map<String, Object?>,
           ),
         );
 
@@ -197,7 +202,7 @@ class DebugSessionStartedEvent extends EditorEvent {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.debugSession: debugSession,
+        Field.debugSession: debugSession,
       };
 }
 
@@ -209,7 +214,7 @@ class DebugSessionChangedEvent extends EditorEvent {
   DebugSessionChangedEvent.fromJson(Map<String, Object?> map)
       : this(
           debugSession: EditorDebugSession.fromJson(
-            map[_Field.debugSession] as Map<String, Object?>,
+            map[Field.debugSession] as Map<String, Object?>,
           ),
         );
 
@@ -220,7 +225,7 @@ class DebugSessionChangedEvent extends EditorEvent {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.debugSession: debugSession,
+        Field.debugSession: debugSession,
       };
 }
 
@@ -230,7 +235,7 @@ class DebugSessionStoppedEvent extends EditorEvent {
 
   DebugSessionStoppedEvent.fromJson(Map<String, Object?> map)
       : this(
-          debugSessionId: map[_Field.debugSessionId] as String,
+          debugSessionId: map[Field.debugSessionId] as String,
         );
 
   @override
@@ -240,7 +245,7 @@ class DebugSessionStoppedEvent extends EditorEvent {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.debugSessionId: debugSessionId,
+        Field.debugSessionId: debugSessionId,
       };
 }
 
@@ -253,10 +258,10 @@ class GetDevicesResult with Serializable {
 
   GetDevicesResult.fromJson(Map<String, Object?> map)
       : this(
-          devices: (map[_Field.devices] as List<Map<String, Object?>>)
+          devices: (map[Field.devices] as List<Map<String, Object?>>)
               .map(EditorDevice.fromJson)
               .toList(),
-          selectedDeviceId: map[_Field.selectedDeviceId] as String?,
+          selectedDeviceId: map[Field.selectedDeviceId] as String?,
         );
 
   final List<EditorDevice> devices;
@@ -264,8 +269,8 @@ class GetDevicesResult with Serializable {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.devices: devices,
-        _Field.selectedDeviceId: selectedDeviceId,
+        Field.devices: devices,
+        Field.selectedDeviceId: selectedDeviceId,
       };
 }
 
@@ -278,7 +283,7 @@ class GetDebugSessionsResult with Serializable {
   GetDebugSessionsResult.fromJson(Map<String, Object?> map)
       : this(
           debugSessions:
-              (map[_Field.debugSessions] as List<Map<String, Object?>>)
+              (map[Field.debugSessions] as List<Map<String, Object?>>)
                   .map(EditorDebugSession.fromJson)
                   .toList(),
         );
@@ -287,7 +292,7 @@ class GetDebugSessionsResult with Serializable {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.debugSessions: debugSessions,
+        Field.debugSessions: debugSessions,
       };
 }
 
@@ -305,13 +310,13 @@ class EditorDebugSession with Serializable {
 
   EditorDebugSession.fromJson(Map<String, Object?> map)
       : this(
-          id: map[_Field.id] as String,
-          name: map[_Field.name] as String,
-          vmServiceUri: map[_Field.vmServiceUri] as String?,
-          flutterMode: map[_Field.flutterMode] as String?,
-          flutterDeviceId: map[_Field.flutterDeviceId] as String?,
-          debuggerType: map[_Field.debuggerType] as String?,
-          projectRootPath: map[_Field.projectRootPath] as String?,
+          id: map[Field.id] as String,
+          name: map[Field.name] as String,
+          vmServiceUri: map[Field.vmServiceUri] as String?,
+          flutterMode: map[Field.flutterMode] as String?,
+          flutterDeviceId: map[Field.flutterDeviceId] as String?,
+          debuggerType: map[Field.debuggerType] as String?,
+          projectRootPath: map[Field.projectRootPath] as String?,
         );
 
   final String id;
@@ -324,13 +329,13 @@ class EditorDebugSession with Serializable {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.id: id,
-        _Field.name: name,
-        _Field.vmServiceUri: vmServiceUri,
-        _Field.flutterMode: flutterMode,
-        _Field.flutterDeviceId: flutterDeviceId,
-        _Field.debuggerType: debuggerType,
-        _Field.projectRootPath: projectRootPath,
+        Field.id: id,
+        Field.name: name,
+        Field.vmServiceUri: vmServiceUri,
+        Field.flutterMode: flutterMode,
+        Field.flutterDeviceId: flutterDeviceId,
+        Field.debuggerType: debuggerType,
+        Field.projectRootPath: projectRootPath,
       };
 }
 
@@ -350,15 +355,15 @@ class EditorDevice with Serializable {
 
   EditorDevice.fromJson(Map<String, Object?> map)
       : this(
-          id: map[_Field.id] as String,
-          name: map[_Field.name] as String,
-          category: map[_Field.category] as String?,
-          emulator: map[_Field.emulator] as bool,
-          emulatorId: map[_Field.emulatorId] as String?,
-          ephemeral: map[_Field.ephemeral] as bool,
-          platform: map[_Field.platform] as String,
-          platformType: map[_Field.platformType] as String?,
-          supported: map[_Field.supported] as bool,
+          id: map[Field.id] as String,
+          name: map[Field.name] as String,
+          category: map[Field.category] as String?,
+          emulator: map[Field.emulator] as bool,
+          emulatorId: map[Field.emulatorId] as String?,
+          ephemeral: map[Field.ephemeral] as bool,
+          platform: map[Field.platform] as String,
+          platformType: map[Field.platformType] as String?,
+          supported: map[Field.supported] as bool,
         );
 
   final String id;
@@ -379,14 +384,14 @@ class EditorDevice with Serializable {
 
   @override
   Map<String, Object?> toJson() => {
-        _Field.id: id,
-        _Field.name: name,
-        _Field.category: category,
-        _Field.emulator: emulator,
-        _Field.emulatorId: emulatorId,
-        _Field.ephemeral: ephemeral,
-        _Field.platform: platform,
-        _Field.platformType: platformType,
-        _Field.supported: supported,
+        Field.id: id,
+        Field.name: name,
+        Field.category: category,
+        Field.emulator: emulator,
+        Field.emulatorId: emulatorId,
+        Field.ephemeral: ephemeral,
+        Field.platform: platform,
+        Field.platformType: platformType,
+        Field.supported: supported,
       };
 }

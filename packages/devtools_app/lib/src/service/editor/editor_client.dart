@@ -123,7 +123,7 @@ class DtdEditorClient extends EditorClient {
       } else if (method == EditorMethod.openDevToolsPage.name) {
         _supportsOpenDevToolsPage = isRegistered;
         _supportsOpenDevToolsForceExternal =
-            capabilities?['supportsForceExternal'] == true;
+            capabilities?[Field.supportsForceExternal] == true;
       } else {
         return;
       }
@@ -237,7 +237,7 @@ class DtdEditorClient extends EditorClient {
   Future<void> selectDevice(EditorDevice? device) async {
     await _call(
       EditorMethod.selectDevice,
-      params: {'deviceId': device?.id},
+      params: {Field.deviceId: device?.id},
     );
   }
 
@@ -245,7 +245,7 @@ class DtdEditorClient extends EditorClient {
   Future<void> hotReload(String debugSessionId) async {
     await _call(
       EditorMethod.hotReload,
-      params: {'debugSessionId': debugSessionId},
+      params: {Field.debugSessionId: debugSessionId},
     );
   }
 
@@ -253,7 +253,7 @@ class DtdEditorClient extends EditorClient {
   Future<void> hotRestart(String debugSessionId) async {
     await _call(
       EditorMethod.hotRestart,
-      params: {'debugSessionId': debugSessionId},
+      params: {Field.debugSessionId: debugSessionId},
     );
   }
 
@@ -268,11 +268,11 @@ class DtdEditorClient extends EditorClient {
     await _call(
       EditorMethod.openDevToolsPage,
       params: {
-        'debugSessionId': debugSessionId,
-        'page': page,
-        'forceExternal': forceExternal,
-        'requiresDebugSession': requiresDebugSession,
-        'prefersDebugSession': prefersDebugSession,
+        Field.debugSessionId: debugSessionId,
+        Field.page: page,
+        Field.forceExternal: forceExternal,
+        Field.requiresDebugSession: requiresDebugSession,
+        Field.prefersDebugSession: prefersDebugSession,
       },
     );
   }
@@ -281,7 +281,7 @@ class DtdEditorClient extends EditorClient {
   Future<void> enablePlatformType(String platformType) async {
     await _call(
       EditorMethod.enablePlatformType,
-      params: {'platformType': platformType},
+      params: {Field.platformType: platformType},
     );
   }
 

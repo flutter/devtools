@@ -189,7 +189,8 @@ class PostMessageEditorClient implements EditorClient {
   Stream<EditorEvent> get event => _eventController.stream;
 
   @override
-  Stream<String> get editorServiceChanged => const Stream.empty();
+  Stream<ServiceRegistrationChange> get editorServiceChanged =>
+      const Stream.empty();
 
   @override
   Future<GetDevicesResult> getDevices() async {
