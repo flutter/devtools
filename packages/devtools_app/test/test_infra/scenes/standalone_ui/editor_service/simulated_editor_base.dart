@@ -16,7 +16,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 /// This class is for the part of an editor connected to DTD that is providing
 /// the editor services. It is the opposite of [EditorClient] which is for
 /// consuming the services provided by the editor(server).
-abstract class EditorServer {
+abstract class SimulatedEditorBase {
   /// A stream of protocol traffic between the editor and DTD (or postMessage
   /// API).
   Stream<String> get log;
@@ -97,10 +97,10 @@ abstract class EditorServer {
 /// made here to match changes made to [EditorClient] should be considered
 /// carefully to ensure they are not breaking changes to already-shipped
 /// editors.
-abstract class DtdEditorServer extends EditorServer {
-  // TODO(dantup): Once the postMessage code is gone, merge DtdEditorServer and
-  //  EditorServer to simplify things.
-  DtdEditorServer(this._dtdUri) {
+abstract class DtdSimulatedEditorBase extends SimulatedEditorBase {
+  // TODO(dantup): Once the postMessage code is gone, merge DtdSimulatedEditor,
+  //  DtdSimulatedEditorBase, and SimulatedEditorBase to simplify things.
+  DtdSimulatedEditorBase(this._dtdUri) {
     // Connect editor automatically at launch.
     unawaited(connectEditor());
   }

@@ -15,7 +15,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
-import 'editor_service/post_message_fake_editor.dart';
+import 'editor_service/post_message_simulated_editor.dart';
 import 'mock_editor_widget.dart';
 
 /// To run, use the "standalone_ui/vs_code" launch configuration with the
@@ -23,7 +23,7 @@ import 'mock_editor_widget.dart';
 ///
 ///   flutter run -t test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart -d chrome
 class VsCodeScene extends Scene {
-  late PostMessageFakeEditor editor;
+  late PostMessageSimulatedEditor editor;
   late PostMessageToolApiImpl api;
 
   @override
@@ -72,7 +72,7 @@ class VsCodeScene extends Scene {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
 
-    editor = PostMessageFakeEditor();
+    editor = PostMessageSimulatedEditor();
     api = PostMessageToolApiImpl.rpc(editor.client);
   }
 }

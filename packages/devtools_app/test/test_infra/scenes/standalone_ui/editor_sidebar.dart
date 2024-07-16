@@ -15,7 +15,7 @@ import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
-import 'editor_service/fake_editor.dart';
+import 'editor_service/simulated_editor_mixin.dart';
 import 'mock_editor_widget.dart';
 import 'utils.dart';
 
@@ -26,7 +26,7 @@ import 'utils.dart';
 class EditorSidebarScene extends Scene {
   late Stream<String> clientLog;
   late DartToolingDaemon clientDtd;
-  late FakeDtdEditor editor;
+  late SimulatedDtdEditor editor;
 
   @override
   Widget build(BuildContext context) {
@@ -76,10 +76,12 @@ class EditorSidebarScene extends Scene {
 
     // We assume a DTD is available on 8500. There's a VS Code task that
     // launches this as part of the standalone_ui/editor_sidebar config.
+    // TODO(dantup): Add a way for the mock editor to set workspace roots so
+    //  the extensions parts can work in the sidebar.
     final dtdUri = Uri.parse('ws://127.0.0.1:8500/');
     final connection = await createLoggedWebSocketChannel(dtdUri);
     clientLog = connection.log;
     clientDtd = DartToolingDaemon.fromStreamChannel(connection.channel);
-    editor = FakeDtdEditor(dtdUri);
+    editor = SimulatedDtdEditor(dtdUri);
   }
 }

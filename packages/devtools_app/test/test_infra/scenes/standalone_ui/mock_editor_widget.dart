@@ -11,12 +11,12 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import 'editor_service/fake_editor.dart';
+import 'editor_service/simulated_editor_mixin.dart';
 
 /// A simple UI that acts as a stand-in host editor to simplify the development
 /// workflow when working on embedded tooling.
 ///
-/// Uses a [FakeEditor] to provide functionality over DTD (or legacy
+/// Uses a [SimulatedEditorMixin] to provide functionality over DTD (or legacy
 /// `postMessage`).
 class MockEditorWidget extends StatefulWidget {
   const MockEditorWidget({
@@ -27,7 +27,7 @@ class MockEditorWidget extends StatefulWidget {
   });
 
   /// The fake editor API we can use to simulate an editor.
-  final FakeEditor editor;
+  final SimulatedEditorMixin editor;
 
   /// A stream of protocol traffic between the sidebar and DTD.
   final Stream<String> clientLog;
@@ -40,7 +40,7 @@ class MockEditorWidget extends StatefulWidget {
 
 class _MockEditorWidgetState extends State<MockEditorWidget>
     with AutoDisposeMixin {
-  FakeEditor get editor => widget.editor;
+  SimulatedEditorMixin get editor => widget.editor;
 
   Stream<String> get clientLog => widget.clientLog;
 

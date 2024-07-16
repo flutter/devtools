@@ -6,19 +6,20 @@ import 'dart:async';
 
 import 'package:devtools_app/src/service/editor/api_classes.dart';
 
-import 'editor_server.dart';
+import 'simulated_editor_base.dart';
 
-class FakeDtdEditor extends DtdEditorServer with FakeEditor {
-  FakeDtdEditor(super.dtdUri) {
+class SimulatedDtdEditor extends DtdSimulatedEditorBase
+    with SimulatedEditorMixin {
+  SimulatedDtdEditor(super.dtdUri) {
     // Start with some existing devices.
     connectDevices();
   }
 }
 
-/// A mixin for [EditorServer]s that provides some useful mock editor
+/// A mixin for [SimulatedEditorBase]s that provides some useful mock editor
 /// functionality to allow working on the sidebar with a Stager app without
 /// needing to be connected to a real editor.
-mixin FakeEditor on EditorServer {
+mixin SimulatedEditorMixin on SimulatedEditorBase {
   /// The current of devices simulated as connected.
   final devices = <String, EditorDevice>{};
 

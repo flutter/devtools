@@ -10,15 +10,16 @@ import 'package:devtools_app/src/standalone_ui/api/vs_code_api.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc_2;
 import 'package:stream_channel/stream_channel.dart';
 
-import 'editor_server.dart';
-import 'fake_editor.dart';
+import 'simulated_editor_base.dart';
+import 'simulated_editor_mixin.dart';
 
-/// An implementation of [EditorServer] that wraps the legacy `postMessage` APIs.
+/// An implementation of [SimulatedEditorBase] that wraps the legacy `postMessage` APIs.
 ///
 /// This is used by the legacy stager app for testing the sidebar in postMessage
 /// mode.
-class PostMessageFakeEditor extends EditorServer with FakeEditor {
-  PostMessageFakeEditor() {
+class PostMessageSimulatedEditor extends SimulatedEditorBase
+    with SimulatedEditorMixin {
+  PostMessageSimulatedEditor() {
     // Set up channels where we can act as the server in-process without really
     // going over postMessage or a WebSocket (since in the mock environment we
     // can't do either).
