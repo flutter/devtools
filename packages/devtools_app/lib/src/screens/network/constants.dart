@@ -73,9 +73,9 @@ class NetworkEventCustomFieldKeys {
   static const events = '_events';
 }
 
-class NetworkEventCustomFieldRemappedKeys {
-  static const isolateId = 'isolateId';
-  static const id = 'id';
-  static const startTime = 'startTime';
-  static const events = 'events';
+enum NetworkEventCustomFieldRemappedKeys {
+  isolateId,
+  id,
+  startTime,
+  events,
 }

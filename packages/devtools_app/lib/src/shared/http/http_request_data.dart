@@ -122,10 +122,10 @@ class DartIOHttpRequestData extends NetworkRequest {
     Map<String, Object?> originalMap,
   ) {
     final replacementMap = {
-      NetworkEventCustomFieldKeys.isolateId: 'isolateId',
-      NetworkEventCustomFieldKeys.id: 'id',
-      NetworkEventCustomFieldKeys.startTime: 'startTime',
-      NetworkEventCustomFieldKeys.events: 'events',
+      NetworkEventCustomFieldKeys.isolateId.name: 'isolateId',
+      NetworkEventCustomFieldKeys.id.name: 'id',
+      NetworkEventCustomFieldKeys.startTime.name: 'startTime',
+      NetworkEventCustomFieldKeys.events.name: 'events',
     };
 
     final convertedMap = <String, dynamic>{};

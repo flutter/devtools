@@ -62,26 +62,22 @@ class NetworkController extends DisposableController
   List<DartIOHttpRequestData>? _httpRequests;
 
   String? exportAsHarFile() {
-    final exportController = ExportController();
-
     _httpRequests =
         filteredData.value.whereType<DartIOHttpRequestData>().toList();
 
-    if (_httpRequests!.isEmpty) {
+    if (_httpRequests.isNullOrEmpty) {
       debugPrint('No valid request data to export');
       return '';
     }
 
     try {
-      if (_httpRequests != null && _httpRequests!.isNotEmpty) {
-        // Build the HAR object
-        final har = buildHar(_httpRequests!);
-        debugPrint('data is ${json.encode(har)}');
-        return exportController.downloadFile(
-          json.encode(har),
-          type: ExportFileType.har,
-        );
-      }
+      // Build the HAR object
+      final har = buildHar(_httpRequests!);
+      debugPrint('data is ${json.encode(har)}');
+      return ExportController().downloadFile(
+        json.encode(har),
+        type: ExportFileType.har,
+      );
     } catch (ex) {
       debugPrint('Exception in export $ex');
     }

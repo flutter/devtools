@@ -138,11 +138,11 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
 
       // Custom fields
       // har spec requires underscore to be added for custom fields, hence removing them
-      NetworkEventCustomFieldKeys.isolateId: '',
-      NetworkEventCustomFieldKeys.id: e.id,
-      NetworkEventCustomFieldKeys.startTime:
+      NetworkEventCustomFieldKeys.isolateId.name: '',
+      NetworkEventCustomFieldKeys.id.name: e.id,
+      NetworkEventCustomFieldKeys.startTime.name:
           e.startTimestamp.microsecondsSinceEpoch,
-      NetworkEventCustomFieldKeys.events: [],
+      NetworkEventCustomFieldKeys.events.name: [],
     };
   }).toList();
 
