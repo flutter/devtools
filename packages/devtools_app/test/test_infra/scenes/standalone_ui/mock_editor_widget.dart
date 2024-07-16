@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/src/utils/list_queue.dart';
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import 'editor_service/fake_editor.dart';
@@ -36,7 +38,8 @@ class MockEditorWidget extends StatefulWidget {
   State<MockEditorWidget> createState() => _MockEditorWidgetState();
 }
 
-class _MockEditorWidgetState extends State<MockEditorWidget> {
+class _MockEditorWidgetState extends State<MockEditorWidget>
+    with AutoDisposeMixin {
   FakeEditor get editor => widget.editor;
 
   Stream<String> get clientLog => widget.clientLog;
@@ -48,19 +51,11 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
 
   /// The last [maxLogEvents] communication messages sent between the sidebar
   /// and DTD.
-  final clientLogRing = ListQueue<String>();
+  final clientLogRing = ListQueueValueNotifier<String>(ListQueue());
 
   /// The last [maxLogEvents] communication messages sent between the editor
   /// and DTD.
-  final editorLogRing = ListQueue<String>();
-
-  /// A stream that emits each time the client log is updated to allow the log
-  /// widget to be rebuilt.
-  Stream<void>? clientLogUpdated;
-
-  /// A stream that emits each time the editor log is updated to allow the log
-  /// widget to be rebuilt.
-  Stream<void>? editorLogUpdated;
+  final editorLogRing = ListQueueValueNotifier<String>(ListQueue());
 
   /// Flutter icon for the sidebar.
   final sidebarImageBytes = base64Decode(
@@ -72,18 +67,22 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
     super.initState();
 
     // Listen to the log streams to maintain our buffer and trigger rebuilds.
-    clientLogUpdated = clientLog.map((log) {
-      clientLogRing.add(log);
-      while (clientLogRing.length > maxLogEvents) {
-        clientLogRing.removeFirst();
-      }
-    }).asBroadcastStream();
-    editorLogUpdated = editorLog.map((log) {
-      editorLogRing.add(log);
-      while (editorLogRing.length > maxLogEvents) {
-        editorLogRing.removeFirst();
-      }
-    }).asBroadcastStream();
+    autoDisposeStreamSubscription(
+      clientLog.listen((log) {
+        clientLogRing.add(log);
+        while (clientLogRing.length > maxLogEvents) {
+          clientLogRing.removeFirst();
+        }
+      }),
+    );
+    autoDisposeStreamSubscription(
+      editorLog.listen((log) {
+        editorLogRing.add(log);
+        while (editorLogRing.length > maxLogEvents) {
+          editorLogRing.removeFirst();
+        }
+      }),
+    );
   }
 
   @override
@@ -283,48 +282,28 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
                     Expanded(
                       child: TabBarView(
                         children: [
-                          StreamBuilder(
-                            stream: clientLogUpdated,
-                            builder: (context, snapshot) {
-                              return ListView.builder(
-                                itemCount: clientLogRing.length,
-                                itemBuilder: (context, index) =>
-                                    OutlineDecoration.onlyBottom(
-                                  child: Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: denseSpacing,
-                                    ),
-                                    child: Text(
-                                      clientLogRing.elementAt(index),
-                                      style: Theme.of(context).fixedFontStyle,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          StreamBuilder(
-                            stream: editorLogUpdated,
-                            builder: (context, snapshot) {
-                              return ListView.builder(
-                                itemCount: editorLogRing.length,
-                                itemBuilder: (context, index) =>
-                                    OutlineDecoration.onlyBottom(
-                                  child: Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: denseSpacing,
-                                    ),
-                                    child: Text(
-                                      editorLogRing.elementAt(index),
-                                      style: Theme.of(context).fixedFontStyle,
+                          for (final logRing in [clientLogRing, editorLogRing])
+                            ValueListenableBuilder(
+                              valueListenable: logRing,
+                              builder: (context, logRing, _) {
+                                return ListView.builder(
+                                  itemCount: logRing.length,
+                                  itemBuilder: (context, index) =>
+                                      OutlineDecoration.onlyBottom(
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: denseSpacing,
+                                      ),
+                                      child: Text(
+                                        logRing.elementAt(index),
+                                        style: Theme.of(context).fixedFontStyle,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
+                                );
+                              },
+                            ),
                         ],
                       ),
                     ),

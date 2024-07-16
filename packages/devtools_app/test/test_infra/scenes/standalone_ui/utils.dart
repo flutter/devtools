@@ -7,10 +7,13 @@ import 'dart:async';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+/// A record of a [StreamChannel] and a [Stream] of logs of protocol traffic
+/// in both directions across it.
+typedef LoggedChannel = ({StreamChannel<String> channel, Stream<String> log});
+
 /// Connects to the websocket at [wsUri] and returns a channel along with
 /// a log stream that includes all protocol traffic.
-Future<({StreamChannel<String> channel, Stream<String> log})>
-    createLoggedWebSocketChannel(Uri wsUri) async {
+Future<LoggedChannel> createLoggedWebSocketChannel(Uri wsUri) async {
   final logController = StreamController<String>();
 
   final rawChannel = WebSocketChannel.connect(wsUri);
