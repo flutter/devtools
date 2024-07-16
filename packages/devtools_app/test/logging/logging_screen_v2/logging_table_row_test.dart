@@ -44,8 +44,10 @@ void main() {
             ],
           ),
         );
-        expect(LoggingTableRow.estimateRowHeight(data, windowWidth),
-            tester.getSize(find.byType(LoggingTableRow)).height);
+        expect(
+          LoggingTableRow.estimateRowHeight(data, windowWidth),
+          tester.getSize(find.byType(LoggingTableRow)).height,
+        );
       });
 
       testWidgetsWithWindowSize(
@@ -86,10 +88,14 @@ void main() {
       final chits = LoggingTableRow.metadataChits(data, windowSize.width);
       final wrapKey = GlobalKey();
 
-      await tester.pumpWidget(wrap(Wrap(
-        key: wrapKey,
-        children: chits,
-      )));
+      await tester.pumpWidget(
+        wrap(
+          Wrap(
+            key: wrapKey,
+            children: chits,
+          ),
+        ),
+      );
 
       final chitFinder = find.bySubtype<MetadataChit>();
 

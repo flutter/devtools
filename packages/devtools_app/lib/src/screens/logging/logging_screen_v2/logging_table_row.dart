@@ -31,8 +31,10 @@ class LoggingTableRow extends StatefulWidget {
 
   static TextStyle get metadataStyle {
     final currentContext = navigatorKey.currentContext;
-    assert(currentContext != null,
-        'LoggingTableRow.metadataStyle requires a valid navigatorKey to be set. If this assertion is hit in tests then make sure to `wrap()` the widget being pumped.');
+    assert(
+      currentContext != null,
+      'LoggingTableRow.metadataStyle requires a valid navigatorKey to be set. If this assertion is hit in tests then make sure to `wrap()` the widget being pumped.',
+    );
     return Theme.of(navigatorKey.currentContext!).subtleTextStyle;
   }
 
@@ -88,11 +90,7 @@ class LoggingTableRow extends StatefulWidget {
     double totalHeight = 0.0;
     double rowHeight = 0.0;
     double remainingWidth = maxWidth;
-    print('------------------------\nSTATS:${[
-      totalHeight,
-      rowHeight,
-      remainingWidth
-    ]}');
+
     for (final presentChit in LoggingTableRow.metadataChits(data, maxWidth)) {
       final chitSize = presentChit.getSize();
       if (chitSize.width > remainingWidth) {
@@ -197,8 +195,6 @@ abstract class MetadataChit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('maxWidth: $maxWidth');
-    //TODO: tooltip ?
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth),
       padding: const EdgeInsets.all(padding),
@@ -221,8 +217,11 @@ abstract class MetadataChit extends StatelessWidget {
 
 @visibleForTesting
 class WhenMetaDataChit extends MetadataChit {
-  const WhenMetaDataChit(
-      {super.key, required super.data, required super.maxWidth});
+  const WhenMetaDataChit({
+    super.key,
+    required super.data,
+    required super.maxWidth,
+  });
 
   @override
   IconData getIcon() => Icons.punch_clock;
@@ -241,8 +240,11 @@ class WhenMetaDataChit extends MetadataChit {
 
 @visibleForTesting
 class KindMetaDataChit extends MetadataChit {
-  const KindMetaDataChit(
-      {super.key, required super.data, required super.maxWidth});
+  const KindMetaDataChit({
+    super.key,
+    required super.data,
+    required super.maxWidth,
+  });
 
   @override
   IconData getIcon() => Icons.type_specimen;
