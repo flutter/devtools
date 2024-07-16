@@ -146,22 +146,24 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
     // Set up subscription to handle events when the available editor services
     // change.
     autoDisposeStreamSubscription(
-      widget.editor.editorServiceChanged.listen((method) async {
+      widget.editor.editorServiceChanged.listen((info) async {
         // When services appear that allow us to get the initial list, call
         // them.
-        if (method == EditorMethod.getDevices.name) {
-          await widget.editor.getDevices().then((result) {
-            for (final device in result.devices) {
-              devices[device.id] = device;
-            }
-            selectedDeviceId = result.selectedDeviceId;
-          });
-        } else if (method == EditorMethod.getDebugSessions.name) {
-          await widget.editor.getDebugSessions().then((result) {
-            for (final session in result.debugSessions) {
-              debugSessions[session.id] = session;
-            }
-          });
+        if (info is ServiceRegistered) {
+          if (info.method == EditorMethod.getDevices.name) {
+            await widget.editor.getDevices().then((result) {
+              for (final device in result.devices) {
+                devices[device.id] = device;
+              }
+              selectedDeviceId = result.selectedDeviceId;
+            });
+          } else if (info.method == EditorMethod.getDebugSessions.name) {
+            await widget.editor.getDebugSessions().then((result) {
+              for (final session in result.debugSessions) {
+                debugSessions[session.id] = session;
+              }
+            });
+          }
         }
 
         // Force an update because editor services changing will impact what

@@ -41,7 +41,7 @@ abstract class EditorClient {
   Stream<EditorEvent> get event;
 
   /// A stream of events of when editor service methods/capabilities change.
-  Stream<String> get editorServiceChanged;
+  Stream<ServiceRegistrationChange> get editorServiceChanged;
 
   /// Gets the set of currently available devices from the editor.
   Future<GetDevicesResult> getDevices();
@@ -127,7 +127,18 @@ class DtdEditorClient extends EditorClient {
       } else {
         return;
       }
-      _editorServiceChangedController.add(method);
+
+      final info = isRegistered
+          ? ServiceRegistered(
+              service: service,
+              method: method,
+              capabilities: capabilities,
+            )
+          : ServiceUnregistered(
+              service: service,
+              method: method,
+            );
+      _editorServiceChangedController.add(info);
     });
 
     final editorKindMap = EditorEventKind.values.asNameMap();
@@ -199,13 +210,11 @@ class DtdEditorClient extends EditorClient {
 
   /// A stream of events of when editor services are registrered or
   /// unregistered.
-  ///
-  /// The values represent the method names that were registered or
-  /// unregistered.
   @override
-  Stream<String> get editorServiceChanged =>
+  Stream<ServiceRegistrationChange> get editorServiceChanged =>
       _editorServiceChangedController.stream;
-  final _editorServiceChangedController = StreamController<String>();
+  final _editorServiceChangedController =
+      StreamController<ServiceRegistrationChange>();
 
   @override
   Future<GetDevicesResult> getDevices() async {
@@ -286,4 +295,34 @@ class DtdEditorClient extends EditorClient {
       params: params,
     );
   }
+}
+
+/// Represents a service method that was registered or unregistered.
+///
+/// See [ServiceRegistered] for registration information.
+/// See [ServiceUnregistered] for unregistration information.
+sealed class ServiceRegistrationChange {
+  ServiceRegistrationChange({required this.service, required this.method});
+
+  final String service;
+  final String method;
+}
+
+/// Represents a service method that was registered.
+class ServiceRegistered extends ServiceRegistrationChange {
+  ServiceRegistered({
+    required super.service,
+    required super.method,
+    required this.capabilities,
+  });
+
+  final Map<String, Object?>? capabilities;
+}
+
+/// Represents a service method that was unregistered.
+class ServiceUnregistered extends ServiceRegistrationChange {
+  ServiceUnregistered({
+    required super.service,
+    required super.method,
+  });
 }
