@@ -34,10 +34,10 @@ mixin FakeEditor on EditorServer {
   /// Whether the editor is currently connected to DTD.
   bool get connected;
 
-  /// Simulates an editor being connected.
+  /// Simulates an editor being connected to DTD.
   Future<void> connectEditor();
 
-  /// Simulates an editor being discconnected.
+  /// Simulates an editor being discconnected from DTD.
   Future<void> disconnectEditor();
 
   /// Simulates devices being connected in the IDE by notifying the embedded

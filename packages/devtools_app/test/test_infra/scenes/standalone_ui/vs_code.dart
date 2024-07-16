@@ -21,7 +21,7 @@ import 'mock_editor_widget.dart';
 /// To run, use the "standalone_ui/vs_code" launch configuration with the
 /// `devtools/packages/` folder open in VS Code, or run:
 ///
-///   flutter run -t test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart --dart-define=enable_experiments=true -d chrome
+///   flutter run -t test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart -d chrome
 class VsCodeScene extends Scene {
   late PostMessageFakeEditor editor;
   late PostMessageToolApiImpl api;

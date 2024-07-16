@@ -125,7 +125,7 @@ abstract class DtdEditorServer extends EditorServer {
         EditorMethod.openDevToolsPage,
         _openDevToolsPage,
         capabilities: {
-          'supportsForceExternal': true,
+          Field.supportsForceExternal: true,
         },
       ),
       _registerService(EditorMethod.enablePlatformType, _enablePlatformType),
@@ -197,7 +197,7 @@ abstract class DtdEditorServer extends EditorServer {
     );
   }
 
-  final _successResponse = {
+  static const _successResponse = {
     'type': 'Success',
   };
 
@@ -210,7 +210,7 @@ abstract class DtdEditorServer extends EditorServer {
   }
 
   Future<Map<String, Object?>> _selectDevice(Parameters params) async {
-    await selectDevice(params['deviceId'].asString);
+    await selectDevice(params[Field.deviceId].asString);
     return _successResponse;
   }
 
@@ -223,28 +223,28 @@ abstract class DtdEditorServer extends EditorServer {
   }
 
   Future<Map<String, Object?>> _hotReload(Parameters params) async {
-    await hotReload(params['debugSessionId'].asString);
+    await hotReload(params[Field.debugSessionId].asString);
     return _successResponse;
   }
 
   Future<Map<String, Object?>> _hotRestart(Parameters params) async {
-    await hotRestart(params['debugSessionId'].asString);
+    await hotRestart(params[Field.debugSessionId].asString);
     return _successResponse;
   }
 
   Future<Map<String, Object?>> _openDevToolsPage(Parameters params) async {
     await openDevToolsPage(
-      params['debugSessionId'].valueOr(null) as String?,
-      params['page'].valueOr(null) as String?,
-      params['forceExternal'].valueOr(null) as bool? ?? false,
-      params['requiresDebugSession'].valueOr(null) as bool? ?? false,
-      params['prefersDebugSession'].valueOr(null) as bool? ?? false,
+      params[Field.debugSessionId].valueOr(null) as String?,
+      params[Field.page].valueOr(null) as String?,
+      params[Field.forceExternal].valueOr(null) as bool? ?? false,
+      params[Field.requiresDebugSession].valueOr(null) as bool? ?? false,
+      params[Field.prefersDebugSession].valueOr(null) as bool? ?? false,
     );
     return _successResponse;
   }
 
   Future<Map<String, Object?>> _enablePlatformType(Parameters params) async {
-    await enablePlatformType(params['platformType'].asString);
+    await enablePlatformType(params[Field.platformType].asString);
     return _successResponse;
   }
 

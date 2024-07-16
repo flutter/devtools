@@ -27,10 +27,7 @@ import 'devtools/devtools_view.dart';
 class DtdEditorSidebarPanel extends StatefulWidget {
   // TODO(dantup): Remove the Dtd prefix from these classes when the postMessage
   //  versions are removed.
-  const DtdEditorSidebarPanel(
-    this.dtd, {
-    super.key,
-  });
+  const DtdEditorSidebarPanel(this.dtd, {super.key});
 
   final DartToolingDaemon dtd;
 
