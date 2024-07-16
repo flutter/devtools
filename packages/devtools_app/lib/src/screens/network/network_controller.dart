@@ -420,17 +420,17 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
     int timelineMicrosOffset,
   ) {
     for (final socket in sockets) {
-      final webSocket = WebSocket(socket, timelineMicrosOffset);
+      final webSocket = Socket(socket, timelineMicrosOffset);
 
       if (_requestsById.containsKey(webSocket.id)) {
         final existingRequest = _requestsById[webSocket.id];
-        if (existingRequest is WebSocket) {
+        if (existingRequest is Socket) {
           existingRequest.update(webSocket);
         } else {
           // If we override an entry that is not a Websocket then that means
           // the ids of the requestMapping entries may collide with other types
           // of requests.
-          assert(existingRequest is WebSocket);
+          assert(existingRequest is Socket);
         }
       } else {
         value.add(webSocket);

@@ -72,7 +72,7 @@ final httpGetResponseBodyData = [
   125,
 ];
 
-final testSocket1 = WebSocket(SocketStatistic.parse(testSocket1Json)!, 0);
+final testSocket1 = Socket(SocketStatistic.parse(testSocket1Json)!, 0);
 final testSocket1Json = <String, Object?>{
   'id': '10000',
   'startTime': 1000000,
@@ -86,7 +86,7 @@ final testSocket1Json = <String, Object?>{
   'writeBytes': 15,
 };
 
-final testSocket2 = WebSocket(SocketStatistic.parse(testSocket2Json)!, 0);
+final testSocket2 = Socket(SocketStatistic.parse(testSocket2Json)!, 0);
 final testSocket2Json = <String, Object?>{
   'id': '11111',
   'startTime': 3000000,
@@ -100,7 +100,7 @@ final testSocket2Json = <String, Object?>{
   'writeBytes': 25,
 };
 
-final testSocket3 = WebSocket(SocketStatistic.parse(testSocket3Json)!, 0);
+final testSocket3 = Socket(SocketStatistic.parse(testSocket3Json)!, 0);
 final testSocket3Json = <String, Object?>{
   'id': '10000',
   'startTime': 1000000,
