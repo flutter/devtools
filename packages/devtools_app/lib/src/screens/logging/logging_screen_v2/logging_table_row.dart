@@ -29,24 +29,29 @@ class LoggingTableRow extends StatefulWidget {
 
   final bool isSelected;
 
-  static TextStyle get metadataStyle =>
-      Theme.of(navigatorKey.currentContext!).subtleTextStyle;
+  static TextStyle get metadataStyle {
+    final currentContext = navigatorKey.currentContext;
+    assert(currentContext != null,
+        'LoggingTableRow.metadataStyle requires a valid navigatorKey to be set. If this assertion is hit in tests then make sure to `wrap()` the widget being pumped.');
+    return Theme.of(navigatorKey.currentContext!).subtleTextStyle;
+  }
 
   static TextStyle get detailsStyle =>
       Theme.of(navigatorKey.currentContext!).regularTextStyle;
 
-  static List<_MetadataChit> _metadataChits(LogDataV2 data, double maxWidth) {
+  @visibleForTesting
+  static List<MetadataChit> metadataChits(LogDataV2 data, double maxWidth) {
     //TODO: maxwidth - prevWidget on Line
     final allChits = [
-      _WhenMetaDataChit(
+      WhenMetaDataChit(
         data: data,
         maxWidth: maxWidth,
       ),
-      _KindMetaDataChit(
+      KindMetaDataChit(
         data: data,
         maxWidth: maxWidth,
       ),
-      _FrameElapsedMetaDataChit(
+      FrameElapsedMetaDataChit(
         data: data,
         maxWidth: maxWidth,
       ),
@@ -59,7 +64,7 @@ class LoggingTableRow extends StatefulWidget {
 
   static final _padding = scaleByFontFactor(8.0);
 
-  static double calculateRowHeight(
+  static double estimateRowHeight(
     LogDataV2 log,
     double width,
   ) {
@@ -70,14 +75,16 @@ class LoggingTableRow extends StatefulWidget {
       TextSpan(text: text, style: detailsStyle),
       maxWidth: maxWidth,
     );
-    print('bef rowHeight');
-    final row2Height = _calculateMetaDataHeight(log, width);
-    print('row2height: ${row2Height}');
+
+    final row2Height = estimateMetaDataWrapHeight(log, maxWidth);
 
     return row1Height + row2Height + _padding * 2;
   }
 
-  static double _calculateMetaDataHeight(LogDataV2 data, double maxWidth) {
+  /// Estimates the height that the [metadataChits] will occupy if they are
+  /// the children of a [Wrap] widget with a parent of [maxWidth] width.
+  @visibleForTesting
+  static double estimateMetaDataWrapHeight(LogDataV2 data, double maxWidth) {
     double totalHeight = 0.0;
     double rowHeight = 0.0;
     double remainingWidth = maxWidth;
@@ -86,25 +93,21 @@ class LoggingTableRow extends StatefulWidget {
       rowHeight,
       remainingWidth
     ]}');
-    for (final presentChit in LoggingTableRow._metadataChits(data, maxWidth)) {
+    for (final presentChit in LoggingTableRow.metadataChits(data, maxWidth)) {
       final chitSize = presentChit.getSize();
-      print('chitSize: ${chitSize}');
       if (chitSize.width > remainingWidth) {
-        print('O1');
         // The chit does not fit so add it to a new row
         totalHeight += rowHeight;
         rowHeight = 0.0;
         remainingWidth = maxWidth;
       }
 
-      print('O2');
       // The Chit fits so it will stay in this row.
       rowHeight = max(rowHeight, chitSize.height);
       remainingWidth -= chitSize.width;
-      print('STATS:${[totalHeight, rowHeight, remainingWidth]}');
     }
+
     totalHeight += rowHeight;
-    print('STATS:${[totalHeight, rowHeight, remainingWidth]}');
     return totalHeight;
   }
 }
@@ -140,7 +143,7 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return Wrap(
-                      children: LoggingTableRow._metadataChits(
+                      children: LoggingTableRow.metadataChits(
                         widget.data,
                         constraints.maxWidth,
                       ),
@@ -156,8 +159,10 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
   }
 }
 
-abstract class _MetadataChit extends StatelessWidget {
-  const _MetadataChit({
+@visibleForTesting
+abstract class MetadataChit extends StatelessWidget {
+  const MetadataChit({
+    super.key,
     required this.data,
     required this.maxWidth,
   });
@@ -214,8 +219,10 @@ abstract class _MetadataChit extends StatelessWidget {
   }
 }
 
-class _WhenMetaDataChit extends _MetadataChit {
-  const _WhenMetaDataChit({required super.data, required super.maxWidth});
+@visibleForTesting
+class WhenMetaDataChit extends MetadataChit {
+  const WhenMetaDataChit(
+      {super.key, required super.data, required super.maxWidth});
 
   @override
   IconData getIcon() => Icons.punch_clock;
@@ -232,8 +239,10 @@ class _WhenMetaDataChit extends _MetadataChit {
   }
 }
 
-class _KindMetaDataChit extends _MetadataChit {
-  const _KindMetaDataChit({required super.data, required super.maxWidth});
+@visibleForTesting
+class KindMetaDataChit extends MetadataChit {
+  const KindMetaDataChit(
+      {super.key, required super.data, required super.maxWidth});
 
   @override
   IconData getIcon() => Icons.type_specimen;
@@ -247,8 +256,10 @@ class _KindMetaDataChit extends _MetadataChit {
   }
 }
 
-class _FrameElapsedMetaDataChit extends _MetadataChit {
-  const _FrameElapsedMetaDataChit({
+@visibleForTesting
+class FrameElapsedMetaDataChit extends MetadataChit {
+  const FrameElapsedMetaDataChit({
+    super.key,
     required super.data,
     required super.maxWidth,
   });

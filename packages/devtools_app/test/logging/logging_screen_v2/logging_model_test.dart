@@ -60,39 +60,60 @@ void main() {
       expect(loggingTableModel.selectedLogCount, 0);
     });
 
-    testWidgetsWithWindowSize(
-      'calculate heights correctly',
-      windowSize,
-      (WidgetTester tester) async {
+    for (var windowWidth = 300.0; windowWidth <= 300.0; windowWidth += 50.0) {
+      testWidgetsWithWindowSize(
+          'calculate heights correctly for window of width: $windowWidth',
+          Size(windowWidth, 3000), (WidgetTester tester) async {
+        await pumpForContext(tester);
         final shortLog = LogDataV2('test', 'Some short details', 464564);
         final longLog = LogDataV2(
           'test',
           'A long log, A long log, A long log, A long log, A long log, A long log, A long log, ',
           464564,
         );
-
+        final frameElapsedLog =
+            LogDataV2('frameLog', '{"elapsed": 1000000}', 4684506);
+        double? columnWidth;
         await tester.pumpWidget(
           wrap(
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                LoggingTableRow(
-                  index: 0,
-                  data: shortLog,
-                  isSelected: false,
-                ),
-                LoggingTableRow(
-                  index: 1,
-                  data: longLog,
-                  isSelected: false,
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                columnWidth = constraints.maxWidth;
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LoggingTableRow(
+                      index: 0,
+                      data: shortLog,
+                      isSelected: false,
+                    ),
+                    LoggingTableRow(
+                      index: 1,
+                      data: longLog,
+                      isSelected: false,
+                    ),
+                    LoggingTableRow(
+                      index: 2,
+                      data: frameElapsedLog,
+                      isSelected: false,
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         );
 
+        await tester.runAsync(() async {
+          // tester.runAsync is needed here to prevent the ChunkWorker
+          // in set tableWidth from blocking in the test. The Future.delayed
+          // in it would hang otherwise.
+          loggingTableModel.tableWidth = columnWidth!;
+        });
+
         loggingTableModel.add(shortLog);
         loggingTableModel.add(longLog);
+        loggingTableModel.add(frameElapsedLog);
 
         final shortWidgetFinder = find.ancestor(
           of: find.richText(shortLog.details!),
@@ -100,6 +121,10 @@ void main() {
         );
         final longWidgetFinder = find.ancestor(
           of: find.richText(longLog.details!),
+          matching: find.byType(LoggingTableRow),
+        );
+        final frameElapsedFinder = find.ancestor(
+          of: find.richText(frameElapsedLog.kind),
           matching: find.byType(LoggingTableRow),
         );
 
@@ -119,8 +144,12 @@ void main() {
           tester.getSize(longWidgetFinder).height,
           loggingTableModel.getFilteredLogHeight(1),
         );
-      },
-    );
+        expect(
+          tester.getSize(frameElapsedFinder).height,
+          loggingTableModel.getFilteredLogHeight(2),
+        );
+      });
+    }
 
     testWidgets('Handles log retention', (WidgetTester tester) async {
       final log1 = LogDataV2('test', 'The details 1', 464564);
