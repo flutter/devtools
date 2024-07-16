@@ -13,6 +13,8 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../test_infra/matchers/matchers.dart';
+
 void main() {
   group('DisconnectObserver', () {
     late FakeServiceConnectionManager fakeServiceConnectionManager;
@@ -25,14 +27,17 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
     });
 
-    Future<void> pumpDisconnectObserver(WidgetTester tester) async {
+    Future<void> pumpDisconnectObserver(
+      WidgetTester tester, {
+      Widget child = const Placeholder(),
+    }) async {
       await tester.pumpWidget(
         wrap(
           Builder(
             builder: (context) {
               return DisconnectObserver(
                 routerDelegate: DevToolsRouterDelegate.of(context),
-                child: const Placeholder(),
+                child: child,
               );
             },
           ),
@@ -62,7 +67,7 @@ void main() {
         showingOverlay && !isEmbedded() ? findsOneWidget : findsNothing,
       );
       expect(
-        find.text('Run a new debug session to reconnect'),
+        find.text('Run a new debug session to reconnect.'),
         showingOverlay && isEmbedded() ? findsOneWidget : findsNothing,
       );
       expect(
@@ -136,6 +141,43 @@ void main() {
         (WidgetTester tester) async {
           offlineDataController.offlineDataJson = {'foo': 'bar'};
           await showOverlayAndVerifyContents(tester);
+        },
+      );
+
+      // Regression test for https://github.com/flutter/devtools/issues/8050.
+      testWidgets(
+        'hides widgets at lower z-index',
+        (WidgetTester tester) async {
+          await pumpDisconnectObserver(
+            tester,
+            child: Container(
+              height: 100.0,
+              width: 100.0,
+              color: Colors.red,
+            ),
+          );
+          verifyObserverState(tester, connected: true, showingOverlay: false);
+          // At this point the red container should be visible.
+          await expectLater(
+            find.byType(MaterialApp),
+            matchesDevToolsGolden(
+              '../test_infra/goldens/shared/disconnect_observer_connected.png',
+            ),
+          );
+
+          // Trigger a disconnect.
+          fakeServiceConnectionManager.serviceManager.setConnectedState(false);
+          await tester.pumpAndSettle();
+
+          verifyObserverState(tester, connected: false, showingOverlay: true);
+          // Once the disconnect overlay is showing, the red container should
+          // be hidden.
+          await expectLater(
+            find.byType(MaterialApp),
+            matchesDevToolsGolden(
+              '../test_infra/goldens/shared/disconnect_observer_disconnected.png',
+            ),
+          );
         },
       );
     });

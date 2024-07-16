@@ -19,6 +19,7 @@ import 'deep_links_model.dart';
 import 'deep_links_services.dart';
 
 typedef _DomainAndPath = ({String? domain, String? path});
+const _defaultSchemes = {'http', 'https'};
 
 const domainAssetLinksJsonFileErrors = {
   AndroidDomainError.existence,
@@ -379,6 +380,7 @@ class DeepLinksController extends DisposableController
           (domain) => LinkData(
             domain: domain,
             path: null,
+            scheme: _defaultSchemes,
             os: {PlatformOS.ios},
           ),
         )

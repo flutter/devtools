@@ -35,13 +35,22 @@ class MemoryController extends DisposableController
   MemoryController({
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
+    @visibleForTesting OfflineMemoryData? offlineData,
   }) {
-    if (connectedDiff != null || connectedProfile != null) {
+    if (offlineData != null) {
+      mode = ControllerCreationMode.offlineData;
+    } else if (connectedDiff != null || connectedProfile != null) {
       mode = ControllerCreationMode.connected;
     } else {
       mode = devToolsMode;
     }
-    unawaited(_init(connectedDiff, connectedProfile));
+    unawaited(
+      _init(
+        connectedDiff: connectedDiff,
+        connectedProfile: connectedProfile,
+        offlineData: offlineData,
+      ),
+    );
   }
 
   Future<void> get initialized => _dataInitialized.future;
@@ -82,10 +91,11 @@ class MemoryController extends DisposableController
 
   static const _jsonKey = 'data';
 
-  Future<void> _init(
+  Future<void> _init({
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
-  ) async {
+    @visibleForTesting OfflineMemoryData? offlineData,
+  }) async {
     assert(!_dataInitialized.isCompleted);
     switch (mode) {
       case ControllerCreationMode.disconnected:
@@ -101,11 +111,7 @@ class MemoryController extends DisposableController
         assert(connectedDiff == null && connectedProfile == null);
         final loaded = await maybeLoadOfflineData(
           ScreenMetaData.memory.id,
-          createData: (json) {
-            final data = json[_jsonKey];
-            if (data is OfflineMemoryData) return data;
-            return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
-          },
+          createData: createData,
           shouldLoad: (data) => true,
           loadData: (data) => _initializeData(offlineData: data),
         );
@@ -113,11 +119,18 @@ class MemoryController extends DisposableController
         //  so ensure we still call [_initializedData] if it has not been called.
         assert(loaded == _dataInitialized.isCompleted);
         if (!_dataInitialized.isCompleted) {
-          _initializeData();
+          _initializeData(offlineData: offlineData);
         }
     }
     assert(_dataInitialized.isCompleted);
     assert(profile == null || profile!.rootPackage == diff.core.rootPackage);
+  }
+
+  @visibleForTesting
+  static OfflineMemoryData createData(Map<String, Object?> json) {
+    final data = json[_jsonKey];
+    if (data is OfflineMemoryData) return data;
+    return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
   }
 
   void _initializeData({

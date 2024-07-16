@@ -193,6 +193,7 @@ class WidgetTheme {
     'PageView': WidgetTheme(iconAsset: WidgetIcons.pageView),
     'Material': WidgetTheme(iconAsset: WidgetIcons.material),
     'AppBar': WidgetTheme(iconAsset: WidgetIcons.appBar),
+    'HiddenGroup': WidgetTheme(iconAsset: WidgetIcons.hidden),
   };
 }
 
@@ -246,4 +247,5 @@ class WidgetIcons {
   static const materialApp = 'icons/inspector/widget_icons/materialapp.png';
   static const bottomNavigationBar =
       'icons/inspector/widget_icons/bottomnavigationbar.png';
+  static const hidden = 'icons/inspector/widget_icons/onedot.png';
 }

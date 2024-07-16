@@ -167,7 +167,7 @@ class CpuProfileData with Serializable {
     _cpuProfileRoot = CpuStackFrame.root(profileMetaData);
   }
 
-  factory CpuProfileData.fromJson(Map<String, dynamic> json_) {
+  factory CpuProfileData.fromJson(Map<String, Object?> json_) {
     final json = _CpuProfileDataJson(json_);
     final profileMetaData = CpuProfileMetaData(
       sampleCount: json.sampleCount ?? 0,
@@ -758,12 +758,12 @@ class CpuProfileData with Serializable {
   }
 }
 
-extension type _CpuProfileDataJson(Map<String, dynamic> json) {
-  int? get timeOriginMicros => json[CpuProfileData._timeOriginKey];
-  int? get timeExtentMicros => json[CpuProfileData._timeExtentKey];
-  int? get sampleCount => json[CpuProfileData._sampleCountKey];
-  int? get samplePeriod => json[CpuProfileData._samplePeriodKey];
-  int? get stackDepth => json[CpuProfileData._stackDepthKey];
+extension type _CpuProfileDataJson(Map<String, Object?> json) {
+  int? get timeOriginMicros => json[CpuProfileData._timeOriginKey] as int?;
+  int? get timeExtentMicros => json[CpuProfileData._timeExtentKey] as int?;
+  int? get sampleCount => json[CpuProfileData._sampleCountKey] as int?;
+  int? get samplePeriod => json[CpuProfileData._samplePeriodKey] as int?;
+  int? get stackDepth => json[CpuProfileData._stackDepthKey] as int?;
   Map<String, Object?>? get stackFrames =>
       (json[CpuProfileData._stackFramesKey] as Map?)?.cast<String, Object?>();
   List<CpuSampleEvent>? get traceEvents =>
@@ -807,11 +807,11 @@ class CpuSampleEvent extends ChromeTraceEvent {
     required this.leafId,
     required this.userTag,
     required this.vmTag,
-    required Map<String, dynamic> traceJson,
+    required Map<String, Object?> traceJson,
   }) : super(traceJson);
 
-  factory CpuSampleEvent.fromJson(Map<String, dynamic> traceJson) {
-    final leafId = traceJson[CpuProfileData.stackFrameIdKey];
+  factory CpuSampleEvent.fromJson(Map<String, Object?> traceJson) {
+    final leafId = traceJson[CpuProfileData.stackFrameIdKey]! as String;
     final args =
         (traceJson[ChromeTraceEvent.argsKey] as Map?)?.cast<String, Object?>();
     final userTag = args?[CpuProfileData.userTagKey] as String?;
@@ -829,7 +829,7 @@ class CpuSampleEvent extends ChromeTraceEvent {
   final String? userTag;
   final String? vmTag;
 
-  Map<String, dynamic> get toJson {
+  Map<String, Object?> get toJson {
     // [leafId] is the source of truth for the leaf id of this sample.
     super.json[CpuProfileData.stackFrameIdKey] = leafId;
     return super.json;
@@ -1298,7 +1298,7 @@ class _CpuProfileTimelineTree {
 }
 
 extension on vm_service.CpuSamples {
-  Map<String, dynamic> generateStackFramesJson({
+  Map<String, Object?> generateStackFramesJson({
     required String isolateId,
     int kRootId = 0,
     bool buildCodeTree = false,

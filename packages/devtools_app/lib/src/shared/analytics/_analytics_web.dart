@@ -817,7 +817,7 @@ void setupUserApplicationDimensions() {
   }
 }
 
-Map<String, dynamic> generateSurveyQueryParameters() {
+Map<String, Object?> generateSurveyQueryParameters() {
   const ideKey = 'IDE';
   const versionKey = 'Version';
   const internalKey = 'Internal';

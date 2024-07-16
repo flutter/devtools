@@ -89,7 +89,7 @@ class DeepLinksServices {
         }),
       );
 
-      final result = json.decode(response.body) as Map<String, dynamic>;
+      final result = json.decode(response.body) as Map<String, Object?>;
 
       final validationResult =
           (result[_validationResultKey] as List).cast<Map<String, Object?>>();
@@ -149,9 +149,10 @@ class DeepLinksServices {
     final errorCode = (result[_errorCodeKey] as String?) ?? '';
     String generatedContent = '';
 
-    if (result[_domainsKey] != null) {
-      generatedContent = (((result[_domainsKey] as List).first)
-          as Map<String, dynamic>)[_generatedContentKey];
+    final domains =
+        (result[_domainsKey] as List?)?.cast<Map<String, Object?>>();
+    if (domains != null) {
+      generatedContent = domains.first[_generatedContentKey]! as String;
     }
 
     return GenerateAssetLinksResult(errorCode, generatedContent);

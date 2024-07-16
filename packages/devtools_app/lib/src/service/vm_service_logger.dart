@@ -41,32 +41,32 @@ class VmServiceTrafficLogger {
   }
 
   void _logServiceProtocolResponses(String message) {
-    final Map m = jsonDecode(message);
+    final m = (jsonDecode(message) as Map).cast<String, Object?>();
 
-    String? details = m['method'];
+    String? details = m['method'] as String?;
     if (details == null) {
-      final Map<String, dynamic>? result = m['result'];
+      final result = (m['result'] as Map?)?.cast<String, Object?>();
       if (result != null) {
-        details = result['type'];
+        details = result['type'] as String?;
       } else {
-        final Map<String, dynamic>? error = m['error'];
+        final error = (m['error'] as Map?)?.cast<String, Object?>();
         details = error == null ? '' : '$error';
       }
     } else if (details == 'streamNotify') {
       details = '';
     }
 
-    final String? id = m['id'];
+    final id = m['id'] as String?;
     String? streamId = '';
     String? kind = '';
 
     if (m['params'] != null) {
-      final Map p = m['params'];
-      streamId = p['streamId'];
+      final p = (m['params'] as Map).cast<String, Object?>();
+      streamId = p['streamId'] as String?;
 
-      final Map? event = m['event'];
+      final event = (m['event'] as Map?)?.cast<String, Object?>();
       if (event != null) {
-        kind = event['extensionKind'] ?? event['kind'];
+        kind = event['extensionKind'] as String? ?? event['kind'] as String?;
       }
     }
 

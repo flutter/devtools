@@ -107,7 +107,7 @@ class DiffPaneController extends DisposableController with Serializable {
   Future<void> takeSnapshot() async {
     ga.select(
       gac.memory,
-      gac.MemoryEvent.diffTakeSnapshotControlPane,
+      gac.MemoryEvents.diffTakeSnapshotControlPane.name,
     );
     final item = SnapshotDataItem(
       displayNumber: _nextDisplayNumber(),
@@ -485,7 +485,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     ga.timeStart(
       gac.memory,
-      gac.MemoryTime.updateValues,
+      gac.MemoryTime.updateValues.name,
     );
 
     _updatingValues = true;
@@ -496,7 +496,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     ga.timeEnd(
       gac.memory,
-      gac.MemoryTime.updateValues,
+      gac.MemoryTime.updateValues.name,
     );
 
     _assertIntegrity();

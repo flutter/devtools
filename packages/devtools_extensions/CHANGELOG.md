@@ -1,3 +1,7 @@
+## 0.2.2-wip
+* Load the IDE Theme from the extension URL instead of creating
+a placeholder `IdeTheme` object.
+
 ## 0.2.1
 * Add testimonies from extension authors to the `README.md`.
 * Add an integration test to the example app, `app_that_uses_foo`.

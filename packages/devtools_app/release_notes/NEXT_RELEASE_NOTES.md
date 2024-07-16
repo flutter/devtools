@@ -26,7 +26,10 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Enable offline analysis of snapshots, historical data analysis and save/load.
+- [#7843](https://github.com/flutter/devtools/pull/7843)
+
+    ![Memory offline data](images/memory-save-load.png "Memory offline data")
 
 ## Debugger updates
 
@@ -54,7 +57,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue where extensions did not load with the proper theme when
+embedded in an IDE. - [#8034](https://github.com/flutter/devtools/pull/8034)
 
 ## Full commit history
 

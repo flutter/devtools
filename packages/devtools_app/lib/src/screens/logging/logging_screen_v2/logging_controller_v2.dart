@@ -22,10 +22,10 @@ import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/search.dart';
 import '../logging_controller.dart'
     show
-        NavigationInfo,
-        ServiceExtensionStateChangedInfo,
         FrameInfo,
-        ImageSizesForFrame;
+        ImageSizesForFrame,
+        NavigationInfo,
+        ServiceExtensionStateChangedInfo;
 import '../logging_screen.dart';
 import 'logging_model.dart';
 

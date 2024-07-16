@@ -40,7 +40,7 @@ class SnapshotControlPane extends StatelessWidget {
                 minScreenWidthForTextBeforeScaling:
                     memoryControlsMinVerboseWidth,
                 gaScreen: gac.memory,
-                gaSelection: gac.MemoryEvent.diffSnapshotDownloadCsv,
+                gaSelection: gac.MemoryEvents.diffSnapshotDownloadCsv.name,
                 onPressed: controller.downloadCurrentItemToCsv,
               ),
             ],
@@ -103,13 +103,13 @@ class _DiffDropdown extends StatelessWidget {
               if ((value ?? current) == current) {
                 ga.select(
                   gac.memory,
-                  gac.MemoryEvent.diffSnapshotDiffOff,
+                  gac.MemoryEvents.diffSnapshotDiffSelectOff.name,
                 );
                 newDiffWith = null;
               } else {
                 ga.select(
                   gac.memory,
-                  gac.MemoryEvent.diffSnapshotDiffSelect,
+                  gac.MemoryEvents.diffSnapshotDiffSelect.name,
                 );
                 newDiffWith = value;
               }

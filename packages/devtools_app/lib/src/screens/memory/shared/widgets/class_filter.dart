@@ -34,7 +34,7 @@ class ClassFilterButton extends StatelessWidget {
           onPressed: () {
             ga.select(
               gac.memory,
-              gac.MemoryEvent.diffSnapshotFilter,
+              gac.MemoryEvents.diffSnapshotFilter.name,
             );
 
             unawaited(
@@ -133,14 +133,14 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
       onResetDefaults: () {
         ga.select(
           gac.memory,
-          gac.MemoryEvent.diffSnapshotFilterReset,
+          gac.MemoryEvents.diffSnapshotFilterReset.name,
         );
         setState(() => _loadStateFromFilter(ClassFilter.theDefault()));
       },
       onApply: () {
         ga.select(
           gac.memory,
-          '${gac.MemoryEvent.diffSnapshotFilterType}-$_type',
+          '${gac.MemoryEvents.diffSnapshotFilterType.name}-$_type',
         );
         final newFilter = ClassFilter(
           filterType: _type,

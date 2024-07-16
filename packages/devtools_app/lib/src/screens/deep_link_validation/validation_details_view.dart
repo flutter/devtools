@@ -578,6 +578,7 @@ class _CrossCheckTable extends StatelessWidget {
     final missingIos = hasIosAasaFile && !linkData.os.contains(PlatformOS.ios);
     final missingAndroid =
         hasAndroidAssetLinksFile && !linkData.os.contains(PlatformOS.android);
+    if (!missingIos && !missingAndroid) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
     final domainMissing = Text(
@@ -602,14 +603,30 @@ class _CrossCheckTable extends StatelessWidget {
             os: PlatformOS.android,
             checkName: 'Manifest file',
             status: domainMissing,
-            children: const <Widget>[],
+            children: const <Widget>[
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
+                child: Text(
+                    'This domain has an Asset link json file but it\'s missing in the android manifest file. '
+                    'If you want to set up deep linking for Android, you need to add this domain '
+                    'to your AndroidManifest.xml file.'),
+              ),
+            ],
           ),
         if (missingIos)
           _CheckExpansionTile(
             os: PlatformOS.ios,
             checkName: 'Settings',
             status: domainMissing,
-            children: const <Widget>[],
+            children: const <Widget>[
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
+                child: Text(
+                    'This domain has an AASA file but it\'s missing in local settings. '
+                    'If you want to set up deep linking for iOS, you need to add this domain '
+                    'to your info.Plist file.'),
+              ),
+            ],
           ),
       ],
     );

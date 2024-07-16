@@ -16,6 +16,7 @@ import 'package:web/web.dart';
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/utils.dart';
 import '_controller_web.dart';
 import 'controller.dart';
 
@@ -143,9 +144,9 @@ class _ExtensionIFrameController extends DisposableController
       }),
     );
 
-    addAutoDisposeListener(preferences.darkModeTheme, () {
+    addAutoDisposeListener(preferences.darkModeEnabled, () {
       updateTheme(
-        theme: preferences.darkModeTheme.value
+        theme: isDarkThemeEnabled()
             ? ExtensionEventParameters.themeValueDark
             : ExtensionEventParameters.themeValueLight,
       );
