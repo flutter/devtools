@@ -4,9 +4,13 @@
 
 part of '../constants.dart';
 
-enum VsCodeFlutterSidebar {
-  /// Analytics id to track events that come from the VS Code Flutter sidebar.
+enum EditorSidebar {
+  /// Analytics id to track events that come from the legacy VS Code
+  /// (postMessage) Flutter sidebar.
   vsCodeFlutterSidebar,
+
+  /// Analytics id to track events that come from the DTD editor sidebar.
+  editorSidebar,
 
   /// Analytics event that is sent when a device selection occurs from the list
   /// of available devices in the sidebar.
@@ -16,7 +20,12 @@ enum VsCodeFlutterSidebar {
   /// without a specific page.
   openDevToolsExternally;
 
-  static String get id => VsCodeFlutterSidebar.vsCodeFlutterSidebar.name;
+  /// Analytics id to track events that come from the DTD editor sidebar.
+  static String get id => EditorSidebar.editorSidebar.name;
+
+  /// Analytics id to track events that come from the legacy VS Code
+  /// (postMessage) Flutter sidebar.
+  static String get legacyId => EditorSidebar.vsCodeFlutterSidebar.name;
 
   /// Analytics event for when a request to enable a new platform type is sent
   /// to VS Code.

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:dtd/dtd.dart';
 
+import '../../shared/analytics/constants.dart';
 import 'api_classes.dart';
 
 /// An interface to services provided by an editor.
@@ -14,6 +15,9 @@ import 'api_classes.dart';
 /// ensure they are not breaking changes to already-shipped editors.
 abstract class EditorClient {
   Future<void> close();
+
+  /// The ID to use for analytics events.
+  String get analyticsId;
 
   /// Whether the connected editor supports the `getDevices` method.
   bool get supportsGetDevices;
@@ -93,6 +97,9 @@ class DtdEditorClient extends EditorClient {
 
   final DartToolingDaemon _dtd;
   late final initialized = _initialize();
+
+  @override
+  String get analyticsId => EditorSidebar.id;
 
   Future<void> _initialize() async {
     _dtd.onEvent('Service').listen((data) {

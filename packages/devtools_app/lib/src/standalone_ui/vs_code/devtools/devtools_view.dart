@@ -89,8 +89,8 @@ class SidebarDevToolsScreens extends StatelessWidget {
                 tooltip: 'Open in browser',
                 onPressed: () {
                   ga.select(
-                    gac.VsCodeFlutterSidebar.id,
-                    gac.VsCodeFlutterSidebar.openDevToolsExternally.name,
+                    editor.analyticsId,
+                    gac.EditorSidebar.openDevToolsExternally.name,
                   );
                   unawaited(
                     editor.openDevToolsPage(null, forceExternal: true),

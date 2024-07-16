@@ -11,6 +11,7 @@ import 'package:stream_channel/stream_channel.dart';
 
 import '../../../service/editor/api_classes.dart';
 import '../../../service/editor/editor_client.dart';
+import '../../../shared/analytics/constants.dart';
 import '../../../shared/config_specific/logger/logger_helpers.dart';
 import '../../../shared/config_specific/post_message/post_message.dart';
 import '../../../shared/constants.dart';
@@ -106,6 +107,9 @@ class PostMessageEditorClient implements EditorClient {
     // devices/sessions.
     unawaited(_api.initialize());
   }
+
+  @override
+  String get analyticsId => EditorSidebar.legacyId;
 
   /// Handles the `postMessage` [VsCodeDevicesEvent] and converts the updates
   /// into events in the format of the new DTD `editor` event stream.

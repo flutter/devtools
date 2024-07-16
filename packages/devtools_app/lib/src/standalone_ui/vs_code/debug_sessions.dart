@@ -79,7 +79,7 @@ class DebugSessions extends StatelessWidget {
           onPressed: editor.supportsHotReload && (isDebug || !isFlutter)
               ? () {
                   ga.select(
-                    gac.VsCodeFlutterSidebar.id,
+                    editor.analyticsId,
                     gac.hotReload,
                   );
                   unawaited(editor.hotReload(session.id));
@@ -92,7 +92,7 @@ class DebugSessions extends StatelessWidget {
           onPressed: editor.supportsHotRestart && (isDebug || !isFlutter)
               ? () {
                   ga.select(
-                    gac.VsCodeFlutterSidebar.id,
+                    editor.analyticsId,
                     gac.hotRestart,
                   );
                   unawaited(editor.hotRestart(session.id));

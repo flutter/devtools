@@ -107,8 +107,8 @@ void openDevToolsScreen({
   required EditorClient editor,
 }) {
   ga.select(
-    gac.VsCodeFlutterSidebar.id,
-    gac.VsCodeFlutterSidebar.openDevToolsScreen(screenId),
+    editor.analyticsId,
+    gac.EditorSidebar.openDevToolsScreen(screenId),
   );
   unawaited(
     editor.openDevToolsPage(

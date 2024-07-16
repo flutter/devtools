@@ -46,12 +46,9 @@ class _DtdEditorSidebarPanelState extends State<DtdEditorSidebarPanel> {
   @override
   void initState() {
     super.initState();
-    // TODO(dantup): Should we make a new entry here for EditorSidebar so that
-    //  a) it's not VS Code-specific, and
-    //  b) we can track progress of the migration from postMessage?
-    ga.screen(gac.VsCodeFlutterSidebar.id);
 
     final editor = DtdEditorClient(widget.dtd);
+    ga.screen(editor.analyticsId);
     unawaited(_editor = editor.initialized.then((_) => editor));
   }
 
@@ -93,7 +90,7 @@ class _VsCodePostMessageSidebarPanelState
   @override
   void initState() {
     super.initState();
-    ga.screen(gac.VsCodeFlutterSidebar.id);
+    ga.screen(gac.EditorSidebar.legacyId);
   }
 
   @override
