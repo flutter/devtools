@@ -170,9 +170,7 @@ class Socket extends NetworkRequest {
   String get method => 'SOCKET';
 
   @override
-  String get status {
-    return _socket.endTime == null ? 'Open' : 'Closed';
-  }
+  String get status => _socket.endTime == null ? 'Open' : 'Closed';
 
   @override
   bool get inProgress => false;
