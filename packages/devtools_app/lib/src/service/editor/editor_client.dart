@@ -133,25 +133,24 @@ class DtdEditorClient extends EditorClient {
     final editorKindMap = EditorEventKind.values.asNameMap();
     _dtd.onEvent(editorStreamName).listen((data) {
       final kind = editorKindMap[data.kind];
-      switch (kind) {
-        case null:
-          // Unknown event. Use null here so we get exhaustiveness checking for
-          // the rest.
-          break;
-        case EditorEventKind.deviceAdded:
-          _eventController.add(DeviceAddedEvent.fromJson(data.data));
-        case EditorEventKind.deviceRemoved:
-          _eventController.add(DeviceRemovedEvent.fromJson(data.data));
-        case EditorEventKind.deviceChanged:
-          _eventController.add(DeviceChangedEvent.fromJson(data.data));
-        case EditorEventKind.deviceSelected:
-          _eventController.add(DeviceSelectedEvent.fromJson(data.data));
-        case EditorEventKind.debugSessionStarted:
-          _eventController.add(DebugSessionStartedEvent.fromJson(data.data));
-        case EditorEventKind.debugSessionChanged:
-          _eventController.add(DebugSessionChangedEvent.fromJson(data.data));
-        case EditorEventKind.debugSessionStopped:
-          _eventController.add(DebugSessionStoppedEvent.fromJson(data.data));
+      final event = switch (kind) {
+        // Unknown event. Use null here so we get exhaustiveness checking for
+        // the rest.
+        null => null,
+        EditorEventKind.deviceAdded => DeviceAddedEvent.fromJson(data.data),
+        EditorEventKind.deviceRemoved => DeviceRemovedEvent.fromJson(data.data),
+        EditorEventKind.deviceChanged => DeviceChangedEvent.fromJson(data.data),
+        EditorEventKind.deviceSelected =>
+          DeviceSelectedEvent.fromJson(data.data),
+        EditorEventKind.debugSessionStarted =>
+          DebugSessionStartedEvent.fromJson(data.data),
+        EditorEventKind.debugSessionChanged =>
+          DebugSessionChangedEvent.fromJson(data.data),
+        EditorEventKind.debugSessionStopped =>
+          DebugSessionStoppedEvent.fromJson(data.data),
+      };
+      if (event != null) {
+        _eventController.add(event);
       }
     });
     await Future.wait([
@@ -166,26 +165,31 @@ class DtdEditorClient extends EditorClient {
 
   @override
   bool get supportsGetDevices => _supportsGetDevices;
+  var _supportsGetDevices = false;
+
   @override
   bool get supportsGetDebugSessions => _supportsGetDebugSessions;
+  var _supportsGetDebugSessions = false;
+
   @override
   bool get supportsSelectDevice => _supportsSelectDevice;
+  var _supportsSelectDevice = false;
+
   @override
   bool get supportsHotReload => _supportsHotReload;
+  var _supportsHotReload = false;
+
   @override
   bool get supportsHotRestart => _supportsHotRestart;
+  var _supportsHotRestart = false;
+
   @override
   bool get supportsOpenDevToolsPage => _supportsOpenDevToolsPage;
+  var _supportsOpenDevToolsPage = false;
+
   @override
   bool get supportsOpenDevToolsForceExternal =>
       _supportsOpenDevToolsForceExternal;
-
-  var _supportsGetDevices = false;
-  var _supportsGetDebugSessions = false;
-  var _supportsSelectDevice = false;
-  var _supportsHotReload = false;
-  var _supportsHotRestart = false;
-  var _supportsOpenDevToolsPage = false;
   var _supportsOpenDevToolsForceExternal = false;
 
   /// A stream of [EditorEvent]s from the editor.

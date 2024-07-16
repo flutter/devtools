@@ -244,7 +244,7 @@ class DebugSessionStoppedEvent extends EditorEvent {
       };
 }
 
-/// The result of a GetDevices request.
+/// The result of a `GetDevices` request.
 class GetDevicesResult with Serializable {
   GetDevicesResult({
     required this.devices,
@@ -269,7 +269,7 @@ class GetDevicesResult with Serializable {
       };
 }
 
-/// The result of a GetDebugSessions request.
+/// The result of a `GetDebugSessions` request.
 class GetDebugSessionsResult with Serializable {
   GetDebugSessionsResult({
     required this.debugSessions,

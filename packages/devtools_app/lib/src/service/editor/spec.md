@@ -71,7 +71,7 @@ class DebugSessionStoppedEvent extends EditorEvent {
   String debugSessionId;
 }
 
-/// The result of a GetDevices request.
+/// The result of a `GetDevices` request.
 class GetDevicesResult with Serializable {
   /// The current available devices.
   List<EditorDevice> devices;
@@ -79,7 +79,7 @@ class GetDevicesResult with Serializable {
   String? selectedDeviceId;
 }
 
-/// The result of a GetDebugSessions request.
+/// The result of a `GetDebugSessions` request.
 class GetDebugSessionsResult with Serializable {
   /// The current active debug sessions.
   final List<EditorDebugSession> debugSessions;
