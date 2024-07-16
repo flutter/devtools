@@ -496,8 +496,12 @@ class InspectorController extends DisposableController
 
   void syncTreeSelection() {
     programmaticSelectionChangeInProgress = true;
-    inspectorTree.selection = selectedNode.value;
-    inspectorTree.expandPath(selectedNode.value);
+    inspectorTree.refreshTree(() {
+      inspectorTree
+        ..updateSelectedNode(selectedNode.value)
+        ..expandPath(selectedNode.value);
+      return true;
+    });
     programmaticSelectionChangeInProgress = false;
     animateTo(selectedNode.value);
   }
@@ -520,15 +524,6 @@ class InspectorController extends DisposableController
 
   InspectorTreeNode? getTreeNode(RemoteDiagnosticsNode node) {
     return valueToInspectorTreeNode[node.valueRef];
-  }
-
-  void maybeUpdateValueUI(InspectorInstanceRef valueRef) {
-    final node = valueToInspectorTreeNode[valueRef];
-    if (node == null) {
-      // The value isn't shown in the parent tree. Nothing to do.
-      return;
-    }
-    inspectorTree.nodeChanged(node);
   }
 
   @override
