@@ -258,7 +258,8 @@ class GetDevicesResult with Serializable {
 
   GetDevicesResult.fromJson(Map<String, Object?> map)
       : this(
-          devices: (map[Field.devices] as List<Map<String, Object?>>)
+          devices: (map[Field.devices] as List<Object?>)
+              .cast<Map<String, Object?>>()
               .map(EditorDevice.fromJson)
               .toList(),
           selectedDeviceId: map[Field.selectedDeviceId] as String?,
@@ -282,10 +283,10 @@ class GetDebugSessionsResult with Serializable {
 
   GetDebugSessionsResult.fromJson(Map<String, Object?> map)
       : this(
-          debugSessions:
-              (map[Field.debugSessions] as List<Map<String, Object?>>)
-                  .map(EditorDebugSession.fromJson)
-                  .toList(),
+          debugSessions: (map[Field.debugSessions] as List<Object?>)
+              .cast<Map<String, Object?>>()
+              .map(EditorDebugSession.fromJson)
+              .toList(),
         );
 
   final List<EditorDebugSession> debugSessions;

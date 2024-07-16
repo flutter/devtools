@@ -232,7 +232,7 @@ class DtdEditorClient extends EditorClient {
   /// Gets the set of currently active debug sessions from the editor.
   @override
   Future<GetDebugSessionsResult> getDebugSessions() async {
-    final response = await _call(EditorMethod.getDevices);
+    final response = await _call(EditorMethod.getDebugSessions);
     return GetDebugSessionsResult.fromJson(response.result);
   }
 
