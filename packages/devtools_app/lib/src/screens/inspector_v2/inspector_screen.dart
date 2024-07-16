@@ -59,13 +59,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         AutoDisposeMixin,
         ProvidedControllerMixin<InspectorController, InspectorScreenBody>,
         SearchFieldMixin<InspectorScreenBody> {
-  InspectorTreeController get _summaryTreeController =>
+  InspectorTreeController get _inspectorTreeController =>
       controller.inspectorTree;
 
   bool searchVisible = false;
 
   @override
-  SearchControllerMixin get searchController => _summaryTreeController;
+  SearchControllerMixin get searchController => _inspectorTreeController;
 
   /// Indicates whether search can be closed. The value is set to true when
   /// search target type dropdown is displayed
@@ -74,14 +74,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   SearchTargetType searchTarget = SearchTargetType.widget;
 
-  static const summaryTreeKey = Key('Summary Tree');
-  static const detailsTreeKey = Key('Details Tree');
+  static const inspectorTreeKey = Key('Inspector Tree');
   static const minScreenWidthForTextBeforeScaling = 900.0;
   static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
 
   @override
   void dispose() {
-    _summaryTreeController.dispose();
+    _inspectorTreeController.dispose();
     super.dispose();
   }
 
@@ -132,19 +131,19 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       ga.timeStart(InspectorScreen.id, gac.pageReady);
     }
 
-    _summaryTreeController.setSearchTarget(searchTarget);
+    _inspectorTreeController.setSearchTarget(searchTarget);
   }
 
   @override
   Widget build(BuildContext context) {
-    final summaryTree = _buildSummaryTreeColumn();
+    final inspectorTree = _buildInspectorTreeColumn();
 
     final splitAxis = SplitPane.axisFor(context, 0.85);
     final widgetTrees = SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
-        summaryTree,
+        inspectorTree,
         InspectorDetails(
           controller: controller,
         ),
@@ -185,20 +184,20 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     );
   }
 
-  Widget _buildSummaryTreeColumn() {
+  Widget _buildInspectorTreeColumn() {
     return LayoutBuilder(
       builder: (context, constraints) {
         return RoundedOutlinedBorder(
           child: Column(
             children: [
-              InspectorSummaryTreeControls(
+              InspectorTreeControls(
                 isSearchVisible: searchVisible,
                 constraints: constraints,
                 onRefreshInspectorPressed: _refreshInspector,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
                 searchFieldBuilder: () =>
                     StatelessSearchField<InspectorTreeRow>(
-                  controller: _summaryTreeController,
+                  controller: _inspectorTreeController,
                   searchFieldEnabled: true,
                   shouldRequestFocus: searchVisible,
                   supportsNavigation: true,
@@ -218,9 +217,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                     return Stack(
                       children: [
                         InspectorTree(
-                          key: summaryTreeKey,
-                          treeController: _summaryTreeController,
-                          isSummaryTree: true,
+                          key: inspectorTreeKey,
+                          treeController: _inspectorTreeController,
                           widgetErrors: inspectableErrors,
                           screenId: InspectorScreen.id,
                         ),
@@ -253,7 +251,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     setState(() {
       searchVisible = !searchVisible;
     });
-    _summaryTreeController.resetSearch();
+    _inspectorTreeController.resetSearch();
   }
 
   List<Widget> getServiceExtensionWidgets() {
@@ -349,7 +347,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Widgets in these directories will show up in your summary tree.',
+                    'Widgets in these directories will show up in your widget tree.',
                     style: theme.subtleTextStyle,
                   ),
                 ),
@@ -379,8 +377,8 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
   }
 }
 
-class InspectorSummaryTreeControls extends StatelessWidget {
-  const InspectorSummaryTreeControls({
+class InspectorTreeControls extends StatelessWidget {
+  const InspectorTreeControls({
     super.key,
     required this.constraints,
     required this.isSearchVisible,

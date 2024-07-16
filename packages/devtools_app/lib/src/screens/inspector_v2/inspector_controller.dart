@@ -46,7 +46,6 @@ class InspectorController extends DisposableController
     required this.inspectorTree,
     required this.treeType,
     this.parent,
-    this.isSummaryTree = true,
   }) {
     unawaited(_init());
   }
@@ -132,9 +131,7 @@ class InspectorController extends DisposableController
 
   void _handleConnectionStop() {
     setActivate(false);
-    if (isSummaryTree) {
-      dispose();
-    }
+    dispose();
   }
 
   IsolateRef? _mainIsolate;
@@ -169,8 +166,6 @@ class InspectorController extends DisposableController
   /// simulator or high powered native device. The frame rate is set low
   /// for now mainly to minimize risk.
   static const refreshFramesPerSecond = 5.0;
-
-  final bool isSummaryTree;
 
   /// Parent InspectorController if this is a details subtree.
   InspectorController? parent;
@@ -355,12 +350,10 @@ class InspectorController extends DisposableController
   }
 
   void filterErrors() {
-    if (isSummaryTree) {
-      serviceConnection.errorBadgeManager.filterErrors(
-        InspectorScreen.id,
-        (id) => hasDiagnosticsValue(InspectorInstanceRef(id)),
-      );
-    }
+    serviceConnection.errorBadgeManager.filterErrors(
+      InspectorScreen.id,
+      (id) => hasDiagnosticsValue(InspectorInstanceRef(id)),
+    );
   }
 
   void setActivate(bool enabled) {
@@ -486,9 +479,7 @@ class InspectorController extends DisposableController
   ) {
     newSelection ??= selectedDiagnostic;
     setSelectedNode(findMatchingInspectorTreeNode(newSelection));
-    syncSelectionHelper(
-      selection: newSelection,
-    );
+    syncSelectionHelper(selection: newSelection);
 
     syncTreeSelection();
   }
@@ -583,7 +574,7 @@ class InspectorController extends DisposableController
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
       treeType,
-      isSummaryTree: isSummaryTree,
+      isSummaryTree: true,
     );
 
     try {
@@ -611,9 +602,7 @@ class InspectorController extends DisposableController
     if (nodeInTree == null) {
       // The tree has probably changed since we last updated. Do a full refresh
       // so that the tree includes the new node we care about.
-      unawaited(
-        _recomputeTreeRoot(newSelection),
-      );
+      unawaited(_recomputeTreeRoot(newSelection));
     }
 
     refreshSelection(newSelection);
@@ -636,9 +625,9 @@ class InspectorController extends DisposableController
 
     lastExpanded = null; // New selected node takes precedence.
     endShowNode();
-    final parantLocal = parent;
-    if (parantLocal != null) {
-      parantLocal.endShowNode();
+    final parentLocal = parent;
+    if (parentLocal != null) {
+      parentLocal.endShowNode();
     }
 
     _updateSelectedErrorFromNode(_selectedNode.value);
@@ -730,9 +719,7 @@ class InspectorController extends DisposableController
       setSelectedNode(node);
       unawaited(_addNodeToConsole(node));
 
-      syncSelectionHelper(
-        selection: selectedDiagnostic,
-      );
+      syncSelectionHelper(selection: selectedDiagnostic);
     }
   }
 
@@ -753,9 +740,7 @@ class InspectorController extends DisposableController
     return null;
   }
 
-  void syncSelectionHelper({
-    required RemoteDiagnosticsNode? selection,
-  }) {
+  void syncSelectionHelper({required RemoteDiagnosticsNode? selection}) {
     if (selection != null) {
       if (selection.isCreatedByLocalProject) {
         _navigateTo(selection);
