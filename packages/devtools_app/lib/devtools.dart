@@ -9,4 +9,4 @@
 // the constant declaration `const version =`.
 // If you change the declaration you must also modify the regex in
 // tools/update_version.dart.
-const version = '2.38.0-dev.5';
+const version = '2.38.0-dev.6';
