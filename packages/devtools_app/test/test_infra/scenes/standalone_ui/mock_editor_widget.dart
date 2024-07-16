@@ -144,6 +144,7 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
                             : _withUpdate(editor.connectEditor),
                         child: const Text('Connect'),
                       ),
+                      const SizedBox(width: denseSpacing),
                       ElevatedButton(
                         onPressed: editor.connected
                             ? _withUpdate(editor.disconnectEditor)
@@ -160,6 +161,7 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
                         onPressed: editor.connectDevices,
                         child: const Text('Connect'),
                       ),
+                      const SizedBox(width: denseSpacing),
                       ElevatedButton(
                         onPressed: editor.disconnectDevices,
                         child: const Text('Disconnect'),
@@ -284,25 +286,20 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
                           StreamBuilder(
                             stream: clientLogUpdated,
                             builder: (context, snapshot) {
-                              return SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    for (final log in clientLogRing)
-                                      OutlineDecoration.onlyBottom(
-                                        child: Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: denseSpacing,
-                                          ),
-                                          child: Text(
-                                            log,
-                                            style: Theme.of(context)
-                                                .fixedFontStyle,
-                                          ),
-                                        ),
-                                      ),
-                                  ],
+                              return ListView.builder(
+                                itemCount: clientLogRing.length,
+                                itemBuilder: (context, index) =>
+                                    OutlineDecoration.onlyBottom(
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: denseSpacing,
+                                    ),
+                                    child: Text(
+                                      clientLogRing.elementAt(index),
+                                      style: Theme.of(context).fixedFontStyle,
+                                    ),
+                                  ),
                                 ),
                               );
                             },
@@ -310,25 +307,20 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
                           StreamBuilder(
                             stream: editorLogUpdated,
                             builder: (context, snapshot) {
-                              return SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    for (final log in editorLogRing)
-                                      OutlineDecoration.onlyBottom(
-                                        child: Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: denseSpacing,
-                                          ),
-                                          child: Text(
-                                            log,
-                                            style: Theme.of(context)
-                                                .fixedFontStyle,
-                                          ),
-                                        ),
-                                      ),
-                                  ],
+                              return ListView.builder(
+                                itemCount: editorLogRing.length,
+                                itemBuilder: (context, index) =>
+                                    OutlineDecoration.onlyBottom(
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: denseSpacing,
+                                    ),
+                                    child: Text(
+                                      editorLogRing.elementAt(index),
+                                      style: Theme.of(context).fixedFontStyle,
+                                    ),
+                                  ),
                                 ),
                               );
                             },
