@@ -1,22 +1,19 @@
 *                   @flutter/devtools-reviewers
 
 # Inspector Files
-inspector/          @CoderDake
+inspector/          @elliette
 
 # Network Files
-network/            @kenzieschmoll @bkonyi
+network/            @bkonyi @kenzieschmoll
 
 # Performance Files
 performance/        @kenzieschmoll
 
 # CPU Profiler files
-profiler/           @kenzieschmoll
+profiler/           @kenzieschmoll @bkonyi
 
 # Memory files
-memory/             @bkonyi @polina-c
-
-# Memory leak tracking files
-memory/panes/leaks  @CoderDake @polina-c
+memory/             @bkonyi @kenzieschmoll
 
 # Debugger files
 debugger/           @elliette
@@ -25,10 +22,15 @@ debugger/           @elliette
 vm_developer/       @bkonyi
 
 # Tooling files
-/tool/              @CoderDake
+/tool/              @kenzieschmoll
 
+# DevTools extensions and related files
+src/extensions/
 packages/devtools_extensions/    @kenzieschmoll
+packages/devtools_app_shared/    @kenzieschmoll
 
+# package:devtools_shared code, which is used across DevTools and the Dart SDK
+packages/devtools_shared/        @kenzieschmoll @bkonyi
 
 # Version bump files.
 # No owners to prevent version update spam

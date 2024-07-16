@@ -57,7 +57,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue where extensions did not load with the proper theme when
+embedded in an IDE. - [#8034](https://github.com/flutter/devtools/pull/8034)
 
 ## Full commit history
 

@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_infra/matchers/_golden_matcher_io.dart';
+import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/test_data/cpu_profiler/simple_profile_2.dart';
 import '../../test_infra/utils/test_utils.dart';
 

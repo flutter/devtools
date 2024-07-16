@@ -57,7 +57,7 @@ class OfflinePerformanceData {
 
   bool get isEmpty => perfettoTraceBinary == null;
 
-  Map<String, dynamic> toJson() => {
+  Map<String, Object?> toJson() => {
         traceBinaryKey: perfettoTraceBinary,
         flutterFramesKey: frames.map((frame) => frame.json).toList(),
         selectedFrameIdKey: selectedFrame?.id,

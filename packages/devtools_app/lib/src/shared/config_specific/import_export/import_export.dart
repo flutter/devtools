@@ -59,7 +59,7 @@ class ImportController {
     previousImportTime = now;
 
     final json = jsonFile.data;
-    final isDevToolsSnapshot = json is Map<String, dynamic> &&
+    final isDevToolsSnapshot = json is Map<String, Object?> &&
         json[DevToolsExportKeys.devToolsSnapshot.name] == true;
     if (!isDevToolsSnapshot) {
       notificationService.push(nonDevToolsFileMessage);
@@ -157,8 +157,8 @@ abstract class ExportController {
     required String fileName,
   });
 
-  Map<String, dynamic> generateDataForExport({
-    required Map<String, dynamic> offlineScreenData,
+  Map<String, Object?> generateDataForExport({
+    required Map<String, Object?> offlineScreenData,
     ConnectedApp? connectedApp,
   }) {
     final contents = {
@@ -173,7 +173,7 @@ abstract class ExportController {
     return contents;
   }
 
-  String encode(Map<String, dynamic> offlineScreenData) {
+  String encode(Map<String, Object?> offlineScreenData) {
     final data = generateDataForExport(offlineScreenData: offlineScreenData);
     return jsonEncode(
       data,
