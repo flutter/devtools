@@ -18,7 +18,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
-import 'har_builder.dart';
+import 'har_network_data.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
@@ -72,10 +72,10 @@ class NetworkController extends DisposableController
 
     try {
       // Build the HAR object
-      final har = buildHar(_httpRequests!);
+      final har = HarNetworkData(_httpRequests!);
       debugPrint('data is ${json.encode(har)}');
       return ExportController().downloadFile(
-        json.encode(har),
+        json.encode(har.toJson()),
         type: ExportFileType.har,
       );
     } catch (ex) {
