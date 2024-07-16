@@ -41,9 +41,9 @@ class LoggingTableRow extends StatefulWidget {
   static TextStyle get detailsStyle =>
       Theme.of(navigatorKey.currentContext!).regularTextStyle;
 
+  /// All of the metatadata chits that can be visible for this [data] entry.
   @visibleForTesting
   static List<MetadataChit> metadataChits(LogDataV2 data, double maxWidth) {
-    //TODO: maxwidth - prevWidget on Line
     final allChits = [
       WhenMetaDataChit(
         data: data,
@@ -66,6 +66,7 @@ class LoggingTableRow extends StatefulWidget {
 
   static final _padding = scaleByFontFactor(8.0);
 
+  /// Estimates the height of the row, including the details section and all of the metadatachits.
   static double estimateRowHeight(
     LogDataV2 log,
     double width,
@@ -92,7 +93,7 @@ class LoggingTableRow extends StatefulWidget {
     double remainingWidth = maxWidth;
 
     for (final presentChit in LoggingTableRow.metadataChits(data, maxWidth)) {
-      final chitSize = presentChit.getSize();
+      final chitSize = presentChit.estimateSize();
       if (chitSize.width > remainingWidth) {
         // The chit does not fit so add it to a new row
         totalHeight += rowHeight;
@@ -169,10 +170,16 @@ abstract class MetadataChit extends StatelessWidget {
   final double maxWidth;
   static const padding = defaultSpacing;
 
+  /// The text value to be displayed for this chit.
   String getValue();
+
+  /// Whether or not [data] has the information to display this chit.
   bool isPresent();
+
+  /// The icon that will be shown with the chit.
   IconData getIcon();
 
+  /// The textspan which will be displayed in the chit.
   TextSpan textSpan() {
     return TextSpan(
       text: getValue(),
@@ -180,7 +187,10 @@ abstract class MetadataChit extends StatelessWidget {
     );
   }
 
-  Size getSize() {
+  /// Estimates the size of this single metadata chit.
+  ///
+  /// If the [build] method is changed then this may need to be updated
+  Size estimateSize() {
     final maxWidthInsidePadding = maxWidth - padding * 2;
     final iconSize = Size.square(tooltipIconSize);
     final textSize = calculateTextSpanSize(
@@ -193,6 +203,7 @@ abstract class MetadataChit extends StatelessWidget {
     );
   }
 
+  /// If this build method is changed then you may need to modify [estimateSize()]
   @override
   Widget build(BuildContext context) {
     return Container(

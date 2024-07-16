@@ -43,6 +43,7 @@ void main() {
   tearDown(() {
     loggingTableModel.dispose();
   });
+
   group('LoggingModel', () {
     testWidgets('can add logs', (WidgetTester tester) async {
       await pumpForContext(tester);
@@ -73,6 +74,7 @@ void main() {
           final frameElapsedLog =
               LogDataV2('frameLog', '{"elapsed": 1000000}', 4684506);
           double? columnWidth;
+
           await tester.pumpWidget(
             wrap(
               LayoutBuilder(

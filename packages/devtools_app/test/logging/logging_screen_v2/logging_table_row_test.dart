@@ -27,6 +27,7 @@ void main() {
         213567823783,
       );
       final windowSize = Size(windowWidth, 500);
+
       testWidgetsWithWindowSize(
           'Estimates the height of a row correctly for windowWidth: $windowWidth',
           windowSize, (WidgetTester tester) async {
@@ -51,7 +52,7 @@ void main() {
       });
 
       testWidgetsWithWindowSize(
-          'Estimates the height of the chits correctly for windowWidth: $windowWidth',
+          'Estimates the height of the wrapped chits correctly for windowWidth: $windowWidth',
           windowSize, (WidgetTester tester) async {
         final chits = LoggingTableRow.metadataChits(data, windowSize.width);
         final wrapKey = GlobalKey();
@@ -79,6 +80,7 @@ void main() {
         );
       });
     }
+
     testWidgetsWithWindowSize(
         'estimates MetadataChit sizes correctly', windowSize,
         (WidgetTester tester) async {
@@ -104,7 +106,7 @@ void main() {
       for (var i = 0; i < numberOfChits; i++) {
         final chit = chits[i];
         final chitElement = chitElements.elementAt(i);
-        expect(chit.getSize(), chitElement.size);
+        expect(chit.estimateSize(), chitElement.size);
       }
     });
   });
