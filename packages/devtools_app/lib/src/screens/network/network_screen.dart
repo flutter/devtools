@@ -305,7 +305,7 @@ class NetworkRequestsTable extends StatelessWidget {
   });
 
   static final methodColumn = MethodColumn();
-  static final addressColumn = UriColumn();
+  static final addressColumn = AddressColumn();
   static final statusColumn = StatusColumn();
   static final typeColumn = TypeColumn();
   static final durationColumn = DurationColumn();
@@ -353,11 +353,11 @@ class NetworkRequestsTable extends StatelessWidget {
   }
 }
 
-class UriColumn extends ColumnData<NetworkRequest>
+class AddressColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
-  UriColumn()
+  AddressColumn()
       : super.wide(
-          'Uri',
+          'Address',
           minWidthPx: scaleByFontFactor(isEmbedded() ? 100 : 150.0),
           showTooltip: true,
         );

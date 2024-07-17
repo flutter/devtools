@@ -299,10 +299,7 @@ void main() {
         test('isSummaryTree = false', () async {
           await env.setupEnvironment();
           final group = inspectorService!.createObjectGroup('test-group');
-          final root = (await group.getRoot(
-            FlutterTreeType.widget,
-            isSummaryTree: false,
-          ))!;
+          final root = (await group.getRoot(FlutterTreeType.widget))!;
           // Tree contains all widgets.
           expect(
             treeToDebugString(root),
@@ -378,7 +375,6 @@ void main() {
           final selection = (await group.getSelection(
             null,
             FlutterTreeType.widget,
-            isSummaryTree: false,
           ))!;
           expect(selection, isNotNull);
           expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
