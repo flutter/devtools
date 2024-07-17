@@ -132,7 +132,10 @@ void main() {
       expect(profile.length, numRequests);
 
       expect(controller.matchesForSearch('jsonplaceholder').length, equals(5));
-      expect(controller.matchesForSearch('IPv6').length, equals(2));
+      expect(
+        controller.matchesForSearch('2606:4700:3037::ac43').length,
+        equals(2),
+      );
       expect(controller.matchesForSearch('').length, equals(0));
 
       // Search with incorrect case.
@@ -155,7 +158,7 @@ void main() {
       expect(matches.length, equals(5));
       verifyIsSearchMatch(profile, matches);
 
-      controller.search = 'IPv6';
+      controller.search = '2606:4700:3037::ac43';
       matches = controller.searchMatches.value;
       expect(matches.length, equals(2));
       verifyIsSearchMatch(profile, matches);
@@ -184,7 +187,11 @@ void main() {
 
       controller.setActiveFilter(query: 'method:get');
       expect(profile, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(6));
+      expect(controller.filteredData.value, hasLength(4));
+
+      controller.setActiveFilter(query: 'method:socket');
+      expect(profile, hasLength(numRequests));
+      expect(controller.filteredData.value, hasLength(2));
 
       controller.setActiveFilter(query: 'm:put');
       expect(profile, hasLength(numRequests));
@@ -200,7 +207,7 @@ void main() {
 
       controller.setActiveFilter(query: 's:101');
       expect(profile, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(3));
+      expect(controller.filteredData.value, hasLength(1));
 
       controller.setActiveFilter(query: '-s:Error');
       expect(profile, hasLength(numRequests));
@@ -210,11 +217,11 @@ void main() {
       expect(profile, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(4));
 
-      controller.setActiveFilter(query: 't:ws');
+      controller.setActiveFilter(query: 't:tcp');
       expect(profile, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.setActiveFilter(query: '-t:ws');
+      controller.setActiveFilter(query: '-t:tcp');
       expect(profile, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(7));
 
@@ -234,17 +241,17 @@ void main() {
       expect(profile, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(numRequests));
 
-      controller.setActiveFilter(query: '-t:ws,http');
+      controller.setActiveFilter(query: '-t:tcp,http');
       expect(profile, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(4));
 
-      controller.setActiveFilter(query: '-t:ws,http method:put');
+      controller.setActiveFilter(query: '-t:tcp,http method:put');
       expect(profile, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(1));
 
       controller.setActiveFilter(query: '-status:error method:get');
       expect(profile, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(5));
+      expect(controller.filteredData.value, hasLength(3));
 
       controller.setActiveFilter(query: '-status:error method:get t:http');
       expect(profile, hasLength(numRequests));

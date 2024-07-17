@@ -26,8 +26,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-* Enable offline analysis of snapshots, historical data analysis and save/load.
-- [#7843](https://github.com/flutter/devtools/pull/7843)
+* Enable offline analysis of snapshots, historical data analysis and save/load. - [#7843](https://github.com/flutter/devtools/pull/7843)
 
     ![Memory offline data](images/memory-save-load.png "Memory offline data")
 
@@ -37,8 +36,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed issue where socket statistics were being reported as web sockets. - [#8061](https://github.com/flutter/devtools/pull/8061)
 
+    ![Network profiler correctly displaying socket statistics](images/socket-profiling.png "Network profiler correctly displaying socket statistics")
 ## Logging updates
 
 TODO: Remove this section if there are not any general updates.

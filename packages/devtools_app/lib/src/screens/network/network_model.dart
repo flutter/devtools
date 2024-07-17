@@ -82,8 +82,8 @@ abstract class NetworkRequest with ChangeNotifier, SearchableDataMixin {
       );
 }
 
-class WebSocket extends NetworkRequest {
-  WebSocket(this._socket, this._timelineMicrosBase);
+class Socket extends NetworkRequest {
+  Socket(this._socket, this._timelineMicrosBase);
 
   int _timelineMicrosBase;
 
@@ -93,7 +93,7 @@ class WebSocket extends NetworkRequest {
     return _timelineMicrosBase + micros;
   }
 
-  void update(WebSocket other) {
+  void update(Socket other) {
     _socket = other._socket;
     _timelineMicrosBase = other._timelineMicrosBase;
     notifyListeners();
@@ -145,15 +145,15 @@ class WebSocket extends NetworkRequest {
   }
 
   @override
-  String get contentType => 'websocket';
+  String get contentType => 'socket';
 
   @override
-  String get type => 'ws';
+  String get type => _socket.socketType;
 
   String get socketType => _socket.socketType;
 
   @override
-  String get uri => _socket.address;
+  String get uri => '${_socket.address}:$port';
 
   @override
   int get port => _socket.port;
@@ -166,21 +166,17 @@ class WebSocket extends NetworkRequest {
 
   int get writeBytes => _socket.writeBytes;
 
-  // TODO(kenz): is this always GET? Chrome DevTools shows GET in the response
-  // headers for web socket traffic.
   @override
-  String get method => 'GET';
+  String get method => 'SOCKET';
 
-  // TODO(kenz): is this always 101? Chrome DevTools lists "101" for WS status
-  // codes with a tooltip of "101 Web Socket Protocol Handshake"
   @override
-  String get status => '101';
+  String get status => _socket.endTime == null ? 'Open' : 'Closed';
 
   @override
   bool get inProgress => false;
 
   @override
-  bool operator ==(Object other) => other is WebSocket && id == other.id;
+  bool operator ==(Object other) => other is Socket && id == other.id;
 
   @override
   int get hashCode => id.hashCode;
