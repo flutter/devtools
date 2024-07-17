@@ -1,9 +1,9 @@
 // Copyright 2024 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'dart:convert';
 
+import '../../../devtools_app.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/utils.dart';
 import 'constants.dart';
@@ -178,8 +178,8 @@ int _calculateHeadersSize(Map<String, dynamic>? headers) {
 }
 
 int _calculateBodySize(String? requestBody) {
-  if (requestBody == null || requestBody.isEmpty) {
+  if (requestBody.isNullOrEmpty) {
     return 0;
   }
-  return utf8.encode(requestBody).length;
+  return utf8.encode(requestBody!).length;
 }
