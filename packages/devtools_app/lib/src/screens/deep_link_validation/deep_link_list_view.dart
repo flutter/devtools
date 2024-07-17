@@ -44,7 +44,7 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    initController();
+    if (!initController()) return;
     callWhenControllerReady((_) {
       controller.firstLoadWithDefaultConfigurations();
     });
@@ -65,7 +65,6 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
       ),
     );
   }
-
 }
 
 class _DeepLinkListViewMainPanel extends StatelessWidget {
@@ -275,9 +274,7 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
             title: 'Android Variant:',
             valueListenable: controller.selectedAndroidVariantIndex,
             configurations: controller.selectedProject.value!.androidVariants,
-            onChanged: (index) {
-              controller.updateSelectedAndroidVariantIndex(index!);
-            },
+            onChanged: controller.updateSelectedAndroidVariantIndex,
           ),
           if (FeatureFlags.deepLinkIosCheck) ...[
             const SizedBox(width: denseSpacing),
@@ -286,9 +283,7 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
               valueListenable: controller.selectedIosConfigurationIndex,
               configurations: controller
                   .selectedProject.value!.iosBuildOptions.configurations,
-            onChanged: (index) {
-              controller.updateSelectedIosConfigurationIndex(index!);
-            },
+              onChanged: controller.updateSelectedIosConfigurationIndex,
             ),
             const SizedBox(width: denseSpacing),
             _ConfigurationDropdown(
@@ -296,9 +291,7 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
               valueListenable: controller.selectedIosTargetIndex,
               configurations:
                   controller.selectedProject.value!.iosBuildOptions.targets,
-              onChanged: (index) {
-              controller.updateSelectedIosTargetIndex(index!);
-            },
+              onChanged: controller.updateSelectedIosTargetIndex,
             ),
           ],
         ],
@@ -317,7 +310,7 @@ class _ConfigurationDropdown extends StatelessWidget {
   final ValueListenable valueListenable;
   final List<String> configurations;
   final String title;
- final  void Function(int?)? onChanged;
+  final void Function(int) onChanged;
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
@@ -336,7 +329,7 @@ class _ConfigurationDropdown extends StatelessWidget {
                     child: Text(configurations[i]),
                   ),
               ],
-              onChanged: onChanged,
+              onChanged: (index) => onChanged(index!),
             ),
           ],
         );

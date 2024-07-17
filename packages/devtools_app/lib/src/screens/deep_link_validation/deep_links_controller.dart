@@ -148,7 +148,6 @@ class DeepLinksController extends DisposableController
     with AutoDisposeControllerMixin {
   DeepLinksController();
 
-
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
   String get applicationId =>
       _androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
@@ -217,24 +216,25 @@ class DeepLinksController extends DisposableController
   final _selectedIosConfigurationIndex = ValueNotifier<int>(0);
   final _selectedIosTargetIndex = ValueNotifier<int>(0);
 
-  ValueListenable<int> get selectedAndroidVariantIndex => _selectedAndroidVariantIndex;
-  ValueListenable<int> get selectedIosConfigurationIndex => _selectedIosConfigurationIndex;
+  ValueListenable<int> get selectedAndroidVariantIndex =>
+      _selectedAndroidVariantIndex;
+  ValueListenable<int> get selectedIosConfigurationIndex =>
+      _selectedIosConfigurationIndex;
   ValueListenable<int> get selectedIosTargetIndex => _selectedIosTargetIndex;
-  
 
   void updateSelectedAndroidVariantIndex(int index) {
     _selectedAndroidVariantIndex.value = index;
-    _handleAndroidConfigurationChanged(); 
+    _handleAndroidConfigurationChanged();
   }
 
   void updateSelectedIosConfigurationIndex(int index) {
     _selectedAndroidVariantIndex.value = index;
-    _handleIosConfigurationChanged(); 
+    _handleIosConfigurationChanged();
   }
 
-    void updateSelectedIosTargetIndex(int index) {
+  void updateSelectedIosTargetIndex(int index) {
     _selectedIosTargetIndex.value = index;
-    _handleIosConfigurationChanged(); 
+    _handleIosConfigurationChanged();
   }
 
   void firstLoadWithDefaultConfigurations() async {
@@ -273,7 +273,7 @@ class DeepLinksController extends DisposableController
     await validateLinks();
   }
 
-    int _getDefaultConfigurationIndex(
+  int _getDefaultConfigurationIndex(
     List<String> configurations, {
     required String containsString,
   }) {
@@ -283,7 +283,6 @@ class DeepLinksController extends DisposableController
     // If not found, default to 0.
     return max(index, 0);
   }
-
 
   Future<void> _loadAndroidAppLinks() async {
     final variant = selectedProject
