@@ -129,7 +129,7 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
         NetworkEventKeys.dns.name: NetworkEventDefaults.dns,
         NetworkEventKeys.connect.name: NetworkEventDefaults.connect,
         NetworkEventKeys.send.name: NetworkEventDefaults.send,
-        NetworkEventKeys.wait.name: e.duration?.inMilliseconds ?? 0 - 2,
+        NetworkEventKeys.wait.name: e.duration?.inMilliseconds ?? 0,
         NetworkEventKeys.receive.name: NetworkEventDefaults.receive,
         NetworkEventKeys.ssl.name: NetworkEventDefaults.ssl,
       },
