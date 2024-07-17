@@ -430,7 +430,6 @@ class InspectorService extends InspectorServiceBase {
     final pendingSelection = await group.getSelection(
       _currentSelection,
       FlutterTreeType.widget,
-      isSummaryTree: false,
     );
     if (!group.disposed &&
         group == _selectionGroups.next &&
