@@ -347,7 +347,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Widgets in these directories will show up in your widget tree.',
+                    'Widgets in these directories will be visible by default in your widget tree.',
                     style: theme.subtleTextStyle,
                   ),
                 ),
