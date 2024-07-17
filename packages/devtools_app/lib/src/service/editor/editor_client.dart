@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 
 import '../../shared/analytics/constants.dart';
@@ -13,7 +14,7 @@ import 'api_classes.dart';
 ///
 /// Changes made to the editor services/events should be considered carefully to
 /// ensure they are not breaking changes to already-shipped editors.
-abstract class EditorClient {
+abstract class EditorClient extends DisposableController {
   Future<void> close();
 
   /// The ID to use for analytics events.
@@ -87,7 +88,7 @@ abstract class EditorClient {
 ///
 /// Changes made to the editor services/events should be considered carefully to
 /// ensure they are not breaking changes to already-shipped editors.
-class DtdEditorClient extends EditorClient {
+class DtdEditorClient extends EditorClient with AutoDisposeControllerMixin {
   // TODO(dantup): Merge this into EditorClient once the postMessage version
   //  is removed.
 
@@ -102,75 +103,81 @@ class DtdEditorClient extends EditorClient {
   String get analyticsId => EditorSidebar.id;
 
   Future<void> _initialize() async {
-    _dtd.onEvent('Service').listen((data) {
-      final kind = data.kind;
-      if (kind != 'ServiceRegistered' && kind != 'ServiceUnregistered') {
-        return;
-      }
+    autoDisposeStreamSubscription(
+      _dtd.onEvent('Service').listen((data) {
+        final kind = data.kind;
+        if (kind != 'ServiceRegistered' && kind != 'ServiceUnregistered') {
+          return;
+        }
 
-      final service = data.data['service'] as String?;
-      if (service == null || service != editorServiceName) {
-        return;
-      }
+        final service = data.data['service'] as String?;
+        if (service == null || service != editorServiceName) {
+          return;
+        }
 
-      final isRegistered = kind == 'ServiceRegistered';
-      final method = data.data['method'] as String;
-      final capabilities = data.data['capabilities'] as Map<String, Object?>?;
+        final isRegistered = kind == 'ServiceRegistered';
+        final method = data.data['method'] as String;
+        final capabilities = data.data['capabilities'] as Map<String, Object?>?;
 
-      if (method == EditorMethod.getDevices.name) {
-        _supportsGetDevices = isRegistered;
-      } else if (method == EditorMethod.getDebugSessions.name) {
-        _supportsGetDebugSessions = isRegistered;
-      } else if (method == EditorMethod.selectDevice.name) {
-        _supportsSelectDevice = isRegistered;
-      } else if (method == EditorMethod.hotReload.name) {
-        _supportsHotReload = isRegistered;
-      } else if (method == EditorMethod.hotRestart.name) {
-        _supportsHotRestart = isRegistered;
-      } else if (method == EditorMethod.openDevToolsPage.name) {
-        _supportsOpenDevToolsPage = isRegistered;
-        _supportsOpenDevToolsForceExternal =
-            capabilities?[Field.supportsForceExternal] == true;
-      } else {
-        return;
-      }
+        if (method == EditorMethod.getDevices.name) {
+          _supportsGetDevices = isRegistered;
+        } else if (method == EditorMethod.getDebugSessions.name) {
+          _supportsGetDebugSessions = isRegistered;
+        } else if (method == EditorMethod.selectDevice.name) {
+          _supportsSelectDevice = isRegistered;
+        } else if (method == EditorMethod.hotReload.name) {
+          _supportsHotReload = isRegistered;
+        } else if (method == EditorMethod.hotRestart.name) {
+          _supportsHotRestart = isRegistered;
+        } else if (method == EditorMethod.openDevToolsPage.name) {
+          _supportsOpenDevToolsPage = isRegistered;
+          _supportsOpenDevToolsForceExternal =
+              capabilities?[Field.supportsForceExternal] == true;
+        } else {
+          return;
+        }
 
-      final info = isRegistered
-          ? ServiceRegistered(
-              service: service,
-              method: method,
-              capabilities: capabilities,
-            )
-          : ServiceUnregistered(
-              service: service,
-              method: method,
-            );
-      _editorServiceChangedController.add(info);
-    });
+        final info = isRegistered
+            ? ServiceRegistered(
+                service: service,
+                method: method,
+                capabilities: capabilities,
+              )
+            : ServiceUnregistered(
+                service: service,
+                method: method,
+              );
+        _editorServiceChangedController.add(info);
+      }),
+    );
 
     final editorKindMap = EditorEventKind.values.asNameMap();
-    _dtd.onEvent(editorStreamName).listen((data) {
-      final kind = editorKindMap[data.kind];
-      final event = switch (kind) {
-        // Unknown event. Use null here so we get exhaustiveness checking for
-        // the rest.
-        null => null,
-        EditorEventKind.deviceAdded => DeviceAddedEvent.fromJson(data.data),
-        EditorEventKind.deviceRemoved => DeviceRemovedEvent.fromJson(data.data),
-        EditorEventKind.deviceChanged => DeviceChangedEvent.fromJson(data.data),
-        EditorEventKind.deviceSelected =>
-          DeviceSelectedEvent.fromJson(data.data),
-        EditorEventKind.debugSessionStarted =>
-          DebugSessionStartedEvent.fromJson(data.data),
-        EditorEventKind.debugSessionChanged =>
-          DebugSessionChangedEvent.fromJson(data.data),
-        EditorEventKind.debugSessionStopped =>
-          DebugSessionStoppedEvent.fromJson(data.data),
-      };
-      if (event != null) {
-        _eventController.add(event);
-      }
-    });
+    autoDisposeStreamSubscription(
+      _dtd.onEvent(editorStreamName).listen((data) {
+        final kind = editorKindMap[data.kind];
+        final event = switch (kind) {
+          // Unknown event. Use null here so we get exhaustiveness checking for
+          // the rest.
+          null => null,
+          EditorEventKind.deviceAdded => DeviceAddedEvent.fromJson(data.data),
+          EditorEventKind.deviceRemoved =>
+            DeviceRemovedEvent.fromJson(data.data),
+          EditorEventKind.deviceChanged =>
+            DeviceChangedEvent.fromJson(data.data),
+          EditorEventKind.deviceSelected =>
+            DeviceSelectedEvent.fromJson(data.data),
+          EditorEventKind.debugSessionStarted =>
+            DebugSessionStartedEvent.fromJson(data.data),
+          EditorEventKind.debugSessionChanged =>
+            DebugSessionChangedEvent.fromJson(data.data),
+          EditorEventKind.debugSessionStopped =>
+            DebugSessionStoppedEvent.fromJson(data.data),
+        };
+        if (event != null) {
+          _eventController.add(event);
+        }
+      }),
+    );
     await Future.wait([
       _dtd.streamListen('Service'),
       _dtd.streamListen(editorServiceName),

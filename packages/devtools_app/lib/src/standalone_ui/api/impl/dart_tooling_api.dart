@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc_2;
 import 'package:logging/logging.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -94,13 +95,17 @@ class PostMessageToolApiImpl implements PostMessageToolApi {
 ///
 /// This class allows the sidebar to use the new [EditorClient] APIs while still
 /// being compatible with postMessage based clients.
-class PostMessageEditorClient implements EditorClient {
+class PostMessageEditorClient extends DisposableController
+    with AutoDisposeControllerMixin
+    implements EditorClient {
   PostMessageEditorClient(this._api) {
     // In PostMessage world, we just get events with the entire new list so
     // we must figure out what the actual changes are so we can produce the
     // same kinds of events as the new DTD version.
-    _api.devicesChanged.listen(_devicesChanged);
-    _api.debugSessionsChanged.listen(_debugSessionsChanged);
+    autoDisposeStreamSubscription(_api.devicesChanged.listen(_devicesChanged));
+    autoDisposeStreamSubscription(
+      _api.debugSessionsChanged.listen(_debugSessionsChanged),
+    );
 
     // Trigger the initial initialization now we have the handlers set up.
     // In the old postMessage world, this is how we get the initial set of
