@@ -73,7 +73,6 @@ class NetworkController extends DisposableController
     try {
       // Build the HAR object
       final har = HarNetworkData(_httpRequests!);
-      debugPrint('data is ${json.encode(har)}');
       return ExportController().downloadFile(
         json.encode(har.toJson()),
         type: ExportFileType.har,

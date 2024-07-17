@@ -12,9 +12,9 @@ import 'har_builder.dart';
 /// This class implements the [Serializable] interface, allowing instances to
 /// be serialized to and from JSON.
 class HarNetworkData with Serializable {
-  /// Creates an instance of [HarNetworkData] with a list of DartIOHttpRequestData requests.
+  /// Creates an instance of [HarNetworkData] with a list of [DartIOHttpRequestData] requests.
   ///
-  /// The [requests] parameter should contain the list of DartIOHttpRequestData request data.
+  /// The [requests] parameter should contain the list of [DartIOHttpRequestData] request data.
   HarNetworkData(this.requests);
 
   /// Creates an instance of [HarNetworkData] from a JSON object.
@@ -39,7 +39,7 @@ class HarNetworkData with Serializable {
     return HarNetworkData(entries);
   }
 
-  /// The list of DartIOHttpRequestData request data.
+  /// The list of [DartIOHttpRequestData] request data.
   final List<DartIOHttpRequestData> requests;
 
   /// Converts the instance to a JSON object.
