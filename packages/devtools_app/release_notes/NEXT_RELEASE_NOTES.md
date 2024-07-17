@@ -44,6 +44,9 @@ TODO: Remove this section if there are not any general updates.
 ## Network profiler updates
 
 * Display query parameters for requests. - [#7825](https://github.com/flutter/devtools/pull/7825)
+* Fixed issue where socket statistics were being reported as web sockets. - [#8061](https://github.com/flutter/devtools/pull/8061)
+
+    ![Network profiler correctly displaying socket statistics](images/socket-profiling.png "Network profiler correctly displaying socket statistics")
 
 ## Logging updates
 
