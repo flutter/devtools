@@ -38,8 +38,10 @@ void main() {
         (entry?['request'] as Map<String, Object?>)['url'],
         'https://jsonplaceholder.typicode.com/albums/1',
       );
-      expect((entry?['request'] as Map<String, Object?>)['httpVersion'],
-          'HTTP/1.1');
+      expect(
+        (entry?['request'] as Map<String, Object?>)['httpVersion'],
+        'HTTP/1.1',
+      );
       expect((entry?['request'] as Map<String, Object?>)['cookies'], isEmpty);
 
       expect(entry?['cache'], isEmpty);

@@ -16,7 +16,6 @@ import '../globals.dart';
 import '../primitives/utils.dart';
 import 'http.dart';
 
-// ignore_for_file: avoid_dynamic_calls
 final _log = Logger('http_request_data');
 
 /// Used to represent an instant event emitted during an HTTP request.
@@ -50,28 +49,43 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   factory DartIOHttpRequestData.fromJson(Map<String, dynamic> requestData) {
     _convertHeaders(requestData);
+
     final modifiedRequestData =
         _remapCustomFieldKeys(requestData) as Map<String, dynamic>;
+    dynamic requestPostData;
+    dynamic responseContent;
 
     // Retrieving url, method from requestData
-    modifiedRequestData['uri'] = modifiedRequestData['request']['url'];
-    modifiedRequestData['method'] = modifiedRequestData['request']['method'];
+    modifiedRequestData['uri'] =
+        (modifiedRequestData['request'] as Map<String, Object?>)['url'];
+    modifiedRequestData['method'] =
+        (modifiedRequestData['request'] as Map<String, Object?>)['method'];
 
     // Adding missing keys which are mandatory for parsing
-    modifiedRequestData['response']['redirects'] = [];
+    (modifiedRequestData['response'] as Map<String, Object?>)['redirects'] = [];
+
+    if (modifiedRequestData['response'] != null &&
+        (modifiedRequestData['response'] as Map<String, Object?>)['content'] !=
+            null) {
+      responseContent =
+          (modifiedRequestData['response'] as Map<String, Object?>)['content'];
+    }
+
+    if (modifiedRequestData['request'] != null &&
+        (modifiedRequestData['request'] as Map<String, Object?>)['postData'] !=
+            null) {
+      requestPostData =
+          (modifiedRequestData['response'] as Map<String, Object?>)['content'];
+    }
 
     return DartIOHttpRequestData(
       HttpProfileRequestRef.parse(modifiedRequestData)!,
       requestFullDataFromVmService: false,
     )
-      .._responseBody = modifiedRequestData['response'] != null &&
-              modifiedRequestData['response']['content'] != null
-          ? modifiedRequestData['response']['content']['text']
-          : null
-      .._requestBody = modifiedRequestData['request'] != null &&
-              modifiedRequestData['request']['postData'] != null
-          ? modifiedRequestData['request']['postData']['text']
-          : null;
+      .._responseBody =
+          (responseContent as Map<String, Object?>)['text'].toString()
+      .._requestBody =
+          (requestPostData as Map<String, Object?>)['text'].toString();
   }
 
   static Map<String, dynamic> _convertHeadersListToMap(
@@ -80,17 +94,21 @@ class DartIOHttpRequestData extends NetworkRequest {
     final transformedHeaders = <String, dynamic>{};
 
     for (final header in serializedHeaders) {
-      final key = header[NetworkEventKeys.name.name] as String?;
-      final value = header[NetworkEventKeys.value.name];
+      if (header is Map<String, dynamic>) {
+        final key = header[NetworkEventKeys.name.name] as String?;
+        final value = header[NetworkEventKeys.value.name];
 
-      if (transformedHeaders.containsKey(key)) {
-        if (transformedHeaders[key] is List) {
-          (transformedHeaders[key] as List).add(value);
-        } else {
-          transformedHeaders[key ?? ''] = [transformedHeaders[key], value];
+        if (key != null) {
+          if (transformedHeaders.containsKey(key)) {
+            if (transformedHeaders[key] is List) {
+              (transformedHeaders[key] as List).add(value);
+            } else {
+              transformedHeaders[key] = [transformedHeaders[key], value];
+            }
+          } else {
+            transformedHeaders[key] = value;
+          }
         }
-      } else {
-        transformedHeaders[key ?? ''] = value;
       }
     }
 
@@ -101,18 +119,25 @@ class DartIOHttpRequestData extends NetworkRequest {
   static void _convertHeaders(Map<String, dynamic> requestData) {
     // Request Headers
     if (requestData['request'] != null &&
-        requestData['request']['headers'] != null) {
-      if (requestData['request']['headers'] is List) {
-        requestData['request']['headers'] =
-            _convertHeadersListToMap(requestData['request']['headers']);
+        (requestData['request'] as Map<String, Object?>)['headers'] != null) {
+      if ((requestData['request'] as Map<String, Object?>)['headers'] is List) {
+        (requestData['request'] as Map<String, Object?>)['headers'] =
+            _convertHeadersListToMap(
+          ((requestData['request'] as Map<String, Object?>)['headers'])
+              as List<dynamic>,
+        );
       }
     }
     // Response Headers
     if (requestData['response'] != null &&
-        requestData['response']['headers'] != null) {
-      if (requestData['response']['headers'] is List) {
-        requestData['response']['headers'] =
-            _convertHeadersListToMap(requestData['response']['headers']);
+        (requestData['response'] as Map<String, Object?>)['headers'] != null) {
+      if ((requestData['response'] as Map<String, Object?>)['headers']
+          is List) {
+        (requestData['response'] as Map<String, Object?>)['headers'] =
+            _convertHeadersListToMap(
+          ((requestData['response'] as Map<String, Object?>)['headers'])
+              as List<dynamic>,
+        );
       }
     }
   }
