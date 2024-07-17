@@ -18,7 +18,7 @@ abstract class EditorClient extends DisposableController {
   Future<void> close();
 
   /// The ID to use for analytics events.
-  String get analyticsId;
+  String get gaId;
 
   /// Whether the connected editor supports the `getDevices` method.
   bool get supportsGetDevices;
@@ -100,7 +100,7 @@ class DtdEditorClient extends EditorClient with AutoDisposeControllerMixin {
   late final initialized = _initialize();
 
   @override
-  String get analyticsId => EditorSidebar.id;
+  String get gaId => EditorSidebar.id;
 
   Future<void> _initialize() async {
     autoDisposeStreamSubscription(

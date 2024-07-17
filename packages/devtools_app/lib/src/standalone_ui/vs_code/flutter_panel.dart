@@ -45,7 +45,7 @@ class _DtdEditorSidebarPanelState extends State<DtdEditorSidebarPanel> {
     super.initState();
 
     final editor = DtdEditorClient(widget.dtd);
-    ga.screen(editor.analyticsId);
+    ga.screen(editor.gaId);
     unawaited(_editor = editor.initialized.then((_) => editor));
   }
 

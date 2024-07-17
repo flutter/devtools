@@ -98,7 +98,7 @@ class Devices extends StatelessWidget {
             ),
             onPressed: () {
               ga.select(
-                editor.analyticsId,
+                editor.gaId,
                 gac.EditorSidebar.changeSelectedDevice.name,
               );
               unawaited(editor.selectDevice(device));
@@ -128,7 +128,7 @@ class Devices extends StatelessWidget {
             ),
             onPressed: () {
               ga.select(
-                editor.analyticsId,
+                editor.gaId,
                 gac.EditorSidebar.enablePlatformType(platformType),
               );
               unawaited(editor.enablePlatformType(platformType));

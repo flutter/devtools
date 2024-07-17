@@ -107,7 +107,7 @@ void openDevToolsScreen({
   required EditorClient editor,
 }) {
   ga.select(
-    editor.analyticsId,
+    editor.gaId,
     gac.EditorSidebar.openDevToolsScreen(screenId),
   );
   unawaited(

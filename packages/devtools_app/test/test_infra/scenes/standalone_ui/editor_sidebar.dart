@@ -22,7 +22,7 @@ import 'utils.dart';
 /// To run, use the "standalone_ui/editor_sidebar" launch configuration with the
 /// `devtools/packages/` folder open in VS Code, or run:
 ///
-///   flutter run -t test/test_infra/scenes/standalone_ui/editor_sidebar.stager_app.g.dart -d chrome
+/// flutter run -t test/test_infra/scenes/standalone_ui/editor_sidebar.stager_app.g.dart -d chrome
 class EditorSidebarScene extends Scene {
   late Stream<String> clientLog;
   late DartToolingDaemon clientDtd;

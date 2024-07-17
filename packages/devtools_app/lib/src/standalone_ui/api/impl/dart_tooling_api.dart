@@ -114,7 +114,7 @@ class PostMessageEditorClient extends DisposableController
   }
 
   @override
-  String get analyticsId => EditorSidebar.legacyId;
+  String get gaId => EditorSidebar.legacyId;
 
   /// Handles the `postMessage` [VsCodeDevicesEvent] and converts the updates
   /// into events in the format of the new DTD `editor` event stream.

@@ -89,7 +89,7 @@ class SidebarDevToolsScreens extends StatelessWidget {
                 tooltip: 'Open in browser',
                 onPressed: () {
                   ga.select(
-                    editor.analyticsId,
+                    editor.gaId,
                     gac.EditorSidebar.openDevToolsExternally.name,
                   );
                   unawaited(

@@ -110,7 +110,7 @@ class _SidebarDevToolsExtensionsState extends State<SidebarDevToolsExtensions>
           hasDebugSessions: widget.debugSessions.isNotEmpty,
           onPressed: (data) {
             ga.select(
-              editor.analyticsId,
+              editor.gaId,
               gac.EditorSidebar.openDevToolsScreen(
                 gac.DevToolsExtensionEvents.extensionScreenName(ext),
               ),
