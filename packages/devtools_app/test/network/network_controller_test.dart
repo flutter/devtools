@@ -132,7 +132,10 @@ void main() {
       expect(profile.length, numRequests);
 
       expect(controller.matchesForSearch('jsonplaceholder').length, equals(5));
-      expect(controller.matchesForSearch('2606:4700:3037::ac43').length, equals(2));
+      expect(
+        controller.matchesForSearch('2606:4700:3037::ac43').length,
+        equals(2),
+      );
       expect(controller.matchesForSearch('').length, equals(0));
 
       // Search with incorrect case.
