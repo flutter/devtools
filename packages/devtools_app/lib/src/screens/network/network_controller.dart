@@ -77,8 +77,8 @@ class NetworkController extends DisposableController
         json.encode(har.toJson()),
         type: ExportFileType.har,
       );
-    } catch (ex) {
-      debugPrint('Exception in export $ex');
+    } catch (e) {
+      debugPrint('Exception in export $e');
     }
     return null;
   }
