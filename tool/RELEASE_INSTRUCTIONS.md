@@ -284,7 +284,7 @@ DevTools version number:
 ### Manually run the DevTools Builder
 
 Follow the instructions at
-[go/dart-engprod/devtools.md#cherry-picks](http://go/dart-engprod/devtools.md#cherry-picks
+[go/dart-engprod/devtools.md#cherry-picks](http://go/dart-engprod/devtools.md#cherry-picks)
 to trigger the DevTools builder.
 
 ### Create the cherry-pick CL in the Dart SDK
