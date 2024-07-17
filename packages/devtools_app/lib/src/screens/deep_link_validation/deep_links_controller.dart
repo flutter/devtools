@@ -7,6 +7,7 @@ import 'dart:math';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
@@ -145,55 +146,9 @@ class DisplayOptions {
 
 class DeepLinksController extends DisposableController
     with AutoDisposeControllerMixin {
-  DeepLinksController() {
-    addAutoDisposeListener(
-      selectedAndroidVariantIndex,
-      _handleAndroidConfigurationChanged,
-    );
-    if (FeatureFlags.deepLinkIosCheck) {
-      addAutoDisposeListener(
-        selectedIosConfigurationIndex,
-        _handleIosConfigurationChanged,
-      );
-      addAutoDisposeListener(
-        selectedIosTargetIndex,
-        _handleIosConfigurationChanged,
-      );
-    }
-  }
+  DeepLinksController();
 
-  void firstLoadWithDefaultConfigurations() async {
-    firstLoadWithDefaultConfigurationsCompleted = false;
-    selectedAndroidVariantIndex.value = _getDefaultConfigurationIndex(
-      selectedProject.value!.androidVariants,
-      containsString: 'release',
-    );
-    if (FeatureFlags.deepLinkIosCheck) {
-      selectedIosConfigurationIndex.value = _getDefaultConfigurationIndex(
-        selectedProject.value!.iosBuildOptions.configurations,
-        containsString: 'release',
-      );
-      selectedIosTargetIndex.value = _getDefaultConfigurationIndex(
-        selectedProject.value!.iosBuildOptions.configurations,
-        containsString: 'runner',
-      );
-    }
-    await loadLinksAndValidate();
-    firstLoadWithDefaultConfigurationsCompleted = true;
-  }
 
-  int _getDefaultConfigurationIndex(
-    List<String> configurations, {
-    required String containsString,
-  }) {
-    final index = configurations.indexWhere(
-      (config) => config.caseInsensitiveContains(containsString),
-    );
-    // If not found, default to 0.
-    return max(index, 0);
-  }
-
-  bool firstLoadWithDefaultConfigurationsCompleted = false;
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
   String get applicationId =>
       _androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
@@ -258,17 +213,51 @@ class DeepLinksController extends DisposableController
 
   final _androidAppLinks = <int, AppLinkSettings>{};
   final _iosLinks = <int, UniversalLinkSettings>{};
+  final _selectedAndroidVariantIndex = ValueNotifier<int>(0);
+  final _selectedIosConfigurationIndex = ValueNotifier<int>(0);
+  final _selectedIosTargetIndex = ValueNotifier<int>(0);
 
-  late final selectedAndroidVariantIndex = ValueNotifier<int>(0);
-  late final selectedIosConfigurationIndex = ValueNotifier<int>(0);
-  late final selectedIosTargetIndex = ValueNotifier<int>(0);
+  ValueListenable<int> get selectedAndroidVariantIndex => _selectedAndroidVariantIndex;
+  ValueListenable<int> get selectedIosConfigurationIndex => _selectedIosConfigurationIndex;
+  ValueListenable<int> get selectedIosTargetIndex => _selectedIosTargetIndex;
+  
+
+  void updateSelectedAndroidVariantIndex(int index) {
+    _selectedAndroidVariantIndex.value = index;
+    _handleAndroidConfigurationChanged(); 
+  }
+
+  void updateSelectedIosConfigurationIndex(int index) {
+    _selectedAndroidVariantIndex.value = index;
+    _handleIosConfigurationChanged(); 
+  }
+
+    void updateSelectedIosTargetIndex(int index) {
+    _selectedIosTargetIndex.value = index;
+    _handleIosConfigurationChanged(); 
+  }
+
+  void firstLoadWithDefaultConfigurations() async {
+    _selectedAndroidVariantIndex.value = _getDefaultConfigurationIndex(
+      selectedProject.value!.androidVariants,
+      containsString: 'release',
+    );
+    if (FeatureFlags.deepLinkIosCheck) {
+      _selectedIosConfigurationIndex.value = _getDefaultConfigurationIndex(
+        selectedProject.value!.iosBuildOptions.configurations,
+        containsString: 'release',
+      );
+      _selectedIosTargetIndex.value = _getDefaultConfigurationIndex(
+        selectedProject.value!.iosBuildOptions.configurations,
+        containsString: 'runner',
+      );
+    }
+    await loadLinksAndValidate();
+  }
 
   void _handleAndroidConfigurationChanged() async {
-    if (!firstLoadWithDefaultConfigurationsCompleted) {
-      return;
-    }
     pagePhase.value = PagePhase.linksLoading;
-    await loadAndroidAppLinks();
+    await _loadAndroidAppLinks();
     if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
     }
@@ -276,18 +265,27 @@ class DeepLinksController extends DisposableController
   }
 
   void _handleIosConfigurationChanged() async {
-    if (!firstLoadWithDefaultConfigurationsCompleted) {
-      return;
-    }
     pagePhase.value = PagePhase.linksLoading;
-    await loadIosLinks();
+    await _loadIosLinks();
     if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
     }
     await validateLinks();
   }
 
-  Future<void> loadAndroidAppLinks() async {
+    int _getDefaultConfigurationIndex(
+    List<String> configurations, {
+    required String containsString,
+  }) {
+    final index = configurations.indexWhere(
+      (config) => config.caseInsensitiveContains(containsString),
+    );
+    // If not found, default to 0.
+    return max(index, 0);
+  }
+
+
+  Future<void> _loadAndroidAppLinks() async {
     final variant = selectedProject
         .value!.androidVariants[selectedAndroidVariantIndex.value];
     await ga.timeAsync(
@@ -312,7 +310,7 @@ class DeepLinksController extends DisposableController
     );
   }
 
-  Future<void> loadIosLinks() async {
+  Future<void> _loadIosLinks() async {
     final iosBuildOptions = selectedProject.value!.iosBuildOptions;
     final configuration =
         iosBuildOptions.configurations[selectedIosConfigurationIndex.value];
@@ -338,12 +336,12 @@ class DeepLinksController extends DisposableController
 
   Future<void> loadLinksAndValidate() async {
     pagePhase.value = PagePhase.linksLoading;
-    await loadAndroidAppLinks();
+    await _loadAndroidAppLinks();
     if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
     }
     if (FeatureFlags.deepLinkIosCheck) {
-      await loadIosLinks();
+      await _loadIosLinks();
       if (pagePhase.value == PagePhase.validationErrorPage) {
         return;
       }

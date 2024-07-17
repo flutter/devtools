@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -65,16 +66,6 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
     );
   }
 
-  int _getDefaultConfigurationIndex(
-    List<String> configurations, {
-    required String containsString,
-  }) {
-    final index = configurations.indexWhere(
-      (config) => config.caseInsensitiveContains(containsString),
-    );
-    // If not found, default to 0.
-    return max(index, 0);
-  }
 }
 
 class _DeepLinkListViewMainPanel extends StatelessWidget {
@@ -282,23 +273,32 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
           const Spacer(),
           _ConfigurationDropdown(
             title: 'Android Variant:',
-            notifier: controller.selectedAndroidVariantIndex,
+            valueListenable: controller.selectedAndroidVariantIndex,
             configurations: controller.selectedProject.value!.androidVariants,
+            onChanged: (index) {
+              controller.updateSelectedAndroidVariantIndex(index!);
+            },
           ),
           if (FeatureFlags.deepLinkIosCheck) ...[
             const SizedBox(width: denseSpacing),
             _ConfigurationDropdown(
               title: 'iOS Configuration:',
-              notifier: controller.selectedIosConfigurationIndex,
+              valueListenable: controller.selectedIosConfigurationIndex,
               configurations: controller
                   .selectedProject.value!.iosBuildOptions.configurations,
+            onChanged: (index) {
+              controller.updateSelectedIosConfigurationIndex(index!);
+            },
             ),
             const SizedBox(width: denseSpacing),
             _ConfigurationDropdown(
               title: 'iOS Target:',
-              notifier: controller.selectedIosTargetIndex,
+              valueListenable: controller.selectedIosTargetIndex,
               configurations:
                   controller.selectedProject.value!.iosBuildOptions.targets,
+              onChanged: (index) {
+              controller.updateSelectedIosTargetIndex(index!);
+            },
             ),
           ],
         ],
@@ -309,17 +309,19 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
 
 class _ConfigurationDropdown extends StatelessWidget {
   const _ConfigurationDropdown({
-    required this.notifier,
+    required this.valueListenable,
     required this.configurations,
     required this.title,
+    required this.onChanged,
   });
-  final ValueNotifier<int> notifier;
+  final ValueListenable valueListenable;
   final List<String> configurations;
   final String title;
+ final  void Function(int?)? onChanged;
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: notifier,
+      valueListenable: valueListenable,
       builder: (_, index, __) {
         return Row(
           children: [
@@ -334,9 +336,7 @@ class _ConfigurationDropdown extends StatelessWidget {
                     child: Text(configurations[i]),
                   ),
               ],
-              onChanged: (int? newIndex) {
-                notifier.value = newIndex!;
-              },
+              onChanged: onChanged,
             ),
           ],
         );
