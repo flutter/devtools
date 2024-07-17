@@ -717,7 +717,10 @@ class InspectorTreeController extends DisposableController
   /* Search support */
   @override
   void onMatchChanged(int index) {
-    onSelectRow(searchMatches.value[index]);
+    refreshTree(() {
+      onSelectRow(searchMatches.value[index]);
+      return true;
+    });
   }
 
   @override
