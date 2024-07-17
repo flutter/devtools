@@ -18,7 +18,7 @@ import 'constants.dart';
 /// For more details on the HAR format, see the [HAR 1.2 Specification](https://github.com/ahmadnassri/har-spec/blob/master/versions/1.2.md).
 ///
 /// Parameters:
-/// - [httpRequests]: A list of DartIOHttpRequestData data.
+/// - [httpRequests]: A list of [DartIOHttpRequestData] data.
 ///
 /// Returns:
 /// - A Map representing the HAR object.

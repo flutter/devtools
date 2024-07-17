@@ -19,10 +19,10 @@ class HarNetworkData with Serializable {
 
   /// Creates an instance of [HarNetworkData] from a JSON object.
   ///
-  /// This factory constructor expects the [json] parameter to be a map
+  /// This factory constructor expects the [json] parameter to be a Map
   /// representing the HAR data, with a structure containing a 'log' key,
   /// which in turn contains an 'entries' key. Each entry in the 'entries'
-  /// list should be a map representing an HTTP request.
+  /// list should be a Map representing an HTTP request.
   ///
   /// ```dart
   /// final harData = HarNetworkData.fromJson(json);
@@ -44,7 +44,7 @@ class HarNetworkData with Serializable {
 
   /// Converts the instance to a JSON object.
   ///
-  /// This method returns a map representing the HAR data, suitable for
+  /// This method returns a Map representing the HAR data, suitable for
   /// serialization.
   ///
   /// ```dart
