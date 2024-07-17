@@ -32,7 +32,7 @@ class HarNetworkData with Serializable {
             as List<Object?>)
         .map(
           (entryJson) =>
-              DartIOHttpRequestData.fromJson(entryJson as Map<String, dynamic>),
+              DartIOHttpRequestData.fromJson(entryJson as Map<String, Object?>),
         )
         .toList();
 
