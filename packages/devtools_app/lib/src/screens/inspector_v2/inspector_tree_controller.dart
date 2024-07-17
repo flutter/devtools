@@ -29,7 +29,6 @@ import '../../shared/ui/colors.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
-import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
 
 final _log = Logger('inspector_tree_controller');
@@ -614,7 +613,6 @@ class InspectorTreeController extends DisposableController
     InspectorTreeNode node,
     RemoteDiagnosticsNode diagnosticsNode, {
     required bool expandChildren,
-    required bool expandProperties,
     RemoteDiagnosticsNode? hideableGroupLeader,
   }) {
     node.diagnostic = diagnosticsNode;
@@ -637,7 +635,6 @@ class InspectorTreeController extends DisposableController
           node,
           node.diagnostic!.childrenNow,
           expandChildren: expandChildren && styleIsMultiline,
-          expandProperties: expandProperties && styleIsMultiline,
           hideableGroupLeader:
               inHideableGroup ? (hideableGroupLeader ?? diagnosticsNode) : null,
         );
@@ -654,7 +651,6 @@ class InspectorTreeController extends DisposableController
     InspectorTreeNode treeNode,
     List<RemoteDiagnosticsNode>? children, {
     required bool expandChildren,
-    required bool expandProperties,
     RemoteDiagnosticsNode? hideableGroupLeader,
   }) {
     treeNode.isExpanded = expandChildren;
@@ -673,8 +669,7 @@ class InspectorTreeController extends DisposableController
           property,
           // We are inside a property so only expand children if
           // expandProperties is true.
-          expandChildren: expandProperties,
-          expandProperties: expandProperties,
+          expandChildren: false,
         ),
       );
     }
@@ -686,7 +681,6 @@ class InspectorTreeController extends DisposableController
             createNode(),
             child,
             expandChildren: expandChildren,
-            expandProperties: expandProperties,
             hideableGroupLeader:
                 child.inHideableGroup ? hideableGroupLeader : null,
           ),
@@ -708,7 +702,6 @@ class InspectorTreeController extends DisposableController
             treeNode,
             children,
             expandChildren: true,
-            expandProperties: false,
           );
           nodeChanged(treeNode);
           if (treeNode == selection) {
@@ -820,22 +813,12 @@ class InspectorTree extends StatefulWidget {
   const InspectorTree({
     super.key,
     required this.treeController,
-    this.summaryTreeController,
-    this.isSummaryTree = false,
     this.widgetErrors,
     this.screenId,
-  }) : assert(isSummaryTree == (summaryTreeController == null));
+  });
 
   final InspectorTreeController? treeController;
 
-  /// Stores the summary tree controller when this instance of [InspectorTree]
-  /// is for the details tree (i.e. when [isSummaryTree] is false).
-  ///
-  /// This value should be null when this instance of [InspectorTree] is for the
-  /// summary tree itself.
-  final InspectorTreeController? summaryTreeController;
-
-  final bool isSummaryTree;
   final LinkedHashMap<String, InspectableWidgetError>? widgetErrors;
   final String? screenId;
 
@@ -871,9 +854,7 @@ class _InspectorTreeState extends State<InspectorTree>
     _scrollControllerY = ScrollController();
     // TODO(devoncarew): Commented out as per flutter/devtools/pull/2001.
     //_scrollControllerY.addListener(_onScrollYChange);
-    if (widget.isSummaryTree) {
-      _constraintDisplayController = longAnimationController(this);
-    }
+    _constraintDisplayController = longAnimationController(this);
     _focusNode = FocusNode(debugLabel: 'inspector-tree');
     autoDisposeFocusNode(_focusNode);
     final mainIsolateState =
@@ -1086,8 +1067,7 @@ class _InspectorTreeState extends State<InspectorTree>
           return const SizedBox();
         }
 
-        if (!controller.firstInspectorTreeLoadCompleted &&
-            widget.isSummaryTree) {
+        if (!controller.firstInspectorTreeLoadCompleted) {
           final screenId = widget.screenId;
           if (screenId != null) {
             ga.timeEnd(screenId, gac.pageReady);
@@ -1123,7 +1103,7 @@ class _InspectorTreeState extends State<InspectorTree>
                     onTap: _focusNode.requestFocus,
                     child: Focus(
                       onKeyEvent: _handleKeyEvent,
-                      autofocus: widget.isSummaryTree,
+                      autofocus: true,
                       focusNode: _focusNode,
                       child: OffsetScrollbar(
                         isAlwaysShown: true,
@@ -1164,23 +1144,6 @@ class _InspectorTreeState extends State<InspectorTree>
                 ),
               ),
             );
-
-            final shouldShowBreadcrumbs = !widget.isSummaryTree;
-            if (shouldShowBreadcrumbs) {
-              final inspectorTreeController = widget.summaryTreeController!;
-
-              final parents =
-                  inspectorTreeController.getPathFromSelectedRowToRoot();
-              return Column(
-                children: [
-                  InspectorBreadcrumbNavigator(
-                    items: parents,
-                    onTap: (node) => inspectorTreeController.onSelectNode(node),
-                  ),
-                  Expanded(child: tree),
-                ],
-              );
-            }
 
             return tree;
           },
