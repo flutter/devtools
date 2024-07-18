@@ -29,6 +29,11 @@ void main() {
     await tester.pumpWidget(wrap(const Placeholder()));
   }
 
+  Finder findLogRow(String details) => find.ancestor(
+        of: find.richText(details),
+        matching: find.byType(LoggingTableRow),
+      );
+
   setUp(() {
     final fakeServiceConnection = FakeServiceConnectionManager();
     setGlobal(PreferencesController, PreferencesController());
@@ -59,7 +64,7 @@ void main() {
       expect(loggingTableModel.selectedLogCount, 0);
     });
 
-    for (var windowWidth = 300.0; windowWidth <= 300.0; windowWidth += 50.0) {
+    for (var windowWidth = 300.0; windowWidth <= 550.0; windowWidth += 50.0) {
       testWidgetsWithWindowSize(
         'calculate heights correctly for window of width: $windowWidth',
         Size(windowWidth, 3000),
@@ -112,22 +117,14 @@ void main() {
             loggingTableModel.tableWidth = columnWidth!;
           });
 
-          loggingTableModel.add(shortLog);
-          loggingTableModel.add(longLog);
-          loggingTableModel.add(frameElapsedLog);
+          loggingTableModel
+            ..add(shortLog)
+            ..add(longLog)
+            ..add(frameElapsedLog);
 
-          final shortWidgetFinder = find.ancestor(
-            of: find.richText(shortLog.details!),
-            matching: find.byType(LoggingTableRow),
-          );
-          final longWidgetFinder = find.ancestor(
-            of: find.richText(longLog.details!),
-            matching: find.byType(LoggingTableRow),
-          );
-          final frameElapsedFinder = find.ancestor(
-            of: find.richText(frameElapsedLog.kind),
-            matching: find.byType(LoggingTableRow),
-          );
+          final shortWidgetFinder = findLogRow(shortLog.details!);
+          final longWidgetFinder = findLogRow(longLog.details!);
+          final frameElapsedFinder = findLogRow(frameElapsedLog.details!);
 
           await tester.runAsync(() async {
             // tester.runAsync is needed here to prevent the ChunkWorker

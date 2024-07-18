@@ -35,7 +35,7 @@ class LoggingTableRow extends StatefulWidget {
       currentContext != null,
       'LoggingTableRow.metadataStyle requires a valid navigatorKey to be set. If this assertion is hit in tests then make sure to `wrap()` the widget being pumped.',
     );
-    return Theme.of(navigatorKey.currentContext!).subtleTextStyle;
+    return Theme.of(currentContext!).subtleTextStyle;
   }
 
   static TextStyle get detailsStyle =>
@@ -88,9 +88,9 @@ class LoggingTableRow extends StatefulWidget {
   /// the children of a [Wrap] widget with a parent of [maxWidth] width.
   @visibleForTesting
   static double estimateMetaDataWrapHeight(LogDataV2 data, double maxWidth) {
-    double totalHeight = 0.0;
-    double rowHeight = 0.0;
-    double remainingWidth = maxWidth;
+    var totalHeight = 0.0;
+    var rowHeight = 0.0;
+    var remainingWidth = maxWidth;
 
     for (final presentChit in LoggingTableRow.metadataChits(data, maxWidth)) {
       final chitSize = presentChit.estimateSize();
