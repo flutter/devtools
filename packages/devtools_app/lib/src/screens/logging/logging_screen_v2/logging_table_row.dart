@@ -41,24 +41,24 @@ class LoggingTableRow extends StatefulWidget {
   static TextStyle get detailsStyle =>
       Theme.of(navigatorKey.currentContext!).regularTextStyle;
 
-  /// All of the metatadata chits that can be visible for this [data] entry.
+  /// All of the metatadata chips that can be visible for this [data] entry.
   @visibleForTesting
-  static List<MetadataChit> metadataChits(LogDataV2 data, double maxWidth) {
-    final allChits = [
-      WhenMetaDataChit(
+  static List<MetadataChip> metadataChips(LogDataV2 data, double maxWidth) {
+    final allChips = [
+      WhenMetaDataChip(
         data: data,
         maxWidth: maxWidth,
       ),
-      KindMetaDataChit(
+      KindMetaDataChip(
         data: data,
         maxWidth: maxWidth,
       ),
-      FrameElapsedMetaDataChit(
+      FrameElapsedMetaDataChip(
         data: data,
         maxWidth: maxWidth,
       ),
     ];
-    return allChits.where((chit) => chit.isPresent()).toList();
+    return allChips.where((chip) => chip.isPresent()).toList();
   }
 
   @override
@@ -66,7 +66,7 @@ class LoggingTableRow extends StatefulWidget {
 
   static final _padding = scaleByFontFactor(8.0);
 
-  /// Estimates the height of the row, including the details section and all of the metadatachits.
+  /// Estimates the height of the row, including the details section and all of the metadatachips.
   static double estimateRowHeight(
     LogDataV2 log,
     double width,
@@ -84,7 +84,7 @@ class LoggingTableRow extends StatefulWidget {
     return row1Height + row2Height + _padding * 2;
   }
 
-  /// Estimates the height that the [metadataChits] will occupy if they are
+  /// Estimates the height that the [metadataChips] will occupy if they are
   /// the children of a [Wrap] widget with a parent of [maxWidth] width.
   @visibleForTesting
   static double estimateMetaDataWrapHeight(LogDataV2 data, double maxWidth) {
@@ -92,18 +92,18 @@ class LoggingTableRow extends StatefulWidget {
     var rowHeight = 0.0;
     var remainingWidth = maxWidth;
 
-    for (final presentChit in LoggingTableRow.metadataChits(data, maxWidth)) {
-      final chitSize = presentChit.estimateSize();
-      if (chitSize.width > remainingWidth) {
-        // The chit does not fit so add it to a new row
+    for (final presentChip in LoggingTableRow.metadataChips(data, maxWidth)) {
+      final chipSize = presentChip.estimateSize();
+      if (chipSize.width > remainingWidth) {
+        // The chip does not fit so add it to a new row
         totalHeight += rowHeight;
         rowHeight = 0.0;
         remainingWidth = maxWidth;
       }
 
-      // The Chit fits so it will stay in this row.
-      rowHeight = max(rowHeight, chitSize.height);
-      remainingWidth -= chitSize.width;
+      // The Chip fits so it will stay in this row.
+      rowHeight = max(rowHeight, chipSize.height);
+      remainingWidth -= chipSize.width;
     }
 
     totalHeight += rowHeight;
@@ -142,7 +142,7 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
                 LayoutBuilder(
                   builder: (context, constraints) {
                     return Wrap(
-                      children: LoggingTableRow.metadataChits(
+                      children: LoggingTableRow.metadataChips(
                         widget.data,
                         constraints.maxWidth,
                       ),
@@ -159,8 +159,8 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
 }
 
 @visibleForTesting
-abstract class MetadataChit extends StatelessWidget {
-  const MetadataChit({
+abstract class MetadataChip extends StatelessWidget {
+  const MetadataChip({
     super.key,
     required this.data,
     required this.maxWidth,
@@ -170,16 +170,16 @@ abstract class MetadataChit extends StatelessWidget {
   final double maxWidth;
   static const padding = defaultSpacing;
 
-  /// The text value to be displayed for this chit.
+  /// The text value to be displayed for this chip.
   String getValue();
 
-  /// Whether or not [data] has the information to display this chit.
+  /// Whether or not [data] has the information to display this chip.
   bool isPresent();
 
-  /// The icon that will be shown with the chit.
+  /// The icon that will be shown with the chip.
   IconData getIcon();
 
-  /// The textspan which will be displayed in the chit.
+  /// The textspan which will be displayed in the chip.
   TextSpan textSpan() {
     return TextSpan(
       text: getValue(),
@@ -187,7 +187,7 @@ abstract class MetadataChit extends StatelessWidget {
     );
   }
 
-  /// Estimates the size of this single metadata chit.
+  /// Estimates the size of this single metadata chip.
   ///
   /// If the [build] method is changed then this may need to be updated
   Size estimateSize() {
@@ -227,8 +227,8 @@ abstract class MetadataChit extends StatelessWidget {
 }
 
 @visibleForTesting
-class WhenMetaDataChit extends MetadataChit {
-  const WhenMetaDataChit({
+class WhenMetaDataChip extends MetadataChip {
+  const WhenMetaDataChip({
     super.key,
     required super.data,
     required super.maxWidth,
@@ -250,8 +250,8 @@ class WhenMetaDataChit extends MetadataChit {
 }
 
 @visibleForTesting
-class KindMetaDataChit extends MetadataChit {
-  const KindMetaDataChit({
+class KindMetaDataChip extends MetadataChip {
+  const KindMetaDataChip({
     super.key,
     required super.data,
     required super.maxWidth,
@@ -270,8 +270,8 @@ class KindMetaDataChit extends MetadataChit {
 }
 
 @visibleForTesting
-class FrameElapsedMetaDataChit extends MetadataChit {
-  const FrameElapsedMetaDataChit({
+class FrameElapsedMetaDataChip extends MetadataChip {
+  const FrameElapsedMetaDataChip({
     super.key,
     required super.data,
     required super.maxWidth,

@@ -22,7 +22,7 @@ void main() {
 
   group('logging_table_row', () {
     for (double windowWidth = 208.0; windowWidth < 600.0; windowWidth += 15.0) {
-      const numberOfChits = 3;
+      const numberOfChips = 3;
       final data = LogDataV2(
         'someKind',
         '{"elapsed": 374}',
@@ -54,12 +54,12 @@ void main() {
       });
 
       testWidgetsWithWindowSize(
-          'Estimates the height of the wrapped chits correctly for windowWidth: $windowWidth',
+          'Estimates the height of the wrapped chips correctly for windowWidth: $windowWidth',
           windowSize, (WidgetTester tester) async {
-        final chits = LoggingTableRow.metadataChits(data, windowSize.width);
+        final chips = LoggingTableRow.metadataChips(data, windowSize.width);
         final wrapKey = GlobalKey();
 
-        expect(chits.length, numberOfChits);
+        expect(chips.length, numberOfChips);
         await tester.pumpWidget(
           wrap(
             Column(
@@ -67,7 +67,7 @@ void main() {
               children: [
                 Wrap(
                   key: wrapKey,
-                  children: chits,
+                  children: chips,
                 ),
               ],
             ),
@@ -84,31 +84,31 @@ void main() {
     }
 
     testWidgetsWithWindowSize(
-        'estimates MetadataChit sizes correctly', windowSize,
+        'estimates MetadataChip sizes correctly', windowSize,
         (WidgetTester tester) async {
-      const numberOfChits = 3;
+      const numberOfChips = 3;
       final data =
           LogDataV2('someKind', '{"elapsed": 378564654}', 213567823783);
-      final chits = LoggingTableRow.metadataChits(data, windowSize.width);
+      final chips = LoggingTableRow.metadataChips(data, windowSize.width);
       final wrapKey = GlobalKey();
 
       await tester.pumpWidget(
         wrap(
           Wrap(
             key: wrapKey,
-            children: chits,
+            children: chips,
           ),
         ),
       );
 
-      final chitFinder = find.bySubtype<MetadataChit>();
+      final chipFinder = find.bySubtype<MetadataChip>();
 
-      expect(chitFinder, findsExactly(numberOfChits));
-      final chitElements = chitFinder.evaluate();
-      for (var i = 0; i < numberOfChits; i++) {
-        final chit = chits[i];
-        final chitElement = chitElements.elementAt(i);
-        expect(chit.estimateSize(), chitElement.size);
+      expect(chipFinder, findsExactly(numberOfChips));
+      final chipElements = chipFinder.evaluate();
+      for (var i = 0; i < numberOfChips; i++) {
+        final chip = chips[i];
+        final chipElement = chipElements.elementAt(i);
+        expect(chip.estimateSize(), chipElement.size);
       }
     });
   });
