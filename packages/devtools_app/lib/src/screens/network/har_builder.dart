@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 import 'dart:convert';
 
-import '../../../devtools_app.dart';
 import '../../shared/http/http_request_data.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/utils.dart';
 import 'constants.dart';
 
