@@ -66,7 +66,7 @@ class LoggingTableRow extends StatefulWidget {
 
   static final _padding = scaleByFontFactor(8.0);
 
-  /// Estimates the height of the row, including the details section and all of the metadatachips.
+  /// Estimates the height of the row, including the details section and all of the metadata chips.
   static double estimateRowHeight(
     LogDataV2 log,
     double width,
