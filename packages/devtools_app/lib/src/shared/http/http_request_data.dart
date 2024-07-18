@@ -10,7 +10,6 @@ import 'package:logging/logging.dart';
 import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../screens/network/constants.dart';
 import '../../screens/network/network_model.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
@@ -47,127 +46,16 @@ class DartIOHttpRequestData extends NetworkRequest {
     }
   }
 
-  factory DartIOHttpRequestData.fromJson(Map<String, dynamic> requestData) {
-    _convertHeaders(requestData);
-
-    final modifiedRequestData =
-        _remapCustomFieldKeys(requestData) as Map<String, dynamic>;
-    dynamic requestPostData;
-    dynamic responseContent;
-
-    // Retrieving url, method from requestData
-    modifiedRequestData['uri'] =
-        (modifiedRequestData['request'] as Map<String, Object?>)['url'];
-    modifiedRequestData['method'] =
-        (modifiedRequestData['request'] as Map<String, Object?>)['method'];
-
-    // Adding missing keys which are mandatory for parsing
-    (modifiedRequestData['response'] as Map<String, Object?>)['redirects'] = [];
-
-    if (modifiedRequestData['response'] != null &&
-        (modifiedRequestData['response'] as Map<String, Object?>)['content'] !=
-            null) {
-      responseContent =
-          (modifiedRequestData['response'] as Map<String, Object?>)['content'];
-    }
-
-    if (modifiedRequestData['request'] != null &&
-        (modifiedRequestData['request'] as Map<String, Object?>)['postData'] !=
-            null) {
-      requestPostData =
-          (modifiedRequestData['response'] as Map<String, Object?>)['content'];
-    }
-
+  factory DartIOHttpRequestData.fromJson(
+      Map<String, dynamic> modifiedRequestData,
+      Map<String, Object?> requestPostData,
+      Map<String, Object?> responseContent) {
     return DartIOHttpRequestData(
       HttpProfileRequestRef.parse(modifiedRequestData)!,
       requestFullDataFromVmService: false,
     )
-      .._responseBody =
-          (responseContent as Map<String, Object?>)['text'].toString()
-      .._requestBody =
-          (requestPostData as Map<String, Object?>)['text'].toString();
-  }
-
-  static Map<String, dynamic> _convertHeadersListToMap(
-    List<dynamic> serializedHeaders,
-  ) {
-    final transformedHeaders = <String, dynamic>{};
-
-    for (final header in serializedHeaders) {
-      if (header is Map<String, dynamic>) {
-        final key = header[NetworkEventKeys.name.name] as String?;
-        final value = header[NetworkEventKeys.value.name];
-
-        if (key != null) {
-          if (transformedHeaders.containsKey(key)) {
-            if (transformedHeaders[key] is List) {
-              (transformedHeaders[key] as List).add(value);
-            } else {
-              transformedHeaders[key] = [transformedHeaders[key], value];
-            }
-          } else {
-            transformedHeaders[key] = value;
-          }
-        }
-      }
-    }
-
-    return transformedHeaders;
-  }
-
-  // Convert list of headers to map
-  static void _convertHeaders(Map<String, dynamic> requestData) {
-    // Request Headers
-    if (requestData['request'] != null &&
-        (requestData['request'] as Map<String, Object?>)['headers'] != null) {
-      if ((requestData['request'] as Map<String, Object?>)['headers'] is List) {
-        (requestData['request'] as Map<String, Object?>)['headers'] =
-            _convertHeadersListToMap(
-          ((requestData['request'] as Map<String, Object?>)['headers'])
-              as List<dynamic>,
-        );
-      }
-    }
-    // Response Headers
-    if (requestData['response'] != null &&
-        (requestData['response'] as Map<String, Object?>)['headers'] != null) {
-      if ((requestData['response'] as Map<String, Object?>)['headers']
-          is List) {
-        (requestData['response'] as Map<String, Object?>)['headers'] =
-            _convertHeadersListToMap(
-          ((requestData['response'] as Map<String, Object?>)['headers'])
-              as List<dynamic>,
-        );
-      }
-    }
-  }
-
-  // Removing underscores from custom fields
-  static Map<String, Object?> _remapCustomFieldKeys(
-    Map<String, Object?> originalMap,
-  ) {
-    final replacementMap = {
-      NetworkEventCustomFieldKeys.isolateId:
-          NetworkEventCustomFieldRemappedKeys.isolateId.name,
-      NetworkEventCustomFieldKeys.id:
-          NetworkEventCustomFieldRemappedKeys.id.name,
-      NetworkEventCustomFieldKeys.startTime:
-          NetworkEventCustomFieldRemappedKeys.startTime.name,
-      NetworkEventCustomFieldKeys.events:
-          NetworkEventCustomFieldRemappedKeys.events.name,
-    };
-
-    final convertedMap = <String, dynamic>{};
-
-    originalMap.forEach((key, value) {
-      if (replacementMap.containsKey(key)) {
-        convertedMap[replacementMap[key]!] = value;
-      } else {
-        convertedMap[key] = value;
-      }
-    });
-
-    return convertedMap;
+      .._responseBody = responseContent['text'].toString()
+      .._requestBody = requestPostData['text'].toString();
   }
 
   static const _connectionInfoKey = 'connectionInfo';
