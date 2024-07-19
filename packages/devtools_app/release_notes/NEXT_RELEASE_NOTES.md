@@ -32,7 +32,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Added recommendation to debug code from an IDE, with links to IDE instructions. - [#8085](https://github.com/flutter/devtools/pull/8085)
 
 ## Network profiler updates
 
