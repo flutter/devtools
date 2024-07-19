@@ -64,6 +64,18 @@ class ExternalDevToolsEnvironmentParameters
     // This should always return a null value for 3p users.
     return null;
   }
+
+  @override
+  GaLink? g3FlutterIdeRecommendationLink() {
+    // This should always return a null value for 3p users.
+    return null;
+  }
+
+  @override
+  GaLink? g3DartIdeRecommendationLink() {
+    // This should always return a null value for 3p users.
+    return null;
+  }
 }
 
 const _newDevToolsIssueUriDisplay = 'github.com/flutter/devtools/issues/new';

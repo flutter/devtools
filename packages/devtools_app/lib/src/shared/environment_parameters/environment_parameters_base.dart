@@ -22,4 +22,8 @@ abstract class DevToolsEnvironmentParameters {
   String get perfettoIndexLocation;
 
   String? chrome115BreakpointBug();
+
+  GaLink? g3FlutterIdeRecommendationLink();
+
+  GaLink? g3DartIdeRecommendationLink();
 }

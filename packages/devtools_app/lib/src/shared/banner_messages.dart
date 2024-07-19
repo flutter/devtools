@@ -479,6 +479,67 @@ For the most accurate absolute memory stats, relaunch your application in ''',
   }
 }
 
+class DebuggerIdeRecommendationMessage {
+  const DebuggerIdeRecommendationMessage(this.screenId);
+
+  final String screenId;
+
+  BannerMessage build(BuildContext context) {
+    final codeType =
+        (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+                false)
+            ? 'Flutter'
+            : 'Dart';
+    final g3FlutterInstructionsLink =
+        devToolsExtensionPoints.g3FlutterIdeRecommendationLink();
+    final g3DartInstructionsLink =
+        devToolsExtensionPoints.g3FlutterIdeRecommendationLink();
+
+    return BannerWarning(
+      key: const Key('DebuggerIdeRecommendationMessage'),
+      textSpans: [
+        TextSpan(
+          text: '''
+The $codeType DevTools debugger is in maintenance mode. For a best-in-class debugging experience, we recommend debugging your $codeType code in an IDE, such as ''',
+        ),
+        if (g3FlutterInstructionsLink != null) ...[
+          GaLinkTextSpan(
+            context: context,
+            link: g3FlutterInstructionsLink,
+          ),
+        ] else if (g3DartInstructionsLink != null) ...[
+          GaLinkTextSpan(
+            context: context,
+            link: g3DartInstructionsLink,
+          ),
+        ] else ...[
+          GaLinkTextSpan(
+            context: context,
+            link: const GaLink(
+              display: 'VS Code',
+              url: 'https://dart.dev/tools/vs-code',
+            ),
+          ),
+          const TextSpan(
+            text: ' or ',
+          ),
+          GaLinkTextSpan(
+            context: context,
+            link: const GaLink(
+              display: 'IntelliJ & Android Studio',
+              url: 'https://dart.dev/tools/jetbrains-plugin',
+            ),
+          ),
+        ],
+        const TextSpan(
+          text: '.',
+        ),
+      ],
+      screenId: screenId,
+    );
+  }
+}
+
 void maybePushDebugModePerformanceMessage(
   BuildContext context,
   String screenId,
@@ -512,6 +573,15 @@ void maybePushHttpLoggingMessage(
       HttpLoggingEnabledMessage(screenId).build(context),
     );
   }
+}
+
+void pushDebuggerIdeRecommendationMessage(
+  BuildContext context,
+  String screenId,
+) {
+  bannerMessages.addMessage(
+    DebuggerIdeRecommendationMessage(screenId).build(context),
+  );
 }
 
 extension BannerMessageThemeExtension on ThemeData {
