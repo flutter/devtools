@@ -78,32 +78,25 @@ class HarDataEntry {
     final modifiedRequestData = _remapCustomFieldKeys(json);
 
     // Retrieving url, method from requestData
+    final requestData = modifiedRequestData[NetworkEventKeys.request.name]
+        as Map<String, dynamic>;
     modifiedRequestData[NetworkEventKeys.uri.name] =
-        (modifiedRequestData[NetworkEventKeys.request.name]
-            as Map<String, dynamic>)[NetworkEventKeys.url.name];
+        requestData[NetworkEventKeys.url.name];
     modifiedRequestData[NetworkEventKeys.method.name] =
-        (modifiedRequestData[NetworkEventKeys.request.name]
-            as Map<String, dynamic>)[NetworkEventKeys.method.name];
+        requestData[NetworkEventKeys.method.name];
 
     // Adding missing keys which are mandatory for parsing
-    (modifiedRequestData[NetworkEventKeys.response.name]
-        as Map<String, dynamic>)[NetworkEventKeys.redirects.name] = [];
+    final responseData = modifiedRequestData[NetworkEventKeys.response.name]
+        as Map<String, dynamic>;
+    responseData[NetworkEventKeys.redirects.name] = [];
     dynamic requestPostData;
     dynamic responseContent;
-    if (modifiedRequestData[NetworkEventKeys.response.name] != null &&
-        (modifiedRequestData[NetworkEventKeys.response.name]
-                as Map<String, dynamic>)[NetworkEventKeys.content.name] !=
-            null) {
-      responseContent = (modifiedRequestData[NetworkEventKeys.response.name]
-          as Map<String, dynamic>)[NetworkEventKeys.content.name];
+    if (responseData[NetworkEventKeys.content.name] != null) {
+      responseContent = responseData[NetworkEventKeys.content.name];
     }
 
-    if (modifiedRequestData[NetworkEventKeys.request.name] != null &&
-        (modifiedRequestData[NetworkEventKeys.request.name]
-                as Map<String, dynamic>)[NetworkEventKeys.postData.name] !=
-            null) {
-      requestPostData = (modifiedRequestData[NetworkEventKeys.response.name]
-          as Map<String, dynamic>)[NetworkEventKeys.content.name];
+    if (requestData[NetworkEventKeys.postData.name] != null) {
+      requestPostData = responseData[NetworkEventKeys.content.name];
     }
 
     return HarDataEntry(
@@ -160,36 +153,24 @@ class HarDataEntry {
 
   // Convert list of headers to map
   static void _convertHeaders(Map<String, dynamic> requestData) {
+    final reqData =
+        requestData[NetworkEventKeys.request.name] as Map<String, dynamic>;
     // Request Headers
-    if (requestData[NetworkEventKeys.request.name] != null &&
-        (requestData[NetworkEventKeys.request.name]
-                as Map<String, dynamic>)[NetworkEventKeys.headers.name] !=
-            null) {
-      if ((requestData[NetworkEventKeys.request.name]
-          as Map<String, dynamic>)[NetworkEventKeys.headers.name] is List) {
-        (requestData[NetworkEventKeys.request.name]
-                as Map<String, dynamic>)[NetworkEventKeys.headers.name] =
-            _convertHeadersListToMap(
-          ((requestData[NetworkEventKeys.request.name]
-                  as Map<String, dynamic>)[NetworkEventKeys.headers.name])
-              as List<dynamic>,
+    if (reqData[NetworkEventKeys.headers.name] != null) {
+      if (reqData[NetworkEventKeys.headers.name] is List) {
+        reqData[NetworkEventKeys.headers.name] = _convertHeadersListToMap(
+          (reqData[NetworkEventKeys.headers.name]) as List<dynamic>,
         );
       }
     }
 
     // Response Headers
-    if (requestData[NetworkEventKeys.response.name] != null &&
-        (requestData[NetworkEventKeys.response.name]
-                as Map<String, dynamic>)[NetworkEventKeys.headers.name] !=
-            null) {
-      if ((requestData[NetworkEventKeys.response.name]
-          as Map<String, dynamic>)[NetworkEventKeys.headers.name] is List) {
-        (requestData[NetworkEventKeys.response.name]
-                as Map<String, dynamic>)[NetworkEventKeys.headers.name] =
-            _convertHeadersListToMap(
-          ((requestData[NetworkEventKeys.response.name]
-                  as Map<String, dynamic>)[NetworkEventKeys.headers.name])
-              as List<dynamic>,
+    final resData =
+        requestData[NetworkEventKeys.response.name] as Map<String, dynamic>;
+    if (resData[NetworkEventKeys.headers.name] != null) {
+      if (resData[NetworkEventKeys.headers.name] is List) {
+        resData[NetworkEventKeys.headers.name] = _convertHeadersListToMap(
+          (resData[NetworkEventKeys.headers.name]) as List<dynamic>,
         );
       }
     }
