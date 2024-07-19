@@ -90,14 +90,16 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
     setState(() {
       final row = widget.row;
       final treeController = widget.inspectorTreeState.treeController!;
-      treeController.refreshTree(() {
-        if (expanded) {
-          treeController.onExpandRow(row);
-        } else {
-          treeController.onCollapseRow(row);
-        }
-        return true;
-      });
+      treeController.refreshTree(
+        updateTreeAction: () {
+          if (expanded) {
+            treeController.onExpandRow(row);
+          } else {
+            treeController.onCollapseRow(row);
+          }
+          return true;
+        },
+      );
     });
   }
 
@@ -185,14 +187,14 @@ class InspectorTreeController extends DisposableController
 
   /// Refreshes the tree's rows if the return value of the [updateTreeAction]
   /// callback is true.
-  void refreshTree(bool Function() updateTreeAction) {
+  void refreshTree({required bool Function() updateTreeAction}) {
     final requiresRefresh = updateTreeAction();
     if (requiresRefresh) {
       _updateRows();
     }
   }
 
-  bool updateSelectedNode(InspectorTreeNode? node) {
+  bool setSelectedNode(InspectorTreeNode? node) {
     if (node == _selection) return false;
 
     _selection?.selected = false;
@@ -325,16 +327,18 @@ class InspectorTreeController extends DisposableController
       return;
     }
 
-    refreshTree(() {
-      if (selectionLocal.isExpanded) {
-        selectionLocal.isExpanded = false;
-        return true;
-      }
-      if (selectionLocal.parent != null) {
-        return updateSelectedNode(selectionLocal.parent);
-      }
-      return false;
-    });
+    refreshTree(
+      updateTreeAction: () {
+        if (selectionLocal.isExpanded) {
+          selectionLocal.isExpanded = false;
+          return true;
+        }
+        if (selectionLocal.parent != null) {
+          return setSelectedNode(selectionLocal.parent);
+        }
+        return false;
+      },
+    );
   }
 
   void navigateRight() {
@@ -355,19 +359,18 @@ class InspectorTreeController extends DisposableController
   void _navigateHelper(int indexOffset) {
     if (_numRows == 0) return;
 
-    refreshTree(() {
-      if (selection == null) {
-        updateSelectedNode(root);
-      } else {
-        updateSelectedNode(
-          rowAtIndex(
-            (_rowIndexFromNode(selection!) + indexOffset)
-                .clamp(0, _numRows - 1),
-          )?.node,
-        );
-      }
-      return true;
-    });
+    refreshTree(
+      updateTreeAction: () {
+        final nodeToSelect = selection == null
+            ? root
+            : rowAtIndex(
+                (_rowIndexFromNode(selection!) + indexOffset)
+                    .clamp(0, _numRows - 1),
+              )?.node;
+        setSelectedNode(nodeToSelect);
+        return true;
+      },
+    );
   }
 
   double get horizontalPadding => 10.0;
@@ -507,7 +510,7 @@ class InspectorTreeController extends DisposableController
   }
 
   void onSelectNode(InspectorTreeNode? node) {
-    updateSelectedNode(node);
+    setSelectedNode(node);
     ga.select(
       gac.inspector,
       gac.treeNodeSelection,
@@ -653,10 +656,12 @@ class InspectorTreeController extends DisposableController
     if (treeNode.children.isNotEmpty) {
       // Only case supported is this is the loading node.
       assert(treeNode.children.length == 1);
-      refreshTree(() {
-        removeNodeFromParent(treeNode.children.first);
-        return true;
-      });
+      refreshTree(
+        updateTreeAction: () {
+          removeNodeFromParent(treeNode.children.first);
+          return true;
+        },
+      );
     }
     final inlineProperties = parent.inlineProperties;
 
@@ -700,13 +705,15 @@ class InspectorTreeController extends DisposableController
             children,
             expandChildren: true,
           );
-          refreshTree(() {
-            nodeChanged(treeNode);
-            if (treeNode == selection) {
-              expandPath(treeNode);
-            }
-            return true;
-          });
+          refreshTree(
+            updateTreeAction: () {
+              nodeChanged(treeNode);
+              if (treeNode == selection) {
+                expandPath(treeNode);
+              }
+              return true;
+            },
+          );
         }
       } catch (e, st) {
         _log.shout(e, e, st);
@@ -717,10 +724,12 @@ class InspectorTreeController extends DisposableController
   /* Search support */
   @override
   void onMatchChanged(int index) {
-    refreshTree(() {
-      onSelectRow(searchMatches.value[index]);
-      return true;
-    });
+    refreshTree(
+      updateTreeAction: () {
+        onSelectRow(searchMatches.value[index]);
+        return true;
+      },
+    );
   }
 
   @override
@@ -1365,14 +1374,16 @@ class InspectorRowContent extends StatelessWidget {
                     color: backgroundColor,
                     child: InkWell(
                       onTap: () {
-                        controller.refreshTree(() {
-                          controller.onSelectRow(row);
-                          // TODO(gmoothart): It may be possible to capture the tap
-                          // and request focus directly from the InspectorTree. Then
-                          // we wouldn't need this.
-                          controller.requestFocus();
-                          return true;
-                        });
+                        controller.refreshTree(
+                          updateTreeAction: () {
+                            controller.onSelectRow(row);
+                            // TODO(gmoothart): It may be possible to capture the tap
+                            // and request focus directly from the InspectorTree. Then
+                            // we wouldn't need this.
+                            controller.requestFocus();
+                            return true;
+                          },
+                        );
                       },
                       child: SizedBox(
                         height: inspectorRowHeight,
@@ -1397,10 +1408,12 @@ class InspectorRowContent extends StatelessWidget {
                               : null,
                           actionCallback: isHideableGroupLeader
                               ? () {
-                                  controller.refreshTree(() {
-                                    controller.toggleHiddenGroup(node);
-                                    return true;
-                                  });
+                                  controller.refreshTree(
+                                    updateTreeAction: () {
+                                      controller.toggleHiddenGroup(node);
+                                      return true;
+                                    },
+                                  );
                                 }
                               : null,
                           customDescription: isHideableGroupLeader &&

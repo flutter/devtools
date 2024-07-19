@@ -462,12 +462,14 @@ class InspectorController extends DisposableController
 
   void syncTreeSelection() {
     programmaticSelectionChangeInProgress = true;
-    inspectorTree.refreshTree(() {
-      inspectorTree
-        ..updateSelectedNode(selectedNode.value)
-        ..expandPath(selectedNode.value);
-      return true;
-    });
+    inspectorTree.refreshTree(
+      updateTreeAction: () {
+        inspectorTree
+          ..setSelectedNode(selectedNode.value)
+          ..expandPath(selectedNode.value);
+        return true;
+      },
+    );
     programmaticSelectionChangeInProgress = false;
     animateTo(selectedNode.value);
   }
