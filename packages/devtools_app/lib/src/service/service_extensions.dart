@@ -481,7 +481,7 @@ final countWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   iconAsset: 'icons/inspector/diagram@2x.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.countWidgetBuilds.nameOverride!,
-  description: 'Tracks widget build counts for each Flutter frame.',
+  description: 'Counts widget builds for each Flutter frame.',
   tooltip: '''Enable this option to see the widgets that were built in each 
 Flutter frame using the Frame Analysis tool, or to see an aggregate
 summary of these counts using the Rebuild Stats tool.''',
