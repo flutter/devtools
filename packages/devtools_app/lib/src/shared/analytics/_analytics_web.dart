@@ -243,7 +243,7 @@ GtagEventDevTools _gtagEvent({
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild.toString(),
     is_embedded: isEmbedded().toString(),
-    g3_username: devToolsExtensionPoints.username(),
+    g3_username: devToolsEnvironmentParameters.username(),
     ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
@@ -308,7 +308,7 @@ GtagExceptionDevTools _gtagException(
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild.toString(),
     is_embedded: isEmbedded().toString(),
-    g3_username: devToolsExtensionPoints.username(),
+    g3_username: devToolsEnvironmentParameters.username(),
     ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics

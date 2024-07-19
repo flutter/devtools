@@ -85,7 +85,7 @@ class NotificationService {
             : null;
         unawaited(
           launchUrlWithErrorHandling(
-            devToolsExtensionPoints
+            devToolsEnvironmentParameters
                 .issueTrackerLink(
                   issueTitle: 'Reporting error: $errorMessage',
                   additionalInfo: additionalInfo,

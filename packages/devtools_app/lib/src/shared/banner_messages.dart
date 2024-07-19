@@ -485,55 +485,24 @@ class DebuggerIdeRecommendationMessage {
   final String screenId;
 
   BannerMessage build(BuildContext context) {
-    final codeType =
-        (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
-                false)
-            ? 'Flutter'
-            : 'Dart';
-    final g3FlutterInstructionsLink =
-        devToolsExtensionPoints.g3FlutterIdeRecommendationLink();
-    final g3DartInstructionsLink =
-        devToolsExtensionPoints.g3FlutterIdeRecommendationLink();
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ?? false;
+    final codeType = isFlutterApp ? 'Flutter' : 'Dart';
+    final recommendedDebuggers = devToolsEnvironmentParameters
+        .recommendedDebuggers(context, isFlutterApp: isFlutterApp);
 
     return BannerWarning(
       key: Key('DebuggerIdeRecommendationMessage - $screenId'),
       textSpans: [
         TextSpan(
           text: '''
-The $codeType DevTools debugger is in maintenance mode. For a best-in-class debugging experience, we recommend debugging your $codeType code in an IDE, such as ''',
+The $codeType DevTools debugger is in maintenance mode. For the best debugging experience, we recommend debugging your $codeType code in a supported IDE''',
         ),
-        if (g3FlutterInstructionsLink != null) ...[
-          GaLinkTextSpan(
-            context: context,
-            link: g3FlutterInstructionsLink,
-          ),
-        ] else if (g3DartInstructionsLink != null) ...[
-          GaLinkTextSpan(
-            context: context,
-            link: g3DartInstructionsLink,
-          ),
-        ] else ...[
-          GaLinkTextSpan(
-            context: context,
-            link: const GaLink(
-              display: 'VS Code',
-              url: 'https://dart.dev/tools/vs-code',
-            ),
-          ),
-          const TextSpan(
-            text: ' or ',
-          ),
-          GaLinkTextSpan(
-            context: context,
-            link: const GaLink(
-              display: 'IntelliJ & Android Studio',
-              url: 'https://dart.dev/tools/jetbrains-plugin',
-            ),
-          ),
+        if (recommendedDebuggers != null) ...[
+          const TextSpan(text: ', such as '),
+          ...recommendedDebuggers,
         ],
-        const TextSpan(
-          text: '.',
-        ),
+        const TextSpan(text: '.'),
       ],
       screenId: screenId,
     );

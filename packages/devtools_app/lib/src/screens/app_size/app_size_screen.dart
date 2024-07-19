@@ -172,7 +172,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  devToolsExtensionPoints.loadingAppSizeDataMessage(),
+                  devToolsEnvironmentParameters.loadingAppSizeDataMessage(),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: defaultSpacing),

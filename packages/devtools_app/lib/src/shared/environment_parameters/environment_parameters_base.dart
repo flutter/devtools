@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
+
 import '../../screens/debugger/codeview.dart';
 import '../common_widgets.dart';
 import '../diagnostics/inspector_service.dart';
@@ -23,7 +25,8 @@ abstract class DevToolsEnvironmentParameters {
 
   String? chrome115BreakpointBug();
 
-  GaLink? g3FlutterIdeRecommendationLink();
-
-  GaLink? g3DartIdeRecommendationLink();
+  List<TextSpan>? recommendedDebuggers(
+    BuildContext context, {
+    required bool isFlutterApp,
+  });
 }
