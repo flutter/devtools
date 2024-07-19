@@ -269,7 +269,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>.from(
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileWidgetBuilds,
-  title: 'Track widget builds',
+  title: 'Trace widget builds',
   iconAsset: 'icons/trackwidget-white.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackRebuilds.name,
@@ -283,7 +283,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
 final profileUserWidgetBuilds =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileUserWidgetBuilds,
-  title: 'Track user-created widget builds',
+  title: 'Trace user-created widget builds',
   iconAsset: 'icons/trackwidget-white.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackUserCreatedWidgetBuilds.name,
@@ -295,7 +295,7 @@ final profileUserWidgetBuilds =
 final profileRenderObjectPaints =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileRenderObjectPaints,
-  title: 'Track paints',
+  title: 'Trace paints',
   iconData: Icons.format_paint,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackPaints.name,
@@ -309,7 +309,7 @@ final profileRenderObjectPaints =
 final profileRenderObjectLayouts =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileRenderObjectLayouts,
-  title: 'Track layouts',
+  title: 'Trace layouts',
   iconData: Icons.auto_awesome_mosaic,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackLayouts.name,
@@ -475,12 +475,12 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>.from(
   tooltip: 'Toggle showing structured errors for Flutter framework issues',
 );
 
-final trackWidgetBuildCounts = ToggleableServiceExtensionDescription<bool>.from(
-  extensions.trackRebuildWidgets,
-  title: 'Track widget build counts',
+final countWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.countWidgetBuilds,
+  title: 'Count widget builds',
   iconAsset: 'icons/inspector/diagram@2x.png',
   gaScreenName: gac.performance,
-  gaItem: gac.trackRebuildWidgets,
+  gaItem: gac.PerformanceEvents.countWidgetBuilds.nameOverride!,
   description: 'Tracks widget build counts for each Flutter frame.',
   tooltip: '''Enable this option to see the widgets that were built in each 
 Flutter frame using the Frame Analysis tool, or to see an aggregate
@@ -491,7 +491,7 @@ summary of these counts using the Rebuild Stats tool.''',
 final profilePlatformChannels =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profilePlatformChannels,
-  title: 'Track platform channels',
+  title: 'Trace platform channels',
   iconAsset: 'icons/trackwidget-white.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.profilePlatformChannels.name,
