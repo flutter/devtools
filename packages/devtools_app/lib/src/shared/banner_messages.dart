@@ -496,7 +496,7 @@ class DebuggerIdeRecommendationMessage {
         devToolsExtensionPoints.g3FlutterIdeRecommendationLink();
 
     return BannerWarning(
-      key: const Key('DebuggerIdeRecommendationMessage'),
+      key: Key('DebuggerIdeRecommendationMessage - $screenId'),
       textSpans: [
         TextSpan(
           text: '''
