@@ -88,7 +88,7 @@ class HarDataEntry {
     // Adding missing keys which are mandatory for parsing
     final responseData = modifiedRequestData[NetworkEventKeys.response.name]
         as Map<String, Object?>;
-    responseData[NetworkEventKeys.redirects.name] = [];
+    responseData[NetworkEventKeys.redirects.name] = <Map<String, Object?>>[];
     Object? requestPostData;
     Object? responseContent;
     if (responseData[NetworkEventKeys.content.name] != null) {
