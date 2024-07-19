@@ -72,14 +72,14 @@ class HarDataEntry {
   ///
   /// This factory constructor expects the [json] parameter to be a Map
   /// representing a single HAR entry.
-  factory HarDataEntry.fromJson(Map<String, dynamic> json) {
+  factory HarDataEntry.fromJson(Map<String, Object?> json) {
     _convertHeaders(json);
 
     final modifiedRequestData = _remapCustomFieldKeys(json);
 
     // Retrieving url, method from requestData
     final requestData = modifiedRequestData[NetworkEventKeys.request.name]
-        as Map<String, dynamic>;
+        as Map<String, Object?>;
     modifiedRequestData[NetworkEventKeys.uri.name] =
         requestData[NetworkEventKeys.url.name];
     modifiedRequestData[NetworkEventKeys.method.name] =
@@ -87,10 +87,10 @@ class HarDataEntry {
 
     // Adding missing keys which are mandatory for parsing
     final responseData = modifiedRequestData[NetworkEventKeys.response.name]
-        as Map<String, dynamic>;
+        as Map<String, Object?>;
     responseData[NetworkEventKeys.redirects.name] = [];
-    dynamic requestPostData;
-    dynamic responseContent;
+    Object? requestPostData;
+    Object? responseContent;
     if (responseData[NetworkEventKeys.content.name] != null) {
       responseContent = responseData[NetworkEventKeys.content.name];
     }
@@ -102,8 +102,8 @@ class HarDataEntry {
     return HarDataEntry(
       DartIOHttpRequestData.fromJson(
         modifiedRequestData,
-        requestPostData as Map<String, dynamic>,
-        responseContent as Map<String, dynamic>,
+        requestPostData as Map<String, Object?>,
+        responseContent as Map<String, Object?>,
       ),
     );
   }
@@ -124,13 +124,13 @@ class HarDataEntry {
     return request;
   }
 
-  static Map<String, dynamic> _convertHeadersListToMap(
-    List<dynamic> serializedHeaders,
+  static Map<String, Object?> _convertHeadersListToMap(
+    List<Object?> serializedHeaders,
   ) {
-    final transformedHeaders = <String, dynamic>{};
+    final transformedHeaders = <String, Object?>{};
 
     for (final header in serializedHeaders) {
-      if (header is Map<String, dynamic>) {
+      if (header is Map<String, Object?>) {
         final key = header[NetworkEventKeys.name.name] as String?;
         final value = header[NetworkEventKeys.value.name];
 
@@ -152,25 +152,25 @@ class HarDataEntry {
   }
 
   // Convert list of headers to map
-  static void _convertHeaders(Map<String, dynamic> requestData) {
+  static void _convertHeaders(Map<String, Object?> requestData) {
     final reqData =
-        requestData[NetworkEventKeys.request.name] as Map<String, dynamic>;
+        requestData[NetworkEventKeys.request.name] as Map<String, Object?>;
     // Request Headers
     if (reqData[NetworkEventKeys.headers.name] != null) {
       if (reqData[NetworkEventKeys.headers.name] is List) {
         reqData[NetworkEventKeys.headers.name] = _convertHeadersListToMap(
-          (reqData[NetworkEventKeys.headers.name]) as List<dynamic>,
+          (reqData[NetworkEventKeys.headers.name]) as List<Object?>,
         );
       }
     }
 
     // Response Headers
     final resData =
-        requestData[NetworkEventKeys.response.name] as Map<String, dynamic>;
+        requestData[NetworkEventKeys.response.name] as Map<String, Object?>;
     if (resData[NetworkEventKeys.headers.name] != null) {
       if (resData[NetworkEventKeys.headers.name] is List) {
         resData[NetworkEventKeys.headers.name] = _convertHeadersListToMap(
-          (resData[NetworkEventKeys.headers.name]) as List<dynamic>,
+          (resData[NetworkEventKeys.headers.name]) as List<Object?>,
         );
       }
     }
@@ -191,7 +191,7 @@ class HarDataEntry {
           NetworkEventCustomFieldRemappedKeys.events.name,
     };
 
-    final convertedMap = <String, dynamic>{};
+    final convertedMap = <String, Object?>{};
 
     originalMap.forEach((key, value) {
       if (replacementMap.containsKey(key)) {
