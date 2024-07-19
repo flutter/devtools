@@ -49,6 +49,8 @@ enum NetworkEventKeys {
   connection,
   comment,
   value,
+  uri,
+  redirects,
 }
 
 class NetworkEventDefaults {
