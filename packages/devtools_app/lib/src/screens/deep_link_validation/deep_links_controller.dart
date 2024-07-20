@@ -146,7 +146,6 @@ class DisplayOptions {
 
 class DeepLinksController extends DisposableController
     with AutoDisposeControllerMixin {
-  DeepLinksController();
 
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
   String get applicationId =>
@@ -212,15 +211,17 @@ class DeepLinksController extends DisposableController
 
   final _androidAppLinks = <int, AppLinkSettings>{};
   final _iosLinks = <int, UniversalLinkSettings>{};
-  final _selectedAndroidVariantIndex = ValueNotifier<int>(0);
-  final _selectedIosConfigurationIndex = ValueNotifier<int>(0);
-  final _selectedIosTargetIndex = ValueNotifier<int>(0);
 
   ValueListenable<int> get selectedAndroidVariantIndex =>
       _selectedAndroidVariantIndex;
+  final _selectedAndroidVariantIndex = ValueNotifier<int>(0);
+
   ValueListenable<int> get selectedIosConfigurationIndex =>
       _selectedIosConfigurationIndex;
+  final _selectedIosConfigurationIndex = ValueNotifier<int>(0);
+
   ValueListenable<int> get selectedIosTargetIndex => _selectedIosTargetIndex;
+  final _selectedIosTargetIndex = ValueNotifier<int>(0);
 
   void updateSelectedAndroidVariantIndex(int index) {
     _selectedAndroidVariantIndex.value = index;
