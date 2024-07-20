@@ -1,12 +1,11 @@
 // Copyright 2024 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:convert';
 
 import '../../shared/http/http_request_data.dart';
-import '../../shared/primitives/utils.dart';
 import '../../shared/utils.dart';
 import 'constants.dart';
+import 'har_data_entry.dart';
 
 /// Builds a HAR (HTTP Archive) object from a list of HTTP requests.
 ///
@@ -30,121 +29,7 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
   };
 
   // Build the entries
-  final entries = httpRequests.map((e) {
-    final requestCookies = e.requestCookies.map((cookie) {
-      return <String, Object?>{
-        NetworkEventKeys.name.name: cookie.name,
-        NetworkEventKeys.value.name: cookie.value,
-        'path': cookie.path,
-        'domain': cookie.domain,
-        'expires': cookie.expires?.toUtc().toIso8601String(),
-        'httpOnly': cookie.httpOnly,
-        'secure': cookie.secure,
-      };
-    }).toList();
-
-    final requestHeaders = e.requestHeaders?.entries.map((header) {
-      var value = header.value;
-      if (value is List) {
-        value = value.first;
-      }
-      return <String, Object?>{
-        NetworkEventKeys.name.name: header.key,
-        NetworkEventKeys.value.name: value,
-      };
-    }).toList();
-
-    final queryString = Uri.parse(e.uri).queryParameters.entries.map((param) {
-      return <String, Object?>{
-        NetworkEventKeys.name.name: param.key,
-        NetworkEventKeys.value.name: param.value,
-      };
-    }).toList();
-
-    final responseCookies = e.responseCookies.map((cookie) {
-      return <String, Object?>{
-        NetworkEventKeys.name.name: cookie.name,
-        NetworkEventKeys.value.name: cookie.value,
-        'path': cookie.path,
-        'domain': cookie.domain,
-        'expires': cookie.expires?.toUtc().toIso8601String(),
-        'httpOnly': cookie.httpOnly,
-        'secure': cookie.secure,
-      };
-    }).toList();
-
-    final responseHeaders = e.responseHeaders?.entries.map((header) {
-      var value = header.value;
-      if (value is List) {
-        value = value.first;
-      }
-      return <String, Object?>{
-        NetworkEventKeys.name.name: header.key,
-        NetworkEventKeys.value.name: value,
-      };
-    }).toList();
-
-    return <String, Object?>{
-      NetworkEventKeys.startedDateTime.name:
-          e.startTimestamp.toUtc().toIso8601String(),
-      NetworkEventKeys.time.name: e.duration?.inMilliseconds,
-      // Request
-      NetworkEventKeys.request.name: <String, Object?>{
-        NetworkEventKeys.method.name: e.method.toUpperCase(),
-        NetworkEventKeys.url.name: e.uri.toString(),
-        NetworkEventKeys.httpVersion.name: NetworkEventDefaults.httpVersion,
-        NetworkEventKeys.cookies.name: requestCookies,
-        NetworkEventKeys.headers.name: requestHeaders,
-        NetworkEventKeys.queryString.name: queryString,
-        NetworkEventKeys.postData.name: <String, Object?>{
-          NetworkEventKeys.mimeType.name: e.contentType,
-          NetworkEventKeys.text.name: e.requestBody,
-        },
-        NetworkEventKeys.headersSize.name:
-            _calculateHeadersSize(e.requestHeaders),
-        NetworkEventKeys.bodySize.name: _calculateBodySize(e.requestBody),
-      },
-      // Response
-      NetworkEventKeys.response.name: <String, Object?>{
-        NetworkEventKeys.status.name: e.status,
-        NetworkEventKeys.statusText.name: '',
-        NetworkEventKeys.httpVersion.name:
-            NetworkEventDefaults.responseHttpVersion,
-        NetworkEventKeys.cookies.name: responseCookies,
-        NetworkEventKeys.headers.name: responseHeaders,
-        NetworkEventKeys.content.name: <String, Object?>{
-          NetworkEventKeys.size.name: e.responseBody?.length,
-          NetworkEventKeys.mimeType.name: e.type,
-          NetworkEventKeys.text.name: e.responseBody,
-        },
-        NetworkEventKeys.redirectURL.name: '',
-        NetworkEventKeys.headersSize.name:
-            _calculateHeadersSize(e.responseHeaders),
-        NetworkEventKeys.bodySize.name: _calculateBodySize(e.responseBody),
-      },
-      // Cache
-      NetworkEventKeys.cache.name: <String, Object?>{},
-      NetworkEventKeys.timings.name: <String, Object?>{
-        NetworkEventKeys.blocked.name: NetworkEventDefaults.blocked,
-        NetworkEventKeys.dns.name: NetworkEventDefaults.dns,
-        NetworkEventKeys.connect.name: NetworkEventDefaults.connect,
-        NetworkEventKeys.send.name: NetworkEventDefaults.send,
-        NetworkEventKeys.wait.name: e.duration?.inMilliseconds ?? 0,
-        NetworkEventKeys.receive.name: NetworkEventDefaults.receive,
-        NetworkEventKeys.ssl.name: NetworkEventDefaults.ssl,
-      },
-      NetworkEventKeys.connection.name: e.hashCode.toString(),
-      NetworkEventKeys.comment.name: '',
-
-      // Custom fields
-      // har spec requires underscore to be added for custom fields, hence removing them
-      NetworkEventCustomFieldKeys.isolateId: '',
-      NetworkEventCustomFieldKeys.id: e.id,
-      NetworkEventCustomFieldKeys.startTime:
-          e.startTimestamp.microsecondsSinceEpoch,
-      NetworkEventCustomFieldKeys.events: [],
-    };
-  }).toList();
+  final entries = httpRequests.map((e) => HarDataEntry.toJson(e)).toList();
 
   // Assemble the final HAR object
   return <String, Object?>{
@@ -154,32 +39,4 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
       NetworkEventKeys.entries.name: entries,
     },
   };
-}
-
-int _calculateHeadersSize(Map<String, dynamic>? headers) {
-  if (headers == null) return -1;
-
-  // Combine headers into a single string with CRLF endings
-  String headersString = headers.entries.map((entry) {
-    final key = entry.key;
-    var value = entry.value;
-    // If the value is a List, join it with a comma
-    if (value is List<String>) {
-      value = value.join(', ');
-    }
-    return '$key: $value\r\n';
-  }).join();
-
-  // Add final CRLF to indicate end of headers
-  headersString += '\r\n';
-
-  // Calculate the byte length of the headers string
-  return utf8.encode(headersString).length;
-}
-
-int _calculateBodySize(String? requestBody) {
-  if (requestBody.isNullOrEmpty) {
-    return 0;
-  }
-  return utf8.encode(requestBody!).length;
 }
