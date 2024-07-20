@@ -51,6 +51,11 @@ enum NetworkEventKeys {
   value,
   uri,
   redirects,
+  path,
+  domain,
+  expires,
+  httpOnly,
+  secure,
 }
 
 class NetworkEventDefaults {

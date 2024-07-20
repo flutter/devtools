@@ -59,11 +59,12 @@ class HarDataEntry {
       return <String, Object?>{
         NetworkEventKeys.name.name: cookie.name,
         NetworkEventKeys.value.name: cookie.value,
-        'path': cookie.path,
-        'domain': cookie.domain,
-        'expires': cookie.expires?.toUtc().toIso8601String(),
-        'httpOnly': cookie.httpOnly,
-        'secure': cookie.secure,
+        NetworkEventKeys.path.name: cookie.path,
+        NetworkEventKeys.domain.name: cookie.domain,
+        NetworkEventKeys.expires.name:
+            cookie.expires?.toUtc().toIso8601String(),
+        NetworkEventKeys.httpOnly.name: cookie.httpOnly,
+        NetworkEventKeys.secure.name: cookie.secure,
       };
     }).toList();
 
@@ -89,11 +90,12 @@ class HarDataEntry {
       return <String, Object?>{
         NetworkEventKeys.name.name: cookie.name,
         NetworkEventKeys.value.name: cookie.value,
-        'path': cookie.path,
-        'domain': cookie.domain,
-        'expires': cookie.expires?.toUtc().toIso8601String(),
-        'httpOnly': cookie.httpOnly,
-        'secure': cookie.secure,
+        NetworkEventKeys.path.name: cookie.path,
+        NetworkEventKeys.domain.name: cookie.domain,
+        NetworkEventKeys.expires.name:
+            cookie.expires?.toUtc().toIso8601String(),
+        NetworkEventKeys.httpOnly.name: cookie.httpOnly,
+        NetworkEventKeys.secure.name: cookie.secure,
       };
     }).toList();
 
