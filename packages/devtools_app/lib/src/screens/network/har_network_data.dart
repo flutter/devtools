@@ -89,21 +89,14 @@ class HarDataEntry {
     final responseData = modifiedRequestData[NetworkEventKeys.response.name]
         as Map<String, Object?>;
     responseData[NetworkEventKeys.redirects.name] = <Map<String, Object?>>[];
-    Object? requestPostData;
-    Object? responseContent;
-    if (responseData[NetworkEventKeys.content.name] != null) {
-      responseContent = responseData[NetworkEventKeys.content.name];
-    }
-
-    if (requestData[NetworkEventKeys.postData.name] != null) {
-      requestPostData = responseData[NetworkEventKeys.content.name];
-    }
+    final requestPostData = responseData[NetworkEventKeys.postData.name];
+    final responseContent = responseData[NetworkEventKeys.content.name];
 
     return HarDataEntry(
       DartIOHttpRequestData.fromJson(
         modifiedRequestData,
-        requestPostData as Map<String, Object?>,
-        responseContent as Map<String, Object?>,
+        requestPostData as Map<String, Object?>?,
+        responseContent as Map<String, Object?>?,
       ),
     );
   }
@@ -156,23 +149,19 @@ class HarDataEntry {
     final reqData =
         requestData[NetworkEventKeys.request.name] as Map<String, Object?>;
     // Request Headers
-    if (reqData[NetworkEventKeys.headers.name] != null) {
-      if (reqData[NetworkEventKeys.headers.name] is List) {
-        reqData[NetworkEventKeys.headers.name] = _convertHeadersListToMap(
-          (reqData[NetworkEventKeys.headers.name]) as List<Object?>,
-        );
-      }
+    if (reqData[NetworkEventKeys.headers.name] is List) {
+      reqData[NetworkEventKeys.headers.name] = _convertHeadersListToMap(
+        (reqData[NetworkEventKeys.headers.name]) as List<Object?>,
+      );
     }
 
     // Response Headers
     final resData =
         requestData[NetworkEventKeys.response.name] as Map<String, Object?>;
-    if (resData[NetworkEventKeys.headers.name] != null) {
-      if (resData[NetworkEventKeys.headers.name] is List) {
-        resData[NetworkEventKeys.headers.name] = _convertHeadersListToMap(
-          (resData[NetworkEventKeys.headers.name]) as List<Object?>,
-        );
-      }
+    if (resData[NetworkEventKeys.headers.name] is List) {
+      resData[NetworkEventKeys.headers.name] = _convertHeadersListToMap(
+        (resData[NetworkEventKeys.headers.name]) as List<Object?>,
+      );
     }
   }
 
