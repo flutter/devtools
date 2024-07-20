@@ -146,7 +146,6 @@ class DisplayOptions {
 
 class DeepLinksController extends DisposableController
     with AutoDisposeControllerMixin {
-
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
   String get applicationId =>
       _androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
@@ -206,6 +205,9 @@ class DeepLinksController extends DisposableController
     return getFilterredLinks(linkDatasByDomain.values.toList());
   }
 
+  @visibleForTesting
+  bool get enableIosCheck => FeatureFlags.deepLinkIosCheck;
+
   AppLinkSettings? get currentAppLinkSettings =>
       _androidAppLinks[selectedAndroidVariantIndex.value];
 
@@ -243,7 +245,7 @@ class DeepLinksController extends DisposableController
       selectedProject.value!.androidVariants,
       containsString: 'release',
     );
-    if (FeatureFlags.deepLinkIosCheck) {
+    if (enableIosCheck) {
       _selectedIosConfigurationIndex.value = _getDefaultConfigurationIndex(
         selectedProject.value!.iosBuildOptions.configurations,
         containsString: 'release',
@@ -340,7 +342,7 @@ class DeepLinksController extends DisposableController
     if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
     }
-    if (FeatureFlags.deepLinkIosCheck) {
+    if (enableIosCheck) {
       await _loadIosLinks();
       if (pagePhase.value == PagePhase.validationErrorPage) {
         return;
@@ -507,7 +509,7 @@ class DeepLinksController extends DisposableController
       androidDomainErrors = androidResult.domainErrors;
       googlePlayFingerprintsAvailability.value =
           androidResult.googlePlayFingerprintsAvailability;
-      if (FeatureFlags.deepLinkIosCheck) {
+      if (enableIosCheck) {
         iosDomainErrors = await deepLinksServices.validateIosDomain(
           domains: domains,
         );
@@ -569,7 +571,7 @@ class DeepLinksController extends DisposableController
     pagePhase.value = PagePhase.linksValidating;
     List<LinkData> linkdata = [
       ..._rawAndroidLinkDatas,
-      if (FeatureFlags.deepLinkIosCheck) ..._rawIosLinkDatas,
+      if (enableIosCheck) ..._rawIosLinkDatas,
     ];
     if (linkdata.isEmpty) {
       ga.select(

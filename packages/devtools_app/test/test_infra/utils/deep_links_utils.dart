@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class DeepLinksTestController extends DeepLinksController {
@@ -12,6 +13,9 @@ class DeepLinksTestController extends DeepLinksController {
   Future<String?> packageDirectoryForMainIsolate() async {
     return null;
   }
+
+  @override
+  bool get enableIosCheck => true;
 
   @override
   Future<void> validateLinks() async {
