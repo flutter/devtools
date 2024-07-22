@@ -113,7 +113,8 @@ class ServiceConnectionManager {
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
 
-    _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
+    _inspectorService =
+        devToolsEnvironmentParameters.inspectorServiceProvider();
 
     _appState?.dispose();
     _appState = AppState(serviceManager.isolateManager.selectedIsolate);
