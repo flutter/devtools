@@ -66,7 +66,7 @@ class LoggingTableRow extends StatefulWidget {
         FrameElapsedMetaDataChip(
           data: data,
           maxWidth: maxWidth,
-          text: elapsedFrameTimeAsString,
+          elapsedTimeDisplay: elapsedFrameTimeAsString,
         ),
     ];
   }
@@ -261,6 +261,6 @@ class FrameElapsedMetaDataChip extends MetadataChip {
     super.key,
     required super.data,
     required super.maxWidth,
-    required super.text,
-  }) : super(icon: Icons.timer);
+    required String elapsedTimeDisplay,
+  }) : super(icon: Icons.timer, text: elapsedTimeDisplay);
 }
