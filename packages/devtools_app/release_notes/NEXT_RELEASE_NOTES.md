@@ -18,7 +18,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+* Renamed the "Track" builds, paints, and layouts settings to "Trace"
+builds, paints, and layouts. - [#8084](https://github.com/flutter/devtools/pull/8084)
+* Renamed the "Track widget build counts" setting to "Count widget builds". - [#8084](https://github.com/flutter/devtools/pull/8084)
 
 ## CPU profiler updates
 

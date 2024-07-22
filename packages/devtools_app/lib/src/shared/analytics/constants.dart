@@ -94,7 +94,6 @@ enum HomeScreenEvents {
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
-const trackRebuildWidgets = 'trackRebuildWidgets';
 
 // App Size Tools UX actions:
 const importFileSingle = 'importFileSingle';

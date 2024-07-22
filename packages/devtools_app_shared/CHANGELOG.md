@@ -9,6 +9,7 @@ and `RoundedDropDownButton`.
 * Deprecate `ServiceManager.hasConnection` in favor of
 `ServiceManager.connectedState.value.connected`.
 * Correct the dartdoc for the `ListValueNotifier` class.
+* Deprecate `trackRebuildWidgets` in favor of `countWidgetBuilds`.
 
 ## 0.2.1
 * Add `navigateToCode` utility method for jumping to code in IDEs.
