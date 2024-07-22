@@ -44,21 +44,31 @@ class LoggingTableRow extends StatefulWidget {
   /// All of the metatadata chips that can be visible for this [data] entry.
   @visibleForTesting
   static List<MetadataChip> metadataChips(LogDataV2 data, double maxWidth) {
-    final allChips = [
-      WhenMetaDataChip(
-        data: data,
-        maxWidth: maxWidth,
-      ),
+    String? elapsedFrameTimeAsString;
+    try {
+      final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
+      elapsedFrameTimeAsString = (micros * 3.0 / 1000.0).toString();
+    } catch (e) {
+      // Ignore exception; [elapsedFrameTimeAsString] will be null.
+    }
+
+    return [
+      if (data.timestamp != null)
+        WhenMetaDataChip(
+          data: data,
+          maxWidth: maxWidth,
+        ),
       KindMetaDataChip(
         data: data,
         maxWidth: maxWidth,
       ),
-      FrameElapsedMetaDataChip(
-        data: data,
-        maxWidth: maxWidth,
-      ),
+      if (elapsedFrameTimeAsString != null)
+        FrameElapsedMetaDataChip(
+          data: data,
+          maxWidth: maxWidth,
+          text: elapsedFrameTimeAsString,
+        ),
     ];
-    return allChips.where((chip) => chip.isPresent()).toList();
   }
 
   @override
@@ -164,28 +174,16 @@ abstract class MetadataChip extends StatelessWidget {
     super.key,
     required this.data,
     required this.maxWidth,
+    required this.icon,
+    required this.text,
   });
 
   final LogDataV2 data;
   final double maxWidth;
+  final IconData icon;
+  final String text;
+
   static const padding = defaultSpacing;
-
-  /// The text value to be displayed for this chip.
-  String getValue();
-
-  /// Whether or not [data] has the information to display this chip.
-  bool isPresent();
-
-  /// The icon that will be shown with the chip.
-  IconData getIcon();
-
-  /// The textspan which will be displayed in the chip.
-  TextSpan textSpan() {
-    return TextSpan(
-      text: getValue(),
-      style: LoggingTableRow.metadataStyle,
-    );
-  }
 
   /// Estimates the size of this single metadata chip.
   ///
@@ -194,7 +192,7 @@ abstract class MetadataChip extends StatelessWidget {
     final maxWidthInsidePadding = maxWidth - padding * 2;
     final iconSize = Size.square(tooltipIconSize);
     final textSize = calculateTextSpanSize(
-      textSpan(),
+      _buildValueText(),
       maxWidth: maxWidthInsidePadding,
     );
     return Size(
@@ -213,60 +211,48 @@ abstract class MetadataChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            getIcon(),
+            icon,
             size: tooltipIconSize,
           ),
           const SizedBox(width: defaultSpacing),
           RichText(
-            text: textSpan(),
+            text: _buildValueText(),
           ),
         ],
       ),
+    );
+  }
+
+  TextSpan _buildValueText() {
+    return TextSpan(
+      text: text,
+      style: LoggingTableRow.metadataStyle,
     );
   }
 }
 
 @visibleForTesting
 class WhenMetaDataChip extends MetadataChip {
-  const WhenMetaDataChip({
+  WhenMetaDataChip({
     super.key,
     required super.data,
     required super.maxWidth,
-  });
-
-  @override
-  IconData getIcon() => Icons.punch_clock;
-
-  @override
-  String getValue() => data.timestamp == null
-      ? ''
-      : loggingTableTimeFormat
-          .format(DateTime.fromMillisecondsSinceEpoch(data.timestamp!));
-
-  @override
-  bool isPresent() {
-    return data.timestamp != null;
-  }
+  }) : super(
+          icon: Icons.punch_clock,
+          text: data.timestamp == null
+              ? ''
+              : loggingTableTimeFormat
+                  .format(DateTime.fromMillisecondsSinceEpoch(data.timestamp!)),
+        );
 }
 
 @visibleForTesting
 class KindMetaDataChip extends MetadataChip {
-  const KindMetaDataChip({
+  KindMetaDataChip({
     super.key,
     required super.data,
     required super.maxWidth,
-  });
-
-  @override
-  IconData getIcon() => Icons.type_specimen;
-
-  @override
-  String getValue() => data.kind;
-
-  @override
-  bool isPresent() {
-    return true;
-  }
+  }) : super(icon: Icons.type_specimen, text: data.kind);
 }
 
 @visibleForTesting
@@ -275,29 +261,6 @@ class FrameElapsedMetaDataChip extends MetadataChip {
     super.key,
     required super.data,
     required super.maxWidth,
-  });
-
-  @override
-  IconData getIcon() => Icons.timer;
-
-  String? _getValue() {
-    double? frameLength;
-    try {
-      final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
-      frameLength = micros * 3.0 / 1000.0;
-    } catch (e) {
-      // ignore
-    }
-    return frameLength?.toString();
-  }
-
-  @override
-  String getValue() {
-    return _getValue() ?? '';
-  }
-
-  @override
-  bool isPresent() {
-    return _getValue() != null;
-  }
+    required super.text,
+  }) : super(icon: Icons.timer);
 }

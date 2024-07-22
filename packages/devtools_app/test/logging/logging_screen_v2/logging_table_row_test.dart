@@ -31,85 +31,91 @@ void main() {
       final windowSize = Size(windowWidth, 500);
 
       testWidgetsWithWindowSize(
-          'Estimates the height of a row correctly for windowWidth: $windowWidth',
-          windowSize, (WidgetTester tester) async {
-        await tester.pumpWidget(
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              wrap(
-                LoggingTableRow(
-                  index: 0,
-                  data: data,
-                  isSelected: false,
-                ),
-              ),
-            ],
-          ),
-        );
-        expect(
-          LoggingTableRow.estimateRowHeight(data, windowWidth),
-          tester.getSize(find.byType(LoggingTableRow)).height,
-        );
-      });
-
-      testWidgetsWithWindowSize(
-          'Estimates the height of the wrapped chips correctly for windowWidth: $windowWidth',
-          windowSize, (WidgetTester tester) async {
-        final chips = LoggingTableRow.metadataChips(data, windowSize.width);
-        final wrapKey = GlobalKey();
-
-        expect(chips.length, numberOfChips);
-        await tester.pumpWidget(
-          wrap(
+        'Estimates the height of a row correctly for windowWidth: $windowWidth',
+        windowSize,
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Wrap(
-                  key: wrapKey,
-                  children: chips,
+                wrap(
+                  LoggingTableRow(
+                    index: 0,
+                    data: data,
+                    isSelected: false,
+                  ),
                 ),
               ],
             ),
-          ),
-        );
-        expect(
-          LoggingTableRow.estimateMetaDataWrapHeight(
-            data,
-            windowWidth,
-          ),
-          tester.getSize(find.byKey(wrapKey)).height,
-        );
-      });
+          );
+          expect(
+            LoggingTableRow.estimateRowHeight(data, windowWidth),
+            tester.getSize(find.byType(LoggingTableRow)).height,
+          );
+        },
+      );
+
+      testWidgetsWithWindowSize(
+        'Estimates the height of the wrapped chips correctly for windowWidth: $windowWidth',
+        windowSize,
+        (WidgetTester tester) async {
+          final chips = LoggingTableRow.metadataChips(data, windowSize.width);
+          final wrapKey = GlobalKey();
+
+          expect(chips.length, numberOfChips);
+          await tester.pumpWidget(
+            wrap(
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Wrap(
+                    key: wrapKey,
+                    children: chips,
+                  ),
+                ],
+              ),
+            ),
+          );
+          expect(
+            LoggingTableRow.estimateMetaDataWrapHeight(
+              data,
+              windowWidth,
+            ),
+            tester.getSize(find.byKey(wrapKey)).height,
+          );
+        },
+      );
     }
 
     testWidgetsWithWindowSize(
-        'estimates MetadataChip sizes correctly', windowSize,
-        (WidgetTester tester) async {
-      const numberOfChips = 3;
-      final data =
-          LogDataV2('someKind', '{"elapsed": 378564654}', 213567823783);
-      final chips = LoggingTableRow.metadataChips(data, windowSize.width);
-      final wrapKey = GlobalKey();
+      'estimates MetadataChip sizes correctly',
+      windowSize,
+      (WidgetTester tester) async {
+        const numberOfChips = 3;
+        final data =
+            LogDataV2('someKind', '{"elapsed": 378564654}', 213567823783);
+        final chips = LoggingTableRow.metadataChips(data, windowSize.width);
+        final wrapKey = GlobalKey();
 
-      await tester.pumpWidget(
-        wrap(
-          Wrap(
-            key: wrapKey,
-            children: chips,
+        await tester.pumpWidget(
+          wrap(
+            Wrap(
+              key: wrapKey,
+              children: chips,
+            ),
           ),
-        ),
-      );
+        );
 
-      final chipFinder = find.bySubtype<MetadataChip>();
+        final chipFinder = find.bySubtype<MetadataChip>();
 
-      expect(chipFinder, findsExactly(numberOfChips));
-      final chipElements = chipFinder.evaluate();
-      for (var i = 0; i < numberOfChips; i++) {
-        final chip = chips[i];
-        final chipElement = chipElements.elementAt(i);
-        expect(chip.estimateSize(), chipElement.size);
-      }
-    });
+        expect(chipFinder, findsExactly(numberOfChips));
+        final chipElements = chipFinder.evaluate();
+        for (var i = 0; i < numberOfChips; i++) {
+          final chip = chips[i];
+          final chipElement = chipElements.elementAt(i);
+          expect(chip.estimateSize(), chipElement.size);
+        }
+      },
+    );
   });
 }
