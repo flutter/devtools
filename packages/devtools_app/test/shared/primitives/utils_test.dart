@@ -1067,27 +1067,6 @@ void main() {
         expect(['a', 'b'].joinWith('z'), equals(['a', 'z', 'b']));
       });
 
-      test('containsWhere', () {
-        final list = [1, 2, 1, 2, 3, 4];
-        expect(list.containsWhere((element) => element == 1), isTrue);
-        expect(list.containsWhere((element) => element == 5), isFalse);
-        expect(list.containsWhere((element) => element + 2 == 3), isTrue);
-
-        final otherList = ['hi', 'hey', 'foo', 'bar'];
-        expect(
-          otherList.containsWhere((element) => element.contains('h')),
-          isTrue,
-        );
-        expect(
-          otherList.containsWhere((element) => element.startsWith('ba')),
-          isTrue,
-        );
-        expect(
-          otherList.containsWhere((element) => element.endsWith('ba')),
-          isFalse,
-        );
-      });
-
       test('allIndicesWhere', () {
         final list = [1, 2, 1, 2, 3, 4];
         expect(list.allIndicesWhere((element) => element.isEven), [1, 3, 5]);
@@ -1108,25 +1087,13 @@ void main() {
     });
 
     group('SetExtension', () {
-      test('containsWhere', () {
-        final set = {1, 2, 3, 4};
-        expect(set.containsWhere((element) => element == 1), isTrue);
-        expect(set.containsWhere((element) => element == 5), isFalse);
-        expect(set.containsWhere((element) => element + 2 == 3), isTrue);
-
-        final otherSet = {'hi', 'hey', 'foo', 'bar'};
-        expect(
-          otherSet.containsWhere((element) => element.contains('h')),
-          isTrue,
-        );
-        expect(
-          otherSet.containsWhere((element) => element.startsWith('ba')),
-          isTrue,
-        );
-        expect(
-          otherSet.containsWhere((element) => element.endsWith('ba')),
-          isFalse,
-        );
+      test('containsAny', () {
+        final test = {1, 2, 3, 4};
+        final subSet = {1, 2};
+        final disjointSet = {5, 6, 7};
+        expect(test.containsAny(test), true);
+        expect(test.containsAny(subSet), true);
+        expect(test.containsAny(disjointSet), false);
       });
     });
 

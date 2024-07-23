@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 import '../shared/globals.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/server/server.dart' as server;
 import 'extension_service_helpers.dart';
 
@@ -234,7 +233,7 @@ class ExtensionService extends DisposableController
       // not always be true for extensions that are not published on pub or
       // extensions that do not follow best practices for naming.
       final isRuntimeDuplicate = runtimeExtensions
-          .containsWhere((ext) => ext.name == staticExtension.name);
+          .any((ext) => ext.name == staticExtension.name);
       if (isRuntimeDuplicate) {
         _log.fine(
           'ignoring duplicate static extension ${staticExtension.identifier} '
