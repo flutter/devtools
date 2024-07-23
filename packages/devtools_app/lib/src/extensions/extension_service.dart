@@ -232,8 +232,8 @@ class ExtensionService extends DisposableController
       // _should_ be unique since they match a pub package name, but this may
       // not always be true for extensions that are not published on pub or
       // extensions that do not follow best practices for naming.
-      final isRuntimeDuplicate = runtimeExtensions
-          .any((ext) => ext.name == staticExtension.name);
+      final isRuntimeDuplicate =
+          runtimeExtensions.any((ext) => ext.name == staticExtension.name);
       if (isRuntimeDuplicate) {
         _log.fine(
           'ignoring duplicate static extension ${staticExtension.identifier} '
