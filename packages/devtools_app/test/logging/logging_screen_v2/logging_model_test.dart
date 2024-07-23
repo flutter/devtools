@@ -43,6 +43,9 @@ void main() {
 
     TestWidgetsFlutterBinding.ensureInitialized();
     loggingTableModel = LoggingTableModel();
+
+    // Set a generic width for all tests
+    loggingTableModel.tableWidth = 500;
   });
 
   tearDown(() {
@@ -52,7 +55,6 @@ void main() {
   group('LoggingModel', () {
     testWidgets('can add logs', (WidgetTester tester) async {
       await pumpForContext(tester);
-
       expect(loggingTableModel.logCount, 0);
       expect(loggingTableModel.filteredLogCount, 0);
       expect(loggingTableModel.selectedLogCount, 0);
