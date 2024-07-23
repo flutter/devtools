@@ -602,9 +602,7 @@ class InspectorController extends DisposableController
     animateTo(selectedNode.value);
   }
 
-  Future<void> _loadPropertiesForNode(
-    InspectorTreeNode? node,
-  ) async {
+  Future<void> _loadPropertiesForNode(InspectorTreeNode? node) async {
     final properties = <RemoteDiagnosticsNode>[];
     final diagnostic = node?.diagnostic;
     final objectGroupApi = diagnostic?.objectGroupApi;
@@ -612,23 +610,29 @@ class InspectorController extends DisposableController
       try {
         // Fetch widget properties:
         final widgetProperties = await diagnostic.getProperties(objectGroupApi);
+        // Check if the selected node has changed, and if so return early:
+        if (_selectedNode.value != node) {
+          return;
+        }
         properties.addAll(widgetProperties);
         // Fetch RenderObject properties:
-        for (final widgetProperty in widgetProperties) {
-          if (widgetProperty.propertyType == 'RenderObject') {
-            final renderProperties =
-                await widgetProperty.getProperties(objectGroupApi);
-            // Only display RenderObject properties that are not already set on
-            // the widget:
-            for (final renderProperty in renderProperties) {
-              final propertyOnWidget = widgetProperties
-                      .firstWhereOrNull((p) => p.name == renderProperty.name) !=
-                  null;
-              if (!propertyOnWidget) {
-                properties.add(renderProperty);
-              }
-            }
+        for (final widgetProperty in widgetProperties
+            .where((p) => p.propertyType == 'RenderObject')) {
+          final renderProperties =
+              await widgetProperty.getProperties(objectGroupApi);
+          // Check if the selected node has changed, and if so return early:
+          if (_selectedNode.value != node) {
+            return;
           }
+          // Only display RenderObject properties that are not already set on
+          // the widget:
+          properties.addAll(
+            renderProperties.where(
+              (renderProperty) => widgetProperties.none(
+                (widgetProperty) => widgetProperty.name == renderProperty.name,
+              ),
+            ),
+          );
         }
       } catch (e, st) {
         _log.warning(e, st);

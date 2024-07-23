@@ -6,7 +6,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/diagnostics/diagnostics_node.dart';
-import '../../../shared/diagnostics_text_styles.dart';
 import '../inspector_controller.dart';
 
 class PropertiesView extends StatelessWidget {
@@ -58,10 +57,6 @@ class PropertyItem extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: _calculateBorderRadiusForRow(
-          rowIndex: index,
-          totalRows: properties.length,
-        ),
         border: _calculateBorderForRow(
           rowIndex: index,
           theme: theme,
@@ -78,27 +73,6 @@ class PropertyItem extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  BorderRadius _calculateBorderRadiusForRow({
-    required int rowIndex,
-    required int totalRows,
-  }) {
-    // Rounded top corners for the first row:
-    if (rowIndex == 0) {
-      return const BorderRadius.only(
-        topLeft: defaultRadius,
-        topRight: defaultRadius,
-      );
-    }
-    // Rounded bottom corners for the last row:
-    if (rowIndex == (totalRows - 1)) {
-      return const BorderRadius.only(
-        bottomLeft: defaultRadius,
-        bottomRight: defaultRadius,
-      );
-    }
-    return BorderRadius.zero;
   }
 
   Border _calculateBorderForRow({
@@ -137,9 +111,7 @@ class PropertyName extends StatelessWidget {
       padding: const EdgeInsets.all(denseRowSpacing),
       child: Text(
         property.name ?? '',
-        style: DiagnosticsTextStyles.regular(
-          theme.colorScheme,
-        ).merge(theme.subtleTextStyle),
+        style: theme.subtleTextStyle,
       ),
     );
   }
@@ -159,7 +131,7 @@ class PropertyValue extends StatelessWidget {
       padding: const EdgeInsets.all(denseRowSpacing),
       child: Text(
         property.description ?? 'null',
-        style: DiagnosticsTextStyles.regular(Theme.of(context).colorScheme),
+        style: Theme.of(context).regularTextStyle,
       ),
     );
   }

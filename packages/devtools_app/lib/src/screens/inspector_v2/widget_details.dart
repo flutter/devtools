@@ -33,16 +33,6 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
   RemoteDiagnosticsNode? get selectedNode =>
       controller.selectedNode.value?.diagnostic;
 
-  Widget? _layoutExplorerForNode(RemoteDiagnosticsNode node) {
-    if (FlexLayoutExplorerWidget.shouldDisplay(node)) {
-      return FlexLayoutExplorerWidget(controller);
-    }
-    if (BoxLayoutExplorerWidget.shouldDisplay(node)) {
-      return BoxLayoutExplorerWidget(controller);
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<InspectorTreeNode?>(
@@ -59,7 +49,6 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
           );
         }
 
-        final layoutExplorer = _layoutExplorerForNode(node);
         return RoundedOutlinedBorder(
           child: SplitPane(
             axis: isScreenWiderThan(
@@ -70,14 +59,17 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
                 : Axis.vertical,
             initialFractions: const [0.5, 0.5],
             children: [
-              layoutExplorer ??
-                  const Center(
-                    child: Text(
-                      'Currently, the Layout Explorer only supports Box and Flex-based widgets.',
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.clip,
-                    ),
-                  ),
+              FlexLayoutExplorerWidget.shouldDisplay(node)
+                  ? FlexLayoutExplorerWidget(controller)
+                  : BoxLayoutExplorerWidget.shouldDisplay(node)
+                      ? BoxLayoutExplorerWidget(controller)
+                      : const Center(
+                          child: Text(
+                            'Currently, the Layout Explorer only supports Box and Flex-based widgets.',
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.clip,
+                          ),
+                        ),
               PropertiesView(controller: controller, node: node),
             ],
           ),
