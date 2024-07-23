@@ -11,25 +11,25 @@ import 'package:vm_service/vm_service.dart';
 // ignore: avoid_classes_with_only_static_members, ok for enum-like class
 class _Tests {
   static final emptyConnected = TracePaneController(
-    ControllerCreationMode.connected,
+    MemoryControllerCreationMode.connected,
     rootPackage: '',
   );
 
   static final emptyOffline = TracePaneController(
-    ControllerCreationMode.offlineData,
+    MemoryControllerCreationMode.offlineData,
     rootPackage: '',
   );
 
   static final selection = TracePaneController(
-    ControllerCreationMode.connected,
+    MemoryControllerCreationMode.connected,
     stateForIsolate: {
       'isolate1': TracingIsolateState(
         isolate: IsolateRef(id: 'isolate1'),
-        mode: ControllerCreationMode.connected,
+        mode: MemoryControllerCreationMode.connected,
       ),
       'isolate2': TracingIsolateState(
         isolate: IsolateRef(id: 'isolate2'),
-        mode: ControllerCreationMode.connected,
+        mode: MemoryControllerCreationMode.connected,
       ),
     },
     rootPackage: 'root',
@@ -37,15 +37,15 @@ class _Tests {
   );
 
   static final noSelection = TracePaneController(
-    ControllerCreationMode.connected,
+    MemoryControllerCreationMode.connected,
     stateForIsolate: {
       'isolate1': TracingIsolateState(
         isolate: IsolateRef(id: 'isolate1'),
-        mode: ControllerCreationMode.connected,
+        mode: MemoryControllerCreationMode.connected,
       ),
       'isolate2': TracingIsolateState(
         isolate: IsolateRef(id: 'isolate2'),
-        mode: ControllerCreationMode.connected,
+        mode: MemoryControllerCreationMode.connected,
       ),
     },
     rootPackage: 'root',
@@ -64,15 +64,15 @@ void main() {
     expect(
       () => TracePaneController(
         rootPackage: 'root',
-        ControllerCreationMode.connected,
+        MemoryControllerCreationMode.connected,
         stateForIsolate: {
           'isolate1': TracingIsolateState(
             isolate: IsolateRef(id: 'isolate1'),
-            mode: ControllerCreationMode.connected,
+            mode: MemoryControllerCreationMode.connected,
           ),
           'isolate2': TracingIsolateState(
             isolate: IsolateRef(id: 'isolate2'),
-            mode: ControllerCreationMode.connected,
+            mode: MemoryControllerCreationMode.connected,
           ),
         },
         selectedIsolateId: 'isolate3',
@@ -82,19 +82,19 @@ void main() {
   });
 
   test('$TracePaneController construction', () {
-    expect(_Tests.emptyConnected.mode, ControllerCreationMode.connected);
+    expect(_Tests.emptyConnected.mode, MemoryControllerCreationMode.connected);
     expect(_Tests.emptyConnected.selection.value.isolate.id, null);
     expect(_Tests.emptyConnected.stateForIsolate.length, 0);
 
-    expect(_Tests.emptyOffline.mode, ControllerCreationMode.offlineData);
+    expect(_Tests.emptyOffline.mode, MemoryControllerCreationMode.offlineData);
     expect(_Tests.emptyOffline.selection.value.isolate.id, null);
     expect(_Tests.emptyOffline.stateForIsolate.length, 0);
 
-    expect(_Tests.selection.mode, ControllerCreationMode.connected);
+    expect(_Tests.selection.mode, MemoryControllerCreationMode.connected);
     expect(_Tests.selection.selection.value.isolate.id, 'isolate1');
     expect(_Tests.selection.stateForIsolate.length, 2);
 
-    expect(_Tests.noSelection.mode, ControllerCreationMode.connected);
+    expect(_Tests.noSelection.mode, MemoryControllerCreationMode.connected);
     expect(_Tests.noSelection.selection.value.isolate.id, null);
     expect(_Tests.noSelection.stateForIsolate.length, 2);
   });
@@ -112,7 +112,7 @@ void main() {
         );
         final fromJson = TracePaneController.fromJson(json);
 
-        expect(fromJson.mode, ControllerCreationMode.offlineData);
+        expect(fromJson.mode, MemoryControllerCreationMode.offlineData);
         expect(
           fromJson.selection.value.isolate.id,
           trace.selection.value.isolate.id,
