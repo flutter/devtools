@@ -26,8 +26,8 @@ import '../../shared/screen.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import 'inspector_controller.dart';
-import 'inspector_screen_details_tab.dart';
 import 'inspector_tree_controller.dart';
+import 'widget_details.dart';
 
 class InspectorScreen extends Screen {
   InspectorScreen() : super.fromMetaData(ScreenMetaData.inspector);
@@ -144,9 +144,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       initialFractions: const [0.33, 0.67],
       children: [
         inspectorTree,
-        InspectorDetails(
-          controller: controller,
-        ),
+        WidgetDetails(controller: controller),
       ],
     );
     return Column(
