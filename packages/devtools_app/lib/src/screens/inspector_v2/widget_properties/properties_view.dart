@@ -71,7 +71,7 @@ class PropertiesView extends StatelessWidget {
               primary: true,
               child: Table(
                 border: TableBorder.all(
-                  color: Colors.transparent,
+                  color: Theme.of(context).focusColor,
                   borderRadius: defaultBorderRadius,
                 ),
                 children: [
@@ -82,9 +82,10 @@ class PropertiesView extends StatelessWidget {
                           rowIndex: i,
                           totalRows: properties.length,
                         ),
-                        color: i % 2 == 0
-                            ? Theme.of(context).primaryColorDark
-                            : Theme.of(context).primaryColor,
+                        color: alternatingColorForIndex(
+                          i,
+                          Theme.of(context).colorScheme,
+                        ),
                       ),
                       children: [
                         TableCell(
