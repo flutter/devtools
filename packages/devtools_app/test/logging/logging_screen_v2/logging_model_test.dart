@@ -81,6 +81,7 @@ void main() {
           final frameElapsedLog =
               LogDataV2('frameLog', '{"elapsed": 1000000}', 4684506);
           double? columnWidth;
+          final frameElapsedKey = GlobalKey();
 
           await tester.pumpWidget(
             wrap(
@@ -101,6 +102,7 @@ void main() {
                         isSelected: false,
                       ),
                       LoggingTableRow(
+                        key: frameElapsedKey,
                         index: 2,
                         data: frameElapsedLog,
                         isSelected: false,
@@ -126,27 +128,26 @@ void main() {
 
           final shortWidgetFinder = findLogRow(shortLog.details!);
           final longWidgetFinder = findLogRow(longLog.details!);
-          final frameElapsedFinder = findLogRow(frameElapsedLog.details!);
+          final frameElapsedFinder = find.byKey(frameElapsedKey);
 
           await tester.runAsync(() async {
             // tester.runAsync is needed here to prevent the ChunkWorker
             // in set tableWidth from blocking in the test. The Future.delayed
             // in it would hang otherwise.
-            loggingTableModel.tableWidth =
-                tester.getSize(shortWidgetFinder).width;
+            loggingTableModel.tableWidth = windowWidth;
           });
 
           expect(
-            tester.getSize(shortWidgetFinder).height,
             loggingTableModel.getFilteredLogHeight(0),
+            tester.getSize(shortWidgetFinder).height,
           );
           expect(
-            tester.getSize(longWidgetFinder).height,
             loggingTableModel.getFilteredLogHeight(1),
+            tester.getSize(longWidgetFinder).height,
           );
           expect(
-            tester.getSize(frameElapsedFinder).height,
             loggingTableModel.getFilteredLogHeight(2),
+            tester.getSize(frameElapsedFinder).height,
           );
         },
       );
