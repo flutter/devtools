@@ -16,6 +16,7 @@ library;
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -199,6 +200,11 @@ class InspectorController extends DisposableController
 
   ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
   final _selectedNode = ValueNotifier<InspectorTreeNode?>(null);
+
+  ValueListenable<List<RemoteDiagnosticsNode>> get selectedNodeProperties =>
+      _selectedNodeProperties;
+  final _selectedNodeProperties =
+      ValueNotifier<List<RemoteDiagnosticsNode>>([]);
 
   InspectorTreeNode? lastExpanded;
 
@@ -592,7 +598,43 @@ class InspectorController extends DisposableController
     endShowNode();
 
     _updateSelectedErrorFromNode(_selectedNode.value);
+    unawaited(_loadPropertiesForNode(_selectedNode.value));
     animateTo(selectedNode.value);
+  }
+
+  Future<void> _loadPropertiesForNode(
+    InspectorTreeNode? node,
+  ) async {
+    final properties = <RemoteDiagnosticsNode>[];
+    final diagnostic = node?.diagnostic;
+    final objectGroupApi = diagnostic?.objectGroupApi;
+    if (diagnostic != null && objectGroupApi != null) {
+      try {
+        // Fetch widget properties:
+        final widgetProperties = await diagnostic.getProperties(objectGroupApi);
+        properties.addAll(widgetProperties);
+        // Fetch RenderObject properties:
+        for (final widgetProperty in widgetProperties) {
+          if (widgetProperty.propertyType == 'RenderObject') {
+            final renderProperties =
+                await widgetProperty.getProperties(objectGroupApi);
+            // Only display RenderObject properties that are not already set on
+            // the widget:
+            for (final renderProperty in renderProperties) {
+              final propertyOnWidget = widgetProperties
+                      .firstWhereOrNull((p) => p.name == renderProperty.name) !=
+                  null;
+              if (!propertyOnWidget) {
+                properties.add(renderProperty);
+              }
+            }
+          }
+        }
+      } catch (e, st) {
+        _log.warning(e, st);
+      }
+    }
+    _selectedNodeProperties.value = properties;
   }
 
   /// Update the index of the selected error based on a node that has been

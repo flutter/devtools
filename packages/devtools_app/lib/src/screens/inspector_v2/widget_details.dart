@@ -30,47 +30,8 @@ class WidgetDetails extends StatefulWidget {
 class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
   InspectorController get controller => widget.controller;
 
-  RemoteDiagnosticsNode? get selected =>
+  RemoteDiagnosticsNode? get selectedNode =>
       controller.selectedNode.value?.diagnostic;
-
-  RemoteDiagnosticsNode? previousSelection;
-
-  Widget rootWidget(RemoteDiagnosticsNode? node) {
-    if (node == null) {
-      return const Center(
-        child: Text(
-          'Select a widget to view its layout.',
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.clip,
-        ),
-      );
-    }
-
-    final layoutExplorer = _layoutExplorerForNode(node);
-    return SplitPane(
-      axis: isScreenWiderThan(
-        context,
-        InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
-      )
-          ? Axis.horizontal
-          : Axis.vertical,
-      initialFractions: const [0.5, 0.5],
-      children: [
-        layoutExplorer != null
-            ? RoundedOutlinedBorder(child: layoutExplorer)
-            : const Center(
-                child: Text(
-                  'Currently, the Layout Explorer only supports Box and Flex-based widgets.',
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.clip,
-                ),
-              ),
-        RoundedOutlinedBorder(
-          child: PropertiesView(controller: controller, node: node),
-        ),
-      ],
-    );
-  }
 
   Widget? _layoutExplorerForNode(RemoteDiagnosticsNode node) {
     if (FlexLayoutExplorerWidget.shouldDisplay(node)) {
@@ -87,7 +48,40 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
     return ValueListenableBuilder<InspectorTreeNode?>(
       valueListenable: controller.selectedNode,
       builder: (context, _, __) {
-        return rootWidget(selected);
+        final node = selectedNode;
+        if (node == null) {
+          return const Center(
+            child: Text(
+              'Select a widget to view its layout.',
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.clip,
+            ),
+          );
+        }
+
+        final layoutExplorer = _layoutExplorerForNode(node);
+        return RoundedOutlinedBorder(
+          child: SplitPane(
+            axis: isScreenWiderThan(
+              context,
+              InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+            )
+                ? Axis.horizontal
+                : Axis.vertical,
+            initialFractions: const [0.5, 0.5],
+            children: [
+              layoutExplorer ??
+                  const Center(
+                    child: Text(
+                      'Currently, the Layout Explorer only supports Box and Flex-based widgets.',
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.clip,
+                    ),
+                  ),
+              PropertiesView(controller: controller, node: node),
+            ],
+          ),
+        );
       },
     );
   }
