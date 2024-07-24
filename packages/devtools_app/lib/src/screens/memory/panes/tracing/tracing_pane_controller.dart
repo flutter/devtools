@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/simple_items.dart';
 import 'tracing_data.dart';
 
 @visibleForTesting
@@ -22,8 +21,7 @@ enum Json {
 
 class TracePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
-  TracePaneController(
-    this.mode, {
+  TracePaneController({
     Map<String, TracingIsolateState>? stateForIsolate,
     String? selectedIsolateId,
     required this.rootPackage,
@@ -43,7 +41,6 @@ class TracePaneController extends DisposableController
 
   factory TracePaneController.fromJson(Map<String, dynamic> json) {
     return TracePaneController(
-      MemoryControllerCreationMode.offlineData,
       stateForIsolate: (json[Json.stateForIsolate.name] as Map).map(
         (key, value) => MapEntry(
           key,
@@ -63,8 +60,6 @@ class TracePaneController extends DisposableController
       Json.rootPackage.name: rootPackage,
     };
   }
-
-  final MemoryControllerCreationMode mode;
 
   /// Maps isolate IDs to their allocation tracing states.
   late final Map<String, TracingIsolateState> stateForIsolate;
@@ -112,7 +107,7 @@ class TracePaneController extends DisposableController
         // TODO(bkonyi): we don't need to request this unless we've had a hot reload.
         // We generally need to rebuild this data if we've had a hot reload or
         // switched the currently selected isolate.
-        state = TracingIsolateState(isolate: isolate, mode: mode);
+        state = TracingIsolateState(isolate: isolate);
         await state.initialize();
         stateForIsolate[isolateId] = state;
       }
@@ -121,7 +116,7 @@ class TracePaneController extends DisposableController
       _selection.value = state;
     }
 
-    if (mode == MemoryControllerCreationMode.connected) {
+    if (!offlineDataController.showingOfflineData.value) {
       addAutoDisposeListener(
         serviceConnection.serviceManager.isolateManager.selectedIsolate,
         updateState,

@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/banner_messages.dart';
 import '../../../shared/common_widgets.dart';
+import '../../../shared/globals.dart';
 import '../../../shared/http/http_service.dart' as http_service;
-import '../../../shared/primitives/simple_items.dart';
 import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
 import '../panes/chart/widgets/chart_pane.dart';
@@ -43,7 +43,7 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
 
     if (!initController()) return;
 
-    if (controller.mode == MemoryControllerCreationMode.connected) {
+    if (!offlineDataController.showingOfflineData.value) {
       maybePushDebugModeMemoryMessage(context, ScreenMetaData.memory.id);
       maybePushHttpLoggingMessage(context, ScreenMetaData.memory.id);
 
@@ -63,7 +63,9 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
             key: MemoryChartPane.hoverKey,
             children: [
               MemoryControlPane(
-                controller: controller.control,
+                isGcing: controller.isGcing,
+                onGc: controller.gc,
+                onSave: controller.exportData,
               ),
               const SizedBox(height: intermediateSpacing),
               MemoryChartPane(

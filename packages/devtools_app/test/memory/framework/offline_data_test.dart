@@ -10,13 +10,11 @@ import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_d
 import 'package:devtools_app/src/screens/memory/framework/offline_data/offline_data.dart'
     as offline_data show Json;
 import 'package:devtools_app/src/screens/memory/panes/chart/controller/chart_data.dart';
-import 'package:devtools_app/src/screens/memory/panes/chart/data/primitives.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
-import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -75,21 +73,13 @@ void main() {
       () {
         final item = OfflineMemoryData(
           DiffPaneController(loader: null, rootPackage: 'root'),
-          ProfilePaneController(
-            mode: MemoryControllerCreationMode.connected,
-            rootPackage: 'root',
-          ),
+          ProfilePaneController(rootPackage: 'root'),
           ChartData(
-            mode: MemoryControllerCreationMode.offlineData,
             isDeviceAndroid: true,
             timeline: MemoryTimeline(),
-            interval: ChartInterval.theDefault,
             isLegendVisible: true,
           ),
-          TracePaneController(
-            MemoryControllerCreationMode.offlineData,
-            rootPackage: '',
-          ),
+          TracePaneController(rootPackage: ''),
           ClassFilter.empty(),
           selectedTab: 0,
         );
@@ -114,18 +104,18 @@ void main() {
           item.diff.core.snapshots.value.length,
         );
         expect(fromJson.profile!.rootPackage, item.profile!.rootPackage);
-        expect(fromJson.chart!.isDeviceAndroid, item.chart!.isDeviceAndroid);
+        expect(fromJson.chart.isDeviceAndroid, item.chart.isDeviceAndroid);
         expect(
-          fromJson.chart!.timeline.data.length,
-          item.chart!.timeline.data.length,
+          fromJson.chart.timeline.data.length,
+          item.chart.timeline.data.length,
         );
         expect(
-          fromJson.chart!.displayInterval.name,
-          item.chart!.displayInterval.name,
+          fromJson.chart.displayInterval.name,
+          item.chart.displayInterval.name,
         );
         expect(
-          fromJson.chart!.isLegendVisible.value,
-          item.chart!.isLegendVisible.value,
+          fromJson.chart.isLegendVisible.value,
+          item.chart.isLegendVisible.value,
         );
         expect(
           fromJson.trace!.selection.value.isolate.id,

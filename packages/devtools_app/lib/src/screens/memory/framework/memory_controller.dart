@@ -6,16 +6,14 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../../shared/globals.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
 import '../../../shared/offline_data.dart';
-import '../../../shared/primitives/simple_items.dart';
 import '../../../shared/screen.dart';
+import '../panes/chart/controller/chart_data.dart';
 import '../panes/chart/controller/chart_pane_controller.dart';
-import '../panes/control/controller/control_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
 import '../panes/profile/profile_pane_controller.dart';
 import '../panes/tracing/tracing_pane_controller.dart';
@@ -36,15 +34,6 @@ class MemoryController extends DisposableController
     @visibleForTesting ProfilePaneController? connectedProfile,
     @visibleForTesting OfflineMemoryData? offlineData,
   }) {
-    if (offlineData != null) {
-      mode = MemoryControllerCreationMode.offlineData;
-    } else if (connectedDiff != null || connectedProfile != null) {
-      mode = MemoryControllerCreationMode.connected;
-    } else {
-      mode = offlineDataController.showingOfflineData.value
-          ? MemoryControllerCreationMode.offlineData
-          : MemoryControllerCreationMode.connected;
-    }
     unawaited(
       _init(
         connectedDiff: connectedDiff,
@@ -56,11 +45,6 @@ class MemoryController extends DisposableController
 
   Future<void> get initialized => _dataInitialized.future;
   final _dataInitialized = Completer<void>();
-
-  /// DevTools mode at the time of creation of the controller.
-  ///
-  /// DevTools will recreate controller when the mode changes.
-  late final MemoryControllerCreationMode mode;
 
   /// Index of the selected feature tab.
   ///
@@ -77,8 +61,6 @@ class MemoryController extends DisposableController
   late final MemoryChartPaneController chart;
 
   late final TracePaneController? trace;
-
-  late final MemoryControlPaneController control;
 
   @override
   void dispose() {
@@ -98,27 +80,26 @@ class MemoryController extends DisposableController
     @visibleForTesting OfflineMemoryData? offlineData,
   }) async {
     assert(!_dataInitialized.isCompleted);
-    switch (mode) {
-      case MemoryControllerCreationMode.connected:
-        await serviceConnection.serviceManager.onServiceAvailable;
-        _initializeData(
-          diffPaneController: connectedDiff,
-          profilePaneController: connectedProfile,
-        );
-      case MemoryControllerCreationMode.offlineData:
-        assert(connectedDiff == null && connectedProfile == null);
-        final loaded = await maybeLoadOfflineData(
-          ScreenMetaData.memory.id,
-          createData: createData,
-          shouldLoad: (data) => true,
-          loadData: (data) => _initializeData(offlineData: data),
-        );
-        // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
-        //  so ensure we still call [_initializedData] if it has not been called.
-        assert(loaded == _dataInitialized.isCompleted);
-        if (!_dataInitialized.isCompleted) {
-          _initializeData(offlineData: offlineData);
-        }
+    if (!offlineDataController.showingOfflineData.value) {
+      await serviceConnection.serviceManager.onServiceAvailable;
+      _initializeData(
+        diffPaneController: connectedDiff,
+        profilePaneController: connectedProfile,
+      );
+    } else {
+      assert(connectedDiff == null && connectedProfile == null);
+      final loaded = await maybeLoadOfflineData(
+        ScreenMetaData.memory.id,
+        createData: createData,
+        shouldLoad: (data) => true,
+        loadData: (data) => _initializeData(offlineData: data),
+      );
+      // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
+      //  so ensure we still call [_initializedData] if it has not been called.
+      assert(loaded == _dataInitialized.isCompleted);
+      if (!_dataInitialized.isCompleted) {
+        _initializeData(offlineData: offlineData);
+      }
     }
     assert(_dataInitialized.isCompleted);
     assert(profile == null || profile!.rootPackage == diff.core.rootPackage);
@@ -138,9 +119,12 @@ class MemoryController extends DisposableController
   }) {
     assert(!_dataInitialized.isCompleted);
 
-    final isConnected = mode == MemoryControllerCreationMode.connected;
+    final isConnected =
+        serviceConnection.serviceManager.connectedState.value.connected;
 
-    chart = MemoryChartPaneController(mode, data: offlineData?.chart);
+    chart = MemoryChartPaneController(
+      data: offlineData != null ? offlineData.chart : ChartData(),
+    );
 
     final rootPackage = isConnected
         ? serviceConnection.serviceManager.rootInfoNow().package!
@@ -156,19 +140,9 @@ class MemoryController extends DisposableController
 
     profile = profilePaneController ??
         offlineData?.profile ??
-        ProfilePaneController(
-          mode: mode,
-          rootPackage: rootPackage!,
-        );
+        ProfilePaneController(rootPackage: rootPackage!);
 
-    control = MemoryControlPaneController(
-      chart.data.timeline,
-      mode,
-      exportData: exportData,
-    );
-
-    trace = offlineData?.trace ??
-        TracePaneController(mode, rootPackage: rootPackage);
+    trace = offlineData?.trace ?? TracePaneController(rootPackage: rootPackage);
 
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;
@@ -211,5 +185,23 @@ class MemoryController extends DisposableController
         diff.core.classFilter.value,
       );
     });
+  }
+
+  ValueListenable<bool> get isGcing => _gcing;
+  final _gcing = ValueNotifier<bool>(false);
+
+  Future<void> gc() async {
+    _gcing.value = true;
+    try {
+      await serviceConnection.serviceManager.service!.getAllocationProfile(
+        (serviceConnection
+            .serviceManager.isolateManager.selectedIsolate.value?.id)!,
+        gc: true,
+      );
+      chart.data.timeline.addGCEvent();
+      notificationService.push('Successfully garbage collected.');
+    } finally {
+      _gcing.value = false;
+    }
   }
 }
