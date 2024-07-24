@@ -32,7 +32,7 @@ class MemoryOfflineScene extends Scene {
           return const CircularProgressIndicator();
         }
         return wrapWithControllers(
-          const MemoryBody(),
+          const MemoryScreenBody(),
           memory: value,
         );
       },
@@ -43,7 +43,7 @@ class MemoryOfflineScene extends Scene {
     await tester.pumpSceneAsync(this);
     // Delay to ensure the memory profiler has collected data.
     await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byType(MemoryBody), findsOneWidget);
+    expect(find.byType(MemoryScreenBody), findsOneWidget);
   }
 
   /// Sets up the scene.

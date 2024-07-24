@@ -63,7 +63,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const MemoryBody(),
+        const MemoryScreenBody(),
         memory: controller,
       ),
     );
@@ -71,7 +71,7 @@ void main() {
     // Delay to ensure the memory profiler has collected data.
     await tester
         .runAsync(() async => tester.pumpAndSettle(const Duration(seconds: 1)));
-    expect(find.byType(MemoryBody), findsOneWidget);
+    expect(find.byType(MemoryScreenBody), findsOneWidget);
   }
 
   // Set a wide enough screen width that we do not run into overflow.

@@ -43,7 +43,7 @@ class TracePaneController extends DisposableController
 
   factory TracePaneController.fromJson(Map<String, dynamic> json) {
     return TracePaneController(
-      ControllerCreationMode.offlineData,
+      MemoryControllerCreationMode.offlineData,
       stateForIsolate: (json[Json.stateForIsolate.name] as Map).map(
         (key, value) => MapEntry(
           key,
@@ -64,7 +64,7 @@ class TracePaneController extends DisposableController
     };
   }
 
-  final ControllerCreationMode mode;
+  final MemoryControllerCreationMode mode;
 
   /// Maps isolate IDs to their allocation tracing states.
   late final Map<String, TracingIsolateState> stateForIsolate;
@@ -121,7 +121,7 @@ class TracePaneController extends DisposableController
       _selection.value = state;
     }
 
-    if (mode == ControllerCreationMode.connected) {
+    if (mode == MemoryControllerCreationMode.connected) {
       addAutoDisposeListener(
         serviceConnection.serviceManager.isolateManager.selectedIsolate,
         updateState,

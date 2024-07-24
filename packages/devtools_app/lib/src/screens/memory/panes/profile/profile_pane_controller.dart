@@ -28,8 +28,8 @@ class ProfilePaneController extends DisposableController
     required this.rootPackage,
     AdaptedProfile? profile,
   }) : assert(
-          (mode == ControllerCreationMode.connected && profile == null) ||
-              (mode == ControllerCreationMode.offlineData),
+          (mode == MemoryControllerCreationMode.connected && profile == null) ||
+              (mode == MemoryControllerCreationMode.offlineData),
         ) {
     if (profile != null) {
       _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
@@ -42,7 +42,7 @@ class ProfilePaneController extends DisposableController
 
   factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
     return ProfilePaneController(
-      mode: ControllerCreationMode.offlineData,
+      mode: MemoryControllerCreationMode.offlineData,
       profile: deserialize(json[Json.profile.name], AdaptedProfile.fromJson),
       rootPackage: json[Json.rootPackage.name],
     );
@@ -56,7 +56,7 @@ class ProfilePaneController extends DisposableController
     };
   }
 
-  final ControllerCreationMode mode;
+  final MemoryControllerCreationMode mode;
 
   bool _initialized = false;
 
@@ -64,7 +64,7 @@ class ProfilePaneController extends DisposableController
   void initialize() {
     if (_initialized) return;
 
-    if (mode == ControllerCreationMode.connected) {
+    if (mode == MemoryControllerCreationMode.connected) {
       autoDisposeStreamSubscription(
         serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
           if (refreshOnGc.value) {
