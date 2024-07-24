@@ -205,9 +205,6 @@ class DeepLinksController extends DisposableController
     return getFilterredLinks(linkDatasByDomain.values.toList());
   }
 
-  @visibleForTesting
-  bool get enableIosCheck => FeatureFlags.deepLinkIosCheck;
-
   AppLinkSettings? get currentAppLinkSettings =>
       _androidAppLinks[selectedAndroidVariantIndex.value];
 
@@ -245,7 +242,7 @@ class DeepLinksController extends DisposableController
       selectedProject.value!.androidVariants,
       containsString: 'release',
     );
-    if (enableIosCheck) {
+    if (FeatureFlags.deepLinkIosCheck) {
       _selectedIosConfigurationIndex.value = _getDefaultConfigurationIndex(
         selectedProject.value!.iosBuildOptions.configurations,
         containsString: 'release',
@@ -342,7 +339,7 @@ class DeepLinksController extends DisposableController
     if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
     }
-    if (enableIosCheck) {
+    if (FeatureFlags.deepLinkIosCheck) {
       await _loadIosLinks();
       if (pagePhase.value == PagePhase.validationErrorPage) {
         return;
@@ -509,7 +506,7 @@ class DeepLinksController extends DisposableController
       androidDomainErrors = androidResult.domainErrors;
       googlePlayFingerprintsAvailability.value =
           androidResult.googlePlayFingerprintsAvailability;
-      if (enableIosCheck) {
+      if (FeatureFlags.deepLinkIosCheck) {
         iosDomainErrors = await deepLinksServices.validateIosDomain(
           domains: domains,
         );
@@ -571,7 +568,7 @@ class DeepLinksController extends DisposableController
     pagePhase.value = PagePhase.linksValidating;
     List<LinkData> linkdata = [
       ..._rawAndroidLinkDatas,
-      if (enableIosCheck) ..._rawIosLinkDatas,
+      if (FeatureFlags.deepLinkIosCheck) ..._rawIosLinkDatas,
     ];
     if (linkdata.isEmpty) {
       ga.select(

@@ -15,9 +15,6 @@ class DeepLinksTestController extends DeepLinksController {
   }
 
   @override
-  bool get enableIosCheck => true;
-
-  @override
   Future<void> validateLinks() async {
     if (validatedLinkDatas.all.isEmpty) {
       return;
