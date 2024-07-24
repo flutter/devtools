@@ -228,7 +228,7 @@ class DeepLinksController extends DisposableController
   }
 
   void updateSelectedIosConfigurationIndex(int index) {
-    _selectedAndroidVariantIndex.value = index;
+    _selectedIosConfigurationIndex.value = index;
     _handleIosConfigurationChanged();
   }
 
