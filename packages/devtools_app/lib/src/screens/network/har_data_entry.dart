@@ -1,3 +1,7 @@
+// Copyright 2024 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 
 import '../../shared/http/http_request_data.dart';
@@ -172,7 +176,7 @@ class HarDataEntry {
     };
   }
 
-  /// Converts the HAR data entry back to [DartIOHttpRequestData].
+  /// Returns the original [DartIOHttpRequestData] that this HAR entry was created from or parsed into.
   DartIOHttpRequestData toDartIOHttpRequest() {
     return request;
   }
@@ -204,7 +208,7 @@ class HarDataEntry {
     return transformedHeaders;
   }
 
-  // Convert list of headers to map
+  /// Convert list of headers to map
   static void _convertHeaders(Map<String, Object?> requestData) {
     final reqData =
         requestData[NetworkEventKeys.request.name] as Map<String, Object?>;
@@ -225,7 +229,7 @@ class HarDataEntry {
     }
   }
 
-  // Removing underscores from custom fields
+  /// Removing underscores from custom fields
   static Map<String, Object?> _remapCustomFieldKeys(
     Map<String, Object?> originalMap,
   ) {

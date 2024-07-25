@@ -47,7 +47,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   factory DartIOHttpRequestData.fromJson(
-    Map<String, dynamic> modifiedRequestData,
+    Map<String, Object?> modifiedRequestData,
     Map<String, Object?>? requestPostData,
     Map<String, Object?>? responseContent,
   ) {
