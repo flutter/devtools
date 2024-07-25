@@ -70,10 +70,12 @@ class PropertiesTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scrollController = ScrollController();
     return Scrollbar(
+      controller: scrollController,
       thumbVisibility: true,
       child: ListView.builder(
-        primary: true,
+        controller: scrollController,
         itemCount: properties.length,
         itemBuilder: (context, index) {
           return PropertyItem(
