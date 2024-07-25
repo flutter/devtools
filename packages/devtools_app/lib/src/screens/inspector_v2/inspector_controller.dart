@@ -201,9 +201,14 @@ class InspectorController extends DisposableController
   ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
   final _selectedNode = ValueNotifier<InspectorTreeNode?>(null);
 
-  ValueListenable<List<RemoteDiagnosticsNode>> get selectedNodeProperties =>
-      _selectedNodeProperties;
-  final _selectedNodeProperties =
+  ValueListenable<List<RemoteDiagnosticsNode>>
+      get selectedNodeWidgetProperties => _selectedNodeWidgetProperties;
+  final _selectedNodeWidgetProperties =
+      ValueNotifier<List<RemoteDiagnosticsNode>>([]);
+
+  ValueListenable<List<RemoteDiagnosticsNode>>
+      get selectedNodeRenderProperties => _selectedNodeRenderProperties;
+  final _selectedNodeRenderProperties =
       ValueNotifier<List<RemoteDiagnosticsNode>>([]);
 
   InspectorTreeNode? lastExpanded;
@@ -603,42 +608,39 @@ class InspectorController extends DisposableController
   }
 
   Future<void> _loadPropertiesForNode(InspectorTreeNode? node) async {
-    final properties = <RemoteDiagnosticsNode>[];
+    final widgetProperties = <RemoteDiagnosticsNode>[];
+    final renderProperties = <RemoteDiagnosticsNode>[];
     final diagnostic = node?.diagnostic;
     final objectGroupApi = diagnostic?.objectGroupApi;
     if (diagnostic != null && objectGroupApi != null) {
       try {
         // Fetch widget properties:
-        final widgetProperties = await diagnostic.getProperties(objectGroupApi);
+        final wProperties = await diagnostic.getProperties(objectGroupApi);
         // Check if the selected node has changed, and if so return early:
         if (_selectedNode.value != node) {
           return;
         }
-        properties.addAll(widgetProperties);
+        widgetProperties.addAll(
+          wProperties.where((p) => p.propertyType != 'RenderObject'),
+        );
+        renderProperties.addAll(
+          wProperties.where((p) => p.propertyType == 'RenderObject'),
+        );
         // Fetch RenderObject properties:
-        for (final widgetProperty in widgetProperties
-            .where((p) => p.propertyType == 'RenderObject')) {
-          final renderProperties =
-              await widgetProperty.getProperties(objectGroupApi);
+        for (final renderObject in renderProperties) {
+          final rProperties = await renderObject.getProperties(objectGroupApi);
           // Check if the selected node has changed, and if so return early:
           if (_selectedNode.value != node) {
             return;
           }
-          // Only display RenderObject properties that are not already set on
-          // the widget:
-          properties.addAll(
-            renderProperties.where(
-              (renderProperty) => widgetProperties.none(
-                (widgetProperty) => widgetProperty.name == renderProperty.name,
-              ),
-            ),
-          );
+          renderProperties.addAll(rProperties);
         }
       } catch (e, st) {
         _log.warning(e, st);
       }
     }
-    _selectedNodeProperties.value = properties;
+    _selectedNodeWidgetProperties.value = widgetProperties;
+    _selectedNodeRenderProperties.value = renderProperties;
   }
 
   /// Update the index of the selected error based on a node that has been

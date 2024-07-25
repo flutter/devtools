@@ -5,7 +5,11 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/common_widgets.dart';
 import '../../../shared/diagnostics/diagnostics_node.dart';
+import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/tab.dart';
 import '../inspector_controller.dart';
 
 class PropertiesView extends StatelessWidget {
@@ -20,62 +24,64 @@ class PropertiesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<RemoteDiagnosticsNode>>(
-      valueListenable: controller.selectedNodeProperties,
-      builder: (context, properties, _) {
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            return Padding(
-              padding: const EdgeInsets.all(denseSpacing),
-              child: OutlineDecoration(
-                child: FlexSplitColumn(
-                  totalHeight: constraints.maxHeight,
-                  initialFractions: const [0.7, 0.3],
-                  minSizes: const [0.0, 0.0],
-                  headers: const <PreferredSizeWidget>[
-                    AreaPaneHeader(
-                      title: Text('Widget properties'),
-                      roundedTopBorder: false,
-                    ),
-                    AreaPaneHeader(
-                      title: Text('Render Object'),
-                      roundedTopBorder: false,
-                    ),
-                  ],
-                  children: [
-                    Scrollbar(
-                      thumbVisibility: true,
-                      child: ListView.builder(
-                        primary: true,
-                        itemCount: properties.length,
-                        itemBuilder: (context, index) {
-                          return PropertyItem(
-                            index: index,
-                            properties: properties,
-                          );
-                        },
-                      ),
-                    ),
-                    Scrollbar(
-                      thumbVisibility: true,
-                      child: ListView.builder(
-                        primary: true,
-                        itemCount: properties.length,
-                        itemBuilder: (context, index) {
-                          return PropertyItem(
-                            index: index,
-                            properties: properties,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.selectedNodeWidgetProperties,
+        controller.selectedNodeRenderProperties,
+      ],
+      builder: (context, values, _) {
+        final widgetProperties = values.first as List<RemoteDiagnosticsNode>;
+        final renderProperties = values.second as List<RemoteDiagnosticsNode>;
+        return Padding(
+          padding: const EdgeInsets.all(denseSpacing),
+          child: AnalyticsTabbedView(
+            gaScreen: gac.inspector,
+            tabs: [
+              (
+                tab: DevToolsTab.create(
+                  tabName: 'Widget properties',
+                  gaPrefix: 'widgetPropertiesTab',
                 ),
+                tabView: PropertiesTable(properties: widgetProperties),
               ),
-            );
-          },
+              if (renderProperties.isNotEmpty)
+                (
+                  tab: DevToolsTab.create(
+                    tabName: 'Render object',
+                    gaPrefix: 'renderObjectTab',
+                  ),
+                  tabView: PropertiesTable(properties: renderProperties),
+                ),
+            ],
+          ),
         );
       },
+    );
+  }
+}
+
+class PropertiesTable extends StatelessWidget {
+  const PropertiesTable({
+    super.key,
+    required this.properties,
+  });
+
+  final List<RemoteDiagnosticsNode> properties;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      thumbVisibility: true,
+      child: ListView.builder(
+        primary: true,
+        itemCount: properties.length,
+        itemBuilder: (context, index) {
+          return PropertyItem(
+            index: index,
+            properties: properties,
+          );
+        },
+      ),
     );
   }
 }
@@ -97,10 +103,7 @@ class PropertyItem extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: _calculateBorderForRow(
-          isFirstRow: index == 0,
-          color: theme.focusColor,
-        ),
+        border: Border(bottom: BorderSide(color: theme.focusColor)),
         color: alternatingColorForIndex(index, theme.colorScheme),
       ),
       child: Row(
@@ -111,19 +114,6 @@ class PropertyItem extends StatelessWidget {
       ),
     );
   }
-
-  Border _calculateBorderForRow({
-    required bool isFirstRow,
-    required Color color,
-  }) =>
-      Border(
-        // This prevents the top and bottom borders from being painted next to
-        // to each other, making the border look thicker than it should be:
-        top: isFirstRow ? BorderSide(color: color) : BorderSide.none,
-        bottom: BorderSide(color: color),
-        left: BorderSide(color: color),
-        right: BorderSide(color: color),
-      );
 }
 
 class PropertyName extends StatelessWidget {
@@ -136,13 +126,11 @@ class PropertyName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Padding(
       padding: const EdgeInsets.all(denseRowSpacing),
       child: Text(
         property.name ?? '',
-        style: theme.subtleTextStyle,
+        style: Theme.of(context).subtleTextStyle,
       ),
     );
   }
