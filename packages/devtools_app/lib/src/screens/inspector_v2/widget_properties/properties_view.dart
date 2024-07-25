@@ -23,17 +23,57 @@ class PropertiesView extends StatelessWidget {
     return ValueListenableBuilder<List<RemoteDiagnosticsNode>>(
       valueListenable: controller.selectedNodeProperties,
       builder: (context, properties, _) {
-        return Container(
-          margin: const EdgeInsets.all(denseSpacing),
-          child: ListView.builder(
-            itemCount: properties.length,
-            itemBuilder: (context, index) {
-              return PropertyItem(
-                index: index,
-                properties: properties,
-              );
-            },
-          ),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return Padding(
+              padding: const EdgeInsets.all(denseSpacing),
+              child: OutlineDecoration(
+                child: FlexSplitColumn(
+                  totalHeight: constraints.maxHeight,
+                  initialFractions: const [0.7, 0.3],
+                  minSizes: const [0.0, 0.0],
+                  headers: const <PreferredSizeWidget>[
+                    AreaPaneHeader(
+                      title: Text('Widget properties'),
+                      roundedTopBorder: false,
+                    ),
+                    AreaPaneHeader(
+                      title: Text('Render Object'),
+                      roundedTopBorder: false,
+                    ),
+                  ],
+                  children: [
+                    Scrollbar(
+                      thumbVisibility: true,
+                      child: ListView.builder(
+                        primary: true,
+                        itemCount: properties.length,
+                        itemBuilder: (context, index) {
+                          return PropertyItem(
+                            index: index,
+                            properties: properties,
+                          );
+                        },
+                      ),
+                    ),
+                    Scrollbar(
+                      thumbVisibility: true,
+                      child: ListView.builder(
+                        primary: true,
+                        itemCount: properties.length,
+                        itemBuilder: (context, index) {
+                          return PropertyItem(
+                            index: index,
+                            properties: properties,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
@@ -58,13 +98,10 @@ class PropertyItem extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: _calculateBorderForRow(
-          rowIndex: index,
-          theme: theme,
+          isFirstRow: index == 0,
+          color: theme.focusColor,
         ),
-        color: alternatingColorForIndex(
-          index,
-          Theme.of(context).colorScheme,
-        ),
+        color: alternatingColorForIndex(index, theme.colorScheme),
       ),
       child: Row(
         children: [
@@ -76,23 +113,17 @@ class PropertyItem extends StatelessWidget {
   }
 
   Border _calculateBorderForRow({
-    required int rowIndex,
-    required ThemeData theme,
-  }) {
-    final borderColor = theme.focusColor;
-    return Border(
-      // This prevents the top and bottom borders from being painted next to
-      // to each other, making the border look thicker than it should be:
-      top: rowIndex == 0
-          ? BorderSide(
-              color: borderColor,
-            )
-          : BorderSide.none,
-      bottom: BorderSide(color: borderColor),
-      right: BorderSide(color: borderColor),
-      left: BorderSide(color: borderColor),
-    );
-  }
+    required bool isFirstRow,
+    required Color color,
+  }) =>
+      Border(
+        // This prevents the top and bottom borders from being painted next to
+        // to each other, making the border look thicker than it should be:
+        top: isFirstRow ? BorderSide(color: color) : BorderSide.none,
+        bottom: BorderSide(color: color),
+        left: BorderSide(color: color),
+        right: BorderSide(color: color),
+      );
 }
 
 class PropertyName extends StatelessWidget {
