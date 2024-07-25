@@ -168,10 +168,14 @@ class HarDataEntry {
 
       // Custom fields
       // har spec requires underscore to be added for custom fields, hence removing them
+      // Note: the 'isolateId' field is kept empty because DartIOHttpRequestData does not expose it
+      // (but it is required by HttpProfileRequestRef.parse)
       NetworkEventCustomFieldKeys.isolateId: '',
       NetworkEventCustomFieldKeys.id: e.id,
       NetworkEventCustomFieldKeys.startTime:
           e.startTimestamp.microsecondsSinceEpoch,
+      // Note: The 'events' field is kept empty because DartIOHttpRequestData does not expose it
+      // (but it is required by HttpProfileRequestRef.parse)
       NetworkEventCustomFieldKeys.events: [],
     };
   }
