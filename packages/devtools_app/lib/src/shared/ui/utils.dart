@@ -59,17 +59,23 @@ double calculateTextSpanWidth(TextSpan? span) {
 }
 
 /// Returns the height in pixels of the [span].
-double calculateTextSpanHeight(TextSpan span, {double? maxWidth}) {
+Size calculateTextSpanSize(TextSpan span, {double? maxWidth}) {
   final textPainter = TextPainter(
     text: span,
     textAlign: TextAlign.left,
     textDirection: TextDirection.ltr,
   )..layout(maxWidth: maxWidth ?? double.infinity);
 
-  final height = textPainter.height;
+  final size = Size(textPainter.width, textPainter.height);
+
   textPainter.dispose();
 
-  return height;
+  return size;
+}
+
+/// Returns the height in pixels of the [span].
+double calculateTextSpanHeight(TextSpan span, {double? maxWidth}) {
+  return calculateTextSpanSize(span, maxWidth: maxWidth).height;
 }
 
 TextSpan? findLongestTextSpan(List<TextSpan> spans) {

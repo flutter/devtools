@@ -287,7 +287,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               _screens.firstWhereOrNull((s) => s.screenId == page);
           final screenInOriginalScreens = originalScreen != null;
           final screenInScaffoldScreens =
-              screensInScaffold.containsWhere((s) => s.screenId == page);
+              screensInScaffold.any((s) => s.screenId == page);
           if (page != null &&
               screenInOriginalScreens &&
               !screenInScaffoldScreens) {

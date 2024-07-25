@@ -9,7 +9,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import 'globals.dart';
-import 'primitives/utils.dart';
 import 'utils.dart';
 
 class NotificationMessage {
@@ -118,8 +117,7 @@ class NotificationService {
     NotificationMessage message, {
     bool allowDuplicates = true,
   }) {
-    if (!allowDuplicates &&
-        activeMessages.containsWhere((m) => m.text == message.text)) {
+    if (!allowDuplicates && activeMessages.any((m) => m.text == message.text)) {
       return false;
     }
     activeMessages.add(message);
@@ -138,7 +136,7 @@ class NotificationService {
     }
 
     // Add task to dismiss for those that were picked up by UI.
-    if (activeMessages.containsWhere((element) => element.text == message)) {
+    if (activeMessages.any((element) => element.text == message)) {
       toDismiss.addLast(NotificationMessage(message));
       newTasks.value++;
     }
