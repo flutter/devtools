@@ -14,9 +14,8 @@ import 'charts/vm_chart_controller.dart';
 
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
-  MemoryChartPaneController({required this.data})
-      {
-      if (offlineDataController.showingOfflineData.value) {
+  MemoryChartPaneController({required this.data}) {
+    if (offlineDataController.showingOfflineData.value) {
       // Setting paused to false, because `recomputeChartData` is noop when it is true.
       _paused.value = false;
       recomputeChartData();

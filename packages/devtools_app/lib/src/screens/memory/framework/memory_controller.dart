@@ -94,8 +94,9 @@ class MemoryController extends DisposableController
         shouldLoad: (data) => true,
         loadData: (data) => _initializeData(offlineData: data),
       );
-      // [maybeLoadOfflineData] will be a noop if there is no offline data for the memory screen,
-      //  so ensure we still call [_initializedData] if it has not been called.
+      // [maybeLoadOfflineData] will be a noop if there is no offline data for
+      // the memory screen, so ensure we still call [_initializedData] if it
+      // has not been called.
       assert(loaded == _dataInitialized.isCompleted);
       if (!_dataInitialized.isCompleted) {
         _initializeData(offlineData: offlineData);
