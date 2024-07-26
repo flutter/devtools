@@ -170,8 +170,8 @@ class AllowedException {
 /// Wraps the callback to [testWidgets] in a new zone that will catch any
 /// exceptions thrown during the test or after the test completes.
 ///
-/// If the error is included in [allowedExceptions], the exeption will be logged
-/// but ignored. Otherwise, the exception will be rethrown.
+/// If the exception is included in [allowedExceptions], the exception will be
+/// logged but ignored. Otherwise, the exception will be rethrown.
 Future<void> Function(WidgetTester) ignoreAllowedExceptions(
   Future<void> Function(WidgetTester) testCallback, {
   required List<AllowedException> allowedExceptions,
