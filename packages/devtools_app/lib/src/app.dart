@@ -287,7 +287,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               _screens.firstWhereOrNull((s) => s.screenId == page);
           final screenInOriginalScreens = originalScreen != null;
           final screenInScaffoldScreens =
-              screensInScaffold.containsWhere((s) => s.screenId == page);
+              screensInScaffold.any((s) => s.screenId == page);
           if (page != null &&
               screenInOriginalScreens &&
               !screenInScaffoldScreens) {
@@ -663,9 +663,6 @@ List<DevToolsScreen> defaultScreens({
             createController: (_) => inspector_v2.InspectorController(
               inspectorTree: inspector_v2.InspectorTreeController(
                 gaId: InspectorScreenMetrics.summaryTreeGaId,
-              ),
-              detailsTree: inspector_v2.InspectorTreeController(
-                gaId: InspectorScreenMetrics.detailsTreeGaId,
               ),
               treeType: FlutterTreeType.widget,
             ),

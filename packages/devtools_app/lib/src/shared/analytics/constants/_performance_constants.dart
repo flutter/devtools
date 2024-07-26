@@ -19,6 +19,7 @@ enum PerformanceEvents {
   disableClipLayers,
   disableOpacityLayers,
   disablePhysicalShapeLayers,
+  countWidgetBuilds('trackRebuildWidgets'),
   collectRasterStats,
   clearRasterStats,
   fullScreenLayerImage,

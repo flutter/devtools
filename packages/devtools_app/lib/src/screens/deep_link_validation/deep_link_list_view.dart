@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -43,24 +42,9 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    initController();
+    if (!initController()) return;
     callWhenControllerReady((_) {
-      controller.selectedAndroidVariantIndex.value =
-          _getDefaultConfigurationIndex(
-        controller.selectedProject.value!.androidVariants,
-        containsString: 'release',
-      );
-      if (FeatureFlags.deepLinkIosCheck) {
-        controller.selectedIosConfigurationIndex.value =
-            _getDefaultConfigurationIndex(
-          controller.selectedProject.value!.iosBuildOptions.configurations,
-          containsString: 'release',
-        );
-        controller.selectedIosTargetIndex.value = _getDefaultConfigurationIndex(
-          controller.selectedProject.value!.iosBuildOptions.configurations,
-          containsString: 'runner',
-        );
-      }
+      controller.firstLoadWithDefaultConfigurations();
     });
   }
 
@@ -78,17 +62,6 @@ class _DeepLinkListViewState extends State<DeepLinkListView>
         ),
       ),
     );
-  }
-
-  int _getDefaultConfigurationIndex(
-    List<String> configurations, {
-    required String containsString,
-  }) {
-    final index = configurations.indexWhere(
-      (config) => config.caseInsensitiveContains(containsString),
-    );
-    // If not found, default to 0.
-    return max(index, 0);
   }
 }
 
@@ -297,23 +270,26 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
           const Spacer(),
           _ConfigurationDropdown(
             title: 'Android Variant:',
-            notifier: controller.selectedAndroidVariantIndex,
+            valueListenable: controller.selectedAndroidVariantIndex,
             configurations: controller.selectedProject.value!.androidVariants,
+            onChanged: controller.updateSelectedAndroidVariantIndex,
           ),
           if (FeatureFlags.deepLinkIosCheck) ...[
             const SizedBox(width: denseSpacing),
             _ConfigurationDropdown(
               title: 'iOS Configuration:',
-              notifier: controller.selectedIosConfigurationIndex,
+              valueListenable: controller.selectedIosConfigurationIndex,
               configurations: controller
                   .selectedProject.value!.iosBuildOptions.configurations,
+              onChanged: controller.updateSelectedIosConfigurationIndex,
             ),
             const SizedBox(width: denseSpacing),
             _ConfigurationDropdown(
               title: 'iOS Target:',
-              notifier: controller.selectedIosTargetIndex,
+              valueListenable: controller.selectedIosTargetIndex,
               configurations:
                   controller.selectedProject.value!.iosBuildOptions.targets,
+              onChanged: controller.updateSelectedIosTargetIndex,
             ),
           ],
         ],
@@ -324,17 +300,19 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
 
 class _ConfigurationDropdown extends StatelessWidget {
   const _ConfigurationDropdown({
-    required this.notifier,
+    required this.valueListenable,
     required this.configurations,
     required this.title,
+    required this.onChanged,
   });
-  final ValueNotifier<int> notifier;
+  final ValueListenable valueListenable;
   final List<String> configurations;
   final String title;
+  final void Function(int) onChanged;
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: notifier,
+      valueListenable: valueListenable,
       builder: (_, index, __) {
         return Row(
           children: [
@@ -349,9 +327,7 @@ class _ConfigurationDropdown extends StatelessWidget {
                     child: Text(configurations[i]),
                   ),
               ],
-              onChanged: (int? newIndex) {
-                notifier.value = newIndex!;
-              },
+              onChanged: (index) => onChanged(index!),
             ),
           ],
         );

@@ -96,7 +96,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                 valueListenable: serviceConnection
                     .serviceManager.serviceExtensionManager
                     .getServiceExtensionState(
-                  extensions.trackWidgetBuildCounts.extension,
+                  extensions.countWidgetBuilds.extension,
                 ),
                 builder: (context, extensionState, _) {
                   if (!extensionState.enabled) {
@@ -107,7 +107,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                         ),
                         Flexible(
                           child: ServiceExtensionCheckbox(
-                            serviceExtension: extensions.trackWidgetBuildCounts,
+                            serviceExtension: extensions.countWidgetBuilds,
                             showDescription: false,
                           ),
                         ),

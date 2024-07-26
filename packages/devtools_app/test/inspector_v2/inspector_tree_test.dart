@@ -9,7 +9,6 @@ import 'package:devtools_app/devtools_app.dart'
         InspectorTree,
         InspectorTreeConfig,
         InspectorTreeNode;
-import 'package:devtools_app/src/screens/inspector_v2/inspector_breadcrumbs.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
 import 'package:devtools_app/src/shared/console/eval/inspector_tree_v2.dart';
@@ -51,7 +50,6 @@ void main() {
 
     inspectorController = InspectorController(
       inspectorTree: InspectorTreeController(),
-      detailsTree: InspectorTreeController(),
       treeType: FlutterTreeType.widget,
     )..firstInspectorTreeLoadCompleted = true;
   });
@@ -59,19 +57,14 @@ void main() {
   Future<void> pumpInspectorTree(
     WidgetTester tester, {
     required InspectorTreeController treeController,
-    bool isSummaryTree = false,
   }) async {
     final debuggerController = DebuggerController();
-    final summaryTreeController =
-        isSummaryTree ? null : InspectorTreeController();
     await tester.pumpWidget(
       wrapWithControllers(
         inspectorV2: inspectorController,
         debugger: debuggerController,
         InspectorTree(
           treeController: treeController,
-          summaryTreeController: summaryTreeController,
-          isSummaryTree: isSummaryTree,
         ),
       ),
     );
@@ -161,33 +154,5 @@ void main() {
         );
       },
     );
-
-    testWidgets('Shows breadcrumbs in Widget detail tree', (tester) async {
-      final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
-        widget: const Text('Hello'),
-        tester: tester,
-      );
-
-      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
-      await pumpInspectorTree(tester, treeController: treeController);
-
-      expect(find.byType(InspectorBreadcrumbNavigator), findsOneWidget);
-    });
-
-    testWidgets('Shows no breadcrumbs widget in summary tree', (tester) async {
-      final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
-        widget: const Text('Hello'),
-        tester: tester,
-      );
-
-      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
-      await pumpInspectorTree(
-        tester,
-        treeController: treeController,
-        isSummaryTree: true,
-      );
-
-      expect(find.byType(InspectorBreadcrumbNavigator), findsNothing);
-    });
   });
 }

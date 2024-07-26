@@ -25,7 +25,7 @@ class SecondaryControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canGC = controller.mode == ControllerCreationMode.connected;
+    final canGC = controller.mode == MemoryControllerCreationMode.connected;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -48,13 +48,12 @@ class SecondaryControls extends StatelessWidget {
           ),
           const SizedBox(width: denseSpacing),
         ],
-        if (controller.mode != ControllerCreationMode.disconnected)
-          SettingsOutlinedButton(
-            gaScreen: gac.memory,
-            gaSelection: gac.MemoryEvents.settings.name,
-            onPressed: () => _openSettingsDialog(context),
-            tooltip: 'Open memory settings',
-          ),
+        SettingsOutlinedButton(
+          gaScreen: gac.memory,
+          gaSelection: gac.MemoryEvents.settings.name,
+          onPressed: () => _openSettingsDialog(context),
+          tooltip: 'Open memory settings',
+        ),
       ],
     );
   }

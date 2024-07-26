@@ -187,7 +187,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   // update selected widget and trigger selection listener event to change focus.
   void refreshSelection(RemoteDiagnosticsNode node) {
-    inspectorController.refreshSelection(node, node, true);
+    inspectorController.refreshSelection(node);
   }
 
   Future<void> onTap(LayoutProperties properties) async {

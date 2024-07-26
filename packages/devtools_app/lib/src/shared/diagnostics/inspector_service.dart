@@ -430,7 +430,6 @@ class InspectorService extends InspectorServiceBase {
     final pendingSelection = await group.getSelection(
       _currentSelection,
       FlutterTreeType.widget,
-      isSummaryTree: false,
     );
     if (!group.disposed &&
         group == _selectionGroups.next &&
@@ -950,7 +949,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
 
   Future<RemoteDiagnosticsNode?> getRoot(
     FlutterTreeType type, {
-    required bool isSummaryTree,
+    bool isSummaryTree = false,
   }) {
     // There is no excuse to call this method on a disposed group.
     assert(!disposed);
@@ -1015,7 +1014,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
   Future<RemoteDiagnosticsNode?> getSelection(
     RemoteDiagnosticsNode? previousSelection,
     FlutterTreeType treeType, {
-    required bool isSummaryTree,
+    bool isSummaryTree = false,
   }) async {
     // There is no reason to allow calling this method on a disposed group.
     assert(!disposed);

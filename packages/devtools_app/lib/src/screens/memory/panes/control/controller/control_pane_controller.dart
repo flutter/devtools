@@ -13,12 +13,10 @@ class MemoryControlPaneController {
     this.memoryTimeline,
     this.mode, {
     required this.exportData,
-  }) : assert(
-          mode == ControllerCreationMode.disconnected || memoryTimeline != null,
-        );
+  });
 
-  final ControllerCreationMode mode;
-  final MemoryTimeline? memoryTimeline;
+  final MemoryControllerCreationMode mode;
+  final MemoryTimeline memoryTimeline;
   final VoidCallback exportData;
   final isChartVisible = preferences.memory.showChart;
 
@@ -26,8 +24,7 @@ class MemoryControlPaneController {
   bool _gcing = false;
 
   Future<void> gc() async {
-    assert(mode == ControllerCreationMode.connected);
-    assert(memoryTimeline != null);
+    assert(mode == MemoryControllerCreationMode.connected);
     _gcing = true;
     try {
       await serviceConnection.serviceManager.service!.getAllocationProfile(
@@ -35,7 +32,7 @@ class MemoryControlPaneController {
             .serviceManager.isolateManager.selectedIsolate.value?.id)!,
         gc: true,
       );
-      memoryTimeline!.addGCEvent();
+      memoryTimeline.addGCEvent();
       notificationService.push('Successfully garbage collected.');
     } finally {
       _gcing = false;

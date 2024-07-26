@@ -116,11 +116,14 @@ class TracingIsolateState with Serializable {
   }
 
   TracingIsolateState.empty()
-      : this(isolate: IsolateRef(), mode: ControllerCreationMode.connected);
+      : this(
+          isolate: IsolateRef(),
+          mode: MemoryControllerCreationMode.connected,
+        );
 
   factory TracingIsolateState.fromJson(Map<String, dynamic> json) {
     return TracingIsolateState(
-      mode: ControllerCreationMode.offlineData,
+      mode: MemoryControllerCreationMode.offlineData,
       isolate: IsolateRefEncodeDecode.instance
           .decode(json[TracingIsolateStateJson.isolate.name]),
       profiles: (json[TracingIsolateStateJson.profiles.name] as Map).map(
@@ -144,7 +147,7 @@ class TracingIsolateState with Serializable {
     };
   }
 
-  final ControllerCreationMode mode;
+  final MemoryControllerCreationMode mode;
 
   final IsolateRef isolate;
 
@@ -175,7 +178,7 @@ class TracingIsolateState with Serializable {
   int _lastClearTimeMicros = 0;
 
   Future<void> initialize() async {
-    if (mode == ControllerCreationMode.connected) {
+    if (mode == MemoryControllerCreationMode.connected) {
       final classList = await serviceConnection.serviceManager.service!
           .getClassList(isolate.id!);
       for (final clazz in classList.classes!) {

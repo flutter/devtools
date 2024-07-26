@@ -607,9 +607,10 @@ class _CrossCheckTable extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
                 child: Text(
-                    'This domain has an Asset link json file but it\'s missing in the android manifest file. '
-                    'If you want to set up deep linking for Android, you need to add this domain '
-                    'to your AndroidManifest.xml file.'),
+                  'This domain has an Asset link json file but it\'s missing in the android manifest file. '
+                  'If you want to set up deep linking for Android, you need to add this domain '
+                  'to your AndroidManifest.xml file.',
+                ),
               ),
             ],
           ),
@@ -622,9 +623,10 @@ class _CrossCheckTable extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: defaultSpacing),
                 child: Text(
-                    'This domain has an AASA file but it\'s missing in local settings. '
-                    'If you want to set up deep linking for iOS, you need to add this domain '
-                    'to your info.Plist file.'),
+                  'This domain has an AASA file but it\'s missing in local settings. '
+                  'If you want to set up deep linking for iOS, you need to add this domain '
+                  'to your info.Plist file.',
+                ),
               ),
             ],
           ),

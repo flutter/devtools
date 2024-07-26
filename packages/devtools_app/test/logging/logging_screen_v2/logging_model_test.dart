@@ -20,8 +20,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const windowSize = Size(500.0, 500.0);
-
   late LoggingTableModel loggingTableModel;
   final log1 = LogDataV2('test', 'The details', 464564);
 
@@ -30,6 +28,11 @@ void main() {
     // for the LogTableModel to approximate widget sizes with
     await tester.pumpWidget(wrap(const Placeholder()));
   }
+
+  Finder findLogRow(String details) => find.ancestor(
+        of: find.richText(details),
+        matching: find.byType(LoggingTableRow),
+      );
 
   setUp(() {
     final fakeServiceConnection = FakeServiceConnectionManager();
@@ -40,15 +43,18 @@ void main() {
 
     TestWidgetsFlutterBinding.ensureInitialized();
     loggingTableModel = LoggingTableModel();
+
+    // Set a generic width for all tests
+    loggingTableModel.tableWidth = 500;
   });
 
   tearDown(() {
     loggingTableModel.dispose();
   });
+
   group('LoggingModel', () {
     testWidgets('can add logs', (WidgetTester tester) async {
       await pumpForContext(tester);
-
       expect(loggingTableModel.logCount, 0);
       expect(loggingTableModel.filteredLogCount, 0);
       expect(loggingTableModel.selectedLogCount, 0);
@@ -60,67 +66,92 @@ void main() {
       expect(loggingTableModel.selectedLogCount, 0);
     });
 
-    testWidgetsWithWindowSize(
-      'calculate heights correctly',
-      windowSize,
-      (WidgetTester tester) async {
-        final shortLog = LogDataV2('test', 'Some short details', 464564);
-        final longLog = LogDataV2(
-          'test',
-          'A long log, A long log, A long log, A long log, A long log, A long log, A long log, ',
-          464564,
-        );
+    for (var windowWidth = 300.0; windowWidth <= 550.0; windowWidth += 50.0) {
+      testWidgetsWithWindowSize(
+        'calculate heights correctly for window of width: $windowWidth',
+        Size(windowWidth, 3000),
+        (WidgetTester tester) async {
+          await pumpForContext(tester);
+          final shortLog = LogDataV2('test', 'Some short details', 464564);
+          final longLog = LogDataV2(
+            'test',
+            'A long log, A long log, A long log, A long log, A long log, A long log, A long log, ',
+            464564,
+          );
+          final frameElapsedLog =
+              LogDataV2('frameLog', '{"elapsed": 1000000}', 4684506);
+          double? columnWidth;
+          final frameElapsedKey = GlobalKey();
 
-        await tester.pumpWidget(
-          wrap(
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                LoggingTableRow(
-                  index: 0,
-                  data: shortLog,
-                  isSelected: false,
-                ),
-                LoggingTableRow(
-                  index: 1,
-                  data: longLog,
-                  isSelected: false,
-                ),
-              ],
+          await tester.pumpWidget(
+            wrap(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  columnWidth = constraints.maxWidth;
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      LoggingTableRow(
+                        index: 0,
+                        data: shortLog,
+                        isSelected: false,
+                      ),
+                      LoggingTableRow(
+                        index: 1,
+                        data: longLog,
+                        isSelected: false,
+                      ),
+                      LoggingTableRow(
+                        key: frameElapsedKey,
+                        index: 2,
+                        data: frameElapsedLog,
+                        isSelected: false,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        );
+          );
 
-        loggingTableModel.add(shortLog);
-        loggingTableModel.add(longLog);
+          await tester.runAsync(() async {
+            // tester.runAsync is needed here to prevent the ChunkWorker
+            // in set tableWidth from blocking in the test. The Future.delayed
+            // in it would hang otherwise.
+            loggingTableModel.tableWidth = columnWidth!;
+          });
 
-        final shortWidgetFinder = find.ancestor(
-          of: find.richText(shortLog.details!),
-          matching: find.byType(LoggingTableRow),
-        );
-        final longWidgetFinder = find.ancestor(
-          of: find.richText(longLog.details!),
-          matching: find.byType(LoggingTableRow),
-        );
+          loggingTableModel
+            ..add(shortLog)
+            ..add(longLog)
+            ..add(frameElapsedLog);
 
-        await tester.runAsync(() async {
-          // tester.runAsync is needed here to prevent the ChunkWorker
-          // in set tableWidth from blocking in the test. The Future.delayed
-          // in it would hang otherwise.
-          loggingTableModel.tableWidth =
-              tester.getSize(shortWidgetFinder).width;
-        });
+          final shortWidgetFinder = findLogRow(shortLog.details!);
+          final longWidgetFinder = findLogRow(longLog.details!);
+          final frameElapsedFinder = find.byKey(frameElapsedKey);
 
-        expect(
-          tester.getSize(shortWidgetFinder).height,
-          loggingTableModel.getFilteredLogHeight(0),
-        );
-        expect(
-          tester.getSize(longWidgetFinder).height,
-          loggingTableModel.getFilteredLogHeight(1),
-        );
-      },
-    );
+          await tester.runAsync(() async {
+            // tester.runAsync is needed here to prevent the ChunkWorker
+            // in set tableWidth from blocking in the test. The Future.delayed
+            // in it would hang otherwise.
+            loggingTableModel.tableWidth = windowWidth;
+          });
+
+          expect(
+            loggingTableModel.getFilteredLogHeight(0),
+            tester.getSize(shortWidgetFinder).height,
+          );
+          expect(
+            loggingTableModel.getFilteredLogHeight(1),
+            tester.getSize(longWidgetFinder).height,
+          );
+          expect(
+            loggingTableModel.getFilteredLogHeight(2),
+            tester.getSize(frameElapsedFinder).height,
+          );
+        },
+      );
+    }
 
     testWidgets('Handles log retention', (WidgetTester tester) async {
       final log1 = LogDataV2('test', 'The details 1', 464564);

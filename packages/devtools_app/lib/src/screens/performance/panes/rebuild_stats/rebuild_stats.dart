@@ -110,7 +110,7 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
                     padding:
                         const EdgeInsets.symmetric(horizontal: denseSpacing),
                     child: ServiceExtensionCheckbox(
-                      serviceExtension: extensions.trackWidgetBuildCounts,
+                      serviceExtension: extensions.countWidgetBuilds,
                     ),
                   ),
                 ),
@@ -123,13 +123,13 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
             valueListenable: serviceConnection
                 .serviceManager.serviceExtensionManager
                 .getServiceExtensionState(
-              extensions.trackWidgetBuildCounts.extension,
+              extensions.countWidgetBuilds.extension,
             ),
             builder: (context, state, _) {
               if (metrics.isEmpty && !state.enabled) {
                 return const Center(
                   child: Text(
-                    'Track widget build counts must be enabled to see data.',
+                    'Count widget builds must be enabled to see data.',
                   ),
                 );
               }
