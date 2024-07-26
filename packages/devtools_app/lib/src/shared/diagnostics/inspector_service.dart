@@ -965,7 +965,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
   }) {
     return parseDiagnosticsNodeDaemon(
       invokeServiceMethodDaemonParams(
-        WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+        WidgetInspectorServiceExtensions.getRootWidget.name,
         {
           'groupName': groupName,
           'isSummaryTree': '$isSummaryTree',

@@ -37,7 +37,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Added a feature to export network requests to HAR files.
+   - [#7970](https://github.com/flutter/devtools/pull/7970)
 
 ## Logging updates
 

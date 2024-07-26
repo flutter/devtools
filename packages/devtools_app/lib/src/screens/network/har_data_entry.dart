@@ -137,7 +137,8 @@ class HarDataEntry {
       // Response
       NetworkEventKeys.response.name: <String, Object?>{
         NetworkEventKeys.status.name: e.status,
-        NetworkEventKeys.statusText.name: e.general[NetworkEventKeys.reasonPhrase.name]??'',
+        NetworkEventKeys.statusText.name:
+            e.general[NetworkEventKeys.reasonPhrase.name] ?? '',
         NetworkEventKeys.httpVersion.name:
             NetworkEventDefaults.responseHttpVersion,
         NetworkEventKeys.cookies.name: responseCookies,
