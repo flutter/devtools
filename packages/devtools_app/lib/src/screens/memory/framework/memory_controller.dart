@@ -32,19 +32,17 @@ class MemoryController extends DisposableController
   MemoryController({
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
-    @visibleForTesting OfflineMemoryData? offlineData,
   }) {
     unawaited(
       _init(
         connectedDiff: connectedDiff,
         connectedProfile: connectedProfile,
-        offlineData: offlineData,
       ),
     );
   }
 
-  Future<void> get initialized => _dataInitialized.future;
-  final _dataInitialized = Completer<void>();
+  Future<void> get initialized => _initialized.future;
+  final _initialized = Completer<void>();
 
   /// Index of the selected feature tab.
   ///
@@ -72,29 +70,21 @@ class MemoryController extends DisposableController
     profile?.dispose();
   }
 
-  static const _jsonKey = 'data';
+  static const _dataKey = 'data';
 
   Future<void> _init({
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
-    @visibleForTesting OfflineMemoryData? offlineData,
   }) async {
-    assert(!_dataInitialized.isCompleted);
+    assert(!_initialized.isCompleted);
     if (offlineDataController.showingOfflineData.value) {
       assert(connectedDiff == null && connectedProfile == null);
-      final loaded = await maybeLoadOfflineData(
+      await maybeLoadOfflineData(
         ScreenMetaData.memory.id,
-        createData: createData,
+        createData: createOfflineData,
         shouldLoad: (data) => true,
         loadData: (data) => _initializeData(offlineData: data),
       );
-      // [maybeLoadOfflineData] will be a noop if there is no offline data for
-      // the memory screen, so ensure we still call [_initializedData] if it
-      // has not been called.
-      assert(loaded == _dataInitialized.isCompleted);
-      if (!_dataInitialized.isCompleted) {
-        _initializeData(offlineData: offlineData);
-      }
     } else {
       await serviceConnection.serviceManager.onServiceAvailable;
       _initializeData(
@@ -102,15 +92,15 @@ class MemoryController extends DisposableController
         profilePaneController: connectedProfile,
       );
     }
-    assert(_dataInitialized.isCompleted);
+    assert(_initialized.isCompleted);
     assert(profile == null || profile!.rootPackage == diff.core.rootPackage);
   }
 
   @visibleForTesting
-  static OfflineMemoryData createData(Map<String, Object?> json) {
-    final data = json[_jsonKey];
+  static OfflineMemoryData createOfflineData(Map<String, Object?> json) {
+    final data = json[_dataKey];
     if (data is OfflineMemoryData) return data;
-    return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
+    return OfflineMemoryData.fromJson(data as Map<String, Object?>);
   }
 
   void _initializeData({
@@ -118,7 +108,7 @@ class MemoryController extends DisposableController
     @visibleForTesting DiffPaneController? diffPaneController,
     @visibleForTesting ProfilePaneController? profilePaneController,
   }) {
-    assert(!_dataInitialized.isCompleted);
+    assert(!_initialized.isCompleted);
 
     final isConnected =
         serviceConnection.serviceManager.connectedState.value.connected;
@@ -149,7 +139,7 @@ class MemoryController extends DisposableController
     if (offlineData != null) profile?.setFilter(offlineData.filter);
     _shareClassFilterBetweenProfileAndDiff();
 
-    _dataInitialized.complete();
+    _initialized.complete();
   }
 
   @override
@@ -159,7 +149,7 @@ class MemoryController extends DisposableController
       data: {
         // Passing serializable data without conversion to json here
         // to skip serialization when data is passed in-process.
-        _jsonKey: OfflineMemoryData(
+        _dataKey: OfflineMemoryData(
           diff,
           profile,
           chart.data,
