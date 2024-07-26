@@ -80,13 +80,7 @@ class MemoryController extends DisposableController
     @visibleForTesting OfflineMemoryData? offlineData,
   }) async {
     assert(!_dataInitialized.isCompleted);
-    if (!offlineDataController.showingOfflineData.value) {
-      await serviceConnection.serviceManager.onServiceAvailable;
-      _initializeData(
-        diffPaneController: connectedDiff,
-        profilePaneController: connectedProfile,
-      );
-    } else {
+    if (offlineDataController.showingOfflineData.value) {
       assert(connectedDiff == null && connectedProfile == null);
       final loaded = await maybeLoadOfflineData(
         ScreenMetaData.memory.id,
@@ -101,6 +95,12 @@ class MemoryController extends DisposableController
       if (!_dataInitialized.isCompleted) {
         _initializeData(offlineData: offlineData);
       }
+    } else {
+      await serviceConnection.serviceManager.onServiceAvailable;
+      _initializeData(
+        diffPaneController: connectedDiff,
+        profilePaneController: connectedProfile,
+      );
     }
     assert(_dataInitialized.isCompleted);
     assert(profile == null || profile!.rootPackage == diff.core.rootPackage);
@@ -123,9 +123,7 @@ class MemoryController extends DisposableController
     final isConnected =
         serviceConnection.serviceManager.connectedState.value.connected;
 
-    chart = MemoryChartPaneController(
-      data: offlineData != null ? offlineData.chart : ChartData(),
-    );
+    chart = MemoryChartPaneController(data: offlineData?.chart ?? ChartData());
 
     final rootPackage = isConnected
         ? serviceConnection.serviceManager.rootInfoNow().package!
