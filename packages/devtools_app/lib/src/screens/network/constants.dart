@@ -7,7 +7,6 @@ enum NetworkEventKeys {
   version,
   creator,
   name,
-  creatorVersion,
   pages,
   startedDateTime,
   id,
@@ -56,6 +55,7 @@ enum NetworkEventKeys {
   expires,
   httpOnly,
   secure,
+  reasonPhrase,
 }
 
 class NetworkEventDefaults {

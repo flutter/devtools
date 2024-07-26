@@ -25,7 +25,7 @@ Map<String, Object?> buildHar(List<DartIOHttpRequestData> httpRequests) {
   // Build the creator
   final creator = <String, Object?>{
     NetworkEventKeys.name.name: NetworkEventDefaults.creatorName,
-    NetworkEventKeys.creatorVersion.name: devToolsVersion,
+    NetworkEventKeys.version.name: devToolsVersion,
   };
 
   // Build the entries
