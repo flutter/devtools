@@ -16,6 +16,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
@@ -123,6 +124,7 @@ class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    pushDebuggerIdeRecommendationMessage(context, DebuggerScreen.id);
     if (!initController()) return;
     unawaited(controller.onFirstDebuggerScreenLoad());
   }

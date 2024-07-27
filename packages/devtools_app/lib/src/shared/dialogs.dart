@@ -44,7 +44,7 @@ class UnexpectedErrorDialog extends StatelessWidget {
           child: const Text('Create issue'),
           onPressed: () => unawaited(
             launchUrlWithErrorHandling(
-              devToolsExtensionPoints
+              devToolsEnvironmentParameters
                   .issueTrackerLink(additionalInfo: additionalInfo)
                   .url,
             ),

@@ -124,7 +124,7 @@ class PerfettoControllerImpl extends PerfettoController {
       path: window.location.pathname,
     );
     final indexFilePath = ui_web.assetManager
-        .getAssetUrl(devToolsExtensionPoints.perfettoIndexLocation);
+        .getAssetUrl(devToolsEnvironmentParameters.perfettoIndexLocation);
     final baseUrl = '$basePath/$indexFilePath';
     return '$baseUrl$_embeddedModeQuery';
   }

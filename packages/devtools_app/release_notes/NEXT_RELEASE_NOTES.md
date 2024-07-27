@@ -18,7 +18,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+* Renamed the "Track" builds, paints, and layouts settings to "Trace"
+builds, paints, and layouts. - [#8084](https://github.com/flutter/devtools/pull/8084)
+* Renamed the "Track widget build counts" setting to "Count widget builds". - [#8084](https://github.com/flutter/devtools/pull/8084)
 
 ## CPU profiler updates
 
@@ -26,20 +28,21 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-* Enable offline analysis of snapshots, historical data analysis and save/load.
-- [#7843](https://github.com/flutter/devtools/pull/7843)
+* Enable offline analysis of snapshots, historical data analysis and save/load. - [#7843](https://github.com/flutter/devtools/pull/7843)
 
     ![Memory offline data](images/memory-save-load.png "Memory offline data")
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Added recommendation to debug code from an IDE, with links to IDE instructions. - [#8085](https://github.com/flutter/devtools/pull/8085)
 
 ## Network profiler updates
 
 * Added support to export network requests to HAR file.
    - [#7970](https://github.com/flutter/devtools/pull/7970)
+* Fixed issue where socket statistics were being reported as web sockets. - [#8061](https://github.com/flutter/devtools/pull/8061)
 
+    ![Network profiler correctly displaying socket statistics](images/socket-profiling.png "Network profiler correctly displaying socket statistics")
 ## Logging updates
 
 TODO: Remove this section if there are not any general updates.

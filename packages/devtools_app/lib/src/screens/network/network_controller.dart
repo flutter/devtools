@@ -172,7 +172,7 @@ class NetworkController extends DisposableController
       timelineMicrosOffset: timelineMicrosOffset,
     );
 
-    // If we have updated data for the selected web socket, we need to update
+    // If we have updated data for the selected socket, we need to update
     // the value.
     final currentSelectedRequestId = selectedRequest.value?.id;
     if (currentSelectedRequestId != null) {
@@ -388,7 +388,7 @@ class NetworkController extends DisposableController
   }
 }
 
-/// Class for managing the set of all current websocket requests, and
+/// Class for managing the set of all current sockets, and
 /// http profile requests.
 class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
   CurrentNetworkRequests() : super([]);
@@ -410,7 +410,7 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
     required int timelineMicrosOffset,
   }) {
     _updateOrAddRequests(requests);
-    _updateWebSocketRequests(sockets, timelineMicrosOffset);
+    _updateSocketProfiles(sockets, timelineMicrosOffset);
     notifyListeners();
   }
 
@@ -441,29 +441,29 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
     }
   }
 
-  void _updateWebSocketRequests(
+  void _updateSocketProfiles(
     List<SocketStatistic> sockets,
     int timelineMicrosOffset,
   ) {
-    for (final socket in sockets) {
-      final webSocket = WebSocket(socket, timelineMicrosOffset);
+    for (final socketStats in sockets) {
+      final socket = Socket(socketStats, timelineMicrosOffset);
 
-      if (_requestsById.containsKey(webSocket.id)) {
-        final existingRequest = _requestsById[webSocket.id];
-        if (existingRequest is WebSocket) {
-          existingRequest.update(webSocket);
+      if (_requestsById.containsKey(socket.id)) {
+        final existingRequest = _requestsById[socket.id];
+        if (existingRequest is Socket) {
+          existingRequest.update(socket);
         } else {
-          // If we override an entry that is not a Websocket then that means
+          // If we override an entry that is not a Socket then that means
           // the ids of the requestMapping entries may collide with other types
           // of requests.
-          assert(existingRequest is WebSocket);
+          assert(existingRequest is Socket);
         }
       } else {
-        value.add(webSocket);
-        // The new [sockets] may contain web sockets with the same ids as ones we
-        // already have, so we remove the current web sockets and replace them with
+        value.add(socket);
+        // The new [sockets] may contain sockets with the same ids as ones we
+        // already have, so we remove the current sockets and replace them with
         // updated data.
-        _requestsById[webSocket.id] = webSocket;
+        _requestsById[socket.id] = socket;
       }
     }
   }

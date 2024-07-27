@@ -44,7 +44,7 @@ class EnhanceTracingButton extends StatelessWidget {
           enhanceTracingController.showMenuStreamController,
       customExtensionUi: {
         extensions.profileWidgetBuilds.extension:
-            const TrackWidgetBuildsSetting(),
+            const TraceWidgetBuildsSetting(),
         extensions.profileUserWidgetBuilds.extension: const SizedBox(),
       },
       overlayDescription: RichText(
@@ -74,71 +74,71 @@ class EnhanceTracingButton extends StatelessWidget {
   }
 }
 
-enum TrackWidgetBuildsScope {
+enum TraceWidgetBuildsScope {
   all,
   userCreated,
 }
 
-extension TrackWidgetBuildsScopeExtension on TrackWidgetBuildsScope {
+extension TraceWidgetBuildsScopeExtension on TraceWidgetBuildsScope {
   String get radioDisplay {
     switch (this) {
-      case TrackWidgetBuildsScope.all:
+      case TraceWidgetBuildsScope.all:
         return 'within all code';
-      case TrackWidgetBuildsScope.userCreated:
+      case TraceWidgetBuildsScope.userCreated:
         return 'within your code';
     }
   }
 
-  /// Returns the opposite [TrackWidgetBuildsScope] from [this].
-  TrackWidgetBuildsScope get opposite {
+  /// Returns the opposite [TraceWidgetBuildsScope] from [this].
+  TraceWidgetBuildsScope get opposite {
     switch (this) {
-      case TrackWidgetBuildsScope.all:
-        return TrackWidgetBuildsScope.userCreated;
-      case TrackWidgetBuildsScope.userCreated:
-        return TrackWidgetBuildsScope.all;
+      case TraceWidgetBuildsScope.all:
+        return TraceWidgetBuildsScope.userCreated;
+      case TraceWidgetBuildsScope.userCreated:
+        return TraceWidgetBuildsScope.all;
     }
   }
 
-  /// Returns the service extension for this [TrackWidgetBuildsScope].
+  /// Returns the service extension for this [TraceWidgetBuildsScope].
   extensions.ToggleableServiceExtensionDescription<bool> get extensionForScope {
     switch (this) {
-      case TrackWidgetBuildsScope.all:
+      case TraceWidgetBuildsScope.all:
         return extensions.profileWidgetBuilds;
-      case TrackWidgetBuildsScope.userCreated:
+      case TraceWidgetBuildsScope.userCreated:
         return extensions.profileUserWidgetBuilds;
     }
   }
 }
 
-class TrackWidgetBuildsSetting extends StatefulWidget {
-  const TrackWidgetBuildsSetting({super.key});
+class TraceWidgetBuildsSetting extends StatefulWidget {
+  const TraceWidgetBuildsSetting({super.key});
 
   @override
-  State<TrackWidgetBuildsSetting> createState() =>
-      _TrackWidgetBuildsSettingState();
+  State<TraceWidgetBuildsSetting> createState() =>
+      _TraceWidgetBuildsSettingState();
 }
 
-class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
+class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
     with AutoDisposeMixin {
   static const _scopeSelectorPadding = 32.0;
 
-  /// Service extensions for tracking widget builds.
-  final _trackWidgetBuildsExtensions = {
-    TrackWidgetBuildsScope.all: extensions.profileWidgetBuilds,
-    TrackWidgetBuildsScope.userCreated: extensions.profileUserWidgetBuilds,
+  /// Service extensions for tracing widget builds.
+  final _traceWidgetBuildsExtensions = {
+    TraceWidgetBuildsScope.all: extensions.profileWidgetBuilds,
+    TraceWidgetBuildsScope.userCreated: extensions.profileUserWidgetBuilds,
   };
 
-  /// The selected track widget builds scope, which may be any value in
-  /// [TrackWidgetBuildsScope] or null if widget builds are not being tracked.
-  final _selectedScope = ValueNotifier<TrackWidgetBuildsScope?>(null);
+  /// The selected trace widget builds scope, which may be any value in
+  /// [TraceWidgetBuildsScope] or null if widget builds are not being traced.
+  final _selectedScope = ValueNotifier<TraceWidgetBuildsScope?>(null);
 
-  /// Whether either of the extensions in [_trackWidgetBuildsExtensions.values]
+  /// Whether either of the extensions in [_traceWidgetBuildsExtensions.values]
   /// are enabled.
-  final _tracked = ValueNotifier<bool>(false);
+  final _tracingEnabled = ValueNotifier<bool>(false);
 
-  /// Whether either of the extensions in [_trackWidgetBuildsExtensions.values]
+  /// Whether either of the extensions in [_traceWidgetBuildsExtensions.values]
   /// are available.
-  final _trackingAvailable = ValueNotifier<bool>(false);
+  final _tracingAvailable = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -146,15 +146,15 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
 
     // Listen for service extensions to become available and add a listener to
     // respond to their state changes.
-    for (final type in TrackWidgetBuildsScope.values) {
-      final extension = _trackWidgetBuildsExtensions[type]!;
+    for (final type in TraceWidgetBuildsScope.values) {
+      final extension = _traceWidgetBuildsExtensions[type]!;
 
       unawaited(
         serviceConnection.serviceManager.serviceExtensionManager
             .waitForServiceExtensionAvailable(extension.extension)
             .then((isServiceAvailable) {
           if (isServiceAvailable) {
-            _trackingAvailable.value = true;
+            _tracingAvailable.value = true;
 
             final state = serviceConnection
                 .serviceManager.serviceExtensionManager
@@ -172,48 +172,48 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
 
   Future<void> _updateForServiceExtensionState(
     ServiceExtensionState newState,
-    TrackWidgetBuildsScope type,
+    TraceWidgetBuildsScope type,
   ) async {
     final otherState = serviceConnection.serviceManager.serviceExtensionManager
         .getServiceExtensionState(type.opposite.extensionForScope.extension)
         .value
         .enabled;
-    final trackAllWidgets =
-        type == TrackWidgetBuildsScope.all ? newState.enabled : otherState;
-    final trackUserWidgets = type == TrackWidgetBuildsScope.userCreated
+    final traceAllWidgets =
+        type == TraceWidgetBuildsScope.all ? newState.enabled : otherState;
+    final traceUserWidgets = type == TraceWidgetBuildsScope.userCreated
         ? newState.enabled
         : otherState;
-    await _updateTracking(
-      trackAllWidgets: trackAllWidgets,
-      trackUserWidgets: trackUserWidgets,
+    await _updateTracing(
+      traceAllWidgets: traceAllWidgets,
+      traceUserWidgets: traceUserWidgets,
     );
   }
 
-  Future<void> _updateTracking({
-    required bool trackAllWidgets,
-    required bool trackUserWidgets,
+  Future<void> _updateTracing({
+    required bool traceAllWidgets,
+    required bool traceUserWidgets,
   }) async {
-    if (trackUserWidgets && trackAllWidgets) {
-      // If both the debug setting for tracking all widgets and tracking only
-      // user-created widgets are true, default to tracking only user-created
-      // widgets. Disable the service extension for tracking all widgets.
+    if (traceUserWidgets && traceAllWidgets) {
+      // If both the debug setting for tracing all widgets and tracing only
+      // user-created widgets are true, default to tracing only user-created
+      // widgets. Disable the service extension for tracing all widgets.
       await serviceConnection.serviceManager.serviceExtensionManager
           .setServiceExtensionState(
         extensions.profileWidgetBuilds.extension,
         enabled: false,
         value: extensions.profileWidgetBuilds.disabledValue,
       );
-      trackAllWidgets = false;
+      traceAllWidgets = false;
     }
 
-    assert(!(trackAllWidgets && trackUserWidgets));
-    _tracked.value = trackUserWidgets || trackAllWidgets;
+    assert(!(traceAllWidgets && traceUserWidgets));
+    _tracingEnabled.value = traceUserWidgets || traceAllWidgets;
     // Double nested conditinoal expressions are hard to read.
     // ignore: prefer-conditional-expression
-    if (_tracked.value) {
-      _selectedScope.value = trackUserWidgets
-          ? TrackWidgetBuildsScope.userCreated
-          : TrackWidgetBuildsScope.all;
+    if (_tracingEnabled.value) {
+      _selectedScope.value = traceUserWidgets
+          ? TraceWidgetBuildsScope.userCreated
+          : TraceWidgetBuildsScope.all;
     } else {
       _selectedScope.value = null;
     }
@@ -225,27 +225,27 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ValueListenableBuilder<bool>(
-          valueListenable: _trackingAvailable,
-          builder: (context, trackingAvailable, _) {
-            return TrackWidgetBuildsCheckbox(
-              trackingNotifier: _tracked,
-              enabled: trackingAvailable,
+          valueListenable: _tracingAvailable,
+          builder: (context, tracingAvailable, _) {
+            return TraceWidgetBuildsCheckbox(
+              tracingNotifier: _tracingEnabled,
+              enabled: tracingAvailable,
             );
           },
         ),
         MultiValueListenableBuilder(
           listenables: [
-            _tracked,
+            _tracingEnabled,
             _selectedScope,
           ],
           builder: (context, values, _) {
-            final tracked = values.first as bool;
-            final selectedScope = values.second as TrackWidgetBuildsScope?;
+            final tracingEnabled = values.first as bool;
+            final selectedScope = values.second as TraceWidgetBuildsScope?;
             return Padding(
               padding: const EdgeInsets.only(left: _scopeSelectorPadding),
-              child: TrackWidgetBuildsScopeSelector(
+              child: TraceWidgetBuildsScopeSelector(
                 scope: selectedScope,
-                enabled: tracked,
+                enabled: tracingEnabled,
               ),
             );
           },
@@ -255,14 +255,14 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
   }
 }
 
-class TrackWidgetBuildsCheckbox extends StatelessWidget {
-  const TrackWidgetBuildsCheckbox({
+class TraceWidgetBuildsCheckbox extends StatelessWidget {
+  const TraceWidgetBuildsCheckbox({
     super.key,
-    required this.trackingNotifier,
+    required this.tracingNotifier,
     required this.enabled,
   });
 
-  final ValueNotifier<bool> trackingNotifier;
+  final ValueNotifier<bool> tracingNotifier;
 
   final bool enabled;
 
@@ -274,7 +274,7 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
       children: [
         Expanded(
           child: CheckboxSetting(
-            notifier: trackingNotifier,
+            notifier: tracingNotifier,
             title: extension.title,
             description: extension.description,
             tooltip: extension.tooltip,
@@ -300,10 +300,10 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
 
   void _checkboxChanged(bool? value) async {
     final enabled = value == true;
-    final trackingExtensions =
-        TrackWidgetBuildsScope.values.map((scope) => scope.extensionForScope);
+    final tracingExtensions =
+        TraceWidgetBuildsScope.values.map((scope) => scope.extensionForScope);
     if (enabled) {
-      // Default to tracking only user-created widgets.
+      // Default to tracing only user-created widgets.
       final extension = extensions.profileUserWidgetBuilds;
       await serviceConnection.serviceManager.serviceExtensionManager
           .setServiceExtensionState(
@@ -313,7 +313,7 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
       );
     } else {
       await Future.wait([
-        for (final extension in trackingExtensions)
+        for (final extension in tracingExtensions)
           serviceConnection.serviceManager.serviceExtensionManager
               .setServiceExtensionState(
             extension.extension,
@@ -325,14 +325,14 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
   }
 }
 
-class TrackWidgetBuildsScopeSelector extends StatelessWidget {
-  const TrackWidgetBuildsScopeSelector({
+class TraceWidgetBuildsScopeSelector extends StatelessWidget {
+  const TraceWidgetBuildsScopeSelector({
     super.key,
     required this.scope,
     required this.enabled,
   });
 
-  final TrackWidgetBuildsScope? scope;
+  final TraceWidgetBuildsScope? scope;
 
   final bool enabled;
 
@@ -343,12 +343,12 @@ class TrackWidgetBuildsScopeSelector extends StatelessWidget {
     return Row(
       children: [
         ..._scopeSetting(
-          TrackWidgetBuildsScope.userCreated,
+          TraceWidgetBuildsScope.userCreated,
           textStyle: textStyle,
         ),
         const SizedBox(width: defaultSpacing),
         ..._scopeSetting(
-          TrackWidgetBuildsScope.all,
+          TraceWidgetBuildsScope.all,
           textStyle: textStyle,
         ),
       ],
@@ -356,11 +356,11 @@ class TrackWidgetBuildsScopeSelector extends StatelessWidget {
   }
 
   List<Widget> _scopeSetting(
-    TrackWidgetBuildsScope type, {
+    TraceWidgetBuildsScope type, {
     TextStyle? textStyle,
   }) {
     return [
-      Radio<TrackWidgetBuildsScope>(
+      Radio<TraceWidgetBuildsScope>(
         value: type,
         groupValue: scope,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -373,7 +373,7 @@ class TrackWidgetBuildsScopeSelector extends StatelessWidget {
     ];
   }
 
-  Future<void> _changeScope(TrackWidgetBuildsScope? type) async {
+  Future<void> _changeScope(TraceWidgetBuildsScope? type) async {
     assert(enabled);
     final extension = type!.extensionForScope;
     final opposite = type.opposite.extensionForScope;

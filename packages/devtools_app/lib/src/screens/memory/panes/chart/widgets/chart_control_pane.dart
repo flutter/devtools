@@ -55,7 +55,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (widget.chart.mode == ControllerCreationMode.connected) ...[
+        if (widget.chart.mode == MemoryControllerCreationMode.connected) ...[
           Row(
             children: [
               ValueListenableBuilder<bool>(

@@ -20,7 +20,6 @@ import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
@@ -60,16 +59,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         AutoDisposeMixin,
         ProvidedControllerMixin<InspectorController, InspectorScreenBody>,
         SearchFieldMixin<InspectorScreenBody> {
-  InspectorTreeController get _summaryTreeController =>
+  InspectorTreeController get _inspectorTreeController =>
       controller.inspectorTree;
-
-  InspectorTreeController get _detailsTreeController =>
-      controller.details!.inspectorTree;
 
   bool searchVisible = false;
 
   @override
-  SearchControllerMixin get searchController => _summaryTreeController;
+  SearchControllerMixin get searchController => _inspectorTreeController;
 
   /// Indicates whether search can be closed. The value is set to true when
   /// search target type dropdown is displayed
@@ -78,17 +74,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   SearchTargetType searchTarget = SearchTargetType.widget;
 
-  static const summaryTreeKey = Key('Summary Tree');
-  static const detailsTreeKey = Key('Details Tree');
+  static const inspectorTreeKey = Key('Inspector Tree');
   static const minScreenWidthForTextBeforeScaling = 900.0;
   static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
 
   @override
   void dispose() {
-    _summaryTreeController.dispose();
-    if (controller.isSummaryTree && controller.details != null) {
-      _detailsTreeController.dispose();
-    }
+    _inspectorTreeController.dispose();
     super.dispose();
   }
 
@@ -139,28 +131,20 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       ga.timeStart(InspectorScreen.id, gac.pageReady);
     }
 
-    _summaryTreeController.setSearchTarget(searchTarget);
+    _inspectorTreeController.setSearchTarget(searchTarget);
   }
 
   @override
   Widget build(BuildContext context) {
-    final summaryTree = _buildSummaryTreeColumn();
-
-    final detailsTree = InspectorTree(
-      key: detailsTreeKey,
-      treeController: _detailsTreeController,
-      summaryTreeController: _summaryTreeController,
-      screenId: InspectorScreen.id,
-    );
+    final inspectorTree = _buildInspectorTreeColumn();
 
     final splitAxis = SplitPane.axisFor(context, 0.85);
     final widgetTrees = SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
-        summaryTree,
+        inspectorTree,
         InspectorDetails(
-          detailsTree: detailsTree,
           controller: controller,
         ),
       ],
@@ -200,20 +184,20 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     );
   }
 
-  Widget _buildSummaryTreeColumn() {
+  Widget _buildInspectorTreeColumn() {
     return LayoutBuilder(
       builder: (context, constraints) {
         return RoundedOutlinedBorder(
           child: Column(
             children: [
-              InspectorSummaryTreeControls(
+              InspectorTreeControls(
                 isSearchVisible: searchVisible,
                 constraints: constraints,
                 onRefreshInspectorPressed: _refreshInspector,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
                 searchFieldBuilder: () =>
                     StatelessSearchField<InspectorTreeRow>(
-                  controller: _summaryTreeController,
+                  controller: _inspectorTreeController,
                   searchFieldEnabled: true,
                   shouldRequestFocus: searchVisible,
                   supportsNavigation: true,
@@ -233,9 +217,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                     return Stack(
                       children: [
                         InspectorTree(
-                          key: summaryTreeKey,
-                          treeController: _summaryTreeController,
-                          isSummaryTree: true,
+                          key: inspectorTreeKey,
+                          treeController: _inspectorTreeController,
                           widgetErrors: inspectableErrors,
                           screenId: InspectorScreen.id,
                         ),
@@ -268,7 +251,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     setState(() {
       searchVisible = !searchVisible;
     });
-    _summaryTreeController.resetSearch();
+    _inspectorTreeController.resetSearch();
   }
 
   List<Widget> getServiceExtensionWidgets() {
@@ -358,15 +341,13 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               gaItem: gac.inspectorHoverEvalMode,
             ),
             const SizedBox(height: denseSpacing),
-            const InspectorDefaultDetailsViewOption(),
-            const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
-                    'Widgets in these directories will show up in your summary tree.',
+                    'Widgets in these directories will be visible by default in your widget tree.',
                     style: theme.subtleTextStyle,
                   ),
                 ),
@@ -396,8 +377,8 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
   }
 }
 
-class InspectorSummaryTreeControls extends StatelessWidget {
-  const InspectorSummaryTreeControls({
+class InspectorTreeControls extends StatelessWidget {
+  const InspectorTreeControls({
     super.key,
     required this.constraints,
     required this.isSearchVisible,
@@ -571,63 +552,6 @@ class _ErrorNavigatorButton extends StatelessWidget {
         onPressed: onPressed,
       ),
     );
-  }
-}
-
-class InspectorDefaultDetailsViewOption extends StatelessWidget {
-  const InspectorDefaultDetailsViewOption({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: preferences.inspectorV2.defaultDetailsView,
-      builder: (context, selection, _) {
-        final theme = Theme.of(context);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Select the default tab for the inspector.',
-              style: theme.subtleTextStyle,
-            ),
-            const SizedBox(height: denseSpacing),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Radio<InspectorV2DetailsViewType>(
-                  value: InspectorV2DetailsViewType.layoutExplorer,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  groupValue: selection,
-                  onChanged: _onChanged,
-                ),
-                Text(InspectorV2DetailsViewType.layoutExplorer.key),
-                const SizedBox(width: denseSpacing),
-                Radio<InspectorV2DetailsViewType>(
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  value: InspectorV2DetailsViewType.widgetDetailsTree,
-                  groupValue: selection,
-                  onChanged: _onChanged,
-                ),
-                Text(InspectorV2DetailsViewType.widgetDetailsTree.key),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _onChanged(InspectorV2DetailsViewType? value) {
-    if (value != null) {
-      preferences.inspectorV2.setDefaultInspectorDetailsView(value);
-      final item = value.name == InspectorV2DetailsViewType.layoutExplorer.name
-          ? gac.defaultDetailsViewToLayoutExplorer
-          : gac.defaultDetailsViewToWidgetDetails;
-      ga.select(
-        gac.inspector,
-        item,
-      );
-    }
   }
 }
 

@@ -209,7 +209,10 @@ final toggleSelectWidgetMode = ToggleableServiceExtension<bool>(
   disabledValue: false,
 );
 
-final trackRebuildWidgets = ToggleableServiceExtension<bool>(
+@Deprecated('Use countWidgetBuilds instead.')
+final trackRebuildWidgets = countWidgetBuilds;
+
+final countWidgetBuilds = ToggleableServiceExtension<bool>(
   extension:
       '$inspectorExtensionPrefix.${WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name}',
   enabledValue: true,
@@ -254,7 +257,7 @@ final _extensionDescriptions = <ServiceExtension<Object>>[
   toggleOnDeviceWidgetInspector,
   togglePlatformMode,
   toggleSelectWidgetMode,
-  trackRebuildWidgets,
+  countWidgetBuilds,
   profilePlatformChannels,
 ];
 

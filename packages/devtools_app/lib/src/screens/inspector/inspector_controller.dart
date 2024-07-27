@@ -645,9 +645,8 @@ class InspectorController extends DisposableController
       isSummaryTree: isSummaryTree,
     );
 
-    final pendingDetailsFuture = isSummaryTree
-        ? group.getSelection(selectedDiagnostic, treeType, isSummaryTree: false)
-        : null;
+    final pendingDetailsFuture =
+        isSummaryTree ? group.getSelection(selectedDiagnostic, treeType) : null;
 
     try {
       final newSelection = await pendingSelectionFuture;

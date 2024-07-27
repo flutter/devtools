@@ -57,7 +57,7 @@ void main() {
     }
 
     test('UriColumn', () {
-      final column = UriColumn();
+      final column = AddressColumn();
       for (final request in requests) {
         expect(column.getDisplayValue(request), request.uri.toString());
       }

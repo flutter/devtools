@@ -639,7 +639,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
         padding: const EdgeInsets.all(defaultSpacing),
         children: [
           ..._buildGeneralRows(context),
-          if (data is WebSocket) ..._buildSocketOverviewRows(context),
+          if (data is Socket) ..._buildSocketOverviewRows(context),
           const PaddedDivider(
             padding: EdgeInsets.only(bottom: denseRowSpacing),
           ),
@@ -699,7 +699,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Timing',
-        child: data is WebSocket
+        child: data is Socket
             ? _buildSocketTimeGraph(context)
             : _buildHttpTimeGraph(),
       ),
@@ -710,7 +710,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
         child: _valueText(data.durationDisplay),
       ),
       const SizedBox(height: defaultSpacing),
-      ...data is WebSocket
+      ...data is Socket
           ? _buildSocketTimingRows(context)
           : _buildHttpTimingRows(context),
       const SizedBox(height: defaultSpacing),
@@ -832,7 +832,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }
 
   List<Widget> _buildSocketOverviewRows(BuildContext context) {
-    final socket = data as WebSocket;
+    final socket = data as Socket;
     return [
       _buildRow(
         context: context,
@@ -870,7 +870,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }
 
   List<Widget> _buildSocketTimingRows(BuildContext context) {
-    final data = this.data as WebSocket;
+    final data = this.data as Socket;
     final lastReadTimestamp = data.lastReadTimestamp;
     final lastWriteTimestamp = data.lastWriteTimestamp;
     return [
