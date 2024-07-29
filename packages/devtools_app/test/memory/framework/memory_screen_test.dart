@@ -144,7 +144,6 @@ void main() {
         (WidgetTester tester) async {
           await pumpMemoryScreen(tester);
 
-          // TODO(kenz): why are the legend icons not visible in this screenshot?
           await expectLater(
             find.byType(MemoryScreenBody),
             matchesDevToolsGolden(
