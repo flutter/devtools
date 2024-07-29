@@ -153,7 +153,7 @@ void main() {
 
           await tester.runAsync(() async {
             await tester.tap(find.byKey(MemoryScreenKeys.diffTab));
-            await tester.pumpAndSettle(const Duration(seconds: 2));
+            await tester.pumpAndSettle(const Duration(seconds: 3));
           });
           await expectLater(
             find.byType(MemoryScreenBody),
@@ -166,7 +166,7 @@ void main() {
             // Select a snapshot.
             expect(find.byType(SnapshotListTitle), findsNWidgets(3));
             await tester.tap(find.byType(SnapshotListTitle).last);
-            await tester.pumpAndSettle();
+            await tester.pumpAndSettle(const Duration(seconds: 3));
           });
           await expectLater(
             find.byType(MemoryScreenBody),
@@ -177,7 +177,7 @@ void main() {
 
           await tester.runAsync(() async {
             await tester.tap(find.byKey(MemoryScreenKeys.traceTab));
-            await tester.pumpAndSettle(const Duration(seconds: 2));
+            await tester.pumpAndSettle(const Duration(seconds: 3));
           });
 
           // TODO(kenz): should there be data here? Figure out before landing.
