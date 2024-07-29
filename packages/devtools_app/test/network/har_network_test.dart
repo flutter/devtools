@@ -64,8 +64,10 @@ void main() {
               as Map<String, Object?>;
       final harDataEntry = HarDataEntry.fromJson(entryJson);
 
-      expect(harDataEntry.request.uri.toString(),
-          'https://jsonplaceholder.typicode.com/albums/1');
+      expect(
+        harDataEntry.request.uri.toString(),
+        'https://jsonplaceholder.typicode.com/albums/1',
+      );
       expect(harDataEntry.request.method, 'GET');
       expect(harDataEntry.request.requestHeaders, isNotEmpty);
       expect(harDataEntry.request.requestCookies, isEmpty);
