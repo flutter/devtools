@@ -17,14 +17,14 @@ class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryChartPaneController(this.mode, {ChartData? data})
       : assert(
-          mode == ControllerCreationMode.connected ||
-              (mode == ControllerCreationMode.offlineData &&
+          mode == MemoryControllerCreationMode.connected ||
+              (mode == MemoryControllerCreationMode.offlineData &&
                   data != null &&
                   data.isDeviceAndroid != null),
           '$mode, $data, ${data?.isDeviceAndroid}',
         ) {
-    if (mode == ControllerCreationMode.connected) {
-      this.data = ChartData(mode: ControllerCreationMode.connected);
+    if (mode == MemoryControllerCreationMode.connected) {
+      this.data = ChartData(mode: MemoryControllerCreationMode.connected);
     } else {
       this.data = data!;
       // Setting paused to false, because `recomputeChartData` is noop when it is true.
@@ -44,7 +44,7 @@ class MemoryChartPaneController extends DisposableController
   }
 
   /// The mode at which the controller was created.
-  ControllerCreationMode mode;
+  MemoryControllerCreationMode mode;
 
   late final ChartData data;
 
@@ -94,7 +94,7 @@ class MemoryChartPaneController extends DisposableController
 
   void _maybeUpdateChart() {
     if (!isChartVisible.value) return;
-    if (mode == ControllerCreationMode.connected) {
+    if (mode == MemoryControllerCreationMode.connected) {
       if (_chartConnection == null) {
         _chartConnection ??= _chartConnection = ChartVmConnection(
           data.timeline,

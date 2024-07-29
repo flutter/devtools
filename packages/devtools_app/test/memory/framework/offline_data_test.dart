@@ -76,18 +76,18 @@ void main() {
         final item = OfflineMemoryData(
           DiffPaneController(loader: null, rootPackage: 'root'),
           ProfilePaneController(
-            mode: ControllerCreationMode.connected,
+            mode: MemoryControllerCreationMode.connected,
             rootPackage: 'root',
           ),
           ChartData(
-            mode: ControllerCreationMode.offlineData,
+            mode: MemoryControllerCreationMode.offlineData,
             isDeviceAndroid: true,
             timeline: MemoryTimeline(),
             interval: ChartInterval.theDefault,
             isLegendVisible: true,
           ),
           TracePaneController(
-            ControllerCreationMode.offlineData,
+            MemoryControllerCreationMode.offlineData,
             rootPackage: '',
           ),
           ClassFilter.empty(),

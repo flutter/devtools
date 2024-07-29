@@ -620,7 +620,7 @@ class _AllocationProfileTableControls extends StatelessWidget {
         _ExportAllocationProfileButton(
           allocationProfileController: controller,
         ),
-        if (controller.mode == ControllerCreationMode.connected) ...[
+        if (controller.mode == MemoryControllerCreationMode.connected) ...[
           const SizedBox(width: denseSpacing),
           RefreshButton(
             gaScreen: gac.memory,

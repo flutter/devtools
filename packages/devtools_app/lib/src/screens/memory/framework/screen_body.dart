@@ -43,7 +43,7 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
 
     if (!initController()) return;
 
-    if (controller.mode == ControllerCreationMode.connected) {
+    if (controller.mode == MemoryControllerCreationMode.connected) {
       maybePushDebugModeMemoryMessage(context, ScreenMetaData.memory.id);
       maybePushHttpLoggingMessage(context, ScreenMetaData.memory.id);
 
@@ -66,11 +66,10 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
                 controller: controller.control,
               ),
               const SizedBox(height: intermediateSpacing),
-              if (controller.mode != ControllerCreationMode.disconnected)
-                MemoryChartPane(
-                  chart: controller.chart!,
-                  keyFocusNode: _focusNode,
-                ),
+              MemoryChartPane(
+                chart: controller.chart,
+                keyFocusNode: _focusNode,
+              ),
               Expanded(
                 child: MemoryTabView(controller),
               ),

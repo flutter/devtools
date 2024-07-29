@@ -25,7 +25,6 @@ import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
-import 'primitives/simple_items.dart';
 import 'primitives/utils.dart';
 
 final _log = Logger('lib/src/shared/utils');
@@ -306,15 +305,6 @@ class DebounceTimer {
   void dispose() {
     cancel();
   }
-}
-
-/// Current mode of DevTools.
-ControllerCreationMode get devToolsMode {
-  return offlineDataController.showingOfflineData.value
-      ? ControllerCreationMode.offlineData
-      : serviceConnection.serviceManager.connectedState.value.connected
-          ? ControllerCreationMode.connected
-          : ControllerCreationMode.disconnected;
 }
 
 Future<void> launchUrlWithErrorHandling(String url) async {

@@ -20,14 +20,14 @@ enum Json {
 /// Chart data, that should be saved when transferred to offline data mode.
 class ChartData with Serializable {
   ChartData({
-    required ControllerCreationMode mode,
+    required MemoryControllerCreationMode mode,
     this.isDeviceAndroid,
     MemoryTimeline? timeline,
     ChartInterval? interval,
     bool? isLegendVisible,
   })  : assert(
-          mode == ControllerCreationMode.connected ||
-              (mode == ControllerCreationMode.offlineData &&
+          mode == MemoryControllerCreationMode.connected ||
+              (mode == MemoryControllerCreationMode.offlineData &&
                   isDeviceAndroid != null &&
                   timeline != null &&
                   interval != null &&
@@ -41,7 +41,7 @@ class ChartData with Serializable {
 
   factory ChartData.fromJson(Map<String, dynamic> json) {
     final result = ChartData(
-      mode: ControllerCreationMode.offlineData,
+      mode: MemoryControllerCreationMode.offlineData,
       isDeviceAndroid: json[Json.isDeviceAndroid.name] as bool? ?? false,
       timeline: deserialize<MemoryTimeline>(
         json[Json.timeline.name],
