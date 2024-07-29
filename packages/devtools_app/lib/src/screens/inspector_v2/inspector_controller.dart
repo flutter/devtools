@@ -307,6 +307,9 @@ class InspectorController extends DisposableController
     inspectorTree.root = inspectorTree.createNode();
     programmaticSelectionChangeInProgress = false;
     valueToInspectorTreeNode.clear();
+    // Mark tree as inactive so that it will be re-loaded the next time it is
+    // opened:
+    isActive = false;
   }
 
   void onIsolateStopped() {
