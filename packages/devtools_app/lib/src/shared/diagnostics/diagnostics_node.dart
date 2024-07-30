@@ -591,10 +591,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   bool get inHideableGroup {
     if (_alwaysVisible(this)) return false;
     final parentIsHideable = parent != null && !_alwaysVisible(parent!);
-    final childIsHideable =
+    final firstChildIsHideable =
         childrenNow.isNotEmpty && !_alwaysVisible(childrenNow.first);
 
-    return hasChildren ? parentIsHideable : parentIsHideable || childIsHideable;
+    return hasChildren
+        ? parentIsHideable || firstChildIsHideable
+        : parentIsHideable;
   }
 
   bool get isHideableGroupLeader {
@@ -623,9 +625,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   bool _alwaysVisible(RemoteDiagnosticsNode node) {
+    final isRoot = node.parent == null;
     final hasMoreThanOneChild = node.hasChildren && node.childrenNow.length > 1;
     final hasSiblings = (node.parent?.childrenNow ?? []).length > 1;
-    return node.isCreatedByLocalProject || hasMoreThanOneChild || hasSiblings;
+    return isRoot ||
+        node.isCreatedByLocalProject ||
+        hasMoreThanOneChild ||
+        hasSiblings;
   }
 
   Future<void> _computeChildren() async {
