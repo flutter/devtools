@@ -37,6 +37,16 @@ final _log = Logger('inspector_controller');
 
 const inspectorRefQueryParam = 'inspectorRef';
 
+/// Data pattern containing the properties and render properties for a widget
+/// tree node.
+typedef WidgetTreeNodeProperties = ({
+  /// Properties defined directly on the widget.
+  List<RemoteDiagnosticsNode> widgetProperties,
+
+  /// Properties defined on the widget's render object.
+  List<RemoteDiagnosticsNode> renderProperties,
+});
+
 /// This class is based on the InspectorPanel class from the Flutter IntelliJ
 /// plugin with some refactors to make it more of a true controller than a view.
 class InspectorController extends DisposableController
@@ -200,15 +210,11 @@ class InspectorController extends DisposableController
   ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
   final _selectedNode = ValueNotifier<InspectorTreeNode?>(null);
 
-  ValueListenable<List<RemoteDiagnosticsNode>>
-      get selectedNodeWidgetProperties => _selectedNodeWidgetProperties;
-  final _selectedNodeWidgetProperties =
-      ValueNotifier<List<RemoteDiagnosticsNode>>([]);
-
-  ValueListenable<List<RemoteDiagnosticsNode>>
-      get selectedNodeRenderProperties => _selectedNodeRenderProperties;
-  final _selectedNodeRenderProperties =
-      ValueNotifier<List<RemoteDiagnosticsNode>>([]);
+  ValueListenable<WidgetTreeNodeProperties> get selectedNodeProperties =>
+      _selectedNodeProperties;
+  final _selectedNodeProperties = ValueNotifier<WidgetTreeNodeProperties>(
+    (widgetProperties: [], renderProperties: []),
+  );
 
   InspectorTreeNode? lastExpanded;
 
@@ -638,8 +644,10 @@ class InspectorController extends DisposableController
         _log.warning(e, st);
       }
     }
-    _selectedNodeWidgetProperties.value = widgetProperties;
-    _selectedNodeRenderProperties.value = renderProperties;
+    _selectedNodeProperties.value = (
+      widgetProperties: widgetProperties,
+      renderProperties: renderProperties
+    );
   }
 
   /// Update the index of the selected error based on a node that has been

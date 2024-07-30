@@ -6,9 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/common_widgets.dart';
 import '../../../shared/diagnostics/diagnostics_node.dart';
-import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/tab.dart';
 import '../inspector_controller.dart';
 
@@ -19,19 +17,18 @@ class PropertiesView extends StatelessWidget {
     required this.node,
   });
 
+  static const _gaPrefix = 'inspectorNodeProperties';
+
   final InspectorController controller;
   final RemoteDiagnosticsNode node;
 
   @override
   Widget build(BuildContext context) {
-    return MultiValueListenableBuilder(
-      listenables: [
-        controller.selectedNodeWidgetProperties,
-        controller.selectedNodeRenderProperties,
-      ],
-      builder: (context, values, _) {
-        final widgetProperties = values.first as List<RemoteDiagnosticsNode>;
-        final renderProperties = values.second as List<RemoteDiagnosticsNode>;
+    return ValueListenableBuilder<WidgetTreeNodeProperties>(
+      valueListenable: controller.selectedNodeProperties,
+      builder: (context, properties, _) {
+        final widgetProperties = properties.widgetProperties;
+        final renderProperties = properties.renderProperties;
         return Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: AnalyticsTabbedView(
@@ -40,7 +37,7 @@ class PropertiesView extends StatelessWidget {
               (
                 tab: DevToolsTab.create(
                   tabName: 'Widget properties',
-                  gaPrefix: 'widgetPropertiesTab',
+                  gaPrefix: _gaPrefix,
                 ),
                 tabView: PropertiesTable(properties: widgetProperties),
               ),
@@ -48,7 +45,7 @@ class PropertiesView extends StatelessWidget {
                 (
                   tab: DevToolsTab.create(
                     tabName: 'Render object',
-                    gaPrefix: 'renderObjectTab',
+                    gaPrefix: _gaPrefix,
                   ),
                   tabView: PropertiesTable(properties: renderProperties),
                 ),
@@ -70,12 +67,9 @@ class PropertiesTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scrollController = ScrollController();
     return Scrollbar(
-      controller: scrollController,
       thumbVisibility: true,
       child: ListView.builder(
-        controller: scrollController,
         itemCount: properties.length,
         itemBuilder: (context, index) {
           return PropertyItem(
@@ -105,7 +99,7 @@ class PropertyItem extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: theme.focusColor)),
+        border: Border(bottom: defaultBorderSide(theme)),
         color: alternatingColorForIndex(index, theme.colorScheme),
       ),
       child: Row(
