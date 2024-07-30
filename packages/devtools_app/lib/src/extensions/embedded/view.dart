@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/globals.dart';
+import '../../shared/utils.dart';
 import '_view_desktop.dart' if (dart.library.js_interop) '_view_web.dart';
 import 'controller.dart';
 

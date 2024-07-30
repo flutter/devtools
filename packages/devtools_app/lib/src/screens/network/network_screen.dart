@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
@@ -436,8 +437,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             unawaited(
               copyToClipboard(
                 data.uri,
-                onSuccess: () =>
-                    notificationService.push('Copied the URL to the clipboard'),
+                'Copied the URL to the clipboard',
               ),
             );
           },
@@ -448,8 +448,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             unawaited(
               copyToClipboard(
                 CurlCommand.from(data).toString(),
-                onSuccess: () => notificationService
-                    .push('Copied the cURL command to the clipboard'),
+                'Copied the cURL command to the clipboard',
               ),
             );
           },

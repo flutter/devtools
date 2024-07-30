@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
-import 'globals.dart';
+import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 
 /// A widget that displays the contents of [entries].
 ///
@@ -276,12 +276,7 @@ class EditableListCopyDirectoryButton extends StatelessWidget {
       icon: Icons.copy_outlined,
       outlined: false,
       onPressed: () {
-        unawaited(
-          copyToClipboard(
-            value,
-            onSuccess: () => notificationService.push('Copied to clipboard.'),
-          ),
-        );
+        unawaited(copyToClipboard(value, 'Copied to clipboard.'));
       },
     );
   }

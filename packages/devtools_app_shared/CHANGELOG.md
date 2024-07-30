@@ -6,7 +6,6 @@ can be disabled to prevent exceptions from being logged to console.
 * Add `caseInsensitiveFuzzyMatch` extension method on `String`.
 * Add common widgets `DevToolsClearableTextField`, `InputDecorationSuffixButton`,
 and `RoundedDropDownButton`.
-* Add `copyToClipboard` and `isEmbedded` utility methods.
 * Deprecate `ServiceManager.hasConnection` in favor of
 `ServiceManager.connectedState.value.connected`.
 * Correct the dartdoc for the `ListValueNotifier` class.

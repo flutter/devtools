@@ -16,6 +16,7 @@ import 'package:vm_service/vm_service.dart';
 import '../screens/debugger/debugger_controller.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
+import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import 'console/widgets/expandable_variable.dart';
 import 'diagnostics/dart_object_node.dart';
 import 'diagnostics/tree_builder.dart';
@@ -1177,8 +1178,7 @@ class _JsonViewerState extends State<JsonViewer>
                             .serviceManager.service!.fakeServiceCache
                             .instanceToJson(copiedVariable.value as Instance),
                       ),
-                      onSuccess: () =>
-                          notificationService.push('JSON copied to clipboard'),
+                      'JSON copied to clipboard',
                     ),
                   );
                 },
@@ -1414,12 +1414,7 @@ class CopyToClipboardControl extends StatelessWidget {
               ga.select(gaScreen!, gaItem!);
             }
             unawaited(
-              copyToClipboard(
-                dataProvider!() ?? '',
-                onSuccess: successMessage != null
-                    ? () => notificationService.push(successMessage!)
-                    : null,
-              ),
+              copyToClipboard(dataProvider!() ?? '', successMessage),
             );
           };
     final size = this.size ?? defaultIconSize;

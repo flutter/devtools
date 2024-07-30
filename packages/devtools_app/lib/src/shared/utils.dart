@@ -39,6 +39,10 @@ void debugLogger(String message) {
   );
 }
 
+/// Whether DevTools is in embedded mode, as determined by the [ideTheme] parsed
+/// from query parameters.
+bool isEmbedded() => ideTheme.embedded;
+
 /// Whether DevTools is using a dark theme.
 ///
 /// When DevTools is in embedded mode, we first check if the [ideTheme] has

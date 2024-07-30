@@ -5,7 +5,8 @@
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
-import '../../ui/ui_utils.dart';
+import '../../globals.dart';
+import '../../utils.dart';
 import '_copy_to_clipboard_desktop.dart'
     if (dart.library.js_interop) '_copy_to_clipboard_web.dart';
 
@@ -18,23 +19,24 @@ final _log = Logger('copy_to_clipboard');
 /// attempts to post the [data] to the parent frame where the parent frame will
 /// try to complete the copy (this fallback will only work in VSCode).
 Future<void> copyToClipboard(
-  String data, {
-  void Function()? onSuccess,
-}) async {
+  String data,
+  String? successMessage,
+) async {
   try {
     await Clipboard.setData(
       ClipboardData(
         text: data,
       ),
     );
-    onSuccess?.call();
+
+    if (successMessage != null) notificationService.push(successMessage);
   } catch (e) {
     if (isEmbedded()) {
       _log.warning(
-        'Copy failed. This may be as a result of a known bug in VS Code. '
+        'DevTools copy failed. This may be as a result of a known bug in VSCode. '
         'See https://github.com/Dart-Code/Dart-Code/issues/4540 for more '
-        'information. Now attempting to use a fallback method of copying the '
-        'that is a workaround for VS Code only.',
+        'information. DevTools will now attempt to use a fallback method of '
+        'copying the contents.',
       );
       // Trying to use Clipboard.setData to copy in vscode will not work as a
       // result of a bug. So we should fallback to `copyToClipboardVSCode` which

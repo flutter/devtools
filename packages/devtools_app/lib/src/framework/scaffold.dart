@@ -23,6 +23,7 @@ import '../shared/query_parameters.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/title.dart';
+import '../shared/utils.dart';
 import 'about_dialog.dart';
 import 'app_bar.dart';
 import 'report_feedback_button.dart';

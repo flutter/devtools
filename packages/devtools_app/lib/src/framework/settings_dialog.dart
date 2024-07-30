@@ -5,16 +5,17 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../shared/analytics/analytics_controller.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
+import '../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../shared/globals.dart';
 import '../shared/log_storage.dart';
 import '../shared/server/server.dart';
+import '../shared/utils.dart';
 
 class OpenSettingsAction extends ScaffoldAction {
   OpenSettingsAction({super.key, super.color})
@@ -112,8 +113,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
                   _minScreenWidthForTextBeforeScaling,
               onPressed: () async => await copyToClipboard(
                 LogStorage.root.toString(),
-                onSuccess: () =>
-                    notificationService.push('Successfully copied logs'),
+                'Successfully copied logs',
               ),
             ),
             const SizedBox(width: denseSpacing),
