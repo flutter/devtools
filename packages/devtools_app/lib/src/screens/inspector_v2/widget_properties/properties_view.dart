@@ -10,6 +10,8 @@ import '../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../shared/ui/tab.dart';
 import '../inspector_controller.dart';
 
+/// Displays the widget's properties along with the properties on its render
+/// object.
 class PropertiesView extends StatefulWidget {
   const PropertiesView({
     super.key,
