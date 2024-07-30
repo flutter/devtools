@@ -10,6 +10,7 @@ library;
 import 'dart:async';
 import 'dart:js_interop';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:unified_analytics/unified_analytics.dart' as ua;

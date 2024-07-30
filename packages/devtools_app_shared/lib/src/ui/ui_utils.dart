@@ -5,6 +5,10 @@
 import '../utils/globals.dart';
 import 'theme/ide_theme.dart';
 
+/// Whether DevTools is in embedded mode, as determined by the [ideTheme] parsed
+/// from query parameters.
+bool isEmbedded() => ideTheme.embedded;
+
 IdeTheme get ideTheme {
   final theme = globals[IdeTheme];
   if (theme == null) {
