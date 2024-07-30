@@ -144,6 +144,7 @@ void main() {
         (WidgetTester tester) async {
           await pumpMemoryScreen(tester);
 
+          // Initial load on the profile tab.
           await expectLater(
             find.byType(MemoryScreenBody),
             matchesDevToolsGolden(
@@ -151,6 +152,7 @@ void main() {
             ),
           );
 
+          // Switch to the diff tab.
           await tester.runAsync(() async {
             await tester.tap(find.byKey(MemoryScreenKeys.diffTab));
             await tester.pumpAndSettle();
@@ -162,8 +164,8 @@ void main() {
             ),
           );
 
+          // Select a snapshot.
           await tester.runAsync(() async {
-            // Select a snapshot.
             expect(find.byType(SnapshotListTitle), findsNWidgets(3));
             await tester.tap(find.byType(SnapshotListTitle).last);
             await tester.pumpAndSettle();
@@ -175,6 +177,7 @@ void main() {
             ),
           );
 
+          // Switch to the trace tab.
           await tester.runAsync(() async {
             await tester.tap(find.byKey(MemoryScreenKeys.traceTab));
             await tester.pumpAndSettle();

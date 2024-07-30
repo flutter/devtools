@@ -58,28 +58,31 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
     return FutureBuilder<void>(
       future: controller.initialized,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return Column(
-            key: MemoryChartPane.hoverKey,
-            children: [
-              MemoryControlPane(
-                isGcing: controller.isGcing,
-                onGc: controller.gc,
-                onSave: controller.exportData,
-              ),
-              const SizedBox(height: intermediateSpacing),
-              MemoryChartPane(
-                chart: controller.chart,
-                keyFocusNode: _focusNode,
-              ),
-              Expanded(
-                child: MemoryTabView(controller),
-              ),
-            ],
+        if (snapshot.connectionState != ConnectionState.done ||
+            controller.loadingOfflineData.value) {
+          return Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: const CenteredCircularProgressIndicator(),
           );
-        } else {
-          return const CenteredCircularProgressIndicator();
         }
+        return Column(
+          key: MemoryChartPane.hoverKey,
+          children: [
+            MemoryControlPane(
+              isGcing: controller.isGcing,
+              onGc: controller.gc,
+              onSave: controller.exportData,
+            ),
+            const SizedBox(height: intermediateSpacing),
+            MemoryChartPane(
+              chart: controller.chart,
+              keyFocusNode: _focusNode,
+            ),
+            Expanded(
+              child: MemoryTabView(controller),
+            ),
+          ],
+        );
       },
     );
   }
