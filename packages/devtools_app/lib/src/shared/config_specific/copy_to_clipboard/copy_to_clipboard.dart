@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
-import '../../ui/ui_utils.dart';
+import '../../globals.dart';
 import '_copy_to_clipboard_desktop.dart'
     if (dart.library.js_interop) '_copy_to_clipboard_web.dart';
 
@@ -19,15 +20,11 @@ final _log = Logger('copy_to_clipboard');
 /// try to complete the copy (this fallback will only work in VSCode).
 Future<void> copyToClipboard(
   String data, {
-  void Function()? onSuccess,
+  String? successMessage,
 }) async {
   try {
-    await Clipboard.setData(
-      ClipboardData(
-        text: data,
-      ),
-    );
-    onSuccess?.call();
+    await Clipboard.setData(ClipboardData(text: data));
+    if (successMessage != null) notificationService.push(successMessage);
   } catch (e) {
     if (isEmbedded()) {
       _log.warning(
