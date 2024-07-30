@@ -594,9 +594,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     final firstChildIsHideable =
         childrenNow.isNotEmpty && !_alwaysVisible(childrenNow.first);
 
-    return hasChildren
-        ? parentIsHideable || firstChildIsHideable
-        : parentIsHideable;
+    // A widget should only be included in a hideable group if either its parent
+    // or first child is hideable (if it's the only hideable widget then it's
+    // not part of a "group").
+    return parentIsHideable || firstChildIsHideable;
   }
 
   bool get isHideableGroupLeader {
