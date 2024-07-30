@@ -10,8 +10,8 @@ import '../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../shared/ui/tab.dart';
 import '../inspector_controller.dart';
 
-class PropertiesView extends StatelessWidget {
-  const PropertiesView({
+class PropertiesView extends StatefulWidget {
+  PropertiesView({
     super.key,
     required this.controller,
     required this.node,
@@ -23,9 +23,31 @@ class PropertiesView extends StatelessWidget {
   final RemoteDiagnosticsNode node;
 
   @override
+  State<PropertiesView> createState() => _PropertiesViewState();
+}
+
+class _PropertiesViewState extends State<PropertiesView> {
+  late ScrollController _widgetPropertiesScrollController;
+  late ScrollController _renderPropertiesScrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _widgetPropertiesScrollController = ScrollController();
+    _renderPropertiesScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _widgetPropertiesScrollController.dispose();
+    _renderPropertiesScrollController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<WidgetTreeNodeProperties>(
-      valueListenable: controller.selectedNodeProperties,
+      valueListenable: widget.controller.selectedNodeProperties,
       builder: (context, properties, _) {
         final widgetProperties = properties.widgetProperties;
         final renderProperties = properties.renderProperties;
@@ -37,17 +59,23 @@ class PropertiesView extends StatelessWidget {
               (
                 tab: DevToolsTab.create(
                   tabName: 'Widget properties',
-                  gaPrefix: _gaPrefix,
+                  gaPrefix: PropertiesView._gaPrefix,
                 ),
-                tabView: PropertiesTable(properties: widgetProperties),
+                tabView: PropertiesTable(
+                  properties: widgetProperties,
+                  scrollController: _widgetPropertiesScrollController,
+                ),
               ),
               if (renderProperties.isNotEmpty)
                 (
                   tab: DevToolsTab.create(
                     tabName: 'Render object',
-                    gaPrefix: _gaPrefix,
+                    gaPrefix: PropertiesView._gaPrefix,
                   ),
-                  tabView: PropertiesTable(properties: renderProperties),
+                  tabView: PropertiesTable(
+                    properties: renderProperties,
+                    scrollController: _renderPropertiesScrollController,
+                  ),
                 ),
             ],
           ),
@@ -61,15 +89,19 @@ class PropertiesTable extends StatelessWidget {
   const PropertiesTable({
     super.key,
     required this.properties,
+    required this.scrollController,
   });
 
   final List<RemoteDiagnosticsNode> properties;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
+      controller: scrollController,
       thumbVisibility: true,
       child: ListView.builder(
+        controller: scrollController,
         itemCount: properties.length,
         itemBuilder: (context, index) {
           return PropertyItem(
