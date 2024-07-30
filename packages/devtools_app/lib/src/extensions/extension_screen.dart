@@ -12,7 +12,6 @@ import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/screen.dart';
-import '../shared/utils.dart';
 import 'embedded/controller.dart';
 import 'embedded/view.dart';
 import 'extension_screen_controls.dart';
