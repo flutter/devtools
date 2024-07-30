@@ -1177,7 +1177,7 @@ class _JsonViewerState extends State<JsonViewer>
                             .serviceManager.service!.fakeServiceCache
                             .instanceToJson(copiedVariable.value as Instance),
                       ),
-                      () =>
+                      onSuccess: () =>
                           notificationService.push('JSON copied to clipboard'),
                     ),
                   );
@@ -1416,7 +1416,7 @@ class CopyToClipboardControl extends StatelessWidget {
             unawaited(
               copyToClipboard(
                 dataProvider!() ?? '',
-                successMessage != null
+                onSuccess: successMessage != null
                     ? () => () => notificationService.push(successMessage!)
                     : null,
               ),

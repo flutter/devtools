@@ -36,8 +36,8 @@ class UnexpectedErrorDialog extends StatelessWidget {
           onPressed: () => unawaited(
             copyToClipboard(
               additionalInfo,
-              () =>
-                          notificationService.push('Error details copied to clipboard'),
+              onSuccess: () =>
+                  notificationService.push('Error details copied to clipboard'),
             ),
           ),
         ),

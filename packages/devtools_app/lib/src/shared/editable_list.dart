@@ -279,7 +279,7 @@ class EditableListCopyDirectoryButton extends StatelessWidget {
         unawaited(
           copyToClipboard(
             value,
-            () => notificationService.push('Copied to clipboard.'),
+            onSuccess: () => notificationService.push('Copied to clipboard.'),
           ),
         );
       },

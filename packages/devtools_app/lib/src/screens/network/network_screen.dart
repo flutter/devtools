@@ -436,7 +436,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             unawaited(
               copyToClipboard(
                 data.uri,
-                () =>
+                onSuccess: () =>
                     notificationService.push('Copied the URL to the clipboard'),
               ),
             );
@@ -448,7 +448,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             unawaited(
               copyToClipboard(
                 CurlCommand.from(data).toString(),
-                () => notificationService
+                onSuccess: () => notificationService
                     .push('Copied the cURL command to the clipboard'),
               ),
             );

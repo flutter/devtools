@@ -18,9 +18,9 @@ final _log = Logger('copy_to_clipboard');
 /// attempts to post the [data] to the parent frame where the parent frame will
 /// try to complete the copy (this fallback will only work in VSCode).
 Future<void> copyToClipboard(
-  String data,
+  String data, {
   void Function()? onSuccess,
-) async {
+}) async {
   try {
     await Clipboard.setData(
       ClipboardData(

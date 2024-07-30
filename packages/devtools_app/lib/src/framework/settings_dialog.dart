@@ -112,7 +112,8 @@ class _VerboseLoggingSetting extends StatelessWidget {
                   _minScreenWidthForTextBeforeScaling,
               onPressed: () async => await copyToClipboard(
                 LogStorage.root.toString(),
-                () => notificationService.push('Successfully copied logs'),
+                onSuccess: () =>
+                    notificationService.push('Successfully copied logs'),
               ),
             ),
             const SizedBox(width: denseSpacing),
