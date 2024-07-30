@@ -46,6 +46,19 @@ class DartIOHttpRequestData extends NetworkRequest {
     }
   }
 
+  factory DartIOHttpRequestData.fromJson(
+    Map<String, Object?> modifiedRequestData,
+    Map<String, Object?>? requestPostData,
+    Map<String, Object?>? responseContent,
+  ) {
+    return DartIOHttpRequestData(
+      HttpProfileRequestRef.parse(modifiedRequestData)!,
+      requestFullDataFromVmService: false,
+    )
+      .._responseBody = responseContent?['text'].toString()
+      .._requestBody = requestPostData?['text'].toString();
+  }
+
   static const _connectionInfoKey = 'connectionInfo';
   static const _contentTypeKey = 'content-type';
   static const _localPortKey = 'localPort';
@@ -147,7 +160,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   /// Extracts the extension from [mime], with overrides for shortened
-  /// extenstions of common types (e.g., jpe -> jpeg).
+  /// extensions of common types (e.g., jpe -> jpeg).
   String _extensionFromMime(String mime) {
     final extension = extensionFromMime(mime);
     if (extension == 'jpe') {
