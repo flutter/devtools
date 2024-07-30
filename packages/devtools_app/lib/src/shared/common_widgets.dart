@@ -1417,7 +1417,7 @@ class CopyToClipboardControl extends StatelessWidget {
               copyToClipboard(
                 dataProvider!() ?? '',
                 onSuccess: successMessage != null
-                    ? () => () => notificationService.push(successMessage!)
+                    ? () => notificationService.push(successMessage!)
                     : null,
               ),
             );
