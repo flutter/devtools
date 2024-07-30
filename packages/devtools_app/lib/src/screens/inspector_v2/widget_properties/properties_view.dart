@@ -11,7 +11,7 @@ import '../../../shared/ui/tab.dart';
 import '../inspector_controller.dart';
 
 class PropertiesView extends StatefulWidget {
-  PropertiesView({
+  const PropertiesView({
     super.key,
     required this.controller,
     required this.node,
