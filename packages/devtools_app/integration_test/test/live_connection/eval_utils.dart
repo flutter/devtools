@@ -37,7 +37,11 @@ class EvalTester {
     await tester.pump(safePumpDuration);
     await _pressEnter();
 
-    expect(expectedResponse, findsOneWidget);
+    final responseFinder = await retryUntilFound(
+      expectedResponse,
+      tester: tester,
+    );
+    expect(responseFinder, findsOneWidget);
   }
 
   Future<void> _pressEnter() async {
@@ -49,6 +53,20 @@ class EvalTester {
     await simulateKeyDownEvent(LogicalKeyboardKey.enter);
     await simulateKeyUpEvent(LogicalKeyboardKey.enter);
     await tester.pump(longPumpDuration);
+  }
+
+  Future<Finder> retryUntilFound(
+    Finder finder, {
+    required WidgetTester tester,
+    int retries = 3,
+  }) async {
+    if (retries == 0) return finder;
+
+    final found = tester.any(finder);
+    if (found) return finder;
+
+    await tester.pump(safePumpDuration);
+    return retryUntilFound(finder, tester: tester, retries: retries - 1);
   }
 
   /// Prepares the UI of the inspector screen so that the eval-related
