@@ -97,51 +97,51 @@ class _ExtensionContextMenuButton extends StatelessWidget {
     return ValueListenableBuilder<ExtensionEnabledState>(
       valueListenable: extensionService.enabledStateListenable(ext.displayName),
       builder: (context, activationState, _) {
-        if (activationState == ExtensionEnabledState.enabled) {
-          return ContextMenuButton(
-            iconSize: defaultIconSize,
-            buttonWidth: buttonMinWidth,
-            menuChildren: <Widget>[
-              PointerInterceptor(
-                child: MenuItemButton(
-                  onPressed: () {
-                    // Do not send analytics here because the user must
-                    // confirm that they want to disable the extension from
-                    // the [DisableExtensionDialog]. Analytics will be sent
-                    // there if they confirm that they'd like to disable the
-                    // extension.
-                    unawaited(
-                      showDialog(
-                        context: context,
-                        builder: (_) => DisableExtensionDialog(ext: ext),
-                      ),
-                    );
-                  },
-                  child: const MaterialIconLabel(
-                    label: 'Disable extension',
-                    iconData: Icons.extension_off_outlined,
-                  ),
-                ),
-              ),
-              PointerInterceptor(
-                child: MenuItemButton(
-                  onPressed: () {
-                    ga.select(
-                      gac.DevToolsExtensionEvents.extensionScreenId.name,
-                      gac.DevToolsExtensionEvents.extensionForceReload(ext),
-                    );
-                    onForceReload();
-                  },
-                  child: const MaterialIconLabel(
-                    label: 'Force reload extension',
-                    iconData: Icons.refresh,
-                  ),
-                ),
-              ),
-            ],
-          );
+        if (activationState != ExtensionEnabledState.enabled) {
+          return const SizedBox.shrink();
         }
-        return const SizedBox.shrink();
+        return ContextMenuButton(
+          iconSize: defaultIconSize,
+          buttonWidth: buttonMinWidth,
+          menuChildren: <Widget>[
+            PointerInterceptor(
+              child: MenuItemButton(
+                onPressed: () {
+                  // Do not send analytics here because the user must
+                  // confirm that they want to disable the extension from
+                  // the [DisableExtensionDialog]. Analytics will be sent
+                  // there if they confirm that they'd like to disable the
+                  // extension.
+                  unawaited(
+                    showDialog(
+                      context: context,
+                      builder: (_) => DisableExtensionDialog(ext: ext),
+                    ),
+                  );
+                },
+                child: const MaterialIconLabel(
+                  label: 'Disable extension',
+                  iconData: Icons.extension_off_outlined,
+                ),
+              ),
+            ),
+            PointerInterceptor(
+              child: MenuItemButton(
+                onPressed: () {
+                  ga.select(
+                    gac.DevToolsExtensionEvents.extensionScreenId.name,
+                    gac.DevToolsExtensionEvents.extensionForceReload(ext),
+                  );
+                  onForceReload();
+                },
+                child: const MaterialIconLabel(
+                  label: 'Force reload extension',
+                  iconData: Icons.refresh,
+                ),
+              ),
+            ),
+          ],
+        );
       },
     );
   }
