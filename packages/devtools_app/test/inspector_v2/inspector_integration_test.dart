@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart'
     hide InspectorScreen, InspectorScreenBodyState, InspectorScreenBody;
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen.dart';
+import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -92,6 +93,23 @@ void main() {
           matchesDevToolsGolden(
             '../test_infra/goldens/integration_inspector_v2_select_center.png',
           ),
+        );
+
+        // Verify the properties are displayed:
+        verifyPropertyIsVisible(
+          name: 'widget',
+          value: 'Center',
+          tester: tester,
+        );
+        verifyPropertyIsVisible(
+          name: 'alignment',
+          value: 'Alignment.center',
+          tester: tester,
+        );
+        verifyPropertyIsVisible(
+          name: 'dependencies',
+          value: '[Directionality]',
+          tester: tester,
         );
 
         await env.tearDownEnvironment();
@@ -294,4 +312,40 @@ Finder findExpandCollapseButtonForNode({
   expect(expandCollapseButtonTextFinder, findsOneWidget);
 
   return expandCollapseButtonFinder;
+}
+
+void verifyPropertyIsVisible({
+  required String name,
+  required String value,
+  required WidgetTester tester,
+}) {
+  // Verify the property name is visible:
+  final propertyNameFinder = find.descendant(
+    of: find.byType(PropertyName),
+    matching: find.text(name),
+  );
+  expect(propertyNameFinder, findsOneWidget);
+
+  // Verify the property value is visible:
+  final propertyValueFinder = find.descendant(
+    of: find.byType(PropertyValue),
+    matching: find.text(value),
+  );
+  expect(propertyValueFinder, findsOneWidget);
+
+  // Verify the property name and value are aligned:
+  final propertyNameCenter = tester.getCenter(propertyNameFinder);
+  final propertyValueCenter = tester.getCenter(propertyValueFinder);
+  expect(propertyNameCenter.dy, equals(propertyValueCenter.dy));
+}
+
+bool areHorizontallyAligned(
+  Finder widgetAFinder,
+  Finder widgetBFinder, {
+  required WidgetTester tester,
+}) {
+  final widgetACenter = tester.getCenter(widgetAFinder);
+  final widgetBCenter = tester.getCenter(widgetBFinder);
+
+  return widgetACenter.dy == widgetBCenter.dy;
 }
