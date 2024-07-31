@@ -63,6 +63,8 @@ TODO: Remove this section if there are not any general updates.
 
 * Fixed an issue where extensions did not load with the proper theme when
 embedded in an IDE. - [#8034](https://github.com/flutter/devtools/pull/8034)
+* Added an API for copying text to clipboard by proxy of the parent DevTools web app, which has
+workarounds for copy issues when embedded inside an IDE. - [#8130](https://github.com/flutter/devtools/pull/8130)
 
 ## Full commit history
 
