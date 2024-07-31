@@ -1,4 +1,4 @@
-## 0.2.2-wip
+## 0.2.2
 * Load the IDE Theme from the extension URL instead of creating
 a placeholder `IdeTheme` object.
 
