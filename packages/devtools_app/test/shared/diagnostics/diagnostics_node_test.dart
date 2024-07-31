@@ -45,30 +45,27 @@ void main() {
     });
 
     group('hidden groups', () {
-      final implementationNodeWithNoChildren = buildNodeJson(
+      final implementationNodeWithNoChildren = buildImplementationNodeJson(
         description: 'ImplementationNodeWithNoChildren',
-        createdByLocalProject: false,
         children: [],
       );
 
-      final implementationNodeWithSingleChild = buildNodeJson(
+      final implementationNodeWithSingleChild = buildImplementationNodeJson(
         description: 'ImplementationNodeWithSingleChild',
-        createdByLocalProject: false,
         children: [implementationNodeWithNoChildren],
       );
 
-      final implementationNodeWithMultipleChildren = buildNodeJson(
+      final implementationNodeWithMultipleChildren =
+          buildImplementationNodeJson(
         description: 'ImplementationNodeWithMultipleChildren',
-        createdByLocalProject: false,
         children: [
           implementationNodeWithNoChildren,
           implementationNodeWithSingleChild,
         ],
       );
 
-      final projectNodeWithSingleChild = buildNodeJson(
+      final projectNodeWithSingleChild = buildProjectNodeJson(
         description: 'ProjectNodeWithSingleChild',
-        createdByLocalProject: true,
         children: [
           implementationNodeWithSingleChild,
         ],
@@ -147,6 +144,46 @@ void main() {
           expect(node.inHideableGroup, isFalse);
         });
 
+        test(
+          'if node\'s parent and child are both not hideable, it is not hideable',
+          () {
+            // Build the child as a project node (project nodes are NOT
+            // hideable):
+            final childJson = buildProjectNodeJson(children: []);
+            // Build the node as an implementation node (to be hideable, a node must
+            // be an implementation node):
+            final nodeJson = buildImplementationNodeJson(children: [childJson]);
+            // Build the parent as a project node (project nodes are NOT
+            // hideable):
+            final parentJson = buildProjectNodeJson(children: [nodeJson]);
+            final parent = buildNode(parentJson);
+            final node = buildNode(nodeJson, parent: parent);
+            final child = buildNode(childJson, parent: node);
+
+            expect(parent.inHideableGroup, isFalse);
+            expect(child.inHideableGroup, isFalse);
+            expect(node.inHideableGroup, isFalse);
+          },
+        );
+
+        test(
+          'if node\'s parent is not hideable and it has no children, it is not hideable',
+          () {
+            // Build the node as an implementation node (to be hideable, a node must
+            // be an implementation node):
+            final nodeJson = buildImplementationNodeJson(children: []);
+            // Build the parent as a project node (project nodes are NOT
+            // hideable):
+            final parentJson = buildProjectNodeJson(children: [nodeJson]);
+            final parent = buildNode(parentJson);
+            final node = buildNode(nodeJson, parent: parent);
+
+            expect(parent.inHideableGroup, isFalse);
+            expect(node.hasChildren, isFalse);
+            expect(node.inHideableGroup, isFalse);
+          },
+        );
+
         test('otherwise, node is hideable', () {
           final node = buildHideableNode();
           expect(node.inHideableGroup, isTrue);
@@ -224,6 +261,26 @@ void main() {
     });
   });
 }
+
+Map<String, dynamic> buildImplementationNodeJson({
+  required List<Map<String, dynamic>> children,
+  String? description,
+}) =>
+    buildNodeJson(
+      description: description ?? 'ImplementationNode',
+      createdByLocalProject: false,
+      children: children,
+    );
+
+Map<String, dynamic> buildProjectNodeJson({
+  required List<Map<String, dynamic>> children,
+  String? description,
+}) =>
+    buildNodeJson(
+      description: description ?? 'ProjectNode',
+      createdByLocalProject: true,
+      children: children,
+    );
 
 Map<String, dynamic> buildNodeJson({
   required String description,
