@@ -34,7 +34,7 @@ abstract class SimulatedEditorBase {
 
   /// Overridden by subclasses to provide an implementation of the selectDevice
   /// method that can be called by a DTD client.
-  FutureOr<void> selectDevice(String deviceId);
+  FutureOr<void> selectDevice(String? deviceId);
 
   /// Overridden by subclasses to provide an implementation of the hotReload
   /// method that can be called by a DTD client.
@@ -210,7 +210,7 @@ abstract class DtdSimulatedEditorBase extends SimulatedEditorBase {
   }
 
   Future<Map<String, Object?>> _selectDevice(Parameters params) async {
-    await selectDevice(params[Field.deviceId].asString);
+    await selectDevice(params[Field.deviceId].valueOr(null) as String?);
     return _successResponse;
   }
 
