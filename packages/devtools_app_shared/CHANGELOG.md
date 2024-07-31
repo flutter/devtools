@@ -1,4 +1,4 @@
-## 0.2.2-wip
+## 0.2.2
 * Lookup the connected app package root from an expression evaluation when
 the connected app is a Dart or Flutter test.
 * Add a field `logExceptions` to `EvalOnDartLibrary` that defaults to true but
