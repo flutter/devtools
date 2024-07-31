@@ -582,17 +582,21 @@ class DescriptionDisplay extends StatelessWidget {
     if (actionLabel != null) {
       return Row(
         children: [
-          RichText(
-            overflow: TextOverflow.ellipsis,
-            text: text,
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              textStyle: Theme.of(context).regularTextStyle,
+          Flexible(
+            child: RichText(
+              overflow: TextOverflow.ellipsis,
+              text: text,
             ),
-            onPressed: actionCallback,
-            child: Text(
-              actionLabel!,
+          ),
+          Flexible(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).regularTextStyle,
+              ),
+              onPressed: actionCallback,
+              child: Text(
+                actionLabel!,
+              ),
             ),
           ),
         ],
