@@ -118,8 +118,8 @@ class _SidebarDevToolsExtensionsState extends State<SidebarDevToolsExtensions>
                 page: ext.screenId,
                 requiresDebugSession: ext.requiresConnection,
                 // TODO(https://github.com/flutter/devtools/issues/7955): set
-                // this value based on support matrix declared by the extension.
-                prefersDebugSession: true,
+                // the 'prefersDebugSession' value based on the support matrix
+                // declared by the extension.
               ),
             );
           },
