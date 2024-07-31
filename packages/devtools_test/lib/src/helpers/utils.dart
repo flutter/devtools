@@ -210,8 +210,8 @@ void verifyIsSearchMatchForTreeData<T extends TreeDataSearchStateMixin<T>>(
   }
 }
 
-/// Given a [finder], repeatedly pumps until the found, or until there are no
-/// more retries.
+/// Given a [finder], repeatedly pumps until found, or until there are no more
+/// retries.
 Future<Finder> retryUntilFound(
   Finder finder, {
   required WidgetTester tester,
