@@ -326,6 +326,7 @@ class _ExtensionIFrameController extends DisposableController
       copyToClipboard(
         copyToClipboardEvent.content,
         successMessage: copyToClipboardEvent.successMessage,
+        showSuccessMessageOnFallback: true,
       ),
     );
   }
