@@ -113,7 +113,14 @@ class _SidebarDevToolsExtensionsState extends State<SidebarDevToolsExtensions>
               ),
             );
             unawaited(
-              widget.editor.openDevToolsPage(null, page: ext.screenId),
+              widget.editor.openDevToolsPage(
+                null,
+                page: ext.screenId,
+                requiresDebugSession: ext.requiresConnection,
+                // TODO(https://github.com/flutter/devtools/issues/7955): set
+                // the 'prefersDebugSession' value based on the support matrix
+                // declared by the extension.
+              ),
             );
           },
         ),
