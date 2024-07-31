@@ -15,6 +15,7 @@ import 'package:web/web.dart';
 
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/globals.dart';
 import '../../shared/utils.dart';
 import '_controller_web.dart';
@@ -281,6 +282,8 @@ class _ExtensionIFrameController extends DisposableController
         _handleShowNotification(event);
       case DevToolsExtensionEventType.showBannerMessage:
         _handleShowBannerMessage(event);
+      case DevToolsExtensionEventType.copyToClipboard:
+        _handleCopyToClipboard(event);
       default:
         onUnknownEvent?.call();
     }
@@ -314,6 +317,16 @@ class _ExtensionIFrameController extends DisposableController
       bannerMessage,
       callInPostFrameCallback: false,
       ignoreIfAlreadyDismissed: showBannerMessageEvent.ignoreIfAlreadyDismissed,
+    );
+  }
+
+  void _handleCopyToClipboard(DevToolsExtensionEvent event) {
+    final copyToClipboardEvent = CopyToClipboardExtensionEvent.from(event);
+    unawaited(
+      copyToClipboard(
+        copyToClipboardEvent.content,
+        successMessage: copyToClipboardEvent.successMessage,
+      ),
     );
   }
 }

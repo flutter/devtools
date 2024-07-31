@@ -68,6 +68,8 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
 
   late final HTMLIFrameElement _extensionIFrame;
 
+  /// A stream of [DevToolsExtensionEvent]s that will be posted from the
+  /// DevTools web app to the embedded extension iFrame.
   final extensionPostEventStream =
       StreamController<DevToolsExtensionEvent>.broadcast();
 

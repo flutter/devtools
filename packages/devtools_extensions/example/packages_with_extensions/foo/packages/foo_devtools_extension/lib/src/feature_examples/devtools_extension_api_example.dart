@@ -69,6 +69,14 @@ class CallingDevToolsExtensionsAPIsExample extends StatelessWidget {
             'Show DevTools warning (can show again after dismiss)',
           ),
         ),
+        const SizedBox(height: 16.0),
+        ElevatedButton(
+          onPressed: () => extensionManager.copyToClipboard(
+            'Some text I copied!',
+            successMessage: 'Successfully copied text',
+          ),
+          child: const Text('Copy text to clipboard'),
+        ),
       ],
     );
   }
