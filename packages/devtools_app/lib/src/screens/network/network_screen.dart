@@ -13,7 +13,6 @@ import 'package:provider/provider.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
@@ -234,6 +233,14 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           onPressed: widget.controller.clear,
         ),
         const SizedBox(width: defaultSpacing),
+        DownloadButton(
+          minScreenWidthForTextBeforeScaling:
+              _NetworkProfilerControls._includeTextWidth,
+          onPressed: widget.controller.exportAsHarFile,
+          gaScreen: gac.network,
+          gaSelection: gac.NetworkEvent.downloadAsHar.name,
+        ),
+        const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<NetworkController>(
@@ -305,7 +312,7 @@ class NetworkRequestsTable extends StatelessWidget {
   });
 
   static final methodColumn = MethodColumn();
-  static final addressColumn = UriColumn();
+  static final addressColumn = AddressColumn();
   static final statusColumn = StatusColumn();
   static final typeColumn = TypeColumn();
   static final durationColumn = DurationColumn();
@@ -353,11 +360,11 @@ class NetworkRequestsTable extends StatelessWidget {
   }
 }
 
-class UriColumn extends ColumnData<NetworkRequest>
+class AddressColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
-  UriColumn()
+  AddressColumn()
       : super.wide(
-          'Uri',
+          'Address',
           minWidthPx: scaleByFontFactor(isEmbedded() ? 100 : 150.0),
           showTooltip: true,
         );
@@ -429,7 +436,8 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             unawaited(
               copyToClipboard(
                 data.uri,
-                'Copied the URL to the clipboard',
+                onSuccess: () =>
+                    notificationService.push('Copied the URL to the clipboard'),
               ),
             );
           },
@@ -440,7 +448,8 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             unawaited(
               copyToClipboard(
                 CurlCommand.from(data).toString(),
-                'Copied the cURL command to the clipboard',
+                onSuccess: () => notificationService
+                    .push('Copied the cURL command to the clipboard'),
               ),
             );
           },

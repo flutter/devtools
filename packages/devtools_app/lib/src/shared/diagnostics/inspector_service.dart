@@ -13,6 +13,7 @@ import 'dart:developer';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/service_extensions.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -400,7 +401,7 @@ class InspectorService extends InspectorServiceBase {
   /// Requests the full mapping of widget ids to source locations.
   ///
   /// See [LocationMap] which provides support to parse this JSON.
-  Future<Map<String, dynamic>> widgetLocationIdMap() async {
+  Future<Map<String, Object?>> widgetLocationIdMap() async {
     await serviceConnection.serviceManager.waitUntilNotPaused();
     assert(useDaemonApi);
     final response = await invokeServiceMethodDaemonNoGroupArgs(
@@ -411,7 +412,7 @@ class InspectorService extends InspectorServiceBase {
       return {};
     }
 
-    return response as Map<String, dynamic>;
+    return response as Map<String, Object?>;
   }
 
   RemoteDiagnosticsNode? _currentSelection;
@@ -430,7 +431,6 @@ class InspectorService extends InspectorServiceBase {
     final pendingSelection = await group.getSelection(
       _currentSelection,
       FlutterTreeType.widget,
-      isSummaryTree: false,
     );
     if (!group.disposed &&
         group == _selectionGroups.next &&
@@ -950,7 +950,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
 
   Future<RemoteDiagnosticsNode?> getRoot(
     FlutterTreeType type, {
-    required bool isSummaryTree,
+    bool isSummaryTree = false,
   }) {
     // There is no excuse to call this method on a disposed group.
     assert(!disposed);
@@ -1015,7 +1015,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
   Future<RemoteDiagnosticsNode?> getSelection(
     RemoteDiagnosticsNode? previousSelection,
     FlutterTreeType treeType, {
-    required bool isSummaryTree,
+    bool isSummaryTree = false,
   }) async {
     // There is no reason to allow calling this method on a disposed group.
     assert(!disposed);

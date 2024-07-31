@@ -104,7 +104,7 @@ Future<void> setupDimensions() async {}
 
 void setupUserApplicationDimensions() {}
 
-Map<String, dynamic> generateSurveyQueryParameters() => {};
+Map<String, Object?> generateSurveyQueryParameters() => {};
 
 // TODO(https://github.com/flutter/devtools/issues/7083): remove these
 // when the legacy analytics are fully removed.

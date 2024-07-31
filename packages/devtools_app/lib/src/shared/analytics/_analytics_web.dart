@@ -10,6 +10,7 @@ library;
 import 'dart:async';
 import 'dart:js_interop';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:unified_analytics/unified_analytics.dart' as ua;
@@ -243,7 +244,7 @@ GtagEventDevTools _gtagEvent({
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild.toString(),
     is_embedded: isEmbedded().toString(),
-    g3_username: devToolsExtensionPoints.username(),
+    g3_username: devToolsEnvironmentParameters.username(),
     ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
@@ -308,7 +309,7 @@ GtagExceptionDevTools _gtagException(
     flutter_client_id: flutterClientId,
     is_external_build: isExternalBuild.toString(),
     is_embedded: isEmbedded().toString(),
-    g3_username: devToolsExtensionPoints.username(),
+    g3_username: devToolsEnvironmentParameters.username(),
     ide_launched_feature: ideLaunchedFeature,
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
@@ -817,7 +818,7 @@ void setupUserApplicationDimensions() {
   }
 }
 
-Map<String, dynamic> generateSurveyQueryParameters() {
+Map<String, Object?> generateSurveyQueryParameters() {
   const ideKey = 'IDE';
   const versionKey = 'Version';
   const internalKey = 'Internal';

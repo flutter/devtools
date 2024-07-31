@@ -716,7 +716,7 @@ class LoggingTableModel extends DisposableController
     final entry = _logs.elementAt(index);
     final cachedHeight = entry.height;
     if (cachedHeight != null) return cachedHeight;
-    return entry.height ??= LoggingTableRow.calculateRowHeight(
+    return entry.height ??= LoggingTableRow.estimateRowHeight(
       entry.log,
       _tableWidth,
     );
@@ -728,7 +728,7 @@ class LoggingTableModel extends DisposableController
     final cachedHeight = filteredLog.logEntry.height;
     if (cachedHeight != null) return cachedHeight;
 
-    return filteredLog.logEntry.height ??= LoggingTableRow.calculateRowHeight(
+    return filteredLog.logEntry.height ??= LoggingTableRow.estimateRowHeight(
       filteredLog.logEntry.log,
       _tableWidth,
     );

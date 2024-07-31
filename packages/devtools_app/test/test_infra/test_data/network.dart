@@ -72,42 +72,42 @@ final httpGetResponseBodyData = [
   125,
 ];
 
-final testSocket1 = WebSocket(SocketStatistic.parse(testSocket1Json)!, 0);
+final testSocket1 = Socket(SocketStatistic.parse(testSocket1Json)!, 0);
 final testSocket1Json = <String, Object?>{
   'id': '10000',
   'startTime': 1000000,
   'endTime': 2000000,
   'lastReadTime': 1800000,
   'lastWriteTime': 1850000,
-  'address': 'InternetAddress(\'2606:4700:3037::ac43:bd8f\', IPv6)',
+  'address': '[2606:4700:3037::ac43:bd8f]',
   'port': 443,
   'socketType': 'tcp',
   'readBytes': 10,
   'writeBytes': 15,
 };
 
-final testSocket2 = WebSocket(SocketStatistic.parse(testSocket2Json)!, 0);
+final testSocket2 = Socket(SocketStatistic.parse(testSocket2Json)!, 0);
 final testSocket2Json = <String, Object?>{
   'id': '11111',
   'startTime': 3000000,
   // This socket has no end time.
   'lastReadTime': 3500000,
   'lastWriteTime': 3600000,
-  'address': 'InternetAddress(\'2606:4700:3037::ac43:0000\', IPv6)',
+  'address': '[2606:4700:3037::ac43:0000]',
   'port': 80,
   'socketType': 'tcp',
   'readBytes': 20,
   'writeBytes': 25,
 };
 
-final testSocket3 = WebSocket(SocketStatistic.parse(testSocket3Json)!, 0);
+final testSocket3 = Socket(SocketStatistic.parse(testSocket3Json)!, 0);
 final testSocket3Json = <String, Object?>{
   'id': '10000',
   'startTime': 1000000,
   'endTime': 2000000,
   'lastReadTime': 1800000,
   'lastWriteTime': 1850000,
-  'address': 'InternetAddress(\'2606:4700:3037::ac43:bd8f\', IPv6)',
+  'address': '[2606:4700:3037::ac43:bd8f]',
   'port': 443,
   'socketType': 'tcp',
   'readBytes': 100,

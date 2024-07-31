@@ -159,8 +159,7 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
     setGlobal(ExtensionManager, ExtensionManager());
     setGlobal(ServiceManager, ServiceManager());
     setGlobal(DTDManager, DTDManager());
-    // TODO(kenz): pull the IDE theme from the url query params.
-    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(IdeTheme, getIdeTheme());
   }
 
   Future<void> _shutdown() async {

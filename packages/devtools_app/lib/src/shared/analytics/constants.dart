@@ -12,6 +12,7 @@ part 'constants/_debugger_constants.dart';
 part 'constants/_deep_links_constants.dart';
 part 'constants/_extension_constants.dart';
 part 'constants/_memory_constants.dart';
+part 'constants/_network_constants.dart';
 part 'constants/_logging_constants.dart';
 part 'constants/_performance_constants.dart';
 part 'constants/_editor_sidebar_constants.dart';
@@ -94,7 +95,6 @@ enum HomeScreenEvents {
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
-const trackRebuildWidgets = 'trackRebuildWidgets';
 
 // App Size Tools UX actions:
 const importFileSingle = 'importFileSingle';

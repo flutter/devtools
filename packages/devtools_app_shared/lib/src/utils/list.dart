@@ -9,9 +9,8 @@ import 'package:flutter/foundation.dart';
 
 /// A [ChangeNotifier] that holds a list of data.
 ///
-/// This class also exposes methods to interact with the data. By default,
-/// listeners are notified whenever the data is modified, but notifying can be
-/// optionally disabled.
+/// This class also exposes methods to modify the underlying [List]. When the
+/// [List] is modified, listeners are notified.
 final class ListValueNotifier<T> extends ChangeNotifier
     implements ValueListenable<List<T>> {
   /// Creates a [ListValueNotifier] that wraps this value [_rawList].

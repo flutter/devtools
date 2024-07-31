@@ -54,6 +54,7 @@ void main() {
       ExternalDevToolsEnvironmentParameters(),
     );
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
     when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));

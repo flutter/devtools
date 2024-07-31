@@ -17,6 +17,7 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/utils.dart';
 import '../../../performance_utils.dart';
 import '_perfetto_controller_web.dart';
 import 'perfetto_controller.dart';
@@ -164,9 +165,9 @@ class _PerfettoViewController extends DisposableController
       _handleMessageListener = _handleMessage.toJS,
     );
 
-    unawaited(_loadStyle(preferences.darkModeTheme.value));
-    addAutoDisposeListener(preferences.darkModeTheme, () async {
-      await _loadStyle(preferences.darkModeTheme.value);
+    unawaited(_loadStyle(darkMode: isDarkThemeEnabled()));
+    addAutoDisposeListener(preferences.darkModeEnabled, () async {
+      await _loadStyle(darkMode: isDarkThemeEnabled());
       reloadCssForThemeChange();
     });
 
@@ -225,7 +226,7 @@ class _PerfettoViewController extends DisposableController
     });
   }
 
-  Future<void> _loadStyle(bool darkMode) async {
+  Future<void> _loadStyle({required bool darkMode}) async {
     // This message will be handled by [devtools_theme_handler.js], which is
     // included in the Perfetto build inside
     // [packages/perfetto_ui_compiled/dist].

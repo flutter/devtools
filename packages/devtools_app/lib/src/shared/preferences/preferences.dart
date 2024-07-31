@@ -31,7 +31,15 @@ const _thirdPartyPathSegment = 'third_party';
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
-  final darkModeTheme = ValueNotifier<bool>(true);
+  /// Whether the user preference for DevTools theme is set to dark mode.
+  ///
+  /// To check whether DevTools is using a light or dark theme, other parts of
+  /// the DevTools codebase should always check [isDarkThemeEnabled] instead of
+  /// directly checking the value of this notifier. This is because
+  /// [isDarkThemeEnabled] properly handles the case where DevTools is embedded
+  /// inside of an IDE, and this notifier only tracks the value of the dark
+  /// theme user preference.
+  final darkModeEnabled = ValueNotifier<bool>(useDarkThemeAsDefault);
 
   final vmDeveloperModeEnabled = ValueNotifier<bool>(false);
 
@@ -66,8 +74,8 @@ class PreferencesController extends DisposableController
         darkModeValue == 'true';
     ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
     toggleDarkModeTheme(useDarkMode);
-    addAutoDisposeListener(darkModeTheme, () {
-      storage.setValue('ui.darkMode', '${darkModeTheme.value}');
+    addAutoDisposeListener(darkModeEnabled, () {
+      storage.setValue('ui.darkMode', '${darkModeEnabled.value}');
     });
 
     final vmDeveloperModeValue = await boolValueFromStorage(
@@ -117,7 +125,7 @@ class PreferencesController extends DisposableController
   /// Change the value for the dark mode setting.
   void toggleDarkModeTheme(bool? useDarkMode) {
     if (useDarkMode != null) {
-      darkModeTheme.value = useDarkMode;
+      darkModeEnabled.value = useDarkMode;
     }
   }
 

@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart'
     hide InspectorScreen, InspectorScreenBodyState, InspectorScreenBody;
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen.dart';
+import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/matchers/matchers.dart';
+
+// Note: This test uses packages/devtools_app/test/test_infra/fixtures/flutter_app
+// running on the flutter-tester device.
 
 // This is a bit conservative to ensure we do not get flakes due to
 // slow interactions with the VM Service. This delay could likely be
@@ -73,7 +77,7 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
-      'navigation',
+      'widget selection',
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
@@ -81,7 +85,7 @@ void main() {
         // Give time for the initial animation to complete.
         await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-        // Click on the Center widget (row index #5)
+        // Select the Center widget (row index #16)
         await tester.tap(find.richText('Center'));
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
@@ -91,321 +95,121 @@ void main() {
           ),
         );
 
-        // Select the details tree.
-        await tester.tap(
-          find.text(
-            InspectorV2DetailsViewType.widgetDetailsTree.key,
-          ),
+        // Verify the properties are displayed:
+        verifyPropertyIsVisible(
+          name: 'widget',
+          value: 'Center',
+          tester: tester,
         );
+        verifyPropertyIsVisible(
+          name: 'alignment',
+          value: 'Alignment.center',
+          tester: tester,
+        );
+        verifyPropertyIsVisible(
+          name: 'dependencies',
+          value: '[Directionality]',
+          tester: tester,
+        );
+
+        await env.tearDownEnvironment();
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'expand and collapse implementation widgets',
+      windowSize,
+      (WidgetTester tester) async {
+        await _loadInspectorUI(tester);
+
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+        // Before hidden widgets are expanded, confirm the HeroControllerScope
+        // is hidden:
+        final hideableNodeFinder = findNodeMatching('HeroControllerScope');
+        expect(hideableNodeFinder, findsNothing);
+
+        // Expand the hidden group that contains the HeroControllerScope:
+        final expandButton = findExpandCollapseButtonForNode(
+          nodeDescription: '71 more widgets...',
+          isExpand: true,
+        );
+        await tester.tap(expandButton);
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_select_center_details_tree.png',
+            '../test_infra/goldens/integration_inspector_v2_implementation_widgets_expanded.png',
           ),
         );
 
-        // Select the RichText row.
-        await tester.tap(find.richText('RichText'));
+        // Confirm the HeroControllerScope is visible, and select it:
+        expect(hideableNodeFinder, findsOneWidget);
+        await tester.tap(hideableNodeFinder);
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_richtext_selected.png',
+            '../test_infra/goldens/integration_inspector_v2_hideable_widget_selected.png',
           ),
         );
 
-        // Test hovering over the icon shown when a property has its default
-        // value.
-        // TODO(jacobr): support tooltips in the Flutter version of the inspector.
-        // https://github.com/flutter/devtools/issues/2570.
-        // For example, verify that the tooltip hovering over the default value
-        // icons is "Default value".
-        // Test selecting a widget.
-
-        // Two 'Scaffold's: a breadcrumb and an actual tree item
-        expect(find.richText('Scaffold'), findsNWidgets(2));
-        // select Scaffold widget in summary tree.
-        await tester.tap(find.richText('Scaffold').last);
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        // This tree is huge. If there is a change to package:flutter it may
-        // change. If this happens don't panic and rebaseline the golden.
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_scaffold_selected.png',
-          ),
+        // Collapse the hidden group that contains the HeroControllerScope:
+        final collapseButton = findExpandCollapseButtonForNode(
+          nodeDescription: 'ScrollConfiguration',
+          isExpand: false,
         );
-
-        // The important thing about this is that the details tree should scroll
-        // instead of re-rooting as the selected row is already visible in the
-        // details tree.
-        await tester.tap(find.richText('AnimatedPhysicalModel'));
+        await tester.tap(collapseButton);
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_animated_physical_model_selected.png',
+            '../test_infra/goldens/integration_inspector_v2_implementation_widgets_collapsed.png',
           ),
         );
 
         await env.tearDownEnvironment();
       },
-      // TODO(https://github.com/flutter/devtools/issues/7911): Re-enable once
-      // the implementation details are collapsed.
-      skip: true,
     );
 
-    // TODO(jacobr): convert these tests to screenshot tests like the initial
-    // state test.
-    /*
+    testWidgetsWithWindowSize(
+      'search for implementation widgets',
+      windowSize,
+      (WidgetTester tester) async {
+        await _loadInspectorUI(tester);
 
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-      // Intentionally trigger multiple quick navigate action to ensure that
-      // multiple quick navigation commands in a row do not trigger race
-      // conditions getting out of order updates from the server.
-      tree.navigateDown();
-      tree.navigateDown();
-      tree.navigateDown();
-      await detailsTree.nextUiFrame;
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▼[A]AppBar <-- selected\n'
-          '          [/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-      // Make sure we don't go off the bottom of the tree.
-      tree.navigateDown();
-      tree.navigateDown();
-      tree.navigateDown();
-      tree.navigateDown();
-      tree.navigateDown();
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▼[A]AppBar\n'
-          '          [/icons/inspector/textArea.png]Text <-- selected\n',
-        ),
-      );
-      tree.navigateUp();
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▼[A]AppBar <-- selected\n'
-          '          [/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-      tree.navigateLeft();
-      await detailsTree.nextUiFrame;
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▶[A]AppBar <-- selected\n',
-        ),
-      );
-      tree.navigateLeft();
-      // First navigate left goes to the parent.
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold <-- selected\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▶[A]AppBar\n',
-        ),
-      );
-      tree.navigateLeft();
-      // Next navigate left closes the parent.
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▶[S]Scaffold <-- selected\n',
-        ),
-      );
+        // Before searching, confirm the HeroControllerScope is hidden:
+        final hideableNodeFinder = findNodeMatching('HeroControllerScope');
+        expect(hideableNodeFinder, findsNothing);
 
-      tree.navigateRight();
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold <-- selected\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▶[A]AppBar\n',
-        ),
-      );
+        // Search for the HeroControllerScope:
+        final searchButtonFinder = find.ancestor(
+          of: find.byIcon(Icons.search),
+          matching: find.byType(ToolbarAction),
+        );
+        await tester.tap(searchButtonFinder);
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+        await tester.enterText(find.byType(TextField), 'HeroControllerScope');
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+        await tester.tap(find.byIcon(Icons.close));
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-      // Node is already expanded so this is equivalent to navigate down.
-      tree.navigateRight();
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center <-- selected\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▶[A]AppBar\n',
-        ),
-      );
+        // Confirm the HeroControllerScope is visible and selected:
+        expect(hideableNodeFinder, findsOneWidget);
+        await expectLater(
+          find.byType(InspectorScreenBody),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/integration_inspector_v2_hideable_widget_selected_from_search.png',
+          ),
+        );
 
-      await detailsTree.nextUiFrame;
-
-      // Make sure the details and main trees have not gotten out of sync.
-      expect(
-        detailsTree.toStringDeep(hidePropertyLines: true),
-        equalsIgnoringHashCodes('▼[C]Center <-- selected\n'
-            '└─▼[/icons/inspector/textArea.png]Text\n'
-            '  └─▼[/icons/inspector/textArea.png]RichText\n'),
-      );
-
-      await env.tearDownEnvironment();
-    });
-    */
-
-    // TODO(jacobr): uncomment hotReload test once the hot reload test is not
-    // flaky. https://github.com/flutter/devtools/issues/642
-    /*
-    test('hotReload', () async {
-      if (flutterVersion == '1.2.1') {
-        // This test can be flaky in Flutter 1.2.1 because of
-        // https://github.com/dart-lang/sdk/issues/33838
-        // so we just skip it. This block of code can be removed after the next
-        // stable flutter release.
-        // TODO(dantup): Remove this.
-        return;
-      }
-      await env.setupEnvironment();
-
-      await serviceManager.performHotReload();
-      // Ensure the inspector does not fall over and die after a hot reload.
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text <-- selected\n'
-          '      └─▼[A]AppBar\n'
-          '          [/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-
-      // TODO(jacobr): would be nice to have some tests that trigger a hot
-      // reload that actually changes app state in a meaningful way.
-
-      await env.tearDownEnvironment();
-    });
-    */
-// TODO(jacobr): uncomment out the hotRestart tests once
-// https://github.com/flutter/devtools/issues/337 is fixed.
-/*
-    test('hotRestart', () async {
-      await env.setupEnvironment();
-
-      // The important thing about this is that the details tree should scroll
-      // instead of re-rooting as the selected row is already visible in the
-      // details tree.
-      simulateRowClick(tree, rowIndex: 4);
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R]root]\n'
-              '  ▼[M]MyApp\n'
-              '    ▼[M]MaterialApp\n'
-              '      ▼[S]Scaffold\n'
-              '      ├───▼[C]Center <-- selected\n'
-              '      │     ▼[/icons/inspector/textArea.png]Text\n'
-              '      └─▼[A]AppBar\n'
-              '          ▼[/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-
-      /// After the hot restart some existing calls to the vm service may
-      /// timeout and that is ok.
-      serviceManager.manager.service.doNotWaitForPendingFuturesBeforeExit();
-
-      await serviceManager.performHotRestart();
-      // The isolate starts out paused on a hot restart so we have to resume
-      // it manually to make the test pass.
-
-      await serviceManager.manager.service
-          .resume(serviceManager.isolateManager.selectedIsolate.id);
-
-      // First UI transition is to an empty tree.
-      await detailsTree.nextUiFrame;
-      expect(tree.toStringDeep(), equalsIgnoringHashCodes('<empty>\n'));
-
-      // Notice that the selection has been lost due to the hot restart.
-      await detailsTree.nextUiFrame;
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-              '  ▼[M]MyApp\n'
-              '    ▼[M]MaterialApp\n'
-              '      ▼[S]Scaffold\n'
-              '      ├───▼[C]Center\n'
-              '      │     ▼[/icons/inspector/textArea.png]Text\n'
-              '      └─▼[A]AppBar\n'
-              '          ▼[/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-
-      // Verify that the selection can actually be changed after a restart.
-      simulateRowClick(tree, rowIndex: 4);
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-              '  ▼[M]MyApp\n'
-              '    ▼[M]MaterialApp\n'
-              '      ▼[S]Scaffold\n'
-              '      ├───▼[C]Center <-- selected\n'
-              '      │     ▼[/icons/inspector/textArea.png]Text\n'
-              '      └─▼[A]AppBar\n'
-              '          ▼[/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-      await env.tearDownEnvironment();
-    });
-*/
+        await env.tearDownEnvironment();
+      },
+    );
   });
 
   group('widget errors', () {
@@ -481,4 +285,67 @@ Future<void> _loadInspectorUI(WidgetTester tester) async {
     await controller.maybeLoadUI();
     await tester.pumpAndSettle();
   }
+}
+
+Finder findNodeMatching(String text) => find.ancestor(
+      of: find.richTextContaining(text),
+      matching: find.byType(DescriptionDisplay),
+    );
+
+Finder findExpandCollapseButtonForNode({
+  required String nodeDescription,
+  required bool isExpand,
+}) {
+  final hiddenNodeFinder = findNodeMatching(nodeDescription);
+  expect(hiddenNodeFinder, findsOneWidget);
+
+  final expandCollapseButtonFinder = find.descendant(
+    of: hiddenNodeFinder,
+    matching: find.byType(TextButton),
+  );
+  expect(expandCollapseButtonFinder, findsOneWidget);
+
+  final expandCollapseButtonTextFinder = find.descendant(
+    of: expandCollapseButtonFinder,
+    matching: find.text(isExpand ? '(expand)' : '(collapse)'),
+  );
+  expect(expandCollapseButtonTextFinder, findsOneWidget);
+
+  return expandCollapseButtonFinder;
+}
+
+void verifyPropertyIsVisible({
+  required String name,
+  required String value,
+  required WidgetTester tester,
+}) {
+  // Verify the property name is visible:
+  final propertyNameFinder = find.descendant(
+    of: find.byType(PropertyName),
+    matching: find.text(name),
+  );
+  expect(propertyNameFinder, findsOneWidget);
+
+  // Verify the property value is visible:
+  final propertyValueFinder = find.descendant(
+    of: find.byType(PropertyValue),
+    matching: find.text(value),
+  );
+  expect(propertyValueFinder, findsOneWidget);
+
+  // Verify the property name and value are aligned:
+  final propertyNameCenter = tester.getCenter(propertyNameFinder);
+  final propertyValueCenter = tester.getCenter(propertyValueFinder);
+  expect(propertyNameCenter.dy, equals(propertyValueCenter.dy));
+}
+
+bool areHorizontallyAligned(
+  Finder widgetAFinder,
+  Finder widgetBFinder, {
+  required WidgetTester tester,
+}) {
+  final widgetACenter = tester.getCenter(widgetAFinder);
+  final widgetBCenter = tester.getCenter(widgetBFinder);
+
+  return widgetACenter.dy == widgetBCenter.dy;
 }
