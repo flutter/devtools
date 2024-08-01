@@ -36,7 +36,7 @@ void setEnableExperiments() {
 bool get enableBeta => enableExperiments || !isExternalBuild;
 
 const _kMemoryOfflineExperiment =
-    bool.fromEnvironment('memory_offline_experiment', defaultValue: true);
+    bool.fromEnvironment('memory_offline_experiment');
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
