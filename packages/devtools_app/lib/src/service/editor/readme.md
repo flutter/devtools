@@ -14,21 +14,22 @@ flowchart LR
         PostMessageEditorClient
     end
     subgraph Editor["`Editor / Mock Editor / Tests`"]
-        EditorServer
-        PostMessageEditorServer
+        SimulatedEditorBase
+        PostMessageSimulatedEditor
     end
-    EditorClient <--> DTD <--> EditorServer
-    PostMessageEditorClient <--> postMessage <--> PostMessageEditorServer
+    EditorClient <--> DTD <--> SimulatedEditorBase
+    PostMessageEditorClient <--> postMessage <--> PostMessageSimulatedEditor
 ```
 
 - `EditorClient` classes are used by the client tool (DevTools sidebar) to
   interact with the services provided by an editor in a strongly-typed way.
-- `EditorServer` classes are used by the editor to provide those services in a
-  strongly-typed way.
-- `FakeEditor` is a helper mixin for `EditorServer` classes that provide some
-  mock editor functionality (such as the ability to connect and disconnect mock
-  devices and start debug sessions). This is used by the "mock editor" Stager
-  scene to allow testing/developing the sidebar without a real editor.
+- `SimulatedEditor` classes are used by the editor to provide those services in
+  a strongly-typed way.
+- `SimulatedEditorMixin` is a helper mixin for `SimulatedEditorBase` classes
+  that provide some mock editor functionality (such as the ability to connect
+  and disconnect mock devices and start debug sessions). This is used by the
+  "mock editor" Stager scene to allow testing/developing the sidebar without a
+  real editor.
 - `_VsCodeConnectedPanel` is the sidebar implementation that works with the
   generic `EditorClient` class so it can work against either transport channel.
 
@@ -37,8 +38,8 @@ flowchart LR
 
 - `PostMessageEditorClient` is an implementation of `EditorClient` that
   communicates over `postMessage`.
-- `PostMessageFakeEditor` is an implementation of `EditorServer` (that mixes in
-  `FakeEditor`) that communicates over `postMessage` streams.
+- `PostMessageSimulatedEditor` is an implementation of `SimulatedEditorBase`
+  (that mixes in `SimulatedEditorMixin`) that communicates over `postMessage` streams.
 - `VsCodePostMessageSidebarPanel` is a widget that wraps `_VsCodeConnectedPanel`
   and provides it with a `postMessage` implementation of `EditorClient`.
 

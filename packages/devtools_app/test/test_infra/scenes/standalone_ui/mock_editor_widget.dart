@@ -2,28 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:devtools_app/src/utils/list_queue_value_notifier.dart';
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import 'editor_service/fake_editor.dart';
+import 'editor_service/simulated_editor_mixin.dart';
 
 /// A simple UI that acts as a stand-in host editor to simplify the development
 /// workflow when working on embedded tooling.
 ///
-/// Uses a [FakeEditor] to provide functionality over DTD (or legacy
+/// Uses a [SimulatedEditorMixin] to provide functionality over DTD (or legacy
 /// `postMessage`).
 class MockEditorWidget extends StatefulWidget {
   const MockEditorWidget({
     super.key,
     required this.editor,
+    required this.clientLog,
     this.child,
   });
 
   /// The fake editor API we can use to simulate an editor.
-  final FakeEditor editor;
+  final SimulatedEditorMixin editor;
+
+  /// A stream of protocol traffic between the sidebar and DTD.
+  final Stream<String> clientLog;
 
   final Widget? child;
 
@@ -31,19 +38,24 @@ class MockEditorWidget extends StatefulWidget {
   State<MockEditorWidget> createState() => _MockEditorWidgetState();
 }
 
-class _MockEditorWidgetState extends State<MockEditorWidget> {
-  FakeEditor get editor => widget.editor;
+class _MockEditorWidgetState extends State<MockEditorWidget>
+    with AutoDisposeMixin {
+  SimulatedEditorMixin get editor => widget.editor;
 
-  /// The number of communication messages to keep in the log.
+  Stream<String> get clientLog => widget.clientLog;
+
+  Stream<String> get editorLog => editor.log;
+
+  /// The number of communication messages to keep in the logs.
   static const maxLogEvents = 20;
 
-  /// The last [maxLogEvents] communication messages sent between the panel
-  /// and the "host IDE".
-  final logRing = ListQueue<String>();
+  /// The last [maxLogEvents] communication messages sent between the sidebar
+  /// and DTD.
+  final clientLogRing = ListQueueValueNotifier<String>(ListQueue());
 
-  /// A stream that emits each time the log is updated to allow the log widget
-  /// to be rebuilt.
-  Stream<void>? logUpdated;
+  /// The last [maxLogEvents] communication messages sent between the editor
+  /// and DTD.
+  final editorLogRing = ListQueueValueNotifier<String>(ListQueue());
 
   /// Flutter icon for the sidebar.
   final sidebarImageBytes = base64Decode(
@@ -54,12 +66,23 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
   void initState() {
     super.initState();
 
-    logUpdated = editor.log.map((log) {
-      logRing.add(log);
-      while (logRing.length > maxLogEvents) {
-        logRing.removeFirst();
-      }
-    });
+    // Listen to the log streams to maintain our buffer and trigger rebuilds.
+    autoDisposeStreamSubscription(
+      clientLog.listen((log) {
+        clientLogRing.add(log);
+        while (clientLogRing.length > maxLogEvents) {
+          clientLogRing.removeFirst();
+        }
+      }),
+    );
+    autoDisposeStreamSubscription(
+      editorLog.listen((log) {
+        editorLogRing.add(log);
+        while (editorLogRing.length > maxLogEvents) {
+          editorLogRing.removeFirst();
+        }
+      }),
+    );
   }
 
   @override
@@ -113,11 +136,31 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
                   const SizedBox(height: defaultSpacing),
                   Row(
                     children: [
+                      const Text('Editor: '),
+                      ElevatedButton(
+                        onPressed: editor.connected
+                            ? null
+                            : _withUpdate(editor.connectEditor),
+                        child: const Text('Connect'),
+                      ),
+                      const SizedBox(width: denseSpacing),
+                      ElevatedButton(
+                        onPressed: editor.connected
+                            ? _withUpdate(editor.disconnectEditor)
+                            : null,
+                        child: const Text('Disconnect'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: defaultSpacing),
+                  Row(
+                    children: [
                       const Text('Devices: '),
                       ElevatedButton(
                         onPressed: editor.connectDevices,
                         child: const Text('Connect'),
                       ),
+                      const SizedBox(width: denseSpacing),
                       ElevatedButton(
                         onPressed: editor.disconnectDevices,
                         child: const Text('Disconnect'),
@@ -222,39 +265,64 @@ class _MockEditorWidgetState extends State<MockEditorWidget> {
                 ],
               ),
             ),
-            Container(
-              color: editorTheme.editorBackgroundColor,
-              padding: const EdgeInsets.all(10),
-              child: StreamBuilder(
-                stream: logUpdated,
-                builder: (context, snapshot) {
-                  return SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (final log in logRing)
-                          OutlineDecoration.onlyBottom(
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: denseSpacing,
-                              ),
-                              child: Text(
-                                log,
-                                style: Theme.of(context).fixedFontStyle,
-                              ),
-                            ),
-                          ),
+            DefaultTabController(
+              length: 2,
+              child: Container(
+                color: editorTheme.editorBackgroundColor,
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    const TabBar(
+                      isScrollable: true,
+                      tabs: [
+                        Tab(text: 'Client/Sidebar Log'),
+                        Tab(text: 'Server Log'),
                       ],
                     ),
-                  );
-                },
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          for (final logRing in [clientLogRing, editorLogRing])
+                            ValueListenableBuilder(
+                              valueListenable: logRing,
+                              builder: (context, logRing, _) {
+                                return ListView.builder(
+                                  itemCount: logRing.length,
+                                  itemBuilder: (context, index) =>
+                                      OutlineDecoration.onlyBottom(
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: denseSpacing,
+                                      ),
+                                      child: Text(
+                                        logRing.elementAt(index),
+                                        style: Theme.of(context).fixedFontStyle,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
       ],
     );
+  }
+
+  /// Returns a function that calls [f] and then once it completes, [setState].
+  Future<void> Function() _withUpdate<T>(FutureOr<T> Function() f) {
+    return () async {
+      await f();
+      setState(() {});
+    };
   }
 }
 
