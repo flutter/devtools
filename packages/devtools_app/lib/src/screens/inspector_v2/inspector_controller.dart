@@ -114,13 +114,13 @@ class InspectorController extends DisposableController
       }
     });
 
-    addAutoDisposeListener(preferences.inspector.onlyShowProjectWidgets, () {
-      final onlyShowProjectWidgets =
-          preferences.inspector.onlyShowProjectWidgets.value;
-      _toggleImplementationWidgetsVisibility(
-        hideImplementationWidgets: onlyShowProjectWidgets,
-      );
-    });
+    // addAutoDisposeListener(preferences.inspector.onlyShowProjectWidgets, () {
+    //   final onlyShowProjectWidgets =
+    //       preferences.inspector.onlyShowProjectWidgets.value;
+    //   _toggleImplementationWidgetsVisibility(
+    //     hideImplementationWidgets: onlyShowProjectWidgets,
+    //   );
+    // });
 
     if (serviceConnection.serviceManager.connectedAppInitialized) {
       _handleConnectionStart();
@@ -223,6 +223,10 @@ class InspectorController extends DisposableController
   final _selectedNodeProperties = ValueNotifier<WidgetTreeNodeProperties>(
     (widgetProperties: [], renderProperties: []),
   );
+
+  ValueListenable<bool> get implementationWidgetsHidden =>
+      _implementationWidgetsHidden;
+  final _implementationWidgetsHidden = ValueNotifier<bool>(false);
 
   InspectorTreeNode? lastExpanded;
 
@@ -445,6 +449,7 @@ class InspectorController extends DisposableController
       inspectorTree.root = rootNode;
 
       refreshSelection(newSelection);
+      _implementationWidgetsHidden.value = hideImplementationWidgets;
     } catch (error, st) {
       _log.shout(error, error, st);
       treeGroups.cancelNext();
@@ -452,9 +457,9 @@ class InspectorController extends DisposableController
     }
   }
 
-  Future<void> _toggleImplementationWidgetsVisibility({
-    required bool hideImplementationWidgets,
-  }) async {
+  Future<void> toggleImplementationWidgetsVisibility() async {
+    final hideImplementationWidgets = !_implementationWidgetsHidden.value;
+
     final root = inspectorTree.root?.diagnostic;
     if (root != null) {
       await _recomputeTreeRoot(
