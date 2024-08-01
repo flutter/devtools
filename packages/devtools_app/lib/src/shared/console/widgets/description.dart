@@ -414,7 +414,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       // Grey out nodes that were not created by the local project to emphasize
       // those that were:
       if (emphasizeNodesFromLocalProject &&
-          !diagnosticLocal.isCreatedByLocalProject) {
+          !diagnosticLocal.isCreatedByLocalProject &&
+          diagnosticLocal.description != '[root]') {
         textStyle = textStyle.merge(theme.subtleTextStyle);
       }
 

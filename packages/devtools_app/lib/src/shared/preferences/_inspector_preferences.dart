@@ -19,6 +19,7 @@ enum InspectorDetailsViewType {
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
+  ValueListenable<bool> get onlyShowProjectWidgets => _onlyShowProjectWidgets;
   ValueListenable<InspectorDetailsViewType> get defaultDetailsView =>
       _defaultDetailsView;
   ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
@@ -28,6 +29,7 @@ class InspectorPreferencesController extends DisposableController
       serviceConnection.inspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
+  final _onlyShowProjectWidgets = ValueNotifier<bool>(false);
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);

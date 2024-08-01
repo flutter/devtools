@@ -114,6 +114,14 @@ class InspectorController extends DisposableController
       }
     });
 
+    addAutoDisposeListener(preferences.inspector.onlyShowProjectWidgets, () {
+      final onlyShowProjectWidgets =
+          preferences.inspector.onlyShowProjectWidgets.value;
+      _toggleImplementationWidgetsVisibility(
+        hideImplementationWidgets: onlyShowProjectWidgets,
+      );
+    });
+
     if (serviceConnection.serviceManager.connectedAppInitialized) {
       _handleConnectionStart();
     }
@@ -403,7 +411,10 @@ class InspectorController extends DisposableController
     }
   }
 
-  Future<void> _recomputeTreeRoot(RemoteDiagnosticsNode? newSelection) async {
+  Future<void> _recomputeTreeRoot(
+    RemoteDiagnosticsNode? newSelection, {
+    bool hideImplementationWidgets = false,
+  }) async {
     assert(!_disposed);
     final treeGroups = _treeGroups;
     if (_disposed || treeGroups == null) {
@@ -413,7 +424,10 @@ class InspectorController extends DisposableController
     treeGroups.cancelNext();
     try {
       final group = treeGroups.next;
-      final node = await group.getRoot(treeType);
+      final node = await group.getRoot(
+        treeType,
+        isSummaryTree: hideImplementationWidgets,
+      );
       if (node == null || group.disposed || _disposed) {
         return;
       }
@@ -435,6 +449,18 @@ class InspectorController extends DisposableController
       _log.shout(error, error, st);
       treeGroups.cancelNext();
       return;
+    }
+  }
+
+  Future<void> _toggleImplementationWidgetsVisibility({
+    required bool hideImplementationWidgets,
+  }) async {
+    final root = inspectorTree.root?.diagnostic;
+    if (root != null) {
+      await _recomputeTreeRoot(
+        root,
+        hideImplementationWidgets: hideImplementationWidgets,
+      );
     }
   }
 
