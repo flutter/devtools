@@ -280,13 +280,6 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                   'Hovering over any widget displays its properties and values.',
               gaItem: gac.inspectorHoverEvalMode,
             ),
-            CheckboxSetting(
-              notifier: preferences.inspector.onlyShowProjectWidgets
-                  as ValueNotifier<bool?>,
-              title: 'Only show widgets from the local project',
-              description:
-                  'Hides widgets created by the Flutter framework or other packages.',
-            ),
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
             Row(

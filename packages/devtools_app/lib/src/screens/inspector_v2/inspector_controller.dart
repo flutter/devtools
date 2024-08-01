@@ -114,14 +114,6 @@ class InspectorController extends DisposableController
       }
     });
 
-    // addAutoDisposeListener(preferences.inspector.onlyShowProjectWidgets, () {
-    //   final onlyShowProjectWidgets =
-    //       preferences.inspector.onlyShowProjectWidgets.value;
-    //   _toggleImplementationWidgetsVisibility(
-    //     hideImplementationWidgets: onlyShowProjectWidgets,
-    //   );
-    // });
-
     if (serviceConnection.serviceManager.connectedAppInitialized) {
       _handleConnectionStart();
     }
