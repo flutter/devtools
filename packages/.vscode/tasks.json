@@ -1,0 +1,41 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start DTD on Port 8500",
+			"detail": "Starts a DTD instance running on port 8500",
+			"type": "shell",
+			"command": "${workspaceFolder}/../tool/flutter-sdk/bin/cache/dart-sdk/bin/dart",
+			"args": [
+				"tooling-daemon",
+				"--disable-service-auth-codes",
+				"--port=8500",
+			],
+			// Don't bring the asks list to the front as this is usually invoked as a background
+			// task for the standalone_ui/editor_sidebar launch config.
+			"presentation": {
+				"reveal": "never"
+			},
+			// We need to run this as a background task, otherwise VS Code would wait for it to
+			// complete/terminate before running the debug session.
+			"isBackground": true,
+			"group": "none",
+			// Background tasks need to indicate to VS Code when they are "working" and when they are complete
+			// and the debug session can start. This is done via a problemMatcher even if you don't want to match
+			// problems so we need to set some parameters that will consider us "ready" when the DTD banner
+			// is printed to stdout.
+			"problemMatcher": [
+				{
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": "NOT-USED-XXXXXXXXXX", // We never need to go back into working state.
+						"endsPattern": "The Dart Tooling Daemon is listening on" // Finished working.
+					},
+					"pattern": {
+						"regexp": "NOT-USED-XXXXXXXXXX", // We never want to find any problems in the output.
+					}
+				}
+			]
+		}
+	]
+}

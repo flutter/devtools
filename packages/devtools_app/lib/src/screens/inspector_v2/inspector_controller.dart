@@ -37,6 +37,16 @@ final _log = Logger('inspector_controller');
 
 const inspectorRefQueryParam = 'inspectorRef';
 
+/// Data pattern containing the properties and render properties for a widget
+/// tree node.
+typedef WidgetTreeNodeProperties = ({
+  /// Properties defined directly on the widget.
+  List<RemoteDiagnosticsNode> widgetProperties,
+
+  /// Properties defined on the widget's render object.
+  List<RemoteDiagnosticsNode> renderProperties,
+});
+
 /// This class is based on the InspectorPanel class from the Flutter IntelliJ
 /// plugin with some refactors to make it more of a true controller than a view.
 class InspectorController extends DisposableController
@@ -199,6 +209,12 @@ class InspectorController extends DisposableController
 
   ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
   final _selectedNode = ValueNotifier<InspectorTreeNode?>(null);
+
+  ValueListenable<WidgetTreeNodeProperties> get selectedNodeProperties =>
+      _selectedNodeProperties;
+  final _selectedNodeProperties = ValueNotifier<WidgetTreeNodeProperties>(
+    (widgetProperties: [], renderProperties: []),
+  );
 
   InspectorTreeNode? lastExpanded;
 
@@ -595,7 +611,46 @@ class InspectorController extends DisposableController
     endShowNode();
 
     _updateSelectedErrorFromNode(_selectedNode.value);
+    unawaited(_loadPropertiesForNode(_selectedNode.value));
     animateTo(selectedNode.value);
+  }
+
+  Future<void> _loadPropertiesForNode(InspectorTreeNode? node) async {
+    final widgetProperties = <RemoteDiagnosticsNode>[];
+    final renderProperties = <RemoteDiagnosticsNode>[];
+    final diagnostic = node?.diagnostic;
+    final objectGroupApi = diagnostic?.objectGroupApi;
+    if (diagnostic != null && objectGroupApi != null) {
+      try {
+        // Fetch widget properties:
+        final wProperties = await diagnostic.getProperties(objectGroupApi);
+        // Check if the selected node has changed, and if so return early:
+        if (_selectedNode.value != node) {
+          return;
+        }
+        widgetProperties.addAll(
+          wProperties.where((p) => p.propertyType != 'RenderObject'),
+        );
+        renderProperties.addAll(
+          wProperties.where((p) => p.propertyType == 'RenderObject'),
+        );
+        // Fetch RenderObject properties:
+        for (final renderObject in renderProperties) {
+          final rProperties = await renderObject.getProperties(objectGroupApi);
+          // Check if the selected node has changed, and if so return early:
+          if (_selectedNode.value != node) {
+            return;
+          }
+          renderProperties.addAll(rProperties);
+        }
+      } catch (e, st) {
+        _log.warning(e, st);
+      }
+    }
+    _selectedNodeProperties.value = (
+      widgetProperties: widgetProperties,
+      renderProperties: renderProperties
+    );
   }
 
   /// Update the index of the selected error based on a node that has been

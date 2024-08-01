@@ -589,9 +589,15 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       inHideableGroup && !isHideableGroupLeader && groupIsHidden;
 
   bool get inHideableGroup {
-    final hasAtMostOneChild = childrenNow.length <= 1;
-    final isOnlyChild = (parent?.childrenNow ?? []).length == 1;
-    return !isCreatedByLocalProject && hasAtMostOneChild && isOnlyChild;
+    if (_alwaysVisible(this)) return false;
+    final parentIsHideable = parent != null && !_alwaysVisible(parent!);
+    final firstChildIsHideable =
+        childrenNow.isNotEmpty && !_alwaysVisible(childrenNow.first);
+
+    // A widget should only be included in a hideable group if either its parent
+    // or first child is hideable (if it's the only hideable widget then it's
+    // not part of a "group").
+    return parentIsHideable || firstChildIsHideable;
   }
 
   bool get isHideableGroupLeader {
@@ -617,6 +623,16 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       _hideableGroupSubordinates
           ?.forEach((node) => node.groupIsHidden = newHiddenValue);
     }
+  }
+
+  bool _alwaysVisible(RemoteDiagnosticsNode node) {
+    final isRoot = node.parent == null;
+    final hasMoreThanOneChild = node.hasChildren && node.childrenNow.length > 1;
+    final hasSiblings = (node.parent?.childrenNow ?? []).length > 1;
+    return isRoot ||
+        node.isCreatedByLocalProject ||
+        hasMoreThanOneChild ||
+        hasSiblings;
   }
 
   Future<void> _computeChildren() async {

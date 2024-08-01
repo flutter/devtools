@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 export 'src/utils/auto_dispose.dart';
-export 'src/utils/copy_to_clipboard/copy_to_clipboard.dart';
 export 'src/utils/globals.dart';
 export 'src/utils/list.dart';
 export 'src/utils/url/url.dart';

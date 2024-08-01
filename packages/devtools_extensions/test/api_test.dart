@@ -97,6 +97,11 @@ void main() {
       );
 
       expect(
+        DevToolsExtensionEventType.from('copyToClipboard'),
+        DevToolsExtensionEventType.copyToClipboard,
+      );
+
+      expect(
         DevToolsExtensionEventType.from('vmServiceConnection'),
         DevToolsExtensionEventType.vmServiceConnection,
       );
@@ -145,6 +150,10 @@ void main() {
       );
       verifyEventDirection(
         DevToolsExtensionEventType.showBannerMessage,
+        (bidirectional: false, toDevTools: true, toExtension: false),
+      );
+      verifyEventDirection(
+        DevToolsExtensionEventType.copyToClipboard,
         (bidirectional: false, toDevTools: true, toExtension: false),
       );
       verifyEventDirection(
@@ -322,6 +331,80 @@ void main() {
       expect(
         () {
           ShowBannerMessageExtensionEvent.from(event4);
+        },
+        throwsAssertionError,
+      );
+    });
+  });
+
+  group('$CopyToClipboardExtensionEvent', () {
+    test('constructs for expected values', () {
+      final event = DevToolsExtensionEvent.parse({
+        'type': 'copyToClipboard',
+        'data': {
+          'content': 'foo content',
+          'successMessage': 'foo success',
+        },
+      });
+      final copyToClipboardEvent = CopyToClipboardExtensionEvent.from(event);
+      expect(copyToClipboardEvent.content, 'foo content');
+      expect(copyToClipboardEvent.successMessage, 'foo success');
+    });
+    test('throws for unexpected values', () {
+      final event1 = DevToolsExtensionEvent.parse({
+        'type': 'copyToClipboard',
+        'data': {
+          // Missing required fields.
+        },
+      });
+      expect(
+        () {
+          CopyToClipboardExtensionEvent.from(event1);
+        },
+        throwsFormatException,
+      );
+
+      final event2 = DevToolsExtensionEvent.parse({
+        'type': 'copyToClipboard',
+        'data': {
+          // Bad key.
+          'msg': 'foo content',
+          'successMessage': 'foo success',
+        },
+      });
+      expect(
+        () {
+          CopyToClipboardExtensionEvent.from(event2);
+        },
+        throwsFormatException,
+      );
+
+      final event3 = DevToolsExtensionEvent.parse({
+        'type': 'copyToClipboard',
+        'data': {
+          // Bad value.
+          'content': false,
+          'successMessage': 'foo success',
+        },
+      });
+      expect(
+        () {
+          CopyToClipboardExtensionEvent.from(event3);
+        },
+        throwsFormatException,
+      );
+
+      final event4 = DevToolsExtensionEvent.parse({
+        // Wrong type.
+        'type': 'showBannerMessage',
+        'data': {
+          'content': 'foo content',
+          'successMessage': 'foo success',
+        },
+      });
+      expect(
+        () {
+          CopyToClipboardExtensionEvent.from(event4);
         },
         throwsAssertionError,
       );

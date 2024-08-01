@@ -5,9 +5,9 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import 'globals.dart';
 import 'utils.dart';
 
@@ -36,8 +36,7 @@ class UnexpectedErrorDialog extends StatelessWidget {
           onPressed: () => unawaited(
             copyToClipboard(
               additionalInfo,
-              onSuccess: () =>
-                  notificationService.push('Error details copied to clipboard'),
+              successMessage: 'Error details copied to clipboard',
             ),
           ),
         ),

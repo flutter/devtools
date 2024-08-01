@@ -98,8 +98,8 @@ class Devices extends StatelessWidget {
             ),
             onPressed: () {
               ga.select(
-                gac.VsCodeFlutterSidebar.id,
-                gac.VsCodeFlutterSidebar.changeSelectedDevice.name,
+                editor.gaId,
+                gac.EditorSidebar.changeSelectedDevice.name,
               );
               unawaited(editor.selectDevice(device));
             },
@@ -128,8 +128,8 @@ class Devices extends StatelessWidget {
             ),
             onPressed: () {
               ga.select(
-                gac.VsCodeFlutterSidebar.id,
-                gac.VsCodeFlutterSidebar.enablePlatformType(platformType),
+                editor.gaId,
+                gac.EditorSidebar.enablePlatformType(platformType),
               );
               unawaited(editor.enablePlatformType(platformType));
             },

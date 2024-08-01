@@ -83,14 +83,14 @@ class SidebarDevToolsScreens extends StatelessWidget {
               'DevTools',
               style: theme.textTheme.titleMedium,
             ),
-            if (editor.supportsOpenDevToolsExternally)
+            if (editor.supportsOpenDevToolsForceExternal)
               ToolbarAction(
                 icon: Icons.open_in_browser_outlined,
                 tooltip: 'Open in browser',
                 onPressed: () {
                   ga.select(
-                    gac.VsCodeFlutterSidebar.id,
-                    gac.VsCodeFlutterSidebar.openDevToolsExternally.name,
+                    editor.gaId,
+                    gac.EditorSidebar.openDevToolsExternally.name,
                   );
                   unawaited(
                     editor.openDevToolsPage(null, forceExternal: true),
