@@ -1,3 +1,8 @@
+## 0.3.0-wip
+* Add `ExtensionManager.copyToClipboard` method.
+* Add `DevToolsExtensionEventType.copyToClipboard` enum type.
+* Add `CopyToClipboardExtensionEvent` extension event type. 
+
 ## 0.2.2
 * Load the IDE Theme from the extension URL instead of creating
 a placeholder `IdeTheme` object.

@@ -14,13 +14,17 @@ final _log = Logger('copy_to_clipboard');
 
 /// Attempts to copy a String of `data` to the clipboard.
 ///
-/// Shows a `successMessage` [Notification] on the passed in `context`, if the
+/// Shows a [successMessage] [Notification] on the passed in `context`, if the
 /// copy is successfully done using the [Clipboard.setData] api. Otherwise it
 /// attempts to post the [data] to the parent frame where the parent frame will
-/// try to complete the copy (this fallback will only work in VSCode).
+/// try to complete the copy (this fallback will only work in VSCode). When
+/// [showSuccessMessageOnFallback] is true, the [successMessage] will always be
+/// shown after attempting the fallback copy approach, even though we cannot
+/// guarantee that the fallback copy was actually successful.
 Future<void> copyToClipboard(
   String data, {
   String? successMessage,
+  bool showSuccessMessageOnFallback = false,
 }) async {
   try {
     await Clipboard.setData(ClipboardData(text: data));
@@ -40,6 +44,9 @@ Future<void> copyToClipboard(
       // See https://github.com/Dart-Code/Dart-Code/issues/4540 for more
       // information.
       copyToClipboardVSCode(data);
+      if (showSuccessMessageOnFallback && successMessage != null) {
+        notificationService.push(successMessage);
+      }
     } else {
       rethrow;
     }
