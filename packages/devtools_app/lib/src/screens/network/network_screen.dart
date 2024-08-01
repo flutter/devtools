@@ -234,6 +234,14 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           onPressed: widget.controller.clear,
         ),
         const SizedBox(width: defaultSpacing),
+        DownloadButton(
+          minScreenWidthForTextBeforeScaling:
+              _NetworkProfilerControls._includeTextWidth,
+          onPressed: widget.controller.exportAsHarFile,
+          gaScreen: gac.network,
+          gaSelection: gac.NetworkEvent.downloadAsHar.name,
+        ),
+        const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<NetworkController>(
@@ -429,7 +437,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             unawaited(
               copyToClipboard(
                 data.uri,
-                'Copied the URL to the clipboard',
+                successMessage: 'Copied the URL to the clipboard',
               ),
             );
           },
@@ -440,7 +448,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             unawaited(
               copyToClipboard(
                 CurlCommand.from(data).toString(),
-                'Copied the cURL command to the clipboard',
+                successMessage: 'Copied the cURL command to the clipboard',
               ),
             );
           },

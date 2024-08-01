@@ -37,7 +37,11 @@ class EvalTester {
     await tester.pump(safePumpDuration);
     await _pressEnter();
 
-    expect(expectedResponse, findsOneWidget);
+    final responseFinder = await retryUntilFound(
+      expectedResponse,
+      tester: tester,
+    );
+    expect(responseFinder, findsOneWidget);
   }
 
   Future<void> _pressEnter() async {

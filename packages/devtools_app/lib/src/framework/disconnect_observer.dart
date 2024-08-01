@@ -16,7 +16,6 @@ import '../shared/connection_info.dart';
 import '../shared/globals.dart';
 import '../shared/query_parameters.dart';
 import '../shared/routing.dart';
-import '../shared/utils.dart';
 
 class DisconnectObserver extends StatefulWidget {
   const DisconnectObserver({

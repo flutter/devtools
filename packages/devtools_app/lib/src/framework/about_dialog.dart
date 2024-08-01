@@ -82,7 +82,7 @@ class _FeedbackLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       text: GaLinkTextSpan(
-        link: devToolsExtensionPoints.issueTrackerLink(),
+        link: devToolsEnvironmentParameters.issueTrackerLink(),
         context: context,
       ),
     );

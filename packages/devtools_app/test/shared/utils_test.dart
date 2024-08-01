@@ -4,7 +4,10 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/shared/utils.dart';
+import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/shared.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -211,6 +214,53 @@ void main() {
         3 / length2,
         1.0,
       ]);
+    });
+  });
+
+  group('isDarkThemeEnabled', () {
+    test('embedded and theme specified uses ide theme', () {
+      setGlobal(
+        PreferencesController,
+        PreferencesController()..darkModeEnabled.value = true,
+      );
+      setGlobal(
+        IdeTheme,
+        IdeTheme(embedMode: EmbedMode.embedOne, isDarkMode: false),
+      );
+
+      expect(preferences.darkModeEnabled.value, true);
+      expect(ideTheme.ideSpecifiedTheme, true);
+      expect(ideTheme.isDarkMode, false);
+
+      expect(isDarkThemeEnabled(), false);
+    });
+
+    test('embedded and theme not specified uses preference', () {
+      setGlobal(
+        PreferencesController,
+        PreferencesController()..darkModeEnabled.value = false,
+      );
+      setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
+
+      expect(preferences.darkModeEnabled.value, false);
+      expect(ideTheme.ideSpecifiedTheme, false);
+      expect(ideTheme.isDarkMode, true);
+
+      expect(isDarkThemeEnabled(), false);
+    });
+
+    test('not embedded uses preference', () {
+      setGlobal(
+        PreferencesController,
+        PreferencesController()..darkModeEnabled.value = false,
+      );
+      setGlobal(IdeTheme, IdeTheme());
+
+      expect(preferences.darkModeEnabled.value, false);
+      expect(ideTheme.ideSpecifiedTheme, false);
+      expect(ideTheme.isDarkMode, true);
+
+      expect(isDarkThemeEnabled(), false);
     });
   });
 }

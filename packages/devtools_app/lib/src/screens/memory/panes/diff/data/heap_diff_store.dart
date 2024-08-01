@@ -27,7 +27,7 @@ HeapDiffData _calculateDiffGaWrapper(_HeapCouple couple) {
   late final HeapDiffData result;
   ga.timeSync(
     gac.memory,
-    gac.MemoryTime.calculateDiff,
+    gac.MemoryTime.calculateDiff.name,
     syncOperation: () => result =
         calculateHeapDiffData(before: couple.before, after: couple.after),
     screenMetricsProvider: () => MemoryScreenMetrics(

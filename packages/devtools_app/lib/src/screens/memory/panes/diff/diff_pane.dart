@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/utils.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
@@ -50,7 +50,7 @@ class _SnapshotItemContent extends StatelessWidget {
 
   final DiffPaneController controller;
 
-  static const _documentationTopic = gac.MemoryEvent.diffHelp;
+  static final _documentationTopic = gac.MemoryEvents.diffHelp.name;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +69,7 @@ class _SnapshotItemContent extends StatelessWidget {
                       Expanded(
                         child: Markdown(
                           data: _snapshotDocumentation(
-                            preferences.darkModeTheme.value,
+                            isDark: isDarkThemeEnabled(),
                           ),
                           styleSheet: MarkdownStyleSheet(
                             p: Theme.of(context).regularTextStyle,
@@ -138,9 +138,13 @@ class SnapshotInstanceItemPane extends StatelessWidget {
   }
 }
 
-String _snapshotDocumentation(bool isDark) {
+String _snapshotDocumentation({required bool isDark}) {
   final filePostfix = isDark ? 'dark' : 'light';
-  final uploadImageUrl = 'assets/img/doc/upload_$filePostfix.png';
+
+  // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/149866
+  const isWebProd = kIsWeb && !kDebugMode;
+  const imagePath = isWebProd ? 'assets/' : '';
+  final uploadImageUrl = '${imagePath}assets/img/doc/upload_$filePostfix.png';
 
   // `\v` adds vertical space
   return '''

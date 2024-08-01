@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/main.dart' as app;
 import 'package:devtools_app_shared/ui.dart';
@@ -156,4 +158,38 @@ Future<void> verifyScreenshot(
       'last_screenshot': lastScreenshot,
     },
   );
+}
+
+class AllowedException {
+  AllowedException({required this.msg, required this.issue});
+
+  final String msg;
+  final String issue;
+}
+
+/// Wraps the callback to [testWidgets] in a new zone that will catch any
+/// exceptions thrown during the test or after the test completes.
+///
+/// If the exception is included in [allowedExceptions], the exception will be
+/// logged but ignored. Otherwise, the exception will be rethrown.
+Future<void> Function(WidgetTester) ignoreAllowedExceptions(
+  Future<void> Function(WidgetTester) testCallback, {
+  required List<AllowedException> allowedExceptions,
+}) {
+  return (WidgetTester tester) async {
+    await runZonedGuarded(
+      () async {
+        await testCallback(tester);
+      },
+      (e, st) {
+        final allowed = allowedExceptions
+            .firstWhereOrNull((allowed) => '$e'.contains(allowed.msg));
+        if (allowed == null) {
+          throw Error.throwWithStackTrace(e, st);
+        } else {
+          logStatus('Ignoring exception due to ${allowed.issue}: $e');
+        }
+      },
+    );
+  };
 }

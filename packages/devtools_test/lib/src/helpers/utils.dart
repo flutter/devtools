@@ -210,6 +210,22 @@ void verifyIsSearchMatchForTreeData<T extends TreeDataSearchStateMixin<T>>(
   }
 }
 
+/// Given a [finder], repeatedly pumps until found, or until there are no more
+/// retries.
+Future<Finder> retryUntilFound(
+  Finder finder, {
+  required WidgetTester tester,
+  int retries = 3,
+}) async {
+  if (retries == 0) return finder;
+
+  final found = tester.any(finder);
+  if (found) return finder;
+
+  await tester.pump(safePumpDuration);
+  return retryUntilFound(finder, tester: tester, retries: retries - 1);
+}
+
 void logStatus(String log) {
   // ignore: avoid_print, intentional print for test output
   print('TEST STATUS: $log');

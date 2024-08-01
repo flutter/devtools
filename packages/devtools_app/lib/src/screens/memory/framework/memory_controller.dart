@@ -14,7 +14,6 @@ import '../../../shared/memory/heap_graph_loader.dart';
 import '../../../shared/offline_data.dart';
 import '../../../shared/primitives/simple_items.dart';
 import '../../../shared/screen.dart';
-import '../../../shared/utils.dart';
 import '../panes/chart/controller/chart_pane_controller.dart';
 import '../panes/control/controller/control_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
@@ -35,13 +34,24 @@ class MemoryController extends DisposableController
   MemoryController({
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
+    @visibleForTesting OfflineMemoryData? offlineData,
   }) {
-    if (connectedDiff != null || connectedProfile != null) {
-      mode = ControllerCreationMode.connected;
+    if (offlineData != null) {
+      mode = MemoryControllerCreationMode.offlineData;
+    } else if (connectedDiff != null || connectedProfile != null) {
+      mode = MemoryControllerCreationMode.connected;
     } else {
-      mode = devToolsMode;
+      mode = offlineDataController.showingOfflineData.value
+          ? MemoryControllerCreationMode.offlineData
+          : MemoryControllerCreationMode.connected;
     }
-    unawaited(_init(connectedDiff, connectedProfile));
+    unawaited(
+      _init(
+        connectedDiff: connectedDiff,
+        connectedProfile: connectedProfile,
+        offlineData: offlineData,
+      ),
+    );
   }
 
   Future<void> get initialized => _dataInitialized.future;
@@ -50,7 +60,7 @@ class MemoryController extends DisposableController
   /// DevTools mode at the time of creation of the controller.
   ///
   /// DevTools will recreate controller when the mode changes.
-  late final ControllerCreationMode mode;
+  late final MemoryControllerCreationMode mode;
 
   /// Index of the selected feature tab.
   ///
@@ -64,7 +74,7 @@ class MemoryController extends DisposableController
 
   late final ProfilePaneController? profile;
 
-  late final MemoryChartPaneController? chart;
+  late final MemoryChartPaneController chart;
 
   late final TracePaneController? trace;
 
@@ -74,7 +84,7 @@ class MemoryController extends DisposableController
   void dispose() {
     super.dispose();
     HeapClassName.dispose();
-    chart?.dispose();
+    chart.dispose();
     trace?.dispose();
     diff.dispose();
     profile?.dispose();
@@ -82,30 +92,24 @@ class MemoryController extends DisposableController
 
   static const _jsonKey = 'data';
 
-  Future<void> _init(
+  Future<void> _init({
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
-  ) async {
+    @visibleForTesting OfflineMemoryData? offlineData,
+  }) async {
     assert(!_dataInitialized.isCompleted);
     switch (mode) {
-      case ControllerCreationMode.disconnected:
-        // TODO(polina-c): load memory screen in disconnected mode, https://github.com/flutter/devtools/issues/6972
-        _initializeData();
-      case ControllerCreationMode.connected:
+      case MemoryControllerCreationMode.connected:
         await serviceConnection.serviceManager.onServiceAvailable;
         _initializeData(
           diffPaneController: connectedDiff,
           profilePaneController: connectedProfile,
         );
-      case ControllerCreationMode.offlineData:
+      case MemoryControllerCreationMode.offlineData:
         assert(connectedDiff == null && connectedProfile == null);
         final loaded = await maybeLoadOfflineData(
           ScreenMetaData.memory.id,
-          createData: (json) {
-            final data = json[_jsonKey];
-            if (data is OfflineMemoryData) return data;
-            return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
-          },
+          createData: createData,
           shouldLoad: (data) => true,
           loadData: (data) => _initializeData(offlineData: data),
         );
@@ -113,11 +117,18 @@ class MemoryController extends DisposableController
         //  so ensure we still call [_initializedData] if it has not been called.
         assert(loaded == _dataInitialized.isCompleted);
         if (!_dataInitialized.isCompleted) {
-          _initializeData();
+          _initializeData(offlineData: offlineData);
         }
     }
     assert(_dataInitialized.isCompleted);
     assert(profile == null || profile!.rootPackage == diff.core.rootPackage);
+  }
+
+  @visibleForTesting
+  static OfflineMemoryData createData(Map<String, Object?> json) {
+    final data = json[_jsonKey];
+    if (data is OfflineMemoryData) return data;
+    return OfflineMemoryData.fromJson(data as Map<String, dynamic>);
   }
 
   void _initializeData({
@@ -127,12 +138,9 @@ class MemoryController extends DisposableController
   }) {
     assert(!_dataInitialized.isCompleted);
 
-    final hasData = mode != ControllerCreationMode.disconnected;
-    final isConnected = mode == ControllerCreationMode.connected;
+    final isConnected = mode == MemoryControllerCreationMode.connected;
 
-    chart = hasData
-        ? MemoryChartPaneController(mode, data: offlineData?.chart)
-        : null;
+    chart = MemoryChartPaneController(mode, data: offlineData?.chart);
 
     final rootPackage = isConnected
         ? serviceConnection.serviceManager.rootInfoNow().package!
@@ -142,37 +150,31 @@ class MemoryController extends DisposableController
         offlineData?.diff ??
         DiffPaneController(
           loader:
-              isConnected ? HeapGraphLoaderRuntime(chart!.data.timeline) : null,
+              isConnected ? HeapGraphLoaderRuntime(chart.data.timeline) : null,
           rootPackage: rootPackage,
         );
 
-    if (hasData) {
-      profile = profilePaneController ??
-          offlineData?.profile ??
-          ProfilePaneController(
-            mode: mode,
-            rootPackage: rootPackage!,
-          );
-    } else {
-      profile = null;
-    }
+    profile = profilePaneController ??
+        offlineData?.profile ??
+        ProfilePaneController(
+          mode: mode,
+          rootPackage: rootPackage!,
+        );
 
     control = MemoryControlPaneController(
-      chart?.data.timeline,
+      chart.data.timeline,
       mode,
       exportData: exportData,
     );
 
-    trace = hasData
-        ? (offlineData?.trace ??
-            TracePaneController(mode, rootPackage: rootPackage))
-        : null;
+    trace = offlineData?.trace ??
+        TracePaneController(mode, rootPackage: rootPackage);
 
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;
 
     if (offlineData != null) profile?.setFilter(offlineData.filter);
-    if (hasData) _shareClassFilterBetweenProfileAndDiff();
+    _shareClassFilterBetweenProfileAndDiff();
 
     _dataInitialized.complete();
   }
@@ -187,7 +189,7 @@ class MemoryController extends DisposableController
         _jsonKey: OfflineMemoryData(
           diff,
           profile,
-          chart?.data,
+          chart.data,
           trace,
           diff.core.classFilter.value,
           selectedTab: selectedFeatureTabIndex,

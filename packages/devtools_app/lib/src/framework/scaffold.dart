@@ -23,7 +23,6 @@ import '../shared/query_parameters.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/title.dart';
-import '../shared/utils.dart';
 import 'about_dialog.dart';
 import 'app_bar.dart';
 import 'report_feedback_button.dart';
@@ -74,11 +73,10 @@ class DevToolsScaffold extends StatefulWidget {
         isEmbedded() ? 2.0 : intermediateSpacing,
       );
 
-  // Note: when changing this value, also update `flameChartContainerOffset`
-  // from flame_chart.dart.
   /// Horizontal padding around the content in the DevTools UI.
-  static EdgeInsets get horizontalPadding =>
-      EdgeInsets.symmetric(horizontal: isEmbedded() ? 2.0 : 16.0);
+  static EdgeInsets get horizontalPadding => EdgeInsets.symmetric(
+        horizontal: isEmbedded() ? densePadding : largeSpacing,
+      );
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> screens;

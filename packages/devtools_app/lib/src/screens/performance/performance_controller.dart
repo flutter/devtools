@@ -49,8 +49,6 @@ class PerformanceController extends DisposableController
       return;
     }
 
-    // See https://github.com/dart-lang/linter/issues/3801
-    // ignore: discarded_futures
     unawaited(_init());
   }
 
@@ -92,9 +90,8 @@ class PerformanceController extends DisposableController
   bool get impellerEnabled => _impellerEnabled;
   bool _impellerEnabled = false;
 
-  final _initialized = Completer<void>();
-
   Future<void> get initialized => _initialized.future;
+  final _initialized = Completer<void>();
 
   Future<void> _init() async {
     await _initHelper();

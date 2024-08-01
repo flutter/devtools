@@ -29,13 +29,15 @@ final valueList = <String>[
 
 /// Tests that the DevTools web benchmarks are run and reported correctly.
 void main() {
-  test(
-    'Can run web benchmarks',
-    () async {
-      await _runBenchmarks();
-    },
-    timeout: const Timeout(Duration(minutes: 10)),
-  );
+  for (final useWasm in [true, false]) {
+    test(
+      'Can run web benchmarks with ${useWasm ? 'WASM' : 'JS'}',
+      () async {
+        await _runBenchmarks(useWasm: useWasm);
+      },
+      timeout: const Timeout(Duration(minutes: 10)),
+    );
+  }
 
   // TODO(kenz): add tests that verify performance meets some expected threshold
 }
@@ -45,7 +47,9 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   final taskResult = await serveWebBenchmark(
     benchmarkAppDirectory: projectRootDirectory(),
     entryPoint: 'benchmark/test_infra/client.dart',
-    compilationOptions: CompilationOptions(useWasm: useWasm),
+    compilationOptions: useWasm
+        ? const CompilationOptions.wasm()
+        : const CompilationOptions.js(),
     treeShakeIcons: false,
     initialPage: benchmarkInitialPage,
   );

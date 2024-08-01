@@ -46,7 +46,7 @@ DTDManager get dtdManager => globals[DTDManager] as DTDManager;
 PreferencesController get preferences =>
     globals[PreferencesController] as PreferencesController;
 
-DevToolsEnvironmentParameters get devToolsExtensionPoints =>
+DevToolsEnvironmentParameters get devToolsEnvironmentParameters =>
     globals[DevToolsEnvironmentParameters] as DevToolsEnvironmentParameters;
 
 OfflineDataController get offlineDataController =>

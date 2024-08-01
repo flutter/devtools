@@ -568,6 +568,73 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _children ?? [];
   }
 
+  RemoteDiagnosticsNode? get hideableGroupLeader =>
+      isHideableGroupLeader ? this : _hideableGroupLeader;
+
+  RemoteDiagnosticsNode? _hideableGroupLeader;
+
+  set hideableGroupLeader(RemoteDiagnosticsNode? newLeader) {
+    _hideableGroupLeader = newLeader;
+  }
+
+  bool get groupIsHidden => inHideableGroup && _groupIsHidden;
+
+  bool _groupIsHidden = true;
+
+  set groupIsHidden(bool newValue) {
+    _groupIsHidden = newValue;
+  }
+
+  bool get isHidden =>
+      inHideableGroup && !isHideableGroupLeader && groupIsHidden;
+
+  bool get inHideableGroup {
+    if (_alwaysVisible(this)) return false;
+    final parentIsHideable = parent != null && !_alwaysVisible(parent!);
+    final firstChildIsHideable =
+        childrenNow.isNotEmpty && !_alwaysVisible(childrenNow.first);
+
+    // A widget should only be included in a hideable group if either its parent
+    // or first child is hideable (if it's the only hideable widget then it's
+    // not part of a "group").
+    return parentIsHideable || firstChildIsHideable;
+  }
+
+  bool get isHideableGroupLeader {
+    return inHideableGroup && _hideableGroupSubordinates != null;
+  }
+
+  List<RemoteDiagnosticsNode>? get hideableGroupSubordinates =>
+      _hideableGroupSubordinates;
+  List<RemoteDiagnosticsNode>? _hideableGroupSubordinates;
+
+  void addHideableGroupSubordinate(RemoteDiagnosticsNode subordinate) {
+    (_hideableGroupSubordinates ??= <RemoteDiagnosticsNode>[]).add(subordinate);
+    subordinate.hideableGroupLeader = this;
+  }
+
+  void toggleHiddenGroup() {
+    // Only the hideable group leader can change the group's hidden state:
+    assert(isHideableGroupLeader);
+
+    final newHiddenValue = !_groupIsHidden;
+    _groupIsHidden = newHiddenValue;
+    if (isHideableGroupLeader) {
+      _hideableGroupSubordinates
+          ?.forEach((node) => node.groupIsHidden = newHiddenValue);
+    }
+  }
+
+  bool _alwaysVisible(RemoteDiagnosticsNode node) {
+    final isRoot = node.parent == null;
+    final hasMoreThanOneChild = node.hasChildren && node.childrenNow.length > 1;
+    final hasSiblings = (node.parent?.childrenNow ?? []).length > 1;
+    return isRoot ||
+        node.isCreatedByLocalProject ||
+        hasMoreThanOneChild ||
+        hasSiblings;
+  }
+
   Future<void> _computeChildren() async {
     _maybePopulateChildren();
     if (!hasChildren || _children != null) {

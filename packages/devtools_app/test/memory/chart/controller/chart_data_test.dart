@@ -13,7 +13,7 @@ void main() {
     '$ChartData serializes and deserializes correctly, offline',
     () {
       final item = ChartData(
-        mode: ControllerCreationMode.offlineData,
+        mode: MemoryControllerCreationMode.offlineData,
         isDeviceAndroid: true,
         timeline: MemoryTimeline(),
         interval: ChartInterval.theDefault,
@@ -34,7 +34,7 @@ void main() {
   test(
     '$ChartData serializes and deserializes correctly, connected',
     () {
-      final item = ChartData(mode: ControllerCreationMode.connected);
+      final item = ChartData(mode: MemoryControllerCreationMode.connected);
       final fromJson = ChartData.fromJson(item.toJson());
 
       expect(fromJson.isDeviceAndroid, false);

@@ -276,7 +276,9 @@ class EditableListCopyDirectoryButton extends StatelessWidget {
       icon: Icons.copy_outlined,
       outlined: false,
       onPressed: () {
-        unawaited(copyToClipboard(value, 'Copied to clipboard.'));
+        unawaited(
+          copyToClipboard(value, successMessage: 'Copied to clipboard.'),
+        );
       },
     );
   }

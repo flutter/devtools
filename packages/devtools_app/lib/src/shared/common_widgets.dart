@@ -1178,7 +1178,7 @@ class _JsonViewerState extends State<JsonViewer>
                             .serviceManager.service!.fakeServiceCache
                             .instanceToJson(copiedVariable.value as Instance),
                       ),
-                      'JSON copied to clipboard',
+                      successMessage: 'JSON copied to clipboard',
                     ),
                   );
                 },
@@ -1414,7 +1414,10 @@ class CopyToClipboardControl extends StatelessWidget {
               ga.select(gaScreen!, gaItem!);
             }
             unawaited(
-              copyToClipboard(dataProvider!() ?? '', successMessage),
+              copyToClipboard(
+                dataProvider!() ?? '',
+                successMessage: successMessage,
+              ),
             );
           };
     final size = this.size ?? defaultIconSize;

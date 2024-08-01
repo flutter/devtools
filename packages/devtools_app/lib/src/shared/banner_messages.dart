@@ -479,6 +479,36 @@ For the most accurate absolute memory stats, relaunch your application in ''',
   }
 }
 
+class DebuggerIdeRecommendationMessage {
+  const DebuggerIdeRecommendationMessage(this.screenId);
+
+  final String screenId;
+
+  BannerMessage build(BuildContext context) {
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ?? false;
+    final codeType = isFlutterApp ? 'Flutter' : 'Dart';
+    final recommendedDebuggers = devToolsEnvironmentParameters
+        .recommendedDebuggers(context, isFlutterApp: isFlutterApp);
+
+    return BannerWarning(
+      key: Key('DebuggerIdeRecommendationMessage - $screenId'),
+      textSpans: [
+        TextSpan(
+          text: '''
+The $codeType DevTools debugger is in maintenance mode. For the best debugging experience, we recommend debugging your $codeType code in a supported IDE''',
+        ),
+        if (recommendedDebuggers != null) ...[
+          const TextSpan(text: ', such as '),
+          ...recommendedDebuggers,
+        ],
+        const TextSpan(text: '.'),
+      ],
+      screenId: screenId,
+    );
+  }
+}
+
 void maybePushDebugModePerformanceMessage(
   BuildContext context,
   String screenId,
@@ -512,6 +542,15 @@ void maybePushHttpLoggingMessage(
       HttpLoggingEnabledMessage(screenId).build(context),
     );
   }
+}
+
+void pushDebuggerIdeRecommendationMessage(
+  BuildContext context,
+  String screenId,
+) {
+  bannerMessages.addMessage(
+    DebuggerIdeRecommendationMessage(screenId).build(context),
+  );
 }
 
 extension BannerMessageThemeExtension on ThemeData {

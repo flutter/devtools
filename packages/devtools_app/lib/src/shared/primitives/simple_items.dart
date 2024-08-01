@@ -48,17 +48,15 @@ enum DocLinks {
 
   final String url;
   final String? hash;
+
   String get value {
     if (hash == null) return url;
     return '$url#$hash';
   }
 }
 
-/// The DevTools mode in which a controller object was created.
-enum ControllerCreationMode {
-  /// Not interacting with app or data from a previous session.
-  disconnected,
-
+/// The mode in which a MemoryController object was created.
+enum MemoryControllerCreationMode {
   /// Interacting with a connected application.
   connected,
 

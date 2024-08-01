@@ -119,7 +119,7 @@ class LiveClassSampler {
   }) async {
     ga.select(
       gac.memory,
-      gac.MemoryEvent.dropAllLiveToConsole(
+      gac.MemoryEvents.dropAllLiveToConsole(
         includeImplementers: includeImplementers,
         includeSubclasses: includeSubclasses,
       ),
@@ -148,7 +148,7 @@ class LiveClassSampler {
   Future<void> oneLiveToConsole({required String sourceFeature}) async {
     ga.select(
       gac.memory,
-      gac.MemoryEvent.dropOneLiveVariable(sourceFeature: sourceFeature),
+      gac.MemoryEvents.dropOneLiveVariable(sourceFeature: sourceFeature),
     );
 
     // drop to console
@@ -170,7 +170,7 @@ class SnapshotClassSampler extends LiveClassSampler {
   Future<void> oneLiveStaticToConsole({required String sourceFeature}) async {
     ga.select(
       gac.memory,
-      gac.MemoryEvent.dropOneLiveVariable(sourceFeature: sourceFeature),
+      gac.MemoryEvents.dropOneLiveVariable(sourceFeature: sourceFeature),
     );
 
     final heapObjects = _objects!;
@@ -207,7 +207,7 @@ class SnapshotClassSampler extends LiveClassSampler {
     final heapObjects = _objects!;
     ga.select(
       gac.memory,
-      gac.MemoryEvent.dropOneStaticVariable(sourceFeature: sourceFeature),
+      gac.MemoryEvents.dropOneStaticVariable(sourceFeature: sourceFeature),
     );
 
     final index = heapObjects.objects.indexes.first;

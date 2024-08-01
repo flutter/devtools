@@ -26,7 +26,7 @@ class ReportFeedbackButton extends ScaffoldAction {
             );
             unawaited(
               launchUrlWithErrorHandling(
-                devToolsExtensionPoints.issueTrackerLink().url,
+                devToolsEnvironmentParameters.issueTrackerLink().url,
               ),
             );
           },

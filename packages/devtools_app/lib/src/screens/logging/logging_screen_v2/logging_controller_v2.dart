@@ -19,14 +19,13 @@ import '../../../shared/globals.dart';
 import '../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/message_bus.dart';
 import '../../../shared/primitives/utils.dart';
-import '../../../shared/ui/filter.dart';
 import '../../../shared/ui/search.dart';
 import '../logging_controller.dart'
     show
-        NavigationInfo,
-        ServiceExtensionStateChangedInfo,
         FrameInfo,
-        ImageSizesForFrame;
+        ImageSizesForFrame,
+        NavigationInfo,
+        ServiceExtensionStateChangedInfo;
 import '../logging_screen.dart';
 import 'logging_model.dart';
 
@@ -62,7 +61,7 @@ final _hideSummaryLogKinds = <String>{
 };
 
 class LoggingControllerV2 extends DisposableController
-    with AutoDisposeControllerMixin, FilterControllerMixin<LogDataV2> {
+    with AutoDisposeControllerMixin {
   LoggingControllerV2() {
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
@@ -102,7 +101,7 @@ class LoggingControllerV2 extends DisposableController
   void _updateSelection() {
     final selected = selectedLog.value;
     if (selected != null) {
-      final logs = filteredData.value;
+      final logs = loggingModel.filteredData.value;
       if (!logs.contains(selected)) {
         selectedLog.value = null;
       }
@@ -114,7 +113,7 @@ class LoggingControllerV2 extends DisposableController
 
   String get statusText {
     final totalCount = loggingModel.logCount;
-    final showingCount = filteredData.value.length;
+    final showingCount = loggingModel.filteredData.value.length;
 
     String label;
 

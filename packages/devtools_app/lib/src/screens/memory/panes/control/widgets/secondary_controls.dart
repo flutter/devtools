@@ -25,7 +25,7 @@ class SecondaryControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canGC = controller.mode == ControllerCreationMode.connected;
+    final canGC = controller.mode == MemoryControllerCreationMode.connected;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -37,11 +37,11 @@ class SecondaryControls extends StatelessWidget {
             tooltip: 'Trigger full garbage collection.',
             minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
             gaScreen: gac.memory,
-            gaSelection: gac.MemoryEvent.gc,
+            gaSelection: gac.MemoryEvents.gc.name,
           ),
           const SizedBox(width: denseSpacing),
         ],
-        if (FeatureFlags.memoryOffline) ...[
+        if (FeatureFlags.memorySaveLoad) ...[
           OpenSaveButtonGroup(
             screenId: ScreenMetaData.memory.id,
             onSave: controller.exportData,
@@ -50,7 +50,7 @@ class SecondaryControls extends StatelessWidget {
         ],
         SettingsOutlinedButton(
           gaScreen: gac.memory,
-          gaSelection: gac.MemoryEvent.settings,
+          gaSelection: gac.MemoryEvents.settings.name,
           onPressed: () => _openSettingsDialog(context),
           tooltip: 'Open memory settings',
         ),

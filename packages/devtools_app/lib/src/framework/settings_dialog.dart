@@ -15,7 +15,6 @@ import '../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../shared/globals.dart';
 import '../shared/log_storage.dart';
 import '../shared/server/server.dart';
-import '../shared/utils.dart';
 
 class OpenSettingsAction extends ScaffoldAction {
   OpenSettingsAction({super.key, super.color})
@@ -49,7 +48,7 @@ class SettingsDialog extends StatelessWidget {
             Flexible(
               child: CheckboxSetting(
                 title: 'Use a dark theme',
-                notifier: preferences.darkModeTheme,
+                notifier: preferences.darkModeEnabled,
                 onChanged: preferences.toggleDarkModeTheme,
                 gaItem: gac.darkTheme,
               ),
@@ -113,7 +112,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
                   _minScreenWidthForTextBeforeScaling,
               onPressed: () async => await copyToClipboard(
                 LogStorage.root.toString(),
-                'Successfully copied logs',
+                successMessage: 'Successfully copied logs',
               ),
             ),
             const SizedBox(width: denseSpacing),

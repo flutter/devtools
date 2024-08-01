@@ -1007,15 +1007,6 @@ extension ListExtension<T> on List<T> {
     ];
   }
 
-  bool containsWhere(bool Function(T element) test) {
-    for (final e in this) {
-      if (test(e)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   T get second => this[1];
 
   T get third => this[2];
@@ -1039,15 +1030,6 @@ extension NullableListExtension<T> on List<T>? {
 }
 
 extension SetExtension<T> on Set<T> {
-  bool containsWhere(bool Function(T element) test) {
-    for (final e in this) {
-      if (test(e)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   bool containsAny(Iterable<T> any) {
     for (final e in any) {
       if (contains(e)) {
