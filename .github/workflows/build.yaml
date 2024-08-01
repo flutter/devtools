@@ -69,7 +69,7 @@ jobs:
           sudo chmod +x /usr/bin/dcm
           echo "$(dcm --version)"
       - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@b64355ae6ca0b5d484f0106a033dd1388965d06d
+        uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
       - name: Run DCM on root
         run: |
           dcm analyze packages/devtools_app packages/devtools_shared packages/devtools_test
