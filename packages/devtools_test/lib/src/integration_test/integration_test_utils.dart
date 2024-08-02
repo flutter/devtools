@@ -159,37 +159,3 @@ Future<void> verifyScreenshot(
     },
   );
 }
-
-class AllowedException {
-  AllowedException({required this.msg, required this.issue});
-
-  final String msg;
-  final String issue;
-}
-
-/// Wraps the callback to [testWidgets] in a new zone that will catch any
-/// exceptions thrown during the test or after the test completes.
-///
-/// If the exception is included in [allowedExceptions], the exception will be
-/// logged but ignored. Otherwise, the exception will be rethrown.
-Future<void> Function(WidgetTester) ignoreAllowedExceptions(
-  Future<void> Function(WidgetTester) testCallback, {
-  required List<AllowedException> allowedExceptions,
-}) {
-  return (WidgetTester tester) async {
-    await runZonedGuarded(
-      () async {
-        await testCallback(tester);
-      },
-      (e, st) {
-        final allowed = allowedExceptions
-            .firstWhereOrNull((allowed) => '$e'.contains(allowed.msg));
-        if (allowed == null) {
-          throw Error.throwWithStackTrace(e, st);
-        } else {
-          logStatus('Ignoring exception due to ${allowed.issue}: $e');
-        }
-      },
-    );
-  };
-}
