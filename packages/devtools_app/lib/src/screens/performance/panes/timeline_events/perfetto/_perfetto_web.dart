@@ -276,7 +276,7 @@ class _PerfettoViewController extends DisposableController
       return;
     }
 
-    perfettoController.perfettoIFrame.contentWindow!.postMessage(
+    iframeWindow.postMessage(
       message.jsify(),
       perfettoController.perfettoUrl.toJS,
     );
