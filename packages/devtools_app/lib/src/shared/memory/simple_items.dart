@@ -49,3 +49,35 @@ extension HeapSnapshotGraphSerialization on HeapSnapshotGraph {
     return b.toBytes();
   }
 }
+
+/// A simple timer for measuring snapshotting performance in release mode.
+///
+/// To see performance numbers in console, set `_print` to `true`.
+class SnapshotTimer {
+  SnapshotTimer() {
+    _timer.start();
+  }
+  static final instance = SnapshotTimer();
+  static const _print = true;
+
+  final _timer = Stopwatch();
+  var _printedSnapshotTime = 0;
+
+  void maybeReset() {
+    if (!_print) return;
+    _timer
+      ..reset()
+      ..start();
+    _printedSnapshotTime = 0;
+  }
+
+  void maybePrint(String message) {
+    if (!_print) return;
+    final total = _timer.elapsedMilliseconds;
+    final delta = total - _printedSnapshotTime;
+    _printedSnapshotTime = total;
+
+    // ignore: avoid_print, we want to measure performance in release mode.
+    print('Snapshotting. $message: + $delta = $total ms');
+  }
+}
