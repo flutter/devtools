@@ -15,6 +15,7 @@ import '../../shared/globals.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
 
+/// Control buttons for the inspector panel.
 class InspectorControls extends StatelessWidget {
   const InspectorControls({
     super.key,
@@ -51,14 +52,16 @@ class InspectorControls extends StatelessWidget {
         const Spacer(),
         HideImplementationWidgetsButton(controller: controller),
         const SizedBox(width: defaultSpacing),
-        const ServiceExtensionButtonsGroup(),
+        const InspectorServiceExtensionButtonGroup(),
       ],
     );
   }
 }
 
-class ServiceExtensionButtonsGroup extends StatelessWidget {
-  const ServiceExtensionButtonsGroup({
+/// Group of service extension buttons for the inspector panel that control the
+/// overlays painted on the connected app.
+class InspectorServiceExtensionButtonGroup extends StatelessWidget {
+  const InspectorServiceExtensionButtonGroup({
     super.key,
   });
 
@@ -93,13 +96,13 @@ class ServiceExtensionButtonsGroup extends StatelessWidget {
             );
           },
         ),
-        // TODO(jacobr): implement TogglePlatformSelector.
-        //  TogglePlatformSelector().selector
       ],
     );
   }
 }
 
+/// Toggle button that allows hiding the implementation widgets in the widget
+/// tree.
 class HideImplementationWidgetsButton extends StatelessWidget {
   const HideImplementationWidgetsButton({
     super.key,

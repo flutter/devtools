@@ -216,6 +216,7 @@ class InspectorController extends DisposableController
     (widgetProperties: [], renderProperties: []),
   );
 
+  /// Whether the implementation widgets are hidden in the widget tree.
   ValueListenable<bool> get implementationWidgetsHidden =>
       _implementationWidgetsHidden;
   final _implementationWidgetsHidden = ValueNotifier<bool>(false);
