@@ -32,6 +32,8 @@ TODO: Remove this section if there are not any general updates.
 
     ![Memory offline data](images/memory-save-load.png "Memory offline data")
 
+* Reduce jankiness of memory snapshotting.
+
 ## Debugger updates
 
 * Added recommendation to debug code from an IDE, with links to IDE instructions. - [#8085](https://github.com/flutter/devtools/pull/8085)
