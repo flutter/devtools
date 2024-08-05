@@ -17,10 +17,7 @@ import 'inspector_screen.dart';
 
 /// Control buttons for the inspector panel.
 class InspectorControls extends StatelessWidget {
-  const InspectorControls({
-    super.key,
-    required this.controller,
-  });
+  const InspectorControls({super.key, required this.controller});
 
   final InspectorController controller;
 
@@ -49,8 +46,9 @@ class InspectorControls extends StatelessWidget {
             );
           },
         ),
+        const SizedBox(width: defaultSpacing),
+        ShowImplementationWidgetsButton(controller: controller),
         const Spacer(),
-        HideImplementationWidgetsButton(controller: controller),
         const SizedBox(width: defaultSpacing),
         const InspectorServiceExtensionButtonGroup(),
       ],
@@ -101,10 +99,10 @@ class InspectorServiceExtensionButtonGroup extends StatelessWidget {
   }
 }
 
-/// Toggle button that allows hiding the implementation widgets in the widget
-/// tree.
-class HideImplementationWidgetsButton extends StatelessWidget {
-  const HideImplementationWidgetsButton({
+/// Toggle button that allows showing/hiding the implementation widgets in the
+/// widget tree.
+class ShowImplementationWidgetsButton extends StatelessWidget {
+  const ShowImplementationWidgetsButton({
     super.key,
     required this.controller,
   });
@@ -117,14 +115,16 @@ class HideImplementationWidgetsButton extends StatelessWidget {
       valueListenable: controller.implementationWidgetsHidden,
       builder: (context, isHidden, _) {
         return DevToolsToggleButton(
-          isSelected: isHidden,
+          isSelected: !isHidden,
           message:
-              'Hide widgets created by the Flutter framework or other packages.',
-          label: 'Hide Implementation Widgets',
+              'Show widgets created by the Flutter framework or other packages.',
+          label: 'Show Implementation Widgets',
           onPressed: () async {
             await controller.toggleImplementationWidgetsVisibility();
           },
-          icon: Icons.code_off,
+          icon: Icons.code,
+          minScreenWidthForTextBeforeScaling:
+              InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
         );
       },
     );
