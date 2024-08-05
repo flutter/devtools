@@ -155,7 +155,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
+        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
@@ -226,7 +226,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32
+        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
