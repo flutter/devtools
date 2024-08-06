@@ -84,12 +84,16 @@ class InspectorController extends DisposableController
     addAutoDisposeListener(
       serviceConnection.serviceManager.isolateManager.mainIsolate,
       () {
-        final isolate =
+        final newIsolate =
             serviceConnection.serviceManager.isolateManager.mainIsolate.value;
-        if (isolate != _mainIsolate) {
-          onIsolateStopped();
+        if (_mainIsolate == newIsolate) return;
+        // First deactivate the current widget tree:
+        setActivate(false);
+        if (newIsolate != null) {
+          // Then reactivate it with the new isolate:
+          setActivate(true);
         }
-        _mainIsolate = isolate;
+        _mainIsolate = newIsolate;
       },
     );
 
@@ -393,13 +397,25 @@ class InspectorController extends DisposableController
     } else {
       if (_disposed) return;
       if (inspectorService is InspectorService) {
-        final widgetTreeReady =
-            await (inspectorService as InspectorService).isWidgetTreeReady();
-        flutterAppFrameReady = widgetTreeReady;
+        flutterAppFrameReady = await _isWidgetTreeReady();
       }
       if (isActive && flutterAppFrameReady) {
         await maybeLoadUI();
       }
+    }
+  }
+
+  Future<bool> _isWidgetTreeReady() async {
+    try {
+      return (inspectorService as InspectorService).isWidgetTreeReady();
+    } catch (err) {
+      if ('$err'.contains('Binding has not yet been initialized.')) {
+        // Ignore error, this is expected if we call isWidgetTreeReady before
+        // the first Flutter frame.
+      } else {
+        _log.warning(err);
+      }
+      return false;
     }
   }
 
