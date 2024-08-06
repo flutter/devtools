@@ -225,13 +225,13 @@ void main() {
         findsWidgets,
       );
 
-      // Tap the "Hide Implementation Widgets" button.
-      final hideImplementationWidgetsButton = find.descendant(
+      // Tap the "Show Implementation Widgets" button (selected by default).
+      final showImplementationWidgetsButton = find.descendant(
         of: find.byType(DevToolsToggleButton),
-        matching: find.text('Hide Implementation Widgets'),
+        matching: find.text('Show Implementation Widgets'),
       );
-      expect(hideImplementationWidgetsButton, findsOneWidget);
-      await tester.tap(hideImplementationWidgetsButton);
+      expect(showImplementationWidgetsButton, findsOneWidget);
+      await tester.tap(showImplementationWidgetsButton);
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
       // Confirm that the hidden widgets are no longer visible.
