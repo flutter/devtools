@@ -451,14 +451,12 @@ class InspectorController extends DisposableController
   }
 
   Future<void> toggleImplementationWidgetsVisibility() async {
-    final hideImplementationWidgets = !_implementationWidgetsHidden.value;
-
     final root = inspectorTree.root?.diagnostic;
     if (root != null) {
       final currentSelectedNode = selectedNode.value;
       await _recomputeTreeRoot(
         root,
-        hideImplementationWidgets: hideImplementationWidgets,
+        hideImplementationWidgets: !_implementationWidgetsHidden.value,
       );
       // Persist the selected node after refreshing the widget tree:
       refreshSelection(currentSelectedNode?.diagnostic);
@@ -502,7 +500,7 @@ class InspectorController extends DisposableController
     newSelection ??= selectedDiagnostic;
     final matchingNode = findMatchingInspectorTreeNode(newSelection);
     if (matchingNode != null) {
-      setSelectedNode(findMatchingInspectorTreeNode(newSelection));
+      setSelectedNode(matchingNode);
       syncSelectionHelper(selection: newSelection);
 
       syncTreeSelection();

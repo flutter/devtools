@@ -119,9 +119,7 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
           message:
               'Show widgets created by the Flutter framework or other packages.',
           label: 'Show Implementation Widgets',
-          onPressed: () async {
-            await controller.toggleImplementationWidgetsVisibility();
-          },
+          onPressed: controller.toggleImplementationWidgetsVisibility,
           icon: Icons.code,
           minScreenWidthForTextBeforeScaling:
               InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
