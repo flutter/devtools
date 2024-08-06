@@ -404,7 +404,7 @@ class InspectorTreeControls extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
                 child: Text(
-                  'Widget Tree 2.0',
+                  'Widget Tree',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
