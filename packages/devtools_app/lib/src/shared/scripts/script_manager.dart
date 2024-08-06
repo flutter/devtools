@@ -35,20 +35,20 @@ class ScriptManager extends DisposableController
 
   final _sortedScripts = ValueNotifier<List<ScriptRef>>([]);
 
-  VmServiceWrapper get _service => serviceConnection.serviceManager.service!;
+  VmServiceWrapper? get _service => serviceConnection.serviceManager.service;
   VmServiceWrapper? _lastService;
 
-  IsolateRef get _currentIsolate =>
-      serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
+  IsolateRef? get _currentIsolate =>
+      serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
   final _scriptCache = _ScriptCache();
 
   /// Refreshes the current set of scripts, updating [sortedScripts]. Returns
   /// the updated value of [sortedScripts].
   Future<List<ScriptRef>> retrieveAndSortScripts(IsolateRef isolateRef) async {
-    final scriptList = await _service.getScripts(isolateRef.id!);
+    final scriptList = await _service?.getScripts(isolateRef.id!);
     // We filter out non-unique ScriptRefs here (dart-lang/sdk/issues/41661).
-    final scriptRefs = Set.of(scriptList.scripts!).toList();
+    final scriptRefs = Set.of(scriptList?.scripts ?? <ScriptRef>[]).toList();
     scriptRefs.sort((a, b) {
       // We sort uppercase so that items like dart:foo sort before items like
       // dart:_foo.
@@ -73,7 +73,7 @@ class ScriptManager extends DisposableController
   /// Retrieve the [Script] for the given [ScriptRef].
   ///
   /// This caches the script lookup for future invocations.
-  Future<Script> getScript(ScriptRef scriptRef) {
+  Future<Script?> getScript(ScriptRef scriptRef) {
     return _scriptCache.getScript(_service, _currentIsolate, scriptRef);
   }
 
@@ -102,9 +102,9 @@ class _ScriptCache {
   /// Retrieve the [Script] for the given [ScriptRef].
   ///
   /// This caches the script lookup for future invocations.
-  Future<Script> getScript(
-    VmService vmService,
-    IsolateRef isolateRef,
+  Future<Script?> getScript(
+    VmService? vmService,
+    IsolateRef? isolateRef,
     ScriptRef scriptRef,
   ) {
     final scriptId = scriptRef.id!;
@@ -120,6 +120,7 @@ class _ScriptCache {
     // We make a copy here as the future could complete after a clear()
     // operation is performed.
     final scripts = _scripts;
+    if (vmService == null || isolateRef == null) return Future.value();
 
     final Future<Script> scriptFuture = vmService
         .getObject(isolateRef.id!, scriptId)

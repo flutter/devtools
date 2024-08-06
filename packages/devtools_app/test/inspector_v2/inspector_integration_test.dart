@@ -77,6 +77,42 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
+      'loads after a hot-restart',
+      windowSize,
+      (WidgetTester tester) async {
+        // Load the inspector panel.
+        await _loadInspectorUI(tester);
+
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+        // Expect the Center widget to be visible in the widget tree.
+        final centerWidgetFinder = find.richText('Center');
+        expect(centerWidgetFinder, findsOneWidget);
+
+        // Trigger a hot-restart and wait for the first Flutter frame.
+        await env.flutter!.hotRestart();
+        await _waitForFlutterFrame(tester);
+
+        // Wait for the Center widget to be visible again.
+        final centerWidgetFinderWithRetries = await retryUntilFound(
+          centerWidgetFinder,
+          tester: tester,
+        );
+        expect(centerWidgetFinderWithRetries, findsOneWidget);
+
+        await expectLater(
+          find.byType(InspectorScreenBody),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/integration_inspector_v2_after_hot_restart.png',
+          ),
+        );
+
+        await env.tearDownEnvironment();
+      },
+    );
+
+    testWidgetsWithWindowSize(
       'widget selection',
       windowSize,
       (WidgetTester tester) async {
@@ -234,13 +270,8 @@ void main() {
           ),
         );
         await tester.pumpAndSettle(const Duration(seconds: 1));
-        final InspectorScreenBodyState state =
-            tester.state(find.byType(InspectorScreenBody));
-        final controller = state.controller;
-        while (!controller.flutterAppFrameReady) {
-          await controller.maybeLoadUI();
-          await tester.pumpAndSettle();
-        }
+        await _waitForFlutterFrame(tester);
+
         await env.flutter!.hotReload();
         // Give time for the initial animation to complete.
         await tester.pumpAndSettle(inspectorChangeSettleTime);
@@ -278,11 +309,14 @@ Future<void> _loadInspectorUI(WidgetTester tester) async {
     ),
   );
   await tester.pump(const Duration(seconds: 1));
-  final InspectorScreenBodyState state =
-      tester.state(find.byType(InspectorScreenBody));
+  await _waitForFlutterFrame(tester);
+}
+
+Future<void> _waitForFlutterFrame(WidgetTester tester) async {
+  final state = tester.state(find.byType(InspectorScreenBody))
+      as InspectorScreenBodyState;
   final controller = state.controller;
   while (!controller.flutterAppFrameReady) {
-    await controller.maybeLoadUI();
     await tester.pumpAndSettle();
   }
 }

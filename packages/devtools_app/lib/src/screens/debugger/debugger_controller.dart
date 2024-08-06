@@ -516,7 +516,7 @@ class DebuggerController extends DisposableController
     }
 
     final script = await scriptManager.getScript(scriptInfo);
-    final position = SourcePosition.calculatePosition(script, tokenPos);
+    final position = SourcePosition.calculatePosition(script!, tokenPos);
     return StackFrameAndSourcePosition(frame, position: position);
   }
 
