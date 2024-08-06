@@ -455,10 +455,13 @@ class InspectorController extends DisposableController
 
     final root = inspectorTree.root?.diagnostic;
     if (root != null) {
+      final currentSelectedNode = selectedNode.value;
       await _recomputeTreeRoot(
         root,
         hideImplementationWidgets: hideImplementationWidgets,
       );
+      // Persist the selected node after refreshing the widget tree:
+      refreshSelection(currentSelectedNode?.diagnostic);
     }
   }
 
@@ -497,10 +500,13 @@ class InspectorController extends DisposableController
 
   void refreshSelection(RemoteDiagnosticsNode? newSelection) {
     newSelection ??= selectedDiagnostic;
-    setSelectedNode(findMatchingInspectorTreeNode(newSelection));
-    syncSelectionHelper(selection: newSelection);
+    final matchingNode = findMatchingInspectorTreeNode(newSelection);
+    if (matchingNode != null) {
+      setSelectedNode(findMatchingInspectorTreeNode(newSelection));
+      syncSelectionHelper(selection: newSelection);
 
-    syncTreeSelection();
+      syncTreeSelection();
+    }
   }
 
   void syncTreeSelection() {
