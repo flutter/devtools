@@ -59,9 +59,7 @@ class InspectorControls extends StatelessWidget {
 /// Group of service extension buttons for the inspector panel that control the
 /// overlays painted on the connected app.
 class InspectorServiceExtensionButtonGroup extends StatelessWidget {
-  const InspectorServiceExtensionButtonGroup({
-    super.key,
-  });
+  const InspectorServiceExtensionButtonGroup({super.key});
 
   static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
 
