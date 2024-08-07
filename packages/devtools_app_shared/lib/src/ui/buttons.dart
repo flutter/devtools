@@ -213,6 +213,7 @@ final class DevToolsToggleButton extends StatelessWidget {
     this.outlined = true,
     this.label,
     this.shape,
+    this.minScreenWidthForTextBeforeScaling,
   });
 
   final String message;
@@ -228,6 +229,8 @@ final class DevToolsToggleButton extends StatelessWidget {
   final OutlinedBorder? shape;
 
   final bool outlined;
+
+  final double? minScreenWidthForTextBeforeScaling;
 
   @override
   Widget build(BuildContext context) {
@@ -245,6 +248,8 @@ final class DevToolsToggleButton extends StatelessWidget {
             child: MaterialIconLabel(
               iconData: icon,
               label: label,
+              minScreenWidthForTextBeforeScaling:
+                  minScreenWidthForTextBeforeScaling,
             ),
           ),
         ),
