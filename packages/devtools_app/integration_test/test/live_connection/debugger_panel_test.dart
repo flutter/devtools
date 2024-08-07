@@ -153,6 +153,12 @@ void main() {
 
     logStatus('looking for the other_classes.dart file');
 
+    final otherClassesFinder = await retryUntilFound(
+      find.text('package:flutter_app/src/other_classes.dart'),
+      tester: tester,
+    );
+    expect(otherClassesFinder, findsOneWidget);
+
     expect(
       find.text('package:flutter_app/src/other_classes.dart'),
       findsOneWidget,
