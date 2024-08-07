@@ -267,8 +267,8 @@ class _PerfettoViewController extends DisposableController
   void _postMessage(Object message) async {
     await _perfettoIFrameReady.future;
     if (_perfettoIFrameUnloaded) return;
-    final iframeWindow = perfettoController.perfettoIFrame.contentWindow;
-    if (iframeWindow == null) {
+    final iFrameWindow = perfettoController.perfettoIFrame.contentWindow;
+    if (iFrameWindow == null) {
       _log.warning(
         'Something went wrong. The iFrame\'s contentWindow is null after the'
         ' _perfettoIFrameReady future completed.',
@@ -276,7 +276,7 @@ class _PerfettoViewController extends DisposableController
       return;
     }
 
-    iframeWindow.postMessage(
+    iFrameWindow.postMessage(
       message.jsify(),
       perfettoController.perfettoUrl.toJS,
     );
