@@ -1074,7 +1074,7 @@ class _InspectorTreeState extends State<InspectorTree>
       valueListenable: treeControllerLocal.rowsInTree,
       builder: (context, rows, _) {
         // Note: The inspector rows contain only the fake root node when the
-        // inspector tree is shutdown:
+        // inspector tree is shutdown.
         if (rows.length <= 1) {
           // This works around a bug when Scrollbars are present on a short lived
           // widget.

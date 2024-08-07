@@ -63,8 +63,6 @@ void main() {
 
         await _loadInspectorUI(tester);
 
-        // Give time for the initial animation to complete.
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
@@ -83,16 +81,13 @@ void main() {
         // Load the inspector panel.
         await _loadInspectorUI(tester);
 
-        // Give time for the initial animation to complete.
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-
         // Expect the Center widget to be visible in the widget tree.
         final centerWidgetFinder = find.richText('Center');
         expect(centerWidgetFinder, findsOneWidget);
 
         // Trigger a hot-restart and wait for the first Flutter frame.
         await env.flutter!.hotRestart();
-        await _waitForFlutterFrame(tester);
+        await _waitForFlutterFrame(tester, isInitialLoad: false);
 
         // Wait for the Center widget to be visible again.
         final centerWidgetFinderWithRetries = await retryUntilFound(
@@ -117,9 +112,6 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
-
-        // Give time for the initial animation to complete.
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Select the Center widget (row index #16)
         await tester.tap(find.richText('Center'));
@@ -157,9 +149,6 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
-
-        // Give time for the initial animation to complete.
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Before hidden widgets are expanded, confirm the HeroControllerScope
         // is hidden:
@@ -214,9 +203,6 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
-
-        // Give time for the initial animation to complete.
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Before searching, confirm the HeroControllerScope is hidden:
         final hideableNodeFinder = findNodeMatching('HeroControllerScope');
@@ -310,13 +296,24 @@ Future<void> _loadInspectorUI(WidgetTester tester) async {
   );
   await tester.pump(const Duration(seconds: 1));
   await _waitForFlutterFrame(tester);
+
+  await tester.pumpAndSettle(inspectorChangeSettleTime);
 }
 
-Future<void> _waitForFlutterFrame(WidgetTester tester) async {
+Future<void> _waitForFlutterFrame(
+  WidgetTester tester, {
+  bool isInitialLoad = true,
+}) async {
   final state = tester.state(find.byType(InspectorScreenBody))
       as InspectorScreenBodyState;
   final controller = state.controller;
   while (!controller.flutterAppFrameReady) {
+    // On the initial load, we might have instantiated the controller after the
+    // first Flutter frame was sent. In which case, calling `maybeLoadUI` is
+    // necessary to ensure we detect that the widget tree is ready.
+    if (isInitialLoad) {
+      await controller.maybeLoadUI();
+    }
     await tester.pumpAndSettle();
   }
 }

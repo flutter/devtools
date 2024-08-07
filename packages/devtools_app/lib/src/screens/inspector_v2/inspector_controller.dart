@@ -87,10 +87,10 @@ class InspectorController extends DisposableController
         final newIsolate =
             serviceConnection.serviceManager.isolateManager.mainIsolate.value;
         if (_mainIsolate == newIsolate) return;
-        // First deactivate the current widget tree:
+        // First deactivate the current widget tree.
         setActivate(false);
         if (newIsolate != null) {
-          // Then reactivate it with the new isolate:
+          // Then reactivate it with the new isolate.
           setActivate(true);
         }
         _mainIsolate = newIsolate;
