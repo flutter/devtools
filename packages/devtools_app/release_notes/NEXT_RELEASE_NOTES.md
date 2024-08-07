@@ -28,6 +28,8 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
+* Reduce jankiness of memory snapshotting.
+
 ## Debugger updates
 
 TODO: Remove this section if there are not any general updates.
