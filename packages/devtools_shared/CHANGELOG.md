@@ -1,5 +1,4 @@
 # 10.0.2
-
 * Update dependency `web_socket_channel: '>=2.4.0 <4.0.0'`.
 
 # 10.0.1
