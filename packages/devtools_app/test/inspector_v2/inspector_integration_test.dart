@@ -314,7 +314,7 @@ Future<void> _waitForFlutterFrame(
     if (isInitialLoad) {
       await controller.maybeLoadUI();
     }
-    await tester.pumpAndSettle();
+    await tester.pump(safePumpDuration);
   }
 }
 
