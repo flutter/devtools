@@ -63,6 +63,9 @@ void main() {
 
         await _loadInspectorUI(tester);
 
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
@@ -80,6 +83,9 @@ void main() {
       (WidgetTester tester) async {
         // Load the inspector panel.
         await _loadInspectorUI(tester);
+
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Expect the Center widget to be visible in the widget tree.
         final centerWidgetFinder = find.richText('Center');
@@ -112,6 +118,9 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
+
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Select the Center widget (row index #16)
         await tester.tap(find.richText('Center'));
@@ -149,6 +158,9 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
+
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Before hidden widgets are expanded, confirm the HeroControllerScope
         // is hidden:
@@ -203,6 +215,9 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
+
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Before searching, confirm the HeroControllerScope is hidden:
         final hideableNodeFinder = findNodeMatching('HeroControllerScope');
@@ -296,8 +311,6 @@ Future<void> _loadInspectorUI(WidgetTester tester) async {
   );
   await tester.pump(const Duration(seconds: 1));
   await _waitForFlutterFrame(tester);
-
-  await tester.pumpAndSettle(inspectorChangeSettleTime);
 }
 
 Future<void> _waitForFlutterFrame(
