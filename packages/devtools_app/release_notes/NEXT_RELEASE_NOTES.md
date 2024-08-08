@@ -10,7 +10,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed table columns to be sortable by default. - [#8175](https://github.com/flutter/devtools/pull/8175)
 
 ## Inspector updates
 

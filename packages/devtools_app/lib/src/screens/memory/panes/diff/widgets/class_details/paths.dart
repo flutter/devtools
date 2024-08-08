@@ -29,9 +29,6 @@ class _RetainingPathColumn extends ColumnData<PathData> {
       record.path.toShortString(inverted: true);
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   String getTooltip(PathData record) => '';
 }
 

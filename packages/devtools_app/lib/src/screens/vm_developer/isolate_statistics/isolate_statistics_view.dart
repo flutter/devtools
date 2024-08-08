@@ -295,6 +295,9 @@ class _StackTraceViewerFrameColumn extends ColumnData<String> {
   _StackTraceViewerFrameColumn() : super.wide('Frame');
 
   @override
+  bool get supportsSorting => false;
+
+  @override
   String getValue(String frame) => frame;
 
   @override
