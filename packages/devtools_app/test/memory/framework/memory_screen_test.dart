@@ -14,13 +14,13 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/test_data/memory.dart';
+import '../../test_infra/test_data/memory/offline/memory_offline_data.dart' as memory_offline;
 import '../../test_infra/test_data/memory_allocation.dart';
 
 void main() {
@@ -123,13 +123,8 @@ void main() {
 
     group('with offline data', () {
       setUp(() async {
-        final file = XFile(
-          'test/test_infra/test_data/memory/offline/memory_offline_data.json',
-        );
-        final importedFile = await toDevToolsFile(file);
-        final json = importedFile.data as Map<String, Object?>;
         offlineDataController
-          ..offlineDataJson = json
+          ..offlineDataJson = memory_offline.data
           ..startShowingOfflineData(
             offlineApp: serviceConnection.serviceManager.connectedApp!,
           );
