@@ -178,6 +178,8 @@ class DebuggerController extends DisposableController
     // and modify to detect if app is paused from the isolate
     // https://github.com/flutter/devtools/pull/4993#discussion_r1060845351
 
+    if (serviceConnection.serviceManager.service == null) return;
+
     await _pause(false);
 
     _clearCaches();
