@@ -227,7 +227,8 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
   external int? get root_set_count;
   external int? get row_count;
   external int? get inspector_tree_controller_id;
-  external String? get app_id;
+  external String? get android_app_id;
+  external String? get ios_bundle_id;
 }
 
 // This cannot be a factory constructor in the [GtagEventDevTools] class due to
