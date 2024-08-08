@@ -7,7 +7,6 @@ import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/widgets/chart_control_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/widgets/chart_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
-import 'package:devtools_app/src/shared/file_import.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
