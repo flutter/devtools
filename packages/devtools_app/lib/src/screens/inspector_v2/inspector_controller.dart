@@ -220,6 +220,11 @@ class InspectorController extends DisposableController
     (widgetProperties: [], renderProperties: []),
   );
 
+  /// Whether the implementation widgets are hidden in the widget tree.
+  ValueListenable<bool> get implementationWidgetsHidden =>
+      _implementationWidgetsHidden;
+  final _implementationWidgetsHidden = ValueNotifier<bool>(false);
+
   InspectorTreeNode? lastExpanded;
 
   bool isActive = false;
@@ -407,7 +412,10 @@ class InspectorController extends DisposableController
     }
   }
 
-  Future<void> _recomputeTreeRoot(RemoteDiagnosticsNode? newSelection) async {
+  Future<void> _recomputeTreeRoot(
+    RemoteDiagnosticsNode? newSelection, {
+    bool hideImplementationWidgets = false,
+  }) async {
     assert(!_disposed);
     final treeGroups = _treeGroups;
     if (_disposed || treeGroups == null) {
@@ -417,7 +425,10 @@ class InspectorController extends DisposableController
     treeGroups.cancelNext();
     try {
       final group = treeGroups.next;
-      final node = await group.getRoot(treeType);
+      final node = await group.getRoot(
+        treeType,
+        isSummaryTree: hideImplementationWidgets,
+      );
       if (node == null || group.disposed || _disposed) {
         return;
       }
@@ -435,10 +446,24 @@ class InspectorController extends DisposableController
       inspectorTree.root = rootNode;
 
       refreshSelection(newSelection);
+      _implementationWidgetsHidden.value = hideImplementationWidgets;
     } catch (error, st) {
       _log.shout(error, error, st);
       treeGroups.cancelNext();
       return;
+    }
+  }
+
+  Future<void> toggleImplementationWidgetsVisibility() async {
+    final root = inspectorTree.root?.diagnostic;
+    if (root != null) {
+      final currentSelectedNode = selectedNode.value;
+      await _recomputeTreeRoot(
+        root,
+        hideImplementationWidgets: !_implementationWidgetsHidden.value,
+      );
+      // Persist the selected node after refreshing the widget tree:
+      refreshSelection(currentSelectedNode?.diagnostic);
     }
   }
 
@@ -477,10 +502,13 @@ class InspectorController extends DisposableController
 
   void refreshSelection(RemoteDiagnosticsNode? newSelection) {
     newSelection ??= selectedDiagnostic;
-    setSelectedNode(findMatchingInspectorTreeNode(newSelection));
-    syncSelectionHelper(selection: newSelection);
+    final matchingNode = findMatchingInspectorTreeNode(newSelection);
+    if (matchingNode != null) {
+      setSelectedNode(matchingNode);
+      syncSelectionHelper(selection: newSelection);
 
-    syncTreeSelection();
+      syncTreeSelection();
+    }
   }
 
   void syncTreeSelection() {
@@ -653,7 +681,7 @@ class InspectorController extends DisposableController
     }
     _selectedNodeProperties.value = (
       widgetProperties: widgetProperties,
-      renderProperties: renderProperties
+      renderProperties: renderProperties,
     );
   }
 

@@ -35,6 +35,9 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
   bool get includeHeader => true;
 
   @override
+  bool get supportsSorting => false;
+
+  @override
   ObjRef getValue(ObjectStoreEntry dataObject) {
     return dataObject.value;
   }
