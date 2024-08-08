@@ -19,7 +19,8 @@ import 'package:mockito/mockito.dart';
 
 import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/test_data/memory.dart';
-import '../../test_infra/test_data/memory/offline/memory_offline_data.dart' as memory_offline;
+import '../../test_infra/test_data/memory/offline/memory_offline_data.dart'
+    as memory_offline;
 import '../../test_infra/test_data/memory_allocation.dart';
 
 void main() {
