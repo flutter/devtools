@@ -49,7 +49,7 @@ void main() {
     await env.setupEnvironment();
   });
 
-  tearDownAll(() async {
+  tearDown(() async {
     await env.tearDownEnvironment(force: true);
   });
 
@@ -69,8 +69,6 @@ void main() {
             '../test_infra/goldens/integration_inspector_v2_initial_load.png',
           ),
         );
-
-        await env.tearDownEnvironment();
       },
     );
 
@@ -102,8 +100,6 @@ void main() {
             '../test_infra/goldens/integration_inspector_v2_after_hot_restart.png',
           ),
         );
-
-        await env.tearDownEnvironment(force: true);
       },
     );
 
@@ -139,8 +135,6 @@ void main() {
           value: '[Directionality]',
           tester: tester,
         );
-
-        await env.tearDownEnvironment();
       },
     );
 
@@ -193,8 +187,6 @@ void main() {
             '../test_infra/goldens/integration_inspector_v2_implementation_widgets_collapsed.png',
           ),
         );
-
-        await env.tearDownEnvironment();
       },
     );
 
@@ -228,8 +220,6 @@ void main() {
             '../test_infra/goldens/integration_inspector_v2_hideable_widget_selected_from_search.png',
           ),
         );
-
-        await env.tearDownEnvironment();
       },
     );
   });
@@ -279,8 +269,6 @@ void main() {
             '../test_infra/goldens/integration_inspector_v2_errors_2_error_selected.png',
           ),
         );
-
-        await env.tearDownEnvironment();
       },
     );
   });
