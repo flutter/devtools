@@ -107,6 +107,8 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     int? root_set_count, // metric10
     int? row_count, // metric11
     int? inspector_tree_controller_id, // metric12
+    String? android_app_id, //metric13
+    String? ios_bundle_id, //metric14
   });
 
   // Custom dimensions:
@@ -136,7 +138,9 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   external int? get root_set_count;
   external int? get row_count;
   external int? get inspector_tree_controller_id;
-}
+  external String? get android_app_id;
+  external String? get ios_bundle_id;
+  }
 
 extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
   external factory GtagExceptionDevTools({
@@ -187,6 +191,8 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     int? root_set_count, // metric10
     int? row_count, // metric11
     int? inspector_tree_controller_id, // metric12
+    String? android_app_id, //metric13
+    String? ios_bundle_id, //metric14
   });
 
   // Custom dimensions:
@@ -216,6 +222,7 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
   external int? get root_set_count;
   external int? get row_count;
   external int? get inspector_tree_controller_id;
+  external String? get app_id;
 }
 
 // This cannot be a factory constructor in the [GtagEventDevTools] class due to
@@ -286,6 +293,13 @@ GtagEventDevTools _gtagEvent({
     inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
         ? screenMetrics.inspectorTreeControllerId
         : null,
+    // [DeepLinkScreenMetrics]
+    android_app_id: screenMetrics is DeepLinkScreenMetrics
+        ? screenMetrics.androidAppId
+        : null,
+    ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
+        ? screenMetrics.iosBundleId
+        : null,
   );
 }
 
@@ -350,6 +364,13 @@ GtagExceptionDevTools _gtagException(
         screenMetrics is InspectorScreenMetrics ? screenMetrics.rowCount : null,
     inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
         ? screenMetrics.inspectorTreeControllerId
+        : null,
+    // [DeepLinkScreenMetrics]
+    android_app_id: screenMetrics is DeepLinkScreenMetrics
+        ? screenMetrics.androidAppId
+        : null,
+    ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
+        ? screenMetrics.iosBundleId
         : null,
   );
 }
@@ -881,5 +902,7 @@ ua.Event uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
     rootSetCount: gtagEvent.root_set_count,
     rowCount: gtagEvent.row_count,
     inspectorTreeControllerId: gtagEvent.inspector_tree_controller_id,
+    androidAppId: gtagEvent.android_app_id,
+    iosBundleId: gtagEvent.ios_bundle_id,
   );
 }

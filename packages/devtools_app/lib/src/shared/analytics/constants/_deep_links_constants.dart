@@ -26,6 +26,12 @@ enum AnalyzeFlutterProject {
   /// Used for recording the time spent in loading iOS Links.
   loadIosLinks,
 
+  /// Used for recording the android app id.
+  androidAppId,
+
+  /// Used for recording the iOS app id.
+  iosBundleId,
+
   /// App Links are loaded and there is at least one link.
   flutterHasAppLinks,
 
