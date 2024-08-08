@@ -102,6 +102,8 @@ void main() {
           ),
         );
       },
+      skip:
+          true, // TODO(elliette): Figure out why this passes locally but times out on CI.
     );
 
     testWidgetsWithWindowSize(
