@@ -37,9 +37,6 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
   String? getValue(SingleClassData data) => data.className.className;
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   // We are removing the tooltip, because it is provided by [HeapClassView].
   String getTooltip(SingleClassData data) => '';
 

@@ -49,9 +49,6 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
   @override
   String getTooltip(ProfileRecord dataObject) => '';
 
-  @override
-  bool get supportsSorting => true;
-
   final ClassFilterData classFilterData;
 
   @override
@@ -272,6 +269,9 @@ class _GCHeapNameColumn extends ColumnData<AdaptedProfile> {
   String? getValue(AdaptedProfile dataObject) {
     return 'GC Statistics';
   }
+
+  @override
+  bool get supportsSorting => false;
 }
 
 class _GCHeapUsageColumn extends _GCHeapStatsColumn {
