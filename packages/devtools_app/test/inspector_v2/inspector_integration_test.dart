@@ -103,7 +103,7 @@ void main() {
           ),
         );
 
-        await env.tearDownEnvironment();
+        await env.tearDownEnvironment(force: true);
       },
     );
 
