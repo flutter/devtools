@@ -649,7 +649,7 @@ class InspectorController extends DisposableController
     }
     _selectedNodeProperties.value = (
       widgetProperties: widgetProperties,
-      renderProperties: renderProperties
+      renderProperties: renderProperties,
     );
   }
 
