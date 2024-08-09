@@ -57,12 +57,16 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
             )
                 ? Axis.horizontal
                 : Axis.vertical,
-            initialFractions: const [0.5, 0.5],
+            initialFractions: const [0.25, 0.75],
             children: [
-              if (FlexLayoutExplorerWidget.shouldDisplay(node)) ...[
-                FlexLayoutExplorerWidget(controller),
-              ] else if (BoxLayoutExplorerWidget.shouldDisplay(node)) ...[
-                BoxLayoutExplorerWidget(controller),
+              if (BoxLayoutExplorerWidget.shouldDisplay(node)) ...[
+                Center(
+                  child: SizedBox(
+                    height: 150.0,
+                    width: 200.0,
+                    child: BoxLayoutExplorerWidget(controller),
+                  ),
+                ),
               ] else ...[
                 const Center(
                   child: Text(
