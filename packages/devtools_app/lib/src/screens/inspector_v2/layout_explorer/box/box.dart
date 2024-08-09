@@ -478,24 +478,24 @@ class LayoutWidthsAndHeights {
     );
   }
 
-  final List<double?> widths;
-  final List<double?> heights;
+  final List<double> widths;
+  final List<double> heights;
   late List<double> _displayWidths;
   late List<double> _displayHeights;
   final double availableWidth;
   final double availableHeight;
 
-  double get widgetWidth => widths[1] ?? 0;
+  double get widgetWidth => widths[1];
 
-  double get widgetHeight => heights[1] ?? 0;
+  double get widgetHeight => heights[1];
 
-  double get leftPadding => widths[0] ?? 0;
+  double get leftPadding => widths[0];
 
-  double get rightPadding => widths[2] ?? 0;
+  double get rightPadding => widths[2];
 
-  double get topPadding => heights[0] ?? 0;
+  double get topPadding => heights[0];
 
-  double get bottomPadding => heights[2] ?? 0;
+  double get bottomPadding => heights[2];
 
   double get displayWidgetWidth => _displayWidths[1];
 
