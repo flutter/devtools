@@ -84,12 +84,16 @@ class InspectorController extends DisposableController
     addAutoDisposeListener(
       serviceConnection.serviceManager.isolateManager.mainIsolate,
       () {
-        final isolate =
+        final newIsolate =
             serviceConnection.serviceManager.isolateManager.mainIsolate.value;
-        if (isolate != _mainIsolate) {
-          onIsolateStopped();
+        if (_mainIsolate == newIsolate) return;
+        // First deactivate the current widget tree.
+        setActivate(false);
+        if (newIsolate != null) {
+          // Then reactivate it with the new isolate.
+          setActivate(true);
         }
-        _mainIsolate = isolate;
+        _mainIsolate = newIsolate;
       },
     );
 
