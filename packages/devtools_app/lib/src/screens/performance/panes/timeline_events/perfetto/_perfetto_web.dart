@@ -11,6 +11,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_app_shared/web_utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:web/web.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
@@ -21,6 +22,8 @@ import '../../../../../shared/utils.dart';
 import '../../../performance_utils.dart';
 import '_perfetto_controller_web.dart';
 import 'perfetto_controller.dart';
+
+final _log = Logger('PerfettoWeb');
 
 class Perfetto extends StatefulWidget {
   const Perfetto({
@@ -264,12 +267,16 @@ class _PerfettoViewController extends DisposableController
   void _postMessage(Object message) async {
     await _perfettoIFrameReady.future;
     if (_perfettoIFrameUnloaded) return;
-    assert(
-      perfettoController.perfettoIFrame.contentWindow != null,
-      'Something went wrong. The iFrame\'s contentWindow is null after the'
-      ' _perfettoIFrameReady future completed.',
-    );
-    perfettoController.perfettoIFrame.contentWindow!.postMessage(
+    final iFrameWindow = perfettoController.perfettoIFrame.contentWindow;
+    if (iFrameWindow == null) {
+      _log.warning(
+        'Something went wrong. The iFrame\'s contentWindow is null after the'
+        ' _perfettoIFrameReady future completed.',
+      );
+      return;
+    }
+
+    iFrameWindow.postMessage(
       message.jsify(),
       perfettoController.perfettoUrl.toJS,
     );
