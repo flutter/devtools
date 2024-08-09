@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/ui/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -93,20 +92,17 @@ class PaddingVisualizerWidget extends StatelessWidget {
   const PaddingVisualizerWidget(
     this.renderProperties, {
     required this.horizontal,
-    this.title,
     super.key,
   });
 
   final RenderProperties renderProperties;
   final bool horizontal;
-  final String? title;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final heightDescription =
-        'h=${toStringAsFixed(renderProperties.realHeight)}';
-    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
+    final heightDescription = toStringAsFixed(renderProperties.realHeight);
+    final widthDescription = toStringAsFixed(renderProperties.realWidth);
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

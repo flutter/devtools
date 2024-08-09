@@ -231,6 +231,7 @@ class WidgetVisualizer extends StatelessWidget {
   }
 }
 
+/// A label for the widget in the layout explorer.
 class WidgetLabel extends StatelessWidget {
   const WidgetLabel({
     super.key,
@@ -469,8 +470,8 @@ class LayoutExplorerBackground extends StatelessWidget {
 
 /// Builds and positions a label for the [LayoutExplorerBackground] as
 /// determined by the widget's padding.
-class BackgroundLabel extends StatelessWidget {
-  const BackgroundLabel({
+class PositionedBackgroundLabel extends StatelessWidget {
+  const PositionedBackgroundLabel({
     super.key,
     required this.labelText,
     required this.labelColor,

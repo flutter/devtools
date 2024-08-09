@@ -138,7 +138,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
     return [
       LayoutExplorerBackground(colorScheme: colorScheme),
-      BackgroundLabel(
+      PositionedBackgroundLabel(
         labelText: describeBoxName(parentProperties),
         labelColor: widgetColor,
         topPadding: hasTopPadding,
@@ -537,8 +537,7 @@ class LayoutWidthsAndHeights {
     final paddingASize = sizes[0] ?? 0;
     final paddingBSize = sizes[2] ?? 0;
 
-    final paddingFraction =
-        paddingASize != 0 && paddingBSize != 0 ? 0.25 : 0.35;
+    final paddingFraction = paddingASize != 0 && paddingBSize != 0 ? 0.3 : 0.35;
 
     final paddingAFraction = paddingASize > 0 ? paddingFraction : 0.0;
     final paddingBFraction = paddingBSize > 0 ? paddingFraction : 0.0;
