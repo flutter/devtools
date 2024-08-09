@@ -107,67 +107,34 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     );
   }
 
-  /// Simplistic layout algorithm that will return sizes for the padding, width,
-  /// and height of the widget based on the display's [availableSize] along with
-  /// [sizes] of the widget.
-  ///
-  /// Uses a constant [paddingFraction] for the display padding, regardless of
-  /// the actual size.
-  ///
-  /// The return value and [sizes] parameter correspond to either:
-  /// - left padding width, widget width, right padding width
-  /// - top padding height, widget height, bottom padding height
-  static List<double> simpleFractionalLayout({
-    required double availableSize,
-    required List<double?> sizes,
-    double paddingFraction = 0.2,
-  }) {
-    final paddingASize = sizes[0] ?? 0;
-    final paddingBSize = sizes[2] ?? 0;
-
-    final paddingAFraction = paddingASize > 0 ? paddingFraction : 0.0;
-    final paddingBFraction = paddingBSize > 0 ? paddingFraction : 0.0;
-    final widgetFraction = 1 - paddingAFraction - paddingBFraction;
-
-    return [
-      paddingAFraction,
-      widgetFraction,
-      paddingBFraction,
-    ].map((fraction) => fraction * availableSize).toList();
-  }
-
   List<Widget> _paddingWidgets({
     required LayoutProperties childProperties,
     required LayoutProperties parentProperties,
-    required LayoutWidths realWidths,
-    required LayoutHeights realHeights,
-    required LayoutWidths displayWidths,
-    required LayoutHeights displayHeights,
+    required LayoutWidthsAndHeights widthsAndHeights,
     required ColorScheme colorScheme,
     required Color widgetColor,
   }) {
-    final parentSize = parentProperties.size;
+    if (!widthsAndHeights.hasAnyPadding) return <Widget>[];
 
-    final realTopPadding = realHeights.topPadding;
-    final realBottomPadding = realHeights.bottomPadding;
-    final realLeftPadding = realWidths.leftPadding;
-    final realRightPadding = realWidths.rightPadding;
+    final realTopPadding = widthsAndHeights.topPadding;
+    final realBottomPadding = widthsAndHeights.bottomPadding;
+    final realLeftPadding = widthsAndHeights.leftPadding;
+    final realRightPadding = widthsAndHeights.rightPadding;
 
-    final displayTopPadding = displayHeights.topPadding;
-    final displayBottomPadding = displayHeights.bottomPadding;
-    final displayLeftPadding = displayWidths.leftPadding;
-    final displayRightPadding = displayWidths.rightPadding;
-    final displayWidgetHeight = displayHeights.widgetHeight;
-    final displayWidgetWidth = displayWidths.widgetWidth;
+    final displayTopPadding = widthsAndHeights.displayTopPadding;
+    final displayBottomPadding = widthsAndHeights.displayBottomPadding;
+    final displayLeftPadding = widthsAndHeights.displayLeftPadding;
+    final displayRightPadding = widthsAndHeights.displayRightPadding;
+    final displayWidgetHeight = widthsAndHeights.displayWidgetHeight;
+    final displayWidgetWidth = widthsAndHeights.displayWidgetWidth;
 
-    final hasTopPadding = realHeights.hasTopPadding;
-    final hasBottomPadding = realHeights.hasBottomPadding;
-    final hasLeftPadding = realWidths.hasLeftPadding;
-    final hasRightPadding = realWidths.hasRightPadding;
+    final hasTopPadding = widthsAndHeights.hasTopPadding;
+    final hasBottomPadding = widthsAndHeights.hasBottomPadding;
+    final hasLeftPadding = widthsAndHeights.hasLeftPadding;
+    final hasRightPadding = widthsAndHeights.hasRightPadding;
 
-    final hasAnyPadding =
-        hasTopPadding || hasBottomPadding || hasLeftPadding || hasRightPadding;
-    if (!hasAnyPadding) return <Widget>[];
+    final parentHeight = parentProperties.size.height;
+    final parentWidth = parentProperties.size.width;
 
     return [
       LayoutExplorerBackground(colorScheme: colorScheme),
@@ -185,26 +152,24 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             axis: Axis.horizontal,
             size: Size(displayLeftPadding, displayWidgetHeight),
             offset: Offset(0, displayTopPadding),
-            realSize: Size(realLeftPadding, parentSize.height),
+            realSize: Size(realLeftPadding, parentHeight),
             layoutProperties: childProperties,
             isFreeSpace: true,
           ),
           horizontal: true,
         ),
-      // Top padding.
       if (hasTopPadding)
         PaddingVisualizerWidget(
           RenderProperties(
             axis: Axis.horizontal,
             size: Size(displayWidgetWidth, displayTopPadding),
             offset: Offset(displayLeftPadding, 0),
-            realSize: Size(parentSize.width, realTopPadding),
+            realSize: Size(parentWidth, realTopPadding),
             layoutProperties: childProperties,
             isFreeSpace: true,
           ),
           horizontal: false,
         ),
-      // Right padding.
       if (hasRightPadding)
         PaddingVisualizerWidget(
           RenderProperties(
@@ -214,7 +179,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               displayLeftPadding + displayWidgetWidth,
               displayTopPadding,
             ),
-            realSize: Size(realRightPadding, parentSize.height),
+            realSize: Size(realRightPadding, parentHeight),
             layoutProperties: childProperties,
             isFreeSpace: true,
           ),
@@ -229,7 +194,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               displayLeftPadding,
               displayTopPadding + displayWidgetHeight,
             ),
-            realSize: Size(parentSize.width, realBottomPadding),
+            realSize: Size(parentWidth, realBottomPadding),
             layoutProperties: childProperties,
             isFreeSpace: true,
           ),
@@ -262,38 +227,25 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         final availableHeight = constraints.maxHeight - 2;
         final availableWidth = constraints.maxWidth - 2;
 
-        // TODO(polinach, jacobr): consider using zeros for zero values,
-        // without replacing them with nulls.
-        // See https://github.com/flutter/devtools/issues/3931.
-        double? nullOutZero(double value) => value != 0.0 ? value : null;
-        final widgetWidths = [
-          nullOutZero(offset.offset.dx),
-          propertiesLocal.size.width,
-          nullOutZero(
-            parentSize.width - (propertiesLocal.size.width + offset.offset.dx),
-          ),
-        ];
-        final widgetHeights = [
-          nullOutZero(offset.offset.dy),
-          propertiesLocal.size.height,
-          nullOutZero(
-            parentSize.height -
-                (propertiesLocal.size.height + offset.offset.dy),
-          ),
-        ];
         // 3 element array with [left padding, widget width, right padding].
-        final displayWidths = simpleFractionalLayout(
-          availableSize: availableWidth,
-          sizes: widgetWidths,
-        );
-
+        final widgetWidths = [
+          offset.offset.dx,
+          propertiesLocal.size.width,
+          parentSize.width - (propertiesLocal.size.width + offset.offset.dx),
+        ];
         // 3 element array with [top padding, widget height, bottom padding].
-        final displayHeights = simpleFractionalLayout(
-          availableSize: availableHeight,
-          sizes: widgetHeights,
+        final widgetHeights = [
+          offset.offset.dy,
+          propertiesLocal.size.height,
+          parentSize.height - (propertiesLocal.size.height + offset.offset.dy),
+        ];
+
+        final widthsAndHeights = LayoutWidthsAndHeights(
+          widths: widgetWidths,
+          heights: widgetHeights,
+          availableWidth: availableWidth,
+          availableHeight: availableHeight,
         );
-        final widgetWidth = displayWidths[1];
-        final widgetHeight = displayHeights[1];
 
         final widgetColor =
             WidgetTheme.fromName(properties?.node.description).color;
@@ -312,10 +264,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                   ..._paddingWidgets(
                     childProperties: propertiesLocal,
                     parentProperties: parentProperties,
-                    realWidths: LayoutWidths(widgetWidths),
-                    realHeights: LayoutHeights(widgetHeights),
-                    displayWidths: LayoutWidths(displayWidths),
-                    displayHeights: LayoutHeights(displayHeights),
+                    widthsAndHeights: widthsAndHeights,
                     colorScheme: colorScheme,
                     widgetColor: widgetColor,
                   ),
@@ -325,8 +274,14 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     layoutProperties: propertiesLocal,
                     renderProperties: RenderProperties(
                       axis: Axis.horizontal,
-                      size: Size(widgetWidth, widgetHeight),
-                      offset: Offset(displayWidths[0], displayHeights[0]),
+                      size: Size(
+                        widthsAndHeights.displayWidgetWidth,
+                        widthsAndHeights.displayWidgetHeight,
+                      ),
+                      offset: Offset(
+                        widthsAndHeights.displayLeftPadding,
+                        widthsAndHeights.displayTopPadding,
+                      ),
                       realSize: propertiesLocal.size,
                       layoutProperties: propertiesLocal,
                     ),
@@ -504,38 +459,95 @@ class BoxChildVisualizer extends StatelessWidget {
   }
 }
 
-/// Encapsulation for [widths] representing the left padding width, widget width,
-/// and right padding width.
-class LayoutWidths {
-  LayoutWidths(this.widths) : assert(widths.length == 3);
+/// Encapsulation of [widths] and [heights] for the layout.
+class LayoutWidthsAndHeights {
+  LayoutWidthsAndHeights({
+    required this.widths,
+    required this.heights,
+    required this.availableWidth,
+    required this.availableHeight,
+  })  : assert(widths.length == 3),
+        assert(heights.length == 3) {
+    _displayWidths = _simpleFractionalLayout(
+      availableSize: availableWidth,
+      sizes: widths,
+    );
+    _displayHeights = _simpleFractionalLayout(
+      availableSize: availableHeight,
+      sizes: heights,
+    );
+  }
 
   final List<double?> widths;
+  final List<double?> heights;
+  late List<double> _displayWidths;
+  late List<double> _displayHeights;
+  final double availableWidth;
+  final double availableHeight;
 
   double get widgetWidth => widths[1] ?? 0;
+
+  double get widgetHeight => heights[1] ?? 0;
 
   double get leftPadding => widths[0] ?? 0;
 
   double get rightPadding => widths[2] ?? 0;
 
-  bool get hasLeftPadding => leftPadding != 0;
-
-  bool get hasRightPadding => rightPadding != 0;
-}
-
-/// Encapsulation for [heights] representing the top padding height, widget
-/// height, and bottom padding height.
-class LayoutHeights {
-  LayoutHeights(this.heights) : assert(heights.length == 3);
-
-  final List<double?> heights;
-
-  double get widgetHeight => heights[1] ?? 0;
-
   double get topPadding => heights[0] ?? 0;
 
   double get bottomPadding => heights[2] ?? 0;
 
+  double get displayWidgetWidth => _displayWidths[1];
+
+  double get displayWidgetHeight => _displayHeights[1];
+
+  double get displayLeftPadding => _displayWidths[0];
+
+  double get displayRightPadding => _displayWidths[2];
+
+  double get displayTopPadding => _displayHeights[0];
+
+  double get displayBottomPadding => _displayHeights[2];
+
+  bool get hasLeftPadding => leftPadding != 0;
+
+  bool get hasRightPadding => rightPadding != 0;
+
   bool get hasTopPadding => topPadding != 0;
 
   bool get hasBottomPadding => bottomPadding != 0;
+
+  bool get hasAnyPadding =>
+      hasLeftPadding || hasRightPadding || hasTopPadding || hasBottomPadding;
+
+  /// Simplistic layout algorithm that will return sizes for the padding, width,
+  /// and height of the widget based on the display's [availableSize] along with
+  /// [sizes] of the widget.
+  ///
+  /// Uses a constant [paddingFraction] for the display padding, regardless of
+  /// the actual size.
+  ///
+  /// The return value and [sizes] parameter correspond to either:
+  /// - left padding width, widget width, right padding width
+  /// - top padding height, widget height, bottom padding height
+  List<double> _simpleFractionalLayout({
+    required double availableSize,
+    required List<double?> sizes,
+  }) {
+    final paddingASize = sizes[0] ?? 0;
+    final paddingBSize = sizes[2] ?? 0;
+
+    final paddingFraction =
+        paddingASize != 0 && paddingBSize != 0 ? 0.25 : 0.35;
+
+    final paddingAFraction = paddingASize > 0 ? paddingFraction : 0.0;
+    final paddingBFraction = paddingBSize > 0 ? paddingFraction : 0.0;
+    final widgetFraction = 1 - paddingAFraction - paddingBFraction;
+
+    return [
+      paddingAFraction,
+      widgetFraction,
+      paddingBFraction,
+    ].map((fraction) => fraction * availableSize).toList();
+  }
 }
