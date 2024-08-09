@@ -44,9 +44,6 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
   String? getValue(DiffClassData data) => data.className.className;
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   // Tooltip is removed, because it is provided by [HeapClassView].
   String getTooltip(DiffClassData data) => '';
 

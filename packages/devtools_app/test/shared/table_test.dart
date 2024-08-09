@@ -1747,9 +1747,6 @@ class _NameColumn extends TreeColumnData<TestData> {
 
   @override
   String getValue(TestData dataObject) => dataObject.name;
-
-  @override
-  bool get supportsSorting => true;
 }
 
 class _NumberColumn extends ColumnData<TestData> {
@@ -1761,9 +1758,6 @@ class _NumberColumn extends ColumnData<TestData> {
 
   @override
   int getValue(TestData dataObject) => dataObject.number;
-
-  @override
-  bool get supportsSorting => true;
 }
 
 class _FlatNameColumn extends ColumnData<TestData> {
@@ -1775,9 +1769,6 @@ class _FlatNameColumn extends ColumnData<TestData> {
 
   @override
   String getValue(TestData dataObject) => dataObject.name;
-
-  @override
-  bool get supportsSorting => true;
 }
 
 class _PinnableFlatNameColumn extends ColumnData<PinnableTestData> {
@@ -1789,9 +1780,6 @@ class _PinnableFlatNameColumn extends ColumnData<PinnableTestData> {
 
   @override
   String getValue(PinnableTestData dataObject) => dataObject.name;
-
-  @override
-  bool get supportsSorting => true;
 }
 
 class _CombinedColumn extends ColumnData<TestData> {
@@ -1804,6 +1792,9 @@ class _CombinedColumn extends ColumnData<TestData> {
   @override
   String getValue(TestData dataObject) =>
       '${dataObject.name} ${dataObject.number}';
+
+  @override
+  bool get supportsSorting => false;
 }
 
 class _WideColumn extends ColumnData<TestData> {
@@ -1812,6 +1803,9 @@ class _WideColumn extends ColumnData<TestData> {
   @override
   String getValue(TestData dataObject) =>
       '${dataObject.name} ${dataObject.number} bla bla bla bla bla bla bla bla';
+
+  @override
+  bool get supportsSorting => false;
 }
 
 class _WideMinWidthColumn extends ColumnData<TestData> {
@@ -1824,6 +1818,9 @@ class _WideMinWidthColumn extends ColumnData<TestData> {
   @override
   String getValue(TestData dataObject) =>
       '${dataObject.name} ${dataObject.number} with min width';
+
+  @override
+  bool get supportsSorting => false;
 }
 
 class _VeryWideMinWidthColumn extends ColumnData<TestData> {
@@ -1836,4 +1833,7 @@ class _VeryWideMinWidthColumn extends ColumnData<TestData> {
   @override
   String getValue(TestData dataObject) =>
       '${dataObject.name} ${dataObject.number} with min width';
+
+  @override
+  bool get supportsSorting => false;
 }
