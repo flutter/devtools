@@ -98,7 +98,7 @@ class _TracingControls extends StatelessWidget {
       padding: const EdgeInsets.all(denseSpacing),
       child: Row(
         children: [
-          if (controller.mode == MemoryControllerCreationMode.connected) ...[
+          if (!offlineDataController.showingOfflineData.value) ...[
             RefreshButton(
               tooltip: 'Request the set of updated allocation traces',
               gaScreen: gac.memory,

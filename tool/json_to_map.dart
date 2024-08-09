@@ -55,7 +55,7 @@ void main(List<String> args) {
 // ignore_for_file: prefer-trailing-comma
 // ignore_for_file: require_trailing_commas
 
-final Map<String, dynamic> data = <String, dynamic>$jsonFormattedString;
+final data = <String, Object?>$jsonFormattedString;
 ''',
     );
 

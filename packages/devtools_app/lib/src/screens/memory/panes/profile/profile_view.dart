@@ -458,14 +458,12 @@ class AllocationProfileTableViewState
   @override
   void initState() {
     super.initState();
-
     widget.controller.initialize();
   }
 
   @override
   void didUpdateWidget(AllocationProfileTableView oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (oldWidget.controller != widget.controller) {
       widget.controller.initialize();
     }
@@ -620,7 +618,7 @@ class _AllocationProfileTableControls extends StatelessWidget {
         _ExportAllocationProfileButton(
           allocationProfileController: controller,
         ),
-        if (controller.mode == MemoryControllerCreationMode.connected) ...[
+        if (!offlineDataController.showingOfflineData.value) ...[
           const SizedBox(width: denseSpacing),
           RefreshButton(
             gaScreen: gac.memory,

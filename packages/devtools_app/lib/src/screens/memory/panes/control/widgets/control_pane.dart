@@ -2,21 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/screen.dart';
-import '../controller/control_pane_controller.dart';
 import 'primary_controls.dart';
 import 'secondary_controls.dart';
 
 class MemoryControlPane extends StatelessWidget {
   const MemoryControlPane({
     super.key,
-    required this.controller,
+    required this.isGcing,
+    required this.onGc,
+    required this.onSave,
   });
 
-  final MemoryControlPaneController controller;
+  final VoidCallback onGc;
+  final VoidCallback onSave;
+  final ValueListenable<bool> isGcing;
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +29,13 @@ class MemoryControlPane extends StatelessWidget {
       controlsBuilder: (_) => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          PrimaryControls(controller: controller),
+          const PrimaryControls(),
           const Spacer(),
-          SecondaryControls(controller: controller),
+          SecondaryControls(
+            isGcing: isGcing,
+            onGc: onGc,
+            onSave: onSave,
+          ),
         ],
       ),
       gaScreen: ScreenMetaData.memory.id,

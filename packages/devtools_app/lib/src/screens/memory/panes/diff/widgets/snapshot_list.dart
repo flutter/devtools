@@ -14,6 +14,7 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
+import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../controller/diff_pane_controller.dart';
@@ -72,10 +73,11 @@ class _ListControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasLoader = controller.loader != null;
+    final showTakeSnapshotButton = controller.loader != null &&
+        !offlineDataController.showingOfflineData.value;
     return Row(
       children: [
-        if (hasLoader) ...[
+        if (showTakeSnapshotButton) ...[
           ToolbarAction(
             icon: iconToTakeSnapshot,
             size: defaultIconSize,

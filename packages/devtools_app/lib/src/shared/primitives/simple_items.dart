@@ -54,12 +54,3 @@ enum DocLinks {
     return '$url#$hash';
   }
 }
-
-/// The mode in which a MemoryController object was created.
-enum MemoryControllerCreationMode {
-  /// Interacting with a connected application.
-  connected,
-
-  /// Showing data saved from a previous session and ignoring connection status.
-  offlineData,
-}
