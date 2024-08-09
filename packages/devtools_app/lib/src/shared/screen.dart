@@ -277,8 +277,14 @@ abstract class Screen {
 
   String get _userFacingTitle => title ?? titleGenerator?.call() ?? '';
 
+  /// The icon to use for this screen's tab.
+  /// 
+  /// Only one of [icon] or [iconAsset] may be non-null.
   final IconData? icon;
 
+  /// The icon asset path to render as the icon for this screen's tab.
+  /// 
+  /// Only one of [icon] or [iconAsset] may be non-null.
   final String? iconAsset;
 
   /// An optional key to use when creating the Tab widget (for use during
