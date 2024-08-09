@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
@@ -298,6 +299,13 @@ class DeepLinksController extends DisposableController
             buildVariant: variant,
           );
           _androidAppLinks[selectedAndroidVariantIndex.value] = result;
+          ga.impression(
+            gac.deeplink,
+            gac.AnalyzeFlutterProject.androidAppLinksSettingsLoaded.name,
+            screenMetricsProvider: () => DeepLinkScreenMetrics(
+              androidAppId: result.applicationId,
+            ),
+          );
         } catch (_) {
           ga.select(
             gac.deeplink,
@@ -326,6 +334,13 @@ class DeepLinksController extends DisposableController
             target: target,
           );
           _iosLinks[selectedAndroidVariantIndex.value] = result;
+          ga.impression(
+            gac.deeplink,
+            gac.AnalyzeFlutterProject.iosUniversalLinkSettingsLoaded.name,
+            screenMetricsProvider: () => DeepLinkScreenMetrics(
+              iosBundleId: result.bundleIdentifier,
+            ),
+          );
         } catch (_) {
           pagePhase.value = PagePhase.validationErrorPage;
         }
