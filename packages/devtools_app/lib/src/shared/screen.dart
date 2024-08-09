@@ -31,7 +31,7 @@ enum ScreenMetaData {
   inspector(
     'inspector',
     title: 'Flutter Inspector',
-    icon: Octicons.deviceMobile,
+    iconAsset: 'icons/flutter_13@2x.png',
     requiresFlutter: true,
     requiresDebugBuild: true,
     tutorialVideoTimestamp: '?t=172',
@@ -39,7 +39,7 @@ enum ScreenMetaData {
   performance(
     'performance',
     title: 'Performance',
-    icon: Octicons.pulse,
+    iconAsset: 'icons/flutter_13@2x.png',
     worksWithOfflineData: true,
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=261',
@@ -47,7 +47,7 @@ enum ScreenMetaData {
   cpuProfiler(
     'cpu-profiler',
     title: 'CPU Profiler',
-    icon: Octicons.dashboard,
+    iconAsset: 'icons/flutter_13@2x.png',
     requiresDartVm: true,
     worksWithOfflineData: true,
     requiresConnection: false,
@@ -56,7 +56,7 @@ enum ScreenMetaData {
   memory(
     'memory',
     title: 'Memory',
-    icon: Octicons.package,
+    iconAsset: 'icons/flutter_13@2x.png',
     requiresDartVm: true,
     // ignore: avoid_redundant_argument_values, false positive
     requiresConnection: !FeatureFlags.memoryOffline,
@@ -67,21 +67,21 @@ enum ScreenMetaData {
   debugger(
     'debugger',
     title: 'Debugger',
-    icon: Octicons.bug,
+    iconAsset: 'icons/flutter_13@2x.png',
     requiresDebugBuild: true,
     tutorialVideoTimestamp: '?t=513',
   ),
   network(
     'network',
     title: 'Network',
-    icon: Icons.network_check,
+    iconAsset: 'icons/flutter_13@2x.png',
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=547',
   ),
   logging(
     'logging',
     title: 'Logging',
-    icon: Octicons.clippy,
+    iconAsset: 'icons/flutter_13@2x.png',
     tutorialVideoTimestamp: '?t=558',
   ),
   provider(
@@ -94,7 +94,7 @@ enum ScreenMetaData {
   appSize(
     'app-size',
     title: 'App Size',
-    icon: Octicons.fileZip,
+    iconAsset: 'icons/flutter_13@2x.png',
     requiresConnection: false,
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=575',
@@ -102,7 +102,7 @@ enum ScreenMetaData {
   deepLinks(
     'deep-links',
     title: 'Deep Links',
-    icon: Icons.link_rounded,
+    iconAsset: 'icons/flutter_13@2x.png',
     requiresConnection: false,
     requiresDartVm: true,
   ),
@@ -118,6 +118,7 @@ enum ScreenMetaData {
     this.id, {
     this.title,
     this.icon,
+    this.iconAsset,
     this.requiresConnection = true,
     this.requiresDartVm = false,
     this.requiresFlutter = false,
@@ -126,11 +127,12 @@ enum ScreenMetaData {
     this.worksWithOfflineData = false,
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
-  });
+  }) : assert(icon == null || iconAsset == null);
 
   final String id;
   final String? title;
   final IconData? icon;
+  final String? iconAsset;
   final bool requiresConnection;
   final bool requiresDartVm;
   final bool requiresFlutter;
@@ -179,6 +181,7 @@ abstract class Screen {
     this.title,
     this.titleGenerator,
     this.icon,
+    this.iconAsset,
     this.tabKey,
     this.requiresLibrary,
     this.requiresConnection = true,
@@ -188,7 +191,8 @@ abstract class Screen {
     this.requiresVmDeveloperMode = false,
     this.worksWithOfflineData = false,
     this.showFloatingDebuggerControls = true,
-  }) : assert((title == null) || (titleGenerator == null));
+  })  : assert(title == null || titleGenerator == null),
+        assert(icon == null || iconAsset == null);
 
   const Screen.conditional({
     required String id,
@@ -204,6 +208,7 @@ abstract class Screen {
     String? title,
     String Function()? titleGenerator,
     IconData? icon,
+    String? iconAsset,
     Key? tabKey,
   }) : this(
           id,
@@ -218,6 +223,7 @@ abstract class Screen {
           title: title,
           titleGenerator: titleGenerator,
           icon: icon,
+          iconAsset: iconAsset,
           tabKey: tabKey,
         );
 
@@ -241,6 +247,7 @@ abstract class Screen {
           title: titleGenerator == null ? metadata.title : null,
           titleGenerator: titleGenerator,
           icon: metadata.icon,
+          iconAsset: metadata.iconAsset,
           tabKey: tabKey,
         );
 
@@ -272,6 +279,8 @@ abstract class Screen {
   String get _userFacingTitle => title ?? titleGenerator?.call() ?? '';
 
   final IconData? icon;
+
+  final String? iconAsset;
 
   /// An optional key to use when creating the Tab widget (for use during
   /// testing).
@@ -362,7 +371,13 @@ abstract class Screen {
           key: tabKey,
           child: Row(
             children: <Widget>[
-              Icon(icon, size: defaultIconSize),
+              if (icon != null) Icon(icon, size: defaultIconSize),
+              if (iconAsset != null)
+                AssetImageIcon(
+                  asset: iconAsset!,
+                  height: defaultIconSize,
+                  width: defaultIconSize,
+                ),
               if (title.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(left: denseSpacing),
