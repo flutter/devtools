@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../inspector/layout_explorer/ui/dimension.dart';
 import '../../inspector_data_models.dart';
 import 'overflow_indicator_painter.dart';
 import 'theme.dart';
@@ -141,14 +142,12 @@ class WidgetVisualizer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final properties = layoutProperties;
     final borderColor = WidgetTheme.fromName(properties.node.description).color;
     final boxAdjust = isSelected ? _selectedPadding : 0.0;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final hintLocal = hint;
         return OverflowBox(
           minWidth: constraints.minWidth + boxAdjust,
           maxWidth: constraints.maxWidth + boxAdjust,
@@ -194,40 +193,32 @@ class WidgetVisualizer extends StatelessWidget {
                         : 0.0,
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Center(
+                        child: WidgetLabel(
+                          labelColor: borderColor,
+                          labelText: title,
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
                           children: [
-                            Flexible(
-                              child: Container(
-                                constraints: BoxConstraints(
-                                  maxWidth: largeTitle
-                                      ? defaultMaxRenderWidth
-                                      : minRenderWidth *
-                                          widgetTitleMaxWidthPercentage,
-                                ),
-                                decoration: BoxDecoration(color: borderColor),
-                                padding: const EdgeInsets.all(4.0),
-                                child: Center(
-                                  child: Text(
-                                    title,
-                                    style: theme.regularTextStyleWithColor(
-                                      colorScheme.widgetNameColor,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
+                            const Spacer(),
+                            dimensionDescription(
+                              TextSpan(text: properties.describeHeight()),
+                              false,
+                              theme.colorScheme,
                             ),
-                            if (hintLocal != null) Flexible(child: hintLocal),
+                            dimensionDescription(
+                              TextSpan(text: properties.describeWidth()),
+                              false,
+                              theme.colorScheme,
+                            ),
+                            const Spacer(),
                           ],
                         ),
                       ),
-                      Expanded(child: child),
                     ],
                   ),
                 ),
@@ -236,6 +227,40 @@ class WidgetVisualizer extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class WidgetLabel extends StatelessWidget {
+  const WidgetLabel({
+    super.key,
+    required this.labelColor,
+    required this.labelText,
+  });
+
+  final Color labelColor;
+  final String labelText;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return IntrinsicHeight(
+      child: Container(
+        decoration: BoxDecoration(color: labelColor),
+        padding: const EdgeInsetsDirectional.symmetric(
+          vertical: densePadding,
+          horizontal: denseSpacing,
+        ),
+        child: Text(
+          labelText,
+          style: theme.regularTextStyleWithColor(
+            colorScheme.widgetNameColor,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
   }
 }

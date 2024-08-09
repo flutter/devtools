@@ -163,6 +163,25 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     return output;
   }
 
+  static List<double> simpleFractionalLayout({
+    required double availableSize,
+    required List<double?> sizes,
+    double paddingFraction = 0.2,
+  }) {
+    final paddingASize = sizes[0] ?? 0;
+    final paddingBSize = sizes[2] ?? 0;
+
+    final paddingAFraction = paddingASize > 0 ? paddingFraction : 0.0;
+    final paddingBFraction = paddingBSize > 0 ? paddingFraction : 0.0;
+    final widgetFraction = 1 - paddingAFraction - paddingBFraction;
+
+    return [
+      paddingAFraction,
+      widgetFraction,
+      paddingBFraction,
+    ].map((fraction) => fraction * availableSize).toList();
+  }
+
   Widget _buildChild(BuildContext context) {
     final propertiesLocal = properties!;
 
@@ -180,7 +199,6 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         final availableHeight = constraints.maxHeight - 2;
         final availableWidth = constraints.maxWidth - 2;
 
-        final minFractions = [0.2, 0.5, 0.2];
         // TODO(polinach, jacobr): consider using zeros for zero values,
         // without replacing them with nulls.
         // See https://github.com/flutter/devtools/issues/3931.
@@ -201,16 +219,15 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           ),
         ];
         // 3 element array with [left padding, widget width, right padding].
-        final displayWidths = minFractionLayout(
+        final displayWidths = simpleFractionalLayout(
           availableSize: availableWidth,
           sizes: widths,
-          minFractions: minFractions,
         );
+
         // 3 element array with [top padding, widget height, bottom padding].
-        final displayHeights = minFractionLayout(
+        final displayHeights = simpleFractionalLayout(
           availableSize: availableHeight,
           sizes: heights,
-          minFractions: minFractions,
         );
         final widgetWidth = displayWidths[1];
         final widgetHeight = displayHeights[1];
@@ -219,90 +236,111 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         final width2 = widths[2];
         final height0 = heights[0];
         final height2 = heights[2];
-        return Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color:
-                  WidgetTheme.fromName(propertiesLocal.node.description).color,
-            ),
-          ),
-          child: Stack(
-            children: [
-              LayoutExplorerBackground(colorScheme: colorScheme),
-              // Left padding.
-              if (width0 != null)
-                PaddingVisualizerWidget(
-                  RenderProperties(
-                    axis: Axis.horizontal,
-                    size: Size(displayWidths[0], widgetHeight),
-                    offset: Offset(0, displayHeights[0]),
-                    realSize: Size(width0, safeParentSize.height),
-                    layoutProperties: propertiesLocal,
-                    isFreeSpace: true,
-                  ),
-                  horizontal: true,
-                ),
-              // Top padding.
-              if (height0 != null)
-                PaddingVisualizerWidget(
-                  RenderProperties(
-                    axis: Axis.horizontal,
-                    size: Size(widgetWidth, displayHeights[0]),
-                    offset: Offset(displayWidths[0], 0),
-                    realSize: Size(safeParentSize.width, height0),
-                    layoutProperties: propertiesLocal,
-                    isFreeSpace: true,
-                  ),
-                  horizontal: false,
-                ),
-              // Right padding.
-              if (width2 != null)
-                PaddingVisualizerWidget(
-                  RenderProperties(
-                    axis: Axis.horizontal,
-                    size: Size(displayWidths[2], widgetHeight),
-                    offset: Offset(
-                      displayWidths[0] + displayWidths[1],
-                      displayHeights[0],
-                    ),
-                    realSize: Size(width2, safeParentSize.height),
-                    layoutProperties: propertiesLocal,
-                    isFreeSpace: true,
-                  ),
-                  horizontal: true,
-                ),
-              // Bottom padding.
-              if (height2 != null)
-                PaddingVisualizerWidget(
-                  RenderProperties(
-                    axis: Axis.horizontal,
-                    size: Size(widgetWidth, displayHeights[2]),
-                    offset: Offset(
-                      displayWidths[0],
-                      displayHeights[0] + displayHeights[1],
-                    ),
-                    realSize: Size(safeParentSize.width, height2),
-                    layoutProperties: propertiesLocal,
-                    isFreeSpace: true,
-                  ),
-                  horizontal: false,
-                ),
-              BoxChildVisualizer(
-                isSelected: true,
-                state: this,
-                layoutProperties: propertiesLocal,
-                renderProperties: RenderProperties(
-                  axis: Axis.horizontal,
-                  size: Size(widgetWidth, widgetHeight),
-                  offset: Offset(displayWidths[0], displayHeights[0]),
-                  realSize: propertiesLocal.size,
-                  layoutProperties: propertiesLocal,
+        final widgetColor =
+            WidgetTheme.fromName(properties?.node.description).color;
+        return Column(
+          children: [
+            Container(
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: widgetColor,
                 ),
               ),
-            ],
-          ),
+              child: Stack(
+                children: [
+                  LayoutExplorerBackground(colorScheme: colorScheme),
+                  Column(
+                    children: [
+                      // Add a spacer if padding is only on the bottom:
+                      if (height0 == null && height2 != null) const Spacer(),
+                      Row(
+                        children: [
+                          // Add a spacer if padding is only on the right:
+                          if (width0 == null && width2 != null) const Spacer(),
+                          WidgetLabel(
+                            labelColor: widgetColor,
+                            labelText: describeBoxName(parentProperties),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  // Left padding.
+                  if (width0 != null)
+                    PaddingVisualizerWidget(
+                      RenderProperties(
+                        axis: Axis.horizontal,
+                        size: Size(displayWidths[0], widgetHeight),
+                        offset: Offset(0, displayHeights[0]),
+                        realSize: Size(width0, safeParentSize.height),
+                        layoutProperties: propertiesLocal,
+                        isFreeSpace: true,
+                      ),
+                      horizontal: true,
+                    ),
+                  // Top padding.
+                  if (height0 != null)
+                    PaddingVisualizerWidget(
+                      RenderProperties(
+                        axis: Axis.horizontal,
+                        size: Size(widgetWidth, displayHeights[0]),
+                        offset: Offset(displayWidths[0], 0),
+                        realSize: Size(safeParentSize.width, height0),
+                        layoutProperties: propertiesLocal,
+                        isFreeSpace: true,
+                      ),
+                      horizontal: false,
+                    ),
+                  // Right padding.
+                  if (width2 != null)
+                    PaddingVisualizerWidget(
+                      RenderProperties(
+                        axis: Axis.horizontal,
+                        size: Size(displayWidths[2], widgetHeight),
+                        offset: Offset(
+                          displayWidths[0] + displayWidths[1],
+                          displayHeights[0],
+                        ),
+                        realSize: Size(width2, safeParentSize.height),
+                        layoutProperties: propertiesLocal,
+                        isFreeSpace: true,
+                      ),
+                      horizontal: true,
+                    ),
+                  // Bottom padding.
+                  if (height2 != null)
+                    PaddingVisualizerWidget(
+                      RenderProperties(
+                        axis: Axis.horizontal,
+                        size: Size(widgetWidth, displayHeights[2]),
+                        offset: Offset(
+                          displayWidths[0],
+                          displayHeights[0] + displayHeights[1],
+                        ),
+                        realSize: Size(safeParentSize.width, height2),
+                        layoutProperties: propertiesLocal,
+                        isFreeSpace: true,
+                      ),
+                      horizontal: false,
+                    ),
+                  BoxChildVisualizer(
+                    isSelected: true,
+                    state: this,
+                    layoutProperties: propertiesLocal,
+                    renderProperties: RenderProperties(
+                      axis: Axis.horizontal,
+                      size: Size(widgetWidth, widgetHeight),
+                      offset: Offset(displayWidths[0], displayHeights[0]),
+                      realSize: propertiesLocal.size,
+                      layoutProperties: propertiesLocal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
@@ -316,34 +354,40 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 
   Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
-    final maxHeight = constraints.maxHeight;
-    final maxWidth = constraints.maxWidth;
+    final childProps = properties!;
+    final parentProps = parentProperties;
+
+    final childHasDifferentSizeThanParent = parentProps != null &&
+        (childProps.height != parentProps.height ||
+            childProps.width != parentProps.width);
 
     Widget widget = _buildChild(context);
-    final parentProperties = this.parentProperties;
-    if (parentProperties != null) {
-      // Wrap with a widget visualizer for the parent if there is a valid parent.
-      widget = WidgetVisualizer(
-        // TODO(jacobr): this node's name can be misleading more often than
-        // in the flex case the widget doesn't have its own RenderObject.
-        // Consider showing the true ancestor for the inspector tree that first
-        // has a different render object.
-        title: describeBoxName(parentProperties),
-        largeTitle: true,
-        layoutProperties: parentProperties,
-        isSelected: false,
-        child: VisualizeWidthAndHeightWithConstraints(
-          properties: parentProperties,
-          warnIfUnconstrained: false,
-          child: Padding(
-            padding: const EdgeInsets.all(denseSpacing),
-            child: widget,
-          ),
-        ),
-      );
-    }
+    // if (childHasDifferentSizeThanParent) {
+    //   // Wrap with a widget visualizer for the parent if there is a valid parent.
+    //   widget = WidgetVisualizer(
+    //     // TODO(jacobr): this node's name can be misleading more often than
+    //     // in the flex case the widget doesn't have its own RenderObject.
+    //     // Consider showing the true ancestor for the inspector tree that first
+    //     // has a different render object.
+    //     title: describeBoxName(parentProps),
+    //     largeTitle: true,
+    //     layoutProperties: parentProps,
+    //     isSelected: false,
+    //     child: VisualizeWidthAndHeightWithConstraints(
+    //       properties: parentProps,
+    //       warnIfUnconstrained: false,
+    //       child: Padding(
+    //         padding: const EdgeInsets.all(denseSpacing),
+    //         child: widget,
+    //       ),
+    //     ),
+    //   );
+    // }
     return Container(
-      constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+      constraints: BoxConstraints(
+        maxWidth: constraints.maxWidth,
+        maxHeight: constraints.maxHeight,
+      ),
       child: widget,
     );
   }
@@ -357,16 +401,7 @@ String describeBoxName(LayoutProperties properties) {
   // This is clearer but risks more confusion
 
   // Widget name.
-  var title = properties.node.description ?? '';
-  final renderDescription = properties.node.renderObject?.description;
-  // TODO(jacobr): consider de-emphasizing the render object name by putting it
-  // in more transparent text or just calling the widget Parent instead of
-  // surfacing a widget name.
-  if (renderDescription != null) {
-    // Name of the associated RenderObject if one is available.
-    title += ' - $renderDescription';
-  }
-  return title;
+  return properties.node.description ?? '';
 }
 
 /// Widget that represents and visualize a direct child of Flex widget.
