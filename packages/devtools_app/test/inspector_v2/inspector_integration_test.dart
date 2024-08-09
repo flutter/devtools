@@ -102,8 +102,7 @@ void main() {
           ),
         );
       },
-      skip:
-          true, // TODO(elliette): Figure out why this passes locally but times out on CI.
+      skip: true, // https://github.com/flutter/devtools/issues/8179
     );
 
     testWidgetsWithWindowSize(
