@@ -19,8 +19,7 @@ import 'ui/icons.dart';
 
 final _log = Logger('screen.dart');
 
-// TODO(https://github.com/flutter/devtools/issues/8134): support SVG icons for
-// screens.
+// TODO(kenz): use correct assets.
 enum ScreenMetaData {
   home(
     'home',
