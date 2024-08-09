@@ -315,8 +315,8 @@ class BreakpointManager with DisposerMixin {
   ) async {
     if (breakpoint.resolved!) {
       final bp = BreakpointAndSourcePosition.create(breakpoint);
-      return scriptManager.getScript(bp.scriptRef!).then((Script script) {
-        final pos = SourcePosition.calculatePosition(script, bp.tokenPos!);
+      return scriptManager.getScript(bp.scriptRef!).then((Script? script) {
+        final pos = SourcePosition.calculatePosition(script!, bp.tokenPos!);
         return BreakpointAndSourcePosition.create(breakpoint, pos);
       });
     } else {

@@ -119,7 +119,6 @@ void main() {
     windowSize,
     (WidgetTester tester) async {
       await tester.pumpWidget(buildInspectorScreen());
-      await tester.pumpAndSettle();
       expect(find.byType(InspectorScreenBody), findsOneWidget);
     },
   );
@@ -368,9 +367,13 @@ void main() {
           await tester.pumpWidget(buildInspectorScreen());
 
           await tester.tap(find.byType(SettingsOutlinedButton));
-          await tester.pumpAndSettle();
-          expect(
+
+          final settingsDialogFinder = await retryUntilFound(
             find.byType(FlutterInspectorSettingsDialog),
+            tester: tester,
+          );
+          expect(
+            settingsDialogFinder,
             findsOneWidget,
           );
 
@@ -383,7 +386,7 @@ void main() {
             matching: find.byType(NotifierCheckbox),
           );
           await tester.tap(hoverModeCheckBox);
-          await tester.pumpAndSettle();
+          await tester.pump(safePumpDuration);
           expect(
             preferences.inspectorV2.hoverEvalModeEnabled.value,
             !startingHoverEvalModeValue,

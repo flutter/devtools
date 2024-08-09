@@ -521,7 +521,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     }
 
     final script = await scriptManager.getScript(scriptRef);
-    final pos = SourcePosition.calculatePosition(script, tokenPos);
+    final pos = SourcePosition.calculatePosition(script!, tokenPos);
 
     return 'paused$reason$fileName $pos';
   }

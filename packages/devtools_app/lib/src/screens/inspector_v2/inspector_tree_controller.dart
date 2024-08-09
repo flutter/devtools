@@ -1073,10 +1073,12 @@ class _InspectorTreeState extends State<InspectorTree>
     return ValueListenableBuilder<List<InspectorTreeRow?>>(
       valueListenable: treeControllerLocal.rowsInTree,
       builder: (context, rows, _) {
-        if (rows.isEmpty) {
+        // Note: The inspector rows contain only the fake root node when the
+        // inspector tree is shutdown.
+        if (rows.length <= 1) {
           // This works around a bug when Scrollbars are present on a short lived
           // widget.
-          return const SizedBox();
+          return const SizedBox(child: CenteredCircularProgressIndicator());
         }
 
         if (!controller.firstInspectorTreeLoadCompleted) {
