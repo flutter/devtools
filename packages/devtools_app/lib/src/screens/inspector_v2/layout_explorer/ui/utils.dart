@@ -466,3 +466,44 @@ class LayoutExplorerBackground extends StatelessWidget {
     );
   }
 }
+
+/// Builds and positions a label for the [LayoutExplorerBackground] as
+/// determined by the widget's padding.
+class BackgroundLabel extends StatelessWidget {
+  const BackgroundLabel({
+    super.key,
+    required this.labelText,
+    required this.labelColor,
+    required this.topPadding,
+    required this.bottomPadding,
+    required this.leftPadding,
+    required this.rightPadding,
+  });
+
+  final String labelText;
+  final Color labelColor;
+  final bool topPadding;
+  final bool bottomPadding;
+  final bool leftPadding;
+  final bool rightPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Push to the bottom if there is no padding on the top.
+        if (!topPadding && bottomPadding) const Spacer(),
+        Row(
+          children: [
+            // Push to the right if there is not padding on the left.
+            if (!leftPadding && rightPadding) const Spacer(),
+            WidgetLabel(
+              labelColor: labelColor,
+              labelText: labelText, // describeBoxName(parentProperties),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
