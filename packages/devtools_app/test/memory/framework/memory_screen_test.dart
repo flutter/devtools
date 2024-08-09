@@ -86,6 +86,7 @@ void main() {
       setGlobal(NotificationService, NotificationService());
       setGlobal(BannerMessagesController, BannerMessagesController());
       setGlobal(DTDManager, MockDTDManager());
+      setGlobal(ScriptManager, MockScriptManager());
       setUpServiceManagerForMemory();
     });
 
@@ -183,8 +184,19 @@ void main() {
           await tester.runAsync(() async {
             await tester.tap(find.byKey(MemoryScreenKeys.traceTab));
             await tester.pumpAndSettle();
+            await controller.trace!.initialized;
+            await tester.pumpAndSettle();
+
+            // TODO(kenz): remove this selection when the selected class is
+            // included with the offline data for the Trace tab.
+            // Select the first class in the trace tab.
+            await tester.tap(find.byType(HeapClassView).first);
+            await tester.pumpAndSettle();
+
+            // Expand the selected allocation trace.
+            await tester.tap(find.byType(ExpandAllButton));
+            await tester.pumpAndSettle();
           });
-          // TODO(kenz): investigate if there should there be data here.
           expect(find.byType(TracingPane), findsOneWidget);
           await expectLater(
             find.byType(MemoryScreenBody),

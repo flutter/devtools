@@ -136,7 +136,9 @@ class MemoryController extends DisposableController
     selectedFeatureTabIndex =
         offlineData?.selectedTab ?? selectedFeatureTabIndex;
 
-    if (offlineData != null) profile?.setFilter(offlineData.filter);
+    if (offlineData != null) {
+      profile?.setFilter(offlineData.filter);
+    }
     _shareClassFilterBetweenProfileAndDiff();
 
     _initialized.complete();

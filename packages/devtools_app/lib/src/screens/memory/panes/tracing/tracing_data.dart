@@ -90,6 +90,7 @@ class TracedClass with PinnableListEntry, Serializable {
       '${clazz.name} instances: $instances trace: $traceAllocations';
 }
 
+// TODO(kenz): include the selected class in the toJson and fromJson methods.
 @visibleForTesting
 enum TracingIsolateStateJson {
   isolate,

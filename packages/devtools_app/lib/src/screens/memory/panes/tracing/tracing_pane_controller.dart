@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -70,9 +72,9 @@ class TracePaneController extends DisposableController
     TracingIsolateState.empty(),
   );
 
-  /// Set to `true` if the controller has not yet finished initializing.
-  ValueListenable<bool> get initializing => _initializing;
-  final _initializing = ValueNotifier<bool>(true);
+  /// A Future tracking whether the controller has been initialized.
+  Future<void> get initialized => _initialized.future;
+  final _initialized = Completer<void>();
 
   /// Set to `true` when `refresh()` has been called and allocation profiles
   /// are being updated, before then being set again to `false`.
@@ -82,15 +84,11 @@ class TracePaneController extends DisposableController
   /// The [TextEditingController] for the 'Class Filter' text field.
   final textEditingController = TextEditingController();
 
-  bool _initialized = false;
-
   final String? rootPackage;
 
   /// Initializes the controller if it is not initialized yet.
   Future<void> initialize() async {
-    if (_initialized) return;
-    _initialized = true;
-    _initializing.value = true;
+    if (_initialized.isCompleted) return;
 
     Future<void> updateState() async {
       final isolate =
@@ -130,7 +128,7 @@ class TracePaneController extends DisposableController
       }
     }
 
-    _initializing.value = false;
+    _initialized.complete();
   }
 
   @override
