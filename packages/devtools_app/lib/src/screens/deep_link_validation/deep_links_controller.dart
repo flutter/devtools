@@ -359,7 +359,7 @@ class DeepLinksController extends DisposableController
           iosLinks[selectedIosConfigurationIndex.value] = result;
           ga.impression(
             gac.deeplink,
-          gac.AnalyzeFlutterProject.iosUniversalLinkSettingsLoaded.name,
+            gac.AnalyzeFlutterProject.iosUniversalLinkSettingsLoaded.name,
             screenMetricsProvider: () => DeepLinkScreenMetrics(
               iosBundleId: result.bundleIdentifier,
             ),

@@ -96,8 +96,8 @@ class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
 
 class DeepLinkScreenMetrics extends ScreenAnalyticsMetrics {
   DeepLinkScreenMetrics({
-     this.androidAppId,
-     this.iosBundleId,
+    this.androidAppId,
+    this.iosBundleId,
   });
 
   /// The anroid app id of the flutter project.

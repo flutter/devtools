@@ -143,7 +143,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   external int? get inspector_tree_controller_id;
   external String? get android_app_id;
   external String? get ios_bundle_id;
-  }
+}
 
 extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
   external factory GtagExceptionDevTools({
