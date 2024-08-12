@@ -674,8 +674,14 @@ abstract class ScaffoldAction extends StatelessWidget {
           'Exactly one of icon and iconAsset must be specified.',
         );
 
+  /// The icon to use for this scaffold action.
+  ///
+  /// Only one of [icon] or [iconAsset] may be non-null.
   final IconData? icon;
 
+  /// The icon asset path to render as the icon for this scaffold action.
+  ///
+  /// Only one of [icon] or [iconAsset] may be non-null.
   final String? iconAsset;
 
   final String tooltip;

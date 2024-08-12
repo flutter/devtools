@@ -190,8 +190,14 @@ abstract class Screen {
     this.requiresVmDeveloperMode = false,
     this.worksWithOfflineData = false,
     this.showFloatingDebuggerControls = true,
-  })  : assert(title == null || titleGenerator == null),
-        assert(icon == null || iconAsset == null);
+  })  : assert(
+          title == null || titleGenerator == null,
+          'Only one of title or titleGenerator may be specified.',
+        ),
+        assert(
+          icon == null || iconAsset == null,
+          'Only one of icon or iconAsset may be specified.',
+        );
 
   const Screen.conditional({
     required String id,
@@ -278,12 +284,12 @@ abstract class Screen {
   String get _userFacingTitle => title ?? titleGenerator?.call() ?? '';
 
   /// The icon to use for this screen's tab.
-  /// 
+  ///
   /// Only one of [icon] or [iconAsset] may be non-null.
   final IconData? icon;
 
   /// The icon asset path to render as the icon for this screen's tab.
-  /// 
+  ///
   /// Only one of [icon] or [iconAsset] may be non-null.
   final String? iconAsset;
 
