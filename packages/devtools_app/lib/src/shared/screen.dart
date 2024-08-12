@@ -30,7 +30,7 @@ enum ScreenMetaData {
   inspector(
     'inspector',
     title: 'Flutter Inspector',
-    iconAsset: 'icons/flutter_13@2x.png',
+    iconAsset: 'icons/app_bar/inspector_20x20.png',
     requiresFlutter: true,
     requiresDebugBuild: true,
     tutorialVideoTimestamp: '?t=172',
@@ -38,7 +38,7 @@ enum ScreenMetaData {
   performance(
     'performance',
     title: 'Performance',
-    iconAsset: 'icons/flutter_13@2x.png',
+    iconAsset: 'icons/app_bar/performance_20x20.png',
     worksWithOfflineData: true,
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=261',
@@ -46,7 +46,7 @@ enum ScreenMetaData {
   cpuProfiler(
     'cpu-profiler',
     title: 'CPU Profiler',
-    iconAsset: 'icons/flutter_13@2x.png',
+    iconAsset: 'icons/app_bar/cpu_profiler_20x20.png',
     requiresDartVm: true,
     worksWithOfflineData: true,
     requiresConnection: false,
@@ -55,7 +55,7 @@ enum ScreenMetaData {
   memory(
     'memory',
     title: 'Memory',
-    iconAsset: 'icons/flutter_13@2x.png',
+    iconAsset: 'icons/app_bar/memory_20x20.png',
     requiresDartVm: true,
     // ignore: avoid_redundant_argument_values, false positive
     requiresConnection: !FeatureFlags.memoryOffline,
@@ -66,21 +66,21 @@ enum ScreenMetaData {
   debugger(
     'debugger',
     title: 'Debugger',
-    iconAsset: 'icons/flutter_13@2x.png',
+    icon: Octicons.bug,
     requiresDebugBuild: true,
     tutorialVideoTimestamp: '?t=513',
   ),
   network(
     'network',
     title: 'Network',
-    iconAsset: 'icons/flutter_13@2x.png',
+    iconAsset: 'icons/app_bar/network_20x20.png',
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=547',
   ),
   logging(
     'logging',
     title: 'Logging',
-    iconAsset: 'icons/flutter_13@2x.png',
+    iconAsset: 'icons/app_bar/logging_20x20.png',
     tutorialVideoTimestamp: '?t=558',
   ),
   provider(
@@ -93,7 +93,7 @@ enum ScreenMetaData {
   appSize(
     'app-size',
     title: 'App Size',
-    iconAsset: 'icons/flutter_13@2x.png',
+    iconAsset: 'icons/app_bar/app_size_20x20.png',
     requiresConnection: false,
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=575',
@@ -101,7 +101,7 @@ enum ScreenMetaData {
   deepLinks(
     'deep-links',
     title: 'Deep Links',
-    iconAsset: 'icons/flutter_13@2x.png',
+    iconAsset: 'icons/app_bar/deep_links_20x20.png',
     requiresConnection: false,
     requiresDartVm: true,
   ),

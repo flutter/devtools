@@ -24,6 +24,7 @@ import 'globals.dart';
 import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
+import 'ui/icons.dart';
 import 'utils.dart';
 
 double get assumedMonospaceCharacterWidth =>
@@ -663,13 +664,19 @@ class ToolbarAction extends StatelessWidget {
 abstract class ScaffoldAction extends StatelessWidget {
   const ScaffoldAction({
     super.key,
-    required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.icon,
+    this.iconAsset,
     this.color,
-  });
+  }) : assert(
+          (icon == null) != (iconAsset == null),
+          'Exactly one of icon and iconAsset must be specified.',
+        );
 
-  final IconData icon;
+  final IconData? icon;
+
+  final String? iconAsset;
 
   final String tooltip;
 
@@ -687,11 +694,18 @@ abstract class ScaffoldAction extends StatelessWidget {
           width: actionWidgetSize,
           height: actionWidgetSize,
           alignment: Alignment.center,
-          child: Icon(
-            icon,
-            size: actionsIconSize,
-            color: color,
-          ),
+          child: icon != null
+              ? Icon(
+                  icon,
+                  size: actionsIconSize,
+                  color: color,
+                )
+              : AssetImageIcon(
+                  asset: iconAsset!,
+                  height: actionsIconSize,
+                  width: actionsIconSize,
+                  color: color,
+                ),
         ),
       ),
     );

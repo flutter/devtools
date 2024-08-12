@@ -291,12 +291,14 @@ class AssetImageIcon extends StatelessWidget {
   const AssetImageIcon({
     super.key,
     required this.asset,
+    this.color,
     double? height,
     double? width,
   })  : _width = width,
         _height = height;
 
   final String asset;
+  final Color? color;
   final double? _height;
   final double? _width;
 
@@ -310,6 +312,7 @@ class AssetImageIcon extends StatelessWidget {
       height: height,
       width: width,
       fit: BoxFit.fill,
+      color: color ?? Theme.of(context).colorScheme.onSurface,
     );
   }
 }
