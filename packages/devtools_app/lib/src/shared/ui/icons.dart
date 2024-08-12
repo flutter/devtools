@@ -327,3 +327,50 @@ class Octicons {
   static const dashboard = IconData(61733, fontFamily: 'Octicons');
   static const pulse = IconData(61823, fontFamily: 'Octicons');
 }
+
+/// A widget that renders either an [icon] from a font glyph or an [iconAsset]
+/// from the app bundle.
+class DevToolsIcon extends StatelessWidget {
+  DevToolsIcon({
+    super.key,
+    this.icon,
+    this.iconAsset,
+    this.color,
+    double? size,
+  })  : assert(
+          (icon == null) != (iconAsset == null),
+          'Exactly one of icon and iconAsset must be specified.',
+        ),
+        size = size ?? defaultIconSize;
+
+  /// The icon to use for this screen's tab.
+  ///
+  /// Exactly one of [icon] and [iconAsset] must be non-null.
+  final IconData? icon;
+
+  /// The icon asset path to render as the icon for this screen's tab.
+  ///
+  /// Exactly one of [icon] and [iconAsset] must be non-null.
+  final String? iconAsset;
+
+  final double size;
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = this.color ?? Theme.of(context).colorScheme.onSurface;
+    return icon != null
+        ? Icon(
+            icon,
+            size: size,
+            color: color,
+          )
+        : AssetImageIcon(
+            asset: iconAsset!,
+            height: size,
+            width: size,
+            color: color,
+          );
+  }
+}

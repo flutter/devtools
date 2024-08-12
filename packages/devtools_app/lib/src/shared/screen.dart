@@ -385,12 +385,10 @@ abstract class Screen {
           key: tabKey,
           child: Row(
             children: <Widget>[
-              if (icon != null) Icon(icon, size: defaultIconSize),
-              if (iconAsset != null)
-                AssetImageIcon(
-                  asset: iconAsset!,
-                  height: defaultIconSize,
-                  width: defaultIconSize,
+              if (icon != null || iconAsset != null)
+                DevToolsIcon(
+                  icon: icon,
+                  iconAsset: iconAsset,
                 ),
               if (title.isNotEmpty)
                 Padding(

@@ -163,7 +163,8 @@ class SidebarDevToolsScreens extends StatelessWidget {
     final id = screen.title ?? screen.id;
     return (
       label: id,
-      icon: screen.icon!,
+      icon: screen.icon,
+      iconAsset: screen.iconAsset,
       screenId: screen.id,
       requiresDebugSession: screen.requiresConnection,
       // Only the app size screen does not care about the active debug session.

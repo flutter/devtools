@@ -35,7 +35,8 @@ void main() {
 
       await switchToScreen(
         tester,
-        tabIcon: ScreenMetaData.performance.icon!,
+        tabIcon: ScreenMetaData.performance.icon,
+        tabTitle: ScreenMetaData.performance.title,
         screenId: ScreenMetaData.performance.id,
       );
       await tester.pump(safePumpDuration);

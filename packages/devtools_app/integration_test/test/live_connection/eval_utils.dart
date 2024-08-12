@@ -61,7 +61,8 @@ class EvalTester {
     // Open the inspector screen.
     await switchToScreen(
       tester,
-      tabIcon: ScreenMetaData.inspector.icon!,
+      tabIcon: ScreenMetaData.inspector.icon,
+      tabTitle: ScreenMetaData.inspector.title,
       screenId: ScreenMetaData.inspector.id,
     );
     await tester.pumpAndSettle();

@@ -33,7 +33,8 @@ void main() {
     await pumpAndConnectDevTools(tester, testApp);
     await switchToScreen(
       tester,
-      tabIcon: ScreenMetaData.debugger.icon!,
+      tabIcon: ScreenMetaData.debugger.icon,
+      tabTitle: ScreenMetaData.debugger.title,
       screenId: ScreenMetaData.debugger.id,
     );
     await tester.pump(safePumpDuration);

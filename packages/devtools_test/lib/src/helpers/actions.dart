@@ -48,7 +48,8 @@ Future<void> navigateThroughDevToolsScreens(
   for (final screen in screens) {
     await switchToScreen(
       controller,
-      tabIcon: screen.icon!,
+      tabIcon: screen.icon,
+      tabTitle: screen.title,
       screenId: screen.id,
       runWithExpectations: runWithExpectations,
     );
@@ -70,13 +71,14 @@ List<String> generateVisibleScreenIds() {
 /// to settle the UI.
 Future<void> switchToScreen(
   WidgetController controller, {
-  required IconData tabIcon,
+  required IconData? tabIcon,
+  required String? tabTitle,
   required String screenId,
   bool warnIfTapMissed = true,
   bool runWithExpectations = true,
 }) async {
-  logStatus('switching to $screenId screen (icon $tabIcon)');
-  final tabFinder = await findTab(controller, tabIcon);
+  logStatus('switching to $screenId screen (icon $tabIcon, title: $tabTitle)');
+  final tabFinder = await findTab(controller, icon: tabIcon, title: tabTitle);
   _maybeExpect(
     tabFinder,
     findsOneWidget,
@@ -91,14 +93,25 @@ Future<void> switchToScreen(
 
 /// Finds the tab with [icon] either in the top-level DevTools tab bar or in the
 /// tab overflow menu for tabs that don't fit on screen.
-Future<Finder> findTab(WidgetController controller, IconData icon) async {
+Future<Finder> findTab(
+  WidgetController controller, {
+  required IconData? icon,
+  required String? title,
+}) async {
+  assert(
+    icon != null || title != null,
+    'At least one of icon or title must be non-null.',
+  );
   // Open the tab overflow menu before looking for the tab.
   final tabOverflowButtonFinder = find.byType(TabOverflowButton);
   if (tabOverflowButtonFinder.evaluate().isNotEmpty) {
     await controller.tap(tabOverflowButtonFinder);
     await controller.pump(shortPumpDuration);
   }
-  return find.widgetWithIcon(Tab, icon);
+  if (icon != null) {
+    return find.widgetWithIcon(Tab, icon);
+  }
+  return find.descendant(of: find.byType(Tab), matching: find.text(title!));
 }
 
 // ignore: avoid-dynamic, wrapper around `expect`, which uses dynamic types.

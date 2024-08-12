@@ -20,6 +20,7 @@ DevToolsButtonData _buttonDataFromExtension(DevToolsExtensionConfig ext) {
   return (
     label: ext.name,
     icon: ext.icon,
+    iconAsset: null,
     screenId: ext.screenId,
     requiresDebugSession: ext.requiresConnection,
     // TODO(https://github.com/flutter/devtools/issues/7955): let extensions

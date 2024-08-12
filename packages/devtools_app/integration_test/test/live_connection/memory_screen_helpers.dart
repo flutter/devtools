@@ -21,7 +21,8 @@ Future<void> prepareMemoryUI(
   // Open memory screen.
   await switchToScreen(
     tester,
-    tabIcon: ScreenMetaData.memory.icon!,
+    tabIcon: ScreenMetaData.memory.icon,
+    tabTitle: ScreenMetaData.memory.title,
     screenId: ScreenMetaData.memory.id,
   );
 

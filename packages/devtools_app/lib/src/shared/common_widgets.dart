@@ -700,18 +700,12 @@ abstract class ScaffoldAction extends StatelessWidget {
           width: actionWidgetSize,
           height: actionWidgetSize,
           alignment: Alignment.center,
-          child: icon != null
-              ? Icon(
-                  icon,
-                  size: actionsIconSize,
-                  color: color,
-                )
-              : AssetImageIcon(
-                  asset: iconAsset!,
-                  height: actionsIconSize,
-                  width: actionsIconSize,
-                  color: color,
-                ),
+          child: DevToolsIcon(
+            icon: icon,
+            iconAsset: iconAsset,
+            size: actionsIconSize,
+            color: color,
+          ),
         ),
       ),
     );

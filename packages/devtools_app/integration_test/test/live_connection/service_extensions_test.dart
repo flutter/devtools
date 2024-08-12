@@ -46,7 +46,8 @@ void main() {
       // on the inspector screen for this to pass.
       await switchToScreen(
         tester,
-        tabIcon: ScreenMetaData.inspector.icon!,
+        tabIcon: ScreenMetaData.inspector.icon,
+        tabTitle: ScreenMetaData.inspector.title,
         screenId: ScreenMetaData.inspector.id,
       );
       await tester.pump(longDuration);
