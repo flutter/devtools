@@ -126,7 +126,10 @@ enum ScreenMetaData {
     this.worksWithOfflineData = false,
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
-  }) : assert(icon == null || iconAsset == null);
+  }) : assert(
+          icon == null || iconAsset == null,
+          'Only one of icon or iconAsset may be specified.',
+        );
 
   final String id;
   final String? title;
