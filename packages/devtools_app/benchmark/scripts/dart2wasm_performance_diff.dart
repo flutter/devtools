@@ -142,24 +142,24 @@ class CsvBuilder {
       // TODO(kenz): make this code possible to run on Windows if necessary.
       final currentDirectoryParts = Directory.current.uri.pathSegments;
       final downloadsDir = Directory.fromUri(
-        Uri.file(
-          p.join(
+        Uri.parse(
+          // We need the leading slash so that this is an absolute path.
+          '/${p.join(
             currentDirectoryParts[0],
             currentDirectoryParts[1],
             'Downloads',
-          ),
+          )}',
         ),
       );
       if (downloadsDir.existsSync()) {
-        // We need the leading slash so that this is an absolute path.
-        saveToUri = Uri.file('/${p.join(downloadsDir.uri.path, fileName)}');
+        saveToUri = Uri.parse(p.join(downloadsDir.uri.path, fileName));
       } else {
         stderr.writeln(
           'Warning: could not locate the \'Downloads\' directory at '
           '${downloadsDir.path}. Saving results to the system temp directory '
           'instead.',
         );
-        saveToUri = Uri.file(p.join(Directory.systemTemp.uri.path, fileName));
+        saveToUri = Uri.parse(p.join(Directory.systemTemp.uri.path, fileName));
       }
     }
 
