@@ -23,6 +23,13 @@ Future<void> main(List<String> args) async {
     return;
   }
 
+  await runBenchmarks(args: args);
+}
+
+Future<BenchmarkResults> runBenchmarks({
+  required List<String> args,
+  bool printResults = true,
+}) async {
   final benchmarkArgs = BenchmarkArgs(args);
   final benchmarkResults = <BenchmarkResults>[];
   for (var i = 0; i < benchmarkArgs.averageOf; i++) {
@@ -95,31 +102,18 @@ class BenchmarkArgs {
   }
 
   late final ArgParser argParser;
-
   late final ArgResults argResults;
 
   bool get useBrowser => argResults[_browserFlag];
-
   bool get useWasm => argResults[_wasmFlag];
-
-  bool get useSkwasm => argResults[_skwasmFlag];
-
   int get averageOf => int.parse(argResults[_averageOfOption]);
-
   String? get saveToFileLocation => argResults[_saveToFileOption];
-
   String? get baselineLocation => argResults[_baselineOption];
 
   static const _browserFlag = 'browser';
-
   static const _wasmFlag = 'wasm';
-
-  static const _skwasmFlag = 'skwasm';
-
   static const _saveToFileOption = 'save-to-file';
-
   static const _baselineOption = 'baseline';
-
   static const _averageOfOption = 'average-of';
 
   /// Builds an arg parser for DevTools benchmarks.
@@ -134,12 +128,6 @@ class BenchmarkArgs {
         _wasmFlag,
         negatable: false,
         help: 'Runs the benchmark tests with dart2wasm',
-      )
-      ..addFlag(
-        _skwasmFlag,
-        negatable: false,
-        help:
-            'Runs the benchmark tests with the skwasm renderer instead of canvaskit.',
       )
       ..addOption(
         _saveToFileOption,
