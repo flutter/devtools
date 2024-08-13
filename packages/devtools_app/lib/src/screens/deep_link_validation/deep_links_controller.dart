@@ -149,6 +149,10 @@ class DeepLinksController extends DisposableController
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
   String get applicationId =>
       _androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
+  String get bundleId =>
+      _iosLinks[selectedIosConfigurationIndex.value]?.bundleIdentifier ?? '';
+  String get teamId =>
+      _iosLinks[selectedIosConfigurationIndex.value]?.teamIdentifier ?? '';
 
   @visibleForTesting
   List<LinkData> linkDatasByPath(List<LinkData> linkdatas) {
@@ -325,7 +329,7 @@ class DeepLinksController extends DisposableController
             configuration: configuration,
             target: target,
           );
-          _iosLinks[selectedAndroidVariantIndex.value] = result;
+          _iosLinks[selectedIosConfigurationIndex.value] = result;
         } catch (_) {
           pagePhase.value = PagePhase.validationErrorPage;
         }
@@ -507,11 +511,14 @@ class DeepLinksController extends DisposableController
       googlePlayFingerprintsAvailability.value =
           androidResult.googlePlayFingerprintsAvailability;
       if (FeatureFlags.deepLinkIosCheck) {
-        iosDomainErrors = await deepLinksServices.validateIosDomain(
+        final iosResult = await deepLinksServices.validateIosDomain(
+          bundleId: bundleId,
+          teamId: teamId,
           domains: domains,
         );
+        iosDomainErrors = iosResult.domainErrors;
       }
-    } catch (_) {
+    } catch (e) {
       //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.validationErrorPage;
       return linkdatas;
