@@ -23,14 +23,14 @@ final _log = Logger('screen.dart');
 enum ScreenMetaData {
   home(
     'home',
-    icon: Icons.home_rounded,
+    iconAsset: 'icons/app_bar/devtools.png',
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=0',
   ),
   inspector(
     'inspector',
     title: 'Flutter Inspector',
-    iconAsset: 'icons/app_bar/inspector_20x20.png',
+    iconAsset: 'icons/app_bar/inspector.png',
     requiresFlutter: true,
     requiresDebugBuild: true,
     tutorialVideoTimestamp: '?t=172',
@@ -38,7 +38,7 @@ enum ScreenMetaData {
   performance(
     'performance',
     title: 'Performance',
-    iconAsset: 'icons/app_bar/performance_20x20.png',
+    iconAsset: 'icons/app_bar/performance.png',
     worksWithOfflineData: true,
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=261',
@@ -46,7 +46,7 @@ enum ScreenMetaData {
   cpuProfiler(
     'cpu-profiler',
     title: 'CPU Profiler',
-    iconAsset: 'icons/app_bar/cpu_profiler_20x20.png',
+    iconAsset: 'icons/app_bar/cpu_profiler.png',
     requiresDartVm: true,
     worksWithOfflineData: true,
     requiresConnection: false,
@@ -55,7 +55,7 @@ enum ScreenMetaData {
   memory(
     'memory',
     title: 'Memory',
-    iconAsset: 'icons/app_bar/memory_20x20.png',
+    iconAsset: 'icons/app_bar/memory.png',
     requiresDartVm: true,
     // ignore: avoid_redundant_argument_values, false positive
     requiresConnection: !FeatureFlags.memoryOffline,
@@ -73,14 +73,14 @@ enum ScreenMetaData {
   network(
     'network',
     title: 'Network',
-    iconAsset: 'icons/app_bar/network_20x20.png',
+    iconAsset: 'icons/app_bar/network.png',
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=547',
   ),
   logging(
     'logging',
     title: 'Logging',
-    iconAsset: 'icons/app_bar/logging_20x20.png',
+    iconAsset: 'icons/app_bar/logging.png',
     tutorialVideoTimestamp: '?t=558',
   ),
   provider(
@@ -93,7 +93,7 @@ enum ScreenMetaData {
   appSize(
     'app-size',
     title: 'App Size',
-    iconAsset: 'icons/app_bar/app_size_20x20.png',
+    iconAsset: 'icons/app_bar/app_size.png',
     requiresConnection: false,
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=575',
@@ -101,7 +101,7 @@ enum ScreenMetaData {
   deepLinks(
     'deep-links',
     title: 'Deep Links',
-    iconAsset: 'icons/app_bar/deep_links_20x20.png',
+    iconAsset: 'icons/app_bar/deep_links.png',
     requiresConnection: false,
     requiresDartVm: true,
   ),
@@ -360,7 +360,7 @@ abstract class Screen {
       text: TextSpan(text: title),
       textDirection: TextDirection.ltr,
     )..layout();
-    const measurementBuffer = 2.0;
+    const measurementBuffer = 1.0;
     return painter.width +
         denseSpacing +
         defaultIconSize +
@@ -389,6 +389,10 @@ abstract class Screen {
                 DevToolsIcon(
                   icon: icon,
                   iconAsset: iconAsset,
+                  size: iconAsset != null
+                      // Add 1.0 to adjust for margins on the screen icon assets.
+                      ? scaleByFontFactor(defaultIconSizeBeforeScaling + 1.0)
+                      : defaultIconSize,
                 ),
               if (title.isNotEmpty)
                 Padding(
