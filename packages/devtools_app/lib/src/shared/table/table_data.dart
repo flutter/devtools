@@ -64,7 +64,7 @@ abstract class ColumnData<T> {
 
   bool get includeHeader => true;
 
-  bool get supportsSorting => numeric;
+  bool get supportsSorting => true;
 
   int compare(T a, T b) {
     final valueA = getValue(a);
@@ -72,7 +72,9 @@ abstract class ColumnData<T> {
     if (valueA == null && valueB == null) return 0;
     if (valueA == null) return -1;
     if (valueB == null) return 1;
-    return (valueA as Comparable).compareTo(valueB as Comparable);
+
+    if (valueA is! Comparable || valueB is! Comparable) return 0;
+    return valueA.compareTo(valueB);
   }
 
   /// Get the cell's value from the given [dataObject].

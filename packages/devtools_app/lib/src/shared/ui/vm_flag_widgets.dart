@@ -272,6 +272,9 @@ class _DescriptionColumn extends ColumnData<_DialogFlag> {
   String getValue(_DialogFlag dataObject) => dataObject.description ?? '';
 
   @override
+  bool get supportsSorting => false;
+
+  @override
   String getTooltip(_DialogFlag dataObject) => getValue(dataObject);
 }
 
@@ -286,6 +289,9 @@ class _ValueColumn extends ColumnData<_DialogFlag> {
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.value ?? '';
+
+  @override
+  bool get supportsSorting => false;
 }
 
 class _DialogFlag {

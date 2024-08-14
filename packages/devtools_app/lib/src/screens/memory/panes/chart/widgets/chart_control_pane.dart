@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/chart_pane_controller.dart';
@@ -16,6 +17,7 @@ import 'interval_dropdown.dart';
 
 class ChartControlPane extends StatefulWidget {
   const ChartControlPane({super.key, required this.chart});
+
   final MemoryChartPaneController chart;
 
   @override
@@ -55,7 +57,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (widget.chart.mode == MemoryControllerCreationMode.connected) ...[
+        if (!offlineDataController.showingOfflineData.value) ...[
           Row(
             children: [
               ValueListenableBuilder<bool>(
