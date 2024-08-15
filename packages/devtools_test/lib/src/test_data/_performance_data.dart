@@ -6,7 +6,11 @@
 // ignore_for_file: prefer-trailing-comma
 // ignore_for_file: require_trailing_commas
 
-final samplePerformanceData = <String, Object?>{
+import 'dart:convert';
+
+final samplePerformanceData = json.decode(
+'''
+{
   "devToolsSnapshot": true,
   "devToolsVersion": "2.34.0",
   "connectedApp": {
@@ -108241,6 +108245,7 @@ final samplePerformanceData = <String, Object?>{
       }
     ],
     "displayRefreshRate": 60,
-    "rebuildCountModel": null,
+    "rebuildCountModel": null
   }
-};
+}
+''');
