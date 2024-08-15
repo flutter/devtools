@@ -170,8 +170,9 @@ class DeepLinksServices {
 
       for (final domainResult in validationResult) {
         if (domainResult[_domainNameKey] case final String domainName) {
-          if (domainResult[_failedChecksKey]
-              case final List<Map<String, Object?>> failedChecks) {
+          final failedChecks = (domainResult[_failedChecksKey] as List?)
+              ?.cast<Map<String, Object?>>();
+          if (failedChecks != null) {
             for (final failedCheck in failedChecks) {
               final checkName = failedCheck[_checkNameKey] as String;
               final domainError = iosCheckNameToDomainError[checkName];
