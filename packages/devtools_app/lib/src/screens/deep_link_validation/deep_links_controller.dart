@@ -519,7 +519,7 @@ class DeepLinksController extends DisposableController
         iosDomainErrors = iosResult.domainErrors;
       }
     } catch (_) {
-      //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
+      // TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.validationErrorPage;
       return linkdatas;
     }

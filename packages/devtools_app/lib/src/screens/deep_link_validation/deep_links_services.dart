@@ -24,7 +24,7 @@ const _checkNameKey = 'checkName';
 const _failedChecksKey = 'failedChecks';
 const _domainBatchSize = 500;
 
-/// The keys for the Android domain validation API.
+// The keys for the Android domain validation API.
 const _packageNameKey = 'package_name';
 const _domainsKey = 'domains';
 const _errorCodeKey = 'errorCode';
@@ -47,7 +47,7 @@ const androidCheckNameToDomainError = <String, DomainError>{
   'OTHER_CHECKS': AndroidDomainError.other,
 };
 
-/// The keys for the iOS domain validation API.
+// The keys for the iOS domain validation API.
 const _appIdKey = 'aasa_app_id';
 const _bundleIdKey = 'bundle_id';
 const _teamIdKey = 'team_id';
@@ -65,14 +65,14 @@ const iosCheckNameToDomainError = <String, DomainError>{
 
 class ValidateIosDomainResult {
   ValidateIosDomainResult(this.errorCode, this.domainErrors);
-  String errorCode;
-  Map<String, List<DomainError>> domainErrors;
+  final String errorCode;
+  final Map<String, List<DomainError>> domainErrors;
 }
 
 class GenerateAssetLinksResult {
   GenerateAssetLinksResult(this.errorCode, this.generatedString);
-  String errorCode;
-  String generatedString;
+  final String errorCode;
+  final String generatedString;
 }
 
 class ValidateAndroidDomainResult {
@@ -94,10 +94,10 @@ class DeepLinksServices {
       for (final domain in domains) domain: <DomainError>[],
     };
 
-    final domainsBybatch = _splitDomains(domains);
+    final domainsByBatch = _splitDomains(domains);
     late bool googlePlayFingerprintsAvailable;
 
-    for (final domainList in domainsBybatch) {
+    for (final domainList in domainsByBatch) {
       final response = await http.post(
         Uri.parse(_androidDomainValidationURL),
         headers: postHeader,
@@ -145,12 +145,12 @@ class DeepLinksServices {
     final domainErrors = <String, List<DomainError>>{
       for (final domain in domains) domain: <DomainError>[],
     };
-    //TODO(hangyujin): Add error code to the result.
+    // TODO(hangyujin): Add error code to the result.
     const errorCode = '';
 
-    final domainsBybatch = _splitDomains(domains);
+    final domainsByBatch = _splitDomains(domains);
 
-    for (final domainList in domainsBybatch) {
+    for (final domainList in domainsByBatch) {
       final response = await http.post(
         Uri.parse(_iosDomainValidationURL),
         headers: postHeader,
@@ -169,21 +169,33 @@ class DeepLinksServices {
           .cast<Map<String, Object?>>();
 
       for (final domainResult in validationResult) {
-        final domainName = domainResult[_domainNameKey] as String?;
-        if (domainName == null) {
-          continue;
-        }
-        final failedChecks = (domainResult[_failedChecksKey] as List?)
-            ?.cast<Map<String, Object?>>();
-        if (failedChecks != null) {
-          for (final failedCheck in failedChecks) {
-            final checkName = failedCheck[_checkNameKey] as String;
-            final domainError = iosCheckNameToDomainError[checkName];
-            if (domainError != null) {
-              domainErrors[domainName]!.add(domainError);
+        if (domainResult[_domainNameKey] case final String domainName) {
+          if (domainResult[_failedChecksKey]
+              case final List<Map<String, Object?>> failedChecks) {
+            for (final failedCheck in failedChecks) {
+              final checkName = failedCheck[_checkNameKey] as String;
+              final domainError = iosCheckNameToDomainError[checkName];
+              if (domainError != null) {
+                domainErrors[domainName]!.add(domainError);
+              }
             }
           }
         }
+        // final domainName = domainResult[_domainNameKey] as String?;
+        // if (domainName == null) {
+        //   continue;
+        // }
+        // final failedChecks = (domainResult[_failedChecksKey] as List?)
+        //     ?.cast<Map<String, Object?>>();
+        // if (failedChecks != null) {
+        //   for (final failedCheck in failedChecks) {
+        //     final checkName = failedCheck[_checkNameKey] as String;
+        //     final domainError = iosCheckNameToDomainError[checkName];
+        //     if (domainError != null) {
+        //       domainErrors[domainName]!.add(domainError);
+        //     }
+        //   }
+        // }
         // TODO(hangyujin): Add path from AASA file check result.
       }
     }
