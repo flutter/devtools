@@ -181,21 +181,6 @@ class DeepLinksServices {
             }
           }
         }
-        // final domainName = domainResult[_domainNameKey] as String?;
-        // if (domainName == null) {
-        //   continue;
-        // }
-        // final failedChecks = (domainResult[_failedChecksKey] as List?)
-        //     ?.cast<Map<String, Object?>>();
-        // if (failedChecks != null) {
-        //   for (final failedCheck in failedChecks) {
-        //     final checkName = failedCheck[_checkNameKey] as String;
-        //     final domainError = iosCheckNameToDomainError[checkName];
-        //     if (domainError != null) {
-        //       domainErrors[domainName]!.add(domainError);
-        //     }
-        //   }
-        // }
         // TODO(hangyujin): Add path from AASA file check result.
       }
     }
