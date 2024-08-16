@@ -121,6 +121,7 @@ class WidgetVisualizer extends StatelessWidget {
     required this.child,
     this.overflowSide,
     this.largeTitle = false,
+    this.isFlex = false,
   });
 
   final LayoutProperties layoutProperties;
@@ -129,6 +130,7 @@ class WidgetVisualizer extends StatelessWidget {
   final Widget? hint;
   final bool isSelected;
   final bool largeTitle;
+  final bool isFlex;
 
   final OverflowSide? overflowSide;
 
@@ -192,41 +194,133 @@ class WidgetVisualizer extends StatelessWidget {
                         ? _overflowIndicatorSize
                         : 0.0,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Center(
-                        child: WidgetLabel(
-                          labelColor: borderColor,
-                          labelText: title,
+                  child: isFlex
+                      ? FlexWidgetVisualizer(
+                          title: title,
+                          largeTitle: largeTitle,
+                          borderColor: borderColor,
+                          hint: hint,
+                          child: child,
+                        )
+                      : BoxWidgetVisualizer(
+                          borderColor: borderColor,
+                          title: title,
+                          properties: properties,
                         ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            const Spacer(),
-                            dimensionDescription(
-                              TextSpan(text: properties.describeHeight()),
-                              false,
-                              theme.colorScheme,
-                            ),
-                            dimensionDescription(
-                              TextSpan(text: properties.describeWidth()),
-                              false,
-                              theme.colorScheme,
-                            ),
-                            const Spacer(),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class FlexWidgetVisualizer extends StatelessWidget {
+  const FlexWidgetVisualizer({
+    super.key,
+    required this.largeTitle,
+    required this.borderColor,
+    required this.title,
+    required this.hint,
+    required this.child,
+  });
+
+  final bool largeTitle;
+  final Color borderColor;
+  final String title;
+  final Widget? hint;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: largeTitle
+                        ? defaultMaxRenderWidth
+                        : minRenderWidth * widgetTitleMaxWidthPercentage,
+                  ),
+                  decoration: BoxDecoration(color: borderColor),
+                  padding: const EdgeInsets.all(4.0),
+                  child: Center(
+                    child: Text(
+                      title,
+                      style: theme.regularTextStyleWithColor(
+                        colorScheme.widgetNameColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ),
+              if (hint != null) Flexible(child: hint!),
+            ],
+          ),
+        ),
+        Expanded(child: child),
+      ],
+    );
+  }
+}
+
+class BoxWidgetVisualizer extends StatelessWidget {
+  const BoxWidgetVisualizer({
+    super.key,
+    required this.borderColor,
+    required this.title,
+    required this.properties,
+  });
+
+  final Color borderColor;
+  final String title;
+  final LayoutProperties properties;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Center(
+          child: WidgetLabel(
+            labelColor: borderColor,
+            labelText: title,
+          ),
+        ),
+        Expanded(
+          child: Column(
+            children: [
+              const Spacer(),
+              dimensionDescription(
+                TextSpan(text: properties.describeHeight()),
+                false,
+                theme.colorScheme,
+              ),
+              dimensionDescription(
+                TextSpan(text: properties.describeWidth()),
+                false,
+                theme.colorScheme,
+              ),
+              const Spacer(),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

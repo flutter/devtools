@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
+import '../../shared/ui/tab.dart';
 import 'inspector_controller.dart';
 import 'layout_explorer/box/box.dart';
 import 'layout_explorer/flex/flex.dart';
@@ -47,7 +48,7 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
                     (horizontalLayout ? 1 : 2) &&
             parentWidth >
                 WidgetDetails.layoutExplorerWidth * (horizontalLayout ? 2 : 1);
-        final canFitLargePropertiesTable = horizontalLayout
+        final canFitLargeDetailsTable = horizontalLayout
             ? parentWidth > WidgetDetails.layoutExplorerWidth * 3
             : parentHeight > WidgetDetails.layoutExplorerHeight * 3;
 
@@ -89,8 +90,21 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
                   ),
                 ],
                 Expanded(
-                  flex: canFitLargePropertiesTable ? 2 : 1,
-                  child: PropertiesView(controller: controller, node: node),
+                  flex: canFitLargeDetailsTable ? 2 : 1,
+                  child: DetailsTable(
+                    controller: controller,
+                    node: node,
+                    extraTabs: [
+                      if (FlexLayoutExplorerWidget.shouldDisplay(node))
+                        (
+                          tab: DevToolsTab.create(
+                            tabName: 'Flex explorer',
+                            gaPrefix: DetailsTable.gaPrefix,
+                          ),
+                          tabView: FlexLayoutExplorerWidget(controller),
+                        ),
+                    ],
+                  ),
                 ),
               ],
             );

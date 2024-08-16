@@ -12,23 +12,25 @@ import '../inspector_controller.dart';
 
 /// Displays the widget's properties along with the properties on its render
 /// object.
-class PropertiesView extends StatefulWidget {
-  const PropertiesView({
+class DetailsTable extends StatefulWidget {
+  const DetailsTable({
     super.key,
     required this.controller,
     required this.node,
+    this.extraTabs,
   });
 
-  static const _gaPrefix = 'inspectorNodeProperties';
+  static const gaPrefix = 'inspectorDetailsTable';
 
   final InspectorController controller;
   final RemoteDiagnosticsNode node;
+  final List<TabAndView>? extraTabs;
 
   @override
-  State<PropertiesView> createState() => _PropertiesViewState();
+  State<DetailsTable> createState() => _DetailsTableState();
 }
 
-class _PropertiesViewState extends State<PropertiesView> {
+class _DetailsTableState extends State<DetailsTable> {
   late ScrollController _widgetPropertiesScrollController;
   late ScrollController _renderPropertiesScrollController;
 
@@ -48,6 +50,7 @@ class _PropertiesViewState extends State<PropertiesView> {
 
   @override
   Widget build(BuildContext context) {
+    final extraTabs = widget.extraTabs ?? <TabAndView>[];
     return ValueListenableBuilder<WidgetTreeNodeProperties>(
       valueListenable: widget.controller.selectedNodeProperties,
       builder: (context, properties, _) {
@@ -59,7 +62,7 @@ class _PropertiesViewState extends State<PropertiesView> {
             (
               tab: DevToolsTab.create(
                 tabName: 'Widget properties',
-                gaPrefix: PropertiesView._gaPrefix,
+                gaPrefix: DetailsTable.gaPrefix,
               ),
               tabView: PropertiesTable(
                 properties: widgetProperties,
@@ -70,13 +73,14 @@ class _PropertiesViewState extends State<PropertiesView> {
               (
                 tab: DevToolsTab.create(
                   tabName: 'Render object',
-                  gaPrefix: PropertiesView._gaPrefix,
+                  gaPrefix: DetailsTable.gaPrefix,
                 ),
                 tabView: PropertiesTable(
                   properties: renderProperties,
                   scrollController: _renderPropertiesScrollController,
                 ),
               ),
+            for (final tab in extraTabs) tab,
           ],
         );
       },
