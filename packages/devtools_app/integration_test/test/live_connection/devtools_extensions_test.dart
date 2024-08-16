@@ -199,7 +199,7 @@ Future<void> _switchToExtensionScreen(
   await switchToScreen(
     tester,
     tabIcon: extensionConfig.icon,
-    tabTitle: extensionConfig.name,
+    tabIconAsset: null,
     screenId: extensionConfig.displayName,
     warnIfTapMissed: false,
   );
@@ -228,7 +228,7 @@ Future<void> _verifyExtensionTabVisibility(
   final tabFinder = await findTab(
     tester,
     icon: extensionConfig.icon,
-    title: extensionConfig.name,
+    iconAsset: extensionConfig.name,
   );
   expect(tabFinder.evaluate(), visible ? isNotEmpty : isEmpty);
 }

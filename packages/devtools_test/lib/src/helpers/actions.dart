@@ -49,7 +49,7 @@ Future<void> navigateThroughDevToolsScreens(
     await switchToScreen(
       controller,
       tabIcon: screen.icon,
-      tabTitle: screen.title,
+      tabIconAsset: screen.iconAsset,
       screenId: screen.id,
       runWithExpectations: runWithExpectations,
     );
@@ -72,13 +72,19 @@ List<String> generateVisibleScreenIds() {
 Future<void> switchToScreen(
   WidgetController controller, {
   required IconData? tabIcon,
-  required String? tabTitle,
+  required String? tabIconAsset,
   required String screenId,
   bool warnIfTapMissed = true,
   bool runWithExpectations = true,
 }) async {
-  logStatus('switching to $screenId screen (icon $tabIcon, title: $tabTitle)');
-  final tabFinder = await findTab(controller, icon: tabIcon, title: tabTitle);
+  logStatus(
+    'switching to $screenId screen (icon $tabIcon, iconAsset: $tabIconAsset)',
+  );
+  final tabFinder = await findTab(
+    controller,
+    icon: tabIcon,
+    iconAsset: tabIconAsset,
+  );
   _maybeExpect(
     tabFinder,
     findsOneWidget,
@@ -96,11 +102,11 @@ Future<void> switchToScreen(
 Future<Finder> findTab(
   WidgetController controller, {
   required IconData? icon,
-  required String? title,
+  required String? iconAsset,
 }) async {
   assert(
-    icon != null || title != null,
-    'At least one of icon or title must be non-null.',
+    icon != null || iconAsset != null,
+    'At least one of icon or iconAsset must be non-null.',
   );
   // Open the tab overflow menu before looking for the tab.
   final tabOverflowButtonFinder = find.byType(TabOverflowButton);
@@ -111,7 +117,12 @@ Future<Finder> findTab(
   if (icon != null) {
     return find.widgetWithIcon(Tab, icon);
   }
-  return find.descendant(of: find.byType(Tab), matching: find.text(title!));
+  return find.descendant(
+    of: find.byType(Tab),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is AssetImageIcon && widget.asset == iconAsset!,
+    ),
+  );
 }
 
 // ignore: avoid-dynamic, wrapper around `expect`, which uses dynamic types.

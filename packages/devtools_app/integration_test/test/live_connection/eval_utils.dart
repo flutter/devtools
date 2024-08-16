@@ -62,7 +62,7 @@ class EvalTester {
     await switchToScreen(
       tester,
       tabIcon: ScreenMetaData.inspector.icon,
-      tabTitle: ScreenMetaData.inspector.title,
+      tabIconAsset: ScreenMetaData.inspector.iconAsset,
       screenId: ScreenMetaData.inspector.id,
     );
     await tester.pumpAndSettle();
