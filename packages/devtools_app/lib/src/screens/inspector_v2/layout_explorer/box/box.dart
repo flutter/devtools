@@ -116,22 +116,22 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }) {
     if (!widthsAndHeights.hasAnyPadding) return <Widget>[];
 
-    final realTopPadding = widthsAndHeights.topPadding;
-    final realBottomPadding = widthsAndHeights.bottomPadding;
-    final realLeftPadding = widthsAndHeights.leftPadding;
-    final realRightPadding = widthsAndHeights.rightPadding;
-
-    final displayTopPadding = widthsAndHeights.displayTopPadding;
-    final displayBottomPadding = widthsAndHeights.displayBottomPadding;
-    final displayLeftPadding = widthsAndHeights.displayLeftPadding;
-    final displayRightPadding = widthsAndHeights.displayRightPadding;
-    final displayWidgetHeight = widthsAndHeights.displayWidgetHeight;
-    final displayWidgetWidth = widthsAndHeights.displayWidgetWidth;
-
-    final hasTopPadding = widthsAndHeights.hasTopPadding;
-    final hasBottomPadding = widthsAndHeights.hasBottomPadding;
-    final hasLeftPadding = widthsAndHeights.hasLeftPadding;
-    final hasRightPadding = widthsAndHeights.hasRightPadding;
+    final LayoutWidthsAndHeights(
+      :topPadding,
+      :bottomPadding,
+      :leftPadding,
+      :rightPadding,
+      :displayTopPadding,
+      :displayBottomPadding,
+      :displayLeftPadding,
+      :displayRightPadding,
+      :displayWidgetHeight,
+      :displayWidgetWidth,
+      :hasTopPadding,
+      :hasBottomPadding,
+      :hasLeftPadding,
+      :hasRightPadding,
+    ) = widthsAndHeights;
 
     final parentHeight = parentProperties.size.height;
     final parentWidth = parentProperties.size.width;
@@ -152,7 +152,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             axis: Axis.horizontal,
             size: Size(displayLeftPadding, displayWidgetHeight),
             offset: Offset(0, displayTopPadding),
-            realSize: Size(realLeftPadding, parentHeight),
+            realSize: Size(leftPadding, parentHeight),
             layoutProperties: childProperties,
             isFreeSpace: true,
           ),
@@ -164,7 +164,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             axis: Axis.horizontal,
             size: Size(displayWidgetWidth, displayTopPadding),
             offset: Offset(displayLeftPadding, 0),
-            realSize: Size(parentWidth, realTopPadding),
+            realSize: Size(parentWidth, topPadding),
             layoutProperties: childProperties,
             isFreeSpace: true,
           ),
@@ -179,7 +179,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               displayLeftPadding + displayWidgetWidth,
               displayTopPadding,
             ),
-            realSize: Size(realRightPadding, parentHeight),
+            realSize: Size(rightPadding, parentHeight),
             layoutProperties: childProperties,
             isFreeSpace: true,
           ),
@@ -194,7 +194,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               displayLeftPadding,
               displayTopPadding + displayWidgetHeight,
             ),
-            realSize: Size(parentWidth, realBottomPadding),
+            realSize: Size(parentWidth, bottomPadding),
             layoutProperties: childProperties,
             isFreeSpace: true,
           ),
