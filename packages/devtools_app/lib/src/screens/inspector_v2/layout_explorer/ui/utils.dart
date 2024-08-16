@@ -496,7 +496,7 @@ class PositionedBackgroundLabel extends StatelessWidget {
         if (!topPadding && bottomPadding) const Spacer(),
         Row(
           children: [
-            // Push to the right if there is not padding on the left.
+            // Push to the right if there is no padding on the left.
             if (!leftPadding && rightPadding) const Spacer(),
             WidgetLabel(
               labelColor: labelColor,
