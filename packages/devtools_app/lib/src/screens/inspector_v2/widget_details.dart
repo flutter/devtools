@@ -59,11 +59,11 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
               Padding(
                 padding: horizontalLayout
                     ? const EdgeInsets.only(
-                        top: denseSpacing,
+                        top: densePadding,
                         right: defaultSpacing,
                       )
                     : const EdgeInsets.only(
-                        top: denseSpacing,
+                        top: densePadding,
                         bottom: defaultSpacing,
                       ),
                 child: Align(
