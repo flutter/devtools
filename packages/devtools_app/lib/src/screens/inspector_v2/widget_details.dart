@@ -35,6 +35,9 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final horizontalLayout = isScreenWiderThan(context, screenHeight);
+
     return ValueListenableBuilder<InspectorTreeNode?>(
       valueListenable: controller.selectedNode,
       builder: (context, _, __) {
@@ -49,33 +52,33 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
           );
         }
 
-        return SplitPane(
-          axis: isScreenWiderThan(
-            context,
-            InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
-          )
-              ? Axis.horizontal
-              : Axis.vertical,
-          initialFractions: const [0.25, 0.75],
+        return Flex(
+          direction: horizontalLayout ? Axis.horizontal : Axis.vertical,
           children: [
             if (BoxLayoutExplorerWidget.shouldDisplay(node)) ...[
-              Center(
-                child: SizedBox(
-                  height: 150.0,
-                  width: 200.0,
-                  child: BoxLayoutExplorerWidget(controller),
-                ),
-              ),
-            ] else ...[
-              const Center(
-                child: Text(
-                  'Currently, the Layout Explorer only supports Box and Flex-based widgets.',
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.clip,
+              Padding(
+                padding: horizontalLayout
+                    ? const EdgeInsets.only(
+                        top: denseSpacing,
+                        right: defaultSpacing,
+                      )
+                    : const EdgeInsets.only(
+                        top: denseSpacing,
+                        bottom: defaultSpacing,
+                      ),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    height: 150.0,
+                    width: 200.0,
+                    child: BoxLayoutExplorerWidget(controller),
+                  ),
                 ),
               ),
             ],
-            PropertiesView(controller: controller, node: node),
+            Expanded(
+              child: PropertiesView(controller: controller, node: node),
+            ),
           ],
         );
       },
