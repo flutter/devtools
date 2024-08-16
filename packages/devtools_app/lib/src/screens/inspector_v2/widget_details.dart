@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import 'inspector_controller.dart';
-import 'inspector_screen.dart';
 import 'layout_explorer/box/box.dart';
 import 'layout_explorer/flex/flex.dart';
 import 'widget_properties/properties_view.dart';
@@ -23,6 +22,9 @@ class WidgetDetails extends StatefulWidget {
 
   final InspectorController controller;
 
+  static const layoutExplorerHeight = 150.0;
+  static const layoutExplorerWidth = 200.0;
+
   @override
   State<WidgetDetails> createState() => _WidgetDetailsState();
 }
@@ -35,51 +37,64 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final horizontalLayout = isScreenWiderThan(context, screenHeight);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final parentHeight = constraints.maxHeight;
+        final parentWidth = constraints.maxWidth;
+        final horizontalLayout = parentWidth > parentHeight;
+        final canFitLayoutExplorer = parentHeight >
+                WidgetDetails.layoutExplorerHeight *
+                    (horizontalLayout ? 1 : 2) &&
+            parentWidth >
+                WidgetDetails.layoutExplorerWidth * (horizontalLayout ? 2 : 1);
+        final canFitLargePropertiesTable = horizontalLayout
+            ? parentWidth > WidgetDetails.layoutExplorerWidth * 3
+            : parentHeight > WidgetDetails.layoutExplorerHeight * 3;
 
-    return ValueListenableBuilder<InspectorTreeNode?>(
-      valueListenable: controller.selectedNode,
-      builder: (context, _, __) {
-        final node = selectedNode;
-        if (node == null) {
-          return const Center(
-            child: Text(
-              'Select a widget to view its layout.',
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.clip,
-            ),
-          );
-        }
-
-        return Flex(
-          direction: horizontalLayout ? Axis.horizontal : Axis.vertical,
-          children: [
-            if (BoxLayoutExplorerWidget.shouldDisplay(node)) ...[
-              Padding(
-                padding: horizontalLayout
-                    ? const EdgeInsets.only(
-                        top: densePadding,
-                        right: defaultSpacing,
-                      )
-                    : const EdgeInsets.only(
-                        top: densePadding,
-                        bottom: defaultSpacing,
-                      ),
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: SizedBox(
-                    height: 150.0,
-                    width: 200.0,
-                    child: BoxLayoutExplorerWidget(controller),
-                  ),
+        return ValueListenableBuilder<InspectorTreeNode?>(
+          valueListenable: controller.selectedNode,
+          builder: (context, _, __) {
+            final node = selectedNode;
+            if (node == null) {
+              return const Center(
+                child: Text(
+                  'Select a widget to view its layout.',
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.clip,
                 ),
-              ),
-            ],
-            Expanded(
-              child: PropertiesView(controller: controller, node: node),
-            ),
-          ],
+              );
+            }
+
+            return Flex(
+              direction: horizontalLayout ? Axis.horizontal : Axis.vertical,
+              children: [
+                if (BoxLayoutExplorerWidget.shouldDisplay(node) &&
+                    canFitLayoutExplorer) ...[
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Container(
+                        margin: EdgeInsets.only(
+                          top: horizontalLayout ? densePadding : defaultSpacing,
+                          right: horizontalLayout ? defaultSpacing : 0.0,
+                          bottom: horizontalLayout ? 0.0 : defaultSpacing,
+                        ),
+                        child: SizedBox(
+                          height: 150.0,
+                          width: 200.0,
+                          child: BoxLayoutExplorerWidget(controller),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                Expanded(
+                  flex: canFitLargePropertiesTable ? 2 : 1,
+                  child: PropertiesView(controller: controller, node: node),
+                ),
+              ],
+            );
+          },
         );
       },
     );
