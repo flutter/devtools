@@ -11,6 +11,7 @@ To learn more about DevTools, check out the
 ## General updates
 
 * Changed table columns to be sortable by default. - [#8175](https://github.com/flutter/devtools/pull/8175)
+* Updated DevTools screen icons to match what is used in the Flutter-supported IDEs. - [#8181](https://github.com/flutter/devtools/pull/8181)
 
 ## Inspector updates
 

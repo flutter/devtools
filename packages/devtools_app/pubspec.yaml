@@ -91,6 +91,7 @@ flutter:
     - assets/img/legend/
     - icons/
     - icons/actions/
+    - icons/app_bar/
     - icons/custom/
     - icons/general/
     - icons/gutter/
