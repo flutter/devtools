@@ -52,7 +52,7 @@ final domainErrorlinkData = LinkData(
   domain: 'www.google.com',
   path: '/',
   os: {PlatformOS.android, PlatformOS.ios},
-  domainErrors: [AndroidDomainError.existence],
+  domainErrors: [AndroidDomainError.existence, IosDomainError.existence],
 );
 
 final pathErrorlinkData = LinkData(
@@ -337,6 +337,8 @@ void main() {
         expect(find.byType(DeepLinkListView), findsOneWidget);
         expect(find.byType(NotificationCard), findsNothing);
         expect(find.byType(ValidationDetailView), findsOneWidget);
+        expect(find.text('Digital assets link file'), findsOneWidget);
+        expect(find.text('Apple-App-Site-Association file'), findsOneWidget);
       },
     );
 

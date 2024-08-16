@@ -25,12 +25,7 @@ import 'shared/constants.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
-  LoggingScreen()
-      : super(
-          id,
-          title: ScreenMetaData.logging.title,
-          icon: ScreenMetaData.logging.icon,
-        );
+  LoggingScreen() : super.fromMetaData(ScreenMetaData.logging);
 
   static final id = ScreenMetaData.logging.id;
 

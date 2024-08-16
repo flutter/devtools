@@ -49,36 +49,34 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
           );
         }
 
-        return RoundedOutlinedBorder(
-          child: SplitPane(
-            axis: isScreenWiderThan(
-              context,
-              InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
-            )
-                ? Axis.horizontal
-                : Axis.vertical,
-            initialFractions: const [0.25, 0.75],
-            children: [
-              if (BoxLayoutExplorerWidget.shouldDisplay(node)) ...[
-                Center(
-                  child: SizedBox(
-                    height: 150.0,
-                    width: 200.0,
-                    child: BoxLayoutExplorerWidget(controller),
-                  ),
+        return SplitPane(
+          axis: isScreenWiderThan(
+            context,
+            InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+          )
+              ? Axis.horizontal
+              : Axis.vertical,
+          initialFractions: const [0.25, 0.75],
+          children: [
+            if (BoxLayoutExplorerWidget.shouldDisplay(node)) ...[
+              Center(
+                child: SizedBox(
+                  height: 150.0,
+                  width: 200.0,
+                  child: BoxLayoutExplorerWidget(controller),
                 ),
-              ] else ...[
-                const Center(
-                  child: Text(
-                    'Currently, the Layout Explorer only supports Box and Flex-based widgets.',
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.clip,
-                  ),
+              ),
+            ] else ...[
+              const Center(
+                child: Text(
+                  'Currently, the Layout Explorer only supports Box and Flex-based widgets.',
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.clip,
                 ),
-              ],
-              PropertiesView(controller: controller, node: node),
+              ),
             ],
-          ),
+            PropertiesView(controller: controller, node: node),
+          ],
         );
       },
     );

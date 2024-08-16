@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '../helpers/actions.dart';
 import '../helpers/utils.dart';
 import '../test_data/sample_data.dart';
 
@@ -109,10 +110,7 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
 Future<void> disconnectFromTestApp(WidgetTester tester) async {
   logStatus('disconnect from test app');
   await tester.tap(
-    find.descendant(
-      of: find.byType(DevToolsAppBar),
-      matching: find.byIcon(Icons.home_rounded),
-    ),
+    await findTab(tester, icon: null, iconAsset: ScreenMetaData.home.iconAsset),
   );
   await tester.pumpAndSettle();
   await tester.tap(find.byType(ConnectToNewAppButton));
