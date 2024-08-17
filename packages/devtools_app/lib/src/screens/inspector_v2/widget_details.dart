@@ -42,12 +42,13 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
       builder: (context, constraints) {
         final parentHeight = constraints.maxHeight;
         final parentWidth = constraints.maxWidth;
-        final horizontalLayout = parentWidth > parentHeight;
-        final canFitLayoutExplorer = parentHeight >
-                WidgetDetails.layoutExplorerHeight *
-                    (horizontalLayout ? 1 : 2) &&
-            parentWidth >
-                WidgetDetails.layoutExplorerWidth * (horizontalLayout ? 2 : 1);
+        final horizontalLayout = parentWidth >= (parentHeight * 1.25);
+        final canFitLayoutExplorerVertically =
+            parentHeight >= WidgetDetails.layoutExplorerHeight;
+        final canFitLayoutExplorerHorizontally =
+            parentWidth >= WidgetDetails.layoutExplorerWidth;
+        final canFitLayoutExplorer =
+            canFitLayoutExplorerVertically && canFitLayoutExplorerHorizontally;
         final canFitLargeDetailsTable = horizontalLayout
             ? parentWidth > WidgetDetails.layoutExplorerWidth * 3
             : parentHeight > WidgetDetails.layoutExplorerHeight * 3;
