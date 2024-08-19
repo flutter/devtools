@@ -89,14 +89,23 @@ class MemoryTracker {
     }
   }
 
+  void onIsolateEvent(Event data) {
+    if (data.kind != EventKind.kIsolateExit) {
+      return;
+    }
+    _isolateHeaps.remove(data.isolate!.id);
+  }
+
   Future<void> pollMemory() async {
     final isolateMemory = <IsolateRef, MemoryUsage>{};
     for (final isolateRef
         in serviceConnection.serviceManager.isolateManager.isolates.value) {
-      if (await _isIsolateLive(isolateRef.id!)) {
+      try {
         isolateMemory[isolateRef] = await serviceConnection
             .serviceManager.service!
             .getMemoryUsage(isolateRef.id!);
+      } on SentinelException {
+        // Isolates can disappear during polling, so just swallow this exception.
       }
     }
 
@@ -115,23 +124,6 @@ class MemoryTracker {
     // Polls for current RSS size.
     final vm = await serviceConnection.serviceManager.service!.getVM();
     _update(vm, isolateMemory);
-  }
-
-  /// Detect stale isolates (sentineled), may happen after a hot restart.
-  static Future<bool> _isIsolateLive(String isolateId) async {
-    try {
-      final service = serviceConnection.serviceManager.service!;
-      await service.getIsolate(isolateId);
-    } catch (e) {
-      if (e is SentinelException) {
-        final sentinelErr = e;
-        final message = 'isIsolateLive: Isolate sentinel $isolateId '
-            '${sentinelErr.sentinel.kind}';
-        debugLogger(message);
-        return false;
-      }
-    }
-    return true;
   }
 
   void _update(VM vm, Map<IsolateRef, MemoryUsage> isolateMemory) {
@@ -166,39 +158,16 @@ class MemoryTracker {
         (await serviceConnection.adbMemoryInfo).json!,
       );
 
-  /// Returns the MemoryUsage of a particular isolate.
-  ///
-  /// `id`: id for the isolate
-  /// `usage`: usage associated with the passed in isolate's id.
-  ///
-  /// Returns the MemoryUsage of the isolate or null if isolate is a sentinel.
-  Future<MemoryUsage?> _isolateMemoryUsage(
-    String id,
-    MemoryUsage? usage,
-  ) async =>
-      await _isIsolateLive(id) ? usage : null;
-
   void _recalculate({bool fromGC = false}) async {
     int used = 0;
     int capacity = 0;
     int external = 0;
 
-    final keysToRemove = <String>[];
-
     final isolateCount = _isolateHeaps.length;
     final keys = _isolateHeaps.keys.toList();
     for (var index = 0; index < isolateCount; index++) {
       final isolateId = keys[index];
-      var usage = _isolateHeaps[isolateId];
-      // Check if the isolate is dead (sentinel), null implies sentinel.
-      final checkIsolateUsage = await _isolateMemoryUsage(isolateId, usage);
-      if (checkIsolateUsage == null && !keysToRemove.contains(isolateId)) {
-        // Sentinel Isolate don't include in the heap computation.
-        keysToRemove.add(isolateId);
-        // Don't use this sentinel isolate for any heap computation.
-        usage = null;
-      }
-
+      final usage = _isolateHeaps[isolateId];
       if (usage != null) {
         // Isolate is live (a null usage implies sentinel).
         used += usage.heapUsage!;
@@ -206,9 +175,6 @@ class MemoryTracker {
         external += usage.externalUsage!;
       }
     }
-
-    // Removes any isolate that is a sentinel.
-    _isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
     int time = DateTime.now().millisecondsSinceEpoch;
     if (timeline.data.isNotEmpty) {
