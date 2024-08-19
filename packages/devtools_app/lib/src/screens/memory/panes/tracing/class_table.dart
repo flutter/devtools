@@ -81,9 +81,6 @@ class _ClassNameColumn extends ColumnData<TracedClass>
   final String? rootPackage;
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   Widget build(
     BuildContext context,
     TracedClass data, {

@@ -255,9 +255,6 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
         );
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   String getValue(MethodTableGraphNode dataObject) => dataObject.name;
 
   @override

@@ -49,32 +49,30 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
           );
         }
 
-        return RoundedOutlinedBorder(
-          child: SplitPane(
-            axis: isScreenWiderThan(
-              context,
-              InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
-            )
-                ? Axis.horizontal
-                : Axis.vertical,
-            initialFractions: const [0.5, 0.5],
-            children: [
-              if (FlexLayoutExplorerWidget.shouldDisplay(node)) ...[
-                FlexLayoutExplorerWidget(controller),
-              ] else if (BoxLayoutExplorerWidget.shouldDisplay(node)) ...[
-                BoxLayoutExplorerWidget(controller),
-              ] else ...[
-                const Center(
-                  child: Text(
-                    'Currently, the Layout Explorer only supports Box and Flex-based widgets.',
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.clip,
-                  ),
+        return SplitPane(
+          axis: isScreenWiderThan(
+            context,
+            InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+          )
+              ? Axis.horizontal
+              : Axis.vertical,
+          initialFractions: const [0.5, 0.5],
+          children: [
+            if (FlexLayoutExplorerWidget.shouldDisplay(node)) ...[
+              FlexLayoutExplorerWidget(controller),
+            ] else if (BoxLayoutExplorerWidget.shouldDisplay(node)) ...[
+              BoxLayoutExplorerWidget(controller),
+            ] else ...[
+              const Center(
+                child: Text(
+                  'Currently, the Layout Explorer only supports Box and Flex-based widgets.',
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.clip,
                 ),
-              ],
-              PropertiesView(controller: controller, node: node),
+              ),
             ],
-          ),
+            PropertiesView(controller: controller, node: node),
+          ],
         );
       },
     );

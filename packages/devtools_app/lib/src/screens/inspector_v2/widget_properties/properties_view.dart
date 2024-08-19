@@ -53,34 +53,31 @@ class _PropertiesViewState extends State<PropertiesView> {
       builder: (context, properties, _) {
         final widgetProperties = properties.widgetProperties;
         final renderProperties = properties.renderProperties;
-        return Padding(
-          padding: const EdgeInsets.all(denseSpacing),
-          child: AnalyticsTabbedView(
-            gaScreen: gac.inspector,
-            tabs: [
+        return AnalyticsTabbedView(
+          gaScreen: gac.inspector,
+          tabs: [
+            (
+              tab: DevToolsTab.create(
+                tabName: 'Widget properties',
+                gaPrefix: PropertiesView._gaPrefix,
+              ),
+              tabView: PropertiesTable(
+                properties: widgetProperties,
+                scrollController: _widgetPropertiesScrollController,
+              ),
+            ),
+            if (renderProperties.isNotEmpty)
               (
                 tab: DevToolsTab.create(
-                  tabName: 'Widget properties',
+                  tabName: 'Render object',
                   gaPrefix: PropertiesView._gaPrefix,
                 ),
                 tabView: PropertiesTable(
-                  properties: widgetProperties,
-                  scrollController: _widgetPropertiesScrollController,
+                  properties: renderProperties,
+                  scrollController: _renderPropertiesScrollController,
                 ),
               ),
-              if (renderProperties.isNotEmpty)
-                (
-                  tab: DevToolsTab.create(
-                    tabName: 'Render object',
-                    gaPrefix: PropertiesView._gaPrefix,
-                  ),
-                  tabView: PropertiesTable(
-                    properties: renderProperties,
-                    scrollController: _renderPropertiesScrollController,
-                  ),
-                ),
-            ],
-          ),
+          ],
         );
       },
     );

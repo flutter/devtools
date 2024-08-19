@@ -81,3 +81,30 @@ There are two ways to calculate the delta between two benchmark test runs:
         ```sh
         dart run benchmark/scripts/run_benchmarks.dart --baseline=/Users/me/baseline_file.json``
         ```
+
+# Compare dart2wasm performance to dart2js
+
+Here are step-by-step instructions for comparing the performance
+of `dart2wasm` with `dart2s` for DevTools benchmark tests.
+
+1. From the `devtools_app` directory, run
+    ```sh
+    dart run benchmark/scripts/dart2wasm_performance_diff.dart
+    ```
+
+    Optional flags (to see the full usage description, run the above command with `-h`):
+    * `--average-of`: specifies the number of times to run each benchmark.
+    The returned results will be the average of all the benchmark runs when
+    this value is greater than 1. If left unspecified, each benchmark will
+    only be run once.
+    * `--save-to-file`: the absolute file path to the location where you want the
+    benchmark comparison to be saved as a CSV file. This will default to the
+    `Downloads/` directory if left unspecified.
+    * `--baseline`: the absolute file path to the baseline benchmark data (dart2js)
+    to use for this performance diff. Only use this option when you do not
+    want to run a new benchmark for the dart2js results.
+    * `--test`: the absolute file path to the test benchmark data (dart2wasm)
+    to use for this performance diff. Only use this option when you do not
+    want to run a new benchmark for the dart2wasm results.
+
+2. Open the CSV file in a spreadsheet application (Google Sheets, Excel, etc.) for viewing.

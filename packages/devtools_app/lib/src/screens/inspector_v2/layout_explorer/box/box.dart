@@ -96,14 +96,11 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         ),
       );
     }
-    return Container(
-      margin: const EdgeInsets.all(denseSpacing),
-      child: AnimatedBuilder(
-        animation: changeController,
-        builder: (context, _) {
-          return LayoutBuilder(builder: _buildLayout);
-        },
-      ),
+    return AnimatedBuilder(
+      animation: changeController,
+      builder: (context, _) {
+        return LayoutBuilder(builder: _buildLayout);
+      },
     );
   }
 

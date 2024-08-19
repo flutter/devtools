@@ -33,7 +33,8 @@ void main() {
     await pumpAndConnectDevTools(tester, testApp);
     await switchToScreen(
       tester,
-      tabIcon: ScreenMetaData.debugger.icon!,
+      tabIcon: ScreenMetaData.debugger.icon,
+      tabIconAsset: ScreenMetaData.debugger.iconAsset,
       screenId: ScreenMetaData.debugger.id,
     );
     await tester.pump(safePumpDuration);
@@ -152,6 +153,12 @@ void main() {
     await tester.pumpAndSettle(safePumpDuration);
 
     logStatus('looking for the other_classes.dart file');
+
+    final otherClassesFinder = await retryUntilFound(
+      find.text('package:flutter_app/src/other_classes.dart'),
+      tester: tester,
+    );
+    expect(otherClassesFinder, findsOneWidget);
 
     expect(
       find.text('package:flutter_app/src/other_classes.dart'),

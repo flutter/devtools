@@ -363,7 +363,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       final fetchedScript = await scriptManager.getScript(scriptRef);
       final position = tokenPos == 0
           ? null
-          : SourcePosition.calculatePosition(fetchedScript, tokenPos!);
+          : SourcePosition.calculatePosition(fetchedScript!, tokenPos!);
 
       location = ScriptLocation(
         scriptRef,
