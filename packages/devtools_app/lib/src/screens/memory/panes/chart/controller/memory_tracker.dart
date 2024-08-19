@@ -90,7 +90,7 @@ class MemoryTracker {
   }
 
   void onIsolateEvent(Event data) {
-    if (data.kind != EventKind.kIsolateExit) {
+    if (data.kind == EventKind.kIsolateExit) {
       _isolateHeaps.remove(data.isolate!.id);
     }
   }
