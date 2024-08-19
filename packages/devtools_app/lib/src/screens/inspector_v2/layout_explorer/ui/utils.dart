@@ -255,7 +255,7 @@ class FlexWidgetVisualizer extends StatelessWidget {
                         : minRenderWidth * widgetTitleMaxWidthPercentage,
                   ),
                   decoration: BoxDecoration(color: borderColor),
-                  padding: const EdgeInsets.all(4.0),
+                  padding: const EdgeInsets.all(densePadding),
                   child: Center(
                     child: Text(
                       title,
@@ -598,8 +598,7 @@ class PositionedBackgroundLabel extends StatelessWidget {
               child: WidgetLabel(
                 labelColor: labelColor,
                 labelText: labelText,
-                positionedAtBottom: !topPadding &&
-                    bottomPadding, // describeBoxName(parentProperties),
+                positionedAtBottom: !topPadding && bottomPadding,
               ),
             ),
           ],
