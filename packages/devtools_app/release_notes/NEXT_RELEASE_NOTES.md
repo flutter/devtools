@@ -37,6 +37,9 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
+* Fixed issue where the memory chart could cause the connected application to hit an
+out of memory exception while allocating large, short-lived objects repeatedly. - [#8209](https://github.com/flutter/devtools/pull/8209)
+
 ## Debugger updates
 
 TODO: Remove this section if there are not any general updates.
