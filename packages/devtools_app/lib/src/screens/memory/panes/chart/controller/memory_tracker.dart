@@ -91,9 +91,8 @@ class MemoryTracker {
 
   void onIsolateEvent(Event data) {
     if (data.kind != EventKind.kIsolateExit) {
-      return;
+      _isolateHeaps.remove(data.isolate!.id);
     }
-    _isolateHeaps.remove(data.isolate!.id);
   }
 
   Future<void> pollMemory() async {
