@@ -33,6 +33,9 @@ crashes or hits an out-of-memory issue. - [#7843](https://github.com/flutter/dev
 [#8093](https://github.com/flutter/devtools/pull/8093),
 [#8096](https://github.com/flutter/devtools/pull/8096)
 
+* Fixed issue where the memory chart could cause the connected application to hit an
+out of memory exception while allocating large, short-lived objects repeatedly. - [#8209](https://github.com/flutter/devtools/pull/8209)
+
 ## Debugger updates
 
 TODO: Remove this section if there are not any general updates.

@@ -158,7 +158,7 @@ class MemoryTracker {
         (await serviceConnection.adbMemoryInfo).json!,
       );
 
-  void _recalculate({bool fromGC = false}) async {
+  void _recalculate({bool fromGC = false}) {
     int used = 0;
     int capacity = 0;
     int external = 0;
