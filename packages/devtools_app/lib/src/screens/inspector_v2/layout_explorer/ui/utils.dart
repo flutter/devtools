@@ -331,30 +331,32 @@ class WidgetLabel extends StatelessWidget {
     super.key,
     required this.labelColor,
     required this.labelText,
+    this.positionedAtBottom = false,
   });
 
   final Color labelColor;
   final String labelText;
+  final bool positionedAtBottom;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return IntrinsicHeight(
-      child: Container(
-        decoration: BoxDecoration(color: labelColor),
-        padding: const EdgeInsetsDirectional.symmetric(
-          vertical: densePadding,
-          horizontal: denseSpacing,
+    return Container(
+      decoration: BoxDecoration(color: labelColor),
+      padding: EdgeInsets.fromLTRB(
+        densePadding,
+        positionedAtBottom ? borderPadding : 0.0,
+        densePadding,
+        positionedAtBottom ? 0.0 : borderPadding,
+      ),
+      child: Text(
+        labelText,
+        style: theme.regularTextStyleWithColor(
+          colorScheme.widgetNameColor,
         ),
-        child: Text(
-          labelText,
-          style: theme.regularTextStyleWithColor(
-            colorScheme.widgetNameColor,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }
@@ -592,9 +594,13 @@ class PositionedBackgroundLabel extends StatelessWidget {
           children: [
             // Push to the right if there is no padding on the left.
             if (!leftPadding && rightPadding) const Spacer(),
-            WidgetLabel(
-              labelColor: labelColor,
-              labelText: labelText, // describeBoxName(parentProperties),
+            Flexible(
+              child: WidgetLabel(
+                labelColor: labelColor,
+                labelText: labelText,
+                positionedAtBottom: !topPadding &&
+                    bottomPadding, // describeBoxName(parentProperties),
+              ),
             ),
           ],
         ),
