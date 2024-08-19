@@ -70,6 +70,11 @@ class ChartVmConnection extends DisposableController
           .listen(_memoryTracker.onGCEvent),
     );
 
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.service!.onIsolateEvent
+          .listen(_memoryTracker.onIsolateEvent),
+    );
+
     _polling = DebounceTimer.periodic(
       chartUpdateDelay,
       () async {
