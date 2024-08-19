@@ -222,9 +222,12 @@ final class ServiceExtensionManager with DisposerMixin {
       if (didSendFirstFrameEvent) {
         await _onFrameEventReceived();
       }
-    } on RPCError {
-      // Connection disappeared.
-      return;
+    } on RPCError catch (e) {
+      if (e.code == RPCErrorKind.kServerError.code) {
+        // Connection disappeared
+        return;
+      }
+      rethrow;
     }
   }
 
@@ -403,8 +406,12 @@ final class ServiceExtensionManager with DisposerMixin {
             args: {name.substring(name.lastIndexOf('.') + 1): value},
           );
         }
-      } on RPCError {
-        return;
+      } on RPCError catch (e) {
+        if (e.code == RPCErrorKind.kServerError.code) {
+          // Connection disappeared
+          return;
+        }
+        rethrow;
       }
     }
 
