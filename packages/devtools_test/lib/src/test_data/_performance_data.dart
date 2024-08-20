@@ -8,8 +8,7 @@ import 'dart:convert';
 // structured value because dart2wasm creates pathological/invalid wasm code
 // to initialize those large data structures.
 // See https://github.com/dart-lang/sdk/issues/56483
-final Map<String, Object?> samplePerformanceData = json.decode(
-'''
+final Map<String, Object?> samplePerformanceData = json.decode('''
 {
   "devToolsSnapshot": true,
   "devToolsVersion": "2.34.0",
