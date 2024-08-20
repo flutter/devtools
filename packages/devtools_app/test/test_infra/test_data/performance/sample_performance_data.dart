@@ -19,7 +19,7 @@ part '_perfetto_events_raw.dart';
 
 PerfettoTimeline perfettoVmTimeline = PerfettoTimeline.parse({
   'trace': base64Encode(
-    (rawPerformanceData[OfflinePerformanceData.traceBinaryKey] as List<dynamic>)
+    (rawPerformanceData[OfflinePerformanceData.traceBinaryKey] as List<Object?>)
         .cast<int>(),
   ),
   'timeOriginMicros': 0,
