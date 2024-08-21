@@ -168,9 +168,9 @@ class DeepLinksController extends DisposableController
       if (path == null) {
         continue;
       }
-      final previousRecord = linkDatasByPath[path];
+      final previousRecord = linkDatasByPath[path.path];
 
-      linkDatasByPath[path] = LinkData(
+      linkDatasByPath[path.path] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
         scheme: linkData.scheme.union(previousRecord?.scheme ?? {}),
@@ -207,7 +207,8 @@ class DeepLinksController extends DisposableController
         },
         associatedPath: [
           ...previousRecord?.associatedPath ?? [],
-          if (linkData.path != null) linkData.path!,
+          if (linkData.path != null && !linkData.path!.isExcluded)
+            linkData.path!.path,
         ],
         domainErrors: linkData.domainErrors,
         hasAndroidAssetLinksFile: linkData.hasAndroidAssetLinksFile,
@@ -401,7 +402,7 @@ class DeepLinksController extends DisposableController
       if (domainPathToLinkData[domainAndPath] == null) {
         domainPathToLinkData[domainAndPath] = LinkData(
           domain: appLink.host,
-          path: appLink.path,
+          path: Path(path: appLink.path),
           pathErrors:
               _getPathErrorsFromIntentFilterChecks(appLink.intentFilterChecks),
           os: {PlatformOS.android},
@@ -510,7 +511,7 @@ class DeepLinksController extends DisposableController
     Map<String, List<DomainError>> iosDomainErrors =
         <String, List<DomainError>>{};
 
-    late final Map<String, List<String>> iosDomainPaths;
+    late final Map<String, List<Path>> iosDomainPaths;
     try {
       final androidResult = await deepLinksService.validateAndroidDomain(
         domains: domains,
@@ -593,7 +594,7 @@ class DeepLinksController extends DisposableController
 
   Future<List<LinkData>> _validatePath(List<LinkData> linkdatas) async {
     for (final linkData in linkdatas) {
-      final path = linkData.path;
+      final path = linkData.path?.path;
       if (path == null) {
         continue;
       }
