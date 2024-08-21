@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('UniversalLinkSettings.fromJson', () {
     final universalLinkSettings = UniversalLinkSettings.fromJson('''
-{"bundleIdentifier":"app.id","teamIdentifier":"AAAABBBB","associatedDomains":["www.deeplinktest.store?mode=developer","example.com"]}
+{"bundleIdentifier":"app.id","teamIdentifier":"AAAABBBB","associatedDomains":["example.com"]}
 ''');
 
     expect(universalLinkSettings.bundleIdentifier, 'app.id');
