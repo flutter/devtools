@@ -5,16 +5,21 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
 
 import 'deep_links_model.dart';
 
 const _apiKey = 'AIzaSyCf_2E9N2AUZR-YSnZTQ72YbCNhKIskIsw';
-const _assetLinksGenerationURL =
+
+@visibleForTesting
+const assetLinksGenerationURL =
     'https://deeplinkassistant-pa.googleapis.com/android/generation/v1/assetlinks:generate?key=$_apiKey';
-const _androidDomainValidationURL =
+@visibleForTesting
+const androidDomainValidationURL =
     'https://deeplinkassistant-pa.googleapis.com/android/validation/v1/domains:batchValidate?key=$_apiKey';
-const _iosDomainValidationURL =
+@visibleForTesting
+const iosDomainValidationURL =
     'https://deeplinkassistant-pa.googleapis.com/ios/validation/v1/domains:batchValidate?key=$_apiKey';
 const postHeader = {'Content-Type': 'application/json'};
 
@@ -85,6 +90,9 @@ class ValidateAndroidDomainResult {
 }
 
 class DeepLinksServices {
+  DeepLinksServices(this.client);
+  final Client client;
+
   Future<ValidateAndroidDomainResult> validateAndroidDomain({
     required List<String> domains,
     required String applicationId,
@@ -98,8 +106,8 @@ class DeepLinksServices {
     late bool googlePlayFingerprintsAvailable;
 
     for (final domainList in domainsByBatch) {
-      final response = await http.post(
-        Uri.parse(_androidDomainValidationURL),
+      final response = await client.post(
+        Uri.parse(androidDomainValidationURL),
         headers: postHeader,
         body: jsonEncode({
           _packageNameKey: applicationId,
@@ -151,8 +159,8 @@ class DeepLinksServices {
     final domainsByBatch = _splitDomains(domains);
 
     for (final domainList in domainsByBatch) {
-      final response = await http.post(
-        Uri.parse(_iosDomainValidationURL),
+      final response = await client.post(
+        Uri.parse(iosDomainValidationURL),
         headers: postHeader,
         body: jsonEncode({
           _appIdKey: {
@@ -209,8 +217,8 @@ class DeepLinksServices {
     required String domain,
     required String? localFingerprint,
   }) async {
-    final response = await http.post(
-      Uri.parse(_assetLinksGenerationURL),
+    final response = await client.post(
+      Uri.parse(assetLinksGenerationURL),
       headers: postHeader,
       body: jsonEncode(
         {

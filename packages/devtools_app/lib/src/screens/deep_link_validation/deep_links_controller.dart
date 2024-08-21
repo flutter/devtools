@@ -9,6 +9,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
@@ -146,13 +147,24 @@ class DisplayOptions {
 
 class DeepLinksController extends DisposableController
     with AutoDisposeControllerMixin {
+  DeepLinksController() {
+    client = Client();
+    deepLinksServices = DeepLinksServices(client);
+  }
+
+  @override
+  void dispose() {
+    client.close();
+    super.dispose();
+  }
+
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
   String get applicationId =>
-      _androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
+      androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
   String get bundleId =>
-      _iosLinks[selectedIosConfigurationIndex.value]?.bundleIdentifier ?? '';
+      iosLinks[selectedIosConfigurationIndex.value]?.bundleIdentifier ?? '';
   String get teamId =>
-      _iosLinks[selectedIosConfigurationIndex.value]?.teamIdentifier ?? '';
+      iosLinks[selectedIosConfigurationIndex.value]?.teamIdentifier ?? '';
 
   @visibleForTesting
   List<LinkData> linkDatasByPath(List<LinkData> linkdatas) {
@@ -212,10 +224,13 @@ class DeepLinksController extends DisposableController
   }
 
   AppLinkSettings? get currentAppLinkSettings =>
-      _androidAppLinks[selectedAndroidVariantIndex.value];
+      androidAppLinks[selectedAndroidVariantIndex.value];
 
-  final _androidAppLinks = <int, AppLinkSettings>{};
-  final _iosLinks = <int, UniversalLinkSettings>{};
+  @visibleForTesting
+  final androidAppLinks = <int, AppLinkSettings>{};
+
+  @visibleForTesting
+  final iosLinks = <int, UniversalLinkSettings>{};
 
   ValueListenable<int> get selectedAndroidVariantIndex =>
       _selectedAndroidVariantIndex;
@@ -303,7 +318,7 @@ class DeepLinksController extends DisposableController
             selectedProject.value!.path,
             buildVariant: variant,
           );
-          _androidAppLinks[selectedAndroidVariantIndex.value] = result;
+          androidAppLinks[selectedAndroidVariantIndex.value] = result;
         } catch (_) {
           ga.select(
             gac.deeplink,
@@ -331,7 +346,7 @@ class DeepLinksController extends DisposableController
             configuration: configuration,
             target: target,
           );
-          _iosLinks[selectedIosConfigurationIndex.value] = result;
+          iosLinks[selectedIosConfigurationIndex.value] = result;
         } catch (_) {
           pagePhase.value = PagePhase.validationErrorPage;
         }
@@ -378,8 +393,7 @@ class DeepLinksController extends DisposableController
 
   /// Get all unverified link data.
   List<LinkData> get _rawAndroidLinkDatas {
-    final appLinksSettings =
-        _androidAppLinks[selectedAndroidVariantIndex.value];
+    final appLinksSettings = androidAppLinks[selectedAndroidVariantIndex.value];
     if (appLinksSettings == null) {
       return const <LinkData>[];
     }
@@ -420,7 +434,7 @@ class DeepLinksController extends DisposableController
 
   List<LinkData> get _rawIosLinkDatas {
     final iosDomains =
-        _iosLinks[selectedIosConfigurationIndex.value]?.associatedDomains ?? [];
+        iosLinks[selectedIosConfigurationIndex.value]?.associatedDomains ?? [];
     return iosDomains
         .map(
           (domain) => LinkData(
@@ -455,7 +469,8 @@ class DeepLinksController extends DisposableController
 
   /// The [TextEditingController] for the search text field.
   final textEditingController = TextEditingController();
-  final deepLinksServices = DeepLinksServices();
+  late DeepLinksServices deepLinksServices;
+  late Client client;
 
   bool addLocalFingerprint(String fingerprint) {
     // A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.
