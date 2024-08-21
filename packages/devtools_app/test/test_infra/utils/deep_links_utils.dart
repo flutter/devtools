@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_services.dart';
+import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
