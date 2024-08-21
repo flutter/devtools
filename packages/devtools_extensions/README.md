@@ -184,7 +184,7 @@ Now it is time to build your extension.
 
     From the directory where you want your extension source code to live, run the following
     command, replacing `some_pkg_devtools_extension` with 
-    `<your_package_name>_devtools_extension``:
+    `<your_package_name>_devtools_extension`:
     ```console
     flutter create --template app --platforms web some_pkg_devtools_extension
     ```

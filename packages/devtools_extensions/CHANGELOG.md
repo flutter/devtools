@@ -1,4 +1,4 @@
-## 0.3.0-wip
+## 0.3.0-dev.0
 * Add `ExtensionManager.copyToClipboard` method.
 * Add `DevToolsExtensionEventType.copyToClipboard` enum type.
 * Add `CopyToClipboardExtensionEvent` extension event type. 
