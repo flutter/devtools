@@ -2,6 +2,7 @@
 * Add `ExtensionManager.copyToClipboard` method.
 * Add `DevToolsExtensionEventType.copyToClipboard` enum type.
 * Add `CopyToClipboardExtensionEvent` extension event type. 
+* Bump `web` dependency to `^1.0.0`.
 
 ## 0.2.2
 * Load the IDE Theme from the extension URL instead of creating
