@@ -55,11 +55,15 @@ class DevToolsAppBar extends StatelessWidget {
 
     // Add a leading [VerticalLineSpacer] to the actions to separate them from
     // the tabs.
-    final actionsWithSpacer = List<Widget>.from(actions ?? [])
-      ..insert(0, VerticalLineSpacer(height: defaultToolbarHeight));
+    final actionsWithSpacer = List<Widget>.from(actions ?? []);
+    if (screens.isNotEmpty && actionsWithSpacer.isNotEmpty) {
+      actionsWithSpacer.insert(
+        0,
+        VerticalLineSpacer(height: defaultToolbarHeight),
+      );
+    }
 
-    final hasMultipleTabs = screens.length > 1;
-    if (hasMultipleTabs) {
+    if (screens.isNotEmpty) {
       tabBar = TabBar(
         controller: tabController,
         isScrollable: true,
