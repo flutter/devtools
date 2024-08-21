@@ -39,12 +39,12 @@ void main() {
         id: 'code-obj',
         kind: 'Dart',
         name: 'testFuncCode',
+        function: testFunction,
       );
 
       final offset = pow(2, 20) as int;
       const addressCount = 1000;
       testCode.json = {
-        'function': testFunction.toJson(),
         '_objectPool': {
           'id': 'pool-id',
           'length': 0,

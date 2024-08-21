@@ -54,7 +54,7 @@ dependencies:
   stream_channel: ^2.1.1
   string_scanner: ^1.1.0
   unified_analytics: ^6.1.0
-  vm_service: ^14.2.1
+  vm_service: ^14.2.5
   vm_service_protos: ^1.0.0
   vm_snapshot_analysis: ^0.7.6
   web: ^1.0.0
