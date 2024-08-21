@@ -41,11 +41,15 @@ void main() {
     expect(appLinkSettings.deeplinkingFlagEnabled, true);
     expect(appLinkSettings.deeplinks.length, 2);
     expect(appLinkSettings.deeplinks[0].path, '/path1');
-    expect(appLinkSettings.deeplinks[0].intentFilterChecks.hasBrowsableCategory,
-        false,);
+    expect(
+      appLinkSettings.deeplinks[0].intentFilterChecks.hasBrowsableCategory,
+      false,
+    );
     expect(appLinkSettings.deeplinks[0].intentFilterChecks.hasActionView, true);
-    expect(appLinkSettings.deeplinks[0].intentFilterChecks.hasDefaultCategory,
-        true,);
+    expect(
+      appLinkSettings.deeplinks[0].intentFilterChecks.hasDefaultCategory,
+      true,
+    );
     expect(appLinkSettings.deeplinks[0].intentFilterChecks.hasAutoVerify, true);
   });
 }
