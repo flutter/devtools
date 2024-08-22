@@ -199,7 +199,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
                   tabs: tabs,
                 ),
                 actions: [
-                  if (true)
+                  if (isDeferredApp)
                     AppUnitDropdown(
                       value: controller.selectedAppUnit.value,
                       onChanged: (newAppUnit) {
