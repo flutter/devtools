@@ -255,6 +255,8 @@ class LinkData with SearchableDataMixin {
     this.pathErrors = const <PathError>{},
     this.associatedPath = const <String>[],
     this.associatedDomains = const <String>[],
+    this.hasAndroidAssetLinksFile = false,
+    this.hasIosAasaFile = false,
   });
 
   final String? path;
@@ -266,6 +268,8 @@ class LinkData with SearchableDataMixin {
 
   final List<String> associatedPath;
   final List<String> associatedDomains;
+  final bool hasAndroidAssetLinksFile;
+  final bool hasIosAasaFile;
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
