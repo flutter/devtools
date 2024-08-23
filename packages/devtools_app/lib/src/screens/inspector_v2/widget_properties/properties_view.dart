@@ -150,31 +150,34 @@ class PropertiesView extends StatelessWidget {
         itemCount: properties.length + layoutExplorerOffset,
         itemBuilder: (context, index) {
           if (index == 0 && includeLayoutExplorer) {
-            return Flex(
-              direction: Axis.horizontal,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(largeSpacing),
-                  child: SizedBox(
-                    height: 150.0,
-                    width: 200.0,
-                    child: BoxLayoutExplorerWidget(
-                      controller,
-                      selectedNode: selectedNode,
-                      layoutProperties: layoutProperties,
-                    ),
-                  ),
-                ),
-                if (widthsAndHeights != null)
-                  Expanded(
-                    child: Center(
-                      child: LayoutPropertiesList(
-                        widgetHeights: widgetHeights,
-                        widgetWidths: widgetWidths,
+            return DecoratedPropertiesTableRow(
+              index: index + layoutExplorerOffset,
+              child: Flex(
+                direction: Axis.horizontal,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(largeSpacing),
+                    child: SizedBox(
+                      height: 150.0,
+                      width: 200.0,
+                      child: BoxLayoutExplorerWidget(
+                        controller,
+                        selectedNode: selectedNode,
+                        layoutProperties: layoutProperties,
                       ),
                     ),
                   ),
-              ],
+                  if (widthsAndHeights != null)
+                    Expanded(
+                      child: Center(
+                        child: LayoutPropertiesList(
+                          widgetHeights: widgetHeights,
+                          widgetWidths: widgetWidths,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             );
           }
 
@@ -287,6 +290,30 @@ class PropertiesTable extends StatelessWidget {
   }
 }
 
+class DecoratedPropertiesTableRow extends StatelessWidget {
+  const DecoratedPropertiesTableRow({
+    super.key,
+    required this.index,
+    required this.child,
+  });
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(bottom: defaultBorderSide(theme)),
+        color: alternatingColorForIndex(index, theme.colorScheme),
+      ),
+      child: child,
+    );
+  }
+}
+
 class PropertyItem extends StatelessWidget {
   const PropertyItem({
     super.key,
@@ -300,13 +327,9 @@ class PropertyItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final property = properties[index];
-    final theme = Theme.of(context);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border(bottom: defaultBorderSide(theme)),
-        color: alternatingColorForIndex(index, theme.colorScheme),
-      ),
+    return DecoratedPropertiesTableRow(
+      index: index,
       child: Row(
         children: [
           Expanded(child: PropertyName(property: property)),
