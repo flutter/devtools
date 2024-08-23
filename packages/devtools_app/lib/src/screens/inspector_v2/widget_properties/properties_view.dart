@@ -116,6 +116,10 @@ class PropertiesView extends StatelessWidget {
     required this.scrollController,
   });
 
+  static const layoutExplorerHeight = 150.0;
+  static const layoutExplorerWidth = 200.0;
+  static const scaleFactorForVerticalLayout = 1.75;
+
   final List<RemoteDiagnosticsNode> properties;
   final LayoutProperties? layoutProperties;
   final InspectorController controller;
@@ -134,59 +138,69 @@ class PropertiesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final layoutExplorerOffset = includeLayoutExplorer ? 1 : 0;
 
-    LayoutWidthsAndHeights? widthsAndHeights;
+    Widget? propertiesList;
     if (widgetWidths != null && widgetHeights != null) {
-      widthsAndHeights = LayoutWidthsAndHeights(
-        widths: widgetWidths!,
-        heights: widgetHeights!,
+      propertiesList = Center(
+        child: LayoutPropertiesList(
+          widgetHeights: widgetHeights,
+          widgetWidths: widgetWidths,
+        ),
       );
     }
 
-    return Scrollbar(
-      controller: scrollController,
-      thumbVisibility: true,
-      child: ListView.builder(
-        controller: scrollController,
-        itemCount: properties.length + layoutExplorerOffset,
-        itemBuilder: (context, index) {
-          if (index == 0 && includeLayoutExplorer) {
-            return DecoratedPropertiesTableRow(
-              index: index + layoutExplorerOffset,
-              child: Flex(
-                direction: Axis.horizontal,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(largeSpacing),
-                    child: SizedBox(
-                      height: 150.0,
-                      width: 200.0,
-                      child: BoxLayoutExplorerWidget(
-                        controller,
-                        selectedNode: selectedNode,
-                        layoutProperties: layoutProperties,
-                      ),
-                    ),
-                  ),
-                  if (widthsAndHeights != null)
-                    Expanded(
-                      child: Center(
-                        child: LayoutPropertiesList(
-                          widgetHeights: widgetHeights,
-                          widgetWidths: widgetWidths,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontalLayout = constraints.maxWidth >
+            (PropertiesView.layoutExplorerWidth *
+                PropertiesView.scaleFactorForVerticalLayout);
+
+        return Scrollbar(
+          controller: scrollController,
+          thumbVisibility: true,
+          child: ListView.builder(
+            controller: scrollController,
+            itemCount: properties.length + layoutExplorerOffset,
+            itemBuilder: (context, index) {
+              if (index == 0 && includeLayoutExplorer) {
+                return DecoratedPropertiesTableRow(
+                  index: index + layoutExplorerOffset,
+                  child: Flex(
+                    direction:
+                        horizontalLayout ? Axis.horizontal : Axis.vertical,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(largeSpacing),
+                        child: SizedBox(
+                          height: PropertiesView.layoutExplorerHeight,
+                          width: PropertiesView.layoutExplorerWidth,
+                          child: BoxLayoutExplorerWidget(
+                            controller,
+                            selectedNode: selectedNode,
+                            layoutProperties: layoutProperties,
+                          ),
                         ),
                       ),
-                    ),
-                ],
-              ),
-            );
-          }
+                      if (propertiesList != null)
+                        horizontalLayout
+                            ? Expanded(child: propertiesList)
+                            : Padding(
+                                padding:
+                                    const EdgeInsets.only(bottom: largeSpacing),
+                                child: propertiesList,
+                              ),
+                    ],
+                  ),
+                );
+              }
 
-          return PropertyItem(
-            index: index - layoutExplorerOffset,
-            properties: properties,
-          );
-        },
-      ),
+              return PropertyItem(
+                index: index - layoutExplorerOffset,
+                properties: properties,
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

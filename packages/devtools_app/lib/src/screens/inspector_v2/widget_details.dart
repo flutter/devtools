@@ -21,9 +21,6 @@ class WidgetDetails extends StatefulWidget {
 
   final InspectorController controller;
 
-  static const layoutExplorerHeight = 150.0;
-  static const layoutExplorerWidth = 200.0;
-
   @override
   State<WidgetDetails> createState() => _WidgetDetailsState();
 }
