@@ -388,6 +388,17 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     end.parent = parent;
   }
 
+  // TODO(elliette): These are only here to provide concrete overrides. The
+  // animation should be removed so these can go away.
+  @override
+  LayoutProperties? get parentLayoutProperties => null;
+
+  @override
+  WidgetSizes? get widgetWidths => null;
+
+  @override
+  WidgetSizes? get widgetHeights => null;
+
   @override
   List<LayoutProperties> get children {
     return _children;

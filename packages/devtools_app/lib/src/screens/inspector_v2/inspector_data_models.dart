@@ -91,6 +91,26 @@ List<double> computeRenderSizes({
   return renderSizes;
 }
 
+/// Data pattern containing a widget's widths or heights.
+typedef WidgetSizes = ({
+  // Whether this record represents a widget's widths or heights.
+  SizeType type,
+
+  /// Either the widget's left or top padding.
+  double paddingA,
+
+  // Either a widget's width or height.
+  double widgetSize,
+
+  // Either a widget's right or bottom padding.
+  double paddingB,
+});
+
+enum SizeType {
+  widths,
+  heights,
+}
+
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 /// Represents parsed layout information for a specific [RemoteDiagnosticsNode].
 class LayoutProperties {
@@ -217,6 +237,45 @@ class LayoutProperties {
     return heightUsed > parentHeight + overflowEpsilon;
   }
 
+  LayoutProperties? get parentLayoutProperties {
+    final parentElement = node.parentRenderElement;
+    // Fall back to this node's properties if there is no parent.
+    if (parentElement == null) return this;
+    final parentProperties =
+        parentElement.computeLayoutProperties(forFlexLayout: false);
+    return parentProperties;
+  }
+
+  WidgetSizes? get widgetWidths => _widgetSizes(SizeType.widths);
+
+  WidgetSizes? get widgetHeights => _widgetSizes(SizeType.heights);
+
+  WidgetSizes? _widgetSizes(SizeType type) {
+    if (parentLayoutProperties == null) return null;
+    final parentProperties = parentLayoutProperties!;
+
+    final parentData = node.parentData;
+    final parentSize = parentProperties.size;
+
+    switch (type) {
+      case SizeType.heights:
+        return (
+          type: type,
+          paddingA: parentData.offset.dy,
+          widgetSize: size.height,
+          paddingB: parentSize.height - (size.height + parentData.offset.dy),
+        );
+      case SizeType.widths:
+      default:
+        return (
+          type: type,
+          paddingA: parentData.offset.dx,
+          widgetSize: size.width,
+          paddingB: parentSize.width - (size.width + parentData.offset.dx),
+        );
+    }
+  }
+
   static String describeAxis(double min, double max, String axis) {
     if (min == max) return '$axis=${min.toStringAsFixed(1)}';
     return '${min.toStringAsFixed(1)}<=$axis<=${max.toStringAsFixed(1)}';
@@ -278,6 +337,40 @@ extension MainAxisAlignmentExtension on MainAxisAlignment {
         return this;
     }
   }
+}
+
+/// Encapsulation of [widths] and [heights] for the layout.
+class LayoutWidthsAndHeights {
+  LayoutWidthsAndHeights({
+    required this.widths,
+    required this.heights,
+  });
+
+  final WidgetSizes widths;
+  final WidgetSizes heights;
+
+  double get widgetWidth => widths.widgetSize;
+
+  double get widgetHeight => heights.widgetSize;
+
+  double get leftPadding => widths.paddingA;
+
+  double get rightPadding => widths.paddingB;
+
+  double get topPadding => heights.paddingA;
+
+  double get bottomPadding => heights.paddingB;
+
+  bool get hasLeftPadding => leftPadding != 0;
+
+  bool get hasRightPadding => rightPadding != 0;
+
+  bool get hasTopPadding => topPadding != 0;
+
+  bool get hasBottomPadding => bottomPadding != 0;
+
+  bool get hasAnyPadding =>
+      hasLeftPadding || hasRightPadding || hasTopPadding || hasBottomPadding;
 }
 
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed.

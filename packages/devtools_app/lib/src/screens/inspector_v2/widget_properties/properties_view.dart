@@ -7,8 +7,12 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/diagnostics/diagnostics_node.dart';
+import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/tab.dart';
 import '../inspector_controller.dart';
+import '../inspector_data_models.dart';
+import '../layout_explorer/box/box.dart';
+import '../layout_explorer/flex/flex.dart';
 
 /// Displays the widget's properties along with the properties on its render
 /// object.
@@ -34,6 +38,12 @@ class _DetailsTableState extends State<DetailsTable> {
   late ScrollController _widgetPropertiesScrollController;
   late ScrollController _renderPropertiesScrollController;
 
+  RemoteDiagnosticsNode? get selectedNode =>
+      widget.controller.selectedDiagnostic;
+
+  LayoutProperties? get layoutProperties =>
+      widget.controller.selectedNodeProperties.value.layoutProperties;
+
   @override
   void initState() {
     super.initState();
@@ -50,12 +60,12 @@ class _DetailsTableState extends State<DetailsTable> {
 
   @override
   Widget build(BuildContext context) {
-    final extraTabs = widget.extraTabs ?? <TabAndView>[];
     return ValueListenableBuilder<WidgetTreeNodeProperties>(
       valueListenable: widget.controller.selectedNodeProperties,
       builder: (context, properties, _) {
         final widgetProperties = properties.widgetProperties;
         final renderProperties = properties.renderProperties;
+        final layoutProperties = properties.layoutProperties;
         return AnalyticsTabbedView(
           gaScreen: gac.inspector,
           tabs: [
@@ -64,8 +74,10 @@ class _DetailsTableState extends State<DetailsTable> {
                 tabName: 'Widget properties',
                 gaPrefix: DetailsTable.gaPrefix,
               ),
-              tabView: PropertiesTable(
+              tabView: PropertiesView(
                 properties: widgetProperties,
+                layoutProperties: layoutProperties,
+                controller: widget.controller,
                 scrollController: _widgetPropertiesScrollController,
               ),
             ),
@@ -80,10 +92,168 @@ class _DetailsTableState extends State<DetailsTable> {
                   scrollController: _renderPropertiesScrollController,
                 ),
               ),
-            for (final tab in extraTabs) tab,
+            if (selectedNode?.isFlexLayout ?? false)
+              (
+                tab: DevToolsTab.create(
+                  tabName: 'Flex explorer',
+                  gaPrefix: DetailsTable.gaPrefix,
+                ),
+                tabView: FlexLayoutExplorerWidget(widget.controller),
+              ),
           ],
         );
       },
+    );
+  }
+}
+
+class PropertiesView extends StatelessWidget {
+  const PropertiesView({
+    super.key,
+    required this.properties,
+    required this.layoutProperties,
+    required this.controller,
+    required this.scrollController,
+  });
+
+  final List<RemoteDiagnosticsNode> properties;
+  final LayoutProperties? layoutProperties;
+  final InspectorController controller;
+  final ScrollController scrollController;
+
+  RemoteDiagnosticsNode? get selectedNode =>
+      controller.selectedNode.value?.diagnostic;
+
+  bool get includeLayoutExplorer => selectedNode?.isBoxLayout ?? false;
+
+  WidgetSizes? get widgetWidths => layoutProperties?.widgetWidths;
+
+  WidgetSizes? get widgetHeights => layoutProperties?.widgetHeights;
+
+  @override
+  Widget build(BuildContext context) {
+    final layoutExplorerOffset = includeLayoutExplorer ? 1 : 0;
+
+    LayoutWidthsAndHeights? widthsAndHeights;
+    if (widgetWidths != null && widgetHeights != null) {
+      widthsAndHeights = LayoutWidthsAndHeights(
+        widths: widgetWidths!,
+        heights: widgetHeights!,
+      );
+    }
+
+    return Scrollbar(
+      controller: scrollController,
+      thumbVisibility: true,
+      child: ListView.builder(
+        controller: scrollController,
+        itemCount: properties.length + layoutExplorerOffset,
+        itemBuilder: (context, index) {
+          if (index == 0 && includeLayoutExplorer) {
+            return Flex(
+              direction: Axis.horizontal,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(largeSpacing),
+                  child: SizedBox(
+                    height: 150.0,
+                    width: 200.0,
+                    child: BoxLayoutExplorerWidget(
+                      controller,
+                      selectedNode: selectedNode,
+                      layoutProperties: layoutProperties,
+                    ),
+                  ),
+                ),
+                if (widthsAndHeights != null)
+                  Expanded(
+                    child: Center(
+                      child: LayoutPropertiesList(
+                        widgetHeights: widgetHeights,
+                        widgetWidths: widgetWidths,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }
+
+          return PropertyItem(
+            index: index - layoutExplorerOffset,
+            properties: properties,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class LayoutPropertiesList extends StatelessWidget {
+  const LayoutPropertiesList({
+    super.key,
+    required this.widgetHeights,
+    required this.widgetWidths,
+  });
+
+  final WidgetSizes? widgetHeights;
+  final WidgetSizes? widgetWidths;
+
+  LayoutWidthsAndHeights? get widthsAndHeights =>
+      widgetHeights != null && widgetWidths != null
+          ? LayoutWidthsAndHeights(
+              widths: widgetWidths!,
+              heights: widgetHeights!,
+            )
+          : null;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widthsAndHeights == null) return const SizedBox.shrink();
+
+    final LayoutWidthsAndHeights(
+      :widgetHeight,
+      :widgetWidth,
+      :topPadding,
+      :bottomPadding,
+      :leftPadding,
+      :rightPadding,
+      :hasTopPadding,
+      :hasBottomPadding,
+      :hasLeftPadding,
+      :hasRightPadding,
+    ) = widthsAndHeights!;
+
+    return Column(
+      children: [
+        PropertyText(
+          name: 'height',
+          value: widgetHeight,
+        ),
+        PropertyText(
+          name: 'width',
+          value: widgetWidth,
+        ),
+        if (hasTopPadding)
+          PropertyText(
+            name: 'top padding',
+            value: topPadding,
+          ),
+        if (hasBottomPadding)
+          PropertyText(
+            name: 'bottom padding',
+            value: bottomPadding,
+          ),
+        if (hasLeftPadding)
+          PropertyText(
+            name: 'left padding',
+            value: leftPadding,
+          ),
+        if (hasRightPadding)
+          PropertyText(
+            name: 'right padding',
+            value: rightPadding,
+          ),
+      ],
     );
   }
 }
@@ -181,7 +351,37 @@ class PropertyValue extends StatelessWidget {
       padding: const EdgeInsets.all(denseRowSpacing),
       child: Text(
         property.description ?? 'null',
-        style: Theme.of(context).regularTextStyle,
+        style: Theme.of(context).fixedFontStyle,
+      ),
+    );
+  }
+}
+
+class PropertyText extends StatelessWidget {
+  const PropertyText({
+    super.key,
+    required this.name,
+    required this.value,
+  });
+
+  final String name;
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(densePadding),
+      child: RichText(
+        text: TextSpan(
+          text: '$name: ',
+          style: Theme.of(context).subtleTextStyle,
+          children: [
+            TextSpan(
+              text: toStringAsFixed(value),
+              style: Theme.of(context).fixedFontStyle,
+            ),
+          ],
+        ),
       ),
     );
   }
