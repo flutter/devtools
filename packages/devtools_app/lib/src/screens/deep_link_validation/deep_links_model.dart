@@ -255,8 +255,8 @@ class LinkData with SearchableDataMixin {
     this.pathErrors = const <PathError>{},
     this.associatedPath = const <String>[],
     this.associatedDomains = const <String>[],
-    this.hasAndroidAssetLinksFile = false,
-    this.hasIosAasaFile = false,
+    this.hasAndroidAssetLinksFile = true,
+    this.hasIosAasaFile = true,
   });
 
   final String? path;

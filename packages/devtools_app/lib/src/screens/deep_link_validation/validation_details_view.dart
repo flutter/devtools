@@ -582,7 +582,7 @@ class _CrossCheckTable extends StatelessWidget {
     final linkData = controller.selectedLink.value!;
 
     final hasIosAasaFile = linkData.hasIosAasaFile;
-    final hasAndroidAssetLinksFile =linkData.hasAndroidAssetLinksFile;
+    final hasAndroidAssetLinksFile = linkData.hasAndroidAssetLinksFile;
 
     final missingIos = hasIosAasaFile && !linkData.os.contains(PlatformOS.ios);
     final missingAndroid =
