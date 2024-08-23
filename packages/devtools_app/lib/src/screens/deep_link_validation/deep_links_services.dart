@@ -59,6 +59,8 @@ const _teamIdKey = 'team_id';
 const _universalLinkDomainsKey = 'universal_link_domains';
 const _iosDomainNameKey = 'domain_name';
 const _iosValidationResultsKey = 'validationResults';
+const _aasaAppPathsKey = 'aasaAppPaths';
+const _aasaPathsKey = 'aasaPaths';
 
 const iosCheckNameToDomainError = <String, DomainError>{
   'EXISTENCE': IosDomainError.existence,
@@ -129,6 +131,8 @@ class DeepLinksService {
       for (final domainResult in validationResult) {
         final domainName = domainResult[_domainNameKey] as String;
         final failedChecks = (domainResult[_failedChecksKey] as List?)
+            ?.cast<Map<String, Object?>>();
+        final aasaPaths = (domainResult[_aasaAppPathsKey] as List?)
             ?.cast<Map<String, Object?>>();
         if (failedChecks != null) {
           for (final failedCheck in failedChecks) {
