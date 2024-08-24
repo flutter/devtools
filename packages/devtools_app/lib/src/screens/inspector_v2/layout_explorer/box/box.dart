@@ -75,12 +75,12 @@ class BoxLayoutExplorerWidget extends StatelessWidget {
     return [
       LayoutExplorerBackground(colorScheme: colorScheme),
       PositionedBackgroundLabel(
-        labelText: describeBoxName(parentProperties),
+        labelText: _describeBoxName(parentProperties),
         labelColor: widgetColor,
-        topPadding: hasTopPadding,
-        bottomPadding: hasBottomPadding,
-        leftPadding: hasLeftPadding,
-        rightPadding: hasRightPadding,
+        hasTopPadding: hasTopPadding,
+        hasBottomPadding: hasBottomPadding,
+        hasLeftPadding: hasLeftPadding,
+        hasRightPadding: hasRightPadding,
       ),
       if (hasLeftPadding)
         PaddingVisualizerWidget(
@@ -230,7 +230,7 @@ class BoxLayoutExplorerWidget extends StatelessWidget {
   }
 }
 
-String describeBoxName(LayoutProperties properties) =>
+String _describeBoxName(LayoutProperties properties) =>
     properties.node.description ?? '';
 
 /// Represents a box widget and its surrounding padding.
@@ -264,7 +264,7 @@ class BoxChildAndPaddingVisualizer extends StatelessWidget {
         child: WidgetVisualizer(
           isSelected: isSelected,
           layoutProperties: layoutProperties,
-          title: describeBoxName(propertiesLocal),
+          title: _describeBoxName(propertiesLocal),
           // TODO(jacobr): consider surfacing the overflow size information
           // if we determine
           // overflowSide: properties.overflowSide,
@@ -314,7 +314,7 @@ class BoxChildVisualizer extends StatelessWidget {
         child: WidgetVisualizer(
           isSelected: isSelected,
           layoutProperties: layoutProperties,
-          title: describeBoxName(propertiesLocal),
+          title: _describeBoxName(propertiesLocal),
           // TODO(jacobr): consider surfacing the overflow size information
           // if we determine
           // overflowSide: properties.overflowSide,

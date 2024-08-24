@@ -217,6 +217,7 @@ class WidgetVisualizer extends StatelessWidget {
   }
 }
 
+/// Visualizer display for a widget in a flex layout.
 class FlexWidgetVisualizer extends StatelessWidget {
   const FlexWidgetVisualizer({
     super.key,
@@ -277,6 +278,7 @@ class FlexWidgetVisualizer extends StatelessWidget {
   }
 }
 
+/// Visualizer display for a widget in a box layout.
 class BoxWidgetVisualizer extends StatelessWidget {
   const BoxWidgetVisualizer({
     super.key,
@@ -304,8 +306,8 @@ class BoxWidgetVisualizer extends StatelessWidget {
         ),
         Expanded(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Spacer(),
               dimensionDescription(
                 TextSpan(text: properties.describeHeight()),
                 false,
@@ -316,7 +318,6 @@ class BoxWidgetVisualizer extends StatelessWidget {
                 false,
                 theme.colorScheme,
               ),
-              const Spacer(),
             ],
           ),
         ),
@@ -388,8 +389,6 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     end.parent = parent;
   }
 
-  // TODO(elliette): These are only here to provide concrete overrides. The
-  // animation should be removed so these can go away.
   @override
   LayoutProperties? get parentLayoutProperties => null;
 
@@ -582,34 +581,34 @@ class PositionedBackgroundLabel extends StatelessWidget {
     super.key,
     required this.labelText,
     required this.labelColor,
-    required this.topPadding,
-    required this.bottomPadding,
-    required this.leftPadding,
-    required this.rightPadding,
+    required this.hasTopPadding,
+    required this.hasBottomPadding,
+    required this.hasLeftPadding,
+    required this.hasRightPadding,
   });
 
   final String labelText;
   final Color labelColor;
-  final bool topPadding;
-  final bool bottomPadding;
-  final bool leftPadding;
-  final bool rightPadding;
+  final bool hasTopPadding;
+  final bool hasBottomPadding;
+  final bool hasLeftPadding;
+  final bool hasRightPadding;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         // Push to the bottom if there is no padding on the top.
-        if (!topPadding && bottomPadding) const Spacer(),
+        if (!hasTopPadding && hasBottomPadding) const Spacer(),
         Row(
           children: [
             // Push to the right if there is no padding on the left.
-            if (!leftPadding && rightPadding) const Spacer(),
+            if (!hasLeftPadding && hasRightPadding) const Spacer(),
             Flexible(
               child: WidgetLabel(
                 labelColor: labelColor,
                 labelText: labelText,
-                positionedAtBottom: !topPadding && bottomPadding,
+                positionedAtBottom: !hasTopPadding && hasBottomPadding,
               ),
             ),
           ],

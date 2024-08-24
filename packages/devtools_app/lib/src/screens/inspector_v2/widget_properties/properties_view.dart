@@ -14,8 +14,8 @@ import '../inspector_data_models.dart';
 import '../layout_explorer/box/box.dart';
 import '../layout_explorer/flex/flex.dart';
 
-/// Displays the widget's properties along with the properties on its render
-/// object.
+/// Table for the widget's properties, along with its render object and a the
+/// flex layout explorer if the widget is part of a flex layout.
 class DetailsTable extends StatefulWidget {
   const DetailsTable({
     super.key,
@@ -107,6 +107,8 @@ class _DetailsTableState extends State<DetailsTable> {
   }
 }
 
+/// Displays a widget's properties, including the layout properties and a
+/// layout visualizer.
 class PropertiesView extends StatelessWidget {
   const PropertiesView({
     super.key,
@@ -205,6 +207,7 @@ class PropertiesView extends StatelessWidget {
   }
 }
 
+/// List of the widget's layout properties.
 class LayoutPropertiesList extends StatelessWidget {
   const LayoutPropertiesList({
     super.key,
@@ -242,31 +245,31 @@ class LayoutPropertiesList extends StatelessWidget {
 
     return Column(
       children: [
-        PropertyText(
+        LayoutPropertyItem(
           name: 'height',
           value: widgetHeight,
         ),
-        PropertyText(
+        LayoutPropertyItem(
           name: 'width',
           value: widgetWidth,
         ),
         if (hasTopPadding)
-          PropertyText(
+          LayoutPropertyItem(
             name: 'top padding',
             value: topPadding,
           ),
         if (hasBottomPadding)
-          PropertyText(
+          LayoutPropertyItem(
             name: 'bottom padding',
             value: bottomPadding,
           ),
         if (hasLeftPadding)
-          PropertyText(
+          LayoutPropertyItem(
             name: 'left padding',
             value: leftPadding,
           ),
         if (hasRightPadding)
-          PropertyText(
+          LayoutPropertyItem(
             name: 'right padding',
             value: rightPadding,
           ),
@@ -275,6 +278,38 @@ class LayoutPropertiesList extends StatelessWidget {
   }
 }
 
+/// A layout property's name and value displayed in the [LayoutPropertiesList].
+class LayoutPropertyItem extends StatelessWidget {
+  const LayoutPropertyItem({
+    super.key,
+    required this.name,
+    required this.value,
+  });
+
+  final String name;
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(densePadding),
+      child: RichText(
+        text: TextSpan(
+          text: '$name: ',
+          style: Theme.of(context).subtleTextStyle,
+          children: [
+            TextSpan(
+              text: toStringAsFixed(value),
+              style: Theme.of(context).fixedFontStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Table of widget's properties with property name and value.
 class PropertiesTable extends StatelessWidget {
   const PropertiesTable({
     super.key,
@@ -304,6 +339,7 @@ class PropertiesTable extends StatelessWidget {
   }
 }
 
+/// A row in the [PropertiesTable] with the correct decoration for the [index].
 class DecoratedPropertiesTableRow extends StatelessWidget {
   const DecoratedPropertiesTableRow({
     super.key,
@@ -328,6 +364,7 @@ class DecoratedPropertiesTableRow extends StatelessWidget {
   }
 }
 
+/// A widget property's name and value displayed in the [PropertiesTable].
 class PropertyItem extends StatelessWidget {
   const PropertyItem({
     super.key,
@@ -354,6 +391,7 @@ class PropertyItem extends StatelessWidget {
   }
 }
 
+/// A widget property's name.
 class PropertyName extends StatelessWidget {
   const PropertyName({
     super.key,
@@ -374,6 +412,7 @@ class PropertyName extends StatelessWidget {
   }
 }
 
+/// A widget property's value.
 class PropertyValue extends StatelessWidget {
   const PropertyValue({
     super.key,
@@ -389,36 +428,6 @@ class PropertyValue extends StatelessWidget {
       child: Text(
         property.description ?? 'null',
         style: Theme.of(context).fixedFontStyle,
-      ),
-    );
-  }
-}
-
-class PropertyText extends StatelessWidget {
-  const PropertyText({
-    super.key,
-    required this.name,
-    required this.value,
-  });
-
-  final String name;
-  final double value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(densePadding),
-      child: RichText(
-        text: TextSpan(
-          text: '$name: ',
-          style: Theme.of(context).subtleTextStyle,
-          children: [
-            TextSpan(
-              text: toStringAsFixed(value),
-              style: Theme.of(context).fixedFontStyle,
-            ),
-          ],
-        ),
       ),
     );
   }
