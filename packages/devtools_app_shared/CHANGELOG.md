@@ -1,3 +1,8 @@
+## 0.2.3
+* Bump `web` dependency to `^1.0.0`
+* Bump `pointer_interceptor` dependency to `^0.10.1+1`
+* Add better error handling in `ServiceExtensionManager`.
+
 ## 0.2.2
 * Lookup the connected app package root from an expression evaluation when
 the connected app is a Dart or Flutter test.
