@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../../shared/development_helpers.dart';
 import '../../../../../shared/memory/heap_data.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../../shared/memory/simple_items.dart';
@@ -87,13 +88,13 @@ class SnapshotDataItem extends SnapshotItem
 
   Future<void> loadHeap(HeapGraphLoader loader) async {
     assert(_heap == null);
-    SnapshotTimer.instance.maybePrint('Loading');
+    DebugTimer.snapshot.maybePrint('Loading');
     final (graph, created) = await loader.load();
-    SnapshotTimer.instance.maybePrint('Loaded');
+    DebugTimer.snapshot.maybePrint('Loaded');
     _heap = HeapData(graph, created: created);
-    SnapshotTimer.instance.maybePrint('HeapData created');
+    DebugTimer.snapshot.maybePrint('HeapData created');
     await _heap!.calculate;
-    SnapshotTimer.instance.maybePrint('HeapData calculated');
+    DebugTimer.snapshot.maybePrint('HeapData calculated');
     _processed.complete();
   }
 

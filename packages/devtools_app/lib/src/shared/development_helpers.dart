@@ -295,3 +295,45 @@ FutureOr<void> debugTimeAsync(
   final time = DateTime.now().millisecondsSinceEpoch - now;
   _log.info('$debugName: $time ms');
 }
+
+/// A timer for measuring performance of a cross-class operation in release mode.
+///
+/// To see performance numbers in console, set `enabled` for instance
+/// of corresponding feature to `true`.
+class DebugTimer {
+  DebugTimer({required this.enabled, required this.name}) {
+    _timer.start();
+  }
+
+  static final snapshot = DebugTimer(enabled: false, name: 'Snapshotting');
+
+  final bool enabled;
+  final String name;
+
+  final _timer = Stopwatch();
+  var _printedSnapshotTime = 0;
+
+  void maybeReset() {
+    if (!enabled) return;
+    _timer
+      ..reset()
+      ..start();
+    _printedSnapshotTime = 0;
+  }
+
+  void maybePrint(String message, {int? count}) {
+    if (!enabled) return;
+    final total = _timer.elapsedMilliseconds;
+    final delta = total - _printedSnapshotTime;
+    _printedSnapshotTime = total;
+
+    var details = '';
+    if (count != null) {
+      final perItem = (total / count).toStringAsFixed(2);
+      details = ', $perItem ms per item';
+    }
+
+    // ignore: avoid_print, we want to measure performance in release mode.
+    print('$name. $message: + $delta = $total ms$details');
+  }
+}
