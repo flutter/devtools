@@ -15,36 +15,9 @@ class AnsiUp {
 
   late String _text;
   int style = StyledText.NONE;
-  List<AnsiUpColor> palette256 = [];
   AnsiUpColor? fg;
   AnsiUpColor? bg;
   RegExp? _csiRegex;
-
-  void _setupPalettes() {
-    _ansiColors.forEach(palette256.addAll);
-    final levels = [0, 95, 135, 175, 215, 255];
-    for (var r = 0; r < 6; ++r) {
-      for (var g = 0; g < 6; ++g) {
-        for (var b = 0; b < 6; ++b) {
-          palette256.add(
-            AnsiUpColor(
-              rgb: [levels[r], levels[g], levels[b]],
-              className: 'truecolor',
-            ),
-          );
-        }
-      }
-    }
-    var greyLevel = 8;
-    for (var i = 0; i < 24; ++i, greyLevel += 10) {
-      palette256.add(
-        AnsiUpColor(
-          rgb: [greyLevel, greyLevel, greyLevel],
-          className: 'truecolor',
-        ),
-      );
-    }
-  }
 
   _TextPacket _getNextPacket() {
     final pkt = _TextPacket(kind: PacketKind.EOS);
@@ -257,9 +230,9 @@ class AnsiUp {
             final paletteIndex = int.tryParse(sgrCmds[index++], radix: 10)!;
             if (paletteIndex >= 0 && paletteIndex <= 255) {
               if (isForeground) {
-                fg = palette256[paletteIndex];
+                fg = _palette256[paletteIndex];
               } else {
-                bg = palette256[paletteIndex];
+                bg = _palette256[paletteIndex];
               }
             }
           }
@@ -313,6 +286,36 @@ const List<List<AnsiUpColor>> _ansiColors = [
     AnsiUpColor(rgb: [255, 255, 255], className: 'ansi-bright-white'),
   ]
 ];
+
+final List<AnsiUpColor> _palette256 = _setupPalettes();
+
+List<AnsiUpColor> _setupPalettes() {
+  final List<AnsiUpColor> palette256 = [];
+  _ansiColors.forEach(palette256.addAll);
+  final levels = [0, 95, 135, 175, 215, 255];
+  for (var r = 0; r < 6; ++r) {
+    for (var g = 0; g < 6; ++g) {
+      for (var b = 0; b < 6; ++b) {
+        palette256.add(
+          AnsiUpColor(
+            rgb: [levels[r], levels[g], levels[b]],
+            className: 'truecolor',
+          ),
+        );
+      }
+    }
+  }
+  var greyLevel = 8;
+  for (var i = 0; i < 24; ++i, greyLevel += 10) {
+    palette256.add(
+      AnsiUpColor(
+        rgb: [greyLevel, greyLevel, greyLevel],
+        className: 'truecolor',
+      ),
+    );
+  }
+  return palette256;
+}
 
 class _TextWithAttr {
   _TextWithAttr({
