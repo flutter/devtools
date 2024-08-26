@@ -99,7 +99,11 @@ class TestInspectorV2Controller extends Fake
   ValueListenable<inspector_v2.WidgetTreeNodeProperties>
       get selectedNodeProperties =>
           ValueNotifier<inspector_v2.WidgetTreeNodeProperties>(
-            (widgetProperties: [], renderProperties: []),
+            (
+              widgetProperties: [],
+              renderProperties: [],
+              layoutProperties: null,
+            ),
           );
 
   @override
