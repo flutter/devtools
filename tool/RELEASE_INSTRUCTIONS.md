@@ -386,7 +386,8 @@ onto the `flutter/devtools` protected branch (`master`).
     
        1. Temporarily modify the settings of https://github.com/flutter/devtools to "allow merge
        commits at the repo level and remove `require linear history`".
-       2. Merge <link to PR>
+       2. IMPORTANT: Merge <link to PR> as a MERGE COMMIT. When merging, use the merge button dropdown
+       menu to select "Create a merge commit", NOT "Squash and merge".
        3. Revert the settings.
 
     Assign and send link to the bug to a member of the Dash team who has Admin access to the
