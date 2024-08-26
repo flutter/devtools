@@ -295,9 +295,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       final propertyType = diagnosticLocal.propertyType;
       final properties = diagnosticLocal.valuePropertiesJson;
 
-      // Show the "default" label if this is the property is the default value:
-      if (diagnosticLocal.level == DiagnosticLevel.fine &&
-          diagnosticLocal.hasDefaultValue) {
+      final showDefaultValueLabel =
+          diagnosticLocal.level == DiagnosticLevel.fine &&
+              diagnosticLocal.hasDefaultValue;
+
+      // Show the "default" value label at the start if the property name isn't
+      // included:
+      if (showDefaultValueLabel && !includeName) {
         children.add(
           Padding(
             padding: const EdgeInsets.only(right: denseSpacing),
@@ -377,6 +381,20 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           ),
         ),
       );
+
+      // Show the "default" value label at the end if the property name is
+      // included:
+      if (showDefaultValueLabel && includeName) {
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(left: denseSpacing),
+            child: DefaultValueLabel(
+              colorScheme: colorScheme,
+              textStyle: textStyle,
+            ),
+          ),
+        );
+      }
     } else {
       // Non property, regular node case.
       if (name != null &&

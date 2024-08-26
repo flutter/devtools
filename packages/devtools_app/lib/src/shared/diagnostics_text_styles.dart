@@ -30,11 +30,6 @@ class DiagnosticsTextStyles {
         color: colorScheme.error,
       );
 
-  static TextStyle details(ColorScheme colorScheme) => TextStyle(
-        color: colorScheme.onSurface,
-        fontStyle: FontStyle.italic,
-      );
-
   static TextStyle link(ColorScheme colorScheme) => TextStyle(
         color:
             colorScheme.isLight ? Colors.blue.shade700 : Colors.blue.shade300,
@@ -56,10 +51,9 @@ class DiagnosticsTextStyles {
         return warning(colorScheme);
       case DiagnosticLevel.error:
         return error(colorScheme);
-      case DiagnosticLevel.fine:
-        return details(colorScheme);
       case DiagnosticLevel.debug:
       case DiagnosticLevel.info:
+      case DiagnosticLevel.fine:
       default:
         return regular(colorScheme);
     }
