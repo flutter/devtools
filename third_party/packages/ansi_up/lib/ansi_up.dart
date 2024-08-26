@@ -9,10 +9,6 @@
 library;
 
 class AnsiUp {
-  AnsiUp() {
-    _setupPalettes();
-  }
-
   late String _text;
   int style = StyledText.NONE;
   AnsiUpColor? fg;
