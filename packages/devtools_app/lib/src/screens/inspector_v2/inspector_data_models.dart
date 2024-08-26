@@ -361,13 +361,13 @@ class LayoutWidthsAndHeights {
 
   double get bottomPadding => heights.paddingB;
 
-  bool get hasLeftPadding => leftPadding != 0;
+  bool get hasLeftPadding => leftPadding > 0;
 
-  bool get hasRightPadding => rightPadding != 0;
+  bool get hasRightPadding => rightPadding > 0;
 
-  bool get hasTopPadding => topPadding != 0;
+  bool get hasTopPadding => topPadding > 0;
 
-  bool get hasBottomPadding => bottomPadding != 0;
+  bool get hasBottomPadding => bottomPadding > 0;
 
   bool get hasAnyPadding =>
       hasLeftPadding || hasRightPadding || hasTopPadding || hasBottomPadding;
