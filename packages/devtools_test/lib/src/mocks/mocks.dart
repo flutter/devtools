@@ -106,6 +106,7 @@ class TestInspectorV2Controller extends Fake
             (
               widgetProperties: [],
               renderProperties: [],
+              // ignore: avoid_init_to_null
               layoutProperties: null,
             ),
           );
@@ -115,7 +116,6 @@ class TestInspectorV2Controller extends Fake
     _selectedNode.value = newSelection;
   }
 
-  @override
   void setSelectedDiagnostic(RemoteDiagnosticsNode newSelection) {
     _selectedDiagnostic = newSelection;
   }
