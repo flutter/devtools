@@ -93,16 +93,19 @@ List<double> computeRenderSizes({
 
 /// Data pattern containing a widget's widths or heights.
 typedef WidgetSizes = ({
-  // Whether this record represents a widget's widths or heights.
+  /// Whether this record represents a widget's widths or heights.
   SizeType type,
 
-  /// Either the widget's left or top padding.
+  /// Either the widget's left (if [type] is [SizeType.widths]) or top (if
+  /// [type] is [SizeType.heights]) padding.
   double paddingA,
 
-  // Either a widget's width or height.
+  /// Either the widget's width (if [type] is [SizeType.widths]) or height (if
+  /// [type] is [SizeType.heights]).
   double widgetSize,
 
-  // Either a widget's right or bottom padding.
+  /// Either the widget's right (if [type] is [SizeType.widths]) or bottom (if
+  /// [type] is [SizeType.heights]) padding.
   double paddingB,
 });
 

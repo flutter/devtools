@@ -19,6 +19,7 @@ import '../ui/utils.dart';
 import '../ui/widget_constraints.dart';
 import '../ui/widgets_theme.dart';
 
+/// Layout visualizer for a widget with a box-layout.
 class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
   const BoxLayoutExplorerWidget(
     super.inspectorController, {

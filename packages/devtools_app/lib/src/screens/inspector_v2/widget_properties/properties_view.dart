@@ -14,7 +14,7 @@ import '../inspector_data_models.dart';
 import '../layout_explorer/box/box.dart';
 import '../layout_explorer/flex/flex.dart';
 
-/// Table for the widget's properties, along with its render object and a the
+/// Table for the widget's properties, along with its render object and a
 /// flex layout explorer if the widget is part of a flex layout.
 class DetailsTable extends StatefulWidget {
   const DetailsTable({
@@ -142,11 +142,9 @@ class PropertiesView extends StatelessWidget {
 
     Widget? propertiesList;
     if (widgetWidths != null && widgetHeights != null) {
-      propertiesList = Center(
-        child: LayoutPropertiesList(
-          widgetHeights: widgetHeights,
-          widgetWidths: widgetWidths,
-        ),
+      propertiesList = LayoutPropertiesList(
+        widgetHeights: widgetHeights,
+        widgetWidths: widgetWidths,
       );
     }
 
@@ -183,13 +181,12 @@ class PropertiesView extends StatelessWidget {
                         ),
                       ),
                       if (propertiesList != null)
-                        horizontalLayout
-                            ? Expanded(child: propertiesList)
-                            : Padding(
-                                padding:
-                                    const EdgeInsets.only(bottom: largeSpacing),
-                                child: propertiesList,
-                              ),
+                        Padding(
+                          padding: horizontalLayout
+                              ? const EdgeInsets.only(left: largeSpacing)
+                              : const EdgeInsets.only(bottom: largeSpacing),
+                          child: propertiesList,
+                        ),
                     ],
                   ),
                 );
@@ -292,16 +289,18 @@ class LayoutPropertyItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.all(densePadding),
       child: RichText(
         text: TextSpan(
           text: '$name: ',
-          style: Theme.of(context).subtleTextStyle,
+          style: theme.subtleTextStyle,
           children: [
             TextSpan(
               text: toStringAsFixed(value),
-              style: Theme.of(context).fixedFontStyle,
+              style: theme.fixedFontStyle,
             ),
           ],
         ),

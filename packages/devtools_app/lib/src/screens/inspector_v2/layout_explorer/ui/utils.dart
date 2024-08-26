@@ -238,6 +238,7 @@ class FlexWidgetVisualizer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final hintLocal = hint;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -268,7 +269,7 @@ class FlexWidgetVisualizer extends StatelessWidget {
                   ),
                 ),
               ),
-              if (hint != null) Flexible(child: hint!),
+              if (hintLocal != null) Flexible(child: hintLocal),
             ],
           ),
         ),
