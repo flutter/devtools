@@ -346,7 +346,7 @@ WidgetSizes _simpleFractionalLayout({
   final paddingASize = sizes.paddingA;
   final paddingBSize = sizes.paddingB;
 
-  final paddingFraction = paddingASize != 0 && paddingBSize != 0 ? 0.3 : 0.35;
+  final paddingFraction = paddingASize > 0 && paddingBSize > 0 ? 0.3 : 0.35;
 
   final paddingAFraction = paddingASize > 0 ? paddingFraction : 0.0;
   final paddingBFraction = paddingBSize > 0 ? paddingFraction : 0.0;
