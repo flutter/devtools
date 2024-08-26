@@ -333,6 +333,14 @@ class BoxChildVisualizer extends StatelessWidget {
   }
 }
 
+/// The percent of the visualizer dedicating to a single padding block when
+/// the box child has multiple padding blocks.
+const _narrowPaddingVisualizerPercent = 0.3;
+
+/// The percent of the visualizer dedicating to a single padding block when
+/// the box child has only one padding block.
+const _widePaddingVisualizerPercent = 0.35;
+
 /// Simplistic layout algorithm that will return [WidgetSizes] for the widget
 /// display based on the display's [availableSize] and the real widget's
 /// [WidgetSizes].
@@ -346,7 +354,9 @@ WidgetSizes _simpleFractionalLayout({
   final paddingASize = sizes.paddingA;
   final paddingBSize = sizes.paddingB;
 
-  final paddingFraction = paddingASize > 0 && paddingBSize > 0 ? 0.3 : 0.35;
+  final paddingFraction = paddingASize > 0 && paddingBSize > 0
+      ? _narrowPaddingVisualizerPercent
+      : _widePaddingVisualizerPercent;
 
   final paddingAFraction = paddingASize > 0 ? paddingFraction : 0.0;
   final paddingBFraction = paddingBSize > 0 ? paddingFraction : 0.0;

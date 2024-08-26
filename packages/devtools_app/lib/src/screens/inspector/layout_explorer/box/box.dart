@@ -311,8 +311,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   LayoutProperties? get parentProperties {
     final parentElement = properties?.node.parentRenderElement;
     if (parentElement == null) return null;
-    final parentProperties = computeLayoutProperties(parentElement);
-    return parentProperties;
+    return computeLayoutProperties(parentElement);
   }
 
   Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
