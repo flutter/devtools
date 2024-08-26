@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/console/widgets/description.dart';
 import '../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../shared/ui/tab.dart';
 import '../inspector_controller.dart';
@@ -96,20 +97,43 @@ class PropertiesTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sortedProperties = _sortPropertiesByLevel(properties);
     return Scrollbar(
       controller: scrollController,
       thumbVisibility: true,
       child: ListView.builder(
         controller: scrollController,
-        itemCount: properties.length,
+        itemCount: sortedProperties.length,
         itemBuilder: (context, index) {
           return PropertyItem(
             index: index,
-            properties: properties,
+            properties: sortedProperties,
           );
         },
       ),
     );
+  }
+
+  /// Filters out properties with [DiagnosticLevel.hidden] and sorts properties
+  /// with [DiagnosticLevel.fine] behind all others.
+  List<RemoteDiagnosticsNode> _sortPropertiesByLevel(
+    List<RemoteDiagnosticsNode> properties,
+  ) {
+    final propertiesWithFineLevel = <RemoteDiagnosticsNode>[];
+    final propertiesWithOtherLevels = <RemoteDiagnosticsNode>[];
+
+    for (final property in properties) {
+      // Don't include properties that should be hidden:
+      if (property.level == DiagnosticLevel.hidden) continue;
+
+      if (property.level == DiagnosticLevel.fine) {
+        propertiesWithFineLevel.add(property);
+      } else {
+        propertiesWithOtherLevels.add(property);
+      }
+    }
+
+    return [...propertiesWithOtherLevels, ...propertiesWithFineLevel];
   }
 }
 
@@ -175,9 +199,11 @@ class PropertyValue extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(denseRowSpacing),
-      child: Text(
-        property.description ?? 'null',
-        style: Theme.of(context).regularTextStyle,
+      child: DiagnosticsNodeDescription(
+        property,
+        includeName: false,
+        overflow: TextOverflow.visible,
+        style: Theme.of(context).fixedFontStyle,
       ),
     );
   }

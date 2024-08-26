@@ -282,8 +282,9 @@ class _ColorIconPainter extends CustomPainter {
 class FlutterMaterialIcons {
   FlutterMaterialIcons._();
 
+  // TODO(https://github.com/flutter/flutter/issues/154144): This shows an invalid icon.
   static Icon getIconForCodePoint(int charCode, ColorScheme colorScheme) {
-    return Icon(IconData(charCode), color: colorScheme.onPrimary);
+    return Icon(IconData(charCode), color: colorScheme.onSurface);
   }
 }
 
