@@ -316,7 +316,8 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         final controller = TestInspectorV2Controller()
-          ..setSelectedNode(treeNode);
+          ..setSelectedNode(treeNode)
+          ..setSelectedDiagnostic(diagnostic);
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -354,7 +355,9 @@ void main() {
         expect(_findFlexExplorerTab(), findsNothing);
 
         // Select a flex widget.
-        controller.setSelectedNode(treeNode);
+        controller
+          ..setSelectedNode(treeNode)
+          ..setSelectedDiagnostic(diagnostic);
         await tester.pumpAndSettle();
 
         // Flex explorer is available for the flex widget.

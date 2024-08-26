@@ -96,6 +96,10 @@ class TestInspectorV2Controller extends Fake
   final _selectedNode = ValueNotifier<inspector_v2.InspectorTreeNode?>(null);
 
   @override
+  RemoteDiagnosticsNode? get selectedDiagnostic => _selectedDiagnostic;
+  RemoteDiagnosticsNode? _selectedDiagnostic = null;
+
+  @override
   ValueListenable<inspector_v2.WidgetTreeNodeProperties>
       get selectedNodeProperties =>
           ValueNotifier<inspector_v2.WidgetTreeNodeProperties>(
@@ -109,6 +113,11 @@ class TestInspectorV2Controller extends Fake
   @override
   void setSelectedNode(inspector_v2.InspectorTreeNode? newSelection) {
     _selectedNode.value = newSelection;
+  }
+
+  @override
+  void setSelectedDiagnostic(RemoteDiagnosticsNode newSelection) {
+    _selectedDiagnostic = newSelection;
   }
 
   @override
