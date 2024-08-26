@@ -244,6 +244,7 @@ class LayoutPropertiesList extends StatelessWidget {
     ) = widthsAndHeights!;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         LayoutPropertyItem(
           name: 'height',
