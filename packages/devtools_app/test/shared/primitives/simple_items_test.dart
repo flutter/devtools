@@ -11,6 +11,9 @@ void main() {
   for (final link in DocLinks.values) {
     test('$link is not broken', () async {
       final content = await loadPageHtmlContent(link.value);
+
+      expect(content, isNot(contains('"title":"File not found"')));
+
       final hash = link.hash;
       if (hash != null) {
         expect(content, contains('href="#$hash"'));
