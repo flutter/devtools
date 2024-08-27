@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../inspector/layout_explorer/ui/dimension.dart';
 import '../../inspector_data_models.dart';
 import 'overflow_indicator_painter.dart';
 import 'theme.dart';
@@ -120,6 +121,7 @@ class WidgetVisualizer extends StatelessWidget {
     required this.child,
     this.overflowSide,
     this.largeTitle = false,
+    this.isFlex = false,
   });
 
   final LayoutProperties layoutProperties;
@@ -128,6 +130,7 @@ class WidgetVisualizer extends StatelessWidget {
   final Widget? hint;
   final bool isSelected;
   final bool largeTitle;
+  final bool isFlex;
 
   final OverflowSide? overflowSide;
 
@@ -141,14 +144,12 @@ class WidgetVisualizer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final properties = layoutProperties;
     final borderColor = WidgetTheme.fromName(properties.node.description).color;
     final boxAdjust = isSelected ? _selectedPadding : 0.0;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final hintLocal = hint;
         return OverflowBox(
           minWidth: constraints.minWidth + boxAdjust,
           maxWidth: constraints.maxWidth + boxAdjust,
@@ -168,7 +169,7 @@ class WidgetVisualizer extends StatelessWidget {
                   ? [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.5),
-                        blurRadius: 20,
+                        blurRadius: 10,
                       ),
                     ]
                   : null,
@@ -193,49 +194,172 @@ class WidgetVisualizer extends StatelessWidget {
                         ? _overflowIndicatorSize
                         : 0.0,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              child: Container(
-                                constraints: BoxConstraints(
-                                  maxWidth: largeTitle
-                                      ? defaultMaxRenderWidth
-                                      : minRenderWidth *
-                                          widgetTitleMaxWidthPercentage,
-                                ),
-                                decoration: BoxDecoration(color: borderColor),
-                                padding: const EdgeInsets.all(4.0),
-                                child: Center(
-                                  child: Text(
-                                    title,
-                                    style: theme.regularTextStyleWithColor(
-                                      colorScheme.widgetNameColor,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            if (hintLocal != null) Flexible(child: hintLocal),
-                          ],
+                  child: isFlex
+                      ? FlexWidgetVisualizer(
+                          title: title,
+                          largeTitle: largeTitle,
+                          borderColor: borderColor,
+                          hint: hint,
+                          child: child,
+                        )
+                      : BoxWidgetVisualizer(
+                          borderColor: borderColor,
+                          title: title,
+                          properties: properties,
                         ),
-                      ),
-                      Expanded(child: child),
-                    ],
-                  ),
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+/// Visualizer display for a widget in a flex layout.
+class FlexWidgetVisualizer extends StatelessWidget {
+  const FlexWidgetVisualizer({
+    super.key,
+    required this.largeTitle,
+    required this.borderColor,
+    required this.title,
+    required this.hint,
+    required this.child,
+  });
+
+  final bool largeTitle;
+  final Color borderColor;
+  final String title;
+  final Widget? hint;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final hintLocal = hint;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: largeTitle
+                        ? defaultMaxRenderWidth
+                        : minRenderWidth * widgetTitleMaxWidthPercentage,
+                  ),
+                  decoration: BoxDecoration(color: borderColor),
+                  padding: const EdgeInsets.all(densePadding),
+                  child: Center(
+                    child: Text(
+                      title,
+                      style: theme.regularTextStyleWithColor(
+                        colorScheme.widgetNameColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ),
+              if (hintLocal != null) Flexible(child: hintLocal),
+            ],
+          ),
+        ),
+        Expanded(child: child),
+      ],
+    );
+  }
+}
+
+/// Visualizer display for a widget in a box layout.
+class BoxWidgetVisualizer extends StatelessWidget {
+  const BoxWidgetVisualizer({
+    super.key,
+    required this.borderColor,
+    required this.title,
+    required this.properties,
+  });
+
+  final Color borderColor;
+  final String title;
+  final LayoutProperties properties;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Center(
+          child: WidgetLabel(
+            labelColor: borderColor,
+            labelText: title,
+          ),
+        ),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              dimensionDescription(
+                TextSpan(text: properties.describeHeight()),
+                false,
+                theme.colorScheme,
+              ),
+              dimensionDescription(
+                TextSpan(text: properties.describeWidth()),
+                false,
+                theme.colorScheme,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A label for the widget in the layout explorer.
+class WidgetLabel extends StatelessWidget {
+  const WidgetLabel({
+    super.key,
+    required this.labelColor,
+    required this.labelText,
+    this.positionedAtBottom = false,
+  });
+
+  final Color labelColor;
+  final String labelText;
+  final bool positionedAtBottom;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(color: labelColor),
+      padding: EdgeInsets.fromLTRB(
+        densePadding,
+        positionedAtBottom ? borderPadding : 0.0,
+        densePadding,
+        positionedAtBottom ? 0.0 : borderPadding,
+      ),
+      child: Text(
+        labelText,
+        style: theme.regularTextStyleWithColor(
+          colorScheme.widgetNameColor,
+        ),
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }
@@ -265,6 +389,15 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   set parent(LayoutProperties? parent) {
     end.parent = parent;
   }
+
+  @override
+  LayoutProperties? get parentLayoutProperties => null;
+
+  @override
+  WidgetSizes? get widgetWidths => null;
+
+  @override
+  WidgetSizes? get widgetHeights => null;
 
   @override
   List<LayoutProperties> get children {
@@ -438,6 +571,54 @@ class LayoutExplorerBackground extends StatelessWidget {
           alignment: Alignment.topLeft,
         ),
       ),
+    );
+  }
+}
+
+/// Builds and positions a label for the [LayoutExplorerBackground] as
+/// determined by the widget's padding.
+class PositionedBackgroundLabel extends StatelessWidget {
+  const PositionedBackgroundLabel({
+    super.key,
+    required this.labelText,
+    required this.labelColor,
+    required this.hasTopPadding,
+    required this.hasBottomPadding,
+    required this.hasLeftPadding,
+    required this.hasRightPadding,
+  });
+
+  final String labelText;
+  final Color labelColor;
+  final bool hasTopPadding;
+  final bool hasBottomPadding;
+  final bool hasLeftPadding;
+  final bool hasRightPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      // Push to the bottom if there is no padding on the top.
+      mainAxisAlignment: !hasTopPadding && hasBottomPadding
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
+      children: [
+        Row(
+          // Push to the right if there is no padding on the left.
+          mainAxisAlignment: (!hasLeftPadding && hasRightPadding)
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
+          children: [
+            Flexible(
+              child: WidgetLabel(
+                labelColor: labelColor,
+                labelText: labelText,
+                positionedAtBottom: !hasTopPadding && hasBottomPadding,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

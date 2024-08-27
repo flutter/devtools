@@ -698,10 +698,6 @@ class ChartPainter extends CustomPainter {
         );
         canvas.drawPath(path, paintFirst);
         break;
-      default:
-        final message = 'Unknown symbol ${characteristics.symbol}';
-        assert(false, message);
-        _log.shout(message);
     }
   }
 

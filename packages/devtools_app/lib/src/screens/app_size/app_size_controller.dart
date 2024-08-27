@@ -37,7 +37,6 @@ enum DiffTreeType {
       case DiffTreeType.decreaseOnly:
         return 'Decrease Only';
       case DiffTreeType.combined:
-      default:
         return 'Combined';
     }
   }
@@ -55,7 +54,6 @@ enum AppUnit {
       case AppUnit.mainOnly:
         return _mainNodeName;
       case AppUnit.entireApp:
-      default:
         return _entireAppNodeName;
     }
   }
@@ -185,7 +183,6 @@ class AppSizeController {
       case AppUnit.deferredOnly:
         return _deferredDiffTreeMap;
       case AppUnit.entireApp:
-      default:
         return _diffTreeMap;
     }
   }
@@ -205,8 +202,6 @@ class AppSizeController {
         return diffMap.decreaseOnly;
       case DiffTreeType.combined:
         return diffMap.combined;
-      default:
-        return diffMap.combined;
     }
   }
 
@@ -221,7 +216,6 @@ class AppSizeController {
       case AppUnit.mainOnly:
         return _mainOnly;
       case AppUnit.entireApp:
-      default:
         return _entireApp;
     }
   }
