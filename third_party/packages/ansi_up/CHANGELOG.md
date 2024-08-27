@@ -1,4 +1,4 @@
-## 2.0.0
+## 2.0.0-dev
 * Removed `AnsiUp.ansiColors` and `AnsiUp.palette256` members.
 
   These members were not useful to users, and they didn't need to be instance
