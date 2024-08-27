@@ -4,8 +4,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-/// ansi_up is an library that parses text containing ANSI color escape
-/// codes.
+/// ansi_up is a library that parses text containing ANSI color escape codes.
 library;
 
 class AnsiUp {
@@ -43,7 +42,6 @@ class AnsiUp {
   List<AnsiUpColor> palette256;
   AnsiUpColor? fg;
   AnsiUpColor? bg;
-  RegExp? _csiRegex;
 
   void _setupPalettes() {
     ansiColors.forEach(palette256.addAll);
@@ -103,37 +101,7 @@ class AnsiUp {
         return pkt;
       }
       if (nextChar == '[') {
-        _csiRegex ??= _cleanAndConvertToRegex(
-          '\n                        '
-          '^                           # beginning of line'
-          '\n                                                    #'
-          '\n                                                    '
-          '# First attempt'
-          '\n                        '
-          '(?:                         # legal sequence'
-          '\n                          '
-          '\\x1b\\[                      # CSI'
-          '\n                          '
-          '([\\x3c-\\x3f]?)              # private-mode char'
-          '\n                          '
-          '([\\d;]*)                    # any digits or semicolons'
-          '\n                          '
-          '([\\x20-\\x2f]?               # an intermediate modifier'
-          '\n                          '
-          '[\\x40-\\x7e])                # the command'
-          '\n                        )\n                        '
-          '|                           # alternate (second attempt)'
-          '\n                        '
-          '(?:                         # illegal sequence'
-          '\n                          '
-          '\\x1b\\[                      # CSI'
-          '\n                          '
-          '[\\x20-\\x7e]*                # anything legal'
-          '\n                          '
-          '([\\x00-\\x1f:])              # anything illegal'
-          '\n                        )\n                    ',
-        );
-        final match = _csiRegex!.firstMatch(_text);
+        final match = _csiRegex.firstMatch(_text);
         if (match == null) {
           pkt.kind = PacketKind.Incomplete;
           return pkt;
@@ -316,6 +284,24 @@ class AnsiUp {
   }
 }
 
+final RegExp _csiRegex = RegExp('^' // beginning of line
+    // First attempt
+    '(?:' // legal sequence
+    '\\x1b\\[' // CSI
+    '([\\x3c-\\x3f]?)' // private-mode char
+    '([\\d;]*)' // any digits or semicolons
+    '([\\x20-\\x2f]?' // an intermediate modifier
+    '[\\x40-\\x7e])' // the command
+    ')'
+
+    // Second attempt
+    '|'
+    '(?:' // illegal sequence
+    '\\x1b\\[' // CSI
+    '[\\x20-\\x7e]*' // anything legal
+    '([\\x00-\\x1f:])' // anything illegal
+    ')');
+
 class _TextWithAttr {
   _TextWithAttr({
     this.fg,
@@ -356,14 +342,6 @@ class _TextPacket {
 }
 
 String _colorToCss(List/*<int>*/ rgb) => 'rgb(${rgb.join(',')})';
-
-// Removes comments and spaces/newlines from a regex string that were present
-// for readability.
-RegExp _cleanAndConvertToRegex(String regexText) {
-  final RegExp spacesAndComments =
-      RegExp(r'^\s+|\s+\n|\s*#[\s\S]*?\n|\n', multiLine: true);
-  return RegExp(regexText.replaceAll(spacesAndComments, ''));
-}
 
 /// Chunk of styled text stored in a Dart friendly format.
 class StyledText {
