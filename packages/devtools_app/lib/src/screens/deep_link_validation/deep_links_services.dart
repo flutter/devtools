@@ -61,6 +61,7 @@ const _iosDomainNameKey = 'domain_name';
 const _iosValidationResultsKey = 'validationResults';
 const _aasaAppPathsKey = 'aasaAppPaths';
 const _aasaPathsKey = 'aasaPaths';
+const _pathKey = 'path';
 
 const iosCheckNameToDomainError = <String, DomainError>{
   'EXISTENCE': IosDomainError.existence,
@@ -71,9 +72,10 @@ const iosCheckNameToDomainError = <String, DomainError>{
 };
 
 class ValidateIosDomainResult {
-  ValidateIosDomainResult(this.errorCode, this.domainErrors);
+  ValidateIosDomainResult(this.errorCode, this.domainErrors, this.paths);
   final String errorCode;
   final Map<String, List<DomainError>> domainErrors;
+  final Map<String, List<String>> paths;
 }
 
 class GenerateAssetLinksResult {
@@ -132,8 +134,6 @@ class DeepLinksService {
         final domainName = domainResult[_domainNameKey] as String;
         final failedChecks = (domainResult[_failedChecksKey] as List?)
             ?.cast<Map<String, Object?>>();
-        final aasaPaths = (domainResult[_aasaAppPathsKey] as List?)
-            ?.cast<Map<String, Object?>>();
         if (failedChecks != null) {
           for (final failedCheck in failedChecks) {
             final checkName = failedCheck[_checkNameKey] as String;
@@ -159,6 +159,10 @@ class DeepLinksService {
   }) async {
     final domainErrors = <String, List<DomainError>>{
       for (final domain in domains) domain: <DomainError>[],
+    };
+
+        final paths = <String, List<String>>{
+      for (final domain in domains) domain: <String>[],
     };
     // TODO(hangyujin): Add error code to the result.
     const errorCode = '';
@@ -196,6 +200,21 @@ class DeepLinksService {
               }
             }
           }
+          final aasaAppPaths = (domainResult[_aasaAppPathsKey] as List?)
+            ?.cast<Map<String, Object?>>();
+          if (aasaAppPaths != null) {
+            for (final aasaAppPath in aasaAppPaths) {
+              final aasaPaths= (aasaAppPath[_aasaPathsKey] as List?)?.cast<Map<String, Object?>>();
+              if (aasaPaths != null) {
+                for(final aasaPath in aasaPaths)
+                {
+                  paths[domainName]!.add( aasaPath[_pathKey] as String);
+                }
+                continue;
+              }
+            }
+
+          }
         }
         // TODO(hangyujin): Add path from AASA file check result.
       }
@@ -203,6 +222,7 @@ class DeepLinksService {
     return ValidateIosDomainResult(
       errorCode,
       domainErrors,
+      paths,
     );
   }
 

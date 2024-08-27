@@ -512,6 +512,9 @@ class DeepLinksController extends DisposableController
     late final Map<String, List<DomainError>> androidDomainErrors;
     Map<String, List<DomainError>> iosDomainErrors =
         <String, List<DomainError>>{};
+
+        Map<String, List<String>> iosDomainPaths =
+        <String, List<String>>{};
     try {
       final androidResult = await deepLinksService.validateAndroidDomain(
         domains: domains,
@@ -528,6 +531,7 @@ class DeepLinksController extends DisposableController
           domains: domains,
         );
         iosDomainErrors = iosResult.domainErrors;
+        iosDomainPaths= iosResult.paths;
       }
     } catch (_) {
       // TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
@@ -542,6 +546,8 @@ class DeepLinksController extends DisposableController
         if (linkdata.os.contains(PlatformOS.ios))
           ...(iosDomainErrors[linkdata.domain] ?? []),
       ];
+     final  iosPaths= iosDomainPaths[linkdata.domain] ?? [];
+
       if (errors.isNotEmpty) {
         return LinkData(
           domain: linkdata.domain,
