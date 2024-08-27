@@ -13,8 +13,8 @@ import '../test_data/deep_link/fake_responses.dart';
 
 final defaultAndroidDeeplink = androidDeepLinkJson(defaultDomain);
 
-class DeepLinksTestServices extends DeepLinksServices {
-  DeepLinksTestServices({
+class TestDeepLinksService extends DeepLinksService {
+  TestDeepLinksService({
     this.hasAndroidDomainErrors = false,
     this.hasIosDomainErrors = false,
   }) {
@@ -42,12 +42,12 @@ class DeepLinksTestServices extends DeepLinksServices {
   final bool hasIosDomainErrors;
 }
 
-class DeepLinksTestController extends DeepLinksController {
-  DeepLinksTestController({
+class TestDeepLinksController extends DeepLinksController {
+  TestDeepLinksController({
     this.hasAndroidDomainErrors = false,
     this.hasIosDomainErrors = false,
   }) {
-    deepLinksServices = DeepLinksTestServices(
+    _deepLinksService = TestDeepLinksService(
       hasAndroidDomainErrors: hasAndroidDomainErrors,
       hasIosDomainErrors: hasIosDomainErrors,
     );
@@ -58,6 +58,11 @@ class DeepLinksTestController extends DeepLinksController {
   bool hasAndroidPathErrors = false;
   bool hasIosDomainErrors = false;
   List<String> fakeIosDomains = [];
+
+  late DeepLinksService _deepLinksService;
+
+  @override
+  DeepLinksService get deepLinksService => _deepLinksService;
 
   @override
   Future<String?> packageDirectoryForMainIsolate() async {

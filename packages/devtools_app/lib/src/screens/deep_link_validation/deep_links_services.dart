@@ -89,8 +89,8 @@ class ValidateAndroidDomainResult {
   Map<String, List<DomainError>> domainErrors;
 }
 
-class DeepLinksServices {
-  DeepLinksServices() {
+class DeepLinksService {
+  DeepLinksService() {
     client = Client();
   }
 

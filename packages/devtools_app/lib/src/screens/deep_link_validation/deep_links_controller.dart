@@ -147,13 +147,10 @@ class DisplayOptions {
 
 class DeepLinksController extends DisposableController
     with AutoDisposeControllerMixin {
-  DeepLinksController() {
-    deepLinksServices = DeepLinksServices();
-  }
 
   @override
   void dispose() {
-    deepLinksServices.dispose();
+    deepLinksService.dispose();
     super.dispose();
   }
 
@@ -468,7 +465,7 @@ class DeepLinksController extends DisposableController
 
   /// The [TextEditingController] for the search text field.
   final textEditingController = TextEditingController();
-  late DeepLinksServices deepLinksServices;
+  final deepLinksService = DeepLinksService();
 
   bool addLocalFingerprint(String fingerprint) {
     // A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.
@@ -494,7 +491,7 @@ class DeepLinksController extends DisposableController
     final domain = selectedLink.value!.domain;
     if (domain != null) {
       generatedAssetLinksForSelectedLink.value =
-          await deepLinksServices.generateAssetLinks(
+          await deepLinksService.generateAssetLinks(
         domain: domain,
         applicationId: applicationId,
         localFingerprint: localFingerprint.value,
@@ -517,7 +514,7 @@ class DeepLinksController extends DisposableController
     Map<String, List<DomainError>> iosDomainErrors =
         <String, List<DomainError>>{};
     try {
-      final androidResult = await deepLinksServices.validateAndroidDomain(
+      final androidResult = await deepLinksService.validateAndroidDomain(
         domains: domains,
         applicationId: applicationId,
         localFingerprint: localFingerprint.value,
@@ -526,7 +523,7 @@ class DeepLinksController extends DisposableController
       googlePlayFingerprintsAvailability.value =
           androidResult.googlePlayFingerprintsAvailability;
       if (FeatureFlags.deepLinkIosCheck) {
-        final iosResult = await deepLinksServices.validateIosDomain(
+        final iosResult = await deepLinksService.validateIosDomain(
           bundleId: bundleId,
           teamId: teamId,
           domains: domains,

@@ -50,7 +50,7 @@ void main() {
   });
 
   late DeepLinksScreen screen;
-  late DeepLinksTestController deepLinksController;
+  late TestDeepLinksController deepLinksController;
 
   const windowSize = Size(2560.0, 1338.0);
 
@@ -71,7 +71,7 @@ void main() {
   group('DeepLinkScreen', () {
     setUp(() {
       screen = DeepLinksScreen();
-      deepLinksController = DeepLinksTestController();
+      deepLinksController = TestDeepLinksController();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -126,7 +126,7 @@ void main() {
       'builds deeplink list page with links',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -152,7 +152,7 @@ void main() {
       'builds deeplink list page with default ios and android configurations',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -180,7 +180,7 @@ void main() {
       'builds deeplink list page with split screen',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -214,7 +214,7 @@ void main() {
       'shows notification cards when there are domain errors',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController(
+        final deepLinksController = TestDeepLinksController(
           hasAndroidDomainErrors: true,
           hasIosDomainErrors: true,
         );
@@ -242,7 +242,7 @@ void main() {
       'shows notification cards when there are path errors',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -269,7 +269,7 @@ void main() {
       'taps the action button in notification cards to go to the split screen',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController(
+        final deepLinksController = TestDeepLinksController(
           hasAndroidDomainErrors: true,
           hasIosDomainErrors: true,
         );
@@ -304,7 +304,7 @@ void main() {
       'search links',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -342,7 +342,7 @@ void main() {
       'filter links with os',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
         deepLinksController
           ..selectedProject.value = FlutterProject(
             path: '/abc',
@@ -397,7 +397,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         final deepLinksController =
-            DeepLinksTestController(hasIosDomainErrors: true);
+            TestDeepLinksController(hasIosDomainErrors: true);
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -451,7 +451,7 @@ void main() {
       'sort links',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -516,7 +516,7 @@ void main() {
       'show scheme or missing scheme',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -546,7 +546,7 @@ void main() {
       'path view',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
