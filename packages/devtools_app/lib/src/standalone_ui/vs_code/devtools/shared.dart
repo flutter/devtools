@@ -10,10 +10,12 @@ import 'package:flutter/material.dart';
 import '../../../service/editor/editor_client.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/ui/icons.dart';
 
 typedef DevToolsButtonData = ({
   String label,
-  IconData icon,
+  IconData? icon,
+  String? iconAsset,
   String screenId,
   bool requiresDebugSession,
   bool prefersDebugSession,
@@ -83,10 +85,10 @@ class _DevToolsScreenButton extends StatelessWidget {
             shape: const ContinuousRectangleBorder(),
             textStyle: theme.regularTextStyle,
           ),
-          icon: Icon(
-            data.icon,
+          icon: DevToolsIcon(
+            icon: data.icon,
+            iconAsset: data.iconAsset,
             size: actionsIconSize,
-            color: theme.colorScheme.onSurface,
           ),
           label: Text(
             data.label,
@@ -107,8 +109,8 @@ void openDevToolsScreen({
   required EditorClient editor,
 }) {
   ga.select(
-    gac.VsCodeFlutterSidebar.id,
-    gac.VsCodeFlutterSidebar.openDevToolsScreen(screenId),
+    editor.gaId,
+    gac.EditorSidebar.openDevToolsScreen(screenId),
   );
   unawaited(
     editor.openDevToolsPage(

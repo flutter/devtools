@@ -234,7 +234,7 @@ class _WidgetColumn extends ColumnData<RebuildLocationStats> {
 
   @override
   String getValue(RebuildLocationStats dataObject) {
-    return dataObject.location.name ?? '???';
+    return dataObject.location.name ?? '<unknown>';
   }
 }
 
@@ -270,9 +270,9 @@ class _RebuildCountColumn extends ColumnData<RebuildLocationStats> {
   final int metricIndex;
 
   @override
-  int getValue(RebuildLocationStats dataObject) =>
-      dataObject.buildCounts[metricIndex];
+  bool get numeric => true;
 
   @override
-  bool get numeric => true;
+  int getValue(RebuildLocationStats dataObject) =>
+      dataObject.buildCounts[metricIndex];
 }

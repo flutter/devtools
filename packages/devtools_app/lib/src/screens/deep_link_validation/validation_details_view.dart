@@ -150,32 +150,42 @@ class _DomainCheckTable extends StatelessWidget {
             Text('Web check', style: theme.textTheme.titleMedium),
             const SizedBox(height: denseSpacing),
             const _CheckTableHeader(),
-            _CheckExpansionTile(
-              os: PlatformOS.android,
-              initiallyExpanded: !fingerprintExists,
-              checkName: 'Digital assets link file',
-              status: _CheckStatusText(
-                hasError:
-                    linkData.domainErrors.any((e) => e is AndroidDomainError),
-              ),
-              children: <Widget>[
-                _Fingerprint(controller: controller),
-                // The following checks are only displayed if a fingerprint exists.
-                if (fingerprintExists) ...[
-                  _AssetLinksJsonFileIssues(controller: controller),
-                  _HostingIssues(controller: controller),
+            if (linkData.os.contains(PlatformOS.android))
+              _CheckExpansionTile(
+                os: PlatformOS.android,
+                initiallyExpanded: !fingerprintExists,
+                checkName: 'Digital assets link file',
+                status: _CheckStatusText(
+                  hasError:
+                      linkData.domainErrors.any((e) => e is AndroidDomainError),
+                ),
+                children: <Widget>[
+                  _Fingerprint(controller: controller),
+                  // The following checks are only displayed if a fingerprint exists.
+                  if (fingerprintExists) ...[
+                    _AssetLinksJsonFileIssues(controller: controller),
+                    _HostingIssues(controller: controller),
+                  ],
                 ],
-              ],
-            ),
-            if (FeatureFlags.deepLinkIosCheck)
-              const _CheckExpansionTile(
+              ),
+            if (FeatureFlags.deepLinkIosCheck &&
+                linkData.os.contains(PlatformOS.ios))
+              _CheckExpansionTile(
                 os: PlatformOS.ios,
                 checkName: 'Apple-App-Site-Association file',
                 status: _CheckStatusText(
-                  //TODO (hangyu jin): add iOS domain errors when api is ready.
-                  hasError: false,
+                  hasError:
+                      linkData.domainErrors.any((e) => e is IosDomainError),
                 ),
-                children: <Widget>[],
+                children: <Widget>[
+                  for (final error
+                      in linkData.domainErrors.whereType<IosDomainError>())
+                    _IssuesBorderWrap(
+                      children: [
+                        _FailureDetails(errors: [error]),
+                      ],
+                    ),
+                ],
               ),
             const SizedBox(height: intermediateSpacing),
           ],
@@ -570,10 +580,9 @@ class _CrossCheckTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
-    // TODO (hangyujin): Update this bool to actually check if aasa file exists.
-    const hasIosAasaFile = true;
-    final hasAndroidAssetLinksFile =
-        !linkData.domainErrors.contains(AndroidDomainError.existence);
+
+    final hasIosAasaFile = linkData.hasIosAasaFile;
+    final hasAndroidAssetLinksFile = linkData.hasAndroidAssetLinksFile;
 
     final missingIos = hasIosAasaFile && !linkData.os.contains(PlatformOS.ios);
     final missingAndroid =

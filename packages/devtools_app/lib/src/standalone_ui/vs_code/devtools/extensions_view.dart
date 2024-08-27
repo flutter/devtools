@@ -20,6 +20,7 @@ DevToolsButtonData _buttonDataFromExtension(DevToolsExtensionConfig ext) {
   return (
     label: ext.name,
     icon: ext.icon,
+    iconAsset: null,
     screenId: ext.screenId,
     requiresDebugSession: ext.requiresConnection,
     // TODO(https://github.com/flutter/devtools/issues/7955): let extensions
@@ -84,13 +85,16 @@ class _SidebarDevToolsExtensionsState extends State<SidebarDevToolsExtensions>
         ),
         Table(
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: generateRows(extensions),
+          children: generateRows(widget.editor, extensions),
         ),
       ],
     );
   }
 
-  List<TableRow> generateRows(List<DevToolsExtensionConfig> extensions) {
+  List<TableRow> generateRows(
+    EditorClient editor,
+    List<DevToolsExtensionConfig> extensions,
+  ) {
     final rows = <TableRow>[];
     for (int i = 0; i < extensions.length; i++) {
       final ext = extensions[i];
@@ -107,13 +111,20 @@ class _SidebarDevToolsExtensionsState extends State<SidebarDevToolsExtensions>
           hasDebugSessions: widget.debugSessions.isNotEmpty,
           onPressed: (data) {
             ga.select(
-              gac.VsCodeFlutterSidebar.id,
-              gac.VsCodeFlutterSidebar.openDevToolsScreen(
+              editor.gaId,
+              gac.EditorSidebar.openDevToolsScreen(
                 gac.DevToolsExtensionEvents.extensionScreenName(ext),
               ),
             );
             unawaited(
-              widget.editor.openDevToolsPage(null, page: ext.screenId),
+              widget.editor.openDevToolsPage(
+                null,
+                page: ext.screenId,
+                requiresDebugSession: ext.requiresConnection,
+                // TODO(https://github.com/flutter/devtools/issues/7955): set
+                // the 'prefersDebugSession' value based on the support matrix
+                // declared by the extension.
+              ),
             );
           },
         ),

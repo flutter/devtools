@@ -6,6 +6,7 @@ import 'package:devtools_app/devtools_app.dart'
     hide InspectorScreen, InspectorScreenBodyState, InspectorScreenBody;
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,7 +50,7 @@ void main() {
     await env.setupEnvironment();
   });
 
-  tearDownAll(() async {
+  tearDown(() async {
     await env.tearDownEnvironment(force: true);
   });
 
@@ -63,17 +64,45 @@ void main() {
 
         await _loadInspectorUI(tester);
 
-        // Give time for the initial animation to complete.
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
             '../test_infra/goldens/integration_inspector_v2_initial_load.png',
           ),
         );
-
-        await env.tearDownEnvironment();
       },
+    );
+
+    testWidgetsWithWindowSize(
+      'loads after a hot-restart',
+      windowSize,
+      (WidgetTester tester) async {
+        // Load the inspector panel.
+        await _loadInspectorUI(tester);
+
+        // Expect the Center widget to be visible in the widget tree.
+        final centerWidgetFinder = find.richText('Center');
+        expect(centerWidgetFinder, findsOneWidget);
+
+        // Trigger a hot-restart and wait for the first Flutter frame.
+        await env.flutter!.hotRestart();
+        await _waitForFlutterFrame(tester, isInitialLoad: false);
+
+        // Wait for the Center widget to be visible again.
+        final centerWidgetFinderWithRetries = await retryUntilFound(
+          centerWidgetFinder,
+          tester: tester,
+        );
+        expect(centerWidgetFinderWithRetries, findsOneWidget);
+
+        await expectLater(
+          find.byType(InspectorScreenBody),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/integration_inspector_v2_after_hot_restart.png',
+          ),
+        );
+      },
+      skip: true, // https://github.com/flutter/devtools/issues/8179
     );
 
     testWidgetsWithWindowSize(
@@ -81,9 +110,6 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
-
-        // Give time for the initial animation to complete.
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Select the Center widget (row index #16)
         await tester.tap(find.richText('Center'));
@@ -111,8 +137,6 @@ void main() {
           value: '[Directionality]',
           tester: tester,
         );
-
-        await env.tearDownEnvironment();
       },
     );
 
@@ -121,9 +145,6 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
-
-        // Give time for the initial animation to complete.
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Before hidden widgets are expanded, confirm the HeroControllerScope
         // is hidden:
@@ -168,8 +189,6 @@ void main() {
             '../test_infra/goldens/integration_inspector_v2_implementation_widgets_collapsed.png',
           ),
         );
-
-        await env.tearDownEnvironment();
       },
     );
 
@@ -178,9 +197,6 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
-
-        // Give time for the initial animation to complete.
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
         // Before searching, confirm the HeroControllerScope is hidden:
         final hideableNodeFinder = findNodeMatching('HeroControllerScope');
@@ -206,11 +222,45 @@ void main() {
             '../test_infra/goldens/integration_inspector_v2_hideable_widget_selected_from_search.png',
           ),
         );
-
-        await env.tearDownEnvironment();
       },
     );
   });
+
+  testWidgetsWithWindowSize(
+    'hide all implementation widgets',
+    windowSize,
+    (WidgetTester tester) async {
+      await _loadInspectorUI(tester);
+
+      // Give time for the initial animation to complete.
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Confirm the hidden widgets are visible behind affordances like "X more
+      // widgets".
+      expect(
+        find.richTextContaining('more widgets...'),
+        findsWidgets,
+      );
+
+      // Tap the "Show Implementation Widgets" button (selected by default).
+      final showImplementationWidgetsButton = find.descendant(
+        of: find.byType(DevToolsToggleButton),
+        matching: find.text('Show Implementation Widgets'),
+      );
+      expect(showImplementationWidgetsButton, findsOneWidget);
+      await tester.tap(showImplementationWidgetsButton);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Confirm that the hidden widgets are no longer visible.
+      expect(find.richTextContaining('more widgets...'), findsNothing);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/integration_inspector_v2_implementation_widgets_hidden.png',
+        ),
+      );
+    },
+  );
 
   group('widget errors', () {
     testWidgetsWithWindowSize(
@@ -234,13 +284,8 @@ void main() {
           ),
         );
         await tester.pumpAndSettle(const Duration(seconds: 1));
-        final InspectorScreenBodyState state =
-            tester.state(find.byType(InspectorScreenBody));
-        final controller = state.controller;
-        while (!controller.flutterAppFrameReady) {
-          await controller.maybeLoadUI();
-          await tester.pumpAndSettle();
-        }
+        await _waitForFlutterFrame(tester);
+
         await env.flutter!.hotReload();
         // Give time for the initial animation to complete.
         await tester.pumpAndSettle(inspectorChangeSettleTime);
@@ -262,8 +307,6 @@ void main() {
             '../test_infra/goldens/integration_inspector_v2_errors_2_error_selected.png',
           ),
         );
-
-        await env.tearDownEnvironment();
       },
     );
   });
@@ -278,12 +321,26 @@ Future<void> _loadInspectorUI(WidgetTester tester) async {
     ),
   );
   await tester.pump(const Duration(seconds: 1));
-  final InspectorScreenBodyState state =
-      tester.state(find.byType(InspectorScreenBody));
+  await _waitForFlutterFrame(tester);
+
+  await tester.pumpAndSettle(inspectorChangeSettleTime);
+}
+
+Future<void> _waitForFlutterFrame(
+  WidgetTester tester, {
+  bool isInitialLoad = true,
+}) async {
+  final state = tester.state(find.byType(InspectorScreenBody))
+      as InspectorScreenBodyState;
   final controller = state.controller;
   while (!controller.flutterAppFrameReady) {
-    await controller.maybeLoadUI();
-    await tester.pumpAndSettle();
+    // On the initial load, we might have instantiated the controller after the
+    // first Flutter frame was sent. In which case, calling `maybeLoadUI` is
+    // necessary to ensure we detect that the widget tree is ready.
+    if (isInitialLoad) {
+      await controller.maybeLoadUI();
+    }
+    await tester.pump(safePumpDuration);
   }
 }
 

@@ -20,10 +20,7 @@ class MemoryScreenKeys {
 }
 
 class MemoryTabView extends StatelessWidget {
-  const MemoryTabView(
-    this.controller, {
-    super.key,
-  });
+  const MemoryTabView(this.controller, {super.key});
 
   static const _gaPrefix = 'memoryTab';
 

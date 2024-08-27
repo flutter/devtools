@@ -414,7 +414,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       // Grey out nodes that were not created by the local project to emphasize
       // those that were:
       if (emphasizeNodesFromLocalProject &&
-          !diagnosticLocal.isCreatedByLocalProject) {
+          !diagnosticLocal.isCreatedByLocalProject &&
+          diagnosticLocal.description != '[root]') {
         textStyle = textStyle.merge(theme.subtleTextStyle);
       }
 
@@ -582,17 +583,21 @@ class DescriptionDisplay extends StatelessWidget {
     if (actionLabel != null) {
       return Row(
         children: [
-          RichText(
-            overflow: TextOverflow.ellipsis,
-            text: text,
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              textStyle: Theme.of(context).regularTextStyle,
+          Flexible(
+            child: RichText(
+              overflow: TextOverflow.ellipsis,
+              text: text,
             ),
-            onPressed: actionCallback,
-            child: Text(
-              actionLabel!,
+          ),
+          Flexible(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).regularTextStyle,
+              ),
+              onPressed: actionCallback,
+              child: Text(
+                actionLabel!,
+              ),
             ),
           ),
         ],

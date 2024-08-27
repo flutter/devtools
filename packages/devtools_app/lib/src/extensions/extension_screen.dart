@@ -86,7 +86,7 @@ class _ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
   Widget build(BuildContext context) {
     return ExtensionView(
       controller: extensionController!,
-      extension: widget.extensionConfig,
+      ext: widget.extensionConfig,
     );
   }
 }
@@ -95,19 +95,20 @@ class ExtensionView extends StatelessWidget {
   const ExtensionView({
     super.key,
     required this.controller,
-    required this.extension,
+    required this.ext,
   });
 
   final EmbeddedExtensionController controller;
 
-  final DevToolsExtensionConfig extension;
+  final DevToolsExtensionConfig ext;
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         EmbeddedExtensionHeader(
-          extension: extension,
+          ext: ext,
           onForceReload: () =>
               controller.postMessage(DevToolsExtensionEventType.forceReload),
         ),
@@ -115,7 +116,7 @@ class ExtensionView extends StatelessWidget {
         Expanded(
           child: ValueListenableBuilder<ExtensionEnabledState>(
             valueListenable: extensionService.enabledStateListenable(
-              extension.name,
+              ext.name,
             ),
             builder: (context, activationState, _) {
               if (activationState == ExtensionEnabledState.enabled) {
@@ -126,7 +127,7 @@ class ExtensionView extends StatelessWidget {
                 );
               }
               return EnableExtensionPrompt(
-                extension: controller.extensionConfig,
+                ext: controller.extensionConfig,
               );
             },
           ),

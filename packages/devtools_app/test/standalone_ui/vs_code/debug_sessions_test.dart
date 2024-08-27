@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../test_infra/scenes/standalone_ui/editor_service/fake_editor.dart';
+import '../../test_infra/scenes/standalone_ui/editor_service/simulated_editor_mixin.dart';
 import '../../test_infra/utils/sidebar_utils.dart';
 
 void main() {
@@ -37,7 +37,7 @@ void main() {
     when(mockEditorClient.supportsGetDevices).thenReturn(true);
     when(mockEditorClient.supportsSelectDevice).thenReturn(true);
     when(mockEditorClient.supportsOpenDevToolsPage).thenReturn(true);
-    when(mockEditorClient.supportsOpenDevToolsExternally).thenReturn(true);
+    when(mockEditorClient.supportsOpenDevToolsForceExternal).thenReturn(true);
     when(mockEditorClient.supportsHotReload).thenReturn(true);
     when(mockEditorClient.supportsHotRestart).thenReturn(true);
     setGlobal(IdeTheme, IdeTheme());

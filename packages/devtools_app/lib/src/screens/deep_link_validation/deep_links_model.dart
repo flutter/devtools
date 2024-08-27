@@ -255,6 +255,8 @@ class LinkData with SearchableDataMixin {
     this.pathErrors = const <PathError>{},
     this.associatedPath = const <String>[],
     this.associatedDomains = const <String>[],
+    this.hasAndroidAssetLinksFile = true,
+    this.hasIosAasaFile = true,
   });
 
   final String? path;
@@ -266,6 +268,8 @@ class LinkData with SearchableDataMixin {
 
   final List<String> associatedPath;
   final List<String> associatedDomains;
+  final bool hasAndroidAssetLinksFile;
+  final bool hasIosAasaFile;
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
@@ -367,6 +371,12 @@ class DomainColumn extends ColumnData<LinkData>
   SortingOption? sortingOption;
 
   @override
+  bool get supportsSorting {
+    // Sorting options for this column are handled manually by [controller].
+    return false;
+  }
+
+  @override
   Widget? buildHeader(
     BuildContext context,
     Widget Function() defaultHeaderRenderer,
@@ -428,6 +438,12 @@ class PathColumn extends ColumnData<LinkData>
 
   DeepLinksController controller;
   SortingOption? sortingOption;
+
+  @override
+  bool get supportsSorting {
+    // Sorting options for this column are handled manually by [controller].
+    return false;
+  }
 
   @override
   Widget? buildHeader(
@@ -504,6 +520,13 @@ class SchemeColumn extends ColumnData<LinkData>
   DeepLinksController controller;
 
   @override
+  bool get supportsSorting {
+    // The sorting action for this column is used instead to provide filter
+    // options. This is handled manually by [controller].
+    return false;
+  }
+
+  @override
   Widget? buildHeader(
     BuildContext context,
     Widget Function() defaultHeaderRenderer,
@@ -550,6 +573,13 @@ class OSColumn extends ColumnData<LinkData>
   OSColumn(this.controller) : super.wide('OS');
 
   DeepLinksController controller;
+
+  @override
+  bool get supportsSorting {
+    // The sorting action for this column is used instead to provide filter
+    // options. This is handled manually by [controller].
+    return false;
+  }
 
   @override
   Widget? buildHeader(
@@ -599,6 +629,13 @@ class StatusColumn extends ColumnData<LinkData>
   DeepLinksController controller;
 
   TableViewType viewType;
+
+  @override
+  bool get supportsSorting {
+    // The sorting action for this column is used instead to provide filter
+    // options. This is handled manually by [controller].
+    return false;
+  }
 
   @override
   String getValue(LinkData dataObject) {
@@ -677,6 +714,9 @@ class NavigationColumn extends ColumnData<LinkData>
           '',
           fixedWidthPx: scaleByFontFactor(40),
         );
+
+  @override
+  bool get supportsSorting => false;
 
   @override
   String getValue(LinkData dataObject) => '';

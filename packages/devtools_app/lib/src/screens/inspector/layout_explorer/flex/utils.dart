@@ -197,7 +197,6 @@ extension AxisExtension on Axis {
       case Axis.horizontal:
         return 'Row';
       case Axis.vertical:
-      default:
         return 'Column';
     }
   }

@@ -5,12 +5,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc_2;
 import 'package:logging/logging.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 import '../../../service/editor/api_classes.dart';
 import '../../../service/editor/editor_client.dart';
+import '../../../shared/analytics/constants.dart';
 import '../../../shared/config_specific/logger/logger_helpers.dart';
 import '../../../shared/config_specific/post_message/post_message.dart';
 import '../../../shared/constants.dart';
@@ -33,6 +35,8 @@ const _enablePostMessageVerboseLogging = false;
 
 final _log = Logger('tooling_api');
 
+/// *** LEGACY API for postMessage, replaced by DTD version (`EditorClient`) ***
+///
 /// An API used by Dart tooling surfaces to interact with Dart tools that expose
 /// APIs such as Dart-Code and the LSP server.
 class PostMessageToolApiImpl implements PostMessageToolApi {
@@ -91,19 +95,26 @@ class PostMessageToolApiImpl implements PostMessageToolApi {
 ///
 /// This class allows the sidebar to use the new [EditorClient] APIs while still
 /// being compatible with postMessage based clients.
-class PostMessageEditorClient implements EditorClient {
+class PostMessageEditorClient extends DisposableController
+    with AutoDisposeControllerMixin
+    implements EditorClient {
   PostMessageEditorClient(this._api) {
     // In PostMessage world, we just get events with the entire new list so
     // we must figure out what the actual changes are so we can produce the
     // same kinds of events as the new DTD version.
-    _api.devicesChanged.listen(_devicesChanged);
-    _api.debugSessionsChanged.listen(_debugSessionsChanged);
+    autoDisposeStreamSubscription(_api.devicesChanged.listen(_devicesChanged));
+    autoDisposeStreamSubscription(
+      _api.debugSessionsChanged.listen(_debugSessionsChanged),
+    );
 
     // Trigger the initial initialization now we have the handlers set up.
     // In the old postMessage world, this is how we get the initial set of
     // devices/sessions.
     unawaited(_api.initialize());
   }
+
+  @override
+  String get gaId => EditorSidebar.legacyId;
 
   /// Handles the `postMessage` [VsCodeDevicesEvent] and converts the updates
   /// into events in the format of the new DTD `editor` event stream.
@@ -187,13 +198,20 @@ class PostMessageEditorClient implements EditorClient {
   Stream<EditorEvent> get event => _eventController.stream;
 
   @override
-  Future<List<EditorDevice>> getDevices() async {
-    return _currentDevices;
+  Stream<ServiceRegistrationChange> get editorServiceChanged =>
+      const Stream.empty();
+
+  @override
+  Future<GetDevicesResult> getDevices() async {
+    return GetDevicesResult(
+      devices: _currentDevices,
+      selectedDeviceId: _currentSelectedDeviceId,
+    );
   }
 
   @override
-  Future<List<EditorDebugSession>> getDebugSessions() async {
-    return _currentDebugSessions;
+  Future<GetDebugSessionsResult> getDebugSessions() async {
+    return GetDebugSessionsResult(debugSessions: _currentDebugSessions);
   }
 
   @override
@@ -232,6 +250,10 @@ class PostMessageEditorClient implements EditorClient {
   bool get supportsGetDevices => true; // Always true because we handle locally.
 
   @override
+  bool get supportsGetDebugSessions =>
+      true; // Always true because we handle locally.
+
+  @override
   bool get supportsSelectDevice => _api.capabilities.selectDevice;
 
   @override
@@ -241,7 +263,7 @@ class PostMessageEditorClient implements EditorClient {
   bool get supportsHotRestart => _api.capabilities.hotRestart;
 
   @override
-  bool get supportsOpenDevToolsExternally =>
+  bool get supportsOpenDevToolsForceExternal =>
       _api.capabilities.openDevToolsExternally;
 
   @override

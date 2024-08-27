@@ -136,6 +136,39 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
       (data![_ignoreIfAlreadyDismissedKey] as bool?) ?? true;
 }
 
+/// An extension event of type [DevToolsExtensionEventType.copyToClipboard]
+/// that is sent from an extension to DevTools asking DevTools copy content to
+/// the user's clipboard.
+class CopyToClipboardExtensionEvent extends DevToolsExtensionEvent {
+  CopyToClipboardExtensionEvent({
+    required String content,
+    String successMessage = defaultSuccessMessage,
+  }) : super(
+          DevToolsExtensionEventType.copyToClipboard,
+          data: {
+            _contentKey: content,
+            _successMessageKey: successMessage,
+          },
+        );
+
+  factory CopyToClipboardExtensionEvent.from(DevToolsExtensionEvent event) {
+    assert(event.type == DevToolsExtensionEventType.copyToClipboard);
+    final content = event.data!.checkValid<String>(_contentKey);
+    final successMessage = event.data!.checkValid<String>(_successMessageKey);
+    return CopyToClipboardExtensionEvent(
+      content: content,
+      successMessage: successMessage,
+    );
+  }
+
+  static const _contentKey = 'content';
+  static const _successMessageKey = 'successMessage';
+  static const defaultSuccessMessage = 'Copied to clipboard';
+
+  String get content => data![_contentKey] as String;
+  String get successMessage => data![_successMessageKey] as String;
+}
+
 extension ParseExtension on Map<String, Object?> {
   T checkValid<T>(String key) {
     final element = this[key];

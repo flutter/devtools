@@ -16,6 +16,7 @@ import 'package:vm_service/vm_service.dart';
 import '../screens/debugger/debugger_controller.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
+import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import 'console/widgets/expandable_variable.dart';
 import 'diagnostics/dart_object_node.dart';
 import 'diagnostics/tree_builder.dart';
@@ -23,6 +24,7 @@ import 'globals.dart';
 import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
+import 'ui/icons.dart';
 import 'utils.dart';
 
 double get assumedMonospaceCharacterWidth =>
@@ -662,13 +664,25 @@ class ToolbarAction extends StatelessWidget {
 abstract class ScaffoldAction extends StatelessWidget {
   const ScaffoldAction({
     super.key,
-    required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.icon,
+    this.iconAsset,
     this.color,
-  });
+  }) : assert(
+          (icon == null) != (iconAsset == null),
+          'Exactly one of icon and iconAsset must be specified.',
+        );
 
-  final IconData icon;
+  /// The icon to use for this scaffold action.
+  ///
+  /// Only one of [icon] or [iconAsset] may be non-null.
+  final IconData? icon;
+
+  /// The icon asset path to render as the icon for this scaffold action.
+  ///
+  /// Only one of [icon] or [iconAsset] may be non-null.
+  final String? iconAsset;
 
   final String tooltip;
 
@@ -686,8 +700,9 @@ abstract class ScaffoldAction extends StatelessWidget {
           width: actionWidgetSize,
           height: actionWidgetSize,
           alignment: Alignment.center,
-          child: Icon(
-            icon,
+          child: DevToolsIcon(
+            icon: icon,
+            iconAsset: iconAsset,
             size: actionsIconSize,
             color: color,
           ),
@@ -1177,8 +1192,7 @@ class _JsonViewerState extends State<JsonViewer>
                             .serviceManager.service!.fakeServiceCache
                             .instanceToJson(copiedVariable.value as Instance),
                       ),
-                      onSuccess: () =>
-                          notificationService.push('JSON copied to clipboard'),
+                      successMessage: 'JSON copied to clipboard',
                     ),
                   );
                 },
@@ -1416,9 +1430,7 @@ class CopyToClipboardControl extends StatelessWidget {
             unawaited(
               copyToClipboard(
                 dataProvider!() ?? '',
-                onSuccess: successMessage != null
-                    ? () => notificationService.push(successMessage!)
-                    : null,
+                successMessage: successMessage,
               ),
             );
           };

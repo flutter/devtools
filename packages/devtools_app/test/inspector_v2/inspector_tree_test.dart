@@ -68,7 +68,6 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
   }
 
   group('InspectorTreeController', () {

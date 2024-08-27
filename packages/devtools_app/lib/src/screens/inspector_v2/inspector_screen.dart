@@ -11,8 +11,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../service/service_extension_widgets.dart';
-import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
@@ -26,6 +24,7 @@ import '../../shared/screen.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import 'inspector_controller.dart';
+import 'inspector_controls.dart';
 import 'inspector_tree_controller.dart';
 import 'widget_details.dart';
 
@@ -76,7 +75,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   static const inspectorTreeKey = Key('Inspector Tree');
   static const minScreenWidthForTextBeforeScaling = 900.0;
-  static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
 
   @override
   void dispose() {
@@ -149,31 +147,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     );
     return Column(
       children: <Widget>[
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ValueListenableBuilder<bool>(
-              valueListenable: serviceConnection
-                  .serviceManager.serviceExtensionManager
-                  .hasServiceExtension(
-                extensions.toggleSelectWidgetMode.extension,
-              ),
-              builder: (_, selectModeSupported, __) {
-                return ServiceExtensionButtonGroup(
-                  extensions: [
-                    selectModeSupported
-                        ? extensions.toggleSelectWidgetMode
-                        : extensions.toggleOnDeviceWidgetInspector,
-                  ],
-                  minScreenWidthForTextBeforeScaling:
-                      minScreenWidthForTextBeforeScaling,
-                );
-              },
-            ),
-            const Spacer(),
-            Row(children: getServiceExtensionWidgets()),
-          ],
-        ),
+        InspectorControls(controller: controller),
         const SizedBox(height: intermediateSpacing),
         Expanded(
           child: widgetTrees,
@@ -250,38 +224,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       searchVisible = !searchVisible;
     });
     _inspectorTreeController.resetSearch();
-  }
-
-  List<Widget> getServiceExtensionWidgets() {
-    return [
-      ServiceExtensionButtonGroup(
-        minScreenWidthForTextBeforeScaling:
-            serviceExtensionButtonsIncludeTextWidth,
-        extensions: [
-          extensions.slowAnimations,
-          extensions.debugPaint,
-          extensions.debugPaintBaselines,
-          extensions.repaintRainbow,
-          extensions.invertOversizedImages,
-        ],
-      ),
-      const SizedBox(width: defaultSpacing),
-      SettingsOutlinedButton(
-        gaScreen: gac.inspector,
-        gaSelection: gac.inspectorSettings,
-        tooltip: 'Flutter Inspector Settings',
-        onPressed: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => const FlutterInspectorSettingsDialog(),
-            ),
-          );
-        },
-      ),
-      // TODO(jacobr): implement TogglePlatformSelector.
-      //  TogglePlatformSelector().selector
-    ];
   }
 
   void _refreshInspector() {
