@@ -298,31 +298,37 @@ FutureOr<void> debugTimeAsync(
 
 /// A timer for measuring performance of a cross-class operation in release mode.
 ///
-/// To see performance numbers in console, set `enabled` for instance
-/// of corresponding feature to `true`.
+/// Outputs time at different points of the operation.
+///
+/// To setup measurements for an operation:
+///
+/// 1. Add member `static final DebugTimer? <operation name> = null;`
+/// 2. Invoke `DebugTimer.<operation name>?.reset()` at the start of the operation.
+/// 3. Invoke `DebugTimer.<operation name>?.print(...)` at every control point.
+///
+/// To measure an operation:
+///
+/// 1. Assign the instance of the `DebugTimer` to a variable.
+/// 2. Execute the operation an find the prints in the console.
 class DebugTimer {
-  DebugTimer({required this.enabled, required this.name}) {
+  DebugTimer() {
     _timer.start();
   }
 
-  static final snapshot = DebugTimer(enabled: false, name: 'Snapshotting');
-
-  final bool enabled;
-  final String name;
+  // ignore: prefer_const_declarations, avoid-explicit-type-declaration, not relevant when used
+  static final DebugTimer? snapshot = null;
 
   final _timer = Stopwatch();
   var _printedSnapshotTime = 0;
 
-  void maybeReset() {
-    if (!enabled) return;
+  void reset() {
     _timer
       ..reset()
       ..start();
     _printedSnapshotTime = 0;
   }
 
-  void maybePrint(String message, {int? count}) {
-    if (!enabled) return;
+  void print(String message, {int? count}) {
     final total = _timer.elapsedMilliseconds;
     final delta = total - _printedSnapshotTime;
     _printedSnapshotTime = total;
@@ -330,10 +336,10 @@ class DebugTimer {
     var details = '';
     if (count != null) {
       final perItem = (total / count).toStringAsFixed(2);
-      details = ', $perItem ms per item';
+      details = ', for $count items, $perItem ms per item';
     }
 
     // ignore: avoid_print, we want to measure performance in release mode.
-    print('$name. $message: + $delta = $total ms$details');
+    print('DebugTimer. $message: + $delta = $total ms$details');
   }
 }

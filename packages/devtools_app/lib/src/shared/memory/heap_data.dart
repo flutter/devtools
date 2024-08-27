@@ -57,13 +57,13 @@ class HeapData {
     @visibleForTesting bool calculateClassData = true,
   }) async {
     if (!calculateClassData) return;
-    DebugTimer.snapshot.maybePrint('calculation started');
+    DebugTimer.snapshot?.print('calculation started');
 
     List<int>? retainers;
 
     if (calculateRetainingPaths || calculateRetainedSizes) {
       final weakClasses = _WeakClasses(graph);
-      DebugTimer.snapshot.maybePrint('weak classes detected');
+      DebugTimer.snapshot?.print('weak classes detected');
 
       final result = findShortestRetainers(
         graphSize: graph.objects.length,
@@ -73,7 +73,7 @@ class HeapData {
         shallowSize: (int index) => graph.objects[index].shallowSize,
         calculateSizes: calculateRetainedSizes,
       );
-      DebugTimer.snapshot.maybePrint('shortest paths found');
+      DebugTimer.snapshot?.print('shortest paths found');
 
       if (calculateRetainingPaths) retainers = result.retainers;
       if (calculateRetainedSizes) retainedSizes = result.retainedSizes;
@@ -122,7 +122,7 @@ class HeapData {
         if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       }
       DebugTimer.snapshot
-          .maybePrint('class data calculated', count: graph.objects.length);
+          ?.print('class data calculated', count: graph.objects.length);
 
       footprint = MemoryFootprint(dart: dartSize, reachable: reachableSize);
       classes = ClassDataList<SingleClassData>(nameToClass.values.toList());
@@ -133,7 +133,7 @@ class HeapData {
             retainedSizes![heapRootIndex] == footprint!.reachable,
       );
     }
-    DebugTimer.snapshot.maybePrint('calculation done');
+    DebugTimer.snapshot?.print('calculation done');
     _calculated.complete();
   }
 }

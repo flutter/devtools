@@ -15,7 +15,6 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/development_helpers.dart';
 import '../../../../../shared/dialogs.dart';
-import '../../../../../shared/memory/simple_items.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../controller/diff_pane_controller.dart';
@@ -58,8 +57,8 @@ class _ListControlPane extends StatelessWidget {
 
   Future<void> _takeSnapshot(BuildContext context) async {
     try {
-      DebugTimer.snapshot.maybeReset();
-      DebugTimer.snapshot.maybePrint('Start snapshot');
+      DebugTimer.snapshot?.reset();
+      DebugTimer.snapshot?.print('Start snapshot');
       await controller.takeSnapshot();
     } catch (e, trace) {
       _log.shout(e, e, trace);
