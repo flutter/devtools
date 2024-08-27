@@ -42,7 +42,7 @@ set -ex
 pushd "$FLUTTER_DIR"
   # The flutter tool relies on git tags to determine its version
   git fetch --tags https://github.com/flutter/flutter.git
-  git describe --tags
+  git describe --tags -f
   # Print out local tags for debugging
   git tag -l
 popd
