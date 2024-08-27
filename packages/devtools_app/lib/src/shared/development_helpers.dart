@@ -316,7 +316,7 @@ class DebugTimer {
   }
 
   // ignore: prefer_const_declarations, avoid-explicit-type-declaration, not relevant when used
-  static final DebugTimer? snapshot = DebugTimer();
+  static final DebugTimer? snapshot = null;
 
   final _timer = Stopwatch();
   var _printedSnapshotTime = 0;
