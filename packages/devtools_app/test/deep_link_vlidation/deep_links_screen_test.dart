@@ -26,45 +26,6 @@ import '../test_infra/utils/deep_links_utils.dart';
 final xcodeBuildOptions = XcodeBuildOptions.fromJson(
   '''{"configurations":["debug", "release"],"targets":["runner","runnerTests"]}''',
 );
-final linkDatas = [
-  LinkData(
-    domain: 'www.domain1.com',
-    path: '/',
-    os: {PlatformOS.android},
-  ),
-  LinkData(
-    domain: 'www.domain2.com',
-    path: '/',
-    os: {PlatformOS.ios},
-  ),
-  LinkData(
-    domain: 'www.google.com',
-    path: '/',
-    os: {PlatformOS.android, PlatformOS.ios},
-  ),
-  LinkData(
-    domain: 'www.google.com',
-    path: '/home',
-    os: {PlatformOS.android, PlatformOS.ios},
-  ),
-];
-
-final domainErrorlinkData = LinkData(
-  domain: 'www.google.com',
-  path: '/',
-  os: {PlatformOS.android, PlatformOS.ios},
-  domainErrors: [AndroidDomainError.existence, IosDomainError.existence],
-);
-
-final pathErrorlinkData = LinkData(
-  domain: 'www.google.com',
-  path: '/abcd',
-  os: {PlatformOS.android, PlatformOS.ios},
-  pathErrors: {
-    PathError.intentFilterActionView,
-    PathError.intentFilterDefault,
-  },
-);
 
 void main() {
   // ignore: avoid-redundant-async, false positive.
@@ -230,14 +191,18 @@ void main() {
           ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
           ..fakeIosDomains = [defaultDomain];
 
-        deepLinksController.displayOptionsNotifier.value =
-            DisplayOptions(showSplitScreen: true);
-        deepLinksController.selectedLink.value = linkDatas.first;
+
 
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
         );
+
+        deepLinksController.autoSelectLink( TableViewType.domainView);
+        deepLinksController.displayOptionsNotifier.value =
+            DisplayOptions(showSplitScreen: true);
+
+        await tester.pumpAndSettle();
 
         expect(find.byType(DeepLinkPage), findsOneWidget);
         expect(find.byType(DeepLinkListView), findsOneWidget);
