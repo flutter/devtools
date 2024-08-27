@@ -148,13 +148,12 @@ class DisplayOptions {
 class DeepLinksController extends DisposableController
     with AutoDisposeControllerMixin {
   DeepLinksController() {
-    client = Client();
-    deepLinksServices = DeepLinksServices(client);
+    deepLinksServices = DeepLinksServices();
   }
 
   @override
   void dispose() {
-    client.close();
+    deepLinksServices.dispose();
     super.dispose();
   }
 
@@ -470,7 +469,6 @@ class DeepLinksController extends DisposableController
   /// The [TextEditingController] for the search text field.
   final textEditingController = TextEditingController();
   late DeepLinksServices deepLinksServices;
-  late Client client;
 
   bool addLocalFingerprint(String fingerprint) {
     // A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.

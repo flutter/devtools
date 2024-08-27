@@ -90,8 +90,15 @@ class ValidateAndroidDomainResult {
 }
 
 class DeepLinksServices {
-  DeepLinksServices(this.client);
-  final Client client;
+  DeepLinksServices() {
+    client = Client();
+  }
+
+  late Client client;
+
+  void dispose() {
+    client.close();
+  }
 
   Future<ValidateAndroidDomainResult> validateAndroidDomain({
     required List<String> domains,

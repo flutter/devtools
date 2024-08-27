@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import '../test_infra/test_data/deep_link/fake_responses.dart';
 import '../test_infra/utils/deep_links_utils.dart';
 
 final xcodeBuildOptions = XcodeBuildOptions.fromJson(
@@ -248,7 +249,10 @@ void main() {
       'shows notification cards when there are domain errors',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = DeepLinksTestController(
+          hasAndroidDomainErrors: true,
+          hasIosDomainErrors: true,
+        );
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -257,9 +261,7 @@ void main() {
             iosBuildOptions: xcodeBuildOptions,
           )
           ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
-          ..fakeIosDomains = [defaultDomain]
-          ..hasAndroidDomainErrors = true
-          ..hasIosDomainErrors = true;
+          ..fakeIosDomains = [defaultDomain];
 
         await pumpDeepLinkScreen(
           tester,
@@ -286,9 +288,7 @@ void main() {
           ..fakeAndroidDeepLinks = [
             androidDeepLinkJson(defaultDomain, hasPathError: true),
           ]
-          ..fakeIosDomains = [defaultDomain]
-          ..hasAndroidDomainErrors = false
-          ..hasIosDomainErrors = false;
+          ..fakeIosDomains = [defaultDomain];
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
@@ -304,7 +304,10 @@ void main() {
       'taps the action button in notification cards to go to the split screen',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = DeepLinksTestController(
+          hasAndroidDomainErrors: true,
+          hasIosDomainErrors: true,
+        );
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -313,9 +316,7 @@ void main() {
             iosBuildOptions: xcodeBuildOptions,
           )
           ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
-          ..fakeIosDomains = [defaultDomain]
-          ..hasAndroidDomainErrors = true
-          ..hasIosDomainErrors = true;
+          ..fakeIosDomains = [defaultDomain];
 
         await pumpDeepLinkScreen(
           tester,
@@ -430,7 +431,8 @@ void main() {
       'filter links with validation result',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController =
+            DeepLinksTestController(hasIosDomainErrors: true);
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -443,7 +445,7 @@ void main() {
             androidDeepLinkJson('www.google.com'),
           ]
           ..fakeIosDomains = [defaultDomain]
-          ..hasIosDomainErrors = true;
+          ;
 
         await pumpDeepLinkScreen(
           tester,
@@ -589,8 +591,11 @@ void main() {
           )
           ..fakeAndroidDeepLinks = [
             androidDeepLinkJson('www.domain1.com', path: '/path1'),
-            androidDeepLinkJson('www.domain2.com',
-                path: '/path2', hasPathError: true),
+            androidDeepLinkJson(
+              'www.domain2.com',
+              path: '/path2',
+              hasPathError: true,
+            ),
             androidDeepLinkJson('www.domain3.com', path: '/path3'),
           ];
 
