@@ -518,7 +518,6 @@ class TimeRange {
       case TimeUnit.microseconds:
         return '[${_start?.inMicroseconds} μs - ${end?.inMicroseconds} μs]';
       case TimeUnit.milliseconds:
-      default:
         return '[${_start?.inMilliseconds} ms - ${end?.inMilliseconds} ms]';
     }
   }

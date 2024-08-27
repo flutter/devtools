@@ -204,6 +204,8 @@ class DeepLinksController extends DisposableController
           if (linkData.path != null) linkData.path!,
         ],
         domainErrors: linkData.domainErrors,
+        hasAndroidAssetLinksFile: linkData.hasAndroidAssetLinksFile,
+        hasIosAasaFile: linkData.hasIosAasaFile,
       );
     }
     return getFilterredLinks(linkDatasByDomain.values.toList());
@@ -526,8 +528,10 @@ class DeepLinksController extends DisposableController
 
     return linkdatas.map((linkdata) {
       final errors = <DomainError>[
-        ...(androidDomainErrors[linkdata.domain] ?? []),
-        ...(iosDomainErrors[linkdata.domain] ?? []),
+        if (linkdata.os.contains(PlatformOS.android))
+          ...(androidDomainErrors[linkdata.domain] ?? []),
+        if (linkdata.os.contains(PlatformOS.ios))
+          ...(iosDomainErrors[linkdata.domain] ?? []),
       ];
       if (errors.isNotEmpty) {
         return LinkData(
@@ -539,6 +543,12 @@ class DeepLinksController extends DisposableController
           scheme: linkdata.scheme,
           associatedDomains: linkdata.associatedDomains,
           associatedPath: linkdata.associatedPath,
+          hasAndroidAssetLinksFile: !(androidDomainErrors[linkdata.domain]
+                  ?.contains(AndroidDomainError.existence) ??
+              false),
+          hasIosAasaFile: !(iosDomainErrors[linkdata.domain]
+                  ?.contains(IosDomainError.existence) ??
+              false),
         );
       }
       return linkdata;

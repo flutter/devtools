@@ -50,7 +50,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## App size tool updates
 
-TODO: Remove this section if there are not any general updates.
+* Added UI polish to the file import views. [#8232](https://github.com/flutter/devtools/pull/8232)
 
 ## Deep links tool updates
 
