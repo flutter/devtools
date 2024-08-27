@@ -131,7 +131,8 @@ class PropertiesView extends StatelessWidget {
   RemoteDiagnosticsNode? get selectedNode =>
       controller.selectedNode.value?.diagnostic;
 
-  bool get includeLayoutExplorer => selectedNode?.isBoxLayout ?? false;
+  bool get includeLayoutExplorer =>
+      (selectedNode?.isBoxLayout ?? false) && layoutProperties != null;
 
   WidgetSizes? get widgetWidths => layoutProperties?.widgetWidths;
 
@@ -141,9 +142,11 @@ class PropertiesView extends StatelessWidget {
   Widget build(BuildContext context) {
     final layoutExplorerOffset = includeLayoutExplorer ? 1 : 0;
 
-    Widget? propertiesList;
+    final sortedProperties = _sortPropertiesByLevel(properties);
+
+    Widget? layoutPropertiesList;
     if (widgetWidths != null && widgetHeights != null) {
-      propertiesList = LayoutPropertiesList(
+      layoutPropertiesList = LayoutPropertiesList(
         widgetHeights: widgetHeights,
         widgetWidths: widgetWidths,
       );
@@ -160,7 +163,7 @@ class PropertiesView extends StatelessWidget {
           thumbVisibility: true,
           child: ListView.builder(
             controller: scrollController,
-            itemCount: properties.length + layoutExplorerOffset,
+            itemCount: sortedProperties.length + layoutExplorerOffset,
             itemBuilder: (context, index) {
               if (index == 0 && includeLayoutExplorer) {
                 return DecoratedPropertiesTableRow(
@@ -181,12 +184,12 @@ class PropertiesView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (propertiesList != null)
+                      if (layoutPropertiesList != null)
                         Padding(
                           padding: horizontalLayout
                               ? const EdgeInsets.only(left: largeSpacing)
                               : const EdgeInsets.only(bottom: largeSpacing),
-                          child: propertiesList,
+                          child: layoutPropertiesList,
                         ),
                     ],
                   ),
@@ -195,13 +198,35 @@ class PropertiesView extends StatelessWidget {
 
               return PropertyItem(
                 index: index - layoutExplorerOffset,
-                properties: properties,
+                properties: sortedProperties,
               );
             },
           ),
         );
       },
     );
+  }
+
+  /// Filters out properties with [DiagnosticLevel.hidden] and sorts properties
+  /// with [DiagnosticLevel.fine] behind all others.
+  List<RemoteDiagnosticsNode> _sortPropertiesByLevel(
+    List<RemoteDiagnosticsNode> properties,
+  ) {
+    final propertiesWithFineLevel = <RemoteDiagnosticsNode>[];
+    final propertiesWithOtherLevels = <RemoteDiagnosticsNode>[];
+
+    for (final property in properties) {
+      // Don't include properties that should be hidden:
+      if (property.level == DiagnosticLevel.hidden) continue;
+
+      if (property.level == DiagnosticLevel.fine) {
+        propertiesWithFineLevel.add(property);
+      } else {
+        propertiesWithOtherLevels.add(property);
+      }
+    }
+
+    return [...propertiesWithOtherLevels, ...propertiesWithFineLevel];
   }
 }
 
@@ -323,43 +348,20 @@ class PropertiesTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sortedProperties = _sortPropertiesByLevel(properties);
     return Scrollbar(
       controller: scrollController,
       thumbVisibility: true,
       child: ListView.builder(
         controller: scrollController,
-        itemCount: sortedProperties.length,
+        itemCount: properties.length,
         itemBuilder: (context, index) {
           return PropertyItem(
             index: index,
-            properties: sortedProperties,
+            properties: properties,
           );
         },
       ),
     );
-  }
-
-  /// Filters out properties with [DiagnosticLevel.hidden] and sorts properties
-  /// with [DiagnosticLevel.fine] behind all others.
-  List<RemoteDiagnosticsNode> _sortPropertiesByLevel(
-    List<RemoteDiagnosticsNode> properties,
-  ) {
-    final propertiesWithFineLevel = <RemoteDiagnosticsNode>[];
-    final propertiesWithOtherLevels = <RemoteDiagnosticsNode>[];
-
-    for (final property in properties) {
-      // Don't include properties that should be hidden:
-      if (property.level == DiagnosticLevel.hidden) continue;
-
-      if (property.level == DiagnosticLevel.fine) {
-        propertiesWithFineLevel.add(property);
-      } else {
-        propertiesWithOtherLevels.add(property);
-      }
-    }
-
-    return [...propertiesWithOtherLevels, ...propertiesWithFineLevel];
   }
 }
 
