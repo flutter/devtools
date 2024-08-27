@@ -598,13 +598,17 @@ class PositionedBackgroundLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      // Push to the bottom if there is no padding on the top.
+      mainAxisAlignment: !hasTopPadding && hasBottomPadding
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
       children: [
-        // Push to the bottom if there is no padding on the top.
-        if (!hasTopPadding && hasBottomPadding) const Spacer(),
         Row(
+          // Push to the right if there is no padding on the left.
+          mainAxisAlignment: (!hasLeftPadding && hasRightPadding)
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
           children: [
-            // Push to the right if there is no padding on the left.
-            if (!hasLeftPadding && hasRightPadding) const Spacer(),
             Flexible(
               child: WidgetLabel(
                 labelColor: labelColor,
