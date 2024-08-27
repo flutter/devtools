@@ -97,7 +97,7 @@ class TestInspectorV2Controller extends Fake
 
   @override
   RemoteDiagnosticsNode? get selectedDiagnostic => _selectedDiagnostic;
-  RemoteDiagnosticsNode? _selectedDiagnostic = null;
+  RemoteDiagnosticsNode? _selectedDiagnostic;
 
   @override
   ValueListenable<inspector_v2.WidgetTreeNodeProperties>
@@ -106,7 +106,6 @@ class TestInspectorV2Controller extends Fake
             (
               widgetProperties: [],
               renderProperties: [],
-              // ignore: avoid_init_to_null
               layoutProperties: null,
             ),
           );
