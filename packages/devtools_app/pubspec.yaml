@@ -164,6 +164,8 @@ flutter:
         - asset: packages/codicon/font/codicon.ttf
 
 dependency_overrides:
+  ansi_up:
+    path: ../../third_party/packages/ansi_up
   devtools_shared:
     path: ../devtools_shared
   devtools_app_shared:
