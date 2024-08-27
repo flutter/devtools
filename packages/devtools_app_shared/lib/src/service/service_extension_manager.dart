@@ -208,19 +208,27 @@ final class ServiceExtensionManager with DisposerMixin {
     }
     _checkForFirstFrameStarted = true;
 
-    final value = await _service!.callServiceExtension(
-      extensions.didSendFirstFrameEvent,
-      isolateId: lastMainIsolate.id,
-    );
-    if (lastMainIsolate != _isolateManager.mainIsolate.value) {
-      // The active isolate has changed since we started querying the first
-      // frame.
-      return;
-    }
-    final didSendFirstFrameEvent = value.json!['enabled'] == 'true';
+    try {
+      final value = await _service!.callServiceExtension(
+        extensions.didSendFirstFrameEvent,
+        isolateId: lastMainIsolate.id,
+      );
+      if (lastMainIsolate != _isolateManager.mainIsolate.value) {
+        // The active isolate has changed since we started querying the first
+        // frame.
+        return;
+      }
+      final didSendFirstFrameEvent = value.json!['enabled'] == 'true';
 
-    if (didSendFirstFrameEvent) {
-      await _onFrameEventReceived();
+      if (didSendFirstFrameEvent) {
+        await _onFrameEventReceived();
+      }
+    } on RPCError catch (e) {
+      if (e.code == RPCErrorKind.kServerError.code) {
+        // Connection disappeared
+        return;
+      }
+      rethrow;
     }
   }
 
@@ -362,41 +370,49 @@ final class ServiceExtensionManager with DisposerMixin {
       if (_isolateManager.mainIsolate.value != mainIsolate) return;
 
       assert(value != null);
-      if (value is bool) {
-        Future<void> call(String? isolateId, bool value) async {
+      try {
+        if (value is bool) {
+          Future<void> call(String? isolateId, bool value) async {
+            await _service!.callServiceExtension(
+              name,
+              isolateId: isolateId,
+              args: {'enabled': value},
+            );
+          }
+
+          final description = extensions.serviceExtensionsAllowlist[name];
+          if (description?.shouldCallOnAllIsolates ?? false) {
+            // TODO(jacobr): be more robust instead of just assuming that if the
+            // service extension is available on one isolate it is available on
+            // all. For example, some isolates may still be initializing so may
+            // not expose the service extension yet.
+            await _service!.forEachIsolate((isolate) async {
+              await call(isolate.id, value);
+            });
+          } else {
+            await call(mainIsolate?.id, value);
+          }
+        } else if (value is String) {
           await _service!.callServiceExtension(
             name,
-            isolateId: isolateId,
-            args: {'enabled': value},
+            isolateId: mainIsolate?.id,
+            args: {'value': value},
+          );
+        } else if (value is double) {
+          await _service!.callServiceExtension(
+            name,
+            isolateId: mainIsolate?.id!,
+            // The param name for a numeric service extension will be the last part
+            // of the extension name (ext.flutter.extensionName => extensionName).
+            args: {name.substring(name.lastIndexOf('.') + 1): value},
           );
         }
-
-        final description = extensions.serviceExtensionsAllowlist[name];
-        if (description?.shouldCallOnAllIsolates ?? false) {
-          // TODO(jacobr): be more robust instead of just assuming that if the
-          // service extension is available on one isolate it is available on
-          // all. For example, some isolates may still be initializing so may
-          // not expose the service extension yet.
-          await _service!.forEachIsolate((isolate) async {
-            await call(isolate.id, value);
-          });
-        } else {
-          await call(mainIsolate?.id, value);
+      } on RPCError catch (e) {
+        if (e.code == RPCErrorKind.kServerError.code) {
+          // Connection disappeared
+          return;
         }
-      } else if (value is String) {
-        await _service!.callServiceExtension(
-          name,
-          isolateId: mainIsolate?.id,
-          args: {'value': value},
-        );
-      } else if (value is double) {
-        await _service!.callServiceExtension(
-          name,
-          isolateId: mainIsolate?.id!,
-          // The param name for a numeric service extension will be the last part
-          // of the extension name (ext.flutter.extensionName => extensionName).
-          args: {name.substring(name.lastIndexOf('.') + 1): value},
-        );
+        rethrow;
       }
     }
 

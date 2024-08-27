@@ -111,7 +111,6 @@ void main() {
         final controller = scene.controller.trace!;
         final state = controller.selection.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
-        expect(controller.initializing.value, isFalse);
         expect(controller.refreshing.value, isFalse);
         expect(state.selectedClass.value, isNull);
         expect(state.selectedClassProfile, isNull);
@@ -274,7 +273,6 @@ void main() {
         final controller = scene.controller.trace!;
         final state = controller.selection.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
-        expect(controller.initializing.value, isFalse);
         expect(controller.refreshing.value, isFalse);
         expect(state.selectedClass.value, isNull);
         expect(state.selectedClassProfile, isNull);

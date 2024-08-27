@@ -53,9 +53,6 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
   }
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   Widget? build(
     BuildContext context,
     CpuStackFrame data, {

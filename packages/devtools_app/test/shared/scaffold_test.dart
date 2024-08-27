@@ -163,7 +163,7 @@ void main() {
   );
 
   testWidgets(
-    'displays no tabs when only one is given',
+    'displays tabs with only one screen',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
@@ -172,7 +172,7 @@ void main() {
       );
       expect(find.byType(DevToolsAppBar), findsOneWidget);
       expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(_t1), findsNothing);
+      expect(find.byKey(_t1), findsOneWidget);
     },
   );
 

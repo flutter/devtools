@@ -20,7 +20,7 @@ import 'extension_screen.dart';
 class ExtensionSettingsAction extends ScaffoldAction {
   ExtensionSettingsAction({super.key, super.color})
       : super(
-          icon: Icons.extension_outlined,
+          iconAsset: 'icons/app_bar/devtools_extensions.png',
           tooltip: 'DevTools Extensions',
           onPressed: (context) {
             unawaited(

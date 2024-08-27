@@ -285,6 +285,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
         child: InkWell(
           onTap: () => unawaited(onTap(propertiesLocal)),
           child: WidgetVisualizer(
+            isFlex: true,
             title: flexType,
             layoutProperties: propertiesLocal,
             isSelected: highlighted == properties,
@@ -754,6 +755,7 @@ class FlexChildVisualizer extends StatelessWidget {
             animation: state.entranceController,
             builder: buildEntranceAnimation,
             child: WidgetVisualizer(
+              isFlex: true,
               isSelected: isSelected,
               layoutProperties: layoutProperties,
               title: propertiesLocal.description ?? '',

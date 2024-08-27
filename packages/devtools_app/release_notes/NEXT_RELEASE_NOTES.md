@@ -10,7 +10,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed table columns to be sortable by default. - [#8175](https://github.com/flutter/devtools/pull/8175)
+* Updated DevTools screen icons to match what is used in the Flutter-supported IDEs. - [#8181](https://github.com/flutter/devtools/pull/8181)
 
 ## Inspector updates
 
@@ -26,7 +27,14 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Enabled offline analysis of memory snapshots, as well as support for viewing memory
+data when an app disconnects. For example, this may happen when an app unexpectedly
+crashes or hits an out-of-memory issue. - [#7843](https://github.com/flutter/devtools/pull/7843),
+[#8093](https://github.com/flutter/devtools/pull/8093),
+[#8096](https://github.com/flutter/devtools/pull/8096)
+
+* Fixed issue where the memory chart could cause the connected application to hit an
+out of memory exception while allocating large, short-lived objects repeatedly. - [#8209](https://github.com/flutter/devtools/pull/8209)
 
 ## Debugger updates
 
@@ -42,7 +50,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## App size tool updates
 
-TODO: Remove this section if there are not any general updates.
+* Added UI polish to the file import views. [#8232](https://github.com/flutter/devtools/pull/8232)
 
 ## Deep links tool updates
 

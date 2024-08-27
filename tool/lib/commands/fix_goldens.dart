@@ -65,7 +65,7 @@ class FixGoldensCommand extends Command {
       final allLocalGoldenPngs =
           Directory(pathFromRepoRoot("packages/devtools_app/test/"))
               .listSync(recursive: true)
-            ..where((e) => e.path.endsWith('.png'));
+              .where((e) => e.path.endsWith('.png'));
 
       for (final downloadedGolden in downloadedGoldens) {
         final downloadedGoldenBaseName = path.basename(downloadedGolden.path);

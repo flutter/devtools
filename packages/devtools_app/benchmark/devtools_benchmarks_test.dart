@@ -14,11 +14,15 @@ import 'package:web_benchmarks/server.dart';
 import 'test_infra/common.dart';
 import 'test_infra/project_root_directory.dart';
 
-final metricList = <String>[
-  'preroll_frame',
-  'apply_frame',
-  'drawFrameDuration',
-];
+List<String> metricList({required bool useWasm}) => [
+      // The skwasm renderer doesn't have preroll or apply frame steps in its
+      // rendering.
+      if (!useWasm) ...[
+        'preroll_frame',
+        'apply_frame',
+      ],
+      'drawFrameDuration',
+    ];
 
 final valueList = <String>[
   'average',
@@ -61,12 +65,13 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   );
 
   for (final benchmarkName in DevToolsBenchmark.values.map((e) => e.id)) {
+    final expectedMetrics = metricList(useWasm: useWasm);
     expect(
       taskResult.scores[benchmarkName],
-      hasLength(metricList.length * valueList.length + 1),
+      hasLength(expectedMetrics.length * valueList.length + 1),
     );
 
-    for (final metricName in metricList) {
+    for (final metricName in expectedMetrics) {
       for (final valueName in valueList) {
         expect(
           taskResult.scores[benchmarkName]?.where(

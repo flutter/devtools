@@ -149,6 +149,10 @@ class DeepLinksController extends DisposableController
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
   String get applicationId =>
       _androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
+  String get bundleId =>
+      _iosLinks[selectedIosConfigurationIndex.value]?.bundleIdentifier ?? '';
+  String get teamId =>
+      _iosLinks[selectedIosConfigurationIndex.value]?.teamIdentifier ?? '';
 
   @visibleForTesting
   List<LinkData> linkDatasByPath(List<LinkData> linkdatas) {
@@ -200,6 +204,8 @@ class DeepLinksController extends DisposableController
           if (linkData.path != null) linkData.path!,
         ],
         domainErrors: linkData.domainErrors,
+        hasAndroidAssetLinksFile: linkData.hasAndroidAssetLinksFile,
+        hasIosAasaFile: linkData.hasIosAasaFile,
       );
     }
     return getFilterredLinks(linkDatasByDomain.values.toList());
@@ -325,7 +331,7 @@ class DeepLinksController extends DisposableController
             configuration: configuration,
             target: target,
           );
-          _iosLinks[selectedAndroidVariantIndex.value] = result;
+          _iosLinks[selectedIosConfigurationIndex.value] = result;
         } catch (_) {
           pagePhase.value = PagePhase.validationErrorPage;
         }
@@ -507,20 +513,25 @@ class DeepLinksController extends DisposableController
       googlePlayFingerprintsAvailability.value =
           androidResult.googlePlayFingerprintsAvailability;
       if (FeatureFlags.deepLinkIosCheck) {
-        iosDomainErrors = await deepLinksServices.validateIosDomain(
+        final iosResult = await deepLinksServices.validateIosDomain(
+          bundleId: bundleId,
+          teamId: teamId,
           domains: domains,
         );
+        iosDomainErrors = iosResult.domainErrors;
       }
     } catch (_) {
-      //TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
+      // TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.validationErrorPage;
       return linkdatas;
     }
 
     return linkdatas.map((linkdata) {
       final errors = <DomainError>[
-        ...(androidDomainErrors[linkdata.domain] ?? []),
-        ...(iosDomainErrors[linkdata.domain] ?? []),
+        if (linkdata.os.contains(PlatformOS.android))
+          ...(androidDomainErrors[linkdata.domain] ?? []),
+        if (linkdata.os.contains(PlatformOS.ios))
+          ...(iosDomainErrors[linkdata.domain] ?? []),
       ];
       if (errors.isNotEmpty) {
         return LinkData(
@@ -532,6 +543,12 @@ class DeepLinksController extends DisposableController
           scheme: linkdata.scheme,
           associatedDomains: linkdata.associatedDomains,
           associatedPath: linkdata.associatedPath,
+          hasAndroidAssetLinksFile: !(androidDomainErrors[linkdata.domain]
+                  ?.contains(AndroidDomainError.existence) ??
+              false),
+          hasIosAasaFile: !(iosDomainErrors[linkdata.domain]
+                  ?.contains(IosDomainError.existence) ??
+              false),
         );
       }
       return linkdata;

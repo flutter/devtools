@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../screens/inspector_v2/inspector_data_models.dart';
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
 import '../ui/icons.dart';
@@ -452,6 +453,30 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
     return json[memberName] as bool;
   }
+
+  LayoutProperties computeLayoutProperties({required bool forFlexLayout}) {
+    assert(!forFlexLayout || (forFlexLayout && isFlexLayout));
+    return forFlexLayout
+        ? FlexLayoutProperties.fromDiagnostics(this)
+        : LayoutProperties(this);
+  }
+
+  RemoteDiagnosticsNode? layoutRootNode({required bool forFlexLayout}) {
+    final shouldDisplayNode = forFlexLayout ? isFlexLayout : isBoxLayout;
+    if (!shouldDisplayNode) return null;
+
+    if (forFlexLayout) {
+      return isFlex ? this : parent;
+    }
+
+    return this;
+  }
+
+  // TODO(https://github.com/flutter/devtools/issues/8238): Actually determine
+  // whether this node has a box layout.
+  bool get isBoxLayout => true;
+
+  bool get isFlexLayout => isFlex || (parent?.isFlex ?? false);
 
   DiagnosticLevel getLevelMember(
     String memberName,
