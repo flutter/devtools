@@ -120,7 +120,7 @@ class PropertiesView extends StatelessWidget {
 
   static const layoutExplorerHeight = 150.0;
   static const layoutExplorerWidth = 200.0;
-  static const scaleFactorForVerticalLayout = 1.75;
+  static const scaleFactorForVerticalLayout = 2.0;
 
   final List<RemoteDiagnosticsNode> properties;
   final LayoutProperties? layoutProperties;
