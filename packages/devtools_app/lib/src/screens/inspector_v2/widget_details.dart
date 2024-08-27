@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import 'inspector_controller.dart';
-import 'inspector_screen.dart';
 import 'layout_explorer/box/box.dart';
 import 'layout_explorer/flex/flex.dart';
 import 'widget_properties/properties_view.dart';
@@ -49,30 +47,9 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
           );
         }
 
-        return SplitPane(
-          axis: isScreenWiderThan(
-            context,
-            InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
-          )
-              ? Axis.horizontal
-              : Axis.vertical,
-          initialFractions: const [0.5, 0.5],
-          children: [
-            if (FlexLayoutExplorerWidget.shouldDisplay(node)) ...[
-              FlexLayoutExplorerWidget(controller),
-            ] else if (BoxLayoutExplorerWidget.shouldDisplay(node)) ...[
-              BoxLayoutExplorerWidget(controller),
-            ] else ...[
-              const Center(
-                child: Text(
-                  'Currently, the Layout Explorer only supports Box and Flex-based widgets.',
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.clip,
-                ),
-              ),
-            ],
-            PropertiesView(controller: controller, node: node),
-          ],
+        return DetailsTable(
+          controller: controller,
+          node: node,
         );
       },
     );
