@@ -87,13 +87,13 @@ class SnapshotDataItem extends SnapshotItem
 
   Future<void> loadHeap(HeapGraphLoader loader) async {
     assert(_heap == null);
-    DebugTimer.snapshot?.print('Loading');
+    DebugTimer.snapshot?.printTime('Loading');
     final (graph, created) = await loader.load();
-    DebugTimer.snapshot?.print('Loaded');
+    DebugTimer.snapshot?.printTime('Loaded');
     _heap = HeapData(graph, created: created);
-    DebugTimer.snapshot?.print('HeapData created');
+    DebugTimer.snapshot?.printTime('HeapData created');
     await _heap!.calculate;
-    DebugTimer.snapshot?.print('HeapData calculated');
+    DebugTimer.snapshot?.printTime('HeapData calculated');
     _processed.complete();
   }
 

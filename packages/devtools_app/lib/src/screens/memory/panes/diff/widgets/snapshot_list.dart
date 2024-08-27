@@ -59,7 +59,7 @@ class _ListControlPane extends StatelessWidget {
   Future<void> _takeSnapshot(BuildContext context) async {
     try {
       DebugTimer.snapshot?.reset();
-      DebugTimer.snapshot?.print('Start snapshot');
+      DebugTimer.snapshot?.printTime('Start snapshot');
       await controller.takeSnapshot();
     } catch (e, trace) {
       _log.shout(e, e, trace);

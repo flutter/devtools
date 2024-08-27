@@ -316,7 +316,7 @@ class DebugTimer {
   }
 
   // ignore: prefer_const_declarations, avoid-explicit-type-declaration, not relevant when used
-  static final DebugTimer? snapshot = null;
+  static final DebugTimer? snapshot = DebugTimer();
 
   final _timer = Stopwatch();
   var _printedSnapshotTime = 0;
@@ -328,7 +328,7 @@ class DebugTimer {
     _printedSnapshotTime = 0;
   }
 
-  void print(String message, {int? count}) {
+  void printTime(String message, {int? count}) {
     final total = _timer.elapsedMilliseconds;
     final delta = total - _printedSnapshotTime;
     _printedSnapshotTime = total;
