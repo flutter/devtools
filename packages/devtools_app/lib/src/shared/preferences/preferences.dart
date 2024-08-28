@@ -17,6 +17,7 @@ import '../config_specific/logger/logger_helpers.dart';
 import '../constants.dart';
 import '../diagnostics/inspector_service.dart';
 import '../globals.dart';
+import '../query_parameters.dart';
 import '../utils.dart';
 
 part '_extension_preferences.dart';
@@ -27,6 +28,32 @@ part '_logging_preferences.dart';
 part '_performance_preferences.dart';
 
 const _thirdPartyPathSegment = 'third_party';
+
+/// DevTools preferences for experimental features.
+enum _ExperimentPreferences {
+  wasm;
+
+  String get storageKey => '$storagePrefix.$name';
+
+  static const storagePrefix = 'experiment';
+}
+
+/// DevTools preferences for UI-related settings.
+enum _UiPreferences {
+  darkMode,
+  vmDeveloperMode;
+
+  String get storageKey => '$storagePrefix.$name';
+
+  static const storagePrefix = 'ui';
+}
+
+/// DevTools preferences for general settings.
+///
+/// These values are not stored in the DevTools storage file with a prefix.
+enum _GeneralPreferences {
+  verboseLogging,
+}
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -43,9 +70,12 @@ class PreferencesController extends DisposableController
 
   final vmDeveloperModeEnabled = ValueNotifier<bool>(false);
 
+  /// Whether DevTools should be rendered with the skwasm renderer instead of
+  /// canvaskit.
+  final wasmMode = ValueNotifier<bool>(false);
+
   final verboseLoggingEnabled =
       ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
-  static const _verboseLoggingStorageId = 'verboseLogging';
 
   // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
   // Inspector V2 has been released.
@@ -69,24 +99,9 @@ class PreferencesController extends DisposableController
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
-    final darkModeValue = await storage.getValue('ui.darkMode');
-    final useDarkMode = (darkModeValue == null && useDarkThemeAsDefault) ||
-        darkModeValue == 'true';
-    ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
-    toggleDarkModeTheme(useDarkMode);
-    addAutoDisposeListener(darkModeEnabled, () {
-      storage.setValue('ui.darkMode', '${darkModeEnabled.value}');
-    });
-
-    final vmDeveloperModeValue = await boolValueFromStorage(
-      'ui.vmDeveloperMode',
-      defaultsTo: false,
-    );
-    toggleVmDeveloperMode(vmDeveloperModeValue);
-    addAutoDisposeListener(vmDeveloperModeEnabled, () {
-      storage.setValue('ui.vmDeveloperMode', '${vmDeveloperModeEnabled.value}');
-    });
-
+    await _initDarkMode();
+    await _initVmDeveloperMode();
+    await _initWasmEnabled();
     await _initVerboseLogging();
 
     await inspector.init();
@@ -98,15 +113,81 @@ class PreferencesController extends DisposableController
     setGlobal(PreferencesController, this);
   }
 
+  Future<void> _initDarkMode() async {
+    final darkModeValue =
+        await storage.getValue(_UiPreferences.darkMode.storageKey);
+    final useDarkMode = (darkModeValue == null && useDarkThemeAsDefault) ||
+        darkModeValue == 'true';
+    ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
+    toggleDarkModeTheme(useDarkMode);
+    addAutoDisposeListener(darkModeEnabled, () {
+      storage.setValue(
+        _UiPreferences.darkMode.storageKey,
+        '${darkModeEnabled.value}',
+      );
+    });
+  }
+
+  Future<void> _initVmDeveloperMode() async {
+    final vmDeveloperModeValue = await boolValueFromStorage(
+      _UiPreferences.vmDeveloperMode.storageKey,
+      defaultsTo: false,
+    );
+    toggleVmDeveloperMode(vmDeveloperModeValue);
+    addAutoDisposeListener(vmDeveloperModeEnabled, () {
+      storage.setValue(
+        _UiPreferences.vmDeveloperMode.storageKey,
+        '${vmDeveloperModeEnabled.value}',
+      );
+    });
+  }
+
+  Future<void> _initWasmEnabled() async {
+    // TODO(https://github.com/flutter/devtools/issues/7856): set the current
+    // value based on whether DevTools is actually loaded with wasm.
+    wasmMode.value = false;
+
+    // It is important that this listener is added before we set the initial
+    // state of the wasm mode setting below. This is because the query parameter
+    // for wasm may need to be updated based on the value of the preference in
+    // the storage file, which we take into account when we call
+    // [toggleWasmMode] at the end of this method.
+    addAutoDisposeListener(wasmMode, () async {
+      final enabled = wasmMode.value;
+      await storage.setValue(
+        _ExperimentPreferences.wasm.storageKey,
+        '$enabled',
+      );
+
+      // Update the wasm mode query parameter if it does not match the value of
+      // the setting.
+      final wasmEnabledFromQueryParams = DevToolsQueryParams.load().useWasm;
+      if (wasmEnabledFromQueryParams != enabled) {
+        updateQueryParameter(
+          DevToolsQueryParams.useWasmKey,
+          enabled ? 'skwasm' : null,
+          reload: true,
+        );
+      }
+    });
+
+    final wasmEnabledFromStorage = await boolValueFromStorage(
+      _ExperimentPreferences.wasm.storageKey,
+      defaultsTo: false,
+    );
+    final wasmEnabledFromQueryParams = DevToolsQueryParams.load().useWasm;
+    toggleWasmMode(wasmEnabledFromStorage || wasmEnabledFromQueryParams);
+  }
+
   Future<void> _initVerboseLogging() async {
     final verboseLoggingEnabledValue = await boolValueFromStorage(
-      _verboseLoggingStorageId,
+      _GeneralPreferences.verboseLogging.name,
       defaultsTo: false,
     );
     toggleVerboseLogging(verboseLoggingEnabledValue);
     addAutoDisposeListener(verboseLoggingEnabled, () {
       storage.setValue(
-        'verboseLogging',
+        _GeneralPreferences.verboseLogging.name,
         verboseLoggingEnabled.value.toString(),
       );
     });
@@ -122,18 +203,25 @@ class PreferencesController extends DisposableController
     super.dispose();
   }
 
-  /// Change the value for the dark mode setting.
+  /// Change the value of the dark mode setting.
   void toggleDarkModeTheme(bool? useDarkMode) {
     if (useDarkMode != null) {
       darkModeEnabled.value = useDarkMode;
     }
   }
 
-  /// Change the value for the VM developer mode setting.
+  /// Change the value of the VM developer mode setting.
   void toggleVmDeveloperMode(bool? enableVmDeveloperMode) {
     if (enableVmDeveloperMode != null) {
       vmDeveloperModeEnabled.value = enableVmDeveloperMode;
       VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
+    }
+  }
+
+  /// Change the value of the wasm mode setting.
+  void toggleWasmMode(bool? enable) {
+    if (enable != null) {
+      wasmMode.value = enable;
     }
   }
 

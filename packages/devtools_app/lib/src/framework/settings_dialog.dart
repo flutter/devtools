@@ -37,6 +37,7 @@ class SettingsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final analyticsController = Provider.of<AnalyticsController>(context);
     return DevToolsDialog(
       title: const DialogTitleText('Settings'),
@@ -50,6 +51,7 @@ class SettingsDialog extends StatelessWidget {
                 title: 'Use a dark theme',
                 notifier: preferences.darkModeEnabled,
                 onChanged: preferences.toggleDarkModeTheme,
+                gaScreen: gac.settingsDialog,
                 gaItem: gac.darkTheme,
               ),
             ),
@@ -61,6 +63,7 @@ class SettingsDialog extends StatelessWidget {
                 onChanged: (enable) => unawaited(
                   analyticsController.toggleAnalyticsEnabled(enable),
                 ),
+                gaScreen: gac.settingsDialog,
                 gaItem: gac.analytics,
               ),
             ),
@@ -69,10 +72,26 @@ class SettingsDialog extends StatelessWidget {
               title: 'Enable VM developer mode',
               notifier: preferences.vmDeveloperModeEnabled,
               onChanged: preferences.toggleVmDeveloperMode,
+              gaScreen: gac.settingsDialog,
               gaItem: gac.vmDeveloperMode,
             ),
           ),
-          const PaddedDivider(),
+          const SizedBox(height: largeSpacing),
+          ...dialogSubHeader(theme, 'Experimental Features'),
+          Flexible(
+            child: CheckboxSetting(
+              title: 'Enable WASM build',
+              description:
+                  'This will trigger a reload of the page to load DevTools '
+                  'with the skwasm renderer.',
+              notifier: preferences.wasmMode,
+              onChanged: preferences.toggleWasmMode,
+              gaScreen: gac.settingsDialog,
+              gaItem: gac.wasmMode,
+            ),
+          ),
+          const SizedBox(height: largeSpacing),
+          ...dialogSubHeader(theme, 'Troubleshooting'),
           const _VerboseLoggingSetting(),
         ],
       ),
@@ -99,6 +118,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
                 title: 'Enable verbose logging',
                 notifier: preferences.verboseLoggingEnabled,
                 onChanged: (enable) => preferences.toggleVerboseLogging(enable),
+                gaScreen:  gac.settingsDialog,
                 gaItem: gac.verboseLogging,
               ),
             ),

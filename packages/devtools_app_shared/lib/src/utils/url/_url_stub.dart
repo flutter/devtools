@@ -15,3 +15,9 @@ String? getWebUrl() => null;
 // Unused parameter lint doesn't make sense for stub files.
 // ignore: avoid-unused-parameters
 void webRedirect(String url) {}
+
+/// Updates the query parameter with [key] to the new [value], and optionally
+/// reloads the page when [reload] is true.
+/// 
+/// No-op for non-web platforms.
+void updateQueryParameter(String key, String? value, {bool reload = false}) {}

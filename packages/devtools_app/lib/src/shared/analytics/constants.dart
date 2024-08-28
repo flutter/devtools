@@ -114,6 +114,7 @@ const settingsDialog = 'settings';
 const darkTheme = 'darkTheme';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
+const wasmMode = 'wasmMode';
 const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const clearLogs = 'clearLogs';
