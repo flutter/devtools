@@ -52,6 +52,10 @@ popd
 echo "Flutter Path: $(which flutter)"
 echo "Flutter Version: $(flutter --version)"
 
+# TODO(https://github.com/flutter/flutter/issues/154194): remove this.
+echo "Running flutter --help as a workaround for https://github.com/flutter/flutter/issues/154194"
+flutter --help
+
 if [[ $1 = "--update-perfetto" ]]; then
   devtools_tool update-perfetto
 fi
