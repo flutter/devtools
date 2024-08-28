@@ -90,11 +90,7 @@ class ValidateAndroidDomainResult {
 }
 
 class DeepLinksService {
-  DeepLinksService() {
-    client = Client();
-  }
-
-  late Client client;
+  final client = Client();
 
   void dispose() {
     client.close();

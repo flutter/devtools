@@ -19,7 +19,7 @@ class TestDeepLinksService extends DeepLinksService {
     this.hasIosDomainErrors = false,
   }) {
     // Create a mock client to return fake responses.
-    client = MockClient((request) async {
+    _client = MockClient((request) async {
       if (request.url == Uri.parse(androidDomainValidationURL)) {
         if (hasAndroidDomainErrors) {
           return Response(androidValidationResponseWithError, 200);
@@ -37,6 +37,11 @@ class TestDeepLinksService extends DeepLinksService {
       return Response('this is a body', 404);
     });
   }
+
+  late Client _client;
+
+  @override
+  Client get client => _client;
 
   final bool hasAndroidDomainErrors;
   final bool hasIosDomainErrors;

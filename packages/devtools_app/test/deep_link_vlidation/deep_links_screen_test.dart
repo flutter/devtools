@@ -191,14 +191,12 @@ void main() {
           ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
           ..fakeIosDomains = [defaultDomain];
 
-
-
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
         );
 
-        deepLinksController.autoSelectLink( TableViewType.domainView);
+        deepLinksController.autoSelectLink(TableViewType.domainView);
         deepLinksController.displayOptionsNotifier.value =
             DisplayOptions(showSplitScreen: true);
 
@@ -409,8 +407,7 @@ void main() {
             androidDeepLinkJson('www.domain1.com'),
             androidDeepLinkJson('www.google.com'),
           ]
-          ..fakeIosDomains = [defaultDomain]
-          ;
+          ..fakeIosDomains = [defaultDomain];
 
         await pumpDeepLinkScreen(
           tester,
