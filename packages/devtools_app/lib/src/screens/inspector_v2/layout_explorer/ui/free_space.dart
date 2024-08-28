@@ -101,9 +101,8 @@ class PaddingVisualizerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final heightDescription =
-        'h=${toStringAsFixed(renderProperties.realHeight)}';
-    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
+    final heightDescription = toStringAsFixed(renderProperties.realHeight);
+    final widthDescription = toStringAsFixed(renderProperties.realWidth);
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

@@ -1,4 +1,9 @@
 ## 2.0.0-dev
+* Fixed a regexp getting recompiled every time an `AnsiUp` is instantiated and
+  `decodeAnsiColorEscapeCodes` is called for the first time.
+
+  The regexp is now compiled once during the lifetime of the program.
+
 * Removed `AnsiUp.ansiColors` and `AnsiUp.palette256` members.
 
   These members were not useful to users, and they didn't need to be instance

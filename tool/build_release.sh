@@ -37,6 +37,16 @@ popd
 # echo on
 set -ex
 
+# TODO(fujino): delete once https://github.com/flutter/flutter/issues/142521
+# is resolved.
+pushd "$FLUTTER_DIR"
+  # The flutter tool relies on git tags to determine its version
+  git fetch --tags https://github.com/flutter/flutter.git
+  git describe --tags -f
+  # Print out local tags for debugging
+  git tag -l
+popd
+
 echo "Flutter Path: $(which flutter)"
 echo "Flutter Version: $(flutter --version)"
 

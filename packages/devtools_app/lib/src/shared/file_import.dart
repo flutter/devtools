@@ -71,6 +71,7 @@ class FileImportContainer extends StatefulWidget {
     required this.gaScreen,
     required this.gaSelectionImport,
     this.title,
+    this.backgroundColor,
     this.gaSelectionAction,
     this.actionText,
     this.onAction,
@@ -81,6 +82,8 @@ class FileImportContainer extends StatefulWidget {
   });
 
   final String? title;
+
+  final Color? backgroundColor;
 
   final String instructions;
 
@@ -112,34 +115,50 @@ class _FileImportContainerState extends State<FileImportContainer> {
   @override
   Widget build(BuildContext context) {
     final title = widget.title;
-    return Column(
+    final backgroundColor = widget.backgroundColor;
+
+    Widget child = Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (title != null) ...[
           Text(
             title,
             style: TextStyle(fontSize: scaleByFontFactor(18.0)),
           ),
-          const SizedBox(height: defaultSpacing),
+          const SizedBox(height: extraLargeSpacing),
         ],
+        CenteredMessage(widget.instructions),
+        const SizedBox(height: denseSpacing),
+        _buildImportFileRow(),
+        if (widget.actionText != null && widget.onAction != null)
+          _buildActionButton(),
+      ],
+    );
+
+    if (backgroundColor != null) {
+      child = Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Container(
+            margin: const EdgeInsets.all(extraLargeSpacing),
+            padding: const EdgeInsets.all(defaultSpacing),
+            decoration: BoxDecoration(
+              borderRadius: defaultBorderRadius,
+              color: backgroundColor,
+            ),
+            child: child,
+          ),
+        ],
+      );
+    }
+    return Column(
+      children: [
         Expanded(
           // TODO(kenz): improve drag over highlight.
           child: DragAndDrop(
             handleDrop: _handleImportedFile,
-            child: RoundedOutlinedBorder(
-              clip: true,
-              child: Container(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CenteredMessage(widget.instructions),
-                    _buildImportFileRow(),
-                    if (widget.actionText != null && widget.onAction != null)
-                      _buildActionButton(),
-                  ],
-                ),
-              ),
-            ),
+            child: child,
           ),
         ),
       ],
@@ -351,11 +370,13 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = Theme.of(context).colorScheme.surface.brighten();
     return Row(
       children: [
         Expanded(
           child: FileImportContainer(
             title: widget.firstFileTitle,
+            backgroundColor: backgroundColor,
             instructions: widget.firstInstructions,
             onFileSelected: onFirstFileSelected,
             onFileCleared: onFirstFileCleared,
@@ -369,6 +390,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Expanded(
           child: FileImportContainer(
             title: widget.secondFileTitle,
+            backgroundColor: backgroundColor,
             instructions: widget.secondInstructions,
             onFileSelected: onSecondFileSelected,
             onFileCleared: onSecondFileCleared,

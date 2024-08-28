@@ -123,8 +123,6 @@ class _TreemapState extends State<Treemap> {
           }
         }
         return pivotIndex;
-      default:
-        return -1;
     }
   }
 

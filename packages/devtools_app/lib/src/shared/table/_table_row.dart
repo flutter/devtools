@@ -365,7 +365,6 @@ class _TableRowState<T> extends State<TableRow<T>>
       case ColumnAlignment.right:
         return Alignment.centerRight;
       case ColumnAlignment.left:
-      default:
         return Alignment.centerLeft;
     }
   }

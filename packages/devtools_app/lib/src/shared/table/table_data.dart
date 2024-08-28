@@ -175,7 +175,6 @@ extension ColumnDataExtension<T> on ColumnData<T> {
       case ColumnAlignment.right:
         return MainAxisAlignment.end;
       case ColumnAlignment.left:
-      default:
         return MainAxisAlignment.start;
     }
   }
@@ -187,7 +186,6 @@ extension ColumnDataExtension<T> on ColumnData<T> {
       case ColumnAlignment.right:
         return TextAlign.right;
       case ColumnAlignment.left:
-      default:
         return TextAlign.left;
     }
   }
