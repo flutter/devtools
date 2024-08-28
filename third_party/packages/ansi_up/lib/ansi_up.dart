@@ -8,66 +8,10 @@
 library;
 
 class AnsiUp {
-  AnsiUp()
-      : style = StyledText.NONE,
-        ansiColors = [
-          [
-            AnsiUpColor(rgb: [0, 0, 0], className: 'ansi-black'),
-            AnsiUpColor(rgb: [187, 0, 0], className: 'ansi-red'),
-            AnsiUpColor(rgb: [0, 187, 0], className: 'ansi-green'),
-            AnsiUpColor(rgb: [187, 187, 0], className: 'ansi-yellow'),
-            AnsiUpColor(rgb: [0, 0, 187], className: 'ansi-blue'),
-            AnsiUpColor(rgb: [187, 0, 187], className: 'ansi-magenta'),
-            AnsiUpColor(rgb: [0, 187, 187], className: 'ansi-cyan'),
-            AnsiUpColor(rgb: [255, 255, 255], className: 'ansi-white'),
-          ],
-          [
-            AnsiUpColor(rgb: [85, 85, 85], className: 'ansi-bright-black'),
-            AnsiUpColor(rgb: [255, 85, 85], className: 'ansi-bright-red'),
-            AnsiUpColor(rgb: [0, 255, 0], className: 'ansi-bright-green'),
-            AnsiUpColor(rgb: [255, 255, 85], className: 'ansi-bright-yellow'),
-            AnsiUpColor(rgb: [85, 85, 255], className: 'ansi-bright-blue'),
-            AnsiUpColor(rgb: [255, 85, 255], className: 'ansi-bright-magenta'),
-            AnsiUpColor(rgb: [85, 255, 255], className: 'ansi-bright-cyan'),
-            AnsiUpColor(rgb: [255, 255, 255], className: 'ansi-bright-white'),
-          ]
-        ],
-        palette256 = [] {
-    _setupPalettes();
-  }
-
   late String _text;
-  int style;
-  List<List<AnsiUpColor>> ansiColors;
-  List<AnsiUpColor> palette256;
+  int style = StyledText.NONE;
   AnsiUpColor? fg;
   AnsiUpColor? bg;
-
-  void _setupPalettes() {
-    ansiColors.forEach(palette256.addAll);
-    final levels = [0, 95, 135, 175, 215, 255];
-    for (var r = 0; r < 6; ++r) {
-      for (var g = 0; g < 6; ++g) {
-        for (var b = 0; b < 6; ++b) {
-          palette256.add(
-            AnsiUpColor(
-              rgb: [levels[r], levels[g], levels[b]],
-              className: 'truecolor',
-            ),
-          );
-        }
-      }
-    }
-    var greyLevel = 8;
-    for (var i = 0; i < 24; ++i, greyLevel += 10) {
-      palette256.add(
-        AnsiUpColor(
-          rgb: [greyLevel, greyLevel, greyLevel],
-          className: 'truecolor',
-        ),
-      );
-    }
-  }
 
   _TextPacket _getNextPacket() {
     final pkt = _TextPacket(kind: PacketKind.EOS);
@@ -235,13 +179,13 @@ class AnsiUp {
       } else if (num == 49) {
         bg = null;
       } else if ((num >= 30) && (num < 38)) {
-        fg = ansiColors[0][(num - 30)];
+        fg = _ansiColors[0][(num - 30)];
       } else if ((num >= 40) && (num < 48)) {
-        bg = ansiColors[0][(num - 40)];
+        bg = _ansiColors[0][(num - 40)];
       } else if ((num >= 90) && (num < 98)) {
-        fg = ansiColors[1][(num - 90)];
+        fg = _ansiColors[1][(num - 90)];
       } else if ((num >= 100) && (num < 108)) {
-        bg = ansiColors[1][(num - 100)];
+        bg = _ansiColors[1][(num - 100)];
       } else if (num == 38 || num == 48) {
         if (index < sgrCmds.length) {
           final isForeground = num == 38;
@@ -250,9 +194,9 @@ class AnsiUp {
             final paletteIndex = int.tryParse(sgrCmds[index++], radix: 10)!;
             if (paletteIndex >= 0 && paletteIndex <= 255) {
               if (isForeground) {
-                fg = palette256[paletteIndex];
+                fg = _palette256[paletteIndex];
               } else {
-                bg = palette256[paletteIndex];
+                bg = _palette256[paletteIndex];
               }
             }
           }
@@ -282,6 +226,59 @@ class AnsiUp {
   _TextWithAttr _withState(_TextPacket packet) {
     return _TextWithAttr(style: style, fg: fg, bg: bg, text: packet.text);
   }
+}
+
+const List<List<AnsiUpColor>> _ansiColors = [
+  [
+    AnsiUpColor(rgb: [0, 0, 0], className: 'ansi-black'),
+    AnsiUpColor(rgb: [187, 0, 0], className: 'ansi-red'),
+    AnsiUpColor(rgb: [0, 187, 0], className: 'ansi-green'),
+    AnsiUpColor(rgb: [187, 187, 0], className: 'ansi-yellow'),
+    AnsiUpColor(rgb: [0, 0, 187], className: 'ansi-blue'),
+    AnsiUpColor(rgb: [187, 0, 187], className: 'ansi-magenta'),
+    AnsiUpColor(rgb: [0, 187, 187], className: 'ansi-cyan'),
+    AnsiUpColor(rgb: [255, 255, 255], className: 'ansi-white'),
+  ],
+  [
+    AnsiUpColor(rgb: [85, 85, 85], className: 'ansi-bright-black'),
+    AnsiUpColor(rgb: [255, 85, 85], className: 'ansi-bright-red'),
+    AnsiUpColor(rgb: [0, 255, 0], className: 'ansi-bright-green'),
+    AnsiUpColor(rgb: [255, 255, 85], className: 'ansi-bright-yellow'),
+    AnsiUpColor(rgb: [85, 85, 255], className: 'ansi-bright-blue'),
+    AnsiUpColor(rgb: [255, 85, 255], className: 'ansi-bright-magenta'),
+    AnsiUpColor(rgb: [85, 255, 255], className: 'ansi-bright-cyan'),
+    AnsiUpColor(rgb: [255, 255, 255], className: 'ansi-bright-white'),
+  ]
+];
+
+final List<AnsiUpColor> _palette256 = _setupPalettes();
+
+List<AnsiUpColor> _setupPalettes() {
+  final List<AnsiUpColor> palette256 = [];
+  _ansiColors.forEach(palette256.addAll);
+  final levels = [0, 95, 135, 175, 215, 255];
+  for (var r = 0; r < 6; ++r) {
+    for (var g = 0; g < 6; ++g) {
+      for (var b = 0; b < 6; ++b) {
+        palette256.add(
+          AnsiUpColor(
+            rgb: [levels[r], levels[g], levels[b]],
+            className: 'truecolor',
+          ),
+        );
+      }
+    }
+  }
+  var greyLevel = 8;
+  for (var i = 0; i < 24; ++i, greyLevel += 10) {
+    palette256.add(
+      AnsiUpColor(
+        rgb: [greyLevel, greyLevel, greyLevel],
+        className: 'truecolor',
+      ),
+    );
+  }
+  return palette256;
 }
 
 final RegExp _csiRegex = RegExp('^' // beginning of line
@@ -317,7 +314,7 @@ class _TextWithAttr {
 }
 
 class AnsiUpColor {
-  AnsiUpColor({this.rgb, this.className});
+  const AnsiUpColor({this.rgb, this.className});
 
   final List<int>? rgb;
   final String? className;
