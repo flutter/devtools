@@ -226,12 +226,10 @@ class _PropertiesViewState extends State<PropertiesView> {
               if (_sortedProperties.isEmpty && index == layoutExplorerOffset) {
                 return DecoratedPropertiesTableRow(
                   index: index - layoutExplorerOffset,
-                  child: Expanded(
-                    child: PaddedText(
-                      child: Text(
-                        'No widget properties to display.',
-                        style: Theme.of(context).regularTextStyle,
-                      ),
+                  child: PaddedText(
+                    child: Text(
+                      'No widget properties to display.',
+                      style: Theme.of(context).regularTextStyle,
                     ),
                   ),
                 );
