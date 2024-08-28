@@ -40,9 +40,11 @@ set -ex
 # TODO(fujino): delete once https://github.com/flutter/flutter/issues/142521
 # is resolved.
 pushd "$FLUTTER_DIR"
+  # If we've already written the wrong version number to disk, delete it
+  rm -f bin/cache/flutter.version.json
   # The flutter tool relies on git tags to determine its version
-  git fetch --tags https://github.com/flutter/flutter.git
-  git describe --tags -f
+  git fetch https://github.com/flutter/flutter.git --tags -f
+  git describe --tags
   # Print out local tags for debugging
   git tag -l
 popd
