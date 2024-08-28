@@ -303,12 +303,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       // included:
       if (showDefaultValueLabel && !includeName) {
         children.add(
-          Padding(
-            padding: const EdgeInsets.only(right: denseSpacing),
-            child: DefaultValueLabel(
-              colorScheme: colorScheme,
-              textStyle: textStyle,
-            ),
+          const Padding(
+            padding: EdgeInsets.only(right: denseSpacing),
+            child: DefaultValueLabel(),
           ),
         );
       }
@@ -386,12 +383,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       // included:
       if (showDefaultValueLabel && includeName) {
         children.add(
-          Padding(
-            padding: const EdgeInsets.only(left: denseSpacing),
-            child: DefaultValueLabel(
-              colorScheme: colorScheme,
-              textStyle: textStyle,
-            ),
+          const Padding(
+            padding: EdgeInsets.only(left: denseSpacing),
+            child: DefaultValueLabel(),
           ),
         );
       }
@@ -583,33 +577,23 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
 /// Label for a property with the default value.
 class DefaultValueLabel extends StatelessWidget {
-  const DefaultValueLabel({
-    super.key,
-    required this.colorScheme,
-    required this.textStyle,
-  });
-
-  final ColorScheme colorScheme;
-  final TextStyle textStyle;
+  const DefaultValueLabel({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: denseSpacing,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(7.5),
-        color: colorScheme.inverseSurface,
+        borderRadius: defaultBorderRadius,
+        color: colorScheme.secondary,
       ),
       child: Text(
         'default',
-        style: textStyle.merge(
-          TextStyle(
-            fontStyle: FontStyle.normal,
-            color: colorScheme.onInverseSurface,
-            backgroundColor: colorScheme.inverseSurface,
-          ),
+        style: theme.regularTextStyleWithColor(
+          colorScheme.onSecondary,
+          backgroundColor: colorScheme.secondary,
         ),
       ),
     );
