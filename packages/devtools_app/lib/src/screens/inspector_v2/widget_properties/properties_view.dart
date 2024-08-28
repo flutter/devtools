@@ -164,6 +164,12 @@ class _PropertiesViewState extends State<PropertiesView> {
   @override
   Widget build(BuildContext context) {
     final layoutExplorerOffset = includeLayoutExplorer ? 1 : 0;
+    // If there are no properties to display, include a single row that says as
+    // much.
+    final propertyRowsCount =
+        _sortedProperties.isEmpty ? 1 : _sortedProperties.length;
+    // If the layout explorer is available, it is the first row.
+    final totalRowsCount = propertyRowsCount + layoutExplorerOffset;
 
     Widget? layoutPropertiesList;
     if (widgetWidths != null && widgetHeights != null) {
@@ -184,9 +190,7 @@ class _PropertiesViewState extends State<PropertiesView> {
           thumbVisibility: true,
           child: ListView.builder(
             controller: widget.scrollController,
-            itemCount:
-                (_sortedProperties.isEmpty ? 1 : _sortedProperties.length) +
-                    layoutExplorerOffset,
+            itemCount: totalRowsCount,
             itemBuilder: (context, index) {
               if (index == 0 && includeLayoutExplorer) {
                 return DecoratedPropertiesTableRow(
