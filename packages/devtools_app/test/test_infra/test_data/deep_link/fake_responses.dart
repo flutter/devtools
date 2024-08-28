@@ -228,7 +228,6 @@ AppLinkSettings fakeAppLinkSettings(List<String> androidDeepLink) {
 ''');
 }
 
-
 UniversalLinkSettings fakeUniversalLinkSettings(List<String> domains) {
   return UniversalLinkSettings.fromJson('''
 {

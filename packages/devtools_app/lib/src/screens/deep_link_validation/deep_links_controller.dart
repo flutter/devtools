@@ -147,7 +147,6 @@ class DisplayOptions {
 
 class DeepLinksController extends DisposableController
     with AutoDisposeControllerMixin {
-
   @override
   void dispose() {
     deepLinksService.dispose();
