@@ -24,14 +24,14 @@ function unregisterDevToolsServiceWorker() {
 // Bootstrap app for 3P environments:
 function bootstrapAppFor3P() {
   const searchParams = new URLSearchParams(window.location.search);
-  const renderer = searchParams.get('renderer');
-  const userConfig = renderer ? {'renderer': renderer} : {};
+  const useSkwasm = searchParams.get('skwasm');
   _flutter.loader.load({
     serviceWorkerSettings: {
       serviceWorkerVersion: {{flutter_service_worker_version}},
     },
     config: {
-      canvasKitBaseUrl: 'canvaskit/'
+      canvasKitBaseUrl: 'canvaskit/',
+      renderer: useSkwasm ? 'skwasm' : 'canvaskit'
     }
   });
 }

@@ -80,14 +80,14 @@ class SettingsDialog extends StatelessWidget {
           ...dialogSubHeader(theme, 'Experimental Features'),
           Flexible(
             child: CheckboxSetting(
-              title: 'Enable WASM build',
+              title: 'Enable Skwasm renderer',
               description:
                   'This will trigger a reload of the page to load DevTools '
                   'with the skwasm renderer.',
-              notifier: preferences.wasmMode,
-              onChanged: preferences.toggleWasmMode,
+              notifier: preferences.skwasmEnabled,
+              onChanged: preferences.toggleSkasmEnabled,
               gaScreen: gac.settingsDialog,
-              gaItem: gac.wasmMode,
+              gaItem: gac.skwasm,
             ),
           ),
           const SizedBox(height: largeSpacing),

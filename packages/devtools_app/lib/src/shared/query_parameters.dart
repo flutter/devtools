@@ -41,7 +41,7 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
 
   /// Whether DevTools should be loaded using the skwasm renderer instead of
   /// canvaskit.
-  bool get useWasm => params[useWasmKey] == 'skwasm';
+  bool get useSkwasm => params[skwasmKey] == 'true';
 
   static const vmServiceUriKey = 'uri';
   static const hideScreensKey = 'hide';
@@ -49,9 +49,7 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   static const hideAllExceptExtensionsValue = 'all-except-extensions';
   static const offlineScreenIdKey = 'screen';
   static const inspectorRefKey = 'inspectorRef';
-
-  // TODO(kenz): consider using `?wasm=true` instead of `?renderer=skwasm`.
-  static const useWasmKey = 'renderer';
+  static const skwasmKey = 'skwasm';
 
   // TODO(kenz): remove legacy value in May of 2025 when all IDEs are not using
   // these and 12 months have passed to allow users ample upgrade time.

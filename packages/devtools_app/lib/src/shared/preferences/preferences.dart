@@ -31,7 +31,7 @@ const _thirdPartyPathSegment = 'third_party';
 
 /// DevTools preferences for experimental features.
 enum _ExperimentPreferences {
-  wasm;
+  skwasm;
 
   String get storageKey => '$storagePrefix.$name';
 
@@ -72,7 +72,7 @@ class PreferencesController extends DisposableController
 
   /// Whether DevTools should be rendered with the skwasm renderer instead of
   /// canvaskit.
-  final wasmMode = ValueNotifier<bool>(false);
+  final skwasmEnabled = ValueNotifier<bool>(false);
 
   final verboseLoggingEnabled =
       ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
@@ -144,39 +144,39 @@ class PreferencesController extends DisposableController
 
   Future<void> _initWasmEnabled() async {
     // TODO(https://github.com/flutter/devtools/issues/7856): set the current
-    // value based on whether DevTools is actually loaded with wasm.
-    wasmMode.value = false;
+    // value based on whether DevTools is actually loaded with skwasm.
+    skwasmEnabled.value = false;
 
     // It is important that this listener is added before we set the initial
-    // state of the wasm mode setting below. This is because the query parameter
-    // for wasm may need to be updated based on the value of the preference in
-    // the storage file, which we take into account when we call
-    // [toggleWasmMode] at the end of this method.
-    addAutoDisposeListener(wasmMode, () async {
-      final enabled = wasmMode.value;
+    // state of the skwasm mode setting below. This is because the query
+    // parameter for skwasm may need to be updated based on the value of the
+    // preference in the storage file, which we take into account when we call
+    // [toggleSkasmEnabled] at the end of this method.
+    addAutoDisposeListener(skwasmEnabled, () async {
+      final enabled = skwasmEnabled.value;
       await storage.setValue(
-        _ExperimentPreferences.wasm.storageKey,
+        _ExperimentPreferences.skwasm.storageKey,
         '$enabled',
       );
 
       // Update the wasm mode query parameter if it does not match the value of
       // the setting.
-      final wasmEnabledFromQueryParams = DevToolsQueryParams.load().useWasm;
-      if (wasmEnabledFromQueryParams != enabled) {
+      final skwasmEnabledFromQueryParams = DevToolsQueryParams.load().useSkwasm;
+      if (skwasmEnabledFromQueryParams != enabled) {
         updateQueryParameter(
-          DevToolsQueryParams.useWasmKey,
-          enabled ? 'skwasm' : null,
+          DevToolsQueryParams.skwasmKey,
+          '$enabled',
           reload: true,
         );
       }
     });
 
-    final wasmEnabledFromStorage = await boolValueFromStorage(
-      _ExperimentPreferences.wasm.storageKey,
+    final enabledFromStorage = await boolValueFromStorage(
+      _ExperimentPreferences.skwasm.storageKey,
       defaultsTo: false,
     );
-    final wasmEnabledFromQueryParams = DevToolsQueryParams.load().useWasm;
-    toggleWasmMode(wasmEnabledFromStorage || wasmEnabledFromQueryParams);
+    final enabledFromQueryParams = DevToolsQueryParams.load().useSkwasm;
+    toggleSkasmEnabled(enabledFromStorage || enabledFromQueryParams);
   }
 
   Future<void> _initVerboseLogging() async {
@@ -219,9 +219,9 @@ class PreferencesController extends DisposableController
   }
 
   /// Change the value of the wasm mode setting.
-  void toggleWasmMode(bool? enable) {
+  void toggleSkasmEnabled(bool? enable) {
     if (enable != null) {
-      wasmMode.value = enable;
+      skwasmEnabled.value = enable;
     }
   }
 
