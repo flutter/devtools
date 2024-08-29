@@ -10,7 +10,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed a bug that was causing the DevTools release notes to always
+show. - []()
 
 ## Inspector updates
 
