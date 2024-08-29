@@ -54,6 +54,10 @@ class SurveyService {
 
     _cachedSurvey ??= await fetchSurveyContent();
     if (_cachedSurvey?.id != null) {
+      // TODO(kenz): consider setting this value on the [SurveyService] and then
+      // we can send the active survey as a parameter in each survey-related
+      // DevTools server request. This would simplify the server API for
+      // DevTools surveys.
       await server.setActiveSurvey(_cachedSurvey!.id!);
     }
 

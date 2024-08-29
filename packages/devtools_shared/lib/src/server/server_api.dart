@@ -113,9 +113,13 @@ class ServerApi {
         }
         return _encodeResponse(_devToolsStore.analyticsEnabled, api: api);
 
+      // ----- Preferences api. -----
+
+      // TODO(kenz): move all the handlers into a separate handler class as a
+      // follow up PR to preserve the diff.
       // ----- DevTools survey store. -----
 
-      case apiSetActiveSurvey:
+      case SurveyApi.setActiveSurvey:
         // Assume failure.
         bool result = false;
 
@@ -123,20 +127,20 @@ class ServerApi {
         // apiSetSurveyActionTaken, apiGetSurveyShownCount, and
         // apiIncrementSurveyShownCount calls.
         if (queryParams.keys.length == 1 &&
-            queryParams.containsKey(activeSurveyName)) {
-          final surveyName = queryParams[activeSurveyName]!;
+            queryParams.containsKey(apiParameterValueKey)) {
+          final surveyName = queryParams[apiParameterValueKey]!;
 
           // Set the current activeSurvey.
           _devToolsStore.activeSurvey = surveyName;
           result = true;
         }
         return _encodeResponse(result, api: api);
-      case apiGetSurveyActionTaken:
+      case SurveyApi.getSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
         if (_devToolsStore.activeSurvey == null) {
           return api.badRequest(
             '$errorNoActiveSurvey '
-            '- $apiGetSurveyActionTaken',
+            '- ${SurveyApi.getSurveyActionTaken}',
           );
         }
         // SurveyActionTaken has the survey been acted upon (taken or dismissed)
@@ -144,37 +148,37 @@ class ServerApi {
       // TODO(terry): remove the query param logic for this request.
       // setSurveyActionTaken should only be called with the value of true, so
       // we can remove the extra complexity.
-      case apiSetSurveyActionTaken:
+      case SurveyApi.setSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
         if (_devToolsStore.activeSurvey == null) {
           return api.badRequest(
             '$errorNoActiveSurvey '
-            '- $apiSetSurveyActionTaken',
+            '- ${SurveyApi.setSurveyActionTaken}',
           );
         }
         // Set the SurveyActionTaken.
         // Has the survey been taken or dismissed..
-        if (queryParams.containsKey(surveyActionTakenPropertyName)) {
+        if (queryParams.containsKey(apiParameterValueKey)) {
           _devToolsStore.surveyActionTaken =
-              json.decode(queryParams[surveyActionTakenPropertyName]!);
+              json.decode(queryParams[apiParameterValueKey]!);
         }
         return _encodeResponse(_devToolsStore.surveyActionTaken, api: api);
-      case apiGetSurveyShownCount:
+      case SurveyApi.getSurveyShownCount:
         // Request setActiveSurvey has not been requested.
         if (_devToolsStore.activeSurvey == null) {
           return api.badRequest(
             '$errorNoActiveSurvey '
-            '- $apiGetSurveyShownCount',
+            '- ${SurveyApi.getSurveyShownCount}',
           );
         }
         // SurveyShownCount how many times have we asked to take survey.
         return _encodeResponse(_devToolsStore.surveyShownCount, api: api);
-      case apiIncrementSurveyShownCount:
+      case SurveyApi.incrementSurveyShownCount:
         // Request setActiveSurvey has not been requested.
         if (_devToolsStore.activeSurvey == null) {
           return api.badRequest(
             '$errorNoActiveSurvey '
-            '- $apiIncrementSurveyShownCount',
+            '- ${SurveyApi.incrementSurveyShownCount}',
           );
         }
         // Increment the SurveyShownCount, we've asked about the survey.

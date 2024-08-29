@@ -28,29 +28,74 @@ const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
 /// in queryParameter:
 const devToolsEnabledPropertyName = 'enabled';
 
-/// Survey properties APIs:
-/// setActiveSurvey sets the survey property to fetch and save JSON values e.g., Q1-2020
-const apiSetActiveSurvey = '${apiPrefix}setActiveSurvey';
+@Deprecated(
+  'Use SurveyApi.setActiveSurvey instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiSetActiveSurvey = SurveyApi.setActiveSurvey;
 
-/// Survey name passed in apiSetActiveSurvey, the activeSurveyName is the property name
-/// passed as a queryParameter and is the property in ~/.devtools too.
-const activeSurveyName = 'activeSurveyName';
+@Deprecated(
+  'Use apiParameterValueKey for the query parameter of the '
+  'SurveyApi.setActiveSurvey request instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const activeSurveyName = apiParameterValueKey;
 
-/// Returns the surveyActionTaken of the activeSurvey (apiSetActiveSurvey).
-const apiGetSurveyActionTaken = '${apiPrefix}getSurveyActionTaken';
+@Deprecated(
+  'Use SurveyApi.getSurveyActionTaken instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiGetSurveyActionTaken = SurveyApi.getSurveyActionTaken;
 
-/// Sets the surveyActionTaken of the of the activeSurvey (apiSetActiveSurvey).
-const apiSetSurveyActionTaken = '${apiPrefix}setSurveyActionTaken';
+@Deprecated(
+  'Use SurveyApi.setSurveyActionTaken instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiSetSurveyActionTaken = SurveyApi.setSurveyActionTaken;
 
-/// Property name to apiSetSurveyActionTaken the surveyActionTaken is the name
-/// passed in queryParameter:
-const surveyActionTakenPropertyName = 'surveyActionTaken';
+@Deprecated(
+  'Use apiParameterValueKey for the query parameter of the '
+  'SurveyApi.setSurveyActionTaken request instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const surveyActionTakenPropertyName = apiParameterValueKey;
 
-/// Returns the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
-const apiGetSurveyShownCount = '${apiPrefix}getSurveyShownCount';
+@Deprecated(
+  'Use SurveyApi.getSurveyShownCount instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiGetSurveyShownCount = SurveyApi.getSurveyShownCount;
 
-/// Increments the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
-const apiIncrementSurveyShownCount = '${apiPrefix}incrementSurveyShownCount';
+@Deprecated(
+  'Use SurveyApi.incrementSurveyShownCount instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiIncrementSurveyShownCount = SurveyApi.incrementSurveyShownCount;
+
+abstract class SurveyApi {
+  /// Sets the active survey value for the DevTools session.
+  ///
+  /// The active survey is used as a key to get and set values within the
+  /// DevTools store file.
+  static const setActiveSurvey = '${apiPrefix}setActiveSurvey';
+
+  /// Returns the 'surveyActionTaken' value for the active survey set by
+  /// [setActiveSurvey].
+  static const getSurveyActionTaken = '${apiPrefix}getSurveyActionTaken';
+
+  /// Sets the 'surveyActionTaken' value for the active survey set by
+  /// [setActiveSurvey].
+  static const setSurveyActionTaken = '${apiPrefix}setSurveyActionTaken';
+
+  /// Returns the 'surveyShownCount' value for the active survey set by
+  /// [setActiveSurvey].
+  static const getSurveyShownCount = '${apiPrefix}getSurveyShownCount';
+
+  /// Increments the 'surveyShownCount' value for the active survey set by
+  /// [setActiveSurvey].
+  static const incrementSurveyShownCount =
+      '${apiPrefix}incrementSurveyShownCount';
+}
 
 @Deprecated(
   'Use apiParameterValueKey for the query parameter of the '
