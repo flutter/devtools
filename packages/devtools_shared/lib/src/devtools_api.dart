@@ -52,27 +52,87 @@ const apiGetSurveyShownCount = '${apiPrefix}getSurveyShownCount';
 /// Increments the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
 const apiIncrementSurveyShownCount = '${apiPrefix}incrementSurveyShownCount';
 
-const lastReleaseNotesVersionPropertyName = 'lastReleaseNotesVersion';
+@Deprecated(
+  'Use apiParameterValueKey for the query parameter of the '
+  'ReleaseNotesApi.setLastReleaseNotesVersion request instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const lastReleaseNotesVersionPropertyName = apiParameterValueKey;
 
-/// Returns the last DevTools version for which we have shown release notes.
-const apiGetLastReleaseNotesVersion = '${apiPrefix}getLastReleaseNotesVersion';
+@Deprecated(
+  'Use ReleaseNotesApi.getLastReleaseNotesVersion instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiGetLastReleaseNotesVersion =
+    ReleaseNotesApi.getLastReleaseNotesVersion;
 
-/// Sets the last DevTools version for which we have shown release notes.
-const apiSetLastReleaseNotesVersion = '${apiPrefix}setLastReleaseNotesVersion';
+@Deprecated(
+  'Use ReleaseNotesApi.setLastReleaseNotesVersion instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiSetLastReleaseNotesVersion =
+    ReleaseNotesApi.setLastReleaseNotesVersion;
 
-/// Returns the base app size file, if present.
-const apiGetBaseAppSizeFile = '${apiPrefix}getBaseAppSizeFile';
+abstract class ReleaseNotesApi {
+  /// Returns the last DevTools version for which we have shown release notes.
+  static const getLastReleaseNotesVersion =
+      '${apiPrefix}getLastReleaseNotesVersion';
 
-/// Returns the test app size file used for comparing two files in a diff, if
-/// present.
-const apiGetTestAppSizeFile = '${apiPrefix}getTestAppSizeFile';
+  /// Sets the last DevTools version for which we have shown release notes.
+  static const setLastReleaseNotesVersion =
+      '${apiPrefix}setLastReleaseNotesVersion';
+}
 
-const baseAppSizeFilePropertyName = 'appSizeBase';
+@Deprecated(
+  'Use AppSizeApi.getBaseAppSizeFile instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiGetBaseAppSizeFile = AppSizeApi.getBaseAppSizeFile;
 
-const testAppSizeFilePropertyName = 'appSizeTest';
+@Deprecated(
+  'Use AppSizeApi.getTestAppSizeFile instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiGetTestAppSizeFile = AppSizeApi.getTestAppSizeFile;
+
+@Deprecated(
+  'Use AppSizeApi.baseAppSizeFilePropertyName instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const baseAppSizeFilePropertyName = AppSizeApi.baseAppSizeFilePropertyName;
+
+@Deprecated(
+  'Use AppSizeApi.testAppSizeFilePropertyName instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const testAppSizeFilePropertyName = AppSizeApi.testAppSizeFilePropertyName;
+
+abstract class AppSizeApi {
+  /// Returns the base app size file, if present.
+  static const getBaseAppSizeFile = '${apiPrefix}getBaseAppSizeFile';
+
+  /// Returns the test app size file used for comparing two files in a diff, if
+  /// present.
+  static const getTestAppSizeFile = '${apiPrefix}getTestAppSizeFile';
+
+  /// The property name for the query parameter passed along with the
+  /// [getBaseAppSizeFile] request.
+  static const baseAppSizeFilePropertyName = 'appSizeBase';
+
+  /// The property name for the query parameter passed along with the
+  /// [getTestAppSizeFile] request.
+  static const testAppSizeFilePropertyName = 'appSizeTest';
+}
 
 abstract class DtdApi {
+  /// Gets the DTD URI from the DevTools server.
+  ///
+  /// DTD is either started from the user's IDE and passed to the DevTools
+  /// server, or it is started directly from the DevTools server.
   static const apiGetDtdUri = '${apiPrefix}getDtdUri';
+
+  /// The property name for the response that the server sends back upon
+  /// receiving an [apiGetDtdUri] request.
   static const uriPropertyName = 'dtdUri';
 }
 
