@@ -21,24 +21,55 @@ function unregisterDevToolsServiceWorker() {
   }
 }
 
+function getDevToolsWasmPreference() {
+  // TODO(https://github.com/flutter/devtools/issues/7856): can we also
+  // look up the wasm preference from the DevTools preferences file? Can
+  // we make a direct call to the DevTools server from here?
+  fetch('api/sse/')
+  const eventSource = new EventSource('/api/sse');
+  eventSource.onopen = () => {
+    console.log('SSE connection opened.');
+  };
+
+  eventSource.onmessage = (event) => {
+    const data = JSON.parse(event.data); 
+    console.log('Received data:', data);
+  };
+
+  eventSource.onerror = (error) => {
+    console.error('SSE error:', error);
+    eventSource.close(); 
+  };
+
+  console.log('eventSource.url: ' + eventSource.url);
+
+  return true;
+}
+
 // Bootstrap app for 3P environments:
 function bootstrapAppFor3P() {
   const searchParams = new URLSearchParams(window.location.search);
   // This query parameter must match the String value specified by
   // `DevToolsQueryParameters.wasmKey`. See
   // devtools/packages/devtools_app/lib/src/shared/query_parameters.dart
-  const useWasm = searchParams.get('wasm');
+  const wasmEnabledFromQueryParameter = searchParams.get('wasm');
+  console.log('wasmEnabledFromQueryParameter: ' + wasmEnabledFromQueryParameter);
+  console.log('wasmEnabledFromQueryParameter === \'true\' : ' + wasmEnabledFromQueryParameter === 'true');
 
-  // TODO(https://github.com/flutter/devtools/issues/7856): can we also
-  // look up the wasm preference from the DevTools preferences file? Can
-  // we make a direct call to the DevTools server from here?
+  const wasmEnabledFromDevToolsPreference = getDevToolsWasmPreference();
+  console.log('wasmEnabledFromDevToolsPreference: ' + wasmEnabledFromDevToolsPreference);
+
+  console.log('boolean value: ' + wasmEnabledFromQueryParameter || wasmEnabledFromDevToolsPreference);
+
   _flutter.loader.load({
     serviceWorkerSettings: {
       serviceWorkerVersion: {{flutter_service_worker_version}},
     },
     config: {
       canvasKitBaseUrl: 'canvaskit/',
-      renderer: useWasm ? 'skwasm' : 'canvaskit'
+      renderer: wasmEnabledFromQueryParameter === 'true' || wasmEnabledFromDevToolsPreference 
+        ? 'skwasm' 
+        : 'canvaskit'
     }
   });
 }

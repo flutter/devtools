@@ -146,7 +146,24 @@ class PreferencesController extends DisposableController
   }
 
   Future<void> _initWasmEnabled() async {
+    print('_initWasmEnabled - start');
     wasmEnabled.value = kIsWasm;
+    print('kIsWasm: $kIsWasm');
+
+    final enabledFromStorage = await boolValueFromStorage(
+      _ExperimentPreferences.wasm.storageKey,
+      defaultsTo: false,
+    );
+    final enabledFromQueryParams = DevToolsQueryParams.load().useWasm;
+    print('enabledFromQueryParams: $enabledFromQueryParams');
+    print('enabledFromStorage: $enabledFromStorage');
+
+    if (kIsWasm != enabledFromQueryParams) {
+      print('kIsWasm != enabledFromQueryParams');
+      // If we hit this case, we tried to reload DevTools with the wasm query
+      // parameter set to true, but DevTools did not load with wasm. This means
+      // that something went wrong and that we fellback to JS.
+    }
 
     // It is important that this listener is added before we set the initial
     // state of the wasm mode setting below. This is because the query parameter
@@ -155,6 +172,7 @@ class PreferencesController extends DisposableController
     // [toggleWasmEnabled] at the end of this method.
     addAutoDisposeListener(wasmEnabled, () async {
       final enabled = wasmEnabled.value;
+      print('listener: setting storage value');
       await storage.setValue(
         _ExperimentPreferences.wasm.storageKey,
         '$enabled',
@@ -163,7 +181,12 @@ class PreferencesController extends DisposableController
       // Update the wasm mode query parameter if it does not match the value of
       // the setting.
       final wasmEnabledFromQueryParams = DevToolsQueryParams.load().useWasm;
+      print('listener: enabled: $enabled');
+      print(
+          'listener: wasmEnabledFromQueryParams: $wasmEnabledFromQueryParams');
       if (wasmEnabledFromQueryParams != enabled) {
+        print('updating query param and reloading the page');
+        await Future.delayed(const Duration(seconds: 7));
         updateQueryParameter(
           DevToolsQueryParams.wasmKey,
           enabled ? 'true' : null,
@@ -172,12 +195,18 @@ class PreferencesController extends DisposableController
       }
     });
 
-    final enabledFromStorage = await boolValueFromStorage(
-      _ExperimentPreferences.wasm.storageKey,
-      defaultsTo: false,
+    // TODO(kenz): this may cause an infinite loop of reloading the page if
+    // the setting from storage or the query parameter indicate we should be
+    // loading with WASM, but each time we reload the page, something goes wrong
+    // and we fall back to JS.
+    print(
+      'calling toggleWasmEnabled '
+      '${enabledFromStorage || enabledFromQueryParams}, '
+      '(enabledFromStorage: $enabledFromStorage, '
+      'enabledFromQueryParams: $enabledFromQueryParams)',
     );
-    final enabledFromQueryParams = DevToolsQueryParams.load().useWasm;
     toggleWasmEnabled(enabledFromStorage || enabledFromQueryParams);
+    print('_initWasmEnabled - end');
   }
 
   Future<void> _initVerboseLogging() async {
