@@ -21,8 +21,9 @@ pushd $TOOL_DIR
 if [[ $1 = "--no-update-flutter" ]]
 then
   # Use the Flutter SDK that is already on the user's PATH.
-  FLUTTER_EXE=`which flutter`
+  FLUTTER_EXE="$(which flutter)"
   echo "Using the Flutter SDK that is already on PATH: $FLUTTER_EXE"
+  FLUTTER_DIR="$(dirname "$(dirname "$FLUTTER_EXE")")"
 else
   # Use the Flutter SDK from flutter-sdk/.
   FLUTTER_DIR="`pwd`/flutter-sdk"
@@ -35,7 +36,7 @@ fi
 popd
 
 # echo on
-set -ex
+set -eux
 
 # TODO(fujino): delete once https://github.com/flutter/flutter/issues/142521
 # is resolved.
