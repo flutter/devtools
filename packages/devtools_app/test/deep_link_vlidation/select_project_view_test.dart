@@ -56,7 +56,7 @@ void main() {
 
   group('$SelectProjectView', () {
     setUp(() {
-      deepLinksController = DeepLinksTestController();
+      deepLinksController = TestDeepLinksController();
     });
 
     testWidgetsWithWindowSize(
