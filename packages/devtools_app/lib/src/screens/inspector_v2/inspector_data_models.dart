@@ -244,10 +244,9 @@ class LayoutProperties {
     final parentElement = node.parentRenderElement;
     // Fall back to this node's properties if there is no parent.
     if (parentElement == null) return this;
-    if (parentElement.size == null) return this;
     final parentProperties =
         parentElement.computeLayoutProperties(forFlexLayout: false);
-    return parentProperties;
+    return parentProperties ?? this;
   }
 
   WidgetSizes? get widgetWidths => _widgetSizes(SizeType.widths);
