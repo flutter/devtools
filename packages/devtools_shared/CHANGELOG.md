@@ -6,6 +6,13 @@
 * Deprecate `apiGetTestAppSizeFile` in favor of `AppSizeApi.getTestAppSizeFile`.
 * Deprecate `baseAppSizeFilePropertyName` in favor of `AppSizeApi.baseAppSizeFilePropertyName`.
 * Deprecate `testAppSizeFilePropertyName` in favor of `AppSizeApi.testAppSizeFilePropertyName`.
+* Deprecate `apiSetActiveSurvey` in favor of `SurveyApi.setActiveSurvey`.
+* Deprecate `activeSurveyName`.
+* Deprecate `apiGetSurveyActionTaken` in favor of `SurveyApi.getSurveyActionTaken`.
+* Deprecate `apiSetSurveyActionTaken` in favor of `SurveyApi.setSurveyActionTaken`.
+* Deprecate `surveyActionTakenPropertyName`.
+* Deprecate `apiGetSurveyShownCount` in favor of `SurveyApi.getSurveyShownCount`.
+* Deprecate `apiIncrementSurveyShownCount` in favor of `SurveyApi.incrementSurveyShownCount`.
 
 # 10.0.2
 * Update dependency `web_socket_channel: '>=2.4.0 <4.0.0'`.
