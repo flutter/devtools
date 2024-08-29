@@ -476,9 +476,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return this;
   }
 
-  // TODO(https://github.com/flutter/devtools/issues/8238): Actually determine
-  // whether this node has a box layout.
-  bool get isBoxLayout => true;
+  bool get isBoxLayout => size != null;
 
   bool get isFlexLayout => isFlex || (parent?.isFlex ?? false);
 
