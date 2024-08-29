@@ -39,9 +39,9 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   // Keys for theming values that an IDE may pass in the embedded DevTools URI.
   IdeThemeQueryParams get ideThemeParams => IdeThemeQueryParams(params);
 
-  /// Whether DevTools should be loaded using the skwasm renderer instead of
-  /// canvaskit.
-  bool get useSkwasm => params[skwasmKey] == 'true';
+  /// Whether DevTools should be loaded using dart2wasm + skwasm instead of
+  /// dart2js + canvaskit.
+  bool get useWasm => params[wasmKey] == 'true';
 
   static const vmServiceUriKey = 'uri';
   static const hideScreensKey = 'hide';
@@ -49,7 +49,11 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   static const hideAllExceptExtensionsValue = 'all-except-extensions';
   static const offlineScreenIdKey = 'screen';
   static const inspectorRefKey = 'inspectorRef';
-  static const skwasmKey = 'skwasm';
+
+  // This query parameter must match the String value in the Flutter bootstrap
+  // logic that is used to select a web renderer. See
+  // devtools/packages/devtools_app/web/flutter_bootstrap.js.
+  static const wasmKey = 'wasm';
 
   // TODO(kenz): remove legacy value in May of 2025 when all IDEs are not using
   // these and 12 months have passed to allow users ample upgrade time.

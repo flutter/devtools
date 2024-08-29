@@ -24,14 +24,17 @@ function unregisterDevToolsServiceWorker() {
 // Bootstrap app for 3P environments:
 function bootstrapAppFor3P() {
   const searchParams = new URLSearchParams(window.location.search);
-  const useSkwasm = searchParams.get('skwasm');
+  // This query parameter must match the String value specified by
+  // `DevToolsQueryParameters.wasmKey`. See
+  // devtools/packages/devtools_app/lib/src/shared/query_parameters.dart
+  const useWasm = searchParams.get('wasm');
   _flutter.loader.load({
     serviceWorkerSettings: {
       serviceWorkerVersion: {{flutter_service_worker_version}},
     },
     config: {
       canvasKitBaseUrl: 'canvaskit/',
-      renderer: useSkwasm ? 'skwasm' : 'canvaskit'
+      renderer: useWasm ? 'skwasm' : 'canvaskit'
     }
   });
 }

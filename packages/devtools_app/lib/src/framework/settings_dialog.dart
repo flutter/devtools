@@ -80,14 +80,15 @@ class SettingsDialog extends StatelessWidget {
           ...dialogSubHeader(theme, 'Experimental Features'),
           Flexible(
             child: CheckboxSetting(
-              title: 'Enable Skwasm renderer',
+              title: 'Enable the WebAssembly build',
               description:
                   'This will trigger a reload of the page to load DevTools '
-                  'with the skwasm renderer.',
-              notifier: preferences.skwasmEnabled,
-              onChanged: preferences.toggleSkasmEnabled,
+                  'compiled with WebAssembly. This may yield better '
+                  'performance.',
+              notifier: preferences.wasmEnabled,
+              onChanged: preferences.toggleWasmEnabled,
               gaScreen: gac.settingsDialog,
-              gaItem: gac.skwasm,
+              gaItem: gac.wasm,
             ),
           ),
           const SizedBox(height: largeSpacing),
@@ -118,7 +119,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
                 title: 'Enable verbose logging',
                 notifier: preferences.verboseLoggingEnabled,
                 onChanged: (enable) => preferences.toggleVerboseLogging(enable),
-                gaScreen:  gac.settingsDialog,
+                gaScreen: gac.settingsDialog,
                 gaItem: gac.verboseLogging,
               ),
             ),
