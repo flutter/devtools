@@ -283,7 +283,10 @@ class FlutterMaterialIcons {
   FlutterMaterialIcons._();
 
   static Icon getIconForCodePoint(int charCode, ColorScheme colorScheme) {
-    return Icon(IconData(charCode), color: colorScheme.onPrimary);
+    return Icon(
+      IconData(charCode, fontFamily: 'MaterialIcons'),
+      color: colorScheme.onSurface,
+    );
   }
 }
 
