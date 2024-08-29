@@ -79,6 +79,7 @@ class ReleaseNotesController extends SidePanelController {
     if (server.isDevToolsServerAvailable) {
       final lastReleaseNotesShownVersion =
           await server.getLastShownReleaseNotesVersion();
+      _log.fine('lastReleaseNotesShownVersion: $lastReleaseNotesShownVersion');
       if (lastReleaseNotesShownVersion.isNotEmpty) {
         previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
       }
@@ -116,10 +117,16 @@ class ReleaseNotesController extends SidePanelController {
     // strip off any build metadata (any characters following a '+' character).
     // Release notes will be hosted on the Flutter website with a version number
     // that does not contain any build metadata.
-    final parsedVersion = SemanticVersion.parse(devToolsVersion);
-    final notesVersion = latestVersionToCheckForReleaseNotes(parsedVersion);
+    final parsedDevToolsVersion = SemanticVersion.parse(devToolsVersion);
+    final checkVersion =
+        latestVersionToCheckForReleaseNotes(parsedDevToolsVersion);
 
-    if (notesVersion <= versionFloor) {
+    _log.fine(
+      'attempting to fetch and show release notes for DevTools $checkVersion '
+      'with version floor $versionFloor.',
+    );
+
+    if (checkVersion <= versionFloor) {
       // If the current version is equal to or below the version floor,
       // no need to show the release notes.
       _emptyAndClose();
@@ -131,23 +138,30 @@ class ReleaseNotesController extends SidePanelController {
       return;
     }
 
-    // If the version floor has the same major and minor version,
-    // don't check below its patch version.
+    // If the version floor has the same major and minor version as the version
+    // we are checking for, don't check below the version floor's patch version.
     final int minimumPatch;
-    if (versionFloor.major == notesVersion.major &&
-        versionFloor.minor == notesVersion.minor) {
+    if (versionFloor.major == checkVersion.major &&
+        versionFloor.minor == checkVersion.minor) {
       minimumPatch = versionFloor.patch;
     } else {
       minimumPatch = 0;
     }
 
-    final majorMinor = '${notesVersion.major}.${notesVersion.minor}';
-    var patchToCheck = notesVersion.patch;
+    final majorMinor = '${checkVersion.major}.${checkVersion.minor}';
+    var patchToCheck = checkVersion.patch;
 
     // Try each patch version in this major.minor combination until we find
     // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
     while (patchToCheck >= minimumPatch) {
       final releaseToCheck = '$majorMinor.$patchToCheck';
+
+      final releaseToCheckVersion = SemanticVersion.parse(releaseToCheck);
+      if (releaseToCheckVersion <= versionFloor) {
+        _emptyAndClose();
+        return;
+      }
+
       if (releases[releaseToCheck] case final releaseNotePath?) {
         final String releaseNotesMarkdown;
         try {
@@ -172,8 +186,7 @@ class ReleaseNotesController extends SidePanelController {
 
         toggleVisibility(true);
         if (server.isDevToolsServerAvailable) {
-          // Only set the last release notes version
-          // if we are not debugging.
+          // Only set the last release notes version if we are not debugging.
           unawaited(
             server.setLastShownReleaseNotesVersion(releaseToCheck),
           );
@@ -185,7 +198,7 @@ class ReleaseNotesController extends SidePanelController {
     }
 
     _emptyAndClose(
-      'Could not find release notes for DevTools version $notesVersion.',
+      'Could not find release notes for DevTools version $checkVersion.',
     );
     return;
   }

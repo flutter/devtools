@@ -16,6 +16,8 @@ connected app. - [#7958](https://github.com/flutter/devtools/pull/7958)
 disconnect. - [#7992](https://github.com/flutter/devtools/pull/7992)
 * Fix a bug where trying to reuse a disconnected DevTools instance would
 fail. - [#8009](https://github.com/flutter/devtools/pull/8009)
+* Fixed a bug that was causing the DevTools release notes to always
+show. - [#8277](https://github.com/flutter/devtools/pull/8277)
 
 ## Inspector updates
 
