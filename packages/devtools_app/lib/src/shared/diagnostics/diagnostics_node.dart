@@ -153,9 +153,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   // [deserializeSize] expects a parameter of type Map<String, Object> (note the
   // non-nullable Object), so we need to first type check as a Map and then we
   // can cast to the expected type.
-  Size get size => deserializeSize(
-        (json['size'] as Map?)?.cast<String, Object>() ?? <String, Object>{},
-      );
+  Size? get size {
+    final sizeMap = json['size'] as Map?;
+    return sizeMap == null
+        ? null
+        : deserializeSize(sizeMap.cast<String, Object>());
+  }
 
   bool get isLocalClass {
     final objectGroup = objectGroupApi;
@@ -454,8 +457,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return json[memberName] as bool;
   }
 
-  LayoutProperties computeLayoutProperties({required bool forFlexLayout}) {
-    assert(!forFlexLayout || (forFlexLayout && isFlexLayout));
+  LayoutProperties? computeLayoutProperties({required bool forFlexLayout}) {
+    if ((!forFlexLayout && !isBoxLayout) || (forFlexLayout && !isFlexLayout)) {
+      return null;
+    }
     return forFlexLayout
         ? FlexLayoutProperties.fromDiagnostics(this)
         : LayoutProperties(this);

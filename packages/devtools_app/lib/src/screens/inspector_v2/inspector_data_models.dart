@@ -119,7 +119,7 @@ enum SizeType {
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
       : description = node.description,
-        size = node.size,
+        size = node.size!,
         constraints = node.constraints,
         isFlex = node.isFlex,
         flexFactor = node.flexFactor,
@@ -244,6 +244,7 @@ class LayoutProperties {
     final parentElement = node.parentRenderElement;
     // Fall back to this node's properties if there is no parent.
     if (parentElement == null) return this;
+    if (parentElement.size == null) return this;
     final parentProperties =
         parentElement.computeLayoutProperties(forFlexLayout: false);
     return parentProperties;

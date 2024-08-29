@@ -96,7 +96,7 @@ List<double> computeRenderSizes({
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
       : description = node.description,
-        size = node.size,
+        size = node.size!,
         constraints = node.constraints,
         isFlex = node.isFlex,
         flexFactor = node.flexFactor,

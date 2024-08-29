@@ -719,7 +719,10 @@ class InspectorController extends DisposableController
         assert(manager.next == nextObjectGroup);
         manager.promoteNext();
       }
-      return node.computeLayoutProperties(forFlexLayout: forFlexLayout);
+      // Verify a node has size before computing layout properties.
+      return node.size == null
+          ? null
+          : node.computeLayoutProperties(forFlexLayout: forFlexLayout);
     } catch (e, st) {
       _log.warning(e, st);
       return null;
