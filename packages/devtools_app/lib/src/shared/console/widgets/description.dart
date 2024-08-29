@@ -19,9 +19,6 @@ import '../eval/inspector_tree.dart';
 import 'expandable_variable.dart';
 
 final _colorIconMaker = ColorIconMaker();
-final _customIconMaker = CustomIconMaker();
-final defaultIcon = _customIconMaker.fromInfo('Default');
-
 const _showRenderObjectPropertiesAsLinks = false;
 
 /// Presents the content of a single [RemoteDiagnosticsNode].
@@ -47,6 +44,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.actionCallback,
     this.customDescription,
     this.customIconName,
+    this.includeName = true,
+    this.overflow,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -64,6 +63,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final VoidCallback? actionCallback;
   final String? customDescription;
   final String? customIconName;
+  final bool includeName;
+  final TextOverflow? overflow;
 
   static Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -254,6 +255,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         multiline: multiline,
         actionLabel: actionLabel,
         actionCallback: actionCallback,
+        overflow: overflow ?? TextOverflow.ellipsis,
       ),
     );
   }
@@ -293,7 +295,22 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       final propertyType = diagnosticLocal.propertyType;
       final properties = diagnosticLocal.valuePropertiesJson;
 
-      if (name?.isNotEmpty == true && diagnosticLocal.showName) {
+      final showDefaultValueLabel =
+          diagnosticLocal.level == DiagnosticLevel.fine &&
+              diagnosticLocal.hasDefaultValue;
+
+      // Show the "default" value label at the start if the property name isn't
+      // included:
+      if (showDefaultValueLabel && !includeName) {
+        children.add(
+          const Padding(
+            padding: EdgeInsets.only(right: denseSpacing),
+            child: DefaultValueLabel(),
+          ),
+        );
+      }
+
+      if (includeName && name?.isNotEmpty == true && diagnosticLocal.showName) {
         children.add(
           Text(
             '$name${diagnosticLocal.separator} ',
@@ -362,10 +379,15 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         ),
       );
 
-      if (diagnosticLocal.level == DiagnosticLevel.fine &&
-          diagnosticLocal.hasDefaultValue) {
-        children.add(const Text(' '));
-        children.add(_paddedIcon(defaultIcon));
+      // Show the "default" value label at the end if the property name is
+      // included:
+      if (showDefaultValueLabel && includeName) {
+        children.add(
+          const Padding(
+            padding: EdgeInsets.only(left: denseSpacing),
+            child: DefaultValueLabel(),
+          ),
+        );
       }
     } else {
       // Non property, regular node case.
@@ -553,6 +575,31 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   }
 }
 
+/// Label for a property with the default value.
+class DefaultValueLabel extends StatelessWidget {
+  const DefaultValueLabel({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+      decoration: BoxDecoration(
+        borderRadius: defaultBorderRadius,
+        color: colorScheme.secondary,
+      ),
+      child: Text(
+        'default',
+        style: theme.regularTextStyleWithColor(
+          colorScheme.onSecondary,
+          backgroundColor: colorScheme.secondary,
+        ),
+      ),
+    );
+  }
+}
+
 class DescriptionDisplay extends StatelessWidget {
   const DescriptionDisplay({
     super.key,
@@ -560,6 +607,7 @@ class DescriptionDisplay extends StatelessWidget {
     this.multiline = false,
     this.actionLabel,
     this.actionCallback,
+    this.overflow = TextOverflow.ellipsis,
   })  : assert(
           multiline ? actionLabel == null : true,
           'Action labels are not supported for multiline descriptions',
@@ -573,6 +621,7 @@ class DescriptionDisplay extends StatelessWidget {
   final bool multiline;
   final String? actionLabel;
   final VoidCallback? actionCallback;
+  final TextOverflow overflow;
 
   @override
   Widget build(BuildContext context) {
@@ -605,7 +654,7 @@ class DescriptionDisplay extends StatelessWidget {
     }
 
     return RichText(
-      overflow: TextOverflow.ellipsis,
+      overflow: overflow,
       text: text,
     );
   }

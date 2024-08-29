@@ -392,8 +392,8 @@ extension ThemeDataExtension on ThemeData {
         ),
       );
 
-  TextStyle regularTextStyleWithColor(Color? color) =>
-      regularTextStyle.copyWith(color: color);
+  TextStyle regularTextStyleWithColor(Color? color, {Color? backgroundColor}) =>
+      regularTextStyle.copyWith(color: color, backgroundColor: backgroundColor);
 
   TextStyle get _smallText =>
       regularTextStyle.copyWith(fontSize: smallFontSize);
