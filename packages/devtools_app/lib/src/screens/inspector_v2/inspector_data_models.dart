@@ -240,7 +240,7 @@ class LayoutProperties {
     return heightUsed > parentHeight + overflowEpsilon;
   }
 
-  LayoutProperties get parentLayoutProperties {
+  LayoutProperties? get parentLayoutProperties {
     final parentElement = node.parentRenderElement;
     // Fall back to this node's properties if there is no parent.
     if (parentElement == null) return this;
