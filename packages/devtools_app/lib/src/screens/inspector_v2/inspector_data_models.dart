@@ -152,8 +152,6 @@ class LayoutProperties {
     }
   }
 
-  static bool hasLayout(RemoteDiagnosticsNode node) => node.size != null;
-
   LayoutProperties? parent;
   final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;
