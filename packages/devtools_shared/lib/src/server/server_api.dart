@@ -113,6 +113,8 @@ class ServerApi {
         }
         return _encodeResponse(_devToolsStore.analyticsEnabled, api: api);
 
+      // TODO(kenz): move all the handlers into a separate handler class as a
+      // follow up PR to preserve the diff.
       // ----- DevTools survey store. -----
 
       case SurveyApi.setActiveSurvey:
