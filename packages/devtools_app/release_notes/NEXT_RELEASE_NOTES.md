@@ -11,7 +11,7 @@ To learn more about DevTools, check out the
 ## General updates
 
 * Fixed a bug that was causing the DevTools release notes to always
-show. - []()
+show. - [#8277](https://github.com/flutter/devtools/pull/8277)
 
 ## Inspector updates
 
