@@ -33,6 +33,7 @@ part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
 part 'handlers/_general.dart';
+part 'handlers/_preferences.dart';
 part 'handlers/_release_notes.dart';
 part 'handlers/_storage.dart';
 part 'handlers/_survey.dart';
@@ -112,6 +113,21 @@ class ServerApi {
           _devToolsStore.analyticsEnabled = analyticsEnabled;
         }
         return _encodeResponse(_devToolsStore.analyticsEnabled, api: api);
+
+      // ----- Preferences api. -----
+      case PreferencesApi.getPreferenceValue:
+        return _PreferencesApiHandler.getPreferenceValue(
+          api,
+          queryParams,
+          _devToolsStore,
+        );
+
+      case PreferencesApi.setPreferenceValue:
+        return _PreferencesApiHandler.setPreferenceValue(
+          api,
+          queryParams,
+          _devToolsStore,
+        );
 
       // ----- DevTools survey api. -----
 

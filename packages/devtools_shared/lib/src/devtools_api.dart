@@ -28,6 +28,23 @@ const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
 /// in queryParameter:
 const devToolsEnabledPropertyName = 'enabled';
 
+abstract class PreferencesApi {
+  /// Returns the preference value in the DevTools store file for the key
+  /// specified by the [preferenceKeyProperty] query parameter.
+  static const getPreferenceValue = 'getPreferenceValue';
+
+  /// Sets the preference value in the DevTools store file for the key
+  /// specified by the [preferenceKeyProperty] query parameter.
+  ///
+  /// The value must be specified by the [apiParameterValueKey] query parameter.
+  static const setPreferenceValue = 'setPreferenceValue';
+
+  /// The property name for the query parameter passed along with the
+  /// [getPreferenceValue] and [setPreferenceValue] requests that describes the
+  /// preference key in the DevTools store file.
+  static const preferenceKeyProperty = 'key';
+}
+
 @Deprecated(
   'Use SurveyApi.setActiveSurvey instead. '
   'This field will be removed in devtools_shared >= 11.0.0.',
