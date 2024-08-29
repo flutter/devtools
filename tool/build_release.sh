@@ -37,8 +37,24 @@ popd
 # echo on
 set -ex
 
+# TODO(fujino): delete once https://github.com/flutter/flutter/issues/142521
+# is resolved.
+pushd "$FLUTTER_DIR"
+  # If we've already written the wrong version number to disk, delete it
+  rm -f bin/cache/flutter.version.json
+  # The flutter tool relies on git tags to determine its version
+  git fetch https://github.com/flutter/flutter.git --tags -f
+  git describe --tags
+  # Print out local tags for debugging
+  git tag -l
+popd
+
 echo "Flutter Path: $(which flutter)"
 echo "Flutter Version: $(flutter --version)"
+
+# TODO(https://github.com/flutter/flutter/issues/154194): remove this.
+echo "Running flutter --help as a workaround for https://github.com/flutter/flutter/issues/154194"
+flutter --help
 
 if [[ $1 = "--update-perfetto" ]]; then
   devtools_tool update-perfetto

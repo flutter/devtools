@@ -4,7 +4,7 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.39.0-dev.18
+version: 2.40.0-dev.1
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -164,6 +164,8 @@ flutter:
         - asset: packages/codicon/font/codicon.ttf
 
 dependency_overrides:
+  ansi_up:
+    path: ../../third_party/packages/ansi_up
   devtools_shared:
     path: ../devtools_shared
   devtools_app_shared:
