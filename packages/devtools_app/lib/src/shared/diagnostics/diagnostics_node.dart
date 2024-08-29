@@ -458,8 +458,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   LayoutProperties? computeLayoutProperties({required bool forFlexLayout}) {
-    assert(!forFlexLayout || (forFlexLayout && isFlexLayout));
-    if (size == null) return null;
+    if ((forFlexLayout && !isFlexLayout) || (!forFlexLayout && !isBoxLayout)) {
+      return null;
+    }
     return forFlexLayout
         ? FlexLayoutProperties.fromDiagnostics(this)
         : LayoutProperties(this);
