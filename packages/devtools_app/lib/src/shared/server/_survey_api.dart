@@ -54,10 +54,7 @@ Future<bool> surveyActionTaken() async {
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<void> setSurveyActionTaken() async {
   if (isDevToolsServerAvailable) {
-    final resp = await request(
-      '${SurveyApi.setSurveyActionTaken}'
-      '?$apiParameterValueKey=true',
-    );
+    final resp = await request(SurveyApi.setSurveyActionTaken);
     if (resp == null || !resp.statusOk || !(json.decode(resp.body) as bool)) {
       logWarning(resp, SurveyApi.setSurveyActionTaken);
     }

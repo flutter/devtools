@@ -54,11 +54,11 @@ const apiGetSurveyActionTaken = SurveyApi.getSurveyActionTaken;
 const apiSetSurveyActionTaken = SurveyApi.setSurveyActionTaken;
 
 @Deprecated(
-  'Use apiParameterValueKey for the query parameter of the '
-  'SurveyApi.setSurveyActionTaken request instead. '
+  'This query parameter is no longer required for the '
+  'SurveyApi.setSurveyActionTaken request. '
   'This field will be removed in devtools_shared >= 11.0.0.',
 )
-const surveyActionTakenPropertyName = apiParameterValueKey;
+const surveyActionTakenPropertyName = 'surveyActionTaken';
 
 @Deprecated(
   'Use SurveyApi.getSurveyShownCount instead. '
