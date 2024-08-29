@@ -16,6 +16,7 @@ import '../analytics/constants.dart' as gac;
 import '../config_specific/logger/logger_helpers.dart';
 import '../constants.dart';
 import '../diagnostics/inspector_service.dart';
+import '../feature_flags.dart';
 import '../globals.dart';
 import '../query_parameters.dart';
 import '../utils.dart';
@@ -101,7 +102,9 @@ class PreferencesController extends DisposableController
     // Get the current values and listen for and write back changes.
     await _initDarkMode();
     await _initVmDeveloperMode();
-    await _initWasmEnabled();
+    if (FeatureFlags.wasmOptInSetting) {
+      await _initWasmEnabled();
+    }
     await _initVerboseLogging();
 
     await inspector.init();

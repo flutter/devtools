@@ -12,6 +12,7 @@ import '../shared/analytics/analytics_controller.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
+import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/log_storage.dart';
 import '../shared/server/server.dart';
@@ -76,21 +77,23 @@ class SettingsDialog extends StatelessWidget {
               gaItem: gac.vmDeveloperMode,
             ),
           ),
-          const SizedBox(height: largeSpacing),
-          ...dialogSubHeader(theme, 'Experimental Features'),
-          Flexible(
-            child: CheckboxSetting(
-              title: 'Enable the WebAssembly build',
-              description:
-                  'This will trigger a reload of the page to load DevTools '
-                  'compiled with WebAssembly. This may yield better '
-                  'performance.',
-              notifier: preferences.wasmEnabled,
-              onChanged: preferences.toggleWasmEnabled,
-              gaScreen: gac.settingsDialog,
-              gaItem: gac.wasm,
+          if (FeatureFlags.wasmOptInSetting) ...[
+            const SizedBox(height: largeSpacing),
+            ...dialogSubHeader(theme, 'Experimental Features'),
+            Flexible(
+              child: CheckboxSetting(
+                title: 'Enable WebAssembly',
+                description:
+                    'This will trigger a reload of the page to load DevTools '
+                    'compiled with WebAssembly. This may yield better '
+                    'performance.',
+                notifier: preferences.wasmEnabled,
+                onChanged: preferences.toggleWasmEnabled,
+                gaScreen: gac.settingsDialog,
+                gaItem: gac.wasm,
+              ),
             ),
-          ),
+          ],
           const SizedBox(height: largeSpacing),
           ...dialogSubHeader(theme, 'Troubleshooting'),
           const _VerboseLoggingSetting(),

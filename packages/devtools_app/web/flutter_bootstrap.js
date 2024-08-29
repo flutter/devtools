@@ -28,6 +28,10 @@ function bootstrapAppFor3P() {
   // `DevToolsQueryParameters.wasmKey`. See
   // devtools/packages/devtools_app/lib/src/shared/query_parameters.dart
   const useWasm = searchParams.get('wasm');
+
+  // TODO(https://github.com/flutter/devtools/issues/7856): can we also
+  // look up the wasm preference from the DevTools preferences file? Can
+  // we make a direct call to the DevTools server from here?
   _flutter.loader.load({
     serviceWorkerSettings: {
       serviceWorkerVersion: {{flutter_service_worker_version}},
