@@ -104,13 +104,13 @@ class _AppSizeBodyState extends State<AppSizeBody>
 
   Future<void> maybeLoadAppSizeFiles() async {
     final queryParams = loadQueryParams();
-    final baseFilePath = queryParams[baseAppSizeFilePropertyName];
+    final baseFilePath = queryParams[AppSizeApi.baseAppSizeFilePropertyName];
     if (baseFilePath != null) {
       // TODO(kenz): does this have to be in a setState()?
       _preLoadingData = true;
       final baseAppSizeFile = await server.requestBaseAppSizeFile(baseFilePath);
       DevToolsJsonFile? testAppSizeFile;
-      final testFilePath = queryParams[testAppSizeFilePropertyName];
+      final testFilePath = queryParams[AppSizeApi.testAppSizeFilePropertyName];
       if (testFilePath != null) {
         testAppSizeFile = await server.requestTestAppSizeFile(testFilePath);
       }

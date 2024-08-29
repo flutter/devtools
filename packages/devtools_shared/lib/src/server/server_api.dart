@@ -28,10 +28,13 @@ import 'flutter_store.dart';
 
 // TODO(kenz): consider using Dart augmentation libraries instead of part files
 // if there is a clear benefit.
+part 'handlers/_app_size.dart';
 part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
 part 'handlers/_general.dart';
+part 'handlers/_release_notes.dart';
+part 'handlers/_storage.dart';
 
 /// The DevTools server API.
 ///
@@ -180,49 +183,26 @@ class ServerApi {
 
       // ----- Release notes api. -----
 
-      case apiGetLastReleaseNotesVersion:
-        return _encodeResponse(
-          _devToolsStore.lastReleaseNotesVersion,
-          api: api,
+      case ReleaseNotesApi.getLastReleaseNotesVersion:
+        return _ReleaseNotesHandler.getLastReleaseNotesVersion(
+          api,
+          _devToolsStore,
         );
-      case apiSetLastReleaseNotesVersion:
-        if (queryParams.containsKey(lastReleaseNotesVersionPropertyName)) {
-          _devToolsStore.lastReleaseNotesVersion =
-              queryParams[lastReleaseNotesVersionPropertyName]!;
-          return _encodeResponse(true, api: api);
-        }
-        return _encodeResponse(false, api: api);
+
+      case ReleaseNotesApi.setLastReleaseNotesVersion:
+        return _ReleaseNotesHandler.setLastReleaseNotesVersion(
+          api,
+          queryParams,
+          _devToolsStore,
+        );
 
       // ----- App size api. -----
 
-      case apiGetBaseAppSizeFile:
-        if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
-          final filePath = queryParams[baseAppSizeFilePropertyName]!;
-          final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
-          if (fileJson == null) {
-            return api.badRequest('No JSON file available at $filePath.');
-          }
-          return api.success(fileJson);
-        }
-        return api.badRequest(
-          'Request for base app size file does not '
-          'contain a query parameter with the expected key: '
-          '$baseAppSizeFilePropertyName',
-        );
-      case apiGetTestAppSizeFile:
-        if (queryParams.containsKey(testAppSizeFilePropertyName)) {
-          final filePath = queryParams[testAppSizeFilePropertyName]!;
-          final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
-          if (fileJson == null) {
-            return api.badRequest('No JSON file available at $filePath.');
-          }
-          return api.success(fileJson);
-        }
-        return api.badRequest(
-          'Request for test app size file does not '
-          'contain a query parameter with the expected key: '
-          '$testAppSizeFilePropertyName',
-        );
+      case AppSizeApi.getBaseAppSizeFile:
+        return _AppSizeHandler.getBaseAppSizeFile(api, queryParams);
+
+      case AppSizeApi.getTestAppSizeFile:
+        return _AppSizeHandler.getTestAppSizeFile(api, queryParams);
 
       // ----- Extensions api. -----
 
@@ -269,8 +249,14 @@ class ServerApi {
           queryParams,
           deeplinkManager,
         );
+
+      // ----- DTD api. -----
+
       case DtdApi.apiGetDtdUri:
         return _DtdApiHandler.handleGetDtdUri(api, dtd);
+
+      // ----- Unimplemented. -----
+
       default:
         return api.notImplemented();
     }
