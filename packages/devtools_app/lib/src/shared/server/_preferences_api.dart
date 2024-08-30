@@ -8,38 +8,38 @@ part of 'server.dart';
 ///
 /// This value is stored in the file '~/.flutter-devtools/.devtools'.
 Future<String?> getPreferenceValue(String key) async {
-  if (isDevToolsServerAvailable) {
-    final uri = Uri(
-      path: PreferencesApi.getPreferenceValue,
-      queryParameters: {
-        PreferencesApi.preferenceKeyProperty: key,
-      },
-    );
-    final resp = await request(uri.toString());
-    if (resp?.statusOk ?? false) {
-      return resp!.body;
-    } else {
-      logWarning(resp, PreferencesApi.getPreferenceValue);
-    }
+  if (!isDevToolsServerAvailable) return null;
+
+  final uri = Uri(
+    path: PreferencesApi.getPreferenceValue,
+    queryParameters: {
+      PreferencesApi.preferenceKeyProperty: key,
+    },
+  );
+  final resp = await request(uri.toString());
+  if (resp?.statusOk ?? false) {
+    return resp!.body;
+  } else {
+    logWarning(resp, PreferencesApi.getPreferenceValue);
+    return null;
   }
-  return null;
 }
 
 /// Sets the DevTools preference [value] for the [key].
 ///
 /// This value is stored in the file '~/.flutter-devtools/.devtools'.
 Future<void> setPreferenceValue(String key, Object value) async {
-  if (isDevToolsServerAvailable) {
-    final uri = Uri(
-      path: PreferencesApi.setPreferenceValue,
-      queryParameters: {
-        PreferencesApi.preferenceKeyProperty: key,
-        apiParameterValueKey: value,
-      },
-    );
-    final resp = await request(uri.toString());
-    if (resp == null || !resp.statusOk) {
-      logWarning(resp, PreferencesApi.setPreferenceValue);
-    }
+  if (!isDevToolsServerAvailable) return;
+
+  final uri = Uri(
+    path: PreferencesApi.setPreferenceValue,
+    queryParameters: {
+      PreferencesApi.preferenceKeyProperty: key,
+      apiParameterValueKey: value,
+    },
+  );
+  final resp = await request(uri.toString());
+  if (resp == null || !resp.statusOk) {
+    logWarning(resp, PreferencesApi.setPreferenceValue);
   }
 }
