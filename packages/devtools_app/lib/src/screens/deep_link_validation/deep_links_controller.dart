@@ -556,18 +556,6 @@ class DeepLinksController extends DisposableController
       if (linkdata.os.contains(PlatformOS.ios)) {
         final List<String> iosPaths = iosDomainPaths[linkdata.domain] ?? [];
 
-        // If there are multiple paths for the same domain, we will show the domain with each path.
-        for (final iosPath in iosPaths) {
-          validatedLinkDatas.add(
-            linkdata.copyWith(
-              path: iosPath,
-              domainErrors: errors,
-              hasAndroidAssetLinksFile: hasAndroidAssetLinksFile,
-              hasIosAasaFile: hasIosAasaFile,
-            ),
-          );
-        }
-
         // If no path is provided, we will still show the domain just with domain errors.
         if (iosPaths.isEmpty) {
           validatedLinkDatas.add(
@@ -577,6 +565,18 @@ class DeepLinksController extends DisposableController
               hasIosAasaFile: hasIosAasaFile,
             ),
           );
+        } else {
+          // If there are multiple paths for the same domain, we will show the domain with each path.
+          for (final iosPath in iosPaths) {
+            validatedLinkDatas.add(
+              linkdata.copyWith(
+                path: iosPath,
+                domainErrors: errors,
+                hasAndroidAssetLinksFile: hasAndroidAssetLinksFile,
+                hasIosAasaFile: hasIosAasaFile,
+              ),
+            );
+          }
         }
       }
 
