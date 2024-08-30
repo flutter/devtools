@@ -31,13 +31,13 @@ const devToolsEnabledPropertyName = 'enabled';
 abstract class PreferencesApi {
   /// Returns the preference value in the DevTools store file for the key
   /// specified by the [preferenceKeyProperty] query parameter.
-  static const getPreferenceValue = 'getPreferenceValue';
+  static const getPreferenceValue = '${apiPrefix}getPreferenceValue';
 
   /// Sets the preference value in the DevTools store file for the key
   /// specified by the [preferenceKeyProperty] query parameter.
   ///
   /// The value must be specified by the [apiParameterValueKey] query parameter.
-  static const setPreferenceValue = 'setPreferenceValue';
+  static const setPreferenceValue = '${apiPrefix}setPreferenceValue';
 
   /// The property name for the query parameter passed along with the
   /// [getPreferenceValue] and [setPreferenceValue] requests that describes the
