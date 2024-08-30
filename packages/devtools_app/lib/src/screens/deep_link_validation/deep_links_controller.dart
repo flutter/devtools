@@ -9,7 +9,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
@@ -557,6 +556,7 @@ class DeepLinksController extends DisposableController
       if (linkdata.os.contains(PlatformOS.ios)) {
         final List<String> iosPaths = iosDomainPaths[linkdata.domain] ?? [];
 
+        // If there are multiple paths for the same domain, we will show the domain with each path.
         for (final iosPath in iosPaths) {
           validatedLinkDatas.add(
             linkdata.copyWith(
