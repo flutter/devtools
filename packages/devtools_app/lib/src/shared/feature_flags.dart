@@ -76,7 +76,7 @@ abstract class FeatureFlags {
   /// Flag to enable ios checks in deep link validation.
   ///
   /// https://github.com/flutter/devtools/issues/7799
-  static bool deepLinkIosCheck = true;
+  static bool deepLinkIosCheck = false;
 
   /// Flag to enable DevTools extensions.
   ///
