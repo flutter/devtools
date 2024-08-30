@@ -25,6 +25,8 @@ Future<String> initializePlatform() async {
         }.toJS,
       );
 
+  // TODO(kenz): this server connection initialized listeners that are never
+  // disposed, so this is likely leaking resources.
   // Here, we try and initialize the connection between the DevTools web app and
   // its local server. DevTools can be launched without the server however, so
   // establishing this connection is a best-effort.
