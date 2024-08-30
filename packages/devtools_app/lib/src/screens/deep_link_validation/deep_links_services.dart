@@ -200,6 +200,7 @@ class DeepLinksService {
               }
             }
           }
+          paths[domainName] ??= <String>[];
           final aasaAppPaths = (domainResult[_aasaAppPathsKey] as List?)
             ?.cast<Map<String, Object?>>();
           if (aasaAppPaths != null) {
@@ -216,7 +217,6 @@ class DeepLinksService {
 
           }
         }
-        // TODO(hangyujin): Add path from AASA file check result.
       }
     }
     return ValidateIosDomainResult(
