@@ -93,8 +93,9 @@ void _sendKeyPressToParent(KeyboardEvent event) {
 
 class ServerConnectionStorage implements Storage {
   @override
-  Future<String?> getValue(String key) {
-    return server.getPreferenceValue(key);
+  Future<String?> getValue(String key) async {
+    final value = await server.getPreferenceValue(key);
+    return value == null ? null : '$value';
   }
 
   @override

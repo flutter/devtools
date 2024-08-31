@@ -7,7 +7,7 @@ part of 'server.dart';
 /// Requests the DevTools preference for the [key].
 ///
 /// This value is stored in the file '~/.flutter-devtools/.devtools'.
-Future<String?> getPreferenceValue(String key) async {
+Future<Object?> getPreferenceValue(String key) async {
   if (!isDevToolsServerAvailable) return null;
 
   final uri = Uri(
@@ -18,7 +18,7 @@ Future<String?> getPreferenceValue(String key) async {
   );
   final resp = await request(uri.toString());
   if (resp?.statusOk ?? false) {
-    return resp!.body;
+    return jsonDecode(resp!.body);
   } else {
     logWarning(resp, PreferencesApi.getPreferenceValue);
     return null;
