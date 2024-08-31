@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
@@ -316,16 +317,30 @@ class DebugTimer {
   }
 
   // ignore: prefer_const_declarations, avoid-explicit-type-declaration, not relevant when used
-  static final DebugTimer? snapshot = null;
+  static final DebugTimer? snapshot = DebugTimer();
 
   final _timer = Stopwatch();
   var _printedSnapshotTime = 0;
+
+  final defaultTag = getCurrentTag();
+  UserTag? _currentTag;
 
   void reset() {
     _timer
       ..reset()
       ..start();
     _printedSnapshotTime = 0;
+  }
+
+  void startTag(String name) {
+    assert(_currentTag == null);
+    _currentTag = UserTag(name);
+  }
+
+  void endTag() {
+    assert(_currentTag != null);
+    _currentTag = null;
+    defaultTag.makeCurrent();
   }
 
   void printTime(String message, {int? count}) {

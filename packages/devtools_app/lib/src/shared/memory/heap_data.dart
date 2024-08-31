@@ -86,6 +86,7 @@ class HeapData {
       int dartSize = 0;
       int reachableSize = graph.objects[heapRootIndex].shallowSize;
 
+      DebugTimer.snapshot?.startTag('class-data');
       for (var i = 0; i < graph.objects.length; i++) {
         if (_uiReleaser.step()) await _uiReleaser.releaseUi();
         final object = graph.objects[i];
@@ -121,6 +122,7 @@ class HeapData {
             );
         if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       }
+      DebugTimer.snapshot?.endTag();
       DebugTimer.snapshot
           ?.printTime('class data calculated', count: graph.objects.length);
 
