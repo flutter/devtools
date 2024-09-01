@@ -316,6 +316,8 @@ class DebugTimer {
     _timer.start();
   }
 
+  static const _prefix = 'DebugTimer. ';
+
   // ignore: prefer_const_declarations, avoid-explicit-type-declaration, not relevant when used
   static final DebugTimer? snapshot = DebugTimer();
 
@@ -333,12 +335,16 @@ class DebugTimer {
   }
 
   void startTag(String name) {
+    // ignore: avoid_print, we want to measure performance in release mode.
+    print('${_prefix}starting tag $name');
     assert(_currentTag == null);
     _currentTag = UserTag(name);
   }
 
   void endTag() {
     assert(_currentTag != null);
+    // ignore: avoid_print, we want to measure performance in release mode.
+    print('${_prefix}stopping tag ${_currentTag!.label}');
     _currentTag = null;
     defaultTag.makeCurrent();
   }
@@ -355,6 +361,6 @@ class DebugTimer {
     }
 
     // ignore: avoid_print, we want to measure performance in release mode.
-    print('DebugTimer. $message: + $delta = $total ms$details');
+    print('$_prefix$message: + $delta = $total ms$details');
   }
 }
