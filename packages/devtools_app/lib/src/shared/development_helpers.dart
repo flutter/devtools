@@ -319,6 +319,8 @@ class DebugTimer {
   static const _prefix = 'DebugTimer. ';
 
   // ignore: prefer_const_declarations, avoid-explicit-type-declaration, not relevant when used
+  /// To start measuring temporarily set snapshot to DebugTimer().
+  /// It should be set to null in master branch.
   static final DebugTimer? snapshot = DebugTimer();
 
   final _timer = Stopwatch();
