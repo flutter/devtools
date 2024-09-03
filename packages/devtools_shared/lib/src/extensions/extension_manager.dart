@@ -59,7 +59,7 @@ class ExtensionsManager {
   Future<void> serveAvailableExtensions(
     String? rootFileUriString,
     List<String> logs,
-    DTDConnectionInfo? dtd,
+    DTDInfo? dtd,
   ) async {
     logs.add(
       'ExtensionsManager.serveAvailableExtensions for '
@@ -86,11 +86,11 @@ class ExtensionsManager {
 
     // Find all static extensions for the project roots, which are derived from
     // the Dart Tooling Daemon, and add them to [devtoolsExtensions].
-    final dtdUri = dtd?.uri;
+    final dtdUri = dtd?.localUri;
     if (dtdUri != null) {
       DartToolingDaemon? dartToolingDaemon;
       try {
-        dartToolingDaemon = await DartToolingDaemon.connect(Uri.parse(dtdUri));
+        dartToolingDaemon = await DartToolingDaemon.connect(dtdUri);
         final projectRoots = await dartToolingDaemon.getProjectRoots(
           depth: staticExtensionsSearchDepth,
         );

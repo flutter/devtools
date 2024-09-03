@@ -13,6 +13,7 @@
 * Deprecate `surveyActionTakenPropertyName`.
 * Deprecate `apiGetSurveyShownCount` in favor of `SurveyApi.getSurveyShownCount`.
 * Deprecate `apiIncrementSurveyShownCount` in favor of `SurveyApi.incrementSurveyShownCount`.
+* Deprecate `DTDConnectionInfo` in favor of `DTDInfo` which supports tracking to URIs for DTD to better support web/remote environments.
 
 # 10.0.2
 * Update dependency `web_socket_channel: '>=2.4.0 <4.0.0'`.

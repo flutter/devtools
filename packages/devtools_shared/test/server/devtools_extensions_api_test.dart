@@ -28,14 +28,14 @@ void main() {
   setUp(() async {
     extensionsManager = ExtensionsManager();
     dtd = await startDtd();
-    expect(dtd!.uri, isNotNull, reason: 'Error starting DTD for test');
-    testDtdConnection = await DartToolingDaemon.connect(Uri.parse(dtd!.uri!));
+    expect(dtd!.info, isNotNull, reason: 'Error starting DTD for test');
+    testDtdConnection = await DartToolingDaemon.connect(dtd!.info!.localUri);
   });
 
   tearDown(() async {
     await testDtdConnection?.close();
-    dtd?.dtdProcess?.kill();
-    await dtd?.dtdProcess?.exitCode;
+    dtd?.process?.kill();
+    await dtd?.process?.exitCode;
     dtd = null;
 
     await extensionTestManager.reset();
@@ -50,7 +50,7 @@ void main() {
       includeBadExtension: includeBadExtension,
     );
     await testDtdConnection!.setIDEWorkspaceRoots(
-      dtd!.secret!,
+      dtd!.info!.secret!,
       [extensionTestManager.packagesRootUri],
     );
   }
@@ -75,7 +75,7 @@ void main() {
       request,
       extensionsManager: manager,
       deeplinkManager: FakeDeeplinkManager(),
-      dtd: (uri: dtd!.uri, secret: dtd!.secret),
+      dtd: dtd!.info,
     );
   }
 
@@ -252,7 +252,7 @@ class _TestExtensionsManager extends ExtensionsManager {
   Future<void> serveAvailableExtensions(
     String? rootFileUriString,
     List<String> logs,
-    DTDConnectionInfo? dtd,
+    DTDInfo? dtd,
   ) async {
     await super.serveAvailableExtensions(rootFileUriString, logs, dtd);
     throw Exception('Fake exception for test');

@@ -9,10 +9,15 @@ part of '../server_api.dart';
 abstract class _DtdApiHandler {
   static shelf.Response handleGetDtdUri(
     ServerApi api,
-    DTDConnectionInfo? dtd,
+    DTDInfo? dtd,
   ) {
     return ServerApi._encodeResponse(
-      {DtdApi.uriPropertyName: dtd?.uri},
+      {
+        // Always provide the exposed URI to callers of the web API.
+        // TODO(dantup): Should we add properties for both URIs and deprecate
+        //  "uri"? Would anyone on the backend ever call this API?
+        DtdApi.uriPropertyName: dtd?.exposedUri,
+      },
       api: api,
     );
   }

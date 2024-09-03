@@ -16,7 +16,7 @@ import '../fakes.dart';
 void main() {
   group('$DtdApi', () {
     test('handle ${DtdApi.apiGetDtdUri} succeeds', () async {
-      const dtdUri = 'ws://dtd:uri';
+      final dtdUri = Uri.parse('ws://dtd:uri');
       final request = Request(
         'get',
         Uri(
@@ -29,7 +29,7 @@ void main() {
         request,
         extensionsManager: ExtensionsManager(),
         deeplinkManager: FakeDeeplinkManager(),
-        dtd: (uri: dtdUri, secret: null),
+        dtd: DTDInfo(dtdUri),
       );
       expect(response.statusCode, HttpStatus.ok);
       expect(
