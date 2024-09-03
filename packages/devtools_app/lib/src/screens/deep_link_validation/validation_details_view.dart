@@ -156,7 +156,7 @@ class _DomainCheckTable extends StatelessWidget {
                 initiallyExpanded: !fingerprintExists,
                 checkName: 'Digital assets link file',
                 status: _CheckStatusText(
-                  hasError:
+                  hasError: !fingerprintExists||
                       linkData.domainErrors.any((e) => e is AndroidDomainError),
                 ),
                 children: <Widget>[
