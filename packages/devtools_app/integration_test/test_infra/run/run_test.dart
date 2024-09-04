@@ -28,7 +28,6 @@ Future<void> runFlutterIntegrationTest(
 
   if (!offline) {
     if (testRunnerArgs.testAppUri == null) {
-      debugLog('Starting a test application');
       // Create the test app and start it.
       try {
         if (testRunnerArgs.testAppDevice == TestAppDevice.cli) {
@@ -46,6 +45,7 @@ Future<void> runFlutterIntegrationTest(
             appDevice: testRunnerArgs.testAppDevice,
           );
         }
+        debugLog('testApp.start()');
         await testApp.start();
       } catch (e) {
         // ignore: avoid-throw-in-catch-block, by design
@@ -63,8 +63,10 @@ Future<void> runFlutterIntegrationTest(
     final testArgs = <String, Object>{
       if (!offline) 'service_uri': testAppUri,
     };
+    final testTarget = testRunnerArgs.testTarget!;
+    debugLog('Starting test run [target: $testTarget]');
     await testRunner.run(
-      testRunnerArgs.testTarget!,
+      testTarget,
       testDriver: 'test_driver/integration_test.dart',
       headless: testRunnerArgs.headless,
       dartDefineArgs: [

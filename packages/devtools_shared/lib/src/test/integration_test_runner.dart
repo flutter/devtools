@@ -35,6 +35,7 @@ class IntegrationTestRunner with IOMixin {
     }
 
     Future<void> runTest({required int attemptNumber}) async {
+      debugLog('starting attempt #$attemptNumber for $testTarget');
       debugLog('starting the flutter drive process');
       final flutterDriveArgs = [
         'drive',
@@ -291,6 +292,10 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
     return;
   }
 
+  void debugLog(String log) {
+    if (debugLogging) print(log);
+  }
+
   final chromedriver = ChromeDriver();
 
   try {
@@ -300,6 +305,7 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
     if (testRunnerArgs.testTarget != null) {
       // TODO(kenz): add support for specifying a directory as the target instead
       // of a single file.
+      debugLog('Running a single test: ${testRunnerArgs.testTarget}');
       await runTest(testRunnerArgs);
     } else {
       // Run all supported tests since a specific target test was not provided.
@@ -312,6 +318,10 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
                 (testIsSupported?.call(testFile) ?? true),
           )
           .toList();
+
+      debugLog(
+        'Running all tests: ${testFiles.map((file) => file.path).toList().toString()}',
+      );
 
       final shard = testRunnerArgs.shard;
       if (shard != null) {
@@ -330,6 +340,7 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
           ...testRunnerArgs.rawArgs,
           '--${IntegrationTestRunnerArgs.testTargetArg}=$testTarget',
         ]);
+        debugLog('Running a single test of many: $testTarget');
         await runTest(newArgsWithTarget);
       }
     }
