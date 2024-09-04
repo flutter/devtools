@@ -62,6 +62,7 @@ class IntegrationTestRunner with IOMixin {
         process,
         printTag: 'FlutterDriveProcess',
         onStdout: (line) {
+          debugLog('STDOUT LINE: $line');
           if (line.endsWith(_allTestsPassed)) {
             testsPassed = true;
           }
@@ -92,6 +93,7 @@ class IntegrationTestRunner with IOMixin {
           }
         },
         onStderr: (line) {
+          debugLog('STDERR LINE: $line');
           if (line.contains(_errorMarker) ||
               line.contains(_unhandledExceptionMarker)) {
             stdErrWriteInProgress = true;
