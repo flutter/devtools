@@ -10,7 +10,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:path/path.dart' as path;
 
 typedef TestDtdConnectionInfo = ({
-  DTDInfo? info,
+  DtdInfo? info,
   Process? process,
 });
 
@@ -43,7 +43,7 @@ Future<TestDtdConnectionInfo> startDtd() async {
             }) {
           completer.complete(
             (
-              info: DTDInfo(Uri.parse(uri), secret: secret),
+              info: DtdInfo(Uri.parse(uri), secret: secret),
               process: dtdProcess
             ),
           );

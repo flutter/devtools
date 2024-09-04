@@ -20,7 +20,7 @@ void main() {
   group('General DevTools server API', () {
     group(apiNotifyForVmServiceConnection, () {
       Future<Response> sendNotifyRequest({
-        required DTDInfo? dtd,
+        required DtdInfo? dtd,
         Map<String, Object?>? queryParameters,
         // ignore: avoid-redundant-async, returning FutureOr.
       }) async {
@@ -60,7 +60,7 @@ void main() {
         'returns badRequest for invalid VM service argument',
         () async {
           final response = await sendNotifyRequest(
-            dtd: DTDInfo(Uri.parse('ws://dtd:uri'), secret: 'fake_secret'),
+            dtd: DtdInfo(Uri.parse('ws://dtd:uri'), secret: 'fake_secret'),
             queryParameters: {
               apiParameterValueKey: 'fake_uri',
               apiParameterVmServiceConnected: 'true',
@@ -77,7 +77,7 @@ void main() {
         'returns badRequest for invalid $apiParameterVmServiceConnected argument',
         () async {
           final response = await sendNotifyRequest(
-            dtd: DTDInfo(Uri.parse('ws://dtd:uri'), secret: 'fake_secret'),
+            dtd: DtdInfo(Uri.parse('ws://dtd:uri'), secret: 'fake_secret'),
             queryParameters: {
               apiParameterValueKey: 'ws://127.0.0.1:8181/LEpVqqD7E_Y=/ws',
               apiParameterVmServiceConnected: 'bad_arg',

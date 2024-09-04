@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 /// Describes an instance of the Dart Tooling Daemon.
-@Deprecated('Use DTDInfo instead')
+@Deprecated('Use DtdInfo instead')
 typedef DTDConnectionInfo = ({String? uri, String? secret});
 
 /// Information about a Dart Tooling Daemon instance.
-class DTDInfo {
-  DTDInfo(
+class DtdInfo {
+  DtdInfo(
     this.localUri, {
     Uri? exposedUri,
     this.secret,

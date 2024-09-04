@@ -29,7 +29,7 @@ void main() {
         request,
         extensionsManager: ExtensionsManager(),
         deeplinkManager: FakeDeeplinkManager(),
-        dtd: DTDInfo(dtdUri),
+        dtd: DtdInfo(dtdUri),
       );
       expect(response.statusCode, HttpStatus.ok);
       expect(

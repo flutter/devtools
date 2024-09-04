@@ -11,7 +11,7 @@ abstract class _ExtensionsApiHandler {
     ServerApi api,
     Map<String, String> queryParams,
     ExtensionsManager extensionsManager,
-    DTDInfo? dtd,
+    DtdInfo? dtd,
   ) async {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
       [ExtensionsApi.packageRootUriPropertyName],

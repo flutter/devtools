@@ -57,7 +57,7 @@ class ServerApi {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
     ServerApi? api,
-    DTDInfo? dtd,
+    DtdInfo? dtd,
   }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;

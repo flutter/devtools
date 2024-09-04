@@ -22,7 +22,7 @@ abstract class Handler {
   static Future<shelf.Response> handleNotifyForVmServiceConnection(
     ServerApi api,
     Map<String, String> queryParams,
-    DTDInfo? dtd,
+    DtdInfo? dtd,
   ) async {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
       const [apiParameterValueKey, apiParameterVmServiceConnected],
@@ -152,7 +152,7 @@ abstract class Handler {
   @visibleForTesting
   static Future<shelf.Response> updateDtdWorkspaceRoots(
     DartToolingDaemon dtd, {
-    required DTDInfo dtdConnectionInfo,
+    required DtdInfo dtdConnectionInfo,
     required Uri rootFromVmService,
     required bool connected,
     required ServerApi api,

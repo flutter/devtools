@@ -252,7 +252,7 @@ class _TestExtensionsManager extends ExtensionsManager {
   Future<void> serveAvailableExtensions(
     String? rootFileUriString,
     List<String> logs,
-    DTDInfo? dtd,
+    DtdInfo? dtd,
   ) async {
     await super.serveAvailableExtensions(rootFileUriString, logs, dtd);
     throw Exception('Fake exception for test');

@@ -59,7 +59,7 @@ class ExtensionsManager {
   Future<void> serveAvailableExtensions(
     String? rootFileUriString,
     List<String> logs,
-    DTDInfo? dtd,
+    DtdInfo? dtd,
   ) async {
     logs.add(
       'ExtensionsManager.serveAvailableExtensions for '
