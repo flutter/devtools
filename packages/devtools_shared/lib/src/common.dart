@@ -18,8 +18,9 @@ class DtdInfo {
   ///
   /// This is usually a `http://localhost/` address that is accessible to tools
   /// running in the same location as the DTD process. It may NOT be accessible
-  /// to frontends that may run in another location - for example the DevTools
-  /// frontend running in a browser (or VS Code UI) in a remote/web IDE session.
+  /// to frontends that run in another location - for example the DevTools
+  /// frontend running in a browser (or embedded in an IDE) in a remote/web IDE
+  /// session.
   final Uri localUri;
 
   /// The exposed URI for connecting to DTD from the frontend.
