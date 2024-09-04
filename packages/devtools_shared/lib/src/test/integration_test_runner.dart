@@ -36,22 +36,21 @@ class IntegrationTestRunner with IOMixin {
 
     Future<void> runTest({required int attemptNumber}) async {
       debugLog('starting the flutter drive process');
-      final process = await Process.start(
-        'flutter',
-        [
-          'drive',
-          // Debug outputs from the test will not show up in profile mode. Since
-          // we rely on debug outputs for detecting errors and exceptions from the
-          // test, we cannot run this these tests in profile mode until this issue
-          // is resolved.  See https://github.com/flutter/flutter/issues/69070.
-          // '--profile',
-          '--driver=$testDriver',
-          '--target=$testTarget',
-          '-d',
-          headless ? 'web-server' : 'chrome',
-          for (final arg in dartDefineArgs) '--dart-define=$arg',
-        ],
-      );
+      final flutterDriveArgs = [
+        'drive',
+        // Debug outputs from the test will not show up in profile mode. Since
+        // we rely on debug outputs for detecting errors and exceptions from the
+        // test, we cannot run this these tests in profile mode until this issue
+        // is resolved.  See https://github.com/flutter/flutter/issues/69070.
+        // '--profile',
+        '--driver=$testDriver',
+        '--target=$testTarget',
+        '-d',
+        headless ? 'web-server' : 'chrome',
+        for (final arg in dartDefineArgs) '--dart-define=$arg',
+      ];
+      debugLog('> flutter ${flutterDriveArgs.join(' ')}');
+      final process = await Process.start('flutter', flutterDriveArgs);
 
       bool stdOutWriteInProgress = false;
       bool stdErrWriteInProgress = false;
@@ -112,6 +111,10 @@ class IntegrationTestRunner with IOMixin {
         timeout,
       ]);
 
+      debugLog(
+        'shutting down processes because '
+        '${testTimedOut ? 'test timed out' : 'test finished'}',
+      );
       debugLog('attempting to kill the flutter drive process');
       process.kill();
       debugLog('flutter drive process has exited');
