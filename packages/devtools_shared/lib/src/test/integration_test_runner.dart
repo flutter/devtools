@@ -103,7 +103,7 @@ class IntegrationTestRunner with IOMixin {
       );
 
       bool testTimedOut = false;
-      final timeout = Future.delayed(const Duration(minutes: 12)).then((_) {
+      final timeout = Future.delayed(const Duration(minutes: 8)).then((_) {
         testTimedOut = true;
       });
 
@@ -112,6 +112,10 @@ class IntegrationTestRunner with IOMixin {
         timeout,
       ]);
 
+      debugLog(
+        'shutting down processes because '
+        '${testTimedOut ? 'test timed out' : 'test finished'}',
+      );
       debugLog('attempting to kill the flutter drive process');
       process.kill();
       debugLog('flutter drive process has exited');

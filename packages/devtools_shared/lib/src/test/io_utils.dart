@@ -82,7 +82,7 @@ mixin IOMixin {
   }) async {
     final processId = process.pid;
     if (debugLogging) {
-      print('Sending SIGTERM to $processId..');
+      print('Sending SIGTERM to $processId.');
     }
     await cancelAllStreamSubscriptions();
     Process.killPid(processId);
