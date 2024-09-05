@@ -51,6 +51,11 @@ class IntegrationTestRunner with IOMixin {
         // --disable-gpu speeds up tests that use ChromeDriver when run on
         // GitHub Actions. See https://github.com/flutter/devtools/issues/8301.
         '--web-browser-flag=--disable-gpu',
+        // Flags to avoid breakage with chromedriver 128. See
+        // https://github.com/flutter/devtools/issues/8301.
+        '--web-browser-flag=--headless=old',
+        '--web-browser-flag=--disable-search-engine-choice-screen',
+        '--browser-dimension=2400,1600',
         for (final arg in dartDefineArgs) '--dart-define=$arg',
       ];
       debugLog('> flutter ${flutterDriveArgs.join(' ')}');
