@@ -48,8 +48,10 @@ class IntegrationTestRunner with IOMixin {
         '--target=$testTarget',
         '-d',
         headless ? 'web-server' : 'chrome',
+        // --disable-gpu speeds up tests that use ChromeDriver when run on
+        // GitHub Actions. See https://github.com/flutter/devtools/issues/8301.
+        '--web-browser-flag=--disable-gpu',
         for (final arg in dartDefineArgs) '--dart-define=$arg',
-        '--browser-dimension=4000,4000',
       ];
       debugLog('> flutter ${flutterDriveArgs.join(' ')}');
       final process = await Process.start('flutter', flutterDriveArgs);
