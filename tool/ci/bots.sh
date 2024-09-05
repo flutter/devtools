@@ -81,14 +81,12 @@ https://github.com/flutter/flutter/issues/118470). Look at the summary of the Gi
 run to see if golden image failures have been uploaded (this only happens once all checks have \
 completed). Download these goldens and update them in the codebase to apply the updates."
 
-        # TODO(https://github.com/flutter/devtools/issues/8301): run these tests with the
-        # --headless flag once the issue with Chrome and chromedriver is resolved.
         if [ "$DEVICE" = "flutter" ]; then
             dart run integration_test/run_tests.dart --headless --shard="$SHARD"
         elif [ "$DEVICE" = "flutter-web" ]; then
-            dart run integration_test/run_tests.dart --headless --test-app-device=chrome --shard="$SHARD"
+            dart run integration_test/run_tests.dart --test-app-device=chrome --headless --shard="$SHARD"
         elif [ "$DEVICE" = "dart-cli" ]; then
-            dart run integration_test/run_tests.dart --headless --test-app-device=cli --shard="$SHARD"
+            dart run integration_test/run_tests.dart --test-app-device=cli --headless --shard="$SHARD"
         fi
     elif [ "$DEVTOOLS_PACKAGE" = "devtools_extensions" ]; then
         pushd $DEVTOOLS_DIR/packages/devtools_extensions
