@@ -307,7 +307,7 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
     if (testRunnerArgs.testTarget != null) {
       // TODO(kenz): add support for specifying a directory as the target instead
       // of a single file.
-      debugLog('Running a single test: ${testRunnerArgs.testTarget}');
+      debugLog('Attempting to run a single test: ${testRunnerArgs.testTarget}');
       await runTest(testRunnerArgs);
     } else {
       // Run all supported tests since a specific target test was not provided.
@@ -321,10 +321,6 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
           )
           .toList();
 
-      debugLog(
-        'Running all tests: ${testFiles.map((file) => file.path).toList().toString()}',
-      );
-
       final shard = testRunnerArgs.shard;
       if (shard != null) {
         final shardSize = testFiles.length ~/ shard.totalShards;
@@ -336,13 +332,18 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
         testFiles = testFiles.sublist(shardStart, shardEnd);
       }
 
+      debugLog(
+        'Attempting to run all tests: '
+        '${testFiles.map((file) => file.path).toList().toString()}',
+      );
+
       for (final testFile in testFiles) {
         final testTarget = testFile.path;
         final newArgsWithTarget = newArgsGenerator([
           ...testRunnerArgs.rawArgs,
           '--${IntegrationTestRunnerArgs.testTargetArg}=$testTarget',
         ]);
-        debugLog('Running a single test of many: $testTarget');
+        debugLog('Attempting to run: $testTarget');
         await runTest(newArgsWithTarget);
       }
     }

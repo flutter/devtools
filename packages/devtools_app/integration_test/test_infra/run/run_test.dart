@@ -64,7 +64,7 @@ Future<void> runFlutterIntegrationTest(
       if (!offline) 'service_uri': testAppUri,
     };
     final testTarget = testRunnerArgs.testTarget!;
-    debugLog('Starting test run [target: $testTarget]');
+    debugLog('starting test run for $testTarget');
     await testRunner.run(
       testTarget,
       testDriver: 'test_driver/integration_test.dart',
