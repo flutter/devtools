@@ -30,14 +30,6 @@ const _testDeviceAll = 'all';
 /// Format: `'my_example_test.dart'`.
 final _disabledTestsForDevice = <String, Set<String>>{
   _testDeviceAll: {
-    'app_test.dart',
-    'debugger_panel_test.dart',
-    'devtools_extensions_test.dart',
-    'performance_screen_event_recording_test.dart',
-    'service_connection_test.dart',
-    'service_extensions_test.dart',
-    'memory_offline_data_test.dart',
-    'perfetto_test.dart',
     // https://github.com/flutter/devtools/issues/6592
     'eval_and_browse_test.dart',
     // https://github.com/flutter/devtools/issues/7425
