@@ -161,7 +161,7 @@ class DeepLinksService {
       for (final domain in domains) domain: <DomainError>[],
     };
 
-        final paths = <String, List<String>>{
+    final paths = <String, List<String>>{
       for (final domain in domains) domain: <String>[],
     };
     // TODO(hangyujin): Add error code to the result.
@@ -202,19 +202,18 @@ class DeepLinksService {
           }
           paths[domainName] ??= <String>[];
           final aasaAppPaths = (domainResult[_aasaAppPathsKey] as List?)
-            ?.cast<Map<String, Object?>>();
+              ?.cast<Map<String, Object?>>();
           if (aasaAppPaths != null) {
             for (final aasaAppPath in aasaAppPaths) {
-              final aasaPaths= (aasaAppPath[_aasaPathsKey] as List?)?.cast<Map<String, Object?>>();
+              final aasaPaths = (aasaAppPath[_aasaPathsKey] as List?)
+                  ?.cast<Map<String, Object?>>();
               if (aasaPaths != null) {
-                for(final aasaPath in aasaPaths)
-                {
-                  paths[domainName]!.add( aasaPath[_pathKey] as String);
+                for (final aasaPath in aasaPaths) {
+                  paths[domainName]!.add(aasaPath[_pathKey] as String);
                 }
                 continue;
               }
             }
-
           }
         }
       }
