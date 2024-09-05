@@ -32,12 +32,12 @@ Future<void> runFlutterIntegrationTest(
       try {
         if (testRunnerArgs.testAppDevice == TestAppDevice.cli) {
           debugLog(
-            'Creating a TestDartCliApp with path ${testFileArgs.appPath}',
+            'creating a TestDartCliApp with path ${testFileArgs.appPath}',
           );
           testApp = TestDartCliApp(appPath: testFileArgs.appPath);
         } else {
           debugLog(
-            'Creating a TestFlutterApp with path ${testFileArgs.appPath} and '
+            'creating a TestFlutterApp with path ${testFileArgs.appPath} and '
             'device ${testRunnerArgs.testAppDevice}',
           );
           testApp = TestFlutterApp(
@@ -45,7 +45,7 @@ Future<void> runFlutterIntegrationTest(
             appDevice: testRunnerArgs.testAppDevice,
           );
         }
-        debugLog('testApp.start()');
+        debugLog('starting the test app');
         await testApp.start();
       } catch (e) {
         // ignore: avoid-throw-in-catch-block, by design
