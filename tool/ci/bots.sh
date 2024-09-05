@@ -77,16 +77,16 @@ elif [ "$BOT" = "integration_dart2js" ]; then
         echo "Preparing to run integration tests. Warning: if you see the exception \
 'Web Driver Command WebDriverCommandType.screenshot failed while waiting for driver side', \
 this is a known issue and likely means that the golden image check failed (see \
-https://github.com/flutter/flutter/issues/118470). Run the test locally to see if new \
-images under a 'failures/' directory are created as a result of the test run: \
-$ dart run integration_test/run_tests.dart --headless"
+https://github.com/flutter/flutter/issues/118470). Look at the summary of the Github Actions \
+run to see if golden image failures have been uploaded (this only happens once all checks have \
+completed). Download these goldens and update them in the codebase to apply the updates."
 
         if [ "$DEVICE" = "flutter" ]; then
-            dart run integration_test/run_tests.dart --headless --shard="$SHARD"
+            dart run integration_test/run_tests.dart --shard="$SHARD"
         elif [ "$DEVICE" = "flutter-web" ]; then
-            dart run integration_test/run_tests.dart --test-app-device=chrome --headless --shard="$SHARD"
+            dart run integration_test/run_tests.dart --test-app-device=chrome --shard="$SHARD"
         elif [ "$DEVICE" = "dart-cli" ]; then
-            dart run integration_test/run_tests.dart --test-app-device=cli --headless --shard="$SHARD"
+            dart run integration_test/run_tests.dart --test-app-device=cli --shard="$SHARD"
         fi
     elif [ "$DEVTOOLS_PACKAGE" = "devtools_extensions" ]; then
         pushd $DEVTOOLS_DIR/packages/devtools_extensions

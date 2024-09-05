@@ -36,6 +36,8 @@ final _disabledTestsForDevice = <String, Set<String>>{
     'performance_screen_event_recording_test.dart',
     'service_connection_test.dart',
     'service_extensions_test.dart',
+    'memory_offline_data_test.dart',
+    'perfetto_test.dart',
     // https://github.com/flutter/devtools/issues/6592
     'eval_and_browse_test.dart',
     // https://github.com/flutter/devtools/issues/7425
