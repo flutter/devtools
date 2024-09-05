@@ -49,6 +49,7 @@ class IntegrationTestRunner with IOMixin {
         '-d',
         headless ? 'web-server' : 'chrome',
         for (final arg in dartDefineArgs) '--dart-define=$arg',
+        '--browser-dimension=4000,4000',
       ];
       debugLog('> flutter ${flutterDriveArgs.join(' ')}');
       final process = await Process.start('flutter', flutterDriveArgs);
