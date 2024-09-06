@@ -13,6 +13,8 @@
 * Deprecate `surveyActionTakenPropertyName`.
 * Deprecate `apiGetSurveyShownCount` in favor of `SurveyApi.getSurveyShownCount`.
 * Deprecate `apiIncrementSurveyShownCount` in favor of `SurveyApi.incrementSurveyShownCount`.
+* Support Chrome's new headless mode in the integration test runner.
+* Add `PreferencesApi` to get and set preference values.
 * Deprecate `DTDConnectionInfo` in favor of `DtdInfo` which supports tracking two URIs for DTD to better support web/remote environments.
 
 # 10.0.2
