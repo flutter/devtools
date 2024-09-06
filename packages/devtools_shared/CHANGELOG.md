@@ -1,3 +1,21 @@
+# 10.1.0
+* Deprecate `apiGetLastReleaseNotesVersion` in favor of `ReleaseNotesApi.getLastReleaseNotesVersion`.
+* Deprecate `apiSetLastReleaseNotesVersion` in favor of `ReleaseNotesApi.setLastReleaseNotesVersion`.
+* Deprecate `lastReleaseNotesVersionPropertyName`.
+* Deprecate `apiGetBaseAppSizeFile` in favor of `AppSizeApi.getBaseAppSizeFile`.
+* Deprecate `apiGetTestAppSizeFile` in favor of `AppSizeApi.getTestAppSizeFile`.
+* Deprecate `baseAppSizeFilePropertyName` in favor of `AppSizeApi.baseAppSizeFilePropertyName`.
+* Deprecate `testAppSizeFilePropertyName` in favor of `AppSizeApi.testAppSizeFilePropertyName`.
+* Deprecate `apiSetActiveSurvey` in favor of `SurveyApi.setActiveSurvey`.
+* Deprecate `activeSurveyName`.
+* Deprecate `apiGetSurveyActionTaken` in favor of `SurveyApi.getSurveyActionTaken`.
+* Deprecate `apiSetSurveyActionTaken` in favor of `SurveyApi.setSurveyActionTaken`.
+* Deprecate `surveyActionTakenPropertyName`.
+* Deprecate `apiGetSurveyShownCount` in favor of `SurveyApi.getSurveyShownCount`.
+* Deprecate `apiIncrementSurveyShownCount` in favor of `SurveyApi.incrementSurveyShownCount`.
+* Support Chrome's new headless mode in the integration test runner.
+* Add `PreferencesApi` to get and set preference values.
+
 # 10.0.2
 * Update dependency `web_socket_channel: '>=2.4.0 <4.0.0'`.
 

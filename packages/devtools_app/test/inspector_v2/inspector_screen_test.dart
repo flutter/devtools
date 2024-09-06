@@ -407,7 +407,7 @@ void main() {
           await tester.tap(hoverModeCheckBox);
           await tester.pump(safePumpDuration);
           expect(
-            preferences.inspectorV2.hoverEvalModeEnabled.value,
+            preferences.inspector.hoverEvalModeEnabled.value,
             !startingHoverEvalModeValue,
           );
         },

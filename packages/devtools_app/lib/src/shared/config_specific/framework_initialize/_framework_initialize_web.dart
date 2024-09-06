@@ -11,6 +11,7 @@ import 'package:web/web.dart' hide Storage;
 import '../../../service/service_manager.dart';
 import '../../globals.dart';
 import '../../primitives/storage.dart';
+import '../../server/server.dart' as server;
 import '../../server/server_api_client.dart';
 
 /// Return the url the application is launched from.
@@ -24,12 +25,14 @@ Future<String> initializePlatform() async {
         }.toJS,
       );
 
+  // TODO(kenz): this server connection initialized listeners that are never
+  // disposed, so this is likely leaking resources.
   // Here, we try and initialize the connection between the DevTools web app and
   // its local server. DevTools can be launched without the server however, so
   // establishing this connection is a best-effort.
   final connection = await DevToolsServerConnection.connect();
   if (connection != null) {
-    setGlobal(Storage, ServerConnectionStorage(connection));
+    setGlobal(Storage, ServerConnectionStorage());
   } else {
     setGlobal(Storage, BrowserStorage());
   }
@@ -89,18 +92,15 @@ void _sendKeyPressToParent(KeyboardEvent event) {
 }
 
 class ServerConnectionStorage implements Storage {
-  ServerConnectionStorage(this.connection);
-
-  final DevToolsServerConnection connection;
-
   @override
-  Future<String?> getValue(String key) {
-    return connection.getPreferenceValue(key);
+  Future<String?> getValue(String key) async {
+    final value = await server.getPreferenceValue(key);
+    return value == null ? null : '$value';
   }
 
   @override
   Future<void> setValue(String key, String value) async {
-    await connection.setPreferenceValue(key, value);
+    await server.setPreferenceValue(key, value);
   }
 }
 

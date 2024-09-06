@@ -28,51 +28,173 @@ const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
 /// in queryParameter:
 const devToolsEnabledPropertyName = 'enabled';
 
-/// Survey properties APIs:
-/// setActiveSurvey sets the survey property to fetch and save JSON values e.g., Q1-2020
-const apiSetActiveSurvey = '${apiPrefix}setActiveSurvey';
+abstract class PreferencesApi {
+  /// Returns the preference value in the DevTools store file for the key
+  /// specified by the [preferenceKeyProperty] query parameter.
+  static const getPreferenceValue = '${apiPrefix}getPreferenceValue';
 
-/// Survey name passed in apiSetActiveSurvey, the activeSurveyName is the property name
-/// passed as a queryParameter and is the property in ~/.devtools too.
-const activeSurveyName = 'activeSurveyName';
+  /// Sets the preference value in the DevTools store file for the key
+  /// specified by the [preferenceKeyProperty] query parameter.
+  ///
+  /// The value must be specified by the [apiParameterValueKey] query parameter.
+  static const setPreferenceValue = '${apiPrefix}setPreferenceValue';
 
-/// Returns the surveyActionTaken of the activeSurvey (apiSetActiveSurvey).
-const apiGetSurveyActionTaken = '${apiPrefix}getSurveyActionTaken';
+  /// The property name for the query parameter passed along with the
+  /// [getPreferenceValue] and [setPreferenceValue] requests that describes the
+  /// preference key in the DevTools store file.
+  static const preferenceKeyProperty = 'key';
+}
 
-/// Sets the surveyActionTaken of the of the activeSurvey (apiSetActiveSurvey).
-const apiSetSurveyActionTaken = '${apiPrefix}setSurveyActionTaken';
+@Deprecated(
+  'Use SurveyApi.setActiveSurvey instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiSetActiveSurvey = SurveyApi.setActiveSurvey;
 
-/// Property name to apiSetSurveyActionTaken the surveyActionTaken is the name
-/// passed in queryParameter:
+@Deprecated(
+  'Use apiParameterValueKey for the query parameter of the '
+  'SurveyApi.setActiveSurvey request instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const activeSurveyName = apiParameterValueKey;
+
+@Deprecated(
+  'Use SurveyApi.getSurveyActionTaken instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiGetSurveyActionTaken = SurveyApi.getSurveyActionTaken;
+
+@Deprecated(
+  'Use SurveyApi.setSurveyActionTaken instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiSetSurveyActionTaken = SurveyApi.setSurveyActionTaken;
+
+@Deprecated(
+  'This query parameter is no longer required for the '
+  'SurveyApi.setSurveyActionTaken request. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
 const surveyActionTakenPropertyName = 'surveyActionTaken';
 
-/// Returns the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
-const apiGetSurveyShownCount = '${apiPrefix}getSurveyShownCount';
+@Deprecated(
+  'Use SurveyApi.getSurveyShownCount instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiGetSurveyShownCount = SurveyApi.getSurveyShownCount;
 
-/// Increments the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
-const apiIncrementSurveyShownCount = '${apiPrefix}incrementSurveyShownCount';
+@Deprecated(
+  'Use SurveyApi.incrementSurveyShownCount instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiIncrementSurveyShownCount = SurveyApi.incrementSurveyShownCount;
 
-const lastReleaseNotesVersionPropertyName = 'lastReleaseNotesVersion';
+abstract class SurveyApi {
+  /// Sets the active survey value for the DevTools session.
+  ///
+  /// The active survey is used as a key to get and set values within the
+  /// DevTools store file.
+  static const setActiveSurvey = '${apiPrefix}setActiveSurvey';
 
-/// Returns the last DevTools version for which we have shown release notes.
-const apiGetLastReleaseNotesVersion = '${apiPrefix}getLastReleaseNotesVersion';
+  /// Returns the 'surveyActionTaken' value for the active survey set by
+  /// [setActiveSurvey].
+  static const getSurveyActionTaken = '${apiPrefix}getSurveyActionTaken';
 
-/// Sets the last DevTools version for which we have shown release notes.
-const apiSetLastReleaseNotesVersion = '${apiPrefix}setLastReleaseNotesVersion';
+  /// Sets the 'surveyActionTaken' value for the active survey set by
+  /// [setActiveSurvey].
+  static const setSurveyActionTaken = '${apiPrefix}setSurveyActionTaken';
 
-/// Returns the base app size file, if present.
-const apiGetBaseAppSizeFile = '${apiPrefix}getBaseAppSizeFile';
+  /// Returns the 'surveyShownCount' value for the active survey set by
+  /// [setActiveSurvey].
+  static const getSurveyShownCount = '${apiPrefix}getSurveyShownCount';
 
-/// Returns the test app size file used for comparing two files in a diff, if
-/// present.
-const apiGetTestAppSizeFile = '${apiPrefix}getTestAppSizeFile';
+  /// Increments the 'surveyShownCount' value for the active survey set by
+  /// [setActiveSurvey].
+  static const incrementSurveyShownCount =
+      '${apiPrefix}incrementSurveyShownCount';
+}
 
-const baseAppSizeFilePropertyName = 'appSizeBase';
+@Deprecated(
+  'Use apiParameterValueKey for the query parameter of the '
+  'ReleaseNotesApi.setLastReleaseNotesVersion request instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const lastReleaseNotesVersionPropertyName = apiParameterValueKey;
 
-const testAppSizeFilePropertyName = 'appSizeTest';
+@Deprecated(
+  'Use ReleaseNotesApi.getLastReleaseNotesVersion instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiGetLastReleaseNotesVersion =
+    ReleaseNotesApi.getLastReleaseNotesVersion;
+
+@Deprecated(
+  'Use ReleaseNotesApi.setLastReleaseNotesVersion instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiSetLastReleaseNotesVersion =
+    ReleaseNotesApi.setLastReleaseNotesVersion;
+
+abstract class ReleaseNotesApi {
+  /// Returns the last DevTools version for which we have shown release notes.
+  static const getLastReleaseNotesVersion =
+      '${apiPrefix}getLastReleaseNotesVersion';
+
+  /// Sets the last DevTools version for which we have shown release notes.
+  static const setLastReleaseNotesVersion =
+      '${apiPrefix}setLastReleaseNotesVersion';
+}
+
+@Deprecated(
+  'Use AppSizeApi.getBaseAppSizeFile instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiGetBaseAppSizeFile = AppSizeApi.getBaseAppSizeFile;
+
+@Deprecated(
+  'Use AppSizeApi.getTestAppSizeFile instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const apiGetTestAppSizeFile = AppSizeApi.getTestAppSizeFile;
+
+@Deprecated(
+  'Use AppSizeApi.baseAppSizeFilePropertyName instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const baseAppSizeFilePropertyName = AppSizeApi.baseAppSizeFilePropertyName;
+
+@Deprecated(
+  'Use AppSizeApi.testAppSizeFilePropertyName instead. '
+  'This field will be removed in devtools_shared >= 11.0.0.',
+)
+const testAppSizeFilePropertyName = AppSizeApi.testAppSizeFilePropertyName;
+
+abstract class AppSizeApi {
+  /// Returns the base app size file, if present.
+  static const getBaseAppSizeFile = '${apiPrefix}getBaseAppSizeFile';
+
+  /// Returns the test app size file used for comparing two files in a diff, if
+  /// present.
+  static const getTestAppSizeFile = '${apiPrefix}getTestAppSizeFile';
+
+  /// The property name for the query parameter passed along with the
+  /// [getBaseAppSizeFile] request.
+  static const baseAppSizeFilePropertyName = 'appSizeBase';
+
+  /// The property name for the query parameter passed along with the
+  /// [getTestAppSizeFile] request.
+  static const testAppSizeFilePropertyName = 'appSizeTest';
+}
 
 abstract class DtdApi {
+  /// Gets the DTD URI from the DevTools server.
+  ///
+  /// DTD is either started from the user's IDE and passed to the DevTools
+  /// server, or it is started directly from the DevTools server.
   static const apiGetDtdUri = '${apiPrefix}getDtdUri';
+
+  /// The property name for the response that the server sends back upon
+  /// receiving an [apiGetDtdUri] request.
   static const uriPropertyName = 'dtdUri';
 }
 

@@ -10,11 +10,11 @@ part of 'server.dart';
 Future<String> getLastShownReleaseNotesVersion() async {
   String version = '';
   if (isDevToolsServerAvailable) {
-    final resp = await request(apiGetLastReleaseNotesVersion);
+    final resp = await request(ReleaseNotesApi.getLastReleaseNotesVersion);
     if (resp?.statusOk ?? false) {
       version = json.decode(resp!.body);
     } else {
-      logWarning(resp, apiGetLastReleaseNotesVersion);
+      logWarning(resp, ReleaseNotesApi.getLastReleaseNotesVersion);
     }
   }
   return version;
@@ -26,11 +26,11 @@ Future<String> getLastShownReleaseNotesVersion() async {
 Future<void> setLastShownReleaseNotesVersion(String version) async {
   if (isDevToolsServerAvailable) {
     final resp = await request(
-      '$apiSetLastReleaseNotesVersion'
-      '?$lastReleaseNotesVersionPropertyName=$version',
+      '${ReleaseNotesApi.setLastReleaseNotesVersion}'
+      '?$apiParameterValueKey=$version',
     );
-    if (resp == null || !resp.statusOk || !(json.decode(resp.body) as bool)) {
-      logWarning(resp, apiSetLastReleaseNotesVersion);
+    if (resp == null || !resp.statusOk) {
+      logWarning(resp, ReleaseNotesApi.setLastReleaseNotesVersion);
     }
   }
 }
