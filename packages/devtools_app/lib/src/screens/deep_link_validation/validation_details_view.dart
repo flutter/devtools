@@ -182,7 +182,13 @@ class _DomainCheckTable extends StatelessWidget {
                       in linkData.domainErrors.whereType<IosDomainError>())
                     _IssuesBorderWrap(
                       children: [
-                        _FailureDetails(errors: [error]),
+                        _FailureDetails(
+                          errors: [
+                            error,
+                            ...error.subcheckErrors,
+                          ],
+                          oneFixGuideForAll: error.fixDetails,
+                        ),
                       ],
                     ),
                 ],
