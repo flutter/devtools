@@ -278,10 +278,31 @@ class LinkData with SearchableDataMixin {
   }
 
   @override
-  String toString() => 'LinkData($domain $path)';
+  String toString() => 'LinkData($domain $path $os)';
 
   String get safePath => path ?? '';
   String get safeDomain => domain ?? '';
+
+  LinkData copyWith({
+    String? path,
+    List<DomainError>? domainErrors,
+    bool? hasAndroidAssetLinksFile,
+    bool? hasIosAasaFile,
+  }) {
+    return LinkData(
+      domain: domain,
+      path: path ?? this.path,
+      os: os,
+      scheme: scheme,
+      domainErrors: domainErrors ?? this.domainErrors,
+      pathErrors: pathErrors,
+      associatedPath: associatedPath,
+      associatedDomains: associatedDomains,
+      hasAndroidAssetLinksFile:
+          hasAndroidAssetLinksFile ?? this.hasAndroidAssetLinksFile,
+      hasIosAasaFile: hasIosAasaFile ?? this.hasIosAasaFile,
+    );
+  }
 }
 
 class _ErrorAwareText extends StatelessWidget {
