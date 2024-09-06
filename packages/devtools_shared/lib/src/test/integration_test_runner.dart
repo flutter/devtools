@@ -35,7 +35,9 @@ class IntegrationTestRunner with IOMixin {
     }
 
     Future<void> runTest({required int attemptNumber}) async {
+      debugLog('starting attempt #$attemptNumber for $testTarget');
       debugLog('starting the flutter drive process');
+
       final flutterDriveArgs = [
         'drive',
         // Debug outputs from the test will not show up in profile mode. Since
@@ -47,8 +49,18 @@ class IntegrationTestRunner with IOMixin {
         '--target=$testTarget',
         '-d',
         headless ? 'web-server' : 'chrome',
+        // --disable-gpu speeds up tests that use ChromeDriver when run on
+        // GitHub Actions. See https://github.com/flutter/devtools/issues/8301.
+        '--web-browser-flag=--disable-gpu',
+        if (headless) ...[
+          // Flags to avoid breakage with chromedriver 128. See
+          // https://github.com/flutter/devtools/issues/8301.
+          '--web-browser-flag=--headless=old',
+          '--web-browser-flag=--disable-search-engine-choice-screen',
+        ],
         for (final arg in dartDefineArgs) '--dart-define=$arg',
       ];
+
       debugLog('> flutter ${flutterDriveArgs.join(' ')}');
       final process = await Process.start('flutter', flutterDriveArgs);
 
@@ -102,7 +114,7 @@ class IntegrationTestRunner with IOMixin {
       );
 
       bool testTimedOut = false;
-      final timeout = Future.delayed(const Duration(minutes: 60)).then((_) {
+      final timeout = Future.delayed(const Duration(minutes: 8)).then((_) {
         testTimedOut = true;
       });
 
@@ -111,10 +123,6 @@ class IntegrationTestRunner with IOMixin {
         timeout,
       ]);
 
-      debugLog(
-        'shutting down processes because '
-        '${testTimedOut ? 'test timed out' : 'test finished'}',
-      );
       debugLog('attempting to kill the flutter drive process');
       process.kill();
       debugLog('flutter drive process has exited');
