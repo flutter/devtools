@@ -37,6 +37,7 @@ class IntegrationTestRunner with IOMixin {
     Future<void> runTest({required int attemptNumber}) async {
       debugLog('starting attempt #$attemptNumber for $testTarget');
       debugLog('starting the flutter drive process');
+
       final flutterDriveArgs = [
         'drive',
         // Debug outputs from the test will not show up in profile mode. Since
@@ -59,6 +60,7 @@ class IntegrationTestRunner with IOMixin {
         ],
         for (final arg in dartDefineArgs) '--dart-define=$arg',
       ];
+
       debugLog('> flutter ${flutterDriveArgs.join(' ')}');
       final process = await Process.start('flutter', flutterDriveArgs);
 
