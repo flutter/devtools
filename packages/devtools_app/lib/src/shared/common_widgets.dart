@@ -893,11 +893,11 @@ extension ColorExtension on Color {
     percent = 1.0 - percent;
 
     final c = this;
-    return Color.fromARGB(
-      c.a.round(),
-      (c.r * percent).round(),
-      (c.g * percent).round(),
-      (c.b * percent).round(),
+    return Color.from(
+      alpha: c.a,
+      red: c.r * percent,
+      green: c.g * percent,
+      blue: c.b * percent,
     );
   }
 
@@ -906,11 +906,11 @@ extension ColorExtension on Color {
     assert(0.0 <= percent && percent <= 1.0);
 
     final c = this;
-    return Color.fromARGB(
-      c.a.round(),
-      (c.r + ((255 - c.r) * percent)).round(),
-      (c.g + ((255 - c.g) * percent)).round(),
-      (c.b + ((255 - c.b) * percent)).round(),
+    return Color.from(
+      alpha: c.a,
+      red: c.r + ((1.0 - c.r) * percent),
+      green: c.g + ((1.0 - c.g) * percent),
+      blue: c.b + ((1.0 - c.b) * percent),
     );
   }
 }
