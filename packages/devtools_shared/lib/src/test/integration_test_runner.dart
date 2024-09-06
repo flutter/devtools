@@ -123,6 +123,10 @@ class IntegrationTestRunner with IOMixin {
         timeout,
       ]);
 
+      debugLog(
+        'shutting down processes because '
+        '${testTimedOut ? 'test timed out' : 'test finished'}',
+      );
       debugLog('attempting to kill the flutter drive process');
       process.kill();
       debugLog('flutter drive process has exited');
@@ -299,6 +303,10 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
     return;
   }
 
+  void debugLog(String log) {
+    if (debugLogging) print(log);
+  }
+
   final chromedriver = ChromeDriver();
 
   try {
@@ -308,6 +316,7 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
     if (testRunnerArgs.testTarget != null) {
       // TODO(kenz): add support for specifying a directory as the target instead
       // of a single file.
+      debugLog('Attempting to run a single test: ${testRunnerArgs.testTarget}');
       await runTest(testRunnerArgs);
     } else {
       // Run all supported tests since a specific target test was not provided.
@@ -332,12 +341,18 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
         testFiles = testFiles.sublist(shardStart, shardEnd);
       }
 
+      debugLog(
+        'Attempting to run all tests: '
+        '${testFiles.map((file) => file.path).toList().toString()}',
+      );
+
       for (final testFile in testFiles) {
         final testTarget = testFile.path;
         final newArgsWithTarget = newArgsGenerator([
           ...testRunnerArgs.rawArgs,
           '--${IntegrationTestRunnerArgs.testTargetArg}=$testTarget',
         ]);
+        debugLog('Attempting to run: $testTarget');
         await runTest(newArgsWithTarget);
       }
     }

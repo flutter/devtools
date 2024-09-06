@@ -18,17 +18,17 @@ import 'test_infra/run/run_test.dart';
 const _testDirectory = 'integration_test/test';
 const _offlineIndicator = 'integration_test/test/offline';
 
-/// The key in [_skipTestsForDevice] that will hold a set of tests that should
+/// The key in [_disabledTestsForDevice] that will hold a set of tests that should
 /// be skipped for all test devices.
 const _testDeviceAll = 'all';
 
-/// The set of tests that should be skipped for each type of test target.
+/// The set of tests that are temporarily disabled for each type of test device.
 ///
 /// This list should be empty most of the time, but may contain a broken test
 /// while a fix being worked on.
 ///
 /// Format: `'my_example_test.dart'`.
-final _skipTestsForDevice = <String, Set<String>>{
+final _disabledTestsForDevice = <String, Set<String>>{
   _testDeviceAll: {
     // https://github.com/flutter/devtools/issues/6592
     'eval_and_browse_test.dart',
@@ -67,14 +67,17 @@ Future<void> _runTest(
   final testTarget = testRunnerArgs.testTarget!;
   final testDevice = testRunnerArgs.testAppDevice.name;
 
-  final skipAll = _skipTestsForDevice[_testDeviceAll]!;
-  final skipForDevice = _skipTestsForDevice[testDevice] ?? {};
-  final shouldSkip =
-      {...skipAll, ...skipForDevice}.any((t) => testTarget.endsWith(t));
-  if (shouldSkip) return;
+  final disabledForAllDevices = _disabledTestsForDevice[_testDeviceAll]!;
+  final disabledForDevice = _disabledTestsForDevice[testDevice] ?? {};
+  final disabled = {...disabledForAllDevices, ...disabledForDevice}
+      .any((t) => testTarget.endsWith(t));
+  if (disabled) {
+    debugLog('Disabled test - skipping $testTarget for $testDevice.');
+    return;
+  }
 
   if (!testRunnerArgs.testAppDevice.supportsTest(testTarget)) {
-    // Skip test, since it is not supported for device.
+    debugLog('Unsupported test - skipping $testTarget for $testDevice.');
     return;
   }
 

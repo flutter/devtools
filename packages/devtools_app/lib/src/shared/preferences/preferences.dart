@@ -21,7 +21,6 @@ import '../utils.dart';
 
 part '_extension_preferences.dart';
 part '_inspector_preferences.dart';
-part '_inspector_v2_preferences.dart';
 part '_memory_preferences.dart';
 part '_logging_preferences.dart';
 part '_performance_preferences.dart';
@@ -67,9 +66,6 @@ class PreferencesController extends DisposableController
   // Inspector V2 has been released.
   InspectorPreferencesController get inspector => _inspector;
   final _inspector = InspectorPreferencesController();
-
-  InspectorV2PreferencesController get inspectorV2 => _inspectorV2;
-  final _inspectorV2 = InspectorV2PreferencesController();
 
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
