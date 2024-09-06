@@ -201,7 +201,6 @@ class DeepLinksService {
               }
             }
           }
-          paths[domainName] ??= <Path>[];
           final aasaAppPaths = (domainResult[_aasaAppPathsKey] as List?)
               ?.cast<Map<String, Object?>>();
           if (aasaAppPaths != null) {
@@ -212,12 +211,10 @@ class DeepLinksService {
                 for (final aasaPath in aasaPaths) {
                   final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
                       ?.cast<Map<String, Object?>>();
-                  final Map<String, String> queryParams = rawQueryParams != null
-                      ? {
-                          for (final item in rawQueryParams)
-                            item[_keyKey] as String: item[_valueKey] as String,
-                        }
-                      : {};
+                  final  queryParams = <String, String>{
+                    for (final item in rawQueryParams ?? <Map>[])
+                      item[_keyKey] as String: item[_valueKey] as String,
+                  };
                   paths.putIfAbsent(domainName, () => <Path>[]).add(
                         Path(
                           path: aasaPath[_pathKey] as String,

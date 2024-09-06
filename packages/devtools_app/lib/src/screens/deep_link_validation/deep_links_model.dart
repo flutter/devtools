@@ -244,16 +244,21 @@ class ValidatedLinkDatas {
   final List<LinkData> byPath;
 }
 
+/// Represents a path in a deep link.
 class Path {
   Path({
     required this.path,
     this.queryParams = const {},
     this.isExcluded = false,
   });
+
   final String path;
 
   // TODO(hangyujin): display queryParams in path table.
   final Map<String, String> queryParams;
+
+  // A Boolean value that indicates whether to stop pattern matching and prevent the universal
+  // link from opening if the URL matches the associated pattern. The default is false.
   final bool isExcluded;
 }
 
