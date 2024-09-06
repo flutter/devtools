@@ -32,7 +32,8 @@ async function getDevToolsWasmPreference() {
     }
 
     // The response text should be an encoded boolean value ("true" or "false").
-    return JSON.parse(await response.text());
+    const wasmEnabled = JSON.parse(await response.text());
+    return wasmEnabled === true || wasmEnabled === 'true';
   } catch (error) {
     console.error('Error fetching experiment.wasm preference value:', error);
     return false;
@@ -45,7 +46,7 @@ async function bootstrapAppFor3P() {
   // `DevToolsQueryParameters.wasmKey`. See
   // devtools/packages/devtools_app/lib/src/shared/query_parameters.dart
   const wasmQueryParameterKey = 'wasm';
-  
+
   const searchParams = new URLSearchParams(window.location.search);
   const wasmEnabledFromQueryParameter = searchParams.get(wasmQueryParameterKey) === 'true';
   const wasmEnabledFromDevToolsPreference = await getDevToolsWasmPreference();
@@ -56,11 +57,12 @@ async function bootstrapAppFor3P() {
     const url = new URL(window.location.href); // Get the current URL object
     url.searchParams.set(wasmQueryParameterKey, 'true');
     // Update the browser's history without reloading
-    window.history.pushState({}, '', url); 
+    window.history.pushState({}, '', url);
   }
 
   const shouldUseSkwasm = wasmEnabledFromQueryParameter === true || wasmEnabledFromDevToolsPreference === true;
-  const renderer = shouldUseSkwasm  ? 'skwasm' : 'canvaskit';
+  const renderer = shouldUseSkwasm ? 'skwasm' : 'canvaskit';
+  console.log('Loading DevTools with ' + renderer + ' renderer.');
   _flutter.loader.load({
     serviceWorkerSettings: {
       serviceWorkerVersion: {{flutter_service_worker_version}},
