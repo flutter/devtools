@@ -894,10 +894,10 @@ extension ColorExtension on Color {
 
     final c = this;
     return Color.fromARGB(
-      c.alpha,
-      (c.red * percent).round(),
-      (c.green * percent).round(),
-      (c.blue * percent).round(),
+      c.a.round(),
+      (c.r * percent).round(),
+      (c.g * percent).round(),
+      (c.b * percent).round(),
     );
   }
 
@@ -907,10 +907,10 @@ extension ColorExtension on Color {
 
     final c = this;
     return Color.fromARGB(
-      c.alpha,
-      c.red + ((255 - c.red) * percent).round(),
-      c.green + ((255 - c.green) * percent).round(),
-      c.blue + ((255 - c.blue) * percent).round(),
+      c.a.round(),
+      (c.r + ((255 - c.r) * percent)).round(),
+      (c.g + ((255 - c.g) * percent)).round(),
+      (c.b + ((255 - c.b) * percent)).round(),
     );
   }
 }
