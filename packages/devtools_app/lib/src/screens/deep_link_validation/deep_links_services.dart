@@ -211,7 +211,7 @@ class DeepLinksService {
                 for (final aasaPath in aasaPaths) {
                   final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
                       ?.cast<Map<String, Object?>>();
-                  final  queryParams = <String, String>{
+                  final queryParams = <String, String>{
                     for (final item in rawQueryParams ?? <Map>[])
                       item[_keyKey] as String: item[_valueKey] as String,
                   };

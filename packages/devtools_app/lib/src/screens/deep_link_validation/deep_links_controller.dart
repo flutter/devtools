@@ -207,8 +207,7 @@ class DeepLinksController extends DisposableController
         },
         associatedPath: [
           ...previousRecord?.associatedPath ?? [],
-          if (linkData.path != null && !linkData.path!.isExcluded)
-            linkData.path!.path,
+          if (!(linkData.path?.isExcluded ?? true)) linkData.path!.path,
         ],
         domainErrors: linkData.domainErrors,
         hasAndroidAssetLinksFile: linkData.hasAndroidAssetLinksFile,
