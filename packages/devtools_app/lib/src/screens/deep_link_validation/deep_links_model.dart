@@ -120,7 +120,12 @@ class AndroidDomainError extends DomainError {
 }
 
 class IosDomainError extends DomainError {
-  const IosDomainError(super.title, super.explanation, super.fixDetails);
+  const IosDomainError(
+    super.title,
+    super.explanation,
+    super.fixDetails, {
+    this.subcheckErrors = const [],
+  });
   // TODO(hangyujin): Finalize strings for these domain errors.
 
   /// Existence of an Apple-App-Site-Association file.
@@ -163,13 +168,120 @@ class IosDomainError extends DomainError {
     'Ensure your domain is accessible without any redirects.',
   );
 
-  /// TODO(hangyujin): There are sub checkes of this check, add them and add links when finalized.
-  /// AASA file format follows guidelines.
-  static const fileFormat = IosDomainError(
-    'Apple-App-Site-Association file format is incorrect',
-    'This test checks that your Apple-App-Site-Association file '
-        'follows the correct format guidelines.',
-    'Ensure your Apple-App-Site-Association file follows the correct format guidelines.',
+  static IosDomainError iosFileFormatDomainError({
+    required List<AASAfileFormatSubCheck> subcheckErrors,
+  }) =>
+      IosDomainError(
+        'Apple-App-Site-Association file format is incorrect',
+        'This test checks that your Apple-App-Site-Association file '
+            'follows the correct format guidelines.',
+        'Ensure your Apple-App-Site-Association file follows the correct format guidelines.',
+        subcheckErrors: subcheckErrors,
+      );
+
+  final List<AASAfileFormatSubCheck> subcheckErrors;
+}
+
+class AASAfileFormatSubCheck extends CommonError {
+  const AASAfileFormatSubCheck(String title, String explanation)
+      : super(title, explanation, '');
+
+  static const appLinksFormat = AASAfileFormatSubCheck(
+    'Applinks format',
+    'This test checks that the `applinks` property holds an object.',
+  );
+  static const appLinksSubstitutionVariablesFormat = AASAfileFormatSubCheck(
+    'Applinks substitution variables format',
+    'This test checks that the `applinks.SubstitutionVariables` property has a valid '
+        'substitution variable format. Ref - '
+        'https://developer.apple.com/documentation/bundleresources/applinks/substitutionvariables',
+  );
+  static const defaultsFormat = AASAfileFormatSubCheck(
+    'Applinks defaults format',
+    'This test checks that the `applinks.defaults` property only holds '
+        'the keys caseSensitive and percentEncoded. Ref - '
+        'https://developer.apple.com/documentation/bundleresources/applinks/defaults',
+  );
+
+  static const defaultsPercentEncodedFormat = AASAfileFormatSubCheck(
+    'Applinks defaults percent encoded format',
+    'This test checks that the `applinks.defaults.percentEncoded` property only holds a boolean.',
+  );
+
+  static const defaultsCaseSensitiveFormat = AASAfileFormatSubCheck(
+    'Applinks defaults case sensitive format',
+    'This test checks that the `applinks.defaults.caseSensitive` property only holds a boolean.',
+  );
+
+  static const detailsFormat = AASAfileFormatSubCheck(
+    'Applinks details format',
+    'This test checks that the `applinks.details` property is formatted properly. Ref - '
+        'https://developer.apple.com/documentation/bundleresources/applinks/details',
+  );
+
+  static const detailsAppIdFormat = AASAfileFormatSubCheck(
+    'Applinks details appIDs format',
+    'This test checks that the `applinks.details.appID` property is an array of strings.',
+  );
+
+  static const detailsPathsFormat = AASAfileFormatSubCheck(
+    'Applinks details paths format',
+    'This test checks that the `applinks.details.paths` property is an array of strings.',
+  );
+
+  static const detailsDefaultsFormat = AASAfileFormatSubCheck(
+    'Applinks details default format',
+    'This test checks that the `applinks.details.defaults` property only holds '
+        'the keys caseSensitive and percentEncoded. Ref - '
+        'https://developer.apple.com/documentation/bundleresources/applinks/details/default',
+  );
+
+  static const detailsDefaultsPercentEncodedFormat = AASAfileFormatSubCheck(
+    'Applinks defaults percent encoded format',
+    'This test checks that the `applinks.details.defaults.percentEncoded` property only holds a boolean.',
+  );
+
+  static const detailsDefaultsCaseSensitiveFormat = AASAfileFormatSubCheck(
+    'Applinks defaults case sensitive format',
+    'This test checks that the `applinks.details.defaults.caseSensitive` property only holds a boolean.',
+  );
+
+  static const componentFormat = AASAfileFormatSubCheck(
+    'Applinks details components format',
+    'This test checks that the `applinks.details.components` property is formatted properly. Ref - '
+        'https://developer.apple.com/documentation/bundleresources/applinks/details/components',
+  );
+
+  static const componentPathFormat = AASAfileFormatSubCheck(
+    'Applinks details components path format',
+    'This test checks that the `applinks.details.components.path` property only holds a string.',
+  );
+
+  static const componentQueryFormat = AASAfileFormatSubCheck(
+    'Applinks details components query format',
+    'This test checks that the `applinks.details.components.query` property only holds either a string or object of type `applinks.Details.Components.Query`.',
+  );
+
+  static const componentFragmentFormat = AASAfileFormatSubCheck(
+    'Applinks details components fragment format',
+    'This test checks that the `applinks.details.components.fragment` property only holds a string.',
+  );
+
+  static const componentExcludeFormat = AASAfileFormatSubCheck(
+    'Applinks details components exclude format',
+    'This test checks that the `applinks.details.components.exclude` property only holds a boolean.',
+  );
+  static const componentPercentEncodedFormat = AASAfileFormatSubCheck(
+    'Applinks details components percent encoded format',
+    'This test checks that the `applinks.details.components.percentEncoded` property only holds a boolean.',
+  );
+  static const componentCaseSensitiveFormat = AASAfileFormatSubCheck(
+    'Applinks details components case sensitive format',
+    'This test checks that the `applinks.details.components.caseSensitive` property only holds a boolean.',
+  );
+  static const componentCommentFormat = AASAfileFormatSubCheck(
+    'Applinks details components comment format',
+    'This test checks that the `applinks.details.components.comment` property only holds a string.',
   );
 }
 

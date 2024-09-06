@@ -207,7 +207,9 @@ class _DomainCheckTable extends StatelessWidget {
                               ),
                             ]
                           : [
-                              _FailureDetails(errors: [error]),
+                              _FailureDetails(
+                                errors: [error, ...error.subcheckErrors],
+                              ),
                             ],
                     ),
                 ],
