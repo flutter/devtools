@@ -651,6 +651,11 @@ class _PathCheckTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final linkData = controller.selectedLink.value!;
+    if (!linkData.os.contains(PlatformOS.android)) {
+      return const SizedBox.shrink();
+    }
+
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
