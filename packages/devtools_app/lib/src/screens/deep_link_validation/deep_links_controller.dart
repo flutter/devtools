@@ -497,9 +497,7 @@ class DeepLinksController extends DisposableController
     }
   }
 
-  Future<List<LinkData>> _validateDomain(
-    List<LinkData> rawLinkdatas,
-  ) async {
+  Future<List<LinkData>> _validateDomain(List<LinkData> rawLinkdatas) async {
     final domains = rawLinkdatas
         .where(
           (linkdata) => linkdata.domain != null,
@@ -512,7 +510,7 @@ class DeepLinksController extends DisposableController
     Map<String, List<DomainError>> iosDomainErrors =
         <String, List<DomainError>>{};
 
-    Map<String, List<String>> iosDomainPaths = <String, List<String>>{};
+    late final Map<String, List<String>> iosDomainPaths;
     try {
       final androidResult = await deepLinksService.validateAndroidDomain(
         domains: domains,

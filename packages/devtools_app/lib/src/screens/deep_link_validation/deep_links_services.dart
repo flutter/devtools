@@ -157,13 +157,8 @@ class DeepLinksService {
     required String teamId,
     required List<String> domains,
   }) async {
-    final domainErrors = <String, List<DomainError>>{
-      for (final domain in domains) domain: <DomainError>[],
-    };
-
-    final paths = <String, List<String>>{
-      for (final domain in domains) domain: <String>[],
-    };
+    final domainErrors = <String, List<DomainError>>{};
+    final paths = <String, List<String>>{};
     // TODO(hangyujin): Add error code to the result.
     const errorCode = '';
 
@@ -196,11 +191,12 @@ class DeepLinksService {
               final checkName = failedCheck[_checkNameKey] as String;
               final domainError = iosCheckNameToDomainError[checkName];
               if (domainError != null) {
-                domainErrors[domainName]!.add(domainError);
+                domainErrors
+                    .putIfAbsent(domainName, () => <DomainError>[])
+                    .add(domainError);
               }
             }
           }
-          paths[domainName] ??= <String>[];
           final aasaAppPaths = (domainResult[_aasaAppPathsKey] as List?)
               ?.cast<Map<String, Object?>>();
           if (aasaAppPaths != null) {
@@ -209,7 +205,9 @@ class DeepLinksService {
                   ?.cast<Map<String, Object?>>();
               if (aasaPaths != null) {
                 for (final aasaPath in aasaPaths) {
-                  paths[domainName]!.add(aasaPath[_pathKey] as String);
+                  paths
+                      .putIfAbsent(domainName, () => <String>[])
+                      .add(aasaPath[_pathKey] as String);
                 }
                 continue;
               }
