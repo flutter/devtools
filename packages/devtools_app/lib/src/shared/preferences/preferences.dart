@@ -27,6 +27,23 @@ part '_performance_preferences.dart';
 
 const _thirdPartyPathSegment = 'third_party';
 
+/// DevTools preferences for UI-related settings.
+enum _UiPreferences {
+  darkMode,
+  vmDeveloperMode;
+
+  String get storageKey => '$storagePrefix.$name';
+
+  static const storagePrefix = 'ui';
+}
+
+/// DevTools preferences for general settings.
+///
+/// These values are not stored in the DevTools storage file with a prefix.
+enum _GeneralPreferences {
+  verboseLogging,
+}
+
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
@@ -44,7 +61,6 @@ class PreferencesController extends DisposableController
 
   final verboseLoggingEnabled =
       ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
-  static const _verboseLoggingStorageId = 'verboseLogging';
 
   // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
   // Inspector V2 has been released.
@@ -65,24 +81,8 @@ class PreferencesController extends DisposableController
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
-    final darkModeValue = await storage.getValue('ui.darkMode');
-    final useDarkMode = (darkModeValue == null && useDarkThemeAsDefault) ||
-        darkModeValue == 'true';
-    ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
-    toggleDarkModeTheme(useDarkMode);
-    addAutoDisposeListener(darkModeEnabled, () {
-      storage.setValue('ui.darkMode', '${darkModeEnabled.value}');
-    });
-
-    final vmDeveloperModeValue = await boolValueFromStorage(
-      'ui.vmDeveloperMode',
-      defaultsTo: false,
-    );
-    toggleVmDeveloperMode(vmDeveloperModeValue);
-    addAutoDisposeListener(vmDeveloperModeEnabled, () {
-      storage.setValue('ui.vmDeveloperMode', '${vmDeveloperModeEnabled.value}');
-    });
-
+    await _initDarkMode();
+    await _initVmDeveloperMode();
     await _initVerboseLogging();
 
     await inspector.init();
@@ -94,15 +94,44 @@ class PreferencesController extends DisposableController
     setGlobal(PreferencesController, this);
   }
 
+  Future<void> _initDarkMode() async {
+    final darkModeValue =
+        await storage.getValue(_UiPreferences.darkMode.storageKey);
+    final useDarkMode = (darkModeValue == null && useDarkThemeAsDefault) ||
+        darkModeValue == 'true';
+    ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
+    toggleDarkModeTheme(useDarkMode);
+    addAutoDisposeListener(darkModeEnabled, () {
+      storage.setValue(
+        _UiPreferences.darkMode.storageKey,
+        '${darkModeEnabled.value}',
+      );
+    });
+  }
+
+  Future<void> _initVmDeveloperMode() async {
+    final vmDeveloperModeValue = await boolValueFromStorage(
+      _UiPreferences.vmDeveloperMode.storageKey,
+      defaultsTo: false,
+    );
+    toggleVmDeveloperMode(vmDeveloperModeValue);
+    addAutoDisposeListener(vmDeveloperModeEnabled, () {
+      storage.setValue(
+        _UiPreferences.vmDeveloperMode.storageKey,
+        '${vmDeveloperModeEnabled.value}',
+      );
+    });
+  }
+
   Future<void> _initVerboseLogging() async {
     final verboseLoggingEnabledValue = await boolValueFromStorage(
-      _verboseLoggingStorageId,
+      _GeneralPreferences.verboseLogging.name,
       defaultsTo: false,
     );
     toggleVerboseLogging(verboseLoggingEnabledValue);
     addAutoDisposeListener(verboseLoggingEnabled, () {
       storage.setValue(
-        'verboseLogging',
+        _GeneralPreferences.verboseLogging.name,
         verboseLoggingEnabled.value.toString(),
       );
     });
@@ -118,14 +147,14 @@ class PreferencesController extends DisposableController
     super.dispose();
   }
 
-  /// Change the value for the dark mode setting.
+  /// Change the value of the dark mode setting.
   void toggleDarkModeTheme(bool? useDarkMode) {
     if (useDarkMode != null) {
       darkModeEnabled.value = useDarkMode;
     }
   }
 
-  /// Change the value for the VM developer mode setting.
+  /// Change the value of the VM developer mode setting.
   void toggleVmDeveloperMode(bool? enableVmDeveloperMode) {
     if (enableVmDeveloperMode != null) {
       vmDeveloperModeEnabled.value = enableVmDeveloperMode;

@@ -16,7 +16,7 @@ class FlutterTestStorage implements Storage {
   }
 
   @override
-  Future setValue(String key, String value) async {
+  Future<void> setValue(String key, String value) async {
     values[key] = value;
   }
 }

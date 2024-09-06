@@ -11,13 +11,10 @@ abstract class _StorageHandler {
     ServerApi api,
     DevToolsUsage devToolsStore, {
     required String key,
-    required T defaultValue,
+    T? defaultValue,
   }) {
-    final T value = (devToolsStore.properties[key] as T?) ?? defaultValue;
-    return ServerApi._encodeResponse(
-      value,
-      api: api,
-    );
+    final T? value = (devToolsStore.properties[key] as T?) ?? defaultValue;
+    return ServerApi._encodeResponse(value, api: api);
   }
 
   static shelf.Response handleSetStorageValue<T>(

@@ -14,6 +14,7 @@
 * Deprecate `apiGetSurveyShownCount` in favor of `SurveyApi.getSurveyShownCount`.
 * Deprecate `apiIncrementSurveyShownCount` in favor of `SurveyApi.incrementSurveyShownCount`.
 * Support Chrome's new headless mode in the integration test runner.
+* Add `PreferencesApi` to get and set preference values.
 
 # 10.0.2
 * Update dependency `web_socket_channel: '>=2.4.0 <4.0.0'`.
