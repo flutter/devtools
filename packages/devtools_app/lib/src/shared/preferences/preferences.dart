@@ -144,23 +144,11 @@ class PreferencesController extends DisposableController
   }
 
   Future<void> _initWasmEnabled() async {
-    final enabledFromStorage = await boolValueFromStorage(
-      _ExperimentPreferences.wasm.storageKey,
-      defaultsTo: false,
-    );
-    final enabledFromQueryParams = DevToolsQueryParams.load().useWasm;
-
-    print('kIsWasm: $kIsWasm');
-    print('enabledFromQueryParams: $enabledFromQueryParams');
-    print('enabledFromStorage: $enabledFromStorage');
-
     wasmEnabled.value = kIsWasm;
     addAutoDisposeListener(wasmEnabled, () async {
       final enabled = wasmEnabled.value;
       _log.fine('preference update (wasmEnabled = $enabled)');
 
-      print('listener: enabled: $enabled');
-      print('listener: setting storage value');
       await storage.setValue(
         _ExperimentPreferences.wasm.storageKey,
         '$enabled',
@@ -169,15 +157,10 @@ class PreferencesController extends DisposableController
       // Update the wasm mode query parameter if it does not match the value of
       // the setting.
       final wasmEnabledFromQueryParams = DevToolsQueryParams.load().useWasm;
-      print(
-        'listener: wasmEnabledFromQueryParams: $wasmEnabledFromQueryParams',
-      );
       if (wasmEnabledFromQueryParams != enabled) {
         _log.fine(
           'Reloading DevTools for Wasm preference update (enabled = $enabled)',
         );
-        print('updating query param and reloading the page');
-        await Future.delayed(const Duration(seconds: 7));
         updateQueryParameter(
           DevToolsQueryParams.wasmKey,
           enabled ? 'true' : null,
@@ -185,6 +168,12 @@ class PreferencesController extends DisposableController
         );
       }
     });
+
+    final enabledFromStorage = await boolValueFromStorage(
+      _ExperimentPreferences.wasm.storageKey,
+      defaultsTo: false,
+    );
+    final enabledFromQueryParams = DevToolsQueryParams.load().useWasm;
 
     if (enabledFromQueryParams && !kIsWasm) {
       // If we hit this case, we tried to load DevTools with WASM but we fell
@@ -201,17 +190,10 @@ class PreferencesController extends DisposableController
       return;
     }
 
-    print(
-      'calling toggleWasmEnabled '
-      '${enabledFromStorage || enabledFromQueryParams}, '
-      '(enabledFromStorage: $enabledFromStorage, '
-      'enabledFromQueryParams: $enabledFromQueryParams)',
-    );
-
     final shouldEnableWasm = enabledFromStorage || enabledFromQueryParams;
     assert(kIsWasm == shouldEnableWasm);
     // This should be a no-op if the flutter_bootstrap.js logic set the
-    // renderer propertly, but we call this to be safe in case something went
+    // renderer properly, but we call this to be safe in case something went
     // wrong.
     toggleWasmEnabled(shouldEnableWasm);
   }

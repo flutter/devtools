@@ -58,7 +58,7 @@ async function getRenderer() {
   const url = new URL(window.location.href);
   // Ensure the 'wasm' query parameter in the URL is accurate for the renderer
   // DevTools will be loaded with.
-  url.searchParams.set(wasmQueryParameterKey, shouldUseSkwasm ? 'true' : null);
+  url.searchParams.set(wasmQueryParameterKey, shouldUseSkwasm ? 'true' : '');
   // Update the browser's history without reloading. This is a no-op if the wasm
   // query parameter does not actually need to be updated.
   window.history.pushState({}, '', url);
