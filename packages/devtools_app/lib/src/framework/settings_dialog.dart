@@ -79,7 +79,7 @@ class SettingsDialog extends StatelessWidget {
           ),
           if (FeatureFlags.wasmOptInSetting) ...[
             const SizedBox(height: largeSpacing),
-            ...dialogSubHeader(theme, 'Experimental Features'),
+            ...dialogSubHeader(theme, 'Experimental features'),
             Flexible(
               child: CheckboxSetting(
                 title: 'Enable WebAssembly',
