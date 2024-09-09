@@ -16,7 +16,7 @@ import '../fakes.dart';
 void main() {
   group('$DtdApi', () {
     test('handle ${DtdApi.apiGetDtdUri} succeeds', () async {
-      final dtdUri = Uri.parse('ws://dtd:uri');
+      final dtdUri = Uri.parse('ws://dtd/uri');
       final request = Request(
         'get',
         Uri(
