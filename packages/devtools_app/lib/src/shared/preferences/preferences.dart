@@ -27,6 +27,8 @@ part '_memory_preferences.dart';
 part '_logging_preferences.dart';
 part '_performance_preferences.dart';
 
+final _log = Logger('PreferencesController');
+
 const _thirdPartyPathSegment = 'third_party';
 
 /// DevTools preferences for experimental features.
@@ -142,32 +144,22 @@ class PreferencesController extends DisposableController
   }
 
   Future<void> _initWasmEnabled() async {
-    print('_initWasmEnabled - start');
-    wasmEnabled.value = kIsWasm;
-    print('kIsWasm: $kIsWasm');
-
     final enabledFromStorage = await boolValueFromStorage(
       _ExperimentPreferences.wasm.storageKey,
       defaultsTo: false,
     );
     final enabledFromQueryParams = DevToolsQueryParams.load().useWasm;
+
+    print('kIsWasm: $kIsWasm');
     print('enabledFromQueryParams: $enabledFromQueryParams');
     print('enabledFromStorage: $enabledFromStorage');
 
-    if (kIsWasm != enabledFromQueryParams) {
-      print('kIsWasm != enabledFromQueryParams');
-      // If we hit this case, we tried to reload DevTools with the wasm query
-      // parameter set to true, but DevTools did not load with wasm. This means
-      // that something went wrong and that we fellback to JS.
-    }
-
-    // It is important that this listener is added before we set the initial
-    // state of the wasm mode setting below. This is because the query parameter
-    // for wasm may need to be updated based on the value of the preference in
-    // the storage file, which we take into account when we call
-    // [toggleWasmEnabled] at the end of this method.
+    wasmEnabled.value = kIsWasm;
     addAutoDisposeListener(wasmEnabled, () async {
       final enabled = wasmEnabled.value;
+      _log.fine('preference update (wasmEnabled = $enabled)');
+
+      print('listener: enabled: $enabled');
       print('listener: setting storage value');
       await storage.setValue(
         _ExperimentPreferences.wasm.storageKey,
@@ -177,11 +169,13 @@ class PreferencesController extends DisposableController
       // Update the wasm mode query parameter if it does not match the value of
       // the setting.
       final wasmEnabledFromQueryParams = DevToolsQueryParams.load().useWasm;
-      print('listener: enabled: $enabled');
       print(
         'listener: wasmEnabledFromQueryParams: $wasmEnabledFromQueryParams',
       );
       if (wasmEnabledFromQueryParams != enabled) {
+        _log.fine(
+          'Reloading DevTools for Wasm preference update (enabled = $enabled)',
+        );
         print('updating query param and reloading the page');
         await Future.delayed(const Duration(seconds: 7));
         updateQueryParameter(
@@ -192,18 +186,34 @@ class PreferencesController extends DisposableController
       }
     });
 
-    // TODO(kenz): this may cause an infinite loop of reloading the page if
-    // the setting from storage or the query parameter indicate we should be
-    // loading with WASM, but each time we reload the page, something goes wrong
-    // and we fall back to JS.
+    if (enabledFromQueryParams && !kIsWasm) {
+      // If we hit this case, we tried to load DevTools with WASM but we fell
+      // back to JS. We know this because the flutter_bootstrap.js logic always
+      // sets the 'wasm' query parameter to 'true' when attempting to load
+      // DevTools with wasm. Remove the wasm query parameter and return early.
+      updateQueryParameter(DevToolsQueryParams.wasmKey, null);
+      ga.impression(gac.devToolsMain, gac.jsFallback);
+      // TODO(kenz): supress for VS Code
+      notificationService.push(
+        'Something went wrong when trying to load DevTools with WebAssembly. '
+        'Falling back to Javascript.',
+      );
+      return;
+    }
+
     print(
       'calling toggleWasmEnabled '
       '${enabledFromStorage || enabledFromQueryParams}, '
       '(enabledFromStorage: $enabledFromStorage, '
       'enabledFromQueryParams: $enabledFromQueryParams)',
     );
-    toggleWasmEnabled(enabledFromStorage || enabledFromQueryParams);
-    print('_initWasmEnabled - end');
+
+    final shouldEnableWasm = enabledFromStorage || enabledFromQueryParams;
+    assert(kIsWasm == shouldEnableWasm);
+    // This should be a no-op if the flutter_bootstrap.js logic set the
+    // renderer propertly, but we call this to be safe in case something went
+    // wrong.
+    toggleWasmEnabled(shouldEnableWasm);
   }
 
   Future<void> _initVerboseLogging() async {
