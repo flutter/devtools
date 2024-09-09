@@ -45,50 +45,6 @@ abstract class PreferencesApi {
   static const preferenceKeyProperty = 'key';
 }
 
-@Deprecated(
-  'Use SurveyApi.setActiveSurvey instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const apiSetActiveSurvey = SurveyApi.setActiveSurvey;
-
-@Deprecated(
-  'Use apiParameterValueKey for the query parameter of the '
-  'SurveyApi.setActiveSurvey request instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const activeSurveyName = apiParameterValueKey;
-
-@Deprecated(
-  'Use SurveyApi.getSurveyActionTaken instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const apiGetSurveyActionTaken = SurveyApi.getSurveyActionTaken;
-
-@Deprecated(
-  'Use SurveyApi.setSurveyActionTaken instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const apiSetSurveyActionTaken = SurveyApi.setSurveyActionTaken;
-
-@Deprecated(
-  'This query parameter is no longer required for the '
-  'SurveyApi.setSurveyActionTaken request. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const surveyActionTakenPropertyName = 'surveyActionTaken';
-
-@Deprecated(
-  'Use SurveyApi.getSurveyShownCount instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const apiGetSurveyShownCount = SurveyApi.getSurveyShownCount;
-
-@Deprecated(
-  'Use SurveyApi.incrementSurveyShownCount instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const apiIncrementSurveyShownCount = SurveyApi.incrementSurveyShownCount;
-
 abstract class SurveyApi {
   /// Sets the active survey value for the DevTools session.
   ///
@@ -114,27 +70,6 @@ abstract class SurveyApi {
       '${apiPrefix}incrementSurveyShownCount';
 }
 
-@Deprecated(
-  'Use apiParameterValueKey for the query parameter of the '
-  'ReleaseNotesApi.setLastReleaseNotesVersion request instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const lastReleaseNotesVersionPropertyName = apiParameterValueKey;
-
-@Deprecated(
-  'Use ReleaseNotesApi.getLastReleaseNotesVersion instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const apiGetLastReleaseNotesVersion =
-    ReleaseNotesApi.getLastReleaseNotesVersion;
-
-@Deprecated(
-  'Use ReleaseNotesApi.setLastReleaseNotesVersion instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const apiSetLastReleaseNotesVersion =
-    ReleaseNotesApi.setLastReleaseNotesVersion;
-
 abstract class ReleaseNotesApi {
   /// Returns the last DevTools version for which we have shown release notes.
   static const getLastReleaseNotesVersion =
@@ -144,30 +79,6 @@ abstract class ReleaseNotesApi {
   static const setLastReleaseNotesVersion =
       '${apiPrefix}setLastReleaseNotesVersion';
 }
-
-@Deprecated(
-  'Use AppSizeApi.getBaseAppSizeFile instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const apiGetBaseAppSizeFile = AppSizeApi.getBaseAppSizeFile;
-
-@Deprecated(
-  'Use AppSizeApi.getTestAppSizeFile instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const apiGetTestAppSizeFile = AppSizeApi.getTestAppSizeFile;
-
-@Deprecated(
-  'Use AppSizeApi.baseAppSizeFilePropertyName instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const baseAppSizeFilePropertyName = AppSizeApi.baseAppSizeFilePropertyName;
-
-@Deprecated(
-  'Use AppSizeApi.testAppSizeFilePropertyName instead. '
-  'This field will be removed in devtools_shared >= 11.0.0.',
-)
-const testAppSizeFilePropertyName = AppSizeApi.testAppSizeFilePropertyName;
 
 abstract class AppSizeApi {
   /// Returns the base app size file, if present.
