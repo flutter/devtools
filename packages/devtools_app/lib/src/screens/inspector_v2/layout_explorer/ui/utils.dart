@@ -168,7 +168,7 @@ class WidgetVisualizer extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withAlpha(255 ~/ 2),
                         blurRadius: 10,
                       ),
                     ]
