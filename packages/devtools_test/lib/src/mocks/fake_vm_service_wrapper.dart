@@ -272,6 +272,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     String objectId, {
     int? offset,
     int? count,
+    String? idZoneId,
   }) {
     return Future.value(MockObj());
   }
@@ -298,7 +299,11 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<Stack> getStack(String isolateId, {int? limit}) {
+  Future<Stack> getStack(
+    String isolateId, {
+    int? limit,
+    String? idZoneId,
+  }) {
     return Future.value(Stack(frames: [], messages: [], truncated: false));
   }
 
