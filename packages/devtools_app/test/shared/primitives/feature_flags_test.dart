@@ -11,5 +11,11 @@ void main() {
     expect(enableExperiments, false);
     expect(enableBeta, false);
     expect(isExternalBuild, true);
+    expect(FeatureFlags.memorySaveLoad, false);
+    expect(FeatureFlags.deepLinkIosCheck, false);
+    expect(FeatureFlags.loggingV2, false);
+    expect(FeatureFlags.dapDebugging, false);
+    expect(FeatureFlags.inspectorV2, false);
+    expect(FeatureFlags.wasmOptInSetting, false);
   });
 }

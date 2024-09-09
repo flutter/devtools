@@ -102,7 +102,7 @@ abstract class FeatureFlags {
   /// Flag to enable the DevTools setting to opt-in to WASM.
   ///
   /// https://github.com/flutter/devtools/issues/7856
-  static bool wasmOptInSetting = true;
+  static bool wasmOptInSetting = enableExperiments;
 
   /// Stores a map of all the feature flags for debugging purposes.
   ///
@@ -110,11 +110,12 @@ abstract class FeatureFlags {
   /// well.
   static final _allFlags = <String, bool>{
     'widgetRebuildStats': widgetRebuildStats,
-    'memoryOffline': memoryDisconnectExperience,
-    'dapDebugging': dapDebugging,
-    'loggingV2': loggingV2,
+    'memorySaveLoad': memorySaveLoad,
     'deepLinkIosCheck': deepLinkIosCheck,
+    'loggingV2': loggingV2,
+    'dapDebugging': dapDebugging,
     'inspectorV2': inspectorV2,
+    'wasmOptInSetting': wasmOptInSetting,
   };
 
   /// A helper to print the status of all the feature flags.
