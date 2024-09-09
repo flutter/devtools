@@ -179,7 +179,8 @@ class PreferencesController extends DisposableController
       final wasmEnabledFromQueryParams = DevToolsQueryParams.load().useWasm;
       print('listener: enabled: $enabled');
       print(
-          'listener: wasmEnabledFromQueryParams: $wasmEnabledFromQueryParams');
+        'listener: wasmEnabledFromQueryParams: $wasmEnabledFromQueryParams',
+      );
       if (wasmEnabledFromQueryParams != enabled) {
         print('updating query param and reloading the page');
         await Future.delayed(const Duration(seconds: 7));
