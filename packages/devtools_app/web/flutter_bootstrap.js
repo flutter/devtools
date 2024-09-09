@@ -40,8 +40,11 @@ async function getDevToolsWasmPreference() {
   }
 }
 
-// Bootstrap app for 3P environments:
-async function bootstrapAppFor3P() {
+// Gets the renderer ('canvaskit' or 'skwasm') for the Flutter bootstrap config
+// based on the value of the 'wasm' query parameter or the wasm setting from the
+// DevTools preference file. This method also updates the 'wasm' query parameter
+// to reflect the renderer that will be used.
+async function getRenderer() {
   // This query parameter must match the String value specified by
   // `DevToolsQueryParameters.wasmKey`. See
   // devtools/packages/devtools_app/lib/src/shared/query_parameters.dart
@@ -50,18 +53,22 @@ async function bootstrapAppFor3P() {
   const searchParams = new URLSearchParams(window.location.search);
   const wasmEnabledFromQueryParameter = searchParams.get(wasmQueryParameterKey) === 'true';
   const wasmEnabledFromDevToolsPreference = await getDevToolsWasmPreference();
-
-  // Add the 'wasm=true' query parameter if WASM should be enabled based on
-  // the DevTools preferences, but the query parameter is not set to 'true'.
-  if (wasmEnabledFromDevToolsPreference === true && wasmEnabledFromQueryParameter === false) {
-    const url = new URL(window.location.href); // Get the current URL object
-    url.searchParams.set(wasmQueryParameterKey, 'true');
-    // Update the browser's history without reloading
-    window.history.pushState({}, '', url);
-  }
-
   const shouldUseSkwasm = wasmEnabledFromQueryParameter === true || wasmEnabledFromDevToolsPreference === true;
-  const renderer = shouldUseSkwasm ? 'skwasm' : 'canvaskit';
+  
+  const url = new URL(window.location.href);
+  // Ensure the 'wasm' query parameter in the URL is accurate for the renderer
+  // DevTools will be loaded with.
+  url.searchParams.set(wasmQueryParameterKey, shouldUseSkwasm ? 'true' : null);
+  // Update the browser's history without reloading. This is a no-op if the wasm
+  // query parameter does not actually need to be updated.
+  window.history.pushState({}, '', url);
+
+  return shouldUseSkwasm ? 'skwasm' : 'canvaskit';
+}
+
+// Bootstrap app for 3P environments:
+async function bootstrapAppFor3P() {
+  const renderer = await getRenderer();
   console.log('Loading DevTools with ' + renderer + ' renderer.');
   _flutter.loader.load({
     serviceWorkerSettings: {
