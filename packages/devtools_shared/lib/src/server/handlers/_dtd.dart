@@ -14,7 +14,7 @@ abstract class _DtdApiHandler {
     return ServerApi._encodeResponse(
       {
         // Always provide the exposed URI to callers of the web API.
-        DtdApi.uriPropertyName: dtd?.exposedUri,
+        DtdApi.uriPropertyName: dtd?.exposedUri.toString(),
       },
       api: api,
     );

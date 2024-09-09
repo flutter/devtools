@@ -34,7 +34,7 @@ void main() {
       expect(response.statusCode, HttpStatus.ok);
       expect(
         await response.readAsString(),
-        jsonEncode({DtdApi.uriPropertyName: dtdUri}),
+        jsonEncode({DtdApi.uriPropertyName: dtdUri.toString()}),
       );
     });
   });
