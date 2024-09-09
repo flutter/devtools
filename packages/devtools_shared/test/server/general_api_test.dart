@@ -20,7 +20,7 @@ void main() {
   group('General DevTools server API', () {
     group(apiNotifyForVmServiceConnection, () {
       Future<Response> sendNotifyRequest({
-        required DTDConnectionInfo dtd,
+        required DtdInfo? dtd,
         Map<String, Object?>? queryParameters,
         // ignore: avoid-redundant-async, returning FutureOr.
       }) async {
@@ -45,7 +45,7 @@ void main() {
         'succeeds when DTD is not available',
         () async {
           final response = await sendNotifyRequest(
-            dtd: (uri: null, secret: null),
+            dtd: null,
             queryParameters: {
               apiParameterValueKey: 'fake_uri',
               apiParameterVmServiceConnected: 'true',
@@ -60,7 +60,7 @@ void main() {
         'returns badRequest for invalid VM service argument',
         () async {
           final response = await sendNotifyRequest(
-            dtd: (uri: 'ws://dtd:uri', secret: 'fake_secret'),
+            dtd: DtdInfo(Uri.parse('ws://dtd/uri'), secret: 'fake_secret'),
             queryParameters: {
               apiParameterValueKey: 'fake_uri',
               apiParameterVmServiceConnected: 'true',
@@ -77,7 +77,7 @@ void main() {
         'returns badRequest for invalid $apiParameterVmServiceConnected argument',
         () async {
           final response = await sendNotifyRequest(
-            dtd: (uri: 'ws://dtd:uri', secret: 'fake_secret'),
+            dtd: DtdInfo(Uri.parse('ws://dtd/uri'), secret: 'fake_secret'),
             queryParameters: {
               apiParameterValueKey: 'ws://127.0.0.1:8181/LEpVqqD7E_Y=/ws',
               apiParameterVmServiceConnected: 'bad_arg',
@@ -98,15 +98,15 @@ void main() {
 
       setUp(() async {
         dtd = await startDtd();
-        expect(dtd!.uri, isNotNull, reason: 'Error starting DTD for test');
+        expect(dtd!.info, isNotNull, reason: 'Error starting DTD for test');
         testDtdConnection =
-            await DartToolingDaemon.connect(Uri.parse(dtd!.uri!));
+            await DartToolingDaemon.connect(dtd!.info!.localUri);
       });
 
       tearDown(() async {
         await testDtdConnection?.close();
-        dtd?.dtdProcess?.kill();
-        await dtd?.dtdProcess?.exitCode;
+        dtd?.process?.kill();
+        await dtd?.process?.exitCode;
         dtd = null;
       });
 
@@ -117,7 +117,7 @@ void main() {
         }) async {
           await server.Handler.updateDtdWorkspaceRoots(
             testDtdConnection!,
-            dtdConnectionInfo: (uri: dtd!.uri, secret: dtd!.secret),
+            dtdConnectionInfo: dtd!.info!,
             rootFromVmService: root,
             connected: connected,
             api: ServerApi(),

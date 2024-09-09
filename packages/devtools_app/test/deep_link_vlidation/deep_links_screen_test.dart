@@ -559,7 +559,8 @@ void main() {
               hasPathError: true,
             ),
             androidDeepLinkJson('www.domain3.com', path: '/path3'),
-          ];
+          ]
+          ..fakeIosDomains = [defaultDomain];
 
         await pumpDeepLinkScreen(
           tester,
@@ -572,6 +573,8 @@ void main() {
         expect(find.text('/path1'), findsOneWidget);
         expect(find.text('/path2'), findsOneWidget);
         expect(find.text('/path3'), findsOneWidget);
+        expect(find.text('/ios-path1'), findsOneWidget);
+        expect(find.text('/ios-path2'), findsOneWidget);
 
         // Only show links with path error.
         deepLinksController.updateDisplayOptions(
@@ -583,6 +586,8 @@ void main() {
         expect(find.text('/path1'), findsNothing);
         expect(find.text('/path2'), findsOneWidget);
         expect(find.text('/path3'), findsNothing);
+        expect(find.text('/ios-path1'), findsNothing);
+        expect(find.text('/ios-path2'), findsNothing);
 
         // Only show links with no issue.
         deepLinksController.updateDisplayOptions(
@@ -597,6 +602,8 @@ void main() {
         expect(find.text('/path1'), findsOneWidget);
         expect(find.text('/path2'), findsNothing);
         expect(find.text('/path3'), findsOneWidget);
+        expect(find.text('/ios-path1'), findsOneWidget);
+        expect(find.text('/ios-path2'), findsOneWidget);
       },
     );
   });

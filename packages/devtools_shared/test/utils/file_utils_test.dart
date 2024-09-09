@@ -39,21 +39,21 @@ void main() {
 
     setUp(() async {
       dtd = await startDtd();
-      expect(dtd!.uri, isNotNull, reason: 'Error starting DTD for test');
-      testDtdConnection = await DartToolingDaemon.connect(Uri.parse(dtd!.uri!));
+      expect(dtd!.info, isNotNull, reason: 'Error starting DTD for test');
+      testDtdConnection = await DartToolingDaemon.connect(dtd!.info!.localUri);
 
       _setupTestDirectoryStructure();
 
       await testDtdConnection!.setIDEWorkspaceRoots(
-        dtd!.secret!,
+        dtd!.info!.secret!,
         [Uri.parse(projectRoot)],
       );
     });
 
     tearDown(() async {
       await testDtdConnection?.close();
-      dtd?.dtdProcess?.kill();
-      await dtd?.dtdProcess?.exitCode;
+      dtd?.process?.kill();
+      await dtd?.process?.exitCode;
       dtd = null;
     });
 

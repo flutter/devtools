@@ -22,7 +22,7 @@ abstract class Handler {
   static Future<shelf.Response> handleNotifyForVmServiceConnection(
     ServerApi api,
     Map<String, String> queryParams,
-    DTDConnectionInfo? dtd,
+    DtdInfo? dtd,
   ) async {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
       const [apiParameterValueKey, apiParameterVmServiceConnected],
@@ -32,7 +32,7 @@ abstract class Handler {
     );
     if (missingRequiredParams != null) return missingRequiredParams;
 
-    final dtdUri = dtd?.uri;
+    final dtdUri = dtd?.localUri;
     final dtdSecret = dtd?.secret;
     if (dtdUri == null || dtdSecret == null) {
       // If DevTools server did not start DTD, there is nothing for us to do.
@@ -62,7 +62,7 @@ abstract class Handler {
 
     DartToolingDaemon? dartToolingDaemon;
     try {
-      dartToolingDaemon = await DartToolingDaemon.connect(Uri.parse(dtd!.uri!));
+      dartToolingDaemon = await DartToolingDaemon.connect(dtd!.localUri);
 
       final detectRootResponse = await detectRootPackageForVmService(
         vmServiceUriAsString: vmServiceUriAsString,
@@ -152,7 +152,7 @@ abstract class Handler {
   @visibleForTesting
   static Future<shelf.Response> updateDtdWorkspaceRoots(
     DartToolingDaemon dtd, {
-    required DTDConnectionInfo dtdConnectionInfo,
+    required DtdInfo dtdConnectionInfo,
     required Uri rootFromVmService,
     required bool connected,
     required ServerApi api,

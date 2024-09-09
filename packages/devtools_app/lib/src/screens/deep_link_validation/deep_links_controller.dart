@@ -497,10 +497,8 @@ class DeepLinksController extends DisposableController
     }
   }
 
-  Future<List<LinkData>> _validateDomain(
-    List<LinkData> linkdatas,
-  ) async {
-    final domains = linkdatas
+  Future<List<LinkData>> _validateDomain(List<LinkData> rawLinkdatas) async {
+    final domains = rawLinkdatas
         .where(
           (linkdata) => linkdata.domain != null,
         )
@@ -511,6 +509,8 @@ class DeepLinksController extends DisposableController
     late final Map<String, List<DomainError>> androidDomainErrors;
     Map<String, List<DomainError>> iosDomainErrors =
         <String, List<DomainError>>{};
+
+    late final Map<String, List<String>> iosDomainPaths;
     try {
       final androidResult = await deepLinksService.validateAndroidDomain(
         domains: domains,
@@ -527,40 +527,68 @@ class DeepLinksController extends DisposableController
           domains: domains,
         );
         iosDomainErrors = iosResult.domainErrors;
+        iosDomainPaths = iosResult.paths;
       }
     } catch (_) {
       // TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.validationErrorPage;
-      return linkdatas;
+      return rawLinkdatas;
     }
 
-    return linkdatas.map((linkdata) {
+    final validatedLinkDatas = <LinkData>[];
+
+    for (final linkdata in rawLinkdatas) {
       final errors = <DomainError>[
         if (linkdata.os.contains(PlatformOS.android))
           ...(androidDomainErrors[linkdata.domain] ?? []),
         if (linkdata.os.contains(PlatformOS.ios))
           ...(iosDomainErrors[linkdata.domain] ?? []),
       ];
-      if (errors.isNotEmpty) {
-        return LinkData(
-          domain: linkdata.domain,
-          domainErrors: errors,
-          path: linkdata.path,
-          pathErrors: linkdata.pathErrors,
-          os: linkdata.os,
-          scheme: linkdata.scheme,
-          associatedDomains: linkdata.associatedDomains,
-          associatedPath: linkdata.associatedPath,
-          hasAndroidAssetLinksFile: !(androidDomainErrors[linkdata.domain]
-                  ?.contains(AndroidDomainError.existence) ??
-              false),
-          hasIosAasaFile: !(iosDomainErrors[linkdata.domain]
-                  ?.contains(IosDomainError.existence) ??
-              false),
+      final hasAndroidAssetLinksFile = !(androidDomainErrors[linkdata.domain]
+              ?.contains(AndroidDomainError.existence) ??
+          false);
+      final hasIosAasaFile = !(iosDomainErrors[linkdata.domain]
+              ?.contains(IosDomainError.existence) ??
+          false);
+
+      if (linkdata.os.contains(PlatformOS.ios)) {
+        final List<String> iosPaths = iosDomainPaths[linkdata.domain] ?? [];
+
+        // If no path is provided, we will still show the domain just with domain errors.
+        if (iosPaths.isEmpty) {
+          validatedLinkDatas.add(
+            linkdata.copyWith(
+              domainErrors: errors,
+              hasAndroidAssetLinksFile: hasAndroidAssetLinksFile,
+              hasIosAasaFile: hasIosAasaFile,
+            ),
+          );
+        } else {
+          // If there are multiple paths for the same domain, we will show the domain with each path.
+          for (final iosPath in iosPaths) {
+            validatedLinkDatas.add(
+              linkdata.copyWith(
+                path: iosPath,
+                domainErrors: errors,
+                hasAndroidAssetLinksFile: hasAndroidAssetLinksFile,
+                hasIosAasaFile: hasIosAasaFile,
+              ),
+            );
+          }
+        }
+      }
+
+      if (linkdata.os.contains(PlatformOS.android)) {
+        validatedLinkDatas.add(
+          linkdata.copyWith(
+            domainErrors: errors,
+            hasAndroidAssetLinksFile: hasAndroidAssetLinksFile,
+            hasIosAasaFile: hasIosAasaFile,
+          ),
         );
       }
-      return linkdata;
-    }).toList();
+    }
+    return validatedLinkDatas;
   }
 
   Future<List<LinkData>> _validatePath(List<LinkData> linkdatas) async {

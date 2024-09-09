@@ -137,7 +137,39 @@ const iosValidationResponseWithNoError = '''
           "severityLevel": "ERROR"
         }
       ],
-      "status": "VALIDATION_COMPLETE"
+      "status": "VALIDATION_COMPLETE",
+      "aasaAppPaths": [
+        {
+          "aasaAppId": {
+            "bundleId": "bundle.id",
+            "teamId": "AAABBB"
+          },
+          "aasaPaths": [
+            {
+              "path": "/ios-path1",
+              "queryParams": [
+                {
+                  "key": "dplnk",
+                  "value": "?*"
+                }
+              ],
+              "isCaseSensitive": true,
+              "isPercentEncoded": true
+            },
+            {
+              "path": "/ios-path2",
+              "queryParams": [
+                {
+                  "key": "dplnk",
+                  "value": "?*"
+                }
+              ],
+              "isCaseSensitive": true,
+              "isPercentEncoded": true
+            }
+          ]
+        }
+      ]
     }
   ]
 }
@@ -177,7 +209,39 @@ const iosValidationResponseWithError = '''
           "severityLevel": "ERROR"
         }
       ],
-      "status": "VALIDATION_COMPLETE"
+      "status": "VALIDATION_COMPLETE",
+      "aasaAppPaths": [
+        {
+          "aasaAppId": {
+            "bundleId": "bundle.id",
+            "teamId": "AAABBB"
+          },
+          "aasaPaths": [
+            {
+              "path": "/ios-path1",
+              "queryParams": [
+                {
+                  "key": "dplnk",
+                  "value": "?*"
+                }
+              ],
+              "isCaseSensitive": true,
+              "isPercentEncoded": true
+            },
+            {
+              "path": "/ios-path2",
+              "queryParams": [
+                {
+                  "key": "dplnk",
+                  "value": "?*"
+                }
+              ],
+              "isCaseSensitive": true,
+              "isPercentEncoded": true
+            }
+          ]
+        }
+      ]
     }
   ]
 }
