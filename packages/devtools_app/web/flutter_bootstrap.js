@@ -44,7 +44,7 @@ async function getDevToolsWasmPreference() {
 // based on the value of the 'wasm' query parameter or the wasm setting from the
 // DevTools preference file. This method also updates the 'wasm' query parameter
 // to reflect the renderer that will be used.
-async function getRenderer() {
+async function getRendererAndUpdateQueryParameter() {
   // This query parameter must match the String value specified by
   // `DevToolsQueryParameters.wasmKey`. See
   // devtools/packages/devtools_app/lib/src/shared/query_parameters.dart
@@ -58,7 +58,11 @@ async function getRenderer() {
   const url = new URL(window.location.href);
   // Ensure the 'wasm' query parameter in the URL is accurate for the renderer
   // DevTools will be loaded with.
-  url.searchParams.set(wasmQueryParameterKey, shouldUseSkwasm ? 'true' : '');
+  if (shouldUseSkwasm) {
+    url.searchParams.set(wasmQueryParameterKey, 'true');
+  } else {
+    url.searchParams.delete(wasmQueryParameterKey);
+  }
   // Update the browser's history without reloading. This is a no-op if the wasm
   // query parameter does not actually need to be updated.
   window.history.pushState({}, '', url);
@@ -68,7 +72,7 @@ async function getRenderer() {
 
 // Bootstrap app for 3P environments:
 async function bootstrapAppFor3P() {
-  const renderer = await getRenderer();
+  const renderer = await getRendererAndUpdateQueryParameter();
   console.log('Loading DevTools with ' + renderer + ' renderer.');
   _flutter.loader.load({
     serviceWorkerSettings: {
