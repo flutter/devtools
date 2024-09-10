@@ -16,6 +16,6 @@ void main() {
     expect(FeatureFlags.loggingV2, false);
     expect(FeatureFlags.dapDebugging, false);
     expect(FeatureFlags.inspectorV2, false);
-    expect(FeatureFlags.wasmOptInSetting, false);
+    expect(FeatureFlags.wasmOptInSetting, true);
   });
 }
