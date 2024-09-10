@@ -44,7 +44,7 @@ Future<TestDtdConnectionInfo> startDtd() async {
           completer.complete(
             (
               info: DtdInfo(Uri.parse(uri), secret: secret),
-              process: dtdProcess
+              process: dtdProcess,
             ),
           );
         } else {
