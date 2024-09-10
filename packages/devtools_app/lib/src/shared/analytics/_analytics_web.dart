@@ -90,6 +90,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     // "onDebugPrompt" - user responded to prompt when running a debug session
     // "languageStatus" - launched from the language status popout
     String? ide_launched_feature,
+    String? is_wasm, // dimension13 whether DevTools is running with WASM.
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
@@ -123,6 +124,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   external String? get is_embedded;
   external String? get g3_username;
   external String? get ide_launched_feature;
+  external String? get is_wasm;
 
   // Custom metrics:
   external int? get ui_duration_micros;
@@ -170,6 +172,7 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     // "onDebugPrompt" - user responded to prompt when running a debug session
     // "languageStatus" - launched from the language status popout
     String? ide_launched_feature,
+    String? is_wasm, // dimension13 whether DevTools is running with WASM.
 
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
@@ -203,6 +206,7 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
   external String? get is_embedded;
   external String? get g3_username;
   external String? get ide_launched_feature;
+  external String? get is_wasm;
 
   // Custom metrics:
   external int? get ui_duration_micros;
@@ -247,6 +251,7 @@ GtagEventDevTools _gtagEvent({
     is_embedded: isEmbedded().toString(),
     g3_username: devToolsEnvironmentParameters.username(),
     ide_launched_feature: ideLaunchedFeature,
+    is_wasm: kIsWasm.toString(),
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
@@ -312,6 +317,7 @@ GtagExceptionDevTools _gtagException(
     is_embedded: isEmbedded().toString(),
     g3_username: devToolsEnvironmentParameters.username(),
     ide_launched_feature: ideLaunchedFeature,
+    is_wasm: kIsWasm.toString(),
     // [PerformanceScreenMetrics]
     ui_duration_micros: screenMetrics is PerformanceScreenMetrics
         ? screenMetrics.uiDuration?.inMicroseconds
@@ -613,16 +619,13 @@ void reportError(
   if (_lastGaError == errorMessage) return;
   _lastGaError = errorMessage;
 
-  GTag.exception(
-    gaExceptionProvider: () => _gtagException(
-      errorMessage,
-      fatal: fatal,
-    ),
+  final gTagException = _gtagException(
+    errorMessage,
+    fatal: fatal,
   );
+  GTag.exception(gaExceptionProvider: () => gTagException);
 
-  // TODO(kenz): we may want to create a new event `devtoolsException` if we
-  // need all of our custom dimensions logged with exceptions.
-  final uaEvent = ua.Event.exception(exception: errorMessage);
+  final uaEvent = _uaEventFromGtagException(gTagException);
   unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
@@ -849,11 +852,11 @@ void _sendEventForScreen(String screenName, GtagEventDevTools gtagEvent) {
     screenName,
     gaEventProvider: () => gtagEvent,
   );
-  final uaEvent = uaEventFromGtagEvent(gtagEvent);
+  final uaEvent = _uaEventFromGtagEvent(gtagEvent);
   unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
-ua.Event uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
+ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
   return ua.Event.devtoolsEvent(
     eventCategory: gtagEvent.event_category!,
     label: gtagEvent.event_label!,
@@ -869,6 +872,7 @@ ua.Event uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
     isExternalBuild: gtagEvent.is_external_build,
     isEmbedded: gtagEvent.is_embedded,
     ideLaunchedFeature: gtagEvent.ide_launched_feature,
+    isWasm: gtagEvent.is_wasm,
     g3Username: gtagEvent.g3_username,
     uiDurationMicros: gtagEvent.ui_duration_micros,
     rasterDurationMicros: gtagEvent.raster_duration_micros,
@@ -883,5 +887,39 @@ ua.Event uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
     rootSetCount: gtagEvent.root_set_count,
     rowCount: gtagEvent.row_count,
     inspectorTreeControllerId: gtagEvent.inspector_tree_controller_id,
+  );
+}
+
+ua.Event _uaEventFromGtagException(GtagExceptionDevTools gtagException) {
+  return ua.Event.exception(
+    exception: gtagException.description ?? 'unknown exception',
+    data: {
+      'fatal': gtagException.fatal,
+      'userApp': gtagException.user_app,
+      'userBuild': gtagException.user_build,
+      'userPlatform': gtagException.user_platform,
+      'devtoolsPlatform': gtagException.devtools_platform,
+      'devtoolsChrome': gtagException.devtools_chrome,
+      'devtoolsVersion': gtagException.devtools_version,
+      'ideLaunched': gtagException.ide_launched,
+      'isExternalBuild': gtagException.is_external_build,
+      'isEmbedded': gtagException.is_embedded,
+      'ideLaunchedFeature': gtagException.ide_launched_feature,
+      'isWasm': gtagException.is_wasm,
+      'g3Username': gtagException.g3_username,
+      'uiDurationMicros': gtagException.ui_duration_micros,
+      'rasterDurationMicros': gtagException.raster_duration_micros,
+      'shaderCompilationDurationMicros':
+          gtagException.shader_compilation_duration_micros,
+      'traceEventCount': gtagException.trace_event_count,
+      'cpuSampleCount': gtagException.cpu_sample_count,
+      'cpuStackDepth': gtagException.cpu_stack_depth,
+      'heapDiffObjectsBefore': gtagException.heap_diff_objects_before,
+      'heapDiffObjectsAfter': gtagException.heap_diff_objects_after,
+      'heapObjectsTotal': gtagException.heap_objects_total,
+      'rootSetCount': gtagException.root_set_count,
+      'rowCount': gtagException.row_count,
+      'inspectorTreeControllerId': gtagException.inspector_tree_controller_id,
+    },
   );
 }
