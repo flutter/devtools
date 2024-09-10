@@ -207,7 +207,7 @@ class DeepLinksController extends DisposableController
         },
         associatedPath: [
           ...previousRecord?.associatedPath ?? [],
-          if (!(linkData.path?.isExcluded ?? true)) linkData.path!.path,
+          if (linkData.path != null && !linkData.path!.isExcluded) linkData.path!.path,
         ],
         domainErrors: linkData.domainErrors,
         hasAndroidAssetLinksFile: linkData.hasAndroidAssetLinksFile,
@@ -552,7 +552,7 @@ class DeepLinksController extends DisposableController
           false);
 
       if (linkdata.os.contains(PlatformOS.ios)) {
-        final iosPaths = iosDomainPaths[linkdata.domain] ?? <String>[];
+        final iosPaths = iosDomainPaths[linkdata.domain] ?? <Path>[];
 
         // If no path is provided, we will still show the domain just with domain errors.
         if (iosPaths.isEmpty) {
