@@ -552,7 +552,7 @@ class DeepLinksController extends DisposableController
           false);
 
       if (linkdata.os.contains(PlatformOS.ios)) {
-        final List<String> iosPaths = iosDomainPaths[linkdata.domain] ?? [];
+        final iosPaths = iosDomainPaths[linkdata.domain] ?? <String>[];
 
         // If no path is provided, we will still show the domain just with domain errors.
         if (iosPaths.isEmpty) {

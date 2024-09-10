@@ -30,13 +30,12 @@ import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/query_parameters.dart';
 import 'inspector_data_models.dart';
 import 'inspector_screen.dart';
 import 'inspector_tree_controller.dart';
 
 final _log = Logger('inspector_controller');
-
-const inspectorRefQueryParam = 'inspectorRef';
 
 /// Data pattern containing the properties and render properties for a widget
 /// tree node.
@@ -401,11 +400,7 @@ class InspectorController extends DisposableController
       if (_disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
-
-      final queryParams = loadQueryParams();
-      final inspectorRef = queryParams.containsKey(inspectorRefQueryParam)
-          ? queryParams[inspectorRefQueryParam]
-          : null;
+      final inspectorRef = DevToolsQueryParams.load().inspectorRef;
       await updateSelectionFromService(
         inspectorRef: inspectorRef,
       );

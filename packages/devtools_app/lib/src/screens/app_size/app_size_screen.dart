@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 
@@ -18,6 +17,7 @@ import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
 import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/query_parameters.dart';
 import '../../shared/screen.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/ui/tab.dart';
@@ -103,14 +103,14 @@ class _AppSizeBodyState extends State<AppSizeBody>
   }
 
   Future<void> maybeLoadAppSizeFiles() async {
-    final queryParams = loadQueryParams();
-    final baseFilePath = queryParams[AppSizeApi.baseAppSizeFilePropertyName];
+    final queryParams = DevToolsQueryParams.load();
+    final baseFilePath = queryParams.appSizeBaseFilePath;
     if (baseFilePath != null) {
       // TODO(kenz): does this have to be in a setState()?
       _preLoadingData = true;
       final baseAppSizeFile = await server.requestBaseAppSizeFile(baseFilePath);
       DevToolsJsonFile? testAppSizeFile;
-      final testFilePath = queryParams[AppSizeApi.testAppSizeFilePropertyName];
+      final testFilePath = queryParams.appSizeTestFilePath;
       if (testFilePath != null) {
         testAppSizeFile = await server.requestTestAppSizeFile(testFilePath);
       }
