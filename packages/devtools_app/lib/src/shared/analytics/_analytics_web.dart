@@ -625,7 +625,7 @@ void reportError(
   );
   GTag.exception(gaExceptionProvider: () => gTagException);
 
-  final uaEvent = uaEventFromGtagException(gTagException);
+  final uaEvent = _uaEventFromGtagException(gTagException);
   unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
@@ -852,11 +852,11 @@ void _sendEventForScreen(String screenName, GtagEventDevTools gtagEvent) {
     screenName,
     gaEventProvider: () => gtagEvent,
   );
-  final uaEvent = uaEventFromGtagEvent(gtagEvent);
+  final uaEvent = _uaEventFromGtagEvent(gtagEvent);
   unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
-ua.Event uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
+ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
   return ua.Event.devtoolsEvent(
     eventCategory: gtagEvent.event_category!,
     label: gtagEvent.event_label!,
@@ -890,7 +890,7 @@ ua.Event uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
   );
 }
 
-ua.Event uaEventFromGtagException(GtagExceptionDevTools gtagException) {
+ua.Event _uaEventFromGtagException(GtagExceptionDevTools gtagException) {
   return ua.Event.exception(
     exception: gtagException.description ?? 'unknown exception',
     data: {
