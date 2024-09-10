@@ -173,7 +173,8 @@ class PreferencesController extends DisposableController
       _ExperimentPreferences.wasm.storageKey,
       defaultsTo: false,
     );
-    final enabledFromQueryParams = DevToolsQueryParams.load().useWasm;
+    final queryParams = DevToolsQueryParams.load();
+    final enabledFromQueryParams = queryParams.useWasm;
 
     if (enabledFromQueryParams && !kIsWasm) {
       // If we hit this case, we tried to load DevTools with WASM but we fell
@@ -182,11 +183,19 @@ class PreferencesController extends DisposableController
       // DevTools with wasm. Remove the wasm query parameter and return early.
       updateQueryParameter(DevToolsQueryParams.wasmKey, null);
       ga.impression(gac.devToolsMain, gac.jsFallback);
-      // TODO(kenz): supress for VS Code
-      notificationService.push(
-        'Something went wrong when trying to load DevTools with WebAssembly. '
-        'Falling back to Javascript.',
-      );
+
+      // Do not show the JS fallback notification when embedded in VS Code
+      // because we do not expect the WASM build to load successfully by
+      // default. This is because cross-origin-isolation is disabled by VS
+      // Code. See https://github.com/microsoft/vscode/issues/186614.
+      final embeddedInVsCode =
+          queryParams.embedMode.embedded && queryParams.ide == 'VSCode';
+      if (!embeddedInVsCode) {
+        notificationService.push(
+          'Something went wrong when trying to load DevTools with WebAssembly. '
+          'Falling back to Javascript.',
+        );
+      }
       return;
     }
 
