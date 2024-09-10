@@ -165,8 +165,11 @@ class _ExtensionIFrameController extends DisposableController
     final message = event.toJson();
     assert(
       embeddedExtensionController.extensionIFrame.contentWindow != null,
-      'Something went wrong. The iFrame\'s contentWindow is null after the'
-      ' _iFrameReady future completed.',
+      'Something went wrong. The '
+      '${embeddedExtensionController.extensionConfig.name} extension\'s iFrame '
+      'contentWindow is null after the _iFrameReady future completed. The '
+      'message that was being posted when the error occurred was:\n'
+      '${message.toString()}',
     );
     embeddedExtensionController.extensionIFrame.contentWindow!.postMessage(
       message.jsify(),
