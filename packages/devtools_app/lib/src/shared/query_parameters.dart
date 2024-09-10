@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 
 extension type DevToolsQueryParams(Map<String, String?> params) {
   static DevToolsQueryParams empty() => DevToolsQueryParams({});
@@ -21,23 +22,45 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
     return DevToolsQueryParams({...params, ...?updates});
   }
 
+  /// The URI for the VM Service that DevTools is connected to.
   String? get vmServiceUri => params[vmServiceUriKey];
 
-  EmbedMode get embedMode => ideThemeParams.embedMode;
-
+  /// The set of screens that are hidden based on the query parameters.
   Set<String> get hiddenScreens => {...?params[hideScreensKey]?.split(',')};
 
+  /// Whether DevTools extensions should be hidden.
   bool get hideExtensions => hiddenScreens.contains(hideExtensionsValue);
 
+  /// Whether all screens except DevTools extension screens should be hidden.
   bool get hideAllExceptExtensions =>
       hiddenScreens.contains(hideAllExceptExtensionsValue);
 
+  /// The screen that should be visible for viewing offline data.
   String? get offlineScreenId => params[offlineScreenIdKey];
 
+  /// The Inspector object reference that should be automatically selected when
+  /// opening the Flutter Inspector.
   String? get inspectorRef => params[inspectorRefKey];
 
-  // Keys for theming values that an IDE may pass in the embedded DevTools URI.
+  /// The file path for the base file to load on the App Size screen.
+  String? get appSizeBaseFilePath =>
+      params[AppSizeApi.baseAppSizeFilePropertyName];
+
+  /// The file path for the test file to load on the App Size screen.
+  String? get appSizeTestFilePath =>
+      params[AppSizeApi.testAppSizeFilePropertyName];
+
+  /// The IDE that DevTools is embedded in or was launched from.
+  String? get ide => params[ideKey];
+
+  /// The feature of the IDE that DevTools was opened from.
+  String? get ideFeature => params[ideFeatureKey];
+
+  /// Keys for theming values that an IDE may pass in the embedded DevTools URI.
   IdeThemeQueryParams get ideThemeParams => IdeThemeQueryParams(params);
+
+  /// The current [EmbedMode] of DevTools based on the query parameters.
+  EmbedMode get embedMode => ideThemeParams.embedMode;
 
   /// Whether DevTools should be loaded using dart2wasm + skwasm instead of
   /// dart2js + canvaskit.
@@ -49,6 +72,8 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   static const hideAllExceptExtensionsValue = 'all-except-extensions';
   static const offlineScreenIdKey = 'screen';
   static const inspectorRefKey = 'inspectorRef';
+  static const ideKey = 'ide';
+  static const ideFeatureKey = 'ideFeature';
 
   // This query parameter must match the String value in the Flutter bootstrap
   // logic that is used to select a web renderer. See

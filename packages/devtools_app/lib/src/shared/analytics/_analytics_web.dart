@@ -18,6 +18,7 @@ import 'package:web/web.dart';
 
 import '../dtd_manager_extensions.dart';
 import '../globals.dart';
+import '../query_parameters.dart';
 import '../server/server.dart' as server;
 import '../utils.dart';
 import 'analytics_common.dart';
@@ -770,12 +771,13 @@ void computeDevToolsCustomGTagsData() {
 void computeDevToolsQueryParams() {
   _ideLaunched = ideLaunchedCLI; // Default is Command Line launch.
 
-  final ideValue = ideFromUrl();
-  if (ideValue != null) {
-    _ideLaunched = ideValue;
+  final queryParams = DevToolsQueryParams.load();
+  final ide = queryParams.ide;
+  if (ide != null) {
+    _ideLaunched = ide;
   }
 
-  final ideFeature = lookupFromQueryParams('ideFeature');
+  final ideFeature = queryParams.ideFeature;
   if (ideFeature != null) {
     ideLaunchedFeature = ideFeature;
   }
