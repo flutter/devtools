@@ -25,9 +25,6 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   /// The URI for the VM Service that DevTools is connected to.
   String? get vmServiceUri => params[vmServiceUriKey];
 
-  /// The current [EmbedMode] of DevTools based on the query parameters.
-  EmbedMode get embedMode => ideThemeParams.embedMode;
-
   /// The set of screens that are hidden based on the query parameters.
   Set<String> get hiddenScreens => {...?params[hideScreensKey]?.split(',')};
 
@@ -45,15 +42,6 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   /// opening the Flutter Inspector.
   String? get inspectorRef => params[inspectorRefKey];
 
-  /// Keys for theming values that an IDE may pass in the embedded DevTools URI.
-  IdeThemeQueryParams get ideThemeParams => IdeThemeQueryParams(params);
-
-  /// The IDE that DevTools is embedded in or was launched from.
-  String? get ide => params[ideKey];
-
-  /// The feature of the IDE that DevTools was opened from.
-  String? get ideFeature => params[ideFeatureKey];
-
   /// The file path for the base file to load on the App Size screen.
   String? get appSizeBaseFilePath =>
       params[AppSizeApi.baseAppSizeFilePropertyName];
@@ -61,6 +49,18 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   /// The file path for the test file to load on the App Size screen.
   String? get appSizeTestFilePath =>
       params[AppSizeApi.testAppSizeFilePropertyName];
+
+  /// The IDE that DevTools is embedded in or was launched from.
+  String? get ide => params[ideKey];
+
+  /// The feature of the IDE that DevTools was opened from.
+  String? get ideFeature => params[ideFeatureKey];
+
+  /// Keys for theming values that an IDE may pass in the embedded DevTools URI.
+  IdeThemeQueryParams get ideThemeParams => IdeThemeQueryParams(params);
+
+  /// The current [EmbedMode] of DevTools based on the query parameters.
+  EmbedMode get embedMode => ideThemeParams.embedMode;
 
   static const vmServiceUriKey = 'uri';
   static const hideScreensKey = 'hide';
