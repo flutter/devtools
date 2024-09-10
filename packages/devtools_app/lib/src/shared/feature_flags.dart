@@ -102,7 +102,7 @@ abstract class FeatureFlags {
   /// Flag to enable the DevTools setting to opt-in to WASM.
   ///
   /// https://github.com/flutter/devtools/issues/7856
-  static bool wasmOptInSetting = enableExperiments;
+  static bool wasmOptInSetting = true;
 
   /// Stores a map of all the feature flags for debugging purposes.
   ///

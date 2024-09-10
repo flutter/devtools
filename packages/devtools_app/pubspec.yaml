@@ -174,3 +174,5 @@ dependency_overrides:
     path: ../devtools_test
   devtools_extensions:
     path: ../devtools_extensions
+  unified_analytics:
+    path: ../../../dart-sdk/tools/pkgs/unified_analytics
