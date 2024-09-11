@@ -24,7 +24,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue with the "Refreshing timeline" overlay that was getting shown
+when it should not have been. - [#8318](https://github.com/flutter/devtools/pull/8318)
 
 ## CPU profiler updates
 
