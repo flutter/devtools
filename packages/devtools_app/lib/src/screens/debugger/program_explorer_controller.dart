@@ -266,7 +266,7 @@ class ProgramExplorerController extends DisposableController
       Iterable<FuncRef> funcs,
       Iterable<FieldRef>? fields,
     ) async {
-      final res = await Future.wait<Func>(
+      return await Future.wait<Func>(
         funcs
             .where((f) => !_isSyntheticAccessor(f, fields as List<FieldRef>))
             .map<Future<Func>>(
@@ -296,7 +296,6 @@ class ProgramExplorerController extends DisposableController
               }),
             ),
       );
-      return res.cast<Func>();
     }
 
     try {

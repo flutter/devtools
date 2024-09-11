@@ -19,7 +19,6 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-// ignore: avoid-importing-entrypoint-exports, special case for getting version.
 import '../../devtools.dart' as devtools;
 
 import 'common_widgets.dart';
