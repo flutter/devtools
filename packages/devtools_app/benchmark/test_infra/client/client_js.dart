@@ -4,22 +4,8 @@
 
 import 'package:web_benchmarks/client.dart';
 
-import 'common.dart';
-import 'devtools_recorder.dart';
-
-typedef RecorderFactory = Recorder Function();
-
-final benchmarks = <String, RecorderFactory>{
-  DevToolsBenchmark.navigateThroughOfflineScreens.id: () => DevToolsRecorder(
-        benchmark: DevToolsBenchmark.navigateThroughOfflineScreens,
-      ),
-  DevToolsBenchmark.offlineCpuProfilerScreen.id: () => DevToolsRecorder(
-        benchmark: DevToolsBenchmark.offlineCpuProfilerScreen,
-      ),
-  DevToolsBenchmark.offlinePerformanceScreen.id: () => DevToolsRecorder(
-        benchmark: DevToolsBenchmark.offlinePerformanceScreen,
-      ),
-};
+import '../common.dart';
+import 'client_shared.dart';
 
 /// Runs the client of the DevTools web benchmarks.
 ///

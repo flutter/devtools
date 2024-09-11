@@ -10,6 +10,8 @@
 // found" in DevTools.
 const benchmarkInitialPage = '';
 
+const wasmQueryParameters = {'wasm': 'true'};
+
 const devtoolsBenchmarkPrefix = 'devtools';
 
 enum DevToolsBenchmark {

@@ -50,12 +50,14 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   stdout.writeln('Starting web benchmark tests ...');
   final taskResult = await serveWebBenchmark(
     benchmarkAppDirectory: projectRootDirectory(),
-    entryPoint: 'benchmark/test_infra/client.dart',
+    entryPoint:
+        'benchmark/test_infra/client/client_${useWasm ? 'wasm' : 'js'}.dart',
     compilationOptions: useWasm
         ? const CompilationOptions.wasm()
         : const CompilationOptions.js(),
     treeShakeIcons: false,
     initialPage: benchmarkInitialPage,
+    queryParameters: useWasm ? wasmQueryParameters : null,
   );
   stdout.writeln('Web benchmark tests finished.');
 
