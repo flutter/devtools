@@ -280,7 +280,7 @@ class TraceWidgetBuildsCheckbox extends StatelessWidget {
             tooltip: extension.tooltip,
             onChanged: _checkboxChanged,
             enabled: enabled,
-            gaScreenName: extension.gaScreenName,
+            gaScreen: extension.gaScreenName,
             gaItem: extension.gaItem,
           ),
         ),

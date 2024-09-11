@@ -15,3 +15,23 @@ String? getWebUrl() => window.location.toString();
 void webRedirect(String url) {
   window.location.replace(url);
 }
+
+void updateQueryParameter(String key, String? value, {bool reload = false}) {
+  final newQueryParams = Map.of(loadQueryParams());
+  if (value == null) {
+    newQueryParams.remove(key);
+  } else {
+    newQueryParams[key] = value;
+  }
+  final newUri = Uri.parse(window.location.toString())
+      .replace(queryParameters: newQueryParams);
+  window.history.replaceState(
+    window.history.state,
+    '',
+    newUri.toString(),
+  );
+
+  if (reload) {
+    window.location.reload();
+  }
+}

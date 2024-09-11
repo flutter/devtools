@@ -1,3 +1,6 @@
+## 0.2.4
+* Add `updateQueryParameter` utility method.
+
 ## 0.2.3
 * Bump `web` dependency to `^1.0.0`
 * Bump `pointer_interceptor` dependency to `^0.10.1+1`

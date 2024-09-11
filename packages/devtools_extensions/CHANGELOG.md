@@ -1,3 +1,6 @@
+## 0.3.0-dev.1
+* Bump `devtools_app_shared` dependency to `0.2.4`.
+
 ## 0.3.0-dev.0
 * Add `ExtensionManager.copyToClipboard` method.
 * Add `DevToolsExtensionEventType.copyToClipboard` enum type.
