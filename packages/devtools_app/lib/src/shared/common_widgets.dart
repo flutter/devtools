@@ -1557,7 +1557,7 @@ class CheckboxSetting extends StatelessWidget {
             final gaScreen = this.gaScreen;
             final gaItem = this.gaItem;
             if (gaScreen != null && gaItem != null) {
-              ga.select(gaScreen, gaItem);
+              ga.select(gaScreen, '$gaItem-$value');
             }
             final onChanged = this.onChanged;
             if (onChanged != null) {

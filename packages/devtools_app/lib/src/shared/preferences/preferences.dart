@@ -16,7 +16,9 @@ import '../analytics/constants.dart' as gac;
 import '../config_specific/logger/logger_helpers.dart';
 import '../constants.dart';
 import '../diagnostics/inspector_service.dart';
+import '../feature_flags.dart';
 import '../globals.dart';
+import '../query_parameters.dart';
 import '../utils.dart';
 
 part '_extension_preferences.dart';
@@ -25,7 +27,18 @@ part '_memory_preferences.dart';
 part '_logging_preferences.dart';
 part '_performance_preferences.dart';
 
+final _log = Logger('PreferencesController');
+
 const _thirdPartyPathSegment = 'third_party';
+
+/// DevTools preferences for experimental features.
+enum _ExperimentPreferences {
+  wasm;
+
+  String get storageKey => '$storagePrefix.$name';
+
+  static const storagePrefix = 'experiment';
+}
 
 /// DevTools preferences for UI-related settings.
 enum _UiPreferences {
@@ -59,6 +72,10 @@ class PreferencesController extends DisposableController
 
   final vmDeveloperModeEnabled = ValueNotifier<bool>(false);
 
+  /// Whether DevTools should loaded with the dart2wasm + skwasm instead of
+  /// dart2js + canvaskit
+  final wasmEnabled = ValueNotifier<bool>(false);
+
   final verboseLoggingEnabled =
       ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
 
@@ -83,6 +100,9 @@ class PreferencesController extends DisposableController
     // Get the current values and listen for and write back changes.
     await _initDarkMode();
     await _initVmDeveloperMode();
+    if (FeatureFlags.wasmOptInSetting) {
+      await _initWasmEnabled();
+    }
     await _initVerboseLogging();
 
     await inspector.init();
@@ -123,6 +143,70 @@ class PreferencesController extends DisposableController
     });
   }
 
+  Future<void> _initWasmEnabled() async {
+    wasmEnabled.value = kIsWasm;
+    addAutoDisposeListener(wasmEnabled, () async {
+      final enabled = wasmEnabled.value;
+      _log.fine('preference update (wasmEnabled = $enabled)');
+
+      await storage.setValue(
+        _ExperimentPreferences.wasm.storageKey,
+        '$enabled',
+      );
+
+      // Update the wasm mode query parameter if it does not match the value of
+      // the setting.
+      final wasmEnabledFromQueryParams = DevToolsQueryParams.load().useWasm;
+      if (wasmEnabledFromQueryParams != enabled) {
+        _log.fine(
+          'Reloading DevTools for Wasm preference update (enabled = $enabled)',
+        );
+        updateQueryParameter(
+          DevToolsQueryParams.wasmKey,
+          enabled ? 'true' : null,
+          reload: true,
+        );
+      }
+    });
+
+    final enabledFromStorage = await boolValueFromStorage(
+      _ExperimentPreferences.wasm.storageKey,
+      defaultsTo: false,
+    );
+    final queryParams = DevToolsQueryParams.load();
+    final enabledFromQueryParams = queryParams.useWasm;
+
+    if (enabledFromQueryParams && !kIsWasm) {
+      // If we hit this case, we tried to load DevTools with WASM but we fell
+      // back to JS. We know this because the flutter_bootstrap.js logic always
+      // sets the 'wasm' query parameter to 'true' when attempting to load
+      // DevTools with wasm. Remove the wasm query parameter and return early.
+      updateQueryParameter(DevToolsQueryParams.wasmKey, null);
+      ga.impression(gac.devToolsMain, gac.jsFallback);
+
+      // Do not show the JS fallback notification when embedded in VS Code
+      // because we do not expect the WASM build to load successfully by
+      // default. This is because cross-origin-isolation is disabled by VS
+      // Code. See https://github.com/microsoft/vscode/issues/186614.
+      final embeddedInVsCode =
+          queryParams.embedMode.embedded && queryParams.ide == 'VSCode';
+      if (!embeddedInVsCode) {
+        notificationService.push(
+          'Something went wrong when trying to load DevTools with WebAssembly. '
+          'Falling back to Javascript.',
+        );
+      }
+      return;
+    }
+
+    final shouldEnableWasm = enabledFromStorage || enabledFromQueryParams;
+    assert(kIsWasm == shouldEnableWasm);
+    // This should be a no-op if the flutter_bootstrap.js logic set the
+    // renderer properly, but we call this to be safe in case something went
+    // wrong.
+    toggleWasmEnabled(shouldEnableWasm);
+  }
+
   Future<void> _initVerboseLogging() async {
     final verboseLoggingEnabledValue = await boolValueFromStorage(
       _GeneralPreferences.verboseLogging.name,
@@ -159,6 +243,13 @@ class PreferencesController extends DisposableController
     if (enableVmDeveloperMode != null) {
       vmDeveloperModeEnabled.value = enableVmDeveloperMode;
       VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
+    }
+  }
+
+  /// Change the value of the wasm mode setting.
+  void toggleWasmEnabled(bool? enable) {
+    if (enable != null) {
+      wasmEnabled.value = enable;
     }
   }
 
