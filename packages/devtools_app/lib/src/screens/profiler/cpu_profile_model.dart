@@ -771,8 +771,7 @@ extension type _CpuProfileDataJson(Map<String, Object?> json) {
           ?.cast<Map>()
           .map((trace) => trace.cast<String, Object?>())
           .map((trace) => CpuSampleEvent.fromJson(trace))
-          .toList()
-          .cast<CpuSampleEvent>();
+          .toList();
 }
 
 class CpuProfileMetaData extends ProfileMetaData {
