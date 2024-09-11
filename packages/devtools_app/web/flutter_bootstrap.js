@@ -81,7 +81,6 @@ async function bootstrapAppFor3P() {
   console.log('Attempting to load DevTools with ' + rendererForLog + ' renderer.');
 
   const rendererConfig = useSkwasm ? {} : { renderer: 'canvaskit' };
-  console.log('using renderer config: ');
   console.log(rendererConfig);
   _flutter.loader.load({
     serviceWorkerSettings: {
