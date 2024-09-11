@@ -40,10 +40,6 @@ void main() {
         await _runBenchmarks(useWasm: useWasm);
       },
       timeout: const Timeout(Duration(minutes: 10)),
-      // TODO(https://github.com/dart-lang/sdk/issues/56664): unskip the wasm
-      // benchmarks once this issue is resolved and we can bump DevTools to a
-      // version of Flutter that includes the fix.
-      skip: useWasm,
     );
   }
 
