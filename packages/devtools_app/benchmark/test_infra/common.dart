@@ -8,9 +8,14 @@
 // We use an empty initial page so that the benchmark server does not attempt
 // to load the default page 'index.html', which will show up as "page not
 // found" in DevTools.
-const benchmarkInitialPage = '';
+const _benchmarkInitialPage = '';
 
-const wasmQueryParameters = {'wasm': 'true'};
+const _wasmQueryParameters = {'wasm': 'true'};
+
+String benchmarkPath({required bool useWasm}) => Uri(
+      path: _benchmarkInitialPage,
+      queryParameters: useWasm ? _wasmQueryParameters : null,
+    ).toString();
 
 const devtoolsBenchmarkPrefix = 'devtools';
 

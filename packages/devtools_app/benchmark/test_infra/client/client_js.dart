@@ -13,5 +13,5 @@ import 'client_shared.dart';
 /// file as the entry point (see `run_benchmarks.dart`). The app automates
 /// the DevTools web app, records some performance data, and reports them.
 Future<void> main() async {
-  await runBenchmarks(benchmarks, initialPage: benchmarkInitialPage);
+  await runBenchmarks(benchmarks, benchmarkPath: benchmarkPath(useWasm: false));
 }

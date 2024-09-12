@@ -56,8 +56,7 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
         ? const CompilationOptions.wasm()
         : const CompilationOptions.js(),
     treeShakeIcons: false,
-    initialPage: benchmarkInitialPage,
-    queryParameters: useWasm ? wasmQueryParameters : null,
+    benchmarkPath: benchmarkPath(useWasm: useWasm),
   );
   stdout.writeln('Web benchmark tests finished.');
 

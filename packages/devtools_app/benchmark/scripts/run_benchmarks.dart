@@ -60,7 +60,7 @@ Future<BenchmarkResults> runBenchmarks({
             ? const CompilationOptions.wasm()
             : const CompilationOptions.js(),
         treeShakeIcons: false,
-        initialPage: benchmarkInitialPage,
+        benchmarkPath: benchmarkPath(useWasm: useWasm),
         headless: !useBrowser,
       ),
     );
