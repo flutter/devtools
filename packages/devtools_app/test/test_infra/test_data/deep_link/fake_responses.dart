@@ -158,6 +158,7 @@ const iosValidationResponseWithNoError = '''
             },
             {
               "path": "/ios-path2",
+              "isExcluded": true,
               "queryParams": [
                 {
                   "key": "dplnk",
@@ -230,6 +231,7 @@ const iosValidationResponseWithError = '''
             },
             {
               "path": "/ios-path2",
+              "isExcluded": true,
               "queryParams": [
                 {
                   "key": "dplnk",

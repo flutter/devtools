@@ -62,6 +62,10 @@ const _iosValidationResultsKey = 'validationResults';
 const _aasaAppPathsKey = 'aasaAppPaths';
 const _aasaPathsKey = 'aasaPaths';
 const _pathKey = 'path';
+const _isExcludedKey = 'isExcluded';
+const _queryParamsKey = 'queryParams';
+const _keyKey = 'key';
+const _valueKey = 'value';
 
 const iosCheckNameToDomainError = <String, DomainError>{
   'EXISTENCE': IosDomainError.existence,
@@ -75,7 +79,7 @@ class ValidateIosDomainResult {
   ValidateIosDomainResult(this.errorCode, this.domainErrors, this.paths);
   final String errorCode;
   final Map<String, List<DomainError>> domainErrors;
-  final Map<String, List<String>> paths;
+  final Map<String, List<Path>> paths;
 }
 
 class GenerateAssetLinksResult {
@@ -158,7 +162,7 @@ class DeepLinksService {
     required List<String> domains,
   }) async {
     final domainErrors = <String, List<DomainError>>{};
-    final paths = <String, List<String>>{};
+    final paths = <String, List<Path>>{};
     // TODO(hangyujin): Add error code to the result.
     const errorCode = '';
 
@@ -205,9 +209,20 @@ class DeepLinksService {
                   ?.cast<Map<String, Object?>>();
               if (aasaPaths != null) {
                 for (final aasaPath in aasaPaths) {
-                  paths
-                      .putIfAbsent(domainName, () => <String>[])
-                      .add(aasaPath[_pathKey] as String);
+                  final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
+                      ?.cast<Map<String, Object?>>();
+                  final queryParams = <String, String>{
+                    for (final item in rawQueryParams ?? <Map>[])
+                      item[_keyKey] as String: item[_valueKey] as String,
+                  };
+                  paths.putIfAbsent(domainName, () => <Path>[]).add(
+                        Path(
+                          path: aasaPath[_pathKey] as String,
+                          queryParams: queryParams,
+                          isExcluded:
+                              aasaPath[_isExcludedKey] as bool? ?? false,
+                        ),
+                      );
                 }
                 continue;
               }

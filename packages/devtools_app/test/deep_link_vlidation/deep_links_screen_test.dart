@@ -574,7 +574,7 @@ void main() {
         expect(find.text('/path2'), findsOneWidget);
         expect(find.text('/path3'), findsOneWidget);
         expect(find.text('/ios-path1'), findsOneWidget);
-        expect(find.text('/ios-path2'), findsOneWidget);
+        expect(find.text('NOT /ios-path2'), findsOneWidget);
 
         // Only show links with path error.
         deepLinksController.updateDisplayOptions(
@@ -587,7 +587,7 @@ void main() {
         expect(find.text('/path2'), findsOneWidget);
         expect(find.text('/path3'), findsNothing);
         expect(find.text('/ios-path1'), findsNothing);
-        expect(find.text('/ios-path2'), findsNothing);
+        expect(find.text('NOT /ios-path2'), findsNothing);
 
         // Only show links with no issue.
         deepLinksController.updateDisplayOptions(
@@ -603,7 +603,7 @@ void main() {
         expect(find.text('/path2'), findsNothing);
         expect(find.text('/path3'), findsOneWidget);
         expect(find.text('/ios-path1'), findsOneWidget);
-        expect(find.text('/ios-path2'), findsOneWidget);
+        expect(find.text('NOT /ios-path2'), findsOneWidget);
       },
     );
   });
