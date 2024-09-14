@@ -126,13 +126,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
     if (!mounted) {
       return;
     }
-    if (androidVariants.isEmpty) {
-      ga.select(
-        gac.deeplink,
-        gac.AnalyzeFlutterProject.flutterInvalidAndroidProjectSelected.name,
-      );
-      await showNonFlutterProjectDialog();
-    }
+
     XcodeBuildOptions iosBuildOptions = XcodeBuildOptions.empty;
     if (FeatureFlags.deepLinkIosCheck) {
       iosBuildOptions = await _requestiOSBuildOptions(directory);
@@ -140,6 +134,15 @@ class _SelectProjectViewState extends State<SelectProjectView>
         gac.deeplink,
         gac.AnalyzeFlutterProject.flutterProjectSelected.name,
       );
+    }
+
+    if (androidVariants.isEmpty && iosBuildOptions.configurations.isEmpty) {
+      ga.select(
+        gac.deeplink,
+        gac.AnalyzeFlutterProject.flutterInvalidAndroidProjectSelected.name,
+      );
+      await showNonFlutterProjectDialog();
+      return ;
     }
     controller.selectedProject.value = FlutterProject(
       path: directory,
