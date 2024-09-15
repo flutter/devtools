@@ -221,6 +221,10 @@ class DeepLinksController extends DisposableController
   AppLinkSettings? get currentAppLinkSettings =>
       androidAppLinks[selectedAndroidVariantIndex.value];
 
+  UniversalLinkSettings? get currentUniversalLinkSettings =>
+      iosLinks[selectedIosConfigurationIndex.value];
+  String errorMessage = '';
+
   @visibleForTesting
   final androidAppLinks = <int, AppLinkSettings>{};
 
@@ -301,6 +305,9 @@ class DeepLinksController extends DisposableController
   }
 
   Future<void> _loadAndroidAppLinks() async {
+    if (selectedProject.value!.androidVariants.isEmpty) {
+      return;
+    }
     final variant = selectedProject
         .value!.androidVariants[selectedAndroidVariantIndex.value];
     await ga.timeAsync(
@@ -314,11 +321,12 @@ class DeepLinksController extends DisposableController
             buildVariant: variant,
           );
           androidAppLinks[selectedAndroidVariantIndex.value] = result;
-        } catch (_) {
+        } catch (e) {
           ga.select(
             gac.deeplink,
             gac.AnalyzeFlutterProject.flutterAppLinkLoadingError.name,
           );
+          errorMessage = 'When validating Android app links: $e';
           pagePhase.value = PagePhase.validationErrorPage;
         }
       },
@@ -327,6 +335,9 @@ class DeepLinksController extends DisposableController
 
   Future<void> _loadIosLinks() async {
     final iosBuildOptions = selectedProject.value!.iosBuildOptions;
+    if (iosBuildOptions.configurations.isEmpty) {
+      return;
+    }
     final configuration =
         iosBuildOptions.configurations[selectedIosConfigurationIndex.value];
     final target = iosBuildOptions.targets[selectedIosTargetIndex.value];
@@ -342,7 +353,8 @@ class DeepLinksController extends DisposableController
             target: target,
           );
           iosLinks[selectedIosConfigurationIndex.value] = result;
-        } catch (_) {
+        } catch (e) {
+          errorMessage = 'When validating ios links: $e';
           pagePhase.value = PagePhase.validationErrorPage;
         }
       },
@@ -507,22 +519,28 @@ class DeepLinksController extends DisposableController
         .toSet()
         .toList();
 
-    late final Map<String, List<DomainError>> androidDomainErrors;
+    Map<String, List<DomainError>> androidDomainErrors =
+        <String, List<DomainError>>{};
     Map<String, List<DomainError>> iosDomainErrors =
         <String, List<DomainError>>{};
 
-    late final Map<String, List<Path>> iosDomainPaths;
+    Map<String, List<Path>> iosDomainPaths = <String, List<Path>>{};
+
+    ValidateIosDomainResult iosResult = ValidateIosDomainResult('', {}, {});
     try {
-      final androidResult = await deepLinksService.validateAndroidDomain(
-        domains: domains,
-        applicationId: applicationId,
-        localFingerprint: localFingerprint.value,
-      );
-      androidDomainErrors = androidResult.domainErrors;
-      googlePlayFingerprintsAvailability.value =
-          androidResult.googlePlayFingerprintsAvailability;
-      if (FeatureFlags.deepLinkIosCheck) {
-        final iosResult = await deepLinksService.validateIosDomain(
+      if (currentAppLinkSettings != null) {
+        final androidResult = await deepLinksService.validateAndroidDomain(
+          domains: domains,
+          applicationId: applicationId,
+          localFingerprint: localFingerprint.value,
+        );
+        androidDomainErrors = androidResult.domainErrors;
+        googlePlayFingerprintsAvailability.value =
+            androidResult.googlePlayFingerprintsAvailability;
+      }
+      if (FeatureFlags.deepLinkIosCheck &&
+          currentUniversalLinkSettings != null) {
+        iosResult = await deepLinksService.validateIosDomain(
           bundleId: bundleId,
           teamId: teamId,
           domains: domains,
@@ -530,9 +548,20 @@ class DeepLinksController extends DisposableController
         iosDomainErrors = iosResult.domainErrors;
         iosDomainPaths = iosResult.paths;
       }
-    } catch (_) {
+    } catch (e) {
       // TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.validationErrorPage;
+      errorMessage = 'When validating domains: $e\n\n '
+          'Android:\n'
+          'currentAppLinkSettings: $currentAppLinkSettings\n'
+          'applicationId: $applicationId\n'
+          'IOS:\n'
+          'currentUniversalLinkSettings: $currentUniversalLinkSettings\n'
+          'bundleId: $bundleId\n'
+          'teamId: $teamId\n'
+          'iosDomainErrors: $iosDomainErrors\n'
+          'iosDomainPaths: $iosDomainPaths\n'
+          'iosResponsebody: ${iosResult.errorCode}\n';
       return rawLinkdatas;
     }
 
@@ -607,11 +636,8 @@ class DeepLinksController extends DisposableController
 
   Future<void> validateLinks() async {
     final appLinkSettings = currentAppLinkSettings;
-    if (appLinkSettings == null) {
-      pagePhase.value = PagePhase.noLinks;
-      return;
-    }
-    if (appLinkSettings.error != null) {
+
+    if (appLinkSettings?.error != null) {
       pagePhase.value = PagePhase.analyzeErrorPage;
       ga.select(
         gac.deeplink,

@@ -90,7 +90,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
     return iosBuildOptions;
   }
 
-  Future<void> showNonFlutterProjectDialog() async {
+  Future<void> showNonFlutterProjectDialog({String more=''}) async {
     await showDialog(
       context: context,
       builder: (_) {
@@ -141,7 +141,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
         gac.deeplink,
         gac.AnalyzeFlutterProject.flutterInvalidAndroidProjectSelected.name,
       );
-      await showNonFlutterProjectDialog();
+      await showNonFlutterProjectDialog(more: '$androidVariants ${iosBuildOptions.configurations}');
       return ;
     }
     controller.selectedProject.value = FlutterProject(

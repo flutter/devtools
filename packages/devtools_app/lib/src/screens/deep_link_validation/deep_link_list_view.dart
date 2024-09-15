@@ -125,7 +125,20 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
 
           case PagePhase.validationErrorPage:
             // TODO(hangyujin): This is just a place holder to add Error handling.
-            return const CenteredMessage('Error validating domain ');
+            return Expanded(
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  child: SelectionArea(
+                    child: Text(
+                      'Error page\n'
+                      '${controller.errorMessage}',
+                      style: theme.errorTextStyle,
+                    ),
+                  ),
+                ),
+              ),
+            );
         }
       },
     );

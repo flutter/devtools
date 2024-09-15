@@ -193,25 +193,31 @@ class DeepLinksService {
     final domainErrors = <String, List<DomainError>>{};
     final paths = <String, List<Path>>{};
     // TODO(hangyujin): Add error code to the result.
-    const errorCode = '';
+    String errorCode = '';
 
     final domainsByBatch = _splitDomains(domains);
 
     for (final domainList in domainsByBatch) {
+      final requestBody = jsonEncode({
+        _appIdKey: {
+          _bundleIdKey: bundleId,
+          _teamIdKey: teamId,
+        },
+        _universalLinkDomainsKey: [
+          for (final domain in domainList) {_iosDomainNameKey: domain},
+        ],
+      });
+
+      errorCode = '$errorCode\n request body: $requestBody';
       final response = await client.post(
         Uri.parse(iosDomainValidationURL),
         headers: postHeader,
-        body: jsonEncode({
-          _appIdKey: {
-            _bundleIdKey: bundleId,
-            _teamIdKey: teamId,
-          },
-          _universalLinkDomainsKey: [
-            for (final domain in domainList) {_iosDomainNameKey: domain},
-          ],
-        }),
+        body: requestBody,
       );
       final result = json.decode(response.body) as Map<String, Object?>;
+
+      errorCode = '$errorCode\n response body: ${response.body}';
+
       final validationResult = (result[_iosValidationResultsKey] as List)
           .cast<Map<String, Object?>>();
 
@@ -261,6 +267,10 @@ class DeepLinksService {
                   ?.cast<Map<String, Object?>>();
               if (aasaPaths != null) {
                 for (final aasaPath in aasaPaths) {
+                  final path = aasaPath[_pathKey] as String? ?? '';
+                  if (path.isEmpty) {
+                    continue;
+                  }
                   final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
                       ?.cast<Map<String, Object?>>();
                   final queryParams = <String, String>{
@@ -269,7 +279,7 @@ class DeepLinksService {
                   };
                   paths.putIfAbsent(domainName, () => <Path>[]).add(
                         Path(
-                          path: aasaPath[_pathKey] as String,
+                          path: path,
                           queryParams: queryParams,
                           isExcluded:
                               aasaPath[_isExcludedKey] as bool? ?? false,
@@ -283,6 +293,7 @@ class DeepLinksService {
         }
       }
     }
+
     return ValidateIosDomainResult(
       errorCode,
       domainErrors,
