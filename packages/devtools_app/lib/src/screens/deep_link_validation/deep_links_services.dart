@@ -86,7 +86,7 @@ const aasaFileFormatSubCheck = {
       AASAfileFormatSubCheck.defaultsPercentEncodedFormat,
   'DETAIL_FORMAT': AASAfileFormatSubCheck.detailsFormat,
   'DETAIL_APP_ID_FORMAT': AASAfileFormatSubCheck.detailsAppIdFormat,
-  'DETAIL_PATHS_FORMAT ': AASAfileFormatSubCheck.detailsPathsFormat,
+  'DETAIL_PATHS_FORMAT': AASAfileFormatSubCheck.detailsPathsFormat,
   'DETAIL_DEFAULTS_FORMAT': AASAfileFormatSubCheck.detailsDefaultsFormat,
   'DETAIL_DEFAULTS_PERCENT_ENCODED_FORMAT':
       AASAfileFormatSubCheck.detailsDefaultsPercentEncodedFormat,
