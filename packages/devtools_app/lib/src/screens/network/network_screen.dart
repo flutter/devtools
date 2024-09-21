@@ -123,19 +123,45 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    unawaited(controller.startRecording());
+    try {
+      if (offlineDataController.showingOfflineData.value == true) {
+        loadOfflineData(offlineDataController.offlineDataJson);
+      }
+      cancelListeners();
+      if (!offlineDataController.showingOfflineData.value) {
+        unawaited(controller.startRecording());
+        debugPrint('started recording');
+        addAutoDisposeListener(
+          serviceConnection.serviceManager.isolateManager.mainIsolate,
+          () {
+            if (serviceConnection
+                    .serviceManager.isolateManager.mainIsolate.value !=
+                null) {
+              unawaited(controller.startRecording());
+            }
+          },
+        );
+      }
+    } catch (ex) {
+      debugPrint('caught ex $ex');
+    }
+  }
 
-    cancelListeners();
-
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.isolateManager.mainIsolate,
-      () {
-        if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
-            null) {
-          unawaited(controller.startRecording());
-        }
-      },
-    );
+  void loadOfflineData(Map<String, dynamic> offlineData) {
+    final requestsMap = (offlineData['network']
+        as Map<String, dynamic>)['requests'] as List<dynamic>;
+    final requests = requestsMap
+        .map(
+          (e) => DartIOHttpRequestData.fromJson(
+            e as Map<String, dynamic>,
+            null,
+            null,
+          ),
+        )
+        .toList();
+    controller.filteredData
+      ..clear()
+      ..addAll(requests);
   }
 
   @override
@@ -187,7 +213,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
   @override
   void initState() {
     super.initState();
-
+    addAutoDisposeListener(offlineDataController.showingOfflineData);
     _recording = widget.controller.recordingNotifier.value;
     addAutoDisposeListener(widget.controller.recordingNotifier, () {
       setState(() {

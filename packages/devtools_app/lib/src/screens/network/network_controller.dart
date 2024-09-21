@@ -14,6 +14,7 @@ import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/http/http_service.dart' as http_service;
+import '../../shared/offline_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
@@ -49,6 +50,7 @@ class NetworkController extends DisposableController
     with
         SearchControllerMixin<NetworkRequest>,
         FilterControllerMixin<NetworkRequest>,
+        OfflineScreenControllerMixin,
         AutoDisposeControllerMixin {
   NetworkController() {
     _networkService = NetworkService(this);
@@ -386,6 +388,25 @@ class NetworkController extends DisposableController
       serviceConnection.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
     }
   }
+
+  @override
+  OfflineScreenData prepareOfflineScreenData() {
+    final requests =
+        filteredData.value.whereType<DartIOHttpRequestData>().toList();
+    return OfflineScreenData(
+      screenId: NetworkScreen.id,
+      data: convertRequestsToMap(requests),
+    );
+  }
+}
+
+Map<String, Object> convertRequestsToMap(
+  List<DartIOHttpRequestData>? requests,
+) {
+  if (requests == null) return {};
+  return {
+    'requests': requests.map((request) => request.toJson()).toList(),
+  };
 }
 
 /// Class for managing the set of all current sockets, and

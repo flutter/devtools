@@ -58,6 +58,105 @@ class DartIOHttpRequestData extends NetworkRequest {
       .._responseBody = responseContent?['text'].toString()
       .._requestBody = requestPostData?['text'].toString();
   }
+  //TODO go through all parameters, to check if they are correctly added.
+  Map<String, Object>? toJson() {
+    try {
+      return {
+        'startedDateTime': startTimestamp.toIso8601String(),
+        'time': duration?.inMilliseconds ?? 0,
+        'request': {
+          'method': method,
+          'url': uri,
+          'httpVersion':
+              'HTTP/2.0', // Assuming HTTP/1.1, can adjust dynamically if needed
+          'cookies': requestCookies.map((cookie) => cookie.toString()).toList(),
+          'headers': requestHeaders,
+          'queryString': queryParameters?.entries
+              .map((entry) => {'name': entry.key, 'value': entry.value})
+              .toList(),
+          'postData': {
+            'mimeType': contentType,
+            'text': requestBody ?? 'None',
+          },
+          //TODO check headersSize calculation
+          'headersSize': requestHeaders != null
+              ? requestHeaders!.length * 40
+              : 0,
+          'bodySize': requestBody?.length ?? 0,
+          'connectionInfo': {
+            'remoteAddress': (general['connectionInfo']
+                as Map<String, Object?>?)?['remoteAddress'],
+            'localPort': (general['connectionInfo']
+                as Map<String, Object?>?)?['localPort'],
+          },
+          'contentLength': general['contentLength'] ?? 0,
+          'followRedirects': _request.request?.followRedirects ?? true,
+          'maxRedirects': _request.request?.maxRedirects ?? 5,
+          'persistentConnection':
+              _request.request?.persistentConnection ?? true,
+          'proxyDetails': {
+            'proxy':
+                (general['proxyDetails'] as Map<String, Object?>?)?['proxy'],
+            'type': (general['proxyDetails'] as Map<String, Object?>?)?['type'],
+          },
+          'error': general['error'],
+        },
+        'response': {
+          'status': status ?? 'Error',
+          'statusCode': _request.response!.statusCode,
+          'statusText': '',
+          //TODO : get http version/ add in constants
+          'httpVersion': 'HTTP/2.0',
+          'cookies':
+              responseCookies.map((cookie) => cookie.toString()).toList(),
+          'headers': responseHeaders,
+          'content': {
+            'size': responseBody?.length ?? 0,
+            'mimeType':
+                contentType ?? 'json',
+            'text': responseBody ?? '',
+          },
+          'redirects': _request.response!.redirects,
+          //TODO : add redirectURL
+          'redirectURL': '',
+          'headersSize':
+              responseHeaders != null ? responseHeaders!.length * 40 : 0,
+          'bodySize': encodedResponse?.length ?? 0,
+        },
+        'cache': {},
+        'timings': {
+          'blocked': -1,
+          'dns': -1,
+          'connect': -1,
+          'send': 1,
+          'wait': duration?.inMilliseconds ?? 0,
+          'receive': 1,
+          'ssl': -1,
+        },
+        'connection': (general['connectionInfo']
+                as Map<String, Object?>?)?['connectionId'] ??
+            '525659655', // sample connection ID
+        'comment': '',
+        'isolateId': _request.isolateId,
+        'type': '@HttpProfileRequest',
+        'method': method,
+        'uri': uri,
+        'id': id,
+        'startTime': startTimestamp.microsecondsSinceEpoch,
+        'events': instantEvents
+            .map(
+              (event) => {
+                'timestamp': event.timestamp.microsecondsSinceEpoch,
+                'event': event.name,
+              },
+            )
+            .toList(),
+      };
+    } catch (ex) {
+      _log.shout('Error in toJson: $ex');
+    }
+    return null;
+  }
 
   static const _connectionInfoKey = 'connectionInfo';
   static const _contentTypeKey = 'content-type';
