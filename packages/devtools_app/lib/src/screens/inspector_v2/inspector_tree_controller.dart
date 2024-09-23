@@ -319,6 +319,11 @@ class InspectorTreeController extends DisposableController
 
   void navigateLeft() {
     final selectionLocal = selection;
+    final diagnostic = selectionLocal?.diagnostic;
+
+    final toggledHideableGroup =
+        _maybeToggleHideableGroup(diagnostic, showGroup: false);
+    if (toggledHideableGroup) return;
 
     // This logic is consistent with how IntelliJ handles tree navigation on
     // on left arrow key press.
@@ -342,10 +347,15 @@ class InspectorTreeController extends DisposableController
   }
 
   void navigateRight() {
+    final selectionLocal = selection;
+    final diagnostic = selectionLocal?.diagnostic;
+
+    final toggledHideableGroup =
+        _maybeToggleHideableGroup(diagnostic, showGroup: true);
+    if (toggledHideableGroup) return;
+
     // This logic is consistent with how IntelliJ handles tree navigation on
     // on right arrow key press.
-
-    final selectionLocal = selection;
 
     if (selectionLocal == null || selectionLocal.isExpanded) {
       _navigateHelper(1);
@@ -371,6 +381,31 @@ class InspectorTreeController extends DisposableController
         return true;
       },
     );
+  }
+
+  /// Given [shouldShow], toggles the visibility of a hideable group.
+  ///
+  /// Returns a [bool] representing whether or not the group was toggled.
+  bool _maybeToggleHideableGroup(
+    RemoteDiagnosticsNode? diagnostic, {
+    required bool showGroup,
+  }) {
+    final isHideableGroupLeader =
+        diagnostic != null && diagnostic.isHideableGroupLeader;
+    final shouldToggle = isHideableGroupLeader &&
+        (showGroup ? diagnostic.groupIsHidden : !diagnostic.groupIsHidden);
+
+    if (shouldToggle) {
+      refreshTree(
+        updateTreeAction: () {
+          diagnostic.toggleHiddenGroup();
+          return true;
+        },
+      );
+      return true;
+    }
+
+    return false;
   }
 
   double get horizontalPadding => 10.0;
