@@ -119,7 +119,7 @@ enum SizeType {
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
       : description = node.description,
-        size = node.size,
+        size = node.size!,
         constraints = node.constraints,
         isFlex = node.isFlex,
         flexFactor = node.flexFactor,
@@ -246,7 +246,7 @@ class LayoutProperties {
     if (parentElement == null) return this;
     final parentProperties =
         parentElement.computeLayoutProperties(forFlexLayout: false);
-    return parentProperties;
+    return parentProperties ?? this;
   }
 
   WidgetSizes? get widgetWidths => _widgetSizes(SizeType.widths);
