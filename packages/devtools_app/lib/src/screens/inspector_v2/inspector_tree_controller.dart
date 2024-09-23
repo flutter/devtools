@@ -824,10 +824,13 @@ abstract class InspectorControllerClient {
 class InspectorTree extends StatefulWidget {
   const InspectorTree({
     super.key,
+    required this.controller,
     required this.treeController,
     this.widgetErrors,
     this.screenId,
   });
+
+  final InspectorController controller;
 
   final InspectorTreeController? treeController;
 
@@ -843,9 +846,9 @@ class _InspectorTreeState extends State<InspectorTree>
     with
         SingleTickerProviderStateMixin,
         AutomaticKeepAliveClientMixin<InspectorTree>,
-        AutoDisposeMixin,
-        ProvidedControllerMixin<InspectorController, InspectorTree>
+        AutoDisposeMixin
     implements InspectorControllerClient {
+  InspectorController get controller => widget.controller;
   InspectorTreeController? get treeController => widget.treeController;
 
   late ScrollController _scrollControllerY;
@@ -883,7 +886,6 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    initController();
   }
 
   @override

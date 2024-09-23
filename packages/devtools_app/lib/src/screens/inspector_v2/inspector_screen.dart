@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -20,33 +19,17 @@ import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/primitives/simple_items.dart';
-import '../../shared/screen.dart';
 import '../../shared/ui/search.dart';
-import '../../shared/utils.dart';
+import '../inspector_shared/inspector_screen.dart';
 import 'inspector_controller.dart';
 import 'inspector_controls.dart';
 import 'inspector_tree_controller.dart';
 import 'widget_details.dart';
 
-class InspectorScreen extends Screen {
-  InspectorScreen() : super.fromMetaData(ScreenMetaData.inspector);
-
-  static final id = ScreenMetaData.inspector.id;
-
-  // There is not enough room to safely show the console in the embed view of
-  // the DevTools and IDEs have their own consoles.
-  @override
-  bool showConsole(EmbedMode embedMode) => !embedMode.embedded;
-
-  @override
-  String get docPageId => screenId;
-
-  @override
-  Widget buildScreenBody(BuildContext context) => const InspectorScreenBody();
-}
-
 class InspectorScreenBody extends StatefulWidget {
-  const InspectorScreenBody({super.key});
+  const InspectorScreenBody({super.key, required this.controller});
+
+  final InspectorController controller;
 
   @override
   InspectorScreenBodyState createState() => InspectorScreenBodyState();
@@ -56,8 +39,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     with
         BlockingActionMixin,
         AutoDisposeMixin,
-        ProvidedControllerMixin<InspectorController, InspectorScreenBody>,
         SearchFieldMixin<InspectorScreenBody> {
+  InspectorController get controller => widget.controller;
+
   InspectorTreeController get _inspectorTreeController =>
       controller.inspectorTree;
 
@@ -91,7 +75,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initController()) return;
 
     if (serviceConnection.inspectorService == null) {
       // The app must not be a Flutter app.
@@ -190,6 +173,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                       children: [
                         InspectorTree(
                           key: inspectorTreeKey,
+                          controller: controller,
                           treeController: _inspectorTreeController,
                           widgetErrors: inspectableErrors,
                           screenId: InspectorScreen.id,
@@ -279,6 +263,13 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               description:
                   'Hovering over any widget displays its properties and values.',
               gaItem: gac.inspectorHoverEvalMode,
+            ),
+            CheckboxSetting(
+              notifier: preferences.inspector.inspectorV2Enabled
+                  as ValueNotifier<bool?>,
+              title: 'Enable Inspector V2',
+              description: 'Try out the new Inspector screen.',
+              gaItem: gac.inspectorV2Enabled,
             ),
             const SizedBox(height: denseSpacing),
             ...dialogSubHeader(theme, 'Package Directories'),
