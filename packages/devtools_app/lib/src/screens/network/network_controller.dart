@@ -61,7 +61,8 @@ class NetworkController extends DisposableController
   }
   List<DartIOHttpRequestData>? _httpRequests;
 
-  String? exportAsHarFile() {
+  Future<String?> exportAsHarFile() async {
+    await _fetchFullDataBeforeExport();
     _httpRequests =
         filteredData.value.whereType<DartIOHttpRequestData>().toList();
 
@@ -384,6 +385,15 @@ class NetworkController extends DisposableController
   void _checkForError(NetworkRequest r) {
     if (r.didFail) {
       serviceConnection.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
+    }
+  }
+
+  Future<void> _fetchFullDataBeforeExport() async {
+    for (final NetworkRequest item in filteredData.value) {
+      // Check if the request is of type DartIOHttpRequestData and fetch full data
+      if (item is DartIOHttpRequestData) {
+        await item.getFullRequestData();
+      }
     }
   }
 }
