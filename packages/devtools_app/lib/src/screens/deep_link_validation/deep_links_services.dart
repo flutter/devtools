@@ -209,6 +209,10 @@ class DeepLinksService {
                   ?.cast<Map<String, Object?>>();
               if (aasaPaths != null) {
                 for (final aasaPath in aasaPaths) {
+                  final path = aasaPath[_pathKey] as String?;
+                  if (path == null) {
+                    continue;
+                  }
                   final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
                       ?.cast<Map<String, Object?>>();
                   final queryParams = <String, String>{
@@ -217,7 +221,7 @@ class DeepLinksService {
                   };
                   paths.putIfAbsent(domainName, () => <Path>[]).add(
                         Path(
-                          path: aasaPath[_pathKey] as String,
+                          path: path,
                           queryParams: queryParams,
                           isExcluded:
                               aasaPath[_isExcludedKey] as bool? ?? false,

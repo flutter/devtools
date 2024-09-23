@@ -167,6 +167,16 @@ const iosValidationResponseWithNoError = '''
               ],
               "isCaseSensitive": true,
               "isPercentEncoded": true
+            },
+            {
+              "queryParams": [
+                {
+                  "key": "dplnk",
+                  "value": "?*"
+                }
+              ],
+              "isCaseSensitive": true,
+              "isPercentEncoded": true
             }
           ]
         }
