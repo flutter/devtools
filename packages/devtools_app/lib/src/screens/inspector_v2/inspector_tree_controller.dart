@@ -383,8 +383,9 @@ class InspectorTreeController extends DisposableController
     );
   }
 
-  /// Given [shouldShow], toggles the visibility of a hideable group. Returns a
-  /// [bool] representing whether or not the group was toggled.
+  /// Given [shouldShow], toggles the visibility of a hideable group.
+  ///
+  /// Returns a [bool] representing whether or not the group was toggled.
   bool _maybeToggleHideableGroup(
     RemoteDiagnosticsNode? diagnostic, {
     required bool showGroup,
