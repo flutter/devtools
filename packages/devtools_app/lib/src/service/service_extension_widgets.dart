@@ -588,7 +588,7 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
                 tooltip: widget.serviceExtension.tooltip,
                 onChanged: _onChanged,
                 enabled: available,
-                gaScreenName: widget.serviceExtension.gaScreenName,
+                gaScreen: widget.serviceExtension.gaScreenName,
                 gaItem: widget.serviceExtension.gaItem,
               ),
             ),

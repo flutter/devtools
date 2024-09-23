@@ -16,14 +16,15 @@ class ChromeDriver with IOMixin {
   // https://github.com/flutter/flutter/blob/master/docs/contributing/testing/Running-Flutter-Driver-tests-with-Web.md#web-installers-repo.
   Future<void> start({bool debugLogging = false}) async {
     try {
+      const chromedriverExe = 'chromedriver';
+      const chromedriverArgs = ['--port=4444'];
       if (debugLogging) {
         print('starting the chromedriver process');
+        print('> $chromedriverExe ${chromedriverArgs.join(' ')}');
       }
       final process = _process = await Process.start(
-        'chromedriver',
-        [
-          '--port=4444',
-        ],
+        chromedriverExe,
+        chromedriverArgs,
       );
       listenToProcessOutput(process, printTag: 'ChromeDriver');
     } catch (e) {

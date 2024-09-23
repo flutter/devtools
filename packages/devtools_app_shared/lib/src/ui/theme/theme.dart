@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(kenz): remove once min flutter version of devtools_app_shared >= 3.25
+// ignore_for_file: deprecated_member_use, analysis performed with newer flutter version than min sdk
+
 import 'package:flutter/material.dart';
 
 import '../ui_utils.dart';

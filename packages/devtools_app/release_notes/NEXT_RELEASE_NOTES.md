@@ -10,7 +10,13 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed a bug that was causing the DevTools release notes to always
+show. - [#8277](https://github.com/flutter/devtools/pull/8277)
+
+* Add a setting that allows users to opt-in to loading DevTools
+with WebAssembly. - [#8270](https://github.com/flutter/devtools/pull/8270)
+
+    ![Wasm opt-in setting](images/wasm_setting.png "DevTools setting to opt into wasm.")
 
 ## Inspector updates
 
@@ -18,7 +24,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue with the "Refreshing timeline" overlay that was getting shown
+when it should not have been. - [#8318](https://github.com/flutter/devtools/pull/8318)
 
 ## CPU profiler updates
 

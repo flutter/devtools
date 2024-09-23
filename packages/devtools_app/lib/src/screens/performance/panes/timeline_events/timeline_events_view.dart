@@ -49,7 +49,8 @@ class _TimelineEventsTabViewState extends State<TimelineEventsTabView>
     super.initState();
     addAutoDisposeListener(widget.controller.status, () {
       final status = widget.controller.status.value;
-      if (status == EventsControllerStatus.refreshing) {
+      if (status == EventsControllerStatus.refreshing &&
+          widget.controller.isActiveFeature) {
         _insertOverlay();
       } else {
         _removeOverlay();

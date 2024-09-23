@@ -146,13 +146,19 @@ class DisplayOptions {
 
 class DeepLinksController extends DisposableController
     with AutoDisposeControllerMixin {
+  @override
+  void dispose() {
+    deepLinksService.dispose();
+    super.dispose();
+  }
+
   DisplayOptions get displayOptions => displayOptionsNotifier.value;
   String get applicationId =>
-      _androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
+      androidAppLinks[selectedAndroidVariantIndex.value]?.applicationId ?? '';
   String get bundleId =>
-      _iosLinks[selectedIosConfigurationIndex.value]?.bundleIdentifier ?? '';
+      iosLinks[selectedIosConfigurationIndex.value]?.bundleIdentifier ?? '';
   String get teamId =>
-      _iosLinks[selectedIosConfigurationIndex.value]?.teamIdentifier ?? '';
+      iosLinks[selectedIosConfigurationIndex.value]?.teamIdentifier ?? '';
 
   @visibleForTesting
   List<LinkData> linkDatasByPath(List<LinkData> linkdatas) {
@@ -162,9 +168,9 @@ class DeepLinksController extends DisposableController
       if (path == null) {
         continue;
       }
-      final previousRecord = linkDatasByPath[path];
+      final previousRecord = linkDatasByPath[path.path];
 
-      linkDatasByPath[path] = LinkData(
+      linkDatasByPath[path.path] = LinkData(
         domain: linkData.domain,
         path: linkData.path,
         scheme: linkData.scheme.union(previousRecord?.scheme ?? {}),
@@ -201,7 +207,8 @@ class DeepLinksController extends DisposableController
         },
         associatedPath: [
           ...previousRecord?.associatedPath ?? [],
-          if (linkData.path != null) linkData.path!,
+          if (linkData.path != null && !linkData.path!.isExcluded)
+            linkData.path!.path,
         ],
         domainErrors: linkData.domainErrors,
         hasAndroidAssetLinksFile: linkData.hasAndroidAssetLinksFile,
@@ -212,10 +219,13 @@ class DeepLinksController extends DisposableController
   }
 
   AppLinkSettings? get currentAppLinkSettings =>
-      _androidAppLinks[selectedAndroidVariantIndex.value];
+      androidAppLinks[selectedAndroidVariantIndex.value];
 
-  final _androidAppLinks = <int, AppLinkSettings>{};
-  final _iosLinks = <int, UniversalLinkSettings>{};
+  @visibleForTesting
+  final androidAppLinks = <int, AppLinkSettings>{};
+
+  @visibleForTesting
+  final iosLinks = <int, UniversalLinkSettings>{};
 
   ValueListenable<int> get selectedAndroidVariantIndex =>
       _selectedAndroidVariantIndex;
@@ -303,7 +313,7 @@ class DeepLinksController extends DisposableController
             selectedProject.value!.path,
             buildVariant: variant,
           );
-          _androidAppLinks[selectedAndroidVariantIndex.value] = result;
+          androidAppLinks[selectedAndroidVariantIndex.value] = result;
         } catch (_) {
           ga.select(
             gac.deeplink,
@@ -331,7 +341,7 @@ class DeepLinksController extends DisposableController
             configuration: configuration,
             target: target,
           );
-          _iosLinks[selectedIosConfigurationIndex.value] = result;
+          iosLinks[selectedIosConfigurationIndex.value] = result;
         } catch (_) {
           pagePhase.value = PagePhase.validationErrorPage;
         }
@@ -378,8 +388,7 @@ class DeepLinksController extends DisposableController
 
   /// Get all unverified link data.
   List<LinkData> get _rawAndroidLinkDatas {
-    final appLinksSettings =
-        _androidAppLinks[selectedAndroidVariantIndex.value];
+    final appLinksSettings = androidAppLinks[selectedAndroidVariantIndex.value];
     if (appLinksSettings == null) {
       return const <LinkData>[];
     }
@@ -393,7 +402,7 @@ class DeepLinksController extends DisposableController
       if (domainPathToLinkData[domainAndPath] == null) {
         domainPathToLinkData[domainAndPath] = LinkData(
           domain: appLink.host,
-          path: appLink.path,
+          path: Path(path: appLink.path),
           pathErrors:
               _getPathErrorsFromIntentFilterChecks(appLink.intentFilterChecks),
           os: {PlatformOS.android},
@@ -420,7 +429,7 @@ class DeepLinksController extends DisposableController
 
   List<LinkData> get _rawIosLinkDatas {
     final iosDomains =
-        _iosLinks[selectedIosConfigurationIndex.value]?.associatedDomains ?? [];
+        iosLinks[selectedIosConfigurationIndex.value]?.associatedDomains ?? [];
     return iosDomains
         .map(
           (domain) => LinkData(
@@ -455,7 +464,7 @@ class DeepLinksController extends DisposableController
 
   /// The [TextEditingController] for the search text field.
   final textEditingController = TextEditingController();
-  final deepLinksServices = DeepLinksServices();
+  final deepLinksService = DeepLinksService();
 
   bool addLocalFingerprint(String fingerprint) {
     // A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.
@@ -481,7 +490,7 @@ class DeepLinksController extends DisposableController
     final domain = selectedLink.value!.domain;
     if (domain != null) {
       generatedAssetLinksForSelectedLink.value =
-          await deepLinksServices.generateAssetLinks(
+          await deepLinksService.generateAssetLinks(
         domain: domain,
         applicationId: applicationId,
         localFingerprint: localFingerprint.value,
@@ -489,10 +498,8 @@ class DeepLinksController extends DisposableController
     }
   }
 
-  Future<List<LinkData>> _validateDomain(
-    List<LinkData> linkdatas,
-  ) async {
-    final domains = linkdatas
+  Future<List<LinkData>> _validateDomain(List<LinkData> rawLinkdatas) async {
+    final domains = rawLinkdatas
         .where(
           (linkdata) => linkdata.domain != null,
         )
@@ -503,8 +510,10 @@ class DeepLinksController extends DisposableController
     late final Map<String, List<DomainError>> androidDomainErrors;
     Map<String, List<DomainError>> iosDomainErrors =
         <String, List<DomainError>>{};
+
+    late final Map<String, List<Path>> iosDomainPaths;
     try {
-      final androidResult = await deepLinksServices.validateAndroidDomain(
+      final androidResult = await deepLinksService.validateAndroidDomain(
         domains: domains,
         applicationId: applicationId,
         localFingerprint: localFingerprint.value,
@@ -513,51 +522,79 @@ class DeepLinksController extends DisposableController
       googlePlayFingerprintsAvailability.value =
           androidResult.googlePlayFingerprintsAvailability;
       if (FeatureFlags.deepLinkIosCheck) {
-        final iosResult = await deepLinksServices.validateIosDomain(
+        final iosResult = await deepLinksService.validateIosDomain(
           bundleId: bundleId,
           teamId: teamId,
           domains: domains,
         );
         iosDomainErrors = iosResult.domainErrors;
+        iosDomainPaths = iosResult.paths;
       }
     } catch (_) {
       // TODO(hangyujin): Add more error handling for cases like RPC error and invalid json.
       pagePhase.value = PagePhase.validationErrorPage;
-      return linkdatas;
+      return rawLinkdatas;
     }
 
-    return linkdatas.map((linkdata) {
+    final validatedLinkDatas = <LinkData>[];
+
+    for (final linkdata in rawLinkdatas) {
       final errors = <DomainError>[
         if (linkdata.os.contains(PlatformOS.android))
           ...(androidDomainErrors[linkdata.domain] ?? []),
         if (linkdata.os.contains(PlatformOS.ios))
           ...(iosDomainErrors[linkdata.domain] ?? []),
       ];
-      if (errors.isNotEmpty) {
-        return LinkData(
-          domain: linkdata.domain,
-          domainErrors: errors,
-          path: linkdata.path,
-          pathErrors: linkdata.pathErrors,
-          os: linkdata.os,
-          scheme: linkdata.scheme,
-          associatedDomains: linkdata.associatedDomains,
-          associatedPath: linkdata.associatedPath,
-          hasAndroidAssetLinksFile: !(androidDomainErrors[linkdata.domain]
-                  ?.contains(AndroidDomainError.existence) ??
-              false),
-          hasIosAasaFile: !(iosDomainErrors[linkdata.domain]
-                  ?.contains(IosDomainError.existence) ??
-              false),
+      final hasAndroidAssetLinksFile = !(androidDomainErrors[linkdata.domain]
+              ?.contains(AndroidDomainError.existence) ??
+          false);
+      final hasIosAasaFile = !(iosDomainErrors[linkdata.domain]
+              ?.contains(IosDomainError.existence) ??
+          false);
+
+      if (linkdata.os.contains(PlatformOS.ios)) {
+        final iosPaths = iosDomainPaths[linkdata.domain] ?? <Path>[];
+
+        // If no path is provided, we will still show the domain just with domain errors.
+        if (iosPaths.isEmpty) {
+          validatedLinkDatas.add(
+            linkdata.copyWith(
+              domainErrors: errors,
+              hasAndroidAssetLinksFile: hasAndroidAssetLinksFile,
+              hasIosAasaFile: hasIosAasaFile,
+            ),
+          );
+        } else {
+          // If there are multiple paths for the same domain, we will show the domain with each path.
+          for (final iosPath in iosPaths) {
+            validatedLinkDatas.add(
+              linkdata.copyWith(
+                path: iosPath,
+                domainErrors: errors,
+                hasAndroidAssetLinksFile: hasAndroidAssetLinksFile,
+                hasIosAasaFile: hasIosAasaFile,
+              ),
+            );
+          }
+        }
+      }
+
+      if (linkdata.os.contains(PlatformOS.android)) {
+        validatedLinkDatas.add(
+          linkdata.copyWith(
+            domainErrors: errors,
+            hasAndroidAssetLinksFile: hasAndroidAssetLinksFile,
+            hasIosAasaFile: hasIosAasaFile,
+          ),
         );
       }
-      return linkdata;
-    }).toList();
+    }
+    return validatedLinkDatas;
   }
 
   Future<List<LinkData>> _validatePath(List<LinkData> linkdatas) async {
     for (final linkData in linkdatas) {
-      final path = linkData.path;
+      final path = linkData.path?.path;
       if (path == null) {
         continue;
       }

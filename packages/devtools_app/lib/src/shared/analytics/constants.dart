@@ -47,6 +47,10 @@ const devToolsMain = 'main';
 const appDisconnected = 'appDisconnected';
 const init = 'init';
 
+/// Event that signals we fell back to JS when trying to load DevTools with
+/// Wasm.
+const jsFallback = 'jsFallback';
+
 // DevTools UI action selected (clicked).
 
 // Main bar UX actions:
@@ -114,6 +118,7 @@ const settingsDialog = 'settings';
 const darkTheme = 'darkTheme';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
+const wasm = 'wasm';
 const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const clearLogs = 'clearLogs';

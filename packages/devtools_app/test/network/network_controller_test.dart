@@ -102,10 +102,7 @@ void main() {
       await controller.networkService.refreshNetworkData();
       requests = requestsNotifier.value;
       expect(requests.length, numRequests);
-      final httpRequests = requests
-          .whereType<DartIOHttpRequestData>()
-          .cast<DartIOHttpRequestData>()
-          .toList();
+      final httpRequests = requests.whereType<DartIOHttpRequestData>().toList();
       for (final request in httpRequests) {
         expect(request.duration, request.inProgress ? isNull : isNotNull);
         expect(request.general.length, greaterThan(0));
