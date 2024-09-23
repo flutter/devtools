@@ -13,13 +13,16 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../devtools_app.dart';
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
+import '../service/editor/api_classes.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
 import '../shared/banner_messages.dart';
 import '../shared/config_specific/framework_initialize/framework_initialize.dart';
 import '../shared/console/eval/eval_service.dart';
+import '../shared/dtd_manager_extensions.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
@@ -30,7 +33,8 @@ import '../shared/scripts/script_manager.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/survey.dart';
 import '../shared/utils.dart';
-import 'app_error_handling.dart';
+import 'app_error_handling.dart' as errorHandling;
+import 'theme_manager.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
 
@@ -168,7 +172,10 @@ abstract class FrameworkCore {
 Future<void> _initDTDConnection() async {
   try {
     // Get the dtdUri from the devtools server
-    final dtdUri = await server.getDtdUri();
+    final runningInIde = true;
+    final dtdUri = runningInIde
+        ? await server.getDtdUri()
+        : Uri.parse('ws://127.0.0.1:57545/bav3tI1kEbrz5ZCF');
 
     if (dtdUri != null) {
       await dtdManager.connect(
@@ -178,20 +185,27 @@ Future<void> _initDTDConnection() async {
             'Failed to connect to the Dart Tooling Daemon',
             isReportable: false,
           );
-          reportError(
+          errorHandling.reportError(
             e,
             errorType: 'Dart Tooling Daemon connection failed.',
             stack: st,
           );
         },
       );
+
+      if (dtdManager.connection.value != null) {
+        ThemeManager(dtdManager.connection.value!).listenForThemeChanges();
+        if (!runningInIde) {
+          dtdManager.sendTestEvent();
+        }
+      }
     } else {
       _log.info('No DTD uri provided from the server during initialization.');
     }
   } catch (e, st) {
     // Dtd failing to connect does not interfere with devtools starting up so
     // catch any errors and report them.
-    reportError(
+    errorHandling.reportError(
       e,
       errorType: 'Failed to initialize the DTD connection.',
       stack: st,

@@ -154,7 +154,12 @@ class DtdEditorClient extends EditorClient with AutoDisposeControllerMixin {
     final editorKindMap = EditorEventKind.values.asNameMap();
     autoDisposeStreamSubscription(
       _dtd.onEvent(editorStreamName).listen((data) {
+        print('received DTD event data');
+        print(data);
         final kind = editorKindMap[data.kind];
+        print('event kind is $kind');
+
+        // Unable to do this from IJ
         final event = switch (kind) {
           // Unknown event. Use null here so we get exhaustiveness checking for
           // the rest.
@@ -172,7 +177,10 @@ class DtdEditorClient extends EditorClient with AutoDisposeControllerMixin {
             DebugSessionChangedEvent.fromJson(data.data),
           EditorEventKind.debugSessionStopped =>
             DebugSessionStoppedEvent.fromJson(data.data),
+          EditorEventKind.themeChanged => ThemeChangedEvent.fromJson(data.data),
         };
+        print('event has been created');
+        print(event);
         if (event != null) {
           _eventController.add(event);
         }

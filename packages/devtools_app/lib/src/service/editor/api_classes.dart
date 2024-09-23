@@ -50,11 +50,15 @@ enum EditorEventKind {
 
   /// The kind for a [DebugSessionStoppedEvent].
   debugSessionStopped,
+
+  /// The kind for a [ThemeChangedEvent].
+  themeChanged
 }
 
 /// Constants for all fields used in JSON maps to avoid literal strings that
 /// may have typos sprinkled throughout the API classes.
 abstract class Field {
+  static const backgroundColor = 'backgroundColor';
   static const category = 'category';
   static const debuggerType = 'debuggerType';
   static const debugSession = 'debugSession';
@@ -68,8 +72,11 @@ abstract class Field {
   static const ephemeral = 'ephemeral';
   static const flutterDeviceId = 'flutterDeviceId';
   static const flutterMode = 'flutterMode';
+  static const fontSize = 'fontSize';
   static const forceExternal = 'forceExternal';
+  static const foregroundColor = 'foregroundColor';
   static const id = 'id';
+  static const isDarkMode = 'isDarkMode';
   static const name = 'name';
   static const page = 'page';
   static const platform = 'platform';
@@ -80,6 +87,7 @@ abstract class Field {
   static const selectedDeviceId = 'selectedDeviceId';
   static const supported = 'supported';
   static const supportsForceExternal = 'supportsForceExternal';
+  static const theme = 'theme';
   static const vmServiceUri = 'vmServiceUri';
 }
 
@@ -249,6 +257,27 @@ class DebugSessionStoppedEvent extends EditorEvent {
       };
 }
 
+class ThemeChangedEvent extends EditorEvent {
+  ThemeChangedEvent({required this.theme});
+
+  ThemeChangedEvent.fromJson(Map<String, Object?> map)
+      : this(
+          theme: EditorTheme.fromJson(
+            map[Field.theme] as Map<String, Object?>,
+          ),
+        );
+
+  @override
+  EditorEventKind get kind => EditorEventKind.themeChanged;
+
+  final EditorTheme theme;
+
+  @override
+  Map<String, Object?> toJson() => {
+        Field.theme: theme,
+      };
+}
+
 /// The result of a `GetDevices` request.
 class GetDevicesResult with Serializable {
   GetDevicesResult({
@@ -394,5 +423,36 @@ class EditorDevice with Serializable {
         Field.platform: platform,
         Field.platformType: platformType,
         Field.supported: supported,
+      };
+}
+
+/// UI settings for an editor's theme.
+class EditorTheme with Serializable {
+  EditorTheme({
+    required this.isDarkMode,
+    required this.backgroundColor,
+    this.foregroundColor,
+    required this.fontSize,
+  });
+
+  EditorTheme.fromJson(Map<String, Object?> map)
+      : this(
+          isDarkMode: map[Field.isDarkMode] as bool,
+          backgroundColor: map[Field.backgroundColor] as String?,
+          foregroundColor: map[Field.foregroundColor] as String?,
+          fontSize: map[Field.fontSize] as int?,
+        );
+
+  final bool isDarkMode;
+  final String? backgroundColor;
+  final String? foregroundColor;
+  final int? fontSize;
+
+  @override
+  Map<String, Object?> toJson() => {
+        Field.isDarkMode: isDarkMode,
+        Field.backgroundColor: backgroundColor,
+        Field.foregroundColor: foregroundColor,
+        Field.fontSize: fontSize,
       };
 }

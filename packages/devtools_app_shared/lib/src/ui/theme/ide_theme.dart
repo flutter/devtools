@@ -16,7 +16,7 @@ final _log = Logger('ide_theme');
 
 /// IDE-supplied theming.
 final class IdeTheme {
-  IdeTheme({
+IdeTheme({
     this.backgroundColor,
     this.foregroundColor,
     this.fontSize = unscaledDefaultFontSize,
@@ -24,17 +24,19 @@ final class IdeTheme {
     bool? isDarkMode,
   }) : _isDarkMode = isDarkMode;
 
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final double fontSize;
+  Color? backgroundColor;
+  Color? foregroundColor;
+  double fontSize;
   final EmbedMode embedMode;
-  final bool? _isDarkMode;
+  bool? _isDarkMode;
 
   double get fontSizeFactor => fontSize / unscaledDefaultFontSize;
 
   bool get embedded => embedMode.embedded;
 
   bool get isDarkMode => _isDarkMode ?? useDarkThemeAsDefault;
+
+  void set isDarkMode(bool newIsDarkMode) => _isDarkMode = newIsDarkMode;
 
   /// Whether the IDE specified the DevTools color theme.
   ///
@@ -61,6 +63,7 @@ extension type IdeThemeQueryParams(Map<String, String?> params) {
   static const fontSizeKey = 'fontSize';
   static const devToolsThemeKey = 'theme';
   static const lightThemeValue = 'light';
+  static const darkThemeValue = 'dark';
 
   Color? _tryParseColor(String? input) {
     if (input == null) return null;
