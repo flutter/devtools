@@ -270,8 +270,9 @@ class _PerfettoViewController extends DisposableController
     final iFrameWindow = perfettoController.perfettoIFrame.contentWindow;
     if (iFrameWindow == null) {
       _log.warning(
-        'Something went wrong. The iFrame\'s contentWindow is null after the'
-        ' _perfettoIFrameReady future completed.',
+        'Something went wrong. The Perfetto iFrame\'s contentWindow is null '
+        'after the _perfettoIFrameReady future completed. The message that '
+        'was being posted when the error occurred was:\n${message.toString()}',
       );
       return;
     }

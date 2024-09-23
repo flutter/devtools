@@ -38,7 +38,7 @@ enum DevToolsExtensionEventType {
 
   /// An event that an extension can send to DevTools asking DevTools to copy
   /// some content to the user's clipboard.
-  /// 
+  ///
   /// It is preferred that extensions send this event to DevTools to copy text
   /// instead of calling `Clipboard.setData` directly because DevTools contains
   /// additional logic for copying text from within an IDE-embedded web view.

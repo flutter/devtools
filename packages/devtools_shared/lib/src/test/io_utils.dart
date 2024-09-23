@@ -82,7 +82,7 @@ mixin IOMixin {
   }) async {
     final processId = process.pid;
     if (debugLogging) {
-      print('Sending SIGTERM to $processId..');
+      print('Sending SIGTERM to $processId.');
     }
     await cancelAllStreamSubscriptions();
     Process.killPid(processId);
@@ -100,7 +100,7 @@ mixin IOMixin {
     // Use sigint here instead of sigkill. See
     // https://github.com/flutter/flutter/issues/117415.
     if (debugLogging) {
-      print('Sending SIGINT to $processId..');
+      print('Sending SIGINT to $processId.');
     }
     Process.killPid(processId, ProcessSignal.sigint);
     return process.exitCode;

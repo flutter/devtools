@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/console/widgets/description.dart';
 import '../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/tab.dart';
@@ -109,7 +110,7 @@ class _DetailsTableState extends State<DetailsTable> {
 
 /// Displays a widget's properties, including the layout properties and a
 /// layout visualizer.
-class PropertiesView extends StatelessWidget {
+class PropertiesView extends StatefulWidget {
   const PropertiesView({
     super.key,
     required this.properties,
@@ -127,22 +128,52 @@ class PropertiesView extends StatelessWidget {
   final InspectorController controller;
   final ScrollController scrollController;
 
+  @override
+  State<PropertiesView> createState() => _PropertiesViewState();
+}
+
+class _PropertiesViewState extends State<PropertiesView> {
   RemoteDiagnosticsNode? get selectedNode =>
-      controller.selectedNode.value?.diagnostic;
+      widget.controller.selectedNode.value?.diagnostic;
 
-  bool get includeLayoutExplorer => selectedNode?.isBoxLayout ?? false;
+  bool get includeLayoutExplorer =>
+      (selectedNode?.isBoxLayout ?? false) && widget.layoutProperties != null;
 
-  WidgetSizes? get widgetWidths => layoutProperties?.widgetWidths;
+  WidgetSizes? get widgetWidths => widget.layoutProperties?.widgetWidths;
 
-  WidgetSizes? get widgetHeights => layoutProperties?.widgetHeights;
+  WidgetSizes? get widgetHeights => widget.layoutProperties?.widgetHeights;
+
+  List<RemoteDiagnosticsNode> _sortedProperties = <RemoteDiagnosticsNode>[];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _sortedProperties = _filterAndSortPropertiesByLevel(widget.properties);
+  }
+
+  @override
+  void didUpdateWidget(PropertiesView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.properties != oldWidget.properties) {
+      _sortedProperties = _filterAndSortPropertiesByLevel(widget.properties);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final layoutExplorerOffset = includeLayoutExplorer ? 1 : 0;
+    // If there are no properties to display, include a single row that says as
+    // much.
+    final propertyRowsCount =
+        _sortedProperties.isEmpty ? 1 : _sortedProperties.length;
+    // If the layout explorer is available, it is the first row.
+    final totalRowsCount = propertyRowsCount + layoutExplorerOffset;
 
-    Widget? propertiesList;
+    Widget? layoutPropertiesList;
     if (widgetWidths != null && widgetHeights != null) {
-      propertiesList = LayoutPropertiesList(
+      layoutPropertiesList = LayoutPropertiesList(
         widgetHeights: widgetHeights,
         widgetWidths: widgetWidths,
       );
@@ -155,11 +186,11 @@ class PropertiesView extends StatelessWidget {
                 PropertiesView.scaleFactorForVerticalLayout);
 
         return Scrollbar(
-          controller: scrollController,
+          controller: widget.scrollController,
           thumbVisibility: true,
           child: ListView.builder(
-            controller: scrollController,
-            itemCount: properties.length + layoutExplorerOffset,
+            controller: widget.scrollController,
+            itemCount: totalRowsCount,
             itemBuilder: (context, index) {
               if (index == 0 && includeLayoutExplorer) {
                 return DecoratedPropertiesTableRow(
@@ -174,33 +205,67 @@ class PropertiesView extends StatelessWidget {
                           height: PropertiesView.layoutExplorerHeight,
                           width: PropertiesView.layoutExplorerWidth,
                           child: BoxLayoutExplorerWidget(
-                            controller,
+                            widget.controller,
                             selectedNode: selectedNode,
-                            layoutProperties: layoutProperties,
+                            layoutProperties: widget.layoutProperties,
                           ),
                         ),
                       ),
-                      if (propertiesList != null)
+                      if (layoutPropertiesList != null)
                         Padding(
                           padding: horizontalLayout
                               ? const EdgeInsets.only(left: largeSpacing)
                               : const EdgeInsets.only(bottom: largeSpacing),
-                          child: propertiesList,
+                          child: layoutPropertiesList,
                         ),
                     ],
                   ),
                 );
               }
 
+              if (_sortedProperties.isEmpty && index == layoutExplorerOffset) {
+                return DecoratedPropertiesTableRow(
+                  index: index - layoutExplorerOffset,
+                  child: PaddedText(
+                    child: Text(
+                      'No widget properties to display.',
+                      style: Theme.of(context).regularTextStyle,
+                    ),
+                  ),
+                );
+              }
+
               return PropertyItem(
                 index: index - layoutExplorerOffset,
-                properties: properties,
+                properties: _sortedProperties,
               );
             },
           ),
         );
       },
     );
+  }
+
+  /// Filters out properties with [DiagnosticLevel.hidden] and sorts properties
+  /// with [DiagnosticLevel.fine] behind all others.
+  List<RemoteDiagnosticsNode> _filterAndSortPropertiesByLevel(
+    List<RemoteDiagnosticsNode> properties,
+  ) {
+    final propertiesWithFineLevel = <RemoteDiagnosticsNode>[];
+    final propertiesWithOtherLevels = <RemoteDiagnosticsNode>[];
+
+    for (final property in properties) {
+      // Don't include properties that should be hidden:
+      if (property.level == DiagnosticLevel.hidden) continue;
+
+      if (property.level == DiagnosticLevel.fine) {
+        propertiesWithFineLevel.add(property);
+      } else {
+        propertiesWithOtherLevels.add(property);
+      }
+    }
+
+    return [...propertiesWithOtherLevels, ...propertiesWithFineLevel];
   }
 }
 
@@ -291,8 +356,7 @@ class LayoutPropertyItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.all(densePadding),
+    return PaddedText(
       child: RichText(
         text: TextSpan(
           text: '$name: ',
@@ -402,8 +466,7 @@ class PropertyName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(denseRowSpacing),
+    return PaddedText(
       child: Text(
         property.name ?? '',
         style: Theme.of(context).subtleTextStyle,
@@ -423,12 +486,31 @@ class PropertyValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(denseRowSpacing),
-      child: Text(
-        property.description ?? 'null',
+    return PaddedText(
+      child: DiagnosticsNodeDescription(
+        property,
+        includeName: false,
+        overflow: TextOverflow.visible,
         style: Theme.of(context).fixedFontStyle,
       ),
+    );
+  }
+}
+
+/// Wraps a text widget with the correct amount of padding for the table.
+class PaddedText extends StatelessWidget {
+  const PaddedText({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(denseRowSpacing),
+      child: child,
     );
   }
 }

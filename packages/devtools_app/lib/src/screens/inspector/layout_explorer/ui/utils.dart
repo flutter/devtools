@@ -167,7 +167,7 @@ class WidgetVisualizer extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withAlpha(255 ~/ 2),
                         blurRadius: 20,
                       ),
                     ]
@@ -285,16 +285,16 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   List<double> childrenDimensions(Axis axis) {
     final beginDimensions = begin.childrenDimensions(axis);
     final endDimensions = end.childrenDimensions(axis);
-    return _lerpList(beginDimensions, endDimensions).cast<double>();
+    return _lerpList(beginDimensions, endDimensions);
   }
 
   @override
   List<double> get childrenHeights =>
-      _lerpList(begin.childrenHeights, end.childrenHeights).cast<double>();
+      _lerpList(begin.childrenHeights, end.childrenHeights);
 
   @override
   List<double> get childrenWidths =>
-      _lerpList(begin.childrenWidths, end.childrenWidths).cast<double>();
+      _lerpList(begin.childrenWidths, end.childrenWidths);
 
   @override
   BoxConstraints? get constraints {

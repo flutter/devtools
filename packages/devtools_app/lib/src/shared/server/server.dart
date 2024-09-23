@@ -19,6 +19,7 @@ part '_analytics_api.dart';
 part '_app_size_api.dart';
 part '_deep_links_api.dart';
 part '_extensions_api.dart';
+part '_preferences_api.dart';
 part '_release_notes_api.dart';
 part '_survey_api.dart';
 part '_dtd_api.dart';

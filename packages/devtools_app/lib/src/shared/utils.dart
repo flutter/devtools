@@ -19,13 +19,13 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-// ignore: avoid-importing-entrypoint-exports, special case for getting version.
 import '../../devtools.dart' as devtools;
 
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
+import 'query_parameters.dart';
 
 final _log = Logger('lib/src/shared/utils');
 
@@ -133,7 +133,7 @@ List<ConnectionDescription> generateDeviceDescription(
 
 /// This method should be public, because it is used by g3 specific code.
 List<String> issueLinkDetails() {
-  final ide = ideFromUrl();
+  final ide = DevToolsQueryParams.load().ide;
   final issueDescriptionItems = [
     '<-- Please describe your problem here. Be sure to include repro steps. -->',
     '___', // This will create a separator in the rendered markdown.
@@ -223,15 +223,6 @@ class ConnectionDescription {
   final String description;
 
   final List<Widget> actions;
-}
-
-String? ideFromUrl() {
-  return lookupFromQueryParams('ide');
-}
-
-String? lookupFromQueryParams(String key) {
-  final queryParameters = loadQueryParams();
-  return queryParameters[key];
 }
 
 const _google3PathSegment = 'google3';

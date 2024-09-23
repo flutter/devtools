@@ -153,6 +153,7 @@ class VmServiceWrapper extends VmService {
     String objectId, {
     int? offset,
     int? count,
+    String? idZoneId,
   }) {
     final cachedObj = fakeServiceCache.getObject(
       objectId: objectId,

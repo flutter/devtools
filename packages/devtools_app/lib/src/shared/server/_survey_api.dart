@@ -15,13 +15,13 @@ part of 'server.dart';
 Future<bool> setActiveSurvey(String value) async {
   if (isDevToolsServerAvailable) {
     final resp = await request(
-      '$apiSetActiveSurvey'
-      '?$activeSurveyName=$value',
+      '${SurveyApi.setActiveSurvey}'
+      '?$apiParameterValueKey=$value',
     );
     if ((resp?.statusOk ?? false) && json.decode(resp!.body)) {
       return true;
     } else {
-      logWarning(resp, apiSetActiveSurvey);
+      logWarning(resp, SurveyApi.setActiveSurvey);
     }
   }
   return false;
@@ -36,11 +36,11 @@ Future<bool> surveyActionTaken() async {
   bool surveyActionTaken = false;
 
   if (isDevToolsServerAvailable) {
-    final resp = await request(apiGetSurveyActionTaken);
+    final resp = await request(SurveyApi.getSurveyActionTaken);
     if (resp?.statusOk ?? false) {
       surveyActionTaken = json.decode(resp!.body);
     } else {
-      logWarning(resp, apiGetSurveyActionTaken);
+      logWarning(resp, SurveyApi.getSurveyActionTaken);
     }
   }
 
@@ -54,12 +54,9 @@ Future<bool> surveyActionTaken() async {
 /// Requires [setActiveSurvey] to have been called prior to calling this method.
 Future<void> setSurveyActionTaken() async {
   if (isDevToolsServerAvailable) {
-    final resp = await request(
-      '$apiSetSurveyActionTaken'
-      '?$surveyActionTakenPropertyName=true',
-    );
+    final resp = await request(SurveyApi.setSurveyActionTaken);
     if (resp == null || !resp.statusOk || !(json.decode(resp.body) as bool)) {
-      logWarning(resp, apiSetSurveyActionTaken);
+      logWarning(resp, SurveyApi.setSurveyActionTaken);
     }
   }
 }
@@ -73,11 +70,11 @@ Future<int> surveyShownCount() async {
   int surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
-    final resp = await request(apiGetSurveyShownCount);
+    final resp = await request(SurveyApi.getSurveyShownCount);
     if (resp?.statusOk ?? false) {
       surveyShownCount = json.decode(resp!.body);
     } else {
-      logWarning(resp, apiGetSurveyShownCount);
+      logWarning(resp, SurveyApi.getSurveyShownCount);
     }
   }
 
@@ -94,11 +91,11 @@ Future<int> incrementSurveyShownCount() async {
   int surveyShownCount = 0;
 
   if (isDevToolsServerAvailable) {
-    final resp = await request(apiIncrementSurveyShownCount);
+    final resp = await request(SurveyApi.incrementSurveyShownCount);
     if (resp?.statusOk ?? false) {
       surveyShownCount = json.decode(resp!.body);
     } else {
-      logWarning(resp, apiIncrementSurveyShownCount);
+      logWarning(resp, SurveyApi.incrementSurveyShownCount);
     }
   }
   return surveyShownCount;

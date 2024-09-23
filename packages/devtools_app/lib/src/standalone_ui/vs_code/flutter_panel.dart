@@ -53,14 +53,16 @@ class _DtdEditorSidebarPanelState extends State<DtdEditorSidebarPanel> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        FutureBuilder(
-          future: _editor,
-          builder: (context, snapshot) =>
-              switch ((snapshot.connectionState, snapshot.data)) {
-            (ConnectionState.done, final editor?) =>
-              _EditorConnectedPanel(editor),
-            _ => const CenteredCircularProgressIndicator(),
-          },
+        Expanded(
+          child: FutureBuilder(
+            future: _editor,
+            builder: (context, snapshot) =>
+                switch ((snapshot.connectionState, snapshot.data)) {
+              (ConnectionState.done, final editor?) =>
+                _EditorConnectedPanel(editor),
+              _ => const CenteredCircularProgressIndicator(),
+            },
+          ),
         ),
       ],
     );
@@ -132,9 +134,13 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
   var devices = <String, EditorDevice>{};
   String? selectedDeviceId;
 
+  late final ScrollController scrollController;
+
   @override
   void initState() {
     super.initState();
+
+    scrollController = ScrollController();
 
     cancelStreamSubscriptions();
     // Set up subscription to handle events when the available editor services
@@ -191,38 +197,53 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
   }
 
   @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: denseSpacing,
-        vertical: defaultSpacing,
-      ),
-      // Debug sessions rely on devices too, because they look up the sessions
-      // device for some capabilities (for example to know if the session is
-      // running on a web device).
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          DebugSessions(
-            editor: widget.editor,
-            sessions: debugSessions,
-            devices: devices,
+    return Scrollbar(
+      controller: scrollController,
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            denseSpacing,
+            defaultSpacing,
+            defaultSpacing, // Additional right padding for scroll bar.
+            defaultSpacing,
           ),
-          const SizedBox(height: defaultSpacing),
-          if (widget.editor.supportsSelectDevice) ...[
-            Devices(
-              editor: widget.editor,
-              devices: devices,
-              selectedDeviceId: selectedDeviceId,
-            ),
-            const SizedBox(height: denseSpacing),
-          ],
-          if (widget.editor.supportsOpenDevToolsPage)
-            DevToolsSidebarOptions(
-              editor: widget.editor,
-              debugSessions: debugSessions,
-            ),
-        ],
+          // Debug sessions rely on devices too, because they look up the sessions
+          // device for some capabilities (for example to know if the session is
+          // running on a web device).
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DebugSessions(
+                editor: widget.editor,
+                sessions: debugSessions,
+                devices: devices,
+              ),
+              const SizedBox(height: defaultSpacing),
+              if (widget.editor.supportsSelectDevice) ...[
+                Devices(
+                  editor: widget.editor,
+                  devices: devices,
+                  selectedDeviceId: selectedDeviceId,
+                ),
+                const SizedBox(height: denseSpacing),
+              ],
+              if (widget.editor.supportsOpenDevToolsPage)
+                DevToolsSidebarOptions(
+                  editor: widget.editor,
+                  debugSessions: debugSessions,
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

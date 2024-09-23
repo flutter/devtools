@@ -565,7 +565,8 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return AnimatedOpacity(
       opacity: _isPaused ? 1.0 : 0.0,
       duration: longDuration,
@@ -580,10 +581,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
         color: colorScheme.warningContainer,
         height: controlHeight,
         child: OutlinedRowGroup(
-          // Default focus color for the light theme - since the background
-          // color of the controls [devtoolsWarning] is the same for both
-          // themes, we will use the same border color.
-          borderColor: Colors.black.withOpacity(0.12),
+          borderColor: theme.focusColor,
           children: [
             Container(
               height: defaultButtonHeight,
