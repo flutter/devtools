@@ -89,8 +89,7 @@ Widget wrapSimple(Widget widget) {
 
 Widget wrapWithControllers(
   Widget widget, {
-  InspectorController? inspector,
-  inspector_v2.InspectorController? inspectorV2,
+  InspectorScreenController? inspector,
   LoggingController? logging,
   LoggingControllerV2? loggingV2,
   MemoryController? memory,
@@ -108,9 +107,7 @@ Widget wrapWithControllers(
 }) {
   final providers = [
     if (inspector != null)
-      Provider<InspectorController>.value(value: inspector),
-    if (inspectorV2 != null)
-      Provider<inspector_v2.InspectorController>.value(value: inspectorV2),
+      Provider<InspectorScreenController>.value(value: inspector),
     if (logging != null) Provider<LoggingController>.value(value: logging),
     if (loggingV2 != null)
       Provider<LoggingControllerV2>.value(value: loggingV2),
@@ -145,28 +142,11 @@ Widget wrapWithNotifications(Widget child) {
   return NotificationsView(child: child);
 }
 
-Widget wrapWithInspectorControllers(Widget widget, {bool v2 = false}) {
-  if (v2) {
-    final inspectorV2Controller = inspector_v2.InspectorController(
-      inspectorTree: inspector_v2.InspectorTreeController(),
-      treeType: FlutterTreeType.widget,
-    );
-    return wrapWithControllers(
-      widget,
-      debugger: DebuggerController(),
-      inspectorV2: inspectorV2Controller,
-    );
-  }
-
-  final inspectorController = InspectorController(
-    inspectorTree: InspectorTreeController(),
-    detailsTree: InspectorTreeController(),
-    treeType: FlutterTreeType.widget,
-  );
+Widget wrapWithInspectorControllers(Widget widget) {
   return wrapWithControllers(
     widget,
     debugger: DebuggerController(),
-    inspector: inspectorController,
+    inspector: InspectorScreenController(),
   );
 }
 
