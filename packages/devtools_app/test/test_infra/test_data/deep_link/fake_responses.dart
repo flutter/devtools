@@ -176,6 +176,84 @@ const iosValidationResponseWithNoError = '''
 }
 ''';
 
+const iosValidationResponseWithWarning = '''
+{
+  "validationResults": [
+    {
+      "domainName": "example.com",
+      "passedChecks": [
+        {
+          "checkName": "HTTPS_ACCESSIBILITY",
+          "resultType": "PASSED",
+          "severityLevel": "ERROR"
+        },
+        {
+          "checkName": "NON_REDIRECT",
+          "resultType": "PASSED",
+          "severityLevel": "ERROR"
+        },
+        {
+          "checkName": "EXISTENCE",
+          "resultType": "PASSED",
+          "severityLevel": "ERROR"
+        },
+        {
+          "checkName": "APP_IDENTIFIER",
+          "resultType": "PASSED",
+          "severityLevel": "ERROR"
+        },
+        {
+          "checkName": "FILE_FORMAT",
+          "resultType": "PASSED",
+          "severityLevel": "ERROR"
+        }
+      ],
+      "failedChecks": [
+        {
+          "checkName": "DEFAULTS_FORMAT",
+          "resultType": "FAILED_INDEPENDENTLY",
+          "severityLevel": "WARNING"
+        }
+      ],
+      "status": "VALIDATION_COMPLETE",
+      "aasaAppPaths": [
+        {
+          "aasaAppId": {
+            "bundleId": "bundle.id",
+            "teamId": "AAABBB"
+          },
+          "aasaPaths": [
+            {
+              "path": "/ios-path1",
+              "queryParams": [
+                {
+                  "key": "dplnk",
+                  "value": "?*"
+                }
+              ],
+              "isCaseSensitive": true,
+              "isPercentEncoded": true
+            },
+            {
+              "path": "/ios-path2",
+              "isExcluded": true,
+              "queryParams": [
+                {
+                  "key": "dplnk",
+                  "value": "?*"
+                }
+              ],
+              "isCaseSensitive": true,
+              "isPercentEncoded": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+''';
+
 const iosValidationResponseWithError = '''
 {
   "validationResults": [

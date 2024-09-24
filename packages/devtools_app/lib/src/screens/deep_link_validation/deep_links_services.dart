@@ -26,6 +26,8 @@ const postHeader = {'Content-Type': 'application/json'};
 // The keys used in both android and ios domain validation API.
 const _domainNameKey = 'domainName';
 const _checkNameKey = 'checkName';
+const _severityLevelKey = 'severityLevel';
+const _severityLevelError = 'ERROR';
 const _failedChecksKey = 'failedChecks';
 const _domainBatchSize = 500;
 
@@ -194,7 +196,8 @@ class DeepLinksService {
             for (final failedCheck in failedChecks) {
               final checkName = failedCheck[_checkNameKey] as String;
               final domainError = iosCheckNameToDomainError[checkName];
-              if (domainError != null) {
+              final severityLevel = failedCheck[_severityLevelKey] as String;
+              if (domainError != null && severityLevel == _severityLevelError) {
                 domainErrors
                     .putIfAbsent(domainName, () => <DomainError>[])
                     .add(domainError);
