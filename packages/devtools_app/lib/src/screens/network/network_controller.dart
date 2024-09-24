@@ -388,14 +388,12 @@ class NetworkController extends DisposableController
     }
   }
 
-  Future<void> _fetchFullDataBeforeExport() async {
-    for (final NetworkRequest item in filteredData.value) {
-      // Check if the request is of type DartIOHttpRequestData and fetch full data
-      if (item is DartIOHttpRequestData) {
-        await item.getFullRequestData();
-      }
-    }
-  }
+  Future<void> _fetchFullDataBeforeExport() =>
+      Future.wait(
+        filteredData.value
+            .whereType<DartIOHttpRequestData>()
+            .map((item) => item.getFullRequestData()),
+      );
 }
 
 /// Class for managing the set of all current sockets, and
