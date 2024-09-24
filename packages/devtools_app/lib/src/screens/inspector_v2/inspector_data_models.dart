@@ -249,7 +249,7 @@ class LayoutProperties {
     if (parentElement == null) return this;
     final parentProperties =
         parentElement.computeLayoutProperties(forFlexLayout: false);
-    return parentProperties;
+    return parentProperties ?? this;
   }
 
   WidgetSizes? get widgetWidths => _widgetSizes(SizeType.widths);

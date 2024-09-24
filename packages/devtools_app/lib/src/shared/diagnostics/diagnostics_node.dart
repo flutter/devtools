@@ -466,8 +466,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   RemoteDiagnosticsNode? layoutRootNode({required bool forFlexLayout}) {
-    final shouldDisplayNode = forFlexLayout ? isFlexLayout : isBoxLayout;
-    if (!shouldDisplayNode) return null;
+    if (forFlexLayout && !isFlexLayout) return null;
 
     if (forFlexLayout) {
       return isFlex ? this : parent;
@@ -476,6 +475,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return this;
   }
 
+  // Warning: This should only be used on a layout explorer node. A regular
+  // remote diagnostics node never has a "size" property.
   bool get isBoxLayout => size != null;
 
   bool get isFlexLayout => isFlex || (parent?.isFlex ?? false);
