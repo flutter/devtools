@@ -26,18 +26,19 @@ class InspectorScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget buildScreenBody(BuildContext context) => const InspectorScreenBody();
+  Widget buildScreenBody(BuildContext context) =>
+      const InspectorScreenSwitcher();
 }
 
-class InspectorScreenBody extends StatefulWidget {
-  const InspectorScreenBody({super.key});
+class InspectorScreenSwitcher extends StatefulWidget {
+  const InspectorScreenSwitcher({super.key});
 
   @override
-  InspectorScreenBodyState createState() => InspectorScreenBodyState();
+  InspectorScreenSwitcherState createState() => InspectorScreenSwitcherState();
 }
 
-class InspectorScreenBodyState extends State<InspectorScreenBody>
-    with ProvidedControllerMixin<InspectorController, InspectorScreenBody> {
+class InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
+    with ProvidedControllerMixin<InspectorController, InspectorScreenSwitcher> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
