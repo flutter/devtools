@@ -388,8 +388,7 @@ class NetworkController extends DisposableController
     }
   }
 
-  Future<void> _fetchFullDataBeforeExport() =>
-      Future.wait(
+  Future<void> _fetchFullDataBeforeExport() => Future.wait(
         filteredData.value
             .whereType<DartIOHttpRequestData>()
             .map((item) => item.getFullRequestData()),
