@@ -129,7 +129,7 @@ class IosDomainError extends DomainError {
     'This test checks whether the Apple-App-Site-Association file, '
         'which is required to verify the association between the app and the '
         'domain name, exists under your domain.',
-    'Add an Apple-App-Side-Association file to all of the '
+    'Add an Apple-App-Site-Association file to all of the '
         'failed website domains at the following location: '
         'https://[domain.name]/apple-app-site-association.',
   );
