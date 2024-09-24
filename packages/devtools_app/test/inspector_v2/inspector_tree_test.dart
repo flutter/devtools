@@ -64,6 +64,7 @@ void main() {
         inspectorV2: inspectorController,
         debugger: debuggerController,
         InspectorTree(
+          controller: inspectorController,
           treeController: treeController,
         ),
       ),

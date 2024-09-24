@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../../shared/utils.dart';
-import '../inspector/inspector_screen.dart' as legacy;
-import '../inspector_v2/inspector_screen.dart' as v2;
+import '../inspector/inspector_screen_body.dart' as legacy;
+import '../inspector_v2/inspector_screen_body.dart' as v2;
 import 'inspector_controller.dart';
 
 class InspectorScreen extends Screen {

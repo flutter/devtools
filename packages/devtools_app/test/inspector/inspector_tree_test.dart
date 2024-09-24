@@ -60,6 +60,7 @@ void main() {
         inspector: inspectorController,
         debugger: debuggerController,
         InspectorTree(
+          controller: inspectorController,
           treeController: treeController,
           summaryTreeController: summaryTreeController,
           isSummaryTree: isSummaryTree,

@@ -10,14 +10,14 @@ import 'dart:convert';
 import 'package:devtools_app/devtools_app.dart'
     hide
         InspectorController,
-        InspectorScreen,
         InspectorTreeController,
         InspectorScreenBody,
         ErrorNavigator,
-        FlutterInspectorSettingsDialog,
         InspectorTreeNode;
+import 'package:devtools_app/src/screens/inspector_shared/inspector_screen.dart';
+import 'package:devtools_app/src/screens/inspector_shared/inspector_settings_dialog.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart';
-import 'package:devtools_app/src/screens/inspector_v2/inspector_screen.dart';
+import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
 import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_details.dart';
