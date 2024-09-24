@@ -119,7 +119,7 @@ enum SizeType {
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
       : description = node.description,
-        size = node.size,
+        size = node.size!,
         constraints = node.constraints,
         isFlex = node.isFlex,
         flexFactor = node.flexFactor,
@@ -127,6 +127,7 @@ class LayoutProperties {
         children = copyLevel == 0
             ? []
             : node.childrenNow
+                .where((child) => child.size != null)
                 .map(
                   (child) => LayoutProperties(child, copyLevel: copyLevel - 1),
                 )
@@ -150,6 +151,8 @@ class LayoutProperties {
       child.parent = this;
     }
   }
+
+  static bool hasLayout(RemoteDiagnosticsNode node) => node.size != null;
 
   LayoutProperties? parent;
   final RemoteDiagnosticsNode node;
