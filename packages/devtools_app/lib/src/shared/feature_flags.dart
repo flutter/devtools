@@ -94,11 +94,6 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/6056
   static bool dapDebugging = enableExperiments;
 
-  /// Flag to enable the new Inspector panel.
-  ///
-  /// https://github.com/flutter/devtools/issues/7854
-  static bool inspectorV2 = enableExperiments;
-
   /// Flag to enable the DevTools setting to opt-in to WASM.
   ///
   /// https://github.com/flutter/devtools/issues/7856
@@ -114,7 +109,6 @@ abstract class FeatureFlags {
     'deepLinkIosCheck': deepLinkIosCheck,
     'loggingV2': loggingV2,
     'dapDebugging': dapDebugging,
-    'inspectorV2': inspectorV2,
     'wasmOptInSetting': wasmOptInSetting,
   };
 
