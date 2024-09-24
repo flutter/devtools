@@ -275,7 +275,6 @@ void main() {
         await tester.pumpWidget(
           wrapWithInspectorControllers(
             Builder(builder: screen.build),
-            v2: true,
           ),
         );
         await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -312,7 +311,6 @@ Future<void> _loadInspectorUI(WidgetTester tester) async {
   await tester.pumpWidget(
     wrapWithInspectorControllers(
       Builder(builder: screen.build),
-      v2: true,
     ),
   );
   await tester.pump(const Duration(seconds: 1));

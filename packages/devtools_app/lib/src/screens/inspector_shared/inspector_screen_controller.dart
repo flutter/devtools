@@ -11,8 +11,8 @@ import '../inspector/inspector_tree_controller.dart' as legacy;
 import '../inspector_v2/inspector_controller.dart' as v2;
 import '../inspector_v2/inspector_tree_controller.dart' as v2;
 
-class InspectorController extends DisposableController {
-  InspectorController();
+class InspectorScreenController extends DisposableController {
+  InspectorScreenController();
 
   v2.InspectorController get inspectorControllerV2 => v2.InspectorController(
         inspectorTree: v2.InspectorTreeController(

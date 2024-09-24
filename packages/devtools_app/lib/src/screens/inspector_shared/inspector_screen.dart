@@ -10,7 +10,7 @@ import '../../shared/screen.dart';
 import '../../shared/utils.dart';
 import '../inspector/inspector_screen_body.dart' as legacy;
 import '../inspector_v2/inspector_screen_body.dart' as v2;
-import 'inspector_controller.dart';
+import 'inspector_screen_controller.dart';
 
 class InspectorScreen extends Screen {
   InspectorScreen() : super.fromMetaData(ScreenMetaData.inspector);
@@ -38,7 +38,9 @@ class InspectorScreenSwitcher extends StatefulWidget {
 }
 
 class InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
-    with ProvidedControllerMixin<InspectorController, InspectorScreenSwitcher> {
+    with
+        ProvidedControllerMixin<InspectorScreenController,
+            InspectorScreenSwitcher> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
