@@ -14,7 +14,6 @@ import 'package:devtools_app/devtools_app.dart'
         InspectorScreenBody,
         ErrorNavigator,
         InspectorTreeNode;
-import 'package:devtools_app/src/screens/inspector_shared/inspector_screen.dart';
 import 'package:devtools_app/src/screens/inspector_shared/inspector_settings_dialog.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';

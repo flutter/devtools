@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/devtools_app.dart'
     hide InspectorScreenBodyState, InspectorScreenBody;
-import 'package:devtools_app/src/screens/inspector_shared/inspector_screen.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
 import 'package:devtools_app_shared/ui.dart';

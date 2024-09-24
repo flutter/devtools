@@ -10,7 +10,6 @@ import 'dart:convert';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
-import 'package:devtools_app/src/screens/inspector_shared/inspector_screen.dart';
 import 'package:devtools_app/src/screens/inspector_shared/inspector_settings_dialog.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app_shared/ui.dart';
