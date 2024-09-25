@@ -127,6 +127,7 @@ class LayoutProperties {
         children = copyLevel == 0
             ? []
             : node.childrenNow
+                .where((child) => child.size != null)
                 .map(
                   (child) => LayoutProperties(child, copyLevel: copyLevel - 1),
                 )
