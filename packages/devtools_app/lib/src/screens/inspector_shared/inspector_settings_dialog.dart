@@ -53,7 +53,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                   notifier: preferences.inspector.inspectorV2Enabled
                       as ValueNotifier<bool?>,
                   title: 'Enable Inspector V2',
-                  description: 'Try out the new Inspector screen.',
+                  description: 'Try out the new Flutter inspector.',
                   gaItem: gac.inspectorV2Enabled,
                 ),
                 const SizedBox(height: denseSpacing),

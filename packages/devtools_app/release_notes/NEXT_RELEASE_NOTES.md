@@ -20,7 +20,11 @@ with WebAssembly. - [#8270](https://github.com/flutter/devtools/pull/8270)
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+* Added a setting that allows users to opt-in to the newly redesigned Flutter inspector. - [#8277](https://github.com/flutter/devtools/pull/8277)
+
+    ![Inspector V2 opt-in setting](images/inspector_v2_setting.png "DevTools setting to opt into the new Flutter inspector.")
+
+    ![Inspector V2](images/inspector_v2.png "The new Flutter inspector.")
 
 ## Performance updates
 
