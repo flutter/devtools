@@ -18,6 +18,9 @@ with WebAssembly. - [#8270](https://github.com/flutter/devtools/pull/8270)
 
     ![Wasm opt-in setting](images/wasm_setting.png "DevTools setting to opt into wasm.")
 
+* Added support for loading extensions in pub workspaces
+  [8347](https://github.com/flutter/devtools/pull/8347).
+
 ## Inspector updates
 
 TODO: Remove this section if there are not any general updates.
