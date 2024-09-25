@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart'
     hide InspectorScreenBodyState, InspectorScreenBody;
+import 'package:devtools_app/src/screens/inspector/inspector_screen_body.dart'
+    as legacy;
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -48,10 +50,14 @@ void main() {
 
   setUp(() async {
     await env.setupEnvironment();
+    // Enable the V2 inspector:
+    preferences.inspector.setInspectorV2Enabled(true);
   });
 
   tearDown(() async {
     await env.tearDownEnvironment(force: true);
+    // Re-set changes to preferences:
+    preferences.inspector.setInspectorV2Enabled(false);
   });
 
   group('screenshot tests', () {
@@ -252,6 +258,43 @@ void main() {
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
           '../test_infra/goldens/integration_inspector_v2_implementation_widgets_hidden.png',
+        ),
+      );
+    },
+  );
+
+  testWidgetsWithWindowSize(
+    'can revert to legacy inspector',
+    windowSize,
+    (WidgetTester tester) async {
+      await _loadInspectorUI(tester);
+
+      // Select the Center widget (row index #16)
+      await tester.tap(find.richText('Center'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Open the settings dialog:
+      final settingsButton = find.byType(SettingsOutlinedButton);
+      await tester.tap(settingsButton);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Disable Inspector V2:
+      final checkboxes = find.byType(Checkbox);
+      expect(checkboxes, findsNWidgets(2));
+      await tester.tap(checkboxes.last);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Close the dialog:
+      final closeButton = find.byType(DialogCloseButton);
+      expect(closeButton, findsOneWidget);
+      await tester.tap(closeButton);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Verify the legacy inspector is visible:
+      await expectLater(
+        find.byType(legacy.InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/integration_inspector_v2_revert_to_legacy.png',
         ),
       );
     },
