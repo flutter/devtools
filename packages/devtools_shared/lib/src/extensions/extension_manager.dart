@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:dtd/dtd.dart';
 import 'package:extension_discovery/extension_discovery.dart';
@@ -105,13 +107,6 @@ class ExtensionsManager {
           if (root.toString() == rootFileUriString) continue;
 
           await _addExtensionsForRoot(
-            // TODO(https://github.com/flutter/devtools/issues/7944): this logic
-            // assumes that the .dart_tool folder containing the
-            // package_config.json file is in the same directory as the
-            // pubspec.yaml file (since `dartToolingDaemon.getProjectRoots`
-            // returns all directories within the IDE workspace roots that have
-            // a pubspec.yaml file). This may be an incorrect assumption for
-            // pub workspaces.
             root.toString(),
             logs: logs,
             parsingErrors: parsingErrors,
@@ -142,27 +137,33 @@ class ExtensionsManager {
   }) async {
     _assertUriFormat(rootFileUriString);
     final List<Extension> extensions;
-    try {
-      // TODO(https://github.com/flutter/devtools/issues/7944): this assumes
-      // that the .dart_tool/package_config.json file is in the package root,
-      // which may be an incorrect assumption for pub workspaces.
-      final packageConfigPath = path.posix.join(
+    String packageConfigPath;
+    while (true) {
+      packageConfigPath = path.url.join(
         rootFileUriString,
         '.dart_tool',
         'package_config.json',
       );
-      extensions = await findExtensions(
-        'devtools',
-        packageConfig: Uri.parse(packageConfigPath),
-      );
-      logs.add(
-        'ExtensionsManager._addExtensionsForRoot find extensions for '
-        'config: $packageConfigPath, result: '
-        '${extensions.map((e) => e.package).toList()}',
-      );
-    } catch (e) {
-      rethrow;
+      if (File.fromUri(Uri.parse(packageConfigPath)).existsSync()) {
+        break;
+      }
+      final nextRootFileUriString = path.url.dirname(rootFileUriString);
+      if (nextRootFileUriString == rootFileUriString) {
+        // No package config was found.
+        return;
+      }
+      rootFileUriString = nextRootFileUriString;
     }
+    // TODO(sigurdm): Do we need to deduplicate package configs?
+    extensions = await findExtensions(
+      'devtools',
+      packageConfig: Uri.parse(packageConfigPath),
+    );
+    logs.add(
+      'ExtensionsManager._addExtensionsForRoot find extensions for '
+      'config: $packageConfigPath, result: '
+      '${extensions.map((e) => e.package).toList()}',
+    );
 
     for (final extension in extensions) {
       final config = extension.config;
@@ -188,10 +189,6 @@ class ExtensionsManager {
         final extensionConfig = DevToolsExtensionConfig.parse({
           ...config,
           DevToolsExtensionConfig.extensionAssetsPathKey: location,
-          // TODO(https://github.com/flutter/devtools/issues/7944): for pub
-          // workspaces, we may want to store the devtools_options.yaml at the
-          // same location as the workspace's .dart_tool/package_config.json
-          // file.
           DevToolsExtensionConfig.devtoolsOptionsUriKey:
               path.join(rootFileUriString, devtoolsOptionsFileName),
           DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,

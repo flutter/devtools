@@ -264,7 +264,7 @@ void _verifyAllExtensions(
   bool includeRuntime = true,
 }) {
   if (includeRuntime) {
-    expect(extensionsManager.devtoolsExtensions.length, 9);
+    expect(extensionsManager.devtoolsExtensions.length, 11);
     final runtimeExtensions = extensionsManager.devtoolsExtensions
         .where((ext) => !ext.detectedFromStaticContext)
         .toList();
@@ -285,60 +285,72 @@ void _verifyExpectedRuntimeExtensions(
   _verifyExtension(
     extensions[0],
     extensionPackage: driftPackage,
-    detectedFromPackage: 'my_app',
+    detectedFromPath: 'my_app',
     fromStaticContext: false,
   );
   _verifyExtension(
     extensions[1],
     extensionPackage: providerPackage,
-    detectedFromPackage: 'my_app',
+    detectedFromPath: 'my_app',
     fromStaticContext: false,
   );
   _verifyExtension(
     extensions[2],
     extensionPackage: staticExtension1Package,
-    detectedFromPackage: 'my_app',
+    detectedFromPath: 'my_app',
     fromStaticContext: false,
   );
 }
 
 void _verifyExpectedStaticExtensions(List<DevToolsExtensionConfig> extensions) {
-  expect(extensions.length, 6);
+  expect(extensions.length, 8);
   extensions.sort();
   _verifyExtension(
     extensions[0],
     extensionPackage: driftPackage,
-    detectedFromPackage: 'my_app',
+    detectedFromPath: 'my_app',
     fromStaticContext: true,
   );
   _verifyExtension(
     extensions[1],
     extensionPackage: providerPackage,
-    detectedFromPackage: 'my_app',
+    detectedFromPath: 'my_app',
     fromStaticContext: true,
   );
   _verifyExtension(
     extensions[2],
     extensionPackage: newerStaticExtension1Package,
-    detectedFromPackage: 'other_root_2',
+    detectedFromPath: 'other_root_2',
     fromStaticContext: true,
   );
   _verifyExtension(
     extensions[3],
     extensionPackage: staticExtension1Package,
-    detectedFromPackage: 'my_app',
+    detectedFromPath: 'my_app',
     fromStaticContext: true,
   );
   _verifyExtension(
     extensions[4],
     extensionPackage: staticExtension1Package,
-    detectedFromPackage: 'other_root_1',
+    detectedFromPath: 'other_root_1',
     fromStaticContext: true,
   );
   _verifyExtension(
     extensions[5],
+    extensionPackage: staticExtension1Package,
+    detectedFromPath: 'workspace_root',
+    fromStaticContext: true,
+  );
+  _verifyExtension(
+    extensions[6],
+    extensionPackage: staticExtension1Package,
+    detectedFromPath: 'workspace_root',
+    fromStaticContext: true,
+  );
+  _verifyExtension(
+    extensions[7],
     extensionPackage: staticExtension2Package,
-    detectedFromPackage: 'other_root_1',
+    detectedFromPath: 'other_root_1',
     fromStaticContext: true,
   );
 }
@@ -346,7 +358,7 @@ void _verifyExpectedStaticExtensions(List<DevToolsExtensionConfig> extensions) {
 void _verifyExtension(
   DevToolsExtensionConfig ext, {
   required TestPackageWithExtension extensionPackage,
-  required String detectedFromPackage,
+  required String detectedFromPath,
   required bool fromStaticContext,
 }) {
   expect(ext.name, extensionPackage.name);
@@ -387,7 +399,7 @@ void _verifyExtension(
   expect(
     ext.devtoolsOptionsUri,
     endsWith(
-      p.join('packages', detectedFromPackage, devtoolsOptionsFileName),
+      p.join('packages', detectedFromPath, devtoolsOptionsFileName),
     ),
   );
   expect(ext.detectedFromStaticContext, fromStaticContext);
