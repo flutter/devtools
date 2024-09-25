@@ -48,7 +48,8 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                       'Hovering over any widget displays its properties and values.',
                   gaItem: gac.inspectorHoverEvalMode,
                 ),
-                // here
+                const SizedBox(height: largeSpacing),
+                ...dialogSubHeader(theme, 'Experimental features'),
                 CheckboxSetting(
                   notifier: preferences.inspector.inspectorV2Enabled
                       as ValueNotifier<bool?>,
