@@ -417,7 +417,9 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
   @protected
   void setCanDrag(bool canDrag) {
     if (canDrag == _lastCanDrag &&
-        (!canDrag || widget.axis == _lastAxisDirection)) return;
+        (!canDrag || widget.axis == _lastAxisDirection)) {
+      return;
+    }
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
     } else {
