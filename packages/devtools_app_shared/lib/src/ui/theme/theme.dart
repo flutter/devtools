@@ -378,7 +378,7 @@ extension DevToolsSharedColorScheme on ColorScheme {
 
   Color get tooltipTextColor => isLight ? Colors.white : Colors.black;
 
-  Color get activeToggleButtonColor => primary.withAlpha(const 0.12);
+  Color get activeToggleButtonColor => primary.withValues(alpha: 0.3);
 
   Color get semiTransparentOverlayColor => isLight
       ? Colors.grey.shade200.withAlpha(200)
