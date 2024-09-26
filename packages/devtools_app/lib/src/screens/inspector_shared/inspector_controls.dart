@@ -63,6 +63,8 @@ class InspectorControls extends StatelessWidget {
           tooltip: 'Try out the new Flutter inspector.',
           gaScreen: gac.inspector,
           gaItem: gac.inspectorV2Enabled,
+          activeColor: activeButtonColor,
+          inactiveColor: Colors.transparent,
         ),
         const SizedBox(width: defaultSpacing),
         const InspectorServiceExtensionButtonGroup(),
@@ -80,12 +82,10 @@ class InspectorServiceExtensionButtonGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeButtonColor =
-        Theme.of(context).colorScheme.activeToggleButtonColor;
     return Row(
       children: [
         ServiceExtensionButtonGroup(
-          fillColor: activeButtonColor,
+          fillColor: Theme.of(context).colorScheme.activeToggleButtonColor,
           minScreenWidthForTextBeforeScaling:
               serviceExtensionButtonsIncludeTextWidth,
           extensions: [
@@ -131,6 +131,7 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
       valueListenable: controller.implementationWidgetsHidden,
       builder: (context, isHidden, _) {
         return DevToolsToggleButton(
+          fillColor: Theme.of(context).colorScheme.activeToggleButtonColor,
           isSelected: !isHidden,
           message:
               'Show widgets created by the Flutter framework or other packages.',

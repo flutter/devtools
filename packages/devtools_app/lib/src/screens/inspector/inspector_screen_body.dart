@@ -19,6 +19,7 @@ import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/search.dart';
+import '../inspector_shared/inspector_controls.dart';
 import '../inspector_shared/inspector_screen.dart';
 import '../inspector_shared/inspector_settings_dialog.dart';
 import 'inspector_controller.dart';
@@ -150,31 +151,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     );
     return Column(
       children: <Widget>[
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ValueListenableBuilder<bool>(
-              valueListenable: serviceConnection
-                  .serviceManager.serviceExtensionManager
-                  .hasServiceExtension(
-                extensions.toggleSelectWidgetMode.extension,
-              ),
-              builder: (_, selectModeSupported, __) {
-                return ServiceExtensionButtonGroup(
-                  extensions: [
-                    selectModeSupported
-                        ? extensions.toggleSelectWidgetMode
-                        : extensions.toggleOnDeviceWidgetInspector,
-                  ],
-                  minScreenWidthForTextBeforeScaling:
-                      minScreenWidthForTextBeforeScaling,
-                );
-              },
-            ),
-            const Spacer(),
-            Row(children: getServiceExtensionWidgets()),
-          ],
-        ),
+        const InspectorControls(),
         const SizedBox(height: intermediateSpacing),
         Expanded(
           child: widgetTrees,

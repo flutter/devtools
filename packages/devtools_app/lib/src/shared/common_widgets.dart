@@ -452,6 +452,9 @@ class DevToolsSwitch extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.padding,
+    this.height,
+    this.activeColor,
+    this.inactiveColor,
   });
 
   final bool value;
@@ -460,18 +463,22 @@ class DevToolsSwitch extends StatelessWidget {
 
   final EdgeInsets? padding;
 
+  final double? height;
+
+  final Color? activeColor;
+
+  final Color? inactiveColor;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final fillColor = theme.colorScheme.activeToggleButtonColor;
     return Container(
-      height: defaultButtonHeight,
+      height: height ?? defaultButtonHeight,
       padding: padding,
       child: FittedBox(
         fit: BoxFit.fill,
         child: Switch(
-          activeColor: fillColor,
-          // activeColor: ToggleButtonsTheme.of(context).selectedColor,
+          activeTrackColor: activeColor,
+          inactiveTrackColor: inactiveColor,
           value: value,
           onChanged: onChanged,
         ),
@@ -1514,23 +1521,25 @@ class NotifierCheckbox extends StatelessWidget {
   }
 }
 
-/// Checkbox Widget class that listens to and manages a [ValueNotifier].
+/// Switch Widget class that listens to and manages a [ValueNotifier].
 ///
-/// Used to create a Checkbox widget who's boolean value is attached
+/// Used to create a Switch widget who's boolean value is attached
 /// to a [ValueNotifier<bool>]. This allows for the pattern:
 ///
-/// Create the [NotifierCheckbox] widget in build e.g.,
+/// Create the [NotifierSwitch] widget in build e.g.,
 ///
-///   myCheckboxWidget = NotifierCheckbox(notifier: controller.myCheckbox);
+///   mySwitchWidget = NotifierSwitch(notifier: controller.mySwitchNotifer);
 ///
-/// The checkbox and the value notifier are now linked with clicks updating the
-/// [ValueNotifier] and changes to the [ValueNotifier] updating the checkbox.
+/// The switch and the value notifier are now linked with clicks updating the
+/// [ValueNotifier] and changes to the [ValueNotifier] updating the switch.
 class NotifierSwitch extends StatelessWidget {
   const NotifierSwitch({
     super.key,
     required this.notifier,
     this.onChanged,
     this.padding,
+    this.activeColor,
+    this.inactiveColor,
   });
 
   /// The notifier this [NotifierSwitch] is responsible for listening to and
@@ -1542,6 +1551,10 @@ class NotifierSwitch extends StatelessWidget {
   final void Function(bool? newValue)? onChanged;
 
   final EdgeInsets? padding;
+
+  final Color? activeColor;
+
+  final Color? inactiveColor;
 
   void _updateValue(bool value) {
     if (notifier.value != value) {
@@ -1557,19 +1570,17 @@ class NotifierSwitch extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: notifier,
       builder: (context, bool? value, _) {
-        return SizedBox(
-          height: defaultRowHeight,
-          child: DevToolsSwitch(
-            value: notifier.value,
-            onChanged: _updateValue,
-            padding: padding,
-          ),
+        return DevToolsSwitch(
+          value: notifier.value,
+          onChanged: _updateValue,
+          padding: padding,
+          activeColor: activeColor,
+          inactiveColor: inactiveColor,
         );
       },
     );
   }
 }
-
 
 /// A widget that represents a check box setting and automatically updates for
 /// value changes to [notifier].
@@ -1689,6 +1700,8 @@ class SwitchSetting extends StatelessWidget {
     this.onChanged,
     this.gaScreen,
     this.gaItem,
+    this.activeColor,
+    this.inactiveColor,
   });
 
   final ValueNotifier<bool> notifier;
@@ -1702,6 +1715,10 @@ class SwitchSetting extends StatelessWidget {
   final String? gaScreen;
 
   final String? gaItem;
+
+  final Color? activeColor;
+
+  final Color? inactiveColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1723,6 +1740,8 @@ class SwitchSetting extends StatelessWidget {
           ),
           NotifierSwitch(
             padding: const EdgeInsets.only(left: borderPadding),
+            activeColor: activeColor,
+            inactiveColor: inactiveColor,
             notifier: notifier,
             onChanged: (bool? value) {
               final gaScreen = this.gaScreen;

@@ -48,21 +48,11 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                       'Hovering over any widget displays its properties and values.',
                   gaItem: gac.inspectorHoverEvalMode,
                 ),
-                const SizedBox(height: largeSpacing),
-                ...dialogSubHeader(theme, 'Experimental features'),
-                SwitchSetting(
-                  notifier: preferences.inspector.inspectorV2Enabled
-                      as ValueNotifier<bool>,
-                  title: 'Enable Inspector V2',
-                  tooltip: 'Try out the new Flutter inspector.',
-                  gaScreen: gac.inspector,
-                  gaItem: gac.inspectorV2Enabled,
-                ),
-                const SizedBox(height: denseSpacing),
                 if (!inspectorV2Enabled) ...[
+                  const SizedBox(height: largeSpacing),
                   const InspectorDefaultDetailsViewOption(),
-                  const SizedBox(height: denseSpacing),
                 ],
+                const SizedBox(height: largeSpacing),
                 ...dialogSubHeader(theme, 'Package Directories'),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
