@@ -77,7 +77,7 @@ rm -rf build/web
 flutter pub get
 
 flutter build web \
-  --web-renderer canvaskit \
+  --wasm \
   --pwa-strategy=offline-first \
   --release \
   --no-tree-shake-icons
