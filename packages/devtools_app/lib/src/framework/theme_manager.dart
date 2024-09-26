@@ -5,6 +5,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:logging/logging.dart';
 
+import '../../devtools_app.dart';
 import '../service/editor/api_classes.dart';
 import '../service/editor/editor_client.dart';
 
@@ -65,6 +66,8 @@ class ThemeManager {
         }
 
         setGlobal(IdeTheme, currentTheme);
+
+        preferences.toggleDarkModeTheme(currentTheme.isDarkMode);
 
         print('got theme changed event');
         print(currentTheme);
