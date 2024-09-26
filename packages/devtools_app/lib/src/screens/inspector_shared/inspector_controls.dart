@@ -13,49 +13,63 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../inspector_shared/inspector_settings_dialog.dart';
-import 'inspector_controller.dart';
-import 'inspector_screen_body.dart';
+import '../inspector_v2/inspector_controller.dart' as v2;
+import 'inspector_screen.dart';
 
 /// Control buttons for the inspector panel.
-// class InspectorControls extends StatelessWidget {
-//   const InspectorControls({super.key, required this.controller});
+class InspectorControls extends StatelessWidget {
+  const InspectorControls({super.key, this.controller});
 
-//   final InspectorController controller;
+  final v2.InspectorController? controller;
 
-//   static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
+  static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         ValueListenableBuilder<bool>(
-//           valueListenable: serviceConnection
-//               .serviceManager.serviceExtensionManager
-//               .hasServiceExtension(
-//             extensions.toggleSelectWidgetMode.extension,
-//           ),
-//           builder: (_, selectModeSupported, __) {
-//             return ServiceExtensionButtonGroup(
-//               extensions: [
-//                 selectModeSupported
-//                     ? extensions.toggleSelectWidgetMode
-//                     : extensions.toggleOnDeviceWidgetInspector,
-//               ],
-//               minScreenWidthForTextBeforeScaling:
-//                   InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
-//             );
-//           },
-//         ),
-//         const SizedBox(width: defaultSpacing),
-//         ShowImplementationWidgetsButton(controller: controller),
-//         const Spacer(),
-//         const SizedBox(width: defaultSpacing),
-//         const InspectorServiceExtensionButtonGroup(),
-//       ],
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    final activeButtonColor =
+        Theme.of(context).colorScheme.activeToggleButtonColor;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ValueListenableBuilder<bool>(
+          valueListenable: serviceConnection
+              .serviceManager.serviceExtensionManager
+              .hasServiceExtension(
+            extensions.toggleSelectWidgetMode.extension,
+          ),
+          builder: (_, selectModeSupported, __) {
+            return ServiceExtensionButtonGroup(
+              fillColor: activeButtonColor,
+              extensions: [
+                selectModeSupported
+                    ? extensions.toggleSelectWidgetMode
+                    : extensions.toggleOnDeviceWidgetInspector,
+              ],
+              minScreenWidthForTextBeforeScaling:
+                  InspectorScreen.minScreenWidthForTextBeforeScaling,
+            );
+          },
+        ),
+        if (controller != null) ...[
+          const SizedBox(width: defaultSpacing),
+          ShowImplementationWidgetsButton(controller: controller!),
+        ],
+        const Spacer(),
+        const SizedBox(width: defaultSpacing),
+        SwitchSetting(
+          notifier:
+              preferences.inspector.inspectorV2Enabled as ValueNotifier<bool>,
+          title: 'Inspector V2',
+          tooltip: 'Try out the new Flutter inspector.',
+          gaScreen: gac.inspector,
+          gaItem: gac.inspectorV2Enabled,
+        ),
+        const SizedBox(width: defaultSpacing),
+        const InspectorServiceExtensionButtonGroup(),
+      ],
+    );
+  }
+}
 
 /// Group of service extension buttons for the inspector panel that control the
 /// overlays painted on the connected app.
@@ -66,9 +80,12 @@ class InspectorServiceExtensionButtonGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final activeButtonColor =
+        Theme.of(context).colorScheme.activeToggleButtonColor;
     return Row(
       children: [
         ServiceExtensionButtonGroup(
+          fillColor: activeButtonColor,
           minScreenWidthForTextBeforeScaling:
               serviceExtensionButtonsIncludeTextWidth,
           extensions: [
@@ -106,7 +123,7 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
     required this.controller,
   });
 
-  final InspectorController controller;
+  final v2.InspectorController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +138,7 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
           onPressed: controller.toggleImplementationWidgetsVisibility,
           icon: Icons.code,
           minScreenWidthForTextBeforeScaling:
-              InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+              InspectorScreen.minScreenWidthForTextBeforeScaling,
         );
       },
     );

@@ -17,6 +17,7 @@ import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/search.dart';
+import '../inspector_shared/inspector_controls.dart';
 import '../inspector_shared/inspector_screen.dart';
 import 'inspector_controller.dart';
 import 'inspector_controls.dart';

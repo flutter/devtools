@@ -15,6 +15,8 @@ import 'inspector_screen_controller.dart';
 class InspectorScreen extends Screen {
   InspectorScreen() : super.fromMetaData(ScreenMetaData.inspector);
 
+  static const minScreenWidthForTextBeforeScaling = 900.0;
+  
   static final id = ScreenMetaData.inspector.id;
 
   // There is not enough room to safely show the console in the embed view of

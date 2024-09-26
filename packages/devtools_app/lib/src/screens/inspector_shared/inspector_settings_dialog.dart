@@ -50,11 +50,12 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: largeSpacing),
                 ...dialogSubHeader(theme, 'Experimental features'),
-                CheckboxSetting(
+                SwitchSetting(
                   notifier: preferences.inspector.inspectorV2Enabled
-                      as ValueNotifier<bool?>,
+                      as ValueNotifier<bool>,
                   title: 'Enable Inspector V2',
-                  description: 'Try out the new Flutter inspector.',
+                  tooltip: 'Try out the new Flutter inspector.',
+                  gaScreen: gac.inspector,
                   gaItem: gac.inspectorV2Enabled,
                 ),
                 const SizedBox(height: denseSpacing),
