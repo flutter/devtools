@@ -16,7 +16,7 @@ abstract class _SurveyHandler {
       [apiParameterValueKey],
       queryParams: queryParams,
       api: api,
-      requestName: ReleaseNotesApi.setLastReleaseNotesVersion,
+      requestName: SurveyApi.setActiveSurvey,
     );
     if (missingRequiredParams != null) return missingRequiredParams;
 
