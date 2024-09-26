@@ -1387,7 +1387,7 @@ class InspectorRowContent extends StatelessWidget {
         valueListenable: controller.searchNotifier,
         builder: (context, searchValue, _) {
           return Opacity(
-            opacity: searchValue.isEmpty || row.isSearchMatch ? 1 : 0.2,
+            opacity: searchValue.isEmpty || row.isSearchMatch ? 1 : 0.6,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
