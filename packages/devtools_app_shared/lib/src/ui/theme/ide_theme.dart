@@ -36,7 +36,7 @@ final class IdeTheme {
 
   bool get isDarkMode => _isDarkMode ?? useDarkThemeAsDefault;
 
-  void set isDarkMode(bool newIsDarkMode) => _isDarkMode = newIsDarkMode;
+  set isDarkMode(bool newIsDarkMode) => _isDarkMode = newIsDarkMode;
 
   /// Whether the IDE specified the DevTools color theme.
   ///
