@@ -7,7 +7,6 @@ import 'package:logging/logging.dart';
 
 import '../../devtools_app.dart';
 import '../service/editor/api_classes.dart';
-import '../service/editor/editor_client.dart';
 
 final _log = Logger('theme_manager');
 
@@ -59,8 +58,10 @@ class ThemeManager {
         if (newTheme.fontSize != null &&
             newTheme.fontSize!.toDouble() != currentTheme.fontSize) {
           currentTheme.fontSize = newTheme.fontSize!.toDouble();
-          updateQueryParameter(IdeThemeQueryParams.fontSizeKey,
-              currentTheme.fontSize.toString());
+          updateQueryParameter(
+            IdeThemeQueryParams.fontSizeKey,
+            currentTheme.fontSize.toString(),
+          );
         }
 
         setGlobal(IdeTheme, currentTheme);
@@ -76,10 +77,9 @@ class ThemeManager {
   }
 
   String _colorAsHex(Color color) {
-    return color.value
-        .toRadixString(16)
-        .padLeft(8, '0')
-        .substring(2)
+    return (color.r.toInt().toRadixString(16).padLeft(2, '0') +
+            color.g.toInt().toRadixString(16).padLeft(2, '0') +
+            color.b.toInt().toRadixString(16).padLeft(2, '0'))
         .toUpperCase();
   }
 

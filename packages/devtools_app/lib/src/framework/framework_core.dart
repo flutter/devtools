@@ -14,25 +14,11 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools_app.dart';
-import '../extensions/extension_service.dart';
-import '../screens/debugger/breakpoint_manager.dart';
-import '../service/editor/api_classes.dart';
-import '../service/service_manager.dart';
-import '../service/vm_service_wrapper.dart';
-import '../shared/banner_messages.dart';
 import '../shared/config_specific/framework_initialize/framework_initialize.dart';
-import '../shared/console/eval/eval_service.dart';
-import '../shared/dtd_manager_extensions.dart';
 import '../shared/framework_controller.dart';
-import '../shared/globals.dart';
-import '../shared/notifications.dart';
-import '../shared/offline_data.dart';
-import '../shared/preferences/preferences.dart';
 import '../shared/primitives/message_bus.dart';
-import '../shared/scripts/script_manager.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/survey.dart';
-import '../shared/utils.dart';
 import 'app_error_handling.dart' as errorHandling;
 import 'theme_manager.dart';
 
