@@ -38,31 +38,16 @@ Follow the instructions below to get started, and use the
 for reference.
 
 # Table of contents
-1. [Setup your package hierarchy](#step-1-setup-your-package-hierarchy)
-2. [Create a DevTools extension](#create-a-devtools-extension)
-      - [Step 1: Setup your package hierarchy](#setup-your-package-hierarchy)
+1. [Create a DevTools extension](#create-a-devtools-extension)
+      - [Step 1: Setup your package hierarchy](#step-1-setup-your-package-hierarchy)
         - [Standalone extensions](#standalone-extensions)
         - [Companion extensions](#companion-extensions)
       - [Step 2: Configure your extension](#step-2-configure-your-extension)
       - [Step 3: Build your extension](#step-3-build-your-extension)
       - [Step 4: Debug your extension](#step-4-debug-your-extension)
-3. [Publish your package with a DevTools extension](#publish-your-package-with-a-devTools-extension)
-4. [Resources and support](#resources-and-support)
-5. [Testimonies from extension authors](#testimonies-from-extension-authors)
-
-## Supported tools
-
-With the DevTools extensions framework you can build many types of tools, including:
-- Companion tools for existing packages
-- New tools that are shipped as their own package
-- Tools that require a running application
-- Tools that **do not** require a running application
-
-The DevTools Extensions framework comes with some out of the box features that make
-distributing your extension to users seamless:
-- Users can use your tool from DevTools in the browser
-- Users can use your tool embedded directly in their IDE
-- Users can discover and open your tool from Dart & Flutter supported IDEs
+2. [Publish your package with a DevTools extension](#publish-your-package-with-a-devTools-extension)
+3. [Resources and support](#resources-and-support)
+4. [Testimonies from extension authors](#testimonies-from-extension-authors)
 
 ## Create a DevTools Extension
 
@@ -129,7 +114,7 @@ some_pkg
   ...
 ```
 
-Under this directory, create the following structure:
+Under the `extension` directory, create the following structure:
 ```
 extension
   devtools/
@@ -302,23 +287,23 @@ real DevTools environment. Build your flutter web app and copy the built assets 
     dart run devtools_extensions validate --package=../some_pkg
     ```
 
-2. Prepare and a test environment with a dependency on your pub package that is providing the
+2. Prepare a test environment with a dependency on your pub package that is providing the
 extension.
     - In the Dart or Flutter project where you are adding a dependency on your package, add a
     [path](https://dart.dev/tools/pub/dependencies#path-packages) dependency that points to your
     local package source code (the package that contains the `extension/devtools/` directory with
     your extension's assets). Once you have done this, run `pub get` on the package.
-      - If your extension requires a running application, then you'll need to run the app that
+      - **If your extension requires a running application**, then you'll need to run the app that
       depends on your extension.
-      - If your extension does not requires a running application, then you will need to
+      - **If your extension does not require a running application**, then you will need to
       open the test Dart or Flutter project that depends on your package in a supported IDE
       (VS Code or IntelliJ / Android Studio).
 
 3. Start DevTools in one of the following ways:
-    - **If your extension requires a running app**, you can open DevTools either from the URI
+    - **If your extension requires a running application**, you can open DevTools either from the URI
     that was printed to command line when you ran the test app, or from the IDE where you
     ran your test app.
-    - **If your extension does not require a running app**, you can open your Dart or Flutter
+    - **If your extension does not require a running application**, you can open your Dart or Flutter
     project that depends on your package in a supported IDE (VS Code or IntelliJ / Android Studio).
     Open DevTools from the IDE to see your extension in the browser.
       - Requires Dart SDK >= 3.5 and Flutter SDK >= 3.23

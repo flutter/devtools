@@ -330,7 +330,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       LogicalKeyboardKey.arrowUp,
       LogicalKeyboardKey.arrowLeft,
       LogicalKeyboardKey.arrowRight,
-    ].contains(event.logicalKey)) return KeyEventResult.ignored;
+    ].contains(event.logicalKey)) {
+      return KeyEventResult.ignored;
+    }
 
     // If there is no selected node, choose the first one.
     if (widget.selectionNotifier.value.node == null) {
