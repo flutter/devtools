@@ -19,8 +19,6 @@ class ThemeManager {
   void listenForThemeChanges() {
     editorClient.event.listen((event) {
       if (event is ThemeChangedEvent) {
-        print('received a ThemeChangedEvent');
-        print(event);
         final currentTheme = getIdeTheme();
         final newTheme = event.theme;
 
@@ -73,9 +71,6 @@ class ThemeManager {
         // all theme features.
         preferences.toggleDarkModeTheme(!currentTheme.isDarkMode);
         preferences.toggleDarkModeTheme(currentTheme.isDarkMode);
-
-        print('got theme changed event');
-        print(currentTheme);
       }
     });
   }
