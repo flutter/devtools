@@ -19,7 +19,7 @@ import '../shared/framework_controller.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/survey.dart';
-import 'app_error_handling.dart' as errorHandling;
+import 'app_error_handling.dart' as error_handling;
 import 'theme_manager.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
@@ -168,7 +168,7 @@ Future<void> _initDTDConnection() async {
             'Failed to connect to the Dart Tooling Daemon',
             isReportable: false,
           );
-          errorHandling.reportError(
+          error_handling.reportError(
             e,
             errorType: 'Dart Tooling Daemon connection failed.',
             stack: st,
@@ -185,7 +185,7 @@ Future<void> _initDTDConnection() async {
   } catch (e, st) {
     // Dtd failing to connect does not interfere with devtools starting up so
     // catch any errors and report them.
-    errorHandling.reportError(
+    error_handling.reportError(
       e,
       errorType: 'Failed to initialize the DTD connection.',
       stack: st,
