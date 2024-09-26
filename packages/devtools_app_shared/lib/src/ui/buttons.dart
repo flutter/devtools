@@ -183,6 +183,7 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    print('FILL COLOR IS $fillColor');
     return SizedBox(
       height: defaultButtonHeight,
       child: ToggleButtons(
@@ -214,6 +215,7 @@ final class DevToolsToggleButton extends StatelessWidget {
     this.label,
     this.shape,
     this.minScreenWidthForTextBeforeScaling,
+    this.fillColor,
   });
 
   final String message;
@@ -232,6 +234,8 @@ final class DevToolsToggleButton extends StatelessWidget {
 
   final double? minScreenWidthForTextBeforeScaling;
 
+  final Color? fillColor;
+
   @override
   Widget build(BuildContext context) {
     return DevToolsToggleButtonGroup(
@@ -240,6 +244,7 @@ final class DevToolsToggleButton extends StatelessWidget {
           : Colors.transparent,
       selectedStates: [isSelected],
       onPressed: (_) => onPressed(),
+      fillColor: fillColor,
       children: [
         DevToolsTooltip(
           message: message,
