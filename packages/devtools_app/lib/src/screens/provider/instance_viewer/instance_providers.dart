@@ -160,10 +160,11 @@ Future<void> _mutate(
     orElse: () => throw StateError('Can only mutate lists/maps/objects'),
   );
 
-  // TODO(rrousselGit): call notifyListeners/setState/notifyClients based on the modified object
-
   // Since the same object can be used in multiple locations at once, we need
   // to refresh the entire tree instead of just the node that was modified.
+
+  // TODO(rrousselGit): call notifyListeners/setState/notifyClients based on the modified object
+  // ignore: unused_result
   ref.refresh(instanceProvider(path.root));
 
   // Forces the UI to rebuild after the state change

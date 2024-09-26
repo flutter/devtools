@@ -154,8 +154,8 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
-              instanceProvider(objPath).overrideWithValue(
-                AsyncValue.data(
+              instanceProvider(objPath).overrideWith(
+                (_) => AsyncValue.data(
                   ObjectInstance(
                     [
                       ObjectField(
@@ -201,16 +201,16 @@ void main() {
                     evalForInstance: FakeEvalOnDartLibrary(),
                     type: 'MyClass',
                   ),
-                ),
+                ).value!,
               ),
               instanceProvider(pathForProperty('first'))
-                  .overrideWithValue(int42Instance),
+                  .overrideWith((_) => int42Instance.value!),
               instanceProvider(pathForProperty('_second'))
-                  .overrideWithValue(int42Instance),
+                  .overrideWith((_) => int42Instance.value!),
               instanceProvider(pathForProperty('third'))
-                  .overrideWithValue(int42Instance),
+                  .overrideWith((_) => int42Instance.value!),
               instanceProvider(pathForProperty('_forth'))
-                  .overrideWithValue(int42Instance),
+                  .overrideWith((_) => int42Instance.value!),
             ],
             child: const MaterialApp(
               home: Scaffold(
@@ -245,8 +245,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            instanceProvider(objPath).overrideWithValue(
-              AsyncValue.data(
+            instanceProvider(objPath).overrideWith(
+              (_) => AsyncValue.data(
                 ObjectInstance(
                   [
                     ObjectField(
@@ -265,16 +265,16 @@ void main() {
                   evalForInstance: FakeEvalOnDartLibrary(),
                   type: 'MyClass',
                 ),
-              ),
+              ).value!,
             ),
-            instanceProvider(propertyPath).overrideWithValue(
-              AsyncValue.data(
+            instanceProvider(propertyPath).overrideWith(
+              (_) => AsyncValue.data(
                 InstanceDetails.number(
                   '0',
                   instanceRefId: '0',
                   setter: (_) async {},
                 ),
-              ),
+              ).value!,
             ),
           ],
           child: const MaterialApp(
@@ -319,7 +319,7 @@ void main() {
           ProviderScope(
             overrides: [
               instanceProvider(const InstancePath.fromInstanceId('0'))
-                  .overrideWithValue(const AsyncValue.loading()),
+                  .overrideWith((_) => const AsyncValue.loading().value!),
             ],
             child: const MaterialApp(
               home: Scaffold(
@@ -362,7 +362,7 @@ void main() {
           ProviderScope(
             overrides: [
               instanceProvider(const InstancePath.fromInstanceId('0'))
-                  .overrideWithValue(nullInstance),
+                  .overrideWith((_) => nullInstance.value!),
             ],
             child: app,
           ),
@@ -372,7 +372,7 @@ void main() {
           ProviderScope(
             overrides: [
               instanceProvider(const InstancePath.fromInstanceId('0'))
-                  .overrideWithValue(const AsyncValue.loading()),
+                  .overrideWith((_) => const AsyncValue.loading().value!),
             ],
             child: app,
           ),
@@ -390,8 +390,10 @@ void main() {
           ProviderScope(
             overrides: [
               instanceProvider(const InstancePath.fromInstanceId('0'))
-                  .overrideWithValue(
-                AsyncValue.error(StateError('test error')),
+                  .overrideWith(
+                (_) =>
+                    AsyncValue.error(StateError('test error'), StackTrace.empty)
+                        .value!,
               ),
             ],
             child: app,
@@ -424,7 +426,7 @@ void main() {
           ProviderScope(
             overrides: [
               instanceProvider(const InstancePath.fromInstanceId('0'))
-                  .overrideWithValue(nullInstance),
+                  .overrideWith((_) => nullInstance.value!),
             ],
             child: app,
           ),
@@ -434,7 +436,7 @@ void main() {
           ProviderScope(
             overrides: [
               instanceProvider(const InstancePath.fromInstanceId('0'))
-                  .overrideWithValue(const AsyncValue.loading()),
+                  .overrideWith((_) => const AsyncValue.loading().value!),
             ],
             child: app,
           ),
@@ -452,7 +454,7 @@ void main() {
           ProviderScope(
             overrides: [
               instanceProvider(const InstancePath.fromInstanceId('0'))
-                  .overrideWithValue(int42Instance),
+                  .overrideWith((_) => int42Instance.value!),
             ],
             child: app,
           ),
@@ -472,7 +474,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           instanceProvider(const InstancePath.fromInstanceId('enum'))
-              .overrideWithValue(enumValueInstance),
+              .overrideWith((_) => enumValueInstance.value!),
         ],
       );
       addTearDown(container.dispose);
@@ -503,7 +505,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           instanceProvider(const InstancePath.fromInstanceId('null'))
-              .overrideWithValue(nullInstance),
+              .overrideWith((_) => nullInstance.value!),
         ],
       );
       addTearDown(container.dispose);
@@ -534,7 +536,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           instanceProvider(const InstancePath.fromInstanceId('bool'))
-              .overrideWithValue(trueInstance),
+              .overrideWith((_) => trueInstance.value!),
         ],
       );
       addTearDown(container.dispose);
@@ -565,7 +567,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           instanceProvider(const InstancePath.fromInstanceId('string'))
-              .overrideWithValue(stringInstance),
+              .overrideWith((_) => stringInstance.value!),
         ],
       );
       addTearDown(container.dispose);
@@ -598,7 +600,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           instanceProvider(const InstancePath.fromInstanceId('num'))
-              .overrideWithValue(int42Instance),
+              .overrideWith((_) => int42Instance.value!),
         ],
       );
       addTearDown(container.dispose);
@@ -629,20 +631,20 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           instanceProvider(const InstancePath.fromInstanceId('map'))
-              .overrideWithValue(map2Instance),
+              .overrideWith((_) => map2Instance.value!),
           // {'string': 42, [...]: ['string', null]}
           instanceProvider(
             const InstancePath.fromInstanceId(
               'map',
               pathToProperty: [PathToProperty.mapKey(ref: 'string')],
             ),
-          ).overrideWithValue(int42Instance),
+          ).overrideWith((_) => int42Instance.value!),
           instanceProvider(
             const InstancePath.fromInstanceId(
               'map',
               pathToProperty: [PathToProperty.mapKey(ref: 'list2')],
             ),
-          ).overrideWithValue(list2Instance),
+          ).overrideWith((_) => list2Instance.value!),
           instanceProvider(
             const InstancePath.fromInstanceId(
               'map',
@@ -651,7 +653,7 @@ void main() {
                 PathToProperty.listIndex(0),
               ],
             ),
-          ).overrideWithValue(stringInstance),
+          ).overrideWith((_) => stringInstance.value!),
           instanceProvider(
             const InstancePath.fromInstanceId(
               'map',
@@ -660,7 +662,7 @@ void main() {
                 PathToProperty.listIndex(1),
               ],
             ),
-          ).overrideWithValue(nullInstance),
+          ).overrideWith((_) => nullInstance.value!),
         ],
       );
       addTearDown(container.dispose);
@@ -713,7 +715,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           instanceProvider(const InstancePath.fromInstanceId('object'))
-              .overrideWithValue(object2Instance),
+              .overrideWith((_) => object2Instance.value!),
           // MyClass(first: 42, second: ['string', null])
           instanceProvider(
             const InstancePath.fromInstanceId(
@@ -726,7 +728,7 @@ void main() {
                 ),
               ],
             ),
-          ).overrideWithValue(int42Instance),
+          ).overrideWith((_) => int42Instance.value!),
           instanceProvider(
             const InstancePath.fromInstanceId(
               'object',
@@ -738,7 +740,7 @@ void main() {
                 ),
               ],
             ),
-          ).overrideWithValue(list2Instance),
+          ).overrideWith((_) => list2Instance.value!),
           instanceProvider(
             const InstancePath.fromInstanceId(
               'object',
@@ -751,7 +753,7 @@ void main() {
                 PathToProperty.listIndex(0),
               ],
             ),
-          ).overrideWithValue(stringInstance),
+          ).overrideWith((_) => stringInstance.value!),
           instanceProvider(
             const InstancePath.fromInstanceId(
               'object',
@@ -764,7 +766,7 @@ void main() {
                 PathToProperty.listIndex(1),
               ],
             ),
-          ).overrideWithValue(nullInstance),
+          ).overrideWith((_) => nullInstance.value!),
         ],
       );
       addTearDown(container.dispose);
@@ -823,7 +825,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           instanceProvider(const InstancePath.fromInstanceId('list'))
-              .overrideWithValue(list2Instance),
+              .overrideWith((_) => list2Instance.value!),
           // [true, {'string': 42, [...]: null}]
           instanceProvider(
             const InstancePath.fromInstanceId(
@@ -832,7 +834,7 @@ void main() {
                 PathToProperty.listIndex(0),
               ],
             ),
-          ).overrideWithValue(trueInstance),
+          ).overrideWith((_) => trueInstance.value!),
           instanceProvider(
             const InstancePath.fromInstanceId(
               'list',
@@ -840,7 +842,7 @@ void main() {
                 PathToProperty.listIndex(1),
               ],
             ),
-          ).overrideWithValue(map2Instance),
+          ).overrideWith((_) => map2Instance.value!),
           instanceProvider(
             const InstancePath.fromInstanceId(
               'list',
@@ -849,7 +851,7 @@ void main() {
                 PathToProperty.mapKey(ref: 'string'),
               ],
             ),
-          ).overrideWithValue(int42Instance),
+          ).overrideWith((_) => int42Instance.value!),
           instanceProvider(
             const InstancePath.fromInstanceId(
               'list',
@@ -858,7 +860,7 @@ void main() {
                 PathToProperty.mapKey(ref: 'list2'),
               ],
             ),
-          ).overrideWithValue(nullInstance),
+          ).overrideWith((_) => nullInstance.value!),
         ],
       );
       addTearDown(container.dispose);
@@ -912,7 +914,7 @@ void main() {
         overrides: [
           neverExpandedOverride,
           instanceProvider(const InstancePath.fromInstanceId('list2'))
-              .overrideWithValue(list2Instance),
+              .overrideWith((_) => list2Instance.value!),
         ],
       );
       addTearDown(container.dispose);
@@ -975,15 +977,15 @@ void main() {
           overrides: [
             neverExpandedOverride,
             instanceProvider(const InstancePath.fromInstanceId('string'))
-                .overrideWithValue(stringInstance),
+                .overrideWith((_) => stringInstance.value!),
             instanceProvider(const InstancePath.fromInstanceId('null'))
-                .overrideWithValue(nullInstance),
+                .overrideWith((_) => nullInstance.value!),
             instanceProvider(const InstancePath.fromInstanceId('bool'))
-                .overrideWithValue(trueInstance),
+                .overrideWith((_) => trueInstance.value!),
             instanceProvider(const InstancePath.fromInstanceId('num'))
-                .overrideWithValue(int42Instance),
+                .overrideWith((_) => int42Instance.value!),
             instanceProvider(const InstancePath.fromInstanceId('enum'))
-                .overrideWithValue(enumValueInstance),
+                .overrideWith((_) => enumValueInstance.value!),
           ],
         );
         addTearDown(container.dispose);
@@ -1036,15 +1038,15 @@ void main() {
             // force expanded status
             alwaysExpandedOverride,
             instanceProvider(const InstancePath.fromInstanceId('string'))
-                .overrideWithValue(stringInstance),
+                .overrideWith((_) => stringInstance.value!),
             instanceProvider(const InstancePath.fromInstanceId('null'))
-                .overrideWithValue(nullInstance),
+                .overrideWith((_) => nullInstance.value!),
             instanceProvider(const InstancePath.fromInstanceId('bool'))
-                .overrideWithValue(trueInstance),
+                .overrideWith((_) => trueInstance.value!),
             instanceProvider(const InstancePath.fromInstanceId('num'))
-                .overrideWithValue(int42Instance),
+                .overrideWith((_) => int42Instance.value!),
             instanceProvider(const InstancePath.fromInstanceId('enum'))
-                .overrideWithValue(enumValueInstance),
+                .overrideWith((_) => enumValueInstance.value!),
           ],
         );
         addTearDown(container.dispose);
@@ -1100,9 +1102,9 @@ void main() {
             overrides: [
               neverExpandedOverride,
               instanceProvider(const InstancePath.fromInstanceId('empty'))
-                  .overrideWithValue(emptyListInstance),
+                  .overrideWith((_) => emptyListInstance.value!),
               instanceProvider(const InstancePath.fromInstanceId('list-2'))
-                  .overrideWithValue(emptyListInstance),
+                  .overrideWith((_) => emptyListInstance.value!),
             ],
           );
           addTearDown(container.dispose);
@@ -1130,22 +1132,22 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             instanceProvider(const InstancePath.fromInstanceId('empty'))
-                .overrideWithValue(emptyListInstance),
+                .overrideWith((_) => emptyListInstance.value!),
             // ['string', [42, true]]
             instanceProvider(const InstancePath.fromInstanceId('list-2'))
-                .overrideWithValue(list2Instance),
+                .overrideWith((_) => list2Instance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'list-2',
                 pathToProperty: [PathToProperty.listIndex(0)],
               ),
-            ).overrideWithValue(stringInstance),
+            ).overrideWith((_) => stringInstance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'list-2',
                 pathToProperty: [PathToProperty.listIndex(1)],
               ),
-            ).overrideWithValue(list2Instance),
+            ).overrideWith((_) => list2Instance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'list-2',
@@ -1154,7 +1156,7 @@ void main() {
                   PathToProperty.listIndex(0),
                 ],
               ),
-            ).overrideWithValue(int42Instance),
+            ).overrideWith((_) => int42Instance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'list-2',
@@ -1163,7 +1165,7 @@ void main() {
                   PathToProperty.listIndex(1),
                 ],
               ),
-            ).overrideWithValue(trueInstance),
+            ).overrideWith((_) => trueInstance.value!),
           ],
         );
         addTearDown(container.dispose);
@@ -1220,9 +1222,9 @@ void main() {
             overrides: [
               neverExpandedOverride,
               instanceProvider(const InstancePath.fromInstanceId('empty'))
-                  .overrideWithValue(emptyMapInstance),
+                  .overrideWith((_) => emptyMapInstance.value!),
               instanceProvider(const InstancePath.fromInstanceId('map-2'))
-                  .overrideWithValue(map2Instance),
+                  .overrideWith((_) => map2Instance.value!),
             ],
           );
           addTearDown(container.dispose);
@@ -1250,22 +1252,22 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             instanceProvider(const InstancePath.fromInstanceId('empty'))
-                .overrideWithValue(emptyMapInstance),
+                .overrideWith((_) => emptyMapInstance.value!),
             // {'string': 'string', [...]: [42, true]]
             instanceProvider(const InstancePath.fromInstanceId('map-2'))
-                .overrideWithValue(map2Instance),
+                .overrideWith((_) => map2Instance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'map-2',
                 pathToProperty: [PathToProperty.mapKey(ref: 'string')],
               ),
-            ).overrideWithValue(stringInstance),
+            ).overrideWith((_) => stringInstance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'map-2',
                 pathToProperty: [PathToProperty.mapKey(ref: 'list2')],
               ),
-            ).overrideWithValue(list2Instance),
+            ).overrideWith((_) => list2Instance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'map-2',
@@ -1274,7 +1276,7 @@ void main() {
                   PathToProperty.listIndex(0),
                 ],
               ),
-            ).overrideWithValue(int42Instance),
+            ).overrideWith((_) => int42Instance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'map-2',
@@ -1283,7 +1285,7 @@ void main() {
                   PathToProperty.listIndex(1),
                 ],
               ),
-            ).overrideWithValue(trueInstance),
+            ).overrideWith((_) => trueInstance.value!),
           ],
         );
         addTearDown(container.dispose);
@@ -1340,9 +1342,9 @@ void main() {
             overrides: [
               neverExpandedOverride,
               instanceProvider(const InstancePath.fromInstanceId('empty'))
-                  .overrideWithValue(emptyObjectInstance),
+                  .overrideWith((_) => emptyObjectInstance.value!),
               instanceProvider(const InstancePath.fromInstanceId('object-2'))
-                  .overrideWithValue(object2Instance),
+                  .overrideWith((_) => object2Instance.value!),
             ],
           );
           addTearDown(container.dispose);
@@ -1370,10 +1372,10 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             instanceProvider(const InstancePath.fromInstanceId('empty'))
-                .overrideWithValue(emptyObjectInstance),
+                .overrideWith((_) => emptyObjectInstance.value!),
             // Class(first: 'string', second: [42, true])
             instanceProvider(const InstancePath.fromInstanceId('object-2'))
-                .overrideWithValue(object2Instance),
+                .overrideWith((_) => object2Instance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'object-2',
@@ -1385,7 +1387,7 @@ void main() {
                   ),
                 ],
               ),
-            ).overrideWithValue(stringInstance),
+            ).overrideWith((_) => stringInstance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'object-2',
@@ -1397,7 +1399,7 @@ void main() {
                   ),
                 ],
               ),
-            ).overrideWithValue(list2Instance),
+            ).overrideWith((_) => list2Instance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'object-2',
@@ -1410,7 +1412,7 @@ void main() {
                   PathToProperty.listIndex(0),
                 ],
               ),
-            ).overrideWithValue(int42Instance),
+            ).overrideWith((_) => int42Instance.value!),
             instanceProvider(
               const InstancePath.fromInstanceId(
                 'object-2',
@@ -1423,7 +1425,7 @@ void main() {
                   PathToProperty.listIndex(1),
                 ],
               ),
-            ).overrideWithValue(trueInstance),
+            ).overrideWith((_) => trueInstance.value!),
           ],
         );
         addTearDown(container.dispose);
