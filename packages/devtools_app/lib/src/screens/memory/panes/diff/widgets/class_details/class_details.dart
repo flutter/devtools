@@ -29,8 +29,8 @@ class HeapClassDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = classData;
     if (data == null) {
-      return const CenteredMessage(
-        'Click a table row to see retaining paths here.',
+      return CenteredMessage(
+        message: 'Click a table row to see retaining paths here.',
       );
     }
 
@@ -44,8 +44,8 @@ class HeapClassDetails extends StatelessWidget {
       valueListenable: pathSelection,
       builder: (_, pathData, __) {
         if (pathData == null) {
-          return const CenteredMessage(
-            'Click a table row to see the detailed path.',
+          return CenteredMessage(
+            message: 'Click a table row to see the detailed path.',
           );
         }
 
