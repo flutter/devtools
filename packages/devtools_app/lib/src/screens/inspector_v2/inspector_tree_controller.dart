@@ -884,11 +884,6 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
   void didUpdateWidget(InspectorTree oldWidget) {
     final oldTreeController = oldWidget.treeController;
     if (oldTreeController != widget.treeController) {

@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/shared.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../../shared/utils.dart';
@@ -54,14 +55,14 @@ class InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
     return ValueListenableBuilder(
       valueListenable: preferences.inspector.inspectorV2Enabled,
       builder: (context, v2Enabled, _) {
-        if (v2Enabled) {
+        if (FeatureFlags.inspectorV2 && v2Enabled) {
           return v2.InspectorScreenBody(
-            controller: controller.inspectorControllerV2,
+            controller: controller.v2InspectorController,
           );
         }
 
         return legacy.InspectorScreenBody(
-          controller: controller.inspectorControllerLegacy,
+          controller: controller.legacyInspectorController,
         );
       },
     );

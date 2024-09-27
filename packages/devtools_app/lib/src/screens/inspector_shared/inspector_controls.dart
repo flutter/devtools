@@ -11,6 +11,7 @@ import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../inspector_shared/inspector_settings_dialog.dart';
 import '../inspector_v2/inspector_controller.dart' as v2;
@@ -55,17 +56,21 @@ class InspectorControls extends StatelessWidget {
           ShowImplementationWidgetsButton(controller: controller!),
         ],
         const Spacer(),
-        const SizedBox(width: defaultSpacing),
-        SwitchSetting(
-          notifier:
-              preferences.inspector.inspectorV2Enabled as ValueNotifier<bool>,
-          title: 'Inspector V2',
-          tooltip: 'Try out the new Flutter inspector.',
-          gaScreen: gac.inspector,
-          gaItem: gac.inspectorV2Enabled,
-          activeColor: activeButtonColor,
-          inactiveColor: Colors.transparent,
-        ),
+        // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
+        // Inspector V2 has been released.
+        if (FeatureFlags.inspectorV2) ...[
+          const SizedBox(width: defaultSpacing),
+          SwitchSetting(
+            notifier:
+                preferences.inspector.inspectorV2Enabled as ValueNotifier<bool>,
+            title: 'Inspector V2',
+            tooltip: 'Try out the new Flutter inspector.',
+            gaScreen: gac.inspector,
+            gaItem: gac.inspectorV2Enabled,
+            activeColor: activeButtonColor,
+            inactiveColor: Colors.transparent,
+          ),
+        ],
         const SizedBox(width: defaultSpacing),
         const InspectorServiceExtensionButtonGroup(),
       ],

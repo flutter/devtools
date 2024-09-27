@@ -12,23 +12,28 @@ import '../inspector_v2/inspector_controller.dart' as v2;
 import '../inspector_v2/inspector_tree_controller.dart' as v2;
 
 class InspectorScreenController extends DisposableController {
-  InspectorScreenController();
 
-  v2.InspectorController get inspectorControllerV2 => v2.InspectorController(
-        inspectorTree: v2.InspectorTreeController(
-          gaId: InspectorScreenMetrics.summaryTreeGaId,
-        ),
-        treeType: FlutterTreeType.widget,
-      );
+  @override
+  void dispose() {
+    v2InspectorController.dispose();
+    legacyInspectorController.dispose();
+    super.dispose();
+  }
 
-  legacy.InspectorController get inspectorControllerLegacy =>
-      legacy.InspectorController(
-        inspectorTree: legacy.InspectorTreeController(
-          gaId: InspectorScreenMetrics.summaryTreeGaId,
-        ),
-        detailsTree: legacy.InspectorTreeController(
-          gaId: InspectorScreenMetrics.detailsTreeGaId,
-        ),
-        treeType: FlutterTreeType.widget,
-      );
+  final v2InspectorController = v2.InspectorController(
+    inspectorTree: v2.InspectorTreeController(
+      gaId: InspectorScreenMetrics.summaryTreeGaId,
+    ),
+    treeType: FlutterTreeType.widget,
+  );
+
+  final legacyInspectorController = legacy.InspectorController(
+    inspectorTree: legacy.InspectorTreeController(
+      gaId: InspectorScreenMetrics.summaryTreeGaId,
+    ),
+    detailsTree: legacy.InspectorTreeController(
+      gaId: InspectorScreenMetrics.detailsTreeGaId,
+    ),
+    treeType: FlutterTreeType.widget,
+  );
 }

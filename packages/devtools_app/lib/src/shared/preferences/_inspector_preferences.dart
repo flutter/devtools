@@ -411,17 +411,11 @@ class InspectorPreferencesController extends DisposableController
     }
   }
 
-  /// Change the value for the hover eval mode setting.
-  ///
-  /// Note: This is only used for testing purposes.
   @visibleForTesting
   void setHoverEvalMode(bool enableHoverEvalMode) {
     _hoverEvalMode.value = enableHoverEvalMode;
   }
 
-  /// Change the value for the Inspector V2 enabled setting.
-  ///
-  /// Note: This is only used for testing purposes.
   @visibleForTesting
   void setInspectorV2Enabled(bool inspectorV2Enabled) {
     _inspectorV2Enabled.value = inspectorV2Enabled;
