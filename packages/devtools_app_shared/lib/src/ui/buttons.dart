@@ -183,7 +183,6 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    print('FILL COLOR IS $fillColor');
     return SizedBox(
       height: defaultButtonHeight,
       child: ToggleButtons(
