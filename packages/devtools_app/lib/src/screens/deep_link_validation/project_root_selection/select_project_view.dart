@@ -138,10 +138,10 @@ class _SelectProjectViewState extends State<SelectProjectView>
     if (androidVariants.isEmpty && iosBuildOptions.configurations.isEmpty) {
       ga.select(
         gac.deeplink,
-        gac.AnalyzeFlutterProject.flutterInvalidAndroidProjectSelected.name,
+        gac.AnalyzeFlutterProject.flutterInvalidProjectSelected.name,
       );
       await showNonFlutterProjectDialog();
-      return ;
+      return;
     }
     controller.selectedProject.value = FlutterProject(
       path: directory,

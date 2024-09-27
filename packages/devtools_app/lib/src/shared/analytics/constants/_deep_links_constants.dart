@@ -11,8 +11,8 @@ enum AnalyzeFlutterProject {
   /// An invalid flutter project has been selected.
   ///
   /// This can be a result of the user didn't select a Flutter project or
-  /// their Android sub project threw error when parsing.
-  flutterInvalidAndroidProjectSelected,
+  /// their Android and iOS sub project both threw error when parsing.
+  flutterInvalidProjectSelected,
 
   /// Used for recording the time spent in loading Android variants.
   loadVariants,
