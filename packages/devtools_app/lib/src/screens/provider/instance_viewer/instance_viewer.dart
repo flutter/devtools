@@ -10,6 +10,7 @@ import 'dart:math' as math;
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -138,7 +139,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           loading: () => const [Text('loading...')],
           error: (err, stack) => _buildError(err, stack, path),
           data: (instance) sync* {
-            final isExpanded = ref.read(isExpandedProvider(path).notifier);
+            final isExpanded = ref.watch(isExpandedProvider(path).state);
             yield _buildHeader(
               instance,
               path: path,
