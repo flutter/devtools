@@ -12,7 +12,6 @@ import '../inspector_v2/inspector_controller.dart' as v2;
 import '../inspector_v2/inspector_tree_controller.dart' as v2;
 
 class InspectorScreenController extends DisposableController {
-
   @override
   void dispose() {
     v2InspectorController.dispose();
