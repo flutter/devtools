@@ -990,8 +990,12 @@ class _InspectorTreeState extends State<InspectorTree>
       safeViewportHeight,
     );
 
+    final centerLeftHalf = Offset(
+      (rect.centerLeft.dx + rect.center.dx) / 2,
+      rect.center.dy,
+    );
     final isRectInViewPort =
-        viewPortInScrollControllerSpace.contains(rect.centerLeft);
+        viewPortInScrollControllerSpace.contains(centerLeftHalf);
     if (isRectInViewPort) {
       // The rect is already in view, don't scroll
       return;
