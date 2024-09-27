@@ -273,21 +273,10 @@ void main() {
       await tester.tap(find.richText('Center'));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-      // Open the settings dialog:
-      final settingsButton = find.byType(SettingsOutlinedButton);
-      await tester.tap(settingsButton);
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
-
       // Disable Inspector V2:
-      final checkboxes = find.byType(Checkbox);
-      expect(checkboxes, findsNWidgets(2));
-      await tester.tap(checkboxes.last);
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
-
-      // Close the dialog:
-      final closeButton = find.byType(DialogCloseButton);
-      expect(closeButton, findsOneWidget);
-      await tester.tap(closeButton);
+      final disableSwitch = find.byType(DevToolsSwitch);
+      expect(disableSwitch, findsOneWidget);
+      await tester.tap(disableSwitch);
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
       // Verify the legacy inspector is visible:
