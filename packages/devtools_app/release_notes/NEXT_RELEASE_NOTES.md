@@ -18,6 +18,10 @@ with WebAssembly. - [#8270](https://github.com/flutter/devtools/pull/8270)
 
     ![Wasm opt-in setting](images/wasm_setting.png "DevTools setting to opt into wasm.")
 
+* Removed the legacy Provider screen from DevTools. The `package:provider` tool is now
+distributed as a DevTools extension from `package:provider`. Upgrade your `package:provider`
+dependency to use the extension. - [#8364](https://github.com/flutter/devtools/pull/8364)
+
 ## Inspector updates
 
 TODO: Remove this section if there are not any general updates.
