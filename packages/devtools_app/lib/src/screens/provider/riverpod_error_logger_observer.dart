@@ -34,11 +34,7 @@ class ErrorLoggerObserver extends ProviderObserver {
     if (value is AsyncError) {
       if (value.error is SentinelException) return;
       _log.shout('Provider $provider failed with "${value.error}"');
-
-      final stackTrace = value.stackTrace;
-      if (stackTrace != null) {
-        _log.info(stackTrace);
-      }
+      _log.info(value.stackTrace);
     }
   }
 }

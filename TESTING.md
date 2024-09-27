@@ -1,5 +1,4 @@
-Testing for DevTools
-=======================
+# Testing for DevTools
 
 DevTools is test covered by multiple types of tests, all of which are run on the CI for each DevTools PR / commit:
 
@@ -25,22 +24,15 @@ Before running tests, make sure your Flutter SDK matches the version that will b
 the CI. To update your local flutter version, run:
 
 ```shell
-flutter channel main
-flutter upgrade
+devtools_tool update-flutter-sdk --update-on-path
 ```
 
-> Note: Running this command requires that you have followed the [set up instructions](CONTRIBUTING.md#set-up-your-devtools-environment)
-in the DevTools contributing guide regarding cloning the Flutter SDK from GitHub.
+> Note: Running this command requires that you have followed the [set up instructions](CONTRIBUTING.md#set-up-your-devtools-environment) in the DevTools contributing guide regarding cloning the Flutter SDK from GitHub, adding the `devtools_tool` executable to your PATH, and running `dart pub get` in the `tool` directory.
 
-Do some one-time configuration of the packages and generate testing mocks:
+You may need to re-generate the testing mocks before running the tests:
 
 ```shell
-(cd tool && flutter pub get)
-for dir in packages/devtools_*; do
-    (cd "$dir" && flutter pub get)
-done
-export DEVTOOLS_TOOL_FLUTTER_FROM_PATH=1
-tool/bin/devtools_tool generate-code
+devtools_tool generate-code --upgrade
 ```
 
 Now you can proceed with running DevTools tests:
@@ -65,7 +57,7 @@ be done in one of two ways:
 
 1. If the tests failed on the CI for a PR, we can download the generated golden images directly from GitHub.
     > If you are developing on a non-MacOS machine, this is the only way you'll be able to update the golden images.
-    - Natvigate to the failed Actions run for your PR on GitHub. Example:
+    - Navigate to the failed Actions run for your PR on GitHub. Example:
 
         ![Failed actions run](_markdown_images/failed_actions_run.png)
 
@@ -78,18 +70,19 @@ be done in one of two ways:
     - Before updating the goldens, ensure your version of Flutter matches the version of Flutter that is used
     on the CI. To update your local flutter version, run:
 
-        ```
-        ./tool/update_flutter_sdk.sh --local
+        ```shell
+        devtools_tool update-flutter-sdk --update-on-path
         ```
 
     - Then proceed with updating the goldens:
 
-        ```
+        ```shell
         flutter test <path/to/my/test> --update-goldens
         ```
 
         or to update goldens for all tests:
-        ```
+
+        ```shell
         flutter test test/ --update-goldens
         ```
 
@@ -101,4 +94,3 @@ When you add a new feature or fix a bug, please add a corresponding test for you
 there.
 - Otherwise, create a new test file with the `_test.dart` suffix, and place it in an appropriate
 location under the `test/` directory for the DevTools package you are working on.
-

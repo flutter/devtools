@@ -138,7 +138,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           loading: () => const [Text('loading...')],
           error: (err, stack) => _buildError(err, stack, path),
           data: (instance) sync* {
-            final isExpanded = ref.watch(isExpandedProvider(path).state);
+            final isExpanded = ref.read(isExpandedProvider(path).notifier);
             yield _buildHeader(
               instance,
               path: path,
