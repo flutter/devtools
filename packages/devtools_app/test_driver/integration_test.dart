@@ -26,13 +26,13 @@ Future<void> main() async {
       List<int> screenshotBytes, [
       Map<String, Object?>? args,
     ]) async {
-      final bool shouldUpdateGoldens = args?['update_goldens'] == true;
+      final shouldUpdateGoldens = args?['update_goldens'] == true;
 
       // TODO(https://github.com/flutter/flutter/issues/118470): remove this.
       // We need this to ensure all golden image checks run. Without this
       // workaround, the flutter integration test framework will crash on the
       // failed expectation.
-      final bool lastScreenshot = args?['last_screenshot'] == true;
+      final lastScreenshot = args?['last_screenshot'] == true;
 
       final goldenFile = File('$_goldensDirectoryPath/$screenshotName.png');
 
@@ -41,7 +41,7 @@ Future<void> main() async {
           // Create the goldens directory if it does not exist.
           Directory(_goldensDirectoryPath).createSync();
         }
-        goldenFile.writeAsBytesSync(screenshotBytes);
+        goldenFile.writeAsBytesSync(screenshotBytes, flush: true);
         print('Golden image updated: $screenshotName.png');
         return true;
       }

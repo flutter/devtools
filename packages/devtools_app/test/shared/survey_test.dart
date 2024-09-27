@@ -17,7 +17,7 @@ void main() {
 
   group('DevToolsSurvey', () {
     test('parse constructor succeeds', () {
-      final survey = DevToolsSurvey.parse({
+      final survey = DevToolsSurvey.fromJson({
         '_comments': [
           'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',
           'title should not exceed 45 characters.',
@@ -45,7 +45,7 @@ void main() {
       expect(survey.minDevToolsVersion.toString(), '2.29.0');
       expect(survey.devEnvironments, ['VSCode']);
 
-      final emptySurvey = DevToolsSurvey.parse({});
+      final emptySurvey = DevToolsSurvey.fromJson({});
       expect(emptySurvey.id, isNull);
       expect(emptySurvey.startDate, isNull);
       expect(emptySurvey.endDate, isNull);
@@ -57,7 +57,7 @@ void main() {
 
     group('should show', () {
       test('empty survey', () {
-        final emptySurvey = DevToolsSurvey.parse({});
+        final emptySurvey = DevToolsSurvey.fromJson({});
 
         withClock(Clock.fixed(DateTime(2023, 11, 7)), () {
           expect(emptySurvey.meetsDateRequirement, isFalse);
@@ -71,7 +71,7 @@ void main() {
       });
 
       test('real survey', () {
-        final survey = DevToolsSurvey.parse({
+        final survey = DevToolsSurvey.fromJson({
           '_comments': [
             'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',
             'title should not exceed 45 characters.',
@@ -93,7 +93,7 @@ void main() {
       });
 
       test('meetsDateRequirement', () {
-        final survey = DevToolsSurvey.parse({
+        final survey = DevToolsSurvey.fromJson({
           'startDate': '2023-10-30T09:00:00-07:00',
           'endDate': '2023-11-14T09:00:00-07:00',
         });
@@ -107,18 +107,18 @@ void main() {
       });
 
       test('meetsMinVersionRequirement', () {
-        var survey = DevToolsSurvey.parse({'minDevToolsVersion': '2.25.0'});
+        var survey = DevToolsSurvey.fromJson({'minDevToolsVersion': '2.25.0'});
         expect(survey.meetsMinVersionRequirement, isTrue);
 
-        survey = DevToolsSurvey.parse({'minDevToolsVersion': '5.25.0'});
+        survey = DevToolsSurvey.fromJson({'minDevToolsVersion': '5.25.0'});
         expect(survey.meetsMinVersionRequirement, isFalse);
       });
 
       test('meetsEnvironmentRequirement', () {
-        final vsCodeOnlySurvey = DevToolsSurvey.parse({
+        final vsCodeOnlySurvey = DevToolsSurvey.fromJson({
           'devEnvironments': ['VSCode'],
         });
-        final intelliJSurvey = DevToolsSurvey.parse({
+        final intelliJSurvey = DevToolsSurvey.fromJson({
           'devEnvironments': ['Android-Studio', 'IntelliJ-IDEA'],
         });
 

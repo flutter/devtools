@@ -5,13 +5,13 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
-import '../../../devtools.dart' as devtools;
 import '../../shared/primitives/url_utils.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/side_panel.dart';
@@ -28,22 +28,24 @@ bool debugTestReleaseNotes = false;
 // from the flutter/website PR, which has a GitHub action that automatically
 // stages commits to firebase. Example:
 // https://flutter-docs-prod--pr8928-dt-notes-links-b0b33er1.web.app/tools/devtools/release-notes/release-notes-2.24.0-src.md.
-const String? _debugReleaseNotesUrl = null;
+String? _debugReleaseNotesUrl;
 
 const releaseNotesKey = Key('release_notes');
-const _unsupportedPathSyntax = '{{site.url}}';
+final _baseUrlRelativeMarkdownLinkPattern = RegExp(
+  r'(\[.*?]\()(/.*\s*)',
+  multiLine: true,
+);
 const _releaseNotesPath = '/f/devtools-releases.json';
 final _flutterDocsSite = Uri.https('docs.flutter.dev');
 
 class ReleaseNotesViewer extends SidePanelViewer {
   const ReleaseNotesViewer({
     required super.controller,
-    Widget? child,
+    super.child,
   }) : super(
           key: releaseNotesKey,
           title: 'What\'s new in DevTools?',
           textIfMarkdownDataEmpty: 'Stay tuned for updates.',
-          child: child,
         );
 }
 
@@ -65,19 +67,22 @@ class ReleaseNotesController extends SidePanelController {
   }
 
   void _maybeShowReleaseNotes() async {
-    final currentUrl = getWebUrl();
-    final currentPage =
-        currentUrl != null ? extractCurrentPageFromUrl(currentUrl) : null;
-    if (isEmbedded() &&
-        currentPage == StandaloneScreenType.vsCodeFlutterPanel.name) {
-      // Do not show release notes in the Flutter sidebar.
-      return;
+    // Do not show release notes in embedded sidebar.
+    if (isEmbedded()) {
+      final currentUrl = getWebUrl();
+      final currentPage =
+          currentUrl != null ? extractCurrentPageFromUrl(currentUrl) : null;
+      if (currentPage == StandaloneScreenType.vsCodeFlutterPanel.name ||
+          currentPage == StandaloneScreenType.editorSidebar.name) {
+        return;
+      }
     }
 
     SemanticVersion previousVersion = SemanticVersion();
     if (server.isDevToolsServerAvailable) {
       final lastReleaseNotesShownVersion =
           await server.getLastShownReleaseNotesVersion();
+      _log.fine('lastReleaseNotesShownVersion: $lastReleaseNotesShownVersion');
       if (lastReleaseNotesShownVersion.isNotEmpty) {
         previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
       }
@@ -98,10 +103,11 @@ class ReleaseNotesController extends SidePanelController {
       final debugUri = Uri.parse(debugUrl);
       final releaseNotesMarkdown = await http.read(debugUri);
 
-      // Update image links to use debug/testing URL.
-      markdown.value = releaseNotesMarkdown.replaceAll(
-        _unsupportedPathSyntax,
-        debugUri.replace(path: '').toString(),
+      // Update the base-url-relative links in the file to
+      // absolute links using the debug/testing URL.
+      markdown.value = _convertBaseUrlRelativeLinks(
+        releaseNotesMarkdown,
+        debugUri.replace(path: ''),
       );
 
       toggleVisibility(true);
@@ -114,10 +120,16 @@ class ReleaseNotesController extends SidePanelController {
     // strip off any build metadata (any characters following a '+' character).
     // Release notes will be hosted on the Flutter website with a version number
     // that does not contain any build metadata.
-    final parsedVersion = SemanticVersion.parse(devtools.version);
-    final notesVersion = latestVersionToCheckForReleaseNotes(parsedVersion);
+    final parsedDevToolsVersion = SemanticVersion.parse(devToolsVersion);
+    final checkVersion =
+        latestVersionToCheckForReleaseNotes(parsedDevToolsVersion);
 
-    if (notesVersion <= versionFloor) {
+    _log.fine(
+      'attempting to fetch and show release notes for DevTools $checkVersion '
+      'with version floor $versionFloor.',
+    );
+
+    if (checkVersion <= versionFloor) {
       // If the current version is equal to or below the version floor,
       // no need to show the release notes.
       _emptyAndClose();
@@ -129,24 +141,31 @@ class ReleaseNotesController extends SidePanelController {
       return;
     }
 
-    // If the version floor has the same major and minor version,
-    // don't check below its patch version.
+    // If the version floor has the same major and minor version as the version
+    // we are checking for, don't check below the version floor's patch version.
     final int minimumPatch;
-    if (versionFloor.major == notesVersion.major &&
-        versionFloor.minor == notesVersion.minor) {
+    if (versionFloor.major == checkVersion.major &&
+        versionFloor.minor == checkVersion.minor) {
       minimumPatch = versionFloor.patch;
     } else {
       minimumPatch = 0;
     }
 
-    final majorMinor = '${notesVersion.major}.${notesVersion.minor}';
-    var patchToCheck = notesVersion.patch;
+    final majorMinor = '${checkVersion.major}.${checkVersion.minor}';
+    var patchToCheck = checkVersion.patch;
 
     // Try each patch version in this major.minor combination until we find
     // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
     while (patchToCheck >= minimumPatch) {
       final releaseToCheck = '$majorMinor.$patchToCheck';
-      if (releases[releaseToCheck] case final String releaseNotePath) {
+
+      final releaseToCheckVersion = SemanticVersion.parse(releaseToCheck);
+      if (releaseToCheckVersion <= versionFloor) {
+        _emptyAndClose();
+        return;
+      }
+
+      if (releases[releaseToCheck] case final releaseNotePath?) {
         final String releaseNotesMarkdown;
         try {
           releaseNotesMarkdown = await http.read(
@@ -162,17 +181,15 @@ class ReleaseNotesController extends SidePanelController {
           continue;
         }
 
-        // Replace the {{site.url}} template syntax that the
-        // Flutter docs website uses to specify site URLs.
-        markdown.value = releaseNotesMarkdown.replaceAll(
-          _unsupportedPathSyntax,
-          _flutterDocsSite.toString(),
+        // Update the base-url-relative links in the file to absolute links.
+        markdown.value = _convertBaseUrlRelativeLinks(
+          releaseNotesMarkdown,
+          _flutterDocsSite,
         );
 
         toggleVisibility(true);
         if (server.isDevToolsServerAvailable) {
-          // Only set the last release notes version
-          // if we are not debugging.
+          // Only set the last release notes version if we are not debugging.
           unawaited(
             server.setLastShownReleaseNotesVersion(releaseToCheck),
           );
@@ -184,10 +201,22 @@ class ReleaseNotesController extends SidePanelController {
     }
 
     _emptyAndClose(
-      'Could not find release notes for DevTools version $notesVersion.',
+      'Could not find release notes for DevTools version $checkVersion.',
     );
     return;
   }
+
+  /// Convert all site-base-url relative links in [markdownContent]
+  /// to absolute links from the specified [baseUrl].
+  ///
+  /// For example, if `baseUrl` is `https://docs.flutter.dev`,
+  /// the path `/tools/devtools` would be converted
+  /// to `https://docs.flutter.dev/tools/devtools`.
+  String _convertBaseUrlRelativeLinks(String markdownContent, Uri baseUrl) =>
+      markdownContent.replaceAllMapped(
+        _baseUrlRelativeMarkdownLinkPattern,
+        (m) => '${m[1]}${baseUrl.toString()}${m[2]}',
+      );
 
   /// Retrieve and parse the release note index from the
   /// Flutter website at [_flutterDocsSite]/[_releaseNotesPath].
@@ -195,7 +224,7 @@ class ReleaseNotesController extends SidePanelController {
   /// Calls [_emptyAndClose] and returns `null` if
   /// the retrieval or parsing fails.
   @visibleForTesting
-  Future<Map<String, Object?>?> retrieveReleasesFromIndex() async {
+  Future<Map<String, String>?> retrieveReleasesFromIndex() async {
     final Map<String, Object?> releaseIndex;
     try {
       final releaseIndexString = await http.read(releaseIndexUrl);
@@ -213,7 +242,7 @@ class ReleaseNotesController extends SidePanelController {
       );
       return null;
     }
-    return releaseIndex;
+    return releases.cast<String, String>();
   }
 
   /// Set the release notes viewer as having no contents, hidden,

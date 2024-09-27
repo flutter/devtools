@@ -19,19 +19,21 @@ part '_perfetto_events_raw.dart';
 
 PerfettoTimeline perfettoVmTimeline = PerfettoTimeline.parse({
   'trace': base64Encode(
-    rawPerformanceData[OfflinePerformanceData.traceBinaryKey] as List<int>,
+    (rawPerformanceData[OfflinePerformanceData.traceBinaryKey] as List<Object?>)
+        .cast<int>(),
   ),
   'timeOriginMicros': 0,
   'timeExtentMicros': 800000000000,
 })!;
 
 Map<String, Object?> rawPerformanceData =
-    samplePerformanceData[ScreenMetaData.performance.id];
+    (samplePerformanceData[ScreenMetaData.performance.id] as Map)
+        .cast<String, Object?>();
 
 final testUiTrackId = Int64(22787);
 final testRasterTrackId = Int64(31491);
 
-final testFrame0 = FlutterFrame.parse({
+final testFrame0 = FlutterFrame.fromJson({
   'number': 0,
   'startTime': 10000,
   'elapsed': 20000,
@@ -40,7 +42,7 @@ final testFrame0 = FlutterFrame.parse({
   'vsyncOverhead': 10,
 });
 
-final testFrame1 = FlutterFrame.parse({
+final testFrame1 = FlutterFrame.fromJson({
   'number': 1,
   'startTime': 40000,
   'elapsed': 20000,
@@ -49,7 +51,7 @@ final testFrame1 = FlutterFrame.parse({
   'vsyncOverhead': 1000,
 });
 
-final testFrame2 = FlutterFrame.parse({
+final testFrame2 = FlutterFrame.fromJson({
   'number': 2,
   'startTime': 40000,
   'elapsed': 20000,
@@ -58,7 +60,7 @@ final testFrame2 = FlutterFrame.parse({
   'vsyncOverhead': 1000,
 });
 
-final jankyFrame = FlutterFrame.parse({
+final jankyFrame = FlutterFrame.fromJson({
   'number': 2,
   'startTime': 10000,
   'elapsed': 20000,
@@ -67,7 +69,7 @@ final jankyFrame = FlutterFrame.parse({
   'vsyncOverhead': 1000,
 });
 
-final jankyFrameUiOnly = FlutterFrame.parse({
+final jankyFrameUiOnly = FlutterFrame.fromJson({
   'number': 3,
   'startTime': 10000,
   'elapsed': 20000,
@@ -76,7 +78,7 @@ final jankyFrameUiOnly = FlutterFrame.parse({
   'vsyncOverhead': 1000,
 });
 
-final jankyFrameRasterOnly = FlutterFrame.parse({
+final jankyFrameRasterOnly = FlutterFrame.fromJson({
   'number': 4,
   'startTime': 10000,
   'elapsed': 20000,
@@ -85,7 +87,7 @@ final jankyFrameRasterOnly = FlutterFrame.parse({
   'vsyncOverhead': 10,
 });
 
-final testFrameWithShaderJank = FlutterFrame.parse({
+final testFrameWithShaderJank = FlutterFrame.fromJson({
   'number': 5,
   'startTime': 10000,
   'elapsed': 200000,
@@ -96,7 +98,7 @@ final testFrameWithShaderJank = FlutterFrame.parse({
   ..setEventFlow(FlutterFrame4.uiEventWithExtras)
   ..setEventFlow(timelineEventWithShaderJank);
 
-final testFrameWithSubtleShaderJank = FlutterFrame.parse({
+final testFrameWithSubtleShaderJank = FlutterFrame.fromJson({
   'number': 6,
   'startTime': 10000,
   'elapsed': 200000,
@@ -126,7 +128,7 @@ final timelineEventWithShaderJank = testTimelineEvent(
 
 /// Data for Frame (id: 2)
 abstract class FlutterFrame2 {
-  static final frame = FlutterFrame.parse({
+  static final frame = FlutterFrame.fromJson({
     'number': 2,
     'startTime': 713834379092,
     'elapsed': 1730039,
@@ -371,7 +373,7 @@ abstract class FlutterFrame2 {
 
 /// Data for Frame (id: 4)
 abstract class FlutterFrame4 {
-  static final frame = FlutterFrame.parse(_frameJson)
+  static final frame = FlutterFrame.fromJson(_frameJson)
     ..setEventFlow(uiEvent)
     ..setEventFlow(rasterEvent);
 
@@ -379,7 +381,7 @@ abstract class FlutterFrame4 {
   ///
   /// Some events included in [uiEventWithExtras] and [rasterEventWithExtras]
   /// are not part of the original trace from with [FlutterFrame4] was formed.
-  static final frameWithExtras = FlutterFrame.parse(_frameJson)
+  static final frameWithExtras = FlutterFrame.fromJson(_frameJson)
     ..setEventFlow(uiEventWithExtras)
     ..setEventFlow(rasterEvent);
 
@@ -951,16 +953,20 @@ abstract class FlutterFrame4 {
 
 /// Data for Frame (id: 6)
 abstract class FlutterFrame6 {
-  static final frame = FlutterFrame.parse({
+  static final frame = FlutterFrame.fromJson(_frameJson)
+    ..setEventFlow(uiEvent)
+    ..setEventFlow(rasterEvent);
+
+  static final frameWithoutTimelineEvents = FlutterFrame.fromJson(_frameJson);
+
+  static const _frameJson = {
     'number': 6,
     'startTime': 713836329948,
     'elapsed': 2843,
     'build': 745,
     'raster': 883,
     'vsyncOverhead': 1108,
-  })
-    ..setEventFlow(uiEvent)
-    ..setEventFlow(rasterEvent);
+  };
 
   static const uiEventAsString =
       '''  Animator::BeginFrame [713836329948 μs - 713836331003 μs]

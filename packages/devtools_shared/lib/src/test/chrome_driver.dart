@@ -13,17 +13,18 @@ class ChromeDriver with IOMixin {
 
   // TODO(kenz): add error messaging if the chromedriver executable is not
   // found. We can also consider using web installers directly in this script:
-  // https://github.com/flutter/flutter/wiki/Running-Flutter-Driver-tests-with-Web#web-installers-repo.
+  // https://github.com/flutter/flutter/blob/master/docs/contributing/testing/Running-Flutter-Driver-tests-with-Web.md#web-installers-repo.
   Future<void> start({bool debugLogging = false}) async {
     try {
+      const chromedriverExe = 'chromedriver';
+      const chromedriverArgs = ['--port=4444'];
       if (debugLogging) {
         print('starting the chromedriver process');
+        print('> $chromedriverExe ${chromedriverArgs.join(' ')}');
       }
       final process = _process = await Process.start(
-        'chromedriver',
-        [
-          '--port=4444',
-        ],
+        chromedriverExe,
+        chromedriverArgs,
       );
       listenToProcessOutput(process, printTag: 'ChromeDriver');
     } catch (e) {

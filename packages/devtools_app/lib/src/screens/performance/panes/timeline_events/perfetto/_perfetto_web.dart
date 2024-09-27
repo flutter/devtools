@@ -9,24 +9,27 @@ import 'dart:typed_data';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_app_shared/web_utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:vm_service_protos/vm_service_protos.dart';
+import 'package:logging/logging.dart';
 import 'package:web/web.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/development_helpers.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/utils.dart';
 import '../../../performance_utils.dart';
 import '_perfetto_controller_web.dart';
 import 'perfetto_controller.dart';
 
+final _log = Logger('PerfettoWeb');
+
 class Perfetto extends StatefulWidget {
   const Perfetto({
-    Key? key,
+    super.key,
     required this.perfettoController,
-  }) : super(key: key);
+  });
 
   final PerfettoController perfettoController;
 
@@ -47,7 +50,7 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
 
     // If [_perfettoController.activeTrace.trace] has a null value, the trace
     // data has not yet been initialized.
-    if (_perfettoController.activeTrace.trace != null) {
+    if (_perfettoController.activeTrace.traceBinary != null) {
       _loadActiveTrace();
     }
     addAutoDisposeListener(_perfettoController.activeTrace, _loadActiveTrace);
@@ -60,10 +63,10 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
   }
 
   void _loadActiveTrace() {
-    assert(_perfettoController.activeTrace.trace != null);
+    assert(_perfettoController.activeTrace.traceBinary != null);
     unawaited(
       _viewController._loadPerfettoTrace(
-        _perfettoController.activeTrace.trace!,
+        _perfettoController.activeTrace.traceBinary!,
       ),
     );
   }
@@ -103,6 +106,13 @@ class _PerfettoViewController extends DisposableController
   /// 'onLoad' stream.
   late final Completer<void> _perfettoIFrameReady;
 
+  /// Whether the perfetto iFrame has been unloaded after loading.
+  ///
+  /// This is stored to prevent race conditions where the iFrame's content
+  /// window has become null. This is set to true when the perfetto iFrame has
+  /// received the first event on the 'unload' stream.
+  bool _perfettoIFrameUnloaded = false;
+
   /// Completes when the Perfetto postMessage handler is ready, which is
   /// signaled by receiving a [_perfettoPong] event in response to sending a
   /// [_perfettoPing] event.
@@ -134,6 +144,7 @@ class _PerfettoViewController extends DisposableController
     _perfettoIFrameReady = Completer<void>();
     _perfettoHandlerReady = Completer<void>();
     _devtoolsThemeHandlerReady = Completer<void>();
+    _perfettoIFrameUnloaded = false;
 
     unawaited(
       perfettoController.perfettoIFrame.onLoad.first.then((_) {
@@ -141,14 +152,25 @@ class _PerfettoViewController extends DisposableController
       }),
     );
 
+    // TODO(kenz): uncomment once https://github.com/dart-lang/web/pull/246 is
+    // landed and package:web 0.6.0 is published.
+    // unawaited(
+    //   perfettoController.perfettoIFrame.onUnload.first.then((_) {
+    //     if (_perfettoIFrameReady.isCompleted) {
+    //       // Only set to true if this occurs after the iFrame has been loaded.
+    //       _perfettoIFrameUnloaded = true;
+    //     }
+    //   }),
+    // );
+
     window.addEventListener(
       'message',
       _handleMessageListener = _handleMessage.toJS,
     );
 
-    unawaited(_loadStyle(preferences.darkModeTheme.value));
-    addAutoDisposeListener(preferences.darkModeTheme, () async {
-      await _loadStyle(preferences.darkModeTheme.value);
+    unawaited(_loadStyle(darkMode: isDarkThemeEnabled()));
+    addAutoDisposeListener(preferences.darkModeEnabled, () async {
+      await _loadStyle(darkMode: isDarkThemeEnabled());
       reloadCssForThemeChange();
     });
 
@@ -161,28 +183,25 @@ class _PerfettoViewController extends DisposableController
     );
   }
 
-  Future<void> _loadPerfettoTrace(Trace trace) async {
-    late Uint8List buffer;
-    debugTimeSync(
-      () => buffer = trace.writeToBuffer(),
-      debugName: 'Trace.writeToBuffer',
-    );
-
-    if (buffer.isEmpty) {
+  Future<void> _loadPerfettoTrace(Uint8List traceBinary) async {
+    if (traceBinary.isEmpty) {
       // TODO(kenz): is there a better way to create an empty data set using the
       // protozero format? I think this is still using the legacy Chrome format.
       // We can't use `Trace()` because the Perfetto post message handler throws
       // an exception if an empty buffer is posted.
-      buffer = Uint8List.fromList(jsonEncode({'traceEvents': []}).codeUnits);
+      traceBinary = Uint8List.fromList(
+        jsonEncode({'traceEvents': []}).codeUnits,
+      );
     }
 
     await _pingPerfettoUntilReady();
     ga.select(gac.performance, gac.PerformanceEvents.perfettoLoadTrace.name);
     _postMessage({
       'perfetto': {
-        'buffer': buffer,
+        'buffer': traceBinary,
         'title': 'DevTools timeline trace',
         'keepApiOpen': true,
+        'expandAllTrackGroups': true,
       },
     });
   }
@@ -210,9 +229,10 @@ class _PerfettoViewController extends DisposableController
     });
   }
 
-  Future<void> _loadStyle(bool darkMode) async {
+  Future<void> _loadStyle({required bool darkMode}) async {
     // This message will be handled by [devtools_theme_handler.js], which is
-    // included in the Perfetto build inside [packages/perfetto_ui_compiled/dist].
+    // included in the Perfetto build inside
+    // [packages/perfetto_ui_compiled/dist].
     await _pingDevToolsThemeHandlerUntilReady();
     _postMessageWithId(
       EmbeddedPerfettoEvent.devtoolsThemeChange.event,
@@ -246,12 +266,18 @@ class _PerfettoViewController extends DisposableController
 
   void _postMessage(Object message) async {
     await _perfettoIFrameReady.future;
-    assert(
-      perfettoController.perfettoIFrame.contentWindow != null,
-      'Something went wrong. The iFrame\'s contentWindow is null after the'
-      ' _perfettoIFrameReady future completed.',
-    );
-    perfettoController.perfettoIFrame.contentWindow!.postMessage(
+    if (_perfettoIFrameUnloaded) return;
+    final iFrameWindow = perfettoController.perfettoIFrame.contentWindow;
+    if (iFrameWindow == null) {
+      _log.warning(
+        'Something went wrong. The Perfetto iFrame\'s contentWindow is null '
+        'after the _perfettoIFrameReady future completed. The message that '
+        'was being posted when the error occurred was:\n${message.toString()}',
+      );
+      return;
+    }
+
+    iFrameWindow.postMessage(
       message.jsify(),
       perfettoController.perfettoUrl.toJS,
     );
@@ -272,14 +298,11 @@ class _PerfettoViewController extends DisposableController
   void _handleMessage(Event e) {
     if (e.isMessageEvent) {
       final messageData = ((e as MessageEvent).data as JSString).toDart;
-      if (messageData == EmbeddedPerfettoEvent.pong.event &&
-          !_perfettoHandlerReady.isCompleted) {
-        _perfettoHandlerReady.complete();
+      if (messageData == EmbeddedPerfettoEvent.pong.event) {
+        _perfettoHandlerReady.safeComplete();
       }
-
-      if (messageData == EmbeddedPerfettoEvent.devtoolsThemePong.event &&
-          !_devtoolsThemeHandlerReady.isCompleted) {
-        _devtoolsThemeHandlerReady.complete();
+      if (messageData == EmbeddedPerfettoEvent.devtoolsThemePong.event) {
+        _devtoolsThemeHandlerReady.safeComplete();
       }
     }
   }
@@ -327,7 +350,9 @@ class _PerfettoViewController extends DisposableController
     window.removeEventListener('message', _handleMessageListener);
     _handleMessageListener = null;
     _pollForPerfettoHandlerReady?.cancel();
+    _pollForPerfettoHandlerReady = null;
     _pollForThemeHandlerReady?.cancel();
+    _pollForThemeHandlerReady = null;
     super.dispose();
   }
 }

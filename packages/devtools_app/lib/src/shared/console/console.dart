@@ -73,10 +73,9 @@ class ConsoleFrame extends StatelessWidget {
 /// This is a ListView of text lines, with a monospace font and a border.
 class _ConsoleOutput extends StatefulWidget {
   const _ConsoleOutput({
-    Key? key,
     required this.lines,
     this.footer,
-  }) : super(key: key);
+  });
 
   final ValueListenable<List<ConsoleLine>> lines;
 
@@ -90,7 +89,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
     with AutoDisposeMixin<_ConsoleOutput> {
   // The scroll controller must survive ConsoleOutput re-renders
   // to work as intended, so it must be part of the "state".
-  final ScrollController _scroll = ScrollController();
+  final _scroll = ScrollController();
 
   static const _scrollBarKey = Key('console-scrollbar');
 

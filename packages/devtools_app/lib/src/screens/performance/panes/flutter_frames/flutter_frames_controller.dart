@@ -68,7 +68,7 @@ class FlutterFramesController extends PerformanceFeatureController {
 
   @override
   Future<void> init() async {
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       await serviceConnection.serviceManager.onServiceAvailable;
       final connectedApp = serviceConnection.serviceManager.connectedApp!;
       if (connectedApp.isFlutterAppNow!) {

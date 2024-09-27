@@ -26,7 +26,7 @@ void main() {
       setGlobal(BreakpointManager, BreakpointManager());
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(PreferencesController, PreferencesController());
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       final scriptManager = MockScriptManager();
       when(scriptManager.sortedScripts).thenReturn(
         const FixedValueListenable<List<ScriptRef>>([]),
@@ -220,7 +220,7 @@ void main() {
     );
 
     testWidgets('are correct when offline', (WidgetTester tester) async {
-      offlineController.enterOfflineMode(
+      offlineDataController.startShowingOfflineData(
         offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
       setupMockValues(web: true); // Web apps would normally hide
@@ -232,7 +232,7 @@ void main() {
           // InspectorScreen,
           PerformanceScreen, // Works offline, so appears regardless of web flag
           ProfilerScreen, // Works offline, so appears regardless of web flag
-          // MemoryScreen,
+          MemoryScreen, // Works offline, so appears regardless of web flag
           // DebuggerScreen,
           // NetworkScreen,
           // LoggingScreen,
@@ -241,7 +241,7 @@ void main() {
           // VMDeveloperToolsScreen,
         ]),
       );
-      offlineController.exitOfflineMode();
+      offlineDataController.stopShowingOfflineData();
     });
 
     testWidgets(
@@ -274,6 +274,6 @@ void main() {
 
 List<Type> get visibleScreenTypes => defaultScreens()
     .map((s) => s.screen)
-    .where(shouldShowScreen)
+    .where((s) => shouldShowScreen(s).show)
     .map((s) => s.runtimeType)
     .toList();

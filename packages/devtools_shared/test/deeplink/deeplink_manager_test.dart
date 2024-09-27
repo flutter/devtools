@@ -63,7 +63,7 @@ Running Gradle task 'printBuildVariants'...                        10.4s
     test(
       'getBuildVariants return internal server error if command failed',
       () async {
-        const String projectRoot = '/abc';
+        const projectRoot = '/abc';
         manager.expectedCommands.add(
           TestCommand(
             executable: manager.mockedFlutterBinary,
@@ -92,10 +92,10 @@ Running Gradle task 'printBuildVariants'...                        10.4s
     );
 
     test('getAndroidAppLinkSettings calls flutter command correctly', () async {
-      const String projectRoot = '/abc';
-      const String json = '"some json"';
-      const String buildVariant = 'someVariant';
-      final File jsonFile = File('${tmpDir.path}/some-output.json');
+      const projectRoot = '/abc';
+      const json = '"some json"';
+      const buildVariant = 'someVariant';
+      final jsonFile = File('${tmpDir.path}/some-output.json');
       jsonFile.writeAsStringSync(json);
       manager.expectedCommands.add(
         TestCommand(
@@ -132,11 +132,11 @@ result saved in ${jsonFile.absolute.path}
     test(
       'getIosUniversalLinkSettings calls flutter command correctly',
       () async {
-        const String projectRoot = '/abc';
-        const String json = '"some json"';
-        const String configuration = 'someConfig';
-        const String target = 'someTarget';
-        final File jsonFile = File('${tmpDir.path}/some-output.json');
+        const projectRoot = '/abc';
+        const json = '"some json"';
+        const configuration = 'someConfig';
+        const target = 'someTarget';
+        final jsonFile = File('${tmpDir.path}/some-output.json');
         jsonFile.writeAsStringSync(json);
         manager.expectedCommands.add(
           TestCommand(
@@ -174,7 +174,7 @@ result saved in ${jsonFile.absolute.path}
     );
 
     test('getIosBuildOptions calls flutter command correctly', () async {
-      const String projectRoot = '/abc';
+      const projectRoot = '/abc';
       manager.expectedCommands.add(
         TestCommand(
           executable: manager.mockedFlutterBinary,
@@ -207,7 +207,7 @@ result saved in ${jsonFile.absolute.path}
 }
 
 class StubbedDeeplinkManager extends DeeplinkManager {
-  final List<TestCommand> expectedCommands = <TestCommand>[];
+  final expectedCommands = <TestCommand>[];
   String mockedFlutterBinary = 'somebinary';
 
   @override
@@ -219,7 +219,7 @@ class StubbedDeeplinkManager extends DeeplinkManager {
     required List<String> arguments,
   }) async {
     if (expectedCommands.isNotEmpty) {
-      final TestCommand expectedCommand = expectedCommands.removeAt(0);
+      final expectedCommand = expectedCommands.removeAt(0);
       expect(expectedCommand.executable, executable);
       expect(
         const ListEquality<String>()

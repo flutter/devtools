@@ -255,9 +255,6 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
         );
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   String getValue(MethodTableGraphNode dataObject) => dataObject.name;
 
   @override
@@ -286,10 +283,9 @@ const _totalAndSelfColumnWidth = 60.0;
 const _callGraphColumnWidth = 70.0;
 
 class _SelfTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
-  _SelfTimeColumn({String? titleTooltip})
+  _SelfTimeColumn()
       : super(
           title: 'Self %',
-          titleTooltip: titleTooltip,
           percentageOnly: true,
           timeProvider: (node) => node.selfTime,
           percentAsDoubleProvider: (node) => node.selfTimeRatio,
@@ -299,10 +295,9 @@ class _SelfTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
 }
 
 class _TotalTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
-  _TotalTimeColumn({String? titleTooltip})
+  _TotalTimeColumn()
       : super(
           title: 'Total %',
-          titleTooltip: titleTooltip,
           percentageOnly: true,
           timeProvider: (node) => node.totalTime,
           percentAsDoubleProvider: (node) => node.totalTimeRatio,
@@ -314,10 +309,8 @@ class _TotalTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
 class _CallerTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
   _CallerTimeColumn({
     required MethodTableController methodTableController,
-    String? titleTooltip,
   }) : super(
           title: 'Caller %',
-          titleTooltip: titleTooltip,
           percentageOnly: true,
           percentAsDoubleProvider: (node) =>
               methodTableController.callerPercentageFor(node),
@@ -329,10 +322,8 @@ class _CallerTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
 class _CalleeTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
   _CalleeTimeColumn({
     required MethodTableController methodTableController,
-    String? titleTooltip,
   }) : super(
           title: 'Callee %',
-          titleTooltip: titleTooltip,
           percentageOnly: true,
           percentAsDoubleProvider: (node) =>
               methodTableController.calleePercentageFor(node),

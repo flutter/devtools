@@ -19,6 +19,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
+import 'byte_utils.dart';
 import 'simple_items.dart';
 
 final _log = Logger('utils');
@@ -31,98 +32,16 @@ bool collectionEquals(Object? e1, Object? e2, {bool ordered = true}) {
 }
 
 // 2^52 is the max int for dart2js.
-final int maxJsInt = pow(2, 52) as int;
+final maxJsInt = pow(2, 52) as int;
 
-final NumberFormat nf = NumberFormat.decimalPattern();
+final nf = NumberFormat.decimalPattern();
 
 String percent(double d, {int fractionDigits = 2}) =>
     '${(d * 100).toStringAsFixed(fractionDigits)}%';
 
 /// Unifies printing of retained size to avoid confusion related to different rounding.
-String? prettyPrintRetainedSize(int? bites) => prettyPrintBytes(
-      bites,
-      includeUnit: true,
-      kbFractionDigits: 1,
-    );
-
-String? prettyPrintBytes(
-  num? bytes, {
-  int kbFractionDigits = 0,
-  int mbFractionDigits = 1,
-  int gbFractionDigits = 1,
-  bool includeUnit = false,
-  num roundingPoint = 1.0,
-  int maxBytes = 52,
-}) {
-  if (bytes == null) {
-    return null;
-  }
-  // TODO(peterdjlee): Generalize to handle different kbFractionDigits.
-  // Ensure a small number of bytes does not print as 0 KB.
-  // If bytes >= maxBytes and kbFractionDigits == 1, it will start rounding to 0.1 KB.
-  if (bytes.abs() < maxBytes && kbFractionDigits == 1) {
-    var output = bytes.toString();
-    if (includeUnit) {
-      output += ' B';
-    }
-    return output;
-  }
-  final sizeInKB = bytes.abs() / 1024.0;
-  final sizeInMB = sizeInKB / 1024.0;
-  final sizeInGB = sizeInMB / 1024.0;
-
-  if (sizeInGB >= roundingPoint) {
-    return printGB(
-      bytes,
-      fractionDigits: gbFractionDigits,
-      includeUnit: includeUnit,
-    );
-  } else if (sizeInMB >= roundingPoint) {
-    return printMB(
-      bytes,
-      fractionDigits: mbFractionDigits,
-      includeUnit: includeUnit,
-    );
-  } else {
-    return printKB(
-      bytes,
-      fractionDigits: kbFractionDigits,
-      includeUnit: includeUnit,
-    );
-  }
-}
-
-String printKB(num bytes, {int fractionDigits = 0, bool includeUnit = false}) {
-  final NumberFormat kbPattern = NumberFormat.decimalPattern()
-    ..maximumFractionDigits = fractionDigits;
-
-  // We add ((1024/2)-1) to the value before formatting so that a non-zero byte
-  // value doesn't round down to 0. If showing decimal points, let it round normally.
-  // TODO(peterdjlee): Round up to the respective digit when fractionDigits > 0.
-  final processedBytes = fractionDigits == 0 ? bytes + 511 : bytes;
-  var output = kbPattern.format(processedBytes / 1024);
-  if (includeUnit) {
-    output += ' KB';
-  }
-  return output;
-}
-
-String printMB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
-  var output = (bytes / (1024 * 1024.0)).toStringAsFixed(fractionDigits);
-  if (includeUnit) {
-    output += ' MB';
-  }
-  return output;
-}
-
-String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
-  var output =
-      (bytes / (1024 * 1024.0 * 1024.0)).toStringAsFixed(fractionDigits);
-  if (includeUnit) {
-    output += ' GB';
-  }
-  return output;
-}
+String? prettyPrintRetainedSize(int? bytes) =>
+    prettyPrintBytes(bytes, includeUnit: true);
 
 enum DurationDisplayUnit {
   micros('μs'),
@@ -364,7 +283,7 @@ Stream combineStreams(Stream a, Stream b, Stream c) {
 class Property<T> {
   Property(this._value);
 
-  final StreamController<T> _changeController = StreamController<T>.broadcast();
+  final _changeController = StreamController<T>.broadcast();
   T _value;
 
   T get value => _value;
@@ -599,7 +518,6 @@ class TimeRange {
       case TimeUnit.microseconds:
         return '[${_start?.inMicroseconds} μs - ${end?.inMicroseconds} μs]';
       case TimeUnit.milliseconds:
-      default:
         return '[${_start?.inMilliseconds} ms - ${end?.inMilliseconds} ms]';
     }
   }
@@ -654,7 +572,7 @@ double safeDivide(
 ///
 /// Only the object that created this reporter should call [notify].
 class Reporter implements Listenable {
-  final Set<VoidCallback> _listeners = {};
+  final _listeners = <VoidCallback>{};
 
   /// Adds [callback] to this reporter.
   ///
@@ -679,7 +597,7 @@ class Reporter implements Listenable {
   /// a notification callback leads to a change in the listeners,
   /// only the original listeners will be called.
   void notify() {
-    for (var callback in _listeners.toList()) {
+    for (final callback in _listeners.toList()) {
       callback();
     }
   }
@@ -933,14 +851,14 @@ Color colorFromAnsi(List<int> ansiInput) {
 /// An extension on [LogicalKeySet] to provide user-facing names for key
 /// bindings.
 extension LogicalKeySetExtension on LogicalKeySet {
-  static final Set<LogicalKeyboardKey> _modifiers = {
+  static final _modifiers = <LogicalKeyboardKey>{
     LogicalKeyboardKey.alt,
     LogicalKeyboardKey.control,
     LogicalKeyboardKey.meta,
     LogicalKeyboardKey.shift,
   };
 
-  static final Map<LogicalKeyboardKey, String> _modifierNames = {
+  static final _modifierNames = <LogicalKeyboardKey, String>{
     LogicalKeyboardKey.alt: 'Alt',
     LogicalKeyboardKey.control: 'Control',
     LogicalKeyboardKey.meta: 'Meta',
@@ -951,7 +869,7 @@ extension LogicalKeySetExtension on LogicalKeySet {
   String describeKeys({bool isMacOS = false}) {
     // Put the modifiers first. If it has a synonym, then it's something like
     // shiftLeft, altRight, etc.
-    final List<LogicalKeyboardKey> sortedKeys = keys.toList()
+    final sortedKeys = keys.toList()
       ..sort((a, b) {
         final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
         final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
@@ -983,13 +901,9 @@ typedef DevToolsJsonFileHandler = void Function(DevToolsJsonFile file);
 class DevToolsJsonFile extends DevToolsFile<Object> {
   const DevToolsJsonFile({
     required String name,
-    required DateTime lastModifiedTime,
-    required Object data,
-  }) : super(
-          path: name,
-          lastModifiedTime: lastModifiedTime,
-          data: data,
-        );
+    required super.lastModifiedTime,
+    required super.data,
+  }) : super(path: name);
 }
 
 class DevToolsFile<T> {
@@ -1035,32 +949,6 @@ extension StringExtension on String {
     );
   }
 
-  /// Whether [query] is a case insensitive "fuzzy match" for this String.
-  ///
-  /// For example, the query "hwf" would be a fuzzy match for the String
-  /// "hello_world_file".
-  bool caseInsensitiveFuzzyMatch(String query) {
-    query = query.toLowerCase();
-    final lowercase = toLowerCase();
-    final it = query.characters.iterator;
-    var strIndex = 0;
-    while (it.moveNext()) {
-      final char = it.current;
-      var foundChar = false;
-      for (int i = strIndex; i < lowercase.length; i++) {
-        if (lowercase[i] == char) {
-          strIndex = i + 1;
-          foundChar = true;
-          break;
-        }
-      }
-      if (!foundChar) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   /// Whether [other] is a case insensitive match for this String.
   ///
   /// If [pattern] is a [RegExp], this method will return true if and only if
@@ -1103,22 +991,19 @@ extension IterableExtension<T> on Iterable<T> {
 }
 
 extension ListExtension<T> on List<T> {
-  List<T> joinWith(T separator) {
+  List<T> joinWith(
+    T separator, {
+    bool includeTrailing = false,
+    bool includeLeading = false,
+  }) {
     return [
+      if (includeLeading) separator,
       for (int i = 0; i < length; i++) ...[
         this[i],
         if (i != length - 1) separator,
       ],
+      if (includeTrailing) separator,
     ];
-  }
-
-  bool containsWhere(bool Function(T element) test) {
-    for (var e in this) {
-      if (test(e)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   T get second => this[1];
@@ -1136,18 +1021,16 @@ extension ListExtension<T> on List<T> {
   }
 }
 
-extension SetExtension<T> on Set<T> {
-  bool containsWhere(bool Function(T element) test) {
-    for (var e in this) {
-      if (test(e)) {
-        return true;
-      }
-    }
-    return false;
+extension NullableListExtension<T> on List<T>? {
+  bool get isNullOrEmpty {
+    final self = this;
+    return self == null || self.isEmpty;
   }
+}
 
+extension SetExtension<T> on Set<T> {
   bool containsAny(Iterable<T> any) {
-    for (var e in any) {
+    for (final e in any) {
       if (contains(e)) {
         return true;
       }
@@ -1158,22 +1041,6 @@ extension SetExtension<T> on Set<T> {
 
 extension UiListExtension<T> on List<T> {
   int get numSpacers => max(0, length - 1);
-}
-
-String simplifyDevToolsUrl(String url) {
-  // DevTools urls can have the form:
-  // http://localhost:123/?key=value
-  // http://localhost:123/#/?key=value
-  // http://localhost:123/#/page-id?key=value
-  // Since we just want the query params, we will modify the url to have an
-  // easy-to-parse form.
-  return url.replaceFirst(RegExp(r'#\/([\w\-]*)[?]'), '?');
-}
-
-Map<String, String> devToolsQueryParams(String url) {
-  final modifiedUrl = simplifyDevToolsUrl(url);
-  final uri = Uri.parse(modifiedUrl);
-  return uri.queryParameters;
 }
 
 double safePositiveDouble(double value) {
@@ -1235,20 +1102,16 @@ extension UriExtension on Uri {
   }
 }
 
-Iterable<T> removeNullValues<T>(Iterable<T?> values) {
-  return values.whereType<T>();
-}
-
 // TODO(mtaylee): Prefer to use this helper method whenever a call to
 // .split('/').last is made on a String (usually on URIs).
 // See https://github.com/flutter/devtools/issues/4360.
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
-String? fileNameFromUri(String? uri) => uri?.split('/').last;
+String? fileNameFromUri(String? uri) => uri?.split('/').lastOrNull;
 
 /// Calculates subtraction of two maps.
 ///
-/// Result map keys is union of the imput maps' keys.
+/// Result map keys is union of the input maps' keys.
 Map<K, R> subtractMaps<K, F, S, R>({
   required Map<K, S>? subtract,
   required Map<K, F>? from,
@@ -1260,7 +1123,7 @@ Map<K, R> subtractMaps<K, F, S, R>({
   final result = <K, R>{};
   final unionOfKeys = from.keys.toSet().union(subtract.keys.toSet());
 
-  for (var key in unionOfKeys) {
+  for (final key in unionOfKeys) {
     final diff = subtractor(from: from[key], subtract: subtract[key]);
     if (diff != null) result[key] = diff;
   }

@@ -43,7 +43,7 @@ void main() {
       when(mockRasterPhase.type).thenReturn(FramePhaseType.raster);
 
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       final fakeServiceConnection = FakeServiceConnectionManager();
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());
@@ -60,12 +60,12 @@ void main() {
       FrameAnalysis frameAnalysis,
     ) async {
       await tester.pumpWidget(
-        wrapWithControllers(
+        wrapSimple(
           FrameHints(
             frameAnalysis: frameAnalysis,
             enhanceTracingController: mockEnhanceTracingController,
+            displayRefreshRate: defaultRefreshRate,
           ),
-          performance: PerformanceController(),
         ),
       );
       expect(find.byType(FrameHints), findsOneWidget);
@@ -75,17 +75,17 @@ void main() {
       required MockFrameAnalysis frameAnalysis,
       required FlutterFrame frame,
       FramePhase? longestUiPhase,
-      bool buildsTracked = false,
-      bool layoutsTracked = false,
-      bool paintsTracked = false,
+      bool buildsTraced = false,
+      bool layoutsTraced = false,
+      bool paintsTraced = false,
       int saveLayerCount = 0,
       int intrinsicsCount = 0,
     }) {
       when(frameAnalysis.frame).thenReturn(frame);
       frame.enhanceTracingState = EnhanceTracingState(
-        builds: buildsTracked,
-        layouts: layoutsTracked,
-        paints: paintsTracked,
+        builds: buildsTraced,
+        layouts: layoutsTraced,
+        paints: paintsTraced,
       );
       when(frameAnalysis.longestUiPhase).thenReturn(
         longestUiPhase ?? mockBuildPhase,
@@ -126,7 +126,7 @@ void main() {
         expect(find.byType(EnhanceTracingHint), findsOneWidget);
         expect(find.byType(IntrinsicOperationsHint), findsNothing);
         expect(find.text('Raster Jank Detected'), findsOneWidget);
-        expect(find.byType(RasterStatsHint), findsOneWidget);
+        expect(find.byType(GeneralRasterJankHint), findsOneWidget);
         expect(find.byType(CanvasSaveLayerHint), findsNothing);
         expect(find.byType(ShaderCompilationHint), findsNothing);
       },
@@ -140,13 +140,13 @@ void main() {
           createMockFrameAnalysis(
             frameAnalysis: mockFrameAnalysis,
             frame: jankyFrame,
-            buildsTracked: true,
+            buildsTraced: true,
           );
           await pumpHints(tester, mockFrameAnalysis);
 
           expect(
             find.richTextContaining(
-              'Build was the longest UI phase in this frame. Since "Track widget '
+              'Build was the longest UI phase in this frame. Since "Trace widget '
               'builds" was enabled while this frame was drawn, you should be able'
               ' to see timeline events for each widget built.',
             ),
@@ -168,7 +168,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Build was the longest UI phase in this frame. Consider enabling '
-              '"Track widget builds" from the ',
+              '"Trace widget builds" from the ',
             ),
             findsOneWidget,
           );
@@ -190,13 +190,13 @@ void main() {
             frameAnalysis: mockFrameAnalysis,
             frame: jankyFrame,
             longestUiPhase: mockLayoutPhase,
-            layoutsTracked: true,
+            layoutsTraced: true,
           );
           await pumpHints(tester, mockFrameAnalysis);
 
           expect(
             find.richTextContaining(
-              'Layout was the longest UI phase in this frame. Since "Track '
+              'Layout was the longest UI phase in this frame. Since "Trace '
               'layouts" was enabled while this frame was drawn, you should be '
               'able to see timeline events for each render object laid out.',
             ),
@@ -219,7 +219,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Layout was the longest UI phase in this frame. Consider enabling '
-              '"Track layouts" from the ',
+              '"Trace layouts" from the ',
             ),
             findsOneWidget,
           );
@@ -241,13 +241,13 @@ void main() {
             frameAnalysis: mockFrameAnalysis,
             frame: jankyFrame,
             longestUiPhase: mockPaintPhase,
-            paintsTracked: true,
+            paintsTraced: true,
           );
           await pumpHints(tester, mockFrameAnalysis);
 
           expect(
             find.richTextContaining(
-              'Paint was the longest UI phase in this frame. Since "Track '
+              'Paint was the longest UI phase in this frame. Since "Trace '
               'paints" was enabled while this frame was drawn, you should be '
               'able to see timeline events for each render object painted.',
             ),
@@ -270,7 +270,7 @@ void main() {
           expect(
             find.richTextContaining(
               'Paint was the longest UI phase in this frame. Consider enabling '
-              '"Track paints" from the ',
+              '"Trace paints" from the ',
             ),
             findsOneWidget,
           );

@@ -10,7 +10,7 @@ description: App for running DevTools integration tests.
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0'
+  sdk: ^3.2.0
   flutter: '>=3.0.0'
 
 dependencies:

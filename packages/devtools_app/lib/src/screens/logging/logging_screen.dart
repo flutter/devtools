@@ -25,12 +25,7 @@ import 'shared/constants.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
-  LoggingScreen()
-      : super(
-          id,
-          title: ScreenMetaData.logging.title,
-          icon: ScreenMetaData.logging.icon,
-        );
+  LoggingScreen() : super.fromMetaData(ScreenMetaData.logging);
 
   static final id = ScreenMetaData.logging.id;
 
@@ -42,8 +37,7 @@ class LoggingScreen extends Screen {
 
   @override
   Widget buildStatus(BuildContext context) {
-    final LoggingController controller =
-        Provider.of<LoggingController>(context);
+    final controller = Provider.of<LoggingController>(context);
 
     return StreamBuilder<String>(
       initialData: controller.statusText,

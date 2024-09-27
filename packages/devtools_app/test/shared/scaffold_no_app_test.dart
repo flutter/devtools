@@ -28,7 +28,6 @@ void main() {
     when(mockServiceManager.connectedState).thenReturn(
       ValueNotifier<ConnectedState>(const ConnectedState(false)),
     );
-    when(mockServiceManager.hasConnection).thenReturn(false);
 
     final mockErrorBadgeManager = MockErrorBadgeManager();
     when(mockServiceConnection.errorBadgeManager)
@@ -39,7 +38,7 @@ void main() {
     setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(FrameworkController, FrameworkController());
     setGlobal(SurveyService, SurveyService());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
@@ -50,7 +49,7 @@ void main() {
       child,
       analytics: AnalyticsController(
         enabled: false,
-        firstRun: false,
+        shouldShowConsentMessage: false,
         consentMessage: 'fake message',
       ),
       releaseNotes: ReleaseNotesController(),

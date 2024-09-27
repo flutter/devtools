@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
+import '../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
@@ -27,7 +28,6 @@ class IsolateStatisticsView extends VMDeveloperView {
           title: 'Isolates',
           icon: Icons.bar_chart,
         );
-  static const id = 'isolate-statistics';
 
   @override
   bool get showIsolateSelector => true;
@@ -295,6 +295,9 @@ class _StackTraceViewerFrameColumn extends ColumnData<String> {
   _StackTraceViewerFrameColumn() : super.wide('Frame');
 
   @override
+  bool get supportsSorting => false;
+
+  @override
   String getValue(String frame) => frame;
 
   @override
@@ -324,8 +327,7 @@ class StackTraceViewerWidget extends StatelessWidget {
     return ValueListenableBuilder<InstanceRef?>(
       valueListenable: stackTrace,
       builder: (context, stackTrace, _) {
-        final List<String>? lines = stackTrace
-            ?.allocationLocation?.valueAsString
+        final lines = stackTrace?.allocationLocation?.valueAsString
             ?.split('\n')
             .where((e) => e.isNotEmpty)
             .toList();

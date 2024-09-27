@@ -48,7 +48,7 @@ class PubGetCommand extends Command {
 
     int failureCount = 0;
 
-    for (Package p in packages) {
+    for (final p in packages) {
       final packagePathParts = path.split(p.relativePath);
       final isMainPackageOrSubdirectory = packagePathParts.length >= 2 &&
           packagePathParts.first == 'packages' &&

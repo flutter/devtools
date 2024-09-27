@@ -23,6 +23,7 @@ import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
+import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
@@ -141,8 +142,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void dispose() {
     // TODO(kenz): this won't work well if we eventually have multiple clients
     // that want to listen to network data.
-    controller.stopRecording();
     super.dispose();
+    unawaited(controller.stopRecording());
   }
 
   @override
@@ -163,9 +164,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 /// clear, search, filter, etc.).
 class _NetworkProfilerControls extends StatefulWidget {
   const _NetworkProfilerControls({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   static const _includeTextWidth = 810.0;
 
@@ -210,27 +210,20 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = ScreenSize(context).width;
     final hasRequests = _filteredRequests.isNotEmpty;
     return Row(
       children: [
-        PauseButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          tooltip: 'Pause recording network traffic',
+        StartStopRecordingButton(
+          recording: _recording,
+          onPressed: () async =>
+              await widget.controller.togglePolling(!_recording),
+          tooltipOverride: _recording
+              ? 'Stop recording network traffic'
+              : 'Resume recording network traffic',
+          minScreenWidthForTextBeforeScaling: double.infinity,
           gaScreen: gac.network,
-          gaSelection: gac.pause,
-          onPressed:
-              _recording ? () => widget.controller.togglePolling(false) : null,
-        ),
-        const SizedBox(width: denseSpacing),
-        ResumeButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          tooltip: 'Resume recording network traffic',
-          gaScreen: gac.network,
-          gaSelection: gac.resume,
-          onPressed:
-              _recording ? null : () => widget.controller.togglePolling(true),
+          gaSelection: _recording ? gac.pause : gac.resume,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
@@ -241,12 +234,22 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           onPressed: widget.controller.clear,
         ),
         const SizedBox(width: defaultSpacing),
+        DownloadButton(
+          minScreenWidthForTextBeforeScaling:
+              _NetworkProfilerControls._includeTextWidth,
+          onPressed: widget.controller.exportAsHarFile,
+          gaScreen: gac.network,
+          gaSelection: gac.NetworkEvent.downloadAsHar.name,
+        ),
+        const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<NetworkController>(
           searchController: widget.controller,
           searchFieldEnabled: hasRequests,
-          searchFieldWidth: wideSearchFieldWidth,
+          searchFieldWidth: screenWidth <= MediaSize.xs
+              ? defaultSearchFieldWidth
+              : wideSearchFieldWidth,
         ),
         const SizedBox(width: denseSpacing),
         DevToolsFilterButton(
@@ -271,49 +274,46 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 }
 
 class _NetworkProfilerBody extends StatelessWidget {
-  const _NetworkProfilerBody({Key? key, required this.controller})
-      : super(key: key);
+  const _NetworkProfilerBody({required this.controller});
 
   final NetworkController controller;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: SplitPane(
-        initialFractions: const [0.5, 0.5],
-        minSizes: const [200, 200],
-        axis: Axis.horizontal,
-        children: [
-          ValueListenableBuilder<List<NetworkRequest>>(
-            valueListenable: controller.filteredData,
-            builder: (context, filteredRequests, _) {
-              return NetworkRequestsTable(
-                networkController: controller,
-                requests: filteredRequests,
-                searchMatchesNotifier: controller.searchMatches,
-                activeSearchMatchNotifier: controller.activeSearchMatch,
-              );
-            },
-          ),
-          NetworkRequestInspector(controller),
-        ],
-      ),
+    final splitAxis = SplitPane.axisFor(context, 1.0);
+    return SplitPane(
+      initialFractions: splitAxis == Axis.horizontal ? [0.6, 0.4] : [0.5, 0.5],
+      minSizes: const [200, 200],
+      axis: splitAxis,
+      children: [
+        ValueListenableBuilder<List<NetworkRequest>>(
+          valueListenable: controller.filteredData,
+          builder: (context, filteredRequests, _) {
+            return NetworkRequestsTable(
+              networkController: controller,
+              requests: filteredRequests,
+              searchMatchesNotifier: controller.searchMatches,
+              activeSearchMatchNotifier: controller.activeSearchMatch,
+            );
+          },
+        ),
+        NetworkRequestInspector(controller),
+      ],
     );
   }
 }
 
 class NetworkRequestsTable extends StatelessWidget {
   const NetworkRequestsTable({
-    Key? key,
+    super.key,
     required this.networkController,
     required this.requests,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
-  }) : super(key: key);
+  });
 
   static final methodColumn = MethodColumn();
-  static final addressColumn = UriColumn();
+  static final addressColumn = AddressColumn();
   static final statusColumn = StatusColumn();
   static final typeColumn = TypeColumn();
   static final durationColumn = DurationColumn();
@@ -361,12 +361,13 @@ class NetworkRequestsTable extends StatelessWidget {
   }
 }
 
-class UriColumn extends ColumnData<NetworkRequest>
+class AddressColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
-  UriColumn()
+  AddressColumn()
       : super.wide(
-          'Uri',
-          minWidthPx: scaleByFontFactor(100.0),
+          'Address',
+          minWidthPx: scaleByFontFactor(isEmbedded() ? 100 : 150.0),
+          showTooltip: true,
         );
 
   @override
@@ -397,7 +398,7 @@ class UriColumn extends ColumnData<NetworkRequest>
 }
 
 class MethodColumn extends ColumnData<NetworkRequest> {
-  MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(70));
+  MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(60));
 
   @override
   String getValue(NetworkRequest dataObject) {
@@ -436,7 +437,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             unawaited(
               copyToClipboard(
                 data.uri,
-                'Copied the URL to the clipboard',
+                successMessage: 'Copied the URL to the clipboard',
               ),
             );
           },
@@ -447,7 +448,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             unawaited(
               copyToClipboard(
                 CurlCommand.from(data).toString(),
-                'Copied the cURL command to the clipboard',
+                successMessage: 'Copied the cURL command to the clipboard',
               ),
             );
           },
@@ -486,7 +487,8 @@ class StatusColumn extends ColumnData<NetworkRequest>
       : super(
           'Status',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(62),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(50),
         );
 
   @override
@@ -522,7 +524,8 @@ class TypeColumn extends ColumnData<NetworkRequest> {
       : super(
           'Type',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(62),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(50),
         );
 
   @override
@@ -541,7 +544,8 @@ class DurationColumn extends ColumnData<NetworkRequest> {
       : super(
           'Duration',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(80),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(75),
         );
 
   @override
@@ -566,7 +570,8 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
       : super(
           'Timestamp',
           alignment: ColumnAlignment.right,
-          fixedWidthPx: scaleByFontFactor(135),
+          headerAlignment: TextAlign.right,
+          fixedWidthPx: scaleByFontFactor(115),
         );
 
   @override

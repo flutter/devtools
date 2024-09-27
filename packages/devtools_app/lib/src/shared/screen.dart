@@ -6,28 +6,31 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
+import 'feature_flags.dart';
 import 'globals.dart';
 import 'primitives/listenable.dart';
 import 'ui/icons.dart';
 
 final _log = Logger('screen.dart');
 
+// TODO(kenz): use correct assets.
 enum ScreenMetaData {
   home(
     'home',
-    icon: Icons.home_rounded,
+    iconAsset: 'icons/app_bar/devtools.png',
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=0',
   ),
   inspector(
     'inspector',
     title: 'Flutter Inspector',
-    icon: Octicons.deviceMobile,
+    iconAsset: 'icons/app_bar/inspector.png',
     requiresFlutter: true,
     requiresDebugBuild: true,
     tutorialVideoTimestamp: '?t=172',
@@ -35,26 +38,30 @@ enum ScreenMetaData {
   performance(
     'performance',
     title: 'Performance',
-    icon: Octicons.pulse,
-    worksOffline: true,
+    iconAsset: 'icons/app_bar/performance.png',
+    worksWithOfflineData: true,
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=261',
   ),
   cpuProfiler(
     'cpu-profiler',
     title: 'CPU Profiler',
-    icon: Octicons.dashboard,
+    iconAsset: 'icons/app_bar/cpu_profiler.png',
     requiresDartVm: true,
-    worksOffline: true,
+    worksWithOfflineData: true,
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=340',
   ),
   memory(
     'memory',
     title: 'Memory',
-    icon: Octicons.package,
+    iconAsset: 'icons/app_bar/memory.png',
     requiresDartVm: true,
+    // ignore: avoid_redundant_argument_values, false positive
+    requiresConnection: !FeatureFlags.memoryDisconnectExperience,
     tutorialVideoTimestamp: '?t=420',
+    // ignore: avoid_redundant_argument_values, false positive
+    worksWithOfflineData: FeatureFlags.memoryDisconnectExperience,
   ),
   debugger(
     'debugger',
@@ -66,14 +73,14 @@ enum ScreenMetaData {
   network(
     'network',
     title: 'Network',
-    icon: Icons.network_check,
+    iconAsset: 'icons/app_bar/network.png',
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=547',
   ),
   logging(
     'logging',
     title: 'Logging',
-    icon: Octicons.clippy,
+    iconAsset: 'icons/app_bar/logging.png',
     tutorialVideoTimestamp: '?t=558',
   ),
   provider(
@@ -86,7 +93,7 @@ enum ScreenMetaData {
   appSize(
     'app-size',
     title: 'App Size',
-    icon: Octicons.fileZip,
+    iconAsset: 'icons/app_bar/app_size.png',
     requiresConnection: false,
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=575',
@@ -94,7 +101,7 @@ enum ScreenMetaData {
   deepLinks(
     'deep-links',
     title: 'Deep Links',
-    icon: Icons.link_rounded,
+    iconAsset: 'icons/app_bar/deep_links.png',
     requiresConnection: false,
     requiresDartVm: true,
   ),
@@ -110,25 +117,30 @@ enum ScreenMetaData {
     this.id, {
     this.title,
     this.icon,
+    this.iconAsset,
     this.requiresConnection = true,
     this.requiresDartVm = false,
     this.requiresFlutter = false,
     this.requiresDebugBuild = false,
     this.requiresVmDeveloperMode = false,
-    this.worksOffline = false,
+    this.worksWithOfflineData = false,
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
-  });
+  }) : assert(
+          icon == null || iconAsset == null,
+          'Only one of icon or iconAsset may be specified.',
+        );
 
   final String id;
   final String? title;
   final IconData? icon;
+  final String? iconAsset;
   final bool requiresConnection;
   final bool requiresDartVm;
   final bool requiresFlutter;
   final bool requiresDebugBuild;
   final bool requiresVmDeveloperMode;
-  final bool worksOffline;
+  final bool worksWithOfflineData;
   final String? requiresLibrary;
 
   /// The timestamp for the chapter of "Dive in to DevTools" YouTube video that
@@ -145,6 +157,25 @@ enum ScreenMetaData {
 }
 
 /// Defines a page shown in the DevTools [TabBar].
+///
+/// A devtools screen can be in three modes:
+/// * offline-data
+/// * connected
+/// * not-connected
+///
+/// See [devToolsMode].
+///
+/// A screen may support any combination of modes.
+///
+/// For offline-data and connected modes:
+/// * Override [Screen.buildScreenBody] to build content.
+/// * Use [ProvidedControllerMixin] to access controller.
+/// * See [OfflineScreenControllerMixin] for documentation on how to
+/// enable and handle offline-data mode for a screen.
+///
+/// For not-connected mode:
+/// * Override [Screen.buildDisconnectedScreenBody] to build content.
+/// * Set [ScreenMetaData.requiresConnection] to false.
 @immutable
 abstract class Screen {
   const Screen(
@@ -152,6 +183,7 @@ abstract class Screen {
     this.title,
     this.titleGenerator,
     this.icon,
+    this.iconAsset,
     this.tabKey,
     this.requiresLibrary,
     this.requiresConnection = true,
@@ -159,9 +191,16 @@ abstract class Screen {
     this.requiresFlutter = false,
     this.requiresDebugBuild = false,
     this.requiresVmDeveloperMode = false,
-    this.worksOffline = false,
+    this.worksWithOfflineData = false,
     this.showFloatingDebuggerControls = true,
-  }) : assert((title == null) || (titleGenerator == null));
+  })  : assert(
+          title == null || titleGenerator == null,
+          'Only one of title or titleGenerator may be specified.',
+        ),
+        assert(
+          icon == null || iconAsset == null,
+          'Only one of icon or iconAsset may be specified.',
+        );
 
   const Screen.conditional({
     required String id,
@@ -171,12 +210,13 @@ abstract class Screen {
     bool requiresFlutter = false,
     bool requiresDebugBuild = false,
     bool requiresVmDeveloperMode = false,
-    bool worksOffline = false,
+    bool worksWithOfflineData = false,
     bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
     bool showFloatingDebuggerControls = true,
     String? title,
     String Function()? titleGenerator,
     IconData? icon,
+    String? iconAsset,
     Key? tabKey,
   }) : this(
           id,
@@ -186,11 +226,12 @@ abstract class Screen {
           requiresFlutter: requiresFlutter,
           requiresDebugBuild: requiresDebugBuild,
           requiresVmDeveloperMode: requiresVmDeveloperMode,
-          worksOffline: worksOffline,
+          worksWithOfflineData: worksWithOfflineData,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: title,
           titleGenerator: titleGenerator,
           icon: icon,
+          iconAsset: iconAsset,
           tabKey: tabKey,
         );
 
@@ -208,12 +249,13 @@ abstract class Screen {
           requiresFlutter: metadata.requiresFlutter,
           requiresDebugBuild: metadata.requiresDebugBuild,
           requiresVmDeveloperMode: metadata.requiresVmDeveloperMode,
-          worksOffline: metadata.worksOffline,
+          worksWithOfflineData: metadata.worksWithOfflineData,
           shouldShowForFlutterVersion: shouldShowForFlutterVersion,
           showFloatingDebuggerControls: showFloatingDebuggerControls,
           title: titleGenerator == null ? metadata.title : null,
           titleGenerator: titleGenerator,
           icon: metadata.icon,
+          iconAsset: metadata.iconAsset,
           tabKey: tabKey,
         );
 
@@ -224,7 +266,7 @@ abstract class Screen {
   final bool showFloatingDebuggerControls;
 
   /// Whether to show the console for this screen.
-  bool showConsole(bool embed) => false;
+  bool showConsole(EmbedMode embedMode) => false;
 
   /// Which keyboard shortcuts should be enabled for this screen.
   ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) =>
@@ -244,7 +286,15 @@ abstract class Screen {
 
   String get _userFacingTitle => title ?? titleGenerator?.call() ?? '';
 
+  /// The icon to use for this screen's tab.
+  ///
+  /// Only one of [icon] or [iconAsset] may be non-null.
   final IconData? icon;
+
+  /// The icon asset path to render as the icon for this screen's tab.
+  ///
+  /// Only one of [icon] or [iconAsset] may be non-null.
+  final String? iconAsset;
 
   /// An optional key to use when creating the Tab widget (for use during
   /// testing).
@@ -276,7 +326,7 @@ abstract class Screen {
   final bool requiresVmDeveloperMode;
 
   /// Whether this screen works offline and should show in offline mode even if conditions are not met.
-  final bool worksOffline;
+  final bool worksWithOfflineData;
 
   /// Whether this screen should display the isolate selector in the status
   /// line.
@@ -310,7 +360,7 @@ abstract class Screen {
       text: TextSpan(text: title),
       textDirection: TextDirection.ltr,
     )..layout();
-    const measurementBuffer = 2.0;
+    const measurementBuffer = 1.0;
     return painter.width +
         denseSpacing +
         defaultIconSize +
@@ -335,11 +385,22 @@ abstract class Screen {
           key: tabKey,
           child: Row(
             children: <Widget>[
-              Icon(icon, size: defaultIconSize),
+              if (icon != null || iconAsset != null)
+                DevToolsIcon(
+                  icon: icon,
+                  iconAsset: iconAsset,
+                  size: iconAsset != null
+                      // Add 1.0 to adjust for margins on the screen icon assets.
+                      ? scaleByFontFactor(defaultIconSizeBeforeScaling + 1.0)
+                      : defaultIconSize,
+                ),
               if (title.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(left: denseSpacing),
-                  child: Text(title),
+                  child: Text(
+                    title,
+                    style: Theme.of(context).regularTextStyle,
+                  ),
                 ),
             ],
           ),
@@ -387,11 +448,12 @@ abstract class Screen {
   /// [Screen] subclass.
   Widget build(BuildContext context) {
     if (!requiresConnection) {
-      final connected = serviceConnection.serviceManager.hasConnection &&
-          serviceConnection.serviceManager.connectedAppInitialized;
+      final connected =
+          serviceConnection.serviceManager.connectedState.value.connected &&
+              serviceConnection.serviceManager.connectedAppInitialized;
       // Do not use the disconnected body in offline mode, because the default
       // [buildScreenBody] should be used for offline states.
-      if (!connected && !offlineController.offlineMode.value) {
+      if (!connected && !offlineDataController.showingOfflineData.value) {
         final disconnectedBody = buildDisconnectedScreenBody(context);
         if (disconnectedBody != null) return disconnectedBody;
       }
@@ -420,11 +482,18 @@ abstract class Screen {
 }
 
 /// Check whether a screen should be shown in the UI.
-bool shouldShowScreen(Screen screen) {
+({bool show, ScreenDisabledReason? disabledReason}) shouldShowScreen(
+  Screen screen,
+) {
   _log.finest('shouldShowScreen: ${screen.screenId}');
-  if (offlineController.offlineMode.value) {
-    _log.finest('for offline mode: returning ${screen.worksOffline}');
-    return screen.worksOffline;
+  if (offlineDataController.showingOfflineData.value) {
+    _log.finest('for offline mode: returning ${screen.worksWithOfflineData}');
+    return (
+      show: screen.worksWithOfflineData,
+      disabledReason: screen.worksWithOfflineData
+          ? null
+          : ScreenDisabledReason.offlineDataNotSupported,
+    );
   }
 
   final serviceReady = serviceConnection.serviceManager.isServiceAvailable &&
@@ -432,13 +501,16 @@ bool shouldShowScreen(Screen screen) {
   if (!serviceReady) {
     if (!screen.requiresConnection) {
       _log.finest('screen does not require connection: returning true');
-      return true;
+      return (show: true, disabledReason: null);
     } else {
       // All of the following checks require a connected vm service, so verify
       // that one exists. This also avoids odd edge cases where we could show
       // screens while the ServiceManager is still initializing.
       _log.finest('service not ready: returning false');
-      return false;
+      return (
+        show: false,
+        disabledReason: ScreenDisabledReason.serviceNotReady,
+      );
     }
   }
 
@@ -450,36 +522,45 @@ bool shouldShowScreen(Screen screen) {
       _log.finest(
         'screen requires library ${screen.requiresLibrary}: returning false',
       );
-      return false;
+      return (
+        show: false,
+        disabledReason: ScreenDisabledReason.requiresDartLibrary,
+      );
     }
   }
   if (screen.requiresDartVm) {
     if (serviceConnection.serviceManager.connectedApp!.isRunningOnDartVM !=
         true) {
       _log.finest('screen requires Dart VM: returning false');
-      return false;
+      return (show: false, disabledReason: ScreenDisabledReason.requiresDartVm);
     }
   }
   if (screen.requiresFlutter &&
       serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == false) {
     _log.finest('screen requires Flutter: returning false');
-    return false;
+    return (show: false, disabledReason: ScreenDisabledReason.requiresFlutter);
   }
   if (screen.requiresDebugBuild) {
     if (serviceConnection.serviceManager.connectedApp!.isProfileBuildNow ==
         true) {
       _log.finest('screen requires debug build: returning false');
-      return false;
+      return (
+        show: false,
+        disabledReason: ScreenDisabledReason.requiresDebugBuild,
+      );
     }
   }
   if (screen.requiresVmDeveloperMode) {
     if (!preferences.vmDeveloperModeEnabled.value) {
       _log.finest('screen requires vm developer mode: returning false');
-      return false;
+      return (
+        show: false,
+        disabledReason: ScreenDisabledReason.requiresVmDeveloperMode,
+      );
     }
   }
   _log.finest('${screen.screenId} screen supported: returning true');
-  return true;
+  return (show: true, disabledReason: null);
 }
 
 class BadgePainter extends CustomPainter {
@@ -544,4 +625,20 @@ class ShortcutsConfiguration {
   final Map<Type, Action<Intent>> actions;
 
   bool get isEmpty => shortcuts.isEmpty && actions.isEmpty;
+}
+
+enum ScreenDisabledReason {
+  offlineDataNotSupported('does not support offline data.'),
+  requiresDartLibrary(null),
+  requiresDartVm('requires the Dart VM, but it is not available.'),
+  requiresDebugBuild('only supports debug builds.'),
+  requiresFlutter('only supports Flutter applications.'),
+  requiresVmDeveloperMode('only works when VM Developer Mode is enabled'),
+  serviceNotReady(
+    'requires a connected application, but there is no connection available.',
+  );
+
+  const ScreenDisabledReason(this.message);
+
+  final String? message;
 }

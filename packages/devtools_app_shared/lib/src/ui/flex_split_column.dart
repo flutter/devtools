@@ -23,7 +23,7 @@ import 'split_pane.dart';
 /// adjusting the sizes of the children.
 final class FlexSplitColumn extends StatelessWidget {
   FlexSplitColumn({
-    Key? key,
+    super.key,
     required this.totalHeight,
     required this.headers,
     required List<Widget> children,
@@ -39,8 +39,7 @@ final class FlexSplitColumn extends StatelessWidget {
           headers,
           totalHeight,
         ),
-        _minSizes = modifyMinSizesToIncludeFirstHeader(minSizes, headers),
-        super(key: key);
+        _minSizes = modifyMinSizesToIncludeFirstHeader(minSizes, headers);
 
   /// The headers that will be laid out above each corresponding child in
   /// [children].
@@ -107,7 +106,7 @@ final class FlexSplitColumn extends StatelessWidget {
     double totalHeight,
   ) {
     var totalHeaderHeight = 0.0;
-    for (var header in headers) {
+    for (final header in headers) {
       totalHeaderHeight += header.preferredSize.height;
     }
     final intendedContentHeight = totalHeight - totalHeaderHeight;

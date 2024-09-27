@@ -25,10 +25,10 @@ void main() {
     });
 
     Future<CpuProfileData> initSingleRootData({
-      required Map<String, dynamic> dataJson,
+      required Map<String, Object?> dataJson,
       required String profileGolden,
     }) async {
-      final data = CpuProfileData.parse(dataJson);
+      final data = CpuProfileData.fromJson(dataJson);
       await CpuProfileTransformer().processData(data, processId: 'test');
       expect(data.callTreeRoots.length, 1);
       expect(data.callTreeRoots.first.profileAsString(), profileGolden);
@@ -67,7 +67,7 @@ void main() {
     });
 
     test('createMethodTableGraph with user tags ', () async {
-      final data = CpuProfileData.parse(simpleCpuProfile1);
+      final data = CpuProfileData.fromJson(simpleCpuProfile1);
       final fullDataPair = CpuProfilePair(
         functionProfile: data,
         codeProfile: null,

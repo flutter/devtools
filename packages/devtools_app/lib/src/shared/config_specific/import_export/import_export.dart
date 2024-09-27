@@ -7,10 +7,11 @@ import 'dart:convert';
 import 'package:devtools_app_shared/service.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../devtools.dart';
 import '../../globals.dart';
+import '../../primitives/encoding.dart';
 import '../../primitives/utils.dart';
 import '../../screen.dart';
+import '../../utils.dart';
 import '_export_desktop.dart' if (dart.library.js_interop) '_export_web.dart';
 
 const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
@@ -58,16 +59,16 @@ class ImportController {
     previousImportTime = now;
 
     final json = jsonFile.data;
-    final isDevToolsSnapshot = json is Map<String, dynamic> &&
+    final isDevToolsSnapshot = json is Map<String, Object?> &&
         json[DevToolsExportKeys.devToolsSnapshot.name] == true;
     if (!isDevToolsSnapshot) {
       notificationService.push(nonDevToolsFileMessage);
       return;
     }
 
-    final devToolsSnapshot = _DevToolsSnapshot(json);
+    final devToolsOfflineData = _DevToolsOfflineData(json);
     // TODO(kenz): support imports for more than one screen at a time.
-    final activeScreenId = devToolsSnapshot.activeScreenId;
+    final activeScreenId = devToolsOfflineData.activeScreenId;
     if (expectedScreenId != null && activeScreenId != expectedScreenId) {
       notificationService.push(
         'Expected a data file for screen \'$expectedScreenId\' but received one'
@@ -77,7 +78,7 @@ class ImportController {
     }
 
     if (activeScreenId == ScreenMetaData.performance.id) {
-      if (devToolsSnapshot.json.containsKey('traceEvents')) {
+      if (devToolsOfflineData.json.containsKey('traceEvents')) {
         notificationService.push(
           'It looks like you are trying to load data that was saved from an '
           'old version of DevTools. This data uses a legacy format that is no '
@@ -89,16 +90,16 @@ class ImportController {
     }
 
     final connectedApp =
-        OfflineConnectedApp.parse(devToolsSnapshot.connectedApp);
-    offlineController
-      ..enterOfflineMode(offlineApp: connectedApp)
-      ..offlineDataJson = devToolsSnapshot.json;
+        OfflineConnectedApp.parse(devToolsOfflineData.connectedApp);
+    offlineDataController
+      ..startShowingOfflineData(offlineApp: connectedApp)
+      ..offlineDataJson = devToolsOfflineData.json;
     notificationService.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
   }
 }
 
-extension type _DevToolsSnapshot(Map<String, Object?> json) {
+extension type _DevToolsOfflineData(Map<String, Object?> json) {
   Map<String, Object?> get connectedApp {
     final connectedApp = json[DevToolsExportKeys.connectedApp.name] as Map?;
     return connectedApp == null ? {} : connectedApp.cast<String, Object?>();
@@ -111,7 +112,9 @@ extension type _DevToolsSnapshot(Map<String, Object?> json) {
 enum ExportFileType {
   json,
   csv,
-  yaml;
+  yaml,
+  data,
+  har;
 
   @override
   String toString() => name;
@@ -135,36 +138,33 @@ abstract class ExportController {
     return '${prefix}_$timestamp$postfix.$type';
   }
 
-  /// Downloads a file with [contents]
+  /// Downloads a file with [content]
   /// and pushes notification about success if [notify] is true.
-  String downloadFile(
-    String content, {
+  String downloadFile<T>(
+    T content, {
     String? fileName,
     ExportFileType type = ExportFileType.json,
     bool notify = true,
   }) {
     fileName ??= ExportController.generateFileName(type: type);
-    saveFile(
-      content: content,
-      fileName: fileName,
-    );
+    saveFile<T>(content: content, fileName: fileName);
     notificationService.push(successfulExportMessage(fileName));
     return fileName;
   }
 
   /// Saves [content] to the [fileName].
-  void saveFile({
-    required String content,
+  void saveFile<T>({
+    required T content,
     required String fileName,
   });
 
-  Map<String, dynamic> generateDataForExport({
-    required Map<String, dynamic> offlineScreenData,
+  Map<String, Object?> generateDataForExport({
+    required Map<String, Object?> offlineScreenData,
     ConnectedApp? connectedApp,
   }) {
     final contents = {
       DevToolsExportKeys.devToolsSnapshot.name: true,
-      DevToolsExportKeys.devToolsVersion.name: version,
+      DevToolsExportKeys.devToolsVersion.name: devToolsVersion,
       DevToolsExportKeys.connectedApp.name: connectedApp?.toJson() ??
           serviceConnection.serviceManager.connectedApp!.toJson(),
       ...offlineScreenData,
@@ -174,8 +174,11 @@ abstract class ExportController {
     return contents;
   }
 
-  String encode(Map<String, dynamic> offlineScreenData) {
+  String encode(Map<String, Object?> offlineScreenData) {
     final data = generateDataForExport(offlineScreenData: offlineScreenData);
-    return jsonEncode(data);
+    return jsonEncode(
+      data,
+      toEncodable: toEncodable,
+    );
   }
 }

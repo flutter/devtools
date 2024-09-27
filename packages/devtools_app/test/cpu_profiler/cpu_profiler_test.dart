@@ -31,8 +31,7 @@ void main() {
   late CpuProfileData cpuProfileData;
   late CpuProfilerController controller;
 
-  final ServiceConnectionManager fakeServiceManager =
-      FakeServiceConnectionManager();
+  final fakeServiceManager = FakeServiceConnectionManager();
   final app = fakeServiceManager.serviceManager.connectedApp!;
   when(app.isFlutterNativeAppNow).thenReturn(false);
   when(app.isFlutterAppNow).thenReturn(false);
@@ -44,7 +43,7 @@ void main() {
 
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
-    cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
+    cpuProfileData = CpuProfileData.fromJson(goldenCpuProfileDataJson);
     await transformer.processData(
       cpuProfileData,
       processId: 'test',
@@ -54,7 +53,7 @@ void main() {
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());
@@ -79,14 +78,13 @@ void main() {
       'builds for empty cpuProfileData',
       windowSize,
       (WidgetTester tester) async {
-        cpuProfileData = CpuProfileData.parse(emptyCpuProfileDataJson);
+        cpuProfileData = CpuProfileData.fromJson(emptyCpuProfileDataJson);
         cpuProfiler = CpuProfiler(
           data: cpuProfileData,
           controller: controller,
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
@@ -121,7 +119,6 @@ void main() {
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuProfileStats), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
@@ -178,7 +175,8 @@ void main() {
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
-        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        cpuProfileData =
+            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
       });
 
       testWidgetsWithWindowSize(
@@ -297,7 +295,6 @@ void main() {
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
@@ -426,7 +423,8 @@ void main() {
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
-        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        cpuProfileData =
+            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
         await controller.cpuProfilerController.transformer.processData(
           cpuProfileData,
           processId: 'test',
@@ -598,7 +596,8 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         preferences.toggleVmDeveloperMode(true);
-        cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
+        cpuProfileData =
+            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
         for (final filter in controller
             .cpuProfilerController.activeFilter.value.toggleFilters) {
           filter.enabled.value = false;

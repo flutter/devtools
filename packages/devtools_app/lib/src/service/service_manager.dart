@@ -5,9 +5,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app_shared/service.dart';
-import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
+import 'package:devtools_app_shared/service.dart' hide SentinelException;
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
@@ -16,7 +14,6 @@ import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
 import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
-import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/title.dart';
@@ -36,10 +33,6 @@ final _log = Logger('service_manager');
 const debugLogServiceProtocolEvents = false;
 
 const defaultRefreshRate = 60.0;
-
-/// The amount of time we will wait for the main isolate to become non-null when
-/// calling [ServiceConnectionManager.rootLibraryForMainIsolate].
-const _waitForRootLibraryTimeout = Duration(seconds: 3);
 
 class ServiceConnectionManager {
   ServiceConnectionManager() {
@@ -119,11 +112,9 @@ class ServiceConnectionManager {
 
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
-    if (FeatureFlags.devToolsExtensions) {
-      await extensionService.initialize();
-    }
 
-    _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
+    _inspectorService =
+        devToolsEnvironmentParameters.inspectorServiceProvider();
 
     _appState?.dispose();
     _appState = AppState(serviceManager.isolateManager.selectedIsolate);
@@ -147,7 +138,7 @@ class ServiceConnectionManager {
     final previousConnectedApp = serviceManager.connectedApp != null
         ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
         : null;
-    offlineController.previousConnectedApp = previousConnectedApp;
+    offlineDataController.previousConnectedApp = previousConnectedApp;
 
     // This must be called before we close the VM service so that
     // [serviceManager.serviceUri] is not null.
@@ -182,43 +173,6 @@ class ServiceConnectionManager {
           .selectIsolate(serviceManager.isolateManager.isolates.value.first);
     }
     await serviceManager.isolateManager.init(isolates);
-  }
-
-  // TODO(kenz): consider caching this value for the duration of the VM service
-  // connection.
-  Future<String?> rootLibraryForMainIsolate() async {
-    final mainIsolateRef = await whenValueNonNull(
-      serviceManager.isolateManager.mainIsolate,
-      timeout: _waitForRootLibraryTimeout,
-    );
-    if (mainIsolateRef == null) return null;
-
-    final isolateState =
-        serviceManager.isolateManager.isolateState(mainIsolateRef);
-    await isolateState.waitForIsolateLoad();
-    final rootLib = isolateState.rootInfo?.library;
-    if (rootLib == null) return null;
-
-    final selectedIsolateRefId = mainIsolateRef.id!;
-    await serviceManager.resolvedUriManager
-        .fetchFileUris(selectedIsolateRefId, [rootLib]);
-    final fileUriString = serviceManager.resolvedUriManager.lookupFileUri(
-      selectedIsolateRefId,
-      rootLib,
-    );
-    _log.fine('rootLibraryForMainIsolate: $fileUriString');
-    return fileUriString;
-  }
-
-  // TODO(kenz): consider caching this value for the duration of the VM service
-  // connection.
-  Future<String?> rootPackageDirectoryForMainIsolate() async {
-    final fileUriString = await serviceConnection.rootLibraryForMainIsolate();
-    final packageUriString = fileUriString != null
-        ? packageRootFromFileUriString(fileUriString)
-        : null;
-    _log.fine('rootPackageDirectoryForMainIsolate: $packageUriString');
-    return packageUriString;
   }
 
   Future<Response> get adbMemoryInfo async {
@@ -260,8 +214,8 @@ class ServiceConnectionManager {
   ///   layerBytes - layer raster cache entries in bytes
   ///   pictureBytes - picture raster cache entries in bytes
   Future<Response?> get rasterCacheMetrics async {
-    if (serviceManager.connectedApp == null ||
-        !await serviceManager.connectedApp!.isFlutterApp) {
+    final app = serviceManager.connectedApp;
+    if (app == null || !await app.isFlutterApp) {
       return null;
     }
 

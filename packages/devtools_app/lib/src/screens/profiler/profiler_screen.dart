@@ -70,7 +70,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   void initState() {
     super.initState();
     ga.screen(ProfilerScreen.id);
-    addAutoDisposeListener(offlineController.offlineMode);
+    addAutoDisposeListener(offlineDataController.showingOfflineData);
   }
 
   @override
@@ -105,7 +105,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    if (offlineController.offlineMode.value) {
+    if (offlineDataController.showingOfflineData.value) {
       return _buildProfilerScreenBody(controller);
     }
     return ValueListenableBuilder<Flag>(
@@ -140,7 +140,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
               controller: controller,
               recording: recording,
               processing: profilerBusy,
-              offline: offlineController.offlineMode.value,
+              offline: offlineDataController.showingOfflineData.value,
             ),
             const SizedBox(height: intermediateSpacing),
             Expanded(
@@ -187,7 +187,7 @@ class DisconnectedCpuProfilerScreenBody extends StatelessWidget {
     return FileImportContainer(
       instructions: importInstructions,
       actionText: 'Load data',
-      gaScreen: gac.appSize,
+      gaScreen: gac.cpuProfiler,
       gaSelectionImport: gac.CpuProfilerEvents.openDataFile.name,
       gaSelectionAction: gac.CpuProfilerEvents.loadDataFromFile.name,
       onAction: (jsonFile) {

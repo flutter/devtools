@@ -55,7 +55,7 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
     maxWidth = max(0, maxWidth);
     double available = maxWidth;
     // Columns sorted by increasing minWidth.
-    final List<ColumnData<T>> sortedColumns = columns.toList()
+    final sortedColumns = columns.toList()
       ..sort((a, b) {
         if (a.minWidthPx != null && b.minWidthPx != null) {
           return a.minWidthPx!.compareTo(b.minWidthPx!);
@@ -65,7 +65,7 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
         return 0;
       });
 
-    for (var col in columns) {
+    for (final col in columns) {
       if (col.fixedWidthPx != null) {
         available -= col.fixedWidthPx!;
       } else if (col.minWidthPx != null) {
@@ -74,7 +74,7 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
     }
     available = max(available, 0);
     int unconstrainedCount = 0;
-    for (var column in sortedColumns) {
+    for (final column in sortedColumns) {
       if (column.fixedWidthPx == null && column.minWidthPx == null) {
         unconstrainedCount++;
       }
@@ -88,7 +88,7 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
       // through the columns from the smallest minWidth to largest minWidth
       // incrementally adding columns where the minWidth constraint can be
       // satisfied using the width given to unconstrained columns.
-      for (var column in sortedColumns) {
+      for (final column in sortedColumns) {
         if (column.fixedWidthPx == null && column.minWidthPx != null) {
           // Width of this column if it was not clamped to its min width.
           // We add column.minWidthPx to the available width because
@@ -113,7 +113,7 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
         unconstrainedCount > 0 ? available / unconstrainedCount : available;
     int unconstrainedFound = 0;
     final widths = <double>[];
-    for (ColumnData<T> column in columns) {
+    for (final column in columns) {
       double? width = column.fixedWidthPx;
       if (width == null) {
         if (column.minWidthPx != null &&

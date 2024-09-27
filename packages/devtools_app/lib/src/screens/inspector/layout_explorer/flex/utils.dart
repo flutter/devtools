@@ -24,10 +24,10 @@ class AnimatedFlexLayoutProperties
     extends AnimatedLayoutProperties<FlexLayoutProperties>
     implements FlexLayoutProperties {
   AnimatedFlexLayoutProperties(
-    FlexLayoutProperties begin,
-    FlexLayoutProperties end,
-    Animation<double> animation,
-  ) : super(begin, end, animation);
+    super.begin,
+    super.end,
+    super.animation,
+  );
 
   @override
   CrossAxisAlignment? get crossAxisAlignment => end.crossAxisAlignment;
@@ -197,7 +197,6 @@ extension AxisExtension on Axis {
       case Axis.horizontal:
         return 'Row';
       case Axis.vertical:
-      default:
         return 'Column';
     }
   }

@@ -6,9 +6,10 @@ import 'dart:async';
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
-import 'package:vm_service_protos/vm_service_protos.dart';
 import 'package:web/web.dart';
 
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import 'perfetto_controller.dart';
@@ -110,9 +111,9 @@ class PerfettoControllerImpl extends PerfettoController {
   /// Delay to allow the Perfetto UI to load a trace.
   ///
   /// This is a heuristic to continue blocking UI elements on the DevTools side
-  /// while the trace is still loading on the Perfetto side (for example,
-  /// the [RefreshTimelineEventsButton]).
-  static const _postTraceDelay = Duration(seconds: 1);
+  /// while the trace is being posted to the Perfetto side (for example, the
+  /// [RefreshTimelineEventsButton]).
+  static const _postTraceDelay = Duration(milliseconds: 500);
 
   String get perfettoUrl {
     if (_debugUseLocalPerfetto) {
@@ -123,7 +124,7 @@ class PerfettoControllerImpl extends PerfettoController {
       path: window.location.pathname,
     );
     final indexFilePath = ui_web.assetManager
-        .getAssetUrl(devToolsExtensionPoints.perfettoIndexLocation);
+        .getAssetUrl(devToolsEnvironmentParameters.perfettoIndexLocation);
     final baseUrl = '$basePath/$indexFilePath';
     return '$baseUrl$_embeddedModeQuery';
   }
@@ -145,7 +146,7 @@ class PerfettoControllerImpl extends PerfettoController {
 
   /// Trace data that we should load, but have not yet since the trace viewer
   /// is not visible (i.e. [TimelineEventsController.isActiveFeature] is false).
-  Trace? pendingTraceToLoad;
+  Uint8List? pendingTraceToLoad;
 
   /// Time range we should scroll to, but have not yet since the trace viewer
   /// is not visible (i.e. [TimelineEventsController.isActiveFeature] is false).
@@ -163,7 +164,7 @@ class PerfettoControllerImpl extends PerfettoController {
     );
     _initialized = true;
 
-    _perfettoIFrame = createIFrameElement()
+    _perfettoIFrame = HTMLIFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html
@@ -202,14 +203,25 @@ class PerfettoControllerImpl extends PerfettoController {
   }
 
   @override
-  Future<void> loadTrace(Trace trace) async {
+  Future<void> loadTrace(Uint8List traceBinary) async {
     if (!timelineEventsController.isActiveFeature) {
-      pendingTraceToLoad = trace;
+      pendingTraceToLoad = traceBinary;
       return;
     }
-    pendingTraceToLoad = null;
-    activeTrace.trace = trace;
-    await Future.delayed(_postTraceDelay);
+    await ga.timeAsync(
+      gac.performance,
+      gac.PerformanceEvents.perfettoLoadTrace.name,
+      asyncOperation: () async {
+        // This captures the time that the Perfetto trace viewer takes to load
+        // the trace. When we await the delay, this allows [activeTrace]'s
+        // listeners to be notified, which triggers posting the new trace to
+        // the iFrame. The main thread is not released until the iFrame is done
+        // receiving the trace.
+        pendingTraceToLoad = null;
+        activeTrace.trace = traceBinary;
+        await Future.delayed(_postTraceDelay);
+      },
+    );
   }
 
   @override
@@ -230,6 +242,6 @@ class PerfettoControllerImpl extends PerfettoController {
   @override
   Future<void> clear() async {
     processor.clear();
-    await loadTrace(Trace());
+    await loadTrace(Uint8List(0));
   }
 }

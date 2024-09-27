@@ -32,9 +32,9 @@ class OverflowIndicatorPainter extends CustomPainter {
 
   /// These static variables  are taken from [DebugOverflowIndicatorMixin]
   /// since all of them are private.
-  static const Color black = Color(0xBF000000);
-  static const Color yellow = Color(0xBFFFFF00);
-  static final Paint indicatorPaint = Paint()
+  static const black = Color(0xBF000000);
+  static const yellow = Color(0xBFFFFF00);
+  static final indicatorPaint = Paint()
     ..shader = ui.Gradient.linear(
       const Offset(0.0, 0.0),
       const Offset(10.0, 10.0),

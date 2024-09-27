@@ -1,3 +1,87 @@
+# 11.0.0
+* **Breaking change:** replace `apiGetLastReleaseNotesVersion` with `ReleaseNotesApi.getLastReleaseNotesVersion`.
+* **Breaking change:** replace `apiSetLastReleaseNotesVersion` with `ReleaseNotesApi.setLastReleaseNotesVersion`.
+* **Breaking change:** replace `lastReleaseNotesVersionPropertyName`.
+* **Breaking change:** replace `apiGetBaseAppSizeFile` with `AppSizeApi.getBaseAppSizeFile`.
+* **Breaking change:** replace `apiGetTestAppSizeFile` with `AppSizeApi.getTestAppSizeFile`.
+* **Breaking change:** replace `baseAppSizeFilePropertyName` with `AppSizeApi.baseAppSizeFilePropertyName`.
+* **Breaking change:** replace `testAppSizeFilePropertyName` with `AppSizeApi.testAppSizeFilePropertyName`.
+* **Breaking change:** replace `apiSetActiveSurvey` with `SurveyApi.setActiveSurvey`.
+* **Breaking change:** remove `activeSurveyName`.
+* **Breaking change:** replace `apiGetSurveyActionTaken` with `SurveyApi.getSurveyActionTaken`.
+* **Breaking change:** replace `apiSetSurveyActionTaken` with `SurveyApi.setSurveyActionTaken`.
+* **Breaking change:** remove `surveyActionTakenPropertyName`.
+* **Breaking change:** replace `apiGetSurveyShownCount` with `SurveyApi.getSurveyShownCount`.
+* **Breaking change:** replace `apiIncrementSurveyShownCount` with `SurveyApi.incrementSurveyShownCount`.
+* Support Chrome's new headless mode in the integration test runner.
+* Add `PreferencesApi` to get and set preference values.
+* Deprecate `DTDConnectionInfo` in favor of `DtdInfo` which supports tracking two URIs for DTD to better support web/remote environments.
+
+# 10.0.2
+* Update dependency `web_socket_channel: '>=2.4.0 <4.0.0'`.
+
+# 10.0.1
+* Added helper `deserialize` and `deserializeNullable`
+* Extended serialization for `HeapSample` and `ExtensionEvents`
+* Added mixin `Serializable`
+* Fix a regression with accessing the Flutter store file.
+* Bump minimum Dart SDK version to Dart stable `3.4.3`.
+
+# 10.0.0-dev.2
+* Support detecting package roots for nested Dart projects in the
+`packageRootFromFileUriString` utility method.
+
+# 10.0.0-dev.1
+* Export `DTDConnectionInfo` from the `devtools_shared.dart` library instead
+of the `devtools_server.dart` library.
+
+# 10.0.0-dev.0
+* **Breaking change:** rename `DevToolsExtensionConfig.path` to
+`DevToolsExtensionConfig.extensionAssetsPath` and update class documentation.
+* **Breaking change:** rename `ExtensionsApi.extensionRootPathPropertyName`
+to `ExtensionsApi.packageRootUriPropertyName`, and modify the String value
+for the parameter from 'rootPath' to 'packageRootUri'.
+* **Breaking change:** add new required JSON fields "devtoolsOptionsUri" and
+"detectedFromStaticContext" in the `DevToolsExtensionConfig.parse` factory constructor.
+* **Breaking change:** remove `DevToolsOptions.optionsFileName` constant in favor of
+new constant `devtoolsOptionsFileName`.
+* **Breaking change:** modify the `ExtensionsApi.apiExtensionEnabledState`
+API to expect a query parameter "devtoolsOptionsUri" instead of "rootPath".
+* **Breaking change:** replace the `rootUri` parameter in the
+`DevToolsOptions.lookupExtensionEnabledState` and
+`DevToolsOptions.setExtensionEnabledState` methods with new parameter
+`devtoolsOptionsUri`. Modify logic to expect a full file URI to the
+options file instead of expecting the package root in which it is contained.
+* Add new fields `requiresConnection`, `devtoolsOptionsUri`, and `detectedFromStaticContext`
+to `DevToolsExtensionConfig`.
+* Add `ExtensionsApi.devtoolsOptionsUriPropertyName` field.
+* Return valid extensions from the `apiServeAvailableExtensions` endpoint even when
+an exception is thrown.
+* Add utility extension methods on `Completer`: `safeComplete` and `safeCompleteError`.
+
+# 9.0.1
+* Restructure `devtools_extensions.dart` and `devtools_extensions_io.dart` libraries.
+
+# 9.0.0
+* **Breaking change:** remove parameter `analytics` from `ServerApi.handle` in favor
+of DTD implementation.
+* **Breaking change:** remove DevTools server APIs `apiMarkConsentMessageAsShown` and `apiGetConsentMessage`
+* **Breaking change:** remove parameter `buildDir` from `ExtensionsManager`.
+in favor of DTD implementation.
+* Stop copying DevTools extensions assets to the DevTools build directory.
+* Bump `package:dtd` to `2.2.0`
+* Remove `package:unified_analytics` dependency.
+* Use DTD in the `packageRootFromFileUriString` utility to detect the package root.
+* Add `runWithRetry` utility method.
+
+# 8.1.1
+* Bump `package:dtd` to `2.1.0`.
+* Bump the minimum Dart SDK version to `3.4.0-282.1.beta`.
+
+# 8.1.0
+* Bump `package:dtd` to `2.0.0`.
+* Bump `package:unified_analytics` to `5.8.8`.
+
 # 8.0.1
 * **Breaking change:** rename `ServerApi.getCompleted` to `ServerApi.success` and make the
 `value` parameter optional.
@@ -15,7 +99,7 @@ VM service connection is connected or disconnected from the client.
 duplicate of `ServerApi.getCompleted`.
 * **Breaking change:** add required parameter `analytics` to `ServerApi.handle`, which accepts
 an instance of `Analytics` from `package:unified_analytics`.
-* Add the ability to send debug logs in DevTools server request responses. 
+* Add the ability to send debug logs in DevTools server request responses.
 * Add an optional positional parameter `logs` to the `ServerApi.serverError` method.
 * Include debug logs with the `ExtensionsApi.apiServeAvailableExtensions` API response.
 * Devtools server API `apiGetConsentMessage` added to fetch the consent message from

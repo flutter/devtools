@@ -79,7 +79,7 @@ class AppState extends DisposableController with AutoDisposeControllerMixin {
   final _currentFrame = ValueNotifier<Frame?>(null);
   void setCurrentFrame(Frame? value) => _currentFrame.value = value;
 
-  final EvalHistory evalHistory = EvalHistory();
+  final evalHistory = EvalHistory();
 
   final cache = AutocompleteCache();
 

@@ -5,8 +5,10 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
+import 'package:devtools_app/src/shared/query_parameters.dart';
 import 'package:devtools_app/src/shared/survey.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -27,7 +29,6 @@ void main() {
     when(mockServiceManager.connectedState).thenReturn(
       ValueNotifier<ConnectedState>(const ConnectedState(false)),
     );
-    when(mockServiceManager.hasConnection).thenReturn(false);
 
     final mockErrorBadgeManager = MockErrorBadgeManager();
     when(mockServiceConnection.errorBadgeManager)
@@ -38,21 +39,22 @@ void main() {
     setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(FrameworkController, FrameworkController());
     setGlobal(SurveyService, SurveyService());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
   });
 
-  Widget wrapScaffold(Widget child) {
+  Widget wrapScaffold(Widget child, {DevToolsQueryParams? queryParams}) {
     return wrapWithControllers(
       child,
       analytics: AnalyticsController(
         enabled: false,
-        firstRun: false,
+        shouldShowConsentMessage: false,
         consentMessage: 'fake message',
       ),
       releaseNotes: ReleaseNotesController(),
+      queryParams: queryParams,
     );
   }
 
@@ -68,6 +70,7 @@ void main() {
           ),
         ),
       );
+      expect(find.byType(DevToolsAppBar), findsOneWidget);
       expect(find.byKey(_k1), findsOneWidget);
 
       expect(find.byKey(_t1), findsOneWidget);
@@ -92,6 +95,7 @@ void main() {
           ),
         ),
       );
+      expect(find.byType(DevToolsAppBar), findsOneWidget);
       expect(find.byKey(_k1), findsOneWidget);
 
       expect(find.byKey(_t1), findsOneWidget);
@@ -116,6 +120,7 @@ void main() {
           ),
         ),
       );
+      expect(find.byType(DevToolsAppBar), findsOneWidget);
       expect(find.byKey(_k1), findsOneWidget);
 
       expect(find.byKey(_t1), findsOneWidget);
@@ -158,19 +163,20 @@ void main() {
   );
 
   testWidgets(
-    'displays no tabs when only one is given',
+    'displays tabs with only one screen',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
           DevToolsScaffold(page: _screen1.screenId, screens: const [_screen1]),
         ),
       );
+      expect(find.byType(DevToolsAppBar), findsOneWidget);
       expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(_t1), findsNothing);
+      expect(find.byKey(_t1), findsOneWidget);
     },
   );
 
-  testWidgets('displays only the selected tab', (WidgetTester tester) async {
+  testWidgets('displays only the selected screen', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapScaffold(
         DevToolsScaffold(
@@ -179,6 +185,7 @@ void main() {
         ),
       ),
     );
+    expect(find.byType(DevToolsAppBar), findsOneWidget);
     expect(find.byKey(_k1), findsOneWidget);
     expect(find.byKey(_k2), findsNothing);
 
@@ -207,9 +214,82 @@ void main() {
           ),
         ),
       );
+      expect(find.byType(DevToolsAppBar), findsOneWidget);
 
       expect(find.byKey(_k1), findsNothing);
       expect(find.byKey(_k2), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'hides the app bar for EmbedMode.embedOne',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapScaffold(
+          DevToolsScaffold(
+            screens: const [_screen1, _screen2],
+            page: _screen2.screenId,
+            embedMode: EmbedMode.embedOne,
+          ),
+        ),
+      );
+      expect(find.byType(DevToolsAppBar), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'hides the app bar for EmbedMode.embedMany with a single simple screen',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapScaffold(
+          DevToolsScaffold.withChild(
+            embedMode: EmbedMode.embedMany,
+            child: const Center(child: Text('some message')),
+          ),
+        ),
+      );
+      expect(find.byType(DevToolsAppBar), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'shows the app bar for EmbedMode.embedMany',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapScaffold(
+          DevToolsScaffold(
+            screens: const [_screen2],
+            page: _screen2.screenId,
+            embedMode: EmbedMode.embedMany,
+          ),
+        ),
+      );
+      expect(find.byType(DevToolsAppBar), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'uses empty actions as default when embedded',
+    (WidgetTester tester) async {
+      var scaffold = DevToolsScaffold(
+        screens: const [_screen1, _screen2],
+        page: _screen1.screenId,
+      );
+      expect(scaffold.actions.length, 4);
+
+      scaffold = DevToolsScaffold(
+        screens: const [_screen1, _screen2],
+        page: _screen1.screenId,
+        embedMode: EmbedMode.embedOne,
+      );
+      expect(scaffold.actions, isEmpty);
+
+      scaffold = DevToolsScaffold(
+        screens: const [_screen1, _screen2],
+        page: _screen1.screenId,
+        embedMode: EmbedMode.embedMany,
+      );
+      expect(scaffold.actions, isEmpty);
     },
   );
 }

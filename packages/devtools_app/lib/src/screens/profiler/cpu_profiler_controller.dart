@@ -208,7 +208,7 @@ class CpuProfilerController extends DisposableController
   /// Clients interested in the current value of [profilerFlagNotifier] should
   /// use this getter. Otherwise, clients subscribing to change notifications,
   /// should listen to [profilerFlagNotifier].
-  bool get profilerEnabled => offlineController.offlineMode.value
+  bool get profilerEnabled => offlineDataController.showingOfflineData.value
       ? true
       : profilerFlagNotifier?.value.valueAsString == 'true';
 

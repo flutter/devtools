@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_infra/matchers/_golden_matcher_io.dart';
+import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/test_data/cpu_profiler/simple_profile_2.dart';
 import '../../test_infra/utils/test_utils.dart';
 
@@ -31,7 +31,7 @@ void main() {
       createMockServiceConnectionWithDefaults(),
     );
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     final mockScriptManager = MockScriptManager();
     when(mockScriptManager.sortedScripts).thenReturn(
       ValueNotifier<List<ScriptRef>>([]),
@@ -43,7 +43,7 @@ void main() {
       ),
     );
     setGlobal(ScriptManager, mockScriptManager);
-    final data = CpuProfileData.parse(simpleCpuProfile2);
+    final data = CpuProfileData.fromJson(simpleCpuProfile2);
     await CpuProfileTransformer().processData(data, processId: 'test');
     methodTableController = MethodTableController(
       dataNotifier: FixedValueListenable<CpuProfileData>(data),

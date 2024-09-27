@@ -19,7 +19,7 @@ void main() {
   group('$PerformanceController', () {
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
@@ -39,7 +39,7 @@ void main() {
       when(mockServiceManager.connectedState)
           .thenReturn(ValueNotifier(const ConnectedState(true)));
       setGlobal(ServiceConnectionManager, mockServiceConnection);
-      offlineController.enterOfflineMode(
+      offlineDataController.startShowingOfflineData(
         offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
       controller = PerformanceController();
@@ -48,17 +48,10 @@ void main() {
     test('setActiveFeature', () async {
       expect(controller.flutterFramesController.isActiveFeature, isFalse);
       expect(controller.timelineEventsController.isActiveFeature, isFalse);
-      expect(controller.rasterStatsController.isActiveFeature, isFalse);
 
       await controller.setActiveFeature(controller.timelineEventsController);
       expect(controller.flutterFramesController.isActiveFeature, isTrue);
       expect(controller.timelineEventsController.isActiveFeature, isTrue);
-      expect(controller.rasterStatsController.isActiveFeature, isFalse);
-
-      await controller.setActiveFeature(controller.rasterStatsController);
-      expect(controller.flutterFramesController.isActiveFeature, isTrue);
-      expect(controller.timelineEventsController.isActiveFeature, isFalse);
-      expect(controller.rasterStatsController.isActiveFeature, isTrue);
     });
   });
 }

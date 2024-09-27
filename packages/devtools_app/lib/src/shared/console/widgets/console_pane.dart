@@ -41,8 +41,8 @@ class ConsolePaneHeader extends AreaPaneHeader {
 /// Display the stdout and stderr output from the process under debug.
 class ConsolePane extends StatelessWidget {
   const ConsolePane({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const copyToClipboardButtonKey =
       Key('console_copy_to_clipboard_button');

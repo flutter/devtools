@@ -28,7 +28,7 @@ Axis axis(ArrowType type) => (type == ArrowType.up || type == ArrowType.down)
 @immutable
 class ArrowWrapper extends StatelessWidget {
   ArrowWrapper.unidirectional({
-    Key? key,
+    super.key,
     this.child,
     required ArrowType type,
     this.arrowColor = defaultArrowColor,
@@ -40,11 +40,10 @@ class ArrowWrapper extends StatelessWidget {
         isBidirectional = false,
         startArrowType = type,
         endArrowType = type,
-        arrowHeadSize = arrowHeadSize ?? defaultIconSize,
-        super(key: key);
+        arrowHeadSize = arrowHeadSize ?? defaultIconSize;
 
   const ArrowWrapper.bidirectional({
-    Key? key,
+    super.key,
     this.child,
     required this.direction,
     this.arrowColor = defaultArrowColor,
@@ -57,8 +56,7 @@ class ArrowWrapper extends StatelessWidget {
         startArrowType =
             direction == Axis.horizontal ? ArrowType.left : ArrowType.up,
         endArrowType =
-            direction == Axis.horizontal ? ArrowType.right : ArrowType.down,
-        super(key: key);
+            direction == Axis.horizontal ? ArrowType.right : ArrowType.down;
 
   final Color arrowColor;
   final double arrowHeadSize;
@@ -135,7 +133,7 @@ class ArrowWidget extends StatelessWidget {
   ArrowWidget({
     this.color = defaultArrowColor,
     required this.headSize,
-    Key? key,
+    super.key,
     this.shouldDrawHead = true,
     this.strokeWidth = defaultArrowStrokeWidth,
     required this.type,
@@ -147,8 +145,7 @@ class ArrowWidget extends StatelessWidget {
           strokeWidth: strokeWidth,
           type: type,
           shouldDrawHead: shouldDrawHead,
-        ),
-        super(key: key);
+        );
 
   final Color color;
 

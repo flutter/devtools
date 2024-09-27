@@ -22,7 +22,10 @@
             "type": "dart",
             "program": "devtools_app/lib/main.dart",
             "args": [
-                "--dart-define=enable_experiments=true"
+                "--dart-define",
+                "memory_disconnect_experience=true",
+                "--dart-define",
+                "enable_experiments=true",
             ],
         },
         {
@@ -33,6 +36,13 @@
             "flutterMode": "profile",
         },
         {
+            "name": "devtools + release",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "flutterMode": "release",
+        },
+        {
             "name": "devtools + profile + experiments",
             "request": "launch",
             "type": "dart",
@@ -41,6 +51,13 @@
             "args": [
                 "--dart-define=enable_experiments=true"
             ],
+        },
+        {
+            "name": "devtools + release",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "flutterMode": "release",
         },
         {
             "name": "memory/default",
@@ -83,6 +100,13 @@
             "request": "launch",
             "type": "dart",
             "program": "devtools_app/test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart",
+        },
+        {
+            "name": "standalone_ui/editor_sidebar",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/scenes/standalone_ui/editor_sidebar.stager_app.g.dart",
+            "preLaunchTask": "Start DTD on Port 8500",
         },
         {
             "name": "devtools_extensions: foo + sim",
@@ -128,5 +152,5 @@
                 "--dart-define=use_simulated_environment=true"
             ],
         },
-    ]
+    ],
 }

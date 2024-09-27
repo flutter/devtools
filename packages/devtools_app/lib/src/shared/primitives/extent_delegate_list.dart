@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart' as collection;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -23,8 +22,7 @@ abstract class ExtentDelegate {
   /// Optional callback to execute after the layout of the extents is modified.
 
   Listenable get layoutDirty => _layoutDirty;
-  final _ExtentDelegateChangeNotifier _layoutDirty =
-      _ExtentDelegateChangeNotifier();
+  final _layoutDirty = _ExtentDelegateChangeNotifier();
 
   int get length;
 
@@ -162,30 +160,19 @@ class FixedExtentDelegate extends FixedExtentDelegateBase {
 /// screen need to be animated.
 class ExtentDelegateListView extends CustomPointerScrollView {
   const ExtentDelegateListView({
-    Key? key,
-    Axis scrollDirection = Axis.vertical,
-    bool reverse = false,
-    ScrollController? controller,
-    bool? primary,
-    ScrollPhysics? physics,
-    bool shrinkWrap = false,
-    EdgeInsetsGeometry? padding,
+    super.key,
+    super.scrollDirection,
+    super.reverse,
+    super.controller,
+    super.primary,
+    super.physics,
+    super.shrinkWrap,
+    super.padding,
     required this.childrenDelegate,
     required this.extentDelegate,
-    int? semanticChildCount,
-    void Function(PointerSignalEvent event)? customPointerSignalHandler,
-  }) : super(
-          key: key,
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          controller: controller,
-          primary: primary,
-          physics: physics,
-          shrinkWrap: shrinkWrap,
-          padding: padding,
-          semanticChildCount: semanticChildCount,
-          customPointerSignalHandler: customPointerSignalHandler,
-        );
+    super.semanticChildCount,
+    super.customPointerSignalHandler,
+  });
 
   /// A delegate that provides the children for the [ExtentDelegateListView].
   final SliverChildDelegate childrenDelegate;
@@ -213,10 +200,10 @@ class SliverExtentDelegateList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children with the same main axis extent
   /// in a linear array.
   const SliverExtentDelegateList({
-    Key? key,
-    required SliverChildDelegate delegate,
+    super.key,
+    required super.delegate,
     required this.extentDelegate,
-  }) : super(key: key, delegate: delegate);
+  });
 
   /// The extent the children are forced to have in the main axis.
   final ExtentDelegate? extentDelegate;
@@ -225,8 +212,7 @@ class SliverExtentDelegateList extends SliverMultiBoxAdaptorWidget {
   RenderSliverExtentDelegateBoxAdaptor createRenderObject(
     BuildContext context,
   ) {
-    final SliverMultiBoxAdaptorElement element =
-        context as SliverMultiBoxAdaptorElement;
+    final element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverExtentDelegateBoxAdaptor(
       childManager: element,
       extentDelegate: extentDelegate,
@@ -254,9 +240,9 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
   ///
   /// The [childManager] argument must not be null.
   RenderSliverExtentDelegateBoxAdaptor({
-    required RenderSliverBoxChildManager childManager,
+    required super.childManager,
     required ExtentDelegate? extentDelegate,
-  }) : super(childManager: childManager) {
+  }) {
     _markNeedsLayout = markNeedsLayout;
     this.extentDelegate = extentDelegate;
   }
@@ -339,22 +325,21 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
-    final double scrollOffset =
-        constraints.scrollOffset + constraints.cacheOrigin;
+    final scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
     assert(scrollOffset >= 0.0);
-    final double remainingExtent = constraints.remainingCacheExtent;
+    final remainingExtent = constraints.remainingCacheExtent;
     assert(remainingExtent >= 0.0);
-    final double targetEndScrollOffset = scrollOffset + remainingExtent;
+    final targetEndScrollOffset = scrollOffset + remainingExtent;
 
-    final int firstIndex =
+    final firstIndex =
         _extentDelegate!.minChildIndexForScrollOffset(scrollOffset);
-    final int? targetLastIndex = targetEndScrollOffset.isFinite
+    final targetLastIndex = targetEndScrollOffset.isFinite
         ? _extentDelegate!.maxChildIndexForScrollOffset(targetEndScrollOffset)
         : null;
 
     if (firstChild != null) {
-      final int leadingGarbage = _calculateLeadingGarbage(firstIndex);
-      final int trailingGarbage = _calculateTrailingGarbage(targetLastIndex);
+      final leadingGarbage = _calculateLeadingGarbage(firstIndex);
+      final trailingGarbage = _calculateTrailingGarbage(targetLastIndex);
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
@@ -367,8 +352,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       )) {
         // There are either no children, or we are past the end of all our children.
         // If it is the latter, we will need to find the first available child.
-        final double max =
-            _extentDelegate!.layoutOffset(childManager.childCount);
+        final max = _extentDelegate!.layoutOffset(childManager.childCount);
         assert(max >= 0.0);
         geometry = SliverGeometry(
           scrollExtent: _extentDelegate!.layoutOffset(_extentDelegate!.length),
@@ -382,8 +366,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     RenderBox? trailingChildWithLayout;
 
     for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
-      final RenderBox? child =
-          insertAndLayoutLeadingChild(buildChildConstraints(index));
+      final child = insertAndLayoutLeadingChild(buildChildConstraints(index));
       if (child == null) {
         // Items before the previously first child are no longer present.
         // Reset the scroll offset to offset all items prior and up to the
@@ -393,7 +376,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
         );
         return;
       }
-      final SliverMultiBoxAdaptorParentData childParentData =
+      final childParentData =
           child.parentData as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = _extentDelegate!.layoutOffset(index);
       assert(childParentData.index == index);
@@ -402,7 +385,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
 
     if (trailingChildWithLayout == null) {
       firstChild!.layout(buildChildConstraints(firstIndex));
-      final SliverMultiBoxAdaptorParentData childParentData =
+      final childParentData =
           firstChild!.parentData as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = _extentDelegate!.layoutOffset(firstIndex);
       trailingChildWithLayout = firstChild;
@@ -428,18 +411,16 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
         child.layout(buildChildConstraints(index));
       }
       trailingChildWithLayout = child;
-      final SliverMultiBoxAdaptorParentData childParentData =
+      final childParentData =
           child.parentData as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
       childParentData.layoutOffset =
           _extentDelegate!.layoutOffset(childParentData.index);
     }
 
-    final int lastIndex = indexOf(lastChild!);
-    final double leadingScrollOffset =
-        _extentDelegate!.layoutOffset(firstIndex);
-    final double trailingScrollOffset =
-        _extentDelegate!.layoutOffset(lastIndex + 1);
+    final lastIndex = indexOf(lastChild!);
+    final leadingScrollOffset = _extentDelegate!.layoutOffset(firstIndex);
+    final trailingScrollOffset = _extentDelegate!.layoutOffset(lastIndex + 1);
 
     assert(
       firstIndex == 0 ||
@@ -461,21 +442,21 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       ),
     );
 
-    final double paintExtent = calculatePaintOffset(
+    final paintExtent = calculatePaintOffset(
       constraints,
       from: leadingScrollOffset,
       to: trailingScrollOffset,
     );
 
-    final double cacheExtent = calculateCacheOffset(
+    final cacheExtent = calculateCacheOffset(
       constraints,
       from: leadingScrollOffset,
       to: trailingScrollOffset,
     );
 
-    final double targetEndScrollOffsetForPaint =
+    final targetEndScrollOffsetForPaint =
         constraints.scrollOffset + constraints.remainingPaintExtent;
-    final int? targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite
+    final targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite
         ? _extentDelegate!
             .maxChildIndexForScrollOffset(targetEndScrollOffsetForPaint)
         : null;

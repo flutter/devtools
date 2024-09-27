@@ -227,7 +227,7 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>.from(
   tooltip:
       'Highlight images that are using too much memory by inverting colors and flipping them.',
   documentationUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#highlight-oversized-images',
+      'https://docs.flutter.dev/tools/devtools/inspector#highlight-oversized-images',
   gaDocsItem: gac.highlightOversizedImagesDocs,
 );
 
@@ -239,7 +239,7 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>.from(
   gaItem: gac.debugPaint,
   tooltip: 'Overlay guidelines to assist with fixing layout issues.',
   documentationUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#show-guidelines',
+      'https://docs.flutter.dev/tools/devtools/inspector#show-guidelines',
   gaDocsItem: gac.debugPaintDocs,
 );
 
@@ -252,7 +252,7 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>.from(
   tooltip:
       'Show baselines, which are used to position text. Can be useful for checking if text is aligned.',
   documentationUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#show-baselines',
+      'https://docs.flutter.dev/tools/devtools/inspector#show-baselines',
   gaDocsItem: gac.paintBaselineDocs,
 );
 
@@ -263,28 +263,27 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>.from(
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.performanceOverlay.name,
   tooltip: 'Overlay a performance chart on your app.',
-  documentationUrl:
-      'https://flutter.dev/docs/perf/rendering/ui-performance#the-performance-overlay',
+  documentationUrl: 'https://flutter.dev/to/performance-overlay',
   gaDocsItem: gac.PerformanceDocs.performanceOverlayDocs.name,
 );
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileWidgetBuilds,
-  title: 'Track widget builds',
+  title: 'Trace widget builds',
   iconAsset: 'icons/trackwidget-white.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackRebuilds.name,
   description: 'Adds an event to the timeline for every Widget built.',
   tooltip: '',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#track-widget-builds',
+      'https://docs.flutter.dev/tools/devtools/performance#track-widget-builds',
   gaDocsItem: gac.PerformanceDocs.trackWidgetBuildsDocs.name,
 );
 
 final profileUserWidgetBuilds =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileUserWidgetBuilds,
-  title: 'Track user-created widget builds',
+  title: 'Trace user-created widget builds',
   iconAsset: 'icons/trackwidget-white.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackUserCreatedWidgetBuilds.name,
@@ -296,28 +295,28 @@ final profileUserWidgetBuilds =
 final profileRenderObjectPaints =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileRenderObjectPaints,
-  title: 'Track paints',
+  title: 'Trace paints',
   iconData: Icons.format_paint,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackPaints.name,
   description: 'Adds an event to the timeline for every RenderObject painted.',
   tooltip: '',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#track-paints',
+      'https://docs.flutter.dev/tools/devtools/performance#track-paints',
   gaDocsItem: gac.PerformanceDocs.trackPaintsDocs.name,
 );
 
 final profileRenderObjectLayouts =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileRenderObjectLayouts,
-  title: 'Track layouts',
+  title: 'Trace layouts',
   iconData: Icons.auto_awesome_mosaic,
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.trackLayouts.name,
   description: 'Adds an event to the timeline for every RenderObject layout.',
   tooltip: '',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#track-layouts',
+      'https://docs.flutter.dev/tools/devtools/performance#track-layouts',
   gaDocsItem: gac.PerformanceDocs.trackLayoutsDocs.name,
 );
 
@@ -330,7 +329,7 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>.from(
   tooltip:
       'Show borders that change color when elements repaint. Useful for finding unnecessary repaints.',
   documentationUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#highlight-repaints',
+      'https://docs.flutter.dev/tools/devtools/inspector#highlight-repaints',
   gaDocsItem: gac.repaintRainbowDocs,
 );
 
@@ -342,7 +341,7 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>.from(
   gaItem: gac.slowAnimation,
   tooltip: 'Run animations 5 times slower to help fine-tune them.',
   documentationUrl:
-      'https://flutter.dev/docs/development/tools/devtools/inspector#slow-animations',
+      'https://docs.flutter.dev/tools/devtools/inspector#slow-animations',
   gaDocsItem: gac.slowAnimationDocs,
 );
 
@@ -373,7 +372,7 @@ final disableClipLayers = ToggleableServiceExtensionDescription<bool>.from(
 affecting performance. If performance improves with this option
 disabled, try to reduce the use of clipping effects in your app.''',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
+      'https://docs.flutter.dev/tools/devtools/performance#more-debugging-options',
   gaDocsItem: gac.PerformanceDocs.disableClipLayersDocs.name,
 );
 
@@ -388,7 +387,7 @@ final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>.from(
 effects is affecting performance. If performance improves with this
 option disabled, try to reduce the use of opacity effects in your app.''',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
+      'https://docs.flutter.dev/tools/devtools/performance#more-debugging-options',
   gaDocsItem: gac.PerformanceDocs.disableOpacityLayersDocs.name,
 );
 
@@ -405,7 +404,7 @@ modeling effects is affecting performance (shadows, elevations, etc.).
 If performance improves with this option disabled, try to reduce the
 use of physical modeling effects in your app.''',
   documentationUrl:
-      'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
+      'https://docs.flutter.dev/tools/devtools/performance#more-debugging-options',
   gaDocsItem: gac.PerformanceDocs.disablePhysicalShapeLayersDocs.name,
 );
 
@@ -417,15 +416,6 @@ final httpEnableTimelineLogging =
   gaScreenName: null,
   gaItem: null,
   tooltip: 'Toggle HTTP timeline logging',
-);
-
-final socketProfiling = ToggleableServiceExtensionDescription<bool>.from(
-  extensions.socketProfiling,
-  title: 'Whether socket profiling is enabled',
-  iconData: Icons.outlet_outlined,
-  gaScreenName: null,
-  gaItem: null,
-  tooltip: 'Toggle socket profiling',
 );
 
 // Legacy extension to show the inspector and enable inspector select mode.
@@ -485,20 +475,23 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>.from(
   tooltip: 'Toggle showing structured errors for Flutter framework issues',
 );
 
-final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>.from(
-  extensions.trackRebuildWidgets,
-  title: 'Track widget build counts',
+final countWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
+  extensions.countWidgetBuilds,
+  title: 'Count widget builds',
   iconAsset: 'icons/inspector/diagram@2x.png',
-  description: 'Tells you what has been rebuilt in your app\'s current screen.',
-  tooltip: 'Show widget rebuild counts since the last reload',
-  gaScreenName: gac.inspector,
-  gaItem: gac.trackRebuildWidgets,
+  gaScreenName: gac.performance,
+  gaItem: gac.PerformanceEvents.countWidgetBuilds.nameOverride!,
+  description: 'Counts widget builds for each Flutter frame.',
+  tooltip: '''Enable this option to see the widgets that were built in each 
+Flutter frame using the Frame Analysis tool, or to see an aggregate
+summary of these counts using the Rebuild Stats tool.''',
+  // TODO(https://github.com/flutter/website/issues/10666): link docs
 );
 
 final profilePlatformChannels =
     ToggleableServiceExtensionDescription<bool>.from(
   extensions.profilePlatformChannels,
-  title: 'Track platform channels',
+  title: 'Trace platform channels',
   iconAsset: 'icons/trackwidget-white.png',
   gaScreenName: gac.performance,
   gaItem: gac.PerformanceEvents.profilePlatformChannels.name,
@@ -507,7 +500,6 @@ final profilePlatformChannels =
       'apps with plugins). Also periodically prints platform channel '
       'statistics to console.',
   tooltip: '',
-  documentationUrl:
-      'https://docs.flutter.dev/platform-integration/platform-channels',
+  documentationUrl: 'https://flutter.dev/to/platform-channels',
   gaDocsItem: gac.PerformanceDocs.platformChannelsDocs.name,
 );

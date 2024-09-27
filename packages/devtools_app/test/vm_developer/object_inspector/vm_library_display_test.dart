@@ -66,7 +66,7 @@ void main() {
         expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
         expect(find.byType(VMInfoCard), findsOneWidget);
         expect(find.text('General Information'), findsOneWidget);
-        expect(find.text('1 KB'), findsOneWidget);
+        expect(find.text('1.0 KB'), findsOneWidget);
         expect(find.text('URI:'), findsOneWidget);
         expect(find.text('fooLib.dart', findRichText: true), findsOneWidget);
         expect(find.text('VM Name:'), findsOneWidget);

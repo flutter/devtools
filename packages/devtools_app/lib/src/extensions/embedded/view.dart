@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/globals.dart';
 import '_view_desktop.dart' if (dart.library.js_interop) '_view_web.dart';
 import 'controller.dart';
 
@@ -17,8 +19,7 @@ import 'controller.dart';
 /// When DevTools is run on Desktop for development, this widget displays a
 /// placeholder, since Flutter Desktop does not currently support web views.
 class EmbeddedExtensionView extends StatefulWidget {
-  const EmbeddedExtensionView({Key? key, required this.controller})
-      : super(key: key);
+  const EmbeddedExtensionView({super.key, required this.controller});
 
   final EmbeddedExtensionController controller;
 
@@ -40,6 +41,41 @@ class _EmbeddedExtensionViewState extends State<EmbeddedExtensionView> {
 
   @override
   Widget build(BuildContext context) {
+    if (isEmbedded() &&
+        widget.controller.extensionConfig.requiresConnection &&
+        !serviceConnection.serviceManager.connectedState.value.connected) {
+      return ExtensionRequiresConnection(
+        extensionName: widget.controller.extensionConfig.displayName,
+      );
+    }
     return EmbeddedExtension(controller: widget.controller);
+  }
+}
+
+@visibleForTesting
+class ExtensionRequiresConnection extends StatelessWidget {
+  const ExtensionRequiresConnection({super.key, required this.extensionName});
+
+  final String extensionName;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'The $extensionName extension requires a running applcation.',
+            style: theme.boldTextStyle,
+          ),
+          const SizedBox(height: denseSpacing),
+          Text(
+            'Start or connect to an active debug session to use this tool.',
+            style: theme.regularTextStyle,
+          ),
+        ],
+      ),
+    );
   }
 }

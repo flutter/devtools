@@ -5,71 +5,73 @@
 part of '../constants.dart';
 
 /// Analytics time constants specific for memory screen.
-class MemoryTime {
-  static const adaptSnapshot = 'adaptSnapshot';
-  static const calculateDiff = 'calculateDiff';
-  static const updateValues = 'updateValues';
+enum MemoryTime {
+  calculateDiff,
+  updateValues,
 }
 
-// ignore: avoid_classes_with_only_static_members, requires refactor.
-/// Analytic event constants specific for memory screen.
-class MemoryEvent {
-  static const gc = 'gc';
-  static const settings = 'settings';
+enum MemoryEvents {
+  browseRefLimit,
+  gc,
+  settings,
 
-  static const showChartLegend = 'showMemoryLegend';
-  static const hideChartLegend = 'hideMemoryLegend';
-  static const chartAndroid = 'androidChart';
+  // Chart events
+  androidChart,
+  chartHelp,
+  chartInterval,
+  clearChart,
+  pauseChart,
+  resumeChart,
+  showChart,
+  hideChart,
+  showChartLegend,
+  hideChartLegend,
 
-  static const pauseChart = 'pauseChart';
-  static const resumeChart = 'resumeChart';
-  static const clearChart = 'clearChart';
-  static const showChart = 'showChart';
-  static const hideChart = 'hideChart';
-  static const chartInterval = 'chartInterval';
-  static const chartHelp = 'memoryChartHelp';
+  // 'Diff' tab events
+  diffTakeSnapshotControlPane,
+  diffClearSnapshots,
+  diffHelp,
 
-  static const leaksAnalyze = 'leaksAnalyze';
+  diffSnapshotDiffSelect,
+  diffSnapshotDiffSelectOff,
+  diffSnapshotFilter,
+  diffSnapshotDownloadCsv,
+  diffSnapshotExport,
+  diffSnapshotDelete,
 
-  static const profileDownloadCsv = 'profileDownloadCsv';
-  static const profileRefreshManual = 'profileRefreshManual';
-  static const profileRefreshOnGc = 'profileRefreshOnGc';
-  static const profileHelp = 'memoryProfileHelp';
+  diffClassDiffSelect,
+  diffClassSingleSelect,
+  diffPathSelect,
+  diffClassDiffCopy,
+  diffClassSingleCopy,
+  diffPathCopy,
+  diffPathFilter,
+  diffPathInvert,
 
-  static const tracingClear = 'tracingClear';
-  static const tracingRefresh = 'tracingRefresh';
-  static const tracingClassFilter = 'tracingClassFilter';
-  static const tracingTraceCheck = 'tracingTraceCheck';
-  static const tracingTreeExpandAll = 'tracingTreeExpandAll';
-  static const tracingTreeCollapseAll = 'tracingTreeCollapseAll';
-  static const tracingHelp = 'memoryTracingHelp';
+  diffSnapshotFilterType,
+  diffSnapshotFilterReset,
 
-  static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
-  static const diffClearSnapshots = 'diffClearSnapshots';
-  static const diffHelp = 'memoryDiffHelp';
+  // 'Profile' tab events
+  profileDownloadCsv,
+  profileHelp,
+  profileRefreshManual,
+  profileRefreshOnGc,
 
-  static const diffSnapshotDiffSelect = 'diffSnapshotDiffSelect';
-  static const diffSnapshotDiffOff = 'diffSnapshotDiffSelectOff';
-  static const diffSnapshotFilter = 'diffSnapshotFilter';
-  static const diffSnapshotDownloadCsv = 'diffSnapshotDownloadCsv';
-  static const diffSnapshotDelete = 'diffSnapshotDelete';
+  // 'Tracing' tab events
+  tracingClear,
+  tracingRefresh,
+  tracingClassFilter,
+  tracingTraceCheck,
+  tracingTreeExpandAll,
+  tracingTreeCollapseAll,
+  tracingHelp;
 
-  static const diffClassDiffSelect = 'diffClassDiffSelect';
-  static const diffClassSingleSelect = 'diffClassSingleSelect';
-  static const diffPathSelect = 'diffPathSelect';
-  static const diffClassDiffCopy = 'diffClassDiffCopy';
-  static const diffClassSingleCopy = 'diffClassSingleCopy';
-  static const diffPathCopy = 'diffPathCopy';
-  static const diffPathFilter = 'diffPathFilter';
-  static const diffPathInvert = 'diffPathInvert';
+  static String dropOneLiveVariable({required String sourceFeature}) =>
+      'dropOneLiveVariable_$sourceFeature';
 
-  static const diffSnapshotFilterType = 'diffSnapshotFilterType';
-  static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
+  static String dropOneStaticVariable({required String sourceFeature}) =>
+      'dropOneStaticVariable_$sourceFeature';
 
-  static const browseRefLimit = 'browseRefLimit';
-
-  static const dropOneLiveVariable = 'dropOneLiveVariable';
-  static const dropOneStaticVariable = 'dropOneStaticVariable';
   static String dropAllLiveToConsole({
     required bool includeSubclasses,
     required bool includeImplementers,
@@ -81,10 +83,7 @@ class MemoryEvent {
 /// by a widget used in different contexts.
 enum MemoryAreas {
   profile('profile'),
-  snapshotSingle('single'),
-  snapshotDiff('diff'),
-  snapshotDiffDelta('diff-delta'),
-  snapshotDiffNew('diff-new');
+  snapshotDiff('diff');
 
   const MemoryAreas(this.name);
 

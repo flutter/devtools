@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
+import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
@@ -72,7 +73,7 @@ class Selection<T> {
 @visibleForTesting
 class DevToolsTable<T> extends StatefulWidget {
   const DevToolsTable({
-    Key? key,
+    super.key,
     required this.tableController,
     required this.columnWidths,
     required this.rowBuilder,
@@ -87,7 +88,7 @@ class DevToolsTable<T> extends StatefulWidget {
     this.headerColor,
     this.fillWithEmptyRows = false,
     this.enableHoverHandling = false,
-  }) : super(key: key);
+  });
 
   final TableControllerBase<T> tableController;
   final bool autoScrollContent;
@@ -180,14 +181,14 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     if (selectionNotifier != null) {
       addAutoDisposeListener(selectionNotifier, () {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          final Selection<T?> selection = selectionNotifier.value;
+          final selection = selectionNotifier.value;
           final T? node = selection.node;
           final int? Function(T?)? nodeIndexCalculator =
               selection.nodeIndexCalculator;
-          final int? nodeIndex = selection.nodeIndex;
+          final nodeIndex = selection.nodeIndex;
 
           if (selection.scrollIntoView && node != null) {
-            final int selectedDisplayRow = nodeIndexCalculator != null
+            final selectedDisplayRow = nodeIndexCalculator != null
                 ? nodeIndexCalculator(node)!
                 : nodeIndex!;
 
@@ -254,7 +255,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
         widget.tableController.columns.numSpacers - numColumnGroupSpacers;
     tableWidth += numColumnSpacers * columnSpacing;
     tableWidth += numColumnGroupSpacers * columnGroupSpacingWithPadding;
-    for (var columnWidth in widget.columnWidths) {
+    for (final columnWidth in widget.columnWidths) {
       tableWidth += columnWidth;
     }
     return tableWidth;

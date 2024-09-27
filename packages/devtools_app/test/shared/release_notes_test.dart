@@ -64,11 +64,9 @@ void main() {
     test('Parses expected index format correctly', () async {
       await http.runWithClient(
         () async {
-          final response = await controller.retrieveReleasesFromIndex();
-          expect(response!.keys, hasLength(2));
-          expect(response['latest'], equals('2.32.0'));
+          final releaseIndex = await controller.retrieveReleasesFromIndex();
           expect(
-            response['releases'],
+            releaseIndex,
             equals({
               '2.32.0':
                   '/tools/devtools/release-notes/release-notes-2.32.0-src.md',

@@ -10,24 +10,30 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 
-import '../../../devtools.dart' as devtools show version;
 import '../shared/notifications.dart';
 import 'analytics/analytics.dart' as ga;
-import 'config_specific/launch_url/launch_url.dart';
 import 'development_helpers.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
 import 'server/server.dart' as server;
+import 'utils.dart';
 
 final _log = Logger('survey');
 
 class SurveyService {
-  static const _noThanksLabel = 'NO THANKS';
+  static const _noThanksLabel = 'No thanks';
 
-  static const _takeSurveyLabel = 'TAKE SURVEY';
+  static const _takeSurveyLabel = 'Take survey';
 
   static const _maxShowSurveyCount = 5;
 
+  /// The URL that we will fetch the DevTools survey metadata from.
+  ///
+  /// To run new surveys, update the content at
+  /// https://github.com/flutter/uxr/blob/master/surveys/devtools-survey-metadata.json.
+  ///
+  /// This content will be propagated to the storage.googleapis.com domain
+  /// automatically.
   static final _metadataUrl = Uri.https(
     'storage.googleapis.com',
     'flutter-uxr/surveys/devtools-survey-metadata.json',
@@ -44,10 +50,14 @@ class SurveyService {
 
   Future<DevToolsSurvey?> get activeSurvey async {
     // If the server is unavailable we don't need to do anything survey related.
-    if (!server.isDevToolsServerAvailable) return null;
+    if (!server.isDevToolsServerAvailable && !debugSurvey) return null;
 
     _cachedSurvey ??= await fetchSurveyContent();
     if (_cachedSurvey?.id != null) {
+      // TODO(kenz): consider setting this value on the [SurveyService] and then
+      // we can send the active survey as a parameter in each survey-related
+      // DevTools server request. This would simplify the server API for
+      // DevTools surveys.
       await server.setActiveSurvey(_cachedSurvey!.id!);
     }
 
@@ -63,14 +73,14 @@ class SurveyService {
       final message = survey.title!;
       final actions = [
         NotificationAction(
-          _noThanksLabel,
-          () => _noThanksPressed(
+          label: _noThanksLabel,
+          onPressed: () => _noThanksPressed(
             message: message,
           ),
         ),
         NotificationAction(
-          _takeSurveyLabel,
-          () => _takeSurveyPressed(
+          label: _takeSurveyLabel,
+          onPressed: () => _takeSurveyPressed(
             surveyUrl: _generateSurveyUrl(survey.url!),
             message: message,
           ),
@@ -124,8 +134,8 @@ class SurveyService {
       }
       final response = await get(_metadataUrl);
       if (response.statusCode == 200) {
-        final Map<String, dynamic> contents = json.decode(response.body);
-        return DevToolsSurvey.parse(contents);
+        final contents = json.decode(response.body) as Map<String, Object?>;
+        return DevToolsSurvey.fromJson(contents);
       }
     } on Error catch (e, st) {
       _log.shout('Error fetching survey content: $e', e, st);
@@ -144,7 +154,7 @@ class SurveyService {
     required String surveyUrl,
     required String message,
   }) async {
-    await launchUrl(surveyUrl);
+    await launchUrlWithErrorHandling(surveyUrl);
     await server.setSurveyActionTaken();
     notificationService.dismiss(message);
   }
@@ -161,17 +171,20 @@ class DevToolsSurvey {
     this.devEnvironments,
   );
 
-  factory DevToolsSurvey.parse(Map<String, dynamic> json) {
-    final id = json[_uniqueIdKey];
-    final startDate = json[_startDateKey] != null
-        ? DateTime.parse(json[_startDateKey])
-        : null;
+  factory DevToolsSurvey.fromJson(Map<String, Object?> json) {
+    final id = json[_uniqueIdKey] as String?;
+    final startDateAsString = json[_startDateKey] as String?;
+    final endDateAsString = json[_endDateKey] as String?;
+    final minVersionAsString = json[_minDevToolsVersionKey] as String?;
+
+    final startDate =
+        startDateAsString != null ? DateTime.parse(startDateAsString) : null;
     final endDate =
-        json[_endDateKey] != null ? DateTime.parse(json[_endDateKey]) : null;
-    final title = json[_titleKey];
-    final surveyUrl = json[_urlKey];
-    final minDevToolsVersion = json[_minDevToolsVersionKey] != null
-        ? SemanticVersion.parse(json[_minDevToolsVersionKey])
+        endDateAsString != null ? DateTime.parse(endDateAsString) : null;
+    final title = json[_titleKey] as String?;
+    final surveyUrl = json[_urlKey] as String?;
+    final minDevToolsVersion = minVersionAsString != null
+        ? SemanticVersion.parse(minVersionAsString)
         : null;
     final devEnvironments =
         (json[_devEnvironmentsKey] as List?)?.cast<String>().toList();
@@ -235,7 +248,7 @@ extension ShowSurveyExtension on DevToolsSurvey {
 
   bool get meetsMinVersionRequirement =>
       minDevToolsVersion == null ||
-      SemanticVersion.parse(devtools.version)
+      SemanticVersion.parse(devToolsVersion)
           .isSupported(minSupportedVersion: minDevToolsVersion!);
 
   bool get meetsEnvironmentRequirement =>

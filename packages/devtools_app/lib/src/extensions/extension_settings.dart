@@ -12,35 +12,42 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/routing.dart';
+import 'extension_screen.dart';
 
 /// A [ScaffoldAction] that, when clicked, will open a dialog menu for
 /// managing DevTools extension states.
 class ExtensionSettingsAction extends ScaffoldAction {
-  ExtensionSettingsAction({super.key, Color? color})
+  ExtensionSettingsAction({super.key, super.color})
       : super(
-          icon: Icons.extension_outlined,
+          iconAsset: 'icons/app_bar/devtools_extensions.png',
           tooltip: 'DevTools Extensions',
-          color: color,
           onPressed: (context) {
             unawaited(
               showDialog(
                 context: context,
-                builder: (context) => const ExtensionSettingsDialog(),
+                builder: (context) => ExtensionSettingsDialog(
+                  extensions: extensionService
+                      .currentExtensions.value.availableExtensions,
+                ),
               ),
             );
           },
         );
 }
 
+@visibleForTesting
 class ExtensionSettingsDialog extends StatelessWidget {
-  const ExtensionSettingsDialog({super.key});
+  const ExtensionSettingsDialog({required this.extensions, super.key});
+
+  final List<DevToolsExtensionConfig> extensions;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final availableExtensions = extensionService.availableExtensions.value;
     // This dialog needs a fixed height because it contains a scrollable list.
-    final dialogHeight = scaleByFontFactor(300.0);
+    final dialogHeight =
+        anyTestMode ? scaleByFontFactor(1000.0) : scaleByFontFactor(300.0);
     return DevToolsDialog(
       title: const DialogTitleText('DevTools Extensions'),
       content: SizedBox(
@@ -65,14 +72,14 @@ class ExtensionSettingsDialog extends StatelessWidget {
             ),
             const PaddedDivider(),
             Expanded(
-              child: availableExtensions.isEmpty
+              child: extensions.isEmpty
                   ? Center(
                       child: Text(
                         'No extensions available.',
                         style: theme.subtleTextStyle,
                       ),
                     )
-                  : _ExtensionsList(extensions: availableExtensions),
+                  : _ExtensionsList(extensions: extensions),
             ),
           ],
         ),
@@ -165,6 +172,10 @@ class ExtensionSetting extends StatelessWidget {
               enable: false,
             ),
           );
+          final router = DevToolsRouterDelegate.of(context);
+          if (router.currentConfiguration?.page == extension.screenId) {
+            router.navigateHome(clearScreenParam: true);
+          }
         },
       ),
     ];

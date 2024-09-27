@@ -1,7 +1,8 @@
 ## DevTools Documentation - How To Guide
-The documentation for Dart & Flutter DevTools lives on [flutter.dev](https://docs.flutter.dev/development/tools/devtools/overview).
 
-Our docs are written and pushed up to the [flutter/website](https://docs.flutter.dev/development/tools/devtools/overview)
+The documentation for Dart & Flutter DevTools lives on [flutter.dev](https://docs.flutter.dev/tools/devtools).
+
+Our docs are written and pushed up to the [flutter/website](https://docs.flutter.dev/tools/devtools)
 repo by the Flutter DevRel team. Developers working on DevTools should collaborate with Flutter tech writers by following
 the below workflow.
 

@@ -9,16 +9,14 @@ import 'dart:math';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/debugger/debugger_controller.dart';
-import '../screens/inspector/layout_explorer/ui/theme.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
 import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
-import 'config_specific/launch_url/launch_url.dart';
 import 'console/widgets/expandable_variable.dart';
 import 'diagnostics/dart_object_node.dart';
 import 'diagnostics/tree_builder.dart';
@@ -26,16 +24,13 @@ import 'globals.dart';
 import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
+import 'ui/icons.dart';
 import 'utils.dart';
-
-/// The width of the package:flutter_test debugger device.
-const debuggerDeviceWidth = 800.0;
-
-const defaultDialogRadius = 20.0;
 
 double get assumedMonospaceCharacterWidth =>
     scaleByFontFactor(_assumedMonospaceCharacterWidth);
 double _assumedMonospaceCharacterWidth = 9.0;
+
 @visibleForTesting
 void setAssumedMonospaceCharacterWidth(double width) {
   _assumedMonospaceCharacterWidth = width;
@@ -237,6 +232,38 @@ class ToolbarRefresh extends ToolbarAction {
     required super.onPressed,
     super.tooltip = 'Refresh',
   });
+}
+
+class StartStopRecordingButton extends GaDevToolsButton {
+  StartStopRecordingButton({
+    super.key,
+    required this.recording,
+    required super.onPressed,
+    required super.gaScreen,
+    required super.gaSelection,
+    super.minScreenWidthForTextBeforeScaling,
+    String? tooltipOverride,
+    Color? colorOverride,
+    String? labelOverride,
+  }) : super(
+          icon: _icon(recording),
+          label: labelOverride ?? _label(recording),
+          color: colorOverride ?? _color(recording),
+          tooltip: tooltipOverride ?? _tooltip(recording),
+        );
+
+  static IconData _icon(bool recording) =>
+      recording ? Icons.stop : Icons.fiber_manual_record;
+
+  static String _label(bool recording) =>
+      recording ? 'Stop recording' : 'Start recording';
+
+  static String _tooltip(bool recording) =>
+      recording ? 'Stop recording' : 'Start recording';
+
+  static Color? _color(bool recording) => recording ? Colors.red : null;
+
+  final bool recording;
 }
 
 /// Button to start recording data.
@@ -451,10 +478,10 @@ class DevToolsSwitch extends StatelessWidget {
 
 class ProcessingInfo extends StatelessWidget {
   const ProcessingInfo({
-    Key? key,
+    super.key,
     required this.progressValue,
     required this.processedObject,
-  }) : super(key: key);
+  });
 
   final double? progressValue;
 
@@ -497,9 +524,9 @@ class ExitOfflineButton extends StatelessWidget {
       label: 'Exit offline mode',
       icon: Icons.clear,
       gaScreen: gaScreen,
-      gaSelection: gac.exitOfflineMode,
+      gaSelection: gac.stopShowingOfflineData,
       onPressed: () {
-        offlineController.exitOfflineMode();
+        offlineDataController.stopShowingOfflineData();
         // Use Router.neglect to replace the current history entry with
         // the homepage so that clicking Back will not return here.
         Router.neglect(
@@ -524,11 +551,11 @@ class OfflineAwareControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: offlineController.offlineMode,
+      valueListenable: offlineDataController.showingOfflineData,
       builder: (context, offline, _) {
         return Row(
           children: [
-            if (offlineController.offlineMode.value)
+            if (offlineDataController.showingOfflineData.value)
               Padding(
                 padding: const EdgeInsets.only(right: defaultSpacing),
                 child: ExitOfflineButton(gaScreen: gaScreen),
@@ -586,14 +613,13 @@ class ToolbarAction extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.tooltip,
-    Key? key,
+    super.key,
     this.size,
     this.style,
     this.color,
     this.gaScreen,
     this.gaSelection,
-  })  : assert((gaScreen == null) == (gaSelection == null)),
-        super(key: key);
+  }) : assert((gaScreen == null) == (gaSelection == null));
 
   final TextStyle? style;
   final IconData icon;
@@ -638,13 +664,25 @@ class ToolbarAction extends StatelessWidget {
 abstract class ScaffoldAction extends StatelessWidget {
   const ScaffoldAction({
     super.key,
-    required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.icon,
+    this.iconAsset,
     this.color,
-  });
+  }) : assert(
+          (icon == null) != (iconAsset == null),
+          'Exactly one of icon and iconAsset must be specified.',
+        );
 
-  final IconData icon;
+  /// The icon to use for this scaffold action.
+  ///
+  /// Only one of [icon] or [iconAsset] may be non-null.
+  final IconData? icon;
+
+  /// The icon asset path to render as the icon for this scaffold action.
+  ///
+  /// Only one of [icon] or [iconAsset] may be non-null.
+  final String? iconAsset;
 
   final String tooltip;
 
@@ -662,8 +700,9 @@ abstract class ScaffoldAction extends StatelessWidget {
           width: actionWidgetSize,
           height: actionWidgetSize,
           alignment: Alignment.center,
-          child: Icon(
-            icon,
+          child: DevToolsIcon(
+            icon: icon,
+            iconAsset: iconAsset,
             size: actionsIconSize,
             color: color,
           ),
@@ -679,10 +718,10 @@ abstract class ScaffoldAction extends StatelessWidget {
 /// [link] is the link that should be opened when the button is clicked.
 class InformationButton extends StatelessWidget {
   const InformationButton({
-    Key? key,
+    super.key,
     required this.tooltip,
     required this.link,
-  }) : super(key: key);
+  });
 
   final String tooltip;
 
@@ -694,211 +733,10 @@ class InformationButton extends StatelessWidget {
       message: tooltip,
       child: IconButton(
         icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrl(link),
+        onPressed: () async => await launchUrlWithErrorHandling(link),
       ),
     );
   }
-}
-
-class RoundedCornerOptions {
-  const RoundedCornerOptions({
-    this.showTopLeft = true,
-    this.showTopRight = true,
-    this.showBottomLeft = true,
-    this.showBottomRight = true,
-  });
-
-  final bool showTopLeft;
-  final bool showTopRight;
-  final bool showBottomLeft;
-  final bool showBottomRight;
-}
-
-class RoundedDropDownButton<T> extends StatelessWidget {
-  const RoundedDropDownButton({
-    Key? key,
-    this.value,
-    this.onChanged,
-    this.isDense = false,
-    this.isExpanded = false,
-    this.style,
-    this.selectedItemBuilder,
-    this.items,
-    this.roundedCornerOptions,
-  }) : super(key: key);
-
-  final T? value;
-
-  final ValueChanged<T?>? onChanged;
-
-  final bool isDense;
-
-  final bool isExpanded;
-
-  final TextStyle? style;
-
-  final DropdownButtonBuilder? selectedItemBuilder;
-
-  final List<DropdownMenuItem<T>>? items;
-
-  final RoundedCornerOptions? roundedCornerOptions;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bgColor = theme.colorScheme.backgroundColorSelected;
-
-    Radius selectRadius(bool show) {
-      return show ? defaultRadius : Radius.zero;
-    }
-
-    final style = this.style ?? theme.regularTextStyle;
-    final showTopLeft = roundedCornerOptions?.showTopLeft ?? true;
-    final showTopRight = roundedCornerOptions?.showTopRight ?? true;
-    final showBottomLeft = roundedCornerOptions?.showBottomLeft ?? true;
-    final showBottomRight = roundedCornerOptions?.showBottomRight ?? true;
-    return RoundedOutlinedBorder(
-      showTopLeft: showTopLeft,
-      showTopRight: showTopRight,
-      showBottomLeft: showBottomLeft,
-      showBottomRight: showBottomRight,
-      child: Center(
-        child: SizedBox(
-          height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              padding: const EdgeInsets.only(
-                left: defaultSpacing,
-                right: borderPadding,
-              ),
-              value: value,
-              onChanged: onChanged,
-              isDense: isDense,
-              isExpanded: isExpanded,
-              borderRadius: BorderRadius.only(
-                topLeft: selectRadius(showTopLeft),
-                topRight: selectRadius(showTopRight),
-                bottomLeft: selectRadius(showBottomLeft),
-                bottomRight: selectRadius(showBottomRight),
-              ),
-              style: style,
-              selectedItemBuilder: selectedItemBuilder,
-              items: items,
-              focusColor: bgColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class DevToolsClearableTextField extends StatelessWidget {
-  DevToolsClearableTextField({
-    Key? key,
-    required this.labelText,
-    TextEditingController? controller,
-    this.hintText,
-    this.prefixIcon,
-    this.additionalSuffixActions = const <Widget>[],
-    this.onChanged,
-    this.onSubmitted,
-    this.autofocus = false,
-  })  : controller = controller ?? TextEditingController(),
-        super(key: key);
-
-  final TextEditingController controller;
-  final String? hintText;
-  final Widget? prefixIcon;
-  final List<Widget> additionalSuffixActions;
-  final String labelText;
-  final void Function(String)? onChanged;
-  final void Function(String)? onSubmitted;
-  final bool autofocus;
-
-  static const _contentVerticalPadding = 6.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SizedBox(
-      height: defaultTextFieldHeight,
-      child: TextField(
-        autofocus: autofocus,
-        controller: controller,
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
-        style: theme.regularTextStyle,
-        decoration: InputDecoration(
-          isDense: true,
-          contentPadding: const EdgeInsets.only(
-            top: _contentVerticalPadding,
-            bottom: _contentVerticalPadding,
-            left: denseSpacing,
-            right: densePadding,
-          ),
-          constraints: BoxConstraints(
-            minHeight: defaultTextFieldHeight,
-            maxHeight: defaultTextFieldHeight,
-          ),
-          border: const OutlineInputBorder(),
-          labelText: labelText,
-          labelStyle: theme.subtleTextStyle,
-          hintText: hintText,
-          hintStyle: theme.subtleTextStyle,
-          prefixIcon: prefixIcon,
-          suffix: SizedBox(
-            height: inputDecorationElementHeight,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                clearInputButton(
-                  () {
-                    controller.clear();
-                    onChanged?.call('');
-                  },
-                ),
-                ...additionalSuffixActions,
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-Widget clearInputButton(VoidCallback onPressed) {
-  return inputDecorationSuffixButton(
-    icon: Icons.clear,
-    onPressed: onPressed,
-    tooltip: 'Clear',
-  );
-}
-
-Widget closeSearchDropdownButton(VoidCallback? onPressed) {
-  return inputDecorationSuffixButton(icon: Icons.close, onPressed: onPressed);
-}
-
-Widget inputDecorationSuffixButton({
-  required IconData icon,
-  required VoidCallback? onPressed,
-  String? tooltip,
-}) {
-  return maybeWrapWithTooltip(
-    tooltip: tooltip,
-    child: SizedBox(
-      height: inputDecorationElementHeight,
-      width: inputDecorationElementHeight + denseSpacing,
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        onPressed: onPressed,
-        iconSize: defaultIconSize,
-        splashRadius: defaultIconSize,
-        icon: Icon(icon),
-      ),
-    ),
-  );
 }
 
 class OutlinedRowGroup extends StatelessWidget {
@@ -937,7 +775,7 @@ class OutlinedRowGroup extends StatelessWidget {
 class ThickDivider extends StatelessWidget {
   const ThickDivider({super.key});
 
-  static const double thickDividerHeight = 5;
+  static const thickDividerHeight = 5.0;
 
   @override
   Widget build(BuildContext context) {
@@ -1069,11 +907,11 @@ extension ColorExtension on Color {
     percent = 1.0 - percent;
 
     final c = this;
-    return Color.fromARGB(
-      c.alpha,
-      (c.red * percent).round(),
-      (c.green * percent).round(),
-      (c.blue * percent).round(),
+    return Color.from(
+      alpha: c.a,
+      red: c.r * percent,
+      green: c.g * percent,
+      blue: c.b * percent,
     );
   }
 
@@ -1082,11 +920,11 @@ extension ColorExtension on Color {
     assert(0.0 <= percent && percent <= 1.0);
 
     final c = this;
-    return Color.fromARGB(
-      c.alpha,
-      c.red + ((255 - c.red) * percent).round(),
-      c.green + ((255 - c.green) * percent).round(),
-      c.blue + ((255 - c.blue) * percent).round(),
+    return Color.from(
+      alpha: c.a,
+      red: c.r + ((1.0 - c.r) * percent),
+      green: c.g + ((1.0 - c.g) * percent),
+      blue: c.b + ((1.0 - c.b) * percent),
     );
   }
 }
@@ -1239,6 +1077,7 @@ class TextViewer extends StatelessWidget {
   });
 
   final String text;
+
   // TODO: change the maxLength if we determine a more appropriate limit
   // in https://github.com/flutter/devtools/issues/6263.
   final int maxLength;
@@ -1253,7 +1092,7 @@ class TextViewer extends StatelessWidget {
     } else {
       displayText = text;
     }
-    return Text(
+    return SelectableText(
       displayText,
       style: style,
     );
@@ -1276,6 +1115,7 @@ class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
+  static const jsonEncoder = JsonEncoder.withIndent('  ');
 
   Future<void> _buildAndExpand(
     DartObjectNode variable,
@@ -1346,19 +1186,33 @@ class _JsonViewerState extends State<JsonViewer>
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(denseSpacing),
-      child: SingleChildScrollView(
-        child: FutureBuilder(
-          future: _initializeTree,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Container();
-            }
-            return ExpandableVariable(
-              variable: variable,
-            );
-          },
+    return SelectionArea(
+      child: Padding(
+        padding: const EdgeInsets.all(denseSpacing),
+        child: SingleChildScrollView(
+          child: FutureBuilder(
+            future: _initializeTree,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return Container();
+              }
+              return ExpandableVariable(
+                variable: variable,
+                onCopy: (copiedVariable) {
+                  unawaited(
+                    copyToClipboard(
+                      jsonEncoder.convert(
+                        serviceConnection
+                            .serviceManager.service!.fakeServiceCache
+                            .instanceToJson(copiedVariable.value as Instance),
+                      ),
+                      successMessage: 'JSON copied to clipboard',
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -1367,12 +1221,12 @@ class _JsonViewerState extends State<JsonViewer>
 
 class MoreInfoLink extends StatelessWidget {
   const MoreInfoLink({
-    Key? key,
+    super.key,
     required this.url,
     required this.gaScreenName,
     required this.gaSelectedItemDescription,
     this.padding,
-  }) : super(key: key);
+  });
 
   final String url;
 
@@ -1411,7 +1265,7 @@ class MoreInfoLink extends StatelessWidget {
   }
 
   void _onLinkTap() {
-    unawaited(launchUrl(url));
+    unawaited(launchUrlWithErrorHandling(url));
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
@@ -1425,7 +1279,7 @@ class LinkIconLabel extends StatelessWidget {
   });
 
   final IconData icon;
-  final Link link;
+  final GaLink link;
   final Color? color;
 
   @override
@@ -1456,58 +1310,50 @@ class LinkIconLabel extends StatelessWidget {
   }
 
   void _onLinkTap() {
-    unawaited(launchUrl(link.url));
+    unawaited(launchUrlWithErrorHandling(link.url));
     if (link.gaScreenName != null && link.gaSelectedItemDescription != null) {
       ga.select(link.gaScreenName!, link.gaSelectedItemDescription!);
     }
   }
 }
 
-class LinkTextSpan extends TextSpan {
-  LinkTextSpan({
-    required Link link,
-    required BuildContext context,
+class GaLinkTextSpan extends LinkTextSpan {
+  GaLinkTextSpan({
+    required GaLink link,
+    required super.context,
     TextStyle? style,
   }) : super(
-          text: link.display,
-          style: style ?? Theme.of(context).linkTextStyle,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              if (link.gaScreenName != null &&
-                  link.gaSelectedItemDescription != null) {
-                ga.select(
-                  link.gaScreenName!,
-                  link.gaSelectedItemDescription!,
-                );
-              }
-              await launchUrl(link.url);
-            },
+          link: link,
+          onTap: () {
+            if (link.gaScreenName != null &&
+                link.gaSelectedItemDescription != null) {
+              ga.select(
+                link.gaScreenName!,
+                link.gaSelectedItemDescription!,
+              );
+            }
+          },
         );
 }
 
-class Link {
-  const Link({
-    required this.display,
-    required this.url,
+class GaLink extends Link {
+  const GaLink({
+    required super.display,
+    required super.url,
     this.gaScreenName,
     this.gaSelectedItemDescription,
   });
 
-  final String display;
-
-  final String url;
-
   final String? gaScreenName;
-
   final String? gaSelectedItemDescription;
 }
 
 class Legend extends StatelessWidget {
   const Legend({
-    Key? key,
+    super.key,
     required this.entries,
     this.dense = false,
-  }) : super(key: key);
+  });
 
   double get legendSquareSize =>
       dense ? scaleByFontFactor(12.0) : scaleByFontFactor(16.0);
@@ -1519,7 +1365,7 @@ class Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = dense ? Theme.of(context).legendTextStyle : null;
-    final List<Widget> legendItems = entries
+    final legendItems = entries
         .map(
           (entry) => _legendItem(
             entry.description,
@@ -1596,7 +1442,10 @@ class CopyToClipboardControl extends StatelessWidget {
               ga.select(gaScreen!, gaItem!);
             }
             unawaited(
-              copyToClipboard(dataProvider!() ?? '', successMessage),
+              copyToClipboard(
+                dataProvider!() ?? '',
+                successMessage: successMessage,
+              ),
             );
           };
     final size = this.size ?? defaultIconSize;
@@ -1626,12 +1475,12 @@ class CopyToClipboardControl extends StatelessWidget {
 /// [ValueNotifier] and changes to the [ValueNotifier] updating the checkbox.
 class NotifierCheckbox extends StatelessWidget {
   const NotifierCheckbox({
-    Key? key,
+    super.key,
     required this.notifier,
     this.onChanged,
     this.enabled = true,
     this.checkboxKey,
-  }) : super(key: key);
+  });
 
   /// The notifier this [NotifierCheckbox] is responsible for listening to and
   /// updating.
@@ -1679,17 +1528,17 @@ class NotifierCheckbox extends StatelessWidget {
 /// value changes to [notifier].
 class CheckboxSetting extends StatelessWidget {
   const CheckboxSetting({
-    Key? key,
+    super.key,
     required this.notifier,
     required this.title,
     this.description,
     this.tooltip,
     this.onChanged,
     this.enabled = true,
-    this.gaScreenName,
+    this.gaScreen,
     this.gaItem,
     this.checkboxKey,
-  }) : super(key: key);
+  });
 
   final ValueNotifier<bool?> notifier;
 
@@ -1704,7 +1553,7 @@ class CheckboxSetting extends StatelessWidget {
   /// Whether this checkbox setting should be enabled for interaction.
   final bool enabled;
 
-  final String? gaScreenName;
+  final String? gaScreen;
 
   final String? gaItem;
 
@@ -1719,10 +1568,10 @@ class CheckboxSetting extends StatelessWidget {
         NotifierCheckbox(
           notifier: notifier,
           onChanged: (bool? value) {
-            final gaScreenName = this.gaScreenName;
+            final gaScreen = this.gaScreen;
             final gaItem = this.gaItem;
-            if (gaScreenName != null && gaItem != null) {
-              ga.select(gaScreenName, gaItem);
+            if (gaScreen != null && gaItem != null) {
+              ga.select(gaScreen, '$gaItem-$value');
             }
             final onChanged = this.onChanged;
             if (onChanged != null) {
@@ -1783,7 +1632,7 @@ class CheckboxSetting extends StatelessWidget {
 }
 
 class PubWarningText extends StatelessWidget {
-  const PubWarningText({Key? key}) : super(key: key);
+  const PubWarningText({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -1821,11 +1670,11 @@ class PubWarningText extends StatelessWidget {
 
 class BlinkingIcon extends StatefulWidget {
   const BlinkingIcon({
-    Key? key,
+    super.key,
     required this.icon,
     required this.color,
     required this.size,
-  }) : super(key: key);
+  });
 
   final IconData icon;
 
@@ -1931,9 +1780,9 @@ class _MultiValueListenableBuilderState
 
 class SmallCircularProgressIndicator extends StatelessWidget {
   const SmallCircularProgressIndicator({
-    Key? key,
+    super.key,
     required this.valueColor,
-  }) : super(key: key);
+  });
 
   final Animation<Color?> valueColor;
 
@@ -1948,12 +1797,12 @@ class SmallCircularProgressIndicator extends StatelessWidget {
 
 class ElevatedCard extends StatelessWidget {
   const ElevatedCard({
-    Key? key,
+    super.key,
     required this.child,
     this.width,
     this.height,
     this.padding,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final double? width;
@@ -1987,7 +1836,7 @@ class ElevatedCard extends StatelessWidget {
 ///
 /// See [AutomaticKeepAliveClientMixin] for more information.
 class KeepAliveWrapper extends StatefulWidget {
-  const KeepAliveWrapper({Key? key, required this.child}) : super(key: key);
+  const KeepAliveWrapper({super.key, required this.child});
 
   final Widget child;
 
@@ -2100,14 +1949,14 @@ class VerticalLineSpacer extends StatelessWidget {
 
 class DownloadButton extends StatelessWidget {
   const DownloadButton({
-    Key? key,
+    super.key,
     this.onPressed,
     this.tooltip = 'Download data',
     this.label = 'Download',
     required this.minScreenWidthForTextBeforeScaling,
     required this.gaScreen,
     required this.gaSelection,
-  }) : super(key: key);
+  });
 
   final VoidCallback? onPressed;
   final String? tooltip;
@@ -2175,8 +2024,8 @@ class ContextMenuButton extends StatelessWidget {
     double? iconSize,
   }) : iconSize = iconSize ?? tableIconSize;
 
-  static const double defaultWidth = 14.0;
-  static const double densePadding = 2.0;
+  static const defaultWidth = 14.0;
+  static const densePadding = 2.0;
 
   final Color? color;
   final String? gaScreen;
@@ -2211,6 +2060,88 @@ class ContextMenuButton extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// A Widget for displaying a setting field, that sets and integer value.
+class PositiveIntegerSetting extends StatefulWidget {
+  const PositiveIntegerSetting({
+    super.key,
+    required this.title,
+    required this.subTitle,
+    required this.notifier,
+  });
+
+  final String title;
+  final String subTitle;
+  final ValueNotifier<int> notifier;
+
+  @override
+  State<PositiveIntegerSetting> createState() => _PositiveIntegerSettingState();
+}
+
+class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
+    with AutoDisposeMixin {
+  late final TextEditingController _textEditingController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    addAutoDisposeListener(
+      widget.notifier,
+      () => _textEditingController.text = widget.notifier.value.toString(),
+    );
+
+    _textEditingController = TextEditingController()
+      ..text = widget.notifier.value.toString();
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.title),
+              Text(
+                widget.subTitle,
+                style: theme.subtleTextStyle,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: defaultSpacing),
+        SizedBox(
+          height: defaultTextFieldHeight,
+          width: defaultTextFieldNumberWidth,
+          child: TextField(
+            textAlignVertical: TextAlignVertical.top,
+            style: theme.regularTextStyle,
+            decoration: singleLineDialogTextFieldDecoration,
+            controller: _textEditingController,
+            inputFormatters: <TextInputFormatter>[
+              // Only positive integers.
+              FilteringTextInputFormatter.allow(
+                RegExp(r'^[1-9][0-9]*'),
+              ),
+            ],
+            onChanged: (String text) {
+              widget.notifier.value = int.parse(text);
+            },
+          ),
+        ),
+      ],
     );
   }
 }

@@ -178,6 +178,8 @@ class DebuggerController extends DisposableController
     // and modify to detect if app is paused from the isolate
     // https://github.com/flutter/devtools/pull/4993#discussion_r1060845351
 
+    if (serviceConnection.serviceManager.service == null) return;
+
     await _pause(false);
 
     _clearCaches();
@@ -411,7 +413,7 @@ class DebuggerController extends DisposableController
           ],
           truncated: true,
         );
-        ga.select(gac.debugger, gac.pausedWithNoFrames);
+        ga.select(gac.debugger, gac.DebuggerEvents.pausedWithNoFrames.name);
         return;
       }
       await _populateFrameInfo(
@@ -516,7 +518,7 @@ class DebuggerController extends DisposableController
     }
 
     final script = await scriptManager.getScript(scriptInfo);
-    final position = SourcePosition.calculatePosition(script, tokenPos);
+    final position = SourcePosition.calculatePosition(script!, tokenPos);
     return StackFrameAndSourcePosition(frame, position: position);
   }
 

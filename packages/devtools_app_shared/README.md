@@ -1,15 +1,17 @@
 # Shared DevTools Components
 
 This package contains UI, utility, and service components from
-[Dart & Flutter DevTools](https://docs.flutter.dev/tools/devtools/overview) that can
+[Dart & Flutter DevTools](https://docs.flutter.dev/tools/devtools) that can
 be shared between DevTools, DevTools extensions, and other tooling surfaces that need
 the same logic or styling.
 
 ## Usage
 
-Add a dependency to your `pubspec.yaml` file:
-```yaml
-devtools_app_shared: ^0.0.7
+The following will add the package as a dependency to your `pubspec.yaml` (and run an
+implicit `flutter pub get`):
+
+```console
+$ flutter pub add devtools_app_shared
 ```
 
 Import the component library that you need:

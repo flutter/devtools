@@ -18,11 +18,11 @@ import 'tracing_tree.dart';
 
 class TracingPane extends StatefulWidget {
   const TracingPane({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   @override
   State<TracingPane> createState() => TracingPaneState();
@@ -34,6 +34,15 @@ class TracingPaneState extends State<TracingPane> {
     super.initState();
 
     unawaited(widget.controller.initialize());
+  }
+
+  @override
+  void didUpdateWidget(TracingPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller != widget.controller) {
+      unawaited(widget.controller.initialize());
+    }
   }
 
   @override
@@ -81,7 +90,7 @@ class _TracingControls extends StatelessWidget {
 
   final bool isProfileMode;
 
-  final TracingPaneController controller;
+  final TracePaneController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -89,20 +98,22 @@ class _TracingControls extends StatelessWidget {
       padding: const EdgeInsets.all(denseSpacing),
       child: Row(
         children: [
-          RefreshButton(
-            tooltip: 'Request the set of updated allocation traces',
-            gaScreen: gac.memory,
-            gaSelection: gac.MemoryEvent.tracingRefresh,
-            onPressed: isProfileMode ? null : controller.refresh,
-          ),
-          const SizedBox(width: denseSpacing),
-          ClearButton(
-            tooltip: 'Clear the set of previously collected traces',
-            gaScreen: gac.memory,
-            gaSelection: gac.MemoryEvent.tracingClear,
-            onPressed: isProfileMode ? null : controller.clear,
-          ),
-          const SizedBox(width: denseSpacing),
+          if (!offlineDataController.showingOfflineData.value) ...[
+            RefreshButton(
+              tooltip: 'Request the set of updated allocation traces',
+              gaScreen: gac.memory,
+              gaSelection: gac.MemoryEvents.tracingRefresh.name,
+              onPressed: isProfileMode ? null : controller.refresh,
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              tooltip: 'Clear the set of previously collected traces',
+              gaScreen: gac.memory,
+              gaSelection: gac.MemoryEvents.tracingClear.name,
+              onPressed: isProfileMode ? null : controller.clear,
+            ),
+            const SizedBox(width: denseSpacing),
+          ],
           const _ProfileHelpLink(),
         ],
       ),
@@ -111,9 +122,9 @@ class _TracingControls extends StatelessWidget {
 }
 
 class _ProfileHelpLink extends StatelessWidget {
-  const _ProfileHelpLink({Key? key}) : super(key: key);
+  const _ProfileHelpLink();
 
-  static const _documentationTopic = gac.MemoryEvent.tracingHelp;
+  static final _documentationTopic = gac.MemoryEvents.tracingHelp.name;
 
   @override
   Widget build(BuildContext context) {

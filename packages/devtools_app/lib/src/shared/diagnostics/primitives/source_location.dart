@@ -7,9 +7,9 @@ import 'package:vm_service/vm_service.dart';
 import '../../primitives/utils.dart';
 
 class _JsonFields {
-  static const String file = 'file';
-  static const String line = 'line';
-  static const String column = 'column';
+  static const file = 'file';
+  static const line = 'line';
+  static const column = 'column';
 }
 
 class InspectorSourceLocation {

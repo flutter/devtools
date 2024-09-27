@@ -1,62 +1,35 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_link_list_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
-import 'package:devtools_app/src/screens/deep_link_validation/deep_links_services.dart';
+import 'package:devtools_app/src/screens/deep_link_validation/project_root_selection/root_selector.dart';
+import 'package:devtools_app/src/screens/deep_link_validation/project_root_selection/select_project_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/validation_details_view.dart';
-import 'package:devtools_app/src/shared/directory_picker.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
+import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
-final linkDatas = [
-  LinkData(
-    domain: 'www.domain1.com',
-    path: '/',
-    os: [PlatformOS.android],
-  ),
-  LinkData(
-    domain: 'www.domain2.com',
-    path: '/',
-    os: [PlatformOS.ios],
-  ),
-  LinkData(
-    domain: 'www.google.com',
-    path: '/',
-    os: [PlatformOS.android, PlatformOS.ios],
-  ),
-  LinkData(
-    domain: 'www.google.com',
-    path: '/home',
-    os: [PlatformOS.android, PlatformOS.ios],
-  ),
-];
+import '../test_infra/test_data/deep_link/fake_responses.dart';
+import '../test_infra/utils/deep_links_utils.dart';
 
-final domainErrorlinkData = LinkData(
-  domain: 'www.google.com',
-  path: '/',
-  os: [PlatformOS.android, PlatformOS.ios],
-  domainErrors: [DomainError.existence],
-);
-
-final pathErrorlinkData = LinkData(
-  domain: 'www.google.com',
-  path: '/abcd',
-  os: [PlatformOS.android, PlatformOS.ios],
-  pathErrors: {
-    PathError.intentFilterActionView,
-    PathError.intentFilterDefault,
-  },
+final xcodeBuildOptions = XcodeBuildOptions.fromJson(
+  '''{"configurations":["debug", "release"],"targets":["runner","runnerTests"]}''',
 );
 
 void main() {
-  setUp(() {
+  // ignore: avoid-redundant-async, false positive.
+  setUp(() async {
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(
       DevToolsEnvironmentParameters,
@@ -65,10 +38,19 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
+
+    final mockDtdManager = MockDTDManager();
+    final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
+    final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
+    when(mockDtdManager.projectRoots()).thenAnswer((_) async {
+      return UriList(uris: [rootUri1, rootUri2]);
+    });
+    setGlobal(DTDManager, mockDtdManager);
+    FeatureFlags.deepLinkIosCheck = true;
   });
 
   late DeepLinksScreen screen;
-  late DeepLinksController deepLinksController;
+  late TestDeepLinksController deepLinksController;
 
   const windowSize = Size(2560.0, 1338.0);
 
@@ -82,7 +64,6 @@ void main() {
         deepLink: controller,
       ),
     );
-    deferredLoadingSupportEnabled = true;
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(DeepLinkPage), findsOneWidget);
   }
@@ -90,7 +71,7 @@ void main() {
   group('DeepLinkScreen', () {
     setUp(() {
       screen = DeepLinksScreen();
-      deepLinksController = DeepLinksTestController();
+      deepLinksController = TestDeepLinksController();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -112,8 +93,9 @@ void main() {
           controller: deepLinksController,
         );
 
-        expect(find.byType(DeepLinkPage), findsOneWidget);
-        expect(find.byType(DirectoryPicker), findsOneWidget);
+        expect(find.byType(SelectProjectView), findsOneWidget);
+        expect(find.byType(ProjectRootsDropdown), findsOneWidget);
+        expect(find.byType(ProjectRootTextField), findsOneWidget);
       },
     );
 
@@ -121,17 +103,22 @@ void main() {
       'builds deeplink list page with no links',
       windowSize,
       (WidgetTester tester) async {
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = []
+          ..fakeIosDomains = [];
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
         );
 
-        expect(deepLinksController.pagePhase.value, PagePhase.linksLoading);
+        expect(deepLinksController.pagePhase.value, PagePhase.noLinks);
         expect(find.byType(DeepLinkPage), findsOneWidget);
         expect(find.byType(DeepLinkListView), findsOneWidget);
-        expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
       },
     );
 
@@ -139,12 +126,16 @@ void main() {
       'builds deeplink list page with links',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-
-        deepLinksController.allValidatedLinkDatas = linkDatas;
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
+          ..fakeIosDomains = [defaultDomain];
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
@@ -158,24 +149,58 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
+      'builds deeplink list page with default ios and android configurations',
+      windowSize,
+      (WidgetTester tester) async {
+        final deepLinksController = TestDeepLinksController();
+
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'profile', 'release'],
+            iosBuildOptions: XcodeBuildOptions.fromJson(
+              '''{"configurations":["debug", "release"],"targets":["runner","runnerTests"]}''',
+            ),
+          )
+          ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
+          ..fakeIosDomains = [defaultDomain];
+        await pumpDeepLinkScreen(
+          tester,
+          controller: deepLinksController,
+        );
+
+        expect(deepLinksController.pagePhase.value, PagePhase.linksValidated);
+        expect(deepLinksController.selectedAndroidVariantIndex.value, 2);
+        expect(deepLinksController.selectedIosConfigurationIndex.value, 1);
+        expect(deepLinksController.selectedIosTargetIndex.value, 0);
+      },
+    );
+
+    testWidgetsWithWindowSize(
       'builds deeplink list page with split screen',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-
-        deepLinksController.allValidatedLinkDatas = linkDatas;
-
-        deepLinksController.displayOptionsNotifier.value =
-            DisplayOptions(showSplitScreen: true);
-        deepLinksController.selectedLink.value = linkDatas.first;
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
+          ..fakeIosDomains = [defaultDomain];
 
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
         );
+
+        deepLinksController.autoSelectLink(TableViewType.domainView);
+        deepLinksController.displayOptionsNotifier.value =
+            DisplayOptions(showSplitScreen: true);
+
+        await tester.pumpAndSettle();
 
         expect(find.byType(DeepLinkPage), findsOneWidget);
         expect(find.byType(DeepLinkListView), findsOneWidget);
@@ -187,12 +212,20 @@ void main() {
       'shows notification cards when there are domain errors',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController(
+          hasAndroidDomainErrors: true,
+          hasIosDomainErrors: true,
+        );
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
+          ..fakeIosDomains = [defaultDomain];
 
-        deepLinksController.allValidatedLinkDatas = [domainErrorlinkData];
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
@@ -207,12 +240,18 @@ void main() {
       'shows notification cards when there are path errors',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-
-        deepLinksController.allValidatedLinkDatas = [pathErrorlinkData];
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [
+            androidDeepLinkJson(defaultDomain, hasPathError: true),
+          ]
+          ..fakeIosDomains = [defaultDomain];
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
@@ -228,12 +267,20 @@ void main() {
       'taps the action button in notification cards to go to the split screen',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController(
+          hasAndroidDomainErrors: true,
+          hasIosDomainErrors: true,
+        );
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
+          ..fakeIosDomains = [defaultDomain];
 
-        deepLinksController.allValidatedLinkDatas = [domainErrorlinkData];
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
@@ -246,6 +293,8 @@ void main() {
         expect(find.byType(DeepLinkListView), findsOneWidget);
         expect(find.byType(NotificationCard), findsNothing);
         expect(find.byType(ValidationDetailView), findsOneWidget);
+        expect(find.text('Digital assets link file'), findsOneWidget);
+        expect(find.text('Apple-App-Site-Association file'), findsOneWidget);
       },
     );
 
@@ -253,12 +302,20 @@ void main() {
       'search links',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-
-        deepLinksController.allValidatedLinkDatas = linkDatas;
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
+          ..fakeIosDomains = [
+            'www.domain1.com',
+            'www.domain2.com',
+            'www.google.com',
+          ];
 
         await pumpDeepLinkScreen(
           tester,
@@ -283,30 +340,21 @@ void main() {
       'filter links with os',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
-
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-
-        final linkDatas = [
-          LinkData(
-            domain: 'www.domain1.com',
-            path: '/',
-            os: [PlatformOS.android],
-          ),
-          LinkData(
-            domain: 'www.domain2.com',
-            path: '/',
-            os: [PlatformOS.ios],
-          ),
-          LinkData(
-            domain: 'www.google.com',
-            path: '/',
-            os: [PlatformOS.android, PlatformOS.ios],
-          ),
-        ];
-
-        deepLinksController.allValidatedLinkDatas = linkDatas;
+        final deepLinksController = TestDeepLinksController();
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [
+            androidDeepLinkJson('www.domain1.com'),
+            androidDeepLinkJson('www.google.com'),
+          ]
+          ..fakeIosDomains = [
+            'www.domain2.com',
+            'www.google.com',
+          ];
 
         await pumpDeepLinkScreen(
           tester,
@@ -318,15 +366,8 @@ void main() {
         expect(find.text('www.google.com'), findsOneWidget);
 
         // Only show Android links.
-        deepLinksController.displayOptionsNotifier.value = DisplayOptions(
-          filters: {
-            FilterOption.http,
-            FilterOption.custom,
-            FilterOption.android,
-            FilterOption.noIssue,
-            FilterOption.failedDomainCheck,
-            FilterOption.failedPathCheck,
-          },
+        deepLinksController.updateDisplayOptions(
+          removedFilter: FilterOption.ios,
         );
 
         await tester.pumpAndSettle();
@@ -336,15 +377,9 @@ void main() {
         expect(find.text('www.google.com'), findsOneWidget);
 
         // Only show iOS links.
-        deepLinksController.displayOptionsNotifier.value = DisplayOptions(
-          filters: {
-            FilterOption.http,
-            FilterOption.custom,
-            FilterOption.ios,
-            FilterOption.noIssue,
-            FilterOption.failedDomainCheck,
-            FilterOption.failedPathCheck,
-          },
+        deepLinksController.updateDisplayOptions(
+          addedFilter: FilterOption.ios,
+          removedFilter: FilterOption.android,
         );
 
         await tester.pumpAndSettle();
@@ -359,32 +394,20 @@ void main() {
       'filter links with validation result',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController =
+            TestDeepLinksController(hasIosDomainErrors: true);
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-
-        final linkDatas = [
-          LinkData(
-            domain: 'www.domain1.com',
-            path: '/',
-            os: [PlatformOS.android],
-            domainErrors: [DomainError.existence],
-          ),
-          LinkData(
-            domain: 'www.domain2.com',
-            path: '/path',
-            os: [PlatformOS.ios],
-            pathErrors: {PathError.intentFilterActionView},
-          ),
-          LinkData(
-            domain: 'www.google.com',
-            path: '/',
-            os: [PlatformOS.android, PlatformOS.ios],
-          ),
-        ];
-
-        deepLinksController.allValidatedLinkDatas = linkDatas;
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [
+            androidDeepLinkJson('www.domain1.com'),
+            androidDeepLinkJson('www.google.com'),
+          ]
+          ..fakeIosDomains = [defaultDomain];
 
         await pumpDeepLinkScreen(
           tester,
@@ -392,7 +415,7 @@ void main() {
         );
 
         expect(find.text('www.domain1.com'), findsOneWidget);
-        expect(find.text('www.domain2.com'), findsOneWidget);
+        expect(find.text('example.com'), findsOneWidget);
         expect(find.text('www.google.com'), findsOneWidget);
 
         // Only show links with domain error.
@@ -401,9 +424,8 @@ void main() {
         );
 
         await tester.pumpAndSettle();
-
-        expect(find.text('www.domain1.com'), findsOneWidget);
-        expect(find.text('www.domain2.com'), findsNothing);
+        expect(find.text('www.domain1.com'), findsNothing);
+        expect(find.text('example.com'), findsOneWidget);
         expect(find.text('www.google.com'), findsNothing);
 
         // Only show links with no issue.
@@ -416,8 +438,8 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        expect(find.text('www.domain1.com'), findsNothing);
-        expect(find.text('www.domain2.com'), findsOneWidget);
+        expect(find.text('www.domain1.com'), findsOneWidget);
+        expect(find.text('example.com'), findsNothing);
         expect(find.text('www.google.com'), findsOneWidget);
       },
     );
@@ -426,38 +448,25 @@ void main() {
       'sort links',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
-        final linkDatas = [
-          LinkData(
-            domain: 'www.domain1.com',
-            path: '/',
-            os: [PlatformOS.android],
-          ),
-          LinkData(
-            domain: 'www.domain2.com',
-            path: '/path',
-            os: [PlatformOS.ios],
-            domainErrors: [DomainError.existence],
-          ),
-          LinkData(
-            domain: 'www.google.com',
-            path: '/',
-            os: [PlatformOS.android, PlatformOS.ios],
-          ),
-        ];
+        final deepLinksController = TestDeepLinksController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-        deepLinksController.allValidatedLinkDatas = linkDatas;
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeIosDomains = [defaultDomain, 'domain1.com', 'domain2.com']
+          ..hasIosDomainErrors = true;
 
         await pumpDeepLinkScreen(
           tester,
           controller: deepLinksController,
         );
 
-        expect(find.text('www.domain1.com'), findsOneWidget);
-        expect(find.text('www.domain2.com'), findsOneWidget);
-        expect(find.text('www.google.com'), findsOneWidget);
+        expect(find.text('domain1.com'), findsOneWidget);
+        expect(find.text('domain2.com'), findsOneWidget);
+        expect(find.text('example.com'), findsOneWidget);
 
         // Sort with a-z.
         deepLinksController.updateDisplayOptions(
@@ -465,9 +474,9 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        var widgetACenter = tester.getCenter(find.text('www.domain1.com'));
-        var widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
-        var widgetCCenter = tester.getCenter(find.text('www.google.com'));
+        var widgetACenter = tester.getCenter(find.text('domain1.com'));
+        var widgetBCenter = tester.getCenter(find.text('domain2.com'));
+        var widgetCCenter = tester.getCenter(find.text('example.com'));
 
         expect(widgetACenter.dy < widgetBCenter.dy, true);
         expect(widgetBCenter.dy < widgetCCenter.dy, true);
@@ -478,25 +487,55 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        widgetACenter = tester.getCenter(find.text('www.domain1.com'));
-        widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
-        widgetCCenter = tester.getCenter(find.text('www.google.com'));
+        widgetACenter = tester.getCenter(find.text('domain1.com'));
+        widgetBCenter = tester.getCenter(find.text('domain2.com'));
+        widgetCCenter = tester.getCenter(find.text('example.com'));
 
         expect(widgetCCenter.dy < widgetBCenter.dy, true);
         expect(widgetBCenter.dy < widgetACenter.dy, true);
 
-        // Sort with error on top.
+        // Sort with error on top. `example.com` is the one with error.
         deepLinksController.updateDisplayOptions(
           domainSortingOption: SortingOption.errorOnTop,
         );
         await tester.pumpAndSettle();
 
-        widgetACenter = tester.getCenter(find.text('www.domain1.com'));
-        widgetBCenter = tester.getCenter(find.text('www.domain2.com'));
-        widgetCCenter = tester.getCenter(find.text('www.google.com'));
+        widgetACenter = tester.getCenter(find.text('domain1.com'));
+        widgetBCenter = tester.getCenter(find.text('domain2.com'));
+        widgetCCenter = tester.getCenter(find.text('example.com'));
 
-        expect(widgetBCenter.dy < widgetACenter.dy, true);
-        expect(widgetBCenter.dy < widgetCCenter.dy, true);
+        expect(widgetCCenter.dy < widgetACenter.dy, true);
+        expect(widgetCCenter.dy < widgetBCenter.dy, true);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'show scheme or missing scheme',
+      windowSize,
+      (WidgetTester tester) async {
+        final deepLinksController = TestDeepLinksController();
+
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [
+            androidDeepLinkJson('www.domain1.com'),
+            androidDeepLinkJson('www.domain2.com', scheme: null),
+          ];
+
+        await pumpDeepLinkScreen(
+          tester,
+          controller: deepLinksController,
+        );
+
+        expect(find.text('www.domain1.com'), findsOneWidget);
+        expect(find.text('www.domain2.com'), findsOneWidget);
+
+        expect(find.text('missing scheme'), findsOneWidget);
+        expect(find.text('http'), findsOneWidget);
       },
     );
 
@@ -504,32 +543,24 @@ void main() {
       'path view',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = DeepLinksTestController();
+        final deepLinksController = TestDeepLinksController();
 
-        deepLinksController.selectedProject.value =
-            FlutterProject(path: '/abc', androidVariants: ['debug', 'release']);
-
-        final linkDatas = [
-          LinkData(
-            domain: 'www.domain1.com',
-            path: '/path1',
-            os: [PlatformOS.android],
-            domainErrors: [DomainError.existence],
-          ),
-          LinkData(
-            domain: 'www.domain2.com',
-            path: '/path2',
-            os: [PlatformOS.ios],
-            pathErrors: {PathError.intentFilterActionView},
-          ),
-          LinkData(
-            domain: 'www.google.com',
-            path: '/path3',
-            os: [PlatformOS.android, PlatformOS.ios],
-          ),
-        ];
-
-        deepLinksController.allValidatedLinkDatas = linkDatas;
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [
+            androidDeepLinkJson('www.domain1.com', path: '/path1'),
+            androidDeepLinkJson(
+              'www.domain2.com',
+              path: '/path2',
+              hasPathError: true,
+            ),
+            androidDeepLinkJson('www.domain3.com', path: '/path3'),
+          ]
+          ..fakeIosDomains = [defaultDomain];
 
         await pumpDeepLinkScreen(
           tester,
@@ -542,6 +573,8 @@ void main() {
         expect(find.text('/path1'), findsOneWidget);
         expect(find.text('/path2'), findsOneWidget);
         expect(find.text('/path3'), findsOneWidget);
+        expect(find.text('/ios-path1'), findsOneWidget);
+        expect(find.text('NOT /ios-path2'), findsOneWidget);
 
         // Only show links with path error.
         deepLinksController.updateDisplayOptions(
@@ -553,6 +586,8 @@ void main() {
         expect(find.text('/path1'), findsNothing);
         expect(find.text('/path2'), findsOneWidget);
         expect(find.text('/path3'), findsNothing);
+        expect(find.text('/ios-path1'), findsNothing);
+        expect(find.text('NOT /ios-path2'), findsNothing);
 
         // Only show links with no issue.
         deepLinksController.updateDisplayOptions(
@@ -567,41 +602,9 @@ void main() {
         expect(find.text('/path1'), findsOneWidget);
         expect(find.text('/path2'), findsNothing);
         expect(find.text('/path3'), findsOneWidget);
+        expect(find.text('/ios-path1'), findsOneWidget);
+        expect(find.text('NOT /ios-path2'), findsOneWidget);
       },
     );
   });
-}
-
-class DeepLinksTestController extends DeepLinksController {
-  @override
-  Future<String?> packageDirectoryForMainIsolate() async {
-    return null;
-  }
-
-  @override
-  Future<void> validateLinks() async {
-    if (allValidatedLinkDatas == null) return;
-    displayLinkDatasNotifier.value = getFilterredLinks(allValidatedLinkDatas!);
-
-    displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount: getLinkDatasByDomain
-          .where((element) => element.domainErrors.isNotEmpty)
-          .length,
-      pathErrorCount: getLinkDatasByPath
-          .where((element) => element.pathErrors.isNotEmpty)
-          .length,
-    );
-    pagePhase.value = PagePhase.linksValidated;
-  }
-
-  @override
-  void selectLink(LinkData linkdata) async {
-    selectedLink.value = linkdata;
-    if (linkdata.domainErrors.isNotEmpty) {
-      generatedAssetLinksForSelectedLink.value = GenerateAssetLinksResult(
-        '',
-        'fake generated content',
-      );
-    }
-  }
 }

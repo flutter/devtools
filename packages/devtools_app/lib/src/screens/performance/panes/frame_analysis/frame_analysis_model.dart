@@ -33,11 +33,9 @@ class FrameAnalysis {
     if (uiEvent == null) {
       return FramePhase.build(events: <FlutterTimelineEvent>[]);
     }
-    final buildEvents = uiEvent
-        .nodesWithCondition(
-          (event) => FramePhaseType.build.isMatchForEventName(event.name),
-        )
-        .cast<FlutterTimelineEvent>();
+    final buildEvents = uiEvent.nodesWithCondition(
+      (event) => FramePhaseType.build.isMatchForEventName(event.name),
+    );
     return FramePhase.build(events: buildEvents);
   }
 

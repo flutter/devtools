@@ -49,7 +49,7 @@ Example: ''',
           ),
           MoreInfoLink(
             // TODO(polina-c): create content and change url.
-            url: 'https://docs.flutter.dev/development/tools/devtools/console',
+            url: 'https://docs.flutter.dev/tools/devtools/console',
             gaScreenName: gac.console,
             gaSelectedItemDescription:
                 gac.topicDocumentationLink(_documentationTopic),
@@ -64,7 +64,7 @@ Example: ''',
 }
 
 class ConsoleHelpLink extends StatelessWidget {
-  const ConsoleHelpLink({Key? key}) : super(key: key);
+  const ConsoleHelpLink({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -15,6 +15,7 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/file_import.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/screen.dart';
+import '../../../../shared/ui/utils.dart';
 import '../../panes/timeline_events/timeline_events_controller.dart';
 import '../../performance_controller.dart';
 import 'enhance_tracing/enhance_tracing.dart';
@@ -47,7 +48,7 @@ class PerformanceControls extends StatelessWidget {
               builder: (context, status, _) {
                 return _PrimaryControls(
                   controller: controller,
-                  processing: status == EventsControllerStatus.processing,
+                  processing: status == EventsControllerStatus.refreshing,
                   offline: offline,
                   onClear: onClear,
                 );
@@ -67,12 +68,11 @@ class PerformanceControls extends StatelessWidget {
 
 class _PrimaryControls extends StatelessWidget {
   const _PrimaryControls({
-    Key? key,
     required this.controller,
     required this.processing,
     required this.offline,
     required this.onClear,
-  }) : super(key: key);
+  });
 
   final PerformanceController controller;
 
@@ -84,6 +84,8 @@ class _PrimaryControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = ScreenSize(context).width;
+    final terse = screenWidth <= MediaSize.xs;
     return Row(
       children: [
         if (serviceConnection
@@ -93,7 +95,7 @@ class _PrimaryControls extends StatelessWidget {
             gaScreen: gac.performance,
             onPressed:
                 controller.flutterFramesController.toggleShowFlutterFrames,
-            label: 'Flutter frames',
+            label: terse ? 'Frames' : 'Flutter frames',
             tooltip: 'Toggle visibility of the Flutter frames chart',
           ),
           const SizedBox(width: denseSpacing),
@@ -122,19 +124,19 @@ class _PrimaryControls extends StatelessWidget {
 
 class _SecondaryPerformanceControls extends StatelessWidget {
   const _SecondaryPerformanceControls({
-    Key? key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final PerformanceController controller;
 
   @override
   Widget build(BuildContext context) {
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (serviceConnection
-            .serviceManager.connectedApp!.isFlutterAppNow!) ...[
+        if (isFlutterApp) ...[
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
                 PerformanceControls.minScreenWidthForTextBeforeScaling,
@@ -152,12 +154,14 @@ class _SecondaryPerformanceControls extends StatelessWidget {
           screenId: ScreenMetaData.performance.id,
           onSave: controller.exportData,
         ),
-        const SizedBox(width: denseSpacing),
-        SettingsOutlinedButton(
-          gaScreen: gac.performance,
-          gaSelection: gac.PerformanceEvents.performanceSettings.name,
-          onPressed: () => _openSettingsDialog(context),
-        ),
+        if (isFlutterApp) ...[
+          const SizedBox(width: denseSpacing),
+          SettingsOutlinedButton(
+            gaScreen: gac.performance,
+            gaSelection: gac.PerformanceEvents.performanceSettings.name,
+            onPressed: () => _openSettingsDialog(context),
+          ),
+        ],
       ],
     );
   }

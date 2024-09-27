@@ -25,16 +25,12 @@ class PackagePrefixes {
   static const dartUi = 'dart:ui';
 }
 
-const String traceEventsFieldName = 'traceEvents';
-
 const closureName = '<closure>';
 
 const anonymousClosureName = '<anonymous closure>';
 
-const _memoryDocUrl =
-    'https://docs.flutter.dev/development/tools/devtools/memory';
-const _consoleDocUrl =
-    'https://docs.flutter.dev/development/tools/devtools/console';
+const _memoryDocUrl = 'https://docs.flutter.dev/tools/devtools/memory';
+const _consoleDocUrl = 'https://docs.flutter.dev/tools/devtools/console';
 const _inspectorDocUrl = 'https://docs.flutter.dev/tools/devtools/inspector';
 
 /// Some links to documentation.
@@ -52,6 +48,7 @@ enum DocLinks {
 
   final String url;
   final String? hash;
+
   String get value {
     if (hash == null) return url;
     return '$url#$hash';

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
@@ -43,11 +44,10 @@ class IsolateState {
 
   void dispose() {
     _isolateNow = null;
-    if (!_isolateLoadCompleter.isCompleted) {
-      _isolateLoadCompleter.complete(null);
-    } else {
-      _isolateLoadCompleter = Completer()..complete(null);
-    }
+    _isolateLoadCompleter.safeComplete(
+      null,
+      () => _isolateLoadCompleter = Completer()..complete(null),
+    );
   }
 
   void handleDebugEvent(String? kind) {

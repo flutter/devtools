@@ -21,7 +21,7 @@ void main() {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
   const windowSize = Size(2600.0, 1200.0);
 
-  final FlutterTestEnvironment env = FlutterTestEnvironment(
+  final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
 
@@ -88,7 +88,11 @@ void main() {
         );
 
         // Select the details tree.
-        await tester.tap(find.text('Widget Details Tree'));
+        await tester.tap(
+          find.text(
+            InspectorDetailsViewType.widgetDetailsTree.key,
+          ),
+        );
         await tester.pumpAndSettle(inspectorChangeSettleTime);
         await expectLater(
           find.byType(InspectorScreenBody),

@@ -58,7 +58,7 @@ class DTDConnectionDisplay extends StatelessWidget {
 class DtdHelp extends StatelessWidget {
   const DtdHelp({super.key});
 
-  static const dtdStartCommand = 'dart tooling-daemon --unrestricted';
+  static const printDtdFlag = '--print-dtd';
 
   @override
   Widget build(BuildContext context) {
@@ -66,23 +66,34 @@ class DtdHelp extends StatelessWidget {
     return DefaultTextStyle(
       style: theme.regularTextStyle,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           RichText(
             text: TextSpan(
               style: theme.regularTextStyle,
               text:
                   'If your DevTools extension interacts with the Dart Tooling '
-                  'Daemon (DTD) through',
+                  'Daemon (DTD) through ',
               children: [
                 TextSpan(
-                  text: ' dtdManager ',
+                  text: 'dtdManager',
                   style: theme.boldTextStyle,
                 ),
                 const TextSpan(
-                  text: 'then you will need to start a local instance of DTD '
-                      'to debug these features in the simulated environment. '
-                      'To start DTD locally:\n\n1. Run the following command '
-                      'from your terminal:',
+                  text: ', then you will need to connect to a local instance '
+                      'of DTD to debug these features in the simulated '
+                      'environment. There are multiple ways to access a local '
+                      'instance of DTD:\n\n'
+                      '1. If you are running a Dart or Flutter application '
+                      'from command line, add the ',
+                ),
+                TextSpan(
+                  text: printDtdFlag,
+                  style: theme.boldTextStyle,
+                ),
+                const TextSpan(
+                  text: ' flag. This will output a Dart Tooling Daemon URI to '
+                      'the command line that you can copy.',
                 ),
               ],
             ),
@@ -90,15 +101,15 @@ class DtdHelp extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: defaultSpacing),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SelectableText(dtdStartCommand),
+                const SelectableText(printDtdFlag),
                 const SizedBox(width: defaultSpacing),
                 DevToolsButton.iconOnly(
                   icon: Icons.content_copy,
                   onPressed: () async {
                     await Clipboard.setData(
-                      const ClipboardData(text: dtdStartCommand),
+                      const ClipboardData(text: printDtdFlag),
                     );
                   },
                 ),
@@ -108,57 +119,31 @@ class DtdHelp extends StatelessWidget {
           RichText(
             text: TextSpan(
               style: theme.regularTextStyle,
-              text: '2. This will output text to the command line:',
+              text: '2. If you have a Dart or Flutter project open in your IDE '
+                  '(VS Code, IntelliJ, or Android Studio), the IDE will have '
+                  'a running instance of DTD that you can use. Use the '
+                  'IDE\'s affordance to find an action (Command Pallette '
+                  'for VS Code or Find Action for IntelliJ / Android '
+                  'Studio) to search for the ',
               children: [
                 TextSpan(
-                  text: ' "The Dart Tooling Daemon is listening on '
-                      'ws://127.0.0.1:62630/". ',
+                  text: '"Copy DTD URI to Clipboard"',
                   style: theme.boldTextStyle,
                 ),
                 const TextSpan(
-                  text: 'Copy the DTD URI and paste it into the "Dart '
-                      'Tooling Daemon Connection" text field to connect.',
+                  text: ' action.\n\n'
+                      'Now, you should have a DTD URI in your clipboard. Paste '
+                      'this into the "Dart Tooling Daemon Connection" text '
+                      'field to connect.',
                 ),
               ],
             ),
           ),
           const SizedBox(height: defaultSpacing),
           Text(
-            'In a real environment, DTD will be started by the user\'s IDE or'
-            ' by DevTools, so your extension will inherit the existing DTD'
-            ' connection from DevTools.',
+            'In a real environment, your extension will inherit the existing '
+            'DTD connection from DevTools.',
             style: theme.subtleTextStyle,
-          ),
-          const SizedBox(height: defaultSpacing),
-          RichText(
-            text: TextSpan(
-              text: 'WARNING: if you are using DTD\'s file system APIs (',
-              style: theme.regularTextStyle.copyWith(
-                color: theme.colorScheme.tertiary,
-              ),
-              children: [
-                TextSpan(
-                  text: 'readFileAsString, writeFileAsString, listDirectories',
-                  style: theme.fixedFontStyle.copyWith(
-                    color: theme.colorScheme.tertiary,
-                  ),
-                ),
-                TextSpan(
-                  text:
-                      '), these will be more restricted in a real environment. '
-                      'In the simulated environment, your extension can access '
-                      'the entire file system; in a real environment, your '
-                      'extension will only have access to files within the '
-                      'user\'s project, which are determined by the workspace '
-                      'directores in the IDE, or, if DevTools was launched from '
-                      'the command line, then the project directories will be '
-                      'determined by the project root of the connected app.',
-                  style: theme.regularTextStyle.copyWith(
-                    color: theme.colorScheme.tertiary,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

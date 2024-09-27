@@ -11,17 +11,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import 'config_specific/launch_url/launch_url.dart';
 import 'primitives/utils.dart';
+import 'utils.dart';
 
 class SidePanelViewer extends StatefulWidget {
   const SidePanelViewer({
-    Key? key,
+    super.key,
     required this.controller,
     this.title,
     this.textIfMarkdownDataEmpty,
     this.child,
-  }) : super(key: key);
+  });
 
   final SidePanelController controller;
   final String? title;
@@ -127,14 +127,14 @@ class SidePanelViewerState extends State<SidePanelViewer>
 
 class SidePanel extends AnimatedWidget {
   const SidePanel({
-    Key? key,
+    super.key,
     required this.sidePanelController,
     required Animation<double> visibilityAnimation,
     this.title,
     this.markdownData,
     this.textIfMarkdownDataEmpty,
     required this.width,
-  }) : super(key: key, listenable: visibilityAnimation);
+  }) : super(listenable: visibilityAnimation);
 
   final SidePanelController sidePanelController;
 
@@ -183,7 +183,7 @@ class SidePanel extends AnimatedWidget {
                     child: Markdown(
                       data: markdownData!,
                       onTapLink: (text, url, title) =>
-                          unawaited(launchUrl(url!)),
+                          unawaited(launchUrlWithErrorHandling(url!)),
                     ),
                   ),
           ],

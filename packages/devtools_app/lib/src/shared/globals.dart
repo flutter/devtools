@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
@@ -14,7 +15,7 @@ import '../shared/notifications.dart';
 import 'console/eval/eval_service.dart';
 import 'environment_parameters/environment_parameters_base.dart';
 import 'framework_controller.dart';
-import 'offline_mode.dart';
+import 'offline_data.dart';
 import 'preferences/preferences.dart';
 import 'primitives/message_bus.dart';
 import 'primitives/storage.dart';
@@ -45,11 +46,11 @@ DTDManager get dtdManager => globals[DTDManager] as DTDManager;
 PreferencesController get preferences =>
     globals[PreferencesController] as PreferencesController;
 
-DevToolsEnvironmentParameters get devToolsExtensionPoints =>
+DevToolsEnvironmentParameters get devToolsEnvironmentParameters =>
     globals[DevToolsEnvironmentParameters] as DevToolsEnvironmentParameters;
 
-OfflineModeController get offlineController =>
-    globals[OfflineModeController] as OfflineModeController;
+OfflineDataController get offlineDataController =>
+    globals[OfflineDataController] as OfflineDataController;
 
 NotificationService get notificationService =>
     globals[NotificationService] as NotificationService;
@@ -64,6 +65,9 @@ EvalService get evalService => globals[EvalService] as EvalService;
 
 ExtensionService get extensionService =>
     globals[ExtensionService] as ExtensionService;
+
+GlobalKey<NavigatorState> get navigatorKey =>
+    globals[GlobalKey<NavigatorState>] as GlobalKey<NavigatorState>;
 
 /// Whether DevTools is being run in integration test mode.
 bool get integrationTestMode => _integrationTestMode;
@@ -87,3 +91,6 @@ void setStagerMode() {
     _stagerMode = true;
   }
 }
+
+/// Whether DevTools is being run in any type of testing mode.
+bool get anyTestMode => _integrationTestMode || _testMode || _stagerMode;

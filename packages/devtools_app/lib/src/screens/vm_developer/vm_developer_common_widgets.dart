@@ -15,6 +15,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/tree.dart';
 import '../debugger/codeview.dart';
@@ -237,7 +238,6 @@ class RequestableSizeWidget extends StatelessWidget {
                           : prettyPrintBytes(
                               int.parse(size.valueAsString!),
                               includeUnit: true,
-                              kbFractionDigits: 1,
                               maxBytes: 512,
                             )!,
                     ),
@@ -301,14 +301,11 @@ class VmExpansionTile extends StatelessWidget {
           data: theme.copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
             title: DefaultTextStyle(
-              style: theme.textTheme.titleSmall!,
+              style: theme.textTheme.titleMedium!,
               child: Text(title),
             ),
             onExpansionChanged: onExpanded,
-            tilePadding: const EdgeInsets.only(
-              left: defaultSpacing,
-              right: defaultSpacing,
-            ),
+            tilePadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
             children: children,
           ),
         ),
@@ -442,7 +439,7 @@ class RetainingPathWidget extends StatelessWidget {
         ],
       ),
       if (retainingPath.elements!.length > 1)
-        for (RetainingObject object in retainingPath.elements!.sublist(1))
+        for (final object in retainingPath.elements!.sublist(1))
           Row(
             children: [
               Flexible(
@@ -855,7 +852,6 @@ MapEntry<String, WidgetBuilder> shallowSizeRowBuilder(VmObject object) {
     prettyPrintBytes(
       object.obj.size ?? 0,
       includeUnit: true,
-      kbFractionDigits: 1,
       maxBytes: 512,
     ),
   );

@@ -96,9 +96,9 @@ void _mockFlutterAssets() {
   if (!Platform.environment.containsKey('UNIT_TEST_ASSETS')) {
     return;
   }
-  final String? assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
+  final assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
   assert(Platform.environment['APP_NAME'] != null);
-  final String prefix = 'packages/${Platform.environment['APP_NAME']}/';
+  final prefix = 'packages/${Platform.environment['APP_NAME']}/';
 
   /// Navigation related actions (pop, push, replace) broadcasts these actions via
   /// platform messages.
@@ -127,7 +127,7 @@ void _mockFlutterAssets() {
         }
       }
 
-      final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
+      final encoded = Uint8List.fromList(asset.readAsBytesSync());
       return Future<ByteData>.value(encoded.buffer.asByteData());
     },
   );
@@ -160,7 +160,6 @@ Future<void> loadFonts() async {
       'fonts/Roboto_Mono/RobotoMono-Bold.ttf',
     ],
     'Octicons': ['fonts/Octicons.ttf'],
-    // 'Codicon': ['packages/codicon/font/codicon.ttf']
   };
 
   final loadFontsFuture = fonts.entries.map((entry) async {
@@ -209,6 +208,22 @@ void verifyIsSearchMatchForTreeData<T extends TreeDataSearchStateMixin<T>>(
       },
     );
   }
+}
+
+/// Given a [finder], repeatedly pumps until found, or until there are no more
+/// retries.
+Future<Finder> retryUntilFound(
+  Finder finder, {
+  required WidgetTester tester,
+  int retries = 3,
+}) async {
+  if (retries == 0) return finder;
+
+  final found = tester.any(finder);
+  if (found) return finder;
+
+  await tester.pump(safePumpDuration);
+  return retryUntilFound(finder, tester: tester, retries: retries - 1);
 }
 
 void logStatus(String log) {

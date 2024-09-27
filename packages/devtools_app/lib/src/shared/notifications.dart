@@ -5,11 +5,11 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import 'config_specific/launch_url/launch_url.dart';
 import 'globals.dart';
-import 'primitives/utils.dart';
+import 'utils.dart';
 
 class NotificationMessage {
   NotificationMessage(
@@ -21,7 +21,7 @@ class NotificationMessage {
   });
 
   /// The default duration for notifications to show.
-  static const Duration defaultDuration = Duration(seconds: 7);
+  static const defaultDuration = Duration(seconds: 7);
 
   final String text;
   final List<Widget> actions;
@@ -37,7 +37,7 @@ class NotificationService {
   final toDismiss = Queue<NotificationMessage>();
 
   /// Notifies about added messages or dismissals.
-  final ValueNotifier<int> newTasks = ValueNotifier(0);
+  final newTasks = ValueNotifier<int>(0);
 
   /// Messages that are planned to be shown or are currently shown in UI.
   @visibleForTesting
@@ -73,8 +73,8 @@ class NotificationService {
     bool isReportable = true,
   }) {
     final reportErrorAction = NotificationAction(
-      'Report error',
-      () {
+      label: 'Report error',
+      onPressed: () {
         final additionalInfoParts = [
           if (reportExplanation != null) 'Explanation:\n$reportExplanation',
           if (stackTrace != null) 'Stack trace:\n$stackTrace',
@@ -83,8 +83,8 @@ class NotificationService {
             ? additionalInfoParts.join('\n\n')
             : null;
         unawaited(
-          launchUrl(
-            devToolsExtensionPoints
+          launchUrlWithErrorHandling(
+            devToolsEnvironmentParameters
                 .issueTrackerLink(
                   issueTitle: 'Reporting error: $errorMessage',
                   additionalInfo: additionalInfo,
@@ -117,8 +117,7 @@ class NotificationService {
     NotificationMessage message, {
     bool allowDuplicates = true,
   }) {
-    if (!allowDuplicates &&
-        activeMessages.containsWhere((m) => m.text == message.text)) {
+    if (!allowDuplicates && activeMessages.any((m) => m.text == message.text)) {
       return false;
     }
     activeMessages.add(message);
@@ -131,13 +130,13 @@ class NotificationService {
   void dismiss(String message) {
     // Remove those that were not picked up yet by UI.
     final toRemove = toPush.where((e) => e.text == message).toList();
-    for (var messageToRemove in toRemove) {
+    for (final messageToRemove in toRemove) {
       toPush.remove(messageToRemove);
       activeMessages.remove(messageToRemove);
     }
 
     // Add task to dismiss for those that were picked up by UI.
-    if (activeMessages.containsWhere((element) => element.text == message)) {
+    if (activeMessages.any((element) => element.text == message)) {
       toDismiss.addLast(NotificationMessage(message));
       newTasks.value++;
     }
@@ -152,30 +151,28 @@ class NotificationService {
 }
 
 class NotificationAction extends StatelessWidget {
-  const NotificationAction(
-    this.label,
-    this.onAction, {
+  const NotificationAction({
     super.key,
+    required this.label,
+    required this.onPressed,
     this.isPrimary = false,
   });
 
   final String label;
-
-  final VoidCallback onAction;
-
+  final VoidCallback onPressed;
   final bool isPrimary;
 
   @override
   Widget build(BuildContext context) {
-    final labelText = Text(label);
-    return isPrimary
-        ? ElevatedButton(
-            onPressed: onAction,
-            child: labelText,
-          )
-        : OutlinedButton(
-            onPressed: onAction,
-            child: labelText,
-          );
+    final theme = Theme.of(context);
+    return DevToolsButton(
+      label: label,
+      color: isPrimary
+          ? theme.colorScheme.onPrimary
+          : theme.colorScheme.onSecondaryContainer,
+      elevated: isPrimary,
+      outlined: !isPrimary,
+      onPressed: onPressed,
+    );
   }
 }

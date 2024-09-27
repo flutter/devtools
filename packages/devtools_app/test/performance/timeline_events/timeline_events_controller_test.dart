@@ -17,8 +17,7 @@ import '../../test_infra/test_data/performance/sample_performance_data.dart';
 
 void main() {
   late MockPerformanceController performanceController;
-  final ServiceConnectionManager fakeServiceManager =
-      FakeServiceConnectionManager(
+  final fakeServiceManager = FakeServiceConnectionManager(
     service: FakeServiceManager.createFakeService(
       timelineData: perfettoVmTimeline,
     ),
@@ -36,7 +35,7 @@ void main() {
           .thenReturn(initializedCompleter);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(OfflineDataController, OfflineDataController());
 
       performanceController = createMockPerformanceControllerWithDefaults();
       eventsController = TimelineEventsController(performanceController);
@@ -51,22 +50,22 @@ void main() {
 
     test('can setOfflineData', () async {
       // Ensure we are starting in an empty state.
-      expect(eventsController.fullPerfettoTrace, isNull);
+      expect(eventsController.fullPerfettoTrace, isEmpty);
       expect(eventsController.perfettoController.processor.uiTrackId, isNull);
       expect(
         eventsController.perfettoController.processor.rasterTrackId,
         isNull,
       );
 
-      offlineController.enterOfflineMode(
+      offlineDataController.startShowingOfflineData(
         offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
-      final offlineData = OfflinePerformanceData.parse(rawPerformanceData);
+      final offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
       when(performanceController.offlinePerformanceData)
           .thenReturn(offlineData);
       await eventsController.setOfflineData(offlineData);
 
-      expect(eventsController.fullPerfettoTrace, isNotNull);
+      expect(eventsController.fullPerfettoTrace, isNotEmpty);
       expect(
         eventsController.perfettoController.processor.uiTrackId,
         equals(testUiTrackId),

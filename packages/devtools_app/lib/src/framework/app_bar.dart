@@ -55,17 +55,21 @@ class DevToolsAppBar extends StatelessWidget {
 
     // Add a leading [VerticalLineSpacer] to the actions to separate them from
     // the tabs.
-    final actionsWithSpacer = List<Widget>.from(actions ?? [])
-      ..insert(0, VerticalLineSpacer(height: defaultToolbarHeight));
+    final actionsWithSpacer = List<Widget>.from(actions ?? []);
+    if (screens.isNotEmpty && actionsWithSpacer.isNotEmpty) {
+      actionsWithSpacer.insert(
+        0,
+        VerticalLineSpacer(height: defaultToolbarHeight),
+      );
+    }
 
-    final bool hasMultipleTabs = screens.length > 1;
-    if (hasMultipleTabs) {
+    if (screens.isNotEmpty) {
       tabBar = TabBar(
         controller: tabController,
         isScrollable: true,
         labelPadding: EdgeInsets.zero,
         tabs: [
-          for (var screen in visibleScreens)
+          for (final screen in visibleScreens)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: tabBarSpacing),
               child: screen.buildTab(context),
@@ -73,7 +77,7 @@ class DevToolsAppBar extends StatelessWidget {
           // We need to include a widget in the tab bar for the overflow screens
           // because the [_tabController] expects a length equal to the total
           // number of screens, hidden or not.
-          for (var _ in overflowScreens) const SizedBox.shrink(),
+          for (final _ in overflowScreens) const SizedBox.shrink(),
         ],
       );
 
@@ -201,8 +205,8 @@ class TabOverflowButton extends StatelessWidget {
             height: defaultToolbarHeight,
             child: MenuItemButton(
               style: const ButtonStyle().copyWith(
-                textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
-                  return theme.textTheme.titleSmall!;
+                textStyle: WidgetStateProperty.resolveWith<TextStyle>((_) {
+                  return theme.textTheme.titleMedium!;
                 }),
               ),
               onPressed: () => onItemSelected(i),

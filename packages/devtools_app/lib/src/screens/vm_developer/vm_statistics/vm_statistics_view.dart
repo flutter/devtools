@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
+import '../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
@@ -22,7 +23,6 @@ class VMStatisticsView extends VMDeveloperView {
           title: 'VM',
           icon: Icons.devices,
         );
-  static const id = 'vm-statistics';
 
   @override
   Widget build(BuildContext context) => VMStatisticsViewBody();
@@ -226,7 +226,7 @@ class _IsolateIDColumn extends ColumnData<Isolate> {
 }
 
 abstract class _IsolateMemoryColumn extends ColumnData<Isolate> {
-  _IsolateMemoryColumn(String title) : super.wide(title);
+  _IsolateMemoryColumn(super.title) : super.wide();
 
   int getCapacity(Isolate i);
   int getUsage(Isolate i);
@@ -246,6 +246,9 @@ class _IsolateNewSpaceColumn extends _IsolateMemoryColumn {
 
   @override
   int getUsage(Isolate i) => i.newSpaceUsage;
+
+  @override
+  bool get numeric => true;
 }
 
 class _IsolateOldSpaceColumn extends _IsolateMemoryColumn {
@@ -256,6 +259,9 @@ class _IsolateOldSpaceColumn extends _IsolateMemoryColumn {
 
   @override
   int getUsage(Isolate i) => i.oldSpaceUsage;
+
+  @override
+  bool get numeric => true;
 }
 
 class _IsolateHeapColumn extends _IsolateMemoryColumn {
@@ -266,6 +272,9 @@ class _IsolateHeapColumn extends _IsolateMemoryColumn {
 
   @override
   int getUsage(Isolate i) => i.dartHeapSize;
+
+  @override
+  bool get numeric => true;
 }
 
 /// Displays general statistics about running isolates including:

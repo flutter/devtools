@@ -92,24 +92,24 @@ class TestFlutterApp extends IntegrationTestApp {
     String method,
     Object? params,
   ) async {
-    final int requestId = _requestId++;
-    final Map<String, dynamic> request = <String, dynamic>{
+    final requestId = _requestId++;
+    final request = <String, dynamic>{
       'id': requestId,
       'method': method,
       'params': params,
     };
-    final String jsonEncoded = json.encode(<Map<String, dynamic>>[request]);
+    final jsonEncoded = json.encode(<Map<String, dynamic>>[request]);
     _debugPrint(jsonEncoded);
 
     // Set up the response future before we send the request to avoid any
     // races. If the method we're calling is app.stop then we tell waitFor not
     // to throw if it sees an app.stop event before the response to this request.
-    final Future<Map<String, dynamic>> responseFuture = waitFor(
+    final responseFuture = waitFor(
       id: requestId,
       ignoreAppStopEvent: method == 'app.stop',
     );
     runProcess!.stdin.writeln(jsonEncoded);
-    final Map<String, dynamic> response = await responseFuture;
+    final response = await responseFuture;
 
     if (response['error'] != null || response['result'] == null) {
       throw Exception('Unexpected error response');
@@ -348,7 +348,7 @@ abstract class IntegrationTestApp with IOMixin {
     final messages = StringBuffer();
     final start = DateTime.now();
     void logMessage(String m) {
-      final int ms = DateTime.now().difference(start).inMilliseconds;
+      final ms = DateTime.now().difference(start).inMilliseconds;
       messages.writeln('[+ ${ms.toString().padLeft(5)}] $m');
     }
 
@@ -431,12 +431,10 @@ enum TestAppDevice {
     TestAppDevice.flutterTester: [],
     TestAppDevice.flutterChrome: [
       'eval_and_browse_test.dart',
-      // TODO(https://github.com/flutter/devtools/issues/7145): Figure out why
-      // this fails on bots but passes locally and enable.
-      'eval_and_inspect_test.dart',
       'perfetto_test.dart',
       'performance_screen_event_recording_test.dart',
       'service_connection_test.dart',
+      'service_extensions_test.dart',
     ],
     TestAppDevice.cli: [
       'debugger_panel_test.dart',
@@ -445,6 +443,7 @@ enum TestAppDevice {
       'perfetto_test.dart',
       'performance_screen_event_recording_test.dart',
       'service_connection_test.dart',
+      'service_extensions_test.dart',
     ],
   };
 

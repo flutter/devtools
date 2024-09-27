@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/panes/chart/memory_charts.dart';
+import 'package:devtools_app/src/screens/memory/panes/chart/data/charts.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/charts/chart.dart';
 import 'package:devtools_app/src/shared/charts/chart_controller.dart';

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -13,14 +14,83 @@ import '../../../../shared/globals.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
+@visibleForTesting
+enum Json {
+  profile,
+  rootPackage;
+}
+
 class ProfilePaneController extends DisposableController
-    with AutoDisposeControllerMixin {
-  final _exportController = ExportController();
+    with AutoDisposeControllerMixin, Serializable {
+  ProfilePaneController({
+    required this.rootPackage,
+    AdaptedProfile? profile,
+  }) {
+    // [profile] should only be non-null when loading offline data.
+    if (profile != null) {
+      _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
+        profile,
+        classFilter.value,
+        rootPackage,
+      );
+    }
+  }
+
+  factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
+    return ProfilePaneController(
+      profile: deserialize(json[Json.profile.name], AdaptedProfile.fromJson),
+      rootPackage: json[Json.rootPackage.name],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      Json.profile.name: _currentAllocationProfile.value,
+      Json.rootPackage.name: rootPackage,
+    };
+  }
+
+  bool _initialized = false;
+
+  /// Initializes the controller if it is not initialized yet.
+  void initialize() {
+    if (_initialized) return;
+
+    if (!offlineDataController.showingOfflineData.value) {
+      autoDisposeStreamSubscription(
+        serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
+          if (refreshOnGc.value) {
+            unawaited(refresh());
+          }
+        }),
+      );
+      addAutoDisposeListener(
+        serviceConnection.serviceManager.isolateManager.selectedIsolate,
+        () {
+          unawaited(refresh());
+        },
+      );
+      unawaited(refresh());
+    }
+
+    _initializeSelection();
+
+    _initialized = true;
+  }
 
   /// The current profile being displayed.
   ValueListenable<AdaptedProfile?> get currentAllocationProfile =>
       _currentAllocationProfile;
   final _currentAllocationProfile = ValueNotifier<AdaptedProfile?>(null);
+  void _setProfile(AllocationProfile profile) {
+    _currentAllocationProfile.value = AdaptedProfile.fromAllocationProfile(
+      profile,
+      classFilter.value,
+      rootPackage,
+    );
+    _initializeSelection();
+  }
 
   /// Specifies if the allocation profile should be refreshed when a GC event
   /// is received.
@@ -33,46 +103,20 @@ class ProfilePaneController extends DisposableController
 
   /// Current class filter.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
-  final _classFilter = ValueNotifier(ClassFilter.empty());
-
-  late final _rootPackage =
-      serviceConnection.serviceManager.rootInfoNow().package;
-
-  bool _initialized = false;
-
-  void initialize() {
-    if (_initialized) {
-      return;
-    }
-
-    autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
-        if (refreshOnGc.value) {
-          unawaited(refresh());
-        }
-      }),
-    );
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.isolateManager.selectedIsolate,
-      () {
-        unawaited(refresh());
-      },
-    );
-    unawaited(refresh());
-    _initialized = true;
-  }
-
+  final _classFilter = ValueNotifier(ClassFilter.theDefault());
   void setFilter(ClassFilter filter) {
-    if (filter.equals(_classFilter.value)) return;
+    if (filter == _classFilter.value) return;
     _classFilter.value = filter;
     final currentProfile = _currentAllocationProfile.value;
     if (currentProfile == null) return;
     _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
       currentProfile,
       classFilter.value,
-      _rootPackage,
+      rootPackage,
     );
   }
+
+  final String rootPackage;
 
   @visibleForTesting
   void clearCurrentProfile() => _currentAllocationProfile.value = null;
@@ -96,13 +140,8 @@ class ProfilePaneController extends DisposableController
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (isolate == null) return;
 
-    final allocationProfile = await service.getAllocationProfile(isolate.id!);
-    _currentAllocationProfile.value = AdaptedProfile.fromAllocationProfile(
-      allocationProfile,
-      classFilter.value,
-      _rootPackage,
-    );
-    _initializeSelection();
+    final profile = await service.getAllocationProfile(isolate.id!);
+    _setProfile(profile);
   }
 
   void _initializeSelection() {
@@ -164,7 +203,7 @@ class ProfilePaneController extends DisposableController
         ].join(','),
       );
     }
-    _exportController.downloadFile(
+    ExportController().downloadFile(
       csvBuffer.toString(),
       type: ExportFileType.csv,
     );

@@ -13,6 +13,7 @@ import 'package:dap/dap.dart' as dap;
 import 'package:dds_service_extensions/dap.dart';
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
@@ -78,9 +79,9 @@ class VmServiceWrapper extends VmService {
 
   final bool _trackFutures;
 
-  final Map<String, Future<Success>> _activeStreams = {};
+  final _activeStreams = <String, Future<Success>>{};
 
-  final Set<TrackedFuture<Object>> activeFutures = {};
+  final activeFutures = <TrackedFuture<Object>>{};
 
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
 
@@ -152,6 +153,7 @@ class VmServiceWrapper extends VmService {
     String objectId, {
     int? offset,
     int? count,
+    String? idZoneId,
   }) {
     final cachedObj = fakeServiceCache.getObject(
       objectId: objectId,
@@ -169,8 +171,21 @@ class VmServiceWrapper extends VmService {
     );
   }
 
-  Future<HeapSnapshotGraph> getHeapSnapshotGraph(IsolateRef isolateRef) async {
-    return await HeapSnapshotGraph.getSnapshot(this, isolateRef);
+  Future<HeapSnapshotGraph> getHeapSnapshotGraph(
+    IsolateRef isolateRef, {
+    bool calculateReferrers = true,
+    bool decodeObjectData = true,
+    bool decodeExternalProperties = true,
+    bool decodeIdentityHashCodes = true,
+  }) async {
+    return await HeapSnapshotGraph.getSnapshot(
+      this,
+      isolateRef,
+      calculateReferrers: calculateReferrers,
+      decodeObjectData: decodeObjectData,
+      decodeExternalProperties: decodeExternalProperties,
+      decodeIdentityHashCodes: decodeIdentityHashCodes,
+    );
   }
 
   @override
@@ -367,8 +382,8 @@ class VmServiceWrapper extends VmService {
 
     void futureComplete() {
       activeFutures.remove(trackedFuture);
-      if (activeFutures.isEmpty && !_allFuturesCompleter.isCompleted) {
-        _allFuturesCompleter.complete(true);
+      if (activeFutures.isEmpty) {
+        _allFuturesCompleter.safeComplete(true);
       }
     }
 

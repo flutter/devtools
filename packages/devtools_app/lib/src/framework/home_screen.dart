@@ -14,10 +14,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/connection_info.dart';
-import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
@@ -64,8 +62,9 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    final connected = serviceConnection.serviceManager.hasConnection &&
-        serviceConnection.serviceManager.connectedAppInitialized;
+    final connected =
+        serviceConnection.serviceManager.connectedState.value.connected &&
+            serviceConnection.serviceManager.connectedAppInitialized;
     return Scrollbar(
       child: ListView(
         children: [
@@ -73,13 +72,6 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
           if (widget.sampleData.isNotEmpty && !kReleaseMode && !connected) ...[
             SampleDataDropDownButton(sampleData: widget.sampleData),
             const SizedBox(height: defaultSpacing),
-          ],
-          // TODO(polina-c): make the MemoryScreen a static screen and remove
-          // this section from the Home page. See this PR for more details:
-          // https://github.com/flutter/devtools/pull/6010.
-          if (FeatureFlags.memoryAnalysis) ...[
-            const SizedBox(height: defaultSpacing),
-            const MemoryAnalysisInstructions(),
           ],
         ],
       ),
@@ -111,6 +103,9 @@ class ConnectionSection extends StatelessWidget {
             gaScreen: gac.home,
             minScreenWidthForTextBeforeScaling:
                 _primaryMinScreenWidthForTextBeforeScaling,
+            routerDelegate: DevToolsRouterDelegate.of(context),
+            onPressed: () =>
+                Navigator.of(context, rootNavigator: true).pop('dialog'),
           ),
         ],
         child: const ConnectedAppSummary(narrowView: false),
@@ -122,11 +117,11 @@ class ConnectionSection extends StatelessWidget {
 
 class LandingScreenSection extends StatelessWidget {
   const LandingScreenSection({
-    Key? key,
+    super.key,
     required this.title,
     required this.child,
     this.actions = const [],
-  }) : super(key: key);
+  });
 
   final String title;
 
@@ -145,7 +140,7 @@ class LandingScreenSection extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: textTheme.titleMedium,
+                style: textTheme.headlineMedium,
               ),
             ),
             ...actions,
@@ -160,7 +155,7 @@ class LandingScreenSection extends StatelessWidget {
 }
 
 class ConnectInput extends StatefulWidget {
-  const ConnectInput({Key? key}) : super(key: key);
+  const ConnectInput({super.key});
 
   @override
   State<ConnectInput> createState() => _ConnectInputState();
@@ -246,7 +241,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
         children: [
           Text(
             'Connect to a Running App',
-            style: textTheme.titleSmall,
+            style: textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
@@ -296,7 +291,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
     if (connected) {
       final connectedUri =
           Uri.parse(serviceConnection.serviceManager.serviceUri!);
-      routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
+      await routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');
     } else if (normalizeVmServiceUri(uri) == null) {
@@ -305,44 +300,6 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
         'The link was not valid.',
       );
     }
-  }
-}
-
-@visibleForTesting
-class MemoryAnalysisInstructions extends StatelessWidget {
-  const MemoryAnalysisInstructions({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return LandingScreenSection(
-      title: 'Memory Analysis',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Analyze and diff the saved memory snapshots',
-            style: textTheme.titleMedium,
-          ),
-          const SizedBox(height: denseRowSpacing),
-          Text(
-            // TODO(polina-c): make package:leak_tracker a link.
-            // https://github.com/flutter/devtools/issues/5606
-            'Analyze heap snapshots that were previously saved from DevTools or package:leak_tracker.',
-            style: textTheme.bodySmall,
-          ),
-          const SizedBox(height: defaultSpacing),
-          ElevatedButton(
-            child: const Text('Open memory analysis tool'),
-            onPressed: () => _onOpen(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _onOpen(BuildContext context) {
-    DevToolsRouterDelegate.of(context).navigate(memoryAnalysisScreenId);
   }
 }
 

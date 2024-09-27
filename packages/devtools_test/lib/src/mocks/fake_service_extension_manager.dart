@@ -85,7 +85,7 @@ base class FakeServiceExtensionManager extends Fake
   ) async {
     final extension = serviceExtensionsAllowlist[name];
     if (extension != null) {
-      final Object? value = _getExtensionValueFromJson(name, valueFromJson);
+      final value = _getExtensionValueFromJson(name, valueFromJson);
 
       final enabled = extension is ToggleableServiceExtension
           ? value == extension.enabledValue
@@ -118,7 +118,7 @@ base class FakeServiceExtensionManager extends Fake
     }
     _firstFrameEventReceived = true;
 
-    for (String extension in _pendingServiceExtensions) {
+    for (final extension in _pendingServiceExtensions) {
       await _addServiceExtension(extension);
     }
     _pendingServiceExtensions.clear();
@@ -193,7 +193,7 @@ base class FakeServiceExtensionManager extends Fake
     _firstFrameEventReceived = false;
     _pendingServiceExtensions.clear();
     _serviceExtensions.clear();
-    for (var listenable in _serviceExtensionAvailable.values) {
+    for (final listenable in _serviceExtensionAvailable.values) {
       listenable.value = false;
     }
   }

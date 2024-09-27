@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(kenz): remove once min flutter version of devtools_app_shared >= 3.25
+// ignore_for_file: deprecated_member_use, analysis performed with newer flutter version than min sdk
+
 import 'dart:async';
 import 'dart:math';
 
@@ -20,8 +23,8 @@ bool equalsWithinEpsilon(double a, double b) {
 }
 
 const tooltipWait = Duration(milliseconds: 500);
-
 const tooltipWaitLong = Duration(milliseconds: 1000);
+const tooltipWaitExtraLong = Duration(milliseconds: 1500);
 
 /// Pluralizes a word, following english rules (1, many).
 ///
@@ -50,7 +53,7 @@ int sortFieldsByName(String a, String b) {
 
 /// A value notifier that calls each listener immediately when registered.
 final class ImmediateValueNotifier<T> extends ValueNotifier<T> {
-  ImmediateValueNotifier(T value) : super(value);
+  ImmediateValueNotifier(super.value);
 
   /// Adds a listener and calls the listener upon registration.
   @override
@@ -114,4 +117,32 @@ String toCssHexColor(Color color) {
   // in the wrong position.
   String hex(int val) => val.toRadixString(16).padLeft(2, '0');
   return '#${hex(color.red)}${hex(color.green)}${hex(color.blue)}${hex(color.alpha)}';
+}
+
+extension StringUtilities on String {
+  /// Whether [query] is a case insensitive "fuzzy match" for this String.
+  ///
+  /// For example, the query "hwf" would be a fuzzy match for the String
+  /// "hello_world_file".
+  bool caseInsensitiveFuzzyMatch(String query) {
+    query = query.toLowerCase();
+    final lowercase = toLowerCase();
+    final it = query.characters.iterator;
+    var strIndex = 0;
+    while (it.moveNext()) {
+      final char = it.current;
+      var foundChar = false;
+      for (int i = strIndex; i < lowercase.length; i++) {
+        if (lowercase[i] == char) {
+          strIndex = i + 1;
+          foundChar = true;
+          break;
+        }
+      }
+      if (!foundChar) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

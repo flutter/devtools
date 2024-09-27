@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../primitives/byte_utils.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 
@@ -26,6 +27,7 @@ abstract class ColumnData<T> {
     this.titleTooltip,
     this.alignment = ColumnAlignment.left,
     this.headerAlignment = TextAlign.left,
+    this.showTooltip = false,
   }) : minWidthPx = null;
 
   ColumnData.wide(
@@ -34,7 +36,10 @@ abstract class ColumnData<T> {
     this.minWidthPx,
     this.alignment = ColumnAlignment.left,
     this.headerAlignment = TextAlign.left,
+    this.showTooltip = false,
   }) : fixedWidthPx = null;
+
+  final bool showTooltip;
 
   final String title;
 
@@ -59,7 +64,7 @@ abstract class ColumnData<T> {
 
   bool get includeHeader => true;
 
-  bool get supportsSorting => numeric;
+  bool get supportsSorting => true;
 
   int compare(T a, T b) {
     final valueA = getValue(a);
@@ -67,7 +72,9 @@ abstract class ColumnData<T> {
     if (valueA == null && valueB == null) return 0;
     if (valueA == null) return -1;
     if (valueB == null) return 1;
-    return (valueA as Comparable).compareTo(valueB as Comparable);
+
+    if (valueA is! Comparable || valueB is! Comparable) return 0;
+    return valueA.compareTo(valueB);
   }
 
   /// Get the cell's value from the given [dataObject].
@@ -79,8 +86,11 @@ abstract class ColumnData<T> {
 
   String? getCaption(T dataObject) => null;
 
+  // TODO: remove redundant getTooltip overrides now that [showToolTip] is
+  // available.
   /// Get the cell's tooltip value from the given [dataObject].
-  String getTooltip(T dataObject) => getDisplayValue(dataObject);
+  String getTooltip(T dataObject) =>
+      showTooltip ? getDisplayValue(dataObject) : '';
 
   /// Get the cell's rich tooltip span from the given [dataObject].
   ///
@@ -101,12 +111,18 @@ abstract class ColumnData<T> {
     return theme.regularTextStyleWithColor(textColor);
   }
 
+  /// The configuration for the column. Configuration changes to columns
+  /// will cause the table to be rebuilt.
+  ///
+  /// Defaults to title.
+  String get config => title;
+
   @override
   String toString() => title;
 }
 
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
-  TreeColumnData(String title) : super.wide(title);
+  TreeColumnData(super.title) : super.wide();
 
   static double get treeToggleWidth => scaleByFontFactor(14.0);
 
@@ -159,7 +175,6 @@ extension ColumnDataExtension<T> on ColumnData<T> {
       case ColumnAlignment.right:
         return MainAxisAlignment.end;
       case ColumnAlignment.left:
-      default:
         return MainAxisAlignment.start;
     }
   }
@@ -171,7 +186,6 @@ extension ColumnDataExtension<T> on ColumnData<T> {
       case ColumnAlignment.right:
         return TextAlign.right;
       case ColumnAlignment.left:
-      default:
         return TextAlign.left;
     }
   }
@@ -222,7 +236,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
 
   @override
   int compare(T a, T b) {
-    final int result = super.compare(a, b);
+    final result = super.compare(a, b);
     if (result == 0 && secondaryCompare != null) {
       return secondaryCompare!(a).compareTo(secondaryCompare!(b));
     }
@@ -306,7 +320,7 @@ abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
 
   @override
   int compare(T a, T b) {
-    final int result = super.compare(a, b);
+    final result = super.compare(a, b);
     if (result == 0 && secondaryCompare != null) {
       return secondaryCompare!(a).compareTo(secondaryCompare!(b));
     }
@@ -340,7 +354,8 @@ abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
       richTooltipProvider?.call(dataObject, context);
 
   String _memoryAndPercentage(T dataObject) =>
-      '${prettyPrintBytes(sizeProvider!(dataObject), includeUnit: true)} (${_percentDisplay(dataObject)})';
+      '${prettyPrintBytes(sizeProvider!(dataObject), includeUnit: true, kbFractionDigits: 0)}'
+      ' (${_percentDisplay(dataObject)})';
 
   String _percentDisplay(T dataObject) =>
       percent(percentAsDoubleProvider(dataObject));

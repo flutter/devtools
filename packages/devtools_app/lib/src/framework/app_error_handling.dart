@@ -53,6 +53,10 @@ void setupErrorHandling(Future Function() appStartCallback) {
         return appStartCallback();
       },
       (Object error, StackTrace stack) {
+        // TODO(https://github.com/flutter/devtools/issues/7856): can we detect
+        // severe errors here that are related to dart2wasm? Otherwise we may
+        // crash DevTools for the user without any way for them to force reload
+        // with JS.
         reportError(error, stack: stack, errorType: 'zoneGuarded');
         throw error;
       },

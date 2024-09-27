@@ -22,7 +22,7 @@ abstract class Handler {
   static Future<shelf.Response> handleNotifyForVmServiceConnection(
     ServerApi api,
     Map<String, String> queryParams,
-    DTDConnectionInfo? dtd,
+    DtdInfo? dtd,
   ) async {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
       const [apiParameterValueKey, apiParameterVmServiceConnected],
@@ -32,7 +32,7 @@ abstract class Handler {
     );
     if (missingRequiredParams != null) return missingRequiredParams;
 
-    final dtdUri = dtd?.uri;
+    final dtdUri = dtd?.localUri;
     final dtdSecret = dtd?.secret;
     if (dtdUri == null || dtdSecret == null) {
       // If DevTools server did not start DTD, there is nothing for us to do.
@@ -43,7 +43,7 @@ abstract class Handler {
     }
 
     final connectedAsString = queryParams[apiParameterVmServiceConnected]!;
-    late bool connected;
+    final bool connected;
     try {
       connected = bool.parse(connectedAsString);
     } catch (e) {
@@ -60,25 +60,36 @@ abstract class Handler {
       );
     }
 
-    final detectRootResponse = await detectRootPackageForVmService(
-      vmServiceUriAsString: vmServiceUriAsString,
-      vmServiceUri: vmServiceUri,
-      connected: connected,
-      api: api,
-    );
-    if (detectRootResponse.success) {
-      final rootUri = detectRootResponse.uri;
-      if (rootUri == null) {
-        return api.success();
-      }
-      return updateDtdWorkspaceRoots(
-        dtd!,
-        rootFromVmService: rootUri,
+    DartToolingDaemon? dartToolingDaemon;
+    try {
+      dartToolingDaemon = await DartToolingDaemon.connect(dtd!.localUri);
+
+      final detectRootResponse = await detectRootPackageForVmService(
+        vmServiceUriAsString: vmServiceUriAsString,
+        vmServiceUri: vmServiceUri,
         connected: connected,
         api: api,
+        dtd: dartToolingDaemon,
       );
-    } else {
-      return api.serverError(detectRootResponse.message);
+      if (detectRootResponse.success) {
+        final rootUri = detectRootResponse.uri;
+        if (rootUri == null) {
+          return api.success();
+        }
+        return await updateDtdWorkspaceRoots(
+          dartToolingDaemon,
+          dtdConnectionInfo: dtd,
+          rootFromVmService: rootUri,
+          connected: connected,
+          api: api,
+        );
+      } else {
+        return api.serverError(detectRootResponse.message);
+      }
+    } catch (e) {
+      return api.serverError('$e');
+    } finally {
+      await dartToolingDaemon?.close();
     }
   }
 
@@ -88,8 +99,9 @@ abstract class Handler {
     required Uri vmServiceUri,
     required bool connected,
     required ServerApi api,
+    required DartToolingDaemon dtd,
   }) async {
-    late Uri rootPackageUri;
+    final Uri rootPackageUri;
     if (connected) {
       // TODO(kenz): should we first try to lookup the root from
       // [_packageRootsForVmServiceConnections]? Could the root library of the
@@ -103,7 +115,7 @@ abstract class Handler {
           serviceFactory: VmService.defaultFactory,
         );
 
-        final root = await vmService.rootPackageDirectoryForMainIsolate;
+        final root = await vmService.rootPackageDirectoryForMainIsolate(dtd);
         if (root == null) {
           return (
             success: false,
@@ -139,37 +151,31 @@ abstract class Handler {
 
   @visibleForTesting
   static Future<shelf.Response> updateDtdWorkspaceRoots(
-    DTDConnectionInfo dtd, {
+    DartToolingDaemon dtd, {
+    required DtdInfo dtdConnectionInfo,
     required Uri rootFromVmService,
     required bool connected,
     required ServerApi api,
   }) async {
-    DTDConnection? dtdConnection;
-    try {
-      dtdConnection = await DartToolingDaemon.connect(Uri.parse(dtd.uri!));
-      final currentRoots = (await dtdConnection.getIDEWorkspaceRoots())
-          .ideWorkspaceRoots
-          .toSet();
-      // Add or remove [rootFromVmService] depending on whether this was a
-      // connect or disconnect notification.
-      final newRoots = connected
-          ? (currentRoots..add(rootFromVmService)).toList()
-          : (currentRoots..remove(rootFromVmService)).toList();
-      await dtdConnection.setIDEWorkspaceRoots(dtd.secret!, newRoots);
-      return api.success();
-    } catch (e) {
-      return api.serverError('$e');
-    } finally {
-      await dtdConnection?.close();
-    }
+    final currentRoots =
+        (await dtd.getIDEWorkspaceRoots()).ideWorkspaceRoots.toSet();
+    // Add or remove [rootFromVmService] depending on whether this was a
+    // connect or disconnect notification.
+    final newRoots = connected
+        ? (currentRoots..add(rootFromVmService)).toList()
+        : (currentRoots..remove(rootFromVmService)).toList();
+    await dtd.setIDEWorkspaceRoots(dtdConnectionInfo.secret!, newRoots);
+    return api.success();
   }
 }
 
 extension on VmService {
-  Future<String?> get rootPackageDirectoryForMainIsolate async {
+  Future<String?> rootPackageDirectoryForMainIsolate(
+    DartToolingDaemon dtd,
+  ) async {
     final fileUriString = await _rootLibraryForMainIsolate;
     return fileUriString != null
-        ? packageRootFromFileUriString(fileUriString)
+        ? await packageRootFromFileUriString(fileUriString, dtd: dtd)
         : null;
   }
 

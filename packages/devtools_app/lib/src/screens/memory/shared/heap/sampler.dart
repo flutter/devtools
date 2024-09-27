@@ -8,24 +8,35 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/globals.dart';
-import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/classes.dart';
+import '../../../../shared/memory/heap_data.dart';
+import '../../../../shared/memory/heap_object.dart';
 import '../../../../shared/vm_utils.dart';
 
 class _HeapObjects {
   _HeapObjects(this.objects, this.heap);
 
   final ObjectSet objects;
-  final AdaptedHeapData heap;
+  final HeapData heap;
+
+  /// A set of identity hash codes for the objects in the heap.
+  ///
+  /// CPU and memory heavy to calculate,
+  /// so avoid calling this member unless necessary.
+  late final codes = Set<int>.of(
+    objects.indexes
+        .map((index) => heap.graph.objects[index].identityHashCode)
+        .where((code) => code > 0),
+  );
 }
 
-class ClassSampler {
-  ClassSampler(
+class LiveClassSampler {
+  LiveClassSampler(
     this.heapClass, {
     ObjectSet? objects,
-    AdaptedHeapData? heap,
-  })  : assert(objects?.objectsByCodes.isNotEmpty ?? true),
+    HeapData? heap,
+  })  : assert(objects?.indexes.isNotEmpty ?? true),
         assert((objects == null) == (heap == null)),
         _objects = objects == null ? null : _HeapObjects(objects, heap!);
 
@@ -108,7 +119,7 @@ class ClassSampler {
   }) async {
     ga.select(
       gac.memory,
-      gac.MemoryEvent.dropAllLiveToConsole(
+      gac.MemoryEvents.dropAllLiveToConsole(
         includeImplementers: includeImplementers,
         includeSubclasses: includeSubclasses,
       ),
@@ -126,20 +137,22 @@ class ClassSampler {
     final selection = _objects;
 
     // drop to console
-    serviceConnection.consoleService.appendBrowsableInstance(
+    await serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: list,
       isolateRef: _mainIsolateRef,
-      heapSelection: selection == null
-          ? null
-          : HeapObjectSelection(selection.heap, object: null),
+      heapSelection:
+          selection == null ? null : HeapObject(selection.heap, index: null),
     );
   }
 
-  Future<void> oneLiveToConsole() async {
-    ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
+  Future<void> oneLiveToConsole({required String sourceFeature}) async {
+    ga.select(
+      gac.memory,
+      gac.MemoryEvents.dropOneLiveVariable(sourceFeature: sourceFeature),
+    );
 
     // drop to console
-    serviceConnection.consoleService.appendBrowsableInstance(
+    await serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: await _liveInstance(),
       isolateRef: _mainIsolateRef,
       heapSelection: null,
@@ -147,23 +160,26 @@ class ClassSampler {
   }
 }
 
-class HeapClassSampler extends ClassSampler {
-  HeapClassSampler(
-    HeapClassName heapClass,
+class SnapshotClassSampler extends LiveClassSampler {
+  SnapshotClassSampler(
+    super.heapClass,
     ObjectSet objects,
-    AdaptedHeapData heap,
-  ) : super(heapClass, heap: heap, objects: objects);
+    HeapData heap,
+  ) : super(heap: heap, objects: objects);
 
-  Future<void> oneLiveStaticToConsole() async {
-    final selection = _objects!;
+  Future<void> oneLiveStaticToConsole({required String sourceFeature}) async {
+    ga.select(
+      gac.memory,
+      gac.MemoryEvents.dropOneLiveVariable(sourceFeature: sourceFeature),
+    );
 
-    ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
+    final heapObjects = _objects!;
     final instances = (await _liveInstances())?.instances;
 
     final instanceRef = instances?.firstWhereOrNull(
       (objRef) =>
           objRef is InstanceRef &&
-          selection.objects.objectsByCodes.containsKey(objRef.identityHashCode),
+          heapObjects.codes.contains(objRef.identityHashCode),
     ) as InstanceRef?;
 
     if (instanceRef == null) {
@@ -174,33 +190,34 @@ class HeapClassSampler extends ClassSampler {
       return;
     }
 
-    final heapObject =
-        selection.objects.objectsByCodes[instanceRef.identityHashCode!]!;
-
-    final heapSelection =
-        HeapObjectSelection(selection.heap, object: heapObject);
+    final heapSelection = HeapObject(
+      heapObjects.heap,
+      index: heapObjects.heap.indexByCode[instanceRef.identityHashCode!],
+    );
 
     // drop to console
-    serviceConnection.consoleService.appendBrowsableInstance(
+    await serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: instanceRef,
       isolateRef: _mainIsolateRef,
       heapSelection: heapSelection,
     );
   }
 
-  void oneStaticToConsole() {
-    final selection = _objects!;
-    ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
+  Future<void> oneStaticToConsole({required String sourceFeature}) async {
+    final heapObjects = _objects!;
+    ga.select(
+      gac.memory,
+      gac.MemoryEvents.dropOneStaticVariable(sourceFeature: sourceFeature),
+    );
 
-    final heapObject = selection.objects.objectsByCodes.values.first;
-    final heapSelection =
-        HeapObjectSelection(selection.heap, object: heapObject);
+    final index = heapObjects.objects.indexes.first;
+    final heapObject = HeapObject(heapObjects.heap, index: index);
 
     // drop to console
-    serviceConnection.consoleService.appendBrowsableInstance(
+    await serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: null,
       isolateRef: _mainIsolateRef,
-      heapSelection: heapSelection,
+      heapSelection: heapObject,
     );
   }
 }

@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import '../common_widgets.dart';
+import '../primitives/byte_utils.dart';
 import '../primitives/trees.dart';
-import '../primitives/utils.dart';
 import '../ui/colors.dart';
 
 enum PivotType { pivotByMiddle, pivotBySize }
@@ -78,7 +78,7 @@ class Treemap extends StatefulWidget {
 
   final void Function(TreemapNode? node) onRootChangedCallback;
 
-  static const PivotType pivotType = PivotType.pivotByMiddle;
+  static const pivotType = PivotType.pivotByMiddle;
 
   static const treeMapHeaderHeight = 20.0;
 
@@ -123,8 +123,6 @@ class _TreemapState extends State<Treemap> {
           }
         }
         return pivotIndex;
-      default:
-        return -1;
     }
   }
 
@@ -757,7 +755,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
   String prettyByteSize() {
     // Negative sign isn't explicitly added since a regular print of a negative number includes it.
     final plusSign = showDiff && byteSize > 0 ? '+' : '';
-    return '$plusSign${prettyPrintBytes(byteSize, kbFractionDigits: 1, includeUnit: true)}';
+    return '$plusSign${prettyPrintBytes(byteSize, includeUnit: true)}';
   }
 
   /// Returns a list of [TreemapNode] in the path from root node to [this].

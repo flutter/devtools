@@ -8,7 +8,7 @@ import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:devtools_extensions/src/template/_simulated_devtools_environment/_simulated_devtools_environment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foo_devtools_extension/src/devtools_extension_api_example.dart';
+import 'package:foo_devtools_extension/src/feature_examples/devtools_extension_api_example.dart';
 import 'package:integration_test/integration_test.dart';
 
 // To run this test:
@@ -22,10 +22,7 @@ void main() {
 
   testWidgets('end to end simulated environment', (tester) async {
     runApp(
-      const DevToolsExtension(
-        requiresRunningApplication: false,
-        child: TestDevToolsExtension(),
-      ),
+      const DevToolsExtension(child: TestDevToolsExtension()),
     );
     await tester.pump(safePumpDuration);
     expect(find.byType(DevToolsExtension), findsOneWidget);
@@ -208,7 +205,7 @@ Future<void> _testCollapseEnvironmentPanel(
     matching: find.byType(SizedBox),
   );
 
-  final double environmentPanelSizedBoxWidth =
+  final environmentPanelSizedBoxWidth =
       tester.firstWidget<SizedBox>(environmentPanelSizedBox).width!;
 
   // Check that the [environmentPanelSizedBoxWidth] is the expected width.
@@ -227,10 +224,9 @@ Future<void> _testCollapseEnvironmentPanel(
   );
   await tester.pumpAndSettle();
 
-  final Rect simulatedDevToolsWrapperRect =
+  final simulatedDevToolsWrapperRect =
       tester.getRect(find.byType(SimulatedDevToolsWrapper));
-  final Rect environmentPanelRect =
-      tester.getRect(find.byWidget(environmentPanel));
+  final environmentPanelRect = tester.getRect(find.byWidget(environmentPanel));
 
   // Verify that the environment panel is off screen to the right of the
   // simulated devtools wrapper.

@@ -14,7 +14,7 @@ import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
 
 void main() {
   group('CpuProfileData', () {
-    final cpuProfileData = CpuProfileData.parse(cpuProfileResponseJson);
+    final cpuProfileData = CpuProfileData.fromJson(cpuProfileResponseJson);
     final cpuSamples = CpuSamples.parse(goldenCpuSamplesJson)!;
 
     setUp(() {
@@ -32,7 +32,7 @@ void main() {
       'empty frame regression test',
       () {
         final cpuProfileEmptyData =
-            CpuProfileData.parse(cpuProfileResponseEmptyJson);
+            CpuProfileData.fromJson(cpuProfileResponseEmptyJson);
         expect(
           cpuProfileEmptyData.profileMetaData.time!.end!.inMilliseconds,
           47377796,
@@ -112,7 +112,7 @@ void main() {
     });
 
     test('profileData to json', () {
-      expect(cpuProfileData.toJson, equals(goldenCpuProfileDataJson));
+      expect(cpuProfileData.toJson(), equals(goldenCpuProfileDataJson));
     });
 
     test(
@@ -125,7 +125,7 @@ void main() {
         );
 
         expect(
-          generatedCpuProfileData.toJson,
+          generatedCpuProfileData.toJson(),
           equals(goldenCpuProfileDataJson),
         );
       },
@@ -142,7 +142,7 @@ void main() {
         profileData['stackFrames'] = stackFrameData;
         stackFrameData[id]!.remove(CpuProfileData.resolvedPackageUriKey);
 
-        final parsedProfileData = CpuProfileData.parse(profileData);
+        final parsedProfileData = CpuProfileData.fromJson(profileData);
 
         final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
         expect(jsonPackageUri, stackFrame['resolvedUrl']);
@@ -368,7 +368,7 @@ void main() {
       final copy = testStackFrame.deepCopy();
       expect(copy.isExpanded, isFalse);
       expect(copy.children.length, equals(1));
-      for (CpuStackFrame child in copy.children) {
+      for (final child in copy.children) {
         expect(child.parent, equals(copy));
       }
       copy.addChild(stackFrameG);

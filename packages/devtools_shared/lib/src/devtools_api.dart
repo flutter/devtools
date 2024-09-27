@@ -24,59 +24,88 @@ const apiGetDevToolsFirstRun = '${apiPrefix}getDevToolsFirstRun';
 const apiGetDevToolsEnabled = '${apiPrefix}getDevToolsEnabled';
 const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
 
-/// package:unified_analytics properties APIs:
-const apiGetConsentMessage = '${apiPrefix}getConsentMessage';
-const apiMarkConsentMessageAsShown = '${apiPrefix}markConsentMessageAsShown';
-
 /// Property name to apiSetDevToolsEnabled the DevToolsEnabled is the name used
 /// in queryParameter:
 const devToolsEnabledPropertyName = 'enabled';
 
-/// Survey properties APIs:
-/// setActiveSurvey sets the survey property to fetch and save JSON values e.g., Q1-2020
-const apiSetActiveSurvey = '${apiPrefix}setActiveSurvey';
+abstract class PreferencesApi {
+  /// Returns the preference value in the DevTools store file for the key
+  /// specified by the [preferenceKeyProperty] query parameter.
+  static const getPreferenceValue = '${apiPrefix}getPreferenceValue';
 
-/// Survey name passed in apiSetActiveSurvey, the activeSurveyName is the property name
-/// passed as a queryParameter and is the property in ~/.devtools too.
-const activeSurveyName = 'activeSurveyName';
+  /// Sets the preference value in the DevTools store file for the key
+  /// specified by the [preferenceKeyProperty] query parameter.
+  ///
+  /// The value must be specified by the [apiParameterValueKey] query parameter.
+  static const setPreferenceValue = '${apiPrefix}setPreferenceValue';
 
-/// Returns the surveyActionTaken of the activeSurvey (apiSetActiveSurvey).
-const apiGetSurveyActionTaken = '${apiPrefix}getSurveyActionTaken';
+  /// The property name for the query parameter passed along with the
+  /// [getPreferenceValue] and [setPreferenceValue] requests that describes the
+  /// preference key in the DevTools store file.
+  static const preferenceKeyProperty = 'key';
+}
 
-/// Sets the surveyActionTaken of the of the activeSurvey (apiSetActiveSurvey).
-const apiSetSurveyActionTaken = '${apiPrefix}setSurveyActionTaken';
+abstract class SurveyApi {
+  /// Sets the active survey value for the DevTools session.
+  ///
+  /// The active survey is used as a key to get and set values within the
+  /// DevTools store file.
+  static const setActiveSurvey = '${apiPrefix}setActiveSurvey';
 
-/// Property name to apiSetSurveyActionTaken the surveyActionTaken is the name
-/// passed in queryParameter:
-const surveyActionTakenPropertyName = 'surveyActionTaken';
+  /// Returns the 'surveyActionTaken' value for the active survey set by
+  /// [setActiveSurvey].
+  static const getSurveyActionTaken = '${apiPrefix}getSurveyActionTaken';
 
-/// Returns the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
-const apiGetSurveyShownCount = '${apiPrefix}getSurveyShownCount';
+  /// Sets the 'surveyActionTaken' value for the active survey set by
+  /// [setActiveSurvey].
+  static const setSurveyActionTaken = '${apiPrefix}setSurveyActionTaken';
 
-/// Increments the surveyShownCount of the of the activeSurvey (apiSetActiveSurvey).
-const apiIncrementSurveyShownCount = '${apiPrefix}incrementSurveyShownCount';
+  /// Returns the 'surveyShownCount' value for the active survey set by
+  /// [setActiveSurvey].
+  static const getSurveyShownCount = '${apiPrefix}getSurveyShownCount';
 
-const lastReleaseNotesVersionPropertyName = 'lastReleaseNotesVersion';
+  /// Increments the 'surveyShownCount' value for the active survey set by
+  /// [setActiveSurvey].
+  static const incrementSurveyShownCount =
+      '${apiPrefix}incrementSurveyShownCount';
+}
 
-/// Returns the last DevTools version for which we have shown release notes.
-const apiGetLastReleaseNotesVersion = '${apiPrefix}getLastReleaseNotesVersion';
+abstract class ReleaseNotesApi {
+  /// Returns the last DevTools version for which we have shown release notes.
+  static const getLastReleaseNotesVersion =
+      '${apiPrefix}getLastReleaseNotesVersion';
 
-/// Sets the last DevTools version for which we have shown release notes.
-const apiSetLastReleaseNotesVersion = '${apiPrefix}setLastReleaseNotesVersion';
+  /// Sets the last DevTools version for which we have shown release notes.
+  static const setLastReleaseNotesVersion =
+      '${apiPrefix}setLastReleaseNotesVersion';
+}
 
-/// Returns the base app size file, if present.
-const apiGetBaseAppSizeFile = '${apiPrefix}getBaseAppSizeFile';
+abstract class AppSizeApi {
+  /// Returns the base app size file, if present.
+  static const getBaseAppSizeFile = '${apiPrefix}getBaseAppSizeFile';
 
-/// Returns the test app size file used for comparing two files in a diff, if
-/// present.
-const apiGetTestAppSizeFile = '${apiPrefix}getTestAppSizeFile';
+  /// Returns the test app size file used for comparing two files in a diff, if
+  /// present.
+  static const getTestAppSizeFile = '${apiPrefix}getTestAppSizeFile';
 
-const baseAppSizeFilePropertyName = 'appSizeBase';
+  /// The property name for the query parameter passed along with the
+  /// [getBaseAppSizeFile] request.
+  static const baseAppSizeFilePropertyName = 'appSizeBase';
 
-const testAppSizeFilePropertyName = 'appSizeTest';
+  /// The property name for the query parameter passed along with the
+  /// [getTestAppSizeFile] request.
+  static const testAppSizeFilePropertyName = 'appSizeTest';
+}
 
 abstract class DtdApi {
+  /// Gets the DTD URI from the DevTools server.
+  ///
+  /// DTD is either started from the user's IDE and passed to the DevTools
+  /// server, or it is started directly from the DevTools server.
   static const apiGetDtdUri = '${apiPrefix}getDtdUri';
+
+  /// The property name for the response that the server sends back upon
+  /// receiving an [apiGetDtdUri] request.
   static const uriPropertyName = 'dtdUri';
 }
 
@@ -90,8 +119,16 @@ abstract class ExtensionsApi {
   /// extension-related requests to the server that describes the package root
   /// for the app whose extensions are being queried.
   ///
-  /// This field is a file:// URI string and NOT a path.
-  static const extensionRootPathPropertyName = 'rootPath';
+  /// This field is a `file://` URI string and NOT a path.
+  static const packageRootUriPropertyName = 'packageRootUri';
+
+  /// The property name for the query parameter, passed along with
+  /// [apiExtensionEnabledState] requests, that specifies the location of the
+  /// 'devtools_options.yaml' file that is responsible for storing extension
+  /// enablement states.
+  ///
+  /// This field is a `file://` URI string and NOT a path.
+  static const devtoolsOptionsUriPropertyName = 'devtoolsOptionsUri';
 
   /// The property name for the response that the server sends back upon
   /// receiving a [apiServeAvailableExtensions] request.

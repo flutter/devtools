@@ -12,7 +12,6 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/diagnostics/inspector_service.dart';
 import '../../../../shared/primitives/math_utils.dart';
-import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../ui/arrow.dart';
 import '../ui/free_space.dart';
@@ -31,9 +30,9 @@ double get alignmentDropdownMaxSize => scaleByFontFactor(140.0);
 
 class FlexLayoutExplorerWidget extends LayoutExplorerWidget {
   const FlexLayoutExplorerWidget(
-    InspectorController inspectorController, {
-    Key? key,
-  }) : super(inspectorController, key: key);
+    super.inspectorController, {
+    super.key,
+  });
 
   static bool shouldDisplay(RemoteDiagnosticsNode node) {
     return (node.isFlex) || (node.parent?.isFlex ?? false);
@@ -156,7 +155,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               : colorScheme.crossAxisColor,
           selectedItemBuilder: (context) {
             return [
-              for (var alignment in alignmentEnumEntries)
+              for (final alignment in alignmentEnumEntries)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -191,7 +190,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             ];
           },
           items: [
-            for (var alignment in alignmentEnumEntries)
+            for (final alignment in alignmentEnumEntries)
               DropdownMenuItem(
                 value: alignment,
                 child: Container(
@@ -395,14 +394,14 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
 class VisualizeFlexChildren extends StatefulWidget {
   const VisualizeFlexChildren({
-    Key? key,
+    super.key,
     required this.state,
     required this.properties,
     required this.children,
     required this.highlighted,
     required this.scrollController,
     required this.direction,
-  }) : super(key: key);
+  });
 
   final FlexLayoutProperties properties;
   final List<LayoutProperties> children;
@@ -511,7 +510,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
           }
 
           final freeSpacesWidgets = [
-            for (var renderProperties in [
+            for (final renderProperties in [
               ...mainAxisSpaces,
               ...crossAxisSpaces,
             ])
@@ -563,12 +562,12 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
 /// Widget that represents and visualize a direct child of Flex widget.
 class FlexChildVisualizer extends StatelessWidget {
   const FlexChildVisualizer({
-    Key? key,
+    super.key,
     required this.state,
     required this.layoutProperties,
     required this.renderProperties,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   final FlexLayoutExplorerWidgetState state;
 

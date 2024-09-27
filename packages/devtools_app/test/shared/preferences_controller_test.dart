@@ -31,20 +31,20 @@ void main() {
     });
 
     test('has value', () {
-      expect(controller.darkModeTheme.value, isNotNull);
+      expect(controller.darkModeEnabled.value, isNotNull);
     });
 
     test('toggleDarkModeTheme', () {
       bool valueChanged = false;
-      final originalValue = controller.darkModeTheme.value;
+      final originalValue = controller.darkModeEnabled.value;
 
-      controller.darkModeTheme.addListener(() {
+      controller.darkModeEnabled.addListener(() {
         valueChanged = true;
       });
 
-      controller.toggleDarkModeTheme(!controller.darkModeTheme.value);
+      controller.toggleDarkModeTheme(!controller.darkModeEnabled.value);
       expect(valueChanged, isTrue);
-      expect(controller.darkModeTheme.value, isNot(originalValue));
+      expect(controller.darkModeEnabled.value, isNot(originalValue));
     });
 
     test('toggleVmDeveloperMode', () {
@@ -116,10 +116,10 @@ void main() {
       'infers the pub root directory based on the main isolate\'s root library',
       () {
         final rootLibToExpectedPubRoot = {
-          'test_dir/fake_app/lib/main.dart': 'test_dir/fake_app',
-          'my_user/google3/dart_apps/test_app/lib/main.dart': '/dart_apps',
+          'test_dir/fake_app/lib/main.dart': 'test_dir/fake_app/',
+          'my_user/google3/dart_apps/test_app/lib/main.dart': '/dart_apps/',
           'my_user/google3/third_party/dart/dart_apps/test_app/lib/main.dart':
-              '/third_party/dart',
+              '/third_party/dart/',
         };
 
         for (final MapEntry(
@@ -247,7 +247,7 @@ void main() {
 
           expect(
             directories,
-            contains('test_dir/fake_app'),
+            contains('test_dir/fake_app/'),
           );
         },
       );
@@ -258,7 +258,7 @@ void main() {
           final cachedDirectories =
               await controller.readCachedPubRootDirectories();
 
-          expect(cachedDirectories, isNot(contains('test_dir/fake_app')));
+          expect(cachedDirectories, isNot(contains('test_dir/fake_app/')));
         },
       );
 
@@ -385,7 +385,7 @@ void main() {
       );
 
       // Flip the values in storage.
-      for (var key in storage.values.keys) {
+      for (final key in storage.values.keys) {
         storage.values[key] = (!(storage.values[key] == 'true')).toString();
       }
 
@@ -445,7 +445,7 @@ void main() {
       );
 
       // Flip the values in storage.
-      for (var key in storage.values.keys) {
+      for (final key in storage.values.keys) {
         storage.values[key] = (!(storage.values[key] == 'true')).toString();
       }
 
@@ -500,7 +500,7 @@ void main() {
       );
 
       // Flip the values in storage.
-      for (var key in storage.values.keys) {
+      for (final key in storage.values.keys) {
         storage.values[key] = (!(storage.values[key] == 'true')).toString();
       }
 

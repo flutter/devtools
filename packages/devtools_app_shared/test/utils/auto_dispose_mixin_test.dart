@@ -10,11 +10,11 @@ import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class AutoDisposeContoller extends DisposableController
+class AutoDisposeController extends DisposableController
     with AutoDisposeControllerMixin {}
 
 class AutoDisposedWidget extends StatefulWidget {
-  const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);
+  const AutoDisposedWidget(this.stream, {super.key});
 
   final Stream<Object?> stream;
 
@@ -201,7 +201,7 @@ void main() {
     });
 
     group('callOnceWhenReady', () {
-      for (bool isReady in [false, true]) {
+      for (final isReady in [false, true]) {
         group('isReady=$isReady', () {
           test('triggers callback and cancels listeners when ready ', () async {
             final disposer = Disposer();
@@ -347,7 +347,7 @@ void main() {
   });
 
   test('Test Listenable auto dispose', () {
-    final controller = AutoDisposeContoller();
+    final controller = AutoDisposeController();
     final notifier = ValueNotifier<int>(42);
     final values = <int>[];
     controller.addAutoDisposeListener(notifier, () {

@@ -242,9 +242,9 @@ void main() {
   Future<void> pump(WidgetTester tester, Widget w) async {
     await tester.runAsync(() async {
       await tester.pumpWidget(w);
-      for (var element in find.byType(Image).evaluate()) {
-        final Image widget = element.widget as Image;
-        final ImageProvider image = widget.image;
+      for (final element in find.byType(Image).evaluate()) {
+        final widget = element.widget as Image;
+        final image = widget.image;
         await precacheImage(image, element);
         await tester.pumpAndSettle();
       }

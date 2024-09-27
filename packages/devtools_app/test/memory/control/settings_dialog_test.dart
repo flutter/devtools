@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/framework/memory_screen.dart';
-import 'package:devtools_app/src/screens/memory/panes/control/settings_dialog.dart';
+import 'package:devtools_app/src/screens/memory/panes/control/widgets/settings_dialog.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app_shared/src/ui/dialogs.dart';
@@ -13,17 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/scenes/memory/default.dart';
-import '../../test_infra/scenes/scene_test_extensions.dart';
 
 void main() {
   late MemoryDefaultScene scene;
-
-  Future<void> pumpMemoryScreen(WidgetTester tester) async {
-    await tester.pumpScene(scene);
-    // Delay to ensure the memory profiler has collected data.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byType(MemoryBody), findsOneWidget);
-  }
 
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1000.0);
@@ -41,7 +32,7 @@ void main() {
     'settings update preferences',
     windowSize,
     (WidgetTester tester) async {
-      await pumpMemoryScreen(tester);
+      await scene.pump(tester);
 
       // Open the dialog.
       await tester.tap(find.byType(SettingsOutlinedButton));

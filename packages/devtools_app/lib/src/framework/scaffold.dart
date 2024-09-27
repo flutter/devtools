@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -18,10 +19,10 @@ import '../shared/console/widgets/console_pane.dart';
 import '../shared/feature_flags.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
+import '../shared/query_parameters.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/title.dart';
-import '../shared/utils.dart';
 import 'about_dialog.dart';
 import 'app_bar.dart';
 import 'report_feedback_button.dart';
@@ -36,29 +37,29 @@ import 'status_line.dart';
 /// for different routes.
 class DevToolsScaffold extends StatefulWidget {
   DevToolsScaffold({
-    Key? key,
+    super.key,
     required this.screens,
     this.page,
     List<Widget>? actions,
-    this.embed = false,
-  })  : actions = actions ?? defaultActions(),
-        super(key: key);
+    this.embedMode = EmbedMode.none,
+  }) : actions = actions ?? (embedMode.embedded ? [] : defaultActions());
 
   DevToolsScaffold.withChild({
     Key? key,
     required Widget child,
-    bool embed = false,
+    EmbedMode embedMode = EmbedMode.none,
     List<Widget>? actions,
   }) : this(
           key: key,
           screens: [SimpleScreen(child)],
           actions: actions,
-          embed: embed,
+          embedMode: embedMode,
         );
 
   static List<Widget> defaultActions({Color? color}) => [
         OpenSettingsAction(color: color),
-        if (FeatureFlags.devToolsExtensions)
+        if (FeatureFlags.devToolsExtensions &&
+            !DevToolsQueryParams.load().hideExtensions)
           ExtensionSettingsAction(color: color),
         ReportFeedbackButton(color: color),
         OpenAboutAction(color: color),
@@ -69,14 +70,13 @@ class DevToolsScaffold extends StatefulWidget {
         horizontalPadding.left,
         isEmbedded() ? 2.0 : intermediateSpacing,
         horizontalPadding.right,
-        isEmbedded() ? 0.0 : intermediateSpacing,
+        isEmbedded() ? 2.0 : intermediateSpacing,
       );
 
-  // Note: when changing this value, also update `flameChartContainerOffset`
-  // from flame_chart.dart.
   /// Horizontal padding around the content in the DevTools UI.
-  static EdgeInsets get horizontalPadding =>
-      EdgeInsets.symmetric(horizontal: isEmbedded() ? 2.0 : 16.0);
+  static EdgeInsets get horizontalPadding => EdgeInsets.symmetric(
+        horizontal: isEmbedded() ? densePadding : largeSpacing,
+      );
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> screens;
@@ -84,13 +84,16 @@ class DevToolsScaffold extends StatefulWidget {
   /// The page being rendered.
   final String? page;
 
-  /// Whether to render the embedded view (without the header).
-  final bool embed;
+  /// The type of embedding for DevTools.
+  ///
+  /// This may result in rendering the DevTools without the top level tab bar.
+  /// See [EmbedMode].
+  final EmbedMode embedMode;
 
   /// Actions that it's possible to perform in this Scaffold.
   ///
   /// These will generally be [RegisteredServiceExtensionButton]s.
-  final List<Widget>? actions;
+  final List<Widget> actions;
 
   @override
   State<StatefulWidget> createState() => DevToolsScaffoldState();
@@ -100,7 +103,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     with AutoDisposeMixin, TickerProviderStateMixin {
   /// A tag used for [Hero] widgets to keep the [AppBar] in the same place
   /// across route transitions.
-  static const Object _appBarTag = 'DevTools AppBar';
+  static const _appBarTag = 'DevTools AppBar';
 
   /// The controller for animating between tabs.
   ///
@@ -120,7 +123,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     _setupTabController();
 
-    addAutoDisposeListener(offlineController.offlineMode);
+    addAutoDisposeListener(offlineDataController.showingOfflineData);
     autoDisposeStreamSubscription(
       frameworkController.onShowPageId.listen(_showPageById),
     );
@@ -198,7 +201,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         // Send the page change info to the framework controller (it can then
         // send it on to the devtools server, if one is connected).
         frameworkController.notifyPageChange(
-          PageChangeEvent(screen.screenId, widget.embed),
+          PageChangeEvent(screen.screenId, widget.embedMode),
         );
 
         // Clear error count when navigating to a screen.
@@ -221,7 +224,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         Router.neglect(context, () {
           routerDelegate.navigateIfNotCurrent(
             _currentScreen.screenId,
-            routerDelegate.currentConfiguration?.args,
+            routerDelegate.currentConfiguration?.params.params,
             routerDelegate.currentConfiguration?.state,
           );
         });
@@ -230,7 +233,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     // Broadcast the initial page.
     frameworkController.notifyPageChange(
-      PageChangeEvent(_currentScreen.screenId, widget.embed),
+      PageChangeEvent(_currentScreen.screenId, widget.embedMode),
     );
   }
 
@@ -250,10 +253,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Pushes the snapshot screen for an offline import.
   void _pushSnapshotScreenForImport(String screenId) {
-    final args = {'screen': screenId};
+    final params = {DevToolsQueryParams.offlineScreenIdKey: screenId};
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    if (!offlineController.offlineMode.value) {
-      routerDelegate.navigate(snapshotScreenId, args);
+    if (!offlineDataController.showingOfflineData.value) {
+      routerDelegate.navigate(snapshotScreenId, params);
     } else {
       // If we are already in offline mode, we need to replace the existing page
       // so clicking Back does not go through all of the old snapshots.
@@ -262,7 +265,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // history entry.
       Router.neglect(
         context,
-        () => routerDelegate.navigate(snapshotScreenId, args),
+        () => routerDelegate.navigate(snapshotScreenId, params),
       );
     }
   }
@@ -271,7 +274,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   Widget build(BuildContext context) {
     // Build the screens for each tab and wrap them in the appropriate styling.
     final tabBodies = [
-      for (var screen in widget.screens)
+      for (final screen in widget.screens)
         Align(
           alignment: Alignment.topLeft,
           child: FocusScope(
@@ -294,7 +297,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         if (serviceConnection.serviceManager.connectedAppInitialized &&
             !serviceConnection
                 .serviceManager.connectedApp!.isProfileBuildNow! &&
-            !offlineController.offlineMode.value &&
+            !offlineDataController.showingOfflineData.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
             alignment: Alignment.topCenter,
@@ -308,9 +311,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       builder: (context, _) {
         final showConsole =
             serviceConnection.serviceManager.connectedAppInitialized &&
-                !offlineController.offlineMode.value &&
-                _currentScreen.showConsole(widget.embed);
-
+                !offlineDataController.showingOfflineData.value &&
+                _currentScreen.showConsole(widget.embedMode);
+        final containsSingleSimpleScreen =
+            widget.screens.length == 1 && widget.screens.first is SimpleScreen;
+        final showAppBar = widget.embedMode == EmbedMode.none ||
+            (widget.embedMode == EmbedMode.embedMany &&
+                !containsSingleSimpleScreen);
         return DragAndDrop(
           handleDrop: _importController.importData,
           child: KeyboardShortcuts(
@@ -318,9 +325,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               context,
             ),
             child: Scaffold(
-              appBar: widget.embed
-                  ? null
-                  : PreferredSize(
+              appBar: showAppBar
+                  ? PreferredSize(
                       preferredSize: Size.fromHeight(defaultToolbarHeight),
                       // Place the AppBar inside of a Hero widget to keep it the same across
                       // route transitions.
@@ -332,7 +338,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                           actions: widget.actions,
                         ),
                       ),
-                    ),
+                    )
+                  : null,
               body: OutlineDecoration.onlyTop(
                 child: Padding(
                   padding: widget.appPadding,
@@ -360,8 +367,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               ),
               bottomNavigationBar: StatusLine(
                 currentScreen: _currentScreen,
-                isEmbedded: widget.embed,
-                isConnected: serviceConnection.serviceManager.hasConnection &&
+                isEmbedded: widget.embedMode.embedded,
+                isConnected: serviceConnection
+                        .serviceManager.connectedState.value.connected &&
                     serviceConnection.serviceManager.connectedAppInitialized,
               ),
             ),

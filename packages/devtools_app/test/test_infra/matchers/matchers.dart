@@ -20,7 +20,7 @@ RemoteDiagnosticsNode? findNodeMatching(
       node.description?.startsWith(text) == true) {
     return node;
   }
-  for (var child in node.childrenNow) {
+  for (final child in node.childrenNow) {
     final match = findNodeMatching(child, text);
     if (match != null) {
       return match;
@@ -74,7 +74,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   late String path;
   late String _value;
 
-  static final Object _mismatchedValueKey = Object();
+  static final _mismatchedValueKey = Object();
 
   static bool get updateGoldens => autoUpdateGoldenFiles;
 
@@ -84,7 +84,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   @override
   bool matches(Object? object, Map<dynamic, dynamic> matchState) {
-    final String description = _normalize(object as String);
+    final description = _normalize(object as String);
     if (_value != description) {
       if (updateGoldens) {
         io.File(path).writeAsStringSync(description);

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -11,11 +12,11 @@ import '../../service/service_registrations.dart' as registrations;
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
-import '../../shared/offline_mode.dart';
+import '../../shared/offline_data.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
-import 'panes/raster_stats/raster_stats_controller.dart';
+import 'panes/rebuild_stats/rebuild_stats_controller.dart';
 import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_model.dart';
@@ -35,11 +36,11 @@ class PerformanceController extends DisposableController
     // only create a controller when it is needed,
     flutterFramesController = FlutterFramesController(this);
     timelineEventsController = TimelineEventsController(this);
-    rasterStatsController = RasterStatsController(this);
+    rebuildStatsController = RebuildStatsController(this);
     _featureControllers = [
       flutterFramesController,
       timelineEventsController,
-      rasterStatsController,
+      rebuildStatsController,
     ];
 
     if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
@@ -48,8 +49,6 @@ class PerformanceController extends DisposableController
       return;
     }
 
-    // See https://github.com/dart-lang/linter/issues/3801
-    // ignore: discarded_futures
     unawaited(_init());
   }
 
@@ -57,7 +56,7 @@ class PerformanceController extends DisposableController
 
   late final TimelineEventsController timelineEventsController;
 
-  late final RasterStatsController rasterStatsController;
+  late final RebuildStatsController rebuildStatsController;
 
   late List<PerformanceFeatureController> _featureControllers;
 
@@ -82,7 +81,7 @@ class PerformanceController extends DisposableController
   /// Performance screen data loaded via import.
   ///
   /// This is expected to be null when we are not in
-  /// [offlineController.offlineMode].
+  /// [OfflineDataController.showingOfflineData].
   ///
   /// This will contain the original data from the imported file, regardless of
   /// any selection modifications that occur while the data is displayed.
@@ -91,9 +90,8 @@ class PerformanceController extends DisposableController
   bool get impellerEnabled => _impellerEnabled;
   bool _impellerEnabled = false;
 
-  final _initialized = Completer<void>();
-
   Future<void> get initialized => _initialized.future;
+  final _initialized = Completer<void>();
 
   Future<void> _init() async {
     await _initHelper();
@@ -101,10 +99,8 @@ class PerformanceController extends DisposableController
   }
 
   Future<void> _initHelper() async {
-    initReviewHistoryOnDisconnectListener();
-
     await _applyToFeatureControllersAsync((c) => c.init());
-    if (!offlineController.offlineMode.value) {
+    if (!offlineDataController.showingOfflineData.value) {
       await serviceConnection.serviceManager.onServiceAvailable;
 
       if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
@@ -126,12 +122,12 @@ class PerformanceController extends DisposableController
         serviceConnection
             .serviceManager.service!.onExtensionEventWithHistorySafe
             .listen((event) {
-          if (event.extensionKind == 'Flutter.Frame') {
-            final frame = FlutterFrame.parse(event.extensionData!.data);
+          if (event.extensionKind == FlutterEvent.frame) {
+            final frame = FlutterFrame.fromJson(event.extensionData!.data);
             enhanceTracingController.assignStateForFrame(frame);
             flutterFramesController.addFrame(frame);
-          } else if (event.extensionKind == 'Flutter.RebuiltWidgets' &&
-              FeatureFlags.widgetRebuildstats) {
+          } else if (event.extensionKind == FlutterEvent.rebuiltWidgets &&
+              FeatureFlags.widgetRebuildStats) {
             if (_currentRebuildWidgetsIsolate != event.isolate) {
               rebuildCountModel.clearFromRestart();
             }
@@ -151,10 +147,19 @@ class PerformanceController extends DisposableController
         PerformanceScreen.id,
         // TODO(kenz): make sure DevTools exports can be loaded into the full
         // Perfetto trace viewer (ui.perfetto.dev).
-        createData: (json) => OfflinePerformanceData.parse(json),
+        createData: (json) => OfflinePerformanceData.fromJson(json),
         shouldLoad: (data) => !data.isEmpty,
+        loadData: _loadOfflineData,
       );
     }
+  }
+
+  Future<void> _loadOfflineData(OfflinePerformanceData data) async {
+    await clearData();
+    offlinePerformanceData = data;
+    await _applyToFeatureControllersAsync(
+      (c) => c.setOfflineData(offlinePerformanceData!),
+    );
   }
 
   void _fetchMissingRebuildLocations() async {
@@ -239,27 +244,16 @@ class PerformanceController extends DisposableController
   }
 
   @override
-  OfflineScreenData screenDataForExport() => OfflineScreenData(
+  OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
         screenId: PerformanceScreen.id,
         data: OfflinePerformanceData(
-          perfettoTraceBinary:
-              timelineEventsController.fullPerfettoTrace?.writeToBuffer(),
+          perfettoTraceBinary: timelineEventsController.fullPerfettoTrace,
           frames: flutterFramesController.flutterFrames.value,
           selectedFrame: flutterFramesController.selectedFrame.value,
-          rasterStats: rasterStatsController.rasterStats.value,
           rebuildCountModel: rebuildCountModel,
           displayRefreshRate: flutterFramesController.displayRefreshRate.value,
         ).toJson(),
       );
-
-  @override
-  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await clearData();
-    offlinePerformanceData = offlineData;
-    await _applyToFeatureControllersAsync(
-      (c) => c.setOfflineData(offlinePerformanceData!),
-    );
-  }
 }
 
 abstract class PerformanceFeatureController extends DisposableController {

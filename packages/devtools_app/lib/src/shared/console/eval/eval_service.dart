@@ -10,7 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
-import '../../memory/adapted_heap_object.dart';
+import '../../memory/heap_object.dart';
 import '../../vm_utils.dart';
 import '../primitives/scope.dart';
 
@@ -176,7 +176,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   }
 
   Future<InstanceRef?> findObject(
-    AdaptedHeapObject object,
+    HeapObject object,
     IsolateRef isolateRef,
   ) async {
     final isolateId = isolateRef.id!;
@@ -184,7 +184,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     final theClass = (await serviceConnection.serviceManager.service!
             .getClassList(isolateId))
         .classes!
-        .firstWhereOrNull((ref) => object.heapClass.matches(ref));
+        .firstWhereOrNull((ref) => object.className?.matches(ref) ?? false);
 
     return await findInstance(isolateId, theClass?.id, object.code);
   }

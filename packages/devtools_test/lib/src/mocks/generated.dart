@@ -14,7 +14,6 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<DebuggerController>(),
   MockSpec<EnhanceTracingController>(),
   MockSpec<ErrorBadgeManager>(),
-  MockSpec<ExtensionService>(),
   MockSpec<FrameAnalysis>(),
   MockSpec<FramePhase>(),
   MockSpec<HeapSnapshotGraph>(),
@@ -23,7 +22,7 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<FlutterFramesController>(),
   MockSpec<TimelineEventsController>(),
   MockSpec<LoggingController>(),
-  MockSpec<RasterStatsController>(),
+  MockSpec<LoggingControllerV2>(),
   MockSpec<ProgramExplorerController>(),
   MockSpec<ScriptManager>(),
   MockSpec<ServiceConnectionManager>(),
@@ -49,8 +48,9 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<IsolateState>(),
   MockSpec<Obj>(),
   MockSpec<VM>(),
-  MockSpec<VsCodeApi>(),
+  MockSpec<EditorClient>(),
   MockSpec<PerfettoTrackDescriptorEvent>(),
   MockSpec<PerfettoTrackEvent>(),
+  MockSpec<DTDManager>(),
 ])
 void main() {}

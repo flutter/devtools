@@ -35,23 +35,34 @@ class IntegrationTestRunner with IOMixin {
     }
 
     Future<void> runTest({required int attemptNumber}) async {
+      debugLog('starting attempt #$attemptNumber for $testTarget');
       debugLog('starting the flutter drive process');
-      final process = await Process.start(
-        'flutter',
-        [
-          'drive',
-          // Debug outputs from the test will not show up in profile mode. Since
-          // we rely on debug outputs for detecting errors and exceptions from the
-          // test, we cannot run this these tests in profile mode until this issue
-          // is resolved.  See https://github.com/flutter/flutter/issues/69070.
-          // '--profile',
-          '--driver=$testDriver',
-          '--target=$testTarget',
-          '-d',
-          headless ? 'web-server' : 'chrome',
-          for (final arg in dartDefineArgs) '--dart-define=$arg',
+
+      final flutterDriveArgs = [
+        'drive',
+        // Debug outputs from the test will not show up in profile mode. Since
+        // we rely on debug outputs for detecting errors and exceptions from the
+        // test, we cannot run this these tests in profile mode until this issue
+        // is resolved.  See https://github.com/flutter/flutter/issues/69070.
+        // '--profile',
+        '--driver=$testDriver',
+        '--target=$testTarget',
+        '-d',
+        headless ? 'web-server' : 'chrome',
+        // --disable-gpu speeds up tests that use ChromeDriver when run on
+        // GitHub Actions. See https://github.com/flutter/devtools/issues/8301.
+        '--web-browser-flag=--disable-gpu',
+        if (headless) ...[
+          // Flags to avoid breakage with chromedriver 128. See
+          // https://github.com/flutter/devtools/issues/8301.
+          '--web-browser-flag=--headless=old',
+          '--web-browser-flag=--disable-search-engine-choice-screen',
         ],
-      );
+        for (final arg in dartDefineArgs) '--dart-define=$arg',
+      ];
+
+      debugLog('> flutter ${flutterDriveArgs.join(' ')}');
+      final process = await Process.start('flutter', flutterDriveArgs);
 
       bool stdOutWriteInProgress = false;
       bool stdErrWriteInProgress = false;
@@ -70,7 +81,7 @@ class IntegrationTestRunner with IOMixin {
             final testResultJson = line.substring(line.indexOf('{'));
             final testResultMap =
                 jsonDecode(testResultJson) as Map<String, Object?>;
-            final result = _IntegrationTestResult.parse(testResultMap);
+            final result = _IntegrationTestResult.fromJson(testResultMap);
             if (!result.result) {
               exceptionBuffer
                 ..writeln('$result')
@@ -112,6 +123,10 @@ class IntegrationTestRunner with IOMixin {
         timeout,
       ]);
 
+      debugLog(
+        'shutting down processes because '
+        '${testTimedOut ? 'test timed out' : 'test finished'}',
+      );
       debugLog('attempting to kill the flutter drive process');
       process.kill();
       debugLog('flutter drive process has exited');
@@ -147,7 +162,7 @@ class IntegrationTestRunner with IOMixin {
 class _IntegrationTestResult {
   _IntegrationTestResult._(this.result, this.methodName, this.details);
 
-  factory _IntegrationTestResult.parse(Map<String, Object?> json) {
+  factory _IntegrationTestResult.fromJson(Map<String, Object?> json) {
     final result = json[resultKey] == 'true';
     final failureDetails =
         (json[failureDetailsKey] as List<Object?>).cast<String>().firstOrNull ??
@@ -288,6 +303,10 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
     return;
   }
 
+  void debugLog(String log) {
+    if (debugLogging) print(log);
+  }
+
   final chromedriver = ChromeDriver();
 
   try {
@@ -297,6 +316,7 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
     if (testRunnerArgs.testTarget != null) {
       // TODO(kenz): add support for specifying a directory as the target instead
       // of a single file.
+      debugLog('Attempting to run a single test: ${testRunnerArgs.testTarget}');
       await runTest(testRunnerArgs);
     } else {
       // Run all supported tests since a specific target test was not provided.
@@ -321,12 +341,18 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
         testFiles = testFiles.sublist(shardStart, shardEnd);
       }
 
+      debugLog(
+        'Attempting to run all tests: '
+        '${testFiles.map((file) => file.path).toList().toString()}',
+      );
+
       for (final testFile in testFiles) {
         final testTarget = testFile.path;
         final newArgsWithTarget = newArgsGenerator([
           ...testRunnerArgs.rawArgs,
           '--${IntegrationTestRunnerArgs.testTargetArg}=$testTarget',
         ]);
+        debugLog('Attempting to run: $testTarget');
         await runTest(newArgsWithTarget);
       }
     }

@@ -6,15 +6,14 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/embedded/view.dart';
 import 'package:devtools_app/src/extensions/extension_screen.dart';
 import 'package:devtools_app/src/extensions/extension_screen_controls.dart';
+import 'package:devtools_app/src/shared/development_helpers.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../test_infra/test_data/extensions.dart';
 
 void main() {
   const windowSize = Size(2000.0, 2000.0);
@@ -24,31 +23,53 @@ void main() {
     late ExtensionScreen providerScreen;
 
     setUp(() async {
+      setTestMode();
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-      fooScreen = ExtensionScreen(fooExtension);
-      barScreen = ExtensionScreen(barExtension);
-      providerScreen = ExtensionScreen(providerExtension);
+      setGlobal(OfflineDataController, OfflineDataController());
+      fooScreen = ExtensionScreen(StubDevToolsExtensions.fooExtension);
+      barScreen = ExtensionScreen(StubDevToolsExtensions.barExtension);
+      providerScreen =
+          ExtensionScreen(StubDevToolsExtensions.providerExtension);
 
       setGlobal(
         ExtensionService,
-        await createMockExtensionServiceWithDefaults(testExtensions),
+        ExtensionService(
+          fixedAppRoot: Uri.parse('file:///Users/me/package_root_1'),
+        ),
       );
+      await extensionService.initialize();
+      expect(extensionService.staticExtensions.length, 4);
+      expect(extensionService.runtimeExtensions.length, 3);
+      expect(extensionService.availableExtensions.length, 5);
+    });
+
+    tearDown(() {
+      resetDevToolsExtensionEnabledStates();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(Builder(builder: fooScreen.buildTab)));
       expect(find.text('foo'), findsOneWidget);
-      expect(find.byIcon(fooExtension.icon), findsOneWidget);
+      expect(
+        find.byIcon(StubDevToolsExtensions.fooExtension.icon),
+        findsOneWidget,
+      );
 
       await tester.pumpWidget(wrap(Builder(builder: barScreen.buildTab)));
       expect(find.text('bar'), findsOneWidget);
-      expect(find.byIcon(barExtension.icon), findsOneWidget);
+      expect(
+        find.byIcon(StubDevToolsExtensions.barExtension.icon),
+        findsOneWidget,
+      );
 
       await tester.pumpWidget(wrap(Builder(builder: providerScreen.buildTab)));
       expect(find.text('provider'), findsOneWidget);
-      expect(find.byIcon(providerExtension.icon), findsOneWidget);
+      expect(
+        find.byIcon(StubDevToolsExtensions.providerExtension.icon),
+        findsOneWidget,
+      );
     });
 
     testWidgetsWithWindowSize(
@@ -101,7 +122,7 @@ void main() {
       windowSize,
       (tester) async {
         await extensionService.setExtensionEnabledState(
-          fooExtension,
+          StubDevToolsExtensions.fooExtension,
           enable: true,
         );
 
@@ -117,6 +138,7 @@ void main() {
         await _verifyContextMenuContents(tester);
         expect(find.byType(EnableExtensionPrompt), findsNothing);
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+        expect(find.byType(ExtensionRequiresConnection), findsNothing);
       },
     );
 
@@ -125,7 +147,7 @@ void main() {
       windowSize,
       (tester) async {
         await extensionService.setExtensionEnabledState(
-          fooExtension,
+          StubDevToolsExtensions.fooExtension,
           enable: false,
         );
 
@@ -145,13 +167,48 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
+      'renders when embedded without a connected app',
+      windowSize,
+      (tester) async {
+        // The following state must be true for this test:
+        // * Embedded mode = true
+        // * Extension must require a connection (the fooExtension does)
+        // * The service manager must be in a disconnected state (this is true
+        //   after [setUp] runs above).
+
+        setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
+
+        await extensionService.setExtensionEnabledState(
+          StubDevToolsExtensions.fooExtension,
+          enable: true,
+        );
+
+        await tester.pumpWidget(wrap(Builder(builder: fooScreen.build)));
+        expect(find.byType(ExtensionView), findsOneWidget);
+        expect(find.byType(EmbeddedExtensionHeader), findsOneWidget);
+        expect(
+          find.richTextContaining('package:foo extension'),
+          findsOneWidget,
+        );
+        expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
+        expect(find.richTextContaining('Report an issue'), findsOneWidget);
+        await _verifyContextMenuContents(tester);
+        expect(find.byType(EnableExtensionPrompt), findsNothing);
+        expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+        expect(find.byType(ExtensionRequiresConnection), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
       'can enable and disable extension from screen',
       windowSize,
       (tester) async {
         await tester.pumpWidget(wrap(Builder(builder: fooScreen.build)));
 
         expect(
-          extensionService.enabledStateListenable(fooExtension.name).value,
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
+              .value,
           ExtensionEnabledState.none,
         );
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);
@@ -167,11 +224,14 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          extensionService.enabledStateListenable(fooExtension.name).value,
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
+              .value,
           ExtensionEnabledState.enabled,
         );
         expect(find.byType(EnableExtensionPrompt), findsNothing);
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+        expect(find.byType(ExtensionRequiresConnection), findsNothing);
         await _verifyContextMenuContents(
           tester,
           autoDismiss: false,
@@ -186,7 +246,9 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          extensionService.enabledStateListenable(fooExtension.name).value,
+          extensionService
+              .enabledStateListenable(StubDevToolsExtensions.fooExtension.name)
+              .value,
           ExtensionEnabledState.disabled,
         );
         expect(find.byType(EnableExtensionPrompt), findsOneWidget);

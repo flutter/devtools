@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_test/test_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/test_data/performance/sample_performance_data.dart';
@@ -15,34 +14,28 @@ void main() {
       expect(offlineData.perfettoTraceBinary, isNull);
       expect(offlineData.frames, isEmpty);
       expect(offlineData.selectedFrame, isNull);
-      expect(offlineData.rasterStats, isNull);
       expect(offlineData.rebuildCountModel, isNull);
       expect(offlineData.displayRefreshRate, 60.0);
     });
 
     test('init from parse', () {
-      OfflinePerformanceData offlineData = OfflinePerformanceData.parse({});
+      OfflinePerformanceData offlineData = OfflinePerformanceData.fromJson({});
       expect(offlineData.frames, isEmpty);
       expect(offlineData.selectedFrame, isNull);
       expect(offlineData.selectedFrame, isNull);
       expect(offlineData.displayRefreshRate, equals(60.0));
-      expect(offlineData.rasterStats, isNull);
 
-      offlineData = OfflinePerformanceData.parse(rawPerformanceData);
+      offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
       expect(offlineData.perfettoTraceBinary, isNotNull);
       expect(offlineData.frames.length, 3);
       expect(offlineData.selectedFrame, isNotNull);
       expect(offlineData.selectedFrame!.id, equals(2));
       expect(offlineData.displayRefreshRate, equals(60));
-      expect(
-        offlineData.rasterStats!.json,
-        equals(rasterStatsFromDevToolsJson),
-      );
       expect(offlineData.rebuildCountModel, isNull);
     });
 
     test('to json', () {
-      OfflinePerformanceData offlineData = OfflinePerformanceData.parse({});
+      OfflinePerformanceData offlineData = OfflinePerformanceData.fromJson({});
       expect(
         offlineData.toJson(),
         equals({
@@ -50,12 +43,11 @@ void main() {
           OfflinePerformanceData.flutterFramesKey: <Object?>[],
           OfflinePerformanceData.selectedFrameIdKey: null,
           OfflinePerformanceData.displayRefreshRateKey: 60,
-          OfflinePerformanceData.rasterStatsKey: null,
           OfflinePerformanceData.rebuildCountModelKey: null,
         }),
       );
 
-      offlineData = OfflinePerformanceData.parse(rawPerformanceData);
+      offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
       expect(offlineData.toJson(), rawPerformanceData);
     });
   });

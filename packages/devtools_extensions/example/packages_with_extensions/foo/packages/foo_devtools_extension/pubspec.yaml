@@ -5,7 +5,7 @@ publish_to: 'none'
 version: 1.0.0
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.2.0
   flutter: '>=3.0.0'
 
 dependencies:
@@ -13,6 +13,7 @@ dependencies:
     path: ../../../../../../devtools_app_shared
   devtools_extensions:
     path: ../../../../../../devtools_extensions 
+  dtd: ^2.2.0
   flutter:
     sdk: flutter
 

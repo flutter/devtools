@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';
@@ -36,8 +38,7 @@ void main() {
     setUp(() {
       mockLoggingController = createMockLoggingControllerWithDefaults();
 
-      final FakeServiceConnectionManager fakeServiceConnection =
-          FakeServiceConnectionManager();
+      final fakeServiceConnection = FakeServiceConnectionManager();
       when(
         fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
       ).thenReturn(false);
@@ -67,8 +68,8 @@ void main() {
       'copy log contents',
       windowSize,
       (WidgetTester tester) async {
-        final LogData logA = LogData('TEST A', 'Log A', 123);
-        final LogData logB = LogData('TEST B', 'Log B', 124);
+        final logA = LogData('TEST A', 'Log A', 123);
+        final logB = LogData('TEST B', 'Log B', 124);
         mockLoggingController = createMockLoggingControllerWithDefaults(
           data: [
             logA,
@@ -133,7 +134,7 @@ void main() {
 
         final textFieldFinder = find.byType(TextField);
         expect(textFieldFinder, findsOneWidget);
-        final TextField textField = tester.widget(textFieldFinder) as TextField;
+        final textField = tester.widget(textFieldFinder) as TextField;
         expect(textField.enabled, isFalse);
       },
     );

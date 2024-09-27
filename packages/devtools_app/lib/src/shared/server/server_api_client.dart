@@ -76,7 +76,7 @@ class DevToolsServerConnection {
   int _nextRequestId = 0;
   Notification? _lastNotification;
 
-  final Map<String, Completer<Object?>> _completers = {};
+  final _completers = <String, Completer<Object?>>{};
 
   /// Tie the DevTools server connection to the framework controller.
   ///
@@ -152,7 +152,7 @@ class DevToolsServerConnection {
     switch (method) {
       case 'connectToVm':
         final String uri = params['uri'];
-        final bool notify = params['notify'] == true;
+        final notify = params['notify'] == true;
         frameworkController.notifyConnectToVmEvent(
           Uri.parse(uri),
           notify: notify,
@@ -191,7 +191,10 @@ class DevToolsServerConnection {
         'currentPage',
         {
           'id': page.id,
-          'embedded': page.embedded,
+          // TODO(kenz): see if we need to change the client code on the
+          // DevTools server to be aware of the type of embedded mode (many vs.
+          // one).
+          'embedded': page.embedMode.embedded,
         },
       ),
     );
@@ -199,23 +202,6 @@ class DevToolsServerConnection {
 
   void _notifyDisconnected() {
     unawaited(_callMethod('disconnected'));
-  }
-
-  /// Retrieves a preference value from the DevTools configuration file at
-  /// ~/.flutter-devtools/.devtools.
-  Future<String?> getPreferenceValue(String key) {
-    return _callMethod('getPreferenceValue', {
-      'key': key,
-    });
-  }
-
-  /// Sets a preference value in the DevTools configuration file at
-  /// ~/.flutter-devtools/.devtools.
-  Future setPreferenceValue(String key, String value) async {
-    await _callMethod('setPreferenceValue', {
-      'key': key,
-      'value': value,
-    });
   }
 
   /// Allows the server to ping the client to see that it is definitely still

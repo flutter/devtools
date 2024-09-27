@@ -48,7 +48,8 @@ Future<void> navigateThroughDevToolsScreens(
   for (final screen in screens) {
     await switchToScreen(
       controller,
-      tabIcon: screen.icon!,
+      tabIcon: screen.icon,
+      tabIconAsset: screen.iconAsset,
       screenId: screen.id,
       runWithExpectations: runWithExpectations,
     );
@@ -59,7 +60,7 @@ List<String> generateVisibleScreenIds() {
   final availableScreenIds = <String>[];
   // ignore: invalid_use_of_visible_for_testing_member, valid use from package:devtools_test
   for (final screen in devtoolsScreens!) {
-    if (shouldShowScreen(screen.screen)) {
+    if (shouldShowScreen(screen.screen).show) {
       availableScreenIds.add(screen.screen.screenId);
     }
   }
@@ -70,13 +71,20 @@ List<String> generateVisibleScreenIds() {
 /// to settle the UI.
 Future<void> switchToScreen(
   WidgetController controller, {
-  required IconData tabIcon,
+  required IconData? tabIcon,
+  required String? tabIconAsset,
   required String screenId,
   bool warnIfTapMissed = true,
   bool runWithExpectations = true,
 }) async {
-  logStatus('switching to $screenId screen (icon $tabIcon)');
-  final tabFinder = await findTab(controller, tabIcon);
+  logStatus(
+    'switching to $screenId screen (icon $tabIcon, iconAsset: $tabIconAsset)',
+  );
+  final tabFinder = await findTab(
+    controller,
+    icon: tabIcon,
+    iconAsset: tabIconAsset,
+  );
   _maybeExpect(
     tabFinder,
     findsOneWidget,
@@ -91,14 +99,30 @@ Future<void> switchToScreen(
 
 /// Finds the tab with [icon] either in the top-level DevTools tab bar or in the
 /// tab overflow menu for tabs that don't fit on screen.
-Future<Finder> findTab(WidgetController controller, IconData icon) async {
+Future<Finder> findTab(
+  WidgetController controller, {
+  required IconData? icon,
+  required String? iconAsset,
+}) async {
+  assert(
+    icon != null || iconAsset != null,
+    'At least one of icon or iconAsset must be non-null.',
+  );
   // Open the tab overflow menu before looking for the tab.
   final tabOverflowButtonFinder = find.byType(TabOverflowButton);
   if (tabOverflowButtonFinder.evaluate().isNotEmpty) {
     await controller.tap(tabOverflowButtonFinder);
     await controller.pump(shortPumpDuration);
   }
-  return find.widgetWithIcon(Tab, icon);
+  if (icon != null) {
+    return find.widgetWithIcon(Tab, icon);
+  }
+  return find.descendant(
+    of: find.byType(Tab),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is AssetImageIcon && widget.asset == iconAsset!,
+    ),
+  );
 }
 
 // ignore: avoid-dynamic, wrapper around `expect`, which uses dynamic types.

@@ -266,7 +266,7 @@ class ProgramExplorerController extends DisposableController
       Iterable<FuncRef> funcs,
       Iterable<FieldRef>? fields,
     ) async {
-      final res = await Future.wait<Func>(
+      return await Future.wait<Func>(
         funcs
             .where((f) => !_isSyntheticAccessor(f, fields as List<FieldRef>))
             .map<Future<Func>>(
@@ -296,7 +296,6 @@ class ProgramExplorerController extends DisposableController
               }),
             ),
       );
-      return res.cast<Func>();
     }
 
     try {
@@ -346,7 +345,7 @@ class ProgramExplorerController extends DisposableController
 
     // Otherwise, we need to find the target script to determine the library
     // the target node is listed under.
-    final ScriptRef? targetScript = switch (object) {
+    final targetScript = switch (object) {
       ClassRef(:final location?) ||
       FieldRef(:final location?) ||
       FuncRef(:final location?) =>
@@ -362,7 +361,7 @@ class ProgramExplorerController extends DisposableController
 
     final scriptObj =
         await service.getObject(isolateId, targetScript.id!) as Script;
-    final LibraryRef targetLib = scriptObj.library!;
+    final targetLib = scriptObj.library!;
 
     // Search targetLib only on the root level nodes (this is the most common
     // scenario).

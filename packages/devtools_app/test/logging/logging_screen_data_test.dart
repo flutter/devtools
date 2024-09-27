@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
@@ -109,7 +111,7 @@ void main() {
 
       final textFieldFinder = find.byType(TextField);
       expect(textFieldFinder, findsOneWidget);
-      final TextField textField = tester.widget(textFieldFinder) as TextField;
+      final textField = tester.widget(textFieldFinder) as TextField;
       expect(textField.enabled, isTrue);
       await tester.enterText(find.byType(TextField), 'abc');
     },

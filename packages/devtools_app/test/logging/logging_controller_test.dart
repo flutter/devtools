@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+library;
+
 import 'dart:convert';
 
 import 'package:devtools_app/src/screens/logging/logging_controller.dart';

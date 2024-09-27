@@ -5,13 +5,19 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:collection/collection.dart';
+import 'package:dds_service_extensions/dds_service_extensions.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../utils/utils.dart';
 import 'connected_app.dart';
+import 'dtd_manager.dart';
+import 'eval_on_dart_library.dart' hide SentinelException;
 import 'flutter_version.dart';
 import 'isolate_manager.dart';
 import 'isolate_state.dart';
@@ -77,7 +83,7 @@ class ServiceManager<T extends VmService> {
   /// Mapping of service name to service method.
   Map<String, String> get registeredMethodsForService =>
       _registeredMethodsForService;
-  final Map<String, String> _registeredMethodsForService = {};
+  final _registeredMethodsForService = <String, String>{};
 
   final isolateManager = IsolateManager();
 
@@ -88,6 +94,25 @@ class ServiceManager<T extends VmService> {
   /// Defaults to false if there is no main isolate.
   bool get isMainIsolatePaused =>
       isolateManager.mainIsolateState?.isPaused.value ?? false;
+
+  Future<void> waitUntilNotPaused() {
+    final notPausedCompleter = Completer<bool>();
+    final isPaused = isMainIsolatePaused;
+
+    if (isPaused) {
+      final mainIsolate = isolateManager.mainIsolateState;
+      mainIsolate?.isPaused.addListener(() {
+        final isPausedNow = isMainIsolatePaused;
+        if (!isPausedNow) {
+          notPausedCompleter.complete(true);
+        }
+      });
+    } else {
+      notPausedCompleter.complete(true);
+    }
+
+    return notPausedCompleter.future;
+  }
 
   Future<RootInfo?> tryToDetectMainRootInfo() async {
     await isolateManager.mainIsolateState?.waitForIsolateLoad();
@@ -115,17 +140,18 @@ class ServiceManager<T extends VmService> {
   VM? vm;
   String? sdkVersion;
 
-  bool get hasConnection => service != null && connectedApp != null;
+  @Deprecated('Check connectedState.value.connected instead.')
+  bool get hasConnection => connectedState.value.connected;
 
   bool get connectedAppInitialized =>
-      hasConnection && connectedApp!.connectedAppInitialized;
+      connectedApp?.connectedAppInitialized ?? false;
 
   ValueListenable<ConnectedState> get connectedState => _connectedState;
 
-  final ValueNotifier<ConnectedState> _connectedState =
-      ValueNotifier(const ConnectedState(false));
+  final _connectedState =
+      ValueNotifier<ConnectedState>(const ConnectedState(false));
 
-  final ValueNotifier<bool> _deviceBusy = ValueNotifier<bool>(false);
+  final _deviceBusy = ValueNotifier<bool>(false);
 
   /// Whether the device is currently busy - performing a long-lived, blocking
   /// operation.
@@ -152,7 +178,6 @@ class ServiceManager<T extends VmService> {
     String name, {
     String? isolateId,
     Map<String, dynamic>? args,
-    // ignore: avoid-redundant-async, for some reasons tests fail without `async
   }) async {
     final registeredMethod = _registeredMethodsForService[name];
     if (registeredMethod == null) {
@@ -238,6 +263,8 @@ class ServiceManager<T extends VmService> {
     serviceExtensionManager.vmServiceOpened(service, connectedApp!);
     resolvedUriManager.vmServiceOpened(service);
 
+    await _configureIsolateSettings();
+
     await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeOpenVmService,
       service,
@@ -258,6 +285,11 @@ class ServiceManager<T extends VmService> {
   FutureOr<void> vmServiceClosed({
     ConnectedState connectionState = const ConnectedState(false),
   }) async {
+    // This needs to be the first call in this method so that listeners get
+    // the notification of app disconnect before we shut down other managers and
+    // services that listeners may be assuming have an app connection.
+    _connectedState.value = connectionState;
+
     await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeCloseVmService,
       this.service,
@@ -274,8 +306,24 @@ class ServiceManager<T extends VmService> {
     _registeredMethodsForService.clear();
     _registeredServiceNotifiers.clear();
     setDeviceBusy(false);
+  }
 
-    _connectedState.value = connectionState;
+  Future<void> _configureIsolateSettings() async {
+    await _setPauseIsolatesOnStart();
+  }
+
+  Future<void> _setPauseIsolatesOnStart() async {
+    if (service == null) return;
+    final vmService = service!;
+
+    try {
+      await vmService.setFlag('pause_isolates_on_start', 'true');
+      await vmService.requirePermissionToResume(
+        onPauseStart: true,
+      );
+    } catch (error) {
+      _log.warning('$error');
+    }
   }
 
   /// Initializes the service manager for [service], including setting up other
@@ -382,7 +430,7 @@ class ServiceManager<T extends VmService> {
   }
 
   Future<void> manuallyDisconnect() async {
-    if (hasConnection) {
+    if (connectedState.value.connected) {
       await vmServiceClosed(
         connectionState:
             const ConnectedState(false, userInitiatedConnectionState: true),
@@ -451,6 +499,175 @@ class ServiceManager<T extends VmService> {
     } catch (_) {
       isolateManager.hotRestartInProgress = false;
     }
+  }
+
+  /// Returns the package root URI for the connected app.
+  ///
+  /// This should be the directory up the tree from the debugging target that
+  /// contains the .dart_tool/package_config.json file.
+  ///
+  /// This method contains special logic for detecting the package root for
+  /// test targets (i.e., a VM service connections spawned from `dart test` or
+  /// `flutter test`). This is because the main isolate for test targets is
+  /// running the test runner, and not the test library itself, so we have to do
+  /// some extra work to find the package root of the test target.
+  Future<Uri?> connectedAppPackageRoot(DTDManager dtdManager) async {
+    var packageRootUriString =
+        await rootPackageDirectoryForMainIsolate(dtdManager);
+    _log.fine(
+      '[connectedAppPackageRoot] root package directory for main isolate: '
+      '$packageRootUriString',
+    );
+
+    // If a Dart library URI was returned, this may be a test target (i.e. a
+    // VM service connection spawned from `dart test` or `flutter test`).
+    if (packageRootUriString?.endsWith('.dart') ?? false) {
+      final rootLibrary = await _mainIsolateRootLibrary();
+      if (rootLibrary != null) {
+        packageRootUriString = (await _lookupPackageRootByEval(rootLibrary)) ??
+            // TODO(kenz): remove this fallback once all test bootstrap
+            // generators include the `packageConfigLocation` constant we
+            // can evaluate.
+            await _lookupPackageRootByImportPrefix(
+              rootLibrary,
+              dtdManager,
+            );
+      }
+    }
+    _log.fine(
+      '[connectedAppPackageRoot] package root for test target: '
+      '$packageRootUriString',
+    );
+    return packageRootUriString == null
+        ? null
+        : Uri.parse(packageRootUriString);
+  }
+
+  Future<String?> _lookupPackageRootByEval(Library rootLibrary) async {
+    final eval = EvalOnDartLibrary(
+      rootLibrary.uri!,
+      this.service! as VmService,
+      serviceManager: this,
+      // Swallow exceptions since this evaluation may be called on an older
+      // version of package:test where we do not expect the evaluation to
+      // succeed.
+      logExceptions: false,
+    );
+    final evalDisposable = Disposable();
+    try {
+      final packageConfig = (await eval.evalInstance(
+        'packageConfigLocation',
+        isAlive: evalDisposable,
+      ))
+          .valueAsString;
+
+      // TODO(https://github.com/flutter/devtools/issues/7944): return the
+      // unmodified package config location. For this case, be sure to handle
+      // invalid values like the empty String or 'null'.
+      final packageConfigIdentifier =
+          path.join('.dart_tool', 'package_config.json');
+      if (packageConfig?.endsWith(packageConfigIdentifier) ?? false) {
+        _log.fine(
+          '[connectedAppPackageRoot] detected test package config from root '
+          'library eval: $packageConfig.',
+        );
+        return packageConfig!.substring(
+          0,
+          // Minus 1 to remove the trailing slash.
+          packageConfig.length - packageConfigIdentifier.length - 1,
+        );
+      }
+    } catch (_) {
+      // Fail gracefully if the evaluation fails.
+    } finally {
+      evalDisposable.dispose();
+    }
+    return null;
+  }
+
+  Future<String?> _lookupPackageRootByImportPrefix(
+    Library rootLibrary,
+    DTDManager dtdManager,
+  ) async {
+    final testTargetFileUriString =
+        (rootLibrary.dependencies ?? <LibraryDependency>[])
+            .firstWhereOrNull((dep) => dep.prefix == 'test')
+            ?.target
+            ?.uri;
+    if (testTargetFileUriString != null) {
+      _log.fine(
+        '[connectedAppPackageRoot] detected test library from root library '
+        'imports: $testTargetFileUriString',
+      );
+      // TODO(https://github.com/flutter/devtools/issues/7944): return the
+      // unmodified package config location.
+      return await packageRootFromFileUriString(
+        testTargetFileUriString,
+        dtd: dtdManager.connection.value,
+      );
+    }
+    return null;
+  }
+
+  Future<Library?> _mainIsolateRootLibrary() async {
+    final ref =
+        (await isolateManager.waitForMainIsolateState())?.isolateNow?.rootLib;
+    if (ref == null) return null;
+    try {
+      final library = await service!.getObject(
+        isolateManager.mainIsolate.value!.id!,
+        ref.id!,
+      );
+      assert(library is Library);
+      return library as Library;
+    } on SentinelException catch (_) {
+      // Fail gracefully if the request to get the Library object fails.
+      return null;
+    }
+  }
+
+  // TODO(kenz): consider caching this value for the duration of the VM service
+  // connection.
+  /// Returns a file URI String for the root library of the connected app's main
+  /// isolate.
+  ///
+  /// If a non-null value is returned, the value will be a file URI String and
+  /// it will NOT have a trailing slash.
+  Future<String?> mainIsolateRootLibraryUriAsString() async {
+    final mainIsolateState = await isolateManager.waitForMainIsolateState();
+    if (mainIsolateState == null) return null;
+
+    final rootLib = mainIsolateState.rootInfo?.library;
+    if (rootLib == null) return null;
+
+    final selectedIsolateRefId = isolateManager.mainIsolate.value!.id!;
+    await resolvedUriManager.fetchFileUris(selectedIsolateRefId, [rootLib]);
+    final fileUriString = resolvedUriManager.lookupFileUri(
+      selectedIsolateRefId,
+      rootLib,
+    );
+    _log.fine('rootLibraryForMainIsolate: $fileUriString');
+    return fileUriString;
+  }
+
+  // TODO(kenz): consider caching this value for the duration of the VM service
+  // connection.
+  /// Returns the root package directory for the main isolate.
+  ///
+  /// If a non-null value is returned, the value will be a file URI String and
+  /// it will NOT have a trailing slash.
+  Future<String?> rootPackageDirectoryForMainIsolate(
+    DTDManager dtdManager,
+  ) async {
+    final fileUriString = await mainIsolateRootLibraryUriAsString();
+    final packageUriString = fileUriString != null
+        ? await packageRootFromFileUriString(
+            fileUriString,
+            dtd: dtdManager.connection.value,
+          )
+        : null;
+    _log.fine('rootPackageDirectoryForMainIsolate: $packageUriString');
+    return packageUriString;
   }
 }
 

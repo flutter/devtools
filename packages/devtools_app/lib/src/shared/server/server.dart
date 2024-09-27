@@ -19,6 +19,7 @@ part '_analytics_api.dart';
 part '_app_size_api.dart';
 part '_deep_links_api.dart';
 part '_extensions_api.dart';
+part '_preferences_api.dart';
 part '_release_notes_api.dart';
 part '_survey_api.dart';
 part '_dtd_api.dart';
@@ -42,20 +43,6 @@ Future<Response?> request(String url) async {
   } catch (_) {}
 
   return response;
-}
-
-// currently unused
-/// Requests all .devtools properties to be reset to their default values in the
-/// file '~/.flutter-devtools/.devtools'.
-Future<void> resetDevToolsFile() async {
-  if (isDevToolsServerAvailable) {
-    final resp = await request(apiResetDevTools);
-    if (resp?.statusOk ?? false) {
-      assert(json.decode(resp!.body));
-    } else {
-      logWarning(resp, apiResetDevTools);
-    }
-  }
 }
 
 Future<DevToolsJsonFile?> requestFile({
@@ -114,7 +101,7 @@ void logWarning(Response? response, String apiType) {
   final respText = response?.body;
   _log.warning(
     'HttpRequest $apiType failed status = ${response?.statusCode}'
-    '${respText != null ? ', responseText = $respText' : ''}',
+    '${respText.isNullOrEmpty ? '' : ', responseText = $respText'}',
   );
 }
 

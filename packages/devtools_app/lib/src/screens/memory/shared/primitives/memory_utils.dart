@@ -12,11 +12,11 @@ Future<HeapSnapshotGraph?> snapshotMemoryInSelectedIsolate() async {
   if (isolate == null) return null;
   return await serviceConnection.serviceManager.service?.getHeapSnapshotGraph(
     isolate,
+    calculateReferrers: false,
+    decodeExternalProperties: false,
+    decodeObjectData: false,
   );
 }
 
 String? get selectedIsolateName =>
     serviceConnection.serviceManager.isolateManager.selectedIsolate.value?.name;
-
-String? get selectedIsolateId =>
-    serviceConnection.serviceManager.isolateManager.selectedIsolate.value?.id;

@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 
@@ -18,6 +17,7 @@ import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
 import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/query_parameters.dart';
 import '../../shared/screen.dart';
 import '../../shared/server/server.dart' as server;
 import '../../shared/ui/tab.dart';
@@ -103,14 +103,14 @@ class _AppSizeBodyState extends State<AppSizeBody>
   }
 
   Future<void> maybeLoadAppSizeFiles() async {
-    final queryParams = loadQueryParams();
-    final baseFilePath = queryParams[baseAppSizeFilePropertyName];
+    final queryParams = DevToolsQueryParams.load();
+    final baseFilePath = queryParams.appSizeBaseFilePath;
     if (baseFilePath != null) {
       // TODO(kenz): does this have to be in a setState()?
       _preLoadingData = true;
       final baseAppSizeFile = await server.requestBaseAppSizeFile(baseFilePath);
       DevToolsJsonFile? testAppSizeFile;
-      final testFilePath = queryParams[testAppSizeFilePropertyName];
+      final testFilePath = queryParams.appSizeTestFilePath;
       if (testFilePath != null) {
         testAppSizeFile = await server.requestTestAppSizeFile(testFilePath);
       }
@@ -172,7 +172,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  devToolsExtensionPoints.loadingAppSizeDataMessage(),
+                  devToolsEnvironmentParameters.loadingAppSizeDataMessage(),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: defaultSpacing),
@@ -182,82 +182,132 @@ class _AppSizeBodyState extends State<AppSizeBody>
           );
         }
         final currentTab = tabs[_tabController.index];
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: defaultButtonHeight,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TabBar(
-                    labelColor: Theme.of(context).textTheme.bodyLarge!.color,
-                    isScrollable: true,
-                    controller: _tabController,
-                    tabs: tabs,
-                  ),
-                  Row(
-                    children: [
-                      if (isDeferredApp) _buildAppUnitDropdown(currentTab.key!),
-                      if (currentTab.key == AppSizeScreen.diffTabKey) ...[
-                        const SizedBox(width: defaultSpacing),
-                        _buildDiffTreeTypeDropdown(),
-                      ],
-                      const SizedBox(width: defaultSpacing),
-                      _buildClearButton(currentTab.key!),
-                    ],
+        return RoundedOutlinedBorder(
+          clip: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AreaPaneHeader(
+                leftPadding: 0,
+                tall: true,
+                includeTopBorder: false,
+                roundedTopBorder: false,
+                title: TabBar(
+                  labelColor: Theme.of(context).regularTextStyle.color,
+                  isScrollable: true,
+                  controller: _tabController,
+                  tabs: tabs,
+                ),
+                actions: [
+                  if (isDeferredApp)
+                    AppUnitDropdown(
+                      value: controller.selectedAppUnit.value,
+                      onChanged: (newAppUnit) {
+                        setState(
+                          () {
+                            controller.changeSelectedAppUnit(
+                              newAppUnit!,
+                              currentTab.key!,
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  if (currentTab.key == AppSizeScreen.diffTabKey) ...[
+                    const SizedBox(width: defaultSpacing),
+                    DiffTreeTypeDropdown(
+                      value: controller.activeDiffTreeType.value,
+                      onChanged: (newDiffTreeType) {
+                        controller.changeActiveDiffTreeType(newDiffTreeType!);
+                      },
+                    ),
+                  ],
+                  const SizedBox(width: defaultSpacing),
+                  ClearButton(
+                    gaScreen: gac.appSize,
+                    gaSelection: gac.clear,
+                    onPressed: () => controller.clear(
+                      currentTab.key!,
+                    ),
                   ),
                 ],
               ),
-            ),
-            Expanded(
-              child: TabBarView(
-                physics: defaultTabBarViewPhysics,
-                controller: _tabController,
-                children: const [
-                  AnalysisView(),
-                  DiffView(),
-                ],
+              Expanded(
+                child: TabBarView(
+                  physics: defaultTabBarViewPhysics,
+                  controller: _tabController,
+                  children: const [
+                    AnalysisView(),
+                    DiffView(),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
   }
+}
 
-  DropdownButtonHideUnderline _buildDiffTreeTypeDropdown() {
-    return DropdownButtonHideUnderline(
-      key: AppSizeScreen.diffTypeDropdownKey,
-      child: DropdownButton<DiffTreeType>(
-        value: controller.activeDiffTreeType.value,
-        items: [
-          _buildDiffTreeTypeMenuItem(DiffTreeType.combined),
-          _buildDiffTreeTypeMenuItem(DiffTreeType.increaseOnly),
-          _buildDiffTreeTypeMenuItem(DiffTreeType.decreaseOnly),
-        ],
-        onChanged: (newDiffTreeType) {
-          controller.changeActiveDiffTreeType(newDiffTreeType!);
-        },
-      ),
-    );
-  }
+class AppUnitDropdown extends StatelessWidget {
+  const AppUnitDropdown({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
 
-  DropdownButtonHideUnderline _buildAppUnitDropdown(Key tabKey) {
-    return DropdownButtonHideUnderline(
-      key: AppSizeScreen.appUnitDropdownKey,
-      child: DropdownButton<AppUnit>(
-        value: controller.selectedAppUnit.value,
+  final AppUnit value;
+  final ValueChanged<AppUnit?>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: RoundedDropDownButton<AppUnit>(
+        key: AppSizeScreen.appUnitDropdownKey,
+        value: value,
         items: [
           _buildAppUnitMenuItem(AppUnit.entireApp),
           _buildAppUnitMenuItem(AppUnit.mainOnly),
           _buildAppUnitMenuItem(AppUnit.deferredOnly),
         ],
-        onChanged: (newAppUnit) {
-          setState(() {
-            controller.changeSelectedAppUnit(newAppUnit!, tabKey);
-          });
-        },
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  DropdownMenuItem<AppUnit> _buildAppUnitMenuItem(AppUnit appUnit) {
+    return DropdownMenuItem<AppUnit>(
+      value: appUnit,
+      child: Text(appUnit.display),
+    );
+  }
+}
+
+class DiffTreeTypeDropdown extends StatelessWidget {
+  const DiffTreeTypeDropdown({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final DiffTreeType value;
+  final ValueChanged<DiffTreeType?>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: RoundedDropDownButton<DiffTreeType>(
+        key: AppSizeScreen.diffTypeDropdownKey,
+        isDense: true,
+        items: [
+          _buildDiffTreeTypeMenuItem(DiffTreeType.combined),
+          _buildDiffTreeTypeMenuItem(DiffTreeType.increaseOnly),
+          _buildDiffTreeTypeMenuItem(DiffTreeType.decreaseOnly),
+        ],
+        onChanged: onChanged,
       ),
     );
   }
@@ -268,21 +318,6 @@ class _AppSizeBodyState extends State<AppSizeBody>
     return DropdownMenuItem<DiffTreeType>(
       value: diffTreeType,
       child: Text(diffTreeType.display),
-    );
-  }
-
-  DropdownMenuItem<AppUnit> _buildAppUnitMenuItem(AppUnit appUnit) {
-    return DropdownMenuItem<AppUnit>(
-      value: appUnit,
-      child: Text(appUnit.display),
-    );
-  }
-
-  Widget _buildClearButton(Key activeTabKey) {
-    return ClearButton(
-      gaScreen: gac.appSize,
-      gaSelection: gac.clear,
-      onPressed: () => controller.clear(activeTabKey),
     );
   }
 }
@@ -358,40 +393,29 @@ class _AnalysisViewState extends State<AnalysisView>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.processingNotifier,
       builder: (context, processing, _) {
-        if (processing) {
-          return Center(
-            child: Text(
-              AppSizeScreen.loadingMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.displayLarge!.color,
-              ),
-            ),
-          );
-        } else {
-          return Column(
-            children: [
-              Flexible(
-                child: FileImportContainer(
-                  title: 'Size analysis',
-                  instructions: AnalysisView.importInstructions,
-                  actionText: 'Analyze Size',
-                  gaScreen: gac.appSize,
-                  gaSelectionImport: gac.importFileSingle,
-                  gaSelectionAction: gac.analyzeSingle,
-                  onAction: (jsonFile) {
-                    controller.loadTreeFromJsonFile(
-                      jsonFile: jsonFile,
-                      onError: (error) {
-                        if (mounted) notificationService.push(error);
+        return processing
+            ? const CenteredMessage(AppSizeScreen.loadingMessage)
+            : Column(
+                children: [
+                  Flexible(
+                    child: FileImportContainer(
+                      instructions: AnalysisView.importInstructions,
+                      actionText: 'Analyze Size',
+                      gaScreen: gac.appSize,
+                      gaSelectionImport: gac.importFileSingle,
+                      gaSelectionAction: gac.analyzeSingle,
+                      onAction: (jsonFile) {
+                        controller.loadTreeFromJsonFile(
+                          jsonFile: jsonFile,
+                          onError: (error) {
+                            if (mounted) notificationService.push(error);
+                          },
+                        );
                       },
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        }
+                    ),
+                  ),
+                ],
+              );
       },
     );
   }
@@ -473,48 +497,34 @@ class _DiffViewState extends State<DiffView>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.processingNotifier,
       builder: (context, processing, _) {
-        if (processing) {
-          return _buildLoadingMessage();
-        } else {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: DualFileImportContainer(
-                  firstFileTitle: 'Old',
-                  secondFileTitle: 'New',
-                  // TODO(kenz): perhaps bold "original" and "modified".
-                  firstInstructions: DiffView.importOldInstructions,
-                  secondInstructions: DiffView.importNewInstructions,
-                  actionText: 'Analyze Diff',
-                  gaScreen: gac.appSize,
-                  gaSelectionImportFirst: gac.importFileDiffFirst,
-                  gaSelectionImportSecond: gac.importFileDiffSecond,
-                  gaSelectionAction: gac.analyzeDiff,
-                  onAction: (oldFile, newFile, onError) =>
-                      controller.loadDiffTreeFromJsonFiles(
-                    oldFile: oldFile,
-                    newFile: newFile,
-                    onError: onError,
+        return processing
+            ? const CenteredMessage(AppSizeScreen.loadingMessage)
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: DualFileImportContainer(
+                      firstFileTitle: 'Old',
+                      secondFileTitle: 'New',
+                      // TODO(kenz): perhaps bold "original" and "modified".
+                      firstInstructions: DiffView.importOldInstructions,
+                      secondInstructions: DiffView.importNewInstructions,
+                      actionText: 'Analyze Diff',
+                      gaScreen: gac.appSize,
+                      gaSelectionImportFirst: gac.importFileDiffFirst,
+                      gaSelectionImportSecond: gac.importFileDiffSecond,
+                      gaSelectionAction: gac.analyzeDiff,
+                      onAction: (oldFile, newFile, onError) =>
+                          controller.loadDiffTreeFromJsonFiles(
+                        oldFile: oldFile,
+                        newFile: newFile,
+                        onError: onError,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          );
-        }
+                ],
+              );
       },
-    );
-  }
-
-  Widget _buildLoadingMessage() {
-    return Center(
-      child: Text(
-        AppSizeScreen.loadingMessage,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Theme.of(context).textTheme.displayLarge!.color,
-        ),
-      ),
     );
   }
 }

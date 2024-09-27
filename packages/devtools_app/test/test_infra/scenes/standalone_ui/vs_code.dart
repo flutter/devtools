@@ -2,24 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/standalone_ui/api/impl/dart_tooling_api.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/flutter_panel.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
-import '../../../test_infra/test_data/dart_tooling_api/mock_api.dart';
-import 'vs_code_mock_editor.dart';
-
-final _api = FakeDartToolingApi();
+import 'editor_service/post_message_simulated_editor.dart';
+import 'mock_editor_widget.dart';
 
 /// To run, use the "standalone_ui/vs_code" launch configuration with the
 /// `devtools/packages/` folder open in VS Code, or run:
 ///
-///   flutter run -t test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart --dart-define=enable_experiments=true -d chrome
+/// flutter run -t test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart -d chrome
 class VsCodeScene extends Scene {
-  late PerformanceController controller;
+  late PostMessageSimulatedEditor editor;
+  late PostMessageToolApiImpl api;
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +40,10 @@ class VsCodeScene extends Scene {
         theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       home: Scaffold(
-        body: VsCodeFlutterPanelMockEditor(
-          api: _api,
-          child: VsCodeFlutterPanel(_api),
+        body: MockEditorWidget(
+          editor: editor,
+          clientLog: const Stream<String>.empty(),
+          child: VsCodePostMessageSidebarPanel(api),
         ),
       ),
     );
@@ -48,7 +54,7 @@ class VsCodeScene extends Scene {
     return IdeTheme(
       backgroundColor: vsCodeTheme.editorBackgroundColor,
       foregroundColor: vsCodeTheme.foregroundColor,
-      embed: true,
+      embedMode: EmbedMode.embedOne,
     );
   }
 
@@ -58,7 +64,15 @@ class VsCodeScene extends Scene {
   @override
   Future<void> setUp() async {
     setStagerMode();
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
+    setGlobal(DTDManager, MockDTDManager());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
+
+    editor = PostMessageSimulatedEditor();
+    api = PostMessageToolApiImpl.rpc(editor.client);
   }
 }

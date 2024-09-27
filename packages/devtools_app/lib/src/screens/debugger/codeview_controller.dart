@@ -11,13 +11,13 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../framework/app_error_handling.dart';
-import '../../shared/config_specific/launch_url/launch_url.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/notifications.dart';
 import '../../shared/primitives/history_manager.dart';
 import '../../shared/routing.dart';
 import '../../shared/ui/search.dart';
+import '../../shared/utils.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
@@ -108,7 +108,7 @@ class CodeViewController extends DisposableController
 
   final programExplorerController = ProgramExplorerController();
 
-  final ScriptsHistory scriptsHistory = ScriptsHistory();
+  final scriptsHistory = ScriptsHistory();
   late VoidCallback _scriptHistoryListener;
 
   ValueListenable<bool> get showCodeCoverage => _showCodeCoverage;
@@ -379,17 +379,13 @@ class CodeViewController extends DisposableController
   void _maybeShowSourceMapsWarning() {
     final isWebApp =
         serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ?? false;
-    final enableSourceMapsLink = devToolsExtensionPoints.enableSourceMapsLink();
+    final enableSourceMapsLink =
+        devToolsEnvironmentParameters.enableSourceMapsLink();
     if (isWebApp && enableSourceMapsLink != null) {
       final enableSourceMapsAction = NotificationAction(
-        'Enable sourcemaps',
-        () {
-          unawaited(
-            launchUrl(
-              enableSourceMapsLink.url,
-            ),
-          );
-        },
+        label: 'Enable sourcemaps',
+        onPressed: () =>
+            unawaited(launchUrlWithErrorHandling(enableSourceMapsLink.url)),
       );
       notificationService.pushNotification(
         NotificationMessage(

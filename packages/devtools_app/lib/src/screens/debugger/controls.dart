@@ -18,7 +18,7 @@ import '../../shared/utils.dart';
 import 'debugger_controller.dart';
 
 class DebuggingControls extends StatefulWidget {
-  const DebuggingControls({Key? key}) : super(key: key);
+  const DebuggingControls({super.key});
 
   static const minWidthBeforeScaling = 1750.0;
 
@@ -139,7 +139,9 @@ class _DebuggingControlsState extends State<DebuggingControls>
           label: 'File Explorer',
           onPressed: controller.codeViewController.toggleLibrariesVisible,
           gaScreen: gac.debugger,
-          gaSelection: visible ? gac.hideFileExplorer : gac.showFileExplorer,
+          gaSelection: visible
+              ? gac.DebuggerEvents.hideFileExplorer.name
+              : gac.DebuggerEvents.showFileExplorer.name,
           minScreenWidthForTextBeforeScaling:
               DebuggingControls.minWidthBeforeScaling,
         );
@@ -195,7 +197,7 @@ class CodeStatisticsControls extends StatelessWidget {
               iconOnly: true,
               tooltip: 'Refresh statistics',
               gaScreen: gac.debugger,
-              gaSelection: gac.refreshStatistics,
+              gaSelection: gac.DebuggerEvents.refreshStatistics.name,
               onPressed: showCodeCoverage || showProfileInformation
                   ? () => unawaited(
                         controller.codeViewController.refreshCodeStatistics(),
@@ -235,9 +237,9 @@ class _CodeStatsControl extends StatelessWidget {
 
 class BreakOnExceptionsControl extends StatelessWidget {
   const BreakOnExceptionsControl({
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   final DebuggerController controller;
 
@@ -258,7 +260,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
                 },
           isDense: true,
           items: [
-            for (var mode in ExceptionMode.modes)
+            for (final mode in ExceptionMode.modes)
               DropdownMenuItem<ExceptionMode>(
                 value: mode,
                 child: Text(

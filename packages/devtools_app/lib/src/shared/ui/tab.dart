@@ -10,28 +10,24 @@ import '../analytics/analytics.dart' as ga;
 double get _tabHeight => scaleByFontFactor(46.0);
 double get _textAndIconTabHeight => scaleByFontFactor(72.0);
 
+typedef TabAndView = ({DevToolsTab tab, Widget tabView});
+
 class DevToolsTab extends Tab {
   /// Creates a material design [TabBar] tab styled for DevTools.
   ///
   /// The only difference is this tab makes more of an effort to reflect
   /// changes in font and icon sizes.
   DevToolsTab._({
-    required Key key,
-    String? text,
-    Icon? icon,
-    EdgeInsets iconMargin = const EdgeInsets.only(bottom: 10.0),
+    required Key super.key,
+    super.text,
+    Icon? super.icon,
     required this.gaId,
     this.trailing,
-    Widget? child,
+    super.child,
   })  : assert(text != null || child != null || icon != null),
         assert(text == null || child == null),
         super(
-          key: key,
-          text: text,
-          icon: icon,
-          iconMargin: iconMargin,
           height: calculateHeight(icon, text, child),
-          child: child,
         );
 
   factory DevToolsTab.create({
@@ -65,7 +61,7 @@ class DevToolsTab extends Tab {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.titleSmall!,
+      style: Theme.of(context).textTheme.titleMedium!,
       child: super.build(context),
     );
   }
@@ -83,20 +79,19 @@ class DevToolsTab extends Tab {
 /// send spurious analytics events.
 class AnalyticsTabbedView extends StatefulWidget {
   AnalyticsTabbedView({
-    Key? key,
+    super.key,
     required this.tabs,
     required this.gaScreen,
     this.sendAnalytics = true,
     this.onTabChanged,
     this.initialSelectedIndex,
     this.analyticsSessionIdentifier,
-  })  : trailingWidgets = List.generate(
+  }) : trailingWidgets = List.generate(
           tabs.length,
           (index) => tabs[index].tab.trailing ?? const SizedBox(),
-        ),
-        super(key: key);
+        );
 
-  final List<({DevToolsTab tab, Widget tabView})> tabs;
+  final List<TabAndView> tabs;
 
   final String gaScreen;
 
@@ -216,7 +211,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
           children: [
             Expanded(
               child: TabBar(
-                labelColor: Theme.of(context).textTheme.bodyLarge?.color,
+                labelColor: Theme.of(context).colorScheme.onSurface,
                 controller: _tabController,
                 tabs: widget.tabs.map((t) => t.tab).toList(),
                 isScrollable: true,

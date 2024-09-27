@@ -9,7 +9,7 @@ import 'devtools_recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
-final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
+final benchmarks = <String, RecorderFactory>{
   DevToolsBenchmark.navigateThroughOfflineScreens.id: () => DevToolsRecorder(
         benchmark: DevToolsBenchmark.navigateThroughOfflineScreens,
       ),

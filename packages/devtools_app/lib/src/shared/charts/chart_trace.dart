@@ -18,7 +18,7 @@ class Data {
 /// Stores the count of number of same points collected @ timestamp.  Used for
 /// ExtensionEvents to coallase multiple events to one plotted symbol.
 class DataAggregate extends Data {
-  DataAggregate(int timestamp, double y, this.count) : super(timestamp, y);
+  DataAggregate(super.timestamp, super.y, this.count);
 
   final int count;
 }
@@ -89,8 +89,8 @@ class PaintCharacteristics {
 
 class Trace {
   Trace(this.controller, this._chartType, this.characteristics) {
-    final double minY = characteristics.fixedMinY ?? 0.0;
-    final double maxY = characteristics.fixedMaxY ?? 0.0;
+    final minY = characteristics.fixedMinY ?? 0.0;
+    final maxY = characteristics.fixedMaxY ?? 0.0;
     yAxis = AxisScale(minY, maxY, 30);
   }
 

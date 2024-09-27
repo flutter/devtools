@@ -95,7 +95,7 @@ class CircleIcon extends StatelessWidget {
 }
 
 class CustomIconMaker {
-  final Map<String, Widget> iconCache = {};
+  final iconCache = <String, Widget>{};
 
   Widget? getCustomIcon(
     String fromText, {
@@ -107,8 +107,8 @@ class CustomIconMaker {
       return null;
     }
 
-    final String text = fromText[0].toUpperCase();
-    final String mapKey = '${text}_${theKind.name}_$isAbstract';
+    final text = fromText[0].toUpperCase();
+    final mapKey = '${text}_${theKind.name}_$isAbstract';
     return iconCache.putIfAbsent(mapKey, () {
       return CustomIcon(kind: theKind, text: text, isAbstract: isAbstract);
     });
@@ -204,7 +204,7 @@ class ColorIcon extends StatelessWidget {
 }
 
 class ColorIconMaker {
-  final Map<Color, ColorIcon> iconCache = {};
+  final iconCache = <Color, ColorIcon>{};
 
   ColorIcon getCustomIcon(Color color) {
     return iconCache.putIfAbsent(color, () => ColorIcon(color));
@@ -217,7 +217,7 @@ class _ColorIconPainter extends CustomPainter {
   final Color color;
 
   final ColorScheme colorScheme;
-  static const double iconMargin = 1;
+  static const iconMargin = 1.0;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -283,7 +283,10 @@ class FlutterMaterialIcons {
   FlutterMaterialIcons._();
 
   static Icon getIconForCodePoint(int charCode, ColorScheme colorScheme) {
-    return Icon(IconData(charCode), color: colorScheme.onPrimary);
+    return Icon(
+      IconData(charCode, fontFamily: 'MaterialIcons'),
+      color: colorScheme.onSurface,
+    );
   }
 }
 
@@ -291,12 +294,14 @@ class AssetImageIcon extends StatelessWidget {
   const AssetImageIcon({
     super.key,
     required this.asset,
+    this.color,
     double? height,
     double? width,
   })  : _width = width,
         _height = height;
 
   final String asset;
+  final Color? color;
   final double? _height;
   final double? _width;
 
@@ -310,17 +315,65 @@ class AssetImageIcon extends StatelessWidget {
       height: height,
       width: width,
       fit: BoxFit.fill,
+      color: color ?? Theme.of(context).colorScheme.onSurface,
     );
   }
 }
 
 class Octicons {
-  static const IconData bug = IconData(61714, fontFamily: 'Octicons');
-  static const IconData info = IconData(61778, fontFamily: 'Octicons');
-  static const IconData deviceMobile = IconData(61739, fontFamily: 'Octicons');
-  static const IconData fileZip = IconData(61757, fontFamily: 'Octicons');
-  static const IconData clippy = IconData(61724, fontFamily: 'Octicons');
-  static const IconData package = IconData(61812, fontFamily: 'Octicons');
-  static const IconData dashboard = IconData(61733, fontFamily: 'Octicons');
-  static const IconData pulse = IconData(61823, fontFamily: 'Octicons');
+  static const bug = IconData(61714, fontFamily: 'Octicons');
+  static const info = IconData(61778, fontFamily: 'Octicons');
+  static const deviceMobile = IconData(61739, fontFamily: 'Octicons');
+  static const fileZip = IconData(61757, fontFamily: 'Octicons');
+  static const clippy = IconData(61724, fontFamily: 'Octicons');
+  static const package = IconData(61812, fontFamily: 'Octicons');
+  static const dashboard = IconData(61733, fontFamily: 'Octicons');
+  static const pulse = IconData(61823, fontFamily: 'Octicons');
+}
+
+/// A widget that renders either an [icon] from a font glyph or an [iconAsset]
+/// from the app bundle.
+class DevToolsIcon extends StatelessWidget {
+  DevToolsIcon({
+    super.key,
+    this.icon,
+    this.iconAsset,
+    this.color,
+    double? size,
+  })  : assert(
+          (icon == null) != (iconAsset == null),
+          'Exactly one of icon and iconAsset must be specified.',
+        ),
+        size = size ?? defaultIconSize;
+
+  /// The icon to use for this screen's tab.
+  ///
+  /// Exactly one of [icon] and [iconAsset] must be non-null.
+  final IconData? icon;
+
+  /// The icon asset path to render as the icon for this screen's tab.
+  ///
+  /// Exactly one of [icon] and [iconAsset] must be non-null.
+  final String? iconAsset;
+
+  final double size;
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = this.color ?? Theme.of(context).colorScheme.onSurface;
+    return icon != null
+        ? Icon(
+            icon,
+            size: size,
+            color: color,
+          )
+        : AssetImageIcon(
+            asset: iconAsset!,
+            height: size,
+            width: size,
+            color: color,
+          );
+  }
 }

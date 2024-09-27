@@ -34,7 +34,7 @@ class MemoryPreferencesController extends DisposableController
         if (androidCollectionEnabled.value) {
           ga.select(
             gac.memory,
-            gac.MemoryEvent.chartAndroid,
+            gac.MemoryEvents.androidChart.name,
           );
         }
       },
@@ -55,8 +55,8 @@ class MemoryPreferencesController extends DisposableController
         ga.select(
           gac.memory,
           showChart.value
-              ? gac.MemoryEvent.showChart
-              : gac.MemoryEvent.hideChart,
+              ? gac.MemoryEvents.showChart.name
+              : gac.MemoryEvents.hideChart.name,
         );
       },
     );
@@ -75,7 +75,7 @@ class MemoryPreferencesController extends DisposableController
 
         ga.select(
           gac.memory,
-          gac.MemoryEvent.browseRefLimit,
+          gac.MemoryEvents.browseRefLimit.name,
         );
       },
     );

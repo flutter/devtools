@@ -35,7 +35,7 @@ void main() {
     onSelected: (_) {},
   )..sectionIndex = 0;
 
-  const Key testNodeKey = Key('test node');
+  const testNodeKey = Key('test node');
   final testNode = FlameChartNode<CpuStackFrame>(
     key: testNodeKey,
     text: 'Test node 1',
@@ -135,7 +135,7 @@ void main() {
 
       controller = CpuProfilerController();
       flameChart = CpuProfileFlameChart(
-        data: CpuProfileData.parse(cpuProfileResponseJson),
+        data: CpuProfileData.fromJson(cpuProfileResponseJson),
         width: 1000.0,
         height: 1000.0,
         selectionNotifier: ValueNotifier<CpuStackFrame?>(null),

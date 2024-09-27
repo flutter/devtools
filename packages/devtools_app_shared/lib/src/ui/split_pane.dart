@@ -23,7 +23,7 @@ import '../utils/utils.dart';
 final class SplitPane extends StatefulWidget {
   /// Builds a split oriented along [axis].
   SplitPane({
-    Key? key,
+    super.key,
     required this.axis,
     required this.children,
     required this.initialFractions,
@@ -31,8 +31,7 @@ final class SplitPane extends StatefulWidget {
     this.splitters,
   })  : assert(children.length >= 2),
         assert(initialFractions.length >= 2),
-        assert(children.length == initialFractions.length),
-        super(key: key) {
+        assert(children.length == initialFractions.length) {
     _verifyFractionsSumTo1(initialFractions);
     if (minSizes != null) {
       assert(minSizes!.length == children.length);
@@ -116,7 +115,7 @@ final class _SplitPaneState extends State<SplitPane> {
       if (widget.minSizes == null) return 0.0;
 
       double totalMinSize = 0;
-      for (var minSize in widget.minSizes!) {
+      for (final minSize in widget.minSizes!) {
         totalMinSize += minSize;
       }
 
@@ -286,7 +285,7 @@ final class _SplitPaneState extends State<SplitPane> {
       return numSplitters * DefaultSplitter.splitterWidth;
     } else {
       var totalSize = 0.0;
-      for (var splitter in widget.splitters!) {
+      for (final splitter in widget.splitters!) {
         totalSize += isHorizontal
             ? splitter.preferredSize.width
             : splitter.preferredSize.height;
@@ -299,8 +298,8 @@ final class _SplitPaneState extends State<SplitPane> {
 final class DefaultSplitter extends StatelessWidget {
   const DefaultSplitter({super.key, required this.isHorizontal});
 
-  static const double iconSize = 24.0;
-  static const double splitterWidth = 12.0;
+  static const iconSize = 24.0;
+  static const splitterWidth = 12.0;
 
   final bool isHorizontal;
 
@@ -323,7 +322,7 @@ final class DefaultSplitter extends StatelessWidget {
 
 void _verifyFractionsSumTo1(List<double> fractions) {
   var sumFractions = 0.0;
-  for (var fraction in fractions) {
+  for (final fraction in fractions) {
     sumFractions += fraction;
   }
   assert(

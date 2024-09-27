@@ -1,0 +1,8 @@
+MaterialApp
+ └─Scaffold
+   ├─Center
+   │ └─Text
+   ├─AppBar
+   │ └─Text
+   └─FloatingActionButton
+     └─Icon

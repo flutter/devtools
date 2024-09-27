@@ -47,7 +47,7 @@ class DevToolsAutomater {
       defaultScreens(sampleData: sampleData),
       AnalyticsController(
         enabled: false,
-        firstRun: false,
+        shouldShowConsentMessage: false,
         consentMessage: 'fake message',
       ),
     );
@@ -100,7 +100,7 @@ class DevToolsAutomater {
   }
 }
 
-const Duration _animationCheckingInterval = Duration(milliseconds: 50);
+const _animationCheckingInterval = Duration(milliseconds: 50);
 
 Future<void> animationStops() async {
   if (!WidgetsBinding.instance.hasScheduledFrame) return;

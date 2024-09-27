@@ -6,18 +6,16 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
-import '../controller/item_controller.dart';
 import '../data/classes_diff.dart';
-import '../data/heap_diff_store.dart';
 import 'class_details/class_details.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
 
 class SnapshotView extends StatelessWidget {
-  const SnapshotView({Key? key, required this.controller}) : super(key: key);
+  const SnapshotView({super.key, required this.controller});
 
   final DiffPaneController controller;
 
@@ -29,18 +27,15 @@ class SnapshotView extends StatelessWidget {
         controller.derived.diffClassesToShow,
       ],
       builder: (_, values, __) {
-        final singleClasses = values.first as List<SingleClassStats>?;
-        final diffClasses = values.second as List<DiffClassData>?;
+        final singleClasses = values.first as ClassDataList<SingleClassData>?;
+        final diffClasses = values.second as ClassDataList<DiffClassData>?;
         if (controller.derived.updatingValues) {
           return const Center(child: Text('Calculating...'));
         }
 
-        final classes = controller.derived.heapClasses.value;
+        final classes = controller.derived.classesBeforeFiltering.value;
         if (classes == null) {
-          final current = controller.core.selectedItem as SnapshotInstanceItem;
-          return current.isProcessing.value
-              ? const SizedBox.shrink()
-              : const Center(child: Text('Could not take snapshot.'));
+          return const Center(child: Text('Processing snapshot...'));
         }
 
         assert((singleClasses == null) != (diffClasses == null));
@@ -54,21 +49,20 @@ class SnapshotView extends StatelessWidget {
           );
         } else if (diffClasses != null) {
           classTable = ClassesTableDiff(
-            classes: controller.derived.diffClassesToShow.value!,
+            classes: controller.derived.diffClassesToShow.value!.list,
             diffData: controller.derived.classesTableDiff,
           );
         } else {
           throw StateError('singleClasses or diffClasses should not be null.');
         }
 
-        final pathTable = ValueListenableBuilder<List<StatsByPathEntry>?>(
-          valueListenable: controller.derived.pathEntries,
-          builder: (_, entries, __) => HeapClassDetails(
-            entries: entries,
-            selection: controller.derived.selectedPathEntry,
-            isDiff: classes is DiffHeapClasses,
+        final pathTable = ValueListenableBuilder<ClassData?>(
+          valueListenable: controller.derived.classData,
+          builder: (_, classData, __) => HeapClassDetails(
+            classData: classData,
+            pathSelection: controller.derived.selectedPath,
+            isDiff: classes is ClassDataList<DiffClassData>,
             pathController: controller.retainingPathController,
-            className: controller.core.className?.className,
           ),
         );
 

@@ -32,13 +32,13 @@ class FlutterFramesChart extends StatelessWidget {
   const FlutterFramesChart(
     this.framesController, {
     super.key,
-    required this.offlineMode,
+    required this.showingOfflineData,
     required this.impellerEnabled,
   });
 
   final FlutterFramesController framesController;
 
-  final bool offlineMode;
+  final bool showingOfflineData;
 
   final bool impellerEnabled;
 
@@ -59,7 +59,7 @@ class FlutterFramesChart extends StatelessWidget {
           frames: frames,
           displayRefreshRate: displayRefreshRate,
           isVisible: showChart,
-          offlineMode: offlineMode,
+          showingOfflineData: showingOfflineData,
           impellerEnabled: impellerEnabled,
         );
       },
@@ -73,7 +73,7 @@ class _FlutterFramesChart extends StatefulWidget {
     required this.frames,
     required this.displayRefreshRate,
     required this.isVisible,
-    required this.offlineMode,
+    required this.showingOfflineData,
     required this.impellerEnabled,
   });
 
@@ -85,7 +85,7 @@ class _FlutterFramesChart extends StatefulWidget {
 
   final bool isVisible;
 
-  final bool offlineMode;
+  final bool showingOfflineData;
 
   final bool impellerEnabled;
 
@@ -123,7 +123,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
       );
       bannerMessages.addMessage(
         ShaderJankMessage(
-          offlineController.offlineMode.value
+          offlineDataController.showingOfflineData.value
               ? SimpleScreen.id
               : PerformanceScreen.id,
           jankyFramesCount: shaderJankFrames.length,
@@ -172,7 +172,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
               framesController: widget.framesController,
               frames: widget.frames,
               displayRefreshRate: widget.displayRefreshRate,
-              offlineMode: widget.offlineMode,
+              showingOfflineData: widget.showingOfflineData,
               impellerEnabled: widget.impellerEnabled,
             ),
           ),
@@ -364,7 +364,7 @@ class FramesChartControls extends StatelessWidget {
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
-    required this.offlineMode,
+    required this.showingOfflineData,
     required this.impellerEnabled,
   });
 
@@ -378,17 +378,19 @@ class FramesChartControls extends StatelessWidget {
 
   final double displayRefreshRate;
 
-  final bool offlineMode;
+  final bool showingOfflineData;
 
   final bool impellerEnabled;
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = ScreenSize(context).width;
+    final terse = screenWidth <= MediaSize.xs;
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!offlineMode)
+        if (!showingOfflineData)
           ValueListenableBuilder<bool>(
             valueListenable: framesController.recordingFrames,
             builder: (context, recording, child) {
@@ -407,9 +409,18 @@ class FramesChartControls extends StatelessWidget {
         Legend(
           dense: true,
           entries: [
-            const LegendEntry('Frame Time (UI)', mainUiColor),
-            const LegendEntry('Frame Time (Raster)', mainRasterColor),
-            const LegendEntry('Jank (slow frame)', uiJankColor),
+            LegendEntry(
+              terse ? 'UI' : 'Frame Time (UI)',
+              mainUiColor,
+            ),
+            LegendEntry(
+              terse ? 'Raster' : 'Frame Time (Raster)',
+              mainRasterColor,
+            ),
+            LegendEntry(
+              terse ? 'Jank' : 'Jank (slow frame)',
+              uiJankColor,
+            ),
             if (!impellerEnabled)
               LegendEntry(
                 'Shader Compilation',
@@ -420,6 +431,7 @@ class FramesChartControls extends StatelessWidget {
         AverageFPS(
           frames: frames,
           displayRefreshRate: displayRefreshRate,
+          terse: terse,
         ),
       ],
     );
@@ -477,9 +489,9 @@ class FlutterFramesChartItem extends StatelessWidget {
     final themeData = Theme.of(context);
     final colorScheme = themeData.colorScheme;
 
-    final bool uiJanky = frame.isUiJanky(displayRefreshRate);
-    final bool rasterJanky = frame.isRasterJanky(displayRefreshRate);
-    final bool hasShaderJank = frame.hasShaderJank(displayRefreshRate);
+    final uiJanky = frame.isUiJanky(displayRefreshRate);
+    final rasterJanky = frame.isRasterJanky(displayRefreshRate);
+    final hasShaderJank = frame.hasShaderJank(displayRefreshRate);
 
     var uiColor = uiJanky ? uiJankColor : mainUiColor;
     var rasterColor = rasterJanky ? rasterJankColor : mainRasterColor;
@@ -618,11 +630,11 @@ class FlutterFramesChartItem extends StatelessWidget {
 
 class FlutterFrameTooltip extends StatelessWidget {
   const FlutterFrameTooltip({
-    Key? key,
+    super.key,
     required this.child,
     required this.frame,
     required this.hasShaderJank,
-  }) : super(key: key);
+  });
 
   final Widget child;
 
@@ -630,7 +642,7 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   final bool hasShaderJank;
 
-  static const double _moreInfoLinkWidth = 100.0;
+  static const _moreInfoLinkWidth = 100.0;
 
   static const _textMeasurementBuffer = 8.0;
 
@@ -724,11 +736,14 @@ class AverageFPS extends StatelessWidget {
     super.key,
     required this.frames,
     required this.displayRefreshRate,
+    this.terse = false,
   });
 
   final List<FlutterFrame> frames;
 
   final double displayRefreshRate;
+
+  final bool terse;
 
   @override
   Widget build(BuildContext context) {
@@ -753,7 +768,7 @@ class AverageFPS extends StatelessWidget {
       fpsText = '$avgFps';
     }
     return Text(
-      '$fpsText FPS (average)',
+      '$fpsText FPS (${terse ? 'avg' : 'average'})',
       maxLines: 2,
       style: Theme.of(context).legendTextStyle,
     );
@@ -823,7 +838,7 @@ class ChartAxisPainter extends CustomPainter {
     final totalMs = msPerPx * constraints.maxHeight;
 
     // Subtract 1 because one of the labels will be 0.0 ms.
-    final int timeUnitMs = totalMs ~/ (yAxisLabelCount - 1);
+    final timeUnitMs = totalMs ~/ (yAxisLabelCount - 1);
 
     // Max FPS non-jank value in ms. E.g., 16.6 for 60 FPS, 8.3 for 120 FPS.
     final targetMsPerFrame = 1 / displayRefreshRate * 1000;

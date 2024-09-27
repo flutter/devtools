@@ -49,7 +49,7 @@ class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable<T> {
 /// and how to present each row of `data`.
 class FlatTable<T> extends StatefulWidget {
   FlatTable({
-    Key? key,
+    super.key,
     required this.keyFactory,
     required this.data,
     required this.dataKey,
@@ -73,8 +73,7 @@ class FlatTable<T> extends StatefulWidget {
     this.fillWithEmptyRows = false,
     this.enableHoverHandling = false,
     ValueNotifier<T?>? selectionNotifier,
-  })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
-        super(key: key);
+  }) : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null);
 
   /// List of columns to display.
   ///
@@ -268,8 +267,8 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     FlatTable<T> newWidget,
   ) {
     final columnsChanged = !collectionEquals(
-          oldWidget.columns.map((c) => c.title),
-          newWidget.columns.map((c) => c.title),
+          oldWidget.columns.map((c) => c.config),
+          newWidget.columns.map((c) => c.config),
         ) ||
         !collectionEquals(
           oldWidget.columnGroups?.map((c) => c.title),

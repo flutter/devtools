@@ -268,7 +268,7 @@ TreemapNode _generateTree(Map<String, dynamic> treeJson) {
   if (rawChildren != null) {
     // If not a leaf node, build all children then take the sum of the
     // children's sizes as its own size.
-    for (var child in rawChildren) {
+    for (final child in rawChildren) {
       final childTreemapNode = _generateTree(child);
       treemapNodeChildren.add(childTreemapNode);
       treemapNodeSize += childTreemapNode.byteSize;

@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/common_widgets.dart';
 import '../../../shared/ui/drop_down_button.dart';
 import '../../debugger/program_explorer.dart';
 import '../../debugger/program_explorer_model.dart';
@@ -28,7 +27,6 @@ class ObjectInspectorView extends VMDeveloperView {
           title: 'Objects',
           icon: Icons.data_object_outlined,
         );
-  static const id = 'object-inspector-view';
 
   @override
   bool get showIsolateSelector => true;

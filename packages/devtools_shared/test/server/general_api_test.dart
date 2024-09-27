@@ -12,17 +12,17 @@ import 'package:devtools_shared/src/server/server_api.dart' as server;
 import 'package:dtd/dtd.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 import '../fakes.dart';
-import '../helpers.dart';
+import '../helpers/helpers.dart';
 
 void main() {
   group('General DevTools server API', () {
     group(apiNotifyForVmServiceConnection, () {
       Future<Response> sendNotifyRequest({
-        required DTDConnectionInfo dtd,
+        required DtdInfo? dtd,
         Map<String, Object?>? queryParameters,
+        // ignore: avoid-redundant-async, returning FutureOr.
       }) async {
         final request = Request(
           'get',
@@ -35,10 +35,9 @@ void main() {
         );
         return server.ServerApi.handle(
           request,
-          extensionsManager: ExtensionsManager(buildDir: '/'),
+          extensionsManager: ExtensionsManager(),
           deeplinkManager: FakeDeeplinkManager(),
           dtd: dtd,
-          analytics: const NoOpAnalytics(),
         );
       }
 
@@ -46,7 +45,7 @@ void main() {
         'succeeds when DTD is not available',
         () async {
           final response = await sendNotifyRequest(
-            dtd: (uri: null, secret: null),
+            dtd: null,
             queryParameters: {
               apiParameterValueKey: 'fake_uri',
               apiParameterVmServiceConnected: 'true',
@@ -61,7 +60,7 @@ void main() {
         'returns badRequest for invalid VM service argument',
         () async {
           final response = await sendNotifyRequest(
-            dtd: (uri: 'ws://dtd:uri', secret: 'fake_secret'),
+            dtd: DtdInfo(Uri.parse('ws://dtd/uri'), secret: 'fake_secret'),
             queryParameters: {
               apiParameterValueKey: 'fake_uri',
               apiParameterVmServiceConnected: 'true',
@@ -78,7 +77,7 @@ void main() {
         'returns badRequest for invalid $apiParameterVmServiceConnected argument',
         () async {
           final response = await sendNotifyRequest(
-            dtd: (uri: 'ws://dtd:uri', secret: 'fake_secret'),
+            dtd: DtdInfo(Uri.parse('ws://dtd/uri'), secret: 'fake_secret'),
             queryParameters: {
               apiParameterValueKey: 'ws://127.0.0.1:8181/LEpVqqD7E_Y=/ws',
               apiParameterVmServiceConnected: 'bad_arg',
@@ -93,117 +92,92 @@ void main() {
       );
     });
 
-    group('updateDtdWorkspaceRoots', () {
+    group('endpoints that require DTD', () {
       TestDtdConnectionInfo? dtd;
-      DTDConnection? testDtdConnection;
+      DartToolingDaemon? testDtdConnection;
 
       setUp(() async {
         dtd = await startDtd();
-        expect(dtd!.uri, isNotNull, reason: 'Error starting DTD for test');
+        expect(dtd!.info, isNotNull, reason: 'Error starting DTD for test');
         testDtdConnection =
-            await DartToolingDaemon.connect(Uri.parse(dtd!.uri!));
+            await DartToolingDaemon.connect(dtd!.info!.localUri);
       });
 
       tearDown(() async {
         await testDtdConnection?.close();
-        dtd?.dtdProcess?.kill();
-        await dtd?.dtdProcess?.exitCode;
+        dtd?.process?.kill();
+        await dtd?.process?.exitCode;
         dtd = null;
       });
 
-      Future<void> updateWorkspaceRoots({
-        required Uri root,
-        required bool connected,
-      }) async {
-        await server.Handler.updateDtdWorkspaceRoots(
-          (uri: dtd!.uri, secret: dtd!.secret),
-          rootFromVmService: root,
-          connected: connected,
-          api: ServerApi(),
+      group('updateDtdWorkspaceRoots', () {
+        Future<void> updateWorkspaceRoots({
+          required Uri root,
+          required bool connected,
+        }) async {
+          await server.Handler.updateDtdWorkspaceRoots(
+            testDtdConnection!,
+            dtdConnectionInfo: dtd!.info!,
+            rootFromVmService: root,
+            connected: connected,
+            api: ServerApi(),
+          );
+        }
+
+        Future<void> verifyWorkspaceRoots(Set<Uri> roots) async {
+          final currentRoots = (await testDtdConnection!.getIDEWorkspaceRoots())
+              .ideWorkspaceRoots;
+          expect(currentRoots, hasLength(roots.length));
+          expect(currentRoots, containsAll(roots));
+        }
+
+        test(
+          'adds and removes workspace roots',
+          () async {
+            await verifyWorkspaceRoots({});
+            final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
+            final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
+
+            await updateWorkspaceRoots(root: rootUri1, connected: true);
+            await verifyWorkspaceRoots({rootUri1});
+
+            // Add a second root and verify the roots are unioned.
+            await updateWorkspaceRoots(root: rootUri2, connected: true);
+            await verifyWorkspaceRoots({rootUri1, rootUri2});
+
+            // Verify duplicates cannot be added.
+            await updateWorkspaceRoots(root: rootUri2, connected: true);
+            await verifyWorkspaceRoots({rootUri1, rootUri2});
+
+            // Verify roots are removed for disconnect events.
+            await updateWorkspaceRoots(root: rootUri2, connected: false);
+            await verifyWorkspaceRoots({rootUri1});
+            await updateWorkspaceRoots(root: rootUri1, connected: false);
+            await verifyWorkspaceRoots({});
+          },
+          timeout: const Timeout.factor(4),
         );
-      }
-
-      Future<void> verifyWorkspaceRoots(Set<Uri> roots) async {
-        final currentRoots =
-            (await testDtdConnection!.getIDEWorkspaceRoots()).ideWorkspaceRoots;
-        expect(currentRoots, hasLength(roots.length));
-        expect(currentRoots, containsAll(roots));
-      }
-
-      test(
-        'adds and removes workspace roots',
-        () async {
-          await verifyWorkspaceRoots({});
-          final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
-          final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
-
-          await updateWorkspaceRoots(root: rootUri1, connected: true);
-          await verifyWorkspaceRoots({rootUri1});
-
-          // Add a second root and verify the roots are unioned.
-          await updateWorkspaceRoots(root: rootUri2, connected: true);
-          await verifyWorkspaceRoots({rootUri1, rootUri2});
-
-          // Verify duplicates cannot be added.
-          await updateWorkspaceRoots(root: rootUri2, connected: true);
-          await verifyWorkspaceRoots({rootUri1, rootUri2});
-
-          // Verify roots are removed for disconnect events.
-          await updateWorkspaceRoots(root: rootUri2, connected: false);
-          await verifyWorkspaceRoots({rootUri1});
-          await updateWorkspaceRoots(root: rootUri1, connected: false);
-          await verifyWorkspaceRoots({});
-        },
-        timeout: const Timeout.factor(4),
-      );
-    });
-
-    group('detectRootPackageForVmService', () {
-      TestDartApp? app;
-      String? vmServiceUriString;
-
-      setUp(() async {
-        app = TestDartApp();
-        vmServiceUriString = await app!.start();
-        // Await a short delay to give the VM a chance to initialize.
-        await delay(duration: const Duration(seconds: 1));
-        expect(vmServiceUriString, isNotEmpty);
       });
 
-      tearDown(() async {
-        await app?.kill();
-        app = null;
-        vmServiceUriString = null;
-      });
+      group('detectRootPackageForVmService', () {
+        TestDartApp? app;
+        String? vmServiceUriString;
 
-      test('succeeds for a connect event', () async {
-        final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
-        expect(vmServiceUri, isNotNull);
-        final response = await server.Handler.detectRootPackageForVmService(
-          vmServiceUriAsString: vmServiceUriString!,
-          vmServiceUri: vmServiceUri!,
-          connected: true,
-          api: ServerApi(),
-        );
-        expect(response.success, true);
-        expect(response.message, isNull);
-        expect(response.uri, isNotNull);
-        expect(response.uri!.toString(), endsWith(app!.directory.path));
-      });
+        setUp(() async {
+          app = TestDartApp();
+          vmServiceUriString = await app!.start();
+          // Await a short delay to give the VM a chance to initialize.
+          await delay(duration: const Duration(seconds: 1));
+          expect(vmServiceUriString, isNotEmpty);
+        });
 
-      test('succeeds for a disconnect event when cache is empty', () async {
-        final response = await server.Handler.detectRootPackageForVmService(
-          vmServiceUriAsString: vmServiceUriString!,
-          vmServiceUri: Uri.parse('ws://127.0.0.1:63555/fake-uri=/ws'),
-          connected: false,
-          api: ServerApi(),
-        );
-        expect(response, (success: true, message: null, uri: null));
-      });
+        tearDown(() async {
+          await app?.kill();
+          app = null;
+          vmServiceUriString = null;
+        });
 
-      test(
-        'succeeds for a disconnect event when cache contains entry for VM service',
-        () async {
+        test('succeeds for a connect event', () async {
           final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
           expect(vmServiceUri, isNotNull);
           final response = await server.Handler.detectRootPackageForVmService(
@@ -211,28 +185,60 @@ void main() {
             vmServiceUri: vmServiceUri!,
             connected: true,
             api: ServerApi(),
+            dtd: testDtdConnection!,
           );
           expect(response.success, true);
           expect(response.message, isNull);
           expect(response.uri, isNotNull);
           expect(response.uri!.toString(), endsWith(app!.directory.path));
+        });
 
-          final disconnectResponse =
-              await server.Handler.detectRootPackageForVmService(
+        test('succeeds for a disconnect event when cache is empty', () async {
+          final response = await server.Handler.detectRootPackageForVmService(
             vmServiceUriAsString: vmServiceUriString!,
-            vmServiceUri: vmServiceUri,
+            vmServiceUri: Uri.parse('ws://127.0.0.1:63555/fake-uri=/ws'),
             connected: false,
             api: ServerApi(),
+            dtd: testDtdConnection!,
           );
-          expect(disconnectResponse.success, true);
-          expect(disconnectResponse.message, isNull);
-          expect(disconnectResponse.uri, isNotNull);
-          expect(
-            disconnectResponse.uri!.toString(),
-            endsWith(app!.directory.path),
-          );
-        },
-      );
+          expect(response, (success: true, message: null, uri: null));
+        });
+
+        test(
+          'succeeds for a disconnect event when cache contains entry for VM service',
+          () async {
+            final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
+            expect(vmServiceUri, isNotNull);
+            final response = await server.Handler.detectRootPackageForVmService(
+              vmServiceUriAsString: vmServiceUriString!,
+              vmServiceUri: vmServiceUri!,
+              connected: true,
+              api: ServerApi(),
+              dtd: testDtdConnection!,
+            );
+            expect(response.success, true);
+            expect(response.message, isNull);
+            expect(response.uri, isNotNull);
+            expect(response.uri!.toString(), endsWith(app!.directory.path));
+
+            final disconnectResponse =
+                await server.Handler.detectRootPackageForVmService(
+              vmServiceUriAsString: vmServiceUriString!,
+              vmServiceUri: vmServiceUri,
+              connected: false,
+              api: ServerApi(),
+              dtd: testDtdConnection!,
+            );
+            expect(disconnectResponse.success, true);
+            expect(disconnectResponse.message, isNull);
+            expect(disconnectResponse.uri, isNotNull);
+            expect(
+              disconnectResponse.uri!.toString(),
+              endsWith(app!.directory.path),
+            );
+          },
+        );
+      });
     });
   });
 }

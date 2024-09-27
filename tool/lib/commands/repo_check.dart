@@ -28,7 +28,7 @@ class RepoCheckCommand extends Command {
 
     int failureCount = 0;
 
-    for (var check in checks) {
+    for (final check in checks) {
       print('\nchecking ${check.name}:');
 
       try {

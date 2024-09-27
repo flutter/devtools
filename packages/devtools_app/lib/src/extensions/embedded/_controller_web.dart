@@ -7,13 +7,16 @@ import 'dart:ui_web' as ui_web;
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:path/path.dart' as path;
 import 'package:web/web.dart';
 
 import '../../shared/development_helpers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/query_parameters.dart';
 import '../../shared/server/server.dart';
+import '../../shared/utils.dart';
 import 'controller.dart';
 
 /// Incrementer for the extension iFrame view that will live for the entire
@@ -48,13 +51,13 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     );
     final baseUri = path.join(
       basePath,
-      'devtools_extensions',
-      extensionConfig.name,
+      extensionRequestPath,
+      extensionConfig.identifier,
       'index.html',
     );
     final queryParams = {
-      ...loadQueryParams(),
-      ExtensionEventParameters.theme: preferences.darkModeTheme.value
+      ...DevToolsQueryParams.load().params,
+      ExtensionEventParameters.theme: isDarkThemeEnabled()
           ? ExtensionEventParameters.themeValueDark
           : ExtensionEventParameters.themeValueLight,
       if (dtdManager.uri != null) 'dtdUri': dtdManager.uri.toString(),
@@ -66,6 +69,8 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
 
   late final HTMLIFrameElement _extensionIFrame;
 
+  /// A stream of [DevToolsExtensionEvent]s that will be posted from the
+  /// DevTools web app to the embedded extension iFrame.
   final extensionPostEventStream =
       StreamController<DevToolsExtensionEvent>.broadcast();
 
@@ -79,7 +84,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     );
     _initialized = true;
 
-    _extensionIFrame = createIFrameElement()
+    _extensionIFrame = HTMLIFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html

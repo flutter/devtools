@@ -4,14 +4,18 @@
 
 import 'package:devtools_shared/devtools_extensions.dart';
 
+import '../preferences/preferences.dart';
 import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
+part 'constants/_debugger_constants.dart';
 part 'constants/_deep_links_constants.dart';
 part 'constants/_extension_constants.dart';
 part 'constants/_memory_constants.dart';
+part 'constants/_network_constants.dart';
+part 'constants/_logging_constants.dart';
 part 'constants/_performance_constants.dart';
-part 'constants/_vs_code_sidebar_constants.dart';
+part 'constants/_editor_sidebar_constants.dart';
 part 'constants/_inspector_constants.dart';
 
 // Type of events (event_category):
@@ -41,6 +45,11 @@ final deeplink = ScreenMetaData.deepLinks.id;
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
 const appDisconnected = 'appDisconnected';
+const init = 'init';
+
+/// Event that signals we fell back to JS when trying to load DevTools with
+/// Wasm.
+const jsFallback = 'jsFallback';
 
 // DevTools UI action selected (clicked).
 
@@ -52,6 +61,8 @@ const feedbackLink = 'feedback';
 const feedbackButton = 'feedbackButton';
 const contributingLink = 'contributing';
 const discordLink = 'discord';
+String startingTheme({required bool darkMode}) =>
+    'startingTheme-${darkMode ? 'dark' : 'light'}';
 
 // Inspector UX actions:
 const refresh = 'refresh';
@@ -75,6 +86,10 @@ const treeNodeSelection = 'treeNodeSelection';
 const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
+final defaultDetailsViewToLayoutExplorer =
+    InspectorDetailsViewType.layoutExplorer.name;
+final defaultDetailsViewToWidgetDetails =
+    InspectorDetailsViewType.widgetDetailsTree.name;
 
 enum HomeScreenEvents {
   connectToApp,
@@ -82,15 +97,8 @@ enum HomeScreenEvents {
   viewVmFlags,
 }
 
-// Debugger UX actions:
-const refreshStatistics = 'refreshStatistics';
-const showFileExplorer = 'showFileExplorer';
-const hideFileExplorer = 'hideFileExplorer';
-const pausedWithNoFrames = 'pausedWithNoFrames';
-
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
-const trackRebuildWidgets = 'trackRebuildWidgets';
 
 // App Size Tools UX actions:
 const importFileSingle = 'importFileSingle';
@@ -108,9 +116,9 @@ const requestSize = 'requestSize';
 // Settings actions:
 const settingsDialog = 'settings';
 const darkTheme = 'darkTheme';
-const denseMode = 'denseMode';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
+const wasm = 'wasm';
 const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const clearLogs = 'clearLogs';
@@ -141,7 +149,7 @@ const expandAll = 'expandAll';
 const collapseAll = 'collapseAll';
 const profileModeDocs = 'profileModeDocs';
 const visibilityButton = 'visibilityButton';
-const exitOfflineMode = 'exitOfflineMode';
+const stopShowingOfflineData = 'exitOfflineMode';
 // This should track the time from `initState` for a screen to the time when
 // the page data has loaded and is ready to interact with.
 const pageReady = 'pageReady';
@@ -155,6 +163,6 @@ String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 /// Analytic event constants specific for console.
 class ConsoleEvent {
   static const helpInline = 'consoleHelpInline';
-  static const String evalInStoppedApp = 'consoleEvalInStoppedApp';
-  static const String evalInRunningApp = 'consoleEvalInRunningApp';
+  static const evalInStoppedApp = 'consoleEvalInStoppedApp';
+  static const evalInRunningApp = 'consoleEvalInRunningApp';
 }

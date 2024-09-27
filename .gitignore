@@ -41,3 +41,6 @@ DEPENDENCIES.md
 
 # Ignore VS code workspaces that may be configured per-user
 *.code-workspace
+
+# Ignore devtools_options.yaml files under example.
+**/example/**/devtools_options.yaml

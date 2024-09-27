@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(kenz): remove once min flutter version of devtools_app_shared >= 3.25
+// ignore_for_file: deprecated_member_use, analysis performed with newer flutter version than min sdk
+
 import 'package:flutter/material.dart';
 
 import '../ui_utils.dart';
@@ -71,6 +74,7 @@ ThemeData _baseTheme({
     tabBarTheme: theme.tabBarTheme.copyWith(
       tabAlignment: TabAlignment.start,
       dividerColor: Colors.transparent,
+      labelStyle: theme.regularTextStyle,
       labelPadding:
           const EdgeInsets.symmetric(horizontal: defaultTabBarPadding),
     ),
@@ -109,8 +113,8 @@ ThemeData _baseTheme({
     ),
     menuButtonTheme: MenuButtonThemeData(
       style: ButtonStyle(
-        textStyle: MaterialStatePropertyAll<TextStyle>(theme.regularTextStyle),
-        fixedSize: const MaterialStatePropertyAll<Size>(Size.fromHeight(24.0)),
+        textStyle: WidgetStatePropertyAll<TextStyle>(theme.regularTextStyle),
+        fixedSize: const WidgetStatePropertyAll<Size>(Size.fromHeight(24.0)),
       ),
     ),
     dropdownMenuTheme: DropdownMenuThemeData(
@@ -119,11 +123,37 @@ ThemeData _baseTheme({
     progressIndicatorTheme: ProgressIndicatorThemeData(
       linearMinHeight: defaultLinearProgressIndicatorHeight,
     ),
-    textTheme: theme.textTheme.copyWith(
-      bodySmall: theme.regularTextStyle,
-      bodyMedium: theme.regularTextStyle,
-      titleSmall: theme.regularTextStyle.copyWith(fontWeight: FontWeight.w400),
+    primaryTextTheme: _devToolsTextTheme(theme, theme.primaryTextTheme),
+    textTheme: _devToolsTextTheme(theme, theme.textTheme),
+  );
+}
+
+TextTheme _devToolsTextTheme(ThemeData theme, TextTheme textTheme) {
+  return textTheme.copyWith(
+    displayLarge: theme.boldTextStyle.copyWith(fontSize: 24),
+    displayMedium: theme.boldTextStyle.copyWith(fontSize: 22),
+    displaySmall: theme.boldTextStyle.copyWith(fontSize: 20),
+    headlineLarge: theme.regularTextStyle.copyWith(
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
     ),
+    headlineMedium: theme.regularTextStyle.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+    ),
+    headlineSmall: theme.regularTextStyle.copyWith(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+    ),
+    titleLarge: theme._largeText.copyWith(fontWeight: FontWeight.w500),
+    titleMedium: theme.regularTextStyle.copyWith(fontWeight: FontWeight.w500),
+    titleSmall: theme._smallText.copyWith(fontWeight: FontWeight.w500),
+    bodyLarge: theme._largeText,
+    bodyMedium: theme.regularTextStyle,
+    bodySmall: theme._smallText,
+    labelLarge: theme._largeText,
+    labelMedium: theme.regularTextStyle,
+    labelSmall: theme._smallText,
   );
 }
 
@@ -239,6 +269,7 @@ double get defaultHeaderHeight => scaleByFontFactor(28.0);
 double get defaultButtonHeight => scaleByFontFactor(26.0);
 double get defaultRowHeight => scaleByFontFactor(24.0);
 double get defaultLinearProgressIndicatorHeight => scaleByFontFactor(4.0);
+double get defaultLinearProgressIndicatorWidth => scaleByFontFactor(200.0);
 double get buttonMinWidth => scaleByFontFactor(26.0);
 
 const defaultIconSizeBeforeScaling = 14.0;
@@ -300,6 +331,8 @@ double get mediumProgressSize => scaleByFontFactor(24.0);
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
 // Font size constants:
+double get largeFontSize => scaleByFontFactor(unscaledLargeFontSize);
+const unscaledLargeFontSize = 14.0;
 
 double get defaultFontSize => scaleByFontFactor(unscaledDefaultFontSize);
 const unscaledDefaultFontSize = 12.0;
@@ -344,6 +377,10 @@ extension DevToolsSharedColorScheme on ColorScheme {
       isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
 
   Color get tooltipTextColor => isLight ? Colors.white : Colors.black;
+
+  Color get semiTransparentOverlayColor => isLight
+      ? Colors.grey.shade200.withAlpha(200)
+      : Colors.grey.shade800.withAlpha(200);
 }
 
 /// Utility extension methods to the [ThemeData] class.
@@ -352,14 +389,20 @@ extension ThemeDataExtension on ThemeData {
   bool get isDarkTheme => brightness == Brightness.dark;
 
   TextStyle get regularTextStyle => fixBlurryText(
-        textTheme.bodySmall!.copyWith(
+        TextStyle(
           color: colorScheme.onSurface,
           fontSize: defaultFontSize,
         ),
       );
 
-  TextStyle regularTextStyleWithColor(Color? color) =>
-      regularTextStyle.copyWith(color: color);
+  TextStyle regularTextStyleWithColor(Color? color, {Color? backgroundColor}) =>
+      regularTextStyle.copyWith(color: color, backgroundColor: backgroundColor);
+
+  TextStyle get _smallText =>
+      regularTextStyle.copyWith(fontSize: smallFontSize);
+
+  TextStyle get _largeText =>
+      regularTextStyle.copyWith(fontSize: largeFontSize);
 
   TextStyle get errorTextStyle => regularTextStyleWithColor(colorScheme.error);
 
@@ -547,7 +590,7 @@ ButtonStyle _generateButtonStyle({
 }) {
   if (!isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
-      padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
+      padding: WidgetStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;
       }),
     );

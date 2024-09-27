@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/math_utils.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../ui/free_space.dart';
 import '../ui/layout_explorer_widget.dart';
@@ -20,11 +19,12 @@ import '../ui/utils.dart';
 import '../ui/widget_constraints.dart';
 import '../ui/widgets_theme.dart';
 
+/// Layout visualizer for a widget with a box-layout.
 class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
   const BoxLayoutExplorerWidget(
-    InspectorController inspectorController, {
-    Key? key,
-  }) : super(inspectorController, key: key);
+    super.inspectorController, {
+    super.key,
+  });
 
   static bool shouldDisplay(RemoteDiagnosticsNode _) {
     // Pretend this layout explorer is always available. This layout explorer
@@ -136,7 +136,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final length = sizes.length;
     double total = 1.0; // This isn't set to zero to avoid divide by zero bugs.
     final fractions = minFractions.toList();
-    for (var size in sizes) {
+    for (final size in sizes) {
       if (size != null) {
         total += math.max(0, size);
       }
@@ -158,7 +158,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
       }
     }
     final output = <double>[];
-    for (var fraction in fractions) {
+    for (final fraction in fractions) {
       output.add(fraction * availableSize);
     }
     return output;
@@ -312,8 +312,7 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   LayoutProperties? get parentProperties {
     final parentElement = properties?.node.parentRenderElement;
     if (parentElement == null) return null;
-    final parentProperties = computeLayoutProperties(parentElement);
-    return parentProperties;
+    return computeLayoutProperties(parentElement);
   }
 
   Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
@@ -373,12 +372,12 @@ String describeBoxName(LayoutProperties properties) {
 /// Widget that represents and visualize a direct child of Flex widget.
 class BoxChildVisualizer extends StatelessWidget {
   const BoxChildVisualizer({
-    Key? key,
+    super.key,
     required this.state,
     required this.layoutProperties,
     required this.renderProperties,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   final BoxLayoutExplorerWidgetState state;
 

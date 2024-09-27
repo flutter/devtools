@@ -5,7 +5,6 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/analytics/constants.dart' as gac;
@@ -13,7 +12,6 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/connected_app.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../performance_controller.dart';
 import '../../performance_utils.dart';
 import '../controls/enhance_tracing/enhance_tracing.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
@@ -22,33 +20,33 @@ import 'frame_analysis_model.dart';
 
 class FrameHints extends StatelessWidget {
   const FrameHints({
-    Key? key,
+    super.key,
     required this.frameAnalysis,
     required this.enhanceTracingController,
-  }) : super(key: key);
+    required this.displayRefreshRate,
+  });
 
   final FrameAnalysis frameAnalysis;
 
   final EnhanceTracingController enhanceTracingController;
 
+  final double displayRefreshRate;
+
   @override
   Widget build(BuildContext context) {
-    final performanceController = Provider.of<PerformanceController>(context);
     final frame = frameAnalysis.frame;
-    final displayRefreshRate =
-        performanceController.flutterFramesController.displayRefreshRate.value;
     final showUiJankHints = frame.isUiJanky(displayRefreshRate);
     final showRasterJankHints = frame.isRasterJanky(displayRefreshRate);
     if (!(showUiJankHints || showRasterJankHints)) {
       return const Text('No suggestions for this frame - no jank detected.');
     }
 
+    final theme = Theme.of(context);
     final saveLayerCount = frameAnalysis.saveLayerCount;
     final intrinsicOperationsCount = frameAnalysis.intrinsicOperationsCount;
-
     final uiHints = showUiJankHints
         ? [
-            const Text('UI Jank Detected'),
+            Text('UI Jank Detected', style: theme.errorTextStyle),
             const SizedBox(height: denseSpacing),
             EnhanceTracingHint(
               longestPhase: frameAnalysis.longestUiPhase,
@@ -62,14 +60,14 @@ class FrameHints extends StatelessWidget {
         : <Widget>[];
     final rasterHints = showRasterJankHints
         ? [
-            const Text('Raster Jank Detected'),
+            Text('Raster Jank Detected', style: theme.errorTextStyle),
             const SizedBox(height: denseSpacing),
             if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
             const SizedBox(height: denseSpacing),
             if (frame.hasShaderTime)
               ShaderCompilationHint(shaderTime: frame.shaderDuration),
             const SizedBox(height: denseSpacing),
-            const RasterStatsHint(),
+            const GeneralRasterJankHint(),
           ]
         : <Widget>[];
 
@@ -86,7 +84,7 @@ class FrameHints extends StatelessWidget {
 }
 
 class _Hint extends StatelessWidget {
-  const _Hint({Key? key, required this.message}) : super(key: key);
+  const _Hint({required this.message});
 
   final Widget message;
 
@@ -108,11 +106,11 @@ class _Hint extends StatelessWidget {
 @visibleForTesting
 class EnhanceTracingHint extends StatelessWidget {
   const EnhanceTracingHint({
-    Key? key,
+    super.key,
     required this.longestPhase,
     required this.enhanceTracingState,
     required this.enhanceTracingController,
-  }) : super(key: key);
+  });
 
   /// The longest [FramePhase] for the [FlutterFrame] this hint is for.
   final FramePhase longestPhase;
@@ -226,9 +224,9 @@ class EnhanceTracingHint extends StatelessWidget {
 @visibleForTesting
 class SmallEnhanceTracingButton extends StatelessWidget {
   const SmallEnhanceTracingButton({
-    Key? key,
+    super.key,
     required this.enhanceTracingController,
-  }) : super(key: key);
+  });
 
   final EnhanceTracingController enhanceTracingController;
 
@@ -248,11 +246,11 @@ class SmallEnhanceTracingButton extends StatelessWidget {
 class IntrinsicOperationsHint extends StatelessWidget {
   const IntrinsicOperationsHint(
     this.intrinsicOperationsCount, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const _intrinsicOperationsDocs =
-      'https://docs.flutter.dev/perf/best-practices#minimize-layout-passes-caused-by-intrinsic-operations';
+      'https://flutter.dev/to/minimize-layout-passes';
 
   final int intrinsicOperationsCount;
 
@@ -292,11 +290,10 @@ class IntrinsicOperationsHint extends StatelessWidget {
 class CanvasSaveLayerHint extends StatelessWidget {
   const CanvasSaveLayerHint(
     this.saveLayerCount, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
-  static const _saveLayerDocs =
-      'https://docs.flutter.dev/perf/best-practices#use-savelayer-thoughtfully';
+  static const _saveLayerDocs = 'https://flutter.dev/to/save-layer-perf';
 
   final int saveLayerCount;
 
@@ -329,9 +326,9 @@ class CanvasSaveLayerHint extends StatelessWidget {
 @visibleForTesting
 class ShaderCompilationHint extends StatelessWidget {
   const ShaderCompilationHint({
-    Key? key,
+    super.key,
     required this.shaderTime,
-  }) : super(key: key);
+  });
 
   final Duration shaderTime;
 
@@ -367,8 +364,8 @@ class ShaderCompilationHint extends StatelessWidget {
                       'pitfalls. Try ',
                   style: theme.regularTextStyle,
                 ),
-                LinkTextSpan(
-                  link: Link(
+                GaLinkTextSpan(
+                  link: GaLink(
                     display: 'Impeller',
                     url: impellerDocsUrl,
                     gaScreenName: gac.performance,
@@ -389,8 +386,8 @@ class ShaderCompilationHint extends StatelessWidget {
 }
 
 @visibleForTesting
-class RasterStatsHint extends StatelessWidget {
-  const RasterStatsHint({Key? key}) : super(key: key);
+class GeneralRasterJankHint extends StatelessWidget {
+  const GeneralRasterJankHint({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -400,16 +397,22 @@ class RasterStatsHint extends StatelessWidget {
         text: TextSpan(
           children: [
             TextSpan(
-              text: 'Consider using the',
+              text: 'To learn about rendering performance in Flutter, check '
+                  'out the Flutter documentation on ',
               style: theme.regularTextStyle,
             ),
-            TextSpan(
-              text: ' Raster Stats ',
-              style: theme.subtleFixedFontStyle,
+            GaLinkTextSpan(
+              link: GaLink(
+                display: 'Performance & Optimization',
+                url: flutterPerformanceDocsUrl,
+                gaScreenName: gac.performance,
+                gaSelectedItemDescription:
+                    gac.PerformanceDocs.flutterPerformanceDocs.name,
+              ),
+              context: context,
             ),
             TextSpan(
-              text: 'tab to identify rendering layers that are expensive to '
-                  'rasterize.',
+              text: '.',
               style: theme.regularTextStyle,
             ),
           ],
@@ -421,13 +424,12 @@ class RasterStatsHint extends StatelessWidget {
 
 class _ExpensiveOperationHint extends StatelessWidget {
   const _ExpensiveOperationHint({
-    Key? key,
     required this.message,
     required this.docsUrl,
     required this.gaScreenName,
     required this.gaSelectedItemDescription,
     this.childrenSpans = const <TextSpan>[],
-  }) : super(key: key);
+  });
 
   final TextSpan message;
   final String docsUrl;
@@ -446,9 +448,9 @@ class _ExpensiveOperationHint extends StatelessWidget {
             text: ' This may ',
             style: theme.regularTextStyle,
           ),
-          LinkTextSpan(
+          GaLinkTextSpan(
             context: context,
-            link: Link(
+            link: GaLink(
               display: 'negatively affect your app\'s performance',
               url: docsUrl,
               gaScreenName: gaScreenName,

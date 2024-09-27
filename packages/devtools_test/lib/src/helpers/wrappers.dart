@@ -2,7 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, fine for test only package.
+
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart'
+    as inspector_v2;
+import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart'
+    as inspector_v2;
+import 'package:devtools_app/src/shared/query_parameters.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +28,8 @@ final _testNavigatorKey = GlobalKey<NavigatorState>();
 /// This includes a [MaterialApp] to provide context like [Theme.of], a
 /// [Material] to support elements like [TextField] that draw ink effects, and a
 /// [Directionality] to support [RenderFlex] widgets like [Row] and [Column].
-Widget wrap(Widget widget) {
+Widget wrap(Widget widget, {DevToolsQueryParams? queryParams}) {
+  setGlobal(GlobalKey<NavigatorState>, _testNavigatorKey);
   return MaterialApp.router(
     theme: themeFor(
       isDarkTheme: false,
@@ -31,7 +39,7 @@ Widget wrap(Widget widget) {
         colorScheme: lightColorScheme,
       ),
     ),
-    routerDelegate: DevToolsRouterDelegate(
+    routerDelegate: DevToolsRouterDelegate.test(
       (context, page, args, state) => MaterialPage(
         child: Material(
           child: Directionality(
@@ -45,9 +53,10 @@ Widget wrap(Widget widget) {
       ),
       _testNavigatorKey,
     ),
-    routeInformationParser:
-        // ignore: invalid_use_of_visible_for_testing_member, false positive.
-        DevToolsRouteInformationParser.test('http://test/uri'),
+    routeInformationParser: DevToolsRouteInformationParser.test(
+      DevToolsQueryParams({'uri': 'http://test/uri'})
+          .withUpdates(queryParams?.params),
+    ),
   );
 }
 
@@ -81,7 +90,9 @@ Widget wrapSimple(Widget widget) {
 Widget wrapWithControllers(
   Widget widget, {
   InspectorController? inspector,
+  inspector_v2.InspectorController? inspectorV2,
   LoggingController? logging,
+  LoggingControllerV2? loggingV2,
   MemoryController? memory,
   PerformanceController? performance,
   ProfilerScreenController? profiler,
@@ -93,11 +104,16 @@ Widget wrapWithControllers(
   ReleaseNotesController? releaseNotes,
   VMDeveloperToolsController? vmDeveloperTools,
   bool includeRouter = true,
+  DevToolsQueryParams? queryParams,
 }) {
   final providers = [
     if (inspector != null)
       Provider<InspectorController>.value(value: inspector),
+    if (inspectorV2 != null)
+      Provider<inspector_v2.InspectorController>.value(value: inspectorV2),
     if (logging != null) Provider<LoggingController>.value(value: logging),
+    if (loggingV2 != null)
+      Provider<LoggingControllerV2>.value(value: loggingV2),
     if (memory != null) Provider<MemoryController>.value(value: memory),
     if (performance != null)
       Provider<PerformanceController>.value(value: performance),
@@ -120,14 +136,28 @@ Widget wrapWithControllers(
       child: widget,
     ),
   );
-  return includeRouter ? wrap(child) : wrapSimple(child);
+  return includeRouter
+      ? wrap(child, queryParams: queryParams)
+      : wrapSimple(child);
 }
 
 Widget wrapWithNotifications(Widget child) {
   return NotificationsView(child: child);
 }
 
-Widget wrapWithInspectorControllers(Widget widget) {
+Widget wrapWithInspectorControllers(Widget widget, {bool v2 = false}) {
+  if (v2) {
+    final inspectorV2Controller = inspector_v2.InspectorController(
+      inspectorTree: inspector_v2.InspectorTreeController(),
+      treeType: FlutterTreeType.widget,
+    );
+    return wrapWithControllers(
+      widget,
+      debugger: DebuggerController(),
+      inspectorV2: inspectorV2Controller,
+    );
+  }
+
   final inspectorController = InspectorController(
     inspectorTree: InspectorTreeController(),
     detailsTree: InspectorTreeController(),
@@ -149,8 +179,8 @@ void testWidgetsWithContext(
 }) {
   testWidgets(description, (WidgetTester widgetTester) async {
     // set up the context
-    final Map<Type, dynamic> oldValues = {};
-    for (Type type in context.keys) {
+    final oldValues = <Type, Object?>{};
+    for (final type in context.keys) {
       oldValues[type] = globals[type];
       setGlobal(type, context[type]);
     }
@@ -159,7 +189,7 @@ void testWidgetsWithContext(
       await callback(widgetTester);
     } finally {
       // restore previous global values
-      for (Type type in oldValues.keys) {
+      for (final type in oldValues.keys) {
         final oldGlobal = oldValues[type];
         if (oldGlobal != null) {
           setGlobal(type, oldGlobal);

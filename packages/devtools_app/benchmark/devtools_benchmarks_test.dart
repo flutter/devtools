@@ -14,11 +14,15 @@ import 'package:web_benchmarks/server.dart';
 import 'test_infra/common.dart';
 import 'test_infra/project_root_directory.dart';
 
-final metricList = <String>[
-  'preroll_frame',
-  'apply_frame',
-  'drawFrameDuration',
-];
+List<String> metricList({required bool useWasm}) => [
+      // The skwasm renderer doesn't have preroll or apply frame steps in its
+      // rendering.
+      if (!useWasm) ...[
+        'preroll_frame',
+        'apply_frame',
+      ],
+      'drawFrameDuration',
+    ];
 
 final valueList = <String>[
   'average',
@@ -29,13 +33,19 @@ final valueList = <String>[
 
 /// Tests that the DevTools web benchmarks are run and reported correctly.
 void main() {
-  test(
-    'Can run web benchmarks',
-    () async {
-      await _runBenchmarks();
-    },
-    timeout: const Timeout(Duration(minutes: 10)),
-  );
+  for (final useWasm in [true, false]) {
+    test(
+      'Can run web benchmarks with ${useWasm ? 'WASM' : 'JS'}',
+      () async {
+        await _runBenchmarks(useWasm: useWasm);
+      },
+      timeout: const Timeout(Duration(minutes: 10)),
+      // TODO(https://github.com/dart-lang/sdk/issues/56664): unskip the wasm
+      // benchmarks once this issue is resolved and we can bump DevTools to a
+      // version of Flutter that includes the fix.
+      skip: useWasm,
+    );
+  }
 
   // TODO(kenz): add tests that verify performance meets some expected threshold
 }
@@ -45,7 +55,9 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   final taskResult = await serveWebBenchmark(
     benchmarkAppDirectory: projectRootDirectory(),
     entryPoint: 'benchmark/test_infra/client.dart',
-    compilationOptions: CompilationOptions(useWasm: useWasm),
+    compilationOptions: useWasm
+        ? const CompilationOptions.wasm()
+        : const CompilationOptions.js(),
     treeShakeIcons: false,
     initialPage: benchmarkInitialPage,
   );
@@ -57,12 +69,13 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   );
 
   for (final benchmarkName in DevToolsBenchmark.values.map((e) => e.id)) {
+    final expectedMetrics = metricList(useWasm: useWasm);
     expect(
       taskResult.scores[benchmarkName],
-      hasLength(metricList.length * valueList.length + 1),
+      hasLength(expectedMetrics.length * valueList.length + 1),
     );
 
-    for (final metricName in metricList) {
+    for (final metricName in expectedMetrics) {
       for (final valueName in valueList) {
         expect(
           taskResult.scores[benchmarkName]?.where(

@@ -11,14 +11,13 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
 import '../globals.dart';
-import '../memory/adapted_heap_data.dart';
+import '../memory/heap_object.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';
 import 'inspector_service.dart';
-import 'object_group_api.dart';
 import 'references.dart';
 import 'variable_factory.dart';
 
@@ -30,7 +29,7 @@ Future<void> _addExpandableChildren(
   bool expandAll = false,
 }) async {
   final tasks = <Future>[];
-  for (var child in children) {
+  for (final child in children) {
     if (expandAll) {
       tasks.add(buildVariablesTree(child, expandAll: expandAll));
     }
@@ -83,8 +82,7 @@ Future<void> _addDiagnosticChildrenIfNeeded(
   if (diagnostic == null || !includeDiagnosticChildren) return;
 
   // Always add children last after properties to avoid confusion.
-  final InspectorObjectGroupApi<RemoteDiagnosticsNode>? service =
-      diagnostic.objectGroupApi;
+  final service = diagnostic.objectGroupApi;
   final diagnosticChildren = await diagnostic.children;
   if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
     final childrenNode = DartObjectNode.text(
@@ -149,7 +147,7 @@ Future<void> _addInstanceRefItems(
   assert(ref is! ObjectReferences);
 
   final existingNames = <String>{};
-  for (var child in variable.children) {
+  for (final child in variable.children) {
     final name = child.name;
     if (name != null && name.isNotEmpty) {
       existingNames.add(name);
@@ -183,7 +181,7 @@ void _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
   required IsolateRef? isolateRef,
-  required HeapObjectSelection? heapSelection,
+  required HeapObject? heapSelection,
   Set<String>? existingNames,
 }) {
   switch (value.kind) {
@@ -300,13 +298,13 @@ Future<void> _addValueItems(
   if (value is ObjRef) {
     value = await getObject(isolateRef: isolateRef!, value: value);
     switch (value.runtimeType) {
-      case Func:
+      case const (Func):
         final function = value as Func;
         variable.addAllChildren(
           createVariablesForFunc(function, isolateRef),
         );
         break;
-      case Context:
+      case const (Context):
         final context = value as Context;
         variable.addAllChildren(
           createVariablesForContext(context, isolateRef),
@@ -315,7 +313,7 @@ Future<void> _addValueItems(
     }
   } else if (value is! String && value is! num && value is! bool) {
     switch (value.runtimeType) {
-      case Parameter:
+      case const (Parameter):
         final parameter = value as Parameter;
         variable.addAllChildren(
           createVariablesForParameter(parameter, isolateRef),
@@ -370,7 +368,7 @@ Future<void> _addInspectorItems(
       }
     }
 
-    for (var child in variable.children) {
+    for (final child in variable.children) {
       tasks.add(maybeUpdateRef(child));
     }
     if (tasks.isNotEmpty) {

@@ -68,11 +68,11 @@ List<double> computeRenderSizes({
     // and we can just divide the size evenly
     // but it should be at least as big as [smallestRenderSize]
     final renderSize = math.max(smallestRenderSize, maxSizeAvailable / n);
-    return [for (var _ in sizes) renderSize];
+    return [for (final _ in sizes) renderSize];
   }
 
   List<double> transformToRenderSize(double largestRenderSize) => [
-        for (var s in sizes)
+        for (final s in sizes)
           (s - smallestSize) *
                   (largestRenderSize - smallestRenderSize) /
                   (largestSize - smallestSize) +
@@ -84,7 +84,7 @@ List<double> computeRenderSizes({
   if (useMaxSizeAvailable && sum(renderSizes) < maxSizeAvailable) {
     largestRenderSize = (maxSizeAvailable - n * smallestRenderSize) *
             (largestSize - smallestSize) /
-            sum([for (var s in sizes) s - smallestSize]) +
+            sum([for (final s in sizes) s - smallestSize]) +
         smallestRenderSize;
     renderSizes = transformToRenderSize(largestRenderSize);
   }
@@ -96,7 +96,7 @@ List<double> computeRenderSizes({
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
       : description = node.description,
-        size = node.size,
+        size = node.size!,
         constraints = node.constraints,
         isFlex = node.isFlex,
         flexFactor = node.flexFactor,
@@ -108,7 +108,7 @@ class LayoutProperties {
                   (child) => LayoutProperties(child, copyLevel: copyLevel - 1),
                 )
                 .toList(growable: false) {
-    for (var child in children) {
+    for (final child in children) {
       child.parent = this;
     }
   }
@@ -123,7 +123,7 @@ class LayoutProperties {
     required this.size,
     required this.flexFit,
   }) {
-    for (var child in children) {
+    for (final child in children) {
       child.parent = this;
     }
   }
@@ -265,7 +265,7 @@ extension LayoutPropertiesExtension on LayoutProperties {
   }
 }
 
-final Expando<FlexLayoutProperties> _flexLayoutExpando = Expando();
+final _flexLayoutExpando = Expando<FlexLayoutProperties>();
 
 extension MainAxisAlignmentExtension on MainAxisAlignment {
   MainAxisAlignment get reversed {
@@ -283,14 +283,14 @@ extension MainAxisAlignmentExtension on MainAxisAlignment {
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed.
 class FlexLayoutProperties extends LayoutProperties {
   FlexLayoutProperties({
-    required Size size,
-    required List<LayoutProperties> children,
-    required RemoteDiagnosticsNode node,
-    BoxConstraints? constraints,
-    bool isFlex = false,
-    String? description,
-    num? flexFactor,
-    FlexFit? flexFit,
+    required super.size,
+    required super.children,
+    required super.node,
+    super.constraints,
+    super.isFlex = false,
+    super.description,
+    super.flexFactor,
+    super.flexFit,
     this.direction = Axis.vertical,
     this.mainAxisAlignment,
     this.crossAxisAlignment,
@@ -298,19 +298,10 @@ class FlexLayoutProperties extends LayoutProperties {
     required this.textDirection,
     required this.verticalDirection,
     this.textBaseline,
-  }) : super.values(
-          size: size,
-          children: children,
-          node: node,
-          constraints: constraints,
-          isFlex: isFlex,
-          description: description,
-          flexFactor: flexFactor,
-          flexFit: flexFit,
-        );
+  }) : super.values();
 
   FlexLayoutProperties._fromNode(
-    RemoteDiagnosticsNode node, {
+    super.node, {
     this.direction = Axis.vertical,
     this.mainAxisAlignment,
     this.mainAxisSize,
@@ -318,7 +309,7 @@ class FlexLayoutProperties extends LayoutProperties {
     required this.textDirection,
     required this.verticalDirection,
     this.textBaseline,
-  }) : super(node);
+  });
 
   factory FlexLayoutProperties.fromDiagnostics(RemoteDiagnosticsNode node) {
     // Cache the properties on an expando so that local tweaks to
@@ -364,7 +355,7 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
-    final Map<String, Object?> renderObjectJson = node.renderObject!.json;
+    final renderObjectJson = node.renderObject!.json;
     final properties = (renderObjectJson['properties'] as List<Object?>)
         .cast<Map<String, Object?>>();
 
@@ -614,7 +605,9 @@ class FlexLayoutProperties extends LayoutProperties {
 
       if (crossAxisAlignment == CrossAxisAlignment.start ||
           crossAxisAlignment == CrossAxisAlignment.stretch ||
-          maxDimension == usedDimension) return 0.0;
+          maxDimension == usedDimension) {
+        return 0.0;
+      }
       final emptySpace = math.max(0.0, maxDimension - usedDimension);
       if (crossAxisAlignment == CrossAxisAlignment.end) return emptySpace;
       return emptySpace * 0.5;
@@ -687,7 +680,9 @@ class FlexLayoutProperties extends LayoutProperties {
       if (dimension(crossAxisDirection) ==
               displayChildren[i].dimension(crossAxisDirection) ||
           childrenRenderProperties[i].crossAxisDimension ==
-              maxSizeAvailable(crossAxisDirection)) continue;
+              maxSizeAvailable(crossAxisDirection)) {
+        continue;
+      }
 
       final renderProperties = childrenRenderProperties[i];
       final space = renderProperties.clone()..isFreeSpace = true;

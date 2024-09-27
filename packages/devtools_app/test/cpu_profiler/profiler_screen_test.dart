@@ -31,8 +31,7 @@ void main() {
 
   group('ProfilerScreen', () {
     void verifyBaseState() {
-      expect(find.byType(RecordButton), findsOneWidget);
-      expect(find.byType(StopRecordingButton), findsOneWidget);
+      expect(find.byType(StartStopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
       expect(find.text('Load all CPU samples'), findsOneWidget);
       if (scene.fakeServiceConnection.serviceManager.connectedApp!
@@ -102,7 +101,7 @@ void main() {
         verifyBaseState();
 
         // Start recording.
-        await tester.tap(find.byType(RecordButton));
+        await tester.tap(find.byType(StartStopRecordingButton));
         await tester.pump(const Duration(seconds: 1));
         expect(
           find.byType(ProfileRecordingInstructions),
@@ -113,7 +112,7 @@ void main() {
         expect(find.byType(CpuProfiler), findsNothing);
 
         // Stop recording.
-        await tester.tap(find.byType(StopRecordingButton));
+        await tester.tap(find.byType(StartStopRecordingButton));
         await tester.pumpAndSettle(const Duration(seconds: 2));
 
         expect(find.byType(CircularProgressIndicator), findsNothing);

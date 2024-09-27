@@ -85,10 +85,8 @@ final class ResolvedUriManager {
 
 /// Helper class for storing 1:1 mappings for full file paths to package paths.
 class _PackagePathMappings {
-  final Map<String, Map<String, String?>> _isolatePackageToFullPathMappings =
-      <String, Map<String, String?>>{};
-  final Map<String, Map<String, String?>> _isolateFullPathToPackageMappings =
-      <String, Map<String, String?>>{};
+  final _isolatePackageToFullPathMappings = <String, Map<String, String?>>{};
+  final _isolateFullPathToPackageMappings = <String, Map<String, String?>>{};
 
   /// Returns the package path to full path mapping if it has already
   /// been fetched.

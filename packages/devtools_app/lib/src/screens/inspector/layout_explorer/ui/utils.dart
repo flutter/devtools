@@ -22,7 +22,7 @@ import 'widgets_theme.dart';
 @immutable
 class BorderLayout extends StatelessWidget {
   const BorderLayout({
-    Key? key,
+    super.key,
     this.left,
     this.leftWidth,
     this.top,
@@ -32,14 +32,13 @@ class BorderLayout extends StatelessWidget {
     this.bottom,
     this.bottomHeight,
     this.center,
-  })  : assert(
+  }) : assert(
           left != null ||
               top != null ||
               right != null ||
               bottom != null ||
               center != null,
-        ),
-        super(key: key);
+        );
 
   final Widget? center;
   final Widget? top;
@@ -94,8 +93,7 @@ class BorderLayout extends StatelessWidget {
 
 @immutable
 class Truncateable extends StatelessWidget {
-  const Truncateable({Key? key, this.truncate = false, required this.child})
-      : super(key: key);
+  const Truncateable({super.key, this.truncate = false, required this.child});
 
   final Widget child;
   final bool truncate;
@@ -114,7 +112,7 @@ class Truncateable extends StatelessWidget {
 /// [textColor] color for title text
 class WidgetVisualizer extends StatelessWidget {
   const WidgetVisualizer({
-    Key? key,
+    super.key,
     required this.title,
     this.hint,
     required this.isSelected,
@@ -122,7 +120,7 @@ class WidgetVisualizer extends StatelessWidget {
     required this.child,
     this.overflowSide,
     this.largeTitle = false,
-  }) : super(key: key);
+  });
 
   final LayoutProperties layoutProperties;
   final String title;
@@ -169,7 +167,7 @@ class WidgetVisualizer extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withAlpha(255 ~/ 2),
                         blurRadius: 20,
                       ),
                     ]
@@ -287,16 +285,16 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   List<double> childrenDimensions(Axis axis) {
     final beginDimensions = begin.childrenDimensions(axis);
     final endDimensions = end.childrenDimensions(axis);
-    return _lerpList(beginDimensions, endDimensions).cast<double>();
+    return _lerpList(beginDimensions, endDimensions);
   }
 
   @override
   List<double> get childrenHeights =>
-      _lerpList(begin.childrenHeights, end.childrenHeights).cast<double>();
+      _lerpList(begin.childrenHeights, end.childrenHeights);
 
   @override
   List<double> get childrenWidths =>
-      _lerpList(begin.childrenWidths, end.childrenWidths).cast<double>();
+      _lerpList(begin.childrenWidths, end.childrenWidths);
 
   @override
   BoxConstraints? get constraints {
@@ -420,9 +418,9 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
 
 class LayoutExplorerBackground extends StatelessWidget {
   const LayoutExplorerBackground({
-    Key? key,
+    super.key,
     required this.colorScheme,
-  }) : super(key: key);
+  });
 
   final ColorScheme colorScheme;
 

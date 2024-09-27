@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../shared/common_widgets.dart';
+import '../shared/globals.dart';
 import 'api/impl/dart_tooling_api.dart';
 import 'vs_code/flutter_panel.dart';
 
@@ -14,22 +16,24 @@ import 'vs_code/flutter_panel.dart';
 /// meaning that this screen will not be part of DevTools' normal navigation.
 /// The only way to access a standalone screen is directly from the url.
 enum StandaloneScreenType {
-  vsCodeFlutterPanel;
-
-  // TODO(dantup): This seems unused, is it needed?
-  static StandaloneScreenType? parse(String? id) {
-    if (id == null) return null;
-
-    for (final type in StandaloneScreenType.values) {
-      if (type.name == id) return type;
-    }
-    return null;
-  }
+  editorSidebar,
+  vsCodeFlutterPanel; // Legacy postMessage version.
 
   Widget get screen {
     return switch (this) {
       StandaloneScreenType.vsCodeFlutterPanel =>
-        VsCodeFlutterPanel(DartToolingApiImpl.postMessage()),
+        VsCodePostMessageSidebarPanel(PostMessageToolApiImpl.postMessage()),
+      StandaloneScreenType.editorSidebar => ValueListenableBuilder(
+          // TODO(dantup): Add a timeout here so if dtdManager.connection
+          //  doesn't complete after some period we can give some kind of
+          //  useful message.
+          valueListenable: dtdManager.connection,
+          builder: (context, data, _) {
+            return data == null
+                ? const CenteredCircularProgressIndicator()
+                : DtdEditorSidebarPanel(data);
+          },
+        ),
     };
   }
 }

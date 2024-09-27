@@ -23,16 +23,15 @@ void loggingTests() {
   });
 
   test('displays log data', () async {
-    final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
+    final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('logging');
 
-    final String? currentPageId = await tools.currentPageId();
+    final currentPageId = await tools.currentPageId();
     expect(currentPageId, 'logging');
 
     // Cause app to log.
-    final LoggingManager logs = LoggingManager(tools);
+    final logs = LoggingManager(tools);
     await logs.clearLogs();
     expect(await logs.logCount(), 0);
     await appFixture.invoke('controller.emitLog()');
@@ -43,15 +42,14 @@ void loggingTests() {
   });
 
   test('log screen postpones write when offscreen', () async {
-    final DevtoolsManager tools =
-        DevtoolsManager(tabInstance, webBuildFixture.baseUri);
+    final tools = DevtoolsManager(tabInstance, webBuildFixture.baseUri);
     await tools.start(appFixture);
     await tools.switchPage('logging');
 
-    final String? currentPageId = await tools.currentPageId();
+    final currentPageId = await tools.currentPageId();
     expect(currentPageId, 'logging');
 
-    final LoggingManager logs = LoggingManager(tools);
+    final logs = LoggingManager(tools);
 
     // Verify that the log is empty.
     expect(await logs.logCount(), 0);
@@ -84,8 +82,7 @@ class LoggingManager {
   }
 
   Future<int> logCount() async {
-    final AppResponse response =
-        await tools.tabInstance.send('logging.logCount');
+    final response = await tools.tabInstance.send('logging.logCount');
     return response.result as int;
   }
 }

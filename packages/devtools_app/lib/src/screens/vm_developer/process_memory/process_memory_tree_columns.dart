@@ -18,6 +18,9 @@ class DescriptionColumn extends ColumnData<TreemapNode> {
 
   @override
   String getValue(TreemapNode dataObject) => dataObject.caption ?? '';
+
+  @override
+  bool get supportsSorting => false;
 }
 
 class MemoryColumn extends SizeAndPercentageColumn<TreemapNode> {

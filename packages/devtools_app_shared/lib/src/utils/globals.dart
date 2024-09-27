@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-final Map<Type, Object> globals = <Type, Object>{};
+final globals = <Type, Object>{};
 
 void setGlobal(Type clazz, Object instance) {
   globals[clazz] = instance;

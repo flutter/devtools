@@ -14,7 +14,7 @@ import '../../shared/ui/search.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
 
-const int numOfMatchesToShow = 10;
+const numOfMatchesToShow = 10;
 
 const noResultsMsg = 'No files found.';
 
@@ -306,9 +306,9 @@ class FileSearchResults {
     required List<ScriptRef> allScripts,
   }) {
     assert(!query.isEmpty);
-    final List<ScriptRef> exactFileNameMatches = [];
-    final List<ScriptRef> exactFullPathMatches = [];
-    final List<ScriptRef> fuzzyMatches = [];
+    final exactFileNameMatches = <ScriptRef>[];
+    final exactFullPathMatches = <ScriptRef>[];
+    final fuzzyMatches = <ScriptRef>[];
 
     for (final scriptRef in allScripts) {
       if (query.isExactFileNameMatch(scriptRef)) {
@@ -359,14 +359,10 @@ class FileSearchResults {
       ? allScripts.map((script) => AutoCompleteMatch(script.uri!)).toList()
       : [
           ..._exactFileNameMatches
-              .map(query.createExactFileNameAutoCompleteMatch)
-              .toList(),
+              .map(query.createExactFileNameAutoCompleteMatch),
           ..._exactFullPathMatches
-              .map(query.createExactFullPathAutoCompleteMatch)
-              .toList(),
-          ..._fuzzyMatches
-              .map(query.createFuzzyMatchAutoCompleteMatch)
-              .toList(),
+              .map(query.createExactFullPathAutoCompleteMatch),
+          ..._fuzzyMatches.map(query.createFuzzyMatchAutoCompleteMatch),
         ];
 
   FileSearchResults copyWith({

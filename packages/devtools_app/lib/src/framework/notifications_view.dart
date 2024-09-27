@@ -19,7 +19,7 @@ final _notificationWidth = _notificationHeight * goldenRatio;
 
 /// Manager for notifications in the app.
 class NotificationsView extends StatelessWidget {
-  const NotificationsView({Key? key, required this.child}) : super(key: key);
+  const NotificationsView({super.key, required this.child});
 
   final Widget child;
 
@@ -43,7 +43,7 @@ class NotificationsView extends StatelessWidget {
 /// in _NotificationsState.build because there would be no Overlay in the tree
 /// at the time Overlay.of(context) is called.
 class _Notifications extends StatefulWidget {
-  const _Notifications({Key? key, required this.child}) : super(key: key);
+  const _Notifications({required this.child});
 
   final Widget child;
 
@@ -54,7 +54,7 @@ class _Notifications extends StatefulWidget {
 class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   OverlayEntry? _overlayEntry;
 
-  final List<_Notification> _notifications = [];
+  final _notifications = <_Notification>[];
 
   @override
   void didChangeDependencies() {
@@ -180,10 +180,9 @@ class _NotificationOverlay extends StatelessWidget {
 
 class _Notification extends StatefulWidget {
   const _Notification({
-    Key? key,
     required this.message,
     required this.remove,
-  }) : super(key: key);
+  });
 
   final NotificationMessage message;
   final void Function(_Notification) remove;
@@ -246,11 +245,11 @@ class _NotificationState extends State<_Notification>
         );
       },
       child: Card(
-        color: theme.snackBarTheme.backgroundColor,
-        margin: const EdgeInsets.fromLTRB(0, 0, 0, densePadding),
+        color: theme.colorScheme.secondaryContainer,
+        margin: const EdgeInsets.only(bottom: densePadding),
         child: DefaultTextStyle(
           style: theme.snackBarTheme.contentTextStyle ??
-              theme.primaryTextTheme.titleMedium!,
+              theme.textTheme.titleMedium!,
           child: Padding(
             padding: const EdgeInsets.all(denseSpacing),
             child: Column(
@@ -277,7 +276,7 @@ class _NotificationState extends State<_Notification>
                         widget: widget,
                       ),
                 const SizedBox(height: defaultSpacing),
-                _NotificationActions(widget: widget),
+                _NotificationActions(actions: widget.message.actions),
               ],
             ),
           ),
@@ -318,13 +317,13 @@ class _NotificationMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle = theme.regularTextStyle;
+    final textStyle =
+        theme.regularTextStyleWithColor(theme.colorScheme.onSecondaryContainer);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        denseSpacing,
-        denseSpacing,
-        denseSpacing,
-        0,
+      padding: const EdgeInsets.only(
+        left: denseSpacing,
+        top: denseSpacing,
+        right: denseSpacing,
       ),
       child: Text(
         widget.message.text,
@@ -339,15 +338,12 @@ class _NotificationMessage extends StatelessWidget {
 }
 
 class _NotificationActions extends StatelessWidget {
-  const _NotificationActions({
-    required this.widget,
-  });
+  const _NotificationActions({required this.actions});
 
-  final _Notification widget;
+  final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) {
-    final actions = widget.message.actions;
     if (actions.isEmpty) return const SizedBox();
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,

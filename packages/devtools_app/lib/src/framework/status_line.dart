@@ -25,27 +25,27 @@ class StatusLine extends StatelessWidget {
     super.key,
     required this.currentScreen,
     required this.isEmbedded,
-    required this.isConnected,
-  });
+    required bool isConnected,
+  }) : highlightForConnection = isConnected && !isEmbedded;
 
   final Screen currentScreen;
   final bool isEmbedded;
-  final bool isConnected;
+
+  /// Whether to highlight the footer when DevTools is connected to an app.
+  final bool highlightForConnection;
 
   static const deviceInfoTooltip = 'Device Info';
 
   /// The padding around the footer in the DevTools UI.
-  EdgeInsets get padding => const EdgeInsets.fromLTRB(
-        defaultSpacing,
-        densePadding,
-        defaultSpacing,
-        densePadding,
+  EdgeInsets get padding => const EdgeInsets.symmetric(
+        horizontal: defaultSpacing,
+        vertical: densePadding,
       );
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = isConnected ? theme.colorScheme.onPrimary : null;
+    final color = highlightForConnection ? theme.colorScheme.onPrimary : null;
     final height = statusLineHeight + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
@@ -54,7 +54,7 @@ class StatusLine extends StatelessWidget {
           style: TextStyle(color: color),
           child: Container(
             decoration: BoxDecoration(
-              color: isConnected ? theme.colorScheme.primary : null,
+              color: highlightForConnection ? theme.colorScheme.primary : null,
               border: Border(
                 top: Divider.createBorderSide(context, width: 1.0),
               ),
@@ -74,9 +74,9 @@ class StatusLine extends StatelessWidget {
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
     final theme = Theme.of(context);
-    final color = isConnected ? theme.colorScheme.onPrimary : null;
+    final color = highlightForConnection ? theme.colorScheme.onPrimary : null;
     final screenWidth = ScreenSize(context).width;
-    final Widget? pageStatus = currentScreen.buildStatus(context);
+    final pageStatus = currentScreen.buildStatus(context);
     final widerThanXxs = screenWidth > MediaSize.xxs;
     final screenMetaData = ScreenMetaData.lookup(currentScreen.screenId);
     final showVideoTutorial = screenMetaData?.tutorialVideoTimestamp != null;
@@ -87,14 +87,14 @@ class StatusLine extends StatelessWidget {
           DocumentationLink(
             screen: currentScreen,
             screenWidth: screenWidth,
-            isConnected: isConnected,
+            highlightForConnection: highlightForConnection,
           ),
           if (showVideoTutorial) ...[
             BulletSpacer(color: color),
             VideoTutorialLink(
               screenMetaData: screenMetaData!,
               screenWidth: screenWidth,
-              isConnected: isConnected,
+              highlightForConnection: highlightForConnection,
             ),
           ],
         ],
@@ -136,7 +136,7 @@ class StatusLine extends StatelessWidget {
             description = vm.deviceDisplay;
           }
 
-          final color = isConnected
+          final color = highlightForConnection
               ? theme.colorScheme.onPrimary
               : theme.regularTextStyle.color;
 
@@ -162,7 +162,7 @@ class StatusLine extends StatelessWidget {
                 message: 'Connected device',
                 child: Text(
                   description,
-                  style: isConnected
+                  style: highlightForConnection
                       ? theme.regularTextStyle
                           .copyWith(color: theme.colorScheme.onPrimary)
                       : theme.regularTextStyle,
@@ -198,22 +198,23 @@ class DocumentationLink extends StatelessWidget {
     super.key,
     required this.screen,
     required this.screenWidth,
-    required this.isConnected,
+    required this.highlightForConnection,
   });
 
   final Screen screen;
 
   final MediaSize screenWidth;
 
-  final bool isConnected;
+  final bool highlightForConnection;
 
   @override
   Widget build(BuildContext context) {
-    final color = isConnected ? Theme.of(context).colorScheme.onPrimary : null;
+    final color =
+        highlightForConnection ? Theme.of(context).colorScheme.onPrimary : null;
     final docPageId = screen.docPageId ?? '';
     return LinkIconLabel(
       icon: Icons.library_books_outlined,
-      link: Link(
+      link: GaLink(
         display: screenWidth <= MediaSize.xs ? 'Docs' : 'Read docs',
         url: screen.docsUrl ??
             'https://docs.flutter.dev/tools/devtools/$docPageId',
@@ -232,23 +233,24 @@ class VideoTutorialLink extends StatelessWidget {
     super.key,
     required this.screenMetaData,
     required this.screenWidth,
-    required this.isConnected,
+    required this.highlightForConnection,
   });
 
   final ScreenMetaData screenMetaData;
 
   final MediaSize screenWidth;
 
-  final bool isConnected;
+  final bool highlightForConnection;
 
   static const _devToolsYouTubeVideoUrl = 'https://youtu.be/_EYk-E29edo';
 
   @override
   Widget build(BuildContext context) {
-    final color = isConnected ? Theme.of(context).colorScheme.onPrimary : null;
+    final color =
+        highlightForConnection ? Theme.of(context).colorScheme.onPrimary : null;
     return LinkIconLabel(
       icon: Icons.ondemand_video_rounded,
-      link: Link(
+      link: GaLink(
         display: screenWidth <= MediaSize.xs ? 'Tutorial' : 'Watch tutorial',
         url:
             '$_devToolsYouTubeVideoUrl${screenMetaData.tutorialVideoTimestamp}',
@@ -262,12 +264,11 @@ class VideoTutorialLink extends StatelessWidget {
 }
 
 class IsolateSelector extends StatelessWidget {
-  const IsolateSelector({Key? key}) : super(key: key);
+  const IsolateSelector({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final IsolateManager isolateManager =
-        serviceConnection.serviceManager.isolateManager;
+    final isolateManager = serviceConnection.serviceManager.isolateManager;
     return MultiValueListenableBuilder(
       listenables: [
         isolateManager.isolates,

@@ -27,7 +27,6 @@ void main() {
     when(mockServiceManager.connectedState).thenReturn(
       ValueNotifier<ConnectedState>(const ConnectedState(false)),
     );
-    when(mockServiceManager.hasConnection).thenReturn(false);
     when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
     when(mockServiceConnection.appState).thenReturn(
       AppState(
@@ -44,7 +43,7 @@ void main() {
     setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(FrameworkController, FrameworkController());
     setGlobal(SurveyService, SurveyService());
-    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());
@@ -77,7 +76,7 @@ void main() {
           debugger: mockDebuggerController,
           analytics: AnalyticsController(
             enabled: false,
-            firstRun: false,
+            shouldShowConsentMessage: false,
             consentMessage: 'fake message',
           ),
           releaseNotes: ReleaseNotesController(),

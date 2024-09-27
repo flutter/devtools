@@ -146,7 +146,7 @@ void main() {
 
     expect(requestedSize.valueAsString, '1024');
     expect(find.byType(Text), findsOneWidget);
-    expect(find.text('1 KB'), findsOneWidget);
+    expect(find.text('1.0 KB'), findsOneWidget);
     expect(find.byType(ToolbarRefresh), findsOneWidget);
 
     await tester.tap(find.byType(ToolbarRefresh));

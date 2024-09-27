@@ -19,7 +19,7 @@ import '../../shared/globals.dart';
 import '../../shared/tree.dart';
 
 class Variables extends StatelessWidget {
-  const Variables({Key? key}) : super(key: key);
+  const Variables({super.key});
 
   @override
   Widget build(BuildContext context) {

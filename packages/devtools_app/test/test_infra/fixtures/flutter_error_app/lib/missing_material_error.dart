@@ -23,7 +23,7 @@ class MissingMaterialError extends StatelessWidget {
 
 /// Opens an [AlertDialog] showing what the user typed.
 class ExampleWidget extends StatefulWidget {
-  const ExampleWidget({Key? key}) : super(key: key);
+  const ExampleWidget({super.key});
 
   @override
   State<ExampleWidget> createState() => _ExampleWidgetState();
@@ -31,7 +31,7 @@ class ExampleWidget extends StatefulWidget {
 
 /// State for [ExampleWidget] widgets.
 class _ExampleWidgetState extends State<ExampleWidget> {
-  final TextEditingController _controller = TextEditingController();
+  final _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {

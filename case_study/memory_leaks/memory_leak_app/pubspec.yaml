@@ -2,7 +2,7 @@ name: memory_leak
 description: Flutter memory leak example app to serve as a DevTools case study.
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.2.0
 
 dependencies:
   flutter:

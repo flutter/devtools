@@ -6,12 +6,14 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../utils/auto_dispose.dart';
 import '../utils/list.dart';
+import '../utils/utils.dart';
 import 'isolate_state.dart';
 import 'service_extensions.dart' as extensions;
 
@@ -23,6 +25,10 @@ base mixin TestIsolateManager implements IsolateManager {}
 final class IsolateManager with DisposerMixin {
   final _isolateStates = <IsolateRef, IsolateState>{};
 
+  /// The amount of time we will wait for the main isolate to become non-null
+  /// when calling [waitForMainIsolateState].
+  static const _waitForMainIsolateStateTimeout = Duration(seconds: 3);
+
   /// Signifies whether the main isolate should be selected if it is started.
   ///
   /// This is used to make sure the the main isolate remains selected after
@@ -31,16 +37,14 @@ final class IsolateManager with DisposerMixin {
 
   VmService? _service;
 
-  final StreamController<IsolateRef?> _isolateCreatedController =
-      StreamController<IsolateRef?>.broadcast();
-  final StreamController<IsolateRef?> _isolateExitedController =
-      StreamController<IsolateRef?>.broadcast();
+  final _isolateCreatedController = StreamController<IsolateRef?>.broadcast();
+  final _isolateExitedController = StreamController<IsolateRef?>.broadcast();
 
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
   final _selectedIsolate = ValueNotifier<IsolateRef?>(null);
 
   int _lastIsolateIndex = 0;
-  final Map<String?, int> _isolateIndexMap = {};
+  final _isolateIndexMap = <String?, int>{};
 
   ValueListenable<List<IsolateRef>> get isolates => _isolates;
   final _isolates = ListValueNotifier(const <IsolateRef>[]);
@@ -62,6 +66,17 @@ final class IsolateManager with DisposerMixin {
     return _mainIsolate.value != null
         ? _isolateStates[_mainIsolate.value!]
         : null;
+  }
+
+  Future<IsolateState?> waitForMainIsolateState() async {
+    final mainIsolateRef = await whenValueNonNull<IsolateRef?>(
+      mainIsolate,
+      timeout: _waitForMainIsolateStateTimeout,
+    );
+    if (mainIsolateRef == null) return null;
+    final state = mainIsolateState;
+    await state?.waitForIsolateLoad();
+    return state;
   }
 
   /// Return a unique, monotonically increasing number for this Isolate.
@@ -99,6 +114,14 @@ final class IsolateManager with DisposerMixin {
     _isolates.add(isolateRef);
     isolateIndex(isolateRef);
     await _loadIsolateState(isolateRef);
+    // If the flag pause-breakpoints-on-start was successfully set, then each
+    // new isolate will start paused. Therefore resume it (unless it is the
+    // current isolate, in which case the breakpoint manager will resume it
+    // after setting breakpoints):
+    final selectedIsolateId = selectedIsolate.value?.id;
+    if (selectedIsolateId != null && selectedIsolateId != isolateRef.id) {
+      await resumeIsolate(isolateRef);
+    }
   }
 
   Future<void> _loadIsolateState(IsolateRef isolateRef) async {
@@ -177,8 +200,7 @@ final class IsolateManager with DisposerMixin {
         _mainIsolate.value = null;
       }
       if (_selectedIsolate.value == event.isolate) {
-        _selectedIsolate.value =
-            _isolateStates.isEmpty ? null : _isolateStates.keys.first;
+        _selectedIsolate.value = _isolateStates.keys.firstOrNull;
       }
       _isolateRunnableCompleters.remove(event.isolate!.id);
     }
@@ -200,11 +222,11 @@ final class IsolateManager with DisposerMixin {
     if (_isolateStates.isEmpty) return null;
 
     final service = _service;
-    for (var isolateState in _isolateStates.values) {
+    for (final isolateState in _isolateStates.values) {
       if (_selectedIsolate.value == null) {
         final isolate = await isolateState.isolate;
         if (service != _service) return null;
-        for (String extensionName in isolate?.extensionRPCs ?? []) {
+        for (final extensionName in isolate?.extensionRPCs ?? <String>[]) {
           if (extensions.isFlutterExtension(extensionName)) {
             return isolateState.isolateRef;
           }
@@ -212,8 +234,7 @@ final class IsolateManager with DisposerMixin {
       }
     }
 
-    final IsolateRef? ref =
-        _isolateStates.keys.firstWhereOrNull((IsolateRef ref) {
+    final ref = _isolateStates.keys.firstWhereOrNull((IsolateRef ref) {
       // 'foo.dart:main()'
       return ref.name!.contains(':main(');
     });
@@ -237,8 +258,34 @@ final class IsolateManager with DisposerMixin {
     _isolateRunnableCompleters.clear();
   }
 
+  /// Resumes the isolate by calling [DdsExtension.readyToResume].
+  ///
+  /// CAUTION: This should only be used for a tool-initiated resume, not a user-
+  /// initiated resume. See:
+  ///  https://github.com/dart-lang/sdk/commit/5536951738ba599d96e075b7140e52b28e233
+  Future<void> resumeIsolate(IsolateRef isolateRef) async {
+    if (isolateRef.id == null || _service == null) return;
+    final isolateId = isolateRef.id!;
+    try {
+      await _readyToResume(isolateId);
+    } catch (error) {
+      _log.warning(error);
+    }
+  }
+
+  Future<void> _readyToResume(String isolateId) async {
+    final service = _service!;
+    try {
+      await service.readyToResume(isolateId);
+    } on UnimplementedError {
+      // Fallback to a regular resume if the DDS version doesn't support
+      // `readyToResume`:
+      await service.resume(isolateId);
+    }
+  }
+
   void _clearIsolateStates() {
-    for (var isolateState in _isolateStates.values) {
+    for (final isolateState in _isolateStates.values) {
       isolateState.dispose();
     }
     _isolateStates.clear();

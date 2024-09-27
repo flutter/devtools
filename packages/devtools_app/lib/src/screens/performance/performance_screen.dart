@@ -9,7 +9,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
@@ -66,7 +65,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   void initState() {
     super.initState();
     ga.screen(PerformanceScreen.id);
-    addAutoDisposeListener(offlineController.offlineMode);
+    addAutoDisposeListener(offlineDataController.showingOfflineData);
   }
 
   @override
@@ -78,7 +77,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
     cancelListeners();
     addAutoDisposeListener(controller.loadingOfflineData);
-    addAutoDisposeListener(controller.flutterFramesController.selectedFrame);
   }
 
   @override
@@ -94,8 +92,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
           );
         }
 
-        final offlineMode = offlineController.offlineMode.value;
-        final isOfflineFlutterApp = offlineMode &&
+        final showingOfflineData =
+            offlineDataController.showingOfflineData.value;
+        final isOfflineFlutterApp = showingOfflineData &&
             controller.offlinePerformanceData != null &&
             controller.offlinePerformanceData!.frames.isNotEmpty;
         return Column(
@@ -106,12 +105,12 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             ),
             const SizedBox(height: intermediateSpacing),
             if (isOfflineFlutterApp ||
-                (!offlineMode &&
+                (!showingOfflineData &&
                     serviceConnection
                         .serviceManager.connectedApp!.isFlutterAppNow!))
               FlutterFramesChart(
                 controller.flutterFramesController,
-                offlineMode: offlineMode,
+                showingOfflineData: showingOfflineData,
                 impellerEnabled: controller.impellerEnabled,
               ),
             const Expanded(child: TabbedPerformanceView()),
@@ -134,11 +133,7 @@ class WebPerformanceScreenBody extends StatelessWidget {
       data: isFlutterWebApp ? flutterWebInstructionsMd : dartWebInstructionsMd,
       onTapLink: (_, url, __) {
         if (url != null) {
-          unawaited(
-            launchUrl(
-              Uri.parse(url),
-            ),
-          );
+          unawaited(launchUrlWithErrorHandling(url));
         }
       },
     );
@@ -156,7 +151,7 @@ class DisconnectedPerformanceScreenBody extends StatelessWidget {
     return FileImportContainer(
       instructions: importInstructions,
       actionText: 'Load data',
-      gaScreen: gac.appSize,
+      gaScreen: gac.performance,
       gaSelectionImport: gac.PerformanceEvents.openDataFile.name,
       gaSelectionAction: gac.PerformanceEvents.loadDataFromFile.name,
       onAction: (jsonFile) {
@@ -179,18 +174,18 @@ const debugLayoutsLink =
     'https://api.flutter.dev/flutter/rendering/debugProfileLayoutsEnabled.html';
 const debugPaintsLink =
     'https://api.flutter.dev/flutter/rendering/debugProfilePaintsEnabled.html';
-const profileModeLink = 'https://docs.flutter.dev/testing/build-modes#profile';
+const profileModeLink = 'https://flutter.dev/to/profile-mode';
 const performancePanelLink =
     'https://developer.chrome.com/docs/devtools/performance';
 
 const flutterWebInstructionsMd = '''
 ## How to use Chrome DevTools for performance profiling
 
-The Flutter framework emits timeline events as it works to build frames, draw 
-scenes, and track other activity such as garbage collections. These events are 
+The Flutter framework emits timeline events as it works to build frames, draw
+scenes, and track other activity such as garbage collections. These events are
 exposed in the Chrome DevTools performance panel for debugging.
 
-You can also emit your own timeline events using the `dart:developer` 
+You can also emit your own timeline events using the `dart:developer`
 [Timeline]($timelineLink) and [TimelineTask]($timelineTaskLink) APIs for further
 performance analysis.
 
@@ -212,8 +207,8 @@ your application, and start recording to capture timeline events.
 const dartWebInstructionsMd = '''
 ## How to use Chrome DevTools for performance profiling
 
-Any events emitted using the `dart:developer` [Timeline]($timelineLink) and 
-[TimelineTask]($timelineTaskLink) APIs are exposed in the Chrome DevTools 
+Any events emitted using the `dart:developer` [Timeline]($timelineLink) and
+[TimelineTask]($timelineTaskLink) APIs are exposed in the Chrome DevTools
 performance panel.
 
 Open up the [Chrome DevTools' Performance panel]($performancePanelLink) for

@@ -3,16 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/analytics/constants.dart';
+import 'package:devtools_app/src/shared/development_helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../test_infra/test_data/extensions.dart';
 
 void main() {
   group('DevTools extension analytics', () {
     test(
       'uses extension name for public package',
       () {
-        final public = providerExtension;
+        final public = StubDevToolsExtensions.providerExtension;
         expect(public.isPubliclyHosted, true);
         expect(public.name, 'provider');
         expect(public.analyticsSafeName, 'provider');
@@ -51,7 +50,7 @@ void main() {
     test(
       'does not use extension name for private package',
       () {
-        final private = fooExtension;
+        final private = StubDevToolsExtensions.fooExtension;
         expect(private.isPubliclyHosted, false);
         expect(private.name, 'foo');
         expect(private.analyticsSafeName, 'private');
