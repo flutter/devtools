@@ -17,12 +17,7 @@ import 'logging_table_v2.dart';
 
 /// Presents logs from the connected app.
 class LoggingScreenV2 extends Screen {
-  LoggingScreenV2()
-      : super(
-          id,
-          title: ScreenMetaData.logging.title,
-          icon: ScreenMetaData.logging.icon,
-        );
+  LoggingScreenV2() : super.fromMetaData(ScreenMetaData.logging);
 
   static final id = ScreenMetaData.logging.id;
 
@@ -72,10 +67,10 @@ class _LoggingScreenBodyV2State extends State<LoggingScreenBodyV2>
 
     cancelListeners();
 
-    filteredLogs = controller.filteredData.value;
-    addAutoDisposeListener(controller.filteredData, () {
+    filteredLogs = controller.loggingModel.filteredData.value;
+    addAutoDisposeListener(controller.loggingModel.filteredData, () {
       setState(() {
-        filteredLogs = controller.filteredData.value;
+        filteredLogs = controller.loggingModel.filteredData.value;
       });
     });
   }

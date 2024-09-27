@@ -12,10 +12,10 @@ import '../shared/analytics/analytics_controller.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
+import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/log_storage.dart';
 import '../shared/server/server.dart';
-import '../shared/utils.dart';
 
 class OpenSettingsAction extends ScaffoldAction {
   OpenSettingsAction({super.key, super.color})
@@ -38,6 +38,7 @@ class SettingsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final analyticsController = Provider.of<AnalyticsController>(context);
     return DevToolsDialog(
       title: const DialogTitleText('Settings'),
@@ -49,8 +50,9 @@ class SettingsDialog extends StatelessWidget {
             Flexible(
               child: CheckboxSetting(
                 title: 'Use a dark theme',
-                notifier: preferences.darkModeTheme,
+                notifier: preferences.darkModeEnabled,
                 onChanged: preferences.toggleDarkModeTheme,
+                gaScreen: gac.settingsDialog,
                 gaItem: gac.darkTheme,
               ),
             ),
@@ -62,6 +64,7 @@ class SettingsDialog extends StatelessWidget {
                 onChanged: (enable) => unawaited(
                   analyticsController.toggleAnalyticsEnabled(enable),
                 ),
+                gaScreen: gac.settingsDialog,
                 gaItem: gac.analytics,
               ),
             ),
@@ -70,10 +73,29 @@ class SettingsDialog extends StatelessWidget {
               title: 'Enable VM developer mode',
               notifier: preferences.vmDeveloperModeEnabled,
               onChanged: preferences.toggleVmDeveloperMode,
+              gaScreen: gac.settingsDialog,
               gaItem: gac.vmDeveloperMode,
             ),
           ),
-          const PaddedDivider(),
+          if (FeatureFlags.wasmOptInSetting) ...[
+            const SizedBox(height: largeSpacing),
+            ...dialogSubHeader(theme, 'Experimental features'),
+            Flexible(
+              child: CheckboxSetting(
+                title: 'Enable WebAssembly',
+                description:
+                    'This will trigger a reload of the page to load DevTools '
+                    'compiled with WebAssembly. This may yield better '
+                    'performance.',
+                notifier: preferences.wasmEnabled,
+                onChanged: preferences.toggleWasmEnabled,
+                gaScreen: gac.settingsDialog,
+                gaItem: gac.wasm,
+              ),
+            ),
+          ],
+          const SizedBox(height: largeSpacing),
+          ...dialogSubHeader(theme, 'Troubleshooting'),
           const _VerboseLoggingSetting(),
         ],
       ),
@@ -100,6 +122,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
                 title: 'Enable verbose logging',
                 notifier: preferences.verboseLoggingEnabled,
                 onChanged: (enable) => preferences.toggleVerboseLogging(enable),
+                gaScreen: gac.settingsDialog,
                 gaItem: gac.verboseLogging,
               ),
             ),
@@ -113,7 +136,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
                   _minScreenWidthForTextBeforeScaling,
               onPressed: () async => await copyToClipboard(
                 LogStorage.root.toString(),
-                'Successfully copied logs',
+                successMessage: 'Successfully copied logs',
               ),
             ),
             const SizedBox(width: denseSpacing),

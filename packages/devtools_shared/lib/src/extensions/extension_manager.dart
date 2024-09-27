@@ -59,7 +59,7 @@ class ExtensionsManager {
   Future<void> serveAvailableExtensions(
     String? rootFileUriString,
     List<String> logs,
-    DTDConnectionInfo? dtd,
+    DtdInfo? dtd,
   ) async {
     logs.add(
       'ExtensionsManager.serveAvailableExtensions for '
@@ -86,11 +86,11 @@ class ExtensionsManager {
 
     // Find all static extensions for the project roots, which are derived from
     // the Dart Tooling Daemon, and add them to [devtoolsExtensions].
-    final dtdUri = dtd?.uri;
+    final dtdUri = dtd?.localUri;
     if (dtdUri != null) {
       DartToolingDaemon? dartToolingDaemon;
       try {
-        dartToolingDaemon = await DartToolingDaemon.connect(Uri.parse(dtdUri));
+        dartToolingDaemon = await DartToolingDaemon.connect(dtdUri);
         final projectRoots = await dartToolingDaemon.getProjectRoots(
           depth: staticExtensionsSearchDepth,
         );
@@ -105,13 +105,13 @@ class ExtensionsManager {
           if (root.toString() == rootFileUriString) continue;
 
           await _addExtensionsForRoot(
-            // TODO(https://github.com/dart-lang/pub/issues/4218): this logic
+            // TODO(https://github.com/flutter/devtools/issues/7944): this logic
             // assumes that the .dart_tool folder containing the
             // package_config.json file is in the same directory as the
             // pubspec.yaml file (since `dartToolingDaemon.getProjectRoots`
             // returns all directories within the IDE workspace roots that have
             // a pubspec.yaml file). This may be an incorrect assumption for
-            // monorepos.
+            // pub workspaces.
             root.toString(),
             logs: logs,
             parsingErrors: parsingErrors,
@@ -143,9 +143,9 @@ class ExtensionsManager {
     _assertUriFormat(rootFileUriString);
     final List<Extension> extensions;
     try {
-      // TODO(https://github.com/dart-lang/pub/issues/4218): this assumes that
-      // the .dart_tool/package_config.json file is in the package root, which
-      // may be an incorrect assumption for monorepos.
+      // TODO(https://github.com/flutter/devtools/issues/7944): this assumes
+      // that the .dart_tool/package_config.json file is in the package root,
+      // which may be an incorrect assumption for pub workspaces.
       final packageConfigPath = path.posix.join(
         rootFileUriString,
         '.dart_tool',
@@ -188,9 +188,10 @@ class ExtensionsManager {
         final extensionConfig = DevToolsExtensionConfig.parse({
           ...config,
           DevToolsExtensionConfig.extensionAssetsPathKey: location,
-          // TODO(kenz): for monorepos, we may want to store the
-          // devtools_options.yaml at the same location as the workspace's
-          // .dart_tool/package_config.json file.
+          // TODO(https://github.com/flutter/devtools/issues/7944): for pub
+          // workspaces, we may want to store the devtools_options.yaml at the
+          // same location as the workspace's .dart_tool/package_config.json
+          // file.
           DevToolsExtensionConfig.devtoolsOptionsUriKey:
               path.join(rootFileUriString, devtoolsOptionsFileName),
           DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,

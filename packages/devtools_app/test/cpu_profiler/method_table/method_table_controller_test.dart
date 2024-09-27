@@ -25,7 +25,7 @@ void main() {
     });
 
     Future<CpuProfileData> initSingleRootData({
-      required Map<String, dynamic> dataJson,
+      required Map<String, Object?> dataJson,
       required String profileGolden,
     }) async {
       final data = CpuProfileData.fromJson(dataJson);

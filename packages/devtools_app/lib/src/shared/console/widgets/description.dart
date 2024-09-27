@@ -9,7 +9,6 @@ import '../../diagnostics/dart_object_node.dart';
 import '../../diagnostics/diagnostics_node.dart';
 import '../../diagnostics/tree_builder.dart';
 import '../../diagnostics_text_styles.dart';
-import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
 import '../../ui/hover.dart';
@@ -19,9 +18,6 @@ import '../eval/inspector_tree.dart';
 import 'expandable_variable.dart';
 
 final _colorIconMaker = ColorIconMaker();
-final _customIconMaker = CustomIconMaker();
-final defaultIcon = _customIconMaker.fromInfo('Default');
-
 const _showRenderObjectPropertiesAsLinks = false;
 
 /// Presents the content of a single [RemoteDiagnosticsNode].
@@ -43,6 +39,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.style,
     this.nodeDescriptionHighlightStyle,
     this.emphasizeNodesFromLocalProject = false,
+    this.actionLabel,
+    this.actionCallback,
+    this.customDescription,
+    this.customIconName,
+    this.includeName = true,
+    this.overflow,
   });
 
   final RemoteDiagnosticsNode? diagnostic;
@@ -56,6 +58,12 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   // to true when turning on inspector V2. This is currently true for the V2
   // inspector and false for the legacy inspector.
   final bool emphasizeNodesFromLocalProject;
+  final String? actionLabel;
+  final VoidCallback? actionCallback;
+  final String? customDescription;
+  final String? customIconName;
+  final bool includeName;
+  final TextOverflow? overflow;
 
   static Widget _paddedIcon(Widget icon) {
     return Padding(
@@ -63,6 +71,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       child: icon,
     );
   }
+
+  /// Returns the custom description if specified, or the default description
+  /// for the diagnostic node.
+  String get descriptionText =>
+      customDescription ?? diagnostic?.description ?? '';
 
   /// Approximates the width of the elements inside a [RemoteDiagnosticsNode]
   /// widget.
@@ -170,6 +183,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     RemoteDiagnosticsNode? diagnostic,
     String? searchValue,
     TextStyle? nodeDescriptionHighlightStyle,
+    String? actionLabel,
+    VoidCallback? actionCallback,
   }) {
     // Store the textStyle of the built widget so that it can be used in
     // [approximateNodeWidth] later.
@@ -191,13 +206,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     return HoverCardTooltip.async(
       enabled: () =>
-          // TODO(https://github.com/flutter/devtools/issues/7860) Clean up
-          // after Inspector V2 release.
-          FeatureFlags.inspectorV2
-              ? preferences.inspectorV2.hoverEvalModeEnabled.value &&
-                  diagnosticLocal.objectGroupApi != null
-              : preferences.inspector.hoverEvalModeEnabled.value &&
-                  diagnosticLocal.objectGroupApi != null,
+          preferences.inspector.hoverEvalModeEnabled.value &&
+          diagnosticLocal.objectGroupApi != null,
       asyncGenerateHoverCardData: ({
         required event,
         required isHoverStale,
@@ -234,12 +244,13 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           ),
         );
       },
-      child: multiline
-          ? SelectableText.rich(textSpan)
-          : RichText(
-              overflow: TextOverflow.ellipsis,
-              text: textSpan,
-            ),
+      child: DescriptionDisplay(
+        text: textSpan,
+        multiline: multiline,
+        actionLabel: actionLabel,
+        actionCallback: actionCallback,
+        overflow: overflow ?? TextOverflow.ellipsis,
+      ),
     );
   }
 
@@ -253,7 +264,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final icon = diagnosticLocal.icon;
+    final icon = customIconName != null
+        ? RemoteDiagnosticsNode.iconMaker.fromWidgetName(customIconName)
+        : diagnosticLocal.icon;
+
     final children = <Widget>[];
 
     if (icon != null) {
@@ -275,7 +289,22 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       final propertyType = diagnosticLocal.propertyType;
       final properties = diagnosticLocal.valuePropertiesJson;
 
-      if (name?.isNotEmpty == true && diagnosticLocal.showName) {
+      final showDefaultValueLabel =
+          diagnosticLocal.level == DiagnosticLevel.fine &&
+              diagnosticLocal.hasDefaultValue;
+
+      // Show the "default" value label at the start if the property name isn't
+      // included:
+      if (showDefaultValueLabel && !includeName) {
+        children.add(
+          const Padding(
+            padding: EdgeInsets.only(right: denseSpacing),
+            child: DefaultValueLabel(),
+          ),
+        );
+      }
+
+      if (includeName && name?.isNotEmpty == true && diagnosticLocal.showName) {
         children.add(
           Text(
             '$name${diagnosticLocal.separator} ',
@@ -291,7 +320,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         textStyle = textStyle.merge(DiagnosticsTextStyles.regularBold);
       }
 
-      String description = diagnosticLocal.description ?? '';
+      String description = descriptionText;
       if (propertyType != null && properties != null) {
         switch (propertyType) {
           case 'Color':
@@ -344,10 +373,15 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         ),
       );
 
-      if (diagnosticLocal.level == DiagnosticLevel.fine &&
-          diagnosticLocal.hasDefaultValue) {
-        children.add(const Text(' '));
-        children.add(_paddedIcon(defaultIcon));
+      // Show the "default" value label at the end if the property name is
+      // included:
+      if (showDefaultValueLabel && includeName) {
+        children.add(
+          const Padding(
+            padding: EdgeInsets.only(left: denseSpacing),
+            child: DefaultValueLabel(),
+          ),
+        );
       }
     } else {
       // Non property, regular node case.
@@ -373,8 +407,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               style: textStyle,
             ),
           );
-          if (diagnosticLocal.separator != ' ' &&
-              (diagnosticLocal.description?.isNotEmpty ?? false)) {
+          if (diagnosticLocal.separator != ' ' && descriptionText.isNotEmpty) {
             children.add(
               Text(
                 ' ',
@@ -397,17 +430,20 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       // Grey out nodes that were not created by the local project to emphasize
       // those that were:
       if (emphasizeNodesFromLocalProject &&
-          !diagnosticLocal.isCreatedByLocalProject) {
+          !diagnosticLocal.isCreatedByLocalProject &&
+          diagnosticLocal.description != '[root]') {
         textStyle = textStyle.merge(theme.subtleTextStyle);
       }
 
       var diagnosticDescription = buildDescription(
-        description: diagnosticLocal.description ?? '',
+        description: descriptionText,
         textStyle: textStyle,
         colorScheme: colorScheme,
         diagnostic: diagnostic,
         searchValue: searchValue,
         nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
+        actionLabel: actionLabel,
+        actionCallback: actionCallback,
       );
 
       if (errorText != null) {
@@ -530,5 +566,90 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     spans.add(quoteSpan);
 
     return TextSpan(children: spans);
+  }
+}
+
+/// Label for a property with the default value.
+class DefaultValueLabel extends StatelessWidget {
+  const DefaultValueLabel({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+      decoration: BoxDecoration(
+        borderRadius: defaultBorderRadius,
+        color: colorScheme.secondary,
+      ),
+      child: Text(
+        'default',
+        style: theme.regularTextStyleWithColor(
+          colorScheme.onSecondary,
+          backgroundColor: colorScheme.secondary,
+        ),
+      ),
+    );
+  }
+}
+
+class DescriptionDisplay extends StatelessWidget {
+  const DescriptionDisplay({
+    super.key,
+    required this.text,
+    this.multiline = false,
+    this.actionLabel,
+    this.actionCallback,
+    this.overflow = TextOverflow.ellipsis,
+  })  : assert(
+          multiline ? actionLabel == null : true,
+          'Action labels are not supported for multiline descriptions',
+        ),
+        assert(
+          (actionLabel == null) == (actionCallback == null),
+          'Actions require both a label and a callback',
+        );
+
+  final TextSpan text;
+  final bool multiline;
+  final String? actionLabel;
+  final VoidCallback? actionCallback;
+  final TextOverflow overflow;
+
+  @override
+  Widget build(BuildContext context) {
+    if (multiline) {
+      return SelectableText.rich(text);
+    }
+
+    if (actionLabel != null) {
+      return Row(
+        children: [
+          Flexible(
+            child: RichText(
+              overflow: TextOverflow.ellipsis,
+              text: text,
+            ),
+          ),
+          Flexible(
+            child: TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).regularTextStyle,
+              ),
+              onPressed: actionCallback,
+              child: Text(
+                actionLabel!,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return RichText(
+      overflow: overflow,
+      text: text,
+    );
   }
 }

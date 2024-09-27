@@ -110,7 +110,7 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
                     padding:
                         const EdgeInsets.symmetric(horizontal: denseSpacing),
                     child: ServiceExtensionCheckbox(
-                      serviceExtension: extensions.trackWidgetBuildCounts,
+                      serviceExtension: extensions.countWidgetBuilds,
                     ),
                   ),
                 ),
@@ -123,13 +123,13 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
             valueListenable: serviceConnection
                 .serviceManager.serviceExtensionManager
                 .getServiceExtensionState(
-              extensions.trackWidgetBuildCounts.extension,
+              extensions.countWidgetBuilds.extension,
             ),
             builder: (context, state, _) {
               if (metrics.isEmpty && !state.enabled) {
                 return const Center(
                   child: Text(
-                    'Track widget build counts must be enabled to see data.',
+                    'Count widget builds must be enabled to see data.',
                   ),
                 );
               }
@@ -234,7 +234,7 @@ class _WidgetColumn extends ColumnData<RebuildLocationStats> {
 
   @override
   String getValue(RebuildLocationStats dataObject) {
-    return dataObject.location.name ?? '???';
+    return dataObject.location.name ?? '<unknown>';
   }
 }
 
@@ -270,9 +270,9 @@ class _RebuildCountColumn extends ColumnData<RebuildLocationStats> {
   final int metricIndex;
 
   @override
-  int getValue(RebuildLocationStats dataObject) =>
-      dataObject.buildCounts[metricIndex];
+  bool get numeric => true;
 
   @override
-  bool get numeric => true;
+  int getValue(RebuildLocationStats dataObject) =>
+      dataObject.buildCounts[metricIndex];
 }

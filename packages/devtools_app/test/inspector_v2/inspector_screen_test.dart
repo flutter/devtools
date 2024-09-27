@@ -20,10 +20,11 @@ import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart'
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
 import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/flex/flex.dart';
-import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/layout_explorer.dart';
+import 'package:devtools_app/src/screens/inspector_v2/widget_details.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/shared/console/eval/inspector_tree_v2.dart';
 import 'package:devtools_app/src/shared/feature_flags.dart';
+import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -80,7 +81,6 @@ void main() {
 
     inspectorController = InspectorController(
       inspectorTree: InspectorTreeController(),
-      detailsTree: InspectorTreeController(),
       treeType: FlutterTreeType.widget,
     )..firstInspectorTreeLoadCompleted = true;
   });
@@ -120,7 +120,6 @@ void main() {
     windowSize,
     (WidgetTester tester) async {
       await tester.pumpWidget(buildInspectorScreen());
-      await tester.pumpAndSettle();
       expect(find.byType(InspectorScreenBody), findsOneWidget);
     },
   );
@@ -317,16 +316,22 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         final controller = TestInspectorV2Controller()
-          ..setSelectedNode(treeNode);
+          ..setSelectedNode(treeNode)
+          ..setSelectedDiagnostic(diagnostic);
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: LayoutExplorerTab(
+              body: WidgetDetails(
                 controller: controller,
               ),
             ),
           ),
         );
+
+        // Navigate to the flex explorer tab.
+        await tester.tap(_findFlexExplorerTab());
+        await tester.pumpAndSettle();
+
         expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
       },
     );
@@ -339,14 +344,26 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
-              body: LayoutExplorerTab(
+              body: WidgetDetails(
                 controller: controller,
               ),
             ),
           ),
         );
-        expect(find.byType(FlexLayoutExplorerWidget), findsNothing);
-        controller.setSelectedNode(treeNode);
+
+        // Flex explorer is not available for selected wiget.
+        expect(_findFlexExplorerTab(), findsNothing);
+
+        // Select a flex widget.
+        controller
+          ..setSelectedNode(treeNode)
+          ..setSelectedDiagnostic(diagnostic);
+        await tester.pumpAndSettle();
+
+        // Flex explorer is available for the flex widget.
+        final flexExplorerTab = _findFlexExplorerTab();
+        expect(flexExplorerTab, findsOneWidget);
+        await tester.tap(flexExplorerTab);
         await tester.pumpAndSettle();
         expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
       },
@@ -369,9 +386,13 @@ void main() {
           await tester.pumpWidget(buildInspectorScreen());
 
           await tester.tap(find.byType(SettingsOutlinedButton));
-          await tester.pumpAndSettle();
-          expect(
+
+          final settingsDialogFinder = await retryUntilFound(
             find.byType(FlutterInspectorSettingsDialog),
+            tester: tester,
+          );
+          expect(
+            settingsDialogFinder,
             findsOneWidget,
           );
 
@@ -384,18 +405,22 @@ void main() {
             matching: find.byType(NotifierCheckbox),
           );
           await tester.tap(hoverModeCheckBox);
-          await tester.pumpAndSettle();
+          await tester.pump(safePumpDuration);
           expect(
-            preferences.inspectorV2.hoverEvalModeEnabled.value,
+            preferences.inspector.hoverEvalModeEnabled.value,
             !startingHoverEvalModeValue,
           );
         },
       );
     },
   );
-
   // TODO(jacobr): add screenshot tests that connect to a test application
   // in the same way the inspector_controller test does today and take golden
   // images. Alternately: support an offline inspector mode and add tests of
   // that mode which would enable faster tests that run as unittests.
 }
+
+Finder _findFlexExplorerTab() => find.descendant(
+      of: find.byType(DevToolsTab),
+      matching: find.text('Flex explorer'),
+    );

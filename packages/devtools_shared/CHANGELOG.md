@@ -1,3 +1,25 @@
+# 11.0.0
+* **Breaking change:** replace `apiGetLastReleaseNotesVersion` with `ReleaseNotesApi.getLastReleaseNotesVersion`.
+* **Breaking change:** replace `apiSetLastReleaseNotesVersion` with `ReleaseNotesApi.setLastReleaseNotesVersion`.
+* **Breaking change:** replace `lastReleaseNotesVersionPropertyName`.
+* **Breaking change:** replace `apiGetBaseAppSizeFile` with `AppSizeApi.getBaseAppSizeFile`.
+* **Breaking change:** replace `apiGetTestAppSizeFile` with `AppSizeApi.getTestAppSizeFile`.
+* **Breaking change:** replace `baseAppSizeFilePropertyName` with `AppSizeApi.baseAppSizeFilePropertyName`.
+* **Breaking change:** replace `testAppSizeFilePropertyName` with `AppSizeApi.testAppSizeFilePropertyName`.
+* **Breaking change:** replace `apiSetActiveSurvey` with `SurveyApi.setActiveSurvey`.
+* **Breaking change:** remove `activeSurveyName`.
+* **Breaking change:** replace `apiGetSurveyActionTaken` with `SurveyApi.getSurveyActionTaken`.
+* **Breaking change:** replace `apiSetSurveyActionTaken` with `SurveyApi.setSurveyActionTaken`.
+* **Breaking change:** remove `surveyActionTakenPropertyName`.
+* **Breaking change:** replace `apiGetSurveyShownCount` with `SurveyApi.getSurveyShownCount`.
+* **Breaking change:** replace `apiIncrementSurveyShownCount` with `SurveyApi.incrementSurveyShownCount`.
+* Support Chrome's new headless mode in the integration test runner.
+* Add `PreferencesApi` to get and set preference values.
+* Deprecate `DTDConnectionInfo` in favor of `DtdInfo` which supports tracking two URIs for DTD to better support web/remote environments.
+
+# 10.0.2
+* Update dependency `web_socket_channel: '>=2.4.0 <4.0.0'`.
+
 # 10.0.1
 * Added helper `deserialize` and `deserializeNullable`
 * Extended serialization for `HeapSample` and `ExtensionEvents`

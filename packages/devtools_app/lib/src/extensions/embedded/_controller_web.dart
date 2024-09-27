@@ -14,7 +14,9 @@ import 'package:web/web.dart';
 import '../../shared/development_helpers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/query_parameters.dart';
 import '../../shared/server/server.dart';
+import '../../shared/utils.dart';
 import 'controller.dart';
 
 /// Incrementer for the extension iFrame view that will live for the entire
@@ -54,8 +56,8 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
       'index.html',
     );
     final queryParams = {
-      ...loadQueryParams(),
-      ExtensionEventParameters.theme: preferences.darkModeTheme.value
+      ...DevToolsQueryParams.load().params,
+      ExtensionEventParameters.theme: isDarkThemeEnabled()
           ? ExtensionEventParameters.themeValueDark
           : ExtensionEventParameters.themeValueLight,
       if (dtdManager.uri != null) 'dtdUri': dtdManager.uri.toString(),
@@ -67,6 +69,8 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
 
   late final HTMLIFrameElement _extensionIFrame;
 
+  /// A stream of [DevToolsExtensionEvent]s that will be posted from the
+  /// DevTools web app to the embedded extension iFrame.
   final extensionPostEventStream =
       StreamController<DevToolsExtensionEvent>.broadcast();
 

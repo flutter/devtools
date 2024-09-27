@@ -5,7 +5,6 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 
@@ -20,28 +19,17 @@ enum Json {
 /// Chart data, that should be saved when transferred to offline data mode.
 class ChartData with Serializable {
   ChartData({
-    required ControllerCreationMode mode,
     this.isDeviceAndroid,
     MemoryTimeline? timeline,
-    ChartInterval? interval,
-    bool? isLegendVisible,
-  })  : assert(
-          mode == ControllerCreationMode.connected ||
-              (mode == ControllerCreationMode.offlineData &&
-                  isDeviceAndroid != null &&
-                  timeline != null &&
-                  interval != null &&
-                  isLegendVisible != null),
-        ),
-        _displayInterval =
-            ValueNotifier<ChartInterval>(interval ?? ChartInterval.theDefault),
-        _isLegendVisible = ValueNotifier<bool>(isLegendVisible ?? true) {
+    ChartInterval interval = ChartInterval.theDefault,
+    bool isLegendVisible = false,
+  })  : _displayInterval = ValueNotifier<ChartInterval>(interval),
+        _isLegendVisible = ValueNotifier<bool>(isLegendVisible) {
     this.timeline = timeline ?? MemoryTimeline();
   }
 
   factory ChartData.fromJson(Map<String, dynamic> json) {
     final result = ChartData(
-      mode: ControllerCreationMode.offlineData,
       isDeviceAndroid: json[Json.isDeviceAndroid.name] as bool? ?? false,
       timeline: deserialize<MemoryTimeline>(
         json[Json.timeline.name],
@@ -49,7 +37,7 @@ class ChartData with Serializable {
       ),
       interval: ChartInterval.byName(json[Json.interval.name]) ??
           ChartInterval.theDefault,
-      isLegendVisible: json[Json.isLegendVisible.name] as bool?,
+      isLegendVisible: json[Json.isLegendVisible.name] as bool? ?? false,
     );
     return result;
   }

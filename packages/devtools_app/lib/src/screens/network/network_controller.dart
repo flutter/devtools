@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
@@ -16,6 +18,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
+import 'har_network_data.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
@@ -55,6 +58,29 @@ class NetworkController extends DisposableController
       _filterAndRefreshSearchMatches,
     );
     subscribeToFilterChanges();
+  }
+  List<DartIOHttpRequestData>? _httpRequests;
+
+  String? exportAsHarFile() {
+    _httpRequests =
+        filteredData.value.whereType<DartIOHttpRequestData>().toList();
+
+    if (_httpRequests.isNullOrEmpty) {
+      debugPrint('No valid request data to export');
+      return '';
+    }
+
+    try {
+      // Build the HAR object
+      final har = HarNetworkData(_httpRequests!);
+      return ExportController().downloadFile(
+        json.encode(har.toJson()),
+        type: ExportFileType.har,
+      );
+    } catch (e) {
+      debugPrint('Exception in export $e');
+    }
+    return null;
   }
 
   static const methodFilterId = 'network-method-filter';

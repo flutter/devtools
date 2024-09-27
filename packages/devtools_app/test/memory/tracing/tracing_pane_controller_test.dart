@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_data.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,50 +9,27 @@ import 'package:vm_service/vm_service.dart';
 
 // ignore: avoid_classes_with_only_static_members, ok for enum-like class
 class _Tests {
-  static final emptyConnected = TracePaneController(
-    ControllerCreationMode.connected,
-    rootPackage: '',
-  );
-
-  static final emptyOffline = TracePaneController(
-    ControllerCreationMode.offlineData,
-    rootPackage: '',
-  );
+  static final empty = TracePaneController(rootPackage: '');
 
   static final selection = TracePaneController(
-    ControllerCreationMode.connected,
     stateForIsolate: {
-      'isolate1': TracingIsolateState(
-        isolate: IsolateRef(id: 'isolate1'),
-        mode: ControllerCreationMode.connected,
-      ),
-      'isolate2': TracingIsolateState(
-        isolate: IsolateRef(id: 'isolate2'),
-        mode: ControllerCreationMode.connected,
-      ),
+      'isolate1': TracingIsolateState(isolate: IsolateRef(id: 'isolate1')),
+      'isolate2': TracingIsolateState(isolate: IsolateRef(id: 'isolate2')),
     },
     rootPackage: 'root',
     selectedIsolateId: 'isolate1',
   );
 
   static final noSelection = TracePaneController(
-    ControllerCreationMode.connected,
     stateForIsolate: {
-      'isolate1': TracingIsolateState(
-        isolate: IsolateRef(id: 'isolate1'),
-        mode: ControllerCreationMode.connected,
-      ),
-      'isolate2': TracingIsolateState(
-        isolate: IsolateRef(id: 'isolate2'),
-        mode: ControllerCreationMode.connected,
-      ),
+      'isolate1': TracingIsolateState(isolate: IsolateRef(id: 'isolate1')),
+      'isolate2': TracingIsolateState(isolate: IsolateRef(id: 'isolate2')),
     },
     rootPackage: 'root',
   );
 
   static final all = {
-    'emptyConnected': emptyConnected,
-    'emptyOffline': emptyOffline,
+    'empty': empty,
     'selection': selection,
     'noSelection': noSelection,
   };
@@ -64,16 +40,9 @@ void main() {
     expect(
       () => TracePaneController(
         rootPackage: 'root',
-        ControllerCreationMode.connected,
         stateForIsolate: {
-          'isolate1': TracingIsolateState(
-            isolate: IsolateRef(id: 'isolate1'),
-            mode: ControllerCreationMode.connected,
-          ),
-          'isolate2': TracingIsolateState(
-            isolate: IsolateRef(id: 'isolate2'),
-            mode: ControllerCreationMode.connected,
-          ),
+          'isolate1': TracingIsolateState(isolate: IsolateRef(id: 'isolate1')),
+          'isolate2': TracingIsolateState(isolate: IsolateRef(id: 'isolate2')),
         },
         selectedIsolateId: 'isolate3',
       ),
@@ -82,19 +51,12 @@ void main() {
   });
 
   test('$TracePaneController construction', () {
-    expect(_Tests.emptyConnected.mode, ControllerCreationMode.connected);
-    expect(_Tests.emptyConnected.selection.value.isolate.id, null);
-    expect(_Tests.emptyConnected.stateForIsolate.length, 0);
+    expect(_Tests.empty.selection.value.isolate.id, null);
+    expect(_Tests.empty.stateForIsolate.length, 0);
 
-    expect(_Tests.emptyOffline.mode, ControllerCreationMode.offlineData);
-    expect(_Tests.emptyOffline.selection.value.isolate.id, null);
-    expect(_Tests.emptyOffline.stateForIsolate.length, 0);
-
-    expect(_Tests.selection.mode, ControllerCreationMode.connected);
     expect(_Tests.selection.selection.value.isolate.id, 'isolate1');
     expect(_Tests.selection.stateForIsolate.length, 2);
 
-    expect(_Tests.noSelection.mode, ControllerCreationMode.connected);
     expect(_Tests.noSelection.selection.value.isolate.id, null);
     expect(_Tests.noSelection.stateForIsolate.length, 2);
   });
@@ -111,8 +73,6 @@ void main() {
           equals(Json.values.map((e) => e.name).toSet()),
         );
         final fromJson = TracePaneController.fromJson(json);
-
-        expect(fromJson.mode, ControllerCreationMode.offlineData);
         expect(
           fromJson.selection.value.isolate.id,
           trace.selection.value.isolate.id,

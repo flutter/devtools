@@ -19,14 +19,13 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-// ignore: avoid-importing-entrypoint-exports, special case for getting version.
 import '../../devtools.dart' as devtools;
 
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
-import 'primitives/simple_items.dart';
 import 'primitives/utils.dart';
+import 'query_parameters.dart';
 
 final _log = Logger('lib/src/shared/utils');
 
@@ -40,7 +39,25 @@ void debugLogger(String message) {
   );
 }
 
-bool isEmbedded() => ideTheme.embedded;
+/// Whether DevTools is using a dark theme.
+///
+/// When DevTools is in embedded mode, we first check if the [ideTheme] has
+/// specified a light or dark theme, and if it has we use this value. This is
+/// safe to do because the user cannot access the dark theme DevTools setting
+/// when in embedded mode, which is intentional so that the embedded DevTools
+/// matches the theme of its surrounding window (the IDE).
+///
+/// When DevTools is not embedded, we use the user preference to determine
+/// whether DevTools is using a light or dark theme.
+///
+/// This utility method should be used in favor of checking
+/// [preferences.darkModeTheme.value] so that the embedded case is always
+/// handled properly.
+bool isDarkThemeEnabled() {
+  return isEmbedded() && ideTheme.ideSpecifiedTheme
+      ? ideTheme.isDarkMode
+      : preferences.darkModeEnabled.value;
+}
 
 extension VmExtension on VM {
   List<IsolateRef> isolatesForDevToolsMode() {
@@ -116,7 +133,7 @@ List<ConnectionDescription> generateDeviceDescription(
 
 /// This method should be public, because it is used by g3 specific code.
 List<String> issueLinkDetails() {
-  final ide = ideFromUrl();
+  final ide = DevToolsQueryParams.load().ide;
   final issueDescriptionItems = [
     '<-- Please describe your problem here. Be sure to include repro steps. -->',
     '___', // This will create a separator in the rendered markdown.
@@ -208,15 +225,6 @@ class ConnectionDescription {
   final List<Widget> actions;
 }
 
-String? ideFromUrl() {
-  return lookupFromQueryParams('ide');
-}
-
-String? lookupFromQueryParams(String key) {
-  final queryParameters = loadQueryParams();
-  return queryParameters[key];
-}
-
 const _google3PathSegment = 'google3';
 
 bool isGoogle3Path(List<String> pathParts) =>
@@ -284,15 +292,6 @@ class DebounceTimer {
   void dispose() {
     cancel();
   }
-}
-
-/// Current mode of DevTools.
-ControllerCreationMode get devToolsMode {
-  return offlineDataController.showingOfflineData.value
-      ? ControllerCreationMode.offlineData
-      : serviceConnection.serviceManager.connectedState.value.connected
-          ? ControllerCreationMode.connected
-          : ControllerCreationMode.disconnected;
 }
 
 Future<void> launchUrlWithErrorHandling(String url) async {

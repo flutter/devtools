@@ -1428,7 +1428,7 @@ class ScriptPopupMenu extends StatelessWidget {
       itemBuilder: (_) => [
         for (final menuOption in defaultScriptPopupMenuOptions)
           menuOption.build(),
-        for (final extensionMenuOption in devToolsExtensionPoints
+        for (final extensionMenuOption in devToolsEnvironmentParameters
             .buildExtraDebuggerScriptPopupMenuOptions())
           extensionMenuOption.build(),
       ],

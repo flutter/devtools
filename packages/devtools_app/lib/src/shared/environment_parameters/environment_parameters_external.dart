@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../../screens/debugger/codeview.dart';
 import '../analytics/constants.dart' as gac;
@@ -63,6 +63,30 @@ class ExternalDevToolsEnvironmentParameters
   String? chrome115BreakpointBug() {
     // This should always return a null value for 3p users.
     return null;
+  }
+
+  @override
+  List<TextSpan>? recommendedDebuggers(
+    BuildContext context, {
+    required bool isFlutterApp,
+  }) {
+    return [
+      GaLinkTextSpan(
+        context: context,
+        link: const GaLink(
+          display: 'VS Code',
+          url: 'https://dart.dev/tools/vs-code',
+        ),
+      ),
+      const TextSpan(text: ' or '),
+      GaLinkTextSpan(
+        context: context,
+        link: const GaLink(
+          display: 'IntelliJ & Android Studio',
+          url: 'https://dart.dev/tools/jetbrains-plugin',
+        ),
+      ),
+    ];
   }
 }
 

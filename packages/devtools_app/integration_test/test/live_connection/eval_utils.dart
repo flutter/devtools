@@ -37,7 +37,11 @@ class EvalTester {
     await tester.pump(safePumpDuration);
     await _pressEnter();
 
-    expect(expectedResponse, findsOneWidget);
+    final responseFinder = await retryUntilFound(
+      expectedResponse,
+      tester: tester,
+    );
+    expect(responseFinder, findsOneWidget);
   }
 
   Future<void> _pressEnter() async {
@@ -57,7 +61,8 @@ class EvalTester {
     // Open the inspector screen.
     await switchToScreen(
       tester,
-      tabIcon: ScreenMetaData.inspector.icon!,
+      tabIcon: ScreenMetaData.inspector.icon,
+      tabIconAsset: ScreenMetaData.inspector.iconAsset,
       screenId: ScreenMetaData.inspector.id,
     );
     await tester.pumpAndSettle();

@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: prefer_single_quotes
-// ignore_for_file: prefer-trailing-comma
-// ignore_for_file: require_trailing_commas
+import 'dart:convert';
 
-final samplePerformanceData = <String, Object?>{
+// We encode this as a JSON string rather than using a very large constant
+// structured value because dart2wasm creates pathological/invalid wasm code
+// to initialize those large data structures.
+// See https://github.com/dart-lang/sdk/issues/56483
+final Map<String, Object?> samplePerformanceData = json.decode('''
+{
   "devToolsSnapshot": true,
   "devToolsVersion": "2.34.0",
   "connectedApp": {
@@ -108241,6 +108244,7 @@ final samplePerformanceData = <String, Object?>{
       }
     ],
     "displayRefreshRate": 60,
-    "rebuildCountModel": null,
+    "rebuildCountModel": null
   }
-};
+}
+''');

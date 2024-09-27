@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/banner_messages.dart';
 import '../../../shared/common_widgets.dart';
+import '../../../shared/globals.dart';
 import '../../../shared/http/http_service.dart' as http_service;
-import '../../../shared/primitives/simple_items.dart';
 import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
 import '../panes/chart/widgets/chart_pane.dart';
@@ -43,7 +43,7 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
 
     if (!initController()) return;
 
-    if (controller.mode == ControllerCreationMode.connected) {
+    if (!offlineDataController.showingOfflineData.value) {
       maybePushDebugModeMemoryMessage(context, ScreenMetaData.memory.id);
       maybePushHttpLoggingMessage(context, ScreenMetaData.memory.id);
 
@@ -58,27 +58,31 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
     return FutureBuilder<void>(
       future: controller.initialized,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return Column(
-            key: MemoryChartPane.hoverKey,
-            children: [
-              MemoryControlPane(
-                controller: controller.control,
-              ),
-              const SizedBox(height: intermediateSpacing),
-              if (controller.mode != ControllerCreationMode.disconnected)
-                MemoryChartPane(
-                  chart: controller.chart!,
-                  keyFocusNode: _focusNode,
-                ),
-              Expanded(
-                child: MemoryTabView(controller),
-              ),
-            ],
+        if (snapshot.connectionState != ConnectionState.done ||
+            controller.loadingOfflineData.value) {
+          return Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: const CenteredCircularProgressIndicator(),
           );
-        } else {
-          return const CenteredCircularProgressIndicator();
         }
+        return Column(
+          key: MemoryChartPane.hoverKey,
+          children: [
+            MemoryControlPane(
+              isGcing: controller.isGcing,
+              onGc: controller.gc,
+              onSave: controller.exportData,
+            ),
+            const SizedBox(height: intermediateSpacing),
+            MemoryChartPane(
+              chart: controller.chart,
+              keyFocusNode: _focusNode,
+            ),
+            Expanded(
+              child: MemoryTabView(controller),
+            ),
+          ],
+        );
       },
     );
   }

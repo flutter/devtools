@@ -121,13 +121,55 @@ class AndroidDomainError extends DomainError {
 
 class IosDomainError extends DomainError {
   const IosDomainError(super.title, super.explanation, super.fixDetails);
-  // TODO: Add  domain errors for iOS.
+  // TODO(hangyujin): Finalize strings for these domain errors.
 
   /// Existence of an Apple-App-Site-Association file.
   static const existence = IosDomainError(
     'Apple-App-Site-Association file does not exist',
-    '',
-    '',
+    'This test checks whether the Apple-App-Site-Association file, '
+        'which is required to verify the association between the app and the '
+        'domain name, exists under your domain.',
+    'Add an Apple-App-Site-Association file to all of the '
+        'failed website domains at the following location: '
+        'https://[domain.name]/apple-app-site-association.',
+  );
+
+  /// AASA file should define a link to this app.
+  static const appIdentifier = IosDomainError(
+    'App identifier not found',
+    'This test checks your Apple-App-Site-Association file '
+        'for App identifier validation, which the mobile device '
+        'uses to verify ownership of the app.',
+    'Ensure your Apple-App-Site-Association file declares the '
+        'correct app identifier.',
+  );
+
+  /// AASA file should be accessible via https.
+  static const httpsAccessibility = IosDomainError(
+    'HTTPS accessibility check failed',
+    'This test tries to access your Apple-App-Site-Association '
+        'file over an HTTPS connection, which must be '
+        'accessible to verify ownership of the app.',
+    'Ensure your Apple-App-Site-Association file is accessible '
+        'over an HTTPS connection for all of the failed website domains.',
+  );
+
+  /// AASA file should be accessible with no redirects.
+  static const nonRedirect = IosDomainError(
+    'Domain non-redirect check failed',
+    'This test checks that your domain is accessible without '
+        'redirects. Your domain must be accessible without '
+        'redirects to verify ownership of the app.',
+    'Ensure your domain is accessible without any redirects.',
+  );
+
+  /// TODO(hangyujin): There are sub checkes of this check, add them and add links when finalized.
+  /// AASA file format follows guidelines.
+  static const fileFormat = IosDomainError(
+    'Apple-App-Site-Association file format is incorrect',
+    'This test checks that your Apple-App-Site-Association file '
+        'follows the correct format guidelines.',
+    'Ensure your Apple-App-Site-Association file follows the correct format guidelines.',
   );
 }
 
@@ -202,6 +244,26 @@ class ValidatedLinkDatas {
   final List<LinkData> byPath;
 }
 
+/// Represents a path in a deep link.
+class Path {
+  Path({
+    required this.path,
+    this.queryParams = const {},
+    this.isExcluded = false,
+  });
+
+  final String path;
+
+  // TODO(hangyujin): display queryParams in path table.
+  final Map<String, String> queryParams;
+
+  /// A Boolean value that indicates whether to stop pattern matching and prevent the universal
+  /// link from opening if the URL matches the associated pattern.
+  ///
+  /// The default is false.
+  final bool isExcluded;
+}
+
 /// Contains all data relevant to a deep link.
 class LinkData with SearchableDataMixin {
   LinkData({
@@ -213,9 +275,11 @@ class LinkData with SearchableDataMixin {
     this.pathErrors = const <PathError>{},
     this.associatedPath = const <String>[],
     this.associatedDomains = const <String>[],
+    this.hasAndroidAssetLinksFile = true,
+    this.hasIosAasaFile = true,
   });
 
-  final String? path;
+  final Path? path;
   final String? domain;
   final Set<PlatformOS> os;
   final Set<String> scheme;
@@ -224,18 +288,41 @@ class LinkData with SearchableDataMixin {
 
   final List<String> associatedPath;
   final List<String> associatedDomains;
+  final bool hasAndroidAssetLinksFile;
+  final bool hasIosAasaFile;
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return (domain?.caseInsensitiveContains(regExpSearch) ?? false) ||
-        (path?.caseInsensitiveContains(regExpSearch) ?? false);
+        (path?.path.caseInsensitiveContains(regExpSearch) ?? false);
   }
 
   @override
-  String toString() => 'LinkData($domain $path)';
+  String toString() => 'LinkData($domain $path $os)';
 
-  String get safePath => path ?? '';
+  String get safePath => path?.path ?? '';
   String get safeDomain => domain ?? '';
+
+  LinkData copyWith({
+    Path? path,
+    List<DomainError>? domainErrors,
+    bool? hasAndroidAssetLinksFile,
+    bool? hasIosAasaFile,
+  }) {
+    return LinkData(
+      domain: domain,
+      path: path ?? this.path,
+      os: os,
+      scheme: scheme,
+      domainErrors: domainErrors ?? this.domainErrors,
+      pathErrors: pathErrors,
+      associatedPath: associatedPath,
+      associatedDomains: associatedDomains,
+      hasAndroidAssetLinksFile:
+          hasAndroidAssetLinksFile ?? this.hasAndroidAssetLinksFile,
+      hasIosAasaFile: hasIosAasaFile ?? this.hasIosAasaFile,
+    );
+  }
 }
 
 class _ErrorAwareText extends StatelessWidget {
@@ -325,6 +412,12 @@ class DomainColumn extends ColumnData<LinkData>
   SortingOption? sortingOption;
 
   @override
+  bool get supportsSorting {
+    // Sorting options for this column are handled manually by [controller].
+    return false;
+  }
+
+  @override
   Widget? buildHeader(
     BuildContext context,
     Widget Function() defaultHeaderRenderer,
@@ -388,6 +481,12 @@ class PathColumn extends ColumnData<LinkData>
   SortingOption? sortingOption;
 
   @override
+  bool get supportsSorting {
+    // Sorting options for this column are handled manually by [controller].
+    return false;
+  }
+
+  @override
   Widget? buildHeader(
     BuildContext context,
     Widget Function() defaultHeaderRenderer,
@@ -422,7 +521,8 @@ class PathColumn extends ColumnData<LinkData>
     return _ErrorAwareText(
       isError: dataObject.pathErrors.isNotEmpty,
       controller: controller,
-      text: dataObject.safePath,
+      text:
+          '${(dataObject.path?.isExcluded ?? false) ? 'NOT ' : ''}${getValue(dataObject)}',
       link: dataObject,
     );
   }
@@ -460,6 +560,13 @@ class SchemeColumn extends ColumnData<LinkData>
   SchemeColumn(this.controller) : super.wide('Scheme');
 
   DeepLinksController controller;
+
+  @override
+  bool get supportsSorting {
+    // The sorting action for this column is used instead to provide filter
+    // options. This is handled manually by [controller].
+    return false;
+  }
 
   @override
   Widget? buildHeader(
@@ -510,6 +617,13 @@ class OSColumn extends ColumnData<LinkData>
   DeepLinksController controller;
 
   @override
+  bool get supportsSorting {
+    // The sorting action for this column is used instead to provide filter
+    // options. This is handled manually by [controller].
+    return false;
+  }
+
+  @override
   Widget? buildHeader(
     BuildContext context,
     Widget Function() defaultHeaderRenderer,
@@ -557,6 +671,13 @@ class StatusColumn extends ColumnData<LinkData>
   DeepLinksController controller;
 
   TableViewType viewType;
+
+  @override
+  bool get supportsSorting {
+    // The sorting action for this column is used instead to provide filter
+    // options. This is handled manually by [controller].
+    return false;
+  }
 
   @override
   String getValue(LinkData dataObject) {
@@ -635,6 +756,9 @@ class NavigationColumn extends ColumnData<LinkData>
           '',
           fixedWidthPx: scaleByFontFactor(40),
         );
+
+  @override
+  bool get supportsSorting => false;
 
   @override
   String getValue(LinkData dataObject) => '';

@@ -18,7 +18,9 @@ bool isRootForReferences(GenericInstanceRef? ref) {
   }
 
   if (ref.instanceRef?.length == 0 ||
-      isPrimitiveInstanceKind(ref.instanceRef?.kind)) return false;
+      isPrimitiveInstanceKind(ref.instanceRef?.kind)) {
+    return false;
+  }
 
   return ref.refNodeType.isRoot;
 }

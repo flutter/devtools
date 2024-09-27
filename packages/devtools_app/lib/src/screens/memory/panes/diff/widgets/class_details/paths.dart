@@ -29,9 +29,6 @@ class _RetainingPathColumn extends ColumnData<PathData> {
       record.path.toShortString(inverted: true);
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   String getTooltip(PathData record) => '';
 }
 
@@ -155,7 +152,7 @@ class RetainingPathTable extends StatelessWidget {
       selectionNotifier: selection,
       onItemSelected: (_) => ga.select(
         gac.memory,
-        '${gac.MemoryEvent.diffPathSelect}-${isDiff ? "diff" : "single"}',
+        '${gac.MemoryEvents.diffPathSelect.name}-${isDiff ? "diff" : "single"}',
       ),
       defaultSortColumn: columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,

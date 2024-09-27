@@ -12,9 +12,10 @@ part 'constants/_debugger_constants.dart';
 part 'constants/_deep_links_constants.dart';
 part 'constants/_extension_constants.dart';
 part 'constants/_memory_constants.dart';
+part 'constants/_network_constants.dart';
 part 'constants/_logging_constants.dart';
 part 'constants/_performance_constants.dart';
-part 'constants/_vs_code_sidebar_constants.dart';
+part 'constants/_editor_sidebar_constants.dart';
 part 'constants/_inspector_constants.dart';
 
 // Type of events (event_category):
@@ -45,6 +46,10 @@ final deeplink = ScreenMetaData.deepLinks.id;
 const devToolsMain = 'main';
 const appDisconnected = 'appDisconnected';
 const init = 'init';
+
+/// Event that signals we fell back to JS when trying to load DevTools with
+/// Wasm.
+const jsFallback = 'jsFallback';
 
 // DevTools UI action selected (clicked).
 
@@ -94,7 +99,6 @@ enum HomeScreenEvents {
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
-const trackRebuildWidgets = 'trackRebuildWidgets';
 
 // App Size Tools UX actions:
 const importFileSingle = 'importFileSingle';
@@ -114,6 +118,7 @@ const settingsDialog = 'settings';
 const darkTheme = 'darkTheme';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
+const wasm = 'wasm';
 const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const clearLogs = 'clearLogs';

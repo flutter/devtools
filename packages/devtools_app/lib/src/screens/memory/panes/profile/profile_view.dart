@@ -49,9 +49,6 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
   @override
   String getTooltip(ProfileRecord dataObject) => '';
 
-  @override
-  bool get supportsSorting => true;
-
   final ClassFilterData classFilterData;
 
   @override
@@ -67,7 +64,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
-      copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
+      copyGaItem: gac.MemoryEvents.diffClassSingleCopy.name,
       rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
     );
   }
@@ -272,6 +269,9 @@ class _GCHeapNameColumn extends ColumnData<AdaptedProfile> {
   String? getValue(AdaptedProfile dataObject) {
     return 'GC Statistics';
   }
+
+  @override
+  bool get supportsSorting => false;
 }
 
 class _GCHeapUsageColumn extends _GCHeapStatsColumn {
@@ -458,14 +458,12 @@ class AllocationProfileTableViewState
   @override
   void initState() {
     super.initState();
-
     widget.controller.initialize();
   }
 
   @override
   void didUpdateWidget(AllocationProfileTableView oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (oldWidget.controller != widget.controller) {
       widget.controller.initialize();
     }
@@ -620,11 +618,11 @@ class _AllocationProfileTableControls extends StatelessWidget {
         _ExportAllocationProfileButton(
           allocationProfileController: controller,
         ),
-        if (controller.mode == ControllerCreationMode.connected) ...[
+        if (!offlineDataController.showingOfflineData.value) ...[
           const SizedBox(width: denseSpacing),
           RefreshButton(
             gaScreen: gac.memory,
-            gaSelection: gac.MemoryEvent.profileRefreshManual,
+            gaSelection: gac.MemoryEvents.profileRefreshManual.name,
             onPressed: controller.refresh,
           ),
           const SizedBox(width: denseSpacing),
@@ -653,7 +651,7 @@ class _ExportAllocationProfileButton extends StatelessWidget {
       builder: (context, currentAllocationProfile, _) {
         return DownloadButton(
           gaScreen: gac.memory,
-          gaSelection: gac.MemoryEvent.profileDownloadCsv,
+          gaSelection: gac.MemoryEvents.profileDownloadCsv.name,
           minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
           label: 'CSV',
@@ -688,7 +686,7 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
             allocationProfileController.toggleRefreshOnGc();
             ga.select(
               gac.memory,
-              '${gac.MemoryEvent.profileRefreshOnGc}-$refreshOnGc',
+              '${gac.MemoryEvents.profileRefreshOnGc.name}-$refreshOnGc',
             );
           },
         );
@@ -700,20 +698,19 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
 class _ProfileHelpLink extends StatelessWidget {
   const _ProfileHelpLink();
 
-  static const _documentationTopic = gac.MemoryEvent.profileHelp;
-
   @override
   Widget build(BuildContext context) {
     return HelpButtonWithDialog(
       gaScreen: gac.memory,
-      gaSelection: gac.topicDocumentationButton(_documentationTopic),
+      gaSelection:
+          gac.topicDocumentationButton(gac.MemoryEvents.profileHelp.name),
       dialogTitle: 'Memory Allocation Profile Help',
       actions: [
         MoreInfoLink(
           url: DocLinks.profile.value,
           gaScreenName: '',
           gaSelectedItemDescription:
-              gac.topicDocumentationLink(_documentationTopic),
+              gac.topicDocumentationLink(gac.MemoryEvents.profileHelp.name),
         ),
       ],
       child: const Column(

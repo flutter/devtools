@@ -161,7 +161,7 @@ class ExtensionManager {
         await serviceManager.manuallyDisconnect();
       }
       if (loadQueryParams().containsKey(_vmServiceQueryParameter)) {
-        _updateQueryParameter(_vmServiceQueryParameter, null);
+        updateQueryParameter(_vmServiceQueryParameter, null);
       }
       return;
     }
@@ -182,7 +182,7 @@ class ExtensionManager {
         vmService,
         onClosed: finishedCompleter.future,
       );
-      _updateQueryParameter(
+      updateQueryParameter(
         _vmServiceQueryParameter,
         serviceManager.serviceUri!,
       );
@@ -202,14 +202,14 @@ class ExtensionManager {
         await dtdManager.disconnect();
       }
       if (loadQueryParams().containsKey(_dtdQueryParameter)) {
-        _updateQueryParameter(_dtdQueryParameter, null);
+        updateQueryParameter(_dtdQueryParameter, null);
       }
       return;
     }
 
     try {
       await dtdManager.connect(Uri.parse(dtdUri));
-      _updateQueryParameter(
+      updateQueryParameter(
         _dtdQueryParameter,
         dtdManager.uri.toString(),
       );
@@ -228,7 +228,7 @@ class ExtensionManager {
     // Use a post frame callback so that we do not try to update this while a
     // build is in progress.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateQueryParameter(
+      updateQueryParameter(
         'theme',
         useDarkTheme
             ? ExtensionEventParameters.themeValueDark
@@ -295,19 +295,25 @@ class ExtensionManager {
     );
   }
 
-  void _updateQueryParameter(String key, String? value) {
-    final newQueryParams = Map.of(loadQueryParams());
-    if (value == null) {
-      newQueryParams.remove(key);
-    } else {
-      newQueryParams[key] = value;
-    }
-    final newUri = Uri.parse(window.location.toString())
-        .replace(queryParameters: newQueryParams);
-    window.history.replaceState(
-      window.history.state,
-      '',
-      newUri.toString(),
+  /// Copy [content] to clipboard from DevTools.
+  ///
+  /// [successMessage] is an optional message that DevTools will show as a
+  /// notification when [content] has been successfully copied to the clipboard.
+  /// Defaults to [CopyToClipboardExtensionEvent.defaultSuccessMessage].
+  ///
+  /// This method of copying text is preferred over calling `Clipboard.setData`
+  /// directly because DevTools contains additional logic for copying text from
+  /// within an IDE-embedded web view. This scenario will occur when a user is
+  /// using a DevTools extension from within their IDE.
+  void copyToClipboard(
+    String content, {
+    String successMessage = CopyToClipboardExtensionEvent.defaultSuccessMessage,
+  }) {
+    postMessageToDevTools(
+      CopyToClipboardExtensionEvent(
+        content: content,
+        successMessage: successMessage,
+      ),
     );
   }
 }

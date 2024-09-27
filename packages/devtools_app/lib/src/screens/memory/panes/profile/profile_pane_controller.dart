@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/simple_items.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
@@ -24,13 +23,10 @@ enum Json {
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
   ProfilePaneController({
-    required this.mode,
     required this.rootPackage,
     AdaptedProfile? profile,
-  }) : assert(
-          (mode == ControllerCreationMode.connected && profile == null) ||
-              (mode == ControllerCreationMode.offlineData),
-        ) {
+  }) {
+    // [profile] should only be non-null when loading offline data.
     if (profile != null) {
       _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
         profile,
@@ -42,7 +38,6 @@ class ProfilePaneController extends DisposableController
 
   factory ProfilePaneController.fromJson(Map<String, dynamic> json) {
     return ProfilePaneController(
-      mode: ControllerCreationMode.offlineData,
       profile: deserialize(json[Json.profile.name], AdaptedProfile.fromJson),
       rootPackage: json[Json.rootPackage.name],
     );
@@ -56,15 +51,13 @@ class ProfilePaneController extends DisposableController
     };
   }
 
-  final ControllerCreationMode mode;
-
   bool _initialized = false;
 
   /// Initializes the controller if it is not initialized yet.
   void initialize() {
     if (_initialized) return;
 
-    if (mode == ControllerCreationMode.connected) {
+    if (!offlineDataController.showingOfflineData.value) {
       autoDisposeStreamSubscription(
         serviceConnection.serviceManager.service!.onGCEvent.listen((event) {
           if (refreshOnGc.value) {

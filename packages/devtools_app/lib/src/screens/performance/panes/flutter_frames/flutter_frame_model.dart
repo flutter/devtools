@@ -23,18 +23,19 @@ class FlutterFrame {
     required this.vsyncOverheadTime,
   });
 
-  factory FlutterFrame.fromJson(Map<String, dynamic> json) {
-    final timeStart = Duration(microseconds: json[startTimeKey]!);
-    final timeEnd = timeStart + Duration(microseconds: json[elapsedKey]!);
+  factory FlutterFrame.fromJson(Map<String, Object?> json) {
+    final timeStart = Duration(microseconds: json[startTimeKey]! as int);
+    final timeEnd =
+        timeStart + Duration(microseconds: json[elapsedKey]! as int);
     final frameTime = TimeRange()
       ..start = timeStart
       ..end = timeEnd;
     return FlutterFrame._(
-      id: json[numberKey]!,
+      id: json[numberKey]! as int,
       timeFromFrameTiming: frameTime,
-      buildTime: Duration(microseconds: json[buildKey]!),
-      rasterTime: Duration(microseconds: json[rasterKey]!),
-      vsyncOverheadTime: Duration(microseconds: json[vsyncOverheadKey]!),
+      buildTime: Duration(microseconds: json[buildKey]! as int),
+      rasterTime: Duration(microseconds: json[rasterKey]! as int),
+      vsyncOverheadTime: Duration(microseconds: json[vsyncOverheadKey]! as int),
     );
   }
 
@@ -145,7 +146,7 @@ class FlutterFrame {
     return 1 / displayRefreshRate * 1000;
   }
 
-  Map<String, dynamic> get json => {
+  Map<String, Object?> get json => {
         numberKey: id,
         startTimeKey: timeFromFrameTiming.start!.inMicroseconds,
         elapsedKey: timeFromFrameTiming.duration.inMicroseconds,

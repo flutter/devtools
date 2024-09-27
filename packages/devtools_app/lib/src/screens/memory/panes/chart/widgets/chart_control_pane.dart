@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/simple_items.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/chart_pane_controller.dart';
@@ -16,6 +17,7 @@ import 'interval_dropdown.dart';
 
 class ChartControlPane extends StatefulWidget {
   const ChartControlPane({super.key, required this.chart});
+
   final MemoryChartPaneController chart;
 
   @override
@@ -55,7 +57,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (widget.chart.mode == ControllerCreationMode.connected) ...[
+        if (!offlineDataController.showingOfflineData.value) ...[
           Row(
             children: [
               ValueListenableBuilder<bool>(
@@ -68,8 +70,8 @@ class _ChartControlPaneState extends State<ChartControlPane>
                     pauseTooltip: ChartPaneTooltips.pauseTooltip,
                     resumeTooltip: ChartPaneTooltips.resumeTooltip,
                     gaScreen: gac.memory,
-                    gaSelectionPause: gac.MemoryEvent.pauseChart,
-                    gaSelectionResume: gac.MemoryEvent.resumeChart,
+                    gaSelectionPause: gac.MemoryEvents.pauseChart.name,
+                    gaSelectionResume: gac.MemoryEvents.resumeChart.name,
                   );
                 },
               ),
@@ -78,7 +80,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
                 onPressed: _clearTimeline,
                 tooltip: 'Clear memory chart.',
                 gaScreen: gac.memory,
-                gaSelection: gac.MemoryEvent.clearChart,
+                gaSelection: gac.MemoryEvents.clearChart.name,
                 iconOnly: true,
               ),
             ],
@@ -112,8 +114,8 @@ class _LegendButton extends StatelessWidget {
         onPressed: chartController.data.toggleLegendVisibility,
         gaScreen: gac.memory,
         gaSelection: legendVisible
-            ? gac.MemoryEvent.hideChartLegend
-            : gac.MemoryEvent.showChartLegend,
+            ? gac.MemoryEvents.hideChartLegend.name
+            : gac.MemoryEvents.showChartLegend.name,
         icon: legendVisible ? Icons.close : Icons.storage,
         label: 'Legend',
         tooltip: 'Toggle visibility of the chart legend',
@@ -126,7 +128,7 @@ class _LegendButton extends StatelessWidget {
 class _ChartHelpLink extends StatelessWidget {
   const _ChartHelpLink();
 
-  static const _documentationTopic = gac.MemoryEvent.chartHelp;
+  static final _documentationTopic = gac.MemoryEvents.chartHelp.name;
 
   @override
   Widget build(BuildContext context) {

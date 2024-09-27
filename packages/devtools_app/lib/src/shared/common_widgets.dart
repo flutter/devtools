@@ -24,6 +24,7 @@ import 'globals.dart';
 import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
+import 'ui/icons.dart';
 import 'utils.dart';
 
 double get assumedMonospaceCharacterWidth =>
@@ -663,13 +664,25 @@ class ToolbarAction extends StatelessWidget {
 abstract class ScaffoldAction extends StatelessWidget {
   const ScaffoldAction({
     super.key,
-    required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.icon,
+    this.iconAsset,
     this.color,
-  });
+  }) : assert(
+          (icon == null) != (iconAsset == null),
+          'Exactly one of icon and iconAsset must be specified.',
+        );
 
-  final IconData icon;
+  /// The icon to use for this scaffold action.
+  ///
+  /// Only one of [icon] or [iconAsset] may be non-null.
+  final IconData? icon;
+
+  /// The icon asset path to render as the icon for this scaffold action.
+  ///
+  /// Only one of [icon] or [iconAsset] may be non-null.
+  final String? iconAsset;
 
   final String tooltip;
 
@@ -687,8 +700,9 @@ abstract class ScaffoldAction extends StatelessWidget {
           width: actionWidgetSize,
           height: actionWidgetSize,
           alignment: Alignment.center,
-          child: Icon(
-            icon,
+          child: DevToolsIcon(
+            icon: icon,
+            iconAsset: iconAsset,
             size: actionsIconSize,
             color: color,
           ),
@@ -879,11 +893,11 @@ extension ColorExtension on Color {
     percent = 1.0 - percent;
 
     final c = this;
-    return Color.fromARGB(
-      c.alpha,
-      (c.red * percent).round(),
-      (c.green * percent).round(),
-      (c.blue * percent).round(),
+    return Color.from(
+      alpha: c.a,
+      red: c.r * percent,
+      green: c.g * percent,
+      blue: c.b * percent,
     );
   }
 
@@ -892,11 +906,11 @@ extension ColorExtension on Color {
     assert(0.0 <= percent && percent <= 1.0);
 
     final c = this;
-    return Color.fromARGB(
-      c.alpha,
-      c.red + ((255 - c.red) * percent).round(),
-      c.green + ((255 - c.green) * percent).round(),
-      c.blue + ((255 - c.blue) * percent).round(),
+    return Color.from(
+      alpha: c.a,
+      red: c.r + ((1.0 - c.r) * percent),
+      green: c.g + ((1.0 - c.g) * percent),
+      blue: c.b + ((1.0 - c.b) * percent),
     );
   }
 }
@@ -1178,7 +1192,7 @@ class _JsonViewerState extends State<JsonViewer>
                             .serviceManager.service!.fakeServiceCache
                             .instanceToJson(copiedVariable.value as Instance),
                       ),
-                      'JSON copied to clipboard',
+                      successMessage: 'JSON copied to clipboard',
                     ),
                   );
                 },
@@ -1414,7 +1428,10 @@ class CopyToClipboardControl extends StatelessWidget {
               ga.select(gaScreen!, gaItem!);
             }
             unawaited(
-              copyToClipboard(dataProvider!() ?? '', successMessage),
+              copyToClipboard(
+                dataProvider!() ?? '',
+                successMessage: successMessage,
+              ),
             );
           };
     final size = this.size ?? defaultIconSize;
@@ -1504,7 +1521,7 @@ class CheckboxSetting extends StatelessWidget {
     this.tooltip,
     this.onChanged,
     this.enabled = true,
-    this.gaScreenName,
+    this.gaScreen,
     this.gaItem,
     this.checkboxKey,
   });
@@ -1522,7 +1539,7 @@ class CheckboxSetting extends StatelessWidget {
   /// Whether this checkbox setting should be enabled for interaction.
   final bool enabled;
 
-  final String? gaScreenName;
+  final String? gaScreen;
 
   final String? gaItem;
 
@@ -1537,10 +1554,10 @@ class CheckboxSetting extends StatelessWidget {
         NotifierCheckbox(
           notifier: notifier,
           onChanged: (bool? value) {
-            final gaScreenName = this.gaScreenName;
+            final gaScreen = this.gaScreen;
             final gaItem = this.gaItem;
-            if (gaScreenName != null && gaItem != null) {
-              ga.select(gaScreenName, gaItem);
+            if (gaScreen != null && gaItem != null) {
+              ga.select(gaScreen, '$gaItem-$value');
             }
             final onChanged = this.onChanged;
             if (onChanged != null) {

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
@@ -66,13 +67,15 @@ class ReleaseNotesController extends SidePanelController {
   }
 
   void _maybeShowReleaseNotes() async {
-    final currentUrl = getWebUrl();
-    final currentPage =
-        currentUrl != null ? extractCurrentPageFromUrl(currentUrl) : null;
-    if (isEmbedded() &&
-        currentPage == StandaloneScreenType.vsCodeFlutterPanel.name) {
-      // Do not show release notes in the Flutter sidebar.
-      return;
+    // Do not show release notes in embedded sidebar.
+    if (isEmbedded()) {
+      final currentUrl = getWebUrl();
+      final currentPage =
+          currentUrl != null ? extractCurrentPageFromUrl(currentUrl) : null;
+      if (currentPage == StandaloneScreenType.vsCodeFlutterPanel.name ||
+          currentPage == StandaloneScreenType.editorSidebar.name) {
+        return;
+      }
     }
 
     SemanticVersion previousVersion = SemanticVersion();

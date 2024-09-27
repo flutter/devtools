@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
-import '../../../shared/primitives/simple_items.dart';
 import '../../../shared/ui/tab.dart';
 import '../panes/diff/diff_pane.dart';
 import '../panes/profile/profile_view.dart';
@@ -21,10 +20,7 @@ class MemoryScreenKeys {
 }
 
 class MemoryTabView extends StatelessWidget {
-  const MemoryTabView(
-    this.controller, {
-    super.key,
-  });
+  const MemoryTabView(this.controller, {super.key});
 
   static const _gaPrefix = 'memoryTab';
 
@@ -33,7 +29,7 @@ class MemoryTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnalyticsTabbedView(
-      tabs: _generateTabRecords(),
+      tabs: [_profile(), _diff(), _trace()],
       initialSelectedIndex: controller.selectedFeatureTabIndex,
       gaScreen: gac.memory,
       onTabChanged: (int index) {
@@ -78,15 +74,4 @@ class MemoryTabView extends StatelessWidget {
           child: TracingPane(controller: controller.trace!),
         ),
       );
-
-  List<TabAndView> _generateTabRecords() {
-    final hasData = controller.mode != ControllerCreationMode.disconnected;
-    return [
-      if (hasData) _profile(),
-      // Diff is enabled even in disconnected mode to allow users to load
-      // snapshots from file.
-      _diff(),
-      if (hasData) _trace(),
-    ];
-  }
 }

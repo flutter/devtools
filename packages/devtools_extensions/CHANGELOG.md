@@ -1,3 +1,16 @@
+## 0.3.0-dev.1
+* Bump `devtools_app_shared` dependency to `0.2.4`.
+
+## 0.3.0-dev.0
+* Add `ExtensionManager.copyToClipboard` method.
+* Add `DevToolsExtensionEventType.copyToClipboard` enum type.
+* Add `CopyToClipboardExtensionEvent` extension event type. 
+* Bump `web` dependency to `^1.0.0`.
+
+## 0.2.2
+* Load the IDE Theme from the extension URL instead of creating
+a placeholder `IdeTheme` object.
+
 ## 0.2.1
 * Add testimonies from extension authors to the `README.md`.
 * Add an integration test to the example app, `app_that_uses_foo`.

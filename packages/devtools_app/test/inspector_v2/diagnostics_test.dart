@@ -76,7 +76,7 @@ void main() {
       late DiagnosticsNodeDescription diagnosticsNodeDescription;
 
       setUp(() {
-        preferences.inspectorV2.setHoverEvalMode(true);
+        preferences.inspector.setHoverEvalMode(true);
         diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnostic,
         );
@@ -96,7 +96,7 @@ void main() {
       testWidgets(
         'can be disabled from preferences',
         (WidgetTester tester) async {
-          preferences.inspectorV2.setHoverEvalMode(false);
+          preferences.inspector.setHoverEvalMode(false);
 
           await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 

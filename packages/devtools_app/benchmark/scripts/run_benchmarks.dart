@@ -11,6 +11,7 @@ import 'package:web_benchmarks/server.dart';
 
 import '../test_infra/common.dart';
 import '../test_infra/project_root_directory.dart';
+import 'args.dart';
 import 'compare_benchmarks.dart';
 import 'utils.dart';
 
@@ -19,34 +20,55 @@ import 'utils.dart';
 /// To see available arguments, run this script with the `-h` flag.
 Future<void> main(List<String> args) async {
   if (args.isNotEmpty && args.first == '-h') {
-    stdout.writeln(BenchmarkArgs._buildArgParser().usage);
+    stdout.writeln(_Args._buildArgParser().usage);
     return;
   }
 
-  final benchmarkArgs = BenchmarkArgs(args);
+  final benchmarkArgs = _Args(args);
+  final results = await runBenchmarks(
+    averageOf: benchmarkArgs.averageOf,
+    useWasm: benchmarkArgs.useWasm,
+    useBrowser: benchmarkArgs.useBrowser,
+  );
+
+  printAndMaybeSaveResults(
+    benchmarkResults: results,
+    saveToFileLocation: benchmarkArgs.saveToFileLocation,
+  );
+
+  maybeCompareToBaseline(
+    benchmarkResults: results,
+    baselineLocation: benchmarkArgs.baselineLocation,
+  );
+}
+
+/// Runs the DevTools benchmarks [averageOf] times and takes returns the average
+/// of the benchmark runs as a single [BenchmarkResults] object.
+Future<BenchmarkResults> runBenchmarks({
+  required int averageOf,
+  required bool useWasm,
+  required bool useBrowser,
+}) async {
   final benchmarkResults = <BenchmarkResults>[];
-  for (var i = 0; i < benchmarkArgs.averageOf; i++) {
+  for (var i = 0; i < averageOf; i++) {
     stdout.writeln('Starting web benchmark tests (run #$i) ...');
     benchmarkResults.add(
       await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
         entryPoint: 'benchmark/test_infra/client.dart',
-        compilationOptions: CompilationOptions(
-          useWasm: benchmarkArgs.useWasm,
-          renderer: benchmarkArgs.useSkwasm
-              ? WebRenderer.skwasm
-              : WebRenderer.canvaskit,
-        ),
+        compilationOptions: useWasm
+            ? const CompilationOptions.wasm()
+            : const CompilationOptions.js(),
         treeShakeIcons: false,
         initialPage: benchmarkInitialPage,
-        headless: !benchmarkArgs.useBrowser,
+        headless: !useBrowser,
       ),
     );
     stdout.writeln('Web benchmark tests finished (run #$i).');
   }
 
   late final BenchmarkResults taskResult;
-  if (benchmarkArgs.averageOf == 1) {
+  if (averageOf == 1) {
     taskResult = benchmarkResults.first;
   } else {
     stdout.writeln(
@@ -54,13 +76,21 @@ Future<void> main(List<String> args) async {
     );
     taskResult = computeAverage(benchmarkResults);
   }
+  return taskResult;
+}
 
-  final resultsAsMap = taskResult.toJson();
+/// Prints the [benchmarkResults] to stdout and optionally saves the results to
+/// disk at [saveToFileLocation] when this value is non-null.
+void printAndMaybeSaveResults({
+  required BenchmarkResults benchmarkResults,
+  required String? saveToFileLocation,
+}) {
+  final resultsAsMap = benchmarkResults.toJson();
   final resultsAsJsonString =
       const JsonEncoder.withIndent('  ').convert(resultsAsMap);
 
-  if (benchmarkArgs.saveToFileLocation != null) {
-    final location = Uri.parse(benchmarkArgs.saveToFileLocation!);
+  if (saveToFileLocation != null) {
+    final location = Uri.parse(saveToFileLocation);
     File.fromUri(location)
       ..createSync()
       ..writeAsStringSync(resultsAsJsonString);
@@ -71,98 +101,54 @@ Future<void> main(List<String> args) async {
     ..writeln(resultsAsJsonString)
     ..writeln('==== End of results ====')
     ..writeln();
+}
 
-  final baselineSource = benchmarkArgs.baselineLocation;
-  if (baselineSource != null) {
-    final baselineFile = checkFileExists(baselineSource);
+/// Compares [benchmarkResults] to the benchmark results contained at the
+/// [baselineLocation] absolute file path, if they exist.
+///
+/// This method computes a diff of the two benchmark runs and prints the delta
+/// information to stdout.
+void maybeCompareToBaseline({
+  required BenchmarkResults benchmarkResults,
+  required String? baselineLocation,
+}) {
+  if (baselineLocation != null) {
+    final baselineFile = checkFileExists(baselineLocation);
     if (baselineFile != null) {
       final baselineResults = BenchmarkResults.parse(
         jsonDecode(baselineFile.readAsStringSync()),
       );
-      final testResults = BenchmarkResults.parse(
-        jsonDecode(resultsAsJsonString),
-      );
       compareBenchmarks(
         baselineResults,
-        testResults,
-        baselineSource: baselineSource,
+        benchmarkResults,
+        baselineSource: baselineLocation,
       );
     }
   }
 }
 
-class BenchmarkArgs {
-  BenchmarkArgs(List<String> args) {
-    argParser = _buildArgParser();
-    argResults = argParser.parse(args);
+class _Args extends BenchmarkArgsBase {
+  _Args(List<String> args) {
+    init(args, parser: _buildArgParser());
   }
 
-  late final ArgParser argParser;
+  bool get useBrowser => argResults[BenchmarkArgument.browser.flagName];
+  bool get useWasm => argResults[BenchmarkArgument.wasm.flagName];
 
-  late final ArgResults argResults;
-
-  bool get useBrowser => argResults[_browserFlag];
-
-  bool get useWasm => argResults[_wasmFlag];
-
-  bool get useSkwasm => argResults[_skwasmFlag];
-
-  int get averageOf => int.parse(argResults[_averageOfOption]);
-
-  String? get saveToFileLocation => argResults[_saveToFileOption];
-
-  String? get baselineLocation => argResults[_baselineOption];
-
-  static const _browserFlag = 'browser';
-
-  static const _wasmFlag = 'wasm';
-
-  static const _skwasmFlag = 'skwasm';
-
-  static const _saveToFileOption = 'save-to-file';
-
-  static const _baselineOption = 'baseline';
-
-  static const _averageOfOption = 'average-of';
-
-  /// Builds an arg parser for DevTools benchmarks.
   static ArgParser _buildArgParser() {
     return ArgParser()
+      ..addSaveToFileOption(BenchmarkResultsOutputType.json)
+      ..addAverageOfOption()
+      ..addBaselineOption()
       ..addFlag(
-        _browserFlag,
+        BenchmarkArgument.browser.flagName,
         negatable: false,
         help: 'Runs the benchmark tests in browser mode (not headless mode).',
       )
       ..addFlag(
-        _wasmFlag,
+        BenchmarkArgument.wasm.flagName,
         negatable: false,
         help: 'Runs the benchmark tests with dart2wasm',
-      )
-      ..addFlag(
-        _skwasmFlag,
-        negatable: false,
-        help:
-            'Runs the benchmark tests with the skwasm renderer instead of canvaskit.',
-      )
-      ..addOption(
-        _saveToFileOption,
-        help: 'Saves the benchmark results to a JSON file at the given path.',
-        valueHelp: '/Users/me/Downloads/output.json',
-      )
-      ..addOption(
-        _baselineOption,
-        help: 'The baseline benchmark data to compare this test run to. The '
-            'baseline file should be created by running this script with the '
-            '$_saveToFileOption in a separate test run.',
-        valueHelp: '/Users/me/Downloads/baseline.json',
-      )
-      ..addOption(
-        _averageOfOption,
-        defaultsTo: '1',
-        help: 'The number of times to run the benchmark. The returned results '
-            'will be the average of all the benchmark runs when this value is '
-            'greater than 1.',
-        valueHelp: '5',
       );
   }
 }

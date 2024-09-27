@@ -37,7 +37,7 @@ extension CpuProfilerExtension on VmService {
     const kCodeStack = '_codeStack';
 
     final rawSamples =
-        (cpuSamples.json![kSamples] as List).cast<Map<String, dynamic>>();
+        (cpuSamples.json![kSamples] as List).cast<Map<String, Object?>>();
 
     bool buildCodeProfile = false;
     if (rawSamples.isNotEmpty && rawSamples.first.containsKey(kCodeStack)) {

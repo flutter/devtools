@@ -1,23 +1,22 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.37.1 release notes
+# DevTools 2.40.0 release notes
 
-The 2.37.1 release of the Dart and Flutter DevTools
+The 2.40.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](/tools/devtools/overview).
 
 ## General updates
 
-* Improve messaging when a screen is unavailable for the platform of the
-connected app. - [#7958](https://github.com/flutter/devtools/pull/7958)
-* Fix a bug where an infinite spinner was shown upon app
-disconnect. - [#7992](https://github.com/flutter/devtools/pull/7992)
-* Fix a bug where trying to reuse a disconnected DevTools instance would
-fail. - [#8009](https://github.com/flutter/devtools/pull/8009)
 * Fixed a bug that was causing the DevTools release notes to always
 show. - [#8277](https://github.com/flutter/devtools/pull/8277)
+
+* Add a setting that allows users to opt-in to loading DevTools
+with WebAssembly. - [#8270](https://github.com/flutter/devtools/pull/8270)
+
+    ![Wasm opt-in setting](images/wasm_setting.png "DevTools setting to opt into wasm.")
 
 ## Inspector updates
 
@@ -25,11 +24,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-* Removed the "Raster Stats" feature. This tool did not work for the Impeller rendering
-engine, and the information it gave for the SKIA rendering engine was misleading and
-inactionable. Users should follow official Flutter guidance for
-[Performance & Optimization](https://docs.flutter.dev/perf) when debugging the
-rendering performance of their Flutter apps. - [#7981](https://github.com/flutter/devtools/pull/7981).
+* Fixed an issue with the "Refreshing timeline" overlay that was getting shown
+when it should not have been. - [#8318](https://github.com/flutter/devtools/pull/8318)
 
 ## CPU profiler updates
 
@@ -48,10 +44,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-* Display query parameters for requests. - [#7825](https://github.com/flutter/devtools/pull/7825)
-* Fixed issue where socket statistics were being reported as web sockets. - [#8061](https://github.com/flutter/devtools/pull/8061)
-
-    ![Network profiler correctly displaying socket statistics](images/socket-profiling.png "Network profiler correctly displaying socket statistics")
+TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 
@@ -67,10 +60,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-* Show all DevTools tools in the sidebar by default, even when there are no
-debug sessions available. - [#7947](https://github.com/flutter/devtools/pull/7947)
-
-![DevTools tools in the sidebar](images/devtools_in_sidebar.png "DevTools tools in the sidebar")
+TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
@@ -79,4 +69,4 @@ TODO: Remove this section if there are not any general updates.
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.37.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.40.0).

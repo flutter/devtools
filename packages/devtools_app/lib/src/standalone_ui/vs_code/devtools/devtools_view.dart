@@ -83,14 +83,14 @@ class SidebarDevToolsScreens extends StatelessWidget {
               'DevTools',
               style: theme.textTheme.titleMedium,
             ),
-            if (editor.supportsOpenDevToolsExternally)
+            if (editor.supportsOpenDevToolsForceExternal)
               ToolbarAction(
                 icon: Icons.open_in_browser_outlined,
                 tooltip: 'Open in browser',
                 onPressed: () {
                   ga.select(
-                    gac.VsCodeFlutterSidebar.id,
-                    gac.VsCodeFlutterSidebar.openDevToolsExternally.name,
+                    editor.gaId,
+                    gac.EditorSidebar.openDevToolsExternally.name,
                   );
                   unawaited(
                     editor.openDevToolsPage(null, forceExternal: true),
@@ -163,7 +163,8 @@ class SidebarDevToolsScreens extends StatelessWidget {
     final id = screen.title ?? screen.id;
     return (
       label: id,
-      icon: screen.icon!,
+      icon: screen.icon,
+      iconAsset: screen.iconAsset,
       screenId: screen.id,
       requiresDebugSession: screen.requiresConnection,
       // Only the app size screen does not care about the active debug session.

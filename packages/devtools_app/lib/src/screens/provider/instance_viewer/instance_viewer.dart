@@ -417,6 +417,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
             ref,
             path: widget.rootPath,
             disableExpand: true,
+            // ignore: avoid-unnecessary-type-casts, this code will be removed soon.
           ).cast<Widget?>(), // This cast is necessary to avoid Null type errors
           estimatedChildCount:
               ref.watch(estimatedChildCountProvider(widget.rootPath)),

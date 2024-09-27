@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -10,7 +12,6 @@ import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/simple_items.dart';
 import 'tracing_data.dart';
 
 @visibleForTesting
@@ -22,8 +23,7 @@ enum Json {
 
 class TracePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
-  TracePaneController(
-    this.mode, {
+  TracePaneController({
     Map<String, TracingIsolateState>? stateForIsolate,
     String? selectedIsolateId,
     required this.rootPackage,
@@ -43,7 +43,6 @@ class TracePaneController extends DisposableController
 
   factory TracePaneController.fromJson(Map<String, dynamic> json) {
     return TracePaneController(
-      ControllerCreationMode.offlineData,
       stateForIsolate: (json[Json.stateForIsolate.name] as Map).map(
         (key, value) => MapEntry(
           key,
@@ -64,8 +63,6 @@ class TracePaneController extends DisposableController
     };
   }
 
-  final ControllerCreationMode mode;
-
   /// Maps isolate IDs to their allocation tracing states.
   late final Map<String, TracingIsolateState> stateForIsolate;
 
@@ -75,9 +72,9 @@ class TracePaneController extends DisposableController
     TracingIsolateState.empty(),
   );
 
-  /// Set to `true` if the controller has not yet finished initializing.
-  ValueListenable<bool> get initializing => _initializing;
-  final _initializing = ValueNotifier<bool>(true);
+  /// A Future tracking whether the controller has been initialized.
+  Future<void> get initialized => _initialized.future;
+  final _initialized = Completer<void>();
 
   /// Set to `true` when `refresh()` has been called and allocation profiles
   /// are being updated, before then being set again to `false`.
@@ -87,15 +84,11 @@ class TracePaneController extends DisposableController
   /// The [TextEditingController] for the 'Class Filter' text field.
   final textEditingController = TextEditingController();
 
-  bool _initialized = false;
-
   final String? rootPackage;
 
   /// Initializes the controller if it is not initialized yet.
   Future<void> initialize() async {
-    if (_initialized) return;
-    _initialized = true;
-    _initializing.value = true;
+    if (_initialized.isCompleted) return;
 
     Future<void> updateState() async {
       final isolate =
@@ -112,7 +105,7 @@ class TracePaneController extends DisposableController
         // TODO(bkonyi): we don't need to request this unless we've had a hot reload.
         // We generally need to rebuild this data if we've had a hot reload or
         // switched the currently selected isolate.
-        state = TracingIsolateState(isolate: isolate, mode: mode);
+        state = TracingIsolateState(isolate: isolate);
         await state.initialize();
         stateForIsolate[isolateId] = state;
       }
@@ -121,7 +114,7 @@ class TracePaneController extends DisposableController
       _selection.value = state;
     }
 
-    if (mode == ControllerCreationMode.connected) {
+    if (!offlineDataController.showingOfflineData.value) {
       addAutoDisposeListener(
         serviceConnection.serviceManager.isolateManager.selectedIsolate,
         updateState,
@@ -135,7 +128,7 @@ class TracePaneController extends DisposableController
       }
     }
 
-    _initializing.value = false;
+    _initialized.complete();
   }
 
   @override

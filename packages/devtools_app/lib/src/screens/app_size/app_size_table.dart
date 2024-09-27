@@ -88,9 +88,6 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
   String? getCaption(TreemapNode dataObject) => dataObject.caption;
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   String getTooltip(TreemapNode dataObject) => dataObject.displayText();
 
   @override
@@ -117,9 +114,6 @@ class _SizeColumn extends ColumnData<TreemapNode> {
   }
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   int compare(TreemapNode a, TreemapNode b) {
     final valueA = getValue(a);
     final valueB = getValue(b);
@@ -144,9 +138,6 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
   @override
   String getDisplayValue(TreemapNode dataObject) =>
       '${getValue(dataObject).toStringAsFixed(2)} %';
-
-  @override
-  bool get supportsSorting => true;
 
   @override
   int compare(TreemapNode a, TreemapNode b) {
@@ -220,9 +211,6 @@ class _DiffColumn extends ColumnData<TreemapNode> {
 // TODO(peterdjlee): Add up or down arrows indicating increase or decrease for display value.
   @override
   String getDisplayValue(TreemapNode dataObject) => dataObject.prettyByteSize();
-
-  @override
-  bool get supportsSorting => true;
 
   @override
   int compare(TreemapNode a, TreemapNode b) {

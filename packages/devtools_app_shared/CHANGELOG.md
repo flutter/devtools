@@ -1,9 +1,24 @@
-## 0.2.2-wip
+## 0.2.4
+* Add `updateQueryParameter` utility method.
+
+## 0.2.3
+* Bump `web` dependency to `^1.0.0`
+* Bump `pointer_interceptor` dependency to `^0.10.1+1`
+* Add better error handling in `ServiceExtensionManager`.
+
+## 0.2.2
+* Lookup the connected app package root from an expression evaluation when
+the connected app is a Dart or Flutter test.
+* Add a field `logExceptions` to `EvalOnDartLibrary` that defaults to true but
+can be disabled to prevent exceptions from being logged to console.
 * Add `caseInsensitiveFuzzyMatch` extension method on `String`.
 * Add common widgets `DevToolsClearableTextField`, `InputDecorationSuffixButton`,
 and `RoundedDropDownButton`.
+* Add `isEmbedded` utility method.
 * Deprecate `ServiceManager.hasConnection` in favor of
 `ServiceManager.connectedState.value.connected`.
+* Correct the dartdoc for the `ListValueNotifier` class.
+* Deprecate `trackRebuildWidgets` in favor of `countWidgetBuilds`.
 
 ## 0.2.1
 * Add `navigateToCode` utility method for jumping to code in IDEs.

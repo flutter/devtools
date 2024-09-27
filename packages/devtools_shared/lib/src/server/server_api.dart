@@ -28,10 +28,15 @@ import 'flutter_store.dart';
 
 // TODO(kenz): consider using Dart augmentation libraries instead of part files
 // if there is a clear benefit.
+part 'handlers/_app_size.dart';
 part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
 part 'handlers/_general.dart';
+part 'handlers/_preferences.dart';
+part 'handlers/_release_notes.dart';
+part 'handlers/_storage.dart';
+part 'handlers/_survey.dart';
 
 /// The DevTools server API.
 ///
@@ -39,7 +44,6 @@ part 'handlers/_general.dart';
 class ServerApi {
   static const logsKey = 'logs';
   static const errorKey = 'error';
-  static const errorNoActiveSurvey = 'ERROR: setActiveSurvey not called.';
 
   /// Determines whether or not [request] is an API call.
   static bool canHandle(shelf.Request request) {
@@ -54,7 +58,7 @@ class ServerApi {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
     ServerApi? api,
-    DTDConnectionInfo? dtd,
+    DtdInfo? dtd,
   }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
@@ -110,119 +114,60 @@ class ServerApi {
         }
         return _encodeResponse(_devToolsStore.analyticsEnabled, api: api);
 
-      // ----- DevTools survey store. -----
+      // ----- Preferences api. -----
+      case PreferencesApi.getPreferenceValue:
+        return _PreferencesApiHandler.getPreferenceValue(
+          api,
+          queryParams,
+          _devToolsStore,
+        );
 
-      case apiSetActiveSurvey:
-        // Assume failure.
-        bool result = false;
+      case PreferencesApi.setPreferenceValue:
+        return _PreferencesApiHandler.setPreferenceValue(
+          api,
+          queryParams,
+          _devToolsStore,
+        );
 
-        // Set the active survey used to store subsequent apiGetSurveyActionTaken,
-        // apiSetSurveyActionTaken, apiGetSurveyShownCount, and
-        // apiIncrementSurveyShownCount calls.
-        if (queryParams.keys.length == 1 &&
-            queryParams.containsKey(activeSurveyName)) {
-          final surveyName = queryParams[activeSurveyName]!;
+      // ----- DevTools survey api. -----
 
-          // Set the current activeSurvey.
-          _devToolsStore.activeSurvey = surveyName;
-          result = true;
-        }
-        return _encodeResponse(result, api: api);
-      case apiGetSurveyActionTaken:
-        // Request setActiveSurvey has not been requested.
-        if (_devToolsStore.activeSurvey == null) {
-          return api.badRequest(
-            '$errorNoActiveSurvey '
-            '- $apiGetSurveyActionTaken',
-          );
-        }
-        // SurveyActionTaken has the survey been acted upon (taken or dismissed)
-        return _encodeResponse(_devToolsStore.surveyActionTaken, api: api);
-      // TODO(terry): remove the query param logic for this request.
-      // setSurveyActionTaken should only be called with the value of true, so
-      // we can remove the extra complexity.
-      case apiSetSurveyActionTaken:
-        // Request setActiveSurvey has not been requested.
-        if (_devToolsStore.activeSurvey == null) {
-          return api.badRequest(
-            '$errorNoActiveSurvey '
-            '- $apiSetSurveyActionTaken',
-          );
-        }
-        // Set the SurveyActionTaken.
-        // Has the survey been taken or dismissed..
-        if (queryParams.containsKey(surveyActionTakenPropertyName)) {
-          _devToolsStore.surveyActionTaken =
-              json.decode(queryParams[surveyActionTakenPropertyName]!);
-        }
-        return _encodeResponse(_devToolsStore.surveyActionTaken, api: api);
-      case apiGetSurveyShownCount:
-        // Request setActiveSurvey has not been requested.
-        if (_devToolsStore.activeSurvey == null) {
-          return api.badRequest(
-            '$errorNoActiveSurvey '
-            '- $apiGetSurveyShownCount',
-          );
-        }
-        // SurveyShownCount how many times have we asked to take survey.
-        return _encodeResponse(_devToolsStore.surveyShownCount, api: api);
-      case apiIncrementSurveyShownCount:
-        // Request setActiveSurvey has not been requested.
-        if (_devToolsStore.activeSurvey == null) {
-          return api.badRequest(
-            '$errorNoActiveSurvey '
-            '- $apiIncrementSurveyShownCount',
-          );
-        }
-        // Increment the SurveyShownCount, we've asked about the survey.
-        _devToolsStore.incrementSurveyShownCount();
-        return _encodeResponse(_devToolsStore.surveyShownCount, api: api);
+      case SurveyApi.setActiveSurvey:
+        return _SurveyHandler.setActiveSurvey(api, queryParams, _devToolsStore);
+
+      case SurveyApi.getSurveyActionTaken:
+        return _SurveyHandler.getSurveyActionTaken(api, _devToolsStore);
+
+      case SurveyApi.setSurveyActionTaken:
+        return _SurveyHandler.setSurveyActionTaken(api, _devToolsStore);
+
+      case SurveyApi.getSurveyShownCount:
+        return _SurveyHandler.getSurveyShownCount(api, _devToolsStore);
+
+      case SurveyApi.incrementSurveyShownCount:
+        return _SurveyHandler.incrementSurveyShownCount(api, _devToolsStore);
 
       // ----- Release notes api. -----
 
-      case apiGetLastReleaseNotesVersion:
-        return _encodeResponse(
-          _devToolsStore.lastReleaseNotesVersion,
-          api: api,
+      case ReleaseNotesApi.getLastReleaseNotesVersion:
+        return _ReleaseNotesHandler.getLastReleaseNotesVersion(
+          api,
+          _devToolsStore,
         );
-      case apiSetLastReleaseNotesVersion:
-        if (queryParams.containsKey(lastReleaseNotesVersionPropertyName)) {
-          _devToolsStore.lastReleaseNotesVersion =
-              queryParams[lastReleaseNotesVersionPropertyName]!;
-          return _encodeResponse(true, api: api);
-        }
-        return _encodeResponse(false, api: api);
+
+      case ReleaseNotesApi.setLastReleaseNotesVersion:
+        return _ReleaseNotesHandler.setLastReleaseNotesVersion(
+          api,
+          queryParams,
+          _devToolsStore,
+        );
 
       // ----- App size api. -----
 
-      case apiGetBaseAppSizeFile:
-        if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
-          final filePath = queryParams[baseAppSizeFilePropertyName]!;
-          final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
-          if (fileJson == null) {
-            return api.badRequest('No JSON file available at $filePath.');
-          }
-          return api.success(fileJson);
-        }
-        return api.badRequest(
-          'Request for base app size file does not '
-          'contain a query parameter with the expected key: '
-          '$baseAppSizeFilePropertyName',
-        );
-      case apiGetTestAppSizeFile:
-        if (queryParams.containsKey(testAppSizeFilePropertyName)) {
-          final filePath = queryParams[testAppSizeFilePropertyName]!;
-          final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
-          if (fileJson == null) {
-            return api.badRequest('No JSON file available at $filePath.');
-          }
-          return api.success(fileJson);
-        }
-        return api.badRequest(
-          'Request for test app size file does not '
-          'contain a query parameter with the expected key: '
-          '$testAppSizeFilePropertyName',
-        );
+      case AppSizeApi.getBaseAppSizeFile:
+        return _AppSizeHandler.getBaseAppSizeFile(api, queryParams);
+
+      case AppSizeApi.getTestAppSizeFile:
+        return _AppSizeHandler.getTestAppSizeFile(api, queryParams);
 
       // ----- Extensions api. -----
 
@@ -269,8 +214,14 @@ class ServerApi {
           queryParams,
           deeplinkManager,
         );
+
+      // ----- DTD api. -----
+
       case DtdApi.apiGetDtdUri:
         return _DtdApiHandler.handleGetDtdUri(api, dtd);
+
+      // ----- Unimplemented. -----
+
       default:
         return api.notImplemented();
     }

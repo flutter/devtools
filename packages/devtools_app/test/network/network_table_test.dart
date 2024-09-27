@@ -52,7 +52,6 @@ void main() {
     DartIOHttpRequestData findRequestById(String id) {
       return requests
           .whereType<DartIOHttpRequestData>()
-          .cast<DartIOHttpRequestData>()
           .firstWhere((request) => request.id == id);
     }
 

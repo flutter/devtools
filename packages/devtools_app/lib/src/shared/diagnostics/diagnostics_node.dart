@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../screens/inspector_v2/inspector_data_models.dart';
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
 import '../ui/icons.dart';
@@ -74,10 +75,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       );
   }
 
-  static Size deserializeSize(Map<String, Object> json) {
+  static Size? deserializeSize(Map<String, Object> json) {
+    final width = json['width'] as String?;
+    final height = json['height'] as String?;
+    if (width == null || height == null) return null;
     return Size(
-      double.parse(json['width'] as String),
-      double.parse(json['height'] as String),
+      double.parse(width),
+      double.parse(height),
     );
   }
 
@@ -152,9 +156,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   // [deserializeSize] expects a parameter of type Map<String, Object> (note the
   // non-nullable Object), so we need to first type check as a Map and then we
   // can cast to the expected type.
-  Size get size => deserializeSize(
-        (json['size'] as Map?)?.cast<String, Object>() ?? <String, Object>{},
-      );
+  Size? get size {
+    final sizeMap = json['size'] as Map?;
+    return sizeMap == null
+        ? null
+        : deserializeSize(sizeMap.cast<String, Object>());
+  }
 
   bool get isLocalClass {
     final objectGroup = objectGroupApi;
@@ -453,6 +460,32 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return json[memberName] as bool;
   }
 
+  LayoutProperties? computeLayoutProperties({required bool forFlexLayout}) {
+    if ((!forFlexLayout && !isBoxLayout) || (forFlexLayout && !isFlexLayout)) {
+      return null;
+    }
+    if (size == null) return null;
+    return forFlexLayout
+        ? FlexLayoutProperties.fromDiagnostics(this)
+        : LayoutProperties(this);
+  }
+
+  RemoteDiagnosticsNode? layoutRootNode({required bool forFlexLayout}) {
+    if (forFlexLayout && !isFlexLayout) return null;
+
+    if (forFlexLayout) {
+      return isFlex ? this : parent;
+    }
+
+    return this;
+  }
+
+  // Warning: This should only be used on a layout explorer node. A regular
+  // remote diagnostics node never has a "size" property.
+  bool get isBoxLayout => size != null;
+
+  bool get isFlexLayout => isFlex || (parent?.isFlex ?? false);
+
   DiagnosticLevel getLevelMember(
     String memberName,
     DiagnosticLevel defaultValue,
@@ -566,6 +599,73 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   List<RemoteDiagnosticsNode> get childrenNow {
     _maybePopulateChildren();
     return _children ?? [];
+  }
+
+  RemoteDiagnosticsNode? get hideableGroupLeader =>
+      isHideableGroupLeader ? this : _hideableGroupLeader;
+
+  RemoteDiagnosticsNode? _hideableGroupLeader;
+
+  set hideableGroupLeader(RemoteDiagnosticsNode? newLeader) {
+    _hideableGroupLeader = newLeader;
+  }
+
+  bool get groupIsHidden => inHideableGroup && _groupIsHidden;
+
+  bool _groupIsHidden = true;
+
+  set groupIsHidden(bool newValue) {
+    _groupIsHidden = newValue;
+  }
+
+  bool get isHidden =>
+      inHideableGroup && !isHideableGroupLeader && groupIsHidden;
+
+  bool get inHideableGroup {
+    if (_alwaysVisible(this)) return false;
+    final parentIsHideable = parent != null && !_alwaysVisible(parent!);
+    final firstChildIsHideable =
+        childrenNow.isNotEmpty && !_alwaysVisible(childrenNow.first);
+
+    // A widget should only be included in a hideable group if either its parent
+    // or first child is hideable (if it's the only hideable widget then it's
+    // not part of a "group").
+    return parentIsHideable || firstChildIsHideable;
+  }
+
+  bool get isHideableGroupLeader {
+    return inHideableGroup && _hideableGroupSubordinates != null;
+  }
+
+  List<RemoteDiagnosticsNode>? get hideableGroupSubordinates =>
+      _hideableGroupSubordinates;
+  List<RemoteDiagnosticsNode>? _hideableGroupSubordinates;
+
+  void addHideableGroupSubordinate(RemoteDiagnosticsNode subordinate) {
+    (_hideableGroupSubordinates ??= <RemoteDiagnosticsNode>[]).add(subordinate);
+    subordinate.hideableGroupLeader = this;
+  }
+
+  void toggleHiddenGroup() {
+    // Only the hideable group leader can change the group's hidden state:
+    assert(isHideableGroupLeader);
+
+    final newHiddenValue = !_groupIsHidden;
+    _groupIsHidden = newHiddenValue;
+    if (isHideableGroupLeader) {
+      _hideableGroupSubordinates
+          ?.forEach((node) => node.groupIsHidden = newHiddenValue);
+    }
+  }
+
+  bool _alwaysVisible(RemoteDiagnosticsNode node) {
+    final isRoot = node.parent == null;
+    final hasMoreThanOneChild = node.hasChildren && node.childrenNow.length > 1;
+    final hasSiblings = (node.parent?.childrenNow ?? []).length > 1;
+    return isRoot ||
+        node.isCreatedByLocalProject ||
+        hasMoreThanOneChild ||
+        hasSiblings;
   }
 
   Future<void> _computeChildren() async {

@@ -10,7 +10,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/primitives/encoding.dart';
-import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../profiler/cpu_profile_model.dart';
@@ -91,6 +90,7 @@ class TracedClass with PinnableListEntry, Serializable {
       '${clazz.name} instances: $instances trace: $traceAllocations';
 }
 
+// TODO(kenz): include the selected class in the toJson and fromJson methods.
 @visibleForTesting
 enum TracingIsolateStateJson {
   isolate,
@@ -104,7 +104,6 @@ enum TracingIsolateStateJson {
 /// consumers the allocation tracing state for the currently selected isolate.
 class TracingIsolateState with Serializable {
   TracingIsolateState({
-    required this.mode,
     required this.isolate,
     Map<String, CpuProfileData>? profiles,
     List<TracedClass>? classes,
@@ -115,12 +114,10 @@ class TracingIsolateState with Serializable {
     this.profiles = profiles ?? {};
   }
 
-  TracingIsolateState.empty()
-      : this(isolate: IsolateRef(), mode: ControllerCreationMode.connected);
+  TracingIsolateState.empty() : this(isolate: IsolateRef());
 
   factory TracingIsolateState.fromJson(Map<String, dynamic> json) {
     return TracingIsolateState(
-      mode: ControllerCreationMode.offlineData,
       isolate: IsolateRefEncodeDecode.instance
           .decode(json[TracingIsolateStateJson.isolate.name]),
       profiles: (json[TracingIsolateStateJson.profiles.name] as Map).map(
@@ -143,8 +140,6 @@ class TracingIsolateState with Serializable {
       TracingIsolateStateJson.profiles.name: profiles,
     };
   }
-
-  final ControllerCreationMode mode;
 
   final IsolateRef isolate;
 
@@ -175,7 +170,7 @@ class TracingIsolateState with Serializable {
   int _lastClearTimeMicros = 0;
 
   Future<void> initialize() async {
-    if (mode == ControllerCreationMode.connected) {
+    if (!offlineDataController.showingOfflineData.value) {
       final classList = await serviceConnection.serviceManager.service!
           .getClassList(isolate.id!);
       for (final clazz in classList.classes!) {

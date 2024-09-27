@@ -35,8 +35,8 @@ void setEnableExperiments() {
 @visibleForTesting
 bool get enableBeta => enableExperiments || !isExternalBuild;
 
-const _kMemoryOfflineExperiment =
-    bool.fromEnvironment('memory_offline_experiment');
+const _kMemoryDisconnectExperience =
+    bool.fromEnvironment('memory_disconnect_experience', defaultValue: true);
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
@@ -56,11 +56,16 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/4564.
   static bool widgetRebuildStats = true;
 
-  /// Flag to enable offline data on memory screen.
+  /// Flag to enable viewing offline data on the memory screen when an app
+  /// disconnects.
   ///
   /// https://github.com/flutter/devtools/issues/5606
-  static const memoryOffline =
-      _kMemoryOfflineExperiment; // requires special handling because it needs to be const
+  static const memoryDisconnectExperience = _kMemoryDisconnectExperience;
+
+  /// Flag to enable save/load for the Memory screen.
+  ///
+  /// https://github.com/flutter/devtools/issues/8019
+  static bool memorySaveLoad = enableExperiments;
 
   /// Flag to enable the deep link validation tooling in DevTools, both for the
   /// DevTools screen and the standalone tool for IDE embedding.
@@ -94,17 +99,23 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/7854
   static bool inspectorV2 = enableExperiments;
 
+  /// Flag to enable the DevTools setting to opt-in to WASM.
+  ///
+  /// https://github.com/flutter/devtools/issues/7856
+  static bool wasmOptInSetting = true;
+
   /// Stores a map of all the feature flags for debugging purposes.
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
   /// well.
   static final _allFlags = <String, bool>{
     'widgetRebuildStats': widgetRebuildStats,
-    'memoryOffline': memoryOffline,
-    'dapDebugging': dapDebugging,
-    'loggingV2': loggingV2,
+    'memorySaveLoad': memorySaveLoad,
     'deepLinkIosCheck': deepLinkIosCheck,
+    'loggingV2': loggingV2,
+    'dapDebugging': dapDebugging,
     'inspectorV2': inspectorV2,
+    'wasmOptInSetting': wasmOptInSetting,
   };
 
   /// A helper to print the status of all the feature flags.

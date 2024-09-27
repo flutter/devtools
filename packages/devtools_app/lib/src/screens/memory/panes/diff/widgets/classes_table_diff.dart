@@ -44,9 +44,6 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
   String? getValue(DiffClassData data) => data.className.className;
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   // Tooltip is removed, because it is provided by [HeapClassView].
   String getTooltip(DiffClassData data) => '';
 
@@ -61,7 +58,7 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
     return HeapClassView(
       theClass: data.className,
       showCopyButton: isRowSelected,
-      copyGaItem: gac.MemoryEvent.diffClassDiffCopy,
+      copyGaItem: gac.MemoryEvents.diffClassDiffCopy.name,
       rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
     );
   }
@@ -349,7 +346,7 @@ class ClassesTableDiff extends StatelessWidget {
           selectionNotifier: diffData.selection,
           onItemSelected: (_) => ga.select(
             gac.memory,
-            gac.MemoryEvent.diffClassDiffSelect,
+            gac.MemoryEvents.diffClassDiffSelect.name,
           ),
           defaultSortColumn: columns.sizeDeltaColumn,
           defaultSortDirection: SortDirection.descending,

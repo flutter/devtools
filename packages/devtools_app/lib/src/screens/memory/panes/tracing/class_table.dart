@@ -49,7 +49,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
       onChanged: (value) async {
         ga.select(
           gac.memory,
-          '${gac.MemoryEvent.tracingTraceCheck}-$value',
+          '${gac.MemoryEvents.tracingTraceCheck.name}-$value',
         );
         await controller.setAllocationTracingForClass(item.clazz, value!);
       },
@@ -81,9 +81,6 @@ class _ClassNameColumn extends ColumnData<TracedClass>
   final String? rootPackage;
 
   @override
-  bool get supportsSorting => true;
-
-  @override
   Widget build(
     BuildContext context,
     TracedClass data, {
@@ -94,7 +91,7 @@ class _ClassNameColumn extends ColumnData<TracedClass>
     return HeapClassView(
       theClass: data.name,
       showCopyButton: isRowSelected,
-      copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
+      copyGaItem: gac.MemoryEvents.diffClassSingleCopy.name,
       rootPackage: rootPackage,
     );
   }
@@ -157,7 +154,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
     if (now.difference(_editFilterGaSent) < _editFilterGaThrottling) return;
     ga.select(
       gac.memory,
-      gac.MemoryEvent.tracingClassFilter,
+      gac.MemoryEvents.tracingClassFilter.name,
     );
     _editFilterGaSent = now;
   }
