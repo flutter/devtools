@@ -394,7 +394,7 @@ class _AnalysisViewState extends State<AnalysisView>
       valueListenable: controller.processingNotifier,
       builder: (context, processing, _) {
         return processing
-            ? const CenteredMessage(AppSizeScreen.loadingMessage)
+            ? CenteredMessage(message: AppSizeScreen.loadingMessage)
             : Column(
                 children: [
                   Flexible(
@@ -498,7 +498,7 @@ class _DiffViewState extends State<DiffView>
       valueListenable: controller.processingNotifier,
       builder: (context, processing, _) {
         return processing
-            ? const CenteredMessage(AppSizeScreen.loadingMessage)
+            ? CenteredMessage(message: AppSizeScreen.loadingMessage)
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

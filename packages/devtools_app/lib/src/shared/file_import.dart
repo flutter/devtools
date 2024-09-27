@@ -128,7 +128,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
           ),
           const SizedBox(height: extraLargeSpacing),
         ],
-        CenteredMessage(widget.instructions),
+        CenteredMessage(message: widget.instructions),
         const SizedBox(height: denseSpacing),
         _buildImportFileRow(),
         if (widget.actionText != null && widget.onAction != null)

@@ -814,7 +814,7 @@ class LeftBorder extends StatelessWidget {
 final goldenRatio = 1 + sqrt(5) / 2;
 
 /// A centered text widget with the default DevTools text style applied.
-/// 
+///
 /// Only one of [message] or [richMessage] can be specified.
 class CenteredMessage extends StatelessWidget {
   const CenteredMessage({
