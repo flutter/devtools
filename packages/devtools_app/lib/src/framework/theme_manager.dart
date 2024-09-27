@@ -68,8 +68,9 @@ class ThemeManager {
 
         // We are toggling to the opposite theme and then back to force the IDE
         // to update all theme features.
-        // TODO: Clean up so that preferences controller listens for changes in
-        // all theme features.
+        // TODO(https://github.com/flutter/devtools/issues/8366): Clean up so
+        // that preferences controller listens for changes in all theme
+        // features.
         preferences.toggleDarkModeTheme(!currentTheme.isDarkMode);
         preferences.toggleDarkModeTheme(currentTheme.isDarkMode);
       }

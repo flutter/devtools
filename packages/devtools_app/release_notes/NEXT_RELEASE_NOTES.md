@@ -28,7 +28,8 @@ show. - [#8277](https://github.com/flutter/devtools/pull/8277)
 * Mapped error stacktraces to use the Dart source code locations so that they are human-
   readable. - [#8385](https://github.com/flutter/devtools/pull/8385)
 
-* Added handling for IDE theme change events to update embedded DevTools UI.
+* Added handling for IDE theme change events to update embedded DevTools UI. -
+[#8336](https://github.com/flutter/devtools/pull/8336)
 
 ## Inspector updates
 
