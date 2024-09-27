@@ -821,7 +821,7 @@ class CenteredMessage extends StatelessWidget {
     this.message,
     this.richMessage,
     super.key,
-  }) : assert((message == null) != (richMessage != null));
+  }) : assert((message == null) != (richMessage == null));
 
   final String? message;
 
