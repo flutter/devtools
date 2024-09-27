@@ -20,7 +20,6 @@ import '../../shared/ui/search.dart';
 import '../inspector_shared/inspector_controls.dart';
 import '../inspector_shared/inspector_screen.dart';
 import 'inspector_controller.dart';
-import 'inspector_controls.dart';
 import 'inspector_tree_controller.dart';
 import 'widget_details.dart';
 
