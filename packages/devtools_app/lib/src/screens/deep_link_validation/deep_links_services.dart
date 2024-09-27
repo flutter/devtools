@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 
+import '../../shared/primitives/utils.dart';
 import 'deep_links_model.dart';
 
 const _apiKey = 'AIzaSyCf_2E9N2AUZR-YSnZTQ72YbCNhKIskIsw';
@@ -210,7 +211,7 @@ class DeepLinksService {
               if (aasaPaths != null) {
                 for (final aasaPath in aasaPaths) {
                   final path = aasaPath[_pathKey] as String?;
-                  if (path?.isEmpty ?? true) {
+                  if (path.isNullOrEmpty) {
                     continue;
                   }
                   final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
