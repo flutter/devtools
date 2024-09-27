@@ -137,27 +137,11 @@ class ExtensionsManager {
   }) async {
     _assertUriFormat(rootFileUriString);
     final List<Extension> extensions;
-    String packageConfigPath;
-    while (true) {
-      packageConfigPath = path.url.join(
-        rootFileUriString,
-        '.dart_tool',
-        'package_config.json',
-      );
-      if (File.fromUri(Uri.parse(packageConfigPath)).existsSync()) {
-        break;
-      }
-      final nextRootFileUriString = path.url.dirname(rootFileUriString);
-      if (nextRootFileUriString == rootFileUriString) {
-        // No package config was found.
-        return;
-      }
-      rootFileUriString = nextRootFileUriString;
-    }
+    final packageConfigPath = findPackageConfig(Uri.parse(rootFileUriString));
     // TODO(sigurdm): Do we need to deduplicate package configs?
     extensions = await findExtensions(
       'devtools',
-      packageConfig: Uri.parse(packageConfigPath),
+      packageConfig: packageConfigPath,
     );
     logs.add(
       'ExtensionsManager._addExtensionsForRoot find extensions for '
@@ -189,8 +173,10 @@ class ExtensionsManager {
         final extensionConfig = DevToolsExtensionConfig.parse({
           ...config,
           DevToolsExtensionConfig.extensionAssetsPathKey: location,
-          DevToolsExtensionConfig.devtoolsOptionsUriKey:
-              path.join(rootFileUriString, devtoolsOptionsFileName),
+          DevToolsExtensionConfig.devtoolsOptionsUriKey: path.url.join(
+            path.url.dirname(path.url.dirname(packageConfigPath.toString())),
+            devtoolsOptionsFileName,
+          ),
           DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,
           DevToolsExtensionConfig.detectedFromStaticContextKey:
               staticContext.toString(),
