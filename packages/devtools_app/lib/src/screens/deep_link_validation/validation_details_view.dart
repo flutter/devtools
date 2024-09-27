@@ -180,13 +180,13 @@ class _DomainCheckTable extends StatelessWidget {
                 children: <Widget>[
                   for (final error
                       in linkData.domainErrors.whereType<IosDomainError>())
-                    error == IosDomainError.existence
-                        ? _IssuesBorderWrap(
-                            children: [
+                    _IssuesBorderWrap(
+                      children: error == IosDomainError.existence
+                          ? [
                               _FailureDetails(
                                 errors: [error],
                                 oneFixGuideForAll:
-                                    'To fix this issues, add an Apple-App-Site-Association file at the following location: '
+                                    'To fix this issue, add an Apple-App-Site-Association file at the following location: '
                                     'https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json.',
                               ),
                               const SizedBox(height: denseSpacing),
@@ -205,13 +205,11 @@ class _DomainCheckTable extends StatelessWidget {
     ]
   }''',
                               ),
-                            ],
-                          )
-                        : _IssuesBorderWrap(
-                            children: [
+                            ]
+                          : [
                               _FailureDetails(errors: [error]),
                             ],
-                          ),
+                    ),
                 ],
               ),
             const SizedBox(height: intermediateSpacing),
