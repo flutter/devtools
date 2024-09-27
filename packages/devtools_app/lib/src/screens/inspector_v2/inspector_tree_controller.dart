@@ -576,7 +576,6 @@ class InspectorTreeController extends DisposableController
   }
 
   void scrollToRect(Rect targetRect) {
-    print('scrolling to $targetRect');
     for (final client in _clients) {
       client.scrollToRect(targetRect);
     }
@@ -1013,7 +1012,6 @@ class _InspectorTreeState extends State<InspectorTree>
     }
 
     final targetX = _padTargetX(initialX: initialX);
-    print('target x is $targetX');
     if (_scrollControllerX.hasClients) {
       unawaited(
         _scrollControllerX.animateTo(
