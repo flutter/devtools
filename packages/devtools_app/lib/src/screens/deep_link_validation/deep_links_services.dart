@@ -5,22 +5,30 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
 
+import '../../shared/primitives/utils.dart';
 import 'deep_links_model.dart';
 
 const _apiKey = 'AIzaSyCf_2E9N2AUZR-YSnZTQ72YbCNhKIskIsw';
-const _assetLinksGenerationURL =
+
+@visibleForTesting
+const assetLinksGenerationURL =
     'https://deeplinkassistant-pa.googleapis.com/android/generation/v1/assetlinks:generate?key=$_apiKey';
-const _androidDomainValidationURL =
+@visibleForTesting
+const androidDomainValidationURL =
     'https://deeplinkassistant-pa.googleapis.com/android/validation/v1/domains:batchValidate?key=$_apiKey';
-const _iosDomainValidationURL =
+@visibleForTesting
+const iosDomainValidationURL =
     'https://deeplinkassistant-pa.googleapis.com/ios/validation/v1/domains:batchValidate?key=$_apiKey';
 const postHeader = {'Content-Type': 'application/json'};
 
 // The keys used in both android and ios domain validation API.
 const _domainNameKey = 'domainName';
 const _checkNameKey = 'checkName';
+const _severityLevelKey = 'severityLevel';
+const _severityLevelError = 'ERROR';
 const _failedChecksKey = 'failedChecks';
 const _domainBatchSize = 500;
 
@@ -54,6 +62,13 @@ const _teamIdKey = 'team_id';
 const _universalLinkDomainsKey = 'universal_link_domains';
 const _iosDomainNameKey = 'domain_name';
 const _iosValidationResultsKey = 'validationResults';
+const _aasaAppPathsKey = 'aasaAppPaths';
+const _aasaPathsKey = 'aasaPaths';
+const _pathKey = 'path';
+const _isExcludedKey = 'isExcluded';
+const _queryParamsKey = 'queryParams';
+const _keyKey = 'key';
+const _valueKey = 'value';
 
 const iosCheckNameToDomainError = <String, DomainError>{
   'EXISTENCE': IosDomainError.existence,
@@ -64,9 +79,10 @@ const iosCheckNameToDomainError = <String, DomainError>{
 };
 
 class ValidateIosDomainResult {
-  ValidateIosDomainResult(this.errorCode, this.domainErrors);
+  ValidateIosDomainResult(this.errorCode, this.domainErrors, this.paths);
   final String errorCode;
   final Map<String, List<DomainError>> domainErrors;
+  final Map<String, List<Path>> paths;
 }
 
 class GenerateAssetLinksResult {
@@ -84,7 +100,13 @@ class ValidateAndroidDomainResult {
   Map<String, List<DomainError>> domainErrors;
 }
 
-class DeepLinksServices {
+class DeepLinksService {
+  final client = Client();
+
+  void dispose() {
+    client.close();
+  }
+
   Future<ValidateAndroidDomainResult> validateAndroidDomain({
     required List<String> domains,
     required String applicationId,
@@ -98,8 +120,8 @@ class DeepLinksServices {
     late bool googlePlayFingerprintsAvailable;
 
     for (final domainList in domainsByBatch) {
-      final response = await http.post(
-        Uri.parse(_androidDomainValidationURL),
+      final response = await client.post(
+        Uri.parse(androidDomainValidationURL),
         headers: postHeader,
         body: jsonEncode({
           _packageNameKey: applicationId,
@@ -142,17 +164,16 @@ class DeepLinksServices {
     required String teamId,
     required List<String> domains,
   }) async {
-    final domainErrors = <String, List<DomainError>>{
-      for (final domain in domains) domain: <DomainError>[],
-    };
+    final domainErrors = <String, List<DomainError>>{};
+    final paths = <String, List<Path>>{};
     // TODO(hangyujin): Add error code to the result.
     const errorCode = '';
 
     final domainsByBatch = _splitDomains(domains);
 
     for (final domainList in domainsByBatch) {
-      final response = await http.post(
-        Uri.parse(_iosDomainValidationURL),
+      final response = await client.post(
+        Uri.parse(iosDomainValidationURL),
         headers: postHeader,
         body: jsonEncode({
           _appIdKey: {
@@ -176,18 +197,52 @@ class DeepLinksServices {
             for (final failedCheck in failedChecks) {
               final checkName = failedCheck[_checkNameKey] as String;
               final domainError = iosCheckNameToDomainError[checkName];
-              if (domainError != null) {
-                domainErrors[domainName]!.add(domainError);
+              final severityLevel = failedCheck[_severityLevelKey] as String;
+              if (domainError != null && severityLevel == _severityLevelError) {
+                domainErrors
+                    .putIfAbsent(domainName, () => <DomainError>[])
+                    .add(domainError);
+              }
+            }
+          }
+          final aasaAppPaths = (domainResult[_aasaAppPathsKey] as List?)
+              ?.cast<Map<String, Object?>>();
+          if (aasaAppPaths != null) {
+            for (final aasaAppPath in aasaAppPaths) {
+              final aasaPaths = (aasaAppPath[_aasaPathsKey] as List?)
+                  ?.cast<Map<String, Object?>>();
+              if (aasaPaths != null) {
+                for (final aasaPath in aasaPaths) {
+                  final path = aasaPath[_pathKey] as String?;
+                  if (path.isNullOrEmpty) {
+                    continue;
+                  }
+                  final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
+                      ?.cast<Map<String, Object?>>();
+                  final queryParams = <String, String>{
+                    for (final item in rawQueryParams ?? <Map>[])
+                      item[_keyKey] as String: item[_valueKey] as String,
+                  };
+                  paths.putIfAbsent(domainName, () => <Path>[]).add(
+                        Path(
+                          path: path!,
+                          queryParams: queryParams,
+                          isExcluded:
+                              aasaPath[_isExcludedKey] as bool? ?? false,
+                        ),
+                      );
+                }
+                continue;
               }
             }
           }
         }
-        // TODO(hangyujin): Add path from AASA file check result.
       }
     }
     return ValidateIosDomainResult(
       errorCode,
       domainErrors,
+      paths,
     );
   }
 
@@ -209,8 +264,8 @@ class DeepLinksServices {
     required String domain,
     required String? localFingerprint,
   }) async {
-    final response = await http.post(
-      Uri.parse(_assetLinksGenerationURL),
+    final response = await client.post(
+      Uri.parse(assetLinksGenerationURL),
       headers: postHeader,
       body: jsonEncode(
         {

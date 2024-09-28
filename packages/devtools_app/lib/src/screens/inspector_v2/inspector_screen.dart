@@ -118,7 +118,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
-    addAutoDisposeListener(preferences.inspectorV2.pubRootDirectories, () {
+    addAutoDisposeListener(preferences.inspector.pubRootDirectories, () {
       if (serviceConnection.serviceManager.connectedState.value.connected &&
           controller.firstInspectorTreeLoadCompleted) {
         _refreshInspector();
@@ -273,7 +273,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               'General',
             ),
             CheckboxSetting(
-              notifier: preferences.inspectorV2.hoverEvalModeEnabled
+              notifier: preferences.inspector.hoverEvalModeEnabled
                   as ValueNotifier<bool?>,
               title: 'Enable hover inspection',
               description:
@@ -346,7 +346,7 @@ class InspectorTreeControls extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
                 child: Text(
-                  'Widget Tree 2.0',
+                  'Widget Tree',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -509,21 +509,20 @@ class PubRootDirectorySection extends StatelessWidget {
           child: EditableList(
             gaScreen: gac.inspector,
             gaRefreshSelection: gac.refreshPubRoots,
-            entries: preferences.inspectorV2.pubRootDirectories,
+            entries: preferences.inspector.pubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
-            isRefreshing:
-                preferences.inspectorV2.isRefreshingPubRootDirectories,
+            isRefreshing: preferences.inspector.isRefreshingPubRootDirectories,
             onEntryAdded: (p0) => unawaited(
-              preferences.inspectorV2.addPubRootDirectories(
+              preferences.inspector.addPubRootDirectories(
                 [p0],
                 shouldCache: true,
               ),
             ),
             onEntryRemoved: (p0) => unawaited(
-              preferences.inspectorV2.removePubRootDirectories([p0]),
+              preferences.inspector.removePubRootDirectories([p0]),
             ),
             onRefreshTriggered: () =>
-                unawaited(preferences.inspectorV2.loadPubRootDirectories()),
+                unawaited(preferences.inspector.loadPubRootDirectories()),
           ),
         );
       },

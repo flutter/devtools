@@ -187,7 +187,9 @@ Future<EnumInstance?> _tryParseEnum(
   required Setter? setter,
 }) async {
   if (instance.kind != InstanceKind.kPlainInstance ||
-      instance.fields?.length != 2) return null;
+      instance.fields?.length != 2) {
+    return null;
+  }
 
   InstanceRef? findPropertyWithName(String name) {
     return instance.fields

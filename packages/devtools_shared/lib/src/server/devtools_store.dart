@@ -4,6 +4,28 @@
 
 import 'file_system.dart';
 
+enum DevToolsStoreKeys {
+  /// The key holding the value for whether Google Analytics (legacy) for
+  /// DevTools have been enabled.
+  analyticsEnabled,
+
+  /// The key holding the value for whether this is a user's first run of
+  /// DevTools.
+  isFirstRun,
+
+  /// The key holding the value for the last DevTools version that the user
+  /// viewed release notes for.
+  lastReleaseNotesVersion,
+
+  /// The key holding the value for whether the user has taken action on the
+  /// DevTools survey prompt.
+  surveyActionTaken,
+
+  /// The key holding the value for number of times the user has seen the
+  /// DevTools survey prompt without taking action.
+  surveyShownCount,
+}
+
 /// Provides access to the local DevTools store (~/.flutter-devtools/.devtools).
 class DevToolsUsage {
   DevToolsUsage() {
@@ -33,47 +55,23 @@ class DevToolsUsage {
 
   late IOPersistentProperties properties;
 
-  static const _surveyActionTaken = 'surveyActionTaken';
-  static const _surveyShownCount = 'surveyShownCount';
-
   void reset() {
-    // TODO(kenz): remove this in Feb 2022. See
-    // https://github.com/flutter/devtools/issues/3264. The `firstRun` property
-    // has been replaced by `isFirstRun`. This is to force all users to answer
-    // the analytics dialog again. The 'enabled' property has been replaced by
-    // 'analyticsEnabled' for better naming.
-    properties.remove('firstRun');
-    properties.remove('enabled');
-
-    properties.remove('firstDevToolsRun');
-    properties['analyticsEnabled'] = false;
+    properties.remove(DevToolsStoreKeys.isFirstRun.name);
+    properties[DevToolsStoreKeys.analyticsEnabled.name] = false;
   }
 
   bool get isFirstRun {
-    // TODO(kenz): remove this in Feb 2022. See
-    // https://github.com/flutter/devtools/issues/3264.The `firstRun` property
-    // has been replaced by `isFirstRun`. This is to force all users to answer
-    // the analytics dialog again.
-    properties.remove('firstRun');
-
-    return properties['isFirstRun'] = properties['isFirstRun'] == null;
+    return properties[DevToolsStoreKeys.isFirstRun.name] =
+        properties[DevToolsStoreKeys.isFirstRun.name] == null;
   }
 
   bool get analyticsEnabled {
-    // TODO(kenz): remove this in Feb 2022. See
-    // https://github.com/flutter/devtools/issues/3264. The `enabled` property
-    // has been replaced by `analyticsEnabled` for better naming.
-    if (properties['enabled'] != null) {
-      properties['analyticsEnabled'] = properties['enabled'];
-      properties.remove('enabled');
-    }
-
-    return properties['analyticsEnabled'] =
-        properties['analyticsEnabled'] == true;
+    return properties[DevToolsStoreKeys.analyticsEnabled.name] =
+        properties[DevToolsStoreKeys.analyticsEnabled.name] == true;
   }
 
   set analyticsEnabled(bool value) {
-    properties['analyticsEnabled'] = value;
+    properties[DevToolsStoreKeys.analyticsEnabled.name] = value;
   }
 
   bool surveyNameExists(String surveyName) => properties[surveyName] != null;
@@ -100,8 +98,8 @@ class DevToolsUsage {
   void rewriteActiveSurvey(bool actionTaken, int shownCount) {
     assert(activeSurvey != null);
     properties[activeSurvey!] = {
-      _surveyActionTaken: actionTaken,
-      _surveyShownCount: shownCount,
+      DevToolsStoreKeys.surveyActionTaken.name: actionTaken,
+      DevToolsStoreKeys.surveyShownCount.name: shownCount,
     };
   }
 
@@ -141,15 +139,18 @@ class DevToolsUsage {
   }
 
   String get lastReleaseNotesVersion {
-    return (properties['lastReleaseNotesVersion'] ??= '') as String;
+    return (properties[DevToolsStoreKeys.lastReleaseNotesVersion.name] ??= '')
+        as String;
   }
 
   set lastReleaseNotesVersion(String value) {
-    properties['lastReleaseNotesVersion'] = value;
+    properties[DevToolsStoreKeys.lastReleaseNotesVersion.name] = value;
   }
 }
 
 extension type _ActiveSurveyJson(Map<String, Object?> json) {
-  bool get surveyActionTaken => json[DevToolsUsage._surveyActionTaken] as bool;
-  int? get surveyShownCount => json[DevToolsUsage._surveyShownCount] as int?;
+  bool get surveyActionTaken =>
+      json[DevToolsStoreKeys.surveyActionTaken.name] as bool;
+  int? get surveyShownCount =>
+      json[DevToolsStoreKeys.surveyShownCount.name] as int?;
 }

@@ -123,11 +123,6 @@ void main() {
 
         // Verify the properties are displayed:
         verifyPropertyIsVisible(
-          name: 'widget',
-          value: 'Center',
-          tester: tester,
-        );
-        verifyPropertyIsVisible(
           name: 'alignment',
           value: 'Alignment.center',
           tester: tester,
@@ -386,7 +381,7 @@ void verifyPropertyIsVisible({
   // Verify the property value is visible:
   final propertyValueFinder = find.descendant(
     of: find.byType(PropertyValue),
-    matching: find.text(value),
+    matching: find.richText(value),
   );
   expect(propertyValueFinder, findsOneWidget);
 

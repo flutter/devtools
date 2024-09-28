@@ -6,16 +6,16 @@ part of 'server.dart';
 
 Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) {
   return requestFile(
-    api: apiGetBaseAppSizeFile,
-    fileKey: baseAppSizeFilePropertyName,
+    api: AppSizeApi.getBaseAppSizeFile,
+    fileKey: AppSizeApi.baseAppSizeFilePropertyName,
     filePath: path,
   );
 }
 
 Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) {
   return requestFile(
-    api: apiGetTestAppSizeFile,
-    fileKey: testAppSizeFilePropertyName,
+    api: AppSizeApi.getTestAppSizeFile,
+    fileKey: AppSizeApi.testAppSizeFilePropertyName,
     filePath: path,
   );
 }

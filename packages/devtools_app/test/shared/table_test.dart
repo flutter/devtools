@@ -1639,10 +1639,11 @@ void main() {
         final snapFinder = find.byKey(const Key('Snap'));
         final crackleFinder = find.byKey(const Key('Crackle'));
 
-        // Expected values returned through accessing Color.value property.
-        const color1Value = 4294111476;
-        const color2Value = 4294967295;
-        const rowSelectedColorValue = 4294967295;
+        // Expected ARGB color values.
+        const color1Value =
+            '(a: 1.0, r: 0.9490196078431372, g: 0.9411764705882353, b: 0.9568627450980393)';
+        const color2Value = '(a: 1.0, r: 1.0, g: 1.0, b: 1.0)';
+        const rowSelectedColorValue = '(a: 1.0, r: 1.0, g: 1.0, b: 1.0)';
 
         await tester.pumpWidget(wrap(table));
         await tester.pumpAndSettle();
@@ -1661,12 +1662,12 @@ void main() {
         final TableRow snapRow = tester.widget(snapFinder);
         TableRow crackleRow = tester.widget(crackleFinder);
 
-        expect(fooRow.backgroundColor!.value, color1Value);
-        expect(barRow.backgroundColor!.value, color2Value);
-        expect(bazRow.backgroundColor!.value, color1Value);
-        expect(quxRow.backgroundColor!.value, color2Value);
-        expect(snapRow.backgroundColor!.value, color1Value);
-        expect(crackleRow.backgroundColor!.value, color2Value);
+        expect(fooRow.backgroundColor!.toArgbString(), color1Value);
+        expect(barRow.backgroundColor!.toArgbString(), color2Value);
+        expect(bazRow.backgroundColor!.toArgbString(), color1Value);
+        expect(quxRow.backgroundColor!.toArgbString(), color2Value);
+        expect(snapRow.backgroundColor!.toArgbString(), color1Value);
+        expect(crackleRow.backgroundColor!.toArgbString(), color2Value);
 
         await tester.tap(barFinder);
         await tester.pumpAndSettle();
@@ -1680,12 +1681,12 @@ void main() {
         barRow = tester.widget(barFinder);
         crackleRow = tester.widget(crackleFinder);
 
-        expect(fooRow.backgroundColor!.value, color1Value);
+        expect(fooRow.backgroundColor!.toArgbString(), color1Value);
         // [barRow] has the rowSelected color after being tapped.
-        expect(barRow.backgroundColor!.value, rowSelectedColorValue);
+        expect(barRow.backgroundColor!.toArgbString(), rowSelectedColorValue);
         // [crackleRow] has a different background color after collapsing previous
         // row (Bar).
-        expect(crackleRow.backgroundColor!.value, color1Value);
+        expect(crackleRow.backgroundColor!.toArgbString(), color1Value);
       },
     );
 
@@ -1836,4 +1837,10 @@ class _VeryWideMinWidthColumn extends ColumnData<TestData> {
 
   @override
   bool get supportsSorting => false;
+}
+
+extension on Color {
+  String toArgbString() {
+    return '(a: $a, r: $r, g: $g, b: $b)';
+  }
 }

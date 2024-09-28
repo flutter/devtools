@@ -14,6 +14,7 @@ import 'package:web/web.dart';
 import '../../shared/development_helpers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/query_parameters.dart';
 import '../../shared/server/server.dart';
 import '../../shared/utils.dart';
 import 'controller.dart';
@@ -55,7 +56,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
       'index.html',
     );
     final queryParams = {
-      ...loadQueryParams(),
+      ...DevToolsQueryParams.load().params,
       ExtensionEventParameters.theme: isDarkThemeEnabled()
           ? ExtensionEventParameters.themeValueDark
           : ExtensionEventParameters.themeValueLight,

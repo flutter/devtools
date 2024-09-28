@@ -30,12 +30,12 @@ import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/query_parameters.dart';
+import 'inspector_data_models.dart';
 import 'inspector_screen.dart';
 import 'inspector_tree_controller.dart';
 
 final _log = Logger('inspector_controller');
-
-const inspectorRefQueryParam = 'inspectorRef';
 
 /// Data pattern containing the properties and render properties for a widget
 /// tree node.
@@ -45,6 +45,9 @@ typedef WidgetTreeNodeProperties = ({
 
   /// Properties defined on the widget's render object.
   List<RemoteDiagnosticsNode> renderProperties,
+
+  /// Layout properties for the widget.
+  LayoutProperties? layoutProperties,
 });
 
 /// This class is based on the InspectorPanel class from the Flutter IntelliJ
@@ -78,6 +81,10 @@ class InspectorController extends DisposableController
       _selectionGroups = InspectorObjectGroupManager(
         serviceConnection.inspectorService as InspectorService,
         'selection',
+      );
+      _layoutGroups = InspectorObjectGroupManager(
+        serviceConnection.inspectorService as InspectorService,
+        'layout',
       );
     }
 
@@ -198,6 +205,8 @@ class InspectorController extends DisposableController
   /// TODO(jacobr): is there a way we can unify the selection and tree groups?
   InspectorObjectGroupManager? _selectionGroups;
 
+  InspectorObjectGroupManager? _layoutGroups;
+
   /// Node being highlighted due to the current hover.
   InspectorTreeNode? get currentShowNode => inspectorTree.hover;
 
@@ -217,7 +226,7 @@ class InspectorController extends DisposableController
   ValueListenable<WidgetTreeNodeProperties> get selectedNodeProperties =>
       _selectedNodeProperties;
   final _selectedNodeProperties = ValueNotifier<WidgetTreeNodeProperties>(
-    (widgetProperties: [], renderProperties: []),
+    (widgetProperties: [], renderProperties: [], layoutProperties: null),
   );
 
   /// Whether the implementation widgets are hidden in the widget tree.
@@ -391,11 +400,7 @@ class InspectorController extends DisposableController
       if (_disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
-
-      final queryParams = loadQueryParams();
-      final inspectorRef = queryParams.containsKey(inspectorRefQueryParam)
-          ? queryParams[inspectorRefQueryParam]
-          : null;
+      final inspectorRef = DevToolsQueryParams.load().inspectorRef;
       await updateSelectionFromService(
         inspectorRef: inspectorRef,
       );
@@ -650,6 +655,7 @@ class InspectorController extends DisposableController
   Future<void> _loadPropertiesForNode(InspectorTreeNode? node) async {
     final widgetProperties = <RemoteDiagnosticsNode>[];
     final renderProperties = <RemoteDiagnosticsNode>[];
+    LayoutProperties? layoutProperties;
     final diagnostic = node?.diagnostic;
     final objectGroupApi = diagnostic?.objectGroupApi;
     if (diagnostic != null && objectGroupApi != null) {
@@ -665,6 +671,11 @@ class InspectorController extends DisposableController
         );
         renderProperties.addAll(
           wProperties.where((p) => p.propertyType == 'RenderObject'),
+        );
+        // Fetch layout properties:
+        layoutProperties = await _loadLayoutPropertiesForNode(
+          diagnostic,
+          forFlexLayout: false,
         );
         // Fetch RenderObject properties:
         for (final renderObject in renderProperties) {
@@ -682,7 +693,32 @@ class InspectorController extends DisposableController
     _selectedNodeProperties.value = (
       widgetProperties: widgetProperties,
       renderProperties: renderProperties,
+      layoutProperties: layoutProperties,
     );
+  }
+
+  Future<LayoutProperties?> _loadLayoutPropertiesForNode(
+    RemoteDiagnosticsNode diagnostic, {
+    required bool forFlexLayout,
+  }) async {
+    try {
+      _layoutGroups?.cancelNext();
+      final manager = _layoutGroups!;
+      final nextObjectGroup = manager.next;
+      final node = await nextObjectGroup.getLayoutExplorerNode(
+        diagnostic.layoutRootNode(forFlexLayout: forFlexLayout),
+      );
+      if (node == null || node.renderObject == null) return null;
+
+      if (!nextObjectGroup.disposed) {
+        assert(manager.next == nextObjectGroup);
+        manager.promoteNext();
+      }
+      return node.computeLayoutProperties(forFlexLayout: forFlexLayout);
+    } catch (e, st) {
+      _log.warning(e, st);
+      return null;
+    }
   }
 
   /// Update the index of the selected error based on a node that has been

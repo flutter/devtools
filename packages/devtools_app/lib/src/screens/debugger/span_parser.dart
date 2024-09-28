@@ -303,8 +303,7 @@ class _MultilineMatcher extends GrammarMatcher {
         patterns = (json['patterns'] as List<Object?>?)
             ?.cast<Map<String, Object?>>()
             .map((e) => GrammarMatcher.fromJson(e))
-            .toList()
-            .cast<GrammarMatcher>(),
+            .toList(),
         super._();
 
   static bool isType(Map<String, Object?> json) {
@@ -521,8 +520,7 @@ class _PatternMatcher extends GrammarMatcher {
       : patterns = (json['patterns'] as List<Object?>?)
             ?.cast<Map<String, Object?>>()
             .map((e) => GrammarMatcher.fromJson(e))
-            .toList()
-            .cast<GrammarMatcher>(),
+            .toList(),
         super._();
 
   static bool isType(Map<String, Object?> json) {

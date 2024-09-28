@@ -10,9 +10,8 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:path/path.dart' as path;
 
 typedef TestDtdConnectionInfo = ({
-  String? uri,
-  String? secret,
-  Process? dtdProcess,
+  DtdInfo? info,
+  Process? process,
 });
 
 /// Helper method to start DTD for the purpose of testing.
@@ -23,8 +22,7 @@ Future<TestDtdConnectionInfo> startDtd() async {
   Process? dtdProcess;
   StreamSubscription? dtdStoutSubscription;
 
-  TestDtdConnectionInfo onFailure() =>
-      (uri: null, secret: null, dtdProcess: dtdProcess);
+  TestDtdConnectionInfo onFailure() => (info: null, process: dtdProcess);
 
   try {
     dtdProcess = await Process.start(
@@ -44,7 +42,10 @@ Future<TestDtdConnectionInfo> startDtd() async {
               }
             }) {
           completer.complete(
-            (uri: uri, secret: secret, dtdProcess: dtdProcess),
+            (
+              info: DtdInfo(Uri.parse(uri), secret: secret),
+              process: dtdProcess,
+            ),
           );
         } else {
           completer.complete(onFailure());

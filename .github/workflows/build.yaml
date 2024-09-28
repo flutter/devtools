@@ -65,14 +65,14 @@ jobs:
           wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
           echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
           sudo apt-get update
-          sudo apt-get install dcm=1.18.1-1 # To avoid errors add `-1` (build number) to the version
+          sudo apt-get install dcm=1.22.0-1 # To avoid errors add `-1` (build number) to the version
           sudo chmod +x /usr/bin/dcm
           echo "$(dcm --version)"
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
       - name: Run DCM on root
         run: |
-          dcm analyze packages/devtools_app packages/devtools_shared packages/devtools_test
+          dcm analyze packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
 
   test-packages:
     name: ${{ matrix.package }} test

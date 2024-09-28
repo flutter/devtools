@@ -21,8 +21,9 @@ pushd $TOOL_DIR
 if [[ $1 = "--no-update-flutter" ]]
 then
   # Use the Flutter SDK that is already on the user's PATH.
-  FLUTTER_EXE=`which flutter`
+  FLUTTER_EXE="$(which flutter)"
   echo "Using the Flutter SDK that is already on PATH: $FLUTTER_EXE"
+  FLUTTER_DIR="$(dirname "$(dirname "$FLUTTER_EXE")")"
 else
   # Use the Flutter SDK from flutter-sdk/.
   FLUTTER_DIR="`pwd`/flutter-sdk"
@@ -35,10 +36,26 @@ fi
 popd
 
 # echo on
-set -ex
+set -eux
+
+# TODO(fujino): delete once https://github.com/flutter/flutter/issues/142521
+# is resolved.
+pushd "$FLUTTER_DIR"
+  # If we've already written the wrong version number to disk, delete it
+  rm -f bin/cache/flutter.version.json
+  # The flutter tool relies on git tags to determine its version
+  git fetch https://github.com/flutter/flutter.git --tags -f
+  git describe --tags
+  # Print out local tags for debugging
+  git tag -l
+popd
 
 echo "Flutter Path: $(which flutter)"
 echo "Flutter Version: $(flutter --version)"
+
+# TODO(https://github.com/flutter/flutter/issues/154194): remove this.
+echo "Running flutter --help as a workaround for https://github.com/flutter/flutter/issues/154194"
+flutter --help
 
 if [[ $1 = "--update-perfetto" ]]; then
   devtools_tool update-perfetto
@@ -60,7 +77,7 @@ rm -rf build/web
 flutter pub get
 
 flutter build web \
-  --web-renderer canvaskit \
+  --wasm \
   --pwa-strategy=offline-first \
   --release \
   --no-tree-shake-icons

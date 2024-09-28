@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../screens/inspector_v2/inspector_data_models.dart';
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
 import '../ui/icons.dart';
@@ -74,10 +75,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       );
   }
 
-  static Size deserializeSize(Map<String, Object> json) {
+  static Size? deserializeSize(Map<String, Object> json) {
+    final width = json['width'] as String?;
+    final height = json['height'] as String?;
+    if (width == null || height == null) return null;
     return Size(
-      double.parse(json['width'] as String),
-      double.parse(json['height'] as String),
+      double.parse(width),
+      double.parse(height),
     );
   }
 
@@ -152,9 +156,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   // [deserializeSize] expects a parameter of type Map<String, Object> (note the
   // non-nullable Object), so we need to first type check as a Map and then we
   // can cast to the expected type.
-  Size get size => deserializeSize(
-        (json['size'] as Map?)?.cast<String, Object>() ?? <String, Object>{},
-      );
+  Size? get size {
+    final sizeMap = json['size'] as Map?;
+    return sizeMap == null
+        ? null
+        : deserializeSize(sizeMap.cast<String, Object>());
+  }
 
   bool get isLocalClass {
     final objectGroup = objectGroupApi;
@@ -452,6 +459,32 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
     return json[memberName] as bool;
   }
+
+  LayoutProperties? computeLayoutProperties({required bool forFlexLayout}) {
+    if ((!forFlexLayout && !isBoxLayout) || (forFlexLayout && !isFlexLayout)) {
+      return null;
+    }
+    if (size == null) return null;
+    return forFlexLayout
+        ? FlexLayoutProperties.fromDiagnostics(this)
+        : LayoutProperties(this);
+  }
+
+  RemoteDiagnosticsNode? layoutRootNode({required bool forFlexLayout}) {
+    if (forFlexLayout && !isFlexLayout) return null;
+
+    if (forFlexLayout) {
+      return isFlex ? this : parent;
+    }
+
+    return this;
+  }
+
+  // Warning: This should only be used on a layout explorer node. A regular
+  // remote diagnostics node never has a "size" property.
+  bool get isBoxLayout => size != null;
+
+  bool get isFlexLayout => isFlex || (parent?.isFlex ?? false);
 
   DiagnosticLevel getLevelMember(
     String memberName,

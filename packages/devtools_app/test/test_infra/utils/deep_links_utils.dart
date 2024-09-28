@@ -6,8 +6,65 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart';
+import 'package:http/testing.dart';
 
-class DeepLinksTestController extends DeepLinksController {
+import '../test_data/deep_link/fake_responses.dart';
+
+final defaultAndroidDeeplink = androidDeepLinkJson(defaultDomain);
+
+class TestDeepLinksService extends DeepLinksService {
+  TestDeepLinksService({
+    this.hasAndroidDomainErrors = false,
+    this.iosValidationResponse = '',
+  }) {
+    // Create a mock client to return fake responses.
+    _client = MockClient((request) async {
+      if (request.url == Uri.parse(androidDomainValidationURL)) {
+        if (hasAndroidDomainErrors) {
+          return Response(androidValidationResponseWithError, 200);
+        } else {
+          return Response(androidValidationResponseWithNoError, 200);
+        }
+      }
+      if (request.url == Uri.parse(iosDomainValidationURL)) {
+        return Response(iosValidationResponse, 200);
+      }
+      return Response('this is a body', 404);
+    });
+  }
+
+  late Client _client;
+
+  @override
+  Client get client => _client;
+
+  final bool hasAndroidDomainErrors;
+  final String iosValidationResponse;
+}
+
+class TestDeepLinksController extends DeepLinksController {
+  TestDeepLinksController({
+    this.hasAndroidDomainErrors = false,
+    this.iosValidationResponse = iosValidationResponseWithNoError,
+  }) {
+    _deepLinksService = TestDeepLinksService(
+      hasAndroidDomainErrors: hasAndroidDomainErrors,
+      iosValidationResponse: iosValidationResponse,
+    );
+  }
+
+  List<String> fakeAndroidDeepLinks = [];
+  bool hasAndroidDomainErrors = false;
+  bool hasAndroidPathErrors = false;
+  String iosValidationResponse = '';
+  List<String> fakeIosDomains = [];
+
+  late DeepLinksService _deepLinksService;
+
+  @override
+  DeepLinksService get deepLinksService => _deepLinksService;
+
   @override
   Future<String?> packageDirectoryForMainIsolate() async {
     return null;
@@ -15,19 +72,12 @@ class DeepLinksTestController extends DeepLinksController {
 
   @override
   Future<void> validateLinks() async {
-    if (validatedLinkDatas.all.isEmpty) {
-      return;
-    }
-    displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount: validatedLinkDatas.byDomain
-          .where((element) => element.domainErrors.isNotEmpty)
-          .length,
-      pathErrorCount: validatedLinkDatas.byPath
-          .where((element) => element.pathErrors.isNotEmpty)
-          .length,
-    );
-    applyFilters();
-    pagePhase.value = PagePhase.linksValidated;
+    androidAppLinks[selectedAndroidVariantIndex.value] =
+        fakeAppLinkSettings(fakeAndroidDeepLinks);
+    iosLinks[selectedIosConfigurationIndex.value] =
+        fakeUniversalLinkSettings(fakeIosDomains);
+
+    await super.validateLinks();
   }
 
   @override
