@@ -214,9 +214,8 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = TestDeepLinksController(
           hasAndroidDomainErrors: true,
-          hasIosDomainErrors: true,
+          iosValidationResponse: iosValidationResponseWithError,
         );
-
         deepLinksController
           ..selectedProject.value = FlutterProject(
             path: '/abc',
@@ -269,7 +268,7 @@ void main() {
       (WidgetTester tester) async {
         final deepLinksController = TestDeepLinksController(
           hasAndroidDomainErrors: true,
-          hasIosDomainErrors: true,
+          iosValidationResponse: iosValidationResponseWithError,
         );
 
         deepLinksController
@@ -295,6 +294,44 @@ void main() {
         expect(find.byType(ValidationDetailView), findsOneWidget);
         expect(find.text('Digital assets link file'), findsOneWidget);
         expect(find.text('Apple-App-Site-Association file'), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'Don\'t show domain errors when they are just warnings',
+      windowSize,
+      (WidgetTester tester) async {
+        final deepLinksController = TestDeepLinksController(
+          iosValidationResponse: iosValidationResponseWithWarning,
+        );
+
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [
+            androidDeepLinkJson('www.domain1.com'),
+            androidDeepLinkJson('www.google.com'),
+          ]
+          ..fakeIosDomains = [defaultDomain];
+
+        await pumpDeepLinkScreen(
+          tester,
+          controller: deepLinksController,
+        );
+
+        expect(find.text('www.domain1.com'), findsOneWidget);
+        expect(find.text('example.com'), findsOneWidget);
+        expect(find.text('www.google.com'), findsOneWidget);
+
+        await tester.tap(find.text('example.com'));
+        await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+        final domainErrors =
+            deepLinksController.selectedLink.value!.domainErrors;
+        expect(domainErrors.length, 0);
       },
     );
 
@@ -394,8 +431,9 @@ void main() {
       'filter links with validation result',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController =
-            TestDeepLinksController(hasIosDomainErrors: true);
+        final deepLinksController = TestDeepLinksController(
+          iosValidationResponse: iosValidationResponseWithError,
+        );
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -448,7 +486,9 @@ void main() {
       'sort links',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController = TestDeepLinksController();
+        final deepLinksController = TestDeepLinksController(
+          iosValidationResponse: iosValidationResponseWithError,
+        );
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
@@ -456,8 +496,7 @@ void main() {
             androidVariants: ['debug', 'release'],
             iosBuildOptions: xcodeBuildOptions,
           )
-          ..fakeIosDomains = [defaultDomain, 'domain1.com', 'domain2.com']
-          ..hasIosDomainErrors = true;
+          ..fakeIosDomains = [defaultDomain, 'domain1.com', 'domain2.com'];
 
         await pumpDeepLinkScreen(
           tester,
@@ -574,7 +613,7 @@ void main() {
         expect(find.text('/path2'), findsOneWidget);
         expect(find.text('/path3'), findsOneWidget);
         expect(find.text('/ios-path1'), findsOneWidget);
-        expect(find.text('/ios-path2'), findsOneWidget);
+        expect(find.text('NOT /ios-path2'), findsOneWidget);
 
         // Only show links with path error.
         deepLinksController.updateDisplayOptions(
@@ -587,7 +626,7 @@ void main() {
         expect(find.text('/path2'), findsOneWidget);
         expect(find.text('/path3'), findsNothing);
         expect(find.text('/ios-path1'), findsNothing);
-        expect(find.text('/ios-path2'), findsNothing);
+        expect(find.text('NOT /ios-path2'), findsNothing);
 
         // Only show links with no issue.
         deepLinksController.updateDisplayOptions(
@@ -603,7 +642,7 @@ void main() {
         expect(find.text('/path2'), findsNothing);
         expect(find.text('/path3'), findsOneWidget);
         expect(find.text('/ios-path1'), findsOneWidget);
-        expect(find.text('/ios-path2'), findsOneWidget);
+        expect(find.text('NOT /ios-path2'), findsOneWidget);
       },
     );
   });

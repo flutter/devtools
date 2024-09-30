@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 
+import '../../shared/primitives/utils.dart';
 import 'deep_links_model.dart';
 
 const _apiKey = 'AIzaSyCf_2E9N2AUZR-YSnZTQ72YbCNhKIskIsw';
@@ -26,6 +27,8 @@ const postHeader = {'Content-Type': 'application/json'};
 // The keys used in both android and ios domain validation API.
 const _domainNameKey = 'domainName';
 const _checkNameKey = 'checkName';
+const _severityLevelKey = 'severityLevel';
+const _severityLevelError = 'ERROR';
 const _failedChecksKey = 'failedChecks';
 const _domainBatchSize = 500;
 
@@ -62,6 +65,10 @@ const _iosValidationResultsKey = 'validationResults';
 const _aasaAppPathsKey = 'aasaAppPaths';
 const _aasaPathsKey = 'aasaPaths';
 const _pathKey = 'path';
+const _isExcludedKey = 'isExcluded';
+const _queryParamsKey = 'queryParams';
+const _keyKey = 'key';
+const _valueKey = 'value';
 
 const iosCheckNameToDomainError = <String, DomainError>{
   'EXISTENCE': IosDomainError.existence,
@@ -75,7 +82,7 @@ class ValidateIosDomainResult {
   ValidateIosDomainResult(this.errorCode, this.domainErrors, this.paths);
   final String errorCode;
   final Map<String, List<DomainError>> domainErrors;
-  final Map<String, List<String>> paths;
+  final Map<String, List<Path>> paths;
 }
 
 class GenerateAssetLinksResult {
@@ -158,7 +165,7 @@ class DeepLinksService {
     required List<String> domains,
   }) async {
     final domainErrors = <String, List<DomainError>>{};
-    final paths = <String, List<String>>{};
+    final paths = <String, List<Path>>{};
     // TODO(hangyujin): Add error code to the result.
     const errorCode = '';
 
@@ -190,7 +197,8 @@ class DeepLinksService {
             for (final failedCheck in failedChecks) {
               final checkName = failedCheck[_checkNameKey] as String;
               final domainError = iosCheckNameToDomainError[checkName];
-              if (domainError != null) {
+              final severityLevel = failedCheck[_severityLevelKey] as String;
+              if (domainError != null && severityLevel == _severityLevelError) {
                 domainErrors
                     .putIfAbsent(domainName, () => <DomainError>[])
                     .add(domainError);
@@ -205,9 +213,24 @@ class DeepLinksService {
                   ?.cast<Map<String, Object?>>();
               if (aasaPaths != null) {
                 for (final aasaPath in aasaPaths) {
-                  paths
-                      .putIfAbsent(domainName, () => <String>[])
-                      .add(aasaPath[_pathKey] as String);
+                  final path = aasaPath[_pathKey] as String?;
+                  if (path.isNullOrEmpty) {
+                    continue;
+                  }
+                  final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
+                      ?.cast<Map<String, Object?>>();
+                  final queryParams = <String, String>{
+                    for (final item in rawQueryParams ?? <Map>[])
+                      item[_keyKey] as String: item[_valueKey] as String,
+                  };
+                  paths.putIfAbsent(domainName, () => <Path>[]).add(
+                        Path(
+                          path: path!,
+                          queryParams: queryParams,
+                          isExcluded:
+                              aasaPath[_isExcludedKey] as bool? ?? false,
+                        ),
+                      );
                 }
                 continue;
               }

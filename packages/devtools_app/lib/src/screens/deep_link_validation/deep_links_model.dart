@@ -129,7 +129,7 @@ class IosDomainError extends DomainError {
     'This test checks whether the Apple-App-Site-Association file, '
         'which is required to verify the association between the app and the '
         'domain name, exists under your domain.',
-    'Add an Apple-App-Side-Association file to all of the '
+    'Add an Apple-App-Site-Association file to all of the '
         'failed website domains at the following location: '
         'https://[domain.name]/apple-app-site-association.',
   );
@@ -244,6 +244,26 @@ class ValidatedLinkDatas {
   final List<LinkData> byPath;
 }
 
+/// Represents a path in a deep link.
+class Path {
+  Path({
+    required this.path,
+    this.queryParams = const {},
+    this.isExcluded = false,
+  });
+
+  final String path;
+
+  // TODO(hangyujin): display queryParams in path table.
+  final Map<String, String> queryParams;
+
+  /// A Boolean value that indicates whether to stop pattern matching and prevent the universal
+  /// link from opening if the URL matches the associated pattern.
+  ///
+  /// The default is false.
+  final bool isExcluded;
+}
+
 /// Contains all data relevant to a deep link.
 class LinkData with SearchableDataMixin {
   LinkData({
@@ -259,7 +279,7 @@ class LinkData with SearchableDataMixin {
     this.hasIosAasaFile = true,
   });
 
-  final String? path;
+  final Path? path;
   final String? domain;
   final Set<PlatformOS> os;
   final Set<String> scheme;
@@ -274,17 +294,17 @@ class LinkData with SearchableDataMixin {
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return (domain?.caseInsensitiveContains(regExpSearch) ?? false) ||
-        (path?.caseInsensitiveContains(regExpSearch) ?? false);
+        (path?.path.caseInsensitiveContains(regExpSearch) ?? false);
   }
 
   @override
   String toString() => 'LinkData($domain $path $os)';
 
-  String get safePath => path ?? '';
+  String get safePath => path?.path ?? '';
   String get safeDomain => domain ?? '';
 
   LinkData copyWith({
-    String? path,
+    Path? path,
     List<DomainError>? domainErrors,
     bool? hasAndroidAssetLinksFile,
     bool? hasIosAasaFile,
@@ -501,7 +521,8 @@ class PathColumn extends ColumnData<LinkData>
     return _ErrorAwareText(
       isError: dataObject.pathErrors.isNotEmpty,
       controller: controller,
-      text: dataObject.safePath,
+      text:
+          '${(dataObject.path?.isExcluded ?? false) ? 'NOT ' : ''}${getValue(dataObject)}',
       link: dataObject,
     );
   }
