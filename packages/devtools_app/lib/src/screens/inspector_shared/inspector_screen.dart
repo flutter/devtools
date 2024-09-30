@@ -39,7 +39,7 @@ class InspectorScreenSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<InspectorScreenController>(context);
-    
+
     return ValueListenableBuilder(
       valueListenable: preferences.inspector.inspectorV2Enabled,
       builder: (context, v2Enabled, _) {
