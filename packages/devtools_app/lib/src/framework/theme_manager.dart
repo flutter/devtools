@@ -18,7 +18,8 @@ final _log = Logger('theme_manager');
 /// Manages changes in theme settings from an editor/IDE.
 class EditorThemeManager extends DisposableController
     with AutoDisposeControllerMixin {
-  EditorThemeManager(DartToolingDaemon dtd) : editorClient = DtdEditorClient(dtd);
+  EditorThemeManager(DartToolingDaemon dtd)
+      : editorClient = DtdEditorClient(dtd);
 
   final DtdEditorClient editorClient;
 
