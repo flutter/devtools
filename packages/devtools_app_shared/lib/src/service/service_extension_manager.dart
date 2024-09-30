@@ -202,7 +202,9 @@ final class ServiceExtensionManager with DisposerMixin {
     final lastMainIsolate = _isolateManager.mainIsolate.value;
     if (_checkForFirstFrameStarted ||
         _firstFrameEventReceived ||
-        lastMainIsolate == null) return;
+        lastMainIsolate == null) {
+      return;
+    }
     if (!isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
       return;
     }

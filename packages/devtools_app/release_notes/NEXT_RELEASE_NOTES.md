@@ -45,7 +45,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Resolved an issue in .har export where response content was sometimes missing in the data. - [#8333](https://github.com/flutter/devtools/pull/8333)
 
 ## Logging updates
 
