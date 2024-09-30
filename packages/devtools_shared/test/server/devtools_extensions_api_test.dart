@@ -335,6 +335,8 @@ void _verifyExpectedStaticExtensions(List<DevToolsExtensionConfig> extensions) {
     detectedFromPath: 'other_root_1',
     fromStaticContext: true,
   );
+  // This extension gets added once by the workspace root pubspec.yaml, and once
+  // by the workspace member pubspec.yaml.
   _verifyExtension(
     extensions[5],
     extensionPackage: staticExtension1Package,

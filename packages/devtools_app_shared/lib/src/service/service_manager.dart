@@ -668,7 +668,7 @@ class ServiceManager<T extends VmService> {
             dtd: dtdManager.connection.value,
           )
         : null;
-    _log.shout('rootPackageDirectoryForMainIsolate: $packageUriString');
+    _log.fine('rootPackageDirectoryForMainIsolate: $packageUriString');
     return packageUriString;
   }
 }

@@ -60,7 +60,6 @@ class ServerApi {
     ServerApi? api,
     DtdInfo? dtd,
   }) {
-    print('Handling ${request.url.path}');
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
     // TODO(kenz): break this switch statement up so that it uses helper methods

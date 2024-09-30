@@ -2,8 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:dtd/dtd.dart';
 import 'package:extension_discovery/extension_discovery.dart';
@@ -138,7 +136,6 @@ class ExtensionsManager {
     _assertUriFormat(rootFileUriString);
     final List<Extension> extensions;
     final packageConfigPath = findPackageConfig(Uri.parse(rootFileUriString));
-    // TODO(sigurdm): Do we need to deduplicate package configs?
     extensions = await findExtensions(
       'devtools',
       packageConfig: packageConfigPath,
@@ -173,6 +170,10 @@ class ExtensionsManager {
         final extensionConfig = DevToolsExtensionConfig.parse({
           ...config,
           DevToolsExtensionConfig.extensionAssetsPathKey: location,
+          // The [packageConfigPath] will look like
+          // 'pkg/.dart_tool/package_config.json' so we will store the
+          // devtools_options.yaml file at the 'pkg' root:
+          // 'pkg/devtools_options.yaml'.
           DevToolsExtensionConfig.devtoolsOptionsUriKey: path.url.join(
             path.url.dirname(path.url.dirname(packageConfigPath.toString())),
             devtoolsOptionsFileName,
