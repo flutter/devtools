@@ -80,7 +80,7 @@ final iosCheckNameToDomainError = <String, DomainError>{
   'HTTPS_ACCESSIBILITY': IosDomainError.httpsAccessibility,
   'NON_REDIRECT': IosDomainError.nonRedirect,
 };
-const aasaFileFormatSubCheck = {
+final aasaFileFormatSubCheck = {
   'APPLINKS_FORMAT': AASAfileFormatSubCheck.appLinksFormat,
   'APPLINKS_SUBSTITUTION_VARIABLES_FORMAT':
       AASAfileFormatSubCheck.appLinksSubstitutionVariablesFormat,
