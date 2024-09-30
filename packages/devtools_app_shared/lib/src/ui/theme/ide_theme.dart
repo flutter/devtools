@@ -5,7 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 
-import '../ui_utils.dart';
 import '../../shared/embed_mode.dart';
 import 'theme.dart';
 
