@@ -15,7 +15,6 @@ void main() {
     expect(FeatureFlags.deepLinkIosCheck, false);
     expect(FeatureFlags.loggingV2, false);
     expect(FeatureFlags.dapDebugging, false);
-    expect(FeatureFlags.inspectorV2, false);
     expect(FeatureFlags.wasmOptInSetting, true);
   });
 }

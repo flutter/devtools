@@ -61,9 +61,9 @@ void main() {
     final debuggerController = DebuggerController();
     await tester.pumpWidget(
       wrapWithControllers(
-        inspectorV2: inspectorController,
         debugger: debuggerController,
         InspectorTree(
+          controller: inspectorController,
           treeController: treeController,
         ),
       ),
