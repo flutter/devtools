@@ -63,8 +63,8 @@ class InspectorControls extends StatelessWidget {
           SwitchSetting(
             notifier:
                 preferences.inspector.inspectorV2Enabled as ValueNotifier<bool>,
-            title: 'Inspector 2.0',
-            tooltip: 'Try out the new Flutter Inspector.',
+            title: 'New Inspector',
+            tooltip: 'Try out the redesigned Flutter Inspector.',
             gaScreen: gac.inspector,
             gaItem: gac.inspectorV2Enabled,
             activeColor: activeButtonColor,

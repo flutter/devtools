@@ -100,8 +100,8 @@ class SettingsDialog extends StatelessWidget {
                 child: CheckboxSetting(
                   notifier: preferences.inspector.inspectorV2Enabled
                       as ValueNotifier<bool?>,
-                  title: 'Enable Inspector 2.0',
-                  description: 'Try out the new Flutter Inspector.',
+                  title: 'Enable the new Inspector',
+                  description: 'Try out the redesigned Flutter Inspector.',
                   gaItem: gac.inspectorV2Enabled,
                 ),
               ),
