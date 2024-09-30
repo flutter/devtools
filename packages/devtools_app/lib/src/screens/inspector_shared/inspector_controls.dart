@@ -27,8 +27,8 @@ class InspectorControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeButtonColor =
-        Theme.of(context).colorScheme.activeToggleButtonColor;
+    final colorScheme = Theme.of(context).colorScheme;
+    final activeButtonColor = colorScheme.activeToggleButtonColor;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,6 +41,7 @@ class InspectorControls extends StatelessWidget {
           builder: (_, selectModeSupported, __) {
             return ServiceExtensionButtonGroup(
               fillColor: activeButtonColor,
+              color: colorScheme.primary,
               extensions: [
                 selectModeSupported
                     ? extensions.toggleSelectWidgetMode
@@ -135,8 +136,10 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.implementationWidgetsHidden,
       builder: (context, isHidden, _) {
+        final colorScheme = Theme.of(context).colorScheme;
         return DevToolsToggleButton(
-          fillColor: Theme.of(context).colorScheme.activeToggleButtonColor,
+          fillColor: colorScheme.activeToggleButtonColor,
+          color: colorScheme.primary,
           isSelected: !isHidden,
           message:
               'Show widgets created by the Flutter framework or other packages.',
