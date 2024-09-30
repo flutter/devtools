@@ -486,8 +486,9 @@ void main() {
       'domain errors are correct',
       windowSize,
       (WidgetTester tester) async {
-        final deepLinksController =
-            TestDeepLinksController(hasIosDomainErrors: true);
+        final deepLinksController = TestDeepLinksController(
+          iosValidationResponse: iosValidationResponseWithError,
+        );
 
         deepLinksController
           ..selectedProject.value = FlutterProject(
