@@ -215,7 +215,6 @@ final class DevToolsToggleButton extends StatelessWidget {
     this.shape,
     this.minScreenWidthForTextBeforeScaling,
     this.fillColor,
-    this.color,
   });
 
   final String message;
@@ -236,8 +235,6 @@ final class DevToolsToggleButton extends StatelessWidget {
 
   final Color? fillColor;
 
-  final Color? color;
-
   @override
   Widget build(BuildContext context) {
     return DevToolsToggleButtonGroup(
@@ -253,7 +250,6 @@ final class DevToolsToggleButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
             child: MaterialIconLabel(
-              color: isSelected ? color : null,
               iconData: icon,
               label: label,
               minScreenWidthForTextBeforeScaling:
