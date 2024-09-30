@@ -1,3 +1,7 @@
+// Copyright 2024 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ui';
 
 import 'package:devtools_app_shared/ui.dart';
@@ -5,76 +9,83 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:logging/logging.dart';
 
-import '../../devtools_app.dart';
 import '../service/editor/api_classes.dart';
+import '../service/editor/editor_client.dart';
+import '../shared/globals.dart';
 
 final _log = Logger('theme_manager');
 
-class ThemeManager {
-  ThemeManager(DartToolingDaemon dtd) : editorClient = DtdEditorClient(dtd);
+/// Manages changes in theme settings from an editor/IDE.
+class EditorThemeManager extends DisposableController
+    with AutoDisposeControllerMixin {
+  EditorThemeManager(DartToolingDaemon dtd) : editorClient = DtdEditorClient(dtd);
 
   final DtdEditorClient editorClient;
 
   void listenForThemeChanges() {
-    editorClient.event.listen((event) {
-      if (event is ThemeChangedEvent) {
-        final currentTheme = getIdeTheme();
-        final newTheme = event.theme;
+    autoDisposeStreamSubscription(
+      editorClient.event.listen((event) {
+        if (event is ThemeChangedEvent) {
+          final currentTheme = getIdeTheme();
+          final newTheme = event.theme;
 
-        if (currentTheme.isDarkMode != newTheme.isDarkMode) {
-          currentTheme.isDarkMode = newTheme.isDarkMode;
-          updateQueryParameter(
-            IdeThemeQueryParams.devToolsThemeKey,
-            currentTheme.isDarkMode
-                ? IdeThemeQueryParams.darkThemeValue
-                : IdeThemeQueryParams.lightThemeValue,
-          );
-        }
-
-        if (newTheme.backgroundColor != null) {
-          final newBackgroundColor = _tryParseColor(newTheme.backgroundColor!);
-          if (newBackgroundColor != null &&
-              newBackgroundColor != currentTheme.backgroundColor) {
-            currentTheme.backgroundColor = newBackgroundColor;
+          if (currentTheme.isDarkMode != newTheme.isDarkMode) {
+            // currentTheme.isDarkMode = newTheme.isDarkMode;
             updateQueryParameter(
-              IdeThemeQueryParams.backgroundColorKey,
-              _colorAsHex(newBackgroundColor),
+              IdeThemeQueryParams.devToolsThemeKey,
+              currentTheme.isDarkMode
+                  ? IdeThemeQueryParams.darkThemeValue
+                  : IdeThemeQueryParams.lightThemeValue,
             );
           }
-        }
 
-        if (newTheme.foregroundColor != null) {
-          final newForegroundColor = _tryParseColor(newTheme.foregroundColor!);
-          if (newForegroundColor != null &&
-              newForegroundColor != currentTheme.foregroundColor) {
-            currentTheme.foregroundColor = newForegroundColor;
+          if (newTheme.backgroundColor != null) {
+            final newBackgroundColor =
+                _tryParseColor(newTheme.backgroundColor!);
+            if (newBackgroundColor != null &&
+                newBackgroundColor != currentTheme.backgroundColor) {
+              // currentTheme.backgroundColor = newBackgroundColor;
+              updateQueryParameter(
+                IdeThemeQueryParams.backgroundColorKey,
+                _colorAsHex(newBackgroundColor),
+              );
+            }
+          }
+
+          if (newTheme.foregroundColor != null) {
+            final newForegroundColor =
+                _tryParseColor(newTheme.foregroundColor!);
+            if (newForegroundColor != null &&
+                newForegroundColor != currentTheme.foregroundColor) {
+              // currentTheme.foregroundColor = newForegroundColor;
+              updateQueryParameter(
+                IdeThemeQueryParams.foregroundColorKey,
+                _colorAsHex(newForegroundColor),
+              );
+            }
+          }
+
+          if (newTheme.fontSize != null &&
+              newTheme.fontSize!.toDouble() != currentTheme.fontSize) {
+            // currentTheme.fontSize = newTheme.fontSize!.toDouble();
             updateQueryParameter(
-              IdeThemeQueryParams.foregroundColorKey,
-              _colorAsHex(newForegroundColor),
+              IdeThemeQueryParams.fontSizeKey,
+              newTheme.fontSize!.toDouble().toString(),
             );
           }
+
+          setGlobal(IdeTheme, getIdeTheme());
+
+          // We are toggling to the opposite theme and then back to force the IDE
+          // to update all theme features.
+          // TODO(https://github.com/flutter/devtools/issues/8366): Clean up so
+          // that preferences controller listens for changes in all theme
+          // features.
+          preferences.toggleDarkModeTheme(!newTheme.isDarkMode);
+          preferences.toggleDarkModeTheme(newTheme.isDarkMode);
         }
-
-        if (newTheme.fontSize != null &&
-            newTheme.fontSize!.toDouble() != currentTheme.fontSize) {
-          currentTheme.fontSize = newTheme.fontSize!.toDouble();
-          updateQueryParameter(
-            IdeThemeQueryParams.fontSizeKey,
-            currentTheme.fontSize.toString(),
-          );
-        }
-
-        setGlobal(IdeTheme, currentTheme);
-
-        // We are toggling to the opposite theme and then back to force the IDE
-        // to update all theme features.
-        // TODO(https://github.com/flutter/devtools/issues/8366): Clean up so
-        // that preferences controller listens for changes in all theme
-        // features.
-        preferences.toggleDarkModeTheme(!currentTheme.isDarkMode);
-        preferences.toggleDarkModeTheme(currentTheme.isDarkMode);
-      }
-    });
+      }),
+    );
   }
 
   String _colorAsHex(Color color) {
