@@ -245,10 +245,11 @@ final class DevToolsToggleButton extends StatelessWidget {
           message: message,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-            child: ImageIconLabel(
-              Icon(icon, size: defaultIconSize),
-              label ?? '',
-              unscaledMinIncludeTextWidth: minScreenWidthForTextBeforeScaling,
+            child: MaterialIconLabel(
+              iconData: icon,
+              label: label,
+              minScreenWidthForTextBeforeScaling:
+                  minScreenWidthForTextBeforeScaling,
             ),
           ),
         ),
