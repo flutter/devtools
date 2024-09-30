@@ -431,7 +431,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       ),
       builder: (context, child) {
         if (child == null) {
-          return CenteredMessage(
+          return const CenteredMessage(
             message: 'Uh-oh, something went wrong. Please refresh the page.',
           );
         }

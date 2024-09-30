@@ -441,7 +441,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
     }
 
     if (!widget.properties.hasChildren) {
-      return CenteredMessage(message: 'No Children');
+      return const CenteredMessage(message: 'No Children');
     }
 
     final theme = Theme.of(context);

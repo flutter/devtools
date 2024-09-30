@@ -96,7 +96,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
             return const _ValidatedDeepLinksView();
           case PagePhase.noLinks:
             // TODO(hangyujin): This is just a place holder to add UI.
-            return CenteredMessage(
+            return const CenteredMessage(
               message: 'Your Flutter project has no Links to verify.',
             );
           case PagePhase.analyzeErrorPage:
@@ -125,7 +125,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
 
           case PagePhase.validationErrorPage:
             // TODO(hangyujin): This is just a place holder to add Error handling.
-            return CenteredMessage(message: 'Error validating domain ');
+            return const CenteredMessage(message: 'Error validating domain ');
         }
       },
     );
