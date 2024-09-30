@@ -4,11 +4,11 @@
 
 import 'package:devtools_app_shared/shared.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
-import '../../shared/utils.dart';
 import '../inspector/inspector_screen_body.dart' as legacy;
 import '../inspector_v2/inspector_screen_body.dart' as v2;
 import 'inspector_screen_controller.dart';
@@ -33,25 +33,13 @@ class InspectorScreen extends Screen {
       const InspectorScreenSwitcher();
 }
 
-class InspectorScreenSwitcher extends StatefulWidget {
+class InspectorScreenSwitcher extends StatelessWidget {
   const InspectorScreenSwitcher({super.key});
 
   @override
-  InspectorScreenSwitcherState createState() => InspectorScreenSwitcherState();
-}
-
-class InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
-    with
-        ProvidedControllerMixin<InspectorScreenController,
-            InspectorScreenSwitcher> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final controller = Provider.of<InspectorScreenController>(context);
+    
     return ValueListenableBuilder(
       valueListenable: preferences.inspector.inspectorV2Enabled,
       builder: (context, v2Enabled, _) {

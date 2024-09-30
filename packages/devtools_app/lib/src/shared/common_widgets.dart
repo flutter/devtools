@@ -1689,7 +1689,7 @@ class CheckboxSetting extends StatelessWidget {
   }
 }
 
-/// A widget that represents a check box setting and automatically updates for
+/// A widget that represents a switch setting and automatically updates for
 /// value changes to [notifier].
 class SwitchSetting extends StatelessWidget {
   const SwitchSetting({
@@ -1750,8 +1750,8 @@ class SwitchSetting extends StatelessWidget {
                 ga.select(gaScreen, '$gaItem-$value');
               }
               final onChanged = this.onChanged;
-              if (value != null && onChanged != null) {
-                onChanged(value);
+              if (value != null) {
+                onChanged?.call(value);
               }
             },
           ),
