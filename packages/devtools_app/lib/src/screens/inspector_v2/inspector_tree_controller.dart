@@ -990,9 +990,14 @@ class _InspectorTreeState extends State<InspectorTree>
       safeViewportHeight,
     );
 
+    // Decide to scroll based on whether the middle of the center-left half of
+    // the row is visible. See https://github.com/flutter/devtools/pull/8367.
+    final centerLeftHalf = Offset(
+      (rect.centerLeft.dx + rect.center.dx) / 2,
+      rect.center.dy,
+    );
     final isRectInViewPort =
-        viewPortInScrollControllerSpace.contains(rect.topLeft) &&
-            viewPortInScrollControllerSpace.contains(rect.bottomRight);
+        viewPortInScrollControllerSpace.contains(centerLeftHalf);
     if (isRectInViewPort) {
       // The rect is already in view, don't scroll
       return;
