@@ -413,7 +413,6 @@ final class MaterialIconLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(jacobr): display the label as a tooltip for the icon particularly
     // when the text is not shown.
-    final iconColor = color ?? IconTheme.of(context).color;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -421,7 +420,7 @@ final class MaterialIconLabel extends StatelessWidget {
           Icon(
             iconData,
             size: defaultIconSize,
-            color: iconColor,
+            color: color,
           ),
         // TODO(jacobr): animate showing and hiding the text.
         if (label != null &&
@@ -432,7 +431,7 @@ final class MaterialIconLabel extends StatelessWidget {
             ),
             child: Text(
               label!,
-              style: Theme.of(context).regularTextStyleWithColor(iconColor),
+              style: Theme.of(context).regularTextStyleWithColor(color),
             ),
           ),
       ],
