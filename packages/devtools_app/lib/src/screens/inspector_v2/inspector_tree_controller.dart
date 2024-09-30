@@ -577,7 +577,7 @@ class InspectorTreeController extends DisposableController
 
   void scrollToRect(Rect targetRect) {
     for (final client in _clients) {
-      client.scrollToRect(targetRect);
+      client.waitForClientsThenScrollToRect(targetRect);
     }
   }
 
@@ -853,6 +853,8 @@ extension RemoteDiagnosticsNodeExtension on RemoteDiagnosticsNode {
 abstract class InspectorControllerClient {
   void scrollToRect(Rect rect);
 
+  void waitForClientsThenScrollToRect(Rect rect, {int retries});
+
   void requestFocus();
 }
 
@@ -916,6 +918,10 @@ class _InspectorTreeState extends State<InspectorTree>
         readyWhen: (triggerValue) => !triggerValue,
       );
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.animateTo(controller.selectedNode.value);
+    });
   }
 
   @override
@@ -963,6 +969,19 @@ class _InspectorTreeState extends State<InspectorTree>
 //      curve: defaultCurve,
 //    );
 //  }
+
+  @override
+  Future<void> waitForClientsThenScrollToRect(
+    Rect rect, {
+    int retries = 5,
+  }) async {
+    if (_scrollControllerY.hasClients || _scrollControllerX.hasClients) {
+      return scrollToRect(rect);
+    }
+    if (retries == 0) return;
+    await Future.delayed(const Duration(milliseconds: 20));
+    return waitForClientsThenScrollToRect(rect, retries: retries - 1);
+  }
 
   @override
   Future<void> scrollToRect(Rect rect) async {
