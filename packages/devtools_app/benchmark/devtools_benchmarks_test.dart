@@ -8,13 +8,14 @@
 import 'dart:convert' show JsonEncoder;
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:test/test.dart';
 import 'package:web_benchmarks/server.dart';
 
 import 'test_infra/common.dart';
 import 'test_infra/project_root_directory.dart';
 
-List<String> metricList({required bool useWasm}) => [
+List<String> _metricList({required bool useWasm}) => [
       // The skwasm renderer doesn't have preroll or apply frame steps in its
       // rendering.
       if (!useWasm) ...[
@@ -24,11 +25,20 @@ List<String> metricList({required bool useWasm}) => [
       'drawFrameDuration',
     ];
 
-final valueList = <String>[
+final _valueList = <String>[
   'average',
   'outlierAverage',
   'outlierRatio',
   'noise',
+];
+
+const _totalUiFrameAverageScore = 'totalUiFrame.average';
+
+const _isWasmScore = 'isWasm';
+
+const _extraScores = [
+  _totalUiFrameAverageScore,
+  _isWasmScore,
 ];
 
 /// Tests that the DevTools web benchmarks are run and reported correctly.
@@ -66,29 +76,34 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   );
 
   for (final benchmarkName in DevToolsBenchmark.values.map((e) => e.id)) {
-    final expectedMetrics = metricList(useWasm: useWasm);
+    final expectedMetrics = _metricList(useWasm: useWasm);
+    final scores = taskResult.scores[benchmarkName] ?? [];
     expect(
-      taskResult.scores[benchmarkName],
-      hasLength(expectedMetrics.length * valueList.length + 1),
+      scores,
+      hasLength(
+        expectedMetrics.length * _valueList.length + _extraScores.length,
+      ),
     );
 
     for (final metricName in expectedMetrics) {
-      for (final valueName in valueList) {
+      for (final valueName in _valueList) {
         expect(
-          taskResult.scores[benchmarkName]?.where(
-            (score) => score.metric == '$metricName.$valueName',
-          ),
+          scores.where((score) => score.metric == '$metricName.$valueName'),
           hasLength(1),
         );
       }
     }
 
     expect(
-      taskResult.scores[benchmarkName]?.where(
-        (score) => score.metric == 'totalUiFrame.average',
-      ),
+      scores.where((score) => score.metric == _totalUiFrameAverageScore),
       hasLength(1),
     );
+
+    final isWasmScore = scores.firstWhereOrNull(
+      (BenchmarkScore score) => score.metric == _isWasmScore,
+    );
+    expect(isWasmScore, isNotNull);
+    expect(isWasmScore!.value, useWasm ? 1 : 0);
   }
 
   expect(

@@ -4,10 +4,10 @@
 
 /// The initial page to load upon opening the DevTools benchmark app or
 /// reloading it in Chrome.
-//
-// We use an empty initial page so that the benchmark server does not attempt
-// to load the default page 'index.html', which will show up as "page not
-// found" in DevTools.
+///
+/// We use an empty initial page so that the benchmark server does not attempt
+/// to load the default page 'index.html', which will show up as "page not
+/// found" in DevTools.
 const _benchmarkInitialPage = '';
 
 const _wasmQueryParameters = {'wasm': 'true'};
