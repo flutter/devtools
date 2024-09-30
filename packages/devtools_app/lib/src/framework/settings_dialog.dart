@@ -16,6 +16,7 @@ import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/log_storage.dart';
 import '../shared/server/server.dart';
+import 'theme_manager.dart';
 
 class OpenSettingsAction extends ScaffoldAction {
   OpenSettingsAction({super.key, super.color})
@@ -40,6 +41,8 @@ class SettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final analyticsController = Provider.of<AnalyticsController>(context);
+    // TODO(helin24): Remove this code to test theme change
+    final ValueNotifier<bool> themeChange = ValueNotifier<bool>(true);
     return DevToolsDialog(
       title: const DialogTitleText('Settings'),
       content: Column(
@@ -68,6 +71,22 @@ class SettingsDialog extends StatelessWidget {
                 gaItem: gac.analytics,
               ),
             ),
+            // TODO(helin24): Remove this code to test theme change
+          Flexible(
+            child: CheckboxSetting(
+              title: 'Test out theme change',
+              notifier: themeChange,
+              onChanged: (enable) {
+                if (enable!) {
+                  dtdManager.sendTestEvent2();
+                } else {
+                  dtdManager.sendTestEvent3();
+                }
+              },
+              gaScreen: gac.settingsDialog,
+              gaItem: gac.analytics,
+            ),
+          ),
           Flexible(
             child: CheckboxSetting(
               title: 'Enable VM developer mode',

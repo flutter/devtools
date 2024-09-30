@@ -16,7 +16,7 @@ final _log = Logger('ide_theme');
 
 /// IDE-supplied theming.
 final class IdeTheme {
-  IdeTheme({
+IdeTheme({
     this.backgroundColor,
     this.foregroundColor,
     this.fontSize = unscaledDefaultFontSize,

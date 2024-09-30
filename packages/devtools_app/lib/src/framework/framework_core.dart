@@ -172,7 +172,11 @@ abstract class FrameworkCore {
 Future<void> _initDTDConnection() async {
   try {
     // Get the dtdUri from the devtools server
-    final dtdUri = await server.getDtdUri();
+    // TODO(helin24): Remove testing code for theme event.
+    final runningInIde = false;
+    final dtdUri = runningInIde
+        ? await server.getDtdUri()
+        : Uri.parse('ws://127.0.0.1:52400/bWpURPBJaAAVvw6S');
 
     if (dtdUri != null) {
       await dtdManager.connect(
@@ -193,6 +197,9 @@ Future<void> _initDTDConnection() async {
       if (dtdManager.connection.value != null) {
         themeManager = EditorThemeManager(dtdManager.connection.value!);
         themeManager!.listenForThemeChanges();
+        if (!runningInIde) {
+          dtdManager.sendTestEvent();
+        }
       }
     } else {
       _log.info('No DTD uri provided from the server during initialization.');
