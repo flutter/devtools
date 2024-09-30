@@ -1,0 +1,140 @@
+JSFiddle'da düzenle
+JavaScript
+HTML
+PostCSS (Aşama 3+)
+Sonuç
+:kök {
+  -- renk -1: rgb( 62 , 80 , 60 );
+  -- renk -2: rgb( 127 , 136 , 106 );
+  -- renk -3: rgb( 243 , 236 , 219 );
+  -- renk -4: rgb( 255 , 111 , 61 );
+}
+
+gövde {
+   arka plan : lineer-gradient( 90deg , var(--color- 1 ) %0 , var(--color- 1 ) %25 , var(--color- 2 ) %25 , var(--color- 2 ) %50 , var(--color- 3 ) %50 , var(--color- 3 ) %75 , var(--color- 4 ) %75 , var(--color- 4 ) %100 );
+} gövde {
+   arka plan : #20262e ;
+   dolgu : 16px ;
+   yazı tipi ailesi : Helvetica;
+}
+
+gövde ::-webkit-kaydırma çubuğu {
+  genişlik: 5px ;
+}
+
+gövde ::-webkit-kaydırma çubuğu-izi {
+  arka plan: şeffaf;
+}
+
+gövde ::-webkit-kaydırma çubuğu-başparmak {
+  konum: mutlak;
+  arka plan : #374353ff ;
+   kenarlık yarıçapı : 5px ;
+}
+
+.inputs-wrapper {
+   ekran : esnek;
+   esnek-yön : sütun;
+  boşluk: 12px ;
+}
+
+.alan-grubu {
+   görüntüleme : esnek;
+   esnek-yön : sütun;
+  boşluk: 6px ;
+}
+
+.label {
+   yazı tipi boyutu : 12px ;
+   satır yüksekliği : 14px ;
+   renk : beyaz;
+}
+
+.input {
+   genişlik : %100 ;
+   dolgu : 4px ;
+
+  & :focus {
+     anahat : hiçbiri;
+  }
+}
+
+.field {
+   görüntüleme : flex;
+   flex-direction : sütun;
+  boşluk: 4px ;
+}
+
+.divider {
+   genişlik : %100 ;
+   yükseklik : 1px ;
+   arka plan : gri;
+}
+
+.section {
+   görüntüleme : flex;
+   flex-yön : sütun;
+  boşluk: 4px ;
+}
+
+.table-wrapper {
+   taşma-x : otomatik;
+}
+
+.tablo-sarmalayıcı ::-webkit-kaydırma çubuğu {
+  genişlik: 5px ;
+}
+
+.tablo-sarmalayıcı ::-webkit-kaydırma çubuğu-izi {
+  arka plan: şeffaf;
+}
+
+.tablo-sarmalayıcı ::-webkit-kaydırma çubuğu-küçük resim {
+  konum: mutlak;
+  arka plan : #374353ff ;
+   kenarlık yarıçapı : 5px ;
+}
+
+tablo {
+   genişlik : %100 ;
+   kenarlık-daraltma : daralt;
+}
+
+tablo  th {
+   dolgu : 8px ;
+   kenarlık : 1px düz gri;
+   renk : beyaz;
+   yazı tipi boyutu : 12px ;
+   boşluk : nowrap;
+   yazı tipi ağırlığı : 600 ;
+}
+
+tablo  td {
+   dolgu : 8px ;
+   kenarlık : 1px düz gri;
+   renk : beyaz;
+   yazı tipi boyutu : 12px ;
+   metin hizalaması : orta;
+}
+
+tablo  başlığı  td {
+   yazı tipi ağırlığı : 600 ;
+}
+
+.text {
+   renk : beyaz;
+   yazı tipi boyutu : 14px ;
+   yazı tipi stili : italik;
+}
+
+.altyazı {
+   renk : beyaz;
+   yazı tipi boyutu : 14px ;
+   yazı tipi ağırlığı : 600 ;
+}
+
+.math {
+   dolgu : 4px ;
+   renk : beyaz;
+   yazı tipi boyutu : 12px ;
+}
