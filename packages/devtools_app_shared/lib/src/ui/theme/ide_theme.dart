@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 
 import '../../shared/embed_mode.dart';
+import '../ui_utils.dart';
 import 'theme.dart';
 
 export '_ide_theme_desktop.dart'
