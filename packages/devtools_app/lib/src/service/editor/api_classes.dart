@@ -110,10 +110,10 @@ class DeviceAddedEvent extends EditorEvent {
               EditorDevice.fromJson(map[Field.device] as Map<String, Object?>),
         );
 
+  final EditorDevice device;
+
   @override
   EditorEventKind get kind => EditorEventKind.deviceAdded;
-
-  final EditorDevice device;
 
   @override
   Map<String, Object?> toJson() => {
@@ -134,10 +134,10 @@ class DeviceChangedEvent extends EditorEvent {
               EditorDevice.fromJson(map[Field.device] as Map<String, Object?>),
         );
 
+  final EditorDevice device;
+
   @override
   EditorEventKind get kind => EditorEventKind.deviceChanged;
-
-  final EditorDevice device;
 
   @override
   Map<String, Object?> toJson() => {
@@ -154,10 +154,10 @@ class DeviceRemovedEvent extends EditorEvent {
           deviceId: map[Field.deviceId] as String,
         );
 
+  final String deviceId;
+
   @override
   EditorEventKind get kind => EditorEventKind.deviceRemoved;
-
-  final String deviceId;
 
   @override
   Map<String, Object?> toJson() => {
@@ -179,12 +179,12 @@ class DeviceSelectedEvent extends EditorEvent {
           deviceId: map[Field.deviceId] as String?,
         );
 
-  @override
-  EditorEventKind get kind => EditorEventKind.deviceSelected;
-
   /// The ID of the device being selected, or `null` if the current device is
   /// being unselected without a new device being selected.
   final String? deviceId;
+
+  @override
+  EditorEventKind get kind => EditorEventKind.deviceSelected;
 
   @override
   Map<String, Object?> toJson() => {
@@ -203,10 +203,10 @@ class DebugSessionStartedEvent extends EditorEvent {
           ),
         );
 
+  final EditorDebugSession debugSession;
+
   @override
   EditorEventKind get kind => EditorEventKind.debugSessionStarted;
-
-  final EditorDebugSession debugSession;
 
   @override
   Map<String, Object?> toJson() => {
@@ -226,10 +226,10 @@ class DebugSessionChangedEvent extends EditorEvent {
           ),
         );
 
+  final EditorDebugSession debugSession;
+
   @override
   EditorEventKind get kind => EditorEventKind.debugSessionChanged;
-
-  final EditorDebugSession debugSession;
 
   @override
   Map<String, Object?> toJson() => {
@@ -246,10 +246,10 @@ class DebugSessionStoppedEvent extends EditorEvent {
           debugSessionId: map[Field.debugSessionId] as String,
         );
 
+  final String debugSessionId;
+
   @override
   EditorEventKind get kind => EditorEventKind.debugSessionStopped;
-
-  final String debugSessionId;
 
   @override
   Map<String, Object?> toJson() => {
@@ -267,10 +267,10 @@ class ThemeChangedEvent extends EditorEvent {
           ),
         );
 
+  final EditorTheme theme;
+
   @override
   EditorEventKind get kind => EditorEventKind.themeChanged;
-
-  final EditorTheme theme;
 
   @override
   Map<String, Object?> toJson() => {

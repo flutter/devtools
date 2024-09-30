@@ -44,7 +44,7 @@ class EditorThemeManager extends DisposableController
 
           if (newTheme.backgroundColor != null) {
             final newBackgroundColor =
-                _tryParseColor(newTheme.backgroundColor!);
+                tryParseColor(newTheme.backgroundColor!, logger: _log);
             if (newBackgroundColor != null &&
                 newBackgroundColor != currentTheme.backgroundColor) {
               // currentTheme.backgroundColor = newBackgroundColor;
@@ -57,7 +57,7 @@ class EditorThemeManager extends DisposableController
 
           if (newTheme.foregroundColor != null) {
             final newForegroundColor =
-                _tryParseColor(newTheme.foregroundColor!);
+                tryParseColor(newTheme.foregroundColor!, logger: _log);
             if (newForegroundColor != null &&
                 newForegroundColor != currentTheme.foregroundColor) {
               // currentTheme.foregroundColor = newForegroundColor;
@@ -99,22 +99,5 @@ class EditorThemeManager extends DisposableController
             color.g.toInt().toRadixString(16).padLeft(2, '0') +
             color.b.toInt().toRadixString(16).padLeft(2, '0'))
         .toUpperCase();
-  }
-
-  Color? _tryParseColor(String? input) {
-    if (input == null) return null;
-
-    try {
-      return parseCssHexColor(input);
-    } catch (e, st) {
-      // The user can manipulate the query string so if the value is invalid
-      // print the value but otherwise continue.
-      _log.warning(
-        'Failed to parse "$input" as a color from the querystring, ignoring: $e',
-        e,
-        st,
-      );
-      return null;
-    }
   }
 }

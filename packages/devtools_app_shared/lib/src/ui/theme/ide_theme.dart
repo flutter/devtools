@@ -5,8 +5,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 
+import '../ui_utils.dart';
 import '../../shared/embed_mode.dart';
-import '../../utils/utils.dart';
 import 'theme.dart';
 
 export '_ide_theme_desktop.dart'
@@ -47,9 +47,9 @@ IdeTheme({
 }
 
 extension type IdeThemeQueryParams(Map<String, String?> params) {
-  Color? get backgroundColor => _tryParseColor(params[backgroundColorKey]);
+  Color? get backgroundColor => tryParseColor(params[backgroundColorKey], logger: _log);
 
-  Color? get foregroundColor => _tryParseColor(params[foregroundColorKey]);
+  Color? get foregroundColor => tryParseColor(params[foregroundColorKey], logger: _log);
 
   double get fontSize =>
       _tryParseDouble(params[fontSizeKey]) ?? unscaledDefaultFontSize;
@@ -64,23 +64,6 @@ extension type IdeThemeQueryParams(Map<String, String?> params) {
   static const devToolsThemeKey = 'theme';
   static const lightThemeValue = 'light';
   static const darkThemeValue = 'dark';
-
-  Color? _tryParseColor(String? input) {
-    if (input == null) return null;
-
-    try {
-      return parseCssHexColor(input);
-    } catch (e, st) {
-      // The user can manipulate the query string so if the value is invalid
-      // print the value but otherwise continue.
-      _log.warning(
-        'Failed to parse "$input" as a color from the querystring, ignoring: $e',
-        e,
-        st,
-      );
-      return null;
-    }
-  }
 
   double? _tryParseDouble(String? input) {
     try {
