@@ -33,10 +33,9 @@ class EditorThemeManager extends DisposableController
           final newTheme = event.theme;
 
           if (currentTheme.isDarkMode != newTheme.isDarkMode) {
-            // currentTheme.isDarkMode = newTheme.isDarkMode;
             updateQueryParameter(
               IdeThemeQueryParams.devToolsThemeKey,
-              currentTheme.isDarkMode
+              newTheme.isDarkMode
                   ? IdeThemeQueryParams.darkThemeValue
                   : IdeThemeQueryParams.lightThemeValue,
             );
@@ -47,7 +46,6 @@ class EditorThemeManager extends DisposableController
                 tryParseColor(newTheme.backgroundColor!, logger: _log);
             if (newBackgroundColor != null &&
                 newBackgroundColor != currentTheme.backgroundColor) {
-              // currentTheme.backgroundColor = newBackgroundColor;
               updateQueryParameter(
                 IdeThemeQueryParams.backgroundColorKey,
                 _colorAsHex(newBackgroundColor),
@@ -60,7 +58,6 @@ class EditorThemeManager extends DisposableController
                 tryParseColor(newTheme.foregroundColor!, logger: _log);
             if (newForegroundColor != null &&
                 newForegroundColor != currentTheme.foregroundColor) {
-              // currentTheme.foregroundColor = newForegroundColor;
               updateQueryParameter(
                 IdeThemeQueryParams.foregroundColorKey,
                 _colorAsHex(newForegroundColor),
@@ -70,7 +67,6 @@ class EditorThemeManager extends DisposableController
 
           if (newTheme.fontSize != null &&
               newTheme.fontSize!.toDouble() != currentTheme.fontSize) {
-            // currentTheme.fontSize = newTheme.fontSize!.toDouble();
             updateQueryParameter(
               IdeThemeQueryParams.fontSizeKey,
               newTheme.fontSize!.toDouble().toString(),
