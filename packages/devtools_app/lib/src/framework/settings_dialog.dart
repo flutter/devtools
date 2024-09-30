@@ -93,6 +93,18 @@ class SettingsDialog extends StatelessWidget {
                 gaItem: gac.wasm,
               ),
             ),
+            // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up
+            // after Inspector V2 has been released.
+            if (FeatureFlags.inspectorV2)
+              Flexible(
+                child: CheckboxSetting(
+                  notifier: preferences.inspector.inspectorV2Enabled
+                      as ValueNotifier<bool?>,
+                  title: 'Enable the new Inspector',
+                  description: 'Try out the redesigned Flutter Inspector.',
+                  gaItem: gac.inspectorV2Enabled,
+                ),
+              ),
           ],
           const SizedBox(height: largeSpacing),
           ...dialogSubHeader(theme, 'Troubleshooting'),

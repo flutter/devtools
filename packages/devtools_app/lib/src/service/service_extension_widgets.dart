@@ -49,10 +49,12 @@ class ServiceExtensionButtonGroup extends StatefulWidget {
     super.key,
     this.minScreenWidthForTextBeforeScaling,
     required this.extensions,
+    this.fillColor,
   });
 
   final double? minScreenWidthForTextBeforeScaling;
   final List<ToggleableServiceExtensionDescription> extensions;
+  final Color? fillColor;
 
   @override
   State<ServiceExtensionButtonGroup> createState() =>
@@ -130,6 +132,7 @@ class _ServiceExtensionButtonGroupState
       child: DevToolsToggleButtonGroup(
         selectedStates: [for (final e in _extensionStates) e.isSelected],
         onPressed: available ? _onPressed : null,
+        fillColor: widget.fillColor,
         children: <Widget>[
           for (final extensionState in _extensionStates)
             ServiceExtensionButton(

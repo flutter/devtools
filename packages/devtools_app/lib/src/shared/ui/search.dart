@@ -71,7 +71,7 @@ mixin SearchControllerMixin<T extends SearchableDataMixin> {
 
   /// Focus node for the [SearchField] that this instance of
   /// [SearchControllerMixin] controls.
-  FocusNode get searchFieldFocusNode => _searchFieldFocusNode!;
+  FocusNode? get searchFieldFocusNode => _searchFieldFocusNode;
   FocusNode? _searchFieldFocusNode;
 
   void refreshSearchMatches({bool searchPreviousMatches = false}) {
@@ -1041,10 +1041,10 @@ class StatelessSearchField<T extends SearchableDataMixin>
       onChanged: (value) {
         onChanged?.call(value);
         controller.search = value;
-        controller.searchFieldFocusNode.requestFocus();
+        controller.searchFieldFocusNode?.requestFocus();
       },
       onEditingComplete: () {
-        controller.searchFieldFocusNode.requestFocus();
+        controller.searchFieldFocusNode?.requestFocus();
       },
       // Guarantee that the TextField on all platforms renders in the same
       // color for border, label text, and cursor. Primarly, so golden screen
@@ -1091,7 +1091,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
     );
 
     if (shouldRequestFocus) {
-      controller.searchFieldFocusNode.requestFocus();
+      controller.searchFieldFocusNode?.requestFocus();
     }
 
     return searchField;
@@ -1222,7 +1222,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
   }
 
   void _handleLostFocus() {
-    if (widget.controller.searchFieldFocusNode.hasPrimaryFocus ||
+    if ((widget.controller.searchFieldFocusNode?.hasPrimaryFocus ?? false) ||
         widget.controller.autocompleteFocusNode.hasPrimaryFocus) {
       return;
     }
