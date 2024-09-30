@@ -227,10 +227,7 @@ class DeepLinksService {
               final checkName = failedCheck[_checkNameKey] as String;
               final domainError = iosCheckNameToDomainError[checkName];
               final severityLevel = failedCheck[_severityLevelKey] as String;
-              if (domainError != null && severityLevel == _severityLevelError) {
-                domainErrors
-                    .putIfAbsent(domainName, () => <DomainError>[])
-                    .add(domainError);
+              if (severityLevel == _severityLevelError) {
                 if (checkName == _fileFormatKey) {
                   final failedAasaFileFormatSubCheck =
                       <AASAfileFormatSubCheck>[];
@@ -255,13 +252,10 @@ class DeepLinksService {
                           subcheckErrors: failedAasaFileFormatSubCheck,
                         ),
                       );
-                } else {
-                  final domainError = iosCheckNameToDomainError[checkName];
-                  if (domainError != null) {
-                    domainErrors
-                        .putIfAbsent(domainName, () => <DomainError>[])
-                        .add(domainError);
-                  }
+                } else if (domainError != null) {
+                  domainErrors
+                      .putIfAbsent(domainName, () => <DomainError>[])
+                      .add(domainError);
                 }
               }
             }

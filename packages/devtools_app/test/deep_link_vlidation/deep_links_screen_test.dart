@@ -518,7 +518,7 @@ void main() {
             deepLinksController.selectedLink.value!.domainErrors;
         expect(domainErrors.length, 3);
         expect(domainErrors[0], IosDomainError.existence);
-        expect(domainErrors[1], IosDomainError.appIdentifier);
+        expect(domainErrors[1].title, IosDomainError.appIdentifier.title);
         expect(
           (domainErrors[2] as IosDomainError).subcheckErrors.single,
           AASAfileFormatSubCheck.componentPercentEncodedFormat,

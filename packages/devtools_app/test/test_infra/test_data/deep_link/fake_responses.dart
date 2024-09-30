@@ -295,7 +295,7 @@ const iosValidationResponseWithError = '''
         {
           "checkName": "FILE_FORMAT",
           "resultType": "FAILED_INDEPENDENTLY",
-          "severityLevel": "WARNING",
+          "severityLevel": "ERROR",
           "subCheckResults": [
             {
               "checkName": "APPLINKS_FORMAT",
