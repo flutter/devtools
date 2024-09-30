@@ -191,9 +191,7 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
             case DebugSessionStoppedEvent(:final debugSessionId):
               debugSessions.remove(debugSessionId);
             case ThemeChangedEvent():
-              print('event is theme change');
-              print(event);
-              // TODO: Handle this case.
+            // Do nothing; this is handled elsewhere.
           }
         });
       }),

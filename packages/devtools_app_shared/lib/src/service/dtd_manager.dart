@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/service/editor/api_classes.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -30,16 +29,11 @@ class DTDManager {
   Future<void> connect(
     Uri uri, {
     void Function(Object, StackTrace?)? onError,
-    // Map<String, Function(DtdEvent)> eventHandlers,
   }) async {
     await disconnect();
 
     try {
       _connection.value = await DartToolingDaemon.connect(uri);
-      // _connection.value.onEvent('Editor').listen((data {
-      //
-      // }));
-      // _connection.value.streamListen('Editor');
       _uri = uri;
       _log.info('Successfully connected to DTD at: $uri');
     } catch (e, st) {
@@ -62,55 +56,6 @@ class DTDManager {
   Future<void> dispose() async {
     await disconnect();
     _connection.dispose();
-  }
-
-  // TODO(helin24): Remove this code to test theme change event
-  void sendTestEvent() {
-    _log.info('about to send theme changed event');
-    _dtd.postEvent(
-        'Editor',
-        'themeChanged',
-        ThemeChangedEvent(
-          theme: EditorTheme(
-            isDarkMode: false,
-            backgroundColor: 'ff5733',
-            // foregroundColor: '',
-            fontSize: 24,
-          ),
-        ).toJson());
-    _log.info('after sending theme changed event');
-  }
-
-  void sendTestEvent2() {
-    _log.info('about to send theme changed event 2');
-    _dtd.postEvent(
-        'Editor',
-        'themeChanged',
-        ThemeChangedEvent(
-          theme: EditorTheme(
-            isDarkMode: false,
-            backgroundColor: 'ff5733',
-            // foregroundColor: '',
-            fontSize: 14,
-          ),
-        ).toJson());
-    _log.info('after sending theme changed event 2');
-  }
-
-  void sendTestEvent3() {
-    _log.info('about to send theme changed event 3');
-    _dtd.postEvent(
-        'Editor',
-        'themeChanged',
-        ThemeChangedEvent(
-          theme: EditorTheme(
-            isDarkMode: true,
-            backgroundColor: '000000',
-            // foregroundColor: '',
-            fontSize: 18,
-          ),
-        ).toJson());
-    _log.info('after sending theme changed event 3');
   }
 
   /// Returns the workspace roots for the Dart Tooling Daemon connection.

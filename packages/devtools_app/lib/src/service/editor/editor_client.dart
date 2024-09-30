@@ -155,8 +155,6 @@ class DtdEditorClient extends EditorClient with AutoDisposeControllerMixin {
     autoDisposeStreamSubscription(
       _dtd.onEvent(editorStreamName).listen((data) {
         final kind = editorKindMap[data.kind];
-
-        // Unable to do this from IJ
         final event = switch (kind) {
           // Unknown event. Use null here so we get exhaustiveness checking for
           // the rest.
