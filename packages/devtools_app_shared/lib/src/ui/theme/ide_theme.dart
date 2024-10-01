@@ -24,19 +24,17 @@ final class IdeTheme {
     bool? isDarkMode,
   }) : _isDarkMode = isDarkMode;
 
-  Color? backgroundColor;
-  Color? foregroundColor;
-  double fontSize;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final double fontSize;
   final EmbedMode embedMode;
-  bool? _isDarkMode;
+  final bool? _isDarkMode;
 
   double get fontSizeFactor => fontSize / unscaledDefaultFontSize;
 
   bool get embedded => embedMode.embedded;
 
   bool get isDarkMode => _isDarkMode ?? useDarkThemeAsDefault;
-
-  set isDarkMode(bool newIsDarkMode) => _isDarkMode = newIsDarkMode;
 
   /// Whether the IDE specified the DevTools color theme.
   ///

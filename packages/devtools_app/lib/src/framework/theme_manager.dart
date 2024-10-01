@@ -22,7 +22,7 @@ class EditorThemeManager extends DisposableController
   final DartToolingDaemon dtd;
 
   void listenForThemeChanges() async {
-    await dtd.streamListen('Editor').catchError((error) {
+    await dtd.streamListen(editorStreamName).catchError((error) {
       _log.warning(error);
     });
 
