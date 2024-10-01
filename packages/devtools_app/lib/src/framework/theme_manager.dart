@@ -10,7 +10,6 @@ import 'package:dtd/dtd.dart';
 import 'package:logging/logging.dart';
 
 import '../service/editor/api_classes.dart';
-import '../service/editor/editor_client.dart';
 import '../shared/globals.dart';
 
 final _log = Logger('theme_manager');
@@ -18,17 +17,16 @@ final _log = Logger('theme_manager');
 /// Manages changes in theme settings from an editor/IDE.
 class EditorThemeManager extends DisposableController
     with AutoDisposeControllerMixin {
-  EditorThemeManager(DartToolingDaemon dtd)
-      : editorClient = DtdEditorClient(dtd);
+  EditorThemeManager(this.dtd);
 
-  final DtdEditorClient editorClient;
+  final DartToolingDaemon dtd;
 
   void listenForThemeChanges() {
     autoDisposeStreamSubscription(
-      editorClient.event.listen((event) {
-        if (event is ThemeChangedEvent) {
+      dtd.onEvent(editorStreamName).listen((event) {
+        if (event.kind == EditorEventKind.themeChanged.toString()) {
           final currentTheme = getIdeTheme();
-          final newTheme = event.theme;
+          final newTheme = ThemeChangedEvent.fromJson(event.data).theme;
 
           if (currentTheme.isDarkMode != newTheme.isDarkMode) {
             updateQueryParameter(
