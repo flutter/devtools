@@ -28,7 +28,8 @@ class EditorThemeManager extends DisposableController
 
     autoDisposeStreamSubscription(
       dtd.onEvent(editorStreamName).listen((event) {
-        if (event.kind == EditorEventKind.themeChanged.toString()) {
+        if (EditorEventKind.values.asNameMap()[event.kind] ==
+            EditorEventKind.themeChanged) {
           final currentTheme = getIdeTheme();
           final newTheme = ThemeChangedEvent.fromJson(event.data).theme;
 
