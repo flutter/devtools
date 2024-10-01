@@ -1,0 +1,8 @@
+curl -sSL "https://mempool.space/api/v1/validate-address/1KFHE7w8BhaENAswwryaoccDb6qcT6DbYY"
+{
+  isvalid: true,
+  address: "1KFHE7w8BhaENAswwryaoccDb6qcT6DbYY",
+  scriptPubKey: "76a914c825a1ecf2a6830c4401620c3a16f1995057c2ab88ac",
+  isscript: false,
+  iswitness: false
+}
