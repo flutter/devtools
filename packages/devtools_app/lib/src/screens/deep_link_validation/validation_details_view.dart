@@ -187,7 +187,7 @@ class _DomainCheckTable extends StatelessWidget {
                                 errors: [error],
                                 oneFixGuideForAll:
                                     'To fix this issue, add an Apple-App-Site-Association file at the following location: '
-                                    'https://${controller.selectedLink.value!.domain}/.well-known/assetlinks.json.',
+                                    'https://${controller.selectedLink.value!.domain}/.well-known/apple-app-site-association',
                               ),
                               const SizedBox(height: denseSpacing),
                               _CodeCard(
@@ -195,7 +195,9 @@ class _DomainCheckTable extends StatelessWidget {
   "applinks": {
     "details": [
       {
-        "appIDs": [ "${controller.teamId}.${controller.bundleId}" ],
+        "appIDs": [
+          "${controller.teamId}.${controller.bundleId}"
+        ],
         "components": [
           {
             "/": "*"
@@ -203,7 +205,8 @@ class _DomainCheckTable extends StatelessWidget {
         ]
       }
     ]
-  }''',
+  }
+}''',
                               ),
                             ]
                           : [
