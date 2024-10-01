@@ -18,8 +18,6 @@ import '../shared/globals.dart';
 
 final _log = Logger('app_error_handling');
 
-SingleMapping? _sourceMap;
-
 /// Set up error handling for the app.
 ///
 /// This method will hook into both the zone error handling and the Flutter
@@ -28,24 +26,14 @@ SingleMapping? _sourceMap;
 ///
 /// [appStartCallback] should be a callback that creates the main Flutter
 /// application.
-Future<void> setupErrorHandling(Future Function() appStartCallback) async {
-  try {
-    final sourceMapUri = Uri.parse('main.dart.js.map');
-    final sourceMapFile = await get(sourceMapUri);
-    _sourceMap = SingleMapping.fromJson(
-      jsonDecode(sourceMapFile.body),
-      mapUrl: sourceMapUri,
-    );
-  } catch (_) {
-    // Ignore any errors getting the source map.
-  }
-
+void setupErrorHandling(Future Function() appStartCallback) {
   // First, run all our code in a new zone.
   unawaited(
     runZonedGuarded<Future<void>>(
-      // ignore: avoid-passing-async-when-sync-expected this ignore should be fixed.
-      () {
+      () async {
         WidgetsFlutterBinding.ensureInitialized();
+
+        await _initializeSourceMapping();
 
         final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
@@ -87,13 +75,29 @@ void reportError(
   bool notifyUser = false,
   StackTrace? stack,
 }) {
-  stack = _maybeMapStackTrace(stack ?? StackTrace.empty);
+  unawaited(
+    _reportError(
+      error,
+      errorType: errorType,
+      notifyUser: notifyUser,
+      stack: stack,
+    ).catchError((_) {
+      // Ignore errors.
+    }),
+  );
+}
 
-  final terseStackTrace = stack_trace.Trace.from(stack).terse.toString();
+Future<void> _reportError(
+  Object error, {
+  String errorType = 'DevToolsError',
+  bool notifyUser = false,
+  StackTrace? stack,
+}) async {
+  final terseStackTrace = await _mapAndTersify(stack);
+  final errorMessage = '$error\n$terseStackTrace';
 
-  _log.severe('[$errorType]: ${error.toString()}', error, stack);
-
-  ga.reportError('$error\n$terseStackTrace');
+  _log.severe('[$errorType]: $errorMessage', error, stack);
+  ga.reportError(errorMessage);
 
   // Show error message in a notification pop-up:
   if (notifyUser) {
@@ -104,11 +108,52 @@ void reportError(
   }
 }
 
-StackTrace _maybeMapStackTrace(StackTrace stack) {
-  final sourceMap = _sourceMap;
-  return sourceMap != null
+SingleMapping? _cachedJsSourceMapping;
+SingleMapping? _cachedWasmSourceMapping;
+
+Future<SingleMapping?> _fetchSourceMapping() async {
+  final cachedSourceMapping = preferences.wasmEnabled.value
+      ? _cachedWasmSourceMapping
+      : _cachedJsSourceMapping;
+
+  return cachedSourceMapping ?? (await _initializeSourceMapping());
+}
+
+Future<SingleMapping?> _initializeSourceMapping() async {
+  try {
+    final wasmEnabled = preferences.wasmEnabled.value;
+    final sourceMapUri = Uri.parse(
+      'main.dart.${wasmEnabled ? 'wasm' : 'js'}.map',
+    );
+    final sourceMapFile = await get(sourceMapUri);
+
+    return SingleMapping.fromJson(
+      jsonDecode(sourceMapFile.body),
+      mapUrl: sourceMapUri,
+    );
+  } catch (_) {
+    // Ignore any errors loading the source map.
+    return Future.value();
+  }
+}
+
+Future<String> _mapAndTersify(StackTrace? stack) async {
+  final originalStackTrace = stack;
+  if (originalStackTrace == null) return '';
+
+  final mappedStackTrace = await _maybeMapStackTrace(originalStackTrace);
+  // If mapping fails, revert back to the original source map:
+  final stackTrace = mappedStackTrace.toString().isEmpty
+      ? originalStackTrace
+      : mappedStackTrace;
+  return stack_trace.Trace.from(stackTrace).terse.toString();
+}
+
+Future<StackTrace> _maybeMapStackTrace(StackTrace stack) async {
+  final sourceMapping = await _fetchSourceMapping();
+  return sourceMapping != null
       ? mapStackTrace(
-          sourceMap,
+          sourceMapping,
           stack,
           minified: true,
         )
