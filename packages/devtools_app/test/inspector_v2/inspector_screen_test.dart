@@ -10,15 +10,12 @@ import 'dart:convert';
 import 'package:devtools_app/devtools_app.dart'
     hide
         InspectorController,
-        InspectorScreen,
         InspectorTreeController,
         InspectorScreenBody,
         ErrorNavigator,
-        FlutterInspectorSettingsDialog,
         InspectorTreeNode;
-import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart';
-import 'package:devtools_app/src/screens/inspector_v2/inspector_screen.dart';
-import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
+import 'package:devtools_app/src/screens/inspector_shared/inspector_settings_dialog.dart';
+import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
 import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_details.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
@@ -40,7 +37,6 @@ void main() {
 
   late FakeServiceConnectionManager fakeServiceConnection;
   late FakeServiceExtensionManager fakeExtensionManager;
-  late InspectorController inspectorController;
   const windowSize = Size(2600.0, 1200.0);
 
   final debuggerController = createMockDebuggerControllerWithDefaults();
@@ -49,7 +45,7 @@ void main() {
     return wrapWithControllers(
       Builder(builder: screen.build),
       debugger: debuggerController,
-      inspectorV2: inspectorController,
+      inspector: InspectorScreenController(),
     );
   }
 
@@ -78,11 +74,8 @@ void main() {
     setGlobal(Storage, FlutterTestStorage());
     setGlobal(NotificationService, NotificationService());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
-
-    inspectorController = InspectorController(
-      inspectorTree: InspectorTreeController(),
-      treeType: FlutterTreeType.widget,
-    )..firstInspectorTreeLoadCompleted = true;
+    // Enable the V2 inspector:
+    preferences.inspector.setInspectorV2Enabled(true);
   });
 
   Future<void> mockExtensions() async {

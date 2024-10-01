@@ -10,17 +10,26 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-* Fixed a bug that was causing the DevTools release notes to always
-show. - [#8277](https://github.com/flutter/devtools/pull/8277)
-
 * Add a setting that allows users to opt-in to loading DevTools
 with WebAssembly. - [#8270](https://github.com/flutter/devtools/pull/8270)
 
     ![Wasm opt-in setting](images/wasm_setting.png "DevTools setting to opt into wasm.")
 
+* Removed the legacy Provider screen from DevTools. The `package:provider` tool is now
+distributed as a DevTools extension from `package:provider`. Upgrade your `package:provider`
+dependency to use the extension. - [#8364](https://github.com/flutter/devtools/pull/8364)
+
+* Fixed a bug that was causing the DevTools release notes to always
+show. - [#8277](https://github.com/flutter/devtools/pull/8277)
+
+* Added support for loading extensions in pub workspaces
+  [8347](https://github.com/flutter/devtools/pull/8347).
+
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+- Added a setting to the Flutter Inspector controls that allows users to opt-in to the newly redesigned Flutter Inspector. - [#8342](https://github.com/flutter/devtools/pull/8342)
+
+  ![New inspector opt-in setting](images/new_inspector.png "DevTools setting to opt into the new Flutter Inspector.")
 
 ## Performance updates
 
