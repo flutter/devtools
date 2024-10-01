@@ -21,7 +21,11 @@ class EditorThemeManager extends DisposableController
 
   final DartToolingDaemon dtd;
 
-  void listenForThemeChanges() {
+  void listenForThemeChanges() async {
+    await dtd.streamListen('Editor').catchError((error) {
+      _log.warning(error);
+    });
+
     autoDisposeStreamSubscription(
       dtd.onEvent(editorStreamName).listen((event) {
         if (event.kind == EditorEventKind.themeChanged.toString()) {
