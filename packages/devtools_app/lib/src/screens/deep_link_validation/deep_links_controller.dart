@@ -220,7 +220,8 @@ class DeepLinksController extends DisposableController
 
   AppLinkSettings? get currentAppLinkSettings =>
       androidAppLinks[selectedAndroidVariantIndex.value];
-
+  UniversalLinkSettings? get currentUniversalLinkSettings =>
+      iosLinks[selectedIosConfigurationIndex.value];
   @visibleForTesting
   final androidAppLinks = <int, AppLinkSettings>{};
 
@@ -301,6 +302,9 @@ class DeepLinksController extends DisposableController
   }
 
   Future<void> _loadAndroidAppLinks() async {
+    if (selectedProject.value!.androidVariants.isEmpty) {
+      return;
+    }
     final variant = selectedProject
         .value!.androidVariants[selectedAndroidVariantIndex.value];
     await ga.timeAsync(
@@ -327,6 +331,9 @@ class DeepLinksController extends DisposableController
 
   Future<void> _loadIosLinks() async {
     final iosBuildOptions = selectedProject.value!.iosBuildOptions;
+    if (iosBuildOptions.configurations.isEmpty) {
+      return;
+    }
     final configuration =
         iosBuildOptions.configurations[selectedIosConfigurationIndex.value];
     final target = iosBuildOptions.targets[selectedIosTargetIndex.value];
@@ -507,21 +514,22 @@ class DeepLinksController extends DisposableController
         .toSet()
         .toList();
 
-    late final Map<String, List<DomainError>> androidDomainErrors;
-    Map<String, List<DomainError>> iosDomainErrors =
-        <String, List<DomainError>>{};
-
-    late final Map<String, List<Path>> iosDomainPaths;
+    Map<String, List<DomainError>> androidDomainErrors = {};
+    Map<String, List<DomainError>> iosDomainErrors = {};
+    Map<String, List<Path>> iosDomainPaths = {};
     try {
-      final androidResult = await deepLinksService.validateAndroidDomain(
-        domains: domains,
-        applicationId: applicationId,
-        localFingerprint: localFingerprint.value,
-      );
-      androidDomainErrors = androidResult.domainErrors;
-      googlePlayFingerprintsAvailability.value =
-          androidResult.googlePlayFingerprintsAvailability;
-      if (FeatureFlags.deepLinkIosCheck) {
+      if (currentAppLinkSettings != null) {
+        final androidResult = await deepLinksService.validateAndroidDomain(
+          domains: domains,
+          applicationId: applicationId,
+          localFingerprint: localFingerprint.value,
+        );
+        androidDomainErrors = androidResult.domainErrors;
+        googlePlayFingerprintsAvailability.value =
+            androidResult.googlePlayFingerprintsAvailability;
+      }
+      if (FeatureFlags.deepLinkIosCheck &&
+          currentUniversalLinkSettings != null) {
         final iosResult = await deepLinksService.validateIosDomain(
           bundleId: bundleId,
           teamId: teamId,
@@ -607,11 +615,7 @@ class DeepLinksController extends DisposableController
 
   Future<void> validateLinks() async {
     final appLinkSettings = currentAppLinkSettings;
-    if (appLinkSettings == null) {
-      pagePhase.value = PagePhase.noLinks;
-      return;
-    }
-    if (appLinkSettings.error != null) {
+    if (appLinkSettings?.error != null) {
       pagePhase.value = PagePhase.analyzeErrorPage;
       ga.select(
         gac.deeplink,
