@@ -452,6 +452,9 @@ class DevToolsSwitch extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.padding,
+    this.height,
+    this.activeColor,
+    this.inactiveColor,
   });
 
   final bool value;
@@ -460,14 +463,22 @@ class DevToolsSwitch extends StatelessWidget {
 
   final EdgeInsets? padding;
 
+  final double? height;
+
+  final Color? activeColor;
+
+  final Color? inactiveColor;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: defaultButtonHeight,
+      height: height ?? defaultButtonHeight,
       padding: padding,
       child: FittedBox(
         fit: BoxFit.fill,
         child: Switch(
+          activeTrackColor: activeColor,
+          inactiveTrackColor: inactiveColor,
           value: value,
           onChanged: onChanged,
         ),
@@ -1510,6 +1521,67 @@ class NotifierCheckbox extends StatelessWidget {
   }
 }
 
+/// Switch Widget class that listens to and manages a [ValueNotifier].
+///
+/// Used to create a Switch widget who's boolean value is attached
+/// to a [ValueNotifier<bool>]. This allows for the pattern:
+///
+/// Create the [NotifierSwitch] widget in build e.g.,
+///
+///   mySwitchWidget = NotifierSwitch(notifier: controller.mySwitchNotifer);
+///
+/// The switch and the value notifier are now linked with clicks updating the
+/// [ValueNotifier] and changes to the [ValueNotifier] updating the switch.
+class NotifierSwitch extends StatelessWidget {
+  const NotifierSwitch({
+    super.key,
+    required this.notifier,
+    this.onChanged,
+    this.padding,
+    this.activeColor,
+    this.inactiveColor,
+  });
+
+  /// The notifier this [NotifierSwitch] is responsible for listening to and
+  /// updating.
+  final ValueNotifier<bool> notifier;
+
+  /// The callback to be called on change in addition to the notifier changes
+  /// handled by this class.
+  final void Function(bool? newValue)? onChanged;
+
+  final EdgeInsets? padding;
+
+  final Color? activeColor;
+
+  final Color? inactiveColor;
+
+  void _updateValue(bool value) {
+    if (notifier.value != value) {
+      notifier.value = value;
+      if (onChanged != null) {
+        onChanged!(value);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: notifier,
+      builder: (context, bool? value, _) {
+        return DevToolsSwitch(
+          value: notifier.value,
+          onChanged: _updateValue,
+          padding: padding,
+          activeColor: activeColor,
+          inactiveColor: inactiveColor,
+        );
+      },
+    );
+  }
+}
+
 /// A widget that represents a check box setting and automatically updates for
 /// value changes to [notifier].
 class CheckboxSetting extends StatelessWidget {
@@ -1611,6 +1683,78 @@ class CheckboxSetting extends StatelessWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A widget that represents a switch setting and automatically updates for
+/// value changes to [notifier].
+class SwitchSetting extends StatelessWidget {
+  const SwitchSetting({
+    super.key,
+    required this.notifier,
+    required this.title,
+    this.tooltip,
+    this.onChanged,
+    this.gaScreen,
+    this.gaItem,
+    this.activeColor,
+    this.inactiveColor,
+  });
+
+  final ValueNotifier<bool> notifier;
+
+  final String title;
+
+  final String? tooltip;
+
+  final void Function(bool newValue)? onChanged;
+
+  final String? gaScreen;
+
+  final String? gaItem;
+
+  final Color? activeColor;
+
+  final Color? inactiveColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return maybeWrapWithTooltip(
+      tooltip: tooltip,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: RichText(
+              overflow: TextOverflow.visible,
+              maxLines: 3,
+              text: TextSpan(
+                text: title,
+                style: theme.regularTextStyle,
+              ),
+            ),
+          ),
+          NotifierSwitch(
+            padding: const EdgeInsets.only(left: borderPadding),
+            activeColor: activeColor,
+            inactiveColor: inactiveColor,
+            notifier: notifier,
+            onChanged: (bool? value) {
+              final gaScreen = this.gaScreen;
+              final gaItem = this.gaItem;
+              if (gaScreen != null && gaItem != null) {
+                ga.select(gaScreen, '$gaItem-$value');
+              }
+              final onChanged = this.onChanged;
+              if (value != null) {
+                onChanged?.call(value);
+              }
+            },
+          ),
         ],
       ),
     );

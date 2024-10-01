@@ -110,7 +110,9 @@ class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
     _shownFirstScript = false;
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       if (!_shownFirstScript ||
-          controller.codeViewController.navigationInProgress) return;
+          controller.codeViewController.navigationInProgress) {
+        return;
+      }
       final routerDelegate = DevToolsRouterDelegate.of(context);
       routerDelegate.updateStateIfChanged(
         CodeViewSourceLocationNavigationState(

@@ -31,7 +31,7 @@ import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/query_parameters.dart';
-import 'inspector_screen.dart';
+import '../inspector_shared/inspector_screen.dart';
 import 'inspector_tree_controller.dart';
 
 final _log = Logger('inspector_controller');

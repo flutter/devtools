@@ -23,7 +23,9 @@ with WebAssembly. - [#8270](https://github.com/flutter/devtools/pull/8270)
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+- Added a setting to the Flutter Inspector controls that allows users to opt-in to the newly redesigned Flutter Inspector. - [#8342](https://github.com/flutter/devtools/pull/8342)
+
+  ![New inspector opt-in setting](images/new_inspector.png "DevTools setting to opt into the new Flutter Inspector.")
 
 ## Performance updates
 
@@ -44,7 +46,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Resolved an issue in .har export where response content was sometimes missing in the data. - [#8333](https://github.com/flutter/devtools/pull/8333)
 
 ## Logging updates
 

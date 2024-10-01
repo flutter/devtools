@@ -57,9 +57,9 @@ void main() {
         isSummaryTree ? null : InspectorTreeController();
     await tester.pumpWidget(
       wrapWithControllers(
-        inspector: inspectorController,
         debugger: debuggerController,
         InspectorTree(
+          controller: inspectorController,
           treeController: treeController,
           summaryTreeController: summaryTreeController,
           isSummaryTree: isSummaryTree,

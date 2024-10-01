@@ -75,10 +75,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       );
   }
 
-  static Size deserializeSize(Map<String, Object> json) {
+  static Size? deserializeSize(Map<String, Object> json) {
+    final width = json['width'] as String?;
+    final height = json['height'] as String?;
+    if (width == null || height == null) return null;
     return Size(
-      double.parse(json['width'] as String),
-      double.parse(json['height'] as String),
+      double.parse(width),
+      double.parse(height),
     );
   }
 
@@ -461,6 +464,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if ((!forFlexLayout && !isBoxLayout) || (forFlexLayout && !isFlexLayout)) {
       return null;
     }
+    if (size == null) return null;
     return forFlexLayout
         ? FlexLayoutProperties.fromDiagnostics(this)
         : LayoutProperties(this);
