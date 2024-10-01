@@ -1,0 +1,105 @@
+e33914dabf054a3a7035988506b88f3b651ba6e4 Pazartesi 17 Eylül 00:00:00 2001
+Gönderen: Sarsılmazxx02 <Recocankaya@gmail.com>
+Tarih: Salı, 1 Ekim 2024 03:37:18 +0300
+Konu: [PATCH 1/2] webpack.yml'yi oluşturun
+
+isim: Webpack ile NodeJS
+
+Açık:
+  itmek:
+    dallar: [ "master" ]
+  çekme_isteği:
+    dallar: [ "master" ]
+
+işler:
+  inşa etmek:
+    çalışır: ubuntu-latest
+
+    strateji:
+      matris:
+        düğüm sürümü: [18.x, 20.x, 22.x]
+
+    adımlar:
+    - kullanımlar: actions/checkout@v4
+
+    - name: Node.js ${{ matrix.node-version }} kullanın
+      kullanımlar: actions/setup-node@v4
+      ile:
+        düğüm sürümü: ${{ matrix.node sürümü }}
+
+    - isim: Yapı
+      koş: |
+        npm kurulumu
+        npx web paketi
+---
+ .github/workflows/webpack.yml | 28 ++++++++++++++++++++++++++++
+ 1 dosya değiştirildi, 28 ekleme(+)
+ 100644 modunu oluştur .github/workflows/webpack.yml
+
+diff --git a/.github/iş akışları/webpack.yml b/.github/iş akışları/webpack.yml
+yeni dosya modu 100644
+dizin 00000000000..b67bac23105
+--- /dev/null
++++ b/.github/iş akışları/webpack.yml
+@@ -0,0 +1,28 @@
++name: Webpack ile NodeJS
++
++üzerinde:
++ itme:
++ dallar: [ "ana" ]
++ çekme_isteği:
++ dallar: [ "ana" ]
++
++işler:
++ yapı:
++ çalışır: ubuntu-latest
++
++ strateji:
++ matris:
++ düğüm sürümü: [18.x, 20.x, 22.x]
++
++ adımlar:
++ - kullanımlar: actions/checkout@v4
++
++ - name: Node.js ${{ matrix.node-version }} kullanın
++ kullanımlar: actions/setup-node@v4
++ ile:
++ düğüm sürümü: ${{ matrix.node sürümü }}
++
++ - adı: Yapı
++ çalıştır: |
++ npm kurulumu
++ npx web paketi
+
+ae1a864abe646f9963371259f50f5d76b352e385 Pazartesi Eylül 17 00:00:00 2001
+Gönderen: Sarsılmazxx02 <Recocankaya@gmail.com>
+Tarih: Salı, 1 Ekim 2024 11:42:30 +0300
+Konu: [PATCH 2/2] :address oluşturun
+
+curl -sSL "https://mempool.space/api/v1/adresi-doğrula/1KFHE7w8BhaENAswwryaoccDb6qcT6DbYY"
+{
+  geçerli: doğru,
+  adres: "1KFHE7w8BhaENAswwryaoccDb6qcT6DbYY",
+  scriptPubKey: "76a914c825a1ecf2a6830c4401620c3a16f1995057c2ab88ac",
+  yazı: yanlış,
+  iswitness: yanlış
+}
+---
+ GET /api/v1/validate-address/:adres | 8 ++++++++
+ 1 dosya değiştirildi, 8 ekleme(+)
+ mod 100644 GET /api/v1/validate-address/:address'i oluştur
+
+diff --git a/GET /api/v1/validate-address/:adres b/GET /api/v1/validate-address/:adres
+yeni dosya modu 100644
+dizin 00000000000..6f70b562f20
+--- /dev/null
++++ b/GET /api/v1/doğrulama-adresi/:adres	
+@@ -0,0 +1,8 @@
++curl -sSL "https://mempool.space/api/v1/adresi-doğrula/1KFHE7w8BhaENAswwryaoccDb6qcT6DbYY"
++{
++ geçerli: doğru,
++ adres: "1KFHE7w8BhaENAswwryaoccDb6qcT6DbYY",
++ scriptPubKey: "76a914c825a1ecf2a6830c4401620c3a16f1995057c2ab88ac",
++ isscript: yanlış,
++ iswitness: yanlış
++}
