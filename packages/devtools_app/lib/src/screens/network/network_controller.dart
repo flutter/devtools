@@ -61,7 +61,8 @@ class NetworkController extends DisposableController
   }
   List<DartIOHttpRequestData>? _httpRequests;
 
-  String? exportAsHarFile() {
+  Future<String?> exportAsHarFile() async {
+    await _fetchFullDataBeforeExport();
     _httpRequests =
         filteredData.value.whereType<DartIOHttpRequestData>().toList();
 
@@ -386,6 +387,12 @@ class NetworkController extends DisposableController
       serviceConnection.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
     }
   }
+
+  Future<void> _fetchFullDataBeforeExport() => Future.wait(
+        filteredData.value
+            .whereType<DartIOHttpRequestData>()
+            .map((item) => item.getFullRequestData()),
+      );
 }
 
 /// Class for managing the set of all current sockets, and

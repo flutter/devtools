@@ -19,6 +19,7 @@ enum InspectorDetailsViewType {
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
+  ValueListenable<bool> get inspectorV2Enabled => _inspectorV2Enabled;
   ValueListenable<InspectorDetailsViewType> get defaultDetailsView =>
       _defaultDetailsView;
   ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
@@ -28,6 +29,7 @@ class InspectorPreferencesController extends DisposableController
       serviceConnection.inspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
+  final _inspectorV2Enabled = ValueNotifier<bool>(false);
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
@@ -36,6 +38,7 @@ class InspectorPreferencesController extends DisposableController
   );
 
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
+  static const _inspectorV2EnabledStorageId = 'inspector.inspectorV2Enabled';
   static const _defaultDetailsViewStorageId =
       'inspector.defaultDetailsViewType';
   static const _customPubRootDirectoriesStoragePrefix =
@@ -58,6 +61,7 @@ class InspectorPreferencesController extends DisposableController
 
   Future<void> init() async {
     await _initHoverEvalMode();
+    await _initInspectorV2Enabled();
     // TODO(jacobr): consider initializing this first as it is not blocking.
     _initPubRootDirectories();
     await _initDefaultInspectorDetailsView();
@@ -65,22 +69,56 @@ class InspectorPreferencesController extends DisposableController
 
   Future<void> _initHoverEvalMode() async {
     await _updateHoverEvalMode();
+    _saveBooleanPreferenceChanges(
+      preferenceStorageId: _hoverEvalModeStorageId,
+      preferenceNotifier: _hoverEvalMode,
+    );
+  }
 
-    addAutoDisposeListener(_hoverEvalMode, () {
-      storage.setValue(
-        _hoverEvalModeStorageId,
-        _hoverEvalMode.value.toString(),
+  Future<void> _initInspectorV2Enabled() async {
+    await _updateInspectorV2Enabled();
+    _saveBooleanPreferenceChanges(
+      preferenceStorageId: _inspectorV2EnabledStorageId,
+      preferenceNotifier: _inspectorV2Enabled,
+    );
+  }
+
+  Future<void> _updateHoverEvalMode() async {
+    await _updateBooleanPreference(
+      preferenceStorageId: _hoverEvalModeStorageId,
+      preferenceNotifier: _hoverEvalMode,
+      defaultValue: _inspectorService?.hoverEvalModeEnabledByDefault ?? false,
+    );
+  }
+
+  Future<void> _updateInspectorV2Enabled() async {
+    await _updateBooleanPreference(
+      preferenceStorageId: _inspectorV2EnabledStorageId,
+      preferenceNotifier: _inspectorV2Enabled,
+      defaultValue: false,
+    );
+  }
+
+  void _saveBooleanPreferenceChanges({
+    required String preferenceStorageId,
+    required ValueNotifier<bool> preferenceNotifier,
+  }) {
+    addAutoDisposeListener(preferenceNotifier, () async {
+      await storage.setValue(
+        preferenceStorageId,
+        preferenceNotifier.value.toString(),
       );
     });
   }
 
-  Future<void> _updateHoverEvalMode() async {
-    String? hoverEvalModeEnabledValue =
-        await storage.getValue(_hoverEvalModeStorageId);
-
-    hoverEvalModeEnabledValue ??=
-        (_inspectorService?.hoverEvalModeEnabledByDefault ?? false).toString();
-    setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
+  Future<void> _updateBooleanPreference({
+    required String preferenceStorageId,
+    required ValueNotifier<bool> preferenceNotifier,
+    required bool defaultValue,
+  }) async {
+    String? preferenceValue = await storage.getValue(preferenceStorageId);
+    preferenceValue ??= (defaultValue).toString();
+    preferenceNotifier.value = preferenceValue == 'true';
   }
 
   Future<void> _initDefaultInspectorDetailsView() async {
@@ -160,6 +198,7 @@ class InspectorPreferencesController extends DisposableController
     _checkedFlutterPubRoot = false;
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
+    await _updateInspectorV2Enabled();
     await loadPubRootDirectories();
     await _updateInspectorDetailsViewSelection();
   }
@@ -372,9 +411,14 @@ class InspectorPreferencesController extends DisposableController
     }
   }
 
-  /// Change the value for the hover eval mode setting.
+  @visibleForTesting
   void setHoverEvalMode(bool enableHoverEvalMode) {
     _hoverEvalMode.value = enableHoverEvalMode;
+  }
+
+  @visibleForTesting
+  void setInspectorV2Enabled(bool inspectorV2Enabled) {
+    _inspectorV2Enabled.value = inspectorV2Enabled;
   }
 
   void setDefaultInspectorDetailsView(InspectorDetailsViewType value) {

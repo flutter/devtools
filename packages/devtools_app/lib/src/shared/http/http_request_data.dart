@@ -144,8 +144,11 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   @override
   String get type {
+    const defaultType = 'http';
     var mime = contentType;
-    if (mime == null) return 'http';
+    if (mime == null) {
+      return defaultType;
+    }
 
     // Extract the MIME from `contentType`.
     // Example: "[text/html; charset-UTF-8]" --> "text/html"
@@ -156,24 +159,24 @@ class DartIOHttpRequestData extends NetworkRequest {
     if (mime.endsWith(']')) {
       mime = mime.substring(0, mime.length - 1);
     }
-    return _extensionFromMime(mime);
+    return _extensionFromMime(mime) ?? defaultType;
   }
 
   /// Extracts the extension from [mime], with overrides for shortened
   /// extensions of common types (e.g., jpe -> jpeg).
-  String _extensionFromMime(String mime) {
-    final extension = extensionFromMime(mime);
-    if (extension == 'jpe') {
+  String? _extensionFromMime(String mime) {
+    final ext = extensionFromMime(mime);
+    if (ext == 'jpe') {
       return 'jpeg';
     }
-    if (extension == 'htm') {
+    if (ext == 'htm') {
       return 'html';
     }
     // text/plain -> conf
-    if (extension == 'conf') {
+    if (ext == 'conf') {
       return 'txt';
     }
-    return extension;
+    return ext;
   }
 
   @override

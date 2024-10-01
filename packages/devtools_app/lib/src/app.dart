@@ -27,12 +27,8 @@ import 'screens/debugger/debugger_controller.dart';
 import 'screens/debugger/debugger_screen.dart';
 import 'screens/deep_link_validation/deep_links_controller.dart';
 import 'screens/deep_link_validation/deep_links_screen.dart';
-import 'screens/inspector/inspector_controller.dart';
-import 'screens/inspector/inspector_screen.dart';
-import 'screens/inspector/inspector_tree_controller.dart';
-import 'screens/inspector_v2/inspector_controller.dart' as inspector_v2;
-import 'screens/inspector_v2/inspector_screen.dart' as inspector_v2;
-import 'screens/inspector_v2/inspector_tree_controller.dart' as inspector_v2;
+import 'screens/inspector_shared/inspector_screen.dart';
+import 'screens/inspector_shared/inspector_screen_controller.dart';
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
 import 'screens/logging/logging_screen_v2/logging_controller_v2.dart';
@@ -51,9 +47,7 @@ import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
 import 'shared/analytics/analytics.dart' as ga;
 import 'shared/analytics/analytics_controller.dart';
-import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
-import 'shared/console/primitives/simple_items.dart';
 import 'shared/feature_flags.dart';
 import 'shared/framework_controller.dart';
 import 'shared/globals.dart';
@@ -657,28 +651,10 @@ List<DevToolsScreen> defaultScreens({
     DevToolsScreen<void>(HomeScreen(sampleData: sampleData)),
     // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
     // Inspector V2 has been released.
-    FeatureFlags.inspectorV2
-        ? DevToolsScreen<inspector_v2.InspectorController>(
-            inspector_v2.InspectorScreen(),
-            createController: (_) => inspector_v2.InspectorController(
-              inspectorTree: inspector_v2.InspectorTreeController(
-                gaId: InspectorScreenMetrics.summaryTreeGaId,
-              ),
-              treeType: FlutterTreeType.widget,
-            ),
-          )
-        : DevToolsScreen<InspectorController>(
-            InspectorScreen(),
-            createController: (_) => InspectorController(
-              inspectorTree: InspectorTreeController(
-                gaId: InspectorScreenMetrics.summaryTreeGaId,
-              ),
-              detailsTree: InspectorTreeController(
-                gaId: InspectorScreenMetrics.detailsTreeGaId,
-              ),
-              treeType: FlutterTreeType.widget,
-            ),
-          ),
+    DevToolsScreen<InspectorScreenController>(
+      InspectorScreen(),
+      createController: (_) => InspectorScreenController(),
+    ),
     DevToolsScreen<PerformanceController>(
       PerformanceScreen(),
       createController: (_) => PerformanceController(),

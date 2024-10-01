@@ -16,7 +16,7 @@ final defaultAndroidDeeplink = androidDeepLinkJson(defaultDomain);
 class TestDeepLinksService extends DeepLinksService {
   TestDeepLinksService({
     this.hasAndroidDomainErrors = false,
-    this.hasIosDomainErrors = false,
+    this.iosValidationResponse = '',
   }) {
     // Create a mock client to return fake responses.
     _client = MockClient((request) async {
@@ -28,11 +28,7 @@ class TestDeepLinksService extends DeepLinksService {
         }
       }
       if (request.url == Uri.parse(iosDomainValidationURL)) {
-        if (hasIosDomainErrors) {
-          return Response(iosValidationResponseWithError, 200);
-        } else {
-          return Response(iosValidationResponseWithNoError, 200);
-        }
+        return Response(iosValidationResponse, 200);
       }
       return Response('this is a body', 404);
     });
@@ -44,24 +40,24 @@ class TestDeepLinksService extends DeepLinksService {
   Client get client => _client;
 
   final bool hasAndroidDomainErrors;
-  final bool hasIosDomainErrors;
+  final String iosValidationResponse;
 }
 
 class TestDeepLinksController extends DeepLinksController {
   TestDeepLinksController({
     this.hasAndroidDomainErrors = false,
-    this.hasIosDomainErrors = false,
+    this.iosValidationResponse = iosValidationResponseWithNoError,
   }) {
     _deepLinksService = TestDeepLinksService(
       hasAndroidDomainErrors: hasAndroidDomainErrors,
-      hasIosDomainErrors: hasIosDomainErrors,
+      iosValidationResponse: iosValidationResponse,
     );
   }
 
   List<String> fakeAndroidDeepLinks = [];
   bool hasAndroidDomainErrors = false;
   bool hasAndroidPathErrors = false;
-  bool hasIosDomainErrors = false;
+  String iosValidationResponse = '';
   List<String> fakeIosDomains = [];
 
   late DeepLinksService _deepLinksService;

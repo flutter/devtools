@@ -11,20 +11,24 @@ import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
-import 'inspector_controller.dart';
+import '../inspector_shared/inspector_settings_dialog.dart';
+import '../inspector_v2/inspector_controller.dart' as v2;
 import 'inspector_screen.dart';
 
 /// Control buttons for the inspector panel.
 class InspectorControls extends StatelessWidget {
-  const InspectorControls({super.key, required this.controller});
+  const InspectorControls({super.key, this.controller});
 
-  final InspectorController controller;
+  final v2.InspectorController? controller;
 
   static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
 
   @override
   Widget build(BuildContext context) {
+    final activeButtonColor =
+        Theme.of(context).colorScheme.activeToggleButtonColor;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -36,19 +40,37 @@ class InspectorControls extends StatelessWidget {
           ),
           builder: (_, selectModeSupported, __) {
             return ServiceExtensionButtonGroup(
+              fillColor: activeButtonColor,
               extensions: [
                 selectModeSupported
                     ? extensions.toggleSelectWidgetMode
                     : extensions.toggleOnDeviceWidgetInspector,
               ],
               minScreenWidthForTextBeforeScaling:
-                  InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+                  InspectorScreen.minScreenWidthForTextBeforeScaling,
             );
           },
         ),
-        const SizedBox(width: defaultSpacing),
-        ShowImplementationWidgetsButton(controller: controller),
+        if (controller != null) ...[
+          const SizedBox(width: defaultSpacing),
+          ShowImplementationWidgetsButton(controller: controller!),
+        ],
         const Spacer(),
+        // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
+        // Inspector V2 has been released.
+        if (FeatureFlags.inspectorV2) ...[
+          const SizedBox(width: defaultSpacing),
+          SwitchSetting(
+            notifier:
+                preferences.inspector.inspectorV2Enabled as ValueNotifier<bool>,
+            title: 'New Inspector',
+            tooltip: 'Try out the redesigned Flutter Inspector.',
+            gaScreen: gac.inspector,
+            gaItem: gac.inspectorV2Enabled,
+            activeColor: activeButtonColor,
+            inactiveColor: Colors.transparent,
+          ),
+        ],
         const SizedBox(width: defaultSpacing),
         const InspectorServiceExtensionButtonGroup(),
       ],
@@ -68,6 +90,7 @@ class InspectorServiceExtensionButtonGroup extends StatelessWidget {
     return Row(
       children: [
         ServiceExtensionButtonGroup(
+          fillColor: Theme.of(context).colorScheme.activeToggleButtonColor,
           minScreenWidthForTextBeforeScaling:
               serviceExtensionButtonsIncludeTextWidth,
           extensions: [
@@ -105,7 +128,7 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
     required this.controller,
   });
 
-  final InspectorController controller;
+  final v2.InspectorController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +136,7 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
       valueListenable: controller.implementationWidgetsHidden,
       builder: (context, isHidden, _) {
         return DevToolsToggleButton(
+          fillColor: Theme.of(context).colorScheme.activeToggleButtonColor,
           isSelected: !isHidden,
           message:
               'Show widgets created by the Flutter framework or other packages.',
@@ -120,7 +144,7 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
           onPressed: controller.toggleImplementationWidgetsVisibility,
           icon: Icons.code,
           minScreenWidthForTextBeforeScaling:
-              InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+              InspectorScreen.minScreenWidthForTextBeforeScaling,
         );
       },
     );

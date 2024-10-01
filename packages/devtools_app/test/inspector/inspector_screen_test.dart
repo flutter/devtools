@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
+import 'package:devtools_app/src/screens/inspector_shared/inspector_settings_dialog.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -26,7 +27,6 @@ void main() {
 
   late FakeServiceConnectionManager fakeServiceConnection;
   late FakeServiceExtensionManager fakeExtensionManager;
-  late InspectorController inspectorController;
   const windowSize = Size(2600.0, 1200.0);
 
   final debuggerController = createMockDebuggerControllerWithDefaults();
@@ -35,7 +35,7 @@ void main() {
     return wrapWithControllers(
       Builder(builder: screen.build),
       debugger: debuggerController,
-      inspector: inspectorController,
+      inspector: InspectorScreenController(),
     );
   }
 
@@ -63,12 +63,6 @@ void main() {
     setGlobal(Storage, FlutterTestStorage());
     setGlobal(NotificationService, NotificationService());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
-
-    inspectorController = InspectorController(
-      inspectorTree: InspectorTreeController(),
-      detailsTree: InspectorTreeController(),
-      treeType: FlutterTreeType.widget,
-    )..firstInspectorTreeLoadCompleted = true;
   });
 
   Future<void> mockExtensions() async {
