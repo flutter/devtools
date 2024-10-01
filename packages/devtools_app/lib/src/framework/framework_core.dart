@@ -37,8 +37,6 @@ typedef ErrorReporter = void Function(String title, Object error);
 
 final _log = Logger('framework_core');
 
-EditorThemeManager? themeManager;
-
 // ignore: avoid_classes_with_only_static_members, intentional grouping of static methods.
 abstract class FrameworkCore {
   /// Initializes the DevTools framework, which includes setting up global
@@ -96,6 +94,8 @@ abstract class FrameworkCore {
   }
 
   static bool vmServiceInitializationInProgress = false;
+
+  static EditorThemeManager? themeManager;
 
   /// Attempts to initialize a VM service connection and return whether the
   /// connection attempt succeeded.
@@ -191,8 +191,9 @@ Future<void> _initDTDConnection() async {
       );
 
       if (dtdManager.connection.value != null) {
-        themeManager = EditorThemeManager(dtdManager.connection.value!);
-        themeManager!.listenForThemeChanges();
+        FrameworkCore.themeManager =
+            EditorThemeManager(dtdManager.connection.value!)
+              ..listenForThemeChanges();
       }
     } else {
       _log.info('No DTD uri provided from the server during initialization.');

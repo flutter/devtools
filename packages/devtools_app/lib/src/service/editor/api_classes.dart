@@ -431,7 +431,7 @@ class EditorTheme with Serializable {
   EditorTheme({
     required this.isDarkMode,
     required this.backgroundColor,
-    this.foregroundColor,
+    required this.foregroundColor,
     required this.fontSize,
   });
 
