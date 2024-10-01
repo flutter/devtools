@@ -3,16 +3,22 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart';
 import 'package:logging/logging.dart';
+import 'package:source_map_stack_trace/source_map_stack_trace.dart';
+import 'package:source_maps/source_maps.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/globals.dart';
 
 final _log = Logger('app_error_handling');
+
+SingleMapping? _sourceMap;
 
 /// Set up error handling for the app.
 ///
@@ -22,7 +28,18 @@ final _log = Logger('app_error_handling');
 ///
 /// [appStartCallback] should be a callback that creates the main Flutter
 /// application.
-void setupErrorHandling(Future Function() appStartCallback) {
+Future<void> setupErrorHandling(Future Function() appStartCallback) async {
+  try {
+    final sourceMapUri = Uri.parse('main.dart.js.map');
+    final sourceMapFile = await get(sourceMapUri);
+    _sourceMap = SingleMapping.fromJson(
+      jsonDecode(sourceMapFile.body),
+      mapUrl: sourceMapUri,
+    );
+  } catch (_) {
+    // Ignore any errors getting the source map.
+  }
+
   // First, run all our code in a new zone.
   unawaited(
     runZonedGuarded<Future<void>>(
@@ -70,7 +87,7 @@ void reportError(
   bool notifyUser = false,
   StackTrace? stack,
 }) {
-  stack = stack ?? StackTrace.empty;
+  stack = _maybeMapStackTrace(stack ?? StackTrace.empty);
 
   final terseStackTrace = stack_trace.Trace.from(stack).terse.toString();
 
@@ -85,4 +102,15 @@ void reportError(
       stackTrace: terseStackTrace,
     );
   }
+}
+
+StackTrace _maybeMapStackTrace(StackTrace stack) {
+  final sourceMap = _sourceMap;
+  return sourceMap != null
+      ? mapStackTrace(
+          sourceMap,
+          stack,
+          minified: true,
+        )
+      : stack;
 }

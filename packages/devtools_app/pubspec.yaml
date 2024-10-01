@@ -49,6 +49,8 @@ dependencies:
   provider: ^6.0.2
   # Only used for debug mode logic.
   shared_preferences: ^2.0.15
+  source_map_stack_trace: ^2.1.2
+  source_maps: ^0.10.12
   sse: ^4.1.2
   stack_trace: ^1.10.0
   stream_channel: ^2.1.1
