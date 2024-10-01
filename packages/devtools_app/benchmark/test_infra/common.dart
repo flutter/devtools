@@ -17,6 +17,10 @@ String benchmarkPath({required bool useWasm}) => Uri(
       queryParameters: useWasm ? _wasmQueryParameters : null,
     ).toString();
 
+String generateBenchmarkEntryPoint({required bool useWasm}) {
+  return 'benchmark/test_infra/client/client_${useWasm ? 'wasm' : 'js'}.dart';
+}
+
 const devtoolsBenchmarkPrefix = 'devtools';
 
 enum DevToolsBenchmark {
