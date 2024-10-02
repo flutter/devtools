@@ -181,7 +181,12 @@ class DtdEditorClient extends EditorClient with AutoDisposeControllerMixin {
     );
     await Future.wait([
       _dtd.streamListen('Service'),
-      _dtd.streamListen(editorServiceName),
+      _dtd.streamListen(editorStreamName).catchError((_) {
+        // Because we currently call streamListen in two places (here and
+        // ThemeManager) this can fail. It doesn't matter if this happens,
+        // however we should refactor this code to better support using the DTD
+        // connection in multiple places without them having to coordinate.
+      }),
     ]);
   }
 
