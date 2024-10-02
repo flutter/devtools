@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
@@ -28,6 +29,8 @@ import '../../shared/utils.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
+
+final _log = Logger('http_request_data');
 
 class NetworkScreen extends Screen {
   NetworkScreen() : super.fromMetaData(ScreenMetaData.network);
@@ -142,8 +145,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
           },
         );
       }
-    } catch (ex) {
-      debugPrint('caught ex $ex');
+    } catch (e) {
+      _log.shout('Could not load offline data: $e');
     }
   }
 

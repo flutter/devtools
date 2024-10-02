@@ -170,8 +170,8 @@ class DartIOHttpRequestData extends NetworkRequest {
         HttpRequestDataKeys.reasonPhrase.name:
             _request.response?.reasonPhrase ?? '',
       };
-    } catch (ex) {
-      _log.shout('Error in toJson: $ex');
+    } catch (e) {
+      _log.shout('Error in toJson: $e');
     }
     return null;
   }
