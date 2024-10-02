@@ -74,7 +74,8 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
       for (final computation in expectedComputations) {
         expect(
           scores.where(
-              (score) => score.metric == '$metricName.${computation.name}'),
+            (score) => score.metric == '$metricName.${computation.name}',
+          ),
           hasLength(1),
         );
       }
