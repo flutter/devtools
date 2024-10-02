@@ -10,6 +10,7 @@ import 'package:dtd/dtd.dart';
 import 'package:logging/logging.dart';
 
 import '../service/editor/api_classes.dart';
+import '../shared/config_specific/post_message/post_message.dart';
 import '../shared/globals.dart';
 
 final _log = Logger('theme_manager');
@@ -30,62 +31,88 @@ class EditorThemeManager extends DisposableController
       dtd.onEvent(editorStreamName).listen((event) {
         if (EditorEventKind.values.asNameMap()[event.kind] ==
             EditorEventKind.themeChanged) {
-          final currentTheme = getIdeTheme();
-          final newTheme = ThemeChangedEvent.fromJson(event.data).theme;
-
-          if (currentTheme.isDarkMode != newTheme.isDarkMode) {
-            updateQueryParameter(
-              IdeThemeQueryParams.devToolsThemeKey,
-              newTheme.isDarkMode
-                  ? IdeThemeQueryParams.darkThemeValue
-                  : IdeThemeQueryParams.lightThemeValue,
-            );
+          try {
+            final newTheme = ThemeChangedEvent.fromJson(event.data).theme;
+            _updateTheme(newTheme);
+          } catch (e) {
+            _log.warning('Failed to parse/update theme: $e');
           }
-
-          if (newTheme.backgroundColor != null) {
-            final newBackgroundColor =
-                tryParseColor(newTheme.backgroundColor!, logger: _log);
-            if (newBackgroundColor != null &&
-                newBackgroundColor != currentTheme.backgroundColor) {
-              updateQueryParameter(
-                IdeThemeQueryParams.backgroundColorKey,
-                _colorAsHex(newBackgroundColor),
-              );
-            }
-          }
-
-          if (newTheme.foregroundColor != null) {
-            final newForegroundColor =
-                tryParseColor(newTheme.foregroundColor!, logger: _log);
-            if (newForegroundColor != null &&
-                newForegroundColor != currentTheme.foregroundColor) {
-              updateQueryParameter(
-                IdeThemeQueryParams.foregroundColorKey,
-                _colorAsHex(newForegroundColor),
-              );
-            }
-          }
-
-          if (newTheme.fontSize != null &&
-              newTheme.fontSize!.toDouble() != currentTheme.fontSize) {
-            updateQueryParameter(
-              IdeThemeQueryParams.fontSizeKey,
-              newTheme.fontSize!.toDouble().toString(),
-            );
-          }
-
-          setGlobal(IdeTheme, getIdeTheme());
-
-          // We are toggling to the opposite theme and then back to force the IDE
-          // to update all theme features.
-          // TODO(https://github.com/flutter/devtools/issues/8366): Clean up so
-          // that preferences controller listens for changes in all theme
-          // features.
-          preferences.toggleDarkModeTheme(!newTheme.isDarkMode);
-          preferences.toggleDarkModeTheme(newTheme.isDarkMode);
         }
       }),
     );
+
+    // Handle themeChanged from postMessage.
+    autoDisposeStreamSubscription(
+      onPostMessage.listen((event) {
+        if (event.data
+            case {
+              'method': 'editor.themeChanged',
+              'params': {'theme': final Map themeJson}
+            }) {
+          try {
+            _updateTheme(
+              EditorTheme.fromJson(themeJson.cast<String, Object?>()),
+            );
+          } catch (e) {
+            _log.warning('Failed to parse/update theme: $e');
+          }
+        }
+      }),
+    );
+  }
+
+  void _updateTheme(EditorTheme newTheme) {
+    final currentTheme = getIdeTheme();
+    if (currentTheme.isDarkMode != newTheme.isDarkMode) {
+      updateQueryParameter(
+        IdeThemeQueryParams.devToolsThemeKey,
+        newTheme.isDarkMode
+            ? IdeThemeQueryParams.darkThemeValue
+            : IdeThemeQueryParams.lightThemeValue,
+      );
+    }
+
+    if (newTheme.backgroundColor != null) {
+      final newBackgroundColor =
+          tryParseColor(newTheme.backgroundColor!, logger: _log);
+      if (newBackgroundColor != null &&
+          newBackgroundColor != currentTheme.backgroundColor) {
+        updateQueryParameter(
+          IdeThemeQueryParams.backgroundColorKey,
+          _colorAsHex(newBackgroundColor),
+        );
+      }
+    }
+
+    if (newTheme.foregroundColor != null) {
+      final newForegroundColor =
+          tryParseColor(newTheme.foregroundColor!, logger: _log);
+      if (newForegroundColor != null &&
+          newForegroundColor != currentTheme.foregroundColor) {
+        updateQueryParameter(
+          IdeThemeQueryParams.foregroundColorKey,
+          _colorAsHex(newForegroundColor),
+        );
+      }
+    }
+
+    if (newTheme.fontSize != null &&
+        newTheme.fontSize!.toDouble() != currentTheme.fontSize) {
+      updateQueryParameter(
+        IdeThemeQueryParams.fontSizeKey,
+        newTheme.fontSize!.toDouble().toString(),
+      );
+    }
+
+    setGlobal(IdeTheme, getIdeTheme());
+
+    // We are toggling to the opposite theme and then back to force the IDE
+    // to update all theme features.
+    // TODO(https://github.com/flutter/devtools/issues/8366): Clean up so
+    // that preferences controller listens for changes in all theme
+    // features.
+    preferences.toggleDarkModeTheme(!newTheme.isDarkMode);
+    preferences.toggleDarkModeTheme(newTheme.isDarkMode);
   }
 
   String _colorAsHex(Color color) {
