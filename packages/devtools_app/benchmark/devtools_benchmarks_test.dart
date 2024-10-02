@@ -10,34 +10,16 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:test/test.dart';
+import 'package:web_benchmarks/metrics.dart';
 import 'package:web_benchmarks/server.dart';
 
 import 'test_infra/common.dart';
 import 'test_infra/project_root_directory.dart';
 
-List<String> _metricList({required bool useWasm}) => [
-      // The skwasm renderer doesn't have preroll or apply frame steps in its
-      // rendering.
-      if (!useWasm) ...[
-        'preroll_frame',
-        'apply_frame',
-      ],
-      'drawFrameDuration',
-    ];
-
-final _valueList = <String>[
-  'average',
-  'outlierAverage',
-  'outlierRatio',
-  'noise',
-];
-
-const _totalUiFrameAverageScore = 'totalUiFrame.average';
-
 const _isWasmScore = 'isWasm';
 
 const _extraScores = [
-  _totalUiFrameAverageScore,
+  totalUiFrameAverage,
   _isWasmScore,
 ];
 
@@ -75,26 +57,29 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   );
 
   for (final benchmarkName in DevToolsBenchmark.values.map((e) => e.id)) {
-    final expectedMetrics = _metricList(useWasm: useWasm);
+    final expectedMetrics = expectedBenchmarkMetrics(useWasm: useWasm)
+        .map((BenchmarkMetric metric) => metric.label)
+        .toList();
+    const expectedComputations = BenchmarkMetricComputation.values;
     final scores = taskResult.scores[benchmarkName] ?? [];
     expect(
       scores,
       hasLength(
-        expectedMetrics.length * _valueList.length + _extraScores.length,
+        expectedMetrics.length * expectedComputations.length + _extraScores.length,
       ),
     );
 
     for (final metricName in expectedMetrics) {
-      for (final valueName in _valueList) {
+      for (final computation in expectedComputations) {
         expect(
-          scores.where((score) => score.metric == '$metricName.$valueName'),
+          scores.where((score) => score.metric == '$metricName.${computation.name}'),
           hasLength(1),
         );
       }
     }
 
     expect(
-      scores.where((score) => score.metric == _totalUiFrameAverageScore),
+      scores.where((score) => score.metric == totalUiFrameAverage),
       hasLength(1),
     );
 
