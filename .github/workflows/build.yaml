@@ -271,9 +271,6 @@ jobs:
           path: |
             ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - uses: browser-actions/setup-chrome@v1
-        with:
-          install-chromedriver: true
       - name: tool/ci/benchmark_performance.sh
         run: ./tool/ci/benchmark_performance.sh
 
