@@ -68,7 +68,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## Deep links tool updates
 
-- Added support for validating ios deep link settings.
+- Added support for validating ios deep link settings. - [#8394](https://github.com/flutter/devtools/pull/8394)
+
+  ![Deep link validator for iOS](images/deep_link_ios.png "DevTools Deep link validator Page")
 
 ## VS Code Sidebar updates
 
