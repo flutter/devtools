@@ -140,7 +140,7 @@ Future<String> _mapAndTersify(StackTrace? stack) async {
   if (originalStackTrace == null) return '';
 
   final mappedStackTrace = await _maybeMapStackTrace(originalStackTrace);
-  // If mapping fails, revert back to the original source map:
+  // If mapping fails, revert back to the original stack trace:
   final stackTrace = mappedStackTrace.toString().isEmpty
       ? originalStackTrace
       : mappedStackTrace;
