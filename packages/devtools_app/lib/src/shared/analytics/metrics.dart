@@ -100,9 +100,9 @@ class DeepLinkScreenMetrics extends ScreenAnalyticsMetrics {
     this.iosBundleId,
   });
 
-  /// The anroid app id of the flutter project.
+  /// The Android app id of the Flutter project.
   final String? androidAppId;
 
-  /// The ios bundle id of the flutter project.
+  /// The iOS bundle id of the Flutter project.
   final String? iosBundleId;
 }
