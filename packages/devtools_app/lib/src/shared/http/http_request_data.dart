@@ -11,8 +11,10 @@ import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/network/network_model.dart';
+import '../../screens/network/utils/http_utils.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
+import 'constants.dart';
 import 'http.dart';
 
 final _log = Logger('http_request_data');
@@ -55,102 +57,118 @@ class DartIOHttpRequestData extends NetworkRequest {
       HttpProfileRequestRef.parse(modifiedRequestData)!,
       requestFullDataFromVmService: false,
     )
-      .._responseBody = responseContent?['text'].toString()
-      .._requestBody = requestPostData?['text'].toString();
+      .._responseBody =
+          responseContent?[HttpRequestDataKeys.text.name].toString()
+      .._requestBody =
+          requestPostData?[HttpRequestDataKeys.text.name].toString();
   }
   //TODO go through all parameters, to check if they are correctly added.
   Map<String, Object>? toJson() {
     try {
       return {
-        'startedDateTime': startTimestamp.toIso8601String(),
-        'time': duration?.inMilliseconds ?? 0,
-        'request': {
-          'method': method,
-          'url': uri,
-          'httpVersion':
-              'HTTP/2.0', // Assuming HTTP/1.1, can adjust dynamically if needed
+        HttpRequestDataKeys.startedDateTime.name:
+            startTimestamp.toIso8601String(),
+        HttpRequestDataKeys.time.name: duration?.inMilliseconds ?? 0,
+        HttpRequestDataKeys.request.name: {
+          HttpRequestDataKeys.method.name: method,
+          HttpRequestDataKeys.url.name: uri,
+          HttpRequestDataKeys.httpVersion.name:
+              HttpRequestDataDefaults.httpVersion,
           'cookies': requestCookies.map((cookie) => cookie.toString()).toList(),
-          'headers': requestHeaders,
-          'queryString': queryParameters?.entries
+          HttpRequestDataKeys.headers.name: requestHeaders,
+          HttpRequestDataKeys.queryString.name: queryParameters?.entries
               .map((entry) => {'name': entry.key, 'value': entry.value})
               .toList(),
-          'postData': {
-            'mimeType': contentType,
-            'text': requestBody ?? 'None',
+          'queryParameters': queryParameters?.entries
+              .map((entry) => {'name': entry.key, 'value': entry.value})
+              .toList(),
+          HttpRequestDataKeys.postData.name: {
+            HttpRequestDataKeys.mimeType.name: contentType,
+            HttpRequestDataKeys.text.name:
+                requestBody ?? HttpRequestDataDefaults.none,
           },
-          //TODO check headersSize calculation
-          'headersSize': requestHeaders != null
-              ? requestHeaders!.length * 40
-              : 0,
-          'bodySize': requestBody?.length ?? 0,
-          'connectionInfo': {
-            'remoteAddress': (general['connectionInfo']
-                as Map<String, Object?>?)?['remoteAddress'],
-            'localPort': (general['connectionInfo']
-                as Map<String, Object?>?)?['localPort'],
+          HttpRequestDataKeys.headersSize.name:
+              requestHeaders != null ? calculateHeadersSize(requestHeaders) : 0,
+          HttpRequestDataKeys.bodySize.name: requestBody?.length ?? 0,
+          HttpRequestDataKeys.connectionInfo.name: {
+            HttpRequestDataKeys.remoteAddress.name:
+                (general[HttpRequestDataKeys.connectionInfo.name] as Map<String,
+                    Object?>?)?[HttpRequestDataKeys.remoteAddress.name],
+            HttpRequestDataKeys.localPort.name: (general[
+                    HttpRequestDataKeys.connectionInfo.name]
+                as Map<String, Object?>?)?[HttpRequestDataKeys.localPort.name],
           },
-          'contentLength': general['contentLength'] ?? 0,
-          'followRedirects': _request.request?.followRedirects ?? true,
-          'maxRedirects': _request.request?.maxRedirects ?? 5,
-          'persistentConnection':
+          HttpRequestDataKeys.contentLength.name:
+              general[HttpRequestDataKeys.contentLength.name] ?? 0,
+          HttpRequestDataKeys.followRedirects.name:
+              _request.request?.followRedirects ?? true,
+          HttpRequestDataKeys.maxRedirects.name:
+              _request.request?.maxRedirects ?? 5,
+          HttpRequestDataKeys.persistentConnection.name:
               _request.request?.persistentConnection ?? true,
-          'proxyDetails': {
-            'proxy':
-                (general['proxyDetails'] as Map<String, Object?>?)?['proxy'],
-            'type': (general['proxyDetails'] as Map<String, Object?>?)?['type'],
+          HttpRequestDataKeys.proxyDetails.name: {
+            HttpRequestDataKeys.proxy.name:
+                (general[HttpRequestDataKeys.proxyDetails.name]
+                    as Map<String, Object?>?)?[HttpRequestDataKeys.proxy.name],
+            HttpRequestDataKeys.type.name:
+                (general[HttpRequestDataKeys.proxyDetails.name]
+                    as Map<String, Object?>?)?[HttpRequestDataKeys.type.name],
           },
-          'error': general['error'],
+          HttpRequestDataKeys.error.name:
+              general[HttpRequestDataKeys.error.name],
         },
-        'response': {
-          'status': status ?? 'Error',
-          'statusCode': _request.response!.statusCode,
-          'statusText': '',
-          //TODO : get http version/ add in constants
-          'httpVersion': 'HTTP/2.0',
-          'cookies':
+        HttpRequestDataKeys.response.name: {
+          HttpRequestDataKeys.status.name:
+              status ?? HttpRequestDataDefaults.error,
+          HttpRequestDataKeys.statusCode.name: _request.response!.statusCode,
+          HttpRequestDataKeys.statusText.name: '',
+          HttpRequestDataKeys.httpVersion.name:
+              HttpRequestDataDefaults.httpVersion,
+          HttpRequestDataKeys.cookies.name:
               responseCookies.map((cookie) => cookie.toString()).toList(),
-          'headers': responseHeaders,
-          'content': {
-            'size': responseBody?.length ?? 0,
-            'mimeType':
-                contentType ?? 'json',
-            'text': responseBody ?? '',
+          HttpRequestDataKeys.headers.name: responseHeaders,
+          HttpRequestDataKeys.content.name: {
+            HttpRequestDataKeys.size.name: responseBody?.length ?? 0,
+            HttpRequestDataKeys.mimeType.name:
+                contentType ?? HttpRequestDataValues.json.name,
+            HttpRequestDataKeys.text.name: responseBody ?? '',
           },
-          'redirects': _request.response!.redirects,
+          HttpRequestDataKeys.redirects.name: _request.response!.redirects,
           //TODO : add redirectURL
-          'redirectURL': '',
-          'headersSize':
-              responseHeaders != null ? responseHeaders!.length * 40 : 0,
-          'bodySize': encodedResponse?.length ?? 0,
+          HttpRequestDataKeys.redirectURL.name: '',
+          HttpRequestDataKeys.headersSize.name: responseHeaders != null
+              ? calculateHeadersSize(responseHeaders)
+              : 0,
+          HttpRequestDataKeys.bodySize.name: encodedResponse?.length ?? 0,
         },
-        'cache': {},
-        'timings': {
-          'blocked': -1,
-          'dns': -1,
-          'connect': -1,
-          'send': 1,
-          'wait': duration?.inMilliseconds ?? 0,
-          'receive': 1,
-          'ssl': -1,
-        },
-        'connection': (general['connectionInfo']
-                as Map<String, Object?>?)?['connectionId'] ??
-            '525659655', // sample connection ID
-        'comment': '',
-        'isolateId': _request.isolateId,
-        'type': '@HttpProfileRequest',
-        'method': method,
-        'uri': uri,
-        'id': id,
-        'startTime': startTimestamp.microsecondsSinceEpoch,
-        'events': instantEvents
+        HttpRequestDataKeys.cache.name: {},
+        HttpRequestDataKeys.connection.name:
+            (general[HttpRequestDataKeys.connectionInfo.name] as Map<String,
+                    Object?>?)?[HttpRequestDataKeys.connectionId.name] ??
+                '',
+        //Remove if not required
+        HttpRequestDataKeys.comment.name: '',
+        HttpRequestDataKeys.isolateId.name: _request.isolateId,
+        HttpRequestDataKeys.type.name:
+            HttpRequestDataDefaults.httpProfileRequest,
+        HttpRequestDataKeys.method.name: method,
+        HttpRequestDataKeys.uri.name: uri,
+        HttpRequestDataKeys.id.name: id,
+        HttpRequestDataKeys.startTime.name:
+            startTimestamp.microsecondsSinceEpoch,
+        HttpRequestDataKeys.events.name: instantEvents
             .map(
               (event) => {
-                'timestamp': event.timestamp.microsecondsSinceEpoch,
-                'event': event.name,
+                HttpRequestDataKeys.timestamp.name:
+                    event.timestamp.microsecondsSinceEpoch,
+                HttpRequestDataKeys.event.name: event.name,
               },
             )
             .toList(),
+        HttpRequestDataKeys.isRedirect.name:
+            _request.response?.isRedirect ?? false,
+        HttpRequestDataKeys.reasonPhrase.name:
+            _request.response?.reasonPhrase ?? '',
       };
     } catch (ex) {
       _log.shout('Error in toJson: $ex');

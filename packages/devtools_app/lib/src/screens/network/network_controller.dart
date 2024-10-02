@@ -395,12 +395,12 @@ class NetworkController extends DisposableController
         filteredData.value.whereType<DartIOHttpRequestData>().toList();
     return OfflineScreenData(
       screenId: NetworkScreen.id,
-      data: convertRequestsToMap(requests),
+      data: serializeRequestDataForOfflineMode(requests),
     );
   }
 }
 
-Map<String, Object> convertRequestsToMap(
+Map<String, Object> serializeRequestDataForOfflineMode(
   List<DartIOHttpRequestData>? requests,
 ) {
   if (requests == null) return {};
