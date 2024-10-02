@@ -40,6 +40,7 @@ class EvalTester {
     final responseFinder = await retryUntilFound(
       expectedResponse,
       tester: tester,
+      retries: 6,
     );
     expect(responseFinder, findsOneWidget);
   }
