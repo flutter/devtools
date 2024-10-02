@@ -73,7 +73,7 @@ abstract class FrameworkCore {
   static void dispose() {
     extensionService.dispose();
     preferences.dispose();
-    themeManager?.dispose();
+    _themeManager?.dispose();
     unawaited(dtdManager.dispose());
   }
 
@@ -95,7 +95,7 @@ abstract class FrameworkCore {
 
   static bool vmServiceInitializationInProgress = false;
 
-  static EditorThemeManager? themeManager;
+  static EditorThemeManager? _themeManager;
 
   /// Attempts to initialize a VM service connection and return whether the
   /// connection attempt succeeded.
@@ -191,7 +191,7 @@ Future<void> _initDTDConnection() async {
       );
 
       if (dtdManager.connection.value != null) {
-        FrameworkCore.themeManager =
+        FrameworkCore._themeManager =
             EditorThemeManager(dtdManager.connection.value!)
               ..listenForThemeChanges();
       }
