@@ -112,18 +112,16 @@ SingleMapping? _cachedJsSourceMapping;
 SingleMapping? _cachedWasmSourceMapping;
 
 Future<SingleMapping?> _fetchSourceMapping() async {
-  final cachedSourceMapping = preferences.wasmEnabled.value
-      ? _cachedWasmSourceMapping
-      : _cachedJsSourceMapping;
+  final cachedSourceMapping =
+      kIsWasm ? _cachedWasmSourceMapping : _cachedJsSourceMapping;
 
   return cachedSourceMapping ?? (await _initializeSourceMapping());
 }
 
 Future<SingleMapping?> _initializeSourceMapping() async {
   try {
-    final wasmEnabled = preferences.wasmEnabled.value;
     final sourceMapUri = Uri.parse(
-      'main.dart.${wasmEnabled ? 'wasm' : 'js'}.map',
+      'main.dart.${kIsWasm ? 'wasm' : 'js'}.map',
     );
     final sourceMapFile = await get(sourceMapUri);
 
@@ -133,7 +131,7 @@ Future<SingleMapping?> _initializeSourceMapping() async {
     );
   } catch (_) {
     // Ignore any errors loading the source map.
-    return Future.value();
+    return null;
   }
 }
 
