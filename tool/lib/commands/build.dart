@@ -101,6 +101,7 @@ class BuildCommand extends Command {
           [
             'build',
             'web',
+            '--source-maps',
             if (useWasm) ...[
               BuildCommandArgs.wasm.asArg(),
               if (noStripWasm) BuildCommandArgs.noStripWasm.asArg(),
