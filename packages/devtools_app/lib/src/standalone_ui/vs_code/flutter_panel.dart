@@ -190,6 +190,9 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
               debugSessions[debugSession.id] = debugSession;
             case DebugSessionStoppedEvent(:final debugSessionId):
               debugSessions.remove(debugSessionId);
+            case ThemeChangedEvent():
+            // Do nothing; this is handled in
+            // lib/src/framework/theme_manager.dart.
           }
         });
       }),

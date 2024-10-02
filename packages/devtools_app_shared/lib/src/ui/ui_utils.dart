@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
+import 'package:logging/logging.dart';
+
 import '../utils/globals.dart';
+import '../utils/utils.dart';
 import 'theme/ide_theme.dart';
 
 /// Whether DevTools is in embedded mode, as determined by the [ideTheme] parsed
@@ -22,4 +27,21 @@ IdeTheme get ideTheme {
 
 double scaleByFontFactor(double original) {
   return (original * ideTheme.fontSizeFactor).roundToDouble();
+}
+
+Color? tryParseColor(String? input, {Logger? logger}) {
+  if (input == null) return null;
+
+  try {
+    return parseCssHexColor(input);
+  } catch (e, st) {
+    // The user can manipulate the query string so if the value is invalid
+    // print the value but otherwise continue.
+    logger?.warning(
+      'Failed to parse "$input" as a color from the querystring, ignoring: $e',
+      e,
+      st,
+    );
+    return null;
+  }
 }
