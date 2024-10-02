@@ -77,7 +77,7 @@ rm -rf build/web
 flutter pub get
 
 flutter build web \
-  --source-maps \ 
+  --source-maps \
   --wasm \
   --pwa-strategy=offline-first \
   --release \
