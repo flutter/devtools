@@ -136,8 +136,7 @@ class _PropertiesViewState extends State<PropertiesView> {
   RemoteDiagnosticsNode? get selectedNode =>
       widget.controller.selectedNode.value?.diagnostic;
 
-  bool get includeLayoutExplorer =>
-      (selectedNode?.isBoxLayout ?? false) && widget.layoutProperties != null;
+  bool get includeLayoutExplorer => widget.layoutProperties != null;
 
   WidgetSizes? get widgetWidths => widget.layoutProperties?.widgetWidths;
 

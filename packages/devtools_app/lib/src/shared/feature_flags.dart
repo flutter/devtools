@@ -105,7 +105,7 @@ abstract class FeatureFlags {
   /// Flag to enable the new Inspector panel.
   ///
   /// https://github.com/flutter/devtools/issues/7854
-  static bool inspectorV2 = enableExperiments;
+  static bool inspectorV2 = true;
 
   /// Flag to enable the DevTools setting to opt-in to WASM.
   ///

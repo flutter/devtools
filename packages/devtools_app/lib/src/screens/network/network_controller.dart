@@ -63,7 +63,8 @@ class NetworkController extends DisposableController
   }
   List<DartIOHttpRequestData>? _httpRequests;
 
-  String? exportAsHarFile() {
+  Future<String?> exportAsHarFile() async {
+    await _fetchFullDataBeforeExport();
     _httpRequests =
         filteredData.value.whereType<DartIOHttpRequestData>().toList();
 
@@ -407,6 +408,12 @@ Map<String, Object> serializeRequestDataForOfflineMode(
   return {
     'requests': requests.map((request) => request.toJson()).toList(),
   };
+  
+  Future<void> _fetchFullDataBeforeExport() => Future.wait(
+        filteredData.value
+            .whereType<DartIOHttpRequestData>()
+            .map((item) => item.getFullRequestData()),
+      );
 }
 
 /// Class for managing the set of all current sockets, and

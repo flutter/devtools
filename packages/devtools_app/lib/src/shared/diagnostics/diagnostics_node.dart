@@ -75,10 +75,13 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       );
   }
 
-  static Size deserializeSize(Map<String, Object> json) {
+  static Size? deserializeSize(Map<String, Object> json) {
+    final width = json['width'] as String?;
+    final height = json['height'] as String?;
+    if (width == null || height == null) return null;
     return Size(
-      double.parse(json['width'] as String),
-      double.parse(json['height'] as String),
+      double.parse(width),
+      double.parse(height),
     );
   }
 
@@ -153,9 +156,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   // [deserializeSize] expects a parameter of type Map<String, Object> (note the
   // non-nullable Object), so we need to first type check as a Map and then we
   // can cast to the expected type.
-  Size get size => deserializeSize(
-        (json['size'] as Map?)?.cast<String, Object>() ?? <String, Object>{},
-      );
+  Size? get size {
+    final sizeMap = json['size'] as Map?;
+    return sizeMap == null
+        ? null
+        : deserializeSize(sizeMap.cast<String, Object>());
+  }
 
   bool get isLocalClass {
     final objectGroup = objectGroupApi;
@@ -454,16 +460,18 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return json[memberName] as bool;
   }
 
-  LayoutProperties computeLayoutProperties({required bool forFlexLayout}) {
-    assert(!forFlexLayout || (forFlexLayout && isFlexLayout));
+  LayoutProperties? computeLayoutProperties({required bool forFlexLayout}) {
+    if ((!forFlexLayout && !isBoxLayout) || (forFlexLayout && !isFlexLayout)) {
+      return null;
+    }
+    if (size == null) return null;
     return forFlexLayout
         ? FlexLayoutProperties.fromDiagnostics(this)
         : LayoutProperties(this);
   }
 
   RemoteDiagnosticsNode? layoutRootNode({required bool forFlexLayout}) {
-    final shouldDisplayNode = forFlexLayout ? isFlexLayout : isBoxLayout;
-    if (!shouldDisplayNode) return null;
+    if (forFlexLayout && !isFlexLayout) return null;
 
     if (forFlexLayout) {
       return isFlex ? this : parent;
@@ -472,9 +480,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return this;
   }
 
-  // TODO(https://github.com/flutter/devtools/issues/8238): Actually determine
-  // whether this node has a box layout.
-  bool get isBoxLayout => true;
+  // Warning: This should only be used on a layout explorer node. A regular
+  // remote diagnostics node never has a "size" property.
+  bool get isBoxLayout => size != null;
 
   bool get isFlexLayout => isFlex || (parent?.isFlex ?? false);
 

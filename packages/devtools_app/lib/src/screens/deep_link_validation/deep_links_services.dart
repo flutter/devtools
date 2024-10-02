@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 
+import '../../shared/primitives/utils.dart';
 import 'deep_links_model.dart';
 
 const _apiKey = 'AIzaSyCf_2E9N2AUZR-YSnZTQ72YbCNhKIskIsw';
@@ -26,7 +27,12 @@ const postHeader = {'Content-Type': 'application/json'};
 // The keys used in both android and ios domain validation API.
 const _domainNameKey = 'domainName';
 const _checkNameKey = 'checkName';
+const _severityLevelKey = 'severityLevel';
+const _severityLevelError = 'ERROR';
 const _failedChecksKey = 'failedChecks';
+const _subCheckResultsKey = 'subCheckResults';
+const _resultTypeKey = 'resultType';
+const _passedKey = 'PASSED';
 const _domainBatchSize = 500;
 
 // The keys for the Android domain validation API.
@@ -67,12 +73,38 @@ const _queryParamsKey = 'queryParams';
 const _keyKey = 'key';
 const _valueKey = 'value';
 
-const iosCheckNameToDomainError = <String, DomainError>{
+const _fileFormatKey = 'FILE_FORMAT';
+final iosCheckNameToDomainError = <String, DomainError>{
   'EXISTENCE': IosDomainError.existence,
   'APP_IDENTIFIER': IosDomainError.appIdentifier,
   'HTTPS_ACCESSIBILITY': IosDomainError.httpsAccessibility,
   'NON_REDIRECT': IosDomainError.nonRedirect,
-  'FILE_FORMAT': IosDomainError.fileFormat,
+};
+final aasaFileFormatSubCheck = {
+  'APPLINKS_FORMAT': AASAfileFormatSubCheck.appLinksFormat,
+  'APPLINKS_SUBSTITUTION_VARIABLES_FORMAT':
+      AASAfileFormatSubCheck.appLinksSubstitutionVariablesFormat,
+  'DEFAULTS_FORMAT': AASAfileFormatSubCheck.defaultsFormat,
+  'DEFAULTS_PERCENT_ENCODED_FORMAT':
+      AASAfileFormatSubCheck.defaultsPercentEncodedFormat,
+  'DETAIL_FORMAT': AASAfileFormatSubCheck.detailsFormat,
+  'DETAIL_APP_ID_FORMAT': AASAfileFormatSubCheck.detailsAppIdFormat,
+  'DETAIL_PATHS_FORMAT': AASAfileFormatSubCheck.detailsPathsFormat,
+  'DETAIL_DEFAULTS_FORMAT': AASAfileFormatSubCheck.detailsDefaultsFormat,
+  'DETAIL_DEFAULTS_PERCENT_ENCODED_FORMAT':
+      AASAfileFormatSubCheck.detailsDefaultsPercentEncodedFormat,
+  'DETAIL_DEFAULTS_CASE_SENSITIVE_FORMAT ':
+      AASAfileFormatSubCheck.detailsDefaultsCaseSensitiveFormat,
+  'COMPONENT_FORMAT': AASAfileFormatSubCheck.componentFormat,
+  'COMPONENT_PATH_FORMAT': AASAfileFormatSubCheck.componentPathFormat,
+  'COMPONENT_QUERY_FORMAT': AASAfileFormatSubCheck.componentQueryFormat,
+  'COMPONENT_FRAGMENT_FORMAT': AASAfileFormatSubCheck.componentFragmentFormat,
+  'COMPONENT_EXCLUDE_FORMAT': AASAfileFormatSubCheck.componentExcludeFormat,
+  'COMPONENT_PERCENT_ENCODED_FORMAT':
+      AASAfileFormatSubCheck.componentPercentEncodedFormat,
+  'COMPONENT_CASE_SENSITIVE_FORMAT':
+      AASAfileFormatSubCheck.componentCaseSensitiveFormat,
+  'COMPONENT_COMMENT_FORMAT': AASAfileFormatSubCheck.componentCommentFormat,
 };
 
 class ValidateIosDomainResult {
@@ -194,13 +226,41 @@ class DeepLinksService {
             for (final failedCheck in failedChecks) {
               final checkName = failedCheck[_checkNameKey] as String;
               final domainError = iosCheckNameToDomainError[checkName];
-              if (domainError != null) {
-                domainErrors
-                    .putIfAbsent(domainName, () => <DomainError>[])
-                    .add(domainError);
+              final severityLevel = failedCheck[_severityLevelKey] as String;
+              if (severityLevel == _severityLevelError) {
+                if (checkName == _fileFormatKey) {
+                  final failedAasaFileFormatSubCheck =
+                      <AASAfileFormatSubCheck>[];
+
+                  // Adds sub checks for file format error.
+                  final subChecks = (failedCheck[_subCheckResultsKey] as List?)
+                      ?.cast<Map<String, Object?>>();
+                  for (final subCheck in (subChecks ?? <Map>[])) {
+                    final subCheckName = subCheck[_checkNameKey] as String;
+                    final subCheckResultType =
+                        subCheck[_resultTypeKey] as String;
+                    if (subCheckResultType != _passedKey) {
+                      failedAasaFileFormatSubCheck
+                          .add(aasaFileFormatSubCheck[subCheckName]!);
+                    }
+                  }
+
+                  domainErrors
+                      .putIfAbsent(domainName, () => <DomainError>[])
+                      .add(
+                        IosDomainError.iosFileFormatDomainError(
+                          subcheckErrors: failedAasaFileFormatSubCheck,
+                        ),
+                      );
+                } else if (domainError != null) {
+                  domainErrors
+                      .putIfAbsent(domainName, () => <DomainError>[])
+                      .add(domainError);
+                }
               }
             }
           }
+
           final aasaAppPaths = (domainResult[_aasaAppPathsKey] as List?)
               ?.cast<Map<String, Object?>>();
           if (aasaAppPaths != null) {
@@ -209,6 +269,10 @@ class DeepLinksService {
                   ?.cast<Map<String, Object?>>();
               if (aasaPaths != null) {
                 for (final aasaPath in aasaPaths) {
+                  final path = aasaPath[_pathKey] as String?;
+                  if (path.isNullOrEmpty) {
+                    continue;
+                  }
                   final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
                       ?.cast<Map<String, Object?>>();
                   final queryParams = <String, String>{
@@ -217,7 +281,7 @@ class DeepLinksService {
                   };
                   paths.putIfAbsent(domainName, () => <Path>[]).add(
                         Path(
-                          path: aasaPath[_pathKey] as String,
+                          path: path!,
                           queryParams: queryParams,
                           isExcluded:
                               aasaPath[_isExcludedKey] as bool? ?? false,

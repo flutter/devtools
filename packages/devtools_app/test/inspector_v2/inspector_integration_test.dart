@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart'
-    hide InspectorScreen, InspectorScreenBodyState, InspectorScreenBody;
-import 'package:devtools_app/src/screens/inspector_v2/inspector_screen.dart';
+    hide InspectorScreenBodyState, InspectorScreenBody;
+import 'package:devtools_app/src/screens/inspector/inspector_screen_body.dart'
+    as legacy;
+import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_test/helpers.dart';
@@ -48,10 +50,14 @@ void main() {
 
   setUp(() async {
     await env.setupEnvironment();
+    // Enable the V2 inspector:
+    preferences.inspector.setInspectorV2Enabled(true);
   });
 
   tearDown(() async {
     await env.tearDownEnvironment(force: true);
+    // Re-set changes to preferences:
+    preferences.inspector.setInspectorV2Enabled(false);
   });
 
   group('screenshot tests', () {
@@ -257,6 +263,32 @@ void main() {
     },
   );
 
+  testWidgetsWithWindowSize(
+    'can revert to legacy inspector',
+    windowSize,
+    (WidgetTester tester) async {
+      await _loadInspectorUI(tester);
+
+      // Select the Center widget (row index #16)
+      await tester.tap(find.richText('Center'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Disable Inspector V2:
+      final disableSwitch = find.byType(DevToolsSwitch);
+      expect(disableSwitch, findsOneWidget);
+      await tester.tap(disableSwitch);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Verify the legacy inspector is visible:
+      await expectLater(
+        find.byType(legacy.InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/integration_inspector_v2_revert_to_legacy.png',
+        ),
+      );
+    },
+  );
+
   group('widget errors', () {
     testWidgetsWithWindowSize(
       'show navigator and error labels',
@@ -275,7 +307,6 @@ void main() {
         await tester.pumpWidget(
           wrapWithInspectorControllers(
             Builder(builder: screen.build),
-            v2: true,
           ),
         );
         await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -312,7 +343,6 @@ Future<void> _loadInspectorUI(WidgetTester tester) async {
   await tester.pumpWidget(
     wrapWithInspectorControllers(
       Builder(builder: screen.build),
-      v2: true,
     ),
   );
   await tester.pump(const Duration(seconds: 1));

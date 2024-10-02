@@ -167,6 +167,94 @@ const iosValidationResponseWithNoError = '''
               ],
               "isCaseSensitive": true,
               "isPercentEncoded": true
+            },
+            {
+              "queryParams": [
+                {
+                  "key": "dplnk",
+                  "value": "?*"
+                }
+              ],
+              "isCaseSensitive": true,
+              "isPercentEncoded": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+''';
+
+const iosValidationResponseWithWarning = '''
+{
+  "validationResults": [
+    {
+      "domainName": "example.com",
+      "passedChecks": [
+        {
+          "checkName": "HTTPS_ACCESSIBILITY",
+          "resultType": "PASSED",
+          "severityLevel": "ERROR"
+        },
+        {
+          "checkName": "NON_REDIRECT",
+          "resultType": "PASSED",
+          "severityLevel": "ERROR"
+        },
+        {
+          "checkName": "EXISTENCE",
+          "resultType": "PASSED",
+          "severityLevel": "ERROR"
+        },
+        {
+          "checkName": "APP_IDENTIFIER",
+          "resultType": "PASSED",
+          "severityLevel": "ERROR"
+        },
+        {
+          "checkName": "FILE_FORMAT",
+          "resultType": "PASSED",
+          "severityLevel": "ERROR"
+        }
+      ],
+      "failedChecks": [
+        {
+          "checkName": "DEFAULTS_FORMAT",
+          "resultType": "FAILED_INDEPENDENTLY",
+          "severityLevel": "WARNING"
+        }
+      ],
+      "status": "VALIDATION_COMPLETE",
+      "aasaAppPaths": [
+        {
+          "aasaAppId": {
+            "bundleId": "bundle.id",
+            "teamId": "AAABBB"
+          },
+          "aasaPaths": [
+            {
+              "path": "/ios-path1",
+              "queryParams": [
+                {
+                  "key": "dplnk",
+                  "value": "?*"
+                }
+              ],
+              "isCaseSensitive": true,
+              "isPercentEncoded": true
+            },
+            {
+              "path": "/ios-path2",
+              "isExcluded": true,
+              "queryParams": [
+                {
+                  "key": "dplnk",
+                  "value": "?*"
+                }
+              ],
+              "isCaseSensitive": true,
+              "isPercentEncoded": true
             }
           ]
         }
@@ -206,8 +294,100 @@ const iosValidationResponseWithError = '''
         },
         {
           "checkName": "FILE_FORMAT",
-          "resultType": "FAILED_PREREQUISITE_FAILURE",
-          "severityLevel": "ERROR"
+          "resultType": "FAILED_INDEPENDENTLY",
+          "severityLevel": "ERROR",
+          "subCheckResults": [
+            {
+              "checkName": "APPLINKS_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "ERROR"
+            },
+            {
+              "checkName": "DETAIL_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "ERROR"
+            },
+            {
+              "checkName": "DEFAULTS_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "DEFAULTS_PERCENT_ENCODED_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "DEFAULTS_CASE_SENSITIVE_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "DETAIL_PATHS_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "COMPONENT_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "COMPONENT_PATH_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "COMPONENT_QUERY_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "COMPONENT_FRAGMENT_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "COMPONENT_EXCLUDE_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "COMPONENT_COMMENT_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "COMPONENT_CASE_SENSITIVE_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "COMPONENT_PERCENT_ENCODED_FORMAT",
+              "resultType": "FAILED_INDEPENDENTLY",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "DETAIL_DEFAULTS_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "DETAIL_DEFAULTS_CASE_SENSITIVE_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "DETAIL_DEFAULTS_PERCENT_ENCODED_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            },
+            {
+              "checkName": "APPLINKS_SUBSTITUTION_VARIABLES_FORMAT",
+              "resultType": "PASSED",
+              "severityLevel": "WARNING"
+            }
+          ]
         }
       ],
       "status": "VALIDATION_COMPLETE",
