@@ -68,7 +68,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Deep links tool updates
 
-TODO: Remove this section if there are not any general updates.
+- Added support for validating ios deep link settings.
 
 ## VS Code Sidebar updates
 
