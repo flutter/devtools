@@ -304,9 +304,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             scaffold = DevToolsScaffold.withChild(
               embedMode: embedMode,
               child: CenteredMessage(
-                'No DevTools '
-                '${queryParams.hideAllExceptExtensions ? 'extensions' : 'screens'} '
-                'available for your project.',
+                message: 'No DevTools '
+                    '${queryParams.hideAllExceptExtensions ? 'extensions' : 'screens'} '
+                    'available for your project.',
               ),
             );
           } else {
@@ -426,7 +426,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       builder: (context, child) {
         if (child == null) {
           return const CenteredMessage(
-            'Uh-oh, something went wrong. Please refresh the page.',
+            message: 'Uh-oh, something went wrong. Please refresh the page.',
           );
         }
         return MultiProvider(

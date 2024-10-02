@@ -47,6 +47,12 @@ class ExtensionTestManager {
   ///     .dart_tool/             # Generated from 'pub get'
   ///       package_config.json   # Generated from 'pub get'
   ///     pubspec.yaml
+  ///   workspace_root/
+  ///     .dart_tool/             # Generated from 'pub get'
+  ///       package_config.json   # Generated from 'pub get'
+  ///     pubspec.yaml            # Defines workspace
+  ///     wokspace_member
+  ///       pubspec.yaml
   /// extensions/
   ///   static_extension_1/
   ///     extension/
@@ -90,7 +96,7 @@ class ExtensionTestManager {
     expect(testDirectoryContents.length, 2);
     final packageRoots =
         Directory.fromUri(packagesRootUri).listSync().whereType<Directory>();
-    expect(packageRoots.length, 3);
+    expect(packageRoots.length, 4);
 
     for (final packageRoot in packageRoots) {
       expect(File(p.join(packageRoot.path, 'pubspec.yaml')).existsSync(), true);
@@ -129,6 +135,12 @@ class ExtensionTestManager {
   ///     .dart_tool/             # Generated from 'pub get'
   ///       package_config.json   # Generated from 'pub get'
   ///     pubspec.yaml
+  ///   workspace_root/
+  ///     .dart_tool/             # Generated from 'pub get'
+  ///       package_config.json   # Generated from 'pub get'
+  ///     pubspec.yaml            # Defines workspace
+  ///     workspace_member/
+  ///       pubspec.yaml
   void _setupPackages({
     required bool includeDependenciesWithExtensions,
     required bool includeBadExtension,
@@ -152,6 +164,45 @@ class ExtensionTestManager {
         includeDependenciesWithExtensions: includeDependenciesWithExtensions,
       ),
     );
+    setupWorkspace(
+      createTestPackageFrom(
+        workspaceMember,
+        includeDependenciesWithExtensions: includeDependenciesWithExtensions,
+      ),
+    );
+  }
+
+  void setupWorkspace(TestPackage package) {
+    File(
+      p.join(
+        testDirectory.path,
+        'packages',
+        'workspace_root',
+        'pubspec.yaml',
+      ),
+    )
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+name: _
+environment:
+  sdk: "^3.5.0"
+workspace:
+  - ${package.name}
+''');
+    File(
+      p.join(
+        testDirectory.path,
+        'packages',
+        'workspace_root',
+        package.name,
+        'pubspec.yaml',
+      ),
+    )
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+${package.pubspecContent}
+resolution: workspace
+''');
   }
 
   /// extensions/
@@ -239,6 +290,7 @@ TestPackage createTestPackageFrom(
     name: originalPackage.name,
     dependencies:
         includeDependenciesWithExtensions ? originalPackage.dependencies : [],
+    pathToExtensions: originalPackage.pathToExtensions,
   );
 }
 
@@ -257,6 +309,11 @@ final otherRoot1Package = TestPackage(
 final otherRoot2Package = TestPackage(
   name: 'other_root_2',
   dependencies: [newerStaticExtension1Package],
+);
+final workspaceMember = TestPackage(
+  name: 'workspace_member',
+  dependencies: [staticExtension1Package],
+  pathToExtensions: '../../../extensions',
 );
 
 final driftPackage = TestPackageWithExtension(
@@ -355,15 +412,20 @@ environment:
 }
 
 class TestPackage {
-  const TestPackage({required this.name, required this.dependencies});
+  const TestPackage({
+    required this.name,
+    required this.dependencies,
+    this.pathToExtensions = '../../extensions',
+  });
 
   final String name;
   final List<TestPackageWithExtension> dependencies;
+  final String pathToExtensions;
 
   String get pubspecContent => '''
 name: $name
 environment:
-  sdk: ">=3.4.0-282.1.beta <4.0.0"
+  sdk: "^3.5.0"
 dependencies:
 ${_dependenciesAsString()}
 ''';
@@ -378,7 +440,7 @@ ${_dependenciesAsString()}
         sb
           ..writeln() // Add a new line for the path dependency.
           ..writeln(
-            '    path: ../../extensions/${dep.relativePathFromExtensions}',
+            '    path: $pathToExtensions/${dep.relativePathFromExtensions}',
           );
       }
     }

@@ -55,7 +55,7 @@ class TimelineEventsController extends PerformanceFeatureController
   static const rasterThreadSuffix = '.raster';
   static const gpuThreadSuffix = '.gpu';
   static const platformThreadSuffix = '.platform';
-  static const flutterTestThreadSuffix = '.flutter.test..platform';
+  static const flutterTestThreadSuffix = '.flutter.test..ui';
   static final _refreshWorkTrackerDelay =
       const Duration(milliseconds: 500).inMicroseconds;
 
@@ -281,7 +281,8 @@ class TimelineEventsController extends PerformanceFeatureController
       // Android: "1.ui (12652)"
       // iOS: "io.flutter.1.ui (12652)"
       // MacOS, Linux, Windows, Dream (g3): "io.flutter.ui (225695)"
-      if (name.contains(uiThreadSuffix)) {
+      if (name.contains(uiThreadSuffix) &&
+          !name.contains(flutterTestThreadSuffix)) {
         uiTrackId = id;
       }
 
