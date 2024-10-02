@@ -25,7 +25,7 @@ show. - [#8277](https://github.com/flutter/devtools/pull/8277)
 * Added support for loading extensions in pub workspaces
   [8347](https://github.com/flutter/devtools/pull/8347).
 
-* Mapped error stacktraces to use the Dart sourcecode locations so that they are human-
+* Mapped error stacktraces to use the Dart source code locations so that they are human-
   readable. - [#8385](https://github.com/flutter/devtools/pull/8385)
 
 ## Inspector updates
