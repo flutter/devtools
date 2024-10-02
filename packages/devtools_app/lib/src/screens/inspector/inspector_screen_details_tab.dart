@@ -15,7 +15,7 @@ import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/tab.dart';
 import 'inspector_controller.dart';
-import 'inspector_screen.dart';
+import 'inspector_screen_body.dart';
 import 'layout_explorer/layout_explorer.dart';
 
 class InspectorDetails extends StatelessWidget {

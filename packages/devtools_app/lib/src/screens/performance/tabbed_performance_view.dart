@@ -136,7 +136,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                         controller.flutterFramesController.displayRefreshRate,
                   )
                 : const CenteredMessage(
-                    'Select a frame above to view analysis data.',
+                    message: 'Select a frame above to view analysis data.',
                   ),
           ),
           featureController: null,

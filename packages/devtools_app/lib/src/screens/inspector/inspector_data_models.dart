@@ -96,7 +96,7 @@ List<double> computeRenderSizes({
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
       : description = node.description,
-        size = node.size,
+        size = node.size!,
         constraints = node.constraints,
         isFlex = node.isFlex,
         flexFactor = node.flexFactor,
@@ -605,7 +605,9 @@ class FlexLayoutProperties extends LayoutProperties {
 
       if (crossAxisAlignment == CrossAxisAlignment.start ||
           crossAxisAlignment == CrossAxisAlignment.stretch ||
-          maxDimension == usedDimension) return 0.0;
+          maxDimension == usedDimension) {
+        return 0.0;
+      }
       final emptySpace = math.max(0.0, maxDimension - usedDimension);
       if (crossAxisAlignment == CrossAxisAlignment.end) return emptySpace;
       return emptySpace * 0.5;
@@ -678,7 +680,9 @@ class FlexLayoutProperties extends LayoutProperties {
       if (dimension(crossAxisDirection) ==
               displayChildren[i].dimension(crossAxisDirection) ||
           childrenRenderProperties[i].crossAxisDimension ==
-              maxSizeAvailable(crossAxisDirection)) continue;
+              maxSizeAvailable(crossAxisDirection)) {
+        continue;
+      }
 
       final renderProperties = childrenRenderProperties[i];
       final space = renderProperties.clone()..isFreeSpace = true;

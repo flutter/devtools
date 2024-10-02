@@ -652,6 +652,8 @@ class ServiceManager<T extends VmService> {
 
   // TODO(kenz): consider caching this value for the duration of the VM service
   // connection.
+  // TODO(https://github.com/dart-lang/sdk/issues/56784) there should be a
+  // vm-service call doing this.
   /// Returns the root package directory for the main isolate.
   ///
   /// If a non-null value is returned, the value will be a file URI String and

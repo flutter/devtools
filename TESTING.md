@@ -1,5 +1,4 @@
-Testing for DevTools
-=======================
+# Testing for DevTools
 
 DevTools is test covered by multiple types of tests, all of which are run on the CI for each DevTools PR / commit:
 
@@ -24,15 +23,21 @@ before writing new integration tests, which are slower to run and are not as eas
 Before running tests, make sure your Flutter SDK matches the version that will be used on
 the CI. To update your local flutter version, run:
 
+```shell
+devtools_tool update-flutter-sdk --update-on-path
 ```
-./tool/update_flutter_sdk.sh --local
+
+> Note: Running this command requires that you have followed the [set up instructions](CONTRIBUTING.md#set-up-your-devtools-environment) in the DevTools contributing guide regarding cloning the Flutter SDK from GitHub, adding the `devtools_tool` executable to your PATH, and running `dart pub get` in the `tool` directory.
+
+You may need to re-generate the testing mocks before running the tests:
+
+```shell
+devtools_tool generate-code --upgrade
 ```
-> Note: Running this command requires that you have followed the [set up instructions](CONTRIBUTING.md#set-up-your-devtools-environment)
-in the DevTools contributing guide regarding cloning the Flutter SDK from GitHub.
 
 Now you can proceed with running DevTools tests:
 
-```
+```shell
 cd packages/devtools_app
 flutter test test/
 ```
@@ -51,11 +56,11 @@ For valid golden image updates (1 and 2 above), the failing golden images will n
 be done in one of two ways:
 
 1. If the tests failed on the CI for a PR, we can download the generated golden images directly from GitHub.
-    > If you are developing on a non-MacOS machine, this is the only way you'll be able to update the golden images. 
-    - Natvigate to the failed Actions run for your PR on GitHub. Example:
+    > If you are developing on a non-MacOS machine, this is the only way you'll be able to update the golden images.
+    - Navigate to the failed Actions run for your PR on GitHub. Example:
 
         ![Failed actions run](_markdown_images/failed_actions_run.png)
-    
+
     - Scroll to the bottom of the Summary view to see the errors from the `macos goldens` job, and the notice containing the golden update command:
 
         ![Failed goldens notice](_markdown_images/failed_goldens_notice.png)
@@ -65,18 +70,19 @@ be done in one of two ways:
     - Before updating the goldens, ensure your version of Flutter matches the version of Flutter that is used
     on the CI. To update your local flutter version, run:
 
-        ```
-        ./tool/update_flutter_sdk.sh --local
+        ```shell
+        devtools_tool update-flutter-sdk --update-on-path
         ```
 
     - Then proceed with updating the goldens:
 
-        ```
+        ```shell
         flutter test <path/to/my/test> --update-goldens
         ```
 
         or to update goldens for all tests:
-        ```
+
+        ```shell
         flutter test test/ --update-goldens
         ```
 
@@ -85,7 +91,6 @@ be done in one of two ways:
 When you add a new feature or fix a bug, please add a corresponding test for your change.
 
 - If there is an existing test file for the feature your code touches, you can add the test case
-there. 
+there.
 - Otherwise, create a new test file with the `_test.dart` suffix, and place it in an appropriate
 location under the `test/` directory for the DevTools package you are working on.
-

@@ -4,7 +4,7 @@ publish_to: none
 
 # Note: this version should only be updated by running tools/update_version.dart
 # that updates all versions of devtools packages (devtools_app, devtools_test).
-version: 2.40.0-dev.1
+version: 2.40.0-dev.2
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -31,8 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_markdown: ^0.7.1
-  # TODO: https://github.com/flutter/devtools/issues/4569 - unpin this version
-  flutter_riverpod: 2.0.0-dev.9
   flutter_web_plugins:
     sdk: flutter
   http: ^1.1.0
@@ -41,7 +39,7 @@ dependencies:
   json_rpc_2: ^3.0.2
   logging: ^1.1.1
   meta: ^1.9.1
-  mime: ^1.0.0
+  mime: ^2.0.0
   path: ^1.8.0
   perfetto_ui_compiled:
     path: ../../third_party/packages/perfetto_ui_compiled

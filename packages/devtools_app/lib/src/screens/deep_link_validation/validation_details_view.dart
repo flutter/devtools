@@ -181,9 +181,39 @@ class _DomainCheckTable extends StatelessWidget {
                   for (final error
                       in linkData.domainErrors.whereType<IosDomainError>())
                     _IssuesBorderWrap(
-                      children: [
-                        _FailureDetails(errors: [error]),
-                      ],
+                      children: error == IosDomainError.existence
+                          ? [
+                              _FailureDetails(
+                                errors: [error],
+                                oneFixGuideForAll:
+                                    'To fix this issue, add an Apple-App-Site-Association file at the following location: '
+                                    'https://${controller.selectedLink.value!.domain}/.well-known/apple-app-site-association',
+                              ),
+                              const SizedBox(height: denseSpacing),
+                              _CodeCard(
+                                content: '''{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "${controller.teamId}.${controller.bundleId}"
+        ],
+        "components": [
+          {
+            "/": "*"
+          }
+        ]
+      }
+    ]
+  }
+}''',
+                              ),
+                            ]
+                          : [
+                              _FailureDetails(
+                                errors: [error, ...error.subcheckErrors],
+                              ),
+                            ],
                     ),
                 ],
               ),

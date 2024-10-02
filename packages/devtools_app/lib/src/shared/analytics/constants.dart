@@ -121,6 +121,7 @@ const vmDeveloperMode = 'vmDeveloperMode';
 const wasm = 'wasm';
 const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
+const inspectorV2Enabled = 'inspectorV2Enabled';
 const clearLogs = 'clearLogs';
 const copyLogs = 'copyLogs';
 

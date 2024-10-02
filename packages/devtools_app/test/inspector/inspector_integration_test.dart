@@ -41,6 +41,8 @@ void main() {
 
   setUp(() async {
     await env.setupEnvironment();
+    // Ensure the legacy inspector is enabled:
+    preferences.inspector.setInspectorV2Enabled(false);
   });
 
   tearDownAll(() async {

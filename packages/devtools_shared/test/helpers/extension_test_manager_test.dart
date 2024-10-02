@@ -179,7 +179,7 @@ materialIconCodePoint: 58634
         '''
 name: my_app
 environment:
-  sdk: ">=3.4.0-282.1.beta <4.0.0"
+  sdk: "^3.5.0"
 dependencies:
   drift: 2.16.0
   provider: 6.1.2
@@ -198,7 +198,7 @@ dependencies:
         '''
 name: my_app
 environment:
-  sdk: ">=3.4.0-282.1.beta <4.0.0"
+  sdk: "^3.5.0"
 dependencies:
   drift: 2.16.0
   provider: 6.1.2
@@ -219,7 +219,7 @@ dependencies:
         '''
 name: other_root_1
 environment:
-  sdk: ">=3.4.0-282.1.beta <4.0.0"
+  sdk: "^3.5.0"
 dependencies:
   static_extension_1:
     path: ../../extensions/static_extension_1
@@ -238,7 +238,7 @@ dependencies:
         '''
 name: other_root_2
 environment:
-  sdk: ">=3.4.0-282.1.beta <4.0.0"
+  sdk: "^3.5.0"
 dependencies:
   static_extension_1:
     path: ../../extensions/newer/static_extension_1
@@ -257,7 +257,7 @@ dependencies:
         '''
 name: my_app
 environment:
-  sdk: ">=3.4.0-282.1.beta <4.0.0"
+  sdk: "^3.5.0"
 dependencies:
 
 ''',
@@ -271,7 +271,7 @@ dependencies:
         '''
 name: my_app
 environment:
-  sdk: ">=3.4.0-282.1.beta <4.0.0"
+  sdk: "^3.5.0"
 dependencies:
 
 ''',
@@ -285,7 +285,7 @@ dependencies:
         '''
 name: other_root_1
 environment:
-  sdk: ">=3.4.0-282.1.beta <4.0.0"
+  sdk: "^3.5.0"
 dependencies:
 
 ''',
@@ -299,7 +299,7 @@ dependencies:
         '''
 name: other_root_2
 environment:
-  sdk: ">=3.4.0-282.1.beta <4.0.0"
+  sdk: "^3.5.0"
 dependencies:
 
 ''',

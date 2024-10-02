@@ -319,6 +319,11 @@ class InspectorTreeController extends DisposableController
 
   void navigateLeft() {
     final selectionLocal = selection;
+    final diagnostic = selectionLocal?.diagnostic;
+
+    final toggledHideableGroup =
+        _maybeToggleHideableGroup(diagnostic, showGroup: false);
+    if (toggledHideableGroup) return;
 
     // This logic is consistent with how IntelliJ handles tree navigation on
     // on left arrow key press.
@@ -342,10 +347,15 @@ class InspectorTreeController extends DisposableController
   }
 
   void navigateRight() {
+    final selectionLocal = selection;
+    final diagnostic = selectionLocal?.diagnostic;
+
+    final toggledHideableGroup =
+        _maybeToggleHideableGroup(diagnostic, showGroup: true);
+    if (toggledHideableGroup) return;
+
     // This logic is consistent with how IntelliJ handles tree navigation on
     // on right arrow key press.
-
-    final selectionLocal = selection;
 
     if (selectionLocal == null || selectionLocal.isExpanded) {
       _navigateHelper(1);
@@ -371,6 +381,31 @@ class InspectorTreeController extends DisposableController
         return true;
       },
     );
+  }
+
+  /// Given [shouldShow], toggles the visibility of a hideable group.
+  ///
+  /// Returns a [bool] representing whether or not the group was toggled.
+  bool _maybeToggleHideableGroup(
+    RemoteDiagnosticsNode? diagnostic, {
+    required bool showGroup,
+  }) {
+    final isHideableGroupLeader =
+        diagnostic != null && diagnostic.isHideableGroupLeader;
+    final shouldToggle = isHideableGroupLeader &&
+        (showGroup ? diagnostic.groupIsHidden : !diagnostic.groupIsHidden);
+
+    if (shouldToggle) {
+      refreshTree(
+        updateTreeAction: () {
+          diagnostic.toggleHiddenGroup();
+          return true;
+        },
+      );
+      return true;
+    }
+
+    return false;
   }
 
   double get horizontalPadding => 10.0;
@@ -542,7 +577,7 @@ class InspectorTreeController extends DisposableController
 
   void scrollToRect(Rect targetRect) {
     for (final client in _clients) {
-      client.scrollToRect(targetRect);
+      client.waitForClientsThenScrollToRect(targetRect);
     }
   }
 
@@ -818,16 +853,21 @@ extension RemoteDiagnosticsNodeExtension on RemoteDiagnosticsNode {
 abstract class InspectorControllerClient {
   void scrollToRect(Rect rect);
 
+  void waitForClientsThenScrollToRect(Rect rect, {int retries});
+
   void requestFocus();
 }
 
 class InspectorTree extends StatefulWidget {
   const InspectorTree({
     super.key,
+    required this.controller,
     required this.treeController,
     this.widgetErrors,
     this.screenId,
   });
+
+  final InspectorController controller;
 
   final InspectorTreeController? treeController;
 
@@ -843,9 +883,9 @@ class _InspectorTreeState extends State<InspectorTree>
     with
         SingleTickerProviderStateMixin,
         AutomaticKeepAliveClientMixin<InspectorTree>,
-        AutoDisposeMixin,
-        ProvidedControllerMixin<InspectorController, InspectorTree>
+        AutoDisposeMixin
     implements InspectorControllerClient {
+  InspectorController get controller => widget.controller;
   InspectorTreeController? get treeController => widget.treeController;
 
   late ScrollController _scrollControllerY;
@@ -878,12 +918,10 @@ class _InspectorTreeState extends State<InspectorTree>
         readyWhen: (triggerValue) => !triggerValue,
       );
     }
-  }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.animateTo(controller.selectedNode.value);
+    });
   }
 
   @override
@@ -933,6 +971,19 @@ class _InspectorTreeState extends State<InspectorTree>
 //  }
 
   @override
+  Future<void> waitForClientsThenScrollToRect(
+    Rect rect, {
+    int retries = 5,
+  }) async {
+    if (_scrollControllerY.hasClients || _scrollControllerX.hasClients) {
+      return scrollToRect(rect);
+    }
+    if (retries == 0) return;
+    await Future.delayed(const Duration(milliseconds: 20));
+    return waitForClientsThenScrollToRect(rect, retries: retries - 1);
+  }
+
+  @override
   Future<void> scrollToRect(Rect rect) async {
     if (rect == _currentAnimateTarget) {
       // We are in the middle of an animation to this exact rectangle.
@@ -955,9 +1006,14 @@ class _InspectorTreeState extends State<InspectorTree>
       safeViewportHeight,
     );
 
+    // Decide to scroll based on whether the middle of the center-left half of
+    // the row is visible. See https://github.com/flutter/devtools/pull/8367.
+    final centerLeftHalf = Offset(
+      (rect.centerLeft.dx + rect.center.dx) / 2,
+      rect.center.dy,
+    );
     final isRectInViewPort =
-        viewPortInScrollControllerSpace.contains(rect.topLeft) &&
-            viewPortInScrollControllerSpace.contains(rect.bottomRight);
+        viewPortInScrollControllerSpace.contains(centerLeftHalf);
     if (isRectInViewPort) {
       // The rect is already in view, don't scroll
       return;
@@ -1352,7 +1408,7 @@ class InspectorRowContent extends StatelessWidget {
         valueListenable: controller.searchNotifier,
         builder: (context, searchValue, _) {
           return Opacity(
-            opacity: searchValue.isEmpty || row.isSearchMatch ? 1 : 0.2,
+            opacity: searchValue.isEmpty || row.isSearchMatch ? 1 : 0.6,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
