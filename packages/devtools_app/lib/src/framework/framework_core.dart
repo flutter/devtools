@@ -30,7 +30,8 @@ import '../shared/scripts/script_manager.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/survey.dart';
 import '../shared/utils.dart';
-import 'app_error_handling.dart';
+import 'app_error_handling.dart' as error_handling;
+import 'theme_manager.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
 
@@ -72,6 +73,7 @@ abstract class FrameworkCore {
   static void dispose() {
     extensionService.dispose();
     preferences.dispose();
+    _themeManager?.dispose();
     unawaited(dtdManager.dispose());
   }
 
@@ -92,6 +94,8 @@ abstract class FrameworkCore {
   }
 
   static bool vmServiceInitializationInProgress = false;
+
+  static EditorThemeManager? _themeManager;
 
   /// Attempts to initialize a VM service connection and return whether the
   /// connection attempt succeeded.
@@ -178,20 +182,26 @@ Future<void> _initDTDConnection() async {
             'Failed to connect to the Dart Tooling Daemon',
             isReportable: false,
           );
-          reportError(
+          error_handling.reportError(
             e,
             errorType: 'Dart Tooling Daemon connection failed.',
             stack: st,
           );
         },
       );
+
+      if (dtdManager.connection.value != null) {
+        FrameworkCore._themeManager =
+            EditorThemeManager(dtdManager.connection.value!)
+              ..listenForThemeChanges();
+      }
     } else {
       _log.info('No DTD uri provided from the server during initialization.');
     }
   } catch (e, st) {
     // Dtd failing to connect does not interfere with devtools starting up so
     // catch any errors and report them.
-    reportError(
+    error_handling.reportError(
       e,
       errorType: 'Failed to initialize the DTD connection.',
       stack: st,

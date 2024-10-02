@@ -93,3 +93,16 @@ class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
   /// The id of the [InspectorTreeController], for which this event is tracking.
   final int? inspectorTreeControllerId;
 }
+
+class DeepLinkScreenMetrics extends ScreenAnalyticsMetrics {
+  DeepLinkScreenMetrics({
+    this.androidAppId,
+    this.iosBundleId,
+  });
+
+  /// The Android app id of the Flutter project.
+  final String? androidAppId;
+
+  /// The iOS bundle id of the Flutter project.
+  final String? iosBundleId;
+}
