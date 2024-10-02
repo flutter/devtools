@@ -29,6 +29,7 @@ class InspectorControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final activeButtonColor =
         Theme.of(context).colorScheme.activeToggleButtonColor;
+    final isInspectorV2 = controller != null;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -49,11 +50,11 @@ class InspectorControls extends StatelessWidget {
               minScreenWidthForTextBeforeScaling:
                   minScreenWidthForTextBeforeScaling,
               minScreenWidthForTextBeforeTruncating:
-                  minScreenWidthForTextBeforeTruncating,
+                  isInspectorV2 ? minScreenWidthForTextBeforeTruncating : null,
             );
           },
         ),
-        if (controller != null) ...[
+        if (isInspectorV2) ...[
           const SizedBox(width: defaultSpacing),
           ShowImplementationWidgetsButton(controller: controller!),
         ],
