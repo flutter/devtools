@@ -8,7 +8,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 
 import '../../shared/http/http_request_data.dart';
 
-/// Class to encapsulate offline data for the NetworkController.
+/// Class to encapsulate offline data for the [NetworkController].
 /// It is responsible for serializing and deserializing offline network data.
 class OfflineNetworkData with Serializable {
   OfflineNetworkData({
