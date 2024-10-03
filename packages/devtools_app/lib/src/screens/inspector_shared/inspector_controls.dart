@@ -29,7 +29,7 @@ class InspectorControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final activeButtonColor =
         Theme.of(context).colorScheme.activeToggleButtonColor;
-    final isInspectorV2 = controller != null;
+    final isInspectorV2 = controller != null && FeatureFlags.inspectorV2;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
