@@ -173,7 +173,7 @@ class NetworkController extends DisposableController
         await maybeLoadOfflineData(
           NetworkScreen.id,
           createData: (json) => OfflineNetworkData.fromJson(json),
-          shouldLoad: (data) => data != null,
+          shouldLoad: (data) => !data.isEmpty,
           loadData: (data) => loadOfflineData(data),
         );
       }

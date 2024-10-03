@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:devtools_shared/devtools_shared.dart';
 
 import '../../shared/http/http_request_data.dart';
+import '../../shared/primitives/utils.dart';
 
 /// Class to encapsulate offline data for the [NetworkController].
 /// It is responsible for serializing and deserializing offline network data.
@@ -36,6 +37,7 @@ class OfflineNetworkData with Serializable {
       recording: json['recording'] as bool? ?? false,
     );
   }
+  bool get isEmpty => requests.isNullOrEmpty;
 
   /// List of current [DartIOHttpRequestData] network requests.
   final List<DartIOHttpRequestData> requests;
