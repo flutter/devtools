@@ -54,7 +54,8 @@ extension BuildCommandArgsExtension on ArgParser {
   void addWasmFlag() {
     addFlag(
       BuildCommandArgs.wasm.flagName,
-      defaultsTo: false,
+      defaultsTo: true,
+      negatable: true,
       help: 'Whether to build DevTools with dart2wasm instead of dart2js.',
     );
   }
