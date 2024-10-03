@@ -45,7 +45,9 @@ extension BenchmarkScoreExtension on BenchmarkScore {
       value.toString(), // Value
       delta?.toString() ?? '', // Delta value
       // value - delta represents the baseline score.
-      delta != null ? (delta! / (value - delta!)).toString() : '', // Delta % value
+      delta != null
+          ? (delta! / (value - delta!)).toString()
+          : '', // Delta % value
     ];
   }
 }
