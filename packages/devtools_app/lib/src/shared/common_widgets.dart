@@ -1716,6 +1716,7 @@ class SwitchSetting extends StatelessWidget {
     this.gaItem,
     this.activeColor,
     this.inactiveColor,
+    this.minScreenWidthForTextBeforeScaling,
   });
 
   final ValueNotifier<bool> notifier;
@@ -1734,6 +1735,8 @@ class SwitchSetting extends StatelessWidget {
 
   final Color? inactiveColor;
 
+  final double? minScreenWidthForTextBeforeScaling;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1742,16 +1745,20 @@ class SwitchSetting extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(
-            child: RichText(
-              overflow: TextOverflow.visible,
-              maxLines: 3,
-              text: TextSpan(
-                text: title,
-                style: theme.regularTextStyle,
+          if (isScreenWiderThan(
+            context,
+            minScreenWidthForTextBeforeScaling,
+          ))
+            Flexible(
+              child: RichText(
+                overflow: TextOverflow.visible,
+                maxLines: 3,
+                text: TextSpan(
+                  text: title,
+                  style: theme.regularTextStyle,
+                ),
               ),
             ),
-          ),
           NotifierSwitch(
             padding: const EdgeInsets.only(left: borderPadding),
             activeColor: activeColor,
