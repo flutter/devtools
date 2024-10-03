@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/import_export/import_export.dart';
@@ -23,6 +24,9 @@ import 'har_network_data.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
+import 'offline_network_data.dart';
+
+final _log = Logger('http_request_data');
 
 /// Different types of Network Response which can be used to visualise response
 /// on Response tab
@@ -53,6 +57,7 @@ class NetworkController extends DisposableController
         OfflineScreenControllerMixin,
         AutoDisposeControllerMixin {
   NetworkController() {
+    _initHelper();
     _networkService = NetworkService(this);
     _currentNetworkRequests = CurrentNetworkRequests();
     addAutoDisposeListener(
@@ -161,6 +166,47 @@ class NetworkController extends DisposableController
 
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
+
+  void _initHelper() async {
+    try {
+      if (offlineDataController.showingOfflineData.value == true) {
+        await maybeLoadOfflineData(
+          NetworkScreen.id,
+          createData: (json) => OfflineNetworkData.fromJson(json),
+          shouldLoad: (data) => data != null,
+          loadData: (data) => loadOfflineData(data),
+        );
+      }
+      cancelListeners();
+      if (!offlineDataController.showingOfflineData.value) {
+        unawaited(startRecording());
+        debugPrint('started recording');
+        addAutoDisposeListener(
+          serviceConnection.serviceManager.isolateManager.mainIsolate,
+          () {
+            if (serviceConnection
+                    .serviceManager.isolateManager.mainIsolate.value !=
+                null) {
+              unawaited(startRecording());
+            }
+          },
+        );
+      }
+    } catch (e) {
+      _log.shout('Could not load offline data: $e');
+    }
+  }
+
+  void loadOfflineData(OfflineNetworkData offlineData) {
+    filteredData
+      ..clear()
+      ..addAll(offlineData.requests);
+
+    if (offlineData.selectedRequestId != null) {
+      selectedRequest.value =
+          _currentNetworkRequests.getRequest(offlineData.selectedRequestId!);
+    }
+  }
 
   @visibleForTesting
   void processNetworkTrafficHelper(
@@ -392,23 +438,17 @@ class NetworkController extends DisposableController
 
   @override
   OfflineScreenData prepareOfflineScreenData() {
-    final requests =
-        filteredData.value.whereType<DartIOHttpRequestData>().toList();
+    final offlineData = OfflineNetworkData(
+      requests: filteredData.value.whereType<DartIOHttpRequestData>().toList(),
+      selectedRequestId: selectedRequest.value?.id,
+    );
+
     return OfflineScreenData(
       screenId: NetworkScreen.id,
-      data: serializeRequestDataForOfflineMode(requests),
+      data: offlineData.toJson(),
     );
   }
-}
 
-Map<String, Object> serializeRequestDataForOfflineMode(
-  List<DartIOHttpRequestData>? requests,
-) {
-  if (requests == null) return {};
-  return {
-    'requests': requests.map((request) => request.toJson()).toList(),
-  };
-  
   Future<void> _fetchFullDataBeforeExport() => Future.wait(
         filteredData.value
             .whereType<DartIOHttpRequestData>()

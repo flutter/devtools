@@ -8,7 +8,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
@@ -29,8 +28,6 @@ import '../../shared/utils.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
-
-final _log = Logger('http_request_data');
 
 class NetworkScreen extends Screen {
   NetworkScreen() : super.fromMetaData(ScreenMetaData.network);
@@ -126,45 +123,6 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    try {
-      if (offlineDataController.showingOfflineData.value == true) {
-        loadOfflineData(offlineDataController.offlineDataJson);
-      }
-      cancelListeners();
-      if (!offlineDataController.showingOfflineData.value) {
-        unawaited(controller.startRecording());
-        debugPrint('started recording');
-        addAutoDisposeListener(
-          serviceConnection.serviceManager.isolateManager.mainIsolate,
-          () {
-            if (serviceConnection
-                    .serviceManager.isolateManager.mainIsolate.value !=
-                null) {
-              unawaited(controller.startRecording());
-            }
-          },
-        );
-      }
-    } catch (e) {
-      _log.shout('Could not load offline data: $e');
-    }
-  }
-
-  void loadOfflineData(Map<String, dynamic> offlineData) {
-    final requestsMap = (offlineData['network']
-        as Map<String, dynamic>)['requests'] as List<dynamic>;
-    final requests = requestsMap
-        .map(
-          (e) => DartIOHttpRequestData.fromJson(
-            e as Map<String, dynamic>,
-            null,
-            null,
-          ),
-        )
-        .toList();
-    controller.filteredData
-      ..clear()
-      ..addAll(requests);
   }
 
   @override
