@@ -204,7 +204,6 @@ class LoggingController extends DisposableController
   }
 
   void clear() {
-    resetFilter();
     _updateData([]);
     serviceConnection.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
