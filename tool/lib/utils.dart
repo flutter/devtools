@@ -94,8 +94,8 @@ class CliCommand {
       // Handling https://github.com/dart-lang/sdk/issues/54493
       // Platform.script.toFilePath() duplicates next to current directory, when run recursively from itself.
       toolPath = toolPath.replaceAll(
-        'devtools/tool/tool/bin/devtools_tool.dart',
-        'devtools/tool/bin/devtools_tool.dart',
+        'devtools/tool/tool/bin/dt.dart',
+        'devtools/tool/bin/dt.dart',
       );
     }
 
