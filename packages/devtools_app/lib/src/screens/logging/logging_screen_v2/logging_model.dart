@@ -170,7 +170,7 @@ class LoggingTableModel extends DisposableController
   ObjectGroup get objectGroup =>
       serviceConnection.consoleService.objectGroup as ObjectGroup;
 
-  final _logs = ListQueue<_LogEntry>();
+  final _logs = ListQueue<LogDataV2>();
 
   /// [FilterControllerMixin] uses [ListValueNotifier] which isn't well optimized to the
   /// retention limit behavior that [LoggingTableModel] uses. So we use
@@ -179,7 +179,7 @@ class LoggingTableModel extends DisposableController
   /// we use [_filteredLogs]. After any changes are done to [_filteredLogs], [notifyListeners]
   /// must be manually triggered, since the listener behaviour is accomplished by the
   /// [LoggingTableModel] being a [ChangeNotifier].
-  final _filteredLogs = ListQueue<_FilteredLogEntry>();
+  final _filteredLogs = ListQueue<LogDataV2>();
 
   final _selectedLogs = ListQueue<LogDataV2>();
   late int _retentionLimit;
@@ -464,16 +464,15 @@ class LoggingTableModel extends DisposableController
   }
 
   void add(LogDataV2 log) {
-    final newEntry = _LogEntry(log);
-    _logs.add(newEntry);
+    _logs.add(log);
     getLogHeight(_logs.length - 1);
     _trimOneOutOfRetentionLog();
 
-    if (!_filterCallback(newEntry)) {
+    if (!_filterCallback(log)) {
       // Only add the log to filtered logs if it matches the filter.
       return;
     }
-    _filteredLogs.add(_FilteredLogEntry(newEntry));
+    _filteredLogs.add(log);
 
     // TODO(danchevalier): Calculate the new offset here
 
@@ -604,9 +603,7 @@ class LoggingTableModel extends DisposableController
 
     _filteredLogs
       ..clear()
-      ..addAll(
-        _logs.where(_filterCallback).map((e) => _FilteredLogEntry(e)).toList(),
-      );
+      ..addAll(_logs.where(_filterCallback).toList());
 
     _recalculateOffsets();
 
@@ -615,10 +612,9 @@ class LoggingTableModel extends DisposableController
     notifyListeners();
   }
 
-  bool _filterCallback(_LogEntry entry) {
+  bool _filterCallback(LogDataV2 log) {
     final filter = activeFilter.value;
 
-    final log = entry.log;
     final filteredOutByToggleFilters = filter.toggleFilters.any(
       (toggleFilter) =>
           toggleFilter.enabled.value && !toggleFilter.includeCallback(log),
@@ -672,8 +668,7 @@ class LoggingTableModel extends DisposableController
   }
 
   /// Get the filtered log at [index].
-  LogDataV2 filteredLogAt(int index) =>
-      _filteredLogs.elementAt(index).logEntry.log;
+  LogDataV2 filteredLogAt(int index) => _filteredLogs.elementAt(index);
 
   double _tableWidth = 0.0;
 
@@ -690,7 +685,7 @@ class LoggingTableModel extends DisposableController
 
   void _trimOneOutOfRetentionLog() {
     if (_logs.length > _retentionLimit) {
-      if (identical(_logs.first.log, _filteredLogs.first.logEntry.log)) {
+      if (identical(_logs.first, _filteredLogs.first)) {
         // Remove a filtered log if it is about to go out of retention.
         _filteredLogs.removeFirst();
       }
@@ -713,11 +708,11 @@ class LoggingTableModel extends DisposableController
   }
 
   double getLogHeight(int index) {
-    final entry = _logs.elementAt(index);
-    final cachedHeight = entry.height;
+    final log = _logs.elementAt(index);
+    final cachedHeight = log.height;
     if (cachedHeight != null) return cachedHeight;
-    return entry.height ??= LoggingTableRow.estimateRowHeight(
-      entry.log,
+    return log.height ??= LoggingTableRow.estimateRowHeight(
+      log,
       _tableWidth,
     );
   }
@@ -725,11 +720,11 @@ class LoggingTableModel extends DisposableController
   /// Get the height of a filtered Log at [index].
   double getFilteredLogHeight(int index) {
     final filteredLog = _filteredLogs.elementAt(index);
-    final cachedHeight = filteredLog.logEntry.height;
+    final cachedHeight = filteredLog.height;
     if (cachedHeight != null) return cachedHeight;
 
-    return filteredLog.logEntry.height ??= LoggingTableRow.estimateRowHeight(
-      filteredLog.logEntry.log,
+    return filteredLog.height ??= LoggingTableRow.estimateRowHeight(
+      filteredLog,
       _tableWidth,
     );
   }
@@ -845,28 +840,3 @@ String? _valueAsString(InstanceRef? ref) {
       : ref.valueAsString;
 }
 
-/// A class for holding a [LogDataV2] and its current estimated [height].
-///
-/// The [log] and its [height] have similar lifecycles, so it is helpful to keep
-/// them tied together.
-class _LogEntry {
-  _LogEntry(this.log);
-  final LogDataV2 log;
-
-  /// The current calculated height [log].
-  double? height;
-}
-
-/// A class for holding a [logEntry] and its [offset] from the top of a list of
-/// filtered entries.
-///
-/// The [logEntry] and its [offset] have similar lifecycles, so it is helpful to keep
-/// them tied together.
-class _FilteredLogEntry {
-  _FilteredLogEntry(this.logEntry);
-
-  final _LogEntry logEntry;
-
-  /// The offset of this log entry in a view.
-  double? offset;
-}

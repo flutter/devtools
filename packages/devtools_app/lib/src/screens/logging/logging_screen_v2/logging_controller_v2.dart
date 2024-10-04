@@ -634,6 +634,12 @@ class LogDataV2 with SearchableDataMixin {
     }
   }
 
+  /// The current calculated display height.
+  double? height;
+
+  /// The current offset of this log entry in the logs table.
+  double? offset;
+
   String? prettyPrinted() {
     if (!detailsComputed.value) {
       return details;
