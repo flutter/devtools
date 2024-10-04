@@ -52,6 +52,13 @@ class LoggingTableRow extends StatefulWidget {
       // Ignore exception; [elapsedFrameTimeAsString] will be null.
     }
 
+    var kindIcon = Icons.crop_square_outlined;
+    if (data.kind == 'stdout' || data.kind == 'stderr') {
+      kindIcon = Icons.terminal_rounded;
+    } else if (RegExp(r'^flutter\..*$').hasMatch(data.kind)) {
+      kindIcon = Icons.flutter_dash; // TODO(kenz): use flutter icon
+    }
+
     return [
       if (data.timestamp != null)
         WhenMetaDataChip(
@@ -61,6 +68,7 @@ class LoggingTableRow extends StatefulWidget {
       KindMetaDataChip(
         data: data,
         maxWidth: maxWidth,
+        icon: kindIcon,
       ),
       if (elapsedFrameTimeAsString != null)
         FrameElapsedMetaDataChip(
@@ -195,7 +203,7 @@ abstract class MetadataChip extends StatelessWidget {
     final horizontalPaddingCount = includeLeadingPadding ? 2 : 1;
     final maxWidthInsidePadding =
         max(0.0, maxWidth - padding * horizontalPaddingCount);
-    final iconSize = Size.square(tooltipIconSize);
+    final iconSize = Size.square(defaultIconSize);
     final textSize = calculateTextSpanSize(
       _buildValueText(),
       maxWidth: maxWidthInsidePadding,
@@ -225,7 +233,8 @@ abstract class MetadataChip extends StatelessWidget {
           if (icon != null) ...[
             Icon(
               icon,
-              size: tooltipIconSize,
+              size: defaultIconSize,
+              color: Theme.of(context).colorScheme.subtleTextColor,
             ),
             const SizedBox(width: iconPadding),
           ],
@@ -267,7 +276,8 @@ class KindMetaDataChip extends MetadataChip {
     super.key,
     required super.data,
     required super.maxWidth,
-  }) : super(icon: Icons.type_specimen, text: data.kind);
+    required super.icon,
+  }) : super(text: data.kind);
 }
 
 @visibleForTesting
