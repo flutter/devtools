@@ -21,13 +21,13 @@ if [ "$BOT" = "main" ]; then
     $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
 
     # Make sure the app versions are in sync.
-    devtools_tool repo-check
+    dt repo-check
 
     # Get packages
-    devtools_tool pub-get
+    dt pub-get
 
     # Analyze the code
-    devtools_tool analyze
+    dt analyze
 
 elif [ "$BOT" = "build_ddc" ]; then
 

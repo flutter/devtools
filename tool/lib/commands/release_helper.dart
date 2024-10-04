@@ -152,7 +152,7 @@ class ReleaseHelperCommand extends Command {
       );
       log.stdout('DONE');
       log.stdout(
-        'Build, run and test this release using: `devtools_tool serve`',
+        'Build, run and test this release using: `dt serve`',
       );
     } catch (e) {
       log.stderr(e.toString());

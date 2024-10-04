@@ -29,11 +29,11 @@ import '../utils.dart';
 ///
 /// If the [BuildCommandArgs.updatePerfetto] argument is present, the
 /// precompiled bits for Perfetto will be updated from the
-/// `devtools_tool update-perfetto` command as part of the DevTools build
+/// `dt update-perfetto` command as part of the DevTools build
 /// process.
 ///
 /// If [BuildCommandArgs.pubGet] argument is negated (e.g. --no-pub-get), then
-/// `devtools_tool pub-get --only-main` command will not be run before building
+/// `dt pub-get --only-main` command will not be run before building
 /// the DevTools web app. Use this flag to save the cost of updating pub
 /// packages if your pub cahce does not need to be updated. This is helpful when
 /// developing with the DevTools server.

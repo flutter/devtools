@@ -23,14 +23,14 @@ const _allowEmbeddingFlag = 'allow-embedding';
 const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 
 /// This command builds DevTools in release mode by running the
-/// `devtools_tool build` command and then serves DevTools with a locally
+/// `dt build` command and then serves DevTools with a locally
 /// running DevTools server.
 ///
 /// If the [_buildAppFlag] argument is negated (e.g. --no-build-app), then the
 /// DevTools web app will not be rebuilt before serving. The following arguments
 /// are ignored if '--no-build-app' is present in the list of arguments passed
 /// to this command. All of the following commands are passed along to the
-/// `devtools_tool build` command.
+/// `dt build` command.
 ///
 /// If the [_debugServerFlag] argument is present, the DevTools server will be
 /// started with the `--observe` flag. This will allow you to debug and profile
@@ -46,11 +46,11 @@ const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 ///
 /// If the [BuildCommandArgs.updatePerfetto] argument is present, the
 /// precompiled bits for Perfetto will be updated from the
-/// `devtools_tool update-perfetto` command as part of the DevTools build
+/// `dt update-perfetto` command as part of the DevTools build
 /// process.
 ///
 /// If [BuildCommandArgs.pubGet] argument is negated (e.g. --no-pub-get), then
-/// `devtools_tool pub-get --only-main` command will not be run before building
+/// `dt pub-get --only-main` command will not be run before building
 /// the DevTools web app. Use this flag to save the cost of updating pub
 /// packages if your pub cahce does not need to be updated. This is helpful when
 /// developing with the DevTools server.
@@ -189,7 +189,7 @@ class ServeCommand extends Command {
       );
       if (process.exitCode == 1) {
         throw Exception(
-          'Something went wrong while running `devtools_tool build`',
+          'Something went wrong while running `dt build`',
         );
       }
       logStatus('completed building DevTools: $devToolsBuildLocation');
