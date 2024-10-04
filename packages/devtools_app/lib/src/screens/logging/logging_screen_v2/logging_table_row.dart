@@ -176,28 +176,35 @@ abstract class MetadataChip extends StatelessWidget {
     required this.maxWidth,
     required this.icon,
     required this.text,
+    this.includeLeadingPadding = true,
   });
 
   final LogDataV2 data;
   final double maxWidth;
-  final IconData icon;
+  final IconData? icon;
   final String text;
+  final bool includeLeadingPadding;
 
-  static const padding = defaultSpacing;
+  static const padding = denseSpacing;
+  static const iconPadding = densePadding;
 
   /// Estimates the size of this single metadata chip.
   ///
   /// If the [build] method is changed then this may need to be updated
   Size estimateSize() {
-    final maxWidthInsidePadding = maxWidth - padding * 2;
+    final horizontalPaddingCount = includeLeadingPadding ? 2 : 1;
+    final maxWidthInsidePadding =
+        max(0.0, maxWidth - padding * horizontalPaddingCount);
     final iconSize = Size.square(tooltipIconSize);
     final textSize = calculateTextSpanSize(
       _buildValueText(),
       maxWidth: maxWidthInsidePadding,
     );
     return Size(
-      iconSize.width + defaultSpacing + textSize.width + padding * 2,
-      max(iconSize.height, textSize.height) + padding * 2,
+      (icon != null ? iconSize.width + iconPadding : 0.0) +
+          textSize.width +
+          padding * horizontalPaddingCount, // Horizontal padding.
+      max(iconSize.height, textSize.height) + padding * 2, // Vertical padding.
     );
   }
 
@@ -206,15 +213,22 @@ abstract class MetadataChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth),
-      padding: const EdgeInsets.all(padding),
+      padding: EdgeInsets.fromLTRB(
+        includeLeadingPadding ? padding : 0,
+        padding,
+        padding,
+        padding,
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: tooltipIconSize,
-          ),
-          const SizedBox(width: defaultSpacing),
+          if (icon != null) ...[
+            Icon(
+              icon,
+              size: tooltipIconSize,
+            ),
+            const SizedBox(width: iconPadding),
+          ],
           RichText(
             text: _buildValueText(),
           ),
@@ -238,11 +252,12 @@ class WhenMetaDataChip extends MetadataChip {
     required super.data,
     required super.maxWidth,
   }) : super(
-          icon: Icons.punch_clock,
+          icon: null,
           text: data.timestamp == null
               ? ''
               : loggingTableTimeFormat
                   .format(DateTime.fromMillisecondsSinceEpoch(data.timestamp!)),
+          includeLeadingPadding: false,
         );
 }
 
