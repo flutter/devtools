@@ -75,7 +75,7 @@ void main() {
           final shortLog = LogDataV2('test', 'Some short details', 464564);
           final longLog = LogDataV2(
             'test',
-            'A long log, A long log, A long log, A long log, A long log, A long log, A long log, ',
+            'A long log, A long log, A long log, A long log, A long log, A long log, A long log.',
             464564,
           );
           final frameElapsedLog =
@@ -136,6 +136,10 @@ void main() {
             // in it would hang otherwise.
             loggingTableModel.tableWidth = windowWidth;
           });
+
+          expect(shortWidgetFinder, findsOneWidget);
+          expect(longWidgetFinder, findsOneWidget);
+          expect(frameElapsedFinder, findsOneWidget);
 
           expect(
             loggingTableModel.getFilteredLogHeight(0),
