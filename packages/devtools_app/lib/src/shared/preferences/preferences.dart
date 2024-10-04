@@ -199,7 +199,8 @@ class PreferencesController extends DisposableController
       return;
     }
 
-    final shouldEnableWasm = enabledFromStorage || enabledFromQueryParams;
+    final shouldEnableWasm =
+        (enabledFromStorage || enabledFromQueryParams) && kIsWeb;
     assert(kIsWasm == shouldEnableWasm);
     // This should be a no-op if the flutter_bootstrap.js logic set the
     // renderer properly, but we call this to be safe in case something went
