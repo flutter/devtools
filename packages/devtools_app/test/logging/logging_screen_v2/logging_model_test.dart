@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_controller_v2.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen_v2/log_data.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_model.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_table_row.dart';
 import 'package:devtools_app/src/service/service_manager.dart';

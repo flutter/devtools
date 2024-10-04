@@ -12,7 +12,6 @@ import 'package:intl/intl.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/ui/icons.dart';
 import '../../../shared/ui/utils.dart';
-import 'logging_controller_v2.dart';
 import 'log_data.dart';
 
 final loggingTableTimeFormat = DateFormat('HH:mm:ss.SSS');

@@ -12,8 +12,8 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/screen.dart';
 import '../../../shared/utils.dart';
-import 'logging_controller_v2.dart';
 import 'log_data.dart';
+import 'logging_controller_v2.dart';
 import 'logging_table_v2.dart';
 
 /// Presents logs from the connected app.
