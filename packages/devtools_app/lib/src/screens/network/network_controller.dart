@@ -57,9 +57,9 @@ class NetworkController extends DisposableController
         OfflineScreenControllerMixin,
         AutoDisposeControllerMixin {
   NetworkController() {
-    _initHelper();
     _networkService = NetworkService(this);
     _currentNetworkRequests = CurrentNetworkRequests();
+    _initHelper();
     addAutoDisposeListener(
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
@@ -197,14 +197,25 @@ class NetworkController extends DisposableController
     }
   }
 
-  void loadOfflineData(OfflineNetworkData offlineData) {
+  Future<void> loadOfflineData(OfflineNetworkData offlineData) async {
+    // Set filtered data to the requests available in offline data.
     filteredData
       ..clear()
       ..addAll(offlineData.requests);
 
+    // If a selectedRequestId is available, select it in offline mode.
     if (offlineData.selectedRequestId != null) {
-      selectedRequest.value =
-          _currentNetworkRequests.getRequest(offlineData.selectedRequestId!);
+      final selected = offlineData.getRequest(offlineData.selectedRequestId!);
+      if (selected != null) {
+        selectedRequest.value = selected;
+        if (selectedRequest.value is DartIOHttpRequestData) {
+          unawaited(
+            (selectedRequest.value as DartIOHttpRequestData)
+                .getFullRequestData(),
+          );
+        }
+        resetDropDown();
+      }
     }
   }
 

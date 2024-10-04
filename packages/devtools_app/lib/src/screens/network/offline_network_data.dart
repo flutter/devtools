@@ -6,6 +6,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
+import 'network_model.dart';
 
 /// Class to encapsulate offline data for the [NetworkController].
 /// It is responsible for serializing and deserializing offline network data.
@@ -39,6 +40,16 @@ class OfflineNetworkData with Serializable {
 
   /// List of current [DartIOHttpRequestData] network requests.
   final List<DartIOHttpRequestData> requests;
+
+  /// Get a request by matching its `id` field.
+  // Temporarily added to check selection in the filtered requests data,
+  // until we have current requests data in place
+  NetworkRequest? getRequest(String id) {
+    // Search through the list of requests and return the one with the matching ID.
+    return requests.firstWhere(
+      (request) => request.id == id,
+    );
+  }
 
   /// The ID of the currently selected request, if any.
   final String? selectedRequestId;
