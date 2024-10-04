@@ -137,7 +137,10 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _NetworkProfilerControls(controller: controller),
+        _NetworkProfilerControls(
+          controller: controller,
+          offline: offlineDataController.showingOfflineData.value,
+        ),
         const SizedBox(height: intermediateSpacing),
         Expanded(
           child: _NetworkProfilerBody(controller: controller),
@@ -152,11 +155,14 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 class _NetworkProfilerControls extends StatefulWidget {
   const _NetworkProfilerControls({
     required this.controller,
+    required this.offline,
   });
 
   static const _includeTextWidth = 810.0;
 
   final NetworkController controller;
+
+  final bool offline;
 
   @override
   State<_NetworkProfilerControls> createState() =>
@@ -201,48 +207,55 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     final hasRequests = _filteredRequests.isNotEmpty;
     return Row(
       children: [
-        StartStopRecordingButton(
-          recording: _recording,
-          onPressed: () async =>
-              await widget.controller.togglePolling(!_recording),
-          tooltipOverride: _recording
-              ? 'Stop recording network traffic'
-              : 'Resume recording network traffic',
-          minScreenWidthForTextBeforeScaling: double.infinity,
-          gaScreen: gac.network,
-          gaSelection: _recording ? gac.pause : gac.resume,
-        ),
-        const SizedBox(width: denseSpacing),
-        ClearButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          gaScreen: gac.network,
-          gaSelection: gac.clear,
-          onPressed: widget.controller.clear,
-        ),
-        const SizedBox(width: defaultSpacing),
-        DownloadButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          onPressed: widget.controller.exportAsHarFile,
-          gaScreen: gac.network,
-          gaSelection: gac.NetworkEvent.downloadAsHar.name,
-        ),
-        const SizedBox(width: defaultSpacing),
-        const Expanded(child: SizedBox()),
-        // TODO(kenz): fix focus issue when state is refreshed
-        SearchField<NetworkController>(
-          searchController: widget.controller,
-          searchFieldEnabled: hasRequests,
-          searchFieldWidth: screenWidth <= MediaSize.xs
-              ? defaultSearchFieldWidth
-              : wideSearchFieldWidth,
-        ),
-        const SizedBox(width: denseSpacing),
-        DevToolsFilterButton(
-          onPressed: _showFilterDialog,
-          isFilterActive: _filteredRequests.length != _requests.length,
-        ),
+        if (widget.offline)
+          Padding(
+            padding: const EdgeInsets.only(right: defaultSpacing),
+            child: ExitOfflineButton(gaScreen: gac.cpuProfiler),
+          )
+        else ...[
+          StartStopRecordingButton(
+            recording: _recording,
+            onPressed: () async =>
+                await widget.controller.togglePolling(!_recording),
+            tooltipOverride: _recording
+                ? 'Stop recording network traffic'
+                : 'Resume recording network traffic',
+            minScreenWidthForTextBeforeScaling: double.infinity,
+            gaScreen: gac.network,
+            gaSelection: _recording ? gac.pause : gac.resume,
+          ),
+          const SizedBox(width: denseSpacing),
+          ClearButton(
+            minScreenWidthForTextBeforeScaling:
+                _NetworkProfilerControls._includeTextWidth,
+            gaScreen: gac.network,
+            gaSelection: gac.clear,
+            onPressed: widget.controller.clear,
+          ),
+          const SizedBox(width: defaultSpacing),
+          DownloadButton(
+            minScreenWidthForTextBeforeScaling:
+                _NetworkProfilerControls._includeTextWidth,
+            onPressed: widget.controller.exportAsHarFile,
+            gaScreen: gac.network,
+            gaSelection: gac.NetworkEvent.downloadAsHar.name,
+          ),
+          const SizedBox(width: defaultSpacing),
+          const Expanded(child: SizedBox()),
+          // TODO(kenz): fix focus issue when state is refreshed
+          SearchField<NetworkController>(
+            searchController: widget.controller,
+            searchFieldEnabled: hasRequests,
+            searchFieldWidth: screenWidth <= MediaSize.xs
+                ? defaultSearchFieldWidth
+                : wideSearchFieldWidth,
+          ),
+          const SizedBox(width: denseSpacing),
+          DevToolsFilterButton(
+            onPressed: _showFilterDialog,
+            isFilterActive: _filteredRequests.length != _requests.length,
+          ),
+        ],
       ],
     );
   }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:devtools_shared/devtools_shared.dart';
 
 import '../../shared/http/http_request_data.dart';
@@ -56,16 +54,5 @@ class OfflineNetworkData with Serializable {
       'selectedRequestId': selectedRequestId,
       'recording': recording,
     };
-  }
-
-  /// Serialize the instance to a JSON-encoded string.
-  String toJsonString() {
-    return jsonEncode(toJson());
-  }
-
-  /// Deserialize a JSON-encoded string to an [OfflineNetworkData] instance.
-  static OfflineNetworkData fromJsonString(String jsonString) {
-    final Map<String, dynamic> json = jsonDecode(jsonString);
-    return OfflineNetworkData.fromJson(json);
   }
 }
