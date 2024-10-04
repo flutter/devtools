@@ -10,7 +10,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+Fixed a bug that was causing data filters to be cleared when clearing data
+on the Network and Logging screens. - [#8407](https://github.com/flutter/devtools/pull/8407)
 
 ## Inspector updates
 

@@ -315,7 +315,6 @@ class NetworkController extends DisposableController
   Future<void> clear() async {
     await _networkService.clearData();
     _currentNetworkRequests.clear();
-    resetFilter();
     _filterAndRefreshSearchMatches();
     _updateSelection();
   }
