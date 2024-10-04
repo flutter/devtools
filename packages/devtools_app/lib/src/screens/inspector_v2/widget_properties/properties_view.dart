@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -45,6 +47,23 @@ class _DetailsTableState extends State<DetailsTable> {
   LayoutProperties? get layoutProperties =>
       widget.controller.selectedNodeProperties.value.layoutProperties;
 
+  final _widgetPropertiesTab = DevToolsTab.create(
+    tabName: 'Widget properties',
+    gaPrefix: DetailsTable.gaPrefix,
+  );
+
+  final _renderObjectTab = DevToolsTab.create(
+    tabName: 'Render object',
+    gaPrefix: DetailsTable.gaPrefix,
+  );
+
+  final _flexExplorerTab = DevToolsTab.create(
+    tabName: 'Flex explorer',
+    gaPrefix: DetailsTable.gaPrefix,
+  );
+
+  DevToolsTab? _lastSelectedTab;
+
   @override
   void initState() {
     super.initState();
@@ -67,14 +86,27 @@ class _DetailsTableState extends State<DetailsTable> {
         final widgetProperties = properties.widgetProperties;
         final renderProperties = properties.renderProperties;
         final layoutProperties = properties.layoutProperties;
+
+        final renderTabExists = renderProperties.isNotEmpty;
+        final flexExplorerTabExists = selectedNode?.isFlexLayout ?? false;
+
         return AnalyticsTabbedView(
           gaScreen: gac.inspector,
+          onTabChanged: (int tabIndex) {
+            _lastSelectedTab = _getTabForIndex(
+              tabIndex,
+              renderTabExists: renderTabExists,
+              flexExplorerTabExists: flexExplorerTabExists,
+            );
+          },
+          initialSelectedIndex: _getIndexForTab(
+            _lastSelectedTab ?? _widgetPropertiesTab,
+            renderTabExists: renderTabExists,
+            flexExplorerTabExists: flexExplorerTabExists,
+          ),
           tabs: [
             (
-              tab: DevToolsTab.create(
-                tabName: 'Widget properties',
-                gaPrefix: DetailsTable.gaPrefix,
-              ),
+              tab: _widgetPropertiesTab,
               tabView: PropertiesView(
                 properties: widgetProperties,
                 layoutProperties: layoutProperties,
@@ -82,23 +114,17 @@ class _DetailsTableState extends State<DetailsTable> {
                 scrollController: _widgetPropertiesScrollController,
               ),
             ),
-            if (renderProperties.isNotEmpty)
+            if (renderTabExists)
               (
-                tab: DevToolsTab.create(
-                  tabName: 'Render object',
-                  gaPrefix: DetailsTable.gaPrefix,
-                ),
+                tab: _renderObjectTab,
                 tabView: PropertiesTable(
                   properties: renderProperties,
                   scrollController: _renderPropertiesScrollController,
                 ),
               ),
-            if (selectedNode?.isFlexLayout ?? false)
+            if (flexExplorerTabExists)
               (
-                tab: DevToolsTab.create(
-                  tabName: 'Flex explorer',
-                  gaPrefix: DetailsTable.gaPrefix,
-                ),
+                tab: _flexExplorerTab,
                 tabView: FlexLayoutExplorerWidget(widget.controller),
               ),
           ],
@@ -106,6 +132,43 @@ class _DetailsTableState extends State<DetailsTable> {
       },
     );
   }
+
+  DevToolsTab _getTabForIndex(
+    int index, {
+    required bool renderTabExists,
+    required bool flexExplorerTabExists,
+  }) {
+    final tabs = _getTabsInOrder(
+      renderTabExists: renderTabExists,
+      flexExplorerTabExists: flexExplorerTabExists,
+    );
+
+    return tabs.safeGet(index) ?? _widgetPropertiesTab;
+  }
+
+  int _getIndexForTab(
+    DevToolsTab tab, {
+    required bool renderTabExists,
+    required bool flexExplorerTabExists,
+  }) {
+    final tabs = _getTabsInOrder(
+      renderTabExists: renderTabExists,
+      flexExplorerTabExists: flexExplorerTabExists,
+    );
+
+    // If tab is not found, return the first tab (at index 0):
+    return max(tabs.indexOf(tab), 0);
+  }
+
+  List<DevToolsTab> _getTabsInOrder({
+    required bool renderTabExists,
+    required bool flexExplorerTabExists,
+  }) =>
+      [
+        _widgetPropertiesTab,
+        if (renderTabExists) _renderObjectTab,
+        if (flexExplorerTabExists) _flexExplorerTab,
+      ];
 }
 
 /// Displays a widget's properties, including the layout properties and a
