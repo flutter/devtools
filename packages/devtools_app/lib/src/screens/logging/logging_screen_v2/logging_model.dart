@@ -29,6 +29,7 @@ import '../logging_controller.dart'
         NavigationInfo,
         ServiceExtensionStateChangedInfo;
 import 'logging_controller_v2.dart';
+import 'log_data.dart';
 import 'logging_table_row.dart';
 import 'logging_table_v2.dart';
 
