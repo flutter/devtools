@@ -78,7 +78,7 @@ class LoggingTableRow extends StatefulWidget {
   @override
   State<LoggingTableRow> createState() => _LoggingTableRowState();
 
-  static final _padding = scaleByFontFactor(8.0);
+  static const _padding = densePadding;
 
   /// Estimates the height of the row, including the details section and all of the metadata chips.
   static double estimateRowHeight(
@@ -142,7 +142,7 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
         valueListenable: widget.data.detailsComputed,
         builder: (context, _, __) {
           return Padding(
-            padding: EdgeInsets.all(LoggingTableRow._padding),
+            padding: const EdgeInsets.all(LoggingTableRow._padding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -191,7 +191,8 @@ abstract class MetadataChip extends StatelessWidget {
   final String text;
   final bool includeLeadingPadding;
 
-  static const padding = denseSpacing;
+  static const horizontalPadding = denseSpacing;
+  static const verticalPadding = densePadding;
   static const iconPadding = densePadding;
 
   /// Estimates the size of this single metadata chip.
@@ -200,7 +201,7 @@ abstract class MetadataChip extends StatelessWidget {
   Size estimateSize() {
     final horizontalPaddingCount = includeLeadingPadding ? 2 : 1;
     final maxWidthInsidePadding =
-        max(0.0, maxWidth - padding * horizontalPaddingCount);
+        max(0.0, maxWidth - horizontalPadding * horizontalPaddingCount);
     final iconSize = Size.square(defaultIconSize);
     final textSize = calculateTextSpanSize(
       _buildValueText(),
@@ -211,8 +212,8 @@ abstract class MetadataChip extends StatelessWidget {
               ? iconSize.width + iconPadding
               : 0.0) +
           textSize.width +
-          padding * horizontalPaddingCount, // Horizontal padding.
-      max(iconSize.height, textSize.height) + padding * 2, // Vertical padding.
+          horizontalPadding * horizontalPaddingCount,
+      max(iconSize.height, textSize.height) + verticalPadding * 2,
     );
   }
 
@@ -222,10 +223,10 @@ abstract class MetadataChip extends StatelessWidget {
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth),
       padding: EdgeInsets.fromLTRB(
-        includeLeadingPadding ? padding : 0,
-        padding,
-        padding,
-        padding,
+        includeLeadingPadding ? horizontalPadding : 0,
+        verticalPadding,
+        horizontalPadding,
+        verticalPadding,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
