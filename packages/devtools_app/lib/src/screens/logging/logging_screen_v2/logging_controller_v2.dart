@@ -642,15 +642,16 @@ class LogDataV2 with SearchableDataMixin {
 
   String? prettyPrinted() {
     if (!detailsComputed.value) {
-      return details;
+      return details?.trim();
     }
 
     try {
       return prettyPrinter
           .convert(jsonDecode(details!))
-          .replaceAll(r'\n', '\n');
+          .replaceAll(r'\n', '\n')
+          .trim();
     } catch (_) {
-      return details;
+      return details?.trim();
     }
   }
 
