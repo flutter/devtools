@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../shared/globals.dart';
+import '../../../shared/ui/icons.dart';
 import '../../../shared/ui/utils.dart';
 import 'logging_controller_v2.dart';
 
@@ -52,6 +53,7 @@ class LoggingTableRow extends StatefulWidget {
       // Ignore exception; [elapsedFrameTimeAsString] will be null.
     }
 
+    final kindIcon = KindMetaDataChip.generateIcon(data.kind);
     return [
       if (data.timestamp != null)
         WhenMetaDataChip(
@@ -61,6 +63,8 @@ class LoggingTableRow extends StatefulWidget {
       KindMetaDataChip(
         data: data,
         maxWidth: maxWidth,
+        icon: kindIcon.icon,
+        iconAsset: kindIcon.iconAsset,
       ),
       if (elapsedFrameTimeAsString != null)
         FrameElapsedMetaDataChip(
@@ -174,30 +178,41 @@ abstract class MetadataChip extends StatelessWidget {
     super.key,
     required this.data,
     required this.maxWidth,
-    required this.icon,
     required this.text,
+    this.icon,
+    this.iconAsset,
+    this.includeLeadingPadding = true,
   });
 
   final LogDataV2 data;
   final double maxWidth;
-  final IconData icon;
+  final IconData? icon;
+  final String? iconAsset;
   final String text;
+  final bool includeLeadingPadding;
 
-  static const padding = defaultSpacing;
+  static const padding = denseSpacing;
+  static const iconPadding = densePadding;
 
   /// Estimates the size of this single metadata chip.
   ///
   /// If the [build] method is changed then this may need to be updated
   Size estimateSize() {
-    final maxWidthInsidePadding = maxWidth - padding * 2;
-    final iconSize = Size.square(tooltipIconSize);
+    final horizontalPaddingCount = includeLeadingPadding ? 2 : 1;
+    final maxWidthInsidePadding =
+        max(0.0, maxWidth - padding * horizontalPaddingCount);
+    final iconSize = Size.square(defaultIconSize);
     final textSize = calculateTextSpanSize(
       _buildValueText(),
       maxWidth: maxWidthInsidePadding,
     );
     return Size(
-      iconSize.width + defaultSpacing + textSize.width + padding * 2,
-      max(iconSize.height, textSize.height) + padding * 2,
+      ((icon != null || iconAsset != null)
+              ? iconSize.width + iconPadding
+              : 0.0) +
+          textSize.width +
+          padding * horizontalPaddingCount, // Horizontal padding.
+      max(iconSize.height, textSize.height) + padding * 2, // Vertical padding.
     );
   }
 
@@ -206,15 +221,27 @@ abstract class MetadataChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth),
-      padding: const EdgeInsets.all(padding),
+      padding: EdgeInsets.fromLTRB(
+        includeLeadingPadding ? padding : 0,
+        padding,
+        padding,
+        padding,
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: tooltipIconSize,
-          ),
-          const SizedBox(width: defaultSpacing),
+          if (icon != null || iconAsset != null) ...[
+            DevToolsIcon(
+              icon: icon,
+              iconAsset: iconAsset,
+              size: defaultIconSize,
+              color: Theme.of(context).colorScheme.subtleTextColor,
+            ),
+            const SizedBox(width: iconPadding),
+          ] else
+            // Include an empty SizedBox to ensure a consistent height for the
+            // chips, regardless of whether the chip includes an icon.
+            SizedBox(height: defaultIconSize),
           RichText(
             text: _buildValueText(),
           ),
@@ -238,11 +265,12 @@ class WhenMetaDataChip extends MetadataChip {
     required super.data,
     required super.maxWidth,
   }) : super(
-          icon: Icons.punch_clock,
+          icon: null,
           text: data.timestamp == null
               ? ''
               : loggingTableTimeFormat
                   .format(DateTime.fromMillisecondsSinceEpoch(data.timestamp!)),
+          includeLeadingPadding: false,
         );
 }
 
@@ -252,7 +280,21 @@ class KindMetaDataChip extends MetadataChip {
     super.key,
     required super.data,
     required super.maxWidth,
-  }) : super(icon: Icons.type_specimen, text: data.kind);
+    super.icon,
+    super.iconAsset,
+  }) : super(text: data.kind);
+
+  static ({IconData? icon, String? iconAsset}) generateIcon(String kind) {
+    IconData? kindIcon = Icons.list_rounded;
+    String? kindIconAsset;
+    if (kind == 'stdout' || kind == 'stderr') {
+      kindIcon = Icons.terminal_rounded;
+    } else if (RegExp(r'^flutter\..*$').hasMatch(kind)) {
+      kindIconAsset = 'icons/flutter.png';
+      kindIcon = null;
+    }
+    return (icon: kindIcon, iconAsset: kindIconAsset);
+  }
 }
 
 @visibleForTesting

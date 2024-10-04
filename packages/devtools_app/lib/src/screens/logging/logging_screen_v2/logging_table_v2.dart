@@ -48,6 +48,12 @@ class _LoggingTableV2State extends State<LoggingTableV2>
       children: [
         Row(
           children: [
+            ClearButton(
+              onPressed: controller.clear,
+              gaScreen: gac.logging,
+              gaSelection: gac.clear,
+            ),
+            const SizedBox(width: defaultSpacing),
             Expanded(
               child: DevToolsClearableTextField(
                 labelText: 'Search', // TODO(danchevalier): use SearchField
@@ -77,8 +83,11 @@ class _LoggingTableV2State extends State<LoggingTableV2>
         ),
         const SizedBox(height: denseSpacing),
         Expanded(
-          child: _LoggingTableProgress(
-            model: widget.model,
+          child: RoundedOutlinedBorder(
+            clip: true,
+            child: _LoggingTableProgress(
+              model: widget.model,
+            ),
           ),
         ),
       ],
