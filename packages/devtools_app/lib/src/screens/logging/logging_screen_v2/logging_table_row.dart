@@ -238,7 +238,10 @@ abstract class MetadataChip extends StatelessWidget {
               color: Theme.of(context).colorScheme.subtleTextColor,
             ),
             const SizedBox(width: iconPadding),
-          ],
+          ] else
+            // Include an empty SizedBox to ensure a consistent height for the
+            // chips, regardless of whether the chip includes an icon.
+            SizedBox(height: defaultIconSize),
           RichText(
             text: _buildValueText(),
           ),
