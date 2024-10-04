@@ -106,10 +106,7 @@ class _DetailsTableState extends State<DetailsTable> {
           ),
           tabs: [
             (
-              tab: DevToolsTab.create(
-                tabName: 'Widget properties',
-                gaPrefix: DetailsTable.gaPrefix,
-              ),
+              tab: _widgetPropertiesTab,
               tabView: PropertiesView(
                 properties: widgetProperties,
                 layoutProperties: layoutProperties,
@@ -119,10 +116,7 @@ class _DetailsTableState extends State<DetailsTable> {
             ),
             if (renderTabExists)
               (
-                tab: DevToolsTab.create(
-                  tabName: 'Render object',
-                  gaPrefix: DetailsTable.gaPrefix,
-                ),
+                tab: _renderObjectTab,
                 tabView: PropertiesTable(
                   properties: renderProperties,
                   scrollController: _renderPropertiesScrollController,
@@ -130,10 +124,7 @@ class _DetailsTableState extends State<DetailsTable> {
               ),
             if (flexExplorerTabExists)
               (
-                tab: DevToolsTab.create(
-                  tabName: 'Flex explorer',
-                  gaPrefix: DetailsTable.gaPrefix,
-                ),
+                tab: _flexExplorerTab,
                 tabView: FlexLayoutExplorerWidget(widget.controller),
               ),
           ],
