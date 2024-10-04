@@ -6,7 +6,7 @@ environment:
   sdk: ^3.2.0
 
 executables:
-  devtools_tool: devtools_tool
+  dt: dt
 
 dependencies:
   args: ^2.4.2

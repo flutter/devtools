@@ -28,7 +28,7 @@ const _flutterFromPathFlag = 'flutter-from-path';
 
 class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
-      : super('devtools_tool', 'A repo management tool for DevTools.') {
+      : super('dt', 'A repo management tool for DevTools.') {
     addCommand(AnalyzeCommand());
     addCommand(BuildCommand());
     addCommand(FixGoldensCommand());
@@ -52,7 +52,7 @@ class DevToolsCommandRunner extends CommandRunner {
       abbr: 'p',
       negatable: false,
       help: 'Use the Flutter SDK on PATH for any `flutter`, `dart` and '
-          '`devtools_tool` commands spawned by this process, instead of the '
+          '`dt` commands spawned by this process, instead of the '
           'Flutter SDK from tool/flutter-sdk which is used by default.',
     );
   }
