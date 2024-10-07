@@ -34,6 +34,9 @@ show. - [#8277](https://github.com/flutter/devtools/pull/8277)
 * Fixed a bug that was causing data filters to be cleared when clearing data
 on the Network and Logging screens. - [#8407](https://github.com/flutter/devtools/pull/8407)
 
+* Fixed a bug that was causing the navigator to lose state when opening the VM
+Flags dialog. - [#8413](https://github.com/flutter/devtools/pull/8413)
+
 ## Inspector updates
 
 - Added a setting to the Flutter Inspector controls that allows users to opt-in to the newly redesigned Flutter Inspector. - [#8342](https://github.com/flutter/devtools/pull/8342)
