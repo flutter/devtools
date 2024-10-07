@@ -16,10 +16,6 @@ enum EditorSidebar {
   /// Analytics id to track events that come from the DTD editor sidebar.
   static String get id => 'editorSidebar';
 
-  /// Analytics id to track events that come from the legacy VS Code
-  /// (postMessage) Flutter sidebar.
-  static String get legacyId => 'vsCodeFlutterSidebar';
-
   /// Analytics event for when a request to enable a new platform type is sent
   /// to VS Code.
   static String enablePlatformType(String platformType) =>

@@ -12,10 +12,7 @@ import 'package:flutter/material.dart';
 import '../../service/editor/api_classes.dart';
 import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
-import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../api/dart_tooling_api.dart';
-import '../api/impl/dart_tooling_api.dart';
 import 'debug_sessions.dart';
 import 'devices.dart';
 import 'devtools/devtools_view.dart';
@@ -63,55 +60,6 @@ class _DtdEditorSidebarPanelState extends State<DtdEditorSidebarPanel> {
               _ => const CenteredCircularProgressIndicator(),
             },
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// A general Flutter sidebar panel for embedding inside postMessage-based
-/// editors.
-///
-/// Provides some basic functionality to improve discoverability of features
-/// such as creation of new projects, device selection and DevTools features.
-class VsCodePostMessageSidebarPanel extends StatefulWidget {
-  const VsCodePostMessageSidebarPanel(this.api, {super.key});
-
-  final PostMessageToolApi api;
-
-  @override
-  State<VsCodePostMessageSidebarPanel> createState() =>
-      _VsCodePostMessageSidebarPanelState();
-}
-
-class _VsCodePostMessageSidebarPanelState
-    extends State<VsCodePostMessageSidebarPanel> {
-  @override
-  void initState() {
-    super.initState();
-    ga.screen(gac.EditorSidebar.legacyId);
-  }
-
-  @override
-  void dispose() {
-    widget.api.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        FutureBuilder(
-          future: widget.api.vsCode,
-          builder: (context, snapshot) =>
-              switch ((snapshot.connectionState, snapshot.data)) {
-            (ConnectionState.done, final vsCodeApi?) =>
-              _EditorConnectedPanel(PostMessageEditorClient(vsCodeApi)),
-            (ConnectionState.done, null) =>
-              const Text('VS Code is not available'),
-            _ => const CenteredCircularProgressIndicator(),
-          },
         ),
       ],
     );
