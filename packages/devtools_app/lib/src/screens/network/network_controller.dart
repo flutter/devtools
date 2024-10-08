@@ -7,7 +7,6 @@ import 'dart:convert';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/import_export/import_export.dart';
@@ -25,8 +24,6 @@ import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
 import 'offline_network_data.dart';
-
-final _log = Logger('http_request_data');
 
 /// Different types of Network Response which can be used to visualise response
 /// on Response tab
@@ -168,19 +165,15 @@ class NetworkController extends DisposableController
   bool get isPolling => _pollingTimer != null;
 
   void _initHelper() async {
-    try {
-      if (offlineDataController.showingOfflineData.value) {
-        await maybeLoadOfflineData(
-          NetworkScreen.id,
-          createData: (json) => OfflineNetworkData.fromJson(json),
-          shouldLoad: (data) => !data.isEmpty,
-          loadData: (data) => loadOfflineData(data),
-        );
-      } else {
-        await startRecording();
-      }
-    } catch (e) {
-      _log.shout('Could not load offline data: $e');
+    if (offlineDataController.showingOfflineData.value) {
+      await maybeLoadOfflineData(
+        NetworkScreen.id,
+        createData: (json) => OfflineNetworkData.fromJson(json),
+        shouldLoad: (data) => !data.isEmpty,
+        loadData: (data) => loadOfflineData(data),
+      );
+    } else {
+      await startRecording();
     }
   }
 
