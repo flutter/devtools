@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -15,12 +16,14 @@ import 'logging_controller.dart';
 class LogsTable extends StatelessWidget {
   const LogsTable({
     super.key,
+    required this.controller,
     required this.data,
     required this.selectionNotifier,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
   });
 
+  final LoggingController controller;
   final List<LogData> data;
   final ValueNotifier<LogData?> selectionNotifier;
   final ValueListenable<List<LogData>> searchMatchesNotifier;
@@ -33,14 +36,12 @@ class LogsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(kenz): use SearchableFlatTable instead.
-    return FlatTable<LogData>(
+    return SearchableFlatTable<LogData>(
+      searchController: controller,
       keyFactory: (LogData data) => ValueKey<LogData>(data),
       data: data,
       dataKey: 'logs',
       autoScrollContent: true,
-      searchMatchesNotifier: searchMatchesNotifier,
-      activeSearchMatchNotifier: activeSearchMatchNotifier,
       columns: columns,
       selectionNotifier: selectionNotifier,
       defaultSortColumn: when,
