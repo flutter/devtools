@@ -185,10 +185,15 @@ class NetworkController extends DisposableController
   }
 
   Future<void> loadOfflineData(OfflineNetworkData offlineData) async {
-    // Set filtered data to the requests available in offline data.
-    filteredData
+    _currentNetworkRequests
       ..clear()
-      ..addAll(offlineData.requests);
+      ..updateOrAddAll(
+        requests: offlineData.currentRequests!,
+        sockets: offlineData.socketStats,
+        timelineMicrosOffset: DateTime.now().microsecondsSinceEpoch -
+            (networkService.timeStamp ?? 0),
+      );
+    _filterAndRefreshSearchMatches();
 
     // If a selectedRequestId is available, select it in offline mode.
     if (offlineData.selectedRequestId != null) {
@@ -433,6 +438,8 @@ class NetworkController extends DisposableController
     final offlineData = OfflineNetworkData(
       requests: filteredData.value.whereType<DartIOHttpRequestData>().toList(),
       selectedRequestId: selectedRequest.value?.id,
+      currentRequests: _networkService.currentHttpRequests,
+      socketStats: _networkService.sockets ?? [],
     );
 
     return OfflineScreenData(

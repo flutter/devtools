@@ -10,8 +10,13 @@ import 'network_controller.dart';
 
 class NetworkService {
   NetworkService(this.networkController);
-
+  List<HttpProfileRequest>? _httpRequests;
+  List<SocketStatistic>? _sockets;
   final NetworkController networkController;
+  List<HttpProfileRequest>? get currentHttpRequests => _httpRequests;
+  List<SocketStatistic>? get sockets => _sockets;
+  int? _timeStamp;
+  int? get timeStamp => _timeStamp;
 
   /// Updates the last Socket data refresh time to the current time.
   ///
@@ -56,15 +61,20 @@ class NetworkService {
     if (serviceConnection.serviceManager.service == null) return;
     final timestampObj =
         await serviceConnection.serviceManager.service!.getVMTimelineMicros();
-    final timestamp = timestampObj.timestamp!;
-    final sockets = await _refreshSockets();
-    networkController.lastSocketDataRefreshMicros = timestamp;
-    List<HttpProfileRequest>? httpRequests;
-    httpRequests = await _refreshHttpProfile();
+    _timeStamp = timestampObj.timestamp!;
+
+    // Refresh socket data
+    _sockets ??= await _refreshSockets();
+    _sockets?.addAll(await _refreshSockets());
+
+    // Refresh HTTP request data
+    _httpRequests ??= await _refreshHttpProfile();
+    _httpRequests?.addAll(await _refreshHttpProfile());
+
     networkController.lastHttpDataRefreshTime = DateTime.now();
     networkController.processNetworkTraffic(
-      sockets: sockets,
-      httpRequests: httpRequests,
+      sockets: _sockets ?? [],
+      httpRequests: _httpRequests,
     );
   }
 
