@@ -176,19 +176,8 @@ class NetworkController extends DisposableController
           shouldLoad: (data) => !data.isEmpty,
           loadData: (data) => loadOfflineData(data),
         );
-      }else{
-        unawaited(startRecording());
-        debugPrint('started recording');
-        addAutoDisposeListener(
-          serviceConnection.serviceManager.isolateManager.mainIsolate,
-              () {
-            if (serviceConnection
-                .serviceManager.isolateManager.mainIsolate.value !=
-                null) {
-              unawaited(startRecording());
-            }
-          },
-        );
+      } else {
+        await startRecording();
       }
     } catch (e) {
       _log.shout('Could not load offline data: $e');
@@ -206,12 +195,6 @@ class NetworkController extends DisposableController
       final selected = offlineData.getRequest(offlineData.selectedRequestId!);
       if (selected != null) {
         selectedRequest.value = selected;
-        if (selectedRequest.value is DartIOHttpRequestData) {
-          unawaited(
-            (selectedRequest.value as DartIOHttpRequestData)
-                .getFullRequestData(),
-          );
-        }
         resetDropDown();
       }
     }
