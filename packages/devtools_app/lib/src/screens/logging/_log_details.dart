@@ -80,6 +80,7 @@ class _LogDetailsState extends State<LogDetails>
         child: Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: Scrollbar(
+            controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
               child: SelectableText(
