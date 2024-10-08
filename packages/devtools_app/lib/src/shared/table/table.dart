@@ -422,6 +422,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                     tall: widget.tallHeaders,
                     backgroundColor: widget.headerColor,
                   ),
+                // TODO(kenz): add support for excluding column headers.
                 TableRow<T>.tableColumnHeader(
                   key: const Key('Table header'),
                   linkedScrollControllerGroup:

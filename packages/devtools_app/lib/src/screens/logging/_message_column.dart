@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app_shared/service.dart' show FlutterEvent;
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -12,11 +11,11 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import 'logging_controller.dart';
+import 'metadata.dart';
 
-@visibleForTesting
 class MessageColumn extends ColumnData<LogData>
     implements ColumnRenderer<LogData> {
-  MessageColumn() : super.wide('Message');
+  MessageColumn() : super.wide('Log');
 
   @override
   bool get supportsSorting => false;
@@ -45,6 +44,46 @@ class MessageColumn extends ColumnData<LogData>
     return valueA.compareTo(valueB);
   }
 
+  /// All of the metatadata chips that can be visible for this [data] entry.
+  @visibleForTesting
+  static List<MetadataChip> metadataChips(
+    LogData data,
+    double maxWidth, {
+    required ColorScheme colorScheme,
+  }) {
+    String? elapsedFrameTimeAsString;
+    try {
+      final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
+      elapsedFrameTimeAsString = (micros * 3.0 / 1000.0).toString();
+    } catch (e) {
+      // Ignore exception; [elapsedFrameTimeAsString] will be null.
+    }
+
+    final kindIcon = KindMetaDataChip.generateIcon(data.kind);
+    final kindColors = KindMetaDataChip.generateColors(data.kind, colorScheme);
+    return [
+      KindMetaDataChip(
+        kind: data.kind,
+        maxWidth: maxWidth,
+        icon: kindIcon.icon,
+        iconAsset: kindIcon.iconAsset,
+        backgroundColor: kindColors.background,
+        foregroundColor: kindColors.foreground,
+      ),
+      if (data.level != null)
+        LogLevelMetadataChip(
+          level: LogLevelMetadataChip.generateLogLevel(data.level!),
+          rawLevel: data.level!,
+          maxWidth: maxWidth,
+        ),
+      if (elapsedFrameTimeAsString != null)
+        FrameElapsedMetaDataChip(
+          maxWidth: maxWidth,
+          elapsedTimeDisplay: elapsedFrameTimeAsString,
+        ),
+    ];
+  }
+
   @override
   Widget build(
     BuildContext context,
@@ -53,46 +92,67 @@ class MessageColumn extends ColumnData<LogData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
-    if (data.kind.caseInsensitiveEquals(FlutterEvent.frame)) {
-      const color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
-      final text = Text(
-        getDisplayValue(data),
-        overflow: TextOverflow.ellipsis,
-      );
-
-      double frameLength = 0.0;
-      try {
-        final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
-        frameLength = micros * 3.0 / 1000.0;
-      } catch (e) {
-        // ignore
-      }
-
-      return Row(
-        children: <Widget>[
-          text,
-          Flexible(
-            child: Container(
-              height: 12.0,
-              width: frameLength,
-              decoration: const BoxDecoration(color: color),
+    final theme = Theme.of(context);
+    final hasSummary = !data.summary.isNullOrEmpty;
+    final hasDetails = !data.details.isNullOrEmpty;
+    return ValueListenableBuilder<bool>(
+      valueListenable: data.detailsComputed,
+      builder: (context, detailsComputed, __) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: borderPadding),
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    if (hasSummary)
+                      ...processAnsiTerminalCodes(
+                        // TODO(helin24): Recompute summary length considering ansi codes.
+                        //  The current summary is generally the first 200 chars of details.
+                        data.summary!,
+                        theme.regularTextStyle,
+                      ),
+                    if (hasSummary && hasDetails)
+                      WidgetSpan(
+                        child: Icon(
+                          Icons.arrow_right,
+                          size: defaultIconSize,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    if (hasDetails)
+                      ...processAnsiTerminalCodes(
+                        detailsComputed ? data.details! : '<fetching>',
+                        theme.subtleTextStyle,
+                      ),
+                  ],
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ),
-          ),
-        ],
-      );
-    } else {
-      return RichText(
-        text: TextSpan(
-          children: processAnsiTerminalCodes(
-            // TODO(helin24): Recompute summary length considering ansi codes.
-            //  The current summary is generally the first 200 chars of details.
-            getDisplayValue(data),
-            Theme.of(context).regularTextStyle,
-          ),
-        ),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-      );
-    }
+            Padding(
+              padding: const EdgeInsets.only(
+                top: borderPadding,
+                bottom: densePadding,
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Wrap(
+                    children: metadataChips(
+                      data,
+                      constraints.maxWidth,
+                      colorScheme: theme.colorScheme,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

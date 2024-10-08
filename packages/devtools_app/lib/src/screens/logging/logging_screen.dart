@@ -73,8 +73,6 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     with
         AutoDisposeMixin,
         ProvidedControllerMixin<LoggingController, LoggingScreenBody> {
-  late List<LogData> filteredLogs;
-
   @override
   void initState() {
     super.initState();
@@ -87,13 +85,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     if (!initController()) return;
 
     cancelListeners();
-
-    filteredLogs = controller.filteredData.value;
-    addAutoDisposeListener(controller.filteredData, () {
-      setState(() {
-        filteredLogs = controller.filteredData.value;
-      });
-    });
+    addAutoDisposeListener(controller.filteredData);
   }
 
   @override
@@ -172,7 +164,8 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         RoundedOutlinedBorder(
           clip: true,
           child: LogsTable(
-            data: filteredLogs,
+            controller: controller,
+            data: controller.filteredData.value,
             selectionNotifier: controller.selectedLog,
             searchMatchesNotifier: controller.searchMatches,
             activeSearchMatchNotifier: controller.activeSearchMatch,

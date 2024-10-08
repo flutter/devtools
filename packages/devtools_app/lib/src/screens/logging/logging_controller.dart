@@ -319,6 +319,8 @@ class LoggingController extends DisposableController
           jsonEncode(e.extensionData!.data),
           e.timestamp,
           summary: summary.toDiagnosticsNode().toString(),
+          level: Level.SEVERE.value,
+          isError: true,
         ),
       );
     } else {
@@ -378,7 +380,8 @@ class LoggingController extends DisposableController
     final error = InstanceRef.parse(logRecord.error);
     final stackTrace = InstanceRef.parse(logRecord.stackTrace);
 
-    final details = summary;
+    // TODO(kenz): we may want to narrow down the details of dart developer logs
+    final details = jsonEncode(e.json);
     Future<String> Function()? detailsComputer;
 
     // If the message string was truncated by the VM, or the error object or
@@ -442,6 +445,7 @@ class LoggingController extends DisposableController
         loggerName,
         details,
         e.timestamp,
+        level: level,
         isError: isError,
         summary: summary,
         detailsComputer: detailsComputer,
@@ -623,11 +627,15 @@ class LoggingController extends DisposableController
 }
 
 extension type _LogRecord(Map<String, dynamic> json) {
+  int? get sequenceNumber => json['sequenceNumber'];
+
   int? get level => json['level'];
 
   Map<String, Object?> get loggerName => json['loggerName'];
 
   Map<String, Object?> get message => json['message'];
+
+  Map<String, Object?> get zone => json['zone'];
 
   Map<String, Object?> get error => json['error'];
 
@@ -740,9 +748,13 @@ class LogData with SearchableDataMixin {
     this.isError = false,
     this.detailsComputer,
     this.node,
-  });
+  }) {
+    // Fetch details immediately on creation.
+    unawaited(compute());
+  }
 
   final String kind;
+  final int? level;
   final int? timestamp;
   final bool isError;
   final String? summary;
@@ -757,22 +769,31 @@ class LogData with SearchableDataMixin {
 
   bool get needsComputing => detailsComputer != null;
 
+  ValueListenable<bool> get detailsComputed => _detailsComputed;
+  final _detailsComputed = ValueNotifier<bool>(false);
+
   Future<void> compute() async {
-    _details = await detailsComputer!();
-    detailsComputer = null;
+    if (!detailsComputed.value) {
+      if (detailsComputer != null) {
+        _details = await detailsComputer!();
+      }
+      detailsComputer = null;
+      _detailsComputed.value = true;
+    }
   }
 
   String? prettyPrinted() {
-    if (needsComputing) {
-      return details;
+    if (!detailsComputed.value) {
+      return details?.trim();
     }
 
     try {
       return prettyPrinter
           .convert(jsonDecode(details!))
-          .replaceAll(r'\n', '\n');
+          .replaceAll(r'\n', '\n')
+          .trim();
     } catch (_) {
-      return details;
+      return details?.trim();
     }
   }
 

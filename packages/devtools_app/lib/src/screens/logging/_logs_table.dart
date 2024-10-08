@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
-import '_kind_column.dart';
 import '_message_column.dart';
 import '_when_column.dart';
 import 'logging_controller.dart';
@@ -31,10 +30,9 @@ class LogsTable extends StatelessWidget {
   final ValueListenable<List<LogData>> searchMatchesNotifier;
   final ValueListenable<LogData?> activeSearchMatchNotifier;
 
-  static final when = WhenColumn();
-  static final kind = KindColumn();
-  static final message = MessageColumn();
-  static final columns = [when, kind, message];
+  static final whenColumn = WhenColumn();
+  static final messageColumn = MessageColumn();
+  static final columns = [whenColumn, messageColumn];
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +44,9 @@ class LogsTable extends StatelessWidget {
       autoScrollContent: true,
       columns: columns,
       selectionNotifier: selectionNotifier,
-      defaultSortColumn: when,
+      defaultSortColumn: whenColumn,
       defaultSortDirection: SortDirection.ascending,
-      secondarySortColumn: message,
+      secondarySortColumn: messageColumn,
       rowHeight: _logRowHeight,
     );
   }
