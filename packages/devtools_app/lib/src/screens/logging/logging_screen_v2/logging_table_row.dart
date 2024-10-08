@@ -7,10 +7,8 @@ import 'dart:math';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../shared/globals.dart';
-import '../../../shared/ui/icons.dart';
 import '../../../shared/ui/utils.dart';
 import '../metadata.dart';
 import '../shared/constants.dart';
@@ -185,7 +183,7 @@ class WhenMetaDataChip extends MetadataChip {
         );
 }
 
-extension on MetadataChip {
+extension SizeExtension on MetadataChip {
   /// Estimates the size of this single metadata chip.
   ///
   /// If the [build] method is changed then this may need to be updated
