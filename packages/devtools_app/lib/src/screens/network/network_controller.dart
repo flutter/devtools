@@ -169,23 +169,21 @@ class NetworkController extends DisposableController
 
   void _initHelper() async {
     try {
-      if (offlineDataController.showingOfflineData.value == true) {
+      if (offlineDataController.showingOfflineData.value) {
         await maybeLoadOfflineData(
           NetworkScreen.id,
           createData: (json) => OfflineNetworkData.fromJson(json),
           shouldLoad: (data) => !data.isEmpty,
           loadData: (data) => loadOfflineData(data),
         );
-      }
-      cancelListeners();
-      if (!offlineDataController.showingOfflineData.value) {
+      }else{
         unawaited(startRecording());
         debugPrint('started recording');
         addAutoDisposeListener(
           serviceConnection.serviceManager.isolateManager.mainIsolate,
-          () {
+              () {
             if (serviceConnection
-                    .serviceManager.isolateManager.mainIsolate.value !=
+                .serviceManager.isolateManager.mainIsolate.value !=
                 null) {
               unawaited(startRecording());
             }
