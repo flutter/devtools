@@ -745,6 +745,7 @@ class LogData with SearchableDataMixin {
     this._details,
     this.timestamp, {
     this.summary,
+    this.level,
     this.isError = false,
     this.detailsComputer,
     this.node,
