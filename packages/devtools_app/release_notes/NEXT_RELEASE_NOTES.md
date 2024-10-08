@@ -41,7 +41,12 @@ TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any general updates.
+* Fetch log details immediately upon receiving logs so that log data is not lost
+due to lazy loading. []()
+
+* Added support for displaying metadata, such as log
+severity. []()
+    ![Logging metadata display](images/log_metadata.png "Logging metadata display")
 
 ## App size tool updates
 

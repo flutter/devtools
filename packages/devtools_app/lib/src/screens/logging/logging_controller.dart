@@ -745,11 +745,11 @@ class LogData with SearchableDataMixin {
     this._details,
     this.timestamp, {
     this.summary,
-    this.level,
+    int? level,
     this.isError = false,
     this.detailsComputer,
     this.node,
-  }) {
+  }) : level = level ?? (isError ? Level.SEVERE.value : Level.INFO.value) {
     // Fetch details immediately on creation.
     unawaited(compute());
   }

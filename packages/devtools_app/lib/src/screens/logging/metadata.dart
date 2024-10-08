@@ -143,6 +143,8 @@ class LogLevelMetadataChip extends MetadataChip {
     required Level level,
     required int rawLevel,
     required super.maxWidth,
+    super.backgroundColor,
+    super.foregroundColor,
   }) : super(text: 'Level.${level.name} ($rawLevel)');
 
   static Level generateLogLevel(int rawLevel) {

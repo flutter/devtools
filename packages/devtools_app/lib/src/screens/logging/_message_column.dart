@@ -71,11 +71,20 @@ class MessageColumn extends ColumnData<LogData>
         foregroundColor: kindColors.foreground,
       ),
       if (data.level != null)
-        LogLevelMetadataChip(
-          level: LogLevelMetadataChip.generateLogLevel(data.level!),
-          rawLevel: data.level!,
-          maxWidth: maxWidth,
-        ),
+        () {
+          final logLevel = LogLevelMetadataChip.generateLogLevel(data.level!);
+          final logLevelColors = LogLevelMetadataChip.generateColors(
+            logLevel,
+            colorScheme,
+          );
+          return LogLevelMetadataChip(
+            level: logLevel,
+            rawLevel: data.level!,
+            maxWidth: maxWidth,
+            backgroundColor: logLevelColors.background,
+            foregroundColor: logLevelColors.foreground,
+          );
+        }(),
       if (elapsedFrameTimeAsString != null)
         FrameElapsedMetaDataChip(
           maxWidth: maxWidth,
