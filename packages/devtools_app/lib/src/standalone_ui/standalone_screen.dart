@@ -22,9 +22,9 @@ enum StandaloneScreenType {
     return switch (this) {
       StandaloneScreenType.vsCodeFlutterPanel => const Padding(
           padding: EdgeInsets.all(8.0),
-          child: Text(
-            'The Flutter sidebar for this SDK requires v3.96 or '
-            'newer of the Dart VS Code extension',
+          child: CenteredMessage(
+            message: 'The Flutter sidebar for this SDK requires v3.96 or '
+                'newer of the Dart VS Code extension',
           ),
         ),
       StandaloneScreenType.editorSidebar => ValueListenableBuilder(
