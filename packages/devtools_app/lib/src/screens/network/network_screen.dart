@@ -183,7 +183,6 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
   @override
   void initState() {
     super.initState();
-    addAutoDisposeListener(offlineDataController.showingOfflineData);
     _recording = widget.controller.recordingNotifier.value;
     addAutoDisposeListener(widget.controller.recordingNotifier, () {
       setState(() {
