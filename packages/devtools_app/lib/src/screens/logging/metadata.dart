@@ -106,6 +106,7 @@ abstract class MetadataChip extends StatelessWidget {
   static const verticalPadding = borderPadding;
   static const iconPadding = densePadding;
   static final height = scaleByFontFactor(18.0);
+  static const _borderRadius = 4.0;
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +120,7 @@ abstract class MetadataChip extends StatelessWidget {
       constraints: BoxConstraints(maxWidth: maxWidth),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(_borderRadius),
       ),
       margin: includeLeadingMargin
           ? const EdgeInsets.only(left: denseSpacing)

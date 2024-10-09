@@ -9,6 +9,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/globals.dart';
+import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/utils.dart';
 import '../metadata.dart';
 import '../shared/constants.dart';
@@ -46,7 +47,11 @@ class LoggingTableRow extends StatefulWidget {
     String? elapsedFrameTimeAsString;
     try {
       final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
-      elapsedFrameTimeAsString = (micros * 3.0 / 1000.0).toString();
+      elapsedFrameTimeAsString = durationText(
+        Duration(microseconds: micros),
+        unit: DurationDisplayUnit.milliseconds,
+        fractionDigits: 2,
+      );
     } catch (e) {
       // Ignore exception; [elapsedFrameTimeAsString] will be null.
     }

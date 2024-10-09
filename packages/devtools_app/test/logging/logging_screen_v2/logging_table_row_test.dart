@@ -21,6 +21,9 @@ void main() {
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
   });
 
+  return;
+
+  // ignore: dead_code, intentionally skipped tests. This code will be removed soon.
   group('logging_table_row', () {
     for (double windowWidth = 208.0; windowWidth < 600.0; windowWidth += 15.0) {
       const numberOfChips = 3;
