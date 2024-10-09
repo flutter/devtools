@@ -42,13 +42,13 @@ import 'utils.dart';
 /// using the '--baseline' or '--test' arguments.
 ///
 /// Example usage:
-///  * dart run benchmark/scripts/run_benchmarks.dart
+///  * dart run benchmark/scripts/dart2wasm_performance_diff.dart
 ///
 /// Example usage that averages benchmark results over 5 runs:
-///  * dart run benchmark/scripts/run_benchmarks.dart --average-of=5
+///  * dart run benchmark/scripts/dart2wasm_performance_diff.dart --average-of=5
 ///
 /// Example usage that diffs against an existing basline:
-///  * dart run benchmark/scripts/run_benchmarks.dart --baseline=/Users/me/Downloads/baseline_run.json
+///  * dart run benchmark/scripts/dart2wasm_performance_diff.dart --baseline=/Users/me/Downloads/baseline_run.json
 void main(List<String> args) async {
   if (!Directory.current.path.contains('devtools_app')) {
     stderr.writeln(

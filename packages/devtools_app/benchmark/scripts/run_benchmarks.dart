@@ -55,12 +55,12 @@ Future<BenchmarkResults> runBenchmarks({
     benchmarkResults.add(
       await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
-        entryPoint: 'benchmark/test_infra/client.dart',
+        entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
         compilationOptions: useWasm
             ? const CompilationOptions.wasm()
             : const CompilationOptions.js(),
         treeShakeIcons: false,
-        initialPage: benchmarkInitialPage,
+        benchmarkPath: benchmarkPath(useWasm: useWasm),
         headless: !useBrowser,
       ),
     );

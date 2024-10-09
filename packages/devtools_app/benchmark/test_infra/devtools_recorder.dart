@@ -34,6 +34,7 @@ class DevToolsRecorder extends WidgetRecorder {
     _devToolsAutomator = DevToolsAutomater(
       benchmark: benchmark,
       stopWarmingUpCallback: profile.stopWarmingUp,
+      profile: profile,
     );
     return _devToolsAutomator!.createWidget();
   }
