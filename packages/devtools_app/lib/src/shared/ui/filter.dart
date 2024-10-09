@@ -517,15 +517,16 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                 controller: queryTextFieldController,
                 prefixIcon: Container(
                   height: inputDecorationElementHeight,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: densePadding,
+                  padding: const EdgeInsets.only(
+                    left: densePadding,
+                    right: denseSpacing,
                   ),
                   child: ValueListenableBuilder<Filter>(
                     valueListenable: widget.controller.activeFilter,
                     builder: (context, _, __) {
                       // TODO(https://github.com/flutter/devtools/issues/8426): support filtering by log level.
                       return DevToolsFilterButton(
-                        message: 'Filter Settings',
+                        message: 'More filters',
                         onPressed: () {
                           unawaited(
                             showDialog(
