@@ -53,6 +53,12 @@ class MessageColumn extends ColumnData<LogData>
     bool isRowHovered = false,
     VoidCallback? onPressed,
   }) {
+    final theme = Theme.of(context);
+    final hasSummary = !data.summary.isNullOrEmpty;
+    // This needs to be a function because the details may be computed after the
+    // initial build.
+    bool hasDetails() => !data.details.isNullOrEmpty;
+
     if (data.kind.caseInsensitiveEquals(FlutterEvent.frame)) {
       const color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
       final text = Text(
@@ -81,17 +87,38 @@ class MessageColumn extends ColumnData<LogData>
         ],
       );
     } else {
-      return RichText(
-        text: TextSpan(
-          children: processAnsiTerminalCodes(
-            // TODO(helin24): Recompute summary length considering ansi codes.
-            //  The current summary is generally the first 200 chars of details.
-            getDisplayValue(data),
-            Theme.of(context).regularTextStyle,
-          ),
-        ),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
+      return ValueListenableBuilder<bool>(
+        valueListenable: data.detailsComputed,
+        builder: (context, detailsComputed, _) {
+          return RichText(
+            text: TextSpan(
+              children: [
+                if (hasSummary)
+                  ...processAnsiTerminalCodes(
+                    // TODO(helin24): Recompute summary length considering ansi codes.
+                    //  The current summary is generally the first 200 chars of details.
+                    data.summary!,
+                    theme.regularTextStyle,
+                  ),
+                if (hasSummary && hasDetails())
+                  WidgetSpan(
+                    child: Icon(
+                      Icons.arrow_right,
+                      size: defaultIconSize,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                if (hasDetails())
+                  ...processAnsiTerminalCodes(
+                    detailsComputed ? data.details! : '<fetching>',
+                    theme.subtleTextStyle,
+                  ),
+              ],
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          );
+        },
       );
     }
   }

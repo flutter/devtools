@@ -15,6 +15,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
+import '../../framework/app_error_handling.dart' as error_handling;
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
@@ -379,7 +380,8 @@ class LoggingController extends DisposableController
     final error = InstanceRef.parse(logRecord.error);
     final stackTrace = InstanceRef.parse(logRecord.stackTrace);
 
-    final details = summary;
+    // TODO(kenz): we may want to narrow down the details of dart developer logs
+    final details = jsonEncode(e.json);
     Future<String> Function()? detailsComputer;
 
     // If the message string was truncated by the VM, or the error object or
@@ -741,7 +743,23 @@ class LogData with SearchableDataMixin {
     this.isError = false,
     this.detailsComputer,
     this.node,
-  });
+  }) {
+    final originalDetails = _details;
+    // Fetch details immediately on creation.
+    unawaited(
+      compute().catchError(
+        (Object? error) {
+          // On error, set the value of details to its original value.
+          _details = originalDetails;
+          _detailsComputed.value = true;
+          error_handling.reportError(
+            'Error fetching details for $kind log'
+            '${error != null ? ': $error' : ''}.',
+          );
+        },
+      ),
+    );
+  }
 
   final String kind;
   final int? timestamp;
@@ -756,24 +774,33 @@ class LogData with SearchableDataMixin {
 
   String? get details => _details;
 
-  bool get needsComputing => detailsComputer != null;
+  bool get needsComputing => !detailsComputed.value;
+
+  ValueListenable<bool> get detailsComputed => _detailsComputed;
+  final _detailsComputed = ValueNotifier<bool>(false);
 
   Future<void> compute() async {
-    _details = await detailsComputer!();
-    detailsComputer = null;
+    if (!detailsComputed.value) {
+      if (detailsComputer != null) {
+        _details = await detailsComputer!();
+      }
+      detailsComputer = null;
+      _detailsComputed.value = true;
+    }
   }
 
   String? prettyPrinted() {
-    if (needsComputing) {
-      return details;
+    if (!detailsComputed.value) {
+      return details?.trim();
     }
 
     try {
       return prettyPrinter
           .convert(jsonDecode(details!))
-          .replaceAll(r'\n', '\n');
+          .replaceAll(r'\n', '\n')
+          .trim();
     } catch (_) {
-      return details;
+      return details?.trim();
     }
   }
 
