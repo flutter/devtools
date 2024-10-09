@@ -42,7 +42,7 @@ TODO: Remove this section if there are not any general updates.
 ## Logging updates
 
 * Fetch log details immediately upon receiving logs so that log data is not lost
-due to lazy loading. [#8419](https://github.com/flutter/devtools/pull/8419)
+due to lazy loading. - [#8421](https://github.com/flutter/devtools/pull/8421)
 
 * Added support for displaying metadata, such as log
 severity. [#8419](https://github.com/flutter/devtools/pull/8419)

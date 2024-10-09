@@ -15,6 +15,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
+import '../../framework/app_error_handling.dart' as error_handling;
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
@@ -750,8 +751,21 @@ class LogData with SearchableDataMixin {
     this.detailsComputer,
     this.node,
   }) : level = level ?? (isError ? Level.SEVERE.value : Level.INFO.value) {
+    final originalDetails = _details;
     // Fetch details immediately on creation.
-    unawaited(compute());
+    unawaited(
+      compute().catchError(
+        (Object? error) {
+          // On error, set the value of details to its original value.
+          _details = originalDetails;
+          _detailsComputed.value = true;
+          error_handling.reportError(
+            'Error fetching details for $kind log'
+            '${error != null ? ': $error' : ''}.',
+          );
+        },
+      ),
+    );
   }
 
   final String kind;
@@ -768,7 +782,7 @@ class LogData with SearchableDataMixin {
 
   String? get details => _details;
 
-  bool get needsComputing => detailsComputer != null;
+  bool get needsComputing => !_detailsComputed.value;
 
   ValueListenable<bool> get detailsComputed => _detailsComputed;
   final _detailsComputed = ValueNotifier<bool>(false);
