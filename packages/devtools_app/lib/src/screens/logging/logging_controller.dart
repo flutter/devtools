@@ -35,6 +35,7 @@ final _log = Logger('logging_controller');
 const kMaxLogItemsLowerBound = 5000;
 const kMaxLogItemsUpperBound = 5500;
 final timeFormat = DateFormat('HH:mm:ss.SSS');
+final dateTimeFormat = DateFormat('HH:mm:ss.SSS (MM/dd/yy)');
 
 bool _verboseDebugging = false;
 
