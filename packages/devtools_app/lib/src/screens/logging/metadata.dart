@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +12,75 @@ import 'package:logging/logging.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/icons.dart';
+import 'logging_controller.dart';
+
+class MetadataChips extends StatelessWidget {
+  const MetadataChips({
+    super.key,
+    required this.data,
+    // TODO(kenz): remove maxWidth from these metadata chips once the Logging
+    // V2 code is removed.
+    required this.maxWidth,
+  });
+
+  final LogData data;
+  final double maxWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // Prepare kind chip.
+    final kindIcon = KindMetaDataChip.generateIcon(data.kind);
+    final kindColors = KindMetaDataChip.generateColors(data.kind, colorScheme);
+
+    // Prepare log level chip.
+    final logLevel = LogLevelMetadataChip.generateLogLevel(data.level!);
+    final logLevelColors = LogLevelMetadataChip.generateColors(
+      logLevel,
+      colorScheme,
+    );
+    final logLevelChip = LogLevelMetadataChip(
+      level: logLevel,
+      rawLevel: data.level!,
+      maxWidth: maxWidth,
+      backgroundColor: logLevelColors.background,
+      foregroundColor: logLevelColors.foreground,
+    );
+
+    // Prepare frame time chip.
+    String? elapsedFrameTimeAsString;
+    try {
+      final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
+      elapsedFrameTimeAsString = durationText(
+        Duration(microseconds: micros),
+        unit: DurationDisplayUnit.milliseconds,
+        fractionDigits: 2,
+      );
+    } catch (e) {
+      // Ignore exception; [elapsedFrameTimeAsString] will be null.
+    }
+
+    return Wrap(
+      children: [
+        KindMetaDataChip(
+          kind: data.kind,
+          maxWidth: maxWidth,
+          icon: kindIcon.icon,
+          iconAsset: kindIcon.iconAsset,
+          backgroundColor: kindColors.background,
+          foregroundColor: kindColors.foreground,
+        ),
+        if (data.level != null) logLevelChip,
+        if (elapsedFrameTimeAsString != null)
+          FrameElapsedMetaDataChip(
+            maxWidth: maxWidth,
+            elapsedTimeDisplay: elapsedFrameTimeAsString,
+          ),
+      ],
+    );
+  }
+}
 
 abstract class MetadataChip extends StatelessWidget {
   const MetadataChip({

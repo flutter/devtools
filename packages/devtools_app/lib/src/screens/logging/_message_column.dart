@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -42,55 +40,6 @@ class MessageColumn extends ColumnData<LogData>
       return 1;
     }
     return valueA.compareTo(valueB);
-  }
-
-  /// All of the metatadata chips that can be visible for this [data] entry.
-  @visibleForTesting
-  static List<MetadataChip> metadataChips(
-    LogData data,
-    double maxWidth, {
-    required ColorScheme colorScheme,
-  }) {
-    String? elapsedFrameTimeAsString;
-    try {
-      final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
-      elapsedFrameTimeAsString = (micros * 3.0 / 1000.0).toString();
-    } catch (e) {
-      // Ignore exception; [elapsedFrameTimeAsString] will be null.
-    }
-
-    final kindIcon = KindMetaDataChip.generateIcon(data.kind);
-    final kindColors = KindMetaDataChip.generateColors(data.kind, colorScheme);
-    return [
-      KindMetaDataChip(
-        kind: data.kind,
-        maxWidth: maxWidth,
-        icon: kindIcon.icon,
-        iconAsset: kindIcon.iconAsset,
-        backgroundColor: kindColors.background,
-        foregroundColor: kindColors.foreground,
-      ),
-      if (data.level != null)
-        () {
-          final logLevel = LogLevelMetadataChip.generateLogLevel(data.level!);
-          final logLevelColors = LogLevelMetadataChip.generateColors(
-            logLevel,
-            colorScheme,
-          );
-          return LogLevelMetadataChip(
-            level: logLevel,
-            rawLevel: data.level!,
-            maxWidth: maxWidth,
-            backgroundColor: logLevelColors.background,
-            foregroundColor: logLevelColors.foreground,
-          );
-        }(),
-      if (elapsedFrameTimeAsString != null)
-        FrameElapsedMetaDataChip(
-          maxWidth: maxWidth,
-          elapsedTimeDisplay: elapsedFrameTimeAsString,
-        ),
-    ];
   }
 
   @override
@@ -152,12 +101,9 @@ class MessageColumn extends ColumnData<LogData>
               ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  return Wrap(
-                    children: metadataChips(
-                      data,
-                      constraints.maxWidth,
-                      colorScheme: theme.colorScheme,
-                    ),
+                  return MetadataChips(
+                    data: data,
+                    maxWidth: constraints.maxWidth,
                   );
                 },
               ),
