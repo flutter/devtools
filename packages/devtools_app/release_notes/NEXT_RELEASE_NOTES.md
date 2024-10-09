@@ -41,7 +41,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any general updates.
+* Fix a bug where logs would get out of order after midnight. - 
+[#8420](https://github.com/flutter/devtools/pull/8420)
 
 ## App size tool updates
 
