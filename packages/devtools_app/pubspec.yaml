@@ -76,7 +76,7 @@ dev_dependencies:
   mockito: ^5.4.1
   stager: ^1.0.1
   test: ^1.21.0
-  web_benchmarks: ^2.0.0
+  web_benchmarks: ^3.1.0
   webkit_inspection_protocol: ">=0.5.0 <2.0.0"
 
 flutter:
