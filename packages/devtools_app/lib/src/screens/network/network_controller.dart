@@ -183,8 +183,7 @@ class NetworkController extends DisposableController
       ..updateOrAddAll(
         requests: offlineData.currentRequests!,
         sockets: offlineData.socketStats,
-        timelineMicrosOffset: DateTime.now().microsecondsSinceEpoch -
-            (networkService.timeStamp ?? 0),
+        timelineMicrosOffset: DateTime.now().microsecondsSinceEpoch,
       );
     _filterAndRefreshSearchMatches();
 
