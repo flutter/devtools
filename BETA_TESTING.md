@@ -47,7 +47,7 @@ to the project.
     - Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-upstream-repository)
     with the upstream DevTools repo.
 
-2. Ensure that you have access to the `devtools_tool` executable by:
+2. Ensure that you have access to the `dt` executable by:
 	- Running `flutter pub get` on the `devtools/tool` directory
 	- Adding the `devtools/tool/bin` folder to your `PATH` environment variable:
 	  - **MacOS Users**
@@ -63,7 +63,7 @@ to the project.
 		- Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`, replacing `<DEVTOOLS_DIR>`
 		with the local path to your DevTools repo.
 	
-	Explore the commands and helpers that the `devtools_tool` provides by running `devtools_tool -h`. 
+	Explore the commands and helpers that the `dt` provides by running `dt -h`. 
 
 ## Prepare to build DevTools
 
@@ -73,8 +73,8 @@ To ensure your DevTools repository is up to date and ready to build, run the fol
 git checkout master
 git reset --hard origin/master
 
-devtools_tool update-flutter-sdk
-devtools_tool pub-get --only-main --upgrade
+dt update-flutter-sdk
+dt pub-get --only-main --upgrade
 ```
 
 ## Start DevTools and connect to an app

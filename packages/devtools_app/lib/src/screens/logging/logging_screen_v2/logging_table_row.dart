@@ -7,13 +7,11 @@ import 'dart:math';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../shared/globals.dart';
 import '../../../shared/ui/utils.dart';
-import 'logging_controller_v2.dart';
-
-final loggingTableTimeFormat = DateFormat('HH:mm:ss.SSS');
+import '../metadata.dart';
+import 'log_data.dart';
 
 class LoggingTableRow extends StatefulWidget {
   const LoggingTableRow({
@@ -52,19 +50,21 @@ class LoggingTableRow extends StatefulWidget {
       // Ignore exception; [elapsedFrameTimeAsString] will be null.
     }
 
+    final kindIcon = KindMetaDataChip.generateIcon(data.kind);
     return [
       if (data.timestamp != null)
         WhenMetaDataChip(
-          data: data,
+          timestamp: data.timestamp,
           maxWidth: maxWidth,
         ),
       KindMetaDataChip(
-        data: data,
+        kind: data.kind,
         maxWidth: maxWidth,
+        icon: kindIcon.icon,
+        iconAsset: kindIcon.iconAsset,
       ),
       if (elapsedFrameTimeAsString != null)
         FrameElapsedMetaDataChip(
-          data: data,
           maxWidth: maxWidth,
           elapsedTimeDisplay: elapsedFrameTimeAsString,
         ),
@@ -74,7 +74,7 @@ class LoggingTableRow extends StatefulWidget {
   @override
   State<LoggingTableRow> createState() => _LoggingTableRowState();
 
-  static final _padding = scaleByFontFactor(8.0);
+  static const _padding = densePadding;
 
   /// Estimates the height of the row, including the details section and all of the metadata chips.
   static double estimateRowHeight(
@@ -138,7 +138,7 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
         valueListenable: widget.data.detailsComputed,
         builder: (context, _, __) {
           return Padding(
-            padding: EdgeInsets.all(LoggingTableRow._padding),
+            padding: const EdgeInsets.all(LoggingTableRow._padding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -166,101 +166,4 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
       ),
     );
   }
-}
-
-@visibleForTesting
-abstract class MetadataChip extends StatelessWidget {
-  const MetadataChip({
-    super.key,
-    required this.data,
-    required this.maxWidth,
-    required this.icon,
-    required this.text,
-  });
-
-  final LogDataV2 data;
-  final double maxWidth;
-  final IconData icon;
-  final String text;
-
-  static const padding = defaultSpacing;
-
-  /// Estimates the size of this single metadata chip.
-  ///
-  /// If the [build] method is changed then this may need to be updated
-  Size estimateSize() {
-    final maxWidthInsidePadding = maxWidth - padding * 2;
-    final iconSize = Size.square(tooltipIconSize);
-    final textSize = calculateTextSpanSize(
-      _buildValueText(),
-      maxWidth: maxWidthInsidePadding,
-    );
-    return Size(
-      iconSize.width + defaultSpacing + textSize.width + padding * 2,
-      max(iconSize.height, textSize.height) + padding * 2,
-    );
-  }
-
-  /// If this build method is changed then you may need to modify [estimateSize()]
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(maxWidth: maxWidth),
-      padding: const EdgeInsets.all(padding),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: tooltipIconSize,
-          ),
-          const SizedBox(width: defaultSpacing),
-          RichText(
-            text: _buildValueText(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  TextSpan _buildValueText() {
-    return TextSpan(
-      text: text,
-      style: LoggingTableRow.metadataStyle,
-    );
-  }
-}
-
-@visibleForTesting
-class WhenMetaDataChip extends MetadataChip {
-  WhenMetaDataChip({
-    super.key,
-    required super.data,
-    required super.maxWidth,
-  }) : super(
-          icon: Icons.punch_clock,
-          text: data.timestamp == null
-              ? ''
-              : loggingTableTimeFormat
-                  .format(DateTime.fromMillisecondsSinceEpoch(data.timestamp!)),
-        );
-}
-
-@visibleForTesting
-class KindMetaDataChip extends MetadataChip {
-  KindMetaDataChip({
-    super.key,
-    required super.data,
-    required super.maxWidth,
-  }) : super(icon: Icons.type_specimen, text: data.kind);
-}
-
-@visibleForTesting
-class FrameElapsedMetaDataChip extends MetadataChip {
-  const FrameElapsedMetaDataChip({
-    super.key,
-    required super.data,
-    required super.maxWidth,
-    required String elapsedTimeDisplay,
-  }) : super(icon: Icons.timer, text: elapsedTimeDisplay);
 }

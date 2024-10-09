@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_controller_v2.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen_v2/log_data.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_model.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_table_row.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -75,7 +75,7 @@ void main() {
           final shortLog = LogDataV2('test', 'Some short details', 464564);
           final longLog = LogDataV2(
             'test',
-            'A long log, A long log, A long log, A long log, A long log, A long log, A long log, ',
+            'A long log, A long log, A long log, A long log, A long log, A long log, A long log.',
             464564,
           );
           final frameElapsedLog =
@@ -136,6 +136,10 @@ void main() {
             // in it would hang otherwise.
             loggingTableModel.tableWidth = windowWidth;
           });
+
+          expect(shortWidgetFinder, findsOneWidget);
+          expect(longWidgetFinder, findsOneWidget);
+          expect(frameElapsedFinder, findsOneWidget);
 
           expect(
             loggingTableModel.getFilteredLogHeight(0),

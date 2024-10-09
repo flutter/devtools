@@ -113,6 +113,84 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     String? ios_bundle_id, //metric14
   });
 
+  factory GtagEventDevTools._create({
+    required String event_category,
+    required String event_label,
+    String? send_to,
+    bool non_interaction = false,
+    int value = 0,
+    ScreenAnalyticsMetrics? screenMetrics,
+  }) {
+    return GtagEventDevTools(
+      event_category: event_category,
+      event_label: event_label,
+      send_to: send_to,
+      non_interaction: non_interaction,
+      value: value,
+      user_app: userAppType,
+      user_build: userBuildType,
+      user_platform: userPlatformType,
+      devtools_platform: devtoolsPlatformType,
+      devtools_chrome: devtoolsChrome,
+      devtools_version: devtoolsVersion,
+      ide_launched: ideLaunched,
+      flutter_client_id: flutterClientId,
+      is_external_build: isExternalBuild.toString(),
+      is_embedded: isEmbedded().toString(),
+      g3_username: devToolsEnvironmentParameters.username(),
+      ide_launched_feature: ideLaunchedFeature,
+      is_wasm: kIsWasm.toString(),
+      // [PerformanceScreenMetrics]
+      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.uiDuration?.inMicroseconds
+          : null,
+      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.rasterDuration?.inMicroseconds
+          : null,
+      shader_compilation_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.shaderCompilationDuration?.inMicroseconds
+              : null,
+      trace_event_count: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.traceEventCount
+          : null,
+      // [ProfilerScreenMetrics]
+      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
+          ? screenMetrics.cpuSampleCount
+          : null,
+      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
+          ? screenMetrics.cpuStackDepth
+          : null,
+      // [MemoryScreenMetrics]
+      heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapDiffObjectsBefore
+          : null,
+      heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapDiffObjectsAfter
+          : null,
+      heap_objects_total: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapObjectsTotal
+          : null,
+      // [InspectorScreenMetrics]
+      root_set_count: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.rootSetCount
+          : null,
+      row_count: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.rowCount
+          : null,
+      inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.inspectorTreeControllerId
+          : null,
+      // [DeepLinkScreenMetrics]
+      android_app_id: screenMetrics is DeepLinkScreenMetrics
+          ? screenMetrics.androidAppId
+          : null,
+      ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
+          ? screenMetrics.iosBundleId
+          : null,
+    );
+  }
+
   // Custom dimensions:
   external String? get user_app;
   external String? get user_build;
@@ -199,6 +277,78 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     String? ios_bundle_id, //metric14
   });
 
+  factory GtagExceptionDevTools._create(
+    String errorMessage, {
+    bool fatal = false,
+    ScreenAnalyticsMetrics? screenMetrics,
+  }) {
+    return GtagExceptionDevTools(
+      description: errorMessage,
+      fatal: fatal,
+      user_app: userAppType,
+      user_build: userBuildType,
+      user_platform: userPlatformType,
+      devtools_platform: devtoolsPlatformType,
+      devtools_chrome: devtoolsChrome,
+      devtools_version: devtoolsVersion,
+      ide_launched: _ideLaunched,
+      flutter_client_id: flutterClientId,
+      is_external_build: isExternalBuild.toString(),
+      is_embedded: isEmbedded().toString(),
+      g3_username: devToolsEnvironmentParameters.username(),
+      ide_launched_feature: ideLaunchedFeature,
+      is_wasm: kIsWasm.toString(),
+      // [PerformanceScreenMetrics]
+      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.uiDuration?.inMicroseconds
+          : null,
+      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.rasterDuration?.inMicroseconds
+          : null,
+      trace_event_count: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.traceEventCount
+          : null,
+      shader_compilation_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.shaderCompilationDuration?.inMicroseconds
+              : null,
+      // [ProfilerScreenMetrics]
+      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
+          ? screenMetrics.cpuSampleCount
+          : null,
+      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
+          ? screenMetrics.cpuStackDepth
+          : null,
+      // [MemoryScreenMetrics]
+      heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapDiffObjectsBefore
+          : null,
+      heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapDiffObjectsAfter
+          : null,
+      heap_objects_total: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapObjectsTotal
+          : null,
+      // [InspectorScreenMetrics]
+      root_set_count: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.rootSetCount
+          : null,
+      row_count: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.rowCount
+          : null,
+      inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.inspectorTreeControllerId
+          : null,
+      // [DeepLinkScreenMetrics]
+      android_app_id: screenMetrics is DeepLinkScreenMetrics
+          ? screenMetrics.androidAppId
+          : null,
+      ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
+          ? screenMetrics.iosBundleId
+          : null,
+    );
+  }
+
   // Custom dimensions:
   external String? get user_app;
   external String? get user_build;
@@ -229,158 +379,6 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
   external int? get inspector_tree_controller_id;
   external String? get android_app_id;
   external String? get ios_bundle_id;
-}
-
-// This cannot be a factory constructor in the [GtagEventDevTools] class due to
-// https://github.com/dart-lang/sdk/issues/46967.
-GtagEventDevTools _gtagEvent({
-  required String event_category,
-  required String event_label,
-  String? send_to,
-  bool non_interaction = false,
-  int value = 0,
-  ScreenAnalyticsMetrics? screenMetrics,
-}) {
-  return GtagEventDevTools(
-    event_category: event_category,
-    event_label: event_label,
-    send_to: send_to,
-    non_interaction: non_interaction,
-    value: value,
-    user_app: userAppType,
-    user_build: userBuildType,
-    user_platform: userPlatformType,
-    devtools_platform: devtoolsPlatformType,
-    devtools_chrome: devtoolsChrome,
-    devtools_version: devtoolsVersion,
-    ide_launched: ideLaunched,
-    flutter_client_id: flutterClientId,
-    is_external_build: isExternalBuild.toString(),
-    is_embedded: isEmbedded().toString(),
-    g3_username: devToolsEnvironmentParameters.username(),
-    ide_launched_feature: ideLaunchedFeature,
-    is_wasm: kIsWasm.toString(),
-    // [PerformanceScreenMetrics]
-    ui_duration_micros: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.uiDuration?.inMicroseconds
-        : null,
-    raster_duration_micros: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.rasterDuration?.inMicroseconds
-        : null,
-    shader_compilation_duration_micros:
-        screenMetrics is PerformanceScreenMetrics
-            ? screenMetrics.shaderCompilationDuration?.inMicroseconds
-            : null,
-    trace_event_count: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.traceEventCount
-        : null,
-    // [ProfilerScreenMetrics]
-    cpu_sample_count: screenMetrics is ProfilerScreenMetrics
-        ? screenMetrics.cpuSampleCount
-        : null,
-    cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
-        ? screenMetrics.cpuStackDepth
-        : null,
-    // [MemoryScreenMetrics]
-    heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
-        ? screenMetrics.heapDiffObjectsBefore
-        : null,
-    heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
-        ? screenMetrics.heapDiffObjectsAfter
-        : null,
-    heap_objects_total: screenMetrics is MemoryScreenMetrics
-        ? screenMetrics.heapObjectsTotal
-        : null,
-    // [InspectorScreenMetrics]
-    root_set_count: screenMetrics is InspectorScreenMetrics
-        ? screenMetrics.rootSetCount
-        : null,
-    row_count:
-        screenMetrics is InspectorScreenMetrics ? screenMetrics.rowCount : null,
-    inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
-        ? screenMetrics.inspectorTreeControllerId
-        : null,
-    // [DeepLinkScreenMetrics]
-    android_app_id: screenMetrics is DeepLinkScreenMetrics
-        ? screenMetrics.androidAppId
-        : null,
-    ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
-        ? screenMetrics.iosBundleId
-        : null,
-  );
-}
-
-// This cannot be a factory constructor in the [GtagExceptionDevTools] class due to
-// https://github.com/dart-lang/sdk/issues/46967.
-GtagExceptionDevTools _gtagException(
-  String errorMessage, {
-  bool fatal = false,
-  ScreenAnalyticsMetrics? screenMetrics,
-}) {
-  return GtagExceptionDevTools(
-    description: errorMessage,
-    fatal: fatal,
-    user_app: userAppType,
-    user_build: userBuildType,
-    user_platform: userPlatformType,
-    devtools_platform: devtoolsPlatformType,
-    devtools_chrome: devtoolsChrome,
-    devtools_version: devtoolsVersion,
-    ide_launched: _ideLaunched,
-    flutter_client_id: flutterClientId,
-    is_external_build: isExternalBuild.toString(),
-    is_embedded: isEmbedded().toString(),
-    g3_username: devToolsEnvironmentParameters.username(),
-    ide_launched_feature: ideLaunchedFeature,
-    is_wasm: kIsWasm.toString(),
-    // [PerformanceScreenMetrics]
-    ui_duration_micros: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.uiDuration?.inMicroseconds
-        : null,
-    raster_duration_micros: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.rasterDuration?.inMicroseconds
-        : null,
-    trace_event_count: screenMetrics is PerformanceScreenMetrics
-        ? screenMetrics.traceEventCount
-        : null,
-    shader_compilation_duration_micros:
-        screenMetrics is PerformanceScreenMetrics
-            ? screenMetrics.shaderCompilationDuration?.inMicroseconds
-            : null,
-    // [ProfilerScreenMetrics]
-    cpu_sample_count: screenMetrics is ProfilerScreenMetrics
-        ? screenMetrics.cpuSampleCount
-        : null,
-    cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
-        ? screenMetrics.cpuStackDepth
-        : null,
-    // [MemoryScreenMetrics]
-    heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
-        ? screenMetrics.heapDiffObjectsBefore
-        : null,
-    heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
-        ? screenMetrics.heapDiffObjectsAfter
-        : null,
-    heap_objects_total: screenMetrics is MemoryScreenMetrics
-        ? screenMetrics.heapObjectsTotal
-        : null,
-    // [InspectorScreenMetrics]
-    root_set_count: screenMetrics is InspectorScreenMetrics
-        ? screenMetrics.rootSetCount
-        : null,
-    row_count:
-        screenMetrics is InspectorScreenMetrics ? screenMetrics.rowCount : null,
-    inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
-        ? screenMetrics.inspectorTreeControllerId
-        : null,
-    // [DeepLinkScreenMetrics]
-    android_app_id: screenMetrics is DeepLinkScreenMetrics
-        ? screenMetrics.androidAppId
-        : null,
-    ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
-        ? screenMetrics.iosBundleId
-        : null,
-  );
 }
 
 /// Whether google analytics are enabled.
@@ -425,7 +423,7 @@ void screen(
   int value = 0,
 ]) {
   _log.fine('Event: Screen(screenName:$screenName, value:$value)');
-  final gtagEvent = _gtagEvent(
+  final gtagEvent = GtagEventDevTools._create(
     event_category: gac.screenViewEvent,
     event_label: gac.init,
     value: value,
@@ -570,7 +568,7 @@ void _timing(
     'timedOperation:$timedOperation, '
     'durationMicros:$durationMicros)',
   );
-  final gtagEvent = _gtagEvent(
+  final gtagEvent = GtagEventDevTools._create(
     event_category: gac.timingEvent,
     event_label: timedOperation,
     value: durationMicros,
@@ -595,7 +593,7 @@ void select(
     'value:$value, '
     'nonInteraction:$nonInteraction)',
   );
-  final gtagEvent = _gtagEvent(
+  final gtagEvent = GtagEventDevTools._create(
     event_category: gac.selectEvent,
     event_label: selectedItem,
     value: value,
@@ -620,7 +618,7 @@ void impression(
     'screenName:$screenName, '
     'item:$item)',
   );
-  final gtagEvent = _gtagEvent(
+  final gtagEvent = GtagEventDevTools._create(
     event_category: gac.impressionEvent,
     event_label: item,
     non_interaction: true,
@@ -641,7 +639,7 @@ void reportError(
   if (_lastGaError == errorMessage) return;
   _lastGaError = errorMessage;
 
-  final gTagException = _gtagException(
+  final gTagException = GtagExceptionDevTools._create(
     errorMessage,
     fatal: fatal,
   );
