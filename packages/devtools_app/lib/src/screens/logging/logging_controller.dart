@@ -321,6 +321,8 @@ class LoggingController extends DisposableController
           jsonEncode(e.extensionData!.data),
           e.timestamp,
           summary: summary.toDiagnosticsNode().toString(),
+          level: Level.SEVERE.value,
+          isError: true,
         ),
       );
     } else {
@@ -445,6 +447,7 @@ class LoggingController extends DisposableController
         loggerName,
         details,
         e.timestamp,
+        level: level,
         isError: isError,
         summary: summary,
         detailsComputer: detailsComputer,
@@ -626,11 +629,15 @@ class LoggingController extends DisposableController
 }
 
 extension type _LogRecord(Map<String, dynamic> json) {
+  int? get sequenceNumber => json['sequenceNumber'];
+
   int? get level => json['level'];
 
   Map<String, Object?> get loggerName => json['loggerName'];
 
   Map<String, Object?> get message => json['message'];
+
+  Map<String, Object?> get zone => json['zone'];
 
   Map<String, Object?> get error => json['error'];
 
@@ -740,10 +747,11 @@ class LogData with SearchableDataMixin {
     this._details,
     this.timestamp, {
     this.summary,
+    int? level,
     this.isError = false,
     this.detailsComputer,
     this.node,
-  }) {
+  }) : level = level ?? (isError ? Level.SEVERE.value : Level.INFO.value) {
     final originalDetails = _details;
     // Fetch details immediately on creation.
     unawaited(
@@ -762,6 +770,7 @@ class LogData with SearchableDataMixin {
   }
 
   final String kind;
+  final int? level;
   final int? timestamp;
   final bool isError;
   final String? summary;
@@ -774,7 +783,7 @@ class LogData with SearchableDataMixin {
 
   String? get details => _details;
 
-  bool get needsComputing => !detailsComputed.value;
+  bool get needsComputing => !_detailsComputed.value;
 
   ValueListenable<bool> get detailsComputed => _detailsComputed;
   final _detailsComputed = ValueNotifier<bool>(false);

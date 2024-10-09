@@ -30,6 +30,7 @@ class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable<T> {
     super.preserveVerticalScrollPosition = false,
     super.includeColumnGroupHeaders = true,
     super.sizeColumnsToFit = true,
+    super.rowHeight,
     super.selectionNotifier,
   }) : super(
           searchMatchesNotifier: searchController.searchMatches,
@@ -69,6 +70,7 @@ class FlatTable<T> extends StatefulWidget {
     this.includeColumnGroupHeaders = true,
     this.tallHeaders = false,
     this.sizeColumnsToFit = true,
+    this.rowHeight,
     this.headerColor,
     this.fillWithEmptyRows = false,
     this.enableHoverHandling = false,
@@ -92,6 +94,8 @@ class FlatTable<T> extends StatefulWidget {
   /// Whether the columns for this table should be sized so that the entire
   /// table fits in view (e.g. so that there is no horizontal scrolling).
   final bool sizeColumnsToFit;
+
+  final double? rowHeight;
 
   // TODO(kenz): should we enable this behavior by default? Does it ever matter
   // to preserve the order of the original data passed to a flat table?
@@ -285,7 +289,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           autoScrollContent: widget.autoScrollContent,
           rowBuilder: _buildRow,
           activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
-          rowItemExtent: defaultRowHeight,
+          rowItemExtent: widget.rowHeight ?? defaultRowHeight,
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
           tallHeaders: widget.tallHeaders,
           headerColor: widget.headerColor,

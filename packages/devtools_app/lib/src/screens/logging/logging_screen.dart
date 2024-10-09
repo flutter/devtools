@@ -93,6 +93,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         RoundedOutlinedBorder(
           clip: true,
           child: LogsTable(
+            controller: controller,
             data: controller.filteredData.value,
             selectionNotifier: controller.selectedLog,
             searchMatchesNotifier: controller.searchMatches,

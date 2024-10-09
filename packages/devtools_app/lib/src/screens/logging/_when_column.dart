@@ -11,7 +11,7 @@ class WhenColumn extends ColumnData<LogData> {
   WhenColumn()
       : super(
           'When',
-          fixedWidthPx: scaleByFontFactor(100),
+          fixedWidthPx: scaleByFontFactor(80),
         );
 
   @override

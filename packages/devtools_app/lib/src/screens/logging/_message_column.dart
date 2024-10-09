@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
-import 'package:devtools_app_shared/service.dart' show FlutterEvent;
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -12,11 +9,11 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import 'logging_controller.dart';
+import 'metadata.dart';
 
-@visibleForTesting
 class MessageColumn extends ColumnData<LogData>
     implements ColumnRenderer<LogData> {
-  MessageColumn() : super.wide('Message');
+  MessageColumn() : super.wide('Log');
 
   @override
   bool get supportsSorting => false;
@@ -59,67 +56,61 @@ class MessageColumn extends ColumnData<LogData>
     // initial build.
     bool hasDetails() => !data.details.isNullOrEmpty;
 
-    if (data.kind.caseInsensitiveEquals(FlutterEvent.frame)) {
-      const color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
-      final text = Text(
-        getDisplayValue(data),
-        overflow: TextOverflow.ellipsis,
-      );
-
-      double frameLength = 0.0;
-      try {
-        final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
-        frameLength = micros * 3.0 / 1000.0;
-      } catch (e) {
-        // ignore
-      }
-
-      return Row(
-        children: <Widget>[
-          text,
-          Flexible(
-            child: Container(
-              height: 12.0,
-              width: frameLength,
-              decoration: const BoxDecoration(color: color),
+    return ValueListenableBuilder<bool>(
+      valueListenable: data.detailsComputed,
+      builder: (context, detailsComputed, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: borderPadding),
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    if (hasSummary)
+                      ...processAnsiTerminalCodes(
+                        // TODO(helin24): Recompute summary length considering ansi codes.
+                        //  The current summary is generally the first 200 chars of details.
+                        data.summary!,
+                        theme.regularTextStyle,
+                      ),
+                    if (hasSummary && hasDetails())
+                      WidgetSpan(
+                        child: Icon(
+                          Icons.arrow_right,
+                          size: defaultIconSize,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    if (hasDetails())
+                      ...processAnsiTerminalCodes(
+                        detailsComputed ? data.details! : '<fetching>',
+                        theme.subtleTextStyle,
+                      ),
+                  ],
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ),
-          ),
-        ],
-      );
-    } else {
-      return ValueListenableBuilder<bool>(
-        valueListenable: data.detailsComputed,
-        builder: (context, detailsComputed, _) {
-          return RichText(
-            text: TextSpan(
-              children: [
-                if (hasSummary)
-                  ...processAnsiTerminalCodes(
-                    // TODO(helin24): Recompute summary length considering ansi codes.
-                    //  The current summary is generally the first 200 chars of details.
-                    data.summary!,
-                    theme.regularTextStyle,
-                  ),
-                if (hasSummary && hasDetails())
-                  WidgetSpan(
-                    child: Icon(
-                      Icons.arrow_right,
-                      size: defaultIconSize,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                if (hasDetails())
-                  ...processAnsiTerminalCodes(
-                    detailsComputed ? data.details! : '<fetching>',
-                    theme.subtleTextStyle,
-                  ),
-              ],
+            Padding(
+              padding: const EdgeInsets.only(
+                top: borderPadding,
+                bottom: densePadding,
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return MetadataChips(
+                    data: data,
+                    maxWidth: constraints.maxWidth,
+                  );
+                },
+              ),
             ),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          );
-        },
-      );
-    }
+          ],
+        );
+      },
+    );
   }
 }

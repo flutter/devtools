@@ -9,8 +9,10 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/globals.dart';
+import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/utils.dart';
 import '../metadata.dart';
+import '../shared/constants.dart';
 import 'log_data.dart';
 
 class LoggingTableRow extends StatefulWidget {
@@ -45,7 +47,11 @@ class LoggingTableRow extends StatefulWidget {
     String? elapsedFrameTimeAsString;
     try {
       final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
-      elapsedFrameTimeAsString = (micros * 3.0 / 1000.0).toString();
+      elapsedFrameTimeAsString = durationText(
+        Duration(microseconds: micros),
+        unit: DurationDisplayUnit.milliseconds,
+        fractionDigits: 2,
+      );
     } catch (e) {
       // Ignore exception; [elapsedFrameTimeAsString] will be null.
     }
@@ -164,6 +170,49 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
           );
         },
       ),
+    );
+  }
+}
+
+class WhenMetaDataChip extends MetadataChip {
+  WhenMetaDataChip({
+    super.key,
+    required int? timestamp,
+    required super.maxWidth,
+  }) : super(
+          icon: null,
+          text: timestamp == null
+              ? ''
+              : loggingTableTimeFormat
+                  .format(DateTime.fromMillisecondsSinceEpoch(timestamp)),
+        );
+}
+
+extension SizeExtension on MetadataChip {
+  /// Estimates the size of this single metadata chip.
+  ///
+  /// If the [build] method is changed then this may need to be updated
+  Size estimateSize() {
+    final horizontalPaddingCount = includeLeadingMargin ? 2 : 1;
+    final maxWidthInsidePadding = max(
+      0.0,
+      maxWidth - MetadataChip.horizontalPadding * horizontalPaddingCount,
+    );
+    final iconSize = Size.square(defaultIconSize);
+    final textSize = calculateTextSpanSize(
+      TextSpan(
+        text: text,
+        style: LoggingTableRow.metadataStyle,
+      ),
+      maxWidth: maxWidthInsidePadding,
+    );
+    return Size(
+      ((icon != null || iconAsset != null)
+              ? iconSize.width + MetadataChip.iconPadding
+              : 0.0) +
+          textSize.width +
+          MetadataChip.horizontalPadding * horizontalPaddingCount,
+      max(iconSize.height, textSize.height) + MetadataChip.verticalPadding * 2,
     );
   }
 }
