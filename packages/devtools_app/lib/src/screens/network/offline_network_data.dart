@@ -23,9 +23,12 @@ class OfflineNetworkData with Serializable {
 
   /// Creates an instance of [OfflineNetworkData] from a JSON map.
   factory OfflineNetworkData.fromJson(Map<String, dynamic> json) {
-    final List<dynamic> requestsJson = json['requests'] ?? [];
-    final List<HttpProfileRequest>? currentReqData = json['currentRequests'];
-    final List<SocketStatistic>? socketStats = json['socketStats'];
+    final List<dynamic> requestsJson =
+        json[OfflineDataKeys.requests.name] ?? [];
+    final List<HttpProfileRequest>? currentReqData =
+        json[OfflineDataKeys.currentRequests.name];
+    final List<SocketStatistic>? socketStats =
+        json[OfflineDataKeys.socketStats.name];
 
     final requests = requestsJson
         .map(
@@ -39,7 +42,8 @@ class OfflineNetworkData with Serializable {
 
     return OfflineNetworkData(
       requests: requests,
-      selectedRequestId: json['selectedRequestId'] as String?,
+      selectedRequestId:
+          json[OfflineDataKeys.selectedRequestId.name] as String?,
       currentRequests: currentReqData,
       socketStats: socketStats!,
     );
@@ -73,10 +77,18 @@ class OfflineNetworkData with Serializable {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'requests': requests.map((request) => request.toJson()).toList(),
-      'selectedRequestId': selectedRequestId,
-      'currentRequests': currentRequests,
-      'socketStats': socketStats,
+      OfflineDataKeys.requests.name:
+          requests.map((request) => request.toJson()).toList(),
+      OfflineDataKeys.selectedRequestId.name: selectedRequestId,
+      OfflineDataKeys.currentRequests.name: currentRequests,
+      OfflineDataKeys.socketStats.name: socketStats,
     };
   }
+}
+
+enum OfflineDataKeys {
+  requests,
+  selectedRequestId,
+  currentRequests,
+  socketStats,
 }
