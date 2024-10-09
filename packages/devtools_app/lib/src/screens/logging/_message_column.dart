@@ -55,7 +55,9 @@ class MessageColumn extends ColumnData<LogData>
   }) {
     final theme = Theme.of(context);
     final hasSummary = !data.summary.isNullOrEmpty;
-    final hasDetails = !data.details.isNullOrEmpty;
+    // This needs to be a function because the details may be computed after the
+    // initial build.
+    bool hasDetails() => !data.details.isNullOrEmpty;
 
     if (data.kind.caseInsensitiveEquals(FlutterEvent.frame)) {
       const color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
@@ -87,7 +89,7 @@ class MessageColumn extends ColumnData<LogData>
     } else {
       return ValueListenableBuilder<bool>(
         valueListenable: data.detailsComputed,
-        builder: (context, detailsComputed, __) {
+        builder: (context, detailsComputed, _) {
           return RichText(
             text: TextSpan(
               children: [
@@ -98,7 +100,7 @@ class MessageColumn extends ColumnData<LogData>
                     data.summary!,
                     theme.regularTextStyle,
                   ),
-                if (hasSummary && hasDetails)
+                if (hasSummary && hasDetails())
                   WidgetSpan(
                     child: Icon(
                       Icons.arrow_right,
@@ -106,7 +108,7 @@ class MessageColumn extends ColumnData<LogData>
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
-                if (hasDetails)
+                if (hasDetails())
                   ...processAnsiTerminalCodes(
                     detailsComputed ? data.details! : '<fetching>',
                     theme.subtleTextStyle,

@@ -32,6 +32,10 @@ void main() {
   }
 
   setUp(() {
+    // Reset the log data for each test so that the delay for computing the
+    // details behaves the same for each test.
+    _fakeLogData = null;
+
     mockLoggingController =
         createMockLoggingControllerWithDefaults(data: fakeLogData);
 
@@ -77,16 +81,21 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(ValueKey(fakeLogData[6])));
       await tester.pumpAndSettle();
+
       expect(
-        find.selectableText('log event 6'),
+        find.descendant(
+          of: find.byType(LogsTable),
+          matching: find.richTextContaining('log event 6'),
+        ),
         findsOneWidget,
-        reason:
-            'The log details should be visible both in the details section.',
       );
       expect(
-        find.selectableText('log event 6'),
+        find.descendant(
+          of: find.byType(LogDetails),
+          matching: find.selectableText('log event 6'),
+        ),
         findsOneWidget,
-        reason: 'The log details should be visible both in the table.',
+        reason: 'The log details should now be visible in the details section.',
       );
     },
   );
@@ -219,7 +228,9 @@ void main() {
 
 const totalLogs = 10;
 
-final fakeLogData = List<LogData>.generate(totalLogs, _generate);
+List<LogData> get fakeLogData =>
+    _fakeLogData ??= List<LogData>.generate(totalLogs, _generate);
+List<LogData>? _fakeLogData;
 
 LogData _generate(int i) {
   String? details = 'log event $i';
