@@ -42,10 +42,10 @@ TODO: Remove this section if there are not any general updates.
 ## Logging updates
 
 * Fetch log details immediately upon receiving logs so that log data is not lost
-due to lazy loading. []()
+due to lazy loading. [#8419](https://github.com/flutter/devtools/pull/8419)
 
 * Added support for displaying metadata, such as log
-severity. []()
+severity. [#8419](https://github.com/flutter/devtools/pull/8419)
     ![Logging metadata display](images/log_metadata.png "Logging metadata display")
 
 ## App size tool updates
