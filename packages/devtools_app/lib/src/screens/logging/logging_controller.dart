@@ -378,7 +378,8 @@ class LoggingController extends DisposableController
     final error = InstanceRef.parse(logRecord.error);
     final stackTrace = InstanceRef.parse(logRecord.stackTrace);
 
-    final details = summary;
+    // TODO(kenz): we may want to narrow down the details of dart developer logs
+    final details = jsonEncode(e.json);
     Future<String> Function()? detailsComputer;
 
     // If the message string was truncated by the VM, or the error object or
@@ -740,7 +741,10 @@ class LogData with SearchableDataMixin {
     this.isError = false,
     this.detailsComputer,
     this.node,
-  });
+  }) {
+    // Fetch details immediately on creation.
+    unawaited(compute());
+  }
 
   final String kind;
   final int? timestamp;
@@ -755,24 +759,33 @@ class LogData with SearchableDataMixin {
 
   String? get details => _details;
 
-  bool get needsComputing => detailsComputer != null;
+  bool get needsComputing => !detailsComputed.value;
+
+  ValueListenable<bool> get detailsComputed => _detailsComputed;
+  final _detailsComputed = ValueNotifier<bool>(false);
 
   Future<void> compute() async {
-    _details = await detailsComputer!();
-    detailsComputer = null;
+    if (!detailsComputed.value) {
+      if (detailsComputer != null) {
+        _details = await detailsComputer!();
+      }
+      detailsComputer = null;
+      _detailsComputed.value = true;
+    }
   }
 
   String? prettyPrinted() {
-    if (needsComputing) {
-      return details;
+    if (!detailsComputed.value) {
+      return details?.trim();
     }
 
     try {
       return prettyPrinter
           .convert(jsonDecode(details!))
-          .replaceAll(r'\n', '\n');
+          .replaceAll(r'\n', '\n')
+          .trim();
     } catch (_) {
-      return details;
+      return details?.trim();
     }
   }
 
