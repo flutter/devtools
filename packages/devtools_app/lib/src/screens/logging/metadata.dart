@@ -35,7 +35,7 @@ class MetadataChips extends StatelessWidget {
     final kindColors = KindMetaDataChip.generateColors(data.kind, colorScheme);
 
     // Prepare log level chip.
-    final logLevel = LogLevelMetadataChip.generateLogLevel(data.level!);
+    final logLevel = LogLevelMetadataChip.generateLogLevel(data.level);
     final logLevelColors = LogLevelMetadataChip.generateColors(
       logLevel,
       colorScheme,

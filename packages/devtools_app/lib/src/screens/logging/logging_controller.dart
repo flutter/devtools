@@ -27,6 +27,7 @@ import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../inspector/inspector_tree_controller.dart';
 import 'logging_screen.dart';
+import 'metadata.dart';
 
 final _log = Logger('logging_controller');
 
@@ -605,6 +606,10 @@ class LoggingController extends DisposableController
             final matchesKind = log.kind.caseInsensitiveContains(substring);
             if (matchesKind) return true;
 
+            final matchesLevel =
+                log.levelName.caseInsensitiveContains(substring);
+            if (matchesLevel) return true;
+
             final matchesSummary = log.summary != null &&
                 log.summary!.caseInsensitiveContains(substring);
             if (matchesSummary) return true;
@@ -770,10 +775,14 @@ class LogData with SearchableDataMixin {
   }
 
   final String kind;
-  final int? level;
+  final int level;
   final int? timestamp;
   final bool isError;
   final String? summary;
+
+  String get levelName =>
+      _levelName ??= LogLevelMetadataChip.generateLogLevel(level).name;
+  String? _levelName;
 
   final RemoteDiagnosticsNode? node;
   String? _details;
