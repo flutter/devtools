@@ -58,7 +58,11 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-TODO: Remove this section if there are not any general updates.
+- The legacy `postMessage` version of the VS Code sidebar has been removed in
+  favor of the DTD-powered version. Trying to access the legacy sidebar will
+  show a message advising to update your Dart VS Code extension. The Dart VS
+  Code extension was the only user of the legacy sidebar and migrated off in
+  v3.96.
 
 ## DevTools Extension updates
 
