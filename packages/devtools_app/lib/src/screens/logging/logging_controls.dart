@@ -45,30 +45,23 @@ Example queries:
           gaSelection: gac.clear,
           minScreenWidthForTextBeforeScaling: loggingMinVerboseWidth,
         ),
-        const Spacer(),
         const SizedBox(width: denseSpacing),
-        // TODO(kenz): fix focus issue when state is refreshed
-        SearchField<LoggingController>(
-          searchFieldWidth: isScreenWiderThan(context, loggingMinVerboseWidth)
-              ? wideSearchFieldWidth
-              : defaultSearchFieldWidth,
-          searchController: controller,
-          searchFieldEnabled: hasData,
+        Expanded(
+          // TODO(kenz): fix focus issue when state is refreshed
+          child: SearchField<LoggingController>(
+            searchFieldWidth: isScreenWiderThan(context, loggingMinVerboseWidth)
+                ? wideSearchFieldWidth
+                : defaultSearchFieldWidth,
+            searchController: controller,
+            searchFieldEnabled: hasData,
+            containerPadding: EdgeInsets.zero,
+          ),
         ),
         const SizedBox(width: denseSpacing),
-        DevToolsFilterButton(
-          onPressed: () {
-            unawaited(
-              showDialog(
-                context: context,
-                builder: (context) => FilterDialog<LogData>(
-                  controller: controller,
-                  queryInstructions: filterQueryInstructions,
-                ),
-              ),
-            );
-          },
-          isFilterActive: controller.isFilterActive,
+        Expanded(
+          child: StandaloneFilterField<LogData>(
+            controller: controller,
+          ),
         ),
         const SizedBox(width: denseSpacing),
         CopyToClipboardControl(

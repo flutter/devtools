@@ -11,8 +11,8 @@ import 'theme/theme.dart';
 final class DevToolsClearableTextField extends StatelessWidget {
   DevToolsClearableTextField({
     super.key,
-    required this.labelText,
     TextEditingController? controller,
+    this.labelText,
     this.hintText,
     this.prefixIcon,
     this.additionalSuffixActions = const <Widget>[],
@@ -27,7 +27,7 @@ final class DevToolsClearableTextField extends StatelessWidget {
   final String? hintText;
   final Widget? prefixIcon;
   final List<Widget> additionalSuffixActions;
-  final String labelText;
+  final String? labelText;
   final void Function(String)? onChanged;
   final void Function(String)? onSubmitted;
   final bool autofocus;
@@ -80,13 +80,13 @@ final class DevToolsClearableTextField extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                ...additionalSuffixActions,
                 InputDecorationSuffixButton.clear(
                   onPressed: () {
                     controller.clear();
                     onChanged?.call('');
                   },
                 ),
-                ...additionalSuffixActions,
               ],
             ),
           ),

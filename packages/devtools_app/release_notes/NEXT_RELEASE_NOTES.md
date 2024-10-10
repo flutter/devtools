@@ -45,6 +45,10 @@ due to lazy loading. - [#8421](https://github.com/flutter/devtools/pull/8421)
 severity. [#8419](https://github.com/flutter/devtools/pull/8419)
     ![Logging metadata display](images/log_metadata.png "Logging metadata display")
 
+* Add a text filter to the top-level logging controls. -
+[#8427](https://github.com/flutter/devtools/pull/8427)
+    ![Logging filter](images/log_filter.png "Logging filter")
+
 * Fix a bug where logs would get out of order after midnight. - 
 [#8420](https://github.com/flutter/devtools/pull/8420)
 
