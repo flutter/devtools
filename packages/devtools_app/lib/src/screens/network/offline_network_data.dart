@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
@@ -15,80 +14,49 @@ import 'network_model.dart';
 /// It is responsible for serializing and deserializing offline network data.
 class OfflineNetworkData with Serializable {
   OfflineNetworkData({
-    required this.requests,
+    required this.httpRequestData,
     this.selectedRequestId,
-    required this.currentRequests,
-    required this.socketStats,
+    required this.socketData,
   });
 
   /// Creates an instance of [OfflineNetworkData] from a JSON map.
   factory OfflineNetworkData.fromJson(Map<String, dynamic> json) {
-    final List<dynamic> requestsJson =
-        json[OfflineDataKeys.requests.name] ?? [];
-    final List<HttpProfileRequest>? currentReqData =
-        json[OfflineDataKeys.currentRequests.name];
-    final List<SocketStatistic>? socketStats =
-        json[OfflineDataKeys.socketStats.name];
-
-    final requests = requestsJson
-        .map(
-          (e) => DartIOHttpRequestData.fromJson(
-            e as Map<String, dynamic>,
-            null,
-            null,
-          ),
-        )
-        .toList();
+    final httpRequestData = json[OfflineDataKeys.httpRequestData.name]
+        as List<DartIOHttpRequestData>;
+    List<Socket>? socketReqData = [];
+    socketReqData = json[OfflineDataKeys.socketData.name] as List<Socket>;
 
     return OfflineNetworkData(
-      requests: requests,
+      httpRequestData: httpRequestData,
       selectedRequestId:
           json[OfflineDataKeys.selectedRequestId.name] as String?,
-      currentRequests: currentReqData,
-      socketStats: socketStats!,
+      socketData: socketReqData,
     );
   }
-  bool get isEmpty => requests.isNullOrEmpty;
+  bool get isEmpty => httpRequestData.isNullOrEmpty;
 
   /// List of current [DartIOHttpRequestData] network requests.
-  final List<DartIOHttpRequestData> requests;
-
-  /// Get a request by matching its `id` field.
-  // Temporarily added to check selection in the filtered requests data,
-  // until we have current requests data in place
-  NetworkRequest? getRequest(String id) {
-    // Search through the list of requests and return the one with the matching ID.
-    return requests.firstWhere(
-      (request) => request.id == id,
-    );
-  }
+  final List<DartIOHttpRequestData> httpRequestData;
 
   /// The ID of the currently selected request, if any.
   final String? selectedRequestId;
 
-  /// Current requests from network controller.
-
-  final List<HttpProfileRequest>? currentRequests;
-
   /// Socket statistics
-  final List<SocketStatistic> socketStats;
+  final List<Socket> socketData;
 
   /// Converts the current offline data to a JSON format.
   @override
   Map<String, dynamic> toJson() {
     return {
-      OfflineDataKeys.requests.name:
-          requests.map((request) => request.toJson()).toList(),
+      OfflineDataKeys.httpRequestData.name: httpRequestData,
       OfflineDataKeys.selectedRequestId.name: selectedRequestId,
-      OfflineDataKeys.currentRequests.name: currentRequests,
-      OfflineDataKeys.socketStats.name: socketStats,
+      OfflineDataKeys.socketData.name: socketData,
     };
   }
 }
 
 enum OfflineDataKeys {
-  requests,
+  httpRequestData,
   selectedRequestId,
-  currentRequests,
-  socketStats,
+  socketData,
 }

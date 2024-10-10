@@ -178,18 +178,25 @@ class NetworkController extends DisposableController
   }
 
   Future<void> loadOfflineData(OfflineNetworkData offlineData) async {
+    List<HttpProfileRequest> httpProfileData = [];
+    List<SocketStatistic> socketStatsData = [];
+
+    httpProfileData = offlineData.httpRequestData.mapToHttpProfileRequests;
+    socketStatsData = offlineData.socketData.mapToSocketStatistics;
+
     _currentNetworkRequests
       ..clear()
       ..updateOrAddAll(
-        requests: offlineData.currentRequests!,
-        sockets: offlineData.socketStats,
+        requests: httpProfileData,
+        sockets: socketStatsData,
         timelineMicrosOffset: DateTime.now().microsecondsSinceEpoch,
       );
     _filterAndRefreshSearchMatches();
 
     // If a selectedRequestId is available, select it in offline mode.
     if (offlineData.selectedRequestId != null) {
-      final selected = offlineData.getRequest(offlineData.selectedRequestId!);
+      final selected = _currentNetworkRequests
+          .getRequest(offlineData.selectedRequestId ?? '');
       if (selected != null) {
         selectedRequest.value = selected;
         resetDropDown();
@@ -427,11 +434,20 @@ class NetworkController extends DisposableController
 
   @override
   OfflineScreenData prepareOfflineScreenData() {
+    final httpRequestData = <DartIOHttpRequestData>[];
+    final socketData = <Socket>[];
+    for (final request in _currentNetworkRequests.value) {
+      if (request is DartIOHttpRequestData) {
+        httpRequestData.add(request);
+      } else if (request is Socket) {
+        socketData.add(request);
+      }
+    }
+
     final offlineData = OfflineNetworkData(
-      requests: filteredData.value.whereType<DartIOHttpRequestData>().toList(),
+      httpRequestData: httpRequestData,
+      socketData: socketData,
       selectedRequestId: selectedRequest.value?.id,
-      currentRequests: _networkService.currentHttpRequests,
-      socketStats: _networkService.sockets ?? [],
     );
 
     return OfflineScreenData(

@@ -63,7 +63,8 @@ class DartIOHttpRequestData extends NetworkRequest {
           requestPostData?[HttpRequestDataKeys.text.name].toString();
   }
   //TODO go through all parameters, to check if they are correctly added.
-  Map<String, Object>? toJson() {
+  @override
+  Map<String, Object?> toJson() {
     try {
       return {
         HttpRequestDataKeys.startedDateTime.name:
@@ -173,7 +174,7 @@ class DartIOHttpRequestData extends NetworkRequest {
     } catch (e) {
       _log.shout('Error in toJson: $e');
     }
-    return null;
+    return {};
   }
 
   static const _connectionInfoKey = 'connectionInfo';
@@ -452,4 +453,12 @@ class DartIOHttpRequestData extends NetworkRequest {
         port,
         startTimestamp,
       );
+}
+
+extension HttpRequestExtension on List<DartIOHttpRequestData> {
+  List<HttpProfileRequest> get mapToHttpProfileRequests {
+    return map(
+      (httpRequestData) => httpRequestData._request as HttpProfileRequest,
+    ).toList();
+  }
 }

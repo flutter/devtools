@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
-abstract class NetworkRequest with ChangeNotifier, SearchableDataMixin {
+abstract class NetworkRequest
+    with ChangeNotifier, SearchableDataMixin, Serializable {
   String get method;
 
   String get uri;
@@ -180,4 +182,64 @@ class Socket extends NetworkRequest {
 
   @override
   int get hashCode => id.hashCode;
+
+  SocketStatistic get socketData => _socket;
+
+  static Socket fromJson(Map<String, Object?> json) {
+    return Socket(
+      SocketStatistic.parse(json['socket'] as Map<String, dynamic>)!,
+      json['timelineMicrosBase'] as int,
+    );
+  }
+
+  @override
+  Map<String, Object?> toJson() {
+    return {
+      'timelineMicrosBase': _timelineMicrosBase,
+      'socket': _socket.toJson(),
+    };
+  }
+}
+
+extension on SocketStatistic {
+  Map<String, Object?> toJson() {
+    return {
+      'id': id,
+      'startTime': startTime,
+      'endTime': endTime,
+      //TODO verify if these timings are in correct format
+      'lastReadTime': lastReadTime,
+      'lastWriteTime': lastWriteTime,
+      'socketType': socketType,
+      'address': address,
+      'port': port,
+      'readBytes': readBytes,
+      'writeBytes': writeBytes,
+    };
+  }
+}
+
+enum SocketJsonKey {
+  id,
+  method,
+  uri,
+  contentType,
+  type,
+  port,
+  status,
+  duration,
+  startTimestamp,
+  endTimestamp,
+  lastReadTimestamp,
+  lastWriteTimestamp,
+  didFail,
+  readBytes,
+  writeBytes,
+  inProgress,
+}
+
+extension SocketExtension on List<Socket> {
+  List<SocketStatistic> get mapToSocketStatistics {
+    return map((socket) => socket._socket).toList();
+  }
 }
