@@ -195,8 +195,8 @@ class Socket extends NetworkRequest {
   @override
   Map<String, Object?> toJson() {
     return {
-      'timelineMicrosBase': _timelineMicrosBase,
-      'socket': _socket.toJson(),
+      SocketJsonKey.timelineMicrosBase.name: _timelineMicrosBase,
+      SocketJsonKey.socket.name: _socket.toJson(),
     };
   }
 }
@@ -204,38 +204,34 @@ class Socket extends NetworkRequest {
 extension on SocketStatistic {
   Map<String, Object?> toJson() {
     return {
-      'id': id,
-      'startTime': startTime,
-      'endTime': endTime,
+      SocketJsonKey.id.name: id,
+      SocketJsonKey.startTime.name: startTime,
+      SocketJsonKey.endTime.name: endTime,
       //TODO verify if these timings are in correct format
-      'lastReadTime': lastReadTime,
-      'lastWriteTime': lastWriteTime,
-      'socketType': socketType,
-      'address': address,
-      'port': port,
-      'readBytes': readBytes,
-      'writeBytes': writeBytes,
+      SocketJsonKey.lastReadTime.name: lastReadTime,
+      SocketJsonKey.lastWriteTime.name: lastWriteTime,
+      SocketJsonKey.socketType.name: socketType,
+      SocketJsonKey.address.name: address,
+      SocketJsonKey.port.name: port,
+      SocketJsonKey.readBytes.name: readBytes,
+      SocketJsonKey.writeBytes.name: writeBytes,
     };
   }
 }
 
 enum SocketJsonKey {
   id,
-  method,
-  uri,
-  contentType,
-  type,
+  startTime,
+  endTime,
+  lastReadTime,
+  lastWriteTime,
+  socketType,
+  address,
   port,
-  status,
-  duration,
-  startTimestamp,
-  endTimestamp,
-  lastReadTimestamp,
-  lastWriteTimestamp,
-  didFail,
   readBytes,
   writeBytes,
-  inProgress,
+  timelineMicrosBase,
+  socket,
 }
 
 extension SocketExtension on List<Socket> {
