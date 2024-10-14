@@ -192,7 +192,7 @@ MockLoggingController createMockLoggingControllerWithDefaults({
   final activeFilter = FixedValueListenable(
     Filter<LogData>(
       queryFilter: QueryFilter.empty(args: LoggingController.queryFilterArgs),
-      toggleFilters: LoggingController.toggleFilters,
+      settingFilters: LoggingController.settingFilters,
     ),
   );
   provideDummy<FixedValueListenable<Filter<LogData>>>(activeFilter);

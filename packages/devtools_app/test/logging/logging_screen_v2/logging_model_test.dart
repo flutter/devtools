@@ -485,8 +485,9 @@ void main() {
       expect(loggingTableModel.filteredLogCount, 5);
 
       // Test query filters assuming default toggle filters are all enabled.
-      for (final filter in loggingTableModel.activeFilter.value.toggleFilters) {
-        filter.enabled.value = true;
+      for (final filter
+          in loggingTableModel.activeFilter.value.settingFilters) {
+        filter.setting.value = true;
       }
 
       loggingTableModel.setActiveFilter(query: 'abc');
@@ -523,22 +524,22 @@ void main() {
 
       // Test toggle filters.
       final verboseFlutterFrameworkFilter =
-          loggingTableModel.activeFilter.value.toggleFilters[0];
+          loggingTableModel.activeFilter.value.settingFilters[0];
       final verboseFlutterServiceFilter =
-          loggingTableModel.activeFilter.value.toggleFilters[1];
-      final gcFilter = loggingTableModel.activeFilter.value.toggleFilters[2];
+          loggingTableModel.activeFilter.value.settingFilters[1];
+      final gcFilter = loggingTableModel.activeFilter.value.settingFilters[2];
 
-      verboseFlutterFrameworkFilter.enabled.value = false;
+      verboseFlutterFrameworkFilter.setting.value = false;
       loggingTableModel.setActiveFilter();
       expect(loggingTableModel.logCount, 12);
       expect(loggingTableModel.filteredLogCount, 9);
 
-      verboseFlutterServiceFilter.enabled.value = false;
+      verboseFlutterServiceFilter.setting.value = false;
       loggingTableModel.setActiveFilter();
       expect(loggingTableModel.logCount, 12);
       expect(loggingTableModel.filteredLogCount, 10);
 
-      gcFilter.enabled.value = false;
+      gcFilter.setting.value = false;
       loggingTableModel.setActiveFilter();
       expect(loggingTableModel.logCount, 12);
       expect(loggingTableModel.filteredLogCount, 12);

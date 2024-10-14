@@ -150,8 +150,8 @@ void main() {
       expect(controller.filteredData.value, hasLength(5));
 
       // Test query filters assuming default toggle filters are all enabled.
-      for (final filter in controller.activeFilter.value.toggleFilters) {
-        filter.enabled.value = true;
+      for (final filter in controller.activeFilter.value.settingFilters) {
+        filter.setting.value = true;
       }
 
       controller.setActiveFilter(query: 'abc');
@@ -188,22 +188,22 @@ void main() {
 
       // Test toggle filters.
       final verboseFlutterFrameworkFilter =
-          controller.activeFilter.value.toggleFilters[0];
+          controller.activeFilter.value.settingFilters[0];
       final verboseFlutterServiceFilter =
-          controller.activeFilter.value.toggleFilters[1];
-      final gcFilter = controller.activeFilter.value.toggleFilters[2];
+          controller.activeFilter.value.settingFilters[1];
+      final gcFilter = controller.activeFilter.value.settingFilters[2];
 
-      verboseFlutterFrameworkFilter.enabled.value = false;
+      verboseFlutterFrameworkFilter.setting.value = false;
       controller.setActiveFilter();
       expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(9));
 
-      verboseFlutterServiceFilter.enabled.value = false;
+      verboseFlutterServiceFilter.setting.value = false;
       controller.setActiveFilter();
       expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(10));
 
-      gcFilter.enabled.value = false;
+      gcFilter.setting.value = false;
       controller.setActiveFilter();
       expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(12));
