@@ -128,7 +128,7 @@ class LoggingController extends DisposableController
           element.level >= currentFilterValue.value,
       enabledCallback: (Level filterValue) => filterValue >= Level.FINEST,
       possibleValues: Level.LEVELS
-          // Omit Level.OFF and Level.ALL from the list of possible levels.
+          // Omit Level.OFF and Level.ALL from the possible minimum levels.
           .where((level) => level != Level.OFF && level != Level.ALL)
           .toList(),
       defaultValue: Level.INFO,
