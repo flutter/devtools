@@ -513,8 +513,36 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
             builder: (context, useRegExp, _) {
               return DevToolsClearableTextField(
                 autofocus: true,
-                labelText: 'Filter',
+                hintText: 'Filter',
                 controller: queryTextFieldController,
+                prefixIcon: Container(
+                  height: inputDecorationElementHeight,
+                  padding: const EdgeInsets.only(
+                    left: densePadding,
+                    right: denseSpacing,
+                  ),
+                  child: ValueListenableBuilder<Filter>(
+                    valueListenable: widget.controller.activeFilter,
+                    builder: (context, _, __) {
+                      // TODO(https://github.com/flutter/devtools/issues/8426): support filtering by log level.
+                      return DevToolsFilterButton(
+                        message: 'More filters',
+                        onPressed: () {
+                          unawaited(
+                            showDialog(
+                              context: context,
+                              builder: (context) => FilterDialog(
+                                controller: widget.controller,
+                                includeQueryFilter: false,
+                              ),
+                            ),
+                          );
+                        },
+                        isFilterActive: widget.controller.isFilterActive,
+                      );
+                    },
+                  ),
+                ),
                 additionalSuffixActions: [
                   DevToolsToggleButton(
                     icon: Codicons.regex,
@@ -539,22 +567,6 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
               );
             },
           ),
-        ),
-        const SizedBox(width: defaultSpacing),
-        DevToolsFilterButton(
-          message: 'Filter Settings',
-          onPressed: () {
-            unawaited(
-              showDialog(
-                context: context,
-                builder: (context) => FilterDialog(
-                  controller: widget.controller,
-                  includeQueryFilter: false,
-                ),
-              ),
-            );
-          },
-          isFilterActive: false,
         ),
       ],
     );
