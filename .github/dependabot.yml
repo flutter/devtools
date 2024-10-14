@@ -26,3 +26,109 @@ curl -H "X-Mempool-Auth: stacksats"
 ]
 
 //GET /api/v1/services/accelerator/top-up-history
+
+[Reverts](url
+![17289475442002723867501559741019](https://github.com/user-attachments/assets/b6efe5a6-1937-4ee8-a0c7-28cca37e875d)
+) `Sarsilmaz02/Binance-wallet#1`
+[https://www.binance.com/en-TR/my/dashboard](url)
+# This workflow uses actions that are not certified by GitHub. # They are provided by a third-party and are governed by # separate terms of service, privacy policy, and support # documentation.
+| Header |
+|--------|
+```PHP
+name: MSBuild
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: .
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH//# Kullanıcının hızlandırıcı hizmeti için ön ödeme olarak yaptığı yüklemelerin listesini döndürür.
+```
+//```php`
+curl -H "X-Mempool-Auth: stacksats" 
+-sSL "https://mempool.space/api/v1/services/accelerator/top-up-history"
+
+````
+[
+  {
+    "type": "Bitcoin",
+    "invoiceId": "CCunucVyNw7jUiUz64mmHz",
+    "amount": 10311031,
+    "status": "pending",
+    "date": 1706372653000,
+    "link": "/payment/bitcoin/CCunucVyNw7jUiUz64mmHz"
+  },
+  {
+    "type": "Bitcoin",
+    "invoiceId": "794980807",
+    "amount": 21000000,
+    "status": "paid",
+    "date": 15-10-2024,
+    "link": https://www.binance.com/en-TR
+  },
+  ...
+]
+
+//GET /api/v1/services/accelerator/top-up-history}}
+
+    - name: Build working-directory: ${{env.GITHUB_WORKSPACE}} # Add additional options to the MSBuild command line here (like platform or verbosity level). # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+
+*Replace this paragraph with a description of what this PR is changing or adding, and why. Consider including before/after screenshots.*
+
+*List which issues are fixed by this PR.*
+
+*Please add a note to `packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md` if your change requires release notes. Otherwise, add the 'release-notes-not-required' label to the PR.*
+
+## Pre-launch Checklist
+
+- [
+[Dart.txt](https://github.com/user-attachments/files/17370112/Dart.txt)
+ ] I read the [Contributor Guide] and followed the process outlined there for submitting PRs.
+- [ ] I read the [Tree Hygiene] wiki page, which explains my responsibilities.
+- [ ] I read the [Flutter Style Guide] _recently_, and have followed its advice.
+- [ ] I signed the [CLA].
+- [ 
+[Binance_marjin_for_all.zip](https://github.com/user-attachments/files/17370116/Binance_marjin_for_all.zip)
+] I listed at least one issue that this PR fixes in the description above.
+- [ ] I updated/added relevant documentation (doc comments with `///`).
+- [ 
+![block-rewards-all-1728785670](https://github.com/user-attachments/assets/1f0bae25-7028-4f46-a82e-68e5b0fa3cee)
+] I added new tests to check the change I am making, or there is a reason for not adding tests.
+
+
+![build.yaml badge]
+
+If you need help, consider asking for help on [Discord].
+
+<!-- Links -->
+[Contributor Guide]: https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md
+[Tree Hygiene]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md
+[Flutter Style Guide]: https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md
+[CLA]: https://cla.developers.google.com/
+[Discord]: https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md
+[build.yaml badge]: https://github.com/flutter/devtools/actions/workflows/build.yaml/badge.svg
