@@ -36,9 +36,6 @@ void main() {
     // details behaves the same for each test.
     _fakeLogData = null;
 
-    mockLoggingController =
-        createMockLoggingControllerWithDefaults(data: fakeLogData);
-
     when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow)
         .thenReturn(false);
     when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
@@ -53,6 +50,9 @@ void main() {
     );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
+
+    mockLoggingController =
+        createMockLoggingControllerWithDefaults(data: fakeLogData);
   });
 
   testWidgetsWithWindowSize(
@@ -110,7 +110,6 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
-
   testWidgetsWithWindowSize(
     'search field can enter text',
     windowSize,
@@ -118,11 +117,14 @@ void main() {
       await pumpLoggingScreen(tester);
       verifyNever(mockLoggingController.clear());
 
-      final textFieldFinder = find.byType(TextField);
+      final textFieldFinder = find.descendant(
+        of: find.byType(SearchField<LoggingController>),
+        matching: find.byType(TextField),
+      );
       expect(textFieldFinder, findsOneWidget);
       final textField = tester.widget(textFieldFinder) as TextField;
       expect(textField.enabled, isTrue);
-      await tester.enterText(find.byType(TextField), 'abc');
+      await tester.enterText(textFieldFinder, 'abc');
     },
   );
 

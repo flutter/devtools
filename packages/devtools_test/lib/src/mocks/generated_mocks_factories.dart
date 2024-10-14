@@ -185,11 +185,24 @@ MockLoggingController createMockLoggingControllerWithDefaults({
   provideDummy<ListValueNotifier<LogData>>(ListValueNotifier<LogData>(data));
   final mockLoggingController = MockLoggingController();
   when(mockLoggingController.data).thenReturn(data);
+  when(mockLoggingController.selectedLog)
+      .thenReturn(ValueNotifier<LogData?>(null));
+
+  // Set up mock filter state.
+  final activeFilter = FixedValueListenable(
+    Filter<LogData>(
+      queryFilter: QueryFilter.empty(args: LoggingController.queryFilterArgs),
+      toggleFilters: LoggingController.toggleFilters,
+    ),
+  );
+  provideDummy<FixedValueListenable<Filter<LogData>>>(activeFilter);
+  when(mockLoggingController.activeFilter).thenReturn(activeFilter);
+  when(mockLoggingController.useRegExp).thenReturn(ValueNotifier<bool>(false));
   when(mockLoggingController.filteredData)
       .thenReturn(ListValueNotifier<LogData>(data));
   when(mockLoggingController.isFilterActive).thenReturn(false);
-  when(mockLoggingController.selectedLog)
-      .thenReturn(ValueNotifier<LogData?>(null));
+
+  // Set up mock search state.
   when(mockLoggingController.searchFieldFocusNode).thenReturn(FocusNode());
   when(mockLoggingController.searchTextFieldController)
       .thenReturn(SearchTextEditingController());
@@ -200,6 +213,7 @@ MockLoggingController createMockLoggingControllerWithDefaults({
   when(mockLoggingController.searchInProgressNotifier)
       .thenReturn(const FixedValueListenable(false));
   when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
+
   return mockLoggingController;
 }
 

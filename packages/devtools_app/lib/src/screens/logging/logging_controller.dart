@@ -117,41 +117,48 @@ class LoggingController extends DisposableController
 
   /// The toggle filters available for the Logging screen.
   @override
-  List<ToggleFilter<LogData>> createToggleFilters() => [
-        if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
-            true) ...[
-          ToggleFilter<LogData>(
-            name: 'Hide verbose Flutter framework logs (initialization, frame '
-                'times, image sizes)',
-            includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
-                .any((kind) => kind.caseInsensitiveEquals(log.kind)),
-            enabledByDefault: true,
-          ),
-          ToggleFilter<LogData>(
-            name: 'Hide verbose Flutter service logs (service extension state '
-                'changes)',
-            includeCallback: (log) => !_verboseFlutterServiceLogKinds
-                .any((kind) => kind.caseInsensitiveEquals(log.kind)),
-            enabledByDefault: true,
-          ),
-        ],
-        ToggleFilter<LogData>(
-          name: 'Hide garbage collection logs',
-          includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
-          enabledByDefault: true,
-        ),
-      ];
+  List<ToggleFilter<LogData>> createToggleFilters() => toggleFilters;
+
+  @visibleForTesting
+  static final toggleFilters = <ToggleFilter<LogData>>[
+    if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+        true) ...[
+      ToggleFilter<LogData>(
+        name: 'Hide verbose Flutter framework logs (initialization, frame '
+            'times, image sizes)',
+        includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
+            .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+        enabledByDefault: true,
+      ),
+      ToggleFilter<LogData>(
+        name: 'Hide verbose Flutter service logs (service extension state '
+            'changes)',
+        includeCallback: (log) => !_verboseFlutterServiceLogKinds
+            .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+        enabledByDefault: true,
+      ),
+    ],
+    ToggleFilter<LogData>(
+      name: 'Hide garbage collection logs',
+      includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
+      enabledByDefault: true,
+    ),
+  ];
 
   static const kindFilterId = 'logging-kind-filter';
 
   @override
-  Map<String, QueryFilterArgument<LogData>> createQueryFilterArgs() => {
-        kindFilterId: QueryFilterArgument<LogData>(
-          keys: ['kind', 'k'],
-          dataValueProvider: (log) => log.kind,
-          substringMatch: true,
-        ),
-      };
+  Map<String, QueryFilterArgument<LogData>> createQueryFilterArgs() =>
+      queryFilterArgs;
+
+  @visibleForTesting
+  static final queryFilterArgs = <String, QueryFilterArgument<LogData>>{
+    kindFilterId: QueryFilterArgument<LogData>(
+      keys: ['kind', 'k'],
+      dataValueProvider: (log) => log.kind,
+      substringMatch: true,
+    ),
+  };
 
   final _logStatusController = StreamController<String>.broadcast();
 
