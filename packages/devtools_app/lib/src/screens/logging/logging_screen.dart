@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/screen.dart';
+import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
 import '_log_details.dart';
 import '_logs_table.dart';
@@ -70,43 +71,48 @@ class _LoggingScreenState extends State<LoggingScreenBody>
 
   @override
   Widget build(BuildContext context) {
+    final splitAxis = _splitAxisFor(context);
     return Column(
       children: [
         const LoggingControls(),
         const SizedBox(height: intermediateSpacing),
         Expanded(
-          child: _buildLoggingBody(),
+          child: SplitPane(
+            axis: splitAxis,
+            initialFractions: splitAxis == Axis.vertical
+                ? const [0.8, 0.2]
+                : const [0.7, 0.3],
+            children: [
+              RoundedOutlinedBorder(
+                clip: true,
+                child: LogsTable(
+                  controller: controller,
+                  data: controller.filteredData.value,
+                  selectionNotifier: controller.selectedLog,
+                  searchMatchesNotifier: controller.searchMatches,
+                  activeSearchMatchNotifier: controller.activeSearchMatch,
+                ),
+              ),
+              ValueListenableBuilder<LogData?>(
+                valueListenable: controller.selectedLog,
+                builder: (context, selected, _) {
+                  return LogDetails(log: selected);
+                },
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  // TODO(kenz): replace with helper widget.
-  Widget _buildLoggingBody() {
-    return SplitPane(
-      axis: Axis.vertical,
-      initialFractions: const [0.72, 0.28],
-      // TODO(kenz): refactor so that the LogDetails header can be the splitter.
-      // This would be more consistent with other screens that use the console
-      // header as the splitter.
-      children: [
-        RoundedOutlinedBorder(
-          clip: true,
-          child: LogsTable(
-            controller: controller,
-            data: controller.filteredData.value,
-            selectionNotifier: controller.selectedLog,
-            searchMatchesNotifier: controller.searchMatches,
-            activeSearchMatchNotifier: controller.activeSearchMatch,
-          ),
-        ),
-        ValueListenableBuilder<LogData?>(
-          valueListenable: controller.selectedLog,
-          builder: (context, selected, _) {
-            return LogDetails(log: selected);
-          },
-        ),
-      ],
-    );
+  Axis _splitAxisFor(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final aspectRatio = screenSize.width / screenSize.height;
+    if (screenSize.height <= MediaSize.s.heightThreshold ||
+        aspectRatio >= 1.2) {
+      return Axis.horizontal;
+    }
+    return Axis.vertical;
   }
 }

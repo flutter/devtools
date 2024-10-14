@@ -11,6 +11,7 @@ import 'package:devtools_app/src/screens/logging/_logs_table.dart';
 import 'package:devtools_app/src/screens/logging/_message_column.dart';
 import 'package:devtools_app/src/screens/logging/logging_controls.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
+import 'package:devtools_app/src/shared/ui/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -113,6 +114,39 @@ void main() {
         expect(find.byType(StandaloneFilterField<LogData>), findsOneWidget);
         expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(SettingsOutlinedButton), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds with horizontal axis for small screens',
+      Size(600.0, MediaSize.s.heightThreshold), // 1.0 aspect ratio
+      (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        final splitPaneFinder = find.byType(SplitPane);
+        final splitPane = tester.widget(splitPaneFinder) as SplitPane;
+        expect(splitPane.axis, Axis.horizontal);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds with horizontal axis for aspect ratio',
+      Size(722.0, MediaSize.s.heightThreshold + 1), // 1.20 aspect ratio
+      (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        final splitPaneFinder = find.byType(SplitPane);
+        final splitPane = tester.widget(splitPaneFinder) as SplitPane;
+        expect(splitPane.axis, Axis.horizontal);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds with vertical axis for aspect ratio',
+      Size(721.0, MediaSize.s.heightThreshold + 1), // 1.19 aspect ratio
+      (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        final splitPaneFinder = find.byType(SplitPane);
+        final splitPane = tester.widget(splitPaneFinder) as SplitPane;
+        expect(splitPane.axis, Axis.vertical);
       },
     );
 
