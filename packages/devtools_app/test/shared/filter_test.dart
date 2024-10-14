@@ -12,11 +12,8 @@ void main() {
 
     void verifyBaseFilterState() {
       final activeFilter = controller.activeFilter.value;
-      for (final toggleFilter in activeFilter.toggleFilters) {
-        expect(
-          toggleFilter.enabled.value,
-          equals(toggleFilter.enabledByDefault),
-        );
+      for (final filter in activeFilter.settingFilters) {
+        expect(filter.setting.value, equals(filter.defaultValue));
       }
       expect(activeFilter.queryFilter.isEmpty, isTrue);
     }
@@ -32,22 +29,20 @@ void main() {
       // Verify the default state of the active filter.
       final activeFilter = controller.activeFilter.value;
       expect(activeFilter.queryFilter.isEmpty, isTrue);
-      expect(activeFilter.toggleFilters.length, equals(2));
+      expect(activeFilter.settingFilters.length, equals(3));
       controller.setActiveFilter();
 
       expect(
         controller.filteredData.value.toString(),
         equals(
-          '[1-FooBar-foobar, 3-Baz-foobar, 5-Basset Hound-dog, 7-Shepherd\'s pie-food, 9-Meal bar-food]',
+          '[1-FooBar-foobar-3, 3-Baz-foobar-5, 5-Basset Hound-dog-3, 9-Meal bar-food-3]',
         ),
       );
     });
 
     test('filterData applies query and toggle filters', () {
       // Disable all toggle filters.
-      for (final toggleFilter in controller.activeFilter.value.toggleFilters) {
-        toggleFilter.enabled.value = false;
-      }
+      controller.disableAllSettingFilters();
       expect(controller.useRegExp.value, isFalse);
 
       controller.setActiveFilter();
@@ -61,53 +56,55 @@ void main() {
       expect(
         controller.filteredData.value.toString(),
         equals(
-          '[1-FooBar-foobar, 2-Bar-foobar, 3-Baz-foobar, 5-Basset Hound-dog, 9-Meal bar-food]',
+          '[1-FooBar-foobar-3, 2-Bar-foobar-4, 3-Baz-foobar-5, 5-Basset Hound-dog-3, 9-Meal bar-food-3]',
         ),
       );
 
       controller.setActiveFilter(query: 'Ba cat:foobar');
       expect(
         controller.filteredData.value.toString(),
-        equals('[1-FooBar-foobar, 2-Bar-foobar, 3-Baz-foobar]'),
+        equals('[1-FooBar-foobar-3, 2-Bar-foobar-4, 3-Baz-foobar-5]'),
       );
 
       controller.setActiveFilter(query: 'Baz foo cat:foobar');
       expect(
         controller.filteredData.value.toString(),
-        equals('[0-Foo-foobar, 1-FooBar-foobar, 3-Baz-foobar]'),
+        equals('[0-Foo-foobar-2, 1-FooBar-foobar-3, 3-Baz-foobar-5]'),
       );
 
       // Ain't nothin' but a hound dog
       controller.setActiveFilter(query: 'Basset');
       expect(
         controller.filteredData.value.toString(),
-        equals('[5-Basset Hound-dog]'),
+        equals('[5-Basset Hound-dog-3]'),
       );
 
       // Only toggle filter.
-      controller.toggleFilters[1].enabled.value = true;
+      controller.settingFilters[2].setting.value = true;
       controller.setActiveFilter(
-        toggleFilters: controller.toggleFilters,
+        settingFilters: controller.settingFilters,
       );
       expect(
         controller.filteredData.value.toString(),
         equals(
-          '[1-FooBar-foobar, 2-Bar-foobar, 4-Shepherd-dog, 5-Basset Hound-dog, 7-Shepherd\'s pie-food, 8-Orange-food]',
+          '[1-FooBar-foobar-3, 2-Bar-foobar-4, 4-Shepherd-dog-1, 5-Basset Hound-dog-3, 7-Shepherd\'s pie-food-1, 8-Orange-food-2]',
         ),
       );
 
       // Query and toggle filter.
-      controller.toggleFilters[0].enabled.value = true;
-      controller.toggleFilters[1].enabled.value = true;
+      controller.settingFilters[0].setting.value = 2;
+      controller.settingFilters[1].setting.value = true;
+      controller.settingFilters[2].setting.value = true;
       controller.setActiveFilter(query: 'Ba cat:foobar');
       expect(
         controller.filteredData.value.toString(),
-        equals('[1-FooBar-foobar]'),
+        equals('[1-FooBar-foobar-3]'),
       );
 
       // Excessive filter returns empty list.
-      controller.toggleFilters[0].enabled.value = false;
-      controller.toggleFilters[1].enabled.value = false;
+      controller.settingFilters[0].setting.value = 5;
+      controller.settingFilters[1].setting.value = false;
+      controller.settingFilters[2].setting.value = false;
       controller.setActiveFilter(query: 'abcdefg');
       expect(
         controller.filteredData.value.toString(),
@@ -117,9 +114,7 @@ void main() {
 
     test('filterData applies regexp query filters when enabled', () {
       // Disable all toggle filters.
-      for (final toggleFilter in controller.activeFilter.value.toggleFilters) {
-        toggleFilter.enabled.value = false;
-      }
+      controller.disableAllSettingFilters();
       controller.useRegExp.value = true;
 
       controller.setActiveFilter();
@@ -133,14 +128,14 @@ void main() {
       expect(
         controller.filteredData.value.toString(),
         equals(
-          '[0-Foo-foobar, 1-FooBar-foobar, 2-Bar-foobar, 3-Baz-foobar, 7-Shepherd\'s pie-food, 8-Orange-food, 9-Meal bar-food]',
+          '[0-Foo-foobar-2, 1-FooBar-foobar-3, 2-Bar-foobar-4, 3-Baz-foobar-5, 7-Shepherd\'s pie-food-1, 8-Orange-food-2, 9-Meal bar-food-3]',
         ),
       );
       controller.setActiveFilter(query: '-cat:foo.*');
       expect(
         controller.filteredData.value.toString(),
         equals(
-          '[4-Shepherd-dog, 5-Basset Hound-dog, 6-Husky-dog]',
+          '[4-Shepherd-dog-1, 5-Basset Hound-dog-3, 6-Husky-dog-5]',
         ),
       );
       // Regexp substring match.
@@ -148,7 +143,7 @@ void main() {
       expect(
         controller.filteredData.value.toString(),
         equals(
-          '[1-FooBar-foobar, 2-Bar-foobar, 9-Meal bar-food]',
+          '[1-FooBar-foobar-3, 2-Bar-foobar-4, 9-Meal bar-food-3]',
         ),
       );
 
@@ -170,32 +165,42 @@ void main() {
     });
 
     test('isFilterActive', () {
-      controller.toggleFilters[0].enabled.value = true;
-      controller.toggleFilters[1].enabled.value = false;
+      controller.settingFilters[0].setting.value = 1;
+      controller.settingFilters[1].setting.value = true;
+      controller.settingFilters[2].setting.value = false;
       controller.setActiveFilter();
-      expect(controller.isFilterActive, isTrue);
+      expect(controller.isFilterActive, true);
 
-      controller.toggleFilters[0].enabled.value = false;
-      controller.toggleFilters[1].enabled.value = true;
+      controller.settingFilters[0].setting.value = 1;
+      controller.settingFilters[1].setting.value = false;
+      controller.settingFilters[2].setting.value = true;
       controller.setActiveFilter();
-      expect(controller.isFilterActive, isTrue);
+      expect(controller.isFilterActive, true);
 
-      controller.toggleFilters[0].enabled.value = false;
-      controller.toggleFilters[1].enabled.value = false;
+      controller.settingFilters[0].setting.value = 2;
+      controller.settingFilters[1].setting.value = false;
+      controller.settingFilters[2].setting.value = false;
       controller.setActiveFilter();
-      expect(controller.isFilterActive, equals(false));
+      expect(controller.isFilterActive, true);
+
+      controller.settingFilters[0].setting.value = 1;
+      controller.settingFilters[1].setting.value = false;
+      controller.settingFilters[2].setting.value = false;
+      controller.setActiveFilter();
+      expect(controller.isFilterActive, false);
 
       controller.setActiveFilter(query: 'bar');
-      expect(controller.isFilterActive, isTrue);
+      expect(controller.isFilterActive, true);
 
       controller.setActiveFilter(query: 'cat:foobar');
-      expect(controller.isFilterActive, isTrue);
+      expect(controller.isFilterActive, true);
     });
 
     test('activeFilterTag', () {
       // No filters active.
-      controller.toggleFilters[0].enabled.value = false;
-      controller.toggleFilters[1].enabled.value = false;
+      controller.settingFilters[0].setting.value = 1;
+      controller.settingFilters[1].setting.value = false;
+      controller.settingFilters[2].setting.value = false;
       controller.setActiveFilter();
       expect(controller.activeFilterTag(), equals(''));
 
@@ -210,29 +215,54 @@ void main() {
       controller.useRegExp.value = false;
 
       // Only toggle filter active and no query filters.
-      controller.toggleFilters[0].enabled.value = true;
-      controller.setActiveFilter();
-      expect(controller.activeFilterTag(), equals('Hide multiples of 2'));
-
-      controller.toggleFilters[1].enabled.value = true;
+      controller.settingFilters[0].setting.value = 3;
       controller.setActiveFilter();
       expect(
         controller.activeFilterTag(),
-        equals('Hide multiples of 2,Hide multiples of 3'),
+        equals('Hide items below the minimum rating level:3'),
       );
 
-      controller.toggleFilters[0].enabled.value = false;
+      controller.settingFilters[1].setting.value = true;
       controller.setActiveFilter();
-      expect(controller.activeFilterTag(), equals('Hide multiples of 3'));
+      expect(
+        controller.activeFilterTag(),
+        equals(
+          'Hide items below the minimum rating level:3,'
+          'Hide multiples of 2:true',
+        ),
+      );
+
+      controller.settingFilters[2].setting.value = true;
+      controller.setActiveFilter();
+      expect(
+        controller.activeFilterTag(),
+        equals(
+          'Hide items below the minimum rating level:3,'
+          'Hide multiples of 2:true,'
+          'Hide multiples of 3:true',
+        ),
+      );
+
+      controller.settingFilters[1].setting.value = false;
+      controller.setActiveFilter();
+      expect(
+        controller.activeFilterTag(),
+        equals(
+          'Hide items below the minimum rating level:3,'
+          'Hide multiples of 3:true',
+        ),
+      );
 
       // Both query filter and toggle filters active.
-      controller.toggleFilters[0].enabled.value = true;
-      controller.toggleFilters[1].enabled.value = true;
+      controller.settingFilters[1].setting.value = true;
       controller.setActiveFilter(query: 'Ba cat:foobar');
       expect(
         controller.activeFilterTag(),
         equals(
-          'Hide multiples of 2,Hide multiples of 3-#-ba cat:foobar',
+          'Hide items below the minimum rating level:3,'
+          'Hide multiples of 2:true,'
+          'Hide multiples of 3:true'
+          '-#-ba cat:foobar',
         ),
       );
     });
@@ -242,11 +272,12 @@ void main() {
       controller.resetFilter();
       verifyBaseFilterState();
 
-      controller.toggleFilters[0].enabled.value = true;
-      controller.toggleFilters[1].enabled.value = true;
+      controller.settingFilters[0].setting.value = 5;
+      controller.settingFilters[1].setting.value = true;
+      controller.settingFilters[2].setting.value = true;
       controller.setActiveFilter(query: 'cat:foobar');
-      for (final toggleFilter in controller.toggleFilters) {
-        expect(toggleFilter.enabled.value, isTrue);
+      for (final settingFilter in controller.settingFilters) {
+        expect(settingFilter.enabled, isTrue);
       }
       expect(controller.activeFilter.value.queryFilter.isEmpty, isFalse);
 
@@ -265,19 +296,28 @@ class _TestController extends DisposableController
   final List<_TestDataClass> data;
 
   // Convenience getters for testing.
-  List<ToggleFilter<_TestDataClass>> get toggleFilters =>
-      activeFilter.value.toggleFilters;
+  List<SettingFilter<_TestDataClass, Object>> get settingFilters =>
+      activeFilter.value.settingFilters;
 
   @override
-  List<ToggleFilter<_TestDataClass>> createToggleFilters() => [
+  List<SettingFilter<_TestDataClass, Object>> createSettingFilters() => [
+        SettingFilter<_TestDataClass, int>(
+          name: 'Hide items below the minimum rating level',
+          includeCallback: (_TestDataClass element, int currentFilterValue) =>
+              element.rating >= currentFilterValue,
+          enabledCallback: (int filterValue) => filterValue > 1,
+          possibleValues: [1, 2, 3, 4, 5],
+          defaultValue: 2,
+        ),
         ToggleFilter<_TestDataClass>(
           name: 'Hide multiples of 2',
           includeCallback: (data) => data.id % 2 != 0,
-          enabledByDefault: true,
+          defaultValue: true,
         ),
         ToggleFilter<_TestDataClass>(
           name: 'Hide multiples of 3',
           includeCallback: (data) => data.id % 3 != 0,
+          defaultValue: false,
         ),
       ];
 
@@ -303,12 +343,10 @@ class _TestController extends DisposableController
     }
     bool filterCallback(_TestDataClass element) {
       // First filter by the toggle filters.
-      final filteredOutByToggleFilters = filter.toggleFilters.any(
-        (toggleFilter) =>
-            toggleFilter.enabled.value &&
-            !toggleFilter.includeCallback(element),
+      final filteredOutBySettingFilters = filter.settingFilters.any(
+        (settingFilter) => !settingFilter.includeData(element),
       );
-      if (filteredOutByToggleFilters) return false;
+      if (filteredOutBySettingFilters) return false;
 
       final queryFilter = filter.queryFilter;
       if (!queryFilter.isEmpty) {
@@ -340,30 +378,42 @@ class _TestController extends DisposableController
       ..clear()
       ..addAll(data.where(filterCallback));
   }
+
+  void disableAllSettingFilters() {
+    for (final filter in activeFilter.value.settingFilters) {
+      if (filter is ToggleFilter) {
+        filter.setting.value = false;
+      } else {
+        // This is the lowest setting for the integer setting filter.
+        filter.setting.value = 1;
+      }
+    }
+  }
 }
 
 class _TestDataClass {
-  const _TestDataClass(this.id, this.label, this.category);
+  const _TestDataClass(this.id, this.label, this.category, this.rating);
 
   final int id;
   final String label;
   final String category;
+  final int rating;
 
   @override
   String toString() {
-    return [id.toString(), label, category].join('-');
+    return [id.toString(), label, category, rating].join('-');
   }
 }
 
 const _sampleData = [
-  _TestDataClass(0, 'Foo', 'foobar'),
-  _TestDataClass(1, 'FooBar', 'foobar'),
-  _TestDataClass(2, 'Bar', 'foobar'),
-  _TestDataClass(3, 'Baz', 'foobar'),
-  _TestDataClass(4, 'Shepherd', 'dog'),
-  _TestDataClass(5, 'Basset Hound', 'dog'),
-  _TestDataClass(6, 'Husky', 'dog'),
-  _TestDataClass(7, 'Shepherd\'s pie', 'food'),
-  _TestDataClass(8, 'Orange', 'food'),
-  _TestDataClass(9, 'Meal bar', 'food'),
+  _TestDataClass(0, 'Foo', 'foobar', 2),
+  _TestDataClass(1, 'FooBar', 'foobar', 3),
+  _TestDataClass(2, 'Bar', 'foobar', 4),
+  _TestDataClass(3, 'Baz', 'foobar', 5),
+  _TestDataClass(4, 'Shepherd', 'dog', 1),
+  _TestDataClass(5, 'Basset Hound', 'dog', 3),
+  _TestDataClass(6, 'Husky', 'dog', 5),
+  _TestDataClass(7, 'Shepherd\'s pie', 'food', 1),
+  _TestDataClass(8, 'Orange', 'food', 2),
+  _TestDataClass(9, 'Meal bar', 'food', 3),
 ];

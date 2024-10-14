@@ -125,7 +125,7 @@ class LoggingTableModel extends DisposableController
 
   /// The toggle filters available for the Logging screen.
   @override
-  List<ToggleFilter<LogDataV2>> createToggleFilters() => [
+  List<SettingFilter<LogDataV2, bool>> createSettingFilters() => [
         if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
             true) ...[
           ToggleFilter<LogDataV2>(
@@ -133,20 +133,20 @@ class LoggingTableModel extends DisposableController
                 'times, image sizes)',
             includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
                 .any((kind) => kind.caseInsensitiveEquals(log.kind)),
-            enabledByDefault: true,
+            defaultValue: true,
           ),
           ToggleFilter<LogDataV2>(
             name: 'Hide verbose Flutter service logs (service extension state '
                 'changes)',
             includeCallback: (log) => !_verboseFlutterServiceLogKinds
                 .any((kind) => kind.caseInsensitiveEquals(log.kind)),
-            enabledByDefault: true,
+            defaultValue: true,
           ),
         ],
         ToggleFilter<LogDataV2>(
           name: 'Hide garbage collection logs',
           includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
-          enabledByDefault: true,
+          defaultValue: true,
         ),
       ];
 
@@ -616,11 +616,10 @@ class LoggingTableModel extends DisposableController
   bool _filterCallback(LogDataV2 log) {
     final filter = activeFilter.value;
 
-    final filteredOutByToggleFilters = filter.toggleFilters.any(
-      (toggleFilter) =>
-          toggleFilter.enabled.value && !toggleFilter.includeCallback(log),
+    final filteredOutBySettingFilters = filter.settingFilters.any(
+      (settingFilter) => !settingFilter.includeData(log),
     );
-    if (filteredOutByToggleFilters) return false;
+    if (filteredOutBySettingFilters) return false;
 
     final queryFilter = filter.queryFilter;
     if (!queryFilter.isEmpty) {

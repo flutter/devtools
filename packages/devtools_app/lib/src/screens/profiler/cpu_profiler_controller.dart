@@ -137,21 +137,23 @@ class CpuProfilerController extends DisposableController
 
   /// The toggle filters available for the CPU profiler.
   @override
-  List<ToggleFilter<CpuStackFrame>> createToggleFilters() => [
+  List<SettingFilter<CpuStackFrame, bool>> createSettingFilters() => [
         ToggleFilter<CpuStackFrame>(
           name: 'Hide Native code',
           includeCallback: (stackFrame) => !stackFrame.isNative,
-          enabledByDefault: true,
+          defaultValue: true,
         ),
         ToggleFilter<CpuStackFrame>(
           name: 'Hide core Dart libraries',
           includeCallback: (stackFrame) => !stackFrame.isDartCore,
+          defaultValue: false,
         ),
         if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
             true)
           ToggleFilter<CpuStackFrame>(
             name: 'Hide core Flutter libraries',
             includeCallback: (stackFrame) => !stackFrame.isFlutterCore,
+            defaultValue: false,
           ),
       ];
 
@@ -675,12 +677,10 @@ class CpuProfilerController extends DisposableController
   }) {
     filter ??= activeFilter.value;
     bool filterCallback(CpuStackFrame stackFrame) {
-      for (final toggleFilter in filter!.toggleFilters) {
-        if (toggleFilter.enabled.value &&
-            !toggleFilter.includeCallback(stackFrame)) {
-          return false;
-        }
-      }
+      final filteredOutBySettingFilters = filter!.settingFilters.any(
+        (settingFilter) => !settingFilter.includeData(stackFrame),
+      );
+      if (filteredOutBySettingFilters) return false;
 
       final queryFilter = filter.queryFilter;
       if (!queryFilter.isEmpty) {

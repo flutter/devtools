@@ -21,7 +21,7 @@ import '../primitives/utils.dart';
 /// storing the state of those filters.
 ///
 /// To use this mixin, you must implement [filterData] as well as either or both
-/// [createToggleFilters] and [createQueryFilterArgs].
+/// [createSettingFilters] and [createQueryFilterArgs].
 ///
 /// Classes mixing in [FilterControllerMixin] must also extend
 /// [DisposableController] and mixin [AutoDisposeControllerMixin], and a class
@@ -35,19 +35,18 @@ mixin FilterControllerMixin<T> on DisposableController
 
   final useRegExp = ValueNotifier<bool>(false);
 
-  // TODO(kenz): replace [Filter] class with a record when available.
   ValueListenable<Filter<T>> get activeFilter => _activeFilter;
 
   late final _activeFilter = ValueNotifier<Filter<T>>(
     Filter(
       queryFilter: QueryFilter.empty(args: _queryFilterArgs),
-      toggleFilters: _toggleFilters,
+      settingFilters: _settingFilters,
     ),
   );
 
   void setActiveFilter({
     String? query,
-    List<ToggleFilter<T>>? toggleFilters,
+    List<SettingFilter<T, Object>>? settingFilters,
   }) {
     _activeFilter.value = Filter(
       queryFilter: query != null
@@ -57,7 +56,7 @@ mixin FilterControllerMixin<T> on DisposableController
               useRegExp: useRegExp.value,
             )
           : QueryFilter.empty(args: _queryFilterArgs),
-      toggleFilters: toggleFilters ?? _toggleFilters,
+      settingFilters: settingFilters ?? _settingFilters,
     );
   }
 
@@ -67,9 +66,10 @@ mixin FilterControllerMixin<T> on DisposableController
     });
   }
 
-  late final List<ToggleFilter<T>> _toggleFilters = createToggleFilters();
+  late final List<SettingFilter<T, Object>> _settingFilters =
+      createSettingFilters();
 
-  List<ToggleFilter<T>> createToggleFilters() => [];
+  List<SettingFilter<T, Object>> createSettingFilters() => [];
 
   late final _queryFilterArgs = createQueryFilterArgs();
 
@@ -79,10 +79,9 @@ mixin FilterControllerMixin<T> on DisposableController
   bool get isFilterActive {
     final filter = activeFilter.value;
     final queryFilterActive = !filter.queryFilter.isEmpty;
-    final toggleFilterActive = filter.toggleFilters.any(
-      (filter) => filter.enabled.value,
-    );
-    return queryFilterActive || toggleFilterActive;
+    final settingFilterActive =
+        filter.settingFilters.any((filter) => filter.enabled);
+    return queryFilterActive || settingFilterActive;
   }
 
   // TODO(kenz): de-dupe the filtering logic in overrides of this method.
@@ -98,16 +97,14 @@ mixin FilterControllerMixin<T> on DisposableController
 
   String activeFilterTag() {
     final activeFilter = _activeFilter.value;
-    final suffixList = <String>[];
-    for (final toggleFilter in activeFilter.toggleFilters) {
-      if (toggleFilter.enabled.value) {
-        suffixList.add(toggleFilter.name);
-      }
-    }
-    final toggleFilterTag = suffixList.join(',');
+    final suffixList = activeFilter.settingFilters
+        .where((f) => f.enabled)
+        .map((f) => '${f.name}:${f.setting.value}');
+
+    final settingFilterTag = suffixList.join(',');
     final queryFilterTag = activeFilter.queryFilter.query.toLowerCase();
     return [
-      toggleFilterTag,
+      settingFilterTag,
       queryFilterTag,
       if (queryFilterTag.isNotEmpty && useRegExp.value) 'regexp',
     ].where((e) => e.isNotEmpty).join(filterTagSeparator);
@@ -115,8 +112,8 @@ mixin FilterControllerMixin<T> on DisposableController
 
   void _resetToDefaultFilter() {
     // Reset all filter values.
-    for (final toggleFilter in _toggleFilters) {
-      toggleFilter.enabled.value = toggleFilter.enabledByDefault;
+    for (final settingFilter in _settingFilters) {
+      settingFilter.setting.value = settingFilter.defaultValue;
     }
     _queryFilterArgs.forEach((key, value) => value.reset());
   }
@@ -125,15 +122,15 @@ mixin FilterControllerMixin<T> on DisposableController
     _resetToDefaultFilter();
     _activeFilter.value = Filter(
       queryFilter: QueryFilter.empty(args: _queryFilterArgs),
-      toggleFilters: _toggleFilters,
+      settingFilters: _settingFilters,
     );
   }
 }
 
-/// Dialog to manage toggleable filter settings.
+/// Dialog to manage filter settings.
 ///
 /// This dialog interacts with a [FilterControllerMixin] to manage and preserve
-/// the toggleable filter state managed by the dialog.
+/// the filter state.
 class FilterDialog<T> extends StatefulWidget {
   FilterDialog({
     super.key,
@@ -145,10 +142,10 @@ class FilterDialog<T> extends StatefulWidget {
               (queryInstructions != null &&
                   controller._queryFilterArgs.isNotEmpty),
         ),
-        toggleFilterValuesAtOpen = List.generate(
-          controller.activeFilter.value.toggleFilters.length,
+        settingFilterValuesAtOpen = List.generate(
+          controller.activeFilter.value.settingFilters.length,
           (index) =>
-              controller.activeFilter.value.toggleFilters[index].enabled.value,
+              controller.activeFilter.value.settingFilters[index].setting.value,
         );
 
   final FilterControllerMixin<T> controller;
@@ -157,7 +154,7 @@ class FilterDialog<T> extends StatefulWidget {
 
   final bool includeQueryFilter;
 
-  final List<bool> toggleFilterValuesAtOpen;
+  final List<Object> settingFilterValuesAtOpen;
 
   @override
   State<FilterDialog<T>> createState() => _FilterDialogState<T>();
@@ -222,8 +219,12 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
               const SizedBox(height: defaultSpacing),
             ],
           ],
-          for (final toggleFilter in widget.controller._toggleFilters) ...[
-            ToggleFilterElement(filter: toggleFilter),
+          for (final filter in widget.controller._settingFilters) ...[
+            if (filter is ToggleFilter<T>)
+              ToggleFilterElement(filter: filter)
+            else
+              // TODO(kenz): add a SettingFilterElement widget.
+              const SizedBox.shrink(),
           ],
         ],
       ),
@@ -237,7 +238,7 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
         query: widget.includeQueryFilter
             ? queryTextFieldController.value.text
             : null,
-        toggleFilters: widget.controller._toggleFilters,
+        settingFilters: widget.controller._settingFilters,
       );
   }
 
@@ -247,9 +248,9 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
   }
 
   void _restoreOldValues() {
-    for (var i = 0; i < widget.controller._toggleFilters.length; i++) {
-      final filter = widget.controller._toggleFilters[i];
-      filter.enabled.value = widget.toggleFilterValuesAtOpen[i];
+    for (var i = 0; i < widget.controller._settingFilters.length; i++) {
+      final filter = widget.controller._settingFilters[i];
+      filter.setting.value = widget.settingFilterValuesAtOpen[i];
     }
   }
 }
@@ -262,10 +263,10 @@ class ToggleFilterElement extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget content = InkWell(
-      onTap: () => filter.enabled.value = !filter.enabled.value,
+      onTap: () => filter.setting.value = !filter.setting.value,
       child: Row(
         children: [
-          NotifierCheckbox(notifier: filter.enabled),
+          NotifierCheckbox(notifier: filter.setting),
           Text(filter.name),
         ],
       ),
@@ -281,32 +282,82 @@ class ToggleFilterElement extends StatelessWidget {
 }
 
 class Filter<T> {
-  Filter({required this.queryFilter, required this.toggleFilters});
+  Filter({required this.queryFilter, required this.settingFilters});
 
   final QueryFilter queryFilter;
 
-  final List<ToggleFilter<T>> toggleFilters;
+  final List<SettingFilter<T, Object>> settingFilters;
 
-  bool get isEmpty => queryFilter.isEmpty && toggleFilters.isEmpty;
+  bool get isEmpty => queryFilter.isEmpty && settingFilters.isEmpty;
 }
 
-class ToggleFilter<T> {
+/// A boolean setting filter that can only be set to the value of true or false.
+class ToggleFilter<T> extends SettingFilter<T, bool> {
   ToggleFilter({
-    required this.name,
-    required this.includeCallback,
-    this.tooltip,
-    this.enabledByDefault = false,
-  }) : enabled = ValueNotifier<bool>(enabledByDefault);
+    required super.name,
+    required bool Function(T element) includeCallback,
+    required super.defaultValue,
+    super.tooltip,
+  }) : super(
+          possibleValues: [true, false],
+          includeCallback: (T element, bool _) => includeCallback(element),
+          enabledCallback: (bool filterValue) => filterValue,
+        );
+}
 
+/// A filter setting that can be set to any of the predefined values
+/// [possibleValues].
+class SettingFilter<T, V> {
+  SettingFilter({
+    required this.name,
+    required bool Function(T element, V currentFilterValue) includeCallback,
+    required bool Function(V filterValue) enabledCallback,
+    required this.possibleValues,
+    required this.defaultValue,
+    this.tooltip,
+  })  : _includeCallback = includeCallback,
+        _enabledCallback = enabledCallback,
+        setting = ValueNotifier<V>(defaultValue),
+        assert(possibleValues.contains(defaultValue));
+
+  /// The name of this setting filter.
   final String name;
 
-  final bool Function(T element) includeCallback;
+  /// The set of possible values that [setting] can be set to.
+  final List<V> possibleValues;
 
+  /// The default value of the filter.
+  ///
+  /// This will be used to set the initial [setting] of the filter, and may be set
+  /// again later if the user triggers "reset to default" behavior from the
+  /// filter dialog or from some other source.
+  final V defaultValue;
+
+  /// The current value of this setting filter.
+  ///
+  /// Filter dialogs and other filter affordances will read this value and
+  /// listen to this notifier for changes.
+  final ValueNotifier<V> setting;
+
+  /// The tooltip to describe the setting filter.
   final String? tooltip;
 
-  final bool enabledByDefault;
+  /// The callback that determines whether a data element should be included
+  /// based on the filter criteria.
+  final bool Function(T element, V currentFilterValue) _includeCallback;
 
-  final ValueNotifier<bool> enabled;
+  /// The callback that determines whether this filter is enabled based on the
+  /// current value of the filter.
+  final bool Function(V filterValue) _enabledCallback;
+
+  /// Whether a data element should be included based on the current state of the
+  /// filter.
+  bool includeData(T data) {
+    return !enabled || _includeCallback(data, setting.value);
+  }
+
+  /// Whether this filter is enabled based on the current value of the filter.
+  bool get enabled => _enabledCallback(setting.value);
 }
 
 class QueryFilter {
@@ -553,7 +604,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                       widget.controller.useRegExp.value = !useRegExp;
                       widget.controller.setActiveFilter(
                         query: queryTextFieldController.value.text,
-                        toggleFilters: widget.controller._toggleFilters,
+                        settingFilters: widget.controller._settingFilters,
                       );
                     },
                   ),
@@ -561,7 +612,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                 onChanged: (_) {
                   widget.controller.setActiveFilter(
                     query: queryTextFieldController.value.text,
-                    toggleFilters: widget.controller._toggleFilters,
+                    settingFilters: widget.controller._settingFilters,
                   );
                 },
               );

@@ -118,10 +118,10 @@ class LoggingController extends DisposableController
 
   /// The toggle filters available for the Logging screen.
   @override
-  List<ToggleFilter<LogData>> createToggleFilters() => toggleFilters;
+  List<SettingFilter<LogData, Object>> createSettingFilters() => settingFilters;
 
   @visibleForTesting
-  static final toggleFilters = <ToggleFilter<LogData>>[
+  static final settingFilters = <SettingFilter<LogData, Object>>[
     if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
         true) ...[
       ToggleFilter<LogData>(
@@ -129,20 +129,20 @@ class LoggingController extends DisposableController
             'times, image sizes)',
         includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
             .any((kind) => kind.caseInsensitiveEquals(log.kind)),
-        enabledByDefault: true,
+        defaultValue: true,
       ),
       ToggleFilter<LogData>(
         name: 'Hide verbose Flutter service logs (service extension state '
             'changes)',
         includeCallback: (log) => !_verboseFlutterServiceLogKinds
             .any((kind) => kind.caseInsensitiveEquals(log.kind)),
-        enabledByDefault: true,
+        defaultValue: true,
       ),
     ],
     ToggleFilter<LogData>(
       name: 'Hide garbage collection logs',
       includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
-      enabledByDefault: true,
+      defaultValue: true,
     ),
   ];
 
@@ -595,11 +595,10 @@ class LoggingController extends DisposableController
     super.filterData(filter);
 
     bool filterCallback(LogData log) {
-      final filteredOutByToggleFilters = filter.toggleFilters.any(
-        (toggleFilter) =>
-            toggleFilter.enabled.value && !toggleFilter.includeCallback(log),
+      final filteredOutBySettingFilters = filter.settingFilters.any(
+        (settingFilter) => !settingFilter.includeData(log),
       );
-      if (filteredOutByToggleFilters) return false;
+      if (filteredOutBySettingFilters) return false;
 
       final queryFilter = filter.queryFilter;
       if (!queryFilter.isEmpty) {

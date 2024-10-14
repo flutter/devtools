@@ -145,8 +145,8 @@ void main() {
 
       Future<void> loadData() async {
         for (final filter in controller
-            .cpuProfilerController.activeFilter.value.toggleFilters) {
-          filter.enabled.value = false;
+            .cpuProfilerController.activeFilter.value.settingFilters) {
+          filter.setting.value = false;
         }
         final data = CpuProfilePair(
           functionProfile: cpuProfileData,
@@ -599,8 +599,8 @@ void main() {
         cpuProfileData =
             CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
         for (final filter in controller
-            .cpuProfilerController.activeFilter.value.toggleFilters) {
-          filter.enabled.value = false;
+            .cpuProfilerController.activeFilter.value.settingFilters) {
+          filter.setting.value = false;
         }
         final data = CpuProfilePair(
           functionProfile: cpuProfileData,

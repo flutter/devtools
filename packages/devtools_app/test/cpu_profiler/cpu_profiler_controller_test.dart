@@ -32,8 +32,8 @@ void main() {
     late CpuProfilerController controller;
 
     Future<void> disableAllFiltering() async {
-      for (final filter in controller.activeFilter.value.toggleFilters) {
-        filter.enabled.value = false;
+      for (final filter in controller.activeFilter.value.settingFilters) {
+        filter.setting.value = false;
       }
       controller.setActiveFilter();
       // [CpuProfilerController.filterData], which is triggered by the call to
@@ -172,8 +172,8 @@ void main() {
       filteredData = controller.dataNotifier.value!;
       expect(filteredData.stackFrames.values.length, equals(7));
 
-      for (final filter in controller.activeFilter.value.toggleFilters) {
-        filter.enabled.value = false;
+      for (final filter in controller.activeFilter.value.settingFilters) {
+        filter.setting.value = false;
       }
       controller.setActiveFilter(query: 'paint thread');
       await shortDelay();
@@ -418,7 +418,7 @@ void main() {
 
     test('processDataForTag applies toggle filters by default', () async {
       expect(
-        controller.activeFilter.value.toggleFilters[0].enabled.value,
+        controller.activeFilter.value.settingFilters[0].setting.value,
         isTrue,
       );
       final cpuProfileDataWithTags =
