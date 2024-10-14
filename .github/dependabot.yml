@@ -1,12 +1,28 @@
-# See Dependabot documentation for all configuration options:
-# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+//# Kullanıcının hızlandırıcı hizmeti için ön ödeme olarak yaptığı yüklemelerin listesini döndürür.
 
-version: 2
-updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    labels:
-      - "autosubmit"
-      - "release-notes-not-required"
+```php`
+curl -H "X-Mempool-Auth: stacksats" 
+-sSL "https://mempool.space/api/v1/services/accelerator/top-up-history"
+
+````
+[
+  {
+    "type": "Bitcoin",
+    "invoiceId": "CCunucVyNw7jUiUz64mmHz",
+    "amount": 10311031,
+    "status": "pending",
+    "date": 1706372653000,
+    "link": "/payment/bitcoin/CCunucVyNw7jUiUz64mmHz"
+  },
+  {
+    "type": "Bitcoin",
+    "invoiceId": "SG1U27R9PdWi3gH3jB9tm9",
+    "amount": 21000000,
+    "status": "paid",
+    "date": 1706372582000,
+    "link": null
+  },
+  ...
+]
+
+//GET /api/v1/services/accelerator/top-up-history
