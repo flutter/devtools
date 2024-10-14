@@ -42,7 +42,7 @@ class MetadataChips extends StatelessWidget {
     );
     final logLevelChip = LogLevelMetadataChip(
       level: logLevel,
-      rawLevel: data.level!,
+      rawLevel: data.level,
       maxWidth: maxWidth,
       backgroundColor: logLevelColors.background,
       foregroundColor: logLevelColors.foreground,
@@ -71,7 +71,7 @@ class MetadataChips extends StatelessWidget {
           backgroundColor: kindColors.background,
           foregroundColor: kindColors.foreground,
         ),
-        if (data.level != null) logLevelChip,
+        logLevelChip,
         if (elapsedFrameTimeAsString != null)
           FrameElapsedMetaDataChip(
             maxWidth: maxWidth,
