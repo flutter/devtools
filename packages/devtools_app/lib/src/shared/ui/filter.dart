@@ -221,10 +221,9 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
           ],
           for (final filter in widget.controller._settingFilters) ...[
             if (filter is ToggleFilter<T>)
-              ToggleFilterElement(filter: filter)
+              _ToggleFilterElement(filter: filter)
             else
-              // TODO(kenz): add a SettingFilterElement widget.
-              const SizedBox.shrink(),
+              _SettingFilterElement(filter: filter),
           ],
         ],
       ),
@@ -255,8 +254,8 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
   }
 }
 
-class ToggleFilterElement extends StatelessWidget {
-  const ToggleFilterElement({super.key, required this.filter});
+class _ToggleFilterElement extends StatelessWidget {
+  const _ToggleFilterElement({required this.filter});
 
   final ToggleFilter filter;
 
@@ -268,6 +267,53 @@ class ToggleFilterElement extends StatelessWidget {
         children: [
           NotifierCheckbox(notifier: filter.setting),
           Text(filter.name),
+        ],
+      ),
+    );
+    if (filter.tooltip != null) {
+      content = DevToolsTooltip(
+        message: filter.tooltip,
+        child: content,
+      );
+    }
+    return content;
+  }
+}
+
+class _SettingFilterElement extends StatelessWidget {
+  const _SettingFilterElement({required this.filter});
+
+  final SettingFilter filter;
+
+  static const _leadingInset = 6.0;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget content = Padding(
+      // This padding is required to left-align [_SettingFilterElement]s with
+      // [_ToggleFilterElement] checkboxes in the dialog.
+      padding: const EdgeInsets.only(left: _leadingInset),
+      child: Row(
+        children: [
+          Text(filter.name),
+          const BulletSpacer(),
+          ValueListenableBuilder(
+            valueListenable: filter.setting,
+            builder: (context, value, _) {
+              return RoundedDropDownButton(
+                value: value,
+                items: filter.possibleValues
+                    .map(
+                      (value) => DropdownMenuItem(
+                        value: value,
+                        child: Text('$value'),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) => filter.setting.value = value!,
+              );
+            },
+          ),
         ],
       ),
     );

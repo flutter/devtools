@@ -122,6 +122,15 @@ class LoggingController extends DisposableController
 
   @visibleForTesting
   static final settingFilters = <SettingFilter<LogData, Object>>[
+    SettingFilter<LogData, Level>(
+      name: 'Hide logs below the minimum log level',
+      includeCallback: (LogData element, Level currentFilterValue) =>
+          element.level >= currentFilterValue.value,
+      enabledCallback: (Level filterValue) => filterValue != Level.ALL,
+      possibleValues:
+          Level.LEVELS.where((level) => level != Level.OFF).toList(),
+      defaultValue: Level.INFO,
+    ),
     if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
         true) ...[
       ToggleFilter<LogData>(
