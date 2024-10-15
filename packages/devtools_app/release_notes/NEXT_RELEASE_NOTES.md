@@ -52,8 +52,11 @@ severity. [#8419](https://github.com/flutter/devtools/pull/8419)
 * Added support for filtering by log severity / levels. - []()
     ![Log level filter](images/log_level_filter.png "Log level filter")
 
-* Fix a bug where logs would get out of order after midnight. - 
+* Fixed a bug where logs would get out of order after midnight. - 
 [#8420](https://github.com/flutter/devtools/pull/8420)
+
+* Automatically scroll logs table to the bottom on the initial load -
+[#8437](https://github.com/flutter/devtools/pull/8437)
 
 ## App size tool updates
 

@@ -26,6 +26,7 @@ class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable<T> {
     super.pinBehavior = FlatTablePinBehavior.none,
     super.columnGroups,
     super.autoScrollContent = false,
+    super.startScrolledAtBottom = false,
     super.onItemSelected,
     super.preserveVerticalScrollPosition = false,
     super.includeColumnGroupHeaders = true,
@@ -57,6 +58,7 @@ class FlatTable<T> extends StatefulWidget {
     required this.columns,
     this.columnGroups,
     this.autoScrollContent = false,
+    this.startScrolledAtBottom = false,
     this.onItemSelected,
     required this.defaultSortColumn,
     required this.defaultSortDirection,
@@ -140,6 +142,10 @@ class FlatTable<T> extends StatefulWidget {
 
   /// Auto-scrolling the table to keep new content visible.
   final bool autoScrollContent;
+
+  /// Determines whether the table should be scrolled to the bottom of the
+  /// scrollable area on the initial build of the table.
+  final bool startScrolledAtBottom;
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T data) keyFactory;
@@ -287,6 +293,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           tableController: tableController,
           columnWidths: columnWidths,
           autoScrollContent: widget.autoScrollContent,
+          startScrolledAtBottom: widget.startScrolledAtBottom,
           rowBuilder: _buildRow,
           activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
           rowItemExtent: widget.rowHeight ?? defaultRowHeight,

@@ -42,6 +42,7 @@ class LogsTable extends StatelessWidget {
       data: data,
       dataKey: 'logs',
       autoScrollContent: true,
+      startScrolledAtBottom: true,
       columns: columns,
       selectionNotifier: selectionNotifier,
       defaultSortColumn: whenColumn,
