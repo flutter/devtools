@@ -257,6 +257,10 @@ class LoggingController extends DisposableController
   }
 
   void _handleExtensionEvent(Event e) {
+    final kind = e.extensionKind!.toLowerCase();
+    final timestamp = e.timestamp;
+    final isolateRef = e.isolate;
+
     if (e.extensionKind == FlutterEvent.frame) {
       final frame = FrameInfo(e.extensionData!.data);
 
@@ -266,10 +270,11 @@ class LoggingController extends DisposableController
 
       log(
         LogData(
-          e.extensionKind!.toLowerCase(),
+          kind,
           jsonEncode(e.extensionData!.data),
-          e.timestamp,
+          timestamp,
           summary: frameInfoText,
+          isolateRef: isolateRef,
         ),
       );
     } else if (e.extensionKind == FlutterEvent.imageSizesForFrame) {
@@ -278,10 +283,11 @@ class LoggingController extends DisposableController
       for (final image in images) {
         log(
           LogData(
-            e.extensionKind!.toLowerCase(),
+            kind,
             jsonEncode(image.json),
-            e.timestamp,
+            timestamp,
             summary: image.summary,
+            isolateRef: isolateRef,
           ),
         );
       }
@@ -290,19 +296,21 @@ class LoggingController extends DisposableController
 
       log(
         LogData(
-          e.extensionKind!.toLowerCase(),
+          kind,
           jsonEncode(e.json),
-          e.timestamp,
+          timestamp,
           summary: navInfo.routeDescription,
+          isolateRef: isolateRef,
         ),
       );
     } else if (_hideSummaryLogKinds.contains(e.extensionKind)) {
       log(
         LogData(
-          e.extensionKind!.toLowerCase(),
+          kind,
           jsonEncode(e.json),
-          e.timestamp,
+          timestamp,
           summary: '',
+          isolateRef: isolateRef,
         ),
       );
     } else if (e.extensionKind == FlutterEvent.serviceExtensionStateChanged) {
@@ -311,10 +319,11 @@ class LoggingController extends DisposableController
 
       log(
         LogData(
-          e.extensionKind!.toLowerCase(),
+          kind,
           jsonEncode(e.json),
-          e.timestamp,
+          timestamp,
           summary: '${changedInfo.extension}: ${changedInfo.value}',
+          isolateRef: isolateRef,
         ),
       );
     } else if (e.extensionKind == FlutterEvent.error) {
@@ -336,21 +345,23 @@ class LoggingController extends DisposableController
       final summary = _findFirstSummary(node) ?? node;
       log(
         LogData(
-          e.extensionKind!.toLowerCase(),
+          kind,
           jsonEncode(e.extensionData!.data),
-          e.timestamp,
+          timestamp,
           summary: summary.toDiagnosticsNode().toString(),
           level: Level.SEVERE.value,
           isError: true,
+          isolateRef: isolateRef,
         ),
       );
     } else {
       log(
         LogData(
-          e.extensionKind!.toLowerCase(),
+          kind,
           jsonEncode(e.json),
-          e.timestamp,
+          timestamp,
           summary: e.json.toString(),
+          isolateRef: isolateRef,
         ),
       );
     }
@@ -379,13 +390,22 @@ class LoggingController extends DisposableController
     };
 
     final message = jsonEncode(event);
-    log(LogData('gc', message, e.timestamp, summary: summary));
+    log(
+      LogData(
+        'gc',
+        message,
+        e.timestamp,
+        summary: summary,
+        isolateRef: e.isolateRef,
+      ),
+    );
   }
 
   void _handleDeveloperLogEvent(Event e) {
+    final eventJson = e.json!;
     final service = serviceConnection.serviceManager.service;
 
-    final logRecord = _LogRecord(e.json!['logRecord']);
+    final logRecord = _LogRecord(eventJson['logRecord']);
 
     String? loggerName =
         _valueAsString(InstanceRef.parse(logRecord.loggerName));
@@ -470,6 +490,7 @@ class LoggingController extends DisposableController
         isError: isError,
         summary: summary,
         detailsComputer: detailsComputer,
+        isolateRef: e.isolateRef,
       ),
     );
   }
@@ -700,6 +721,7 @@ class _StdoutEventHandler {
             buffer!.timestamp,
             summary: buffer!.summary! + message,
             isError: buffer!.isError,
+            isolateRef: e.isolateRef,
           ),
         );
         buffer = null;
@@ -723,6 +745,7 @@ class _StdoutEventHandler {
       e.timestamp,
       summary: summary,
       isError: isError,
+      isolateRef: e.isolateRef,
     );
 
     if (message == '\n') {
@@ -773,6 +796,7 @@ class LogData with SearchableDataMixin {
     this.isError = false,
     this.detailsComputer,
     this.node,
+    this.isolateRef,
   }) : level = level ?? (isError ? Level.SEVERE.value : Level.INFO.value) {
     final originalDetails = _details;
     // Fetch details immediately on creation.
@@ -796,6 +820,7 @@ class LogData with SearchableDataMixin {
   final int? timestamp;
   final bool isError;
   final String? summary;
+  final IsolateRef? isolateRef;
 
   String get levelName =>
       _levelName ??= LogLevelMetadataChip.generateLogLevel(level).name;
@@ -932,4 +957,8 @@ class ServiceExtensionStateChangedInfo {
 
   final String? extension;
   final Object value;
+}
+
+extension on Event {
+  IsolateRef? get isolateRef => IsolateRef.parse(this.json?['isolate']);
 }

@@ -75,14 +75,19 @@ class MessageColumn extends ColumnData<LogData>
                         data.summary!,
                         theme.regularTextStyle,
                       ),
-                    if (hasSummary && hasDetails())
-                      WidgetSpan(
-                        child: Icon(
-                          Icons.arrow_right,
-                          size: defaultIconSize,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
+                    WidgetSpan(
+                      child: hasSummary && hasDetails()
+                          ? Icon(
+                              Icons.arrow_right,
+                              size: defaultIconSize,
+                              color: theme.colorScheme.onSurface,
+                            )
+                          :
+                          // Include an empty SizedBox to ensure a consistent
+                          // height for the text display, regardless of whether
+                          // the log has details information.
+                          SizedBox(height: defaultIconSize),
+                    ),
                     if (hasDetails())
                       ...processAnsiTerminalCodes(
                         detailsComputed ? data.details! : '<fetching>',
@@ -95,10 +100,7 @@ class MessageColumn extends ColumnData<LogData>
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(
-                top: borderPadding,
-                bottom: densePadding,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: densePadding),
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return MetadataChips(

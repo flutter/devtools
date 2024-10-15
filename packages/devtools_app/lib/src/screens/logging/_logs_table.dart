@@ -22,7 +22,7 @@ class LogsTable extends StatelessWidget {
     required this.activeSearchMatchNotifier,
   });
 
-  static final _logRowHeight = scaleByFontFactor(44.0);
+  static final _logRowHeight = scaleByFontFactor(45.0);
 
   final LoggingController controller;
   final List<LogData> data;
