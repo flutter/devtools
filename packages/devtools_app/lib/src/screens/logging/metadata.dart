@@ -48,6 +48,20 @@ class MetadataChips extends StatelessWidget {
       foregroundColor: logLevelColors.foreground,
     );
 
+    // Prepare the isolate chip.
+    Widget? isolateChip;
+    final isolateName = data.isolateRef?.name;
+    if (isolateName != null) {
+      isolateChip = IsolateChip(
+        name: isolateName,
+        id: data.isolateRef?.id,
+        maxWidth: maxWidth,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        outlined: true,
+      );
+    }
+
     // Prepare frame time chip.
     String? elapsedFrameTimeAsString;
     try {
@@ -72,6 +86,7 @@ class MetadataChips extends StatelessWidget {
           foregroundColor: kindColors.foreground,
         ),
         logLevelChip,
+        if (isolateChip != null) isolateChip,
         if (elapsedFrameTimeAsString != null)
           FrameElapsedMetaDataChip(
             maxWidth: maxWidth,
@@ -87,10 +102,12 @@ abstract class MetadataChip extends StatelessWidget {
     super.key,
     required this.maxWidth,
     required this.text,
+    this.tooltip,
     this.icon,
     this.iconAsset,
     this.backgroundColor,
     this.foregroundColor,
+    this.outlined = false,
     this.includeLeadingMargin = true,
   });
 
@@ -98,15 +115,17 @@ abstract class MetadataChip extends StatelessWidget {
   final IconData? icon;
   final String? iconAsset;
   final String text;
+  final String? tooltip;
   final Color? backgroundColor;
   final Color? foregroundColor;
+  final bool outlined;
   final bool includeLeadingMargin;
 
   static const horizontalPadding = densePadding;
   static const verticalPadding = borderPadding;
   static const iconPadding = densePadding;
-  static final height = scaleByFontFactor(18.0);
   static const _borderRadius = 4.0;
+  static final _metadataIconSize = scaleByFontFactor(12.0);
 
   @override
   Widget build(BuildContext context) {
@@ -116,41 +135,49 @@ abstract class MetadataChip extends StatelessWidget {
     final foregroundColor =
         this.foregroundColor ?? theme.colorScheme.onSecondaryContainer;
 
-    return Container(
-      constraints: BoxConstraints(maxWidth: maxWidth),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(_borderRadius),
-      ),
-      margin: includeLeadingMargin
-          ? const EdgeInsets.only(left: denseSpacing)
-          : null,
-      padding: const EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: verticalPadding,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null || iconAsset != null) ...[
-            DevToolsIcon(
-              icon: icon,
-              iconAsset: iconAsset,
-              size: defaultIconSize,
-              color: foregroundColor,
+    return maybeWrapWithTooltip(
+      tooltip: tooltip,
+      child: Container(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(_borderRadius),
+          border: outlined
+              ? Border.all(color: theme.colorScheme.subtleTextColor)
+              : null,
+        ),
+        margin: includeLeadingMargin
+            ? const EdgeInsets.only(left: denseSpacing)
+            : null,
+        padding: const EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null || iconAsset != null) ...[
+              DevToolsIcon(
+                icon: icon,
+                iconAsset: iconAsset,
+                size: _metadataIconSize,
+                color: foregroundColor,
+              ),
+              const SizedBox(width: iconPadding),
+            ] else
+              // Include an empty SizedBox to ensure a consistent height for the
+              // chips, regardless of whether the chip includes an icon.
+              SizedBox(height: _metadataIconSize),
+            RichText(
+              text: TextSpan(
+                text: text,
+                style: theme
+                    .regularTextStyleWithColor(foregroundColor)
+                    .copyWith(fontSize: smallFontSize),
+              ),
             ),
-            const SizedBox(width: iconPadding),
-          ] else
-            // Include an empty SizedBox to ensure a consistent height for the
-            // chips, regardless of whether the chip includes an icon.
-            SizedBox(height: defaultIconSize),
-          RichText(
-            text: TextSpan(
-              text: text,
-              style: theme.regularTextStyleWithColor(foregroundColor),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -253,4 +280,16 @@ class LogLevelMetadataChip extends MetadataChip {
     }
     return (background: background, foreground: foreground);
   }
+}
+
+class IsolateChip extends MetadataChip {
+  const IsolateChip({
+    super.key,
+    required String name,
+    required String? id,
+    required super.maxWidth,
+    super.backgroundColor,
+    super.foregroundColor,
+    super.outlined = false,
+  }) : super(text: 'isolate: $name', tooltip: id);
 }

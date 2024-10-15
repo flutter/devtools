@@ -42,7 +42,8 @@ TODO: Remove this section if there are not any general updates.
 due to lazy loading. - [#8421](https://github.com/flutter/devtools/pull/8421)
 
 * Added support for displaying metadata, such as log
-severity. [#8419](https://github.com/flutter/devtools/pull/8419)
+severity, category, and isolate name.
+[#8419](https://github.com/flutter/devtools/pull/8419), []()
     ![Logging metadata display](images/log_metadata.png "Logging metadata display")
 
 * Add a text filter to the top-level logging controls. -
