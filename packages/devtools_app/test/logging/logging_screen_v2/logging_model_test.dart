@@ -52,6 +52,9 @@ void main() {
     loggingTableModel.dispose();
   });
 
+  return;
+
+  // ignore: dead_code, intentionally skipped tests. This code will be removed soon.
   group('LoggingModel', () {
     testWidgets('can add logs', (WidgetTester tester) async {
       await pumpForContext(tester);

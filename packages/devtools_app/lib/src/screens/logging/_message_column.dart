@@ -100,10 +100,7 @@ class MessageColumn extends ColumnData<LogData>
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(
-                top: densePadding,
-                bottom: densePadding,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: densePadding),
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return MetadataChips(

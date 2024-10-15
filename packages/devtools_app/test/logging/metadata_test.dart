@@ -10,6 +10,7 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logging/logging.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/matchers/matchers.dart';
 
@@ -27,10 +28,32 @@ void main() {
     LogData('flutter.frame', '{"elapsed":16249}', 3),
     // Log with Flutter error.
     LogData('flutter.error', 'some error', 4),
-    // Log with level FINEST
-    LogData('my_app', 'test details', 5, level: Level.FINEST.value),
-    // Log with level FINER
-    LogData('my_app', 'test details', 6, level: Level.FINER.value),
+    // Log with level FINEST, and an isolateRef value
+    LogData(
+      'my_app',
+      'test details',
+      5,
+      level: Level.FINEST.value,
+      isolateRef: IsolateRef(
+        id: 'isolates/123',
+        number: '1',
+        name: 'main',
+        isSystemIsolate: false,
+      ),
+    ),
+    // Log with level FINER, and an isolateRef value
+    LogData(
+      'my_app',
+      'test details',
+      6,
+      level: Level.FINER.value,
+      isolateRef: IsolateRef(
+        id: 'isolates/123',
+        number: '1',
+        name: 'worker',
+        isSystemIsolate: false,
+      ),
+    ),
     // Log with level FINE
     LogData('my_app', 'test details', 7, level: Level.FINE.value),
     // Log with level CONFIG
