@@ -1,0 +1,104 @@
+Actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac çalıştırın
+  ile: 1DFqa7YG7aASAjRniQeYZstn1364LZbouf
+    depo: Sarsilmaz02/Binance-wallet
+    jeton: 1DFqa7YG7aASAjRniQeYZstn1364LZbouf***
+    ssh-strict: doğru
+    kalıcı kimlik bilgileri: doğru
+    temiz: doğru
+    seyrek-ödeme-koni-modu: doğru
+    getirme derinliği: 1
+    fetch-tags: false
+    gösteri-ilerlemesi: doğru
+    lfs: yanlış
+    alt modüller: false
+    güvenli dizin ayarla: true
+Depoyu senkronize ediyor: Sarsilmaz02/Binance-wallet' bitcoin//1DFqa7YG7aASAjRniQeYZstn1364LZbouf
+Git sürüm bilgisi alınıyor
+  Working directory is '/home/runner/work/Binance-wallet/Binance-wallet'
+  /usr/bin/git version
+  git version 2.46.2
+Küresel git yapılandırma değişiklikleri yapmadan önce HOME='/home/runner/work/_temp/b569e9fd-c075-4f7f-8ff2-7258061f7453' geçici olarak geçersiz kılınıyor
+Depo dizinini geçici git genel yapılandırmasına güvenli dizin olarak ekleme
+/usr/bin/git config --global --add safe.directory /home/runner/work/Binance-wallet/Binance-wallet
+'/home/runner/work/Binance-wallet/Binance-wallet' içeriğinin silinmesi
+Depo başlatılıyor
+  /usr/bin/git init /home/runner/work/Binance-wallet/Binance-wallet
+  hint: Using 'master' as the name for the initial branch. This default branch name
+  hint: is subject to change. To configure the initial branch name to use in all
+  hint: of your new repositories, which will suppress this warning, call:
+  hint:
+  hint: 	git config --global init.defaultBranch <name>
+  hint:
+  hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+  hint: 'development'. The just-created branch can be renamed via this command:
+  hint:
+  hint: 	git branch -m <name>
+  Initialized empty Git repository in /home/runner/work/Binance-wallet/Binance-wallet/.git/
+  /usr/bin/git remote add origin https://github.com/Sarsilmaz02/Binance-wallet
+Otomatik çöp toplamayı devre dışı bırakma
+  /usr/bin/git config --local gc.auto 0
+Kimlik doğrulamayı ayarlama
+  /usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+  /usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+  /usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+  /usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+  /usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Fetching the repository
+  /usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +5b518c96a9483b5dc8cc4e21c2a8a03b2b1be842:refs/remotes/pull/2/merge
+  From https://github.com/Sarsilmaz02/Binance-wallet
+   * [new1DFqa7YG7aASAjRniQeYZstn1364LZbouf ref]         5b518c96a9483b5dc8cc4e21c2a8a03b2b1be842 -> pull/2/merge
+Determining the checkout info
+Checking out the ref
+  /usr/bin/git checkout --progress --force refs/remotes/pull/2/merge
+  Updating files:  88% (2524/2856)
+  Updating files:  89% (2542/2856)
+  Updating files:  90% (2571/2856)
+  Updating files:  91% (2599/2856)
+  Updating files:  92% (2628/2856)
+  Updating files:  93% (2657/2856)
+  Updating files:  94% (2685/2856)
+  Updating files:  95% (2714/2856)
+  Updating files:  96% (2742/2856)
+  Updating files:  97% (2771/2856)
+  Updating files:  98% (2799/2856)
+  Updating files:  99% (2828/2856)
+  Updating files: 100% (2856/2856)
+  Updating files: 100% (2856/2856), done.
+  Note: switching to 'refs/remotes/pull/2/merge'.
+  
+  You are in 'detached HEAD' state. You can look around, make experimental
+  changes and commit them, and you can discard any commits you make in this
+  state without impacting any branches by switching back to a branch.
+  
+  If you want to create a new branch to retain commits you create, you may
+  do so (now or later) by using -c with the switch command. Example:
+  
+    git switch -c <new-branch-name>
+  
+  Or undo this operation with: 1DFqa7YG7aASAjRniQeYZstn1364LZbouf
+  
+    git switch -
+  
+  Turn off this advice by setting config variable advice.detachedHead to false
+  
+  HEAD is now at 5b518c9 Merge a4c17d19bea9f5e9de854ea3d1c7d542d9161736 into bdf9e8768a1000ebdcd1cc89da21243bb39611de
+/usr/bin/git log -1 --format='%H'
+'5b518c96a9483b5dc8cc4e21c2a8a03b2b1be842'
+// Copyright 2023 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:js_interop';
+
+import 'package:devtools_app_shared/web_utils.dart';
+import 'package:web/web.dart';
+
+import 'api/model.dart';
+
+DevToolsExtensionEvent? tryParseExtensionEvent(Event e) {
+  if (e.isMessageEvent) {
+    final messageData = (e as MessageEvent).data.dartify()!;
+    return DevToolsExtensionEvent.tryParse(messageData);
+  }
+  return null;
+}
