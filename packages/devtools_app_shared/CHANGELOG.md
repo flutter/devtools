@@ -1,5 +1,6 @@
 ## 0.2.4
 * Add `updateQueryParameter` utility method.
+* Add `jump` parameter to `ScrollController.autoScrollToBottom` extension method.
 
 ## 0.2.3
 * Bump `web` dependency to `^1.0.0`

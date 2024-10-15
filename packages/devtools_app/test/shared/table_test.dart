@@ -1122,6 +1122,73 @@ void main() {
         expect(data[i].enabled, index % 2 == 0);
       }
     });
+
+    group('scrolling behavior', () {
+      const shortTableSize = Size(1000.0, 500.0);
+
+      testWidgetsWithWindowSize(
+        'start scrolled at offset 0.0 by default ',
+        shortTableSize,
+        (WidgetTester tester) async {
+          final table = FlatTable<TestData>(
+            columns: [
+              flatNameColumn,
+              _NumberColumn(),
+            ],
+            data: flatData,
+            dataKey: 'test-data',
+            keyFactory: (d) => Key(d.name),
+            defaultSortColumn: flatNameColumn,
+            defaultSortDirection: SortDirection.ascending,
+            // Use tall rows to make the table data extend the bounds of the
+            // window size, which will allow for scrolling.
+            rowHeight: 100.0,
+          );
+          await tester.pumpWidget(wrap(table));
+
+          final tableState = tester
+              .state<DevToolsTableState>(find.byType(DevToolsTable<TestData>));
+          final scrollController = tableState.scrollController;
+
+          expect(scrollController.offset, 0.0);
+          expect(scrollController.position.maxScrollExtent, greaterThan(0.0));
+        },
+      );
+
+      testWidgetsWithWindowSize(
+        'can start scrolled at bottom ',
+        shortTableSize,
+        (WidgetTester tester) async {
+          final table = FlatTable<TestData>(
+            columns: [
+              flatNameColumn,
+              _NumberColumn(),
+            ],
+            data: flatData,
+            dataKey: 'test-data',
+            keyFactory: (d) => Key(d.name),
+            defaultSortColumn: flatNameColumn,
+            defaultSortDirection: SortDirection.ascending,
+            // Use tall rows to make the table data extend the bounds of the
+            // window size, which will allow for scrolling.
+            rowHeight: 100.0,
+            startScrolledAtBottom: true,
+          );
+          await tester.pumpWidget(wrap(table));
+
+          final tableState = tester
+              .state<DevToolsTableState>(find.byType(DevToolsTable<TestData>));
+          final scrollController = tableState.scrollController;
+
+          expect(scrollController.offset, isNot(0.0));
+          expect(scrollController.position.maxScrollExtent, greaterThan(0.0));
+          expect(
+            scrollController.offset,
+            scrollController.position.maxScrollExtent,
+          );
+        },
+      );
+    });
   });
 
   group('TreeTable view', () {
