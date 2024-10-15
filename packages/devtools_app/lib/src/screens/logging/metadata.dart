@@ -62,6 +62,21 @@ class MetadataChips extends StatelessWidget {
       );
     }
 
+    // Prepare the zone chip.
+    Widget? zoneChip;
+    final zone = data.zone;
+    final zoneName = zone?.name;
+    if (zoneName != null && !zoneName.caseInsensitiveEquals('null')) {
+      zoneChip = ZoneChip(
+        name: zoneName,
+        identityHashCode: zone!.identityHashCode,
+        maxWidth: maxWidth,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        outlined: true,
+      );
+    }
+
     // Prepare frame time chip.
     String? elapsedFrameTimeAsString;
     try {
@@ -86,12 +101,13 @@ class MetadataChips extends StatelessWidget {
           foregroundColor: kindColors.foreground,
         ),
         logLevelChip,
-        if (isolateChip != null) isolateChip,
         if (elapsedFrameTimeAsString != null)
           FrameElapsedMetaDataChip(
             maxWidth: maxWidth,
             elapsedTimeDisplay: elapsedFrameTimeAsString,
           ),
+        if (isolateChip != null) isolateChip,
+        if (zoneChip != null) zoneChip,
       ],
     );
   }
@@ -292,4 +308,21 @@ class IsolateChip extends MetadataChip {
     super.foregroundColor,
     super.outlined = false,
   }) : super(text: 'isolate: $name', tooltip: id);
+}
+
+class ZoneChip extends MetadataChip {
+  const ZoneChip({
+    super.key,
+    required String name,
+    required int? identityHashCode,
+    required super.maxWidth,
+    super.backgroundColor,
+    super.foregroundColor,
+    super.outlined = false,
+  }) : super(
+          text: name,
+          tooltip: identityHashCode != null
+              ? 'Zone identityHashCode: $identityHashCode'
+              : null,
+        );
 }
