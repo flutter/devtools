@@ -584,7 +584,7 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
     return Banner(
       message: 'DEBUG',
       textDirection: TextDirection.ltr,
-      location: BannerLocation.topStart,
+      location: BannerLocation.bottomEnd,
       child: Builder(
         builder: builder,
       ),
