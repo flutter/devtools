@@ -412,7 +412,15 @@ class LoggingController extends DisposableController
     if (loggerName == null || loggerName.isEmpty) {
       loggerName = 'log';
     }
+
     final level = logRecord.level;
+
+    final zoneInstanceRef = InstanceRef.parse(logRecord.zone);
+    final zone = (
+      name: zoneInstanceRef?.classRef?.name,
+      identityHashCode: zoneInstanceRef?.identityHashCode,
+    );
+
     final messageRef = InstanceRef.parse(logRecord.message)!;
     String? summary = _valueAsString(messageRef);
     if (messageRef.valueAsStringIsTruncated == true) {
@@ -491,6 +499,7 @@ class LoggingController extends DisposableController
         summary: summary,
         detailsComputer: detailsComputer,
         isolateRef: e.isolateRef,
+        zone: zone,
       ),
     );
   }
@@ -797,6 +806,7 @@ class LogData with SearchableDataMixin {
     this.detailsComputer,
     this.node,
     this.isolateRef,
+    this.zone,
   }) : level = level ?? (isError ? Level.SEVERE.value : Level.INFO.value) {
     final originalDetails = _details;
     // Fetch details immediately on creation.
@@ -821,6 +831,7 @@ class LogData with SearchableDataMixin {
   final bool isError;
   final String? summary;
   final IsolateRef? isolateRef;
+  final ({String? name, int? identityHashCode})? zone;
 
   String get levelName =>
       _levelName ??= LogLevelMetadataChip.generateLogLevel(level).name;

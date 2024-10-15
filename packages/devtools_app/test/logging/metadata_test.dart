@@ -28,7 +28,7 @@ void main() {
     LogData('flutter.frame', '{"elapsed":16249}', 3),
     // Log with Flutter error.
     LogData('flutter.error', 'some error', 4),
-    // Log with level FINEST, and an isolateRef value
+    // Log with level FINEST, and an isolateRef value.
     LogData(
       'my_app',
       'test details',
@@ -41,7 +41,7 @@ void main() {
         isSystemIsolate: false,
       ),
     ),
-    // Log with level FINER, and an isolateRef value
+    // Log with level FINER, and an isolateRef value.
     LogData(
       'my_app',
       'test details',
@@ -58,10 +58,22 @@ void main() {
     LogData('my_app', 'test details', 7, level: Level.FINE.value),
     // Log with level CONFIG
     LogData('my_app', 'test details', 8, level: Level.CONFIG.value),
-    // Log with level INFO
-    LogData('my_app', 'test details', 9, level: Level.INFO.value),
-    // Log with level WARNING
-    LogData('my_app', 'test details', 10, level: Level.WARNING.value),
+    // Log with level INFO, and a custom zone.
+    LogData(
+      'my_app',
+      'test details',
+      9,
+      level: Level.INFO.value,
+      zone: (name: '_CustomZone', identityHashCode: 456),
+    ),
+    // Log with level WARNING, and the root zone.
+    LogData(
+      'my_app',
+      'test details',
+      10,
+      level: Level.WARNING.value,
+      zone: (name: '_RootZone', identityHashCode: 123),
+    ),
     // Log with level SEVERE
     LogData('my_app', 'test details', 11, level: Level.SEVERE.value),
     // Log with level SHOUT
