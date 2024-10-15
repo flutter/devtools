@@ -43,14 +43,16 @@ due to lazy loading. - [#8421](https://github.com/flutter/devtools/pull/8421)
 
 * Added support for displaying metadata, such as log
 severity, category, and isolate name.
-[#8419](https://github.com/flutter/devtools/pull/8419), []()
+[#8419](https://github.com/flutter/devtools/pull/8419),
+[#8439](https://github.com/flutter/devtools/pull/8439)
     ![Logging metadata display](images/log_metadata.png "Logging metadata display")
 
 * Add a text filter to the top-level logging controls. -
 [#8427](https://github.com/flutter/devtools/pull/8427)
     ![Logging filter](images/log_filter.png "Logging filter")
 
-* Added support for filtering by log severity / levels. - []()
+* Added support for filtering by log severity / levels. -
+[#8433](https://github.com/flutter/devtools/pull/8433)
     ![Log level filter](images/log_level_filter.png "Log level filter")
 
 * Fixed a bug where logs would get out of order after midnight. - 
