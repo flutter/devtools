@@ -14,6 +14,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logging/logging.dart';
 
 void main() {
   group('LoggingController', () {
@@ -27,6 +28,7 @@ void main() {
           jsonEncode({'kind': 'stdout', 'message': message}),
           0,
           summary: message,
+          level: Level.INFO.value,
         ),
       );
     }
@@ -38,12 +40,21 @@ void main() {
           jsonEncode({'kind': 'gc', 'message': message}),
           0,
           summary: message,
+          level: Level.INFO.value,
         ),
       );
     }
 
-    void addLogWithKind(String kind) {
-      controller.log(LogData(kind, jsonEncode({'foo': 'test_data'}), 0));
+    void addLog({required String kind, Level? level, bool isError = false}) {
+      controller.log(
+        LogData(
+          kind,
+          jsonEncode({'foo': 'test_data'}),
+          0,
+          level: level?.value,
+          isError: isError,
+        ),
+      );
     }
 
     setUp(() {
@@ -88,8 +99,8 @@ void main() {
       addStdoutData('abc');
       addStdoutData('def');
       addStdoutData('abc ghi');
-      addLogWithKind('Flutter.Navigation');
-      addLogWithKind('Flutter.Error');
+      addLog(kind: 'Flutter.Navigation');
+      addLog(kind: 'Flutter.Error', isError: true);
       addGcData('gc1');
       addGcData('gc2');
 
@@ -112,8 +123,8 @@ void main() {
       addStdoutData('abc');
       addStdoutData('def');
       addStdoutData('abc ghi');
-      addLogWithKind('Flutter.Navigation');
-      addLogWithKind('Flutter.Error');
+      addLog(kind: 'Flutter.Navigation');
+      addLog(kind: 'Flutter.Error', isError: true);
       addGcData('gc1');
       addGcData('gc2');
 
@@ -133,24 +144,27 @@ void main() {
       addStdoutData('abc');
       addStdoutData('def');
       addStdoutData('abc ghi');
-      addLogWithKind('Flutter.Navigation');
-      addLogWithKind('Flutter.Error');
+      addLog(kind: 'Flutter.Navigation');
+      addLog(kind: 'Flutter.Error', isError: true);
 
       // The following logs should all be filtered by default.
       addGcData('gc1');
       addGcData('gc2');
-      addLogWithKind('Flutter.FirstFrame');
-      addLogWithKind('Flutter.FrameworkInitialization');
-      addLogWithKind('Flutter.Frame');
-      addLogWithKind('Flutter.ImageSizesForFrame');
-      addLogWithKind('Flutter.ServiceExtensionStateChanged');
+      addLog(kind: 'Flutter.FirstFrame');
+      addLog(kind: 'Flutter.FrameworkInitialization');
+      addLog(kind: 'Flutter.Frame');
+      addLog(kind: 'Flutter.ImageSizesForFrame');
+      addLog(kind: 'Flutter.ServiceExtensionStateChanged');
 
       // At this point data is filtered by the default toggle filter values.
       expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(5));
 
-      // Test query filters assuming default toggle filters are all enabled.
-      for (final filter in controller.activeFilter.value.settingFilters) {
+      // Test query filters assuming default setting filters are all enabled.
+      controller.activeFilter.value.settingFilters.first.setting.value =
+          Level.INFO;
+      for (final filter
+          in controller.activeFilter.value.settingFilters.sublist(1)) {
         filter.setting.value = true;
       }
 
@@ -186,12 +200,14 @@ void main() {
       expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(5));
 
-      // Test toggle filters.
-      final verboseFlutterFrameworkFilter =
+      // Test setting filters.
+      final minimumLogLevelFilter =
           controller.activeFilter.value.settingFilters[0];
-      final verboseFlutterServiceFilter =
+      final verboseFlutterFrameworkFilter =
           controller.activeFilter.value.settingFilters[1];
-      final gcFilter = controller.activeFilter.value.settingFilters[2];
+      final verboseFlutterServiceFilter =
+          controller.activeFilter.value.settingFilters[2];
+      final gcFilter = controller.activeFilter.value.settingFilters[3];
 
       verboseFlutterFrameworkFilter.setting.value = false;
       controller.setActiveFilter();
@@ -207,6 +223,11 @@ void main() {
       controller.setActiveFilter();
       expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(12));
+
+      minimumLogLevelFilter.setting.value = Level.SEVERE;
+      controller.setActiveFilter();
+      expect(controller.data, hasLength(12));
+      expect(controller.filteredData.value, hasLength(1));
     });
   });
 
