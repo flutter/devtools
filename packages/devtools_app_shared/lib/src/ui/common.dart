@@ -11,6 +11,37 @@ import '../utils/url/url.dart';
 import '../utils/utils.dart';
 import 'theme/theme.dart';
 
+/// A DevTools-styled area pane to hold a section of UI on a screen.
+/// 
+/// It is strongly recommended to use [AreaPaneHeader] or a Widget that builds
+/// an [AreaPaneHeader] for the value of the [header] parameter.
+class DevToolsAreaPane extends StatelessWidget {
+  const DevToolsAreaPane({
+    super.key,
+    required this.header,
+    required this.child,
+  });
+
+  final Widget header;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedOutlinedBorder(
+      clip: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          Expanded(
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Create a bordered, fixed-height header area with a title and optional child
 /// on the right-hand side.
 ///

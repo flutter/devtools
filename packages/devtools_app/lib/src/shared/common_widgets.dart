@@ -643,6 +643,41 @@ class ToolbarAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return SmallAction(
+      onPressed: onPressed,
+      tooltip: tooltip,
+      style: style,
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      child: Icon(
+        icon,
+        size: size ?? actionsIconSize,
+        color: color ?? Theme.of(context).colorScheme.onSurface,
+      ),
+    );
+  }
+}
+
+class SmallAction extends StatelessWidget {
+  const SmallAction({
+    required this.child,
+    required this.onPressed,
+    this.tooltip,
+    super.key,
+    this.style,
+    this.gaScreen,
+    this.gaSelection,
+  }) : assert((gaScreen == null) == (gaSelection == null));
+
+  final TextStyle? style;
+  final Widget child;
+  final String? tooltip;
+  final VoidCallback? onPressed;
+  final String? gaScreen;
+  final String? gaSelection;
+
+  @override
+  Widget build(BuildContext context) {
     final button = TextButton(
       style: TextButton.styleFrom(
         padding: EdgeInsets.zero,
@@ -655,11 +690,7 @@ class ToolbarAction extends StatelessWidget {
         }
         onPressed?.call();
       },
-      child: Icon(
-        icon,
-        size: size ?? actionsIconSize,
-        color: color ?? Theme.of(context).colorScheme.onSurface,
-      ),
+      child: child,
     );
 
     return tooltip == null
@@ -1114,9 +1145,11 @@ class JsonViewer extends StatefulWidget {
   const JsonViewer({
     super.key,
     required this.encodedJson,
+    this.scrollable = true,
   });
 
   final String encodedJson;
+  final bool scrollable;
 
   @override
   State<JsonViewer> createState() => _JsonViewerState();
@@ -1172,7 +1205,8 @@ class _JsonViewerState extends State<JsonViewer>
   @override
   void didUpdateWidget(JsonViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateVariablesTree();
+    if (oldWidget.encodedJson != widget.encodedJson) {
+    _updateVariablesTree();}
   }
 
   @override
@@ -1197,34 +1231,37 @@ class _JsonViewerState extends State<JsonViewer>
 
   @override
   Widget build(BuildContext context) {
+    Widget child = FutureBuilder(
+      future: _initializeTree,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Container();
+        }
+        return ExpandableVariable(
+          variable: variable,
+          onCopy: (copiedVariable) {
+            unawaited(
+              copyToClipboard(
+                jsonEncoder.convert(
+                  serviceConnection.serviceManager.service!.fakeServiceCache
+                      .instanceToJson(copiedVariable.value as Instance),
+                ),
+                successMessage: 'JSON copied to clipboard',
+              ),
+            );
+          },
+        );
+      },
+    );
+    if (widget.scrollable) {
+      child = SingleChildScrollView(
+        child: child,
+      );
+    }
     return SelectionArea(
       child: Padding(
         padding: const EdgeInsets.all(denseSpacing),
-        child: SingleChildScrollView(
-          child: FutureBuilder(
-            future: _initializeTree,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return Container();
-              }
-              return ExpandableVariable(
-                variable: variable,
-                onCopy: (copiedVariable) {
-                  unawaited(
-                    copyToClipboard(
-                      jsonEncoder.convert(
-                        serviceConnection
-                            .serviceManager.service!.fakeServiceCache
-                            .instanceToJson(copiedVariable.value as Instance),
-                      ),
-                      successMessage: 'JSON copied to clipboard',
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ),
+        child: child,
       ),
     );
   }

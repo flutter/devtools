@@ -8,7 +8,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
-import '../../shared/console/console.dart';
 import 'logging_controller.dart';
 
 class LogDetails extends StatefulWidget {
@@ -27,6 +26,10 @@ class _LogDetailsState extends State<LogDetails>
     with SingleTickerProviderStateMixin {
   String? _lastDetails;
   late final ScrollController scrollController;
+
+  // TODO(kenz): store this as a setting in logging preferences instead of in
+  // this state class.
+  bool showDetailsAsText = true;
 
   @override
   void initState() {
@@ -73,22 +76,29 @@ class _LogDetailsState extends State<LogDetails>
       _lastDetails = details;
     }
 
-    return RoundedOutlinedBorder(
-      clip: true,
-      child: ConsoleFrame(
-        title: _LogDetailsHeader(log: log),
-        child: Padding(
-          padding: const EdgeInsets.all(denseSpacing),
-          child: Scrollbar(
-            controller: scrollController,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: SelectableText(
-                log?.prettyPrinted() ?? '',
-                textAlign: TextAlign.left,
-              ),
-            ),
-          ),
+    return DevToolsAreaPane(
+      header: _LogDetailsHeader(
+        log: log,
+        showDetailsAsText: showDetailsAsText,
+        onDetailsFormatPressed: (value) {
+          setState(() {
+            showDetailsAsText = value;
+          });
+        },
+      ),
+      child: Scrollbar(
+        controller: scrollController,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: showDetailsAsText
+              ? Padding(
+                  padding: const EdgeInsets.all(denseSpacing),
+                  child: SelectableText(
+                    log?.prettyPrinted() ?? '',
+                    textAlign: TextAlign.left,
+                  ),
+                )
+              : JsonViewer(encodedJson: log?.encodedDetails ?? ''),
         ),
       ),
     );
@@ -96,9 +106,15 @@ class _LogDetailsState extends State<LogDetails>
 }
 
 class _LogDetailsHeader extends StatelessWidget {
-  const _LogDetailsHeader({required this.log});
+  const _LogDetailsHeader({
+    required this.log,
+    required this.showDetailsAsText,
+    required this.onDetailsFormatPressed,
+  });
 
   final LogData? log;
+  final bool showDetailsAsText;
+  final void Function(bool) onDetailsFormatPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -111,11 +127,50 @@ class _LogDetailsHeader extends StatelessWidget {
       includeTopBorder: false,
       roundedTopBorder: false,
       actions: [
+        _DetailsFormatButton(
+          showDetailsAsText: showDetailsAsText,
+          onPressed: onDetailsFormatPressed,
+        ),
+        const SizedBox(width: densePadding),
         CopyToClipboardControl(
           dataProvider: dataProvider,
           buttonKey: LogDetails.copyToClipboardButtonKey,
         ),
       ],
     );
+  }
+}
+
+class _DetailsFormatButton extends StatelessWidget {
+  const _DetailsFormatButton({
+    required this.showDetailsAsText,
+    required this.onPressed,
+  });
+
+  final bool showDetailsAsText;
+  final void Function(bool) onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final tooltip = showDetailsAsText ? 'View as JSON' : 'View as raw text';
+    return showDetailsAsText
+        ? Padding(
+          // This padding aligns this button with the copy button.
+          padding: const EdgeInsets.only(bottom: borderPadding),
+          child: SmallAction(
+              tooltip: tooltip,
+              onPressed: () => onPressed(!showDetailsAsText),
+              child: Text(
+                ' { } ',
+                style: Theme.of(context).regularTextStyle,
+              ),
+            ),
+        )
+        : ToolbarAction(
+            icon: Icons.text_fields,
+            tooltip: tooltip,
+            onPressed: () => onPressed(!showDetailsAsText),
+            size: defaultIconSize,
+          );
   }
 }

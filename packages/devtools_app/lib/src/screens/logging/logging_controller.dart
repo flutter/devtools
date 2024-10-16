@@ -875,6 +875,29 @@ class LogData with SearchableDataMixin {
     }
   }
 
+  String get encodedDetails {
+    if (_encodedDetails != null) return _encodedDetails!;
+    if (details == null) return '';
+
+    // TODO(kenz): ensure this doesn't cause performance issues.
+    late String encoded;
+    try {
+      // Attempt to decode the input string as JSON
+      jsonDecode(details!);
+      // If decoding is successful, it's already JSON encoded
+      encoded = details!;
+    } catch (e) {
+      // If decoding fails, it's not JSON encoded, so encode it
+      encoded = jsonEncode(details!);
+    }
+
+    // Only cache the value if details have already been computed.
+    if (detailsComputed.value) _encodedDetails = encoded;
+    return encoded;
+  }
+
+  String? _encodedDetails;
+
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return kind.caseInsensitiveContains(regExpSearch) ||
