@@ -21,19 +21,17 @@ import 'devtools/devtools_view.dart';
 ///
 /// Provides some basic functionality to improve discoverability of features
 /// such as creation of new projects, device selection and DevTools features.
-class DtdEditorSidebarPanel extends StatefulWidget {
-  // TODO(dantup): Remove the Dtd prefix from these classes when the postMessage
-  //  versions are removed.
-  const DtdEditorSidebarPanel(this.dtd, {super.key});
+class EditorSidebarPanel extends StatefulWidget {
+  const EditorSidebarPanel(this.dtd, {super.key});
 
   final DartToolingDaemon dtd;
 
   @override
-  State<DtdEditorSidebarPanel> createState() => _DtdEditorSidebarPanelState();
+  State<EditorSidebarPanel> createState() => _EditorSidebarPanelState();
 }
 
-class _DtdEditorSidebarPanelState extends State<DtdEditorSidebarPanel> {
-  _DtdEditorSidebarPanelState();
+class _EditorSidebarPanelState extends State<EditorSidebarPanel> {
+  _EditorSidebarPanelState();
 
   Future<EditorClient>? _editor;
 
@@ -41,7 +39,7 @@ class _DtdEditorSidebarPanelState extends State<DtdEditorSidebarPanel> {
   void initState() {
     super.initState();
 
-    final editor = DtdEditorClient(widget.dtd);
+    final editor = EditorClient(widget.dtd);
     ga.screen(editor.gaId);
     unawaited(_editor = editor.initialized.then((_) => editor));
   }

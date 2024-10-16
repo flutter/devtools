@@ -35,7 +35,7 @@ enum StandaloneScreenType {
           builder: (context, data, _) {
             return data == null
                 ? const CenteredCircularProgressIndicator()
-                : DtdEditorSidebarPanel(data);
+                : EditorSidebarPanel(data);
           },
         ),
     };

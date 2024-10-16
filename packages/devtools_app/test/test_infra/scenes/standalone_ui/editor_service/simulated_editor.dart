@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:devtools_app/devtools_app.dart';
+library;
+
 import 'dart:async';
 
 import 'package:devtools_app/src/service/editor/api_classes.dart';
@@ -10,108 +13,35 @@ import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-/// A base for classes that can act as an Editor (agnostic to the communication
-/// channel).
-///
-/// This class is for the part of an editor connected to DTD that is providing
-/// the editor services. It is the opposite of [EditorClient] which is for
-/// consuming the services provided by the editor(server).
-abstract class SimulatedEditorBase {
-  /// A stream of protocol traffic between the editor and DTD (or postMessage
-  /// API).
-  Stream<String> get log;
-
-  /// Close any communication channel.
-  Future<void> close();
-
-  /// Overridden by subclasses to provide an implementation of the getDevices
-  /// method that can be called by a DTD client.
-  FutureOr<GetDevicesResult> getDevices();
-
-  /// Overridden by subclasses to provide an implementation of the
-  /// getDebugSessions method that can be called by a DTD client.
-  FutureOr<GetDebugSessionsResult> getDebugSessions();
-
-  /// Overridden by subclasses to provide an implementation of the selectDevice
-  /// method that can be called by a DTD client.
-  FutureOr<void> selectDevice(String? deviceId);
-
-  /// Overridden by subclasses to provide an implementation of the hotReload
-  /// method that can be called by a DTD client.
-  FutureOr<void> hotReload(String debugSessionId);
-
-  /// Overridden by subclasses to provide an implementation of the hotRestart
-  /// method that can be called by a DTD client.
-  FutureOr<void> hotRestart(String debugSessionId);
-
-  /// Overridden by subclasses to provide an implementation of the openDevTools
-  /// method that can be called by a DTD client.
-  FutureOr<void> openDevToolsPage(
-    String? debugSessionId,
-    String? page,
-    bool forceExternal,
-    bool requiresDebugSession,
-    bool prefersDebugSession,
-  );
-
-  /// Overridden by subclasses to provide an implementation of the
-  /// enablePlatformType method that can be called by a DTD client.
-  FutureOr<void> enablePlatformType(String platformType);
-
-  /// Implemented by subclasses to provide the implementation to send a
-  /// `deviceAdded` event.
-  void sendDeviceAdded(EditorDevice device);
-
-  /// Implemented by subclasses to provide the implementation to send a
-  /// `deviceChanged` event.
-  void sendDeviceChanged(EditorDevice device);
-
-  /// Implemented by subclasses to provide the implementation to send a
-  /// `deviceRemoved` event.
-  void sendDeviceRemoved(EditorDevice device);
-
-  /// Implemented by subclasses to provide the implementation to send a
-  /// `deviceSelected` event.
-  void sendDeviceSelected(EditorDevice? device);
-
-  /// Implemented by subclasses to provide the implementation to send a
-  /// `debugSessionStarted` event.
-  void sendDebugSessionStarted(EditorDebugSession debugSession);
-
-  /// Implemented by subclasses to provide the implementation to send a
-  /// `debugSessionChanged` event.
-  void sendDebugSessionChanged(EditorDebugSession debugSession);
-
-  /// Implemented by subclasses to provide the implementation to send a
-  /// `debugSessionStopped` event.
-  void sendDebugSessionStopped(EditorDebugSession debugSession);
-}
-
-/// A wrapper over DTD for providing editor functionality.
-///
-/// This class is useful for tests and the "mock editor" but could in theory
-/// also be used by an editor directly (if it was written in Dart, and had
-/// access to this class).
+/// A class that can simulate the part of an Editor over DTD used for testing
+/// (both automated and manually via the "mock editor" stager app).
 ///
 /// Since this class is intended to represent what real IDEs may do, any changes
 /// made here to match changes made to [EditorClient] should be considered
 /// carefully to ensure they are not breaking changes to already-shipped
 /// editors.
-abstract class DtdSimulatedEditorBase extends SimulatedEditorBase {
-  // TODO(dantup): Once the postMessage code is gone, merge DtdSimulatedEditor,
-  //  DtdSimulatedEditorBase, and SimulatedEditorBase to simplify things.
-  DtdSimulatedEditorBase(this._dtdUri) {
+class SimulatedEditor {
+  SimulatedEditor(this._dtdUri) {
+    // Set up some default devices.
+    connectDevices();
+
     // Connect editor automatically at launch.
     unawaited(connectEditor());
   }
 
+  /// The URI of the DTD instance we are connecting/connected to.
   final Uri _dtdUri;
+
+  /// The [DartToolingDaemon] we are connected to.
+  ///
+  /// `null` if the connection has not yet been established.
   DartToolingDaemon? _dtd;
 
   /// A controller for emitting to [log].
   final _logger = StreamController<String>();
 
-  @override
+  /// A stream of protocol traffic between the editor and DTD (or postMessage
+  /// API).
   Stream<String> get log => _logger.stream;
 
   Future<void> _registerServices() {
@@ -178,7 +108,6 @@ abstract class DtdSimulatedEditorBase extends SimulatedEditorBase {
   }
 
   /// Close the connection to DTD.
-  @override
   Future<void> close() async {
     await _dtd?.close();
     _dtd = null;
@@ -252,38 +181,198 @@ abstract class DtdSimulatedEditorBase extends SimulatedEditorBase {
     await _dtd?.postEvent(editorStreamName, params.kind.name, params.toJson());
   }
 
-  @override
   void sendDeviceAdded(EditorDevice device) async {
     await _postEvent(DeviceAddedEvent(device: device));
   }
 
-  @override
   void sendDeviceChanged(EditorDevice device) async {
     await _postEvent(DeviceChangedEvent(device: device));
   }
 
-  @override
   void sendDeviceRemoved(EditorDevice device) async {
     await _postEvent(DeviceRemovedEvent(deviceId: device.id));
   }
 
-  @override
   void sendDeviceSelected(EditorDevice? device) async {
     await _postEvent(DeviceSelectedEvent(deviceId: device?.id));
   }
 
-  @override
   void sendDebugSessionStarted(EditorDebugSession debugSession) async {
     await _postEvent(DebugSessionStartedEvent(debugSession: debugSession));
   }
 
-  @override
   void sendDebugSessionChanged(EditorDebugSession debugSession) async {
     await _postEvent(DebugSessionChangedEvent(debugSession: debugSession));
   }
 
-  @override
   void sendDebugSessionStopped(EditorDebugSession debugSession) async {
     await _postEvent(DebugSessionStoppedEvent(debugSessionId: debugSession.id));
   }
+
+  /// The current of devices simulated as connected.
+  final devices = <String, EditorDevice>{};
+
+  /// The current of debug sessions simulated as running.
+  final debugSessions = <String, EditorDebugSession>{};
+
+  /// The number of the next debug session to start.
+  var _nextDebugSessionNumber = 1;
+
+  /// The current device simulated as selected.
+  String? selectedDeviceId;
+
+  /// Simulates devices being connected in the IDE by notifying the embedded
+  /// panel about a set of test devices.
+  void connectDevices() {
+    devices.clear();
+    for (final device in stubbedDevices) {
+      devices[device.id] = device;
+    }
+
+    devices.values.forEach(sendDeviceAdded);
+    sendDeviceSelected(devices.values.lastOrNull);
+  }
+
+  /// Simulates devices being disconnected in the IDE by notifying the embedded
+  /// panel about a set of test devices.
+  void disconnectDevices() {
+    sendDeviceSelected(null);
+    final devicesToRemove = devices.values.toList();
+    devices.clear();
+    devicesToRemove.forEach(sendDeviceRemoved);
+  }
+
+  /// Simulates a debug session starting by sending debug session update events.
+  void startSession({
+    required String debuggerType,
+    required String deviceId,
+    String? flutterMode,
+  }) {
+    final sessionNum = _nextDebugSessionNumber++;
+    final sessionId = 'debug-$sessionNum';
+    final session = EditorDebugSession(
+      id: 'debug-$sessionNum',
+      name: 'Session $sessionNum ($deviceId)',
+      vmServiceUri: 'ws://127.0.0.1:1234/ws',
+      flutterMode: flutterMode,
+      flutterDeviceId: deviceId,
+      debuggerType: debuggerType,
+      projectRootPath: '/mock/root/path',
+    );
+    debugSessions[sessionId] = session;
+    sendDebugSessionStarted(session);
+  }
+
+  /// Simulates ending all active debug sessions.
+  void stopAllSessions() {
+    final sessionsToRemove = debugSessions.values.toList();
+    debugSessions.clear();
+    sessionsToRemove.forEach(sendDebugSessionStopped);
+  }
+
+  FutureOr<GetDevicesResult> getDevices() {
+    return GetDevicesResult(
+      devices: devices.values.toList(),
+      selectedDeviceId: selectedDeviceId,
+    );
+  }
+
+  FutureOr<GetDebugSessionsResult> getDebugSessions() {
+    return GetDebugSessionsResult(
+      debugSessions: debugSessions.values.toList(),
+    );
+  }
+
+  FutureOr<void> selectDevice(String? deviceId) {
+    // Find the device the client asked us to select, select it, and then
+    // send an event back to confirm it is now the selected device.
+    final device = devices[deviceId];
+    selectedDeviceId = deviceId;
+    sendDeviceSelected(device);
+  }
+
+  FutureOr<void> enablePlatformType(String platformType) {
+    for (var MapEntry(key: id, value: device) in devices.entries) {
+      if (!device.supported && device.platformType == platformType) {
+        device = devices[id] = EditorDevice.fromJson(
+          {
+            ...device.toJson(),
+            'supported': true,
+          },
+        );
+        sendDeviceChanged(device);
+      }
+    }
+  }
+
+  FutureOr<void> hotReload(String debugSessionId) {}
+
+  FutureOr<void> hotRestart(String debugSessionId) {}
+
+  FutureOr<void> openDevToolsPage(
+    String? debugSessionId,
+    String? page,
+    bool forceExternal,
+    bool requiresDebugSession,
+    bool prefersDebugSession,
+  ) {}
 }
+
+/// A set of mock devices that can be presented for testing.
+final stubbedDevices = [
+  EditorDevice(
+    id: 'macos',
+    name: 'Mac',
+    category: 'desktop',
+    emulator: false,
+    emulatorId: null,
+    ephemeral: false,
+    platform: 'darwin-x64',
+    platformType: 'macos',
+    supported: true,
+  ),
+  EditorDevice(
+    id: 'myPhone',
+    name: 'My Android Phone',
+    category: 'mobile',
+    emulator: false,
+    emulatorId: null,
+    ephemeral: true,
+    platform: 'android-x64',
+    platformType: 'android',
+    supported: true,
+  ),
+  EditorDevice(
+    id: 'chrome',
+    name: 'Chrome',
+    category: 'web',
+    emulator: false,
+    emulatorId: null,
+    ephemeral: true,
+    platform: 'web-javascript',
+    platformType: 'web',
+    supported: true,
+  ),
+  EditorDevice(
+    id: 'web-server',
+    name: 'Web Server',
+    category: 'web',
+    emulator: false,
+    emulatorId: null,
+    ephemeral: true,
+    platform: 'web-javascript',
+    platformType: 'web',
+    supported: true,
+  ),
+  EditorDevice(
+    id: 'my-unsupported-platform',
+    name: 'My Unsupported Platform',
+    category: 'desktop',
+    emulator: false,
+    emulatorId: null,
+    ephemeral: true,
+    platform: 'platform-unknown',
+    platformType: 'unknown',
+    supported: false,
+  ),
+];
