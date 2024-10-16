@@ -880,7 +880,7 @@ class LogData with SearchableDataMixin {
     if (details == null) return '';
 
     // TODO(kenz): ensure this doesn't cause performance issues.
-    late String encoded;
+    String encoded;
     try {
       // Attempt to decode the input string as JSON
       jsonDecode(details!);
