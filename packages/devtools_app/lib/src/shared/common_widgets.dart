@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../screens/debugger/debugger_controller.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
 import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
@@ -1155,8 +1154,7 @@ class JsonViewer extends StatefulWidget {
   State<JsonViewer> createState() => _JsonViewerState();
 }
 
-class _JsonViewerState extends State<JsonViewer>
-    with ProvidedControllerMixin<DebuggerController, JsonViewer> {
+class _JsonViewerState extends State<JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
   static const jsonEncoder = JsonEncoder.withIndent('  ');
@@ -1217,17 +1215,6 @@ class _JsonViewerState extends State<JsonViewer>
     // to large objects indefinitely.
     serviceConnection.serviceManager.service!.fakeServiceCache
         .removeJsonObject(variable.value as Instance);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Currently a redundant check, but adding it anyway to prevent future
-    // bugs being introduced.
-    if (!initController()) {
-      return;
-    }
-    // Any additional initialization code should be added after this line.
   }
 
   @override
