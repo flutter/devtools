@@ -16,7 +16,6 @@ import 'api_classes.dart';
 /// ensure they are not breaking changes to already-shipped editors.
 class EditorClient extends DisposableController
     with AutoDisposeControllerMixin {
-
   EditorClient(this._dtd) {
     unawaited(initialized); // Trigger async initialization.
   }
