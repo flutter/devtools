@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:devtools_shared/src/utils/license_utils.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
 
 import '../helpers/helpers.dart';
 
@@ -57,20 +58,65 @@ void main() {
       await deleteDirectoryWithRetry(testDirectory);
     });
 
-    test('config can be read from disk', () {
-      // Should be no errors thrown
-      LicenseConfig.fromYamlFile(configFile);  
+    test('config can be read from disk without any errors', () {
+      expect(() => LicenseConfig.fromYamlFile(configFile), returnsNormally);
     });
 
     test('remove licenses text is parsed correctly', () {
+      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      
+      expect(config.removeLicenses.length, equals(3));
 
+      var expectedVal = '''// This is some {value} multiline license
+// text that should be removed from the file.
+''';
+      expect(config.removeLicenses[0], equals(expectedVal));
+      
+      expectedVal = '''/* This is other {value} multiline license
+text that should be removed from the file. */
+''';
+      expect(config.removeLicenses[1], equals(expectedVal));
+
+      expectedVal = '''# This is more {value} multiline license
+# text that should be removed from the file.
+''';
+      expect(config.removeLicenses[2], equals(expectedVal));
     });
 
     test('add licenses text is parsed correctly', () {
+      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      
+      expect(config.addLicenses.length, equals(2));
+
+      var expectedVal = '''// This is some {value} multiline license
+// text that should be added from the file.
+''';
+      expect(config.addLicenses[0], equals(expectedVal));
+      
+      expectedVal = '''# This is more {value} multiline license
+# text that should be removed from the file.
+''';
+      expect(config.addLicenses[1], equals(expectedVal));
 
     });
 
     test('file types parsed correctly', () {
+      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+
+      YamlList removeIndices = config.getRemoveIndicesForExtension('ext1');
+      expect(removeIndices.length, equals(2));
+      expect(removeIndices[0],equals(0));
+      expect(removeIndices[1],equals(1));
+
+      int addIndex = config.getAddIndexForExtension('ext1');
+      expect(addIndex, equals(0));
+
+      removeIndices = config.getRemoveIndicesForExtension('ext2');
+      expect(removeIndices.length, equals(1));
+      expect(removeIndices[0],equals(2));
+
+      addIndex = config.getAddIndexForExtension('ext2');
+      expect(addIndex, equals(1));
 
     });
   });
