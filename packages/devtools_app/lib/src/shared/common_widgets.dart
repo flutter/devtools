@@ -1206,7 +1206,8 @@ class _JsonViewerState extends State<JsonViewer>
   void didUpdateWidget(JsonViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.encodedJson != widget.encodedJson) {
-    _updateVariablesTree();}
+      _updateVariablesTree();
+    }
   }
 
   @override
