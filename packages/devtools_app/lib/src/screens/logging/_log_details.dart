@@ -5,9 +5,12 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
+import '../../shared/preferences/preferences.dart';
 import 'logging_controller.dart';
 
 class LogDetails extends StatefulWidget {
@@ -23,18 +26,15 @@ class LogDetails extends StatefulWidget {
 }
 
 class _LogDetailsState extends State<LogDetails>
-    with SingleTickerProviderStateMixin {
+    with AutoDisposeMixin<LogDetails>, SingleTickerProviderStateMixin {
   String? _lastDetails;
   late final ScrollController scrollController;
-
-  // TODO(kenz): store this as a setting in logging preferences instead of in
-  // this state class.
-  bool showDetailsAsText = true;
 
   @override
   void initState() {
     super.initState();
     scrollController = ScrollController();
+    addAutoDisposeListener(preferences.logging.detailsFormat);
     unawaited(_computeLogDetails());
   }
 
@@ -79,18 +79,14 @@ class _LogDetailsState extends State<LogDetails>
     return DevToolsAreaPane(
       header: _LogDetailsHeader(
         log: log,
-        showDetailsAsText: showDetailsAsText,
-        onDetailsFormatPressed: (value) {
-          setState(() {
-            showDetailsAsText = value;
-          });
-        },
+        format: preferences.logging.detailsFormat.value,
       ),
       child: Scrollbar(
         controller: scrollController,
         child: SingleChildScrollView(
           controller: scrollController,
-          child: showDetailsAsText
+          child: preferences.logging.detailsFormat.value ==
+                  LoggingDetailsFormat.text
               ? Padding(
                   padding: const EdgeInsets.all(denseSpacing),
                   child: SelectableText(
@@ -106,15 +102,10 @@ class _LogDetailsState extends State<LogDetails>
 }
 
 class _LogDetailsHeader extends StatelessWidget {
-  const _LogDetailsHeader({
-    required this.log,
-    required this.showDetailsAsText,
-    required this.onDetailsFormatPressed,
-  });
+  const _LogDetailsHeader({required this.log, required this.format});
 
   final LogData? log;
-  final bool showDetailsAsText;
-  final void Function(bool) onDetailsFormatPressed;
+  final LoggingDetailsFormat format;
 
   @override
   Widget build(BuildContext context) {
@@ -127,10 +118,7 @@ class _LogDetailsHeader extends StatelessWidget {
       includeTopBorder: false,
       roundedTopBorder: false,
       actions: [
-        LogDetailsFormatButton(
-          showDetailsAsText: showDetailsAsText,
-          onPressed: onDetailsFormatPressed,
-        ),
+        LogDetailsFormatButton(format: format),
         const SizedBox(width: densePadding),
         CopyToClipboardControl(
           dataProvider: dataProvider,
@@ -143,29 +131,28 @@ class _LogDetailsHeader extends StatelessWidget {
 
 @visibleForTesting
 class LogDetailsFormatButton extends StatelessWidget {
-  const LogDetailsFormatButton({
-    super.key,
-    required this.showDetailsAsText,
-    required this.onPressed,
-  });
+  const LogDetailsFormatButton({super.key, required this.format});
 
-  final bool showDetailsAsText;
-  final void Function(bool) onPressed;
+  final LoggingDetailsFormat format;
 
   static const viewAsJsonTooltip = 'View as JSON';
   static const viewAsRawTextTooltip = 'View as raw text';
 
   @override
   Widget build(BuildContext context) {
+    final currentlyUsingTextFormat = format == LoggingDetailsFormat.text;
     final tooltip =
-        showDetailsAsText ? viewAsJsonTooltip : viewAsRawTextTooltip;
-    return showDetailsAsText
+        currentlyUsingTextFormat ? viewAsJsonTooltip : viewAsRawTextTooltip;
+    void togglePreference() =>
+        preferences.logging.detailsFormat.value = format.opposite();
+
+    return currentlyUsingTextFormat
         ? Padding(
             // This padding aligns this button with the copy button.
             padding: const EdgeInsets.only(bottom: borderPadding),
             child: SmallAction(
               tooltip: tooltip,
-              onPressed: () => onPressed(!showDetailsAsText),
+              onPressed: togglePreference,
               child: Text(
                 ' { } ',
                 style: Theme.of(context).regularTextStyle,
@@ -175,7 +162,7 @@ class LogDetailsFormatButton extends StatelessWidget {
         : ToolbarAction(
             icon: Icons.text_fields,
             tooltip: tooltip,
-            onPressed: () => onPressed(!showDetailsAsText),
+            onPressed: togglePreference,
             size: defaultIconSize,
           );
   }

@@ -400,6 +400,57 @@ void main() {
     });
   });
 
+  group('$LoggingPreferencesController', () {
+    late LoggingPreferencesController controller;
+    late FlutterTestStorage storage;
+
+    setUp(() async {
+      setGlobal(Storage, storage = FlutterTestStorage());
+      controller = LoggingPreferencesController();
+      await controller.init();
+    });
+
+    test('has expected default values', () {
+      expect(controller.detailsFormat.value, LoggingDetailsFormat.text);
+    });
+
+    test('stores values and reads them on init', () async {
+      storage.values.clear();
+
+      // Remember original values.
+      final detailsFormat = controller.detailsFormat.value;
+
+      // Flip the values in controller.
+      controller.detailsFormat.value = detailsFormat.opposite();
+
+      // Check the values are stored.
+      expect(storage.values, hasLength(1));
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they did not change back to default.
+      expect(
+        controller.detailsFormat.value,
+        detailsFormat.opposite(),
+      );
+
+      // Flip the values in storage.
+      for (final key in storage.values.keys) {
+        storage.values[key] = detailsFormat.name;
+      }
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they flipped values are loaded.
+      expect(
+        controller.detailsFormat.value,
+        detailsFormat,
+      );
+    });
+  });
+
   group('$PerformancePreferencesController', () {
     late PerformancePreferencesController controller;
     late FlutterTestStorage storage;
