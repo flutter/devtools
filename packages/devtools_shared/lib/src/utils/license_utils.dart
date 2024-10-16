@@ -17,6 +17,16 @@ class LicenseConfig {
     fileTypes = updatePaths['file_types'];
   }
 
+  YamlList getRemoveIndicesForExtension(String ext) {
+    final YamlMap fileType = fileTypes[ext];
+    return fileType['remove'] as YamlList;
+  }
+
+  int getAddIndexForExtension(String ext) {
+    final YamlMap fileType = fileTypes[ext];
+    return fileType['add'];
+  }
+
   YamlList removeLicenses = YamlList();
   YamlList addLicenses = YamlList();
   YamlList includePaths = YamlList();
