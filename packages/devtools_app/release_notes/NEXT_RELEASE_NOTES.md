@@ -56,6 +56,9 @@ severity, category, zone, and isolate.
 [#8433](https://github.com/flutter/devtools/pull/8433)
     ![Log level filter](images/log_level_filter.png "Log level filter")
 
+* Added a button to toggle the log details display between raw text and JSON. -
+[]()
+
 * Fixed a bug where logs would get out of order after midnight. - 
 [#8420](https://github.com/flutter/devtools/pull/8420)
 
