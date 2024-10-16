@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../test_infra/scenes/standalone_ui/editor_service/simulated_editor_mixin.dart';
+import '../../test_infra/scenes/standalone_ui/editor_service/simulated_editor.dart';
 import '../../test_infra/utils/sidebar_utils.dart';
 
 void main() {
