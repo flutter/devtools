@@ -171,7 +171,7 @@ void main() {
   );
 
   testWidgetsWithWindowSize(
-    'can compute details of non-json log data',
+    'can show details of non-json log data',
     windowSize,
     (WidgetTester tester) async {
       const index = 8;
@@ -191,6 +191,30 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(find.selectableText(nonJsonOutput), findsOneWidget);
+      expect(find.byType(JsonViewer), findsNothing);
+
+      // Toggle the log details view format to view as JSON.
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
+        findsOneWidget,
+      );
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
+        findsNothing,
+      );
+      await tester.tap(find.byType(LogDetailsFormatButton));
+      await tester.pumpAndSettle();
+
+      expect(find.selectableText(nonJsonOutput), findsNothing);
+      expect(find.byType(JsonViewer), findsOneWidget);
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
+        findsNothing,
+      );
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
+        findsOneWidget,
+      );
     },
   );
 
@@ -224,6 +248,30 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(findJson, findsOneWidget);
+      expect(find.byType(JsonViewer), findsNothing);
+
+      // Toggle the log details view format to view as JSON.
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
+        findsOneWidget,
+      );
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
+        findsNothing,
+      );
+      await tester.tap(find.byType(LogDetailsFormatButton));
+      await tester.pumpAndSettle();
+
+      expect(findJson, findsNothing);
+      expect(find.byType(JsonViewer), findsOneWidget);
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
+        findsNothing,
+      );
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
+        findsOneWidget,
+      );
     },
   );
 }

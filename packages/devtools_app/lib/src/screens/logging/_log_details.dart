@@ -127,7 +127,7 @@ class _LogDetailsHeader extends StatelessWidget {
       includeTopBorder: false,
       roundedTopBorder: false,
       actions: [
-        _DetailsFormatButton(
+        LogDetailsFormatButton(
           showDetailsAsText: showDetailsAsText,
           onPressed: onDetailsFormatPressed,
         ),
@@ -141,8 +141,10 @@ class _LogDetailsHeader extends StatelessWidget {
   }
 }
 
-class _DetailsFormatButton extends StatelessWidget {
-  const _DetailsFormatButton({
+@visibleForTesting
+class LogDetailsFormatButton extends StatelessWidget {
+  const LogDetailsFormatButton({
+    super.key,
     required this.showDetailsAsText,
     required this.onPressed,
   });
@@ -150,14 +152,18 @@ class _DetailsFormatButton extends StatelessWidget {
   final bool showDetailsAsText;
   final void Function(bool) onPressed;
 
+  static const viewAsJsonTooltip = 'View as JSON';
+  static const viewAsRawTextTooltip = 'View as raw text';
+
   @override
   Widget build(BuildContext context) {
-    final tooltip = showDetailsAsText ? 'View as JSON' : 'View as raw text';
+    final tooltip =
+        showDetailsAsText ? viewAsJsonTooltip : viewAsRawTextTooltip;
     return showDetailsAsText
         ? Padding(
-          // This padding aligns this button with the copy button.
-          padding: const EdgeInsets.only(bottom: borderPadding),
-          child: SmallAction(
+            // This padding aligns this button with the copy button.
+            padding: const EdgeInsets.only(bottom: borderPadding),
+            child: SmallAction(
               tooltip: tooltip,
               onPressed: () => onPressed(!showDetailsAsText),
               child: Text(
@@ -165,7 +171,7 @@ class _DetailsFormatButton extends StatelessWidget {
                 style: Theme.of(context).regularTextStyle,
               ),
             ),
-        )
+          )
         : ToolbarAction(
             icon: Icons.text_fields,
             tooltip: tooltip,
