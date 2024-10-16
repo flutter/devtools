@@ -305,16 +305,16 @@ class SimulatedEditor {
     }
   }
 
-  FutureOr<void> hotReload(String debugSessionId) {}
+  FutureOr<void> hotReload(String _) {}
 
-  FutureOr<void> hotRestart(String debugSessionId) {}
+  FutureOr<void> hotRestart(String _) {}
 
   FutureOr<void> openDevToolsPage(
-    String? debugSessionId,
-    String? page,
-    bool forceExternal,
-    bool requiresDebugSession,
-    bool prefersDebugSession,
+    String? _,
+    String? __,
+    bool ___,
+    bool ____,
+    bool _____,
   ) {}
 }
 
