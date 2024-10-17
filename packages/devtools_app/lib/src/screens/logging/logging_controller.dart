@@ -177,8 +177,7 @@ class LoggingController extends DisposableController
   };
 
   @override
-  ValueNotifier<String>? get filterTagNotifier =>
-      preferences.logging.filterTag;
+  ValueNotifier<String>? get filterTagNotifier => preferences.logging.filterTag;
 
   final _logStatusController = StreamController<String>.broadcast();
 

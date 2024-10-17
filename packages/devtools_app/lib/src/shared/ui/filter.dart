@@ -38,7 +38,7 @@ mixin FilterControllerMixin<T> on DisposableController
   final useRegExp = ValueNotifier<bool>(false);
 
   /// The notifier that stores the current filter tag in DevTools preferences.
-  /// 
+  ///
   /// This should be overriden as a getter by subclasses to support persisting
   /// the most recent filter to DevTools preferences.
   ValueNotifier<String>? filterTagNotifier;
