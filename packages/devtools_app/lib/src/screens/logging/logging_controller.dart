@@ -116,6 +116,11 @@ class LoggingController extends DisposableController
     initFilterController();
   }
 
+  static const _minLogLevelFilterId = 'min-log-level';
+  static const _verboseFlutterFrameworkFilterId = 'verbose-flutter-framework';
+  static const _verboseFlutterServiceFilterId = 'verbose-flutter-service';
+  static const _gcFilterId = 'gc';
+
   /// The setting filters available for the Logging screen.
   @override
   SettingFilters<LogData> createSettingFilters() => settingFilters;
@@ -123,7 +128,7 @@ class LoggingController extends DisposableController
   @visibleForTesting
   static final settingFilters = <SettingFilter<LogData, Object>>[
     SettingFilter<LogData, Level>(
-      id: 'min-log-level',
+      id: _minLogLevelFilterId,
       name: 'Hide logs below the minimum log level',
       includeCallback: (LogData element, Level currentFilterValue) =>
           element.level >= currentFilterValue.value,
@@ -137,7 +142,7 @@ class LoggingController extends DisposableController
     if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
         true) ...[
       ToggleFilter<LogData>(
-        id: 'verbose-flutter-framework',
+        id: _verboseFlutterFrameworkFilterId,
         name: 'Hide verbose Flutter framework logs (initialization, frame '
             'times, image sizes)',
         includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
@@ -145,7 +150,7 @@ class LoggingController extends DisposableController
         defaultValue: true,
       ),
       ToggleFilter<LogData>(
-        id: 'verbose-flutter-service',
+        id: _verboseFlutterServiceFilterId,
         name: 'Hide verbose Flutter service logs (service extension state '
             'changes)',
         includeCallback: (log) => !_verboseFlutterServiceLogKinds
@@ -154,7 +159,7 @@ class LoggingController extends DisposableController
       ),
     ],
     ToggleFilter<LogData>(
-      id: 'gc',
+      id: _gcFilterId,
       name: 'Hide garbage collection logs',
       includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
       defaultValue: true,

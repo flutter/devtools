@@ -137,17 +137,21 @@ class CpuProfilerController extends DisposableController
   final _viewType =
       ValueNotifier<CpuProfilerViewType>(CpuProfilerViewType.function);
 
+  static const _nativeFilterId = 'native';
+  static const _coreDartFilterId = 'core-dart';
+  static const _coreFlutterFilterId = 'core-flutter';
+
   /// The toggle filters available for the CPU profiler.
   @override
   SettingFilters<CpuStackFrame> createSettingFilters() => [
         ToggleFilter<CpuStackFrame>(
-          id: 'native',
+          id: _nativeFilterId,
           name: 'Hide Native code',
           includeCallback: (stackFrame) => !stackFrame.isNative,
           defaultValue: true,
         ),
         ToggleFilter<CpuStackFrame>(
-          id: 'core-dart',
+          id: _coreDartFilterId,
           name: 'Hide core Dart libraries',
           includeCallback: (stackFrame) => !stackFrame.isDartCore,
           defaultValue: false,
@@ -155,7 +159,7 @@ class CpuProfilerController extends DisposableController
         if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
             true)
           ToggleFilter<CpuStackFrame>(
-            id: 'core-flutter',
+            id: _coreFlutterFilterId,
             name: 'Hide core Flutter libraries',
             includeCallback: (stackFrame) => !stackFrame.isFlutterCore,
             defaultValue: false,
