@@ -52,7 +52,7 @@ class CpuProfilerController extends DisposableController
         AutoDisposeControllerMixin {
   CpuProfilerController() {
     // TODO(https://github.com/flutter/devtools/issues/7727): add support for
-    // persisting network filter.
+    // persisting cpu profiler filter.
     initFilterController();
   }
 
