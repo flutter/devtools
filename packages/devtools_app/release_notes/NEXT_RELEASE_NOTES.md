@@ -10,7 +10,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Persist filter settings across sessions. - [#8447](https://github.com/flutter/devtools/pull/8447)
 
 ## Inspector updates
 

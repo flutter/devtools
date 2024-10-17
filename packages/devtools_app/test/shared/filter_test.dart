@@ -201,17 +201,34 @@ void main() {
       controller.settingFilters[0].setting.value = 1;
       controller.settingFilters[1].setting.value = false;
       controller.settingFilters[2].setting.value = false;
+      controller.useRegExp.value = false;
       controller.setActiveFilter();
-      expect(controller.activeFilterTag(), equals(''));
+      expect(
+        controller.activeFilterTag(),
+        equals(
+          '|[{"min-rating-level":1},{"multiple-2":false},{"multiple-3":false}]',
+        ),
+      );
 
       // Only query filter active and no toggle filters.
       controller.setActiveFilter(query: 'Ba cat:foobar');
-      expect(controller.activeFilterTag(), 'ba cat:foobar');
+      expect(
+        controller.activeFilterTag(),
+        equals(
+          'Ba cat:foobar|[{"min-rating-level":1},{"multiple-2":false},{"multiple-3":false}]',
+        ),
+      );
 
       // Query filter with regular expressions enabled.
       controller.useRegExp.value = true;
       controller.setActiveFilter(query: 'Ba cat:foobar');
-      expect(controller.activeFilterTag(), 'ba cat:foobar-#-regexp');
+      expect(
+        controller.activeFilterTag(),
+        equals(
+          'Ba cat:foobar|[{"min-rating-level":1},{"multiple-2":false},{"multiple-3":false}]|regexp',
+        ),
+      );
+      // Switch the regexp setting back to false before the next case.
       controller.useRegExp.value = false;
 
       // Only toggle filter active and no query filters.
@@ -219,7 +236,9 @@ void main() {
       controller.setActiveFilter();
       expect(
         controller.activeFilterTag(),
-        equals('Hide items below the minimum rating level:3'),
+        equals(
+          '|[{"min-rating-level":3},{"multiple-2":false},{"multiple-3":false}]',
+        ),
       );
 
       controller.settingFilters[1].setting.value = true;
@@ -227,8 +246,7 @@ void main() {
       expect(
         controller.activeFilterTag(),
         equals(
-          'Hide items below the minimum rating level:3,'
-          'Hide multiples of 2:true',
+          '|[{"min-rating-level":3},{"multiple-2":true},{"multiple-3":false}]',
         ),
       );
 
@@ -237,34 +255,58 @@ void main() {
       expect(
         controller.activeFilterTag(),
         equals(
-          'Hide items below the minimum rating level:3,'
-          'Hide multiples of 2:true,'
-          'Hide multiples of 3:true',
-        ),
-      );
-
-      controller.settingFilters[1].setting.value = false;
-      controller.setActiveFilter();
-      expect(
-        controller.activeFilterTag(),
-        equals(
-          'Hide items below the minimum rating level:3,'
-          'Hide multiples of 3:true',
+          '|[{"min-rating-level":3},{"multiple-2":true},{"multiple-3":true}]',
         ),
       );
 
       // Both query filter and toggle filters active.
-      controller.settingFilters[1].setting.value = true;
       controller.setActiveFilter(query: 'Ba cat:foobar');
       expect(
         controller.activeFilterTag(),
         equals(
-          'Hide items below the minimum rating level:3,'
-          'Hide multiples of 2:true,'
-          'Hide multiples of 3:true'
-          '-#-ba cat:foobar',
+          'Ba cat:foobar|[{"min-rating-level":3},{"multiple-2":true},{"multiple-3":true}]',
         ),
       );
+    });
+
+    test('setFilterFromTag', () {
+      // Start with no filters active.
+      controller.settingFilters[0].setting.value = 1;
+      controller.settingFilters[1].setting.value = false;
+      controller.settingFilters[2].setting.value = false;
+      controller.useRegExp.value = false;
+
+      controller.setFilterFromTag(
+        FilterTag(
+          query: '',
+          settingFilterValues: [],
+          useRegExp: false,
+        ),
+      );
+      var activeFilter = controller.activeFilter.value;
+      expect(activeFilter.queryFilter.query, '');
+      expect(activeFilter.settingFilters[0].setting.value, 1);
+      expect(activeFilter.settingFilters[1].setting.value, false);
+      expect(activeFilter.settingFilters[2].setting.value, false);
+      expect(controller.useRegExp.value, false);
+
+      controller.setFilterFromTag(
+        FilterTag(
+          query: 'Ba',
+          settingFilterValues: [
+            {'min-rating-level': 3},
+            {'multiple-2': true},
+            {'multiple-3': true},
+          ],
+          useRegExp: true,
+        ),
+      );
+      activeFilter = controller.activeFilter.value;
+      expect(activeFilter.queryFilter.query, 'Ba');
+      expect(activeFilter.settingFilters[0].setting.value, 3);
+      expect(activeFilter.settingFilters[1].setting.value, true);
+      expect(activeFilter.settingFilters[2].setting.value, true);
+      expect(controller.useRegExp.value, true);
     });
 
     test('resetFilter', () {
@@ -285,23 +327,105 @@ void main() {
       verifyBaseFilterState();
     });
   });
+
+  group('FilterTag', () {
+    test('generates String tag', () {
+      var tag = FilterTag(
+        query: 'foo bar:baz',
+        settingFilterValues: [
+          {'some-id': false},
+          {'other-id': 3},
+        ],
+        useRegExp: true,
+      );
+      expect(tag.tag, 'foo bar:baz|[{"some-id":false},{"other-id":3}]|regexp');
+
+      tag = FilterTag(
+        query: '',
+        settingFilterValues: [
+          {'some-id': false},
+          {'other-id': 3},
+        ],
+        useRegExp: false,
+      );
+      expect(tag.tag, '|[{"some-id":false},{"other-id":3}]');
+
+      tag = FilterTag(
+        query: '',
+        settingFilterValues: [],
+        useRegExp: false,
+      );
+      expect(tag.tag, '|[]');
+    });
+
+    test('can parse valid String tag', () {
+      var stringTag = 'foo bar:baz|[{"some-id":false},{"other-id":3}]|regexp';
+      var parsed = FilterTag.parse(stringTag);
+      expect(parsed, isNotNull);
+      expect(parsed!.query, 'foo bar:baz');
+      expect(parsed.settingFilterValues, [
+        {'some-id': false},
+        {'other-id': 3},
+      ]);
+      expect(parsed.useRegExp, true);
+
+      stringTag = '|[{"some-id":false},{"other-id":3}]';
+      parsed = FilterTag.parse(stringTag);
+      expect(parsed, isNotNull);
+      expect(parsed!.query, '');
+      expect(parsed.settingFilterValues, [
+        {'some-id': false},
+        {'other-id': 3},
+      ]);
+      expect(parsed.useRegExp, false);
+
+      stringTag = '|[]';
+      parsed = FilterTag.parse(stringTag);
+      expect(parsed, isNotNull);
+      expect(parsed!.query, '');
+      expect(parsed.settingFilterValues, []);
+      expect(parsed.useRegExp, false);
+
+      stringTag = '   foo      |[]';
+      parsed = FilterTag.parse(stringTag);
+      expect(parsed, isNotNull);
+      expect(parsed!.query, 'foo');
+      expect(parsed.settingFilterValues, []);
+      expect(parsed.useRegExp, false);
+    });
+
+    test('can parse invalid String tag', () {
+      var stringTag = '';
+      var parsed = FilterTag.parse(stringTag);
+      expect(parsed, isNull);
+
+      stringTag = 'some bad input';
+      parsed = FilterTag.parse(stringTag);
+      expect(parsed, isNull);
+
+      stringTag = 'bad setting filters|{}|regexp';
+      parsed = FilterTag.parse(stringTag);
+      expect(parsed, isNull);
+    });
+  });
 }
 
 class _TestController extends DisposableController
     with FilterControllerMixin<_TestDataClass>, AutoDisposeControllerMixin {
   _TestController(this.data) {
-    subscribeToFilterChanges();
+    initFilterController();
   }
 
   final List<_TestDataClass> data;
 
   // Convenience getters for testing.
-  List<SettingFilter<_TestDataClass, Object>> get settingFilters =>
+  SettingFilters<_TestDataClass> get settingFilters =>
       activeFilter.value.settingFilters;
 
   @override
-  List<SettingFilter<_TestDataClass, Object>> createSettingFilters() => [
+  SettingFilters<_TestDataClass> createSettingFilters() => [
         SettingFilter<_TestDataClass, int>(
+          id: 'min-rating-level',
           name: 'Hide items below the minimum rating level',
           includeCallback: (_TestDataClass element, int currentFilterValue) =>
               element.rating >= currentFilterValue,
@@ -310,11 +434,13 @@ class _TestController extends DisposableController
           defaultValue: 2,
         ),
         ToggleFilter<_TestDataClass>(
+          id: 'multiple-2',
           name: 'Hide multiples of 2',
           includeCallback: (data) => data.id % 2 != 0,
           defaultValue: true,
         ),
         ToggleFilter<_TestDataClass>(
+          id: 'multiple-3',
           name: 'Hide multiples of 3',
           includeCallback: (data) => data.id % 3 != 0,
           defaultValue: false,
