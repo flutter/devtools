@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:codicon/codicon.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -13,6 +14,9 @@ import 'package:flutter/material.dart';
 
 import '../common_widgets.dart';
 import '../primitives/utils.dart';
+
+typedef QueryFilterArgs = Map<String, QueryFilterArgument>;
+typedef SettingFilters<T> = List<SettingFilter<T, Object>>;
 
 // TODO(kenz): consider breaking this up for flat data filtering and tree data
 // filtering.
@@ -26,14 +30,18 @@ import '../primitives/utils.dart';
 /// Classes mixing in [FilterControllerMixin] must also extend
 /// [DisposableController] and mixin [AutoDisposeControllerMixin], and a class
 /// can subscribe to updates to the active filter by calling
-/// [subscribeToFilterChanges].
+/// [initFilterController].
 mixin FilterControllerMixin<T> on DisposableController
     implements AutoDisposeControllerMixin {
-  static const filterTagSeparator = '-#-';
-
   final filteredData = ListValueNotifier<T>([]);
 
   final useRegExp = ValueNotifier<bool>(false);
+
+  /// The notifier that stores the current filter tag in DevTools preferences.
+  /// 
+  /// This should be overriden as a getter by subclasses to support persisting
+  /// the most recent filter to DevTools preferences.
+  ValueNotifier<String>? filterTagNotifier;
 
   ValueListenable<Filter<T>> get activeFilter => _activeFilter;
 
@@ -44,10 +52,7 @@ mixin FilterControllerMixin<T> on DisposableController
     ),
   );
 
-  void setActiveFilter({
-    String? query,
-    List<SettingFilter<T, Object>>? settingFilters,
-  }) {
+  void setActiveFilter({String? query, SettingFilters<T>? settingFilters}) {
     _activeFilter.value = Filter(
       queryFilter: query != null
           ? QueryFilter.parse(
@@ -60,21 +65,35 @@ mixin FilterControllerMixin<T> on DisposableController
     );
   }
 
-  void subscribeToFilterChanges() {
+  void initFilterController() {
+    if (filterTagNotifier != null) {
+      final tag = FilterTag.parse(filterTagNotifier!.value);
+      setFilterFromTag(tag);
+    }
     addAutoDisposeListener(activeFilter, () {
       filterData(activeFilter.value);
+      filterTagNotifier?.value = activeFilterTag();
     });
   }
 
-  late final List<SettingFilter<T, Object>> _settingFilters =
-      createSettingFilters();
+  /// Creates the setting filters for this filter controller.
+  ///
+  /// This method should be overridden by subclasses to support filtering by
+  /// settings (e.g. check box, dropdown selection, etc.).
+  SettingFilters<T> createSettingFilters() => [];
 
-  List<SettingFilter<T, Object>> createSettingFilters() => [];
+  late final SettingFilters<T> _settingFilters = createSettingFilters();
+
+  /// Creates the query filter arguments for this filter controller.
+  ///
+  /// This method should be overridden by subclasses to support filtering by
+  /// query arguments in addition to raw String matches. For example, a filter
+  /// query with arguments may look like 'foo category:bar type:baz'. In this
+  /// example, 'category' and 'type' would need to be defined as query filter
+  /// arguments.
+  QueryFilterArgs createQueryFilterArgs() => <String, QueryFilterArgument>{};
 
   late final _queryFilterArgs = createQueryFilterArgs();
-
-  Map<String, QueryFilterArgument> createQueryFilterArgs() =>
-      <String, QueryFilterArgument>{};
 
   bool get isFilterActive {
     final filter = activeFilter.value;
@@ -95,19 +114,47 @@ mixin FilterControllerMixin<T> on DisposableController
     _activeFilter.value = filter;
   }
 
+  /// The filter tag as a String for the currently active filter.
+  ///
+  /// See also [FilterTag].
   String activeFilterTag() {
-    final activeFilter = _activeFilter.value;
-    final suffixList = activeFilter.settingFilters
-        .where((f) => f.enabled)
-        .map((f) => '${f.name}:${f.setting.value}');
+    final filter = _activeFilter.value;
+    return FilterTag(
+      query: filter.queryFilter.query,
+      settingFilterValues:
+          _settingFilters.map((filter) => filter.valueAsJson).toList(),
+      useRegExp: useRegExp.value,
+    ).tag;
+  }
 
-    final settingFilterTag = suffixList.join(',');
-    final queryFilterTag = activeFilter.queryFilter.query.toLowerCase();
-    return [
-      settingFilterTag,
-      queryFilterTag,
-      if (queryFilterTag.isNotEmpty && useRegExp.value) 'regexp',
-    ].where((e) => e.isNotEmpty).join(filterTagSeparator);
+  /// Sets the active filter state from the given [tag].
+  ///
+  /// See also [FilterTag].
+  void setFilterFromTag(FilterTag? tag) {
+    if (tag == null) return;
+
+    useRegExp.value = tag.useRegExp;
+
+    final valuesFromTag = tag.settingFilterValues.map((value) {
+      assert(
+        value.length == 1,
+        'Each setting filter map should only have one entry.',
+      );
+      return (id: value.keys.first, value: value.values.first);
+    });
+    final settingFilterIds = _settingFilters.map((filter) => filter.id);
+    for (final settingFilterValue in valuesFromTag) {
+      if (settingFilterIds.contains(settingFilterValue.id)) {
+        final settingFilter = _settingFilters
+            .firstWhere((filter) => filter.id == settingFilterValue.id);
+        settingFilter.setting.value = settingFilterValue.value!;
+      }
+    }
+
+    setActiveFilter(
+      query: tag.query,
+      settingFilters: _settingFilters,
+    );
   }
 
   void _resetToDefaultFilter() {
@@ -332,7 +379,7 @@ class Filter<T> {
 
   final QueryFilter queryFilter;
 
-  final List<SettingFilter<T, Object>> settingFilters;
+  final SettingFilters<T> settingFilters;
 
   bool get isEmpty => queryFilter.isEmpty && settingFilters.isEmpty;
 }
@@ -340,6 +387,7 @@ class Filter<T> {
 /// A boolean setting filter that can only be set to the value of true or false.
 class ToggleFilter<T> extends SettingFilter<T, bool> {
   ToggleFilter({
+    required super.id,
     required super.name,
     required bool Function(T element) includeCallback,
     required super.defaultValue,
@@ -355,6 +403,7 @@ class ToggleFilter<T> extends SettingFilter<T, bool> {
 /// [possibleValues].
 class SettingFilter<T, V> {
   SettingFilter({
+    required this.id,
     required this.name,
     required bool Function(T element, V currentFilterValue) includeCallback,
     required bool Function(V filterValue) enabledCallback,
@@ -365,6 +414,12 @@ class SettingFilter<T, V> {
         _enabledCallback = enabledCallback,
         setting = ValueNotifier<V>(defaultValue),
         assert(possibleValues.contains(defaultValue));
+
+  /// The unique id for this setting filter.
+  ///
+  /// This value will be used when reading and writing setting filter values to
+  /// DevTools preferences on disk.
+  final String id;
 
   /// The name of this setting filter.
   final String name;
@@ -404,6 +459,8 @@ class SettingFilter<T, V> {
 
   /// Whether this filter is enabled based on the current value of the filter.
   bool get enabled => _enabledCallback(setting.value);
+
+  Map<String, Object?> get valueAsJson => {id: setting.value};
 }
 
 class QueryFilter {
@@ -413,7 +470,7 @@ class QueryFilter {
     this.isEmpty = false,
   });
 
-  factory QueryFilter.empty({required Map<String, QueryFilterArgument> args}) {
+  factory QueryFilter.empty({required QueryFilterArgs args}) {
     return QueryFilter._(
       filterArguments: args,
       substringExpressions: <Pattern>[],
@@ -423,7 +480,7 @@ class QueryFilter {
 
   factory QueryFilter.parse(
     String query, {
-    required Map<String, QueryFilterArgument> args,
+    required QueryFilterArgs args,
     required bool useRegExp,
   }) {
     if (query.isEmpty) {
@@ -479,7 +536,7 @@ class QueryFilter {
     );
   }
 
-  final Map<String, QueryFilterArgument> filterArguments;
+  final QueryFilterArgs filterArguments;
 
   final List<Pattern> substringExpressions;
 
@@ -668,4 +725,48 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
       ],
     );
   }
+}
+
+/// A class that stores information for a filter tag, which is a string
+/// representation of a filter state.
+///
+/// This tag is used to identify filters in caches, like in user preferences
+/// or in other screen specific data caches.
+class FilterTag {
+  FilterTag({
+    required this.query,
+    required this.settingFilterValues,
+    required this.useRegExp,
+  });
+
+  static FilterTag? parse(String value) {
+    final parts = value.split(filterTagSeparator);
+    try {
+      final useRegExp = parts.last == useRegExpTag;
+      final query = parts[0].trim();
+      final settingFilterValues =
+          (jsonDecode(parts[1]) as List).cast<Map<String, Object?>>();
+      return FilterTag(
+        query: query,
+        settingFilterValues: settingFilterValues,
+        useRegExp: useRegExp,
+      );
+    } catch (_) {
+      // Return null for any parsing error.
+      return null;
+    }
+  }
+
+  static const filterTagSeparator = '|';
+  static const useRegExpTag = 'regexp';
+
+  final String query;
+  final List<Map<String, Object?>> settingFilterValues;
+  final bool useRegExp;
+
+  String get tag => [
+        query.trim(),
+        jsonEncode(settingFilterValues),
+        if (useRegExp) useRegExpTag,
+      ].join(filterTagSeparator);
 }

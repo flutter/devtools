@@ -19,17 +19,22 @@ class LoggingPreferencesController extends DisposableController
   final detailsFormat =
       ValueNotifier<LoggingDetailsFormat>(_defaultDetailsFormat);
 
+  /// The active filter tag for the logging screen.
+  ///
+  /// This value caches the most recent filter settings.
+  final filterTag = ValueNotifier<String>('');
+
   static const _defaultRetentionLimit = 3000;
   static const _defaultDetailsFormat = LoggingDetailsFormat.text;
 
   static const _retentionLimitStorageId = 'logging.retentionLimit';
   static const _detailsFormatStorageId = 'logging.detailsFormat';
+  static const _filterStorageId = 'logging.filter';
 
   Future<void> init() async {
     retentionLimit.value =
         int.tryParse(await storage.getValue(_retentionLimitStorageId) ?? '') ??
             _defaultRetentionLimit;
-
     addAutoDisposeListener(
       retentionLimit,
       () {
@@ -51,7 +56,6 @@ class LoggingPreferencesController extends DisposableController
           (value) => detailsFormatValueFromStorage == value.name,
         ) ??
         _defaultDetailsFormat;
-
     addAutoDisposeListener(
       detailsFormat,
       () {
@@ -62,6 +66,12 @@ class LoggingPreferencesController extends DisposableController
           value: detailsFormat.value.index,
         );
       },
+    );
+
+    filterTag.value = await storage.getValue(_filterStorageId) ?? '';
+    addAutoDisposeListener(
+      filterTag,
+      () => storage.setValue(_filterStorageId, filterTag.value),
     );
   }
 }

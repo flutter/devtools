@@ -113,16 +113,17 @@ class LoggingController extends DisposableController
       _handleConnectionStart(serviceConnection.serviceManager.service!);
     }
     _handleBusEvents();
-    subscribeToFilterChanges();
+    initFilterController();
   }
 
-  /// The toggle filters available for the Logging screen.
+  /// The setting filters available for the Logging screen.
   @override
-  List<SettingFilter<LogData, Object>> createSettingFilters() => settingFilters;
+  SettingFilters<LogData> createSettingFilters() => settingFilters;
 
   @visibleForTesting
   static final settingFilters = <SettingFilter<LogData, Object>>[
     SettingFilter<LogData, Level>(
+      id: 'min-log-level',
       name: 'Hide logs below the minimum log level',
       includeCallback: (LogData element, Level currentFilterValue) =>
           element.level >= currentFilterValue.value,
@@ -136,6 +137,7 @@ class LoggingController extends DisposableController
     if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
         true) ...[
       ToggleFilter<LogData>(
+        id: 'verbose-flutter-framework',
         name: 'Hide verbose Flutter framework logs (initialization, frame '
             'times, image sizes)',
         includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
@@ -143,6 +145,7 @@ class LoggingController extends DisposableController
         defaultValue: true,
       ),
       ToggleFilter<LogData>(
+        id: 'verbose-flutter-service',
         name: 'Hide verbose Flutter service logs (service extension state '
             'changes)',
         includeCallback: (log) => !_verboseFlutterServiceLogKinds
@@ -151,6 +154,7 @@ class LoggingController extends DisposableController
       ),
     ],
     ToggleFilter<LogData>(
+      id: 'gc',
       name: 'Hide garbage collection logs',
       includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
       defaultValue: true,
@@ -171,6 +175,10 @@ class LoggingController extends DisposableController
       substringMatch: true,
     ),
   };
+
+  @override
+  ValueNotifier<String>? get filterTagNotifier =>
+      preferences.logging.filterTag;
 
   final _logStatusController = StreamController<String>.broadcast();
 

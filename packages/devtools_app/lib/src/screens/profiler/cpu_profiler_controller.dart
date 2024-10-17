@@ -51,7 +51,9 @@ class CpuProfilerController extends DisposableController
         FilterControllerMixin<CpuStackFrame>,
         AutoDisposeControllerMixin {
   CpuProfilerController() {
-    subscribeToFilterChanges();
+    // TODO(https://github.com/flutter/devtools/issues/7727): add support for
+    // persisting network filter.
+    initFilterController();
   }
 
   /// Tag to represent when no user tag filters are applied.
@@ -137,13 +139,15 @@ class CpuProfilerController extends DisposableController
 
   /// The toggle filters available for the CPU profiler.
   @override
-  List<SettingFilter<CpuStackFrame, bool>> createSettingFilters() => [
+  SettingFilters<CpuStackFrame> createSettingFilters() => [
         ToggleFilter<CpuStackFrame>(
+          id: 'native',
           name: 'Hide Native code',
           includeCallback: (stackFrame) => !stackFrame.isNative,
           defaultValue: true,
         ),
         ToggleFilter<CpuStackFrame>(
+          id: 'core-dart',
           name: 'Hide core Dart libraries',
           includeCallback: (stackFrame) => !stackFrame.isDartCore,
           defaultValue: false,
@@ -151,6 +155,7 @@ class CpuProfilerController extends DisposableController
         if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
             true)
           ToggleFilter<CpuStackFrame>(
+            id: 'core-flutter',
             name: 'Hide core Flutter libraries',
             includeCallback: (stackFrame) => !stackFrame.isFlutterCore,
             defaultValue: false,
