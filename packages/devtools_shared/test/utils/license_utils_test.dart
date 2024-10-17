@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_shared/src/utils/license_utils.dart';
@@ -67,17 +68,17 @@ void main() {
       
       expect(config.removeLicenses.length, equals(3));
 
-      var expectedVal = '''// This is some {value} multiline license
+      var expectedVal = '''// This is some <value1> multiline license
 // text that should be removed from the file.
 ''';
       expect(config.removeLicenses[0], equals(expectedVal));
       
-      expectedVal = '''/* This is other {value} multiline license
+      expectedVal = '''/* This is other <value2> multiline license
 text that should be removed from the file. */
 ''';
       expect(config.removeLicenses[1], equals(expectedVal));
 
-      expectedVal = '''# This is more {value} multiline license
+      expectedVal = '''# This is more <value3> multiline license
 # text that should be removed from the file.
 ''';
       expect(config.removeLicenses[2], equals(expectedVal));
@@ -88,16 +89,15 @@ text that should be removed from the file. */
       
       expect(config.addLicenses.length, equals(2));
 
-      var expectedVal = '''// This is some {value} multiline license
-// text that should be added from the file.
+      var expectedVal = '''// This is some <value1> multiline license
+// text that should be added to the file.
 ''';
       expect(config.addLicenses[0], equals(expectedVal));
       
-      expectedVal = '''# This is more {value} multiline license
-# text that should be removed from the file.
+      expectedVal = '''# This is other <value3> multiline license
+# text that should be added to the file.
 ''';
       expect(config.addLicenses[1], equals(expectedVal));
-
     });
 
     test('file types parsed correctly', () {
@@ -130,12 +130,24 @@ text that should be removed from the file. */
       await deleteDirectoryWithRetry(testDirectory);
     });
 
-    test('value preserved', () {
+    test('value is stored when header exists', () async {
+      final LicenseHeader header = LicenseHeader();
+      const licenseText = 
+    '''// This is some <value1> multiline license
+// text that should be removed from the file.
+''';
+      final bytes = utf8.encode(licenseText);
+      final storedValue = await header.getStoredValue(testFile1, licenseText, bytes.length + 1);
+      expect(storedValue.containsKey('value1'), true);
+      expect(storedValue.containsValue('2015'), true);
+    });
+
+    test('value preserved when header is replaced', () {
 
     });
 
-    test('update skipped if license not found', () {
-
+    test('update skipped if license text not found', () {
+      
     });
   });
 }
@@ -149,24 +161,24 @@ Future<void> _setupTestConfigFile() async {
 
   const contents = 
 '''---
-# sequence of license text strings that should be matched against at the top of a file and removed. {value} will be stored.
+# sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
 remove_licenses:
   - |
-    // This is some {value} multiline license
+    // This is some <value1> multiline license
     // text that should be removed from the file.
   - |
-    /* This is other {value} multiline license
+    /* This is other <value2> multiline license
     text that should be removed from the file. */
   - |
-    # This is more {value} multiline license
+    # This is more <value3> multiline license
     # text that should be removed from the file.
 # sequence of license text strings that should be added to the top of a file. {value} will be replaced.
 add_licenses: 
   - |
-    // This is some {value} multiline license 
+    // This is some <value1> multiline license
     // text that should be added to the file.
   - |
-    # This is other {value} multiline license
+    # This is other <value3> multiline license
     # text that should be added to the file.
 # defines which files should have license text added or updated.
 update_paths:
