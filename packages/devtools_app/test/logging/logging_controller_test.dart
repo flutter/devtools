@@ -7,8 +7,7 @@ library;
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/screens/logging/logging_controller.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -19,7 +18,6 @@ import 'package:logging/logging.dart';
 void main() {
   group('LoggingController', () {
     late LoggingController controller;
-    setGlobal(MessageBus, MessageBus());
 
     void addStdoutData(String message) {
       controller.log(
@@ -62,6 +60,8 @@ void main() {
         ServiceConnectionManager,
         FakeServiceConnectionManager(),
       );
+      setGlobal(MessageBus, MessageBus());
+      setGlobal(PreferencesController, PreferencesController());
 
       controller = LoggingController();
     });

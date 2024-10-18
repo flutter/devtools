@@ -57,7 +57,9 @@ class NetworkController extends DisposableController
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
     );
-    subscribeToFilterChanges();
+    // TODO(https://github.com/flutter/devtools/issues/7727): add support for
+    // persisting network filter.
+    initFilterController();
   }
   List<DartIOHttpRequestData>? _httpRequests;
 
