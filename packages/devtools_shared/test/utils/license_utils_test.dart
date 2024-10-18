@@ -19,8 +19,13 @@ text that should be removed from the file. */
 ''';
 
 const licenseText3 = 
-'''# This some more 2001 multiline license
+'''# This is more 2001 multiline license
 # text that should be removed from the file.
+''';
+
+const licenseText4 =
+'''// This is some multiline license text to
+// remove that does not contain a stored value.
 ''';
 
 const extraText = '''
@@ -66,7 +71,7 @@ void main() {
     test('remove licenses text is parsed correctly', () {
       final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
       
-      expect(config.removeLicenses.length, equals(3));
+      expect(config.removeLicenses.length, equals(4));
 
       var expectedVal = '''// This is some <value1> multiline license
 // text that should be removed from the file.
@@ -82,12 +87,17 @@ text that should be removed from the file. */
 # text that should be removed from the file.
 ''';
       expect(config.removeLicenses[2], equals(expectedVal));
+
+      expectedVal = '''// This is some multiline license text to
+// remove that does not contain a stored value.
+''';
+      expect(config.removeLicenses[3], equals(expectedVal));
     });
 
     test('add licenses text is parsed correctly', () {
       final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
       
-      expect(config.addLicenses.length, equals(2));
+      expect(config.addLicenses.length, equals(3));
 
       var expectedVal = '''// This is some <value1> multiline license
 // text that should be added to the file.
@@ -98,6 +108,11 @@ text that should be removed from the file. */
 # text that should be added to the file.
 ''';
       expect(config.addLicenses[1], equals(expectedVal));
+
+      expectedVal = '''// This is some multiline license text to
+// add that does not contain a stored value.
+''';
+      expect(config.addLicenses[2], equals(expectedVal));
     });
 
     test('file types parsed correctly', () {
@@ -130,26 +145,119 @@ text that should be removed from the file. */
       await deleteDirectoryWithRetry(testDirectory);
     });
 
-    test('value is stored when header exists', () async {
-      final LicenseHeader header = LicenseHeader();
-      const licenseText = 
-    '''// This is some <value1> multiline license
-// text that should be removed from the file.
-''';
-      final bytes = utf8.encode(licenseText);
-      final storedValue = await header.getStoredValue(testFile1, licenseText, bytes.length + 1);
-      expect(storedValue.containsKey('value1'), true);
-      expect(storedValue.containsValue('2015'), true);
-    });
+    test('default to the current year in replacement header', () async {
+      const existingLicenseText = '''// This is some multiline license text to
+// remove that does not contain a stored value.''';
+      const replacementLicenseText = 
+        '''// This is some <value4> multiline license
+// text that should be added to the file.''';
 
-    test('value preserved when header is replaced', () {
-
-    });
-
-    test('update skipped if license text not found', () {
+      final replacementInfo = await _getTestReplacementInfo(
+        existingLicenseText, testFile10, replacementLicenseText,);
       
+      const String expectedExistingHeader = 
+        '''// This is some multiline license text to
+// remove that does not contain a stored value.''';
+
+      // Note: There might be a potential failure case if the test is
+      // run right when the year ends and a new year starts.
+      final String currentYear = DateTime.now().year.toString();
+      final String expectedReplacementHeader = 
+        '''// This is some $currentYear multiline license
+// text that should be added to the file.''';
+
+      expect(replacementInfo.containsKey('existing_header'), true);
+      expect(replacementInfo['existing_header'], equals(expectedExistingHeader));
+
+      expect(replacementInfo.containsKey('replacement_header'), true);
+      expect(replacementInfo['replacement_header'], equals(expectedReplacementHeader));
+    });
+
+    test('stored value preserved in replacement header', () async {
+
+      final List<File> testFiles = [testFile1,testFile2,testFile3];
+      final List<String> existingLicenseTexts = [
+        '''// This is some <value1> multiline license
+// text that should be removed from the file.''',
+        '''# This is more <value2> multiline license
+# text that should be removed from the file.''',
+        '''/* This is other <value3> multiline license
+text that should be removed from the file. */''',
+      ];
+      final List<String> replacementLicenseTexts = [
+        '''// This is some <value1> multiline license
+// text that should be added to the file.''',
+        '''# This is more <value2> multiline license
+// text that should be added to the file.''',
+        '''/* This is other <value3> multiline license
+text that should be added to the file. */''',
+      ];
+      final List<String> expectedExistingHeaders = [
+        '''// This is some 2015 multiline license
+// text that should be removed from the file.''',
+        '''# This is more 2001 multiline license
+# text that should be removed from the file.''',
+        '''/* This is other 1999 multiline license
+text that should be removed from the file. */''',
+      ];
+      final List<String> expectedReplacementHeaders = [
+        '''// This is some 2015 multiline license
+// text that should be added to the file.''',
+        '''# This is more 2001 multiline license
+// text that should be added to the file.''',
+        '''/* This is other 1999 multiline license
+text that should be added to the file. */''',
+      ];
+      
+      for (var i = 0; i < testFiles.length; i++) {
+        final replacementInfo = await _getTestReplacementInfo(
+          existingLicenseTexts[i], testFiles[i], replacementLicenseTexts[i],);
+
+        expect(replacementInfo.containsKey('existing_header'), true, reason: 'Failed on iteration $i');
+        expect(replacementInfo['existing_header'], equals(expectedExistingHeaders[i]), reason: 'Failed on iteration $i');
+
+        expect(replacementInfo.containsKey('replacement_header'), true, reason: 'Failed on iteration $i');
+        expect(replacementInfo['replacement_header'], equals(expectedReplacementHeaders[i]), reason: 'Failed on iteration $i');
+      }
+    });
+
+    test('update skipped if license text not found', () async {
+      String errorMessage = '';
+      final LicenseHeader header = LicenseHeader();
+      try {
+        await header.getReplacementInfo(testFile9, 'test','test', 50);
+      } on Exception catch(e) {
+        errorMessage = e.toString();
+      }
+      expect(errorMessage, equals('Exception: License header expected, but not found!'));
+    });
+
+    test("update skipped if file can't be read", () async {
+      String errorMessage = '';
+      final LicenseHeader header = LicenseHeader();
+      try {
+        await header.getReplacementInfo(File('bad.txt'), 'test','test', 50);
+      } on Exception catch(e) {
+        errorMessage = e.toString();
+      }
+      expect(errorMessage, contains('Exception: License header expected, but error reading file - PathNotFoundException'));
     });
   });
+}
+
+
+Future<Map<String,String>> _getTestReplacementInfo(
+  String existingLicenseText,
+  File testFile,
+  String replacementLicenseText,) async {
+    final LicenseHeader header = LicenseHeader();
+    final bytes = utf8.encode(existingLicenseText);
+    return await header.getReplacementInfo(
+      testFile,
+      existingLicenseText,
+      replacementLicenseText,
+      bytes.length + 1,
+    );
 }
 
 /// Sets up the config file
@@ -172,6 +280,9 @@ remove_licenses:
   - |
     # This is more <value3> multiline license
     # text that should be removed from the file.
+  - |
+    // This is some multiline license text to
+    // remove that does not contain a stored value.
 # sequence of license text strings that should be added to the top of a file. {value} will be replaced.
 add_licenses: 
   - |
@@ -180,6 +291,9 @@ add_licenses:
   - |
     # This is other <value3> multiline license
     # text that should be added to the file.
+  - |
+    // This is some multiline license text to
+    // add that does not contain a stored value.
 # defines which files should have license text added or updated.
 update_paths:
   # path(s) to recursively check for files to remove/add license
@@ -314,7 +428,7 @@ Future<void> _setupTestDirectoryStructure() async {
 
   testFile9 = File(p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'test9.ext1'))
     ..createSync(recursive: true);
-  await testFile9.writeAsString(licenseText3 + extraText);
+  await testFile9.writeAsString(extraText);
 
   // Setup /repo_root/sub_dir2/sub_dir4/sub_dir5 directory structure
   Directory(
@@ -328,5 +442,5 @@ Future<void> _setupTestDirectoryStructure() async {
 
   testFile10 = File(p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'sub_dir5', 'test10.ext2'))
     ..createSync(recursive: true);
-  await testFile10.writeAsString(licenseText2 + extraText);
+  await testFile10.writeAsString(licenseText4 + extraText);
 }
