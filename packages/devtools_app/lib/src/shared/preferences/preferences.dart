@@ -22,10 +22,12 @@ import '../globals.dart';
 import '../query_parameters.dart';
 import '../utils.dart';
 
+part '_cpu_profiler_preferences.dart';
 part '_extension_preferences.dart';
 part '_inspector_preferences.dart';
 part '_memory_preferences.dart';
 part '_logging_preferences.dart';
+part '_network_preferences.dart';
 part '_performance_preferences.dart';
 
 final _log = Logger('PreferencesController');
@@ -80,22 +82,28 @@ class PreferencesController extends DisposableController
   final verboseLoggingEnabled =
       ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
 
+  CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
+  final _cpuProfiler = CpuProfilerPreferencesController();
+
+  ExtensionsPreferencesController get devToolsExtensions => _extensions;
+  final _extensions = ExtensionsPreferencesController();
+
   // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
   // Inspector V2 has been released.
   InspectorPreferencesController get inspector => _inspector;
   final _inspector = InspectorPreferencesController();
 
-  MemoryPreferencesController get memory => _memory;
-  final _memory = MemoryPreferencesController();
-
   LoggingPreferencesController get logging => _logging;
   final _logging = LoggingPreferencesController();
 
+  MemoryPreferencesController get memory => _memory;
+  final _memory = MemoryPreferencesController();
+
+  NetworkPreferencesController get network => _network;
+  final _network = NetworkPreferencesController();
+
   PerformancePreferencesController get performance => _performance;
   final _performance = PerformancePreferencesController();
-
-  ExtensionsPreferencesController get devToolsExtensions => _extensions;
-  final _extensions = ExtensionsPreferencesController();
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
@@ -106,11 +114,13 @@ class PreferencesController extends DisposableController
     }
     await _initVerboseLogging();
 
-    await inspector.init();
-    await memory.init();
-    await logging.init();
-    await performance.init();
+    await cpuProfiler.init();
     await devToolsExtensions.init();
+    await inspector.init();
+    await logging.init();
+    await memory.init();
+    await network.init();
+    await performance.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -225,11 +235,13 @@ class PreferencesController extends DisposableController
 
   @override
   void dispose() {
-    inspector.dispose();
-    memory.dispose();
-    logging.dispose();
-    performance.dispose();
+    cpuProfiler.dispose();
     devToolsExtensions.dispose();
+    inspector.dispose();
+    logging.dispose();
+    memory.dispose();
+    network.dispose();
+    performance.dispose();
     super.dispose();
   }
 

@@ -28,8 +28,12 @@ class LoggingPreferencesController extends DisposableController
   static const _defaultDetailsFormat = LoggingDetailsFormat.text;
 
   static const _retentionLimitStorageId = 'logging.retentionLimit';
-  static const _detailsFormatStorageId = 'logging.detailsFormat';
-  static const _filterStorageId = 'logging.filter';
+
+  @visibleForTesting
+  static const detailsFormatStorageId = 'logging.detailsFormat';
+
+  @visibleForTesting
+  static const filterStorageId = 'logging.filter';
 
   Future<void> init() async {
     retentionLimit.value =
@@ -51,7 +55,7 @@ class LoggingPreferencesController extends DisposableController
     );
 
     final detailsFormatValueFromStorage =
-        await storage.getValue(_detailsFormatStorageId);
+        await storage.getValue(detailsFormatStorageId);
     detailsFormat.value = LoggingDetailsFormat.values.firstWhereOrNull(
           (value) => detailsFormatValueFromStorage == value.name,
         ) ??
@@ -59,7 +63,7 @@ class LoggingPreferencesController extends DisposableController
     addAutoDisposeListener(
       detailsFormat,
       () {
-        storage.setValue(_detailsFormatStorageId, detailsFormat.value.name);
+        storage.setValue(detailsFormatStorageId, detailsFormat.value.name);
         ga.select(
           gac.logging,
           gac.LoggingEvents.changeDetailsFormat.name,
@@ -68,10 +72,10 @@ class LoggingPreferencesController extends DisposableController
       },
     );
 
-    filterTag.value = await storage.getValue(_filterStorageId) ?? '';
+    filterTag.value = await storage.getValue(filterStorageId) ?? '';
     addAutoDisposeListener(
       filterTag,
-      () => storage.setValue(_filterStorageId, filterTag.value),
+      () => storage.setValue(filterStorageId, filterTag.value),
     );
   }
 }
