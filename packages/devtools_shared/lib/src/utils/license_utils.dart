@@ -1,3 +1,7 @@
+// Copyright 2024 The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -141,12 +145,12 @@ class LicenseHeader {
   Future<Map<String,List<String>>> bulkUpdate(Directory directory, LicenseConfig config) async {
     final List<String> includedPaths = [];
     final List<String> updatedPaths = [];
-    final List<FileSystemEntity> entities = directory.listSync(recursive: true);
-    for (final entity in entities) {
-      if (entity is! Directory && 
-            entity is File && !config.shouldExclude(entity)) {
-        includedPaths.add(entity.path);
-        final String extension = p.extension(entity.path)
+    final List<File> files = directory.listSync(recursive: true)
+      .whereType<File>().toList();
+    for (final file in files) {
+      if (!config.shouldExclude(file)) {
+        includedPaths.add(file.path);
+        final String extension = p.extension(file.path)
           .replaceAll('.', '');
         final YamlList removeIndices = 
           config.getRemoveIndicesForExtension(extension);
@@ -154,7 +158,7 @@ class LicenseHeader {
           final String existingLicenseText = config.removeLicenses[removeIndex];
           final int addIndex = config.getAddIndexForExtension(extension);
           final String replacementLicenseText = config.addLicenses[addIndex];
-          final int fileLength = await entity.length();
+          final int fileLength = await file.length();
           final int existingLicenseTextLength = existingLicenseText.length;
           const int buffer = 20;
           // Assume that the license text will be near the start of the file,
@@ -162,7 +166,7 @@ class LicenseHeader {
           int byteCount = existingLicenseTextLength + buffer;
           byteCount = fileLength > byteCount ? byteCount : fileLength;
           final Map<String,String> replacementInfo = await getReplacementInfo(
-            entity, existingLicenseText, replacementLicenseText, 
+            file, existingLicenseText, replacementLicenseText, 
             existingLicenseText.length,
           );
           final String? existingHeader = 
@@ -170,13 +174,13 @@ class LicenseHeader {
           final String? replacementHeader =
             replacementInfo[LicenseHeader.replacementHeaderKey];
           if (existingHeader != null && replacementHeader != null) {
-            final File rewrittenFile = await rewriteLicenseHeader(entity,
+            final File rewrittenFile = await rewriteLicenseHeader(file,
               existingHeader, replacementHeader,);
-            final File backupFile = entity.copySync('${entity.path}.bak');
+            final File backupFile = file.copySync('${file.path}.bak');
             if (await rewrittenFile.length() > 0) {
-                entity.writeAsStringSync(rewrittenFile.readAsStringSync(),
+                file.writeAsStringSync(rewrittenFile.readAsStringSync(),
                   mode: FileMode.writeOnly,);
-                updatedPaths.add(entity.path);
+                updatedPaths.add(file.path);
             }
             rewrittenFile.deleteSync();
             backupFile.deleteSync();
