@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 class LicenseConfig {
@@ -43,6 +44,26 @@ class LicenseConfig {
     return fileType['add'];
   }
 
+  /// Returns 'true' if the file should be excluded according to the config,
+  /// 'false' otherwise.
+  bool shouldExclude(File file) {
+    bool included = false;
+    for (final includePath in includePaths) {
+      if (file.path.startsWith(includePath)) {
+        included = true;
+        break;
+      }
+    }
+    bool excluded = false;
+    for (final excludePath in excludePaths) {
+      if (file.path.startsWith(excludePath)) {
+        excluded = true;
+        break;
+      }
+    }
+    return !included || excluded;
+  }
+
   YamlList removeLicenses = YamlList();
   YamlList addLicenses = YamlList();
   YamlList includePaths = YamlList();
@@ -57,7 +78,7 @@ class LicenseHeader {
   /// 'replacement_header' each with the stored value ('<value>'
   /// if configured, defaults to [defaultStoreValue] or current year)
   /// populated. For now, only up to one stored value is supported.
-  /// If the file can't be read or no match is found, throw an exception.
+  /// If the file can't be read or no match is found, throws an exception.
   Future<Map<String,String>> getReplacementInfo(
     File file,
     String existingLicenseText,
@@ -79,14 +100,14 @@ class LicenseHeader {
             defaultStoredValue ?? DateTime.now().year.toString(),
           );
         return {
-          'existing_header':existingLicenseText,
-          'replacement_header':replacementLicenseText,
+          existingHeaderKey:existingLicenseText,
+          replacementHeaderKey:replacementLicenseText,
         };
       }
       // Return a non-empty map for the case where there is a stored value 
       // requested (i.e. when there is a '<value>' defined in the license text)
       final String storedName = _parseStoredName(existingLicenseText);
-      if (storedName.isNotEmpty) { 
+      if (storedName.isNotEmpty) {
         return _processHeaders(
             storedName,
             existingLicenseText,
@@ -94,11 +115,85 @@ class LicenseHeader {
             content,);
       }
     }
-    throw Exception('License header expected, but not found!');
+    throw Exception('License header expected in ${file.path}, but not found!');
+  }
+
+  /// Returns a copy of the given [file] with the [existingHeader] replaced by
+  /// the [replacementHeader]. Reads and writes the entire file contents all
+  /// at once, so performance may degrade for large files.
+  Future<File> rewriteLicenseHeader(
+    File file,
+    String existingHeader,
+    String replacementHeader,) async {
+    final File rewrittenFile = File('${file.path}.tmp');
+    // TODO: [mossmana] Convert to using a stream
+    await file.readAsString().then((String contents) async {
+      final String replacementContents = contents.replaceFirst(
+        existingHeader, replacementHeader
+      );
+      await rewrittenFile.writeAsString(replacementContents);
+    });
+    return rewrittenFile;
+  }
+
+  /// Bulk update license headers for files in the [directory] as configured 
+  /// in the [config]. Returns a list of file paths that were updated.
+  Future<Map<String,List<String>>> bulkUpdate(Directory directory, LicenseConfig config) async {
+    final List<String> includedPaths = [];
+    final List<String> updatedPaths = [];
+    final List<FileSystemEntity> entities = directory.listSync(recursive: true);
+    for (final entity in entities) {
+      if (entity is! Directory && 
+            entity is File && !config.shouldExclude(entity)) {
+        includedPaths.add(entity.path);
+        final String extension = p.extension(entity.path)
+          .replaceAll('.', '');
+        final YamlList removeIndices = 
+          config.getRemoveIndicesForExtension(extension);
+        for (final removeIndex in removeIndices) {
+          final String existingLicenseText = config.removeLicenses[removeIndex];
+          final int addIndex = config.getAddIndexForExtension(extension);
+          final String replacementLicenseText = config.addLicenses[addIndex];
+          final int fileLength = await entity.length();
+          final int existingLicenseTextLength = existingLicenseText.length;
+          const int buffer = 20;
+          // Assume that the license text will be near the start of the file,
+          // but add in some buffer.
+          int byteCount = existingLicenseTextLength + buffer;
+          byteCount = fileLength > byteCount ? byteCount : fileLength;
+          final Map<String,String> replacementInfo = await getReplacementInfo(
+            entity, existingLicenseText, replacementLicenseText, 
+            existingLicenseText.length,
+          );
+          final String? existingHeader = 
+            replacementInfo[LicenseHeader.existingHeaderKey];
+          final String? replacementHeader =
+            replacementInfo[LicenseHeader.replacementHeaderKey];
+          if (existingHeader != null && replacementHeader != null) {
+            final File rewrittenFile = await rewriteLicenseHeader(entity,
+              existingHeader, replacementHeader,);
+            final File backupFile = entity.copySync('${entity.path}.bak');
+            if (await rewrittenFile.length() > 0) {
+                entity.writeAsStringSync(rewrittenFile.readAsStringSync(),
+                  mode: FileMode.writeOnly,);
+                updatedPaths.add(entity.path);
+            }
+            rewrittenFile.deleteSync();
+            backupFile.deleteSync();
+          }
+        }
+      }
+    }
+    return {
+      includedPathsKey:includedPaths,
+      updatedPathsKey:updatedPaths,
+    };
   }
 
   static const String existingHeaderKey = 'existing_header';
   static const String replacementHeaderKey = 'replacement_header';
+  static const String includedPathsKey = 'included_paths';
+  static const String updatedPathsKey = 'update_paths';
 
   Map<String,String> _processHeaders(
     String storedName,
@@ -132,7 +227,7 @@ class LicenseHeader {
     return {};
   }
 
-  // TODO: [mossmana] Add support for multiple stored names?
+  // TODO: [mossmana] Add support for multiple stored names
   String _parseStoredName(String licenseText) {
     final storedMatch = RegExp(r'<(\S+)>').firstMatch(licenseText);
     final storedName = storedMatch?.group(1);
