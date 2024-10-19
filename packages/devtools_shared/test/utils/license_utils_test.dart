@@ -57,6 +57,7 @@ late File excludeFile2;
 void main() {
   group('config file tests', () {
     setUp(() async {
+      await _setupTestDirectoryStructure();
       await _setupTestConfigFile();
     });
 
@@ -132,7 +133,37 @@ text that should be removed from the file. */
 
       addIndex = config.getAddIndexForExtension('ext2');
       expect(addIndex, equals(1));
+    });
 
+    test("included files shouldn't be excluded", () {
+      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      expect(config.shouldExclude(testFile1), false);
+      expect(config.shouldExclude(testFile2), false);
+      expect(config.shouldExclude(testFile3), false);
+      expect(config.shouldExclude(testFile7), false);
+      expect(config.shouldExclude(testFile8), false);
+      expect(config.shouldExclude(testFile9), false);
+      expect(config.shouldExclude(testFile10), false);
+    });
+
+    test('excluded files should be excluded', () {
+      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      expect(config.shouldExclude(excludeFile1), true);
+      expect(config.shouldExclude(excludeFile2), true);
+    });
+
+    test('files in an excluded directory should be excluded', () {
+      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      expect(config.shouldExclude(testFile4), true);
+      expect(config.shouldExclude(testFile5), true);
+      expect(config.shouldExclude(testFile6), true);
+    });
+
+    test('files not in an included directory should be excluded', () {
+      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+
+      final File fileNotInTestDirectory = File('test.txt');
+      expect(config.shouldExclude(fileNotInTestDirectory), true);
     });
   });
 
@@ -229,7 +260,7 @@ text that should be added to the file. */''',
       } on Exception catch(e) {
         errorMessage = e.toString();
       }
-      expect(errorMessage, equals('Exception: License header expected, but not found!'));
+      expect(errorMessage, equals('Exception: License header expected in ${testFile9.path}, but not found!'));
     });
 
     test("update skipped if file can't be read", () async {
@@ -241,6 +272,59 @@ text that should be added to the file. */''',
         errorMessage = e.toString();
       }
       expect(errorMessage, contains('Exception: License header expected, but error reading file - PathNotFoundException'));
+    });
+
+    test('license header can be rewritten on disk', () async {
+      final LicenseHeader header = LicenseHeader();
+      const String existingHeader = '''// This is some 2015 multiline license
+// text that should be removed from the file.''';
+      const String replacementHeader = '''// This is some 2015 multiline license
+// text that should be added to the file.''';
+      final File rewrittenFile = await header.rewriteLicenseHeader(
+        testFile1, existingHeader, replacementHeader,);
+      
+      expect(await rewrittenFile.length(), greaterThan(0));
+      
+      final String existingContents = await testFile1.readAsString();
+      expect(existingContents.substring(0, existingHeader.length), equals(existingHeader));
+      
+      final String rewrittenContents = await rewrittenFile.readAsString();
+      expect(rewrittenContents.substring(0, replacementHeader.length), equals(replacementHeader));
+
+      expect(existingContents.substring(existingHeader.length + 1),
+        equals(rewrittenContents.substring(replacementHeader.length + 1)),);
+    });
+
+    test('license headers can be updated in bulk', () async {
+      await _setupTestConfigFile();
+      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      final LicenseHeader header = LicenseHeader();
+      final Map<String,List<String>> results = await header.bulkUpdate(testDirectory,
+        config,);
+      
+      final List<String>? includedPaths = results[LicenseHeader.includedPathsKey];
+      expect(includedPaths, isNotNull);
+      expect(includedPaths?.length, equals(7));
+      // Order is not guaranteed
+      expect(includedPaths?.contains(testFile1.path), true);
+      expect(includedPaths?.contains(testFile2.path), true);
+      expect(includedPaths?.contains(testFile3.path), true);
+      expect(includedPaths?.contains(testFile7.path), true);
+      expect(includedPaths?.contains(testFile8.path), true);
+      expect(includedPaths?.contains(testFile9.path), true);
+      expect(includedPaths?.contains(testFile10.path), true);
+
+      final List<String>? updatedPaths = results[LicenseHeader.updatedPathsKey];
+      expect(updatedPaths, isNotNull);
+      // testFile9 and testFile10 are intentionally misconfigured and so they
+      // won't be updated even though they are on the include list.
+      expect(updatedPaths?.length, equals(5));
+      // Order is not guaranteed
+      expect(updatedPaths?.contains(testFile1.path), true);
+      expect(updatedPaths?.contains(testFile2.path), true);
+      expect(updatedPaths?.contains(testFile3.path), true);
+      expect(updatedPaths?.contains(testFile7.path), true);
+      expect(updatedPaths?.contains(testFile8.path), true);
     });
   });
 }
@@ -263,11 +347,10 @@ Future<Map<String,String>> _getTestReplacementInfo(
 /// Sets up the config file
 Future<void> _setupTestConfigFile() async {
 
-  testDirectory = Directory.systemTemp.createTempSync();
   configFile = File(p.join(testDirectory.path, 'test_config.yaml'))
     ..createSync(recursive: true);
 
-  const contents = 
+  final contents = 
 '''---
 # sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
 remove_licenses:
@@ -298,14 +381,14 @@ add_licenses:
 update_paths:
   # path(s) to recursively check for files to remove/add license
   include:
-      - /repo_root
+      - ${testDirectory.path}/repo_root
   # path(s) to recursively check for files to ignore
   exclude:
     # exclude everything in the /repo_root/sub_dir1 directory
-    - /repo_root/sub_dir1/
+    - ${testDirectory.path}/repo_root/sub_dir1/
     # exclude the given files
-    - /repo_root/sub_dir2/exclude1.ext1
-    - /repo_root/sub_dir2/sub_dir3/exclude2.ext2
+    - ${testDirectory.path}/repo_root/sub_dir2/exclude1.ext1
+    - ${testDirectory.path}/repo_root/sub_dir2/sub_dir3/exclude2.ext2
   # extensions
   file_types:
     ext1:
@@ -347,7 +430,6 @@ update_paths:
 ///            test10.ext2
 ///          
 Future<void> _setupTestDirectoryStructure() async {
-
   testDirectory = Directory.systemTemp.createTempSync();
 
   // Setup /repo_root directory structure
