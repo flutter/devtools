@@ -1,3 +1,7 @@
+// Copyright 2024 The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -327,8 +331,51 @@ text that should be added to the file. */''',
       expect(updatedPaths?.contains(testFile8.path), true);
     });
   });
-}
 
+  test('repo wide check', () async {
+    // This test is currently skipped because not all existing files
+    // have had their license headers updated to the correct license text.
+    // So this test will always fail. Set skip to false to run locally, but
+    // don't commit the change to the repository.
+    
+    // TODO: [mossmana] This test should stop being skipped only when it is safe to check just new files going forward.
+
+    final RegExp packagePathMatcher = RegExp(r'(.*[/|\\]devtools[/|\\]packages).*');
+    // TODO: [mossmana] make this work on CI and Google3
+    expect(packagePathMatcher.hasMatch(Directory.current.path), true);
+    final RegExpMatch? match = packagePathMatcher.firstMatch(Directory.current.path);
+    final String? packagePath = match?.group(1);
+    expect(packagePath, isNotNull);
+    final Directory packageDirectory = Directory(packagePath ?? '');
+    expect(packageDirectory.existsSync(), true, 
+      reason:'$packageDirectory does not exist.',);
+    final List<String> failedPaths = [];
+    final List<File> files = packageDirectory.listSync(recursive: true)
+      .whereType<File>().toList();
+    final LicenseHeader header = LicenseHeader();
+    const goodReplacementLicenseText = '''// Copyright <copyright_date> The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.''';
+    for (final file in files) {
+      final String extension = p.extension(file.path);
+      // Currently, only checking dart source files.
+      // TODO: [mossmana] Add checks for other file types or read from a config.
+      if (extension != '.dart') continue;
+      try {
+        final Map<String,String> replacementInfo = 
+          await header.getReplacementInfo(file, goodReplacementLicenseText,
+            goodReplacementLicenseText, goodReplacementLicenseText.length,);
+        if (replacementInfo.isEmpty) {
+          failedPaths.add(file.path);
+        }
+      } on Exception {
+        failedPaths.add(file.path);
+      }
+    }
+    expect(failedPaths.isEmpty, true, 
+      reason: 'License headers are incorrect for ${failedPaths.length} files: $failedPaths',);
+  }, skip: true,);
+}
 
 Future<Map<String,String>> _getTestReplacementInfo(
   String existingLicenseText,
