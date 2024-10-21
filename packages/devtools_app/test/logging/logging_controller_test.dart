@@ -162,7 +162,7 @@ void main() {
 
       // Test query filters assuming default setting filters are all enabled.
       controller.activeFilter.value.settingFilters.first.setting.value =
-          Level.INFO;
+          Level.INFO.value;
       for (final filter
           in controller.activeFilter.value.settingFilters.sublist(1)) {
         filter.setting.value = true;
@@ -224,7 +224,7 @@ void main() {
       expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(12));
 
-      minimumLogLevelFilter.setting.value = Level.SEVERE;
+      minimumLogLevelFilter.setting.value = Level.SEVERE.value;
       controller.setActiveFilter();
       expect(controller.data, hasLength(12));
       expect(controller.filteredData.value, hasLength(1));

@@ -127,17 +127,15 @@ class LoggingController extends DisposableController
 
   @visibleForTesting
   static final settingFilters = <SettingFilter<LogData, Object>>[
-    SettingFilter<LogData, Level>(
+    SettingFilter<LogData, int>(
       id: _minLogLevelFilterId,
       name: 'Hide logs below the minimum log level',
-      includeCallback: (LogData element, Level currentFilterValue) =>
-          element.level >= currentFilterValue.value,
-      enabledCallback: (Level filterValue) => filterValue >= Level.FINEST,
-      possibleValues: Level.LEVELS
-          // Omit Level.OFF from the possible minimum levels.
-          .where((level) => level != Level.OFF)
-          .toList(),
-      defaultValue: Level.ALL,
+      includeCallback: (LogData element, int currentFilterValue) =>
+          element.level >= currentFilterValue,
+      enabledCallback: (int filterValue) => filterValue > Level.ALL.value,
+      possibleValues: _possibleLogLevels.map((l) => l.value).toList(),
+      possibleValueDisplays: _possibleLogLevels.map((l) => l.name).toList(),
+      defaultValue: Level.ALL.value,
     ),
     if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
         true) ...[
@@ -165,6 +163,10 @@ class LoggingController extends DisposableController
       defaultValue: true,
     ),
   ];
+
+  static final _possibleLogLevels = Level.LEVELS
+      // Omit Level.OFF from the possible minimum levels.
+      .where((level) => level != Level.OFF);
 
   static const kindFilterId = 'logging-kind-filter';
 
