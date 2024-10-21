@@ -388,47 +388,53 @@ text that should be added to the file. */''',
       // don't commit the change to the repository.
 
       // TODO: [mossmana] This test should stop being skipped only when it is safe to check just new files going forward.
-
-      final RegExp packagePathMatcher =
-          RegExp(r'(.*[/|\\]devtools[/|\\]packages).*');
+      final RegExp rootPathMatcher = RegExp(r'(.*[/|\\]devtools[/|\\]).*');
       // TODO: [mossmana] make this work on CI and Google3
-      expect(packagePathMatcher.hasMatch(Directory.current.path), true);
+      expect(rootPathMatcher.hasMatch(Directory.current.path), true);
       final RegExpMatch? match =
-          packagePathMatcher.firstMatch(Directory.current.path);
-      final String? packagePath = match?.group(1);
-      expect(packagePath, isNotNull);
-      final Directory packageDirectory = Directory(packagePath ?? '');
-      expect(
-        packageDirectory.existsSync(),
-        true,
-        reason: '$packageDirectory does not exist.',
-      );
+          rootPathMatcher.firstMatch(Directory.current.path);
+      final String? rootPath = match?.group(1);
+      expect(rootPath, isNotNull);
+
       final List<String> failedPaths = [];
-      final List<File> files =
-          packageDirectory.listSync(recursive: true).whereType<File>().toList();
-      final LicenseHeader header = LicenseHeader();
-      const goodReplacementLicenseText =
-          '''// Copyright <copyright_date> The Flutter Authors
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.''';
-      for (final file in files) {
-        final String extension = p.extension(file.path);
-        // Currently, only checking dart source files.
-        // TODO: [mossmana] Add checks for other file types or read from a config.
-        if (extension != '.dart') continue;
-        try {
-          final Map<String, String> replacementInfo =
-              await header.getReplacementInfo(
-            file,
-            goodReplacementLicenseText,
-            goodReplacementLicenseText,
-            goodReplacementLicenseText.length,
-          );
-          if (replacementInfo.isEmpty) {
+      final subDirectories = ['packages', 'tool'];
+
+      for (var subDirectory in subDirectories) {
+        final Directory checkedDirectory =
+            Directory('$rootPath$subDirectory');
+        expect(
+          checkedDirectory.existsSync(),
+          true,
+          reason: '$checkedDirectory does not exist.',
+        );
+        final List<File> files = checkedDirectory
+            .listSync(recursive: true)
+            .whereType<File>()
+            .toList();
+        final LicenseHeader header = LicenseHeader();
+        const goodReplacementLicenseText =
+            '''// Copyright <copyright_date> The Flutter Authors
+  // Use of this source code is governed by a BSD-style license that can be
+  // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.''';
+        for (final file in files) {
+          final String extension = p.extension(file.path);
+          // Currently, only checking dart source files.
+          // TODO: [mossmana] Add checks for other file types or read from a config.
+          if (extension != '.dart') continue;
+          try {
+            final Map<String, String> replacementInfo =
+                await header.getReplacementInfo(
+              file,
+              goodReplacementLicenseText,
+              goodReplacementLicenseText,
+              goodReplacementLicenseText.length,
+            );
+            if (replacementInfo.isEmpty) {
+              failedPaths.add(file.path);
+            }
+          } on Exception {
             failedPaths.add(file.path);
           }
-        } on Exception {
-          failedPaths.add(file.path);
         }
       }
       expect(
@@ -638,5 +644,3 @@ Future<void> _setupTestDirectoryStructure() async {
   )..createSync(recursive: true);
   await testFile10.writeAsString(licenseText4 + extraText);
 }
-
-
