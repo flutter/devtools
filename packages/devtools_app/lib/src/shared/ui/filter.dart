@@ -349,14 +349,15 @@ class _SettingFilterElement extends StatelessWidget {
             builder: (context, value, _) {
               return RoundedDropDownButton(
                 value: value,
-                items: filter.possibleValues
-                    .map(
-                      (value) => DropdownMenuItem(
-                        value: value,
-                        child: Text('$value'),
+                items: [
+                  for (int i = 0; i < filter.possibleValues.length; i++)
+                    DropdownMenuItem(
+                      value: filter.possibleValues[i],
+                      child: Text(
+                        '${filter.possibleValueDisplays?[i] ?? filter.possibleValues[i]}',
                       ),
-                    )
-                    .toList(),
+                    ),
+                ],
                 onChanged: (value) => filter.setting.value = value!,
               );
             },
@@ -401,19 +402,28 @@ class ToggleFilter<T> extends SettingFilter<T, bool> {
 
 /// A filter setting that can be set to any of the predefined values
 /// [possibleValues].
+///
+/// The generic type [V] must be a json encodable type, since this value will
+/// be JSON encoded and decoded during the creation and parsing of [FilterTag]
+/// objects.
 class SettingFilter<T, V> {
   SettingFilter({
     required this.id,
     required this.name,
     required bool Function(T element, V currentFilterValue) includeCallback,
     required bool Function(V filterValue) enabledCallback,
-    required this.possibleValues,
     required this.defaultValue,
+    required this.possibleValues,
+    this.possibleValueDisplays,
     this.tooltip,
   })  : _includeCallback = includeCallback,
         _enabledCallback = enabledCallback,
         setting = ValueNotifier<V>(defaultValue),
-        assert(possibleValues.contains(defaultValue));
+        assert(possibleValues.contains(defaultValue)),
+        assert(
+          possibleValueDisplays == null ||
+              possibleValues.length == possibleValueDisplays.length,
+        );
 
   /// The unique id for this setting filter.
   ///
@@ -426,6 +436,15 @@ class SettingFilter<T, V> {
 
   /// The set of possible values that [setting] can be set to.
   final List<V> possibleValues;
+
+  /// An optional List of values to use for the display of the setting filter
+  /// options in a dropdown menu.
+  ///
+  /// If null, the String representation of each value in [possibleValues] will
+  /// be used for the dropdown menu items instead.
+  ///
+  /// The length and order of this List should match that of [possibleValues].
+  final List<String>? possibleValueDisplays;
 
   /// The default value of the filter.
   ///

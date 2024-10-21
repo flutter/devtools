@@ -86,7 +86,8 @@ class _LogDetailsState extends State<LogDetails>
         child: SingleChildScrollView(
           controller: scrollController,
           child: preferences.logging.detailsFormat.value ==
-                  LoggingDetailsFormat.text
+                      LoggingDetailsFormat.text ||
+                  (log?.encodedDetails ?? '').isEmpty
               ? Padding(
                   padding: const EdgeInsets.all(denseSpacing),
                   child: SelectableText(
@@ -94,7 +95,7 @@ class _LogDetailsState extends State<LogDetails>
                     textAlign: TextAlign.left,
                   ),
                 )
-              : JsonViewer(encodedJson: log?.encodedDetails ?? ''),
+              : JsonViewer(encodedJson: log!.encodedDetails),
         ),
       ),
     );
