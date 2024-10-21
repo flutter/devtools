@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/common_widgets.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -77,11 +78,7 @@ class MessageColumn extends ColumnData<LogData>
                       ),
                     WidgetSpan(
                       child: hasSummary && hasDetails()
-                          ? Icon(
-                              Icons.arrow_right,
-                              size: defaultIconSize,
-                              color: theme.colorScheme.onSurface,
-                            )
+                          ? const BulletSpacer()
                           :
                           // Include an empty SizedBox to ensure a consistent
                           // height for the text display, regardless of whether
