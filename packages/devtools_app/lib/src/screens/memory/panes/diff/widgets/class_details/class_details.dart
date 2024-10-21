@@ -42,7 +42,7 @@ class HeapClassDetails extends StatelessWidget {
 
     final selectedPathView = ValueListenableBuilder<PathData?>(
       valueListenable: pathSelection,
-      builder: (_, pathData, __) {
+      builder: (_, pathData, _) {
         if (pathData == null) {
           return const CenteredMessage(
             message: 'Click a table row to see the detailed path.',

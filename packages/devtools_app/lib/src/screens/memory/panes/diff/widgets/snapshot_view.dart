@@ -26,7 +26,7 @@ class SnapshotView extends StatelessWidget {
         controller.derived.singleClassesToShow,
         controller.derived.diffClassesToShow,
       ],
-      builder: (_, values, __) {
+      builder: (_, values, _) {
         final singleClasses = values.first as ClassDataList<SingleClassData>?;
         final diffClasses = values.second as ClassDataList<DiffClassData>?;
         if (controller.derived.updatingValues) {
@@ -58,7 +58,7 @@ class SnapshotView extends StatelessWidget {
 
         final pathTable = ValueListenableBuilder<ClassData?>(
           valueListenable: controller.derived.classData,
-          builder: (_, classData, __) => HeapClassDetails(
+          builder: (_, classData, _) => HeapClassDetails(
             classData: classData,
             pathSelection: controller.derived.selectedPath,
             isDiff: classes is ClassDataList<DiffClassData>,

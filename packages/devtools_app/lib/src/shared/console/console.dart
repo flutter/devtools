@@ -187,7 +187,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
             physics: const ClampingScrollPhysics(
               parent: RangeMaintainingScrollPhysics(),
             ),
-            separatorBuilder: (_, __) {
+            separatorBuilder: (_, _) {
               return const PaddedDivider.noPadding();
             },
             itemBuilder: (context, index) {
