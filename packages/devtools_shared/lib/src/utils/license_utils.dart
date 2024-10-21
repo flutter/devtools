@@ -92,7 +92,7 @@ class LicenseHeader {
         .openRead(0, byteCount)
         .transform(utf8.decoder)
         .handleError((e) => throw Exception(
-            'License header expected, but error reading file - $e'));
+            'License header expected, but error reading file - $e',),);
     await for (final content in stream) {
       // Return just the license headers for the simple case with no stored
       // value requested (i.e. content matches licenseText verbatim)
