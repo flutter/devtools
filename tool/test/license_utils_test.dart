@@ -5,12 +5,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_shared/src/utils/license_utils.dart';
+import 'package:devtools_tool/license_utils.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
-import '../helpers/helpers.dart';
+import '../../packages/devtools_shared/test/helpers/helpers.dart';
 
 const licenseText1 = '''// This is some 2015 multiline license
 // text that should be removed from the file.
@@ -638,3 +638,5 @@ Future<void> _setupTestDirectoryStructure() async {
   )..createSync(recursive: true);
   await testFile10.writeAsString(licenseText4 + extraText);
 }
+
+
