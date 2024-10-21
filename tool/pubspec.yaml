@@ -19,3 +19,6 @@ dependency_overrides:
   devtools_shared:
     path: ../packages/devtools_shared
   lints: ^4.0.0
+  
+dev_dependencies:
+  test: ^1.25.8
