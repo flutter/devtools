@@ -1141,11 +1141,11 @@ class TextViewer extends StatelessWidget {
 }
 
 class JsonViewer extends StatefulWidget {
-  const JsonViewer({
+  JsonViewer({
     super.key,
     required this.encodedJson,
     this.scrollable = true,
-  });
+  }) : assert(encodedJson.isNotEmpty);
 
   final String encodedJson;
   final bool scrollable;
