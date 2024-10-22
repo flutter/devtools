@@ -154,7 +154,7 @@ class _ValidatedDeepLinksView extends StatelessWidget {
               Expanded(
                 child: ValueListenableBuilder<LinkData?>(
                   valueListenable: controller.selectedLink,
-                  builder: (context, _, __) => TabBarView(
+                  builder: (context, _, _) => TabBarView(
                     children: [
                       ValidationDetailView(
                         controller: controller,
@@ -313,7 +313,7 @@ class _ConfigurationDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: valueListenable,
-      builder: (_, index, __) {
+      builder: (_, index, _) {
         return Row(
           children: [
             Text(title),

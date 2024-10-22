@@ -213,7 +213,7 @@ class SnapshotListTitle extends StatelessWidget {
 
     return FutureBuilder(
       future: theItem is SnapshotDataItem ? theItem.process : null,
-      builder: (_, __) {
+      builder: (_, _) {
         final isProcessing =
             theItem is SnapshotDataItem ? !theItem.isProcessed : false;
 
@@ -388,7 +388,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
         core.snapshots,
         core.selectedSnapshotIndex,
       ],
-      builder: (_, values, __) {
+      builder: (_, values, _) {
         final snapshots = values.first as List<SnapshotItem>;
         final selectedIndex = values.second as int;
         return ListView.builder(

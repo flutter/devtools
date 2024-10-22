@@ -696,7 +696,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                   ),
                   child: ValueListenableBuilder<Filter>(
                     valueListenable: widget.controller.activeFilter,
-                    builder: (context, _, __) {
+                    builder: (context, _, _) {
                       // TODO(https://github.com/flutter/devtools/issues/8426): support filtering by log level.
                       return DevToolsFilterButton(
                         message: 'More filters',

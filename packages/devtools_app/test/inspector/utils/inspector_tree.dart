@@ -14,7 +14,7 @@ InspectorTreeController inspectorTreeControllerFromNode(
 ) {
   final controller = InspectorTreeController()
     ..config = InspectorTreeConfig(
-      onNodeAdded: (_, __) {},
+      onNodeAdded: (_, _) {},
       onClientActiveChange: (_) {},
     );
 

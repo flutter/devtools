@@ -146,7 +146,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     const memoryEventsPainHeight = 70.0;
     return ValueListenableBuilder<bool>(
       valueListenable: preferences.memory.showChart,
-      builder: (_, showChart, __) {
+      builder: (_, showChart, _) {
         if (!showChart) return const SizedBox.shrink();
 
         return KeyboardListener(
@@ -184,7 +184,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                   widget.chart.data.isLegendVisible,
                   widget.chart.isAndroidChartVisible,
                 ],
-                builder: (_, values, __) {
+                builder: (_, values, _) {
                   final isLegendVisible = values.first as bool;
                   final isAndroidChartVisible = values.second as bool;
                   if (!isLegendVisible) return const SizedBox.shrink();
