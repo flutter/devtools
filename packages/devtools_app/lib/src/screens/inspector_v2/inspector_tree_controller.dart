@@ -486,10 +486,6 @@ class InspectorTreeController extends DisposableController
         );
       }
 
-      final style = node.diagnostic?.style;
-      final indented = style != DiagnosticsTreeStyle.flat &&
-          style != DiagnosticsTreeStyle.error;
-
       if (!node.isExpanded && !includeCollapsedRows) return;
       final children = node.children;
       final parentDepth = depth;
@@ -498,7 +494,7 @@ class InspectorTreeController extends DisposableController
         final shouldAddTick = children.length > 1 &&
             children.last != child &&
             !children.last.isProperty &&
-            indented;
+            node.diagnostic?.shouldIndent == true;
 
         buildRowsHelper(
           child,
