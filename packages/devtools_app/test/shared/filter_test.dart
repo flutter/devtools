@@ -453,6 +453,7 @@ class _TestController extends DisposableController
   Map<String, QueryFilterArgument> createQueryFilterArgs() => {
         categoryFilterId: QueryFilterArgument<_TestDataClass>(
           keys: ['cat', 'c'],
+          exampleUsages: ['cat:foo', '-c:bar'],
           dataValueProvider: (data) => data.category,
           substringMatch: false,
         ),

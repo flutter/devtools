@@ -182,12 +182,10 @@ class FilterDialog<T> extends StatefulWidget {
   FilterDialog({
     super.key,
     required this.controller,
+    required this.filteredItem,
     this.includeQueryFilter = true,
-    this.queryInstructions,
   })  : assert(
-          !includeQueryFilter ||
-              (queryInstructions != null &&
-                  controller._queryFilterArgs.isNotEmpty),
+          !includeQueryFilter || controller._queryFilterArgs.isNotEmpty,
         ),
         settingFilterValuesAtOpen = List.generate(
           controller.activeFilter.value.settingFilters.length,
@@ -197,7 +195,7 @@ class FilterDialog<T> extends StatefulWidget {
 
   final FilterControllerMixin<T> controller;
 
-  final String? queryInstructions;
+  final String filteredItem;
 
   final bool includeQueryFilter;
 
@@ -261,8 +259,11 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
               ],
             ),
             const SizedBox(height: defaultSpacing),
-            if (widget.queryInstructions != null) ...[
-              DialogHelpText(helpText: widget.queryInstructions!),
+            if (widget.controller._queryFilterArgs.isNotEmpty) ...[
+              _FilterSyntax(
+                controller: widget.controller,
+                filteredItem: widget.filteredItem,
+              ),
               const SizedBox(height: defaultSpacing),
             ],
           ],
@@ -572,6 +573,7 @@ class QueryFilter {
 class QueryFilterArgument<T> {
   QueryFilterArgument({
     required this.keys,
+    required this.exampleUsages,
     required this.dataValueProvider,
     required this.substringMatch,
     this.values = const [],
@@ -587,6 +589,8 @@ class QueryFilterArgument<T> {
   final String? Function(T data) dataValueProvider;
 
   final bool substringMatch;
+
+  final List<String> exampleUsages;
 
   List<Pattern> values;
 
@@ -649,9 +653,12 @@ class StandaloneFilterField<T> extends StatefulWidget {
   const StandaloneFilterField({
     super.key,
     required this.controller,
+    required this.filteredItem,
   });
 
   final FilterControllerMixin<T> controller;
+
+  final String filteredItem;
 
   @override
   State<StandaloneFilterField<T>> createState() =>
@@ -706,6 +713,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                               context: context,
                               builder: (context) => FilterDialog(
                                 controller: widget.controller,
+                                filteredItem: widget.filteredItem,
                                 includeQueryFilter: false,
                               ),
                             ),
@@ -717,6 +725,19 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                   ),
                 ),
                 additionalSuffixActions: [
+                  if (widget.controller._queryFilterArgs.isNotEmpty)
+                    InputDecorationSuffixButton.help(
+                      onPressed: () {
+                        showDevToolsDialog(
+                          context: context,
+                          title: 'Filter Syntax',
+                          content: _FilterSyntax(
+                            controller: widget.controller,
+                            filteredItem: widget.filteredItem,
+                          ),
+                        );
+                      },
+                    ),
                   DevToolsToggleButton(
                     icon: Codicons.regex,
                     message: 'Use regular expressions',
@@ -739,6 +760,77 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                 },
               );
             },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FilterSyntax<T> extends StatelessWidget {
+  const _FilterSyntax({required this.controller, required this.filteredItem});
+
+  final FilterControllerMixin<T> controller;
+  final String filteredItem;
+
+  static const _separator = ', ';
+
+  @override
+  Widget build(BuildContext context) {
+    final queryFilterArgs = controller._queryFilterArgs.values;
+    final filterKeys = queryFilterArgs.map(
+      (arg) => arg.keys.map((key) => "'$key'").join(_separator),
+    );
+    final filterExampleUsages = queryFilterArgs.map(
+      (arg) => arg.exampleUsages.map((usage) => "'$usage'").join(_separator),
+    );
+
+    final usageTextStyle = Theme.of(context).fixedFontStyle;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '''
+Type a query to show or hide specific ${pluralize(filteredItem, 2)}.
+
+Any text that is not paired with an available filter key below will
+be queried against all available data for each $filteredItem.
+
+Available filters:
+''',
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: defaultSpacing),
+          child: Row(
+            children: [
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final key in filterKeys)
+                      Text(
+                        key,
+                        style: usageTextStyle,
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: extraLargeSpacing),
+              Flexible(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final exampleUsage in filterExampleUsages)
+                      Text(
+                        '(e.g. $exampleUsage)',
+                        style: usageTextStyle,
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ],

@@ -61,6 +61,7 @@ Example queries:
         Expanded(
           child: StandaloneFilterField<LogData>(
             controller: controller,
+            filteredItem: 'log',
           ),
         ),
         const SizedBox(width: denseSpacing),

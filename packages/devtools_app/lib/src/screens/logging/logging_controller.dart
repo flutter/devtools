@@ -178,9 +178,11 @@ class LoggingController extends DisposableController
   static final queryFilterArgs = <String, QueryFilterArgument<LogData>>{
     kindFilterId: QueryFilterArgument<LogData>(
       keys: ['kind', 'k'],
+      exampleUsages: ['k:stderr', '-k:stdout'],
       dataValueProvider: (log) => log.kind,
       substringMatch: true,
     ),
+    // TODO(kenz): include zone and isolate as query filters.
   };
 
   @override
