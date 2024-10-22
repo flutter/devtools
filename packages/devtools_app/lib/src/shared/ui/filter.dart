@@ -91,7 +91,8 @@ mixin FilterControllerMixin<T> on DisposableController
   /// query with arguments may look like 'foo category:bar type:baz'. In this
   /// example, 'category' and 'type' would need to be defined as query filter
   /// arguments.
-  QueryFilterArgs<T> createQueryFilterArgs() => <String, QueryFilterArgument<T>>{};
+  QueryFilterArgs<T> createQueryFilterArgs() =>
+      <String, QueryFilterArgument<T>>{};
 
   @visibleForTesting
   late final queryFilterArgs = createQueryFilterArgs();
@@ -100,7 +101,6 @@ mixin FilterControllerMixin<T> on DisposableController
     final filter = activeFilter.value;
     final queryFilterActive = !filter.queryFilter.isEmpty;
     final settingFilterActive =
-        filter.settingFilters.any((filter) => filter.enabled);
         filter.settingFilters.any((filter) => filter.enabled);
     return queryFilterActive || settingFilterActive;
   }
@@ -645,8 +645,6 @@ extension PatternListExtension on List<Pattern> {
   }
 }
 
-// TODO:: Change screens that use [DevtoolsFilterButton] to use a [StandaloneFilterField]
-// instead.
 /// A text field for controlling the filter query for a [FilterControllerMixin].
 ///
 /// This text field has a button to open a dialog for toggling any toggleable
