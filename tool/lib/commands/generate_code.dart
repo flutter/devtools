@@ -35,29 +35,44 @@ class GenerateCodeCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final upgrade = argResults![_upgradeFlag] as bool;
-    if (upgrade) {
-      await processManager.runProcess(
-        CliCommand.tool(['pub-get', '--only-main', '--upgrade']),
-      );
+    Future<void> runOverPackages(
+      CliCommand command, {
+      String? commandDescription,
+    }) async {
+      for (final packageName in ['devtools_app', 'devtools_test']) {
+        if (commandDescription != null) {
+          print('Running $commandDescription for $packageName...');
+        }
+        final directoryPath = path.join(repo.repoPath, 'packages', packageName);
+        await processManager.runProcess(
+          command,
+          workingDirectory: directoryPath,
+        );
+      }
     }
 
-    for (final packageName in ['devtools_app', 'devtools_test']) {
-      print('Running build_runner build for $packageName');
-      final directoryPath = path.join(repo.repoPath, 'packages', packageName);
-      await processManager.runProcess(
-        CliCommand.flutter(
-          [
-            'pub',
-            'run',
-            'build_runner',
-            'build',
-            '--delete-conflicting-outputs',
-          ],
-        ),
-        workingDirectory: directoryPath,
-      );
-    }
+    await runOverPackages(
+      CliCommand.git(['clean', '-xfd', '.']),
+      commandDescription: 'git clean',
+    );
+
+    final upgrade = argResults![_upgradeFlag] as bool;
+    await processManager.runProcess(
+      CliCommand.tool(['pub-get', '--only-main', if (upgrade) '--upgrade']),
+    );
+
+    await runOverPackages(
+      CliCommand.flutter(
+        [
+          'pub',
+          'run',
+          'build_runner',
+          'build',
+          '--delete-conflicting-outputs',
+        ],
+      ),
+      commandDescription: 'build_runner build',
+    );
 
     print('Adding lint ignores for mocks');
     final mockFile = File(
