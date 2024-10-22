@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import '../common_widgets.dart';
 import '../primitives/utils.dart';
 
-typedef QueryFilterArgs = Map<String, QueryFilterArgument>;
+typedef QueryFilterArgs<T> = Map<String, QueryFilterArgument<T>>;
 typedef SettingFilters<T> = List<SettingFilter<T, Object>>;
 
 // TODO(kenz): consider breaking this up for flat data filtering and tree data
@@ -91,7 +91,7 @@ mixin FilterControllerMixin<T> on DisposableController
   /// query with arguments may look like 'foo category:bar type:baz'. In this
   /// example, 'category' and 'type' would need to be defined as query filter
   /// arguments.
-  QueryFilterArgs createQueryFilterArgs() => <String, QueryFilterArgument>{};
+  QueryFilterArgs<T> createQueryFilterArgs() => <String, QueryFilterArgument<T>>{};
 
   late final _queryFilterArgs = createQueryFilterArgs();
 

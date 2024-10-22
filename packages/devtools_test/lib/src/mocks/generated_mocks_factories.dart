@@ -189,6 +189,8 @@ MockLoggingController createMockLoggingControllerWithDefaults({
       .thenReturn(ValueNotifier<LogData?>(null));
 
   // Set up mock filter state.
+  when(mockLoggingController.createQueryFilterArgs())
+      .thenReturn(LoggingController.queryFilterArgs);
   final activeFilter = FixedValueListenable(
     Filter<LogData>(
       queryFilter: QueryFilter.empty(args: LoggingController.queryFilterArgs),

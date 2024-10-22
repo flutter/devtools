@@ -169,7 +169,7 @@ class CpuProfilerController extends DisposableController
   static const uriFilterId = 'cpu-profiler-uri-filter';
 
   @override
-  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
+  Map<String, QueryFilterArgument<CpuStackFrame>> createQueryFilterArgs() => {
         uriFilterId: QueryFilterArgument<CpuStackFrame>(
           keys: ['uri', 'u'],
           exampleUsages: [
