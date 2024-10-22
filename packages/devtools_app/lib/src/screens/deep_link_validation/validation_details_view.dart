@@ -488,7 +488,7 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
       builder: (
         _,
         GenerateAssetLinksResult? generatedAssetLinks,
-        __,
+        _,
       ) {
         return (generatedAssetLinks != null &&
                 generatedAssetLinks.errorCode.isNotEmpty)
