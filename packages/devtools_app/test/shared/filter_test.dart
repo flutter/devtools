@@ -418,10 +418,6 @@ class _TestController extends DisposableController
 
   final List<_TestDataClass> data;
 
-  // Convenience getters for testing.
-  SettingFilters<_TestDataClass> get settingFilters =>
-      activeFilter.value.settingFilters;
-
   @override
   SettingFilters<_TestDataClass> createSettingFilters() => [
         SettingFilter<_TestDataClass, int>(

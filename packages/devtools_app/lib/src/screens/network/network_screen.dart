@@ -161,10 +161,6 @@ class _NetworkProfilerControls extends StatefulWidget {
 
 class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     with AutoDisposeMixin {
-  late List<NetworkRequest> _requests;
-
-  late List<NetworkRequest> _filteredRequests;
-
   bool _recording = false;
 
   @override
@@ -177,24 +173,14 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         _recording = widget.controller.recordingNotifier.value;
       });
     });
-    _requests = widget.controller.requests.value;
-    addAutoDisposeListener(widget.controller.requests, () {
-      setState(() {
-        _requests = widget.controller.requests.value;
-      });
-    });
-    _filteredRequests = widget.controller.filteredData.value;
-    addAutoDisposeListener(widget.controller.filteredData, () {
-      setState(() {
-        _filteredRequests = widget.controller.filteredData.value;
-      });
-    });
+
+    addAutoDisposeListener(widget.controller.filteredData);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = ScreenSize(context).width;
-    final hasRequests = _filteredRequests.isNotEmpty;
+    final hasRequests = widget.controller.filteredData.value.isNotEmpty;
     return Row(
       children: [
         StartStopRecordingButton(
@@ -218,6 +204,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         ),
         const SizedBox(width: defaultSpacing),
         DownloadButton(
+          tooltip: 'Download as .har file',
           minScreenWidthForTextBeforeScaling:
               _NetworkProfilerControls._includeTextWidth,
           onPressed: widget.controller.exportAsHarFile,
@@ -225,33 +212,24 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           gaSelection: gac.NetworkEvent.downloadAsHar.name,
         ),
         const SizedBox(width: defaultSpacing),
-        const Expanded(child: SizedBox()),
         // TODO(kenz): fix focus issue when state is refreshed
-        SearchField<NetworkController>(
-          searchController: widget.controller,
-          searchFieldEnabled: hasRequests,
-          searchFieldWidth: screenWidth <= MediaSize.xs
-              ? defaultSearchFieldWidth
-              : wideSearchFieldWidth,
+        Expanded(
+          child: SearchField<NetworkController>(
+            searchController: widget.controller,
+            searchFieldEnabled: hasRequests,
+            searchFieldWidth: screenWidth <= MediaSize.xs
+                ? defaultSearchFieldWidth
+                : wideSearchFieldWidth,
+          ),
         ),
         const SizedBox(width: denseSpacing),
-        DevToolsFilterButton(
-          onPressed: _showFilterDialog,
-          isFilterActive: _filteredRequests.length != _requests.length,
+        Expanded(
+          child: StandaloneFilterField<NetworkRequest>(
+            controller: widget.controller,
+            filteredItem: 'request',
+          ),
         ),
       ],
-    );
-  }
-
-  void _showFilterDialog() {
-    unawaited(
-      showDialog(
-        context: context,
-        builder: (context) => FilterDialog<NetworkRequest>(
-          controller: widget.controller,
-          filteredItem: 'request',
-        ),
-      ),
     );
   }
 }
