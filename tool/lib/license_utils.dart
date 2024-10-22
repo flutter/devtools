@@ -9,28 +9,86 @@ import 'dart:math';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
+/// This class contains config file related business logic for
+/// [license_utils.dart].
+///
+/// The [LicenseConfig] reads in config data from a YAML file into an
+/// object that can be used to update license headers.
+/// 
+/// Sample config file:
+/// ---
+/// # sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
+/// remove_licenses:
+///   - |
+///     // This is some <value1> multiline license
+///     // text that should be removed from the file.
+///   - |
+///     /* This is other <value2> multiline license
+///     text that should be removed from the file. */
+///   - |
+///     # This is more <value3> multiline license
+///     # text that should be removed from the file.
+///   - |
+///     // This is some multiline license text to
+///     // remove that does not contain a stored value.
+/// # sequence of license text strings that should be added to the top of a file. {value} will be replaced.
+/// add_licenses: 
+///   - |
+///     // This is some <value1> multiline license
+///     // text that should be added to the file.
+///   - |
+///     # This is other <value3> multiline license
+///     # text that should be added to the file.
+///   - |
+///     // This is some multiline license text to
+///     // add that does not contain a stored value.
+/// # defines which files should have license text added or updated.
+/// update_paths:
+///   # path(s) to recursively check for files to remove/add license
+///   include:
+///       - /repo_root
+///   # path(s) to recursively check for files to ignore
+///   exclude:
+///     # exclude everything in the /repo_root/sub_dir1 directory
+///     - /repo_root/sub_dir1/
+///     # exclude the given files
+///     - /repo_root/sub_dir2/exclude1.ext1
+///     - /repo_root/sub_dir2/sub_dir3/exclude2.ext2
+///   file_types:
+///     # extension
+///     ext1:
+///       # one or more indices of remove_licenses to remove
+///       remove:
+///         - 0
+///         - 1
+///       # index of add_licenses to add
+///       add: 0
+///     ext2:
+///       remove:
+///         - 2
+///       add: 1
 class LicenseConfig {
   /// Sequence of license text strings that should be matched against at the top
   /// of a file and removed.
-  YamlList removeLicenses = YamlList();
+  late final YamlList removeLicenses;
 
   /// Sequence of license text strings that should be added to the top of a
   /// file.
-  YamlList addLicenses = YamlList();
+  late final YamlList addLicenses;
 
   /// Path(s) to recursively check for file to remove/add license text
-  YamlList includePaths = YamlList();
+  late final YamlList includePaths;
 
   /// Path(s) to recursively check for files to ignore
-  YamlList excludePaths = YamlList();
+  late final YamlList excludePaths;
 
   /// Contains the extension (without a '.') and the associated indices
   /// of [removeLicenses] to remove and index of [addLicenses] to add for the
   /// file type.
-  YamlMap fileTypes = YamlMap();
+  late final YamlMap fileTypes;
 
   /// Builds a [LicenseConfig] from the provided values.
-  LicenseConfig.fromValues( {
+  LicenseConfig( {
     required this.removeLicenses,
     required this.addLicenses,
     required this.includePaths,
@@ -40,17 +98,19 @@ class LicenseConfig {
 
   /// Reads the contents of the yaml [file] and parses it into a [LicenseConfig]
   /// object.
-  LicenseConfig.fromYamlFile(File file) {
+  factory LicenseConfig.fromYamlFile(File file) {
     final String yamlString = file.readAsStringSync();
     final YamlDocument yamlDoc = loadYamlDocument(yamlString);
     final YamlMap yaml = yamlDoc.contents as YamlMap;
     final YamlMap updatePaths = yaml['update_paths'];
 
-    removeLicenses = yaml['remove_licenses'];
-    addLicenses = yaml['add_licenses'];
-    includePaths = updatePaths['include'];
-    excludePaths = updatePaths['exclude'];
-    fileTypes = updatePaths['file_types'];
+    return LicenseConfig(
+      removeLicenses: yaml['remove_licenses'],
+      addLicenses: yaml['add_licenses'],
+      includePaths: updatePaths ['include'],
+      excludePaths: updatePaths['exclude'],
+      fileTypes: updatePaths['file_types'],
+    );
   }
 
   /// Returns the list of indices for the given [ext] of [removeLicenses]
@@ -98,6 +158,11 @@ class LicenseConfig {
   }
 }
 
+/// This class contains license update related business logic for
+/// [license_utils.dart].
+///
+/// The [LicenseHeader] uses config data from [LicenseConfig] to update
+/// license text in configured files.
 class LicenseHeader {
   /// If the [file] matches the given [existingLicenseText] within the first
   /// number of [byteCount] bytes, return the 'existing_header' and
