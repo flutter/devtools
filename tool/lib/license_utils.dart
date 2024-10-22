@@ -4,11 +4,40 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 class LicenseConfig {
+  /// Sequence of license text strings that should be matched against at the top
+  /// of a file and removed.
+  YamlList removeLicenses = YamlList();
+
+  /// Sequence of license text strings that should be added to the top of a
+  /// file.
+  YamlList addLicenses = YamlList();
+
+  /// Path(s) to recursively check for file to remove/add license text
+  YamlList includePaths = YamlList();
+
+  /// Path(s) to recursively check for files to ignore
+  YamlList excludePaths = YamlList();
+
+  /// Contains the extension (without a '.') and the associated indices
+  /// of [removeLicenses] to remove and index of [addLicenses] to add for the
+  /// file type.
+  YamlMap fileTypes = YamlMap();
+
+  /// Builds a [LicenseConfig] from the provided values.
+  LicenseConfig.fromValues( {
+    required this.removeLicenses,
+    required this.addLicenses,
+    required this.includePaths,
+    required this.excludePaths,
+    required this.fileTypes,
+  });
+
   /// Reads the contents of the yaml [file] and parses it into a [LicenseConfig]
   /// object.
   LicenseConfig.fromYamlFile(File file) {
@@ -24,26 +53,17 @@ class LicenseConfig {
     fileTypes = updatePaths['file_types'];
   }
 
-  /// Builds a [LicenseConfig] from the provided values.
-  LicenseConfig.fromValues(
-    this.removeLicenses,
-    this.addLicenses,
-    this.includePaths,
-    this.excludePaths,
-    this.fileTypes,
-  );
-
   /// Returns the list of indices for the given [ext] of [removeLicenses]
   /// containing the license text to remove.
   YamlList getRemoveIndicesForExtension(String ext) {
-    final YamlMap fileType = fileTypes[ext];
+    final YamlMap fileType = fileTypes[_removeDotFromExtension(ext)];
     return fileType['remove'] as YamlList;
   }
 
   /// Returns the index for the given [ext] of [removeLicenses] containing the
   /// license text to remove.
   int getAddIndexForExtension(String ext) {
-    final YamlMap fileType = fileTypes[ext];
+    final YamlMap fileType = fileTypes[_removeDotFromExtension(ext)];
     return fileType['add'];
   }
 
@@ -67,11 +87,15 @@ class LicenseConfig {
     return !included || excluded;
   }
 
-  YamlList removeLicenses = YamlList();
-  YamlList addLicenses = YamlList();
-  YamlList includePaths = YamlList();
-  YamlList excludePaths = YamlList();
-  YamlMap fileTypes = YamlMap();
+  /// The config expects an extension without a starting dot, so remove
+  /// any that might exist (e.g. in the extension that is returned by
+  /// [p.extension]).
+  String _removeDotFromExtension(String ext) {
+      if (ext.startsWith('.')) {
+        return ext.replaceFirst('.', '');
+      }
+      return ext;
+  }
 }
 
 class LicenseHeader {
@@ -146,14 +170,14 @@ class LicenseHeader {
   /// in the [config]. Returns a list of file paths that were updated.
   Future<Map<String, List<String>>> bulkUpdate(
       Directory directory, LicenseConfig config,) async {
-    final List<String> includedPaths = [];
-    final List<String> updatedPaths = [];
+    final includedPaths = <String>[];
+    final updatedPaths = <String>[];
     final List<File> files =
         directory.listSync(recursive: true).whereType<File>().toList();
     for (final file in files) {
       if (!config.shouldExclude(file)) {
         includedPaths.add(file.path);
-        final String extension = p.extension(file.path).replaceAll('.', '');
+        final String extension = p.extension(file.path);
         final YamlList removeIndices =
             config.getRemoveIndicesForExtension(extension);
         for (final removeIndex in removeIndices) {
@@ -165,13 +189,12 @@ class LicenseHeader {
           const int buffer = 20;
           // Assume that the license text will be near the start of the file,
           // but add in some buffer.
-          int byteCount = existingLicenseTextLength + buffer;
-          byteCount = fileLength > byteCount ? byteCount : fileLength;
+          final byteCount = min(existingLicenseTextLength + buffer, fileLength);
           final Map<String, String> replacementInfo = await getReplacementInfo(
             file,
             existingLicenseText,
             replacementLicenseText,
-            existingLicenseText.length,
+            byteCount,
           );
           final String? existingHeader =
               replacementInfo[LicenseHeader.existingHeaderKey];
@@ -203,10 +226,10 @@ class LicenseHeader {
     };
   }
 
-  static const String existingHeaderKey = 'existing_header';
-  static const String replacementHeaderKey = 'replacement_header';
-  static const String includedPathsKey = 'included_paths';
-  static const String updatedPathsKey = 'update_paths';
+  static const existingHeaderKey = 'existing_header';
+  static const replacementHeaderKey = 'replacement_header';
+  static const includedPathsKey = 'included_paths';
+  static const updatedPathsKey = 'update_paths';
 
   Map<String, String> _processHeaders(
     String storedName,
