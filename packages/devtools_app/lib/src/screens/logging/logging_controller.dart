@@ -178,7 +178,7 @@ class LoggingController extends DisposableController
   static final queryFilterArgs = <String, QueryFilterArgument<LogData>>{
     kindFilterId: QueryFilterArgument<LogData>(
       keys: ['kind', 'k'],
-      exampleUsages: ['k:stderr', '-k:stdout'],
+      exampleUsages: ['k:stderr', '-k:stdout,gc'],
       dataValueProvider: (log) => log.kind,
       substringMatch: true,
     ),
