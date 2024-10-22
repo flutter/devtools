@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
-abstract class NetworkRequest with ChangeNotifier, SearchableDataMixin {
+abstract class NetworkRequest
+    with ChangeNotifier, SearchableDataMixin, Serializable {
   String get method;
 
   String get uri;
@@ -180,4 +182,60 @@ class Socket extends NetworkRequest {
 
   @override
   int get hashCode => id.hashCode;
+
+  SocketStatistic get socketData => _socket;
+
+  static Socket fromJson(Map<String, Object?> json) {
+    return Socket(
+      SocketStatistic.parse(json['socket'] as Map<String, dynamic>)!,
+      json['timelineMicrosBase'] as int,
+    );
+  }
+
+  @override
+  Map<String, Object?> toJson() {
+    return {
+      SocketJsonKey.timelineMicrosBase.name: _timelineMicrosBase,
+      SocketJsonKey.socket.name: _socket.toJson(),
+    };
+  }
+}
+
+extension on SocketStatistic {
+  Map<String, Object?> toJson() {
+    return {
+      SocketJsonKey.id.name: id,
+      SocketJsonKey.startTime.name: startTime,
+      SocketJsonKey.endTime.name: endTime,
+      //TODO verify if these timings are in correct format
+      SocketJsonKey.lastReadTime.name: lastReadTime,
+      SocketJsonKey.lastWriteTime.name: lastWriteTime,
+      SocketJsonKey.socketType.name: socketType,
+      SocketJsonKey.address.name: address,
+      SocketJsonKey.port.name: port,
+      SocketJsonKey.readBytes.name: readBytes,
+      SocketJsonKey.writeBytes.name: writeBytes,
+    };
+  }
+}
+
+enum SocketJsonKey {
+  id,
+  startTime,
+  endTime,
+  lastReadTime,
+  lastWriteTime,
+  socketType,
+  address,
+  port,
+  readBytes,
+  writeBytes,
+  timelineMicrosBase,
+  socket,
+}
+
+extension SocketExtension on List<Socket> {
+  List<SocketStatistic> get mapToSocketStatistics {
+    return map((socket) => socket._socket).toList();
+  }
 }
