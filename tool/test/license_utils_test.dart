@@ -508,8 +508,8 @@ update_paths:
     # exclude the given files
     - ${testDirectory.path}/repo_root/sub_dir2/exclude1.ext1
     - ${testDirectory.path}/repo_root/sub_dir2/sub_dir3/exclude2.ext2
-  # extensions
   file_types:
+    # extension
     ext1:
       # one or more indices of remove_licenses to remove
       remove:
