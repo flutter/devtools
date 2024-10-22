@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:devtools_tool/license_utils.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
 
 import '../../packages/devtools_shared/test/helpers/helpers.dart';
 
@@ -70,7 +69,7 @@ void main() {
     });
 
     test('remove licenses text is parsed correctly', () {
-      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      final config = LicenseConfig.fromYamlFile(configFile);
 
       expect(config.removeLicenses.length, equals(4));
 
@@ -96,7 +95,7 @@ text that should be removed from the file. */
     });
 
     test('add licenses text is parsed correctly', () {
-      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      final config = LicenseConfig.fromYamlFile(configFile);
 
       expect(config.addLicenses.length, equals(3));
 
@@ -117,14 +116,14 @@ text that should be removed from the file. */
     });
 
     test('file types parsed correctly', () {
-      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      final config = LicenseConfig.fromYamlFile(configFile);
 
-      YamlList removeIndices = config.getRemoveIndicesForExtension('ext1');
+      var removeIndices = config.getRemoveIndicesForExtension('ext1');
       expect(removeIndices.length, equals(2));
       expect(removeIndices[0], equals(0));
       expect(removeIndices[1], equals(1));
 
-      int addIndex = config.getAddIndexForExtension('ext1');
+      var addIndex = config.getAddIndexForExtension('ext1');
       expect(addIndex, equals(0));
 
       removeIndices = config.getRemoveIndicesForExtension('ext2');
@@ -136,7 +135,7 @@ text that should be removed from the file. */
     });
 
     test("included files shouldn't be excluded", () {
-      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      final config = LicenseConfig.fromYamlFile(configFile);
       expect(config.shouldExclude(testFile1), false);
       expect(config.shouldExclude(testFile2), false);
       expect(config.shouldExclude(testFile3), false);
@@ -147,22 +146,22 @@ text that should be removed from the file. */
     });
 
     test('excluded files should be excluded', () {
-      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      final config = LicenseConfig.fromYamlFile(configFile);
       expect(config.shouldExclude(excludeFile1), true);
       expect(config.shouldExclude(excludeFile2), true);
     });
 
     test('files in an excluded directory should be excluded', () {
-      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      final config = LicenseConfig.fromYamlFile(configFile);
       expect(config.shouldExclude(testFile4), true);
       expect(config.shouldExclude(testFile5), true);
       expect(config.shouldExclude(testFile6), true);
     });
 
     test('files not in an included directory should be excluded', () {
-      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
+      final config = LicenseConfig.fromYamlFile(configFile);
 
-      final File fileNotInTestDirectory = File('test.txt');
+      final fileNotInTestDirectory = File('test.txt');
       expect(config.shouldExclude(fileNotInTestDirectory), true);
     });
   });
@@ -184,9 +183,9 @@ text that should be removed from the file. */
 // text that should be added to the file.''';
 
       final replacementInfo = await _getTestReplacementInfo(
-        existingLicenseText,
-        testFile10,
-        replacementLicenseText,
+        testFile: testFile10,
+        existingLicenseText: existingLicenseText,
+        replacementLicenseText: replacementLicenseText,
       );
 
       const String expectedExistingHeader =
@@ -214,8 +213,8 @@ text that should be removed from the file. */
     });
 
     test('stored value preserved in replacement header', () async {
-      final List<File> testFiles = [testFile1, testFile2, testFile3];
-      final List<String> existingLicenseTexts = [
+      final testFiles = [testFile1, testFile2, testFile3];
+      final existingLicenseTexts = [
         '''// This is some <value1> multiline license
 // text that should be removed from the file.''',
         '''# This is more <value2> multiline license
@@ -223,7 +222,7 @@ text that should be removed from the file. */
         '''/* This is other <value3> multiline license
 text that should be removed from the file. */''',
       ];
-      final List<String> replacementLicenseTexts = [
+      final replacementLicenseTexts = [
         '''// This is some <value1> multiline license
 // text that should be added to the file.''',
         '''# This is more <value2> multiline license
@@ -231,7 +230,7 @@ text that should be removed from the file. */''',
         '''/* This is other <value3> multiline license
 text that should be added to the file. */''',
       ];
-      final List<String> expectedExistingHeaders = [
+      final expectedExistingHeaders = [
         '''// This is some 2015 multiline license
 // text that should be removed from the file.''',
         '''# This is more 2001 multiline license
@@ -239,7 +238,7 @@ text that should be added to the file. */''',
         '''/* This is other 1999 multiline license
 text that should be removed from the file. */''',
       ];
-      final List<String> expectedReplacementHeaders = [
+      final expectedReplacementHeaders = [
         '''// This is some 2015 multiline license
 // text that should be added to the file.''',
         '''# This is more 2001 multiline license
@@ -250,9 +249,9 @@ text that should be added to the file. */''',
 
       for (var i = 0; i < testFiles.length; i++) {
         final replacementInfo = await _getTestReplacementInfo(
-          existingLicenseTexts[i],
-          testFiles[i],
-          replacementLicenseTexts[i],
+          testFile: testFiles[i],
+          existingLicenseText: existingLicenseTexts[i],
+          replacementLicenseText: replacementLicenseTexts[i],
         );
 
         expect(
@@ -280,10 +279,15 @@ text that should be added to the file. */''',
     });
 
     test('update skipped if license text not found', () async {
-      String errorMessage = '';
-      final LicenseHeader header = LicenseHeader();
+      var errorMessage = '';
+      final header = LicenseHeader();
       try {
-        await header.getReplacementInfo(testFile9, 'test', 'test', 50);
+        await header.getReplacementInfo(
+          file: testFile9,
+          existingLicenseText: 'test',
+          replacementLicenseText: 'test',
+          byteCount: 50,
+        );
       } on Exception catch (e) {
         errorMessage = e.toString();
       }
@@ -296,10 +300,14 @@ text that should be added to the file. */''',
     });
 
     test("update skipped if file can't be read", () async {
-      String errorMessage = '';
+      var errorMessage = '';
       final LicenseHeader header = LicenseHeader();
       try {
-        await header.getReplacementInfo(File('bad.txt'), 'test', 'test', 50);
+        await header.getReplacementInfo(
+            file: File('bad.txt'),
+            existingLicenseText: 'test',
+            replacementLicenseText: 'test',
+            byteCount: 50);
       } on Exception catch (e) {
         errorMessage = e.toString();
       }
@@ -312,26 +320,26 @@ text that should be added to the file. */''',
     });
 
     test('license header can be rewritten on disk', () async {
-      final LicenseHeader header = LicenseHeader();
-      const String existingHeader = '''// This is some 2015 multiline license
+      final header = LicenseHeader();
+      const existingHeader = '''// This is some 2015 multiline license
 // text that should be removed from the file.''';
-      const String replacementHeader = '''// This is some 2015 multiline license
+      const replacementHeader = '''// This is some 2015 multiline license
 // text that should be added to the file.''';
-      final File rewrittenFile = await header.rewriteLicenseHeader(
-        testFile1,
-        existingHeader,
-        replacementHeader,
+      final rewrittenFile = header.rewriteLicenseHeader(
+        file: testFile1,
+        existingHeader: existingHeader,
+        replacementHeader: replacementHeader,
       );
 
-      expect(await rewrittenFile.length(), greaterThan(0));
+      expect(rewrittenFile.lengthSync(), greaterThan(0));
 
-      final String existingContents = await testFile1.readAsString();
+      final String existingContents = testFile1.readAsStringSync();
       expect(
         existingContents.substring(0, existingHeader.length),
         equals(existingHeader),
       );
 
-      final String rewrittenContents = await rewrittenFile.readAsString();
+      final String rewrittenContents = rewrittenFile.readAsStringSync();
       expect(
         rewrittenContents.substring(0, replacementHeader.length),
         equals(replacementHeader),
@@ -345,15 +353,14 @@ text that should be added to the file. */''',
 
     test('license headers can be updated in bulk', () async {
       await _setupTestConfigFile();
-      final LicenseConfig config = LicenseConfig.fromYamlFile(configFile);
-      final LicenseHeader header = LicenseHeader();
-      final Map<String, List<String>> results = await header.bulkUpdate(
-        testDirectory,
-        config,
+      final config = LicenseConfig.fromYamlFile(configFile);
+      final header = LicenseHeader();
+      final results = await header.bulkUpdate(
+        directory: testDirectory,
+        config: config,
       );
 
-      final List<String>? includedPaths =
-          results[LicenseHeader.includedPathsKey];
+      final includedPaths = results[LicenseHeader.includedPathsKey];
       expect(includedPaths, isNotNull);
       expect(includedPaths?.length, equals(7));
       // Order is not guaranteed
@@ -365,7 +372,7 @@ text that should be added to the file. */''',
       expect(includedPaths?.contains(testFile9.path), true);
       expect(includedPaths?.contains(testFile10.path), true);
 
-      final List<String>? updatedPaths = results[LicenseHeader.updatedPathsKey];
+      final updatedPaths = results[LicenseHeader.updatedPathsKey];
       expect(updatedPaths, isNotNull);
       // testFile9 and testFile10 are intentionally misconfigured and so they
       // won't be updated even though they are on the include list.
@@ -387,49 +394,46 @@ text that should be added to the file. */''',
       // So this test will always fail. Set skip to false to run locally, but
       // don't commit the change to the repository.
 
-      // TODO: [mossmana] This test should stop being skipped only when it is safe to check just new files going forward.
-      final RegExp rootPathMatcher = RegExp(r'(.*[/|\\]devtools[/|\\]).*');
-      // TODO: [mossmana] make this work on Google3
+      // TODO(mossmana): This test should stop being skipped only when it is safe to check just new files going forward.
+      final rootPathMatcher = RegExp(r'(.*[/|\\]devtools[/|\\]).*');
+      // TODO(mossmana): make this work on Google3
       expect(rootPathMatcher.hasMatch(Directory.current.path), true);
-      final RegExpMatch? match =
-          rootPathMatcher.firstMatch(Directory.current.path);
-      final String? rootPath = match?.group(1);
+      final match = rootPathMatcher.firstMatch(Directory.current.path);
+      final rootPath = match?.group(1);
       expect(rootPath, isNotNull);
 
-      final List<String> failedPaths = [];
+      final failedPaths = <String>[];
       final subDirectories = ['packages', 'tool'];
 
-      for (var subDirectory in subDirectories) {
-        final Directory checkedDirectory =
-            Directory('$rootPath$subDirectory');
+      for (final subDirectory in subDirectories) {
+        final checkedDirectory = Directory('$rootPath$subDirectory');
         expect(
           checkedDirectory.existsSync(),
           true,
           reason: '$checkedDirectory does not exist.',
         );
-        final List<File> files = checkedDirectory
+        final files = checkedDirectory
             .listSync(recursive: true)
             .whereType<File>()
             .toList();
-        final LicenseHeader header = LicenseHeader();
+        final header = LicenseHeader();
         const goodReplacementLicenseText =
             '''// Copyright <copyright_date> The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.''';
         for (final file in files) {
-          final String extension = p.extension(file.path);
+          final extension = p.extension(file.path);
           // Only check dart source files and exclude any files that are
           // downloaded as part of the flutter-sdk package dependencies.
           if (extension != '.dart' || file.path.contains('flutter-sdk')) {
             continue;
           }
           try {
-            final Map<String, String> replacementInfo =
-                await header.getReplacementInfo(
-              file,
-              goodReplacementLicenseText,
-              goodReplacementLicenseText,
-              goodReplacementLicenseText.length,
+            final replacementInfo = await header.getReplacementInfo(
+              file: file,
+              existingLicenseText: goodReplacementLicenseText,
+              replacementLicenseText: '',
+              byteCount: goodReplacementLicenseText.length,
             );
             if (replacementInfo.isEmpty) {
               failedPaths.add(file.path);
@@ -450,18 +454,18 @@ text that should be added to the file. */''',
   );
 }
 
-Future<Map<String, String>> _getTestReplacementInfo(
-  String existingLicenseText,
-  File testFile,
-  String replacementLicenseText,
-) async {
-  final LicenseHeader header = LicenseHeader();
+Future<Map<String, String>> _getTestReplacementInfo({
+  required File testFile,
+  required String existingLicenseText,
+  required String replacementLicenseText,
+}) async {
+  final header = LicenseHeader();
   final bytes = utf8.encode(existingLicenseText);
   return await header.getReplacementInfo(
-    testFile,
-    existingLicenseText,
-    replacementLicenseText,
-    bytes.length + 1,
+    file: testFile,
+    existingLicenseText: existingLicenseText,
+    replacementLicenseText: replacementLicenseText,
+    byteCount: bytes.length + 1,
   );
 }
 
@@ -522,7 +526,7 @@ update_paths:
         - 2
       add: 1''';
 
-  await configFile.writeAsString(contents);
+  configFile.writeAsStringSync(contents, flush: true);
 }
 
 /// Sets up the directory structure for the tests
@@ -557,18 +561,18 @@ Future<void> _setupTestDirectoryStructure() async {
 
   testFile1 = File(p.join(repoRoot.path, 'test1.ext1'))
     ..createSync(recursive: true);
-  await testFile1.writeAsString(licenseText1 + extraText);
+  testFile1.writeAsStringSync(licenseText1 + extraText, flush: true);
 
   testFile2 = File(p.join(repoRoot.path, 'test2.ext2'))
     ..createSync(recursive: true);
-  await testFile2.writeAsString(licenseText3 + extraText);
+  testFile2.writeAsStringSync(licenseText3 + extraText, flush: true);
 
   // Setup /repo_root/.hidden directory structure
   Directory(p.join(repoRoot.path, '.hidden')).createSync(recursive: true);
 
   testFile3 = File(p.join(repoRoot.path, '.hidden', 'test3.ext1'))
     ..createSync(recursive: true);
-  await testFile3.writeAsString(licenseText2 + extraText);
+  testFile3.writeAsStringSync(licenseText2 + extraText, flush: true);
 
   // Setup /repo_root/sub_dir1/sub_dir1a/sub_dir1b directory structure
   Directory(
@@ -582,24 +586,24 @@ Future<void> _setupTestDirectoryStructure() async {
 
   testFile4 = File(p.join(repoRoot.path, 'sub_dir1', 'test4.ext1'))
     ..createSync(recursive: true);
-  await testFile4.writeAsString(licenseText1 + extraText);
+  testFile4.writeAsStringSync(licenseText1 + extraText, flush: true);
   testFile5 = File(p.join(repoRoot.path, 'sub_dir1', 'sub_dir1a', 'test5.ext2'))
     ..createSync(recursive: true);
-  await testFile5.writeAsString(licenseText3 + extraText);
+  testFile5.writeAsStringSync(licenseText3 + extraText, flush: true);
   testFile6 = File(
     p.join(repoRoot.path, 'sub_dir1', 'sub_dir1a', 'sub_dir1b', 'test6.ext2'),
   )..createSync(recursive: true);
-  await testFile6.writeAsString(licenseText3 + extraText);
+  testFile6.writeAsStringSync(licenseText3 + extraText, flush: true);
 
   // Setup /repo_root/sub_dir2 directory structure
   Directory(p.join(repoRoot.path, 'sub_dir2')).createSync(recursive: true);
 
   excludeFile1 = File(p.join(repoRoot.path, 'sub_dir2', 'exclude1.ext1'))
     ..createSync(recursive: true);
-  await excludeFile1.writeAsString(licenseText2 + extraText);
+  excludeFile1.writeAsStringSync(licenseText2 + extraText, flush: true);
   testFile7 = File(p.join(repoRoot.path, 'sub_dir2', 'test7.ext2'))
     ..createSync(recursive: true);
-  await testFile7.writeAsString(licenseText3 + extraText);
+  testFile7.writeAsStringSync(licenseText3 + extraText, flush: true);
 
   // Setup /repo_root/sub_dir2/sub_dir3 directory structure
   Directory(
@@ -612,11 +616,11 @@ Future<void> _setupTestDirectoryStructure() async {
 
   testFile8 = File(p.join(repoRoot.path, 'sub_dir2', 'sub_dir3', 'test8.ext1'))
     ..createSync(recursive: true);
-  await testFile8.writeAsString(licenseText2 + extraText);
+  testFile8.writeAsStringSync(licenseText2 + extraText, flush: true);
   excludeFile2 =
       File(p.join(repoRoot.path, 'sub_dir2', 'sub_dir3', 'exclude2.ext2'))
         ..createSync(recursive: true);
-  await excludeFile2.writeAsString(licenseText3 + extraText);
+  excludeFile2.writeAsStringSync(licenseText3 + extraText, flush: true);
 
   // Setup /repo_root/sub_dir2/sub_dir4 directory structure
   Directory(
@@ -629,7 +633,7 @@ Future<void> _setupTestDirectoryStructure() async {
 
   testFile9 = File(p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'test9.ext1'))
     ..createSync(recursive: true);
-  await testFile9.writeAsString(extraText);
+  testFile9.writeAsStringSync(extraText, flush: true);
 
   // Setup /repo_root/sub_dir2/sub_dir4/sub_dir5 directory structure
   Directory(
@@ -644,5 +648,5 @@ Future<void> _setupTestDirectoryStructure() async {
   testFile10 = File(
     p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'sub_dir5', 'test10.ext2'),
   )..createSync(recursive: true);
-  await testFile10.writeAsString(licenseText4 + extraText);
+  testFile10.writeAsStringSync(licenseText4 + extraText, flush: true);
 }
