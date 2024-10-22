@@ -450,9 +450,10 @@ class _TestController extends DisposableController
   static const categoryFilterId = 'category-filter';
 
   @override
-  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
+  Map<String, QueryFilterArgument<_TestDataClass>> createQueryFilterArgs() => {
         categoryFilterId: QueryFilterArgument<_TestDataClass>(
           keys: ['cat', 'c'],
+          exampleUsages: ['cat:foo', '-c:bar'],
           dataValueProvider: (data) => data.category,
           substringMatch: false,
         ),

@@ -124,6 +124,15 @@ final class InputDecorationSuffixButton extends StatelessWidget {
         tooltip: 'Close',
       );
 
+  factory InputDecorationSuffixButton.help({
+    required VoidCallback? onPressed,
+  }) =>
+      InputDecorationSuffixButton(
+        icon: Icons.question_mark,
+        onPressed: onPressed,
+        tooltip: 'Help',
+      );
+
   final IconData icon;
   final VoidCallback? onPressed;
   final String? tooltip;

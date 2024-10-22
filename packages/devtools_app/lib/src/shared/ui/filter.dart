@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import '../common_widgets.dart';
 import '../primitives/utils.dart';
 
-typedef QueryFilterArgs = Map<String, QueryFilterArgument>;
+typedef QueryFilterArgs<T> = Map<String, QueryFilterArgument<T>>;
 typedef SettingFilters<T> = List<SettingFilter<T, Object>>;
 
 // TODO(kenz): consider breaking this up for flat data filtering and tree data
@@ -33,7 +33,7 @@ typedef SettingFilters<T> = List<SettingFilter<T, Object>>;
 /// [initFilterController].
 mixin FilterControllerMixin<T> on DisposableController
     implements AutoDisposeControllerMixin {
-  final filteredData = ListValueNotifier<T>([]);
+  final filteredData = ListValueNotifier<T>(<T>[]);
 
   final useRegExp = ValueNotifier<bool>(false);
 
@@ -47,7 +47,7 @@ mixin FilterControllerMixin<T> on DisposableController
 
   late final _activeFilter = ValueNotifier<Filter<T>>(
     Filter(
-      queryFilter: QueryFilter.empty(args: _queryFilterArgs),
+      queryFilter: QueryFilter.empty(args: queryFilterArgs),
       settingFilters: _settingFilters,
     ),
   );
@@ -57,10 +57,10 @@ mixin FilterControllerMixin<T> on DisposableController
       queryFilter: query != null
           ? QueryFilter.parse(
               query,
-              args: _queryFilterArgs,
+              args: queryFilterArgs,
               useRegExp: useRegExp.value,
             )
-          : QueryFilter.empty(args: _queryFilterArgs),
+          : QueryFilter.empty(args: queryFilterArgs),
       settingFilters: settingFilters ?? _settingFilters,
     );
   }
@@ -91,9 +91,11 @@ mixin FilterControllerMixin<T> on DisposableController
   /// query with arguments may look like 'foo category:bar type:baz'. In this
   /// example, 'category' and 'type' would need to be defined as query filter
   /// arguments.
-  QueryFilterArgs createQueryFilterArgs() => <String, QueryFilterArgument>{};
+  QueryFilterArgs<T> createQueryFilterArgs() =>
+      <String, QueryFilterArgument<T>>{};
 
-  late final _queryFilterArgs = createQueryFilterArgs();
+  @visibleForTesting
+  late final queryFilterArgs = createQueryFilterArgs();
 
   bool get isFilterActive {
     final filter = activeFilter.value;
@@ -162,13 +164,13 @@ mixin FilterControllerMixin<T> on DisposableController
     for (final settingFilter in _settingFilters) {
       settingFilter.setting.value = settingFilter.defaultValue;
     }
-    _queryFilterArgs.forEach((key, value) => value.reset());
+    queryFilterArgs.forEach((key, value) => value.reset());
   }
 
   void resetFilter() {
     _resetToDefaultFilter();
     _activeFilter.value = Filter(
-      queryFilter: QueryFilter.empty(args: _queryFilterArgs),
+      queryFilter: QueryFilter.empty(args: queryFilterArgs),
       settingFilters: _settingFilters,
     );
   }
@@ -182,12 +184,10 @@ class FilterDialog<T> extends StatefulWidget {
   FilterDialog({
     super.key,
     required this.controller,
+    required this.filteredItem,
     this.includeQueryFilter = true,
-    this.queryInstructions,
   })  : assert(
-          !includeQueryFilter ||
-              (queryInstructions != null &&
-                  controller._queryFilterArgs.isNotEmpty),
+          !includeQueryFilter || controller.queryFilterArgs.isNotEmpty,
         ),
         settingFilterValuesAtOpen = List.generate(
           controller.activeFilter.value.settingFilters.length,
@@ -197,7 +197,7 @@ class FilterDialog<T> extends StatefulWidget {
 
   final FilterControllerMixin<T> controller;
 
-  final String? queryInstructions;
+  final String filteredItem;
 
   final bool includeQueryFilter;
 
@@ -261,8 +261,11 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
               ],
             ),
             const SizedBox(height: defaultSpacing),
-            if (widget.queryInstructions != null) ...[
-              DialogHelpText(helpText: widget.queryInstructions!),
+            if (widget.controller.queryFilterArgs.isNotEmpty) ...[
+              _FilterSyntax(
+                controller: widget.controller,
+                filteredItem: widget.filteredItem,
+              ),
               const SizedBox(height: defaultSpacing),
             ],
           ],
@@ -572,6 +575,7 @@ class QueryFilter {
 class QueryFilterArgument<T> {
   QueryFilterArgument({
     required this.keys,
+    required this.exampleUsages,
     required this.dataValueProvider,
     required this.substringMatch,
     this.values = const [],
@@ -587,6 +591,8 @@ class QueryFilterArgument<T> {
   final String? Function(T data) dataValueProvider;
 
   final bool substringMatch;
+
+  final List<String> exampleUsages;
 
   List<Pattern> values;
 
@@ -639,8 +645,6 @@ extension PatternListExtension on List<Pattern> {
   }
 }
 
-// TODO:: Change screens that use [DevtoolsFilterButton] to use a [StandaloneFilterField]
-// instead.
 /// A text field for controlling the filter query for a [FilterControllerMixin].
 ///
 /// This text field has a button to open a dialog for toggling any toggleable
@@ -649,9 +653,12 @@ class StandaloneFilterField<T> extends StatefulWidget {
   const StandaloneFilterField({
     super.key,
     required this.controller,
+    required this.filteredItem,
   });
 
   final FilterControllerMixin<T> controller;
+
+  final String filteredItem;
 
   @override
   State<StandaloneFilterField<T>> createState() =>
@@ -697,7 +704,6 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                   child: ValueListenableBuilder<Filter>(
                     valueListenable: widget.controller.activeFilter,
                     builder: (context, _, _) {
-                      // TODO(https://github.com/flutter/devtools/issues/8426): support filtering by log level.
                       return DevToolsFilterButton(
                         message: 'More filters',
                         onPressed: () {
@@ -706,6 +712,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                               context: context,
                               builder: (context) => FilterDialog(
                                 controller: widget.controller,
+                                filteredItem: widget.filteredItem,
                                 includeQueryFilter: false,
                               ),
                             ),
@@ -717,6 +724,19 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                   ),
                 ),
                 additionalSuffixActions: [
+                  if (widget.controller.queryFilterArgs.isNotEmpty)
+                    InputDecorationSuffixButton.help(
+                      onPressed: () {
+                        showDevToolsDialog(
+                          context: context,
+                          title: 'Filter Syntax',
+                          content: _FilterSyntax(
+                            controller: widget.controller,
+                            filteredItem: widget.filteredItem,
+                          ),
+                        );
+                      },
+                    ),
                   DevToolsToggleButton(
                     icon: Codicons.regex,
                     message: 'Use regular expressions',
@@ -739,6 +759,78 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                 },
               );
             },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FilterSyntax<T> extends StatelessWidget {
+  const _FilterSyntax({required this.controller, required this.filteredItem});
+
+  final FilterControllerMixin<T> controller;
+  final String filteredItem;
+
+  static const _separator = ', ';
+
+  @override
+  Widget build(BuildContext context) {
+    final queryFilterArgs = controller.queryFilterArgs.values;
+    final filterKeys = queryFilterArgs.map(
+      (arg) => arg.keys.map((key) => "'$key'").join(_separator),
+    );
+    final filterExampleUsages = queryFilterArgs.map(
+      (arg) => arg.exampleUsages.map((usage) => "'$usage'").join(_separator),
+    );
+
+    final usageTextStyle = Theme.of(context).fixedFontStyle;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '''
+Type a query to show or hide specific ${pluralize(filteredItem, 2)}.
+
+Any text that is not paired with an available filter key below will
+be queried against all available data for each $filteredItem.
+
+Available filters:
+''',
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: defaultSpacing),
+          child: Row(
+            children: [
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final key in filterKeys)
+                      Text(
+                        key,
+                        style: usageTextStyle,
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: extraLargeSpacing),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final exampleUsage in filterExampleUsages)
+                      Text(
+                        '(e.g. $exampleUsage)',
+                        style: usageTextStyle,
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ],

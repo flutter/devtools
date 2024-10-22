@@ -159,6 +159,7 @@ class LoggingTableModel extends DisposableController
   Map<String, QueryFilterArgument<LogDataV2>> createQueryFilterArgs() => {
         kindFilterId: QueryFilterArgument<LogDataV2>(
           keys: ['kind', 'k'],
+          exampleUsages: ['k:stderr', '-k:stdout'],
           dataValueProvider: (log) => log.kind,
           substringMatch: true,
         ),

@@ -64,6 +64,7 @@ class _LoggingTableV2State extends State<LoggingTableV2>
             Expanded(
               child: StandaloneFilterField<LogDataV2>(
                 controller: widget.model,
+                filteredItem: 'log',
               ),
             ), // TODO for some reason the controller isn't hooking up correctly to the one over in the model. It is not getting notified of the changes?
             const SizedBox(width: defaultSpacing),
