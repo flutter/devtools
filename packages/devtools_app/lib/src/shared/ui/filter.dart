@@ -33,7 +33,7 @@ typedef SettingFilters<T> = List<SettingFilter<T, Object>>;
 /// [initFilterController].
 mixin FilterControllerMixin<T> on DisposableController
     implements AutoDisposeControllerMixin {
-  final filteredData = ListValueNotifier<T>([]);
+  final filteredData = ListValueNotifier<T>(<T>[]);
 
   final useRegExp = ValueNotifier<bool>(false);
 
@@ -47,7 +47,7 @@ mixin FilterControllerMixin<T> on DisposableController
 
   late final _activeFilter = ValueNotifier<Filter<T>>(
     Filter(
-      queryFilter: QueryFilter.empty(args: _queryFilterArgs),
+      queryFilter: QueryFilter.empty(args: queryFilterArgs),
       settingFilters: _settingFilters,
     ),
   );
@@ -57,10 +57,10 @@ mixin FilterControllerMixin<T> on DisposableController
       queryFilter: query != null
           ? QueryFilter.parse(
               query,
-              args: _queryFilterArgs,
+              args: queryFilterArgs,
               useRegExp: useRegExp.value,
             )
-          : QueryFilter.empty(args: _queryFilterArgs),
+          : QueryFilter.empty(args: queryFilterArgs),
       settingFilters: settingFilters ?? _settingFilters,
     );
   }
@@ -93,12 +93,14 @@ mixin FilterControllerMixin<T> on DisposableController
   /// arguments.
   QueryFilterArgs<T> createQueryFilterArgs() => <String, QueryFilterArgument<T>>{};
 
-  late final _queryFilterArgs = createQueryFilterArgs();
+  @visibleForTesting
+  late final queryFilterArgs = createQueryFilterArgs();
 
   bool get isFilterActive {
     final filter = activeFilter.value;
     final queryFilterActive = !filter.queryFilter.isEmpty;
     final settingFilterActive =
+        filter.settingFilters.any((filter) => filter.enabled);
         filter.settingFilters.any((filter) => filter.enabled);
     return queryFilterActive || settingFilterActive;
   }
@@ -162,13 +164,13 @@ mixin FilterControllerMixin<T> on DisposableController
     for (final settingFilter in _settingFilters) {
       settingFilter.setting.value = settingFilter.defaultValue;
     }
-    _queryFilterArgs.forEach((key, value) => value.reset());
+    queryFilterArgs.forEach((key, value) => value.reset());
   }
 
   void resetFilter() {
     _resetToDefaultFilter();
     _activeFilter.value = Filter(
-      queryFilter: QueryFilter.empty(args: _queryFilterArgs),
+      queryFilter: QueryFilter.empty(args: queryFilterArgs),
       settingFilters: _settingFilters,
     );
   }
@@ -185,7 +187,7 @@ class FilterDialog<T> extends StatefulWidget {
     required this.filteredItem,
     this.includeQueryFilter = true,
   })  : assert(
-          !includeQueryFilter || controller._queryFilterArgs.isNotEmpty,
+          !includeQueryFilter || controller.queryFilterArgs.isNotEmpty,
         ),
         settingFilterValuesAtOpen = List.generate(
           controller.activeFilter.value.settingFilters.length,
@@ -259,7 +261,7 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
               ],
             ),
             const SizedBox(height: defaultSpacing),
-            if (widget.controller._queryFilterArgs.isNotEmpty) ...[
+            if (widget.controller.queryFilterArgs.isNotEmpty) ...[
               _FilterSyntax(
                 controller: widget.controller,
                 filteredItem: widget.filteredItem,
@@ -724,7 +726,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                   ),
                 ),
                 additionalSuffixActions: [
-                  if (widget.controller._queryFilterArgs.isNotEmpty)
+                  if (widget.controller.queryFilterArgs.isNotEmpty)
                     InputDecorationSuffixButton.help(
                       onPressed: () {
                         showDevToolsDialog(
@@ -776,7 +778,7 @@ class _FilterSyntax<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final queryFilterArgs = controller._queryFilterArgs.values;
+    final queryFilterArgs = controller.queryFilterArgs.values;
     final filterKeys = queryFilterArgs.map(
       (arg) => arg.keys.map((key) => "'$key'").join(_separator),
     );

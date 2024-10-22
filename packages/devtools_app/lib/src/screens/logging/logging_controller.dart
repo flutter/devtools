@@ -172,10 +172,10 @@ class LoggingController extends DisposableController
 
   @override
   Map<String, QueryFilterArgument<LogData>> createQueryFilterArgs() =>
-      queryFilterArgs;
+      loggingQueryFilterArgs;
 
   @visibleForTesting
-  static final queryFilterArgs = <String, QueryFilterArgument<LogData>>{
+  static final loggingQueryFilterArgs = <String, QueryFilterArgument<LogData>>{
     kindFilterId: QueryFilterArgument<LogData>(
       keys: ['kind', 'k'],
       exampleUsages: ['k:stderr', '-k:stdout,gc'],
