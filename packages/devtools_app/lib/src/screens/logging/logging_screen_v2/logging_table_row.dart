@@ -142,7 +142,7 @@ class _LoggingTableRowState extends State<LoggingTableRow> {
       color: color,
       child: ValueListenableBuilder<bool>(
         valueListenable: widget.data.detailsComputed,
-        builder: (context, _, __) {
+        builder: (context, _, _) {
           return Padding(
             padding: const EdgeInsets.all(LoggingTableRow._padding),
             child: Column(

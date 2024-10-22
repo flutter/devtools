@@ -10,7 +10,9 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-* Persist filter settings across sessions. - [#8447](https://github.com/flutter/devtools/pull/8447), [#8456](https://github.com/flutter/devtools/pull/8456)
+* Persist filter settings across sessions. - [#8447](https://github.com/flutter/devtools/pull/8447),
+[#8456](https://github.com/flutter/devtools/pull/8456)
+[#8470](https://github.com/flutter/devtools/pull/8470)
 
 ## Inspector updates
 
@@ -34,7 +36,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Added a filter text field to the top-level Network profiler controls. -
+[#8469](https://github.com/flutter/devtools/pull/8469)
+    ![Network filter field](images/network_filter.png "Network filter field")
 
 ## Logging updates
 
@@ -48,7 +52,7 @@ severity, category, zone, and isolate.
 []()
     ![Logging metadata display](images/log_metadata.png "Logging metadata display")
 
-* Add a text filter to the top-level logging controls. -
+* Add a filter text field to the top-level Logging controls. -
 [#8427](https://github.com/flutter/devtools/pull/8427)
     ![Logging filter](images/log_filter.png "Logging filter")
 

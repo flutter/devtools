@@ -418,10 +418,6 @@ class _TestController extends DisposableController
 
   final List<_TestDataClass> data;
 
-  // Convenience getters for testing.
-  SettingFilters<_TestDataClass> get settingFilters =>
-      activeFilter.value.settingFilters;
-
   @override
   SettingFilters<_TestDataClass> createSettingFilters() => [
         SettingFilter<_TestDataClass, int>(
@@ -450,9 +446,10 @@ class _TestController extends DisposableController
   static const categoryFilterId = 'category-filter';
 
   @override
-  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
+  Map<String, QueryFilterArgument<_TestDataClass>> createQueryFilterArgs() => {
         categoryFilterId: QueryFilterArgument<_TestDataClass>(
           keys: ['cat', 'c'],
+          exampleUsages: ['cat:foo', '-c:bar'],
           dataValueProvider: (data) => data.category,
           substringMatch: false,
         ),

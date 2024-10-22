@@ -448,7 +448,6 @@ void main() {
   group('$LoggingPreferencesController', () {
     late LoggingPreferencesController controller;
     late FlutterTestStorage storage;
-
     setUp(() async {
       setGlobal(Storage, storage = FlutterTestStorage());
       controller = LoggingPreferencesController();

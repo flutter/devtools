@@ -45,9 +45,11 @@ final class IdeTheme {
 }
 
 extension type IdeThemeQueryParams(Map<String, String?> params) {
-  Color? get backgroundColor => tryParseColor(params[backgroundColorKey], logger: _log);
+  Color? get backgroundColor =>
+      tryParseColor(params[backgroundColorKey], logger: _log);
 
-  Color? get foregroundColor => tryParseColor(params[foregroundColorKey], logger: _log);
+  Color? get foregroundColor =>
+      tryParseColor(params[foregroundColorKey], logger: _log);
 
   double get fontSize =>
       _tryParseDouble(params[fontSizeKey]) ?? unscaledDefaultFontSize;

@@ -168,9 +168,13 @@ class CpuProfilerController extends DisposableController
       ];
 
   @override
-  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
+  Map<String, QueryFilterArgument<CpuStackFrame>> createQueryFilterArgs() => {
         _uriQueryFilterId: QueryFilterArgument<CpuStackFrame>(
           keys: ['uri', 'u'],
+          exampleUsages: [
+            'uri:my_dart_package/some_lib.dart',
+            '-u:some_lib_to_hide',
+          ],
           dataValueProvider: (stackFrame) => stackFrame.packageUri,
           substringMatch: true,
         ),

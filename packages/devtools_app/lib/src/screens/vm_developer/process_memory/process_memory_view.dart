@@ -230,7 +230,7 @@ class _ProcessMemoryTreeMap extends StatelessWidget {
       builder: (context, constraints) {
         return ValueListenableBuilder<TreemapNode?>(
           valueListenable: controller.treeMapRoot,
-          builder: (context, root, __) {
+          builder: (context, root, _) {
             return Treemap.fromRoot(
               rootNode: root!,
               levelsVisible: 2,

@@ -96,16 +96,19 @@ class NetworkController extends DisposableController
   Map<String, QueryFilterArgument<NetworkRequest>> createQueryFilterArgs() => {
         methodFilterId: QueryFilterArgument<NetworkRequest>(
           keys: ['method', 'm'],
+          exampleUsages: ['m:get', '-m:put,patch'],
           dataValueProvider: (request) => request.method,
           substringMatch: false,
         ),
         statusFilterId: QueryFilterArgument<NetworkRequest>(
           keys: ['status', 's'],
+          exampleUsages: ['s:200', '-s:404'],
           dataValueProvider: (request) => request.status,
           substringMatch: false,
         ),
         typeFilterId: QueryFilterArgument<NetworkRequest>(
           keys: ['type', 't'],
+          exampleUsages: ['t:json', '-t:text'],
           dataValueProvider: (request) => request.type,
           substringMatch: false,
         ),

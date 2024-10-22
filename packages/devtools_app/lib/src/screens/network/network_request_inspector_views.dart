@@ -150,7 +150,7 @@ class HttpRequestView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: data,
-      builder: (context, __) {
+      builder: (context, _) {
         final theme = Theme.of(context);
         final requestHeaders = data.requestHeaders;
         final requestContentType = requestHeaders?['content-type'] ?? '';
@@ -202,7 +202,7 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: data,
-      builder: (context, __) {
+      builder: (context, _) {
         final dataToCopy = dataSelector(data);
         final isLoading = data.isFetchingFullData;
         if (dataToCopy == null || dataToCopy.isEmpty || isLoading) {
@@ -249,7 +249,7 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: data,
-      builder: (_, __) {
+      builder: (_, _) {
         final visible = (data.contentType != null &&
                 !data.contentType!.contains('image')) &&
             data.responseBody!.isNotEmpty;
@@ -265,7 +265,7 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
           replacement: const SizedBox(),
           child: ValueListenableBuilder<NetworkResponseViewType>(
             valueListenable: currentResponseViewType,
-            builder: (_, currentType, __) {
+            builder: (_, currentType, _) {
               return RoundedDropDownButton<NetworkResponseViewType>(
                 value: currentType,
                 items: availableResponseTypes
@@ -305,7 +305,7 @@ class HttpResponseView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: data,
-      builder: (context, __) {
+      builder: (context, _) {
         Widget child;
         final theme = Theme.of(context);
         // We shouldn't try and display an image response view when using the
@@ -356,7 +356,7 @@ class HttpTextResponseViewer extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: currentResponseNotifier,
-      builder: (_, currentResponseType, __) {
+      builder: (_, currentResponseType, _) {
         NetworkResponseViewType currentLocalResponseType = currentResponseType;
 
         if (currentResponseType == NetworkResponseViewType.auto) {

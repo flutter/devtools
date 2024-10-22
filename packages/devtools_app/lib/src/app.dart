@@ -239,7 +239,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     BuildContext _,
     String? page,
     DevToolsQueryParams queryParams,
-    DevToolsNavigationState? __,
+    DevToolsNavigationState? _,
   ) {
     final vmServiceUri = queryParams.vmServiceUri;
     final embedMode = queryParams.embedMode;
@@ -262,7 +262,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           preferences.vmDeveloperModeEnabled,
           extensionService.currentExtensions,
         ],
-        builder: (_, __, child) {
+        builder: (_, _, child) {
           final screensInScaffold = _visibleScreens()
               .where(
                 (s) => maybeIncludeOnlyEmbeddedScreen(
@@ -359,7 +359,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return _routes ??= {
       homeScreenId: _buildTabbedPage,
       for (final screen in _screens) screen.screenId: _buildTabbedPage,
-      snapshotScreenId: (_, __, params, ___) {
+      snapshotScreenId: (_, _, params, _) {
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
           embedMode: params.embedMode,
@@ -386,7 +386,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     //  the server which page they are rendering.
     return {
       for (final type in StandaloneScreenType.values)
-        type.name: (_, __, args, ___) => type.screen,
+        type.name: (_, _, args, _) => type.screen,
     };
   }
 
