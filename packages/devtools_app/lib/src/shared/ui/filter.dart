@@ -819,6 +819,7 @@ Available filters:
               const SizedBox(width: extraLargeSpacing),
               Flexible(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     for (final exampleUsage in filterExampleUsages)
