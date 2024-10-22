@@ -48,7 +48,7 @@ mixin FilterControllerMixin<T> on DisposableController
   late final _activeFilter = ValueNotifier<Filter<T>>(
     Filter(
       queryFilter: QueryFilter.empty(args: queryFilterArgs),
-      settingFilters: _settingFilters,
+      settingFilters: settingFilters,
     ),
   );
 
@@ -61,7 +61,7 @@ mixin FilterControllerMixin<T> on DisposableController
               useRegExp: useRegExp.value,
             )
           : QueryFilter.empty(args: queryFilterArgs),
-      settingFilters: settingFilters ?? _settingFilters,
+      settingFilters: settingFilters ?? this.settingFilters,
     );
   }
 
@@ -82,7 +82,8 @@ mixin FilterControllerMixin<T> on DisposableController
   /// settings (e.g. check box, dropdown selection, etc.).
   SettingFilters<T> createSettingFilters() => [];
 
-  late final SettingFilters<T> _settingFilters = createSettingFilters();
+  @visibleForTesting
+  late final SettingFilters<T> settingFilters = createSettingFilters();
 
   /// Creates the query filter arguments for this filter controller.
   ///
@@ -124,7 +125,7 @@ mixin FilterControllerMixin<T> on DisposableController
     return FilterTag(
       query: filter.queryFilter.query,
       settingFilterValues:
-          _settingFilters.map((filter) => filter.valueAsJson).toList(),
+          settingFilters.map((filter) => filter.valueAsJson).toList(),
       useRegExp: useRegExp.value,
     ).tag;
   }
@@ -144,10 +145,10 @@ mixin FilterControllerMixin<T> on DisposableController
       );
       return (id: value.keys.first, value: value.values.first);
     });
-    final settingFilterIds = _settingFilters.map((filter) => filter.id);
+    final settingFilterIds = settingFilters.map((filter) => filter.id);
     for (final settingFilterValue in valuesFromTag) {
       if (settingFilterIds.contains(settingFilterValue.id)) {
-        final settingFilter = _settingFilters
+        final settingFilter = settingFilters
             .firstWhere((filter) => filter.id == settingFilterValue.id);
         settingFilter.setting.value = settingFilterValue.value!;
       }
@@ -155,13 +156,13 @@ mixin FilterControllerMixin<T> on DisposableController
 
     setActiveFilter(
       query: tag.query,
-      settingFilters: _settingFilters,
+      settingFilters: settingFilters,
     );
   }
 
   void _resetToDefaultFilter() {
     // Reset all filter values.
-    for (final settingFilter in _settingFilters) {
+    for (final settingFilter in settingFilters) {
       settingFilter.setting.value = settingFilter.defaultValue;
     }
     queryFilterArgs.forEach((key, value) => value.reset());
@@ -171,7 +172,7 @@ mixin FilterControllerMixin<T> on DisposableController
     _resetToDefaultFilter();
     _activeFilter.value = Filter(
       queryFilter: QueryFilter.empty(args: queryFilterArgs),
-      settingFilters: _settingFilters,
+      settingFilters: settingFilters,
     );
   }
 }
@@ -269,7 +270,7 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
               const SizedBox(height: defaultSpacing),
             ],
           ],
-          for (final filter in widget.controller._settingFilters) ...[
+          for (final filter in widget.controller.settingFilters) ...[
             if (filter is ToggleFilter<T>)
               _ToggleFilterElement(filter: filter)
             else
@@ -287,7 +288,7 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
         query: widget.includeQueryFilter
             ? queryTextFieldController.value.text
             : null,
-        settingFilters: widget.controller._settingFilters,
+        settingFilters: widget.controller.settingFilters,
       );
   }
 
@@ -297,8 +298,8 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
   }
 
   void _restoreOldValues() {
-    for (var i = 0; i < widget.controller._settingFilters.length; i++) {
-      final filter = widget.controller._settingFilters[i];
+    for (var i = 0; i < widget.controller.settingFilters.length; i++) {
+      final filter = widget.controller.settingFilters[i];
       filter.setting.value = widget.settingFilterValuesAtOpen[i];
     }
   }
@@ -695,7 +696,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                 autofocus: true,
                 hintText: 'Filter',
                 controller: queryTextFieldController,
-                prefixIcon: widget.controller._settingFilters.isNotEmpty
+                prefixIcon: widget.controller.settingFilters.isNotEmpty
                     ? Container(
                         height: inputDecorationElementHeight,
                         padding: const EdgeInsets.only(
@@ -748,7 +749,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                       widget.controller.useRegExp.value = !useRegExp;
                       widget.controller.setActiveFilter(
                         query: queryTextFieldController.value.text,
-                        settingFilters: widget.controller._settingFilters,
+                        settingFilters: widget.controller.settingFilters,
                       );
                     },
                   ),
@@ -756,7 +757,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                 onChanged: (_) {
                   widget.controller.setActiveFilter(
                     query: queryTextFieldController.value.text,
-                    settingFilters: widget.controller._settingFilters,
+                    settingFilters: widget.controller.settingFilters,
                   );
                 },
               );

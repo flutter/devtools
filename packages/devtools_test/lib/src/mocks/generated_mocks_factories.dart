@@ -193,11 +193,15 @@ MockLoggingController createMockLoggingControllerWithDefaults({
       .thenReturn(LoggingController.loggingQueryFilterArgs);
   when(mockLoggingController.queryFilterArgs)
       .thenReturn(LoggingController.loggingQueryFilterArgs);
+  when(mockLoggingController.createSettingFilters())
+      .thenReturn(LoggingController.loggingSettingFilters);
+  when(mockLoggingController.settingFilters)
+      .thenReturn(LoggingController.loggingSettingFilters);
   final activeFilter = FixedValueListenable(
     Filter<LogData>(
       queryFilter:
           QueryFilter.empty(args: LoggingController.loggingQueryFilterArgs),
-      settingFilters: LoggingController.settingFilters,
+      settingFilters: LoggingController.loggingSettingFilters,
     ),
   );
   provideDummy<FixedValueListenable<Filter<LogData>>>(activeFilter);

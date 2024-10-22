@@ -123,10 +123,10 @@ class LoggingController extends DisposableController
 
   /// The setting filters available for the Logging screen.
   @override
-  SettingFilters<LogData> createSettingFilters() => settingFilters;
+  SettingFilters<LogData> createSettingFilters() => loggingSettingFilters;
 
   @visibleForTesting
-  static final settingFilters = <SettingFilter<LogData, Object>>[
+  static final loggingSettingFilters = <SettingFilter<LogData, Object>>[
     SettingFilter<LogData, int>(
       id: _minLogLevelFilterId,
       name: 'Hide logs below the minimum log level',

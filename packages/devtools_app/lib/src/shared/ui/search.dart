@@ -899,7 +899,7 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
     this.searchFieldWidth = defaultSearchFieldWidth,
     double? searchFieldHeight,
     super.key,
-  })  : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight;
+  }) : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight;
 
   final T searchController;
 
