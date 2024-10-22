@@ -114,6 +114,9 @@ class NetworkController extends DisposableController
         ),
       };
 
+  @override
+  ValueNotifier<String>? get filterTagNotifier => preferences.network.filterTag;
+
   /// Notifies that new Network requests have been processed.
   ValueListenable<List<NetworkRequest>> get requests => _currentNetworkRequests;
 
