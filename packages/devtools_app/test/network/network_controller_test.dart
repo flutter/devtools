@@ -30,7 +30,6 @@ void main() {
           httpProfile: httpProfile,
         ),
       );
-      setGlobal(PreferencesController, PreferencesController());
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(PreferencesController, PreferencesController());
       controller = NetworkController();
