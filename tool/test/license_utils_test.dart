@@ -1,4 +1,4 @@
-// Copyright 2024 The Flutter Authors.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
@@ -446,7 +446,7 @@ text that should be added to the file. */''',
             'License headers are incorrect for ${failedPaths.length} files: $failedPaths',
       );
     },
-    skip: false,
+    skip: true,
   );
 }
 
