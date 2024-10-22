@@ -24,7 +24,7 @@ class LicenseConfig {
     fileTypes = updatePaths['file_types'];
   }
 
-  // Builds a [LicenseConfig] from the provided values.
+  /// Builds a [LicenseConfig] from the provided values.
   LicenseConfig.fromValues(
     this.removeLicenses,
     this.addLicenses,

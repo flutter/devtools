@@ -444,7 +444,7 @@ text that should be added to the file. */''',
             'License headers are incorrect for ${failedPaths.length} files: $failedPaths',
       );
     },
-    skip: true,
+    skip: false,
   );
 }
 
