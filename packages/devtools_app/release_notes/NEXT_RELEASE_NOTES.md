@@ -35,7 +35,7 @@ TODO: Remove this section if there are not any general updates.
 ## Network profiler updates
 
 * Added a filter text field to the top-level Network profiler controls. -
-[#](link)
+[#8469](https://github.com/flutter/devtools/pull/8469)
     ![Network filter field](images/network_filter.png "Network filter field")
 
 ## Logging updates
