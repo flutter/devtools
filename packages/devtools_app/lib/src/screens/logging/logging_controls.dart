@@ -41,7 +41,6 @@ class LoggingControls extends StatelessWidget {
                 : defaultSearchFieldWidth,
             searchController: controller,
             searchFieldEnabled: hasData,
-            containerPadding: EdgeInsets.zero,
           ),
         ),
         const SizedBox(width: denseSpacing),

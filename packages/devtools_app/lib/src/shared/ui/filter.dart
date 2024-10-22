@@ -695,34 +695,36 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                 autofocus: true,
                 hintText: 'Filter',
                 controller: queryTextFieldController,
-                prefixIcon: Container(
-                  height: inputDecorationElementHeight,
-                  padding: const EdgeInsets.only(
-                    left: densePadding,
-                    right: denseSpacing,
-                  ),
-                  child: ValueListenableBuilder<Filter>(
-                    valueListenable: widget.controller.activeFilter,
-                    builder: (context, _, _) {
-                      return DevToolsFilterButton(
-                        message: 'More filters',
-                        onPressed: () {
-                          unawaited(
-                            showDialog(
-                              context: context,
-                              builder: (context) => FilterDialog(
-                                controller: widget.controller,
-                                filteredItem: widget.filteredItem,
-                                includeQueryFilter: false,
-                              ),
-                            ),
-                          );
-                        },
-                        isFilterActive: widget.controller.isFilterActive,
-                      );
-                    },
-                  ),
-                ),
+                prefixIcon: widget.controller._settingFilters.isNotEmpty
+                    ? Container(
+                        height: inputDecorationElementHeight,
+                        padding: const EdgeInsets.only(
+                          left: densePadding,
+                          right: denseSpacing,
+                        ),
+                        child: ValueListenableBuilder<Filter>(
+                          valueListenable: widget.controller.activeFilter,
+                          builder: (context, _, _) {
+                            return DevToolsFilterButton(
+                              message: 'More filters',
+                              onPressed: () {
+                                unawaited(
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => FilterDialog(
+                                      controller: widget.controller,
+                                      filteredItem: widget.filteredItem,
+                                      includeQueryFilter: false,
+                                    ),
+                                  ),
+                                );
+                              },
+                              isFilterActive: widget.controller.isFilterActive,
+                            );
+                          },
+                        ),
+                      )
+                    : null,
                 additionalSuffixActions: [
                   if (widget.controller.queryFilterArgs.isNotEmpty)
                     InputDecorationSuffixButton.help(

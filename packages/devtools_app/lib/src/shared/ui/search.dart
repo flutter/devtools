@@ -898,20 +898,14 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
     this.onClose,
     this.searchFieldWidth = defaultSearchFieldWidth,
     double? searchFieldHeight,
-    EdgeInsets? containerPadding,
     super.key,
-  })  : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight,
-        containerPadding =
-            containerPadding ?? const EdgeInsets.only(top: _defaultTopPadding);
+  })  : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight;
 
   final T searchController;
 
   final double searchFieldWidth;
 
   final double searchFieldHeight;
-
-  /// The padding for the [Container] that contains the search text field.
-  final EdgeInsets containerPadding;
 
   /// Whether the search text field should be enabled.
   final bool searchFieldEnabled;
@@ -928,10 +922,6 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
   /// triggered.
   final VoidCallback? onClose;
 
-  /// Padding to ensure the 'Search' hint on the text field is not cut off for
-  /// the default text field height [defaultTextFieldHeight].
-  static const _defaultTopPadding = 3.0;
-
   @override
   State<SearchField> createState() => _SearchFieldState();
 }
@@ -943,10 +933,9 @@ class _SearchFieldState extends State<SearchField>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.searchFieldWidth,
       height: widget.searchFieldHeight,
-      padding: widget.containerPadding,
       child: StatelessSearchField(
         controller: searchController,
         searchFieldEnabled: widget.searchFieldEnabled,
