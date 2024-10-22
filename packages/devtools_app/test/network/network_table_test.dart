@@ -35,6 +35,7 @@ void main() {
         ),
       );
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
+      setGlobal(PreferencesController, PreferencesController());
       setGlobal(IdeTheme, IdeTheme());
 
       // Bypass controller recording so timelineMicroOffset is not time dependant
