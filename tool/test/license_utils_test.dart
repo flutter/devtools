@@ -389,7 +389,7 @@ text that should be added to the file. */''',
 
       // TODO: [mossmana] This test should stop being skipped only when it is safe to check just new files going forward.
       final RegExp rootPathMatcher = RegExp(r'(.*[/|\\]devtools[/|\\]).*');
-      // TODO: [mossmana] make this work on CI and Google3
+      // TODO: [mossmana] make this work on Google3
       expect(rootPathMatcher.hasMatch(Directory.current.path), true);
       final RegExpMatch? match =
           rootPathMatcher.firstMatch(Directory.current.path);
@@ -414,13 +414,15 @@ text that should be added to the file. */''',
         final LicenseHeader header = LicenseHeader();
         const goodReplacementLicenseText =
             '''// Copyright <copyright_date> The Flutter Authors
-  // Use of this source code is governed by a BSD-style license that can be
-  // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.''';
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.''';
         for (final file in files) {
           final String extension = p.extension(file.path);
-          // Currently, only checking dart source files.
-          // TODO: [mossmana] Add checks for other file types or read from a config.
-          if (extension != '.dart') continue;
+          // Only check dart source files and exclude any files that are
+          // downloaded as part of the flutter-sdk package dependencies.
+          if (extension != '.dart' || file.path.contains('flutter-sdk')) {
+            continue;
+          }
           try {
             final Map<String, String> replacementInfo =
                 await header.getReplacementInfo(
