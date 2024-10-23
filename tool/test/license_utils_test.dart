@@ -402,10 +402,10 @@ text that should be added to the file. */''',
       );
       final contentsAfterUpdate = testFile1.readAsStringSync();
 
-      final includedPaths = results[LicenseHeader.includedPathsKey];
-      expect(includedPaths, isNotNull);
-      expect(includedPaths?.length, equals(7));
-      expect(includedPaths?.contains(testFile1.path), true);
+      final updatedPaths = results[LicenseHeader.updatedPathsKey];
+      expect(updatedPaths, isNotNull);
+      expect(updatedPaths?.length, equals(5));
+      expect(updatedPaths?.contains(testFile1.path), true);
       expect(contentsBeforeUpdate, equals(contentsAfterUpdate));
     });
   });
