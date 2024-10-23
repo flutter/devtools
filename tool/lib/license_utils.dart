@@ -68,25 +68,6 @@ import 'package:yaml/yaml.dart';
 ///         - 2
 ///       add: 1
 class LicenseConfig {
-  /// Sequence of license text strings that should be matched against at the top
-  /// of a file and removed.
-  late final YamlList removeLicenses;
-
-  /// Sequence of license text strings that should be added to the top of a
-  /// file.
-  late final YamlList addLicenses;
-
-  /// Path(s) to recursively check for file to remove/add license text
-  late final YamlList includePaths;
-
-  /// Path(s) to recursively check for files to ignore
-  late final YamlList excludePaths;
-
-  /// Contains the extension (without a '.') and the associated indices
-  /// of [removeLicenses] to remove and index of [addLicenses] to add for the
-  /// file type.
-  late final YamlMap fileTypes;
-
   /// Builds a [LicenseConfig] from the provided values.
   LicenseConfig({
     required this.removeLicenses,
@@ -113,6 +94,25 @@ class LicenseConfig {
     );
   }
 
+  /// Sequence of license text strings that should be matched against at the top
+  /// of a file and removed.
+  late YamlList removeLicenses;
+
+  /// Sequence of license text strings that should be added to the top of a
+  /// file.
+  late YamlList addLicenses;
+
+  /// Path(s) to recursively check for file to remove/add license text
+  late YamlList includePaths;
+
+  /// Path(s) to recursively check for files to ignore
+  late YamlList excludePaths;
+
+  /// Contains the extension (without a '.') and the associated indices
+  /// of [removeLicenses] to remove and index of [addLicenses] to add for the
+  /// file type.
+  late YamlMap fileTypes;
+
   /// Returns the list of indices for the given [ext] of [removeLicenses]
   /// containing the license text to remove.
   YamlList getRemoveIndicesForExtension(String ext) {
@@ -120,8 +120,8 @@ class LicenseConfig {
     return fileType['remove'] as YamlList;
   }
 
-  /// Returns the index for the given [ext] of [removeLicenses] containing the
-  /// license text to remove.
+  /// Returns the index for the given [ext] of [addLicenses] containing the
+  /// license text to add.
   int getAddIndexForExtension(String ext) {
     final fileType = fileTypes[_removeDotFromExtension(ext)];
     return fileType['add'];
