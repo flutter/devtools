@@ -304,10 +304,11 @@ text that should be added to the file. */''',
       final LicenseHeader header = LicenseHeader();
       try {
         await header.getReplacementInfo(
-            file: File('bad.txt'),
-            existingLicenseText: 'test',
-            replacementLicenseText: 'test',
-            byteCount: 50);
+          file: File('bad.txt'),
+          existingLicenseText: 'test',
+          replacementLicenseText: 'test',
+          byteCount: 50,
+        );
       } on Exception catch (e) {
         errorMessage = e.toString();
       }
