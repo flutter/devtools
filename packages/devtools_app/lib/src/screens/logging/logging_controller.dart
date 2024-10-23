@@ -49,6 +49,8 @@ typedef CreateLoggingTree = InspectorTreeController Function({
   VoidCallback? onSelectionChange,
 });
 
+typedef ZoneDescription = ({String? name, int? identityHashCode});
+
 Future<String> _retrieveFullStringValue(
   VmServiceWrapper? service,
   IsolateRef isolateRef,
@@ -168,7 +170,9 @@ class LoggingController extends DisposableController
       // Omit Level.OFF from the possible minimum levels.
       .where((level) => level != Level.OFF);
 
-  static const kindFilterId = 'logging-kind-filter';
+  static const _kindFilterId = 'logging-kind-filter';
+  static const _isolateFilterId = 'logging-isolate-filter';
+  static const _zoneFilterId = 'logging-zone-filter';
 
   @override
   Map<String, QueryFilterArgument<LogData>> createQueryFilterArgs() =>
@@ -176,13 +180,24 @@ class LoggingController extends DisposableController
 
   @visibleForTesting
   static final loggingQueryFilterArgs = <String, QueryFilterArgument<LogData>>{
-    kindFilterId: QueryFilterArgument<LogData>(
+    _kindFilterId: QueryFilterArgument<LogData>(
       keys: ['kind', 'k'],
       exampleUsages: ['k:stderr', '-k:stdout,gc'],
       dataValueProvider: (log) => log.kind,
       substringMatch: true,
     ),
-    // TODO(kenz): include zone and isolate as query filters.
+    _isolateFilterId: QueryFilterArgument<LogData>(
+      keys: ['isolate', 'i'],
+      exampleUsages: ['i:main', '-i:worker'],
+      dataValueProvider: (log) => log.isolateRef?.name,
+      substringMatch: true,
+    ),
+    _zoneFilterId: QueryFilterArgument<LogData>(
+      keys: ['zone', 'z'],
+      exampleUsages: ['z:custom', '-z:root'],
+      dataValueProvider: (log) => log.zone?.name,
+      substringMatch: true,
+    ),
   };
 
   @override
@@ -673,6 +688,20 @@ class LoggingController extends DisposableController
                 log.levelName.caseInsensitiveContains(substring);
             if (matchesLevel) return true;
 
+            final matchesIsolateName =
+                log.isolateRef?.name?.caseInsensitiveContains(substring) ??
+                    false;
+            if (matchesIsolateName) return true;
+
+            final zone = log.zone;
+            final matchesZone =
+                (zone?.name?.caseInsensitiveContains(substring) ?? false) ||
+                    (zone?.identityHashCode
+                            ?.toString()
+                            .caseInsensitiveContains(substring) ??
+                        false);
+            if (matchesZone) return true;
+
             final matchesSummary = log.summary != null &&
                 log.summary!.caseInsensitiveContains(substring);
             if (matchesSummary) return true;
@@ -847,7 +876,7 @@ class LogData with SearchableDataMixin {
   final bool isError;
   final String? summary;
   final IsolateRef? isolateRef;
-  final ({String? name, int? identityHashCode})? zone;
+  final ZoneDescription? zone;
 
   String get levelName =>
       _levelName ??= LogLevelMetadataChip.generateLogLevel(level).name;
@@ -917,6 +946,9 @@ class LogData with SearchableDataMixin {
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return kind.caseInsensitiveContains(regExpSearch) ||
+        levelName.caseInsensitiveContains(regExpSearch) ||
+        isolateRef?.name?.caseInsensitiveContains(regExpSearch) == true ||
+        zone?.name?.caseInsensitiveContains(regExpSearch) == true ||
         (summary?.caseInsensitiveContains(regExpSearch) == true) ||
         (details?.caseInsensitiveContains(regExpSearch) == true);
   }
