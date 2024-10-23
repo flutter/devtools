@@ -58,7 +58,14 @@ enum HttpRequestDataKeys {
   queryParameters,
   content,
   size,
-  connectionId
+  connectionId,
+  requestBody,
+  responseBody,
+  endTime,
+  arguments,
+  host,
+  username,
+  isDirect
 }
 
 enum HttpRequestDataValues {

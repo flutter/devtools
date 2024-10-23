@@ -20,20 +20,35 @@ class OfflineNetworkData with Serializable {
   });
 
   /// Creates an instance of [OfflineNetworkData] from a JSON map.
-  factory OfflineNetworkData.fromJson(Map<String, dynamic> json) {
-    final httpRequestData = json[OfflineDataKeys.httpRequestData.name]
-        as List<DartIOHttpRequestData>;
-    List<Socket>? socketReqData = [];
-    socketReqData = json[OfflineDataKeys.socketData.name] as List<Socket>;
+  factory OfflineNetworkData.fromJson(Map<String, Object?> json) {
+    final httpRequestJsonList =
+        json[OfflineDataKeys.httpRequestData.name] as List<Object>?;
 
+    final httpRequestData = httpRequestJsonList
+            ?.map((e) {
+              if (e is Map<String, Object?>) {
+                final requestData = e['request'] as Map<String, Object?>?;
+                return requestData != null
+                    ? DartIOHttpRequestData.fromJson(requestData, null, null)
+                    : null;
+              }
+              return null;
+            })
+            .whereType<DartIOHttpRequestData>()
+            .toList() ??
+        [];
+
+    final socketRequestData =
+        (json[OfflineDataKeys.socketData.name] as List?)?.cast<Socket>();
     return OfflineNetworkData(
       httpRequestData: httpRequestData,
       selectedRequestId:
           json[OfflineDataKeys.selectedRequestId.name] as String?,
-      socketData: socketReqData,
+      socketData: socketRequestData ?? [],
     );
   }
-  bool get isEmpty => httpRequestData.isNullOrEmpty;
+
+  bool get isEmpty => httpRequestData.isNullOrEmpty && socketData.isNullOrEmpty;
 
   /// List of current [DartIOHttpRequestData] network requests.
   final List<DartIOHttpRequestData> httpRequestData;
@@ -46,9 +61,10 @@ class OfflineNetworkData with Serializable {
 
   /// Converts the current offline data to a JSON format.
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, Object?> toJson() {
     return {
-      OfflineDataKeys.httpRequestData.name: httpRequestData,
+      OfflineDataKeys.httpRequestData.name:
+          httpRequestData.map((e) => e.toJson()).toList(),
       OfflineDataKeys.selectedRequestId.name: selectedRequestId,
       OfflineDataKeys.socketData.name: socketData,
     };

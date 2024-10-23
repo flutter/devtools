@@ -178,11 +178,8 @@ class NetworkController extends DisposableController
   }
 
   Future<void> loadOfflineData(OfflineNetworkData offlineData) async {
-    List<HttpProfileRequest> httpProfileData = [];
-    List<SocketStatistic> socketStatsData = [];
-
-    httpProfileData = offlineData.httpRequestData.mapToHttpProfileRequests;
-    socketStatsData = offlineData.socketData.mapToSocketStatistics;
+    final httpProfileData = offlineData.httpRequestData.mapToHttpProfileRequests;
+    final socketStatsData = offlineData.socketData.mapToSocketStatistics;
 
     _currentNetworkRequests
       ..clear()
