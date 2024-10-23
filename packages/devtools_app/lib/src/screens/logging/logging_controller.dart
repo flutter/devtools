@@ -423,7 +423,7 @@ class LoggingController extends DisposableController
     final message = jsonEncode(event);
     log(
       LogData(
-        'gc',
+        _gcFilterId,
         message,
         e.timestamp,
         summary: summary,

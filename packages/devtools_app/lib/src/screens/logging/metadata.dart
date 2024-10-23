@@ -80,12 +80,16 @@ class MetadataChips extends StatelessWidget {
     // Prepare frame time chip.
     String? elapsedFrameTimeAsString;
     try {
-      final int micros = (jsonDecode(data.details!) as Map)['elapsed'];
-      elapsedFrameTimeAsString = durationText(
-        Duration(microseconds: micros),
-        unit: DurationDisplayUnit.milliseconds,
-        fractionDigits: 2,
-      );
+      if (data.details != null) {
+        final int? micros = (jsonDecode(data.details!) as Map)['elapsed'];
+        if (micros != null) {
+          elapsedFrameTimeAsString = durationText(
+            Duration(microseconds: micros),
+            unit: DurationDisplayUnit.milliseconds,
+            fractionDigits: 2,
+          );
+        }
+      }
     } catch (e) {
       // Ignore exception; [elapsedFrameTimeAsString] will be null.
     }
