@@ -855,6 +855,7 @@ class FilterTag {
 
   static FilterTag? parse(String value) {
     final parts = value.split(filterTagSeparator);
+    if (parts.length < 2) return null;
     try {
       final useRegExp = parts.last == useRegExpTag;
       final query = parts[0].trim();
