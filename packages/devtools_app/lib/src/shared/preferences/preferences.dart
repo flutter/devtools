@@ -22,6 +22,7 @@ import '../globals.dart';
 import '../query_parameters.dart';
 import '../utils.dart';
 
+part '_cpu_profiler_preferences.dart';
 part '_extension_preferences.dart';
 part '_inspector_preferences.dart';
 part '_memory_preferences.dart';
@@ -81,6 +82,9 @@ class PreferencesController extends DisposableController
   final verboseLoggingEnabled =
       ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
 
+  CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
+  final _cpuProfiler = CpuProfilerPreferencesController();
+
   ExtensionsPreferencesController get devToolsExtensions => _extensions;
   final _extensions = ExtensionsPreferencesController();
 
@@ -110,6 +114,7 @@ class PreferencesController extends DisposableController
     }
     await _initVerboseLogging();
 
+    await cpuProfiler.init();
     await devToolsExtensions.init();
     await inspector.init();
     await logging.init();
@@ -230,6 +235,7 @@ class PreferencesController extends DisposableController
 
   @override
   void dispose() {
+    cpuProfiler.dispose();
     devToolsExtensions.dispose();
     inspector.dispose();
     logging.dispose();
