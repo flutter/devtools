@@ -45,10 +45,11 @@ TODO: Remove this section if there are not any general updates.
 due to lazy loading. - [#8421](https://github.com/flutter/devtools/pull/8421)
 
 * Added support for displaying metadata, such as log
-severity, category, zone, and isolate.
+severity, category, zone, and isolate -
 [#8419](https://github.com/flutter/devtools/pull/8419),
 [#8439](https://github.com/flutter/devtools/pull/8439),
-[]()
+[#8441](https://github.com/flutter/devtools/pull/8441). It is now also possible to
+search and filter by these metadata values. - [#8473](https://github.com/flutter/devtools/pull/8473)
     ![Logging metadata display](images/log_metadata.png "Logging metadata display")
 
 * Add a filter text field to the top-level Logging controls. -
