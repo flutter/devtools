@@ -96,22 +96,22 @@ class LicenseConfig {
 
   /// Sequence of license text strings that should be matched against at the top
   /// of a file and removed.
-  late YamlList removeLicenses;
+  final YamlList removeLicenses;
 
   /// Sequence of license text strings that should be added to the top of a
   /// file.
-  late YamlList addLicenses;
+  final YamlList addLicenses;
 
   /// Path(s) to recursively check for file to remove/add license text
-  late YamlList includePaths;
+  final YamlList includePaths;
 
   /// Path(s) to recursively check for files to ignore
-  late YamlList excludePaths;
+  final YamlList excludePaths;
 
   /// Contains the extension (without a '.') and the associated indices
   /// of [removeLicenses] to remove and index of [addLicenses] to add for the
   /// file type.
-  late YamlMap fileTypes;
+  final YamlMap fileTypes;
 
   /// Returns the list of indices for the given [ext] of [removeLicenses]
   /// containing the license text to remove.
