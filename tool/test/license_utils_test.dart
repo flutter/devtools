@@ -355,16 +355,20 @@ text that should be added to the file. */''',
       await _setupTestConfigFile();
       final config = LicenseConfig.fromYamlFile(configFile);
       final header = LicenseHeader();
+
+      final contentsBeforeUpdate = testFile1.readAsStringSync();
       final results = await header.bulkUpdate(
         directory: testDirectory,
         config: config,
       );
+      final contentsAfterUpdate = testFile1.readAsStringSync();
 
       final includedPaths = results[LicenseHeader.includedPathsKey];
       expect(includedPaths, isNotNull);
       expect(includedPaths?.length, equals(7));
       // Order is not guaranteed
       expect(includedPaths?.contains(testFile1.path), true);
+      expect(contentsBeforeUpdate, isNot(equals(contentsAfterUpdate)));
       expect(includedPaths?.contains(testFile2.path), true);
       expect(includedPaths?.contains(testFile3.path), true);
       expect(includedPaths?.contains(testFile7.path), true);
@@ -383,6 +387,26 @@ text that should be added to the file. */''',
       expect(updatedPaths?.contains(testFile3.path), true);
       expect(updatedPaths?.contains(testFile7.path), true);
       expect(updatedPaths?.contains(testFile8.path), true);
+    });
+
+    test('license headers bulk update can be dry run', () async {
+      await _setupTestConfigFile();
+      final config = LicenseConfig.fromYamlFile(configFile);
+      final header = LicenseHeader();
+
+      final contentsBeforeUpdate = testFile1.readAsStringSync();
+      final results = await header.bulkUpdate(
+        directory: testDirectory,
+        config: config,
+        dryRun: true,
+      );
+      final contentsAfterUpdate = testFile1.readAsStringSync();
+
+      final includedPaths = results[LicenseHeader.includedPathsKey];
+      expect(includedPaths, isNotNull);
+      expect(includedPaths?.length, equals(7));
+      expect(includedPaths?.contains(testFile1.path), true);
+      expect(contentsBeforeUpdate, equals(contentsAfterUpdate));
     });
   });
 

@@ -234,9 +234,13 @@ class LicenseHeader {
 
   /// Bulk update license headers for files in the [directory] as configured
   /// in the [config] and return a list of file paths that were updated.
+  ///
+  /// If [dryRun] is set, returns a list of file paths that should be updated,
+  /// but no files will be actually be updated.
   Future<Map<String, List<String>>> bulkUpdate({
     required Directory directory,
     required LicenseConfig config,
+    bool dryRun = false,
   }) async {
     final includedPaths = <String>[];
     final updatedPaths = <String>[];
@@ -268,19 +272,23 @@ class LicenseHeader {
           final replacementHeader =
               replacementInfo[LicenseHeader.replacementHeaderKey];
           if (existingHeader != null && replacementHeader != null) {
-            final rewrittenFile = rewriteLicenseHeader(
-              file: file,
-              existingHeader: existingHeader,
-              replacementHeader: replacementHeader,
-            );
-            if (rewrittenFile.lengthSync() > 0) {
-              file.writeAsStringSync(
-                rewrittenFile.readAsStringSync(),
-                mode: FileMode.writeOnly,
-              );
+            if (dryRun) {
               updatedPaths.add(file.path);
+            } else {
+              final rewrittenFile = rewriteLicenseHeader(
+                file: file,
+                existingHeader: existingHeader,
+                replacementHeader: replacementHeader,
+              );
+              if (rewrittenFile.lengthSync() > 0) {
+                file.writeAsStringSync(
+                  rewrittenFile.readAsStringSync(),
+                  mode: FileMode.writeOnly,
+                );
+                updatedPaths.add(file.path);
+              }
+              rewrittenFile.deleteSync();
             }
-            rewrittenFile.deleteSync();
           }
         }
       }
