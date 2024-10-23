@@ -694,13 +694,13 @@ class LoggingController extends DisposableController
             if (matchesIsolateName) return true;
 
             final zone = log.zone;
-            final matchesZone =
-                (zone?.name?.caseInsensitiveContains(substring) ?? false) ||
-                    (zone?.identityHashCode
-                            ?.toString()
-                            .caseInsensitiveContains(substring) ??
-                        false);
-            if (matchesZone) return true;
+            final matchesZoneName =
+                zone?.name?.caseInsensitiveContains(substring) ?? false;
+            final matchesZoneIdentity = zone?.identityHashCode
+                    ?.toString()
+                    .caseInsensitiveContains(substring) ??
+                false;
+            if (matchesZoneName || matchesZoneIdentity) return true;
 
             final matchesSummary = log.summary != null &&
                 log.summary!.caseInsensitiveContains(substring);
