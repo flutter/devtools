@@ -40,6 +40,7 @@ void main() {
   setUp(() async {
     setCharacterWidthForTables();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(PreferencesController, PreferencesController());
 
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();

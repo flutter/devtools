@@ -140,6 +140,7 @@ class CpuProfilerController extends DisposableController
   static const _nativeFilterId = 'native';
   static const _coreDartFilterId = 'core-dart';
   static const _coreFlutterFilterId = 'core-flutter';
+  static const _uriQueryFilterId = 'cpu-profiler-uri-filter';
 
   /// The toggle filters available for the CPU profiler.
   @override
@@ -166,11 +167,9 @@ class CpuProfilerController extends DisposableController
           ),
       ];
 
-  static const uriFilterId = 'cpu-profiler-uri-filter';
-
   @override
   Map<String, QueryFilterArgument<CpuStackFrame>> createQueryFilterArgs() => {
-        uriFilterId: QueryFilterArgument<CpuStackFrame>(
+        _uriQueryFilterId: QueryFilterArgument<CpuStackFrame>(
           keys: ['uri', 'u'],
           exampleUsages: [
             'uri:my_dart_package/some_lib.dart',
@@ -180,6 +179,10 @@ class CpuProfilerController extends DisposableController
           substringMatch: true,
         ),
       };
+
+  @override
+  ValueNotifier<String>? get filterTagNotifier =>
+      preferences.cpuProfiler.filterTag;
 
   int selectedProfilerTabIndex = 0;
 
