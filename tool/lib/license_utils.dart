@@ -214,8 +214,10 @@ class LicenseHeader {
   }
 
   /// Returns a copy of the given [file] with the [existingHeader] replaced by
-  /// the [replacementHeader]. Reads and writes the entire file contents all
-  /// at once, so performance may degrade for large files.
+  /// the [replacementHeader].
+  ///
+  /// Reads and writes the entire file contents all at once, so performance may
+  ///  degrade for large files.
   File rewriteLicenseHeader({
     required File file,
     required String existingHeader,
@@ -284,6 +286,7 @@ class LicenseHeader {
                 file.writeAsStringSync(
                   rewrittenFile.readAsStringSync(),
                   mode: FileMode.writeOnly,
+                  flush: true,
                 );
                 updatedPaths.add(file.path);
               }
