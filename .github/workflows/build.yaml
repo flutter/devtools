@@ -99,6 +99,24 @@ jobs:
           PACKAGE: ${{ matrix.package }}
         run: ./tool/ci/package_tests.sh
 
+  test-tool:
+    name: Tool test
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/ci/tool_tests.sh
+        run: ./tool/ci/tool_tests.sh
+
   test:
     name: ${{ matrix.bot }}
     needs: flutter-prep
