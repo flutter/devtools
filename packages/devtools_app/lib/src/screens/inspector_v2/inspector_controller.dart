@@ -534,7 +534,7 @@ class InspectorController extends DisposableController
     final matchingDescendant = _findMatchingDescendant(
       of: closestUnchangedAncestor,
       matching: previousSelection,
-      inRange: Range(distanceToAncestor - 5, distanceToAncestor + 5),
+      inRange: Range(distanceToAncestor - 3, distanceToAncestor + 3),
     );
 
     return matchingDescendant ?? closestUnchangedAncestor;
