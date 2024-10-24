@@ -157,21 +157,34 @@ class LicenseConfig {
   }
 }
 
+///
+typedef ReplacementInfo = Map<String, String>;
+
 /// This class contains license update related business logic for
 /// [license_utils.dart].
 ///
 /// The [LicenseHeader] uses config data from [LicenseConfig] to update
 /// license text in configured files.
 class LicenseHeader {
-  /// Processes the [file] for replacement header information.
+  /// Processes the [file] for replacement information.
   ///
-  /// If the [file] matches the given [existingLicenseText] within the first
-  /// number of [byteCount] bytes, return the 'existing_header' and
-  /// 'replacement_header' each with the stored value ('<value>'
-  /// if configured, defaults to [defaultStoreValue] or current year)
-  /// populated. For now, only up to one stored value is supported.
+  /// If the [file] contains the given [existingLicenseText] within the first
+  /// number of [byteCount] bytes, return the [ReplacementInfo] containing:
+  /// - existing license text for key [LicenseHeader.existingHeaderKey]
+  /// - replacement license text for key [LicenseHeader.replacementHeaderKey]
+  ///
   /// If the file can't be read or no match is found, throws an exception.
-  Future<Map<String, String>> getReplacementInfo({
+  ///
+  /// Note on stored values
+  /// ---------------------
+  /// Any instance of &lt;value&gt; in the replacement license text will be
+  /// replaced with either:
+  /// 1. the stored value parsed from the existing header
+  /// 2. [defaultStoredValue], if no value is parsed
+  /// 3. current year, if no [defaultStoredValue] is provided
+  ///
+  /// For now, only up to one stored value is supported.
+  Future<ReplacementInfo> getReplacementInfo({
     required File file,
     required String existingLicenseText,
     required String replacementLicenseText,
@@ -224,7 +237,6 @@ class LicenseHeader {
     required String replacementHeader,
   }) {
     final rewrittenFile = File('${file.path}.tmp');
-    // TODO(mossmana): Convert to using a stream
     final contents = file.readAsStringSync();
     final replacementContents = contents.replaceFirst(
       existingHeader,
