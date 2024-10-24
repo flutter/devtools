@@ -188,14 +188,14 @@ text that should be removed from the file. */
         replacementLicenseText: replacementLicenseText,
       );
 
-      const String expectedExistingHeader =
+      const expectedExistingHeader =
           '''// This is some multiline license text to
 // remove that does not contain a stored value.''';
 
       // Note: There might be a potential failure case if the test is
       // run right when the year ends and a new year starts.
-      final String currentYear = DateTime.now().year.toString();
-      final String expectedReplacementHeader =
+      final currentYear = DateTime.now().year.toString();
+      final expectedReplacementHeader =
           '''// This is some $currentYear multiline license
 // text that should be added to the file.''';
 
@@ -301,7 +301,7 @@ text that should be added to the file. */''',
 
     test("update skipped if file can't be read", () async {
       var errorMessage = '';
-      final LicenseHeader header = LicenseHeader();
+      final header = LicenseHeader();
       try {
         await header.getReplacementInfo(
           file: File('bad.txt'),
@@ -334,13 +334,13 @@ text that should be added to the file. */''',
 
       expect(rewrittenFile.lengthSync(), greaterThan(0));
 
-      final String existingContents = testFile1.readAsStringSync();
+      final existingContents = testFile1.readAsStringSync();
       expect(
         existingContents.substring(0, existingHeader.length),
         equals(existingHeader),
       );
 
-      final String rewrittenContents = rewrittenFile.readAsStringSync();
+      final rewrittenContents = rewrittenFile.readAsStringSync();
       expect(
         rewrittenContents.substring(0, replacementHeader.length),
         equals(replacementHeader),
