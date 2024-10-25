@@ -260,6 +260,18 @@ void main() {
           '../test_infra/goldens/integration_inspector_v2_implementation_widgets_hidden.png',
         ),
       );
+
+      // Refresh the tree.
+      final refreshTreeButton = find.descendant(
+        of: find.byType(ToolbarAction),
+        matching: find.byIcon(Icons.refresh),
+      );
+
+      await tester.tap(refreshTreeButton);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Confirm that the hidden widgets are still not visible.
+      expect(find.richTextContaining('more widgets...'), findsNothing);
     },
   );
 

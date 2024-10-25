@@ -14,6 +14,7 @@ import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/colors.dart';
+import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/tab.dart';
 import 'common.dart';
@@ -188,12 +189,10 @@ class _CpuProfilerState extends State<CpuProfiler>
               if (currentTab.key == ProfilerTab.methodTable.key)
                 SearchField<MethodTableController>(
                   searchController: widget.controller.methodTableController,
-                  containerPadding: EdgeInsets.zero,
                 )
               else
                 SearchField<CpuProfilerController>(
                   searchController: widget.controller,
-                  containerPadding: EdgeInsets.zero,
                 ),
             ],
             if (currentTab.key == ProfilerTab.cpuFlameChart.key) ...[
@@ -287,8 +286,9 @@ class _CpuProfilerState extends State<CpuProfiler>
     unawaited(
       showDialog(
         context: context,
-        builder: (context) => CpuProfileFilterDialog(
+        builder: (context) => FilterDialog<CpuStackFrame>(
           controller: widget.controller,
+          filteredItem: 'stack frame',
         ),
       ),
     );

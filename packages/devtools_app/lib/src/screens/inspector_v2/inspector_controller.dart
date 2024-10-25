@@ -481,6 +481,7 @@ class InspectorController extends DisposableController
     hideImplementationWidgets =
         hideImplementationWidgets ?? _implementationWidgetsHidden.value;
     assert(!_disposed);
+    hideImplementationWidgets ??= _implementationWidgetsHidden.value;
     final treeGroups = _treeGroups;
     if (_disposed || treeGroups == null) {
       return;
