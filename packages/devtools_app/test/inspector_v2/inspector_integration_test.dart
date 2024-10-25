@@ -289,6 +289,47 @@ void main() {
     },
   );
 
+  testWidgetsWithWindowSize(
+    'tree nodes contain only essential information',
+    windowSize,
+    (WidgetTester tester) async {
+      const requiredDetailsForTreeNode = [
+        'description',
+        'shouldIndent',
+        'valueId',
+        'widgetRuntimeType',
+      ];
+      const possibleDetailsForTreeNode = [
+        'textPreview',
+        'children',
+        'createdByLocalProject',
+      ];
+
+      await _loadInspectorUI(tester);
+      final state = tester.state(find.byType(InspectorScreenBody))
+          as InspectorScreenBodyState;
+      final rowsInTree = state.controller.inspectorTree.rowsInTree.value;
+
+      for (final row in rowsInTree) {
+        final detailKeys = row?.node.diagnostic?.json.keys ?? [];
+        expect(
+          requiredDetailsForTreeNode.every(
+            (detail) => detailKeys.contains(detail),
+          ),
+          isTrue,
+        );
+        expect(
+          detailKeys.every(
+            (detail) =>
+                requiredDetailsForTreeNode.contains(detail) ||
+                possibleDetailsForTreeNode.contains(detail),
+          ),
+          isTrue,
+        );
+      }
+    },
+  );
+
   group('widget errors', () {
     testWidgetsWithWindowSize(
       'show navigator and error labels',
