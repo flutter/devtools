@@ -30,7 +30,6 @@ import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
-import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/query_parameters.dart';
@@ -137,11 +136,11 @@ class InspectorController extends DisposableController
     final vmService = serviceConnection.serviceManager.service;
     if (vmService != null) {
       autoDisposeStreamSubscription(
-        vmService.onIsolateEvent.listen(_maybeLiveReloadInspector),
+        vmService.onIsolateEvent.listen(_maybeAutoRefreshInspector),
       );
 
       autoDisposeStreamSubscription(
-        vmService.onExtensionEvent.listen(_maybeLiveReloadInspector),
+        vmService.onExtensionEvent.listen(_maybeAutoRefreshInspector),
       );
     }
   }
@@ -453,10 +452,8 @@ class InspectorController extends DisposableController
 
   bool _receivedIsolateReloadEvent = false;
 
-  Future<void> _maybeLiveReloadInspector(Event event) async {
-    // TODO(https://github.com/flutter/devtools/issues/1423): Always live-reload
-    // the Inspector.
-    if (!FeatureFlags.liveReloadInspectorTree) return;
+  Future<void> _maybeAutoRefreshInspector(Event event) async {
+    if (!preferences.inspector.autoRefreshEnabled.value) return;
 
     // It is not sufficent to wait for the isolate reload event, because Flutter
     // might not have re-painted the app. Instead, we need to wait for the first

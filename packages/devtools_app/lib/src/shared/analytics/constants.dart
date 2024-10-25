@@ -122,6 +122,7 @@ const wasm = 'wasm';
 const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const inspectorV2Enabled = 'inspectorV2Enabled';
+const inspectorAutoRefreshEnabled = 'inspectorAutoRefreshEnabled';
 const clearLogs = 'clearLogs';
 const copyLogs = 'copyLogs';
 

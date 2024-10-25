@@ -266,12 +266,11 @@ class InspectorTreeControls extends StatelessWidget {
                           ? _buildSearchControls()
                           : const Spacer(),
                     ],
-              if (!FeatureFlags.liveReloadInspectorTree)
-                ToolbarAction(
-                  icon: Icons.refresh,
-                  onPressed: onRefreshInspectorPressed,
-                  tooltip: 'Refresh Tree',
-                ),
+              ToolbarAction(
+                icon: Icons.refresh,
+                onPressed: onRefreshInspectorPressed,
+                tooltip: 'Refresh Tree',
+              ),
             ],
           ),
         ),

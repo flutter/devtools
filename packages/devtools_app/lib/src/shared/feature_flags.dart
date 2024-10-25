@@ -104,11 +104,6 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/7856
   static bool wasmOptInSetting = true;
 
-  /// Flag to enable live-reloading of the Inspector tree.
-  ///
-  /// https://github.com/flutter/devtools/issues/1423
-  static bool liveReloadInspectorTree = enableExperiments;
-
   /// Stores a map of all the feature flags for debugging purposes.
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
