@@ -419,9 +419,10 @@ class InspectorController extends DisposableController
 
   Future<void> _recomputeTreeRoot(
     RemoteDiagnosticsNode? newSelection, {
-    bool hideImplementationWidgets = false,
+    bool? hideImplementationWidgets,
   }) async {
     assert(!_disposed);
+    hideImplementationWidgets ??= _implementationWidgetsHidden.value;
     final treeGroups = _treeGroups;
     if (_disposed || treeGroups == null) {
       return;
