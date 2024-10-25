@@ -478,8 +478,6 @@ class InspectorController extends DisposableController
     RemoteDiagnosticsNode? newSelection, {
     bool? hideImplementationWidgets,
   }) async {
-    hideImplementationWidgets =
-        hideImplementationWidgets ?? _implementationWidgetsHidden.value;
     assert(!_disposed);
     hideImplementationWidgets ??= _implementationWidgetsHidden.value;
     final treeGroups = _treeGroups;
