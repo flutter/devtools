@@ -57,7 +57,9 @@ class NetworkController extends DisposableController
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
     );
-    subscribeToFilterChanges();
+    // TODO(https://github.com/flutter/devtools/issues/7727): add support for
+    // persisting network filter.
+    initFilterController();
   }
   List<DartIOHttpRequestData>? _httpRequests;
 
@@ -94,20 +96,26 @@ class NetworkController extends DisposableController
   Map<String, QueryFilterArgument<NetworkRequest>> createQueryFilterArgs() => {
         methodFilterId: QueryFilterArgument<NetworkRequest>(
           keys: ['method', 'm'],
+          exampleUsages: ['m:get', '-m:put,patch'],
           dataValueProvider: (request) => request.method,
           substringMatch: false,
         ),
         statusFilterId: QueryFilterArgument<NetworkRequest>(
           keys: ['status', 's'],
+          exampleUsages: ['s:200', '-s:404'],
           dataValueProvider: (request) => request.status,
           substringMatch: false,
         ),
         typeFilterId: QueryFilterArgument<NetworkRequest>(
           keys: ['type', 't'],
+          exampleUsages: ['t:json', '-t:text'],
           dataValueProvider: (request) => request.type,
           substringMatch: false,
         ),
       };
+
+  @override
+  ValueNotifier<String>? get filterTagNotifier => preferences.network.filterTag;
 
   /// Notifies that new Network requests have been processed.
   ValueListenable<List<NetworkRequest>> get requests => _currentNetworkRequests;

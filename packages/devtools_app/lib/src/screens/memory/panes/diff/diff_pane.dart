@@ -56,7 +56,7 @@ class _SnapshotItemContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SnapshotItem>(
       valueListenable: controller.derived.selectedItem,
-      builder: (_, item, __) {
+      builder: (_, item, _) {
         if (item is SnapshotDocItem) {
           return Padding(
             padding: const EdgeInsets.all(denseSpacing),

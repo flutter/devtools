@@ -35,7 +35,7 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<InspectorTreeNode?>(
       valueListenable: controller.selectedNode,
-      builder: (context, _, __) {
+      builder: (context, _, _) {
         final node = selectedNode;
         if (node == null) {
           return const Center(

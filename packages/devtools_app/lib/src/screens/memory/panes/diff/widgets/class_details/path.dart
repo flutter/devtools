@@ -87,7 +87,7 @@ class _PathControlPane extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.hideStandard,
-          builder: (_, hideStandard, __) => DevToolsFilterButton(
+          builder: (_, hideStandard, _) => DevToolsFilterButton(
             onPressed: () {
               ga.select(
                 gac.memory,
@@ -102,7 +102,7 @@ class _PathControlPane extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.invert,
-          builder: (_, invert, __) => DevToolsToggleButton(
+          builder: (_, invert, _) => DevToolsToggleButton(
             onPressed: () {
               ga.select(
                 gac.memory,
@@ -133,7 +133,7 @@ class _PathView extends StatelessWidget {
         controller.hideStandard,
         controller.invert,
       ],
-      builder: (_, values, __) {
+      builder: (_, values, _) {
         final hideStandard = values.first as bool;
         final invert = values.second as bool;
         return SingleChildScrollView(

@@ -427,7 +427,7 @@ class VisibilityButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: show,
-      builder: (_, show, __) {
+      builder: (_, show, _) {
         return GaDevToolsButton(
           key: key,
           tooltip: tooltip,
@@ -1141,11 +1141,11 @@ class TextViewer extends StatelessWidget {
 }
 
 class JsonViewer extends StatefulWidget {
-  const JsonViewer({
+  JsonViewer({
     super.key,
     required this.encodedJson,
     this.scrollable = true,
-  });
+  }) : assert(encodedJson.isNotEmpty);
 
   final String encodedJson;
   final bool scrollable;

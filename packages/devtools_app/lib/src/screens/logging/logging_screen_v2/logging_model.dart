@@ -97,7 +97,7 @@ class LoggingTableModel extends DisposableController
       _onRetentionLimitUpdate,
     );
 
-    subscribeToFilterChanges();
+    initFilterController();
 
     _retentionLimit = preferences.logging.retentionLimit.value;
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
@@ -125,10 +125,11 @@ class LoggingTableModel extends DisposableController
 
   /// The toggle filters available for the Logging screen.
   @override
-  List<SettingFilter<LogDataV2, bool>> createSettingFilters() => [
+  SettingFilters<LogDataV2> createSettingFilters() => [
         if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
             true) ...[
           ToggleFilter<LogDataV2>(
+            id: 'verbose-flutter-framework-logs',
             name: 'Hide verbose Flutter framework logs (initialization, frame '
                 'times, image sizes)',
             includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
@@ -136,6 +137,7 @@ class LoggingTableModel extends DisposableController
             defaultValue: true,
           ),
           ToggleFilter<LogDataV2>(
+            id: 'verbose-flutter-service-logs',
             name: 'Hide verbose Flutter service logs (service extension state '
                 'changes)',
             includeCallback: (log) => !_verboseFlutterServiceLogKinds
@@ -144,6 +146,7 @@ class LoggingTableModel extends DisposableController
           ),
         ],
         ToggleFilter<LogDataV2>(
+          id: 'gc-logs',
           name: 'Hide garbage collection logs',
           includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
           defaultValue: true,
@@ -156,6 +159,7 @@ class LoggingTableModel extends DisposableController
   Map<String, QueryFilterArgument<LogDataV2>> createQueryFilterArgs() => {
         kindFilterId: QueryFilterArgument<LogDataV2>(
           keys: ['kind', 'k'],
+          exampleUsages: ['k:stderr', '-k:stdout'],
           dataValueProvider: (log) => log.kind,
           substringMatch: true,
         ),

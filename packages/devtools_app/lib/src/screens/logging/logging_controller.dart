@@ -49,6 +49,8 @@ typedef CreateLoggingTree = InspectorTreeController Function({
   VoidCallback? onSelectionChange,
 });
 
+typedef ZoneDescription = ({String? name, int? identityHashCode});
+
 Future<String> _retrieveFullStringValue(
   VmServiceWrapper? service,
   IsolateRef isolateRef,
@@ -113,29 +115,34 @@ class LoggingController extends DisposableController
       _handleConnectionStart(serviceConnection.serviceManager.service!);
     }
     _handleBusEvents();
-    subscribeToFilterChanges();
+    initFilterController();
   }
 
-  /// The toggle filters available for the Logging screen.
+  static const _minLogLevelFilterId = 'min-log-level';
+  static const _verboseFlutterFrameworkFilterId = 'verbose-flutter-framework';
+  static const _verboseFlutterServiceFilterId = 'verbose-flutter-service';
+  static const _gcFilterId = 'gc';
+
+  /// The setting filters available for the Logging screen.
   @override
-  List<SettingFilter<LogData, Object>> createSettingFilters() => settingFilters;
+  SettingFilters<LogData> createSettingFilters() => loggingSettingFilters;
 
   @visibleForTesting
-  static final settingFilters = <SettingFilter<LogData, Object>>[
-    SettingFilter<LogData, Level>(
+  static final loggingSettingFilters = <SettingFilter<LogData, Object>>[
+    SettingFilter<LogData, int>(
+      id: _minLogLevelFilterId,
       name: 'Hide logs below the minimum log level',
-      includeCallback: (LogData element, Level currentFilterValue) =>
-          element.level >= currentFilterValue.value,
-      enabledCallback: (Level filterValue) => filterValue >= Level.FINEST,
-      possibleValues: Level.LEVELS
-          // Omit Level.OFF and Level.ALL from the possible minimum levels.
-          .where((level) => level != Level.OFF && level != Level.ALL)
-          .toList(),
-      defaultValue: Level.INFO,
+      includeCallback: (LogData element, int currentFilterValue) =>
+          element.level >= currentFilterValue,
+      enabledCallback: (int filterValue) => filterValue > Level.ALL.value,
+      possibleValues: _possibleLogLevels.map((l) => l.value).toList(),
+      possibleValueDisplays: _possibleLogLevels.map((l) => l.name).toList(),
+      defaultValue: Level.ALL.value,
     ),
     if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
         true) ...[
       ToggleFilter<LogData>(
+        id: _verboseFlutterFrameworkFilterId,
         name: 'Hide verbose Flutter framework logs (initialization, frame '
             'times, image sizes)',
         includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
@@ -143,6 +150,7 @@ class LoggingController extends DisposableController
         defaultValue: true,
       ),
       ToggleFilter<LogData>(
+        id: _verboseFlutterServiceFilterId,
         name: 'Hide verbose Flutter service logs (service extension state '
             'changes)',
         includeCallback: (log) => !_verboseFlutterServiceLogKinds
@@ -151,26 +159,49 @@ class LoggingController extends DisposableController
       ),
     ],
     ToggleFilter<LogData>(
+      id: _gcFilterId,
       name: 'Hide garbage collection logs',
       includeCallback: (log) => !log.kind.caseInsensitiveEquals(_gcLogKind),
       defaultValue: true,
     ),
   ];
 
-  static const kindFilterId = 'logging-kind-filter';
+  static final _possibleLogLevels = Level.LEVELS
+      // Omit Level.OFF from the possible minimum levels.
+      .where((level) => level != Level.OFF);
+
+  static const _kindFilterId = 'logging-kind-filter';
+  static const _isolateFilterId = 'logging-isolate-filter';
+  static const _zoneFilterId = 'logging-zone-filter';
 
   @override
   Map<String, QueryFilterArgument<LogData>> createQueryFilterArgs() =>
-      queryFilterArgs;
+      loggingQueryFilterArgs;
 
   @visibleForTesting
-  static final queryFilterArgs = <String, QueryFilterArgument<LogData>>{
-    kindFilterId: QueryFilterArgument<LogData>(
+  static final loggingQueryFilterArgs = <String, QueryFilterArgument<LogData>>{
+    _kindFilterId: QueryFilterArgument<LogData>(
       keys: ['kind', 'k'],
+      exampleUsages: ['k:stderr', '-k:stdout,gc'],
       dataValueProvider: (log) => log.kind,
       substringMatch: true,
     ),
+    _isolateFilterId: QueryFilterArgument<LogData>(
+      keys: ['isolate', 'i'],
+      exampleUsages: ['i:main', '-i:worker'],
+      dataValueProvider: (log) => log.isolateRef?.name,
+      substringMatch: true,
+    ),
+    _zoneFilterId: QueryFilterArgument<LogData>(
+      keys: ['zone', 'z'],
+      exampleUsages: ['z:custom', '-z:root'],
+      dataValueProvider: (log) => log.zone?.name,
+      substringMatch: true,
+    ),
   };
+
+  @override
+  ValueNotifier<String>? get filterTagNotifier => preferences.logging.filterTag;
 
   final _logStatusController = StreamController<String>.broadcast();
 
@@ -392,7 +423,7 @@ class LoggingController extends DisposableController
     final message = jsonEncode(event);
     log(
       LogData(
-        'gc',
+        _gcFilterId,
         message,
         e.timestamp,
         summary: summary,
@@ -657,6 +688,20 @@ class LoggingController extends DisposableController
                 log.levelName.caseInsensitiveContains(substring);
             if (matchesLevel) return true;
 
+            final matchesIsolateName =
+                log.isolateRef?.name?.caseInsensitiveContains(substring) ??
+                    false;
+            if (matchesIsolateName) return true;
+
+            final zone = log.zone;
+            final matchesZoneName =
+                zone?.name?.caseInsensitiveContains(substring) ?? false;
+            final matchesZoneIdentity = zone?.identityHashCode
+                    ?.toString()
+                    .caseInsensitiveContains(substring) ??
+                false;
+            if (matchesZoneName || matchesZoneIdentity) return true;
+
             final matchesSummary = log.summary != null &&
                 log.summary!.caseInsensitiveContains(substring);
             if (matchesSummary) return true;
@@ -831,7 +876,7 @@ class LogData with SearchableDataMixin {
   final bool isError;
   final String? summary;
   final IsolateRef? isolateRef;
-  final ({String? name, int? identityHashCode})? zone;
+  final ZoneDescription? zone;
 
   String get levelName =>
       _levelName ??= LogLevelMetadataChip.generateLogLevel(level).name;
@@ -901,6 +946,9 @@ class LogData with SearchableDataMixin {
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return kind.caseInsensitiveContains(regExpSearch) ||
+        levelName.caseInsensitiveContains(regExpSearch) ||
+        isolateRef?.name?.caseInsensitiveContains(regExpSearch) == true ||
+        zone?.name?.caseInsensitiveContains(regExpSearch) == true ||
         (summary?.caseInsensitiveContains(regExpSearch) == true) ||
         (details?.caseInsensitiveContains(regExpSearch) == true);
   }

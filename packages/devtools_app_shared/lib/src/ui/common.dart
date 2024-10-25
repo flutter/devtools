@@ -12,7 +12,7 @@ import '../utils/utils.dart';
 import 'theme/theme.dart';
 
 /// A DevTools-styled area pane to hold a section of UI on a screen.
-/// 
+///
 /// It is strongly recommended to use [AreaPaneHeader] or a Widget that builds
 /// an [AreaPaneHeader] for the value of the [header] parameter.
 class DevToolsAreaPane extends StatelessWidget {

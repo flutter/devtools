@@ -8,37 +8,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/globals.dart';
-import '../../../../shared/ui/filter.dart';
-import '../../cpu_profile_model.dart';
 import '../../cpu_profiler_controller.dart';
 import '../../profiler_screen_controller.dart';
-
-class CpuProfileFilterDialog extends StatelessWidget {
-  const CpuProfileFilterDialog({required this.controller, super.key});
-
-  static const filterQueryInstructions = '''
-Type a filter query to show or hide specific stack frames.
-
-Any text that is not paired with an available filter key below will be queried against all categories (method, uri).
-
-Available filters:
-    'uri', 'u'       (e.g. 'uri:my_dart_package/some_lib.dart', '-u:some_lib_to_hide')
-
-Example queries:
-    'someMethodName uri:my_dart_package,b_dart_package'
-    '.toString -uri:flutter'
-''';
-
-  final CpuProfilerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilterDialog<CpuStackFrame>(
-      controller: controller,
-      queryInstructions: filterQueryInstructions,
-    );
-  }
-}
 
 /// DropdownButton that controls the value of
 /// [ProfilerScreenController.userTagFilter].

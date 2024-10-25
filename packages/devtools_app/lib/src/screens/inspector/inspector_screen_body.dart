@@ -184,8 +184,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 child: ValueListenableBuilder(
                   valueListenable: serviceConnection.errorBadgeManager
                       .erroredItemsForPage(InspectorScreen.id),
-                  builder:
-                      (_, LinkedHashMap<String, DevToolsError> errors, __) {
+                  builder: (_, LinkedHashMap<String, DevToolsError> errors, _) {
                     final inspectableErrors = errors.map(
                       (key, value) =>
                           MapEntry(key, value as InspectableWidgetError),
@@ -203,7 +202,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                         if (errors.isNotEmpty)
                           ValueListenableBuilder<int?>(
                             valueListenable: controller.selectedErrorIndex,
-                            builder: (_, selectedErrorIndex, __) => Positioned(
+                            builder: (_, selectedErrorIndex, _) => Positioned(
                               top: 0,
                               right: 0,
                               child: ErrorNavigator(

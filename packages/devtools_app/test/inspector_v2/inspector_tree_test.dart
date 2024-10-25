@@ -76,7 +76,7 @@ void main() {
       (WidgetTester tester) async {
         final treeController = InspectorTreeController()
           ..config = InspectorTreeConfig(
-            onNodeAdded: (_, __) {},
+            onNodeAdded: (_, _) {},
             onClientActiveChange: (_) {},
           );
         await pumpInspectorTree(tester, treeController: treeController);
