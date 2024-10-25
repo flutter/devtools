@@ -636,10 +636,6 @@ abstract class InspectorObjectGroupBase
       if (json['errorMessage'] != null) {
         throw Exception('$extension -- ${json['errorMessage']}');
       }
-      final result = json['result'];
-      final jsonString = jsonEncode(result);
-      final jsonSizeInBytes = utf8.encode(jsonString).lengthInBytes;
-      print('[$extension] response size: $jsonSizeInBytes bytes');
       return json['result'];
     });
   }
@@ -979,7 +975,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
           'groupName': groupName,
           'isSummaryTree': '$isSummaryTree',
           'withPreviews': 'true',
-          'abbreviated': '${!includeFullDetails}',
+          'fullDetails': '$includeFullDetails',
         },
       ),
     );
