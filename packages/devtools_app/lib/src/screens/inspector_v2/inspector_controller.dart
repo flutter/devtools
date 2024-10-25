@@ -523,6 +523,9 @@ class InspectorController extends DisposableController
       return previousSelection;
     }
 
+    // TODO(https://github.com/flutter/devtools/issues/8481): Consider using a
+    // variation of a path-finding algorithm to determine the new selection,
+    // instead of looking for the first matching descendant.
     final (closestUnchangedAncestor, distanceToAncestor) =
         _findClosestUnchangedAncestor(previousSelection);
     if (closestUnchangedAncestor == null) return inspectorTree.root?.diagnostic;
