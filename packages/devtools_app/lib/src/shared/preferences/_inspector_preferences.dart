@@ -31,7 +31,9 @@ class InspectorPreferencesController extends DisposableController
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
   final _inspectorV2Enabled = ValueNotifier<bool>(false);
-  final _autoRefreshEnabled = ValueNotifier<bool>(true);
+  // TODO(https://github.com/flutter/devtools/issues/1423): Default to true
+  // after verifying auto-refreshes are performant.
+  final _autoRefreshEnabled = ValueNotifier<bool>(false);
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
@@ -115,7 +117,9 @@ class InspectorPreferencesController extends DisposableController
     await _updateBooleanPreference(
       preferenceStorageId: _autoRefreshEnabledStorageId,
       preferenceNotifier: _autoRefreshEnabled,
-      defaultValue: true,
+      // TODO(https://github.com/flutter/devtools/issues/1423): Default to true
+      // after verifying auto-refreshes are performant.
+      defaultValue: false,
     );
   }
 
