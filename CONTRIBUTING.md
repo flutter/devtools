@@ -58,7 +58,7 @@ own Github account, and then clone it using SSH. If you haven't already, you may
 to connect to Github with SSH.
 2. Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-upstream-repository)
 with the upstream DevTools repo.
-3. Ensure that you have access to the `devtools_tool` executable by:
+3. Ensure that you have access to the DevTools repo management tool exectuable, `dt`:
 	- Running `flutter pub get` on the `devtools/tool` directory
 	- Adding the `devtools/tool/bin` folder to your `PATH` environment variable:
 	  - **MacOS Users**
@@ -74,7 +74,7 @@ with the upstream DevTools repo.
 		- Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`, replacing `<DEVTOOLS_DIR>`
 		with the local path to your DevTools repo.
 
-	Explore the commands and helpers that `devtools_tool` provides by running `devtools_tool -h`.
+	Explore the commands and helpers that `dt` provides by running `dt -h`.
 4. **Optional:** enable and activate DCM (Dart Code Metrics) - see the [DCM section below](#enable-and-activate-dcm-dart-code-metrics)
 
 #### Set up your IDE
@@ -88,13 +88,13 @@ of launch configurations for running and debugging DevTools:
 
 ### Workflow for making changes
 
-1. Change your local Flutter SDK to the latest flutter candidate branch: `devtools_tool update-flutter-sdk --from-path`
+1. Change your local Flutter SDK to the latest flutter candidate branch: `dt update-flutter-sdk --from-path`
 
 > Note: Until  https://github.com/flutter/devtools/issues/7939 is fixed, run
-`devtools_tool update-flutter-sdk --use-cache` instead.
+`dt update-flutter-sdk --use-cache` instead.
 
 2. Create a branch from your cloned DevTools repo: `git checkout -b myBranch`
-3. Ensure your branch, dependencies, and generated code are up-to-date: `devtools_tool sync`
+3. Ensure your branch, dependencies, and generated code are up-to-date: `dt sync`
 4. Implement your changes, and commit to your branch: `git commit -m “description”`
 	- If your improvement is user-facing, [document it](packages/devtools_app/release_notes/README.md) in the same PR.
 5. Push to your branch to GitHub: `git push origin myBranch`
@@ -112,13 +112,13 @@ request from the branch in your cloned repo to the DevTools master branch. Creat
 
 - If at any time you need to re-sync your branch, run:
 	```
-	devtools_tool sync
+	dt sync
 	```
 	This will pull the latest code from the upstream DevTools, upgrade dependencies, and perform code generation.
 
 - If you want to upgrade dependencies and re-generate code (like mocks), but do not want to merge `upstream/master`, instead run
 	```
-	devtools_tool generate-code --upgrade
+	dt generate-code --upgrade
 	```
 
  - To update DCM to the same version as on GitHub bots with apt-get or brew:
@@ -171,7 +171,7 @@ dependency_overrides:
 
 Then you can run DevTools with the server by running the following from the top-level `devtools` directory:
 ```
-devtools_tool serve
+dt serve
 ```
 
 ### DevTools + VS Code integration (IDE-embedded DevTools experience)
@@ -195,7 +195,7 @@ command palette (`F1`)) and add the following to your settings:
 },
 ```
 
-This instructs VS Code to run the `devtools_tool serve` command instead of running `dart devtools`.
+This instructs VS Code to run the `dt serve` command instead of running `dart devtools`.
 You must set the `LOCAL_DART_SDK` and `FLUTTER_ROOT` env variables correctly for the script to work.
 
 Next, restart VS Code (or run the **Developer: Reload Window** command from the command palette (`F1`))

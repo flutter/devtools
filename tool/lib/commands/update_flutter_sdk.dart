@@ -31,7 +31,7 @@ final _flutterPreReleaseTagRegExp = RegExp(r'[0-9]+.[0-9]+.0-[0-9]+.0.pre');
 /// time since the GitHub workflow that updates this file runs twice per day.
 ///
 /// To run this script:
-/// `devtools_tool update-flutter-sdk [--from-path] [--no-use-cache]`
+/// `dt update-flutter-sdk [--from-path] [--no-use-cache]`
 class UpdateFlutterSdkCommand extends Command {
   UpdateFlutterSdkCommand() {
     argParser

@@ -52,7 +52,7 @@ void main() {
       expect(controller.loggingModel.filteredLogCount, 0);
       expect(controller.loggingModel.selectedLogCount, 0);
       expect(
-        controller.loggingModel.activeFilter.value.toggleFilters.length,
+        controller.loggingModel.activeFilter.value.settingFilters.length,
         3,
       );
       expect(

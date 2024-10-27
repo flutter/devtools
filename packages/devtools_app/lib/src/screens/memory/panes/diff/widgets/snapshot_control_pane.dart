@@ -91,7 +91,7 @@ class _DiffDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SnapshotDataItem?>(
       valueListenable: current.diffWith,
-      builder: (_, diffWith, __) => Row(
+      builder: (_, diffWith, _) => Row(
         children: [
           const Text('Diff with:'),
           const SizedBox(width: defaultSpacing),

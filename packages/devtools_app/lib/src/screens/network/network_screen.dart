@@ -87,23 +87,6 @@ class NetworkScreen extends Screen {
 class NetworkScreenBody extends StatefulWidget {
   const NetworkScreenBody({super.key});
 
-  static const filterQueryInstructions = '''
-Type a filter query to show or hide specific requests.
-
-Any text that is not paired with an available filter key below will be queried against all categories (method, uri, status, type).
-
-Available filters:
-    'method', 'm'       (e.g. 'm:get', '-m:put,patch')
-    'status', 's'           (e.g. 's:200', '-s:404')
-    'type', 't'               (e.g. 't:json', '-t:ws')
-
-Example queries:
-    'my-endpoint method:put,post -status:404 type:json'
-    'example.com -m:get s:200,201 t:htm,html,json'
-    'http s:404'
-    'POST'
-''';
-
   @override
   State<StatefulWidget> createState() => _NetworkScreenBodyState();
 }
@@ -173,10 +156,6 @@ class _NetworkProfilerControls extends StatefulWidget {
 
 class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     with AutoDisposeMixin {
-  late List<NetworkRequest> _requests;
-
-  late List<NetworkRequest> _filteredRequests;
-
   bool _recording = false;
 
   @override
@@ -188,83 +167,64 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         _recording = widget.controller.recordingNotifier.value;
       });
     });
-    _requests = widget.controller.requests.value;
-    addAutoDisposeListener(widget.controller.requests, () {
-      setState(() {
-        _requests = widget.controller.requests.value;
-      });
-    });
-    _filteredRequests = widget.controller.filteredData.value;
-    addAutoDisposeListener(widget.controller.filteredData, () {
-      setState(() {
-        _filteredRequests = widget.controller.filteredData.value;
-      });
-    });
+
+    addAutoDisposeListener(widget.controller.filteredData);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = ScreenSize(context).width;
-    final hasRequests = _filteredRequests.isNotEmpty;
+    final hasRequests = widget.controller.filteredData.value.isNotEmpty;
     return Row(
       children: [
         if (!widget.offline) ...[
           StartStopRecordingButton(
-            recording: _recording,
-            onPressed: () async =>
-                await widget.controller.togglePolling(!_recording),
-            tooltipOverride: _recording
-                ? 'Stop recording network traffic'
-                : 'Resume recording network traffic',
-            minScreenWidthForTextBeforeScaling: double.infinity,
-            gaScreen: gac.network,
-            gaSelection: _recording ? gac.pause : gac.resume,
-          ),
-          const SizedBox(width: denseSpacing),
-          ClearButton(
-            minScreenWidthForTextBeforeScaling:
-                _NetworkProfilerControls._includeTextWidth,
-            gaScreen: gac.network,
-            gaSelection: gac.clear,
-            onPressed: widget.controller.clear,
-          ),
-          const SizedBox(width: defaultSpacing),
-          DownloadButton(
-            minScreenWidthForTextBeforeScaling:
-                _NetworkProfilerControls._includeTextWidth,
-            onPressed: widget.controller.exportAsHarFile,
-            gaScreen: gac.network,
-            gaSelection: gac.NetworkEvent.downloadAsHar.name,
-          ),
-          const SizedBox(width: defaultSpacing),
-        ],
-        const Spacer(),
-        // TODO(kenz): fix focus issue when state is refreshed
-        SearchField<NetworkController>(
-          searchController: widget.controller,
-          searchFieldEnabled: hasRequests,
-          searchFieldWidth: screenWidth <= MediaSize.xs
-              ? defaultSearchFieldWidth
-              : wideSearchFieldWidth,
+          recording: _recording,
+          onPressed: () async =>
+              await widget.controller.togglePolling(!_recording),
+          tooltipOverride: _recording
+              ? 'Stop recording network traffic'
+              : 'Resume recording network traffic',
+          minScreenWidthForTextBeforeScaling: double.infinity,
+          gaScreen: gac.network,
+          gaSelection: _recording ? gac.pause : gac.resume,
         ),
         const SizedBox(width: denseSpacing),
-        DevToolsFilterButton(
-          onPressed: _showFilterDialog,
-          isFilterActive: _filteredRequests.length != _requests.length,
+        ClearButton(
+          minScreenWidthForTextBeforeScaling:
+              _NetworkProfilerControls._includeTextWidth,
+          gaScreen: gac.network,
+          gaSelection: gac.clear,
+          onPressed: widget.controller.clear,
+        ),
+        const SizedBox(width: defaultSpacing),
+        DownloadButton(
+          tooltip: 'Download as .har file',
+          minScreenWidthForTextBeforeScaling:
+              _NetworkProfilerControls._includeTextWidth,
+          onPressed: widget.controller.exportAsHarFile,
+          gaScreen: gac.network,
+          gaSelection: gac.NetworkEvent.downloadAsHar.name,
+        ),
+        const Spacer(),
+        // TODO(kenz): fix focus issue when state is refreshed
+        Expanded(
+          child: SearchField<NetworkController>(
+            searchController: widget.controller,
+            searchFieldEnabled: hasRequests,
+            searchFieldWidth: screenWidth <= MediaSize.xs
+                ? defaultSearchFieldWidth
+                : wideSearchFieldWidth,
+          ),
+        ),
+        const SizedBox(width: denseSpacing),
+        Expanded(
+          child: StandaloneFilterField<NetworkRequest>(
+            controller: widget.controller,
+            filteredItem: 'request',
+          ),
         ),
       ],
-    );
-  }
-
-  void _showFilterDialog() {
-    unawaited(
-      showDialog(
-        context: context,
-        builder: (context) => FilterDialog<NetworkRequest>(
-          controller: widget.controller,
-          queryInstructions: NetworkScreenBody.filterQueryInstructions,
-        ),
-      ),
     );
   }
 }

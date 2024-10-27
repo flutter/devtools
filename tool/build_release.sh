@@ -30,7 +30,7 @@ else
   PATH="$FLUTTER_DIR/bin":$PATH
 
   # Make sure the flutter sdk is on the correct branch.
-  devtools_tool update-flutter-sdk
+  dt update-flutter-sdk
 fi
 
 popd
@@ -58,7 +58,7 @@ echo "Running flutter --help as a workaround for https://github.com/flutter/flut
 flutter --help
 
 if [[ $1 = "--update-perfetto" ]]; then
-  devtools_tool update-perfetto
+  dt update-perfetto
 fi
 
 pushd $DEVTOOLS_DIR/packages/devtools_shared
@@ -77,6 +77,7 @@ rm -rf build/web
 flutter pub get
 
 flutter build web \
+  --source-maps \
   --wasm \
   --pwa-strategy=offline-first \
   --release \

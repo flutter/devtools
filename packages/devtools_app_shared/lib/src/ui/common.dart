@@ -11,6 +11,37 @@ import '../utils/url/url.dart';
 import '../utils/utils.dart';
 import 'theme/theme.dart';
 
+/// A DevTools-styled area pane to hold a section of UI on a screen.
+///
+/// It is strongly recommended to use [AreaPaneHeader] or a Widget that builds
+/// an [AreaPaneHeader] for the value of the [header] parameter.
+class DevToolsAreaPane extends StatelessWidget {
+  const DevToolsAreaPane({
+    super.key,
+    required this.header,
+    required this.child,
+  });
+
+  final Widget header;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedOutlinedBorder(
+      clip: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          Expanded(
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Create a bordered, fixed-height header area with a title and optional child
 /// on the right-hand side.
 ///
@@ -495,14 +526,21 @@ extension ScrollControllerAutoScroll on ScrollController {
     return pos.pixels == pos.maxScrollExtent;
   }
 
-  /// Scroll the content to the bottom using the app's default animation
-  /// duration and curve..
-  Future<void> autoScrollToBottom() async {
-    await animateTo(
-      position.maxScrollExtent,
-      duration: rapidDuration,
-      curve: defaultCurve,
-    );
+  /// Scroll the content to the bottom.
+  ///
+  /// By default, this will scroll using the app's default animation
+  /// duration and curve. When [jump] is false, this will scroll by jumping
+  /// instead.
+  Future<void> autoScrollToBottom({bool jump = false}) async {
+    if (jump) {
+      jumpTo(position.maxScrollExtent);
+    } else {
+      await animateTo(
+        position.maxScrollExtent,
+        duration: rapidDuration,
+        curve: defaultCurve,
+      );
+    }
 
     // Scroll again if we've received new content in the interim.
     if (hasClients) {

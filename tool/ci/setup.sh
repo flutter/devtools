@@ -66,11 +66,11 @@ pushd $DEVTOOLS_DIR/tool
 flutter pub get
 popd
 
-# Ensure the devtools_tool command is available
+# Ensure the dt command is available
 export PATH="$PATH":"$DEVTOOLS_DIR/tool/bin"
 
 # Fetch dependencies
-devtools_tool pub-get --only-main
+dt pub-get --only-main
 
 # Generate code.
-devtools_tool generate-code
+dt generate-code

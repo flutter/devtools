@@ -15,7 +15,7 @@ import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
-import 'editor_service/simulated_editor_mixin.dart';
+import 'editor_service/simulated_editor.dart';
 import 'mock_editor_widget.dart';
 import 'utils.dart';
 
@@ -26,7 +26,7 @@ import 'utils.dart';
 class EditorSidebarScene extends Scene {
   late Stream<String> clientLog;
   late DartToolingDaemon clientDtd;
-  late SimulatedDtdEditor editor;
+  late SimulatedEditor editor;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +45,7 @@ class EditorSidebarScene extends Scene {
         body: MockEditorWidget(
           editor: editor,
           clientLog: clientLog,
-          child: DtdEditorSidebarPanel(clientDtd),
+          child: EditorSidebarPanel(clientDtd),
         ),
       ),
     );
@@ -82,6 +82,6 @@ class EditorSidebarScene extends Scene {
     final connection = await createLoggedWebSocketChannel(dtdUri);
     clientLog = connection.log;
     clientDtd = DartToolingDaemon.fromStreamChannel(connection.channel);
-    editor = SimulatedDtdEditor(dtdUri);
+    editor = SimulatedEditor(dtdUri);
   }
 }

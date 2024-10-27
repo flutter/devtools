@@ -31,6 +31,8 @@ abstract class ServiceExtensionInterface {
   String? get gaDocsItem;
 
   String get gaItemTooltipLink;
+
+  String? get shortTitle;
 }
 
 /// A subclass of [extensions.ToggleableServiceExtension] that includes metadata
@@ -53,6 +55,7 @@ class ToggleableServiceExtensionDescription<T extends Object> extends extensions
     this.gaDocsItem,
     this.iconAsset,
     this.iconData,
+    this.shortTitle,
   })  : displayValues =
             [enabledValue, disabledValue].map((v) => v.toString()).toList(),
         assert((iconAsset == null) != (iconData == null)),
@@ -69,6 +72,7 @@ class ToggleableServiceExtensionDescription<T extends Object> extends extensions
     String? gaDocsItem,
     String? iconAsset,
     IconData? iconData,
+    String? shortTitle,
   }) {
     return ToggleableServiceExtensionDescription._(
       extension: extension.extension,
@@ -85,6 +89,7 @@ class ToggleableServiceExtensionDescription<T extends Object> extends extensions
       gaDocsItem: gaDocsItem,
       iconAsset: iconAsset,
       iconData: iconData,
+      shortTitle: shortTitle,
     );
   }
 
@@ -119,6 +124,9 @@ class ToggleableServiceExtensionDescription<T extends Object> extends extensions
   final String? gaDocsItem;
 
   @override
+  final String? shortTitle;
+
+  @override
   String get gaItemTooltipLink => '${gaItem}TooltipLink';
 }
 
@@ -139,6 +147,7 @@ class ServiceExtensionDescription<T> extends extensions.ServiceExtension<T>
     required this.tooltip,
     this.description,
     this.documentationUrl,
+    this.shortTitle,
     this.gaDocsItem,
   })  : displayValues =
             displayValues ?? values.map((v) => v.toString()).toList(),
@@ -156,6 +165,7 @@ class ServiceExtensionDescription<T> extends extensions.ServiceExtension<T>
     String? gaDocsItem,
     String? iconAsset,
     IconData? iconData,
+    String? shortTitle,
     List<String>? displayValues,
   }) {
     return ServiceExtensionDescription._(
@@ -171,6 +181,7 @@ class ServiceExtensionDescription<T> extends extensions.ServiceExtension<T>
       gaDocsItem: gaDocsItem,
       iconAsset: iconAsset,
       iconData: iconData,
+      shortTitle: shortTitle,
       displayValues: displayValues,
     );
   }
@@ -204,6 +215,9 @@ class ServiceExtensionDescription<T> extends extensions.ServiceExtension<T>
 
   @override
   final String? gaDocsItem;
+
+  @override
+  final String? shortTitle;
 
   @override
   String get gaItemTooltipLink => '${gaItem}TooltipLink';
@@ -426,6 +440,7 @@ final toggleOnDeviceWidgetInspector =
   // versions of package:flutter it makes sense to describe this extension as
   // toggling widget select mode as it is the only way to toggle that mode.
   title: 'Select Widget Mode',
+  shortTitle: 'Select',
   iconAsset: 'icons/widget-select-white.png',
   gaScreenName: gac.inspector,
   gaItem: gac.showOnDeviceInspector,

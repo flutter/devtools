@@ -14,6 +14,7 @@ import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/ui/filter.dart';
 import '../../../shared/utils.dart';
+import 'log_data.dart';
 import 'logging_controller_v2.dart';
 import 'logging_model.dart';
 import 'logging_table_row.dart';
@@ -48,6 +49,12 @@ class _LoggingTableV2State extends State<LoggingTableV2>
       children: [
         Row(
           children: [
+            ClearButton(
+              onPressed: controller.clear,
+              gaScreen: gac.logging,
+              gaSelection: gac.clear,
+            ),
+            const SizedBox(width: defaultSpacing),
             Expanded(
               child: DevToolsClearableTextField(
                 labelText: 'Search', // TODO(danchevalier): use SearchField
@@ -57,6 +64,7 @@ class _LoggingTableV2State extends State<LoggingTableV2>
             Expanded(
               child: StandaloneFilterField<LogDataV2>(
                 controller: widget.model,
+                filteredItem: 'log',
               ),
             ), // TODO for some reason the controller isn't hooking up correctly to the one over in the model. It is not getting notified of the changes?
             const SizedBox(width: defaultSpacing),
@@ -77,8 +85,11 @@ class _LoggingTableV2State extends State<LoggingTableV2>
         ),
         const SizedBox(height: denseSpacing),
         Expanded(
-          child: _LoggingTableProgress(
-            model: widget.model,
+          child: RoundedOutlinedBorder(
+            clip: true,
+            child: _LoggingTableProgress(
+              model: widget.model,
+            ),
           ),
         ),
       ],

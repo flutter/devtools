@@ -32,8 +32,9 @@ void main() {
   }
 
   setUp(() {
-    mockLoggingController =
-        createMockLoggingControllerWithDefaults(data: fakeLogData);
+    // Reset the log data for each test so that the delay for computing the
+    // details behaves the same for each test.
+    _fakeLogData = null;
 
     when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow)
         .thenReturn(false);
@@ -49,6 +50,9 @@ void main() {
     );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
+
+    mockLoggingController =
+        createMockLoggingControllerWithDefaults(data: fakeLogData);
   });
 
   testWidgetsWithWindowSize(
@@ -77,16 +81,21 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(ValueKey(fakeLogData[6])));
       await tester.pumpAndSettle();
+
       expect(
-        find.selectableText('log event 6'),
+        find.descendant(
+          of: find.byType(LogsTable),
+          matching: find.richTextContaining('log event 6'),
+        ),
         findsOneWidget,
-        reason:
-            'The log details should be visible both in the details section.',
       );
       expect(
-        find.selectableText('log event 6'),
+        find.descendant(
+          of: find.byType(LogDetails),
+          matching: find.selectableText('log event 6'),
+        ),
         findsOneWidget,
-        reason: 'The log details should be visible both in the table.',
+        reason: 'The log details should now be visible in the details section.',
       );
     },
   );
@@ -101,7 +110,6 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
-
   testWidgetsWithWindowSize(
     'search field can enter text',
     windowSize,
@@ -109,11 +117,14 @@ void main() {
       await pumpLoggingScreen(tester);
       verifyNever(mockLoggingController.clear());
 
-      final textFieldFinder = find.byType(TextField);
+      final textFieldFinder = find.descendant(
+        of: find.byType(SearchField<LoggingController>),
+        matching: find.byType(TextField),
+      );
       expect(textFieldFinder, findsOneWidget);
       final textField = tester.widget(textFieldFinder) as TextField;
       expect(textField.enabled, isTrue);
-      await tester.enterText(find.byType(TextField), 'abc');
+      await tester.enterText(textFieldFinder, 'abc');
     },
   );
 
@@ -160,7 +171,7 @@ void main() {
   );
 
   testWidgetsWithWindowSize(
-    'can compute details of non-json log data',
+    'can show details of non-json log data',
     windowSize,
     (WidgetTester tester) async {
       const index = 8;
@@ -180,6 +191,30 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(find.selectableText(nonJsonOutput), findsOneWidget);
+      expect(find.byType(JsonViewer), findsNothing);
+
+      // Toggle the log details view format to view as JSON.
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
+        findsOneWidget,
+      );
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
+        findsNothing,
+      );
+      await tester.tap(find.byType(LogDetailsFormatButton));
+      await tester.pumpAndSettle();
+
+      expect(find.selectableText(nonJsonOutput), findsNothing);
+      expect(find.byType(JsonViewer), findsOneWidget);
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
+        findsNothing,
+      );
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
+        findsOneWidget,
+      );
     },
   );
 
@@ -213,13 +248,39 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(findJson, findsOneWidget);
+      expect(find.byType(JsonViewer), findsNothing);
+
+      // Toggle the log details view format to view as JSON.
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
+        findsOneWidget,
+      );
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
+        findsNothing,
+      );
+      await tester.tap(find.byType(LogDetailsFormatButton));
+      await tester.pumpAndSettle();
+
+      expect(findJson, findsNothing);
+      expect(find.byType(JsonViewer), findsOneWidget);
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
+        findsNothing,
+      );
+      expect(
+        find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
+        findsOneWidget,
+      );
     },
   );
 }
 
 const totalLogs = 10;
 
-final fakeLogData = List<LogData>.generate(totalLogs, _generate);
+List<LogData> get fakeLogData =>
+    _fakeLogData ??= List<LogData>.generate(totalLogs, _generate);
+List<LogData>? _fakeLogData;
 
 LogData _generate(int i) {
   String? details = 'log event $i';

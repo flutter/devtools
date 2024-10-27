@@ -37,25 +37,25 @@ class NetworkRequestInspector extends StatelessWidget {
     return ValueListenableBuilder<NetworkRequest?>(
       valueListenable: controller.selectedRequest,
       builder: (context, data, _) {
-        return RoundedOutlinedBorder(
-          child: (data == null)
-              ? Center(
+        return data == null
+            ? RoundedOutlinedBorder(
+                child: Center(
                   child: Text(
                     'No request selected',
                     style: Theme.of(context).regularTextStyle,
                   ),
-                )
-              : ListenableBuilder(
-                  listenable: data,
-                  builder: (context, _) {
-                    return AnalyticsTabbedView(
-                      analyticsSessionIdentifier: data.id,
-                      tabs: _generateTabs(data),
-                      gaScreen: gac.network,
-                    );
-                  },
                 ),
-        );
+              )
+            : ListenableBuilder(
+                listenable: data,
+                builder: (context, _) {
+                  return AnalyticsTabbedView(
+                    analyticsSessionIdentifier: data.id,
+                    tabs: _generateTabs(data),
+                    gaScreen: gac.network,
+                  );
+                },
+              );
       },
     );
   }

@@ -50,17 +50,17 @@ Future<BenchmarkResults> runBenchmarks({
   required bool useBrowser,
 }) async {
   final benchmarkResults = <BenchmarkResults>[];
-  for (var i = 0; i < averageOf; i++) {
+  for (var i = 1; i <= averageOf; i++) {
     stdout.writeln('Starting web benchmark tests (run #$i) ...');
     benchmarkResults.add(
       await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
-        entryPoint: 'benchmark/test_infra/client.dart',
+        entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
         compilationOptions: useWasm
             ? const CompilationOptions.wasm()
             : const CompilationOptions.js(),
         treeShakeIcons: false,
-        initialPage: benchmarkInitialPage,
+        benchmarkPath: benchmarkPath(useWasm: useWasm),
         headless: !useBrowser,
       ),
     );

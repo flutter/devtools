@@ -62,6 +62,51 @@ void main() {
     });
   });
 
+  group('$CpuProfilerPreferencesController', () {
+    late CpuProfilerPreferencesController controller;
+    late FlutterTestStorage storage;
+
+    setUp(() async {
+      setGlobal(Storage, storage = FlutterTestStorage());
+      controller = CpuProfilerPreferencesController();
+      await controller.init();
+    });
+
+    test('has expected default values', () {
+      expect(controller.filterTag.value, '');
+    });
+
+    test('stores values and reads them on init', () async {
+      storage.values.clear();
+
+      // Remember original values.
+      final originalFilterTag = controller.filterTag.value;
+
+      // Change the values in controller.
+      const filterTag = 'foo|[{"level":2}]|regexp';
+      controller.filterTag.value = filterTag;
+
+      // Check the values are stored.
+      expect(storage.values, hasLength(1));
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they did not change back to the original values.
+      expect(controller.filterTag.value, filterTag);
+
+      // Change the values from storage.
+      storage.values[CpuProfilerPreferencesController.filterStorageId] =
+          originalFilterTag;
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they flipped values are loaded.
+      expect(controller.filterTag.value, originalFilterTag);
+    });
+  });
+
   // TODO(https://github.com/flutter/devtools/issues/4342): Add more tests.
   group('$InspectorPreferencesController', () {
     late InspectorPreferencesController controller;
@@ -397,6 +442,103 @@ void main() {
         controller.androidCollectionEnabled.value,
         originalAndroidCollection,
       );
+    });
+  });
+
+  group('$LoggingPreferencesController', () {
+    late LoggingPreferencesController controller;
+    late FlutterTestStorage storage;
+    setUp(() async {
+      setGlobal(Storage, storage = FlutterTestStorage());
+      controller = LoggingPreferencesController();
+      await controller.init();
+    });
+
+    test('has expected default values', () {
+      expect(controller.detailsFormat.value, LoggingDetailsFormat.text);
+      expect(controller.filterTag.value, '');
+    });
+
+    test('stores values and reads them on init', () async {
+      storage.values.clear();
+
+      // Remember original values.
+      final originalDetailsFormat = controller.detailsFormat.value;
+      final originalFilterTag = controller.filterTag.value;
+
+      // Change the values in controller.
+      final detailsFormat = originalDetailsFormat.opposite();
+      const filterTag = 'foo|[{"level":2}]|regexp';
+      controller.detailsFormat.value = detailsFormat;
+      controller.filterTag.value = filterTag;
+
+      // Check the values are stored.
+      expect(storage.values, hasLength(2));
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they did not change back to the original values.
+      expect(controller.detailsFormat.value, detailsFormat);
+      expect(controller.filterTag.value, filterTag);
+
+      // Change the values from storage.
+      storage.values[LoggingPreferencesController.detailsFormatStorageId] =
+          originalDetailsFormat.name;
+      storage.values[LoggingPreferencesController.filterStorageId] =
+          originalFilterTag;
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they flipped values are loaded.
+      expect(controller.detailsFormat.value, originalDetailsFormat);
+      expect(controller.filterTag.value, originalFilterTag);
+    });
+  });
+
+  group('$NetworkPreferencesController', () {
+    late NetworkPreferencesController controller;
+    late FlutterTestStorage storage;
+
+    setUp(() async {
+      setGlobal(Storage, storage = FlutterTestStorage());
+      controller = NetworkPreferencesController();
+      await controller.init();
+    });
+
+    test('has expected default values', () {
+      expect(controller.filterTag.value, '');
+    });
+
+    test('stores values and reads them on init', () async {
+      storage.values.clear();
+
+      // Remember original values.
+      final originalFilterTag = controller.filterTag.value;
+
+      // Change the values in controller.
+      const filterTag = 'foo|[{"level":2}]|regexp';
+      controller.filterTag.value = filterTag;
+
+      // Check the values are stored.
+      expect(storage.values, hasLength(1));
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they did not change back to the original values.
+      expect(controller.filterTag.value, filterTag);
+
+      // Change the values from storage.
+      storage.values[NetworkPreferencesController.filterStorageId] =
+          originalFilterTag;
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they flipped values are loaded.
+      expect(controller.filterTag.value, originalFilterTag);
     });
   });
 

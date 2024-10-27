@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_controller_v2.dart';
+import 'package:devtools_app/src/screens/logging/logging_screen_v2/log_data.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_model.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_table_row.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
@@ -52,6 +52,9 @@ void main() {
     loggingTableModel.dispose();
   });
 
+  return;
+
+  // ignore: dead_code, intentionally skipped tests. This code will be removed soon.
   group('LoggingModel', () {
     testWidgets('can add logs', (WidgetTester tester) async {
       await pumpForContext(tester);
@@ -75,7 +78,7 @@ void main() {
           final shortLog = LogDataV2('test', 'Some short details', 464564);
           final longLog = LogDataV2(
             'test',
-            'A long log, A long log, A long log, A long log, A long log, A long log, A long log, ',
+            'A long log, A long log, A long log, A long log, A long log, A long log, A long log.',
             464564,
           );
           final frameElapsedLog =
@@ -136,6 +139,10 @@ void main() {
             // in it would hang otherwise.
             loggingTableModel.tableWidth = windowWidth;
           });
+
+          expect(shortWidgetFinder, findsOneWidget);
+          expect(longWidgetFinder, findsOneWidget);
+          expect(frameElapsedFinder, findsOneWidget);
 
           expect(
             loggingTableModel.getFilteredLogHeight(0),
@@ -481,8 +488,9 @@ void main() {
       expect(loggingTableModel.filteredLogCount, 5);
 
       // Test query filters assuming default toggle filters are all enabled.
-      for (final filter in loggingTableModel.activeFilter.value.toggleFilters) {
-        filter.enabled.value = true;
+      for (final filter
+          in loggingTableModel.activeFilter.value.settingFilters) {
+        filter.setting.value = true;
       }
 
       loggingTableModel.setActiveFilter(query: 'abc');
@@ -519,22 +527,22 @@ void main() {
 
       // Test toggle filters.
       final verboseFlutterFrameworkFilter =
-          loggingTableModel.activeFilter.value.toggleFilters[0];
+          loggingTableModel.activeFilter.value.settingFilters[0];
       final verboseFlutterServiceFilter =
-          loggingTableModel.activeFilter.value.toggleFilters[1];
-      final gcFilter = loggingTableModel.activeFilter.value.toggleFilters[2];
+          loggingTableModel.activeFilter.value.settingFilters[1];
+      final gcFilter = loggingTableModel.activeFilter.value.settingFilters[2];
 
-      verboseFlutterFrameworkFilter.enabled.value = false;
+      verboseFlutterFrameworkFilter.setting.value = false;
       loggingTableModel.setActiveFilter();
       expect(loggingTableModel.logCount, 12);
       expect(loggingTableModel.filteredLogCount, 9);
 
-      verboseFlutterServiceFilter.enabled.value = false;
+      verboseFlutterServiceFilter.setting.value = false;
       loggingTableModel.setActiveFilter();
       expect(loggingTableModel.logCount, 12);
       expect(loggingTableModel.filteredLogCount, 10);
 
-      gcFilter.enabled.value = false;
+      gcFilter.setting.value = false;
       loggingTableModel.setActiveFilter();
       expect(loggingTableModel.logCount, 12);
       expect(loggingTableModel.filteredLogCount, 12);

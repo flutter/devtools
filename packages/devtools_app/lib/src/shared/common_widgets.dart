@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../screens/debugger/debugger_controller.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
 import 'config_specific/copy_to_clipboard/copy_to_clipboard.dart';
@@ -428,7 +427,7 @@ class VisibilityButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: show,
-      builder: (_, show, __) {
+      builder: (_, show, _) {
         return GaDevToolsButton(
           key: key,
           tooltip: tooltip,
@@ -643,6 +642,41 @@ class ToolbarAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return SmallAction(
+      onPressed: onPressed,
+      tooltip: tooltip,
+      style: style,
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      child: Icon(
+        icon,
+        size: size ?? actionsIconSize,
+        color: color ?? Theme.of(context).colorScheme.onSurface,
+      ),
+    );
+  }
+}
+
+class SmallAction extends StatelessWidget {
+  const SmallAction({
+    required this.child,
+    required this.onPressed,
+    this.tooltip,
+    super.key,
+    this.style,
+    this.gaScreen,
+    this.gaSelection,
+  }) : assert((gaScreen == null) == (gaSelection == null));
+
+  final TextStyle? style;
+  final Widget child;
+  final String? tooltip;
+  final VoidCallback? onPressed;
+  final String? gaScreen;
+  final String? gaSelection;
+
+  @override
+  Widget build(BuildContext context) {
     final button = TextButton(
       style: TextButton.styleFrom(
         padding: EdgeInsets.zero,
@@ -655,11 +689,7 @@ class ToolbarAction extends StatelessWidget {
         }
         onPressed?.call();
       },
-      child: Icon(
-        icon,
-        size: size ?? actionsIconSize,
-        color: color ?? Theme.of(context).colorScheme.onSurface,
-      ),
+      child: child,
     );
 
     return tooltip == null
@@ -1111,19 +1141,20 @@ class TextViewer extends StatelessWidget {
 }
 
 class JsonViewer extends StatefulWidget {
-  const JsonViewer({
+  JsonViewer({
     super.key,
     required this.encodedJson,
-  });
+    this.scrollable = true,
+  }) : assert(encodedJson.isNotEmpty);
 
   final String encodedJson;
+  final bool scrollable;
 
   @override
   State<JsonViewer> createState() => _JsonViewerState();
 }
 
-class _JsonViewerState extends State<JsonViewer>
-    with ProvidedControllerMixin<DebuggerController, JsonViewer> {
+class _JsonViewerState extends State<JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
   static const jsonEncoder = JsonEncoder.withIndent('  ');
@@ -1172,7 +1203,9 @@ class _JsonViewerState extends State<JsonViewer>
   @override
   void didUpdateWidget(JsonViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateVariablesTree();
+    if (oldWidget.encodedJson != widget.encodedJson) {
+      _updateVariablesTree();
+    }
   }
 
   @override
@@ -1185,46 +1218,38 @@ class _JsonViewerState extends State<JsonViewer>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Currently a redundant check, but adding it anyway to prevent future
-    // bugs being introduced.
-    if (!initController()) {
-      return;
-    }
-    // Any additional initialization code should be added after this line.
-  }
-
-  @override
   Widget build(BuildContext context) {
+    Widget child = FutureBuilder(
+      future: _initializeTree,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Container();
+        }
+        return ExpandableVariable(
+          variable: variable,
+          onCopy: (copiedVariable) {
+            unawaited(
+              copyToClipboard(
+                jsonEncoder.convert(
+                  serviceConnection.serviceManager.service!.fakeServiceCache
+                      .instanceToJson(copiedVariable.value as Instance),
+                ),
+                successMessage: 'JSON copied to clipboard',
+              ),
+            );
+          },
+        );
+      },
+    );
+    if (widget.scrollable) {
+      child = SingleChildScrollView(
+        child: child,
+      );
+    }
     return SelectionArea(
       child: Padding(
         padding: const EdgeInsets.all(denseSpacing),
-        child: SingleChildScrollView(
-          child: FutureBuilder(
-            future: _initializeTree,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return Container();
-              }
-              return ExpandableVariable(
-                variable: variable,
-                onCopy: (copiedVariable) {
-                  unawaited(
-                    copyToClipboard(
-                      jsonEncoder.convert(
-                        serviceConnection
-                            .serviceManager.service!.fakeServiceCache
-                            .instanceToJson(copiedVariable.value as Instance),
-                      ),
-                      successMessage: 'JSON copied to clipboard',
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ),
+        child: child,
       ),
     );
   }
@@ -1716,6 +1741,7 @@ class SwitchSetting extends StatelessWidget {
     this.gaItem,
     this.activeColor,
     this.inactiveColor,
+    this.minScreenWidthForTextBeforeScaling,
   });
 
   final ValueNotifier<bool> notifier;
@@ -1734,6 +1760,8 @@ class SwitchSetting extends StatelessWidget {
 
   final Color? inactiveColor;
 
+  final double? minScreenWidthForTextBeforeScaling;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1742,16 +1770,20 @@ class SwitchSetting extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(
-            child: RichText(
-              overflow: TextOverflow.visible,
-              maxLines: 3,
-              text: TextSpan(
-                text: title,
-                style: theme.regularTextStyle,
+          if (isScreenWiderThan(
+            context,
+            minScreenWidthForTextBeforeScaling,
+          ))
+            Flexible(
+              child: RichText(
+                overflow: TextOverflow.visible,
+                maxLines: 3,
+                text: TextSpan(
+                  text: title,
+                  style: theme.regularTextStyle,
+                ),
               ),
             ),
-          ),
           NotifierSwitch(
             padding: const EdgeInsets.only(left: borderPadding),
             activeColor: activeColor,

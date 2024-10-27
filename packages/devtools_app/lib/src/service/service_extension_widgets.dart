@@ -48,11 +48,13 @@ class ServiceExtensionButtonGroup extends StatefulWidget {
   const ServiceExtensionButtonGroup({
     super.key,
     this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForTextBeforeTruncating,
     required this.extensions,
     this.fillColor,
   });
 
   final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForTextBeforeTruncating;
   final List<ToggleableServiceExtensionDescription> extensions;
   final Color? fillColor;
 
@@ -139,6 +141,8 @@ class _ServiceExtensionButtonGroupState
               extensionState: extensionState,
               minScreenWidthForTextBeforeScaling:
                   widget.minScreenWidthForTextBeforeScaling,
+              minScreenWidthForTextBeforeTruncating:
+                  widget.minScreenWidthForTextBeforeTruncating,
             ),
         ],
       ),
@@ -181,11 +185,13 @@ class ServiceExtensionButton extends StatelessWidget {
     super.key,
     required this.extensionState,
     required this.minScreenWidthForTextBeforeScaling,
+    required this.minScreenWidthForTextBeforeTruncating,
   });
 
   final ExtensionState extensionState;
 
   final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForTextBeforeTruncating;
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +209,9 @@ class ServiceExtensionButton extends StatelessWidget {
         ),
         child: ImageIconLabel(
           ServiceExtensionIcon(extensionState: extensionState),
-          description.title,
+          isScreenWiderThan(context, minScreenWidthForTextBeforeTruncating)
+              ? description.title
+              : description.shortTitle ?? description.title,
           unscaledMinIncludeTextWidth: minScreenWidthForTextBeforeScaling,
         ),
       ),

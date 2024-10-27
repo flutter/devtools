@@ -40,6 +40,7 @@ void main() {
   setUp(() async {
     setCharacterWidthForTables();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(PreferencesController, PreferencesController());
 
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
@@ -140,35 +141,35 @@ void main() {
       },
     );
 
+    Future<void> loadData(ProfilerScreenController controller) async {
+      for (final filter in controller
+          .cpuProfilerController.activeFilter.value.settingFilters) {
+        filter.setting.value = false;
+      }
+      final data = CpuProfilePair(
+        functionProfile: cpuProfileData,
+        // Function and code profiles have the same structure, so just use
+        // the function profile in place of a dedicated code profile for
+        // testing since we don't care about the contents as much as we
+        // care about testing the ability to switch between function and
+        // code profile views.
+        codeProfile: cpuProfileData,
+      );
+      await controller.cpuProfilerController.processAndSetData(
+        data,
+        processId: 'test-load-data',
+        storeAsUserTagNone: true,
+        shouldApplyFilters: true,
+        shouldRefreshSearchMatches: false,
+      );
+    }
+
     group('profile views', () {
       late ProfilerScreenController controller;
 
-      Future<void> loadData() async {
-        for (final filter in controller
-            .cpuProfilerController.activeFilter.value.toggleFilters) {
-          filter.enabled.value = false;
-        }
-        final data = CpuProfilePair(
-          functionProfile: cpuProfileData,
-          // Function and code profiles have the same structure, so just use
-          // the function profile in place of a dedicated code profile for
-          // testing since we don't care about the contents as much as we
-          // care about testing the ability to switch between function and
-          // code profile views.
-          codeProfile: cpuProfileData,
-        );
-        await data.process(
-          transformer: controller.cpuProfilerController.transformer,
-          processId: 'test',
-        );
-        // Call this to force the value of `_dataByTag[userTagNone]` to be set.
-        controller.cpuProfilerController.loadProcessedData(
-          data,
-          storeAsUserTagNone: true,
-        );
-      }
-
       setUp(() async {
+        preferences.toggleVmDeveloperMode(false);
+
         controller = ProfilerScreenController();
 
         // Await a small delay to allow the ProfilerScreenController to complete
@@ -206,7 +207,7 @@ void main() {
 
             // Verify the profile view dropdown appears when toggling VM developer
             // mode and data is present.
-            await loadData();
+            await loadData(controller);
             await tester.pumpAndSettle();
             expect(find.byType(ModeDropdown), findsOneWidget);
 
@@ -248,7 +249,7 @@ void main() {
             preferences.toggleVmDeveloperMode(true);
             await tester.pumpAndSettle();
             expect(find.byType(CpuProfiler), findsNothing);
-            await loadData();
+            await loadData(controller);
             await tester.pumpAndSettle();
 
             // Verify the function profile view is still selected.
@@ -585,7 +586,7 @@ void main() {
       );
     });
 
-    group('Group by ', () {
+    group('Group by', () {
       late ProfilerScreenController controller;
 
       setUp(() async {
@@ -598,28 +599,7 @@ void main() {
         preferences.toggleVmDeveloperMode(true);
         cpuProfileData =
             CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
-        for (final filter in controller
-            .cpuProfilerController.activeFilter.value.toggleFilters) {
-          filter.enabled.value = false;
-        }
-        final data = CpuProfilePair(
-          functionProfile: cpuProfileData,
-          // Function and code profiles have the same structure, so just use
-          // the function profile in place of a dedicated code profile for
-          // testing since we don't care about the contents as much as we
-          // care about testing the ability to switch between function and
-          // code profile views.
-          codeProfile: cpuProfileData,
-        );
-        await data.process(
-          transformer: controller.cpuProfilerController.transformer,
-          processId: 'test',
-        );
-        // Call this to force the value of `_dataByTag[userTagNone]` to be set.
-        controller.cpuProfilerController.loadProcessedData(
-          data,
-          storeAsUserTagNone: true,
-        );
+        await loadData(controller);
       });
 
       testWidgetsWithWindowSize('user tags', windowSize, (tester) async {

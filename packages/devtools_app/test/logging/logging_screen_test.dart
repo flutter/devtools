@@ -9,7 +9,9 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';
 import 'package:devtools_app/src/screens/logging/_message_column.dart';
+import 'package:devtools_app/src/screens/logging/logging_controls.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
+import 'package:devtools_app/src/shared/ui/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -36,8 +38,6 @@ void main() {
     }
 
     setUp(() {
-      mockLoggingController = createMockLoggingControllerWithDefaults();
-
       final fakeServiceConnection = FakeServiceConnectionManager();
       when(
         fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
@@ -56,6 +56,7 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
 
+      mockLoggingController = createMockLoggingControllerWithDefaults();
       screen = LoggingScreen();
     });
 
@@ -107,10 +108,45 @@ void main() {
         expect(find.byType(LoggingScreenBody), findsOneWidget);
         expect(find.byType(LogsTable), findsOneWidget);
         expect(find.byType(LogDetails), findsOneWidget);
+        expect(find.byType(LoggingControls), findsOneWidget);
         expect(find.byType(ClearButton), findsOneWidget);
-        expect(find.byType(TextField), findsOneWidget);
+        expect(find.byType(SearchField<LoggingController>), findsOneWidget);
+        expect(find.byType(StandaloneFilterField<LogData>), findsOneWidget);
         expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(SettingsOutlinedButton), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds with horizontal axis for small screens',
+      Size(600.0, MediaSize.s.heightThreshold), // 1.0 aspect ratio
+      (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        final splitPaneFinder = find.byType(SplitPane);
+        final splitPane = tester.widget(splitPaneFinder) as SplitPane;
+        expect(splitPane.axis, Axis.horizontal);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds with horizontal axis for aspect ratio',
+      Size(722.0, MediaSize.s.heightThreshold + 1), // 1.20 aspect ratio
+      (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        final splitPaneFinder = find.byType(SplitPane);
+        final splitPane = tester.widget(splitPaneFinder) as SplitPane;
+        expect(splitPane.axis, Axis.horizontal);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds with vertical axis for aspect ratio',
+      Size(721.0, MediaSize.s.heightThreshold + 1), // 1.19 aspect ratio
+      (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        final splitPaneFinder = find.byType(SplitPane);
+        final splitPane = tester.widget(splitPaneFinder) as SplitPane;
+        expect(splitPane.axis, Axis.vertical);
       },
     );
 
@@ -132,7 +168,10 @@ void main() {
         await pumpLoggingScreen(tester);
         verifyNever(mockLoggingController.clear());
 
-        final textFieldFinder = find.byType(TextField);
+        final textFieldFinder = find.descendant(
+          of: find.byType(SearchField<LoggingController>),
+          matching: find.byType(TextField),
+        );
         expect(textFieldFinder, findsOneWidget);
         final textField = tester.widget(textFieldFinder) as TextField;
         expect(textField.enabled, isFalse);

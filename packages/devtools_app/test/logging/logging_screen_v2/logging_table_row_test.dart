@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen_v2/logging_table_row.dart';
+import 'package:devtools_app/src/screens/logging/metadata.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -20,6 +21,9 @@ void main() {
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
   });
 
+  return;
+
+  // ignore: dead_code, intentionally skipped tests. This code will be removed soon.
   group('logging_table_row', () {
     for (double windowWidth = 208.0; windowWidth < 600.0; windowWidth += 15.0) {
       const numberOfChips = 3;

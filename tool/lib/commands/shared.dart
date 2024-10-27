@@ -27,7 +27,7 @@ extension BuildCommandArgsExtension on ArgParser {
       BuildCommandArgs.pubGet.flagName,
       negatable: true,
       defaultsTo: true,
-      help: 'Whether to run `devtools_tool pub-get --only-main` before building'
+      help: 'Whether to run `dt pub-get --only-main` before building'
           ' the DevTools web app.',
     );
   }
@@ -54,7 +54,8 @@ extension BuildCommandArgsExtension on ArgParser {
   void addWasmFlag() {
     addFlag(
       BuildCommandArgs.wasm.flagName,
-      defaultsTo: false,
+      defaultsTo: true,
+      negatable: true,
       help: 'Whether to build DevTools with dart2wasm instead of dart2js.',
     );
   }

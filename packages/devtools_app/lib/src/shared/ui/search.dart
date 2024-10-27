@@ -898,20 +898,14 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
     this.onClose,
     this.searchFieldWidth = defaultSearchFieldWidth,
     double? searchFieldHeight,
-    EdgeInsets? containerPadding,
     super.key,
-  })  : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight,
-        containerPadding =
-            containerPadding ?? const EdgeInsets.only(top: _defaultTopPadding);
+  }) : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight;
 
   final T searchController;
 
   final double searchFieldWidth;
 
   final double searchFieldHeight;
-
-  /// The padding for the [Container] that contains the search text field.
-  final EdgeInsets containerPadding;
 
   /// Whether the search text field should be enabled.
   final bool searchFieldEnabled;
@@ -928,10 +922,6 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
   /// triggered.
   final VoidCallback? onClose;
 
-  /// Padding to ensure the 'Search' hint on the text field is not cut off for
-  /// the default text field height [defaultTextFieldHeight].
-  static const _defaultTopPadding = 3.0;
-
   @override
   State<SearchField> createState() => _SearchFieldState();
 }
@@ -943,16 +933,16 @@ class _SearchFieldState extends State<SearchField>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.searchFieldWidth,
       height: widget.searchFieldHeight,
-      padding: widget.containerPadding,
       child: StatelessSearchField(
         controller: searchController,
         searchFieldEnabled: widget.searchFieldEnabled,
         shouldRequestFocus: widget.shouldRequestFocus,
         supportsNavigation: widget.supportsNavigation,
         onClose: widget.onClose,
+        searchFieldHeight: widget.searchFieldHeight,
       ),
     );
   }
@@ -976,7 +966,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
     required this.searchFieldEnabled,
     required this.shouldRequestFocus,
     this.searchFieldKey,
-    this.label = 'Search',
+    this.label,
     this.decoration,
     this.supportsNavigation = false,
     this.onClose,
@@ -984,6 +974,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
     this.prefix,
     this.suffix,
     this.style,
+    this.searchFieldHeight,
   });
 
   final SearchControllerMixin<T> controller;
@@ -1000,7 +991,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
   final bool supportsNavigation;
 
   /// Label for the search field's input text decoration.
-  final String label;
+  final String? label;
 
   /// Optional callback called when the search field suffix close action is
   /// triggered.
@@ -1026,10 +1017,18 @@ class StatelessSearchField<T extends SearchableDataMixin>
   /// Optional key for the search text field.
   final GlobalKey? searchFieldKey;
 
+  final double? searchFieldHeight;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textStyle = style ?? theme.regularTextStyle;
+
+    void onChanged(String value) {
+      this.onChanged?.call(value);
+      controller.search = value;
+      controller.searchFieldFocusNode?.requestFocus();
+    }
 
     final searchField = TextField(
       key: searchFieldKey,
@@ -1038,11 +1037,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
       focusNode: controller.searchFieldFocusNode,
       controller: controller.searchTextFieldController,
       style: textStyle,
-      onChanged: (value) {
-        onChanged?.call(value);
-        controller.search = value;
-        controller.searchFieldFocusNode?.requestFocus();
-      },
+      onChanged: onChanged,
       onEditingComplete: () {
         controller.searchFieldFocusNode?.requestFocus();
       },
@@ -1054,14 +1049,18 @@ class StatelessSearchField<T extends SearchableDataMixin>
       // snapshots will compare with the exact color.
       decoration: decoration ??
           InputDecoration(
+            constraints: BoxConstraints(
+              minHeight: searchFieldHeight ?? defaultTextFieldHeight,
+            ),
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: denseSpacing,
-              vertical: densePadding,
+              horizontal: densePadding,
             ),
             border: const OutlineInputBorder(),
+            hintText: 'Search',
+            hintStyle: theme.subtleTextStyle,
             labelText: label,
             labelStyle: theme.subtleTextStyle,
-            // TODO(kenz): add the search icon to the search field.
+            prefixIcon: Icon(Icons.search, size: defaultIconSize),
             prefix: prefix != null
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1080,13 +1079,14 @@ class StatelessSearchField<T extends SearchableDataMixin>
                   )
                 : null,
             suffix: suffix ??
-                ((supportsNavigation || onClose != null)
-                    ? _SearchFieldSuffix(
-                        controller: controller,
-                        supportsNavigation: supportsNavigation,
-                        onClose: onClose,
-                      )
-                    : null),
+                _SearchFieldSuffix(
+                  controller: controller,
+                  supportsNavigation: supportsNavigation,
+                  onClose: () {
+                    onClose?.call();
+                    onChanged('');
+                  },
+                ),
           ),
     );
 
@@ -1349,10 +1349,14 @@ class _SearchFieldSuffix extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(supportsNavigation || onClose != null);
     return supportsNavigation
         ? SearchNavigationControls(controller, onClose: onClose)
-        : InputDecorationSuffixButton.close(onPressed: onClose);
+        : InputDecorationSuffixButton.close(
+            onPressed: () {
+              controller.searchTextFieldController.clear();
+              onClose?.call();
+            },
+          );
   }
 }
 
@@ -1411,8 +1415,12 @@ class SearchNavigationControls extends StatelessWidget {
                   icon: Icons.keyboard_arrow_down,
                   onPressed: numMatches > 1 ? controller.nextMatch : null,
                 ),
-                if (onClose != null)
-                  InputDecorationSuffixButton.close(onPressed: onClose),
+                InputDecorationSuffixButton.close(
+                  onPressed: () {
+                    controller.searchTextFieldController.clear();
+                    onClose?.call();
+                  },
+                ),
               ],
             );
           },

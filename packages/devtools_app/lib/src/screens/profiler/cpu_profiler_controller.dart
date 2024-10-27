@@ -51,7 +51,9 @@ class CpuProfilerController extends DisposableController
         FilterControllerMixin<CpuStackFrame>,
         AutoDisposeControllerMixin {
   CpuProfilerController() {
-    subscribeToFilterChanges();
+    // TODO(https://github.com/flutter/devtools/issues/7727): add support for
+    // persisting cpu profiler filter.
+    initFilterController();
   }
 
   /// Tag to represent when no user tag filters are applied.
@@ -135,36 +137,52 @@ class CpuProfilerController extends DisposableController
   final _viewType =
       ValueNotifier<CpuProfilerViewType>(CpuProfilerViewType.function);
 
+  static const _nativeFilterId = 'native';
+  static const _coreDartFilterId = 'core-dart';
+  static const _coreFlutterFilterId = 'core-flutter';
+  static const _uriQueryFilterId = 'cpu-profiler-uri-filter';
+
   /// The toggle filters available for the CPU profiler.
   @override
-  List<ToggleFilter<CpuStackFrame>> createToggleFilters() => [
+  SettingFilters<CpuStackFrame> createSettingFilters() => [
         ToggleFilter<CpuStackFrame>(
+          id: _nativeFilterId,
           name: 'Hide Native code',
           includeCallback: (stackFrame) => !stackFrame.isNative,
-          enabledByDefault: true,
+          defaultValue: true,
         ),
         ToggleFilter<CpuStackFrame>(
+          id: _coreDartFilterId,
           name: 'Hide core Dart libraries',
           includeCallback: (stackFrame) => !stackFrame.isDartCore,
+          defaultValue: false,
         ),
         if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
             true)
           ToggleFilter<CpuStackFrame>(
+            id: _coreFlutterFilterId,
             name: 'Hide core Flutter libraries',
             includeCallback: (stackFrame) => !stackFrame.isFlutterCore,
+            defaultValue: false,
           ),
       ];
 
-  static const uriFilterId = 'cpu-profiler-uri-filter';
-
   @override
-  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
-        uriFilterId: QueryFilterArgument<CpuStackFrame>(
+  Map<String, QueryFilterArgument<CpuStackFrame>> createQueryFilterArgs() => {
+        _uriQueryFilterId: QueryFilterArgument<CpuStackFrame>(
           keys: ['uri', 'u'],
+          exampleUsages: [
+            'uri:my_dart_package/some_lib.dart',
+            '-u:some_lib_to_hide',
+          ],
           dataValueProvider: (stackFrame) => stackFrame.packageUri,
           substringMatch: true,
         ),
       };
+
+  @override
+  ValueNotifier<String>? get filterTagNotifier =>
+      preferences.cpuProfiler.filterTag;
 
   int selectedProfilerTabIndex = 0;
 
@@ -675,12 +693,10 @@ class CpuProfilerController extends DisposableController
   }) {
     filter ??= activeFilter.value;
     bool filterCallback(CpuStackFrame stackFrame) {
-      for (final toggleFilter in filter!.toggleFilters) {
-        if (toggleFilter.enabled.value &&
-            !toggleFilter.includeCallback(stackFrame)) {
-          return false;
-        }
-      }
+      final filteredOutBySettingFilters = filter!.settingFilters.any(
+        (settingFilter) => !settingFilter.includeData(stackFrame),
+      );
+      if (filteredOutBySettingFilters) return false;
 
       final queryFilter = filter.queryFilter;
       if (!queryFilter.isEmpty) {

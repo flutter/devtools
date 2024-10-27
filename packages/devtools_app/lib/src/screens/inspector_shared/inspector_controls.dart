@@ -15,7 +15,6 @@ import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../inspector_shared/inspector_settings_dialog.dart';
 import '../inspector_v2/inspector_controller.dart' as v2;
-import 'inspector_screen.dart';
 
 /// Control buttons for the inspector panel.
 class InspectorControls extends StatelessWidget {
@@ -23,12 +22,14 @@ class InspectorControls extends StatelessWidget {
 
   final v2.InspectorController? controller;
 
-  static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
+  static const minScreenWidthForTextBeforeTruncating = 800.0;
+  static const minScreenWidthForTextBeforeScaling = 550.0;
 
   @override
   Widget build(BuildContext context) {
     final activeButtonColor =
         Theme.of(context).colorScheme.activeToggleButtonColor;
+    final isInspectorV2 = controller != null && FeatureFlags.inspectorV2;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -38,7 +39,7 @@ class InspectorControls extends StatelessWidget {
               .hasServiceExtension(
             extensions.toggleSelectWidgetMode.extension,
           ),
-          builder: (_, selectModeSupported, __) {
+          builder: (_, selectModeSupported, _) {
             return ServiceExtensionButtonGroup(
               fillColor: activeButtonColor,
               extensions: [
@@ -47,11 +48,13 @@ class InspectorControls extends StatelessWidget {
                     : extensions.toggleOnDeviceWidgetInspector,
               ],
               minScreenWidthForTextBeforeScaling:
-                  InspectorScreen.minScreenWidthForTextBeforeScaling,
+                  minScreenWidthForTextBeforeScaling,
+              minScreenWidthForTextBeforeTruncating:
+                  isInspectorV2 ? minScreenWidthForTextBeforeTruncating : null,
             );
           },
         ),
-        if (controller != null) ...[
+        if (isInspectorV2) ...[
           const SizedBox(width: defaultSpacing),
           ShowImplementationWidgetsButton(controller: controller!),
         ],
@@ -69,6 +72,8 @@ class InspectorControls extends StatelessWidget {
             gaItem: gac.inspectorV2Enabled,
             activeColor: activeButtonColor,
             inactiveColor: Colors.transparent,
+            minScreenWidthForTextBeforeScaling:
+                minScreenWidthForTextBeforeScaling,
           ),
         ],
         const SizedBox(width: defaultSpacing),
@@ -140,11 +145,16 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
           isSelected: !isHidden,
           message:
               'Show widgets created by the Flutter framework or other packages.',
-          label: 'Show Implementation Widgets',
+          label: isScreenWiderThan(
+            context,
+            InspectorControls.minScreenWidthForTextBeforeTruncating,
+          )
+              ? 'Show Implementation Widgets'
+              : 'Show',
           onPressed: controller.toggleImplementationWidgetsVisibility,
           icon: Icons.code,
           minScreenWidthForTextBeforeScaling:
-              InspectorScreen.minScreenWidthForTextBeforeScaling,
+              InspectorControls.minScreenWidthForTextBeforeScaling,
         );
       },
     );

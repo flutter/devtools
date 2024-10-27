@@ -123,6 +123,7 @@ void main() {
       final mockServiceManager =
           mockServiceConnection.serviceManager as MockServiceManager;
       setGlobal(ServiceConnectionManager, mockServiceConnection);
+      setGlobal(PreferencesController, PreferencesController());
 
       final connectedApp = MockConnectedApp();
       mockConnectedApp(

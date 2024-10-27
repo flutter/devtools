@@ -24,15 +24,15 @@ Before running tests, make sure your Flutter SDK matches the version that will b
 the CI. To update your local flutter version, run:
 
 ```shell
-devtools_tool update-flutter-sdk --update-on-path
+dt update-flutter-sdk --update-on-path
 ```
 
-> Note: Running this command requires that you have followed the [set up instructions](CONTRIBUTING.md#set-up-your-devtools-environment) in the DevTools contributing guide regarding cloning the Flutter SDK from GitHub, adding the `devtools_tool` executable to your PATH, and running `dart pub get` in the `tool` directory.
+> Note: Running this command requires that you have followed the [set up instructions](CONTRIBUTING.md#set-up-your-devtools-environment) in the DevTools contributing guide regarding cloning the Flutter SDK from GitHub, adding the `dt` executable to your PATH, and running `dart pub get` in the `tool` directory.
 
 You may need to re-generate the testing mocks before running the tests:
 
 ```shell
-devtools_tool generate-code --upgrade
+dt generate-code --upgrade
 ```
 
 Now you can proceed with running DevTools tests:
@@ -71,7 +71,7 @@ be done in one of two ways:
     on the CI. To update your local flutter version, run:
 
         ```shell
-        devtools_tool update-flutter-sdk --update-on-path
+        dt update-flutter-sdk --update-on-path
         ```
 
     - Then proceed with updating the goldens:

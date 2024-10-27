@@ -7,4 +7,5 @@ part of '../constants.dart';
 /// Logging event constants specific for logging screen.
 enum LoggingEvents {
   changeRetentionLimit,
+  changeDetailsFormat,
 }

@@ -81,6 +81,7 @@ class DevToolsTable<T> extends StatefulWidget {
     this.focusNode,
     this.handleKeyEvent,
     this.autoScrollContent = false,
+    this.startScrolledAtBottom = false,
     this.preserveVerticalScrollPosition = false,
     this.activeSearchMatchNotifier,
     this.rowItemExtent,
@@ -92,6 +93,7 @@ class DevToolsTable<T> extends StatefulWidget {
 
   final TableControllerBase<T> tableController;
   final bool autoScrollContent;
+  final bool startScrolledAtBottom;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
   final double? rowItemExtent;
@@ -140,6 +142,12 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
         : 0.0;
     widget.tableController.initScrollController(initialScrollOffset);
     scrollController = widget.tableController.verticalScrollController!;
+
+    if (widget.startScrolledAtBottom) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(scrollController.autoScrollToBottom(jump: true));
+      });
+    }
 
     pinnedScrollController = ScrollController();
 
@@ -422,6 +430,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                     tall: widget.tallHeaders,
                     backgroundColor: widget.headerColor,
                   ),
+                // TODO(kenz): add support for excluding column headers.
                 TableRow<T>.tableColumnHeader(
                   key: const Key('Table header'),
                   linkedScrollControllerGroup:

@@ -191,9 +191,11 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
         selectedColor: selectedColor,
         borderColor: borderColor,
         textStyle: theme.textTheme.bodyMedium,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         constraints: BoxConstraints(
           minWidth: defaultButtonHeight,
           minHeight: defaultButtonHeight,
+          maxHeight: defaultButtonHeight,
         ),
         isSelected: selectedStates,
         onPressed: onPressed,
@@ -237,10 +239,10 @@ final class DevToolsToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DevToolsToggleButtonGroup(
-      borderColor: outlined || isSelected
-          ? Theme.of(context).focusColor
-          : Colors.transparent,
+      borderColor:
+          outlined || isSelected ? theme.focusColor : Colors.transparent,
       selectedStates: [isSelected],
       onPressed: (_) => onPressed(),
       fillColor: fillColor,
@@ -250,6 +252,7 @@ final class DevToolsToggleButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
             child: MaterialIconLabel(
+              color: isSelected ? theme.colorScheme.primary : null,
               iconData: icon,
               label: label,
               minScreenWidthForTextBeforeScaling:

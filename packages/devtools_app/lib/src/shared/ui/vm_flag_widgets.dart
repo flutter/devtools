@@ -130,7 +130,6 @@ class ViewVmFlagsButton extends StatelessWidget {
       gaSelection: gac.HomeScreenEvents.viewVmFlags.name,
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
       onPressed: () {
-        Navigator.of(context, rootNavigator: true).pop('dialog');
         unawaited(
           showDialog(
             context: context,
