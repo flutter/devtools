@@ -24,10 +24,12 @@ class OfflineNetworkData with Serializable {
     final httpRequestJsonList =
         json[OfflineDataKeys.httpRequestData.name] as List<Object>?;
 
+    // Deserialize httpRequestData
     final httpRequestData = httpRequestJsonList
             ?.map((e) {
               if (e is Map<String, Object?>) {
-                final requestData = e['request'] as Map<String, Object?>?;
+                final requestData =
+                    e[OfflineDataKeys.request.name] as Map<String, Object?>?;
                 return requestData != null
                     ? DartIOHttpRequestData.fromJson(requestData, null, null)
                     : null;
@@ -38,13 +40,25 @@ class OfflineNetworkData with Serializable {
             .toList() ??
         [];
 
-    final socketRequestData =
-        (json[OfflineDataKeys.socketData.name] as List?)?.cast<Socket>();
+    // Deserialize socketData
+    final socketJsonList =
+        json[OfflineDataKeys.socketData.name] as List<Object>?;
+    final socketData = socketJsonList
+            ?.map((e) {
+              if (e is Map<String, Object?>) {
+                return Socket.fromJson(e);
+              }
+              return null;
+            })
+            .whereType<Socket>()
+            .toList() ??
+        [];
+
     return OfflineNetworkData(
       httpRequestData: httpRequestData,
       selectedRequestId:
           json[OfflineDataKeys.selectedRequestId.name] as String?,
-      socketData: socketRequestData ?? [],
+      socketData: socketData,
     );
   }
 
@@ -67,6 +81,8 @@ class OfflineNetworkData with Serializable {
           httpRequestData.map((e) => e.toJson()).toList(),
       OfflineDataKeys.selectedRequestId.name: selectedRequestId,
       OfflineDataKeys.socketData.name: socketData,
+      OfflineDataKeys.socketData.name:
+          socketData.map((e) => e.toJson()).toList(),
     };
   }
 }
@@ -75,4 +91,5 @@ enum OfflineDataKeys {
   httpRequestData,
   selectedRequestId,
   socketData,
+  request,
 }
