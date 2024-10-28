@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart'
     hide InspectorScreenBodyState, InspectorScreenBody;
 import 'package:devtools_app/src/screens/inspector/inspector_screen_body.dart'
@@ -304,6 +305,13 @@ void main() {
         'children',
         'createdByLocalProject',
       ];
+      const extraneousDetailsForTreeNode = [
+        'creationLocation',
+        'type',
+        'style',
+        'hasChildren',
+        'stateful',
+      ];
 
       await _loadInspectorUI(tester);
       final state = tester.state(find.byType(InspectorScreenBody))
@@ -324,6 +332,11 @@ void main() {
                 requiredDetailsForTreeNode.contains(detail) ||
                 possibleDetailsForTreeNode.contains(detail),
           ),
+          isTrue,
+        );
+        expect(
+          detailKeys
+              .none((detail) => extraneousDetailsForTreeNode.contains(detail)),
           isTrue,
         );
       }
