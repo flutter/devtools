@@ -457,7 +457,7 @@ class InspectorController extends DisposableController
 
     // It is not sufficent to wait for the isolate reload event, because Flutter
     // might not have re-painted the app. Instead, we need to wait for the first
-    // frame AFTER the isoalte reload event in order to request the new tree.
+    // frame AFTER the isolate reload event in order to request the new tree.
     if (event.kind == EventKind.kExtension) {
       if (!_receivedIsolateReloadEvent) return;
       if (event.extensionKind == 'Flutter.Frame') {
@@ -530,10 +530,14 @@ class InspectorController extends DisposableController
         _findClosestUnchangedAncestor(previousSelection);
     if (closestUnchangedAncestor == null) return inspectorTree.root?.diagnostic;
 
+    const distanceOffset = 3;
     final matchingDescendant = _findMatchingDescendant(
       of: closestUnchangedAncestor,
       matching: previousSelection,
-      inRange: Range(distanceToAncestor - 3, distanceToAncestor + 3),
+      inRange: Range(
+        distanceToAncestor - distanceOffset,
+        distanceToAncestor + distanceOffset,
+      ),
     );
 
     return matchingDescendant ?? closestUnchangedAncestor;
@@ -543,10 +547,11 @@ class InspectorController extends DisposableController
     RemoteDiagnosticsNode node, [
     int distanceToAncestor = 1,
   ]) {
-    if (valueToInspectorTreeNode.containsKey(node.valueRef)) {
-      final inspectorTreeNode = valueToInspectorTreeNode[node.valueRef];
-      return (inspectorTreeNode?.diagnostic, distanceToAncestor);
+    final inspectorTreeNode = valueToInspectorTreeNode[node.valueRef];
+    if (inspectorTreeNode != null) {
+      return (inspectorTreeNode.diagnostic, distanceToAncestor);
     }
+
     final ancestor = node.parent;
     if (ancestor == null) return (null, distanceToAncestor);
     return _findClosestUnchangedAncestor(ancestor, distanceToAncestor++);
@@ -632,7 +637,7 @@ class InspectorController extends DisposableController
     final matchingNode = findMatchingInspectorTreeNode(newSelection);
     if (matchingNode != null) {
       setSelectedNode(matchingNode);
-      syncSelectionHelper(selection: newSelection);
+      syncSelectionHelper(selection: matchingNode.diagnostic);
 
       syncTreeSelection();
     }

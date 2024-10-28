@@ -16,7 +16,8 @@ To learn more about DevTools, check out the
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+- Added an option to the [new Inspector's](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates)
+  settings to allow auto-refreshing the widget tree after a hot-reload. - [#8483](https://github.com/flutter/devtools/pull/8483)
 
 ## Performance updates
 

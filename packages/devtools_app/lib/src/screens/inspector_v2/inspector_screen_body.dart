@@ -14,7 +14,6 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/error_badge_manager.dart';
-import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/search.dart';
