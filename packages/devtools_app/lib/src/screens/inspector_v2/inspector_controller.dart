@@ -731,6 +731,24 @@ class InspectorController extends DisposableController
 
     try {
       final newSelection = await pendingSelectionFuture;
+      if (implementationWidgetsHidden.value && newSelection != null) {
+        final isInTree =
+            valueToInspectorTreeNode.containsKey(newSelection.valueRef);
+        final hasParent = newSelection.parent != null;
+        final isImplementationWidget = !isInTree && !hasParent;
+        // Show an error and don't update the selected node in the tree if the
+        // user seleced an implementation widget in their app while
+        // implementation widgets are hidden in the tree.
+        if (isImplementationWidget) {
+          notificationService.pushError(
+            'Selected an implementation widget. Please toggle "Show Implementation Widgets" and re-select it to inspect.',
+            allowDuplicates: true,
+            isReportable: false,
+          );
+          return;
+        }
+      }
+
       if (_disposed || group.disposed) return;
 
       selectionGroups.promoteNext();
@@ -778,6 +796,17 @@ class InspectorController extends DisposableController
 
     _updateSelectedErrorFromNode(_selectedNode.value);
     unawaited(_loadPropertiesForNode(_selectedNode.value));
+
+    final diagnostic = _selectedNode.value?.diagnostic;
+    if (diagnostic != null && diagnostic.isHidden) {
+      inspectorTree.refreshTree(
+        updateTreeAction: () {
+          diagnostic.hideableGroupLeader?.toggleHiddenGroup();
+          return true;
+        },
+      );
+    }
+
     animateTo(selectedNode.value);
   }
 
