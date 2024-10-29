@@ -169,7 +169,7 @@ class InspectorController extends DisposableController
       serviceConnection.serviceManager.serviceExtensionManager
           .hasServiceExtension(extensions.toggleSelectWidgetMode.extension);
 
-  void _onClientChange(bool added) {
+  Future<void> _onClientChange(bool added) async {
     if (!added && _clientCount == 0) {
       // Don't try to remove clients if there are none
       return;
@@ -178,10 +178,10 @@ class InspectorController extends DisposableController
     _clientCount += added ? 1 : -1;
     assert(_clientCount >= 0);
     if (_clientCount == 1) {
-      setVisibleToUser(true);
+      await setVisibleToUser(true);
       setActivate(true);
     } else if (_clientCount == 0) {
-      setVisibleToUser(false);
+      await setVisibleToUser(false);
     }
   }
 
@@ -276,13 +276,14 @@ class InspectorController extends DisposableController
     return treeType;
   }
 
-  void setVisibleToUser(bool visible) {
+  Future<void> setVisibleToUser(bool visible) async {
     if (visibleToUser == visible) {
       return;
     }
     visibleToUser = visible;
 
     if (visibleToUser) {
+      await refreshInspector();
     } else {
       shutdownTree(false);
     }

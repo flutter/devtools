@@ -287,9 +287,7 @@ void main() {
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
       // Disable Inspector V2:
-      final disableSwitch = find.byType(DevToolsSwitch);
-      expect(disableSwitch, findsOneWidget);
-      await tester.tap(disableSwitch);
+      await toggleV2Inspector(tester);
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
       // Verify the legacy inspector is visible:
@@ -300,6 +298,43 @@ void main() {
         ),
       );
     },
+  );
+
+  // Test to verify https://github.com/flutter/devtools/issues/8487 is fixed.
+  testWidgetsWithWindowSize(
+    'revert to legacy inspector, hot-restart, and back to new inspector',
+    windowSize,
+    (WidgetTester tester) async {
+      await _loadInspectorUI(tester);
+
+      // Disable Inspector V2.
+      await toggleV2Inspector(tester);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Verify the legacy inspector is visible.
+      expect(find.richTextContaining('Widget Details Tree'), findsOneWidget);
+
+      // Trigger a hot restart.
+      await env.flutter!.hotRestart();
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Enable Inspector V2.
+      await toggleV2Inspector(tester);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Verify the legacy inspector is not visible.
+      expect(find.richTextContaining('Widget Details Tree'), findsNothing);
+
+      // Wait for the widget tree to load.
+      final centerWidgetFinder = find.richText('Center');
+      final centerWidgetFinderWithRetries = await retryUntilFound(
+        centerWidgetFinder,
+        tester: tester,
+        retries: 10,
+      );
+      expect(centerWidgetFinderWithRetries, findsOneWidget);
+    },
+    skip: true, // https://github.com/flutter/devtools/issues/8490
   );
 
   testWidgetsWithWindowSize(
@@ -460,6 +495,12 @@ Finder findExpandCollapseButtonForNode({
   expect(expandCollapseButtonTextFinder, findsOneWidget);
 
   return expandCollapseButtonFinder;
+}
+
+Future<void> toggleV2Inspector(WidgetTester tester) async {
+  final inspectorSwitch = find.byType(DevToolsSwitch);
+  expect(inspectorSwitch, findsOneWidget);
+  await tester.tap(inspectorSwitch);
 }
 
 void verifyPropertyIsVisible({
