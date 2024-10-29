@@ -319,7 +319,7 @@ void main() {
       final rowsInTree = state.controller.inspectorTree.rowsInTree.value;
 
       for (final row in rowsInTree) {
-        final detailKeys = row?.node.diagnostic?.json.keys ?? [];
+        final detailKeys = row?.node.diagnostic?.json.keys ?? const <String>[];
         expect(
           requiredDetailsForTreeNode.every(
             (detail) => detailKeys.contains(detail),
