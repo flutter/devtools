@@ -62,7 +62,7 @@ search and filter by these metadata values. - [#8473](https://github.com/flutter
 [#8433](https://github.com/flutter/devtools/pull/8433)
     ![Log level filter](images/log_level_filter.png "Log level filter")
 
-* Added a setting to set the log retention limit. - []()
+* Added a setting to set the log retention limit. - [#8493](https://github.com/flutter/devtools/pull/8493)
 
 * Added a button to toggle the log details display between raw text and JSON. -
 [#8445](https://github.com/flutter/devtools/pull/8445)
