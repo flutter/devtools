@@ -119,6 +119,7 @@ Future<SingleMapping?> _fetchSourceMapping() async {
 }
 
 Future<SingleMapping?> _initializeSourceMapping() async {
+  if (!kIsWeb) return null;
   try {
     final sourceMapUri = Uri.parse(
       'main.dart.${kIsWasm ? 'wasm' : 'js'}.map',
