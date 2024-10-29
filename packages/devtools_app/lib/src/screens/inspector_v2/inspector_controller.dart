@@ -23,6 +23,8 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
@@ -130,6 +132,17 @@ class InspectorController extends DisposableController
     }
 
     serviceConnection.consoleService.ensureServiceInitialized();
+
+    final vmService = serviceConnection.serviceManager.service;
+    if (vmService != null) {
+      autoDisposeStreamSubscription(
+        vmService.onIsolateEvent.listen(_maybeAutoRefreshInspector),
+      );
+
+      autoDisposeStreamSubscription(
+        vmService.onExtensionEvent.listen(_maybeAutoRefreshInspector),
+      );
+    }
   }
 
   void _handleConnectionStart() {
@@ -368,6 +381,26 @@ class InspectorController extends DisposableController
     return _waitForPendingUpdateDone();
   }
 
+  Future<void> refreshInspector() async {
+    // If the user is force refreshing the inspector before the first load has
+    // completed, this could indicate a slow load time or that the inspector
+    // failed to load the tree once available.
+    if (!firstInspectorTreeLoadCompleted) {
+      // We do not want to complete this timing operation because the force
+      // refresh will skew the results.
+      ga.cancelTimingOperation(
+        InspectorScreen.id,
+        gac.pageReady,
+      );
+      ga.select(
+        gac.inspector,
+        gac.refreshEmptyTree,
+      );
+      firstInspectorTreeLoadCompleted = true;
+    }
+    await onForceRefresh();
+  }
+
   void filterErrors() {
     serviceConnection.errorBadgeManager.filterErrors(
       InspectorScreen.id,
@@ -417,6 +450,27 @@ class InspectorController extends DisposableController
     }
   }
 
+  bool _receivedIsolateReloadEvent = false;
+
+  Future<void> _maybeAutoRefreshInspector(Event event) async {
+    if (!preferences.inspector.autoRefreshEnabled.value) return;
+
+    // It is not sufficent to wait for the isolate reload event, because Flutter
+    // might not have re-painted the app. Instead, we need to wait for the first
+    // frame AFTER the isolate reload event in order to request the new tree.
+    if (event.kind == EventKind.kExtension) {
+      if (!_receivedIsolateReloadEvent) return;
+      if (event.extensionKind == 'Flutter.Frame') {
+        _receivedIsolateReloadEvent = false;
+        await refreshInspector();
+      }
+    }
+
+    if (event.kind == EventKind.kIsolateReload) {
+      _receivedIsolateReloadEvent = true;
+    }
+  }
+
   Future<void> _recomputeTreeRoot(
     RemoteDiagnosticsNode? newSelection, {
     bool? hideImplementationWidgets,
@@ -451,14 +505,86 @@ class InspectorController extends DisposableController
         expandChildren: true,
       );
       inspectorTree.root = rootNode;
-
-      refreshSelection(newSelection);
+      final selectedNode =
+          _determineNewSelection(newSelection ?? selectedDiagnostic);
+      refreshSelection(selectedNode);
       _implementationWidgetsHidden.value = hideImplementationWidgets;
     } catch (error, st) {
       _log.shout(error, error, st);
       treeGroups.cancelNext();
       return;
     }
+  }
+
+  RemoteDiagnosticsNode? _determineNewSelection(
+    RemoteDiagnosticsNode? previousSelection,
+  ) {
+    if (previousSelection == null) return null;
+    if (valueToInspectorTreeNode.containsKey(previousSelection.valueRef)) {
+      return previousSelection;
+    }
+
+    // TODO(https://github.com/flutter/devtools/issues/8481): Consider using a
+    // variation of a path-finding algorithm to determine the new selection,
+    // instead of looking for the first matching descendant.
+    final (closestUnchangedAncestor, distanceToAncestor) =
+        _findClosestUnchangedAncestor(previousSelection);
+    if (closestUnchangedAncestor == null) return inspectorTree.root?.diagnostic;
+
+    const distanceOffset = 3;
+    final matchingDescendant = _findMatchingDescendant(
+      of: closestUnchangedAncestor,
+      matching: previousSelection,
+      inRange: Range(
+        distanceToAncestor - distanceOffset,
+        distanceToAncestor + distanceOffset,
+      ),
+    );
+
+    return matchingDescendant ?? closestUnchangedAncestor;
+  }
+
+  (RemoteDiagnosticsNode?, int) _findClosestUnchangedAncestor(
+    RemoteDiagnosticsNode node, [
+    int distanceToAncestor = 1,
+  ]) {
+    final inspectorTreeNode = valueToInspectorTreeNode[node.valueRef];
+    if (inspectorTreeNode != null) {
+      return (inspectorTreeNode.diagnostic, distanceToAncestor);
+    }
+
+    final ancestor = node.parent;
+    if (ancestor == null) return (null, distanceToAncestor);
+    return _findClosestUnchangedAncestor(ancestor, distanceToAncestor++);
+  }
+
+  RemoteDiagnosticsNode? _findMatchingDescendant({
+    required RemoteDiagnosticsNode of,
+    required RemoteDiagnosticsNode matching,
+    required Range inRange,
+    int currentDistance = 1,
+  }) {
+    if (currentDistance > inRange.end) return null;
+
+    if (inRange.contains(currentDistance)) {
+      if (of.description == matching.description) {
+        return of;
+      }
+    }
+
+    final children = of.childrenNow;
+    final distance = currentDistance++;
+    for (final child in children) {
+      final matchingDescendant = _findMatchingDescendant(
+        of: child,
+        matching: matching,
+        inRange: inRange,
+        currentDistance: distance,
+      );
+      if (matchingDescendant != null) return matchingDescendant;
+    }
+
+    return null;
   }
 
   Future<void> toggleImplementationWidgetsVisibility() async {
@@ -512,7 +638,7 @@ class InspectorController extends DisposableController
     final matchingNode = findMatchingInspectorTreeNode(newSelection);
     if (matchingNode != null) {
       setSelectedNode(matchingNode);
-      syncSelectionHelper(selection: newSelection);
+      syncSelectionHelper(selection: matchingNode.diagnostic);
 
       syncTreeSelection();
     }

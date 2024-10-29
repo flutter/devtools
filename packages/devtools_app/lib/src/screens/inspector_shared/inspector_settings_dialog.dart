@@ -48,8 +48,17 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                       'Hovering over any widget displays its properties and values.',
                   gaItem: gac.inspectorHoverEvalMode,
                 ),
-                if (!inspectorV2Enabled) ...[
-                  const SizedBox(height: largeSpacing),
+                const SizedBox(height: largeSpacing),
+                if (inspectorV2Enabled) ...[
+                  CheckboxSetting(
+                    notifier: preferences.inspector.autoRefreshEnabled
+                        as ValueNotifier<bool?>,
+                    title: 'Enable auto-refreshing of the widget tree',
+                    description:
+                        'The widget tree will automatically be refreshed after a hot-reload.',
+                    gaItem: gac.inspectorAutoRefreshEnabled,
+                  ),
+                ] else ...[
                   const InspectorDefaultDetailsViewOption(),
                 ],
                 const SizedBox(height: largeSpacing),
