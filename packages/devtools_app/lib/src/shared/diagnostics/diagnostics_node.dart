@@ -240,6 +240,15 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// will make the name self-evident.
   bool get showName => getBooleanMember('showName', true);
 
+  /// Whether or not the node should be indented in the Inspector Tree.
+  bool get shouldIndent {
+    final value = json['shouldIndent'] as bool?;
+
+    return value ??
+        style != DiagnosticsTreeStyle.flat &&
+            style != DiagnosticsTreeStyle.error;
+  }
+
   /// Description to show if the node has no displayed properties or children.
   String? getEmptyBodyDescription() => getStringMember('emptyBodyDescription');
 

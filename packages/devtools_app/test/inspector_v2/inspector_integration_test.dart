@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart'
     hide InspectorScreenBodyState, InspectorScreenBody;
 import 'package:devtools_app/src/screens/inspector/inspector_screen_body.dart'
@@ -298,6 +299,59 @@ void main() {
           '../test_infra/goldens/integration_inspector_v2_revert_to_legacy.png',
         ),
       );
+    },
+  );
+
+  testWidgetsWithWindowSize(
+    'tree nodes contain only essential information',
+    windowSize,
+    (WidgetTester tester) async {
+      const requiredDetailsForTreeNode = [
+        'description',
+        'shouldIndent',
+        'valueId',
+        'widgetRuntimeType',
+      ];
+      const possibleDetailsForTreeNode = [
+        'textPreview',
+        'children',
+        'createdByLocalProject',
+      ];
+      const extraneousDetailsForTreeNode = [
+        'creationLocation',
+        'type',
+        'style',
+        'hasChildren',
+        'stateful',
+      ];
+
+      await _loadInspectorUI(tester);
+      final state = tester.state(find.byType(InspectorScreenBody))
+          as InspectorScreenBodyState;
+      final rowsInTree = state.controller.inspectorTree.rowsInTree.value;
+
+      for (final row in rowsInTree) {
+        final detailKeys = row?.node.diagnostic?.json.keys ?? const <String>[];
+        expect(
+          requiredDetailsForTreeNode.every(
+            (detail) => detailKeys.contains(detail),
+          ),
+          isTrue,
+        );
+        expect(
+          detailKeys.every(
+            (detail) =>
+                requiredDetailsForTreeNode.contains(detail) ||
+                possibleDetailsForTreeNode.contains(detail),
+          ),
+          isTrue,
+        );
+        expect(
+          detailKeys
+              .none((detail) => extraneousDetailsForTreeNode.contains(detail)),
+          isTrue,
+        );
+      }
     },
   );
 

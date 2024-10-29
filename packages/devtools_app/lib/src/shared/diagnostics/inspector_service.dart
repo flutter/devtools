@@ -951,17 +951,22 @@ class ObjectGroup extends InspectorObjectGroupBase {
   Future<RemoteDiagnosticsNode?> getRoot(
     FlutterTreeType type, {
     bool isSummaryTree = false,
+    bool includeFullDetails = true,
   }) {
     // There is no excuse to call this method on a disposed group.
     assert(!disposed);
     switch (type) {
       case FlutterTreeType.widget:
-        return getRootWidgetTree(isSummaryTree: isSummaryTree);
+        return getRootWidgetTree(
+          isSummaryTree: isSummaryTree,
+          includeFullDetails: includeFullDetails,
+        );
     }
   }
 
   Future<RemoteDiagnosticsNode?> getRootWidgetTree({
     required bool isSummaryTree,
+    required bool includeFullDetails,
   }) {
     return parseDiagnosticsNodeDaemon(
       invokeServiceMethodDaemonParams(
@@ -970,6 +975,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
           'groupName': groupName,
           'isSummaryTree': '$isSummaryTree',
           'withPreviews': 'true',
+          'fullDetails': '$includeFullDetails',
         },
       ),
     );

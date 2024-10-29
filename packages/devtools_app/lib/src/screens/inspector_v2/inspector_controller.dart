@@ -434,6 +434,7 @@ class InspectorController extends DisposableController
       final node = await group.getRoot(
         treeType,
         isSummaryTree: hideImplementationWidgets,
+        includeFullDetails: false,
       );
       if (node == null || group.disposed || _disposed) {
         return;
