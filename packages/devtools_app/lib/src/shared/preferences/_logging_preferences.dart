@@ -8,9 +8,6 @@ class LoggingPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   final retentionLimitTitle = 'Limit for the number of logs retained.';
 
-  // TODO(kenz): remove the retention limit setting if we cannot apply this
-  // functionality to the existing logging page, since the logging V2 code may
-  // be removed.
   /// The number of logs to retain on the logging table.
   final retentionLimit = ValueNotifier<int>(_defaultRetentionLimit);
 
@@ -24,7 +21,7 @@ class LoggingPreferencesController extends DisposableController
   /// This value caches the most recent filter settings.
   final filterTag = ValueNotifier<String>('');
 
-  static const _defaultRetentionLimit = 3000;
+  static const _defaultRetentionLimit = 5000;
   static const _defaultDetailsFormat = LoggingDetailsFormat.text;
 
   static const _retentionLimitStorageId = 'logging.retentionLimit';
