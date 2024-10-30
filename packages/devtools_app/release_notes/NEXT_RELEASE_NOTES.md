@@ -42,6 +42,7 @@ Flags dialog. - [#8413](https://github.com/flutter/devtools/pull/8413)
 - Added a setting to the Flutter Inspector controls that allows users to opt-in to the newly redesigned Flutter Inspector. - [#8342](https://github.com/flutter/devtools/pull/8342)
 
   ![New inspector opt-in setting](images/new_inspector.png "DevTools setting to opt into the new Flutter Inspector.")
+- Fixed an [issue](https://github.com/flutter/devtools/issues/8487) where the [new Inspector](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates) would not load after a hot-restart in the legacy Inspector. - [#8491](https://github.com/flutter/devtools/pull/8491)
 
 ## Performance updates
 
