@@ -2289,8 +2289,7 @@ class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textFieldValidationText =
-        'Enter an integer > ${widget.minimumValue}';
+    final textFieldValidationText = 'Enter an integer > ${widget.minimumValue}';
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
