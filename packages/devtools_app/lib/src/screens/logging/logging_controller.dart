@@ -540,9 +540,11 @@ class LoggingController extends DisposableController
   }
 
   void log(LogData log) {
+    final Stopwatch stopwatch = Stopwatch()..start();
     data.add(log);
     _updateForRetentionLimit(updateData: false);
     _updateData(data);
+    print(stopwatch.elapsed.inMicroseconds);
   }
 
   void _updateForRetentionLimit({
