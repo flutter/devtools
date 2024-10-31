@@ -157,8 +157,15 @@ class LicenseConfig {
   }
 }
 
-///
+/// Map containing:
+/// - existing license text for key [LicenseHeader.existingHeaderKey]
+/// - replacement license text for key [LicenseHeader.replacementHeaderKey]
 typedef ReplacementInfo = Map<String, String>;
+
+/// Map containing:
+/// - list of included paths for key [LicenseHeader.includedPathsKey]
+/// - list of updated paths for key [LicenseHeader.updatedPathsKey]
+typedef ProcessedPaths = Map<String, List<String>>;
 
 /// This class contains license update related business logic for
 /// [license_utils.dart].
@@ -166,12 +173,22 @@ typedef ReplacementInfo = Map<String, String>;
 /// The [LicenseHeader] uses config data from [LicenseConfig] to update
 /// license text in configured files.
 class LicenseHeader {
+  /// Key for license text that exists
+  static const existingHeaderKey = 'existing_header';
+
+  /// Key for license text to replace
+  static const replacementHeaderKey = 'replacement_header';
+
+  /// Key for paths that should be included in the license replacement check
+  static const includedPathsKey = 'included_paths';
+
+  /// Key for paths that are updated during license replacement
+  static const updatedPathsKey = 'update_paths';
+
   /// Processes the [file] for replacement information.
   ///
   /// If the [file] contains the given [existingLicenseText] within the first
-  /// number of [byteCount] bytes, return the [ReplacementInfo] containing:
-  /// - existing license text for key [LicenseHeader.existingHeaderKey]
-  /// - replacement license text for key [LicenseHeader.replacementHeaderKey]
+  /// number of [byteCount] bytes, return the [ReplacementInfo].
   ///
   /// If the file can't be read or no match is found, throws an exception.
   ///
@@ -247,11 +264,11 @@ class LicenseHeader {
   }
 
   /// Bulk update license headers for files in the [directory] as configured
-  /// in the [config] and return a list of file paths that were updated.
+  /// in the [config] and return [ProcessedPaths]
   ///
-  /// If [dryRun] is set, returns a list of file paths that should be updated,
-  /// but no files will be actually be updated.
-  Future<Map<String, List<String>>> bulkUpdate({
+  /// If [dryRun] is set, return [ProcessedPaths], but no files will be
+  /// actually be updated.
+  Future<ProcessedPaths> bulkUpdate({
     required Directory directory,
     required LicenseConfig config,
     bool dryRun = false,
@@ -270,22 +287,22 @@ class LicenseHeader {
           final addIndex = config.getAddIndexForExtension(extension);
           final replacementLicenseText = config.addLicenses[addIndex];
           final fileLength = file.lengthSync();
-          const buffer = 20;
+          const bufferSize = 20;
           // Assume that the license text will be near the start of the file,
           // but add in some buffer.
           final byteCount =
-              min(buffer + existingLicenseText.length, fileLength);
+              min(bufferSize + existingLicenseText.length, fileLength);
           final replacementInfo = await getReplacementInfo(
             file: file,
             existingLicenseText: existingLicenseText,
             replacementLicenseText: replacementLicenseText,
             byteCount: byteCount as int,
           );
-          final existingHeader =
-              replacementInfo[LicenseHeader.existingHeaderKey];
-          final replacementHeader =
-              replacementInfo[LicenseHeader.replacementHeaderKey];
-          if (existingHeader != null && replacementHeader != null) {
+          if (replacementInfo
+              case {
+                LicenseHeader.existingHeaderKey: final existingHeader,
+                LicenseHeader.replacementHeaderKey: final replacementHeader
+              }) {
             if (dryRun) {
               updatedPaths.add(file.path);
             } else {
@@ -314,12 +331,7 @@ class LicenseHeader {
     };
   }
 
-  static const existingHeaderKey = 'existing_header';
-  static const replacementHeaderKey = 'replacement_header';
-  static const includedPathsKey = 'included_paths';
-  static const updatedPathsKey = 'update_paths';
-
-  Map<String, String> _processHeaders({
+  ReplacementInfo _processHeaders({
     required String storedName,
     required String existingLicenseText,
     required String replacementLicenseText,
@@ -354,7 +366,7 @@ class LicenseHeader {
         };
       }
     }
-    return {};
+    return const {};
   }
 
   // TODO(mossmana) Add support for multiple stored names
