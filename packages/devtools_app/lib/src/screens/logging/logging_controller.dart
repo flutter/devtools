@@ -540,11 +540,27 @@ class LoggingController extends DisposableController
   }
 
   void log(LogData log) {
-    final Stopwatch stopwatch = Stopwatch()..start();
     data.add(log);
-    _updateForRetentionLimit(updateData: false);
-    _updateData(data);
-    print(stopwatch.elapsed.inMicroseconds);
+    if (includeLogForFilter(log, filter: activeFilter.value)) {
+      // This will notify since [filteredData] is a [ListValueNotifier].
+      filteredData.add(log);
+    }
+    // TODO(kenz): we don't need to re-filter the data from this method if we
+    // trim the logs for the retention limit. This would require some
+    // refactoring to the _updateData method to support updating the notifiers
+    // without re-filtering all the data.
+    // If we need to trim logs to meet the retention limit, this will call
+    // [_updateData] and perform a re-filter of all the logs.
+    _updateForRetentionLimit();
+
+    // TODO(kenz): this will traverse all the logs to refresh search matches.
+    // We don't need to do this. We could optimize further by updating the
+    // search match status for the individual log and for the controller without
+    // traversing the entire data set. This is a no-op when the search value is
+    // empty, but this cost is O(N*N) when a search value is present.
+    refreshSearchMatches();
+
+    _updateStatus();
   }
 
   void _updateForRetentionLimit({
@@ -678,65 +694,61 @@ class LoggingController extends DisposableController
   @override
   Iterable<LogData> get currentDataToSearchThrough => filteredData.value;
 
+  bool includeLogForFilter(LogData log, {required Filter filter}) {
+    final filteredOutBySettingFilters = filter.settingFilters.any(
+      (settingFilter) => !settingFilter.includeData(log),
+    );
+    if (filteredOutBySettingFilters) return false;
+
+    final queryFilter = filter.queryFilter;
+    if (!queryFilter.isEmpty) {
+      final filteredOutByQueryFilterArgument = queryFilter
+          .filterArguments.values
+          .any((argument) => !argument.matchesValue(log));
+      if (filteredOutByQueryFilterArgument) return false;
+
+      if (filter.queryFilter.substringExpressions.isNotEmpty) {
+        for (final substring in filter.queryFilter.substringExpressions) {
+          final matchesKind = log.kind.caseInsensitiveContains(substring);
+          if (matchesKind) return true;
+
+          final matchesLevel = log.levelName.caseInsensitiveContains(substring);
+          if (matchesLevel) return true;
+
+          final matchesIsolateName =
+              log.isolateRef?.name?.caseInsensitiveContains(substring) ?? false;
+          if (matchesIsolateName) return true;
+
+          final zone = log.zone;
+          final matchesZoneName =
+              zone?.name?.caseInsensitiveContains(substring) ?? false;
+          final matchesZoneIdentity = zone?.identityHashCode
+                  ?.toString()
+                  .caseInsensitiveContains(substring) ??
+              false;
+          if (matchesZoneName || matchesZoneIdentity) return true;
+
+          final matchesSummary = log.summary != null &&
+              log.summary!.caseInsensitiveContains(substring);
+          if (matchesSummary) return true;
+
+          final matchesDetails = log.details != null &&
+              log.details!.caseInsensitiveContains(substring);
+          if (matchesDetails) return true;
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+
   @override
   void filterData(Filter<LogData> filter) {
     super.filterData(filter);
-
-    bool filterCallback(LogData log) {
-      final filteredOutBySettingFilters = filter.settingFilters.any(
-        (settingFilter) => !settingFilter.includeData(log),
-      );
-      if (filteredOutBySettingFilters) return false;
-
-      final queryFilter = filter.queryFilter;
-      if (!queryFilter.isEmpty) {
-        final filteredOutByQueryFilterArgument = queryFilter
-            .filterArguments.values
-            .any((argument) => !argument.matchesValue(log));
-        if (filteredOutByQueryFilterArgument) return false;
-
-        if (filter.queryFilter.substringExpressions.isNotEmpty) {
-          for (final substring in filter.queryFilter.substringExpressions) {
-            final matchesKind = log.kind.caseInsensitiveContains(substring);
-            if (matchesKind) return true;
-
-            final matchesLevel =
-                log.levelName.caseInsensitiveContains(substring);
-            if (matchesLevel) return true;
-
-            final matchesIsolateName =
-                log.isolateRef?.name?.caseInsensitiveContains(substring) ??
-                    false;
-            if (matchesIsolateName) return true;
-
-            final zone = log.zone;
-            final matchesZoneName =
-                zone?.name?.caseInsensitiveContains(substring) ?? false;
-            final matchesZoneIdentity = zone?.identityHashCode
-                    ?.toString()
-                    .caseInsensitiveContains(substring) ??
-                false;
-            if (matchesZoneName || matchesZoneIdentity) return true;
-
-            final matchesSummary = log.summary != null &&
-                log.summary!.caseInsensitiveContains(substring);
-            if (matchesSummary) return true;
-
-            final matchesDetails = log.details != null &&
-                log.details!.caseInsensitiveContains(substring);
-            if (matchesDetails) return true;
-          }
-          return false;
-        }
-      }
-
-      return true;
-    }
-
     filteredData
       ..clear()
       ..addAll(
-        data.where(filterCallback).toList(),
+        data.where((log) => includeLogForFilter(log, filter: filter)).toList(),
       );
   }
 }
