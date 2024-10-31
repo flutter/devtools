@@ -5,6 +5,8 @@
 // TODO(kenz): remove once min flutter version of devtools_app_shared >= 3.25
 // ignore_for_file: deprecated_member_use, analysis performed with newer flutter version than min sdk
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../ui_utils.dart';
@@ -71,61 +73,63 @@ ThemeData _baseTheme({
   // TODO(kenz): do we need to pass in the foreground color from the [IdeTheme]
   // as well as the background color?
   return theme.copyWith(
-    tabBarTheme: theme.tabBarTheme.copyWith(
-      tabAlignment: TabAlignment.start,
-      dividerColor: Colors.transparent,
-      labelStyle: theme.regularTextStyle,
-      labelPadding:
-          const EdgeInsets.symmetric(horizontal: defaultTabBarPadding),
-    ),
-    canvasColor: backgroundColor,
-    scaffoldBackgroundColor: backgroundColor,
-    iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(
-        padding: const EdgeInsets.all(densePadding),
-        minimumSize: Size(defaultButtonHeight, defaultButtonHeight),
-        fixedSize: Size(defaultButtonHeight, defaultButtonHeight),
+      tabBarTheme: theme.tabBarTheme.copyWith(
+        tabAlignment: TabAlignment.start,
+        dividerColor: Colors.transparent,
+        labelStyle: theme.regularTextStyle,
+        labelPadding:
+            const EdgeInsets.symmetric(horizontal: defaultTabBarPadding),
       ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: Size.fromHeight(defaultButtonHeight),
-        foregroundColor: theme.colorScheme.onSurface,
-        padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+      canvasColor: backgroundColor,
+      scaffoldBackgroundColor: backgroundColor,
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          padding: const EdgeInsets.all(densePadding),
+          minimumSize: Size(defaultButtonHeight, defaultButtonHeight),
+          fixedSize: Size(defaultButtonHeight, defaultButtonHeight),
+        ),
       ),
-    ),
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        padding: const EdgeInsets.all(densePadding),
-        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: Size.fromHeight(defaultButtonHeight),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+          fixedSize: Size.fromHeight(defaultButtonHeight),
+          foregroundColor: theme.colorScheme.onSurface,
+          padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+        ),
       ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: Size.fromHeight(defaultButtonHeight),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.all(densePadding),
+          minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+          fixedSize: Size.fromHeight(defaultButtonHeight),
+        ),
       ),
-    ),
-    menuButtonTheme: MenuButtonThemeData(
-      style: ButtonStyle(
-        textStyle: WidgetStatePropertyAll<TextStyle>(theme.regularTextStyle),
-        fixedSize: const WidgetStatePropertyAll<Size>(Size.fromHeight(24.0)),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+          fixedSize: Size.fromHeight(defaultButtonHeight),
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+        ),
       ),
-    ),
-    dropdownMenuTheme: DropdownMenuThemeData(
-      textStyle: theme.regularTextStyle,
-    ),
-    progressIndicatorTheme: ProgressIndicatorThemeData(
-      linearMinHeight: defaultLinearProgressIndicatorHeight,
-    ),
-    primaryTextTheme: _devToolsTextTheme(theme, theme.primaryTextTheme),
-    textTheme: _devToolsTextTheme(theme, theme.textTheme),
-  );
+      menuButtonTheme: MenuButtonThemeData(
+        style: ButtonStyle(
+          textStyle: WidgetStatePropertyAll<TextStyle>(theme.regularTextStyle),
+          fixedSize: const WidgetStatePropertyAll<Size>(Size.fromHeight(24.0)),
+        ),
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: theme.regularTextStyle,
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        linearMinHeight: defaultLinearProgressIndicatorHeight,
+      ),
+      primaryTextTheme: _devToolsTextTheme(theme, theme.primaryTextTheme),
+      textTheme: _devToolsTextTheme(theme, theme.textTheme),
+      colorScheme: theme.colorScheme.copyWith(
+        surface: backgroundColor,
+      ));
 }
 
 TextTheme _devToolsTextTheme(ThemeData theme, TextTheme textTheme) {
@@ -359,11 +363,10 @@ extension DevToolsSharedColorScheme on ColorScheme {
   Color get _devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
 
-  Color get alternatingBackgroundColor1 =>
-      isLight ? Colors.white : const Color(0xFF1B1B1F);
+  Color get alternatingBackgroundColor1 => surface;
 
   Color get alternatingBackgroundColor2 =>
-      isLight ? const Color(0xFFF2F0F4) : const Color(0xFF303033);
+      isLight ? surface.darken() : surface.lighten();
 
   Color get selectedRowBackgroundColor =>
       isLight ? const Color(0xFFC7C6CA) : const Color(0xFF5E5E62);
@@ -598,4 +601,24 @@ ButtonStyle _generateButtonStyle({
     );
   }
   return buttonStyle;
+}
+
+extension on Color {
+  Color darken({int percent = 10}) {
+    assert(1 <= percent && percent <= 100);
+    final p = percent / 100;
+    final hslColor = HSLColor.fromColor(this);
+    return hslColor
+        .withLightness(math.max(0.0, hslColor.lightness - p))
+        .toColor();
+  }
+
+  Color lighten({int percent = 10}) {
+    assert(1 <= percent && percent <= 100);
+    final p = percent / 100;
+    final hslColor = HSLColor.fromColor(this);
+    return hslColor
+        .withLightness(math.min(1.0, hslColor.lightness + p))
+        .toColor();
+  }
 }
