@@ -2240,18 +2240,22 @@ class ContextMenuButton extends StatelessWidget {
   }
 }
 
-/// A Widget for displaying a setting field, that sets and integer value.
+/// A Widget for displaying a setting field that sets an integer value.
 class PositiveIntegerSetting extends StatefulWidget {
   const PositiveIntegerSetting({
     super.key,
     required this.title,
     required this.subTitle,
     required this.notifier,
+    this.minimumValue = 0,
+    this.width = 150.0,
   });
 
   final String title;
   final String subTitle;
   final ValueNotifier<int> notifier;
+  final int minimumValue;
+  final double width;
 
   @override
   State<PositiveIntegerSetting> createState() => _PositiveIntegerSettingState();
@@ -2260,6 +2264,8 @@ class PositiveIntegerSetting extends StatefulWidget {
 class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
     with AutoDisposeMixin {
   late final TextEditingController _textEditingController;
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -2283,7 +2289,9 @@ class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textFieldValidationText = 'Enter an integer > ${widget.minimumValue}';
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Column(
@@ -2299,22 +2307,47 @@ class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
         ),
         const SizedBox(width: defaultSpacing),
         SizedBox(
-          height: defaultTextFieldHeight,
-          width: defaultTextFieldNumberWidth,
-          child: TextField(
-            textAlignVertical: TextAlignVertical.top,
-            style: theme.regularTextStyle,
-            decoration: singleLineDialogTextFieldDecoration,
-            controller: _textEditingController,
-            inputFormatters: <TextInputFormatter>[
-              // Only positive integers.
-              FilteringTextInputFormatter.allow(
-                RegExp(r'^[1-9][0-9]*'),
+          width: scaleByFontFactor(widget.width),
+          child: Form(
+            key: _formKey,
+            child: TextFormField(
+              enableInteractiveSelection: false,
+              textAlignVertical: TextAlignVertical.top,
+              style: theme.regularTextStyle,
+              controller: _textEditingController,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(
+                labelText: 'Integer > ${widget.minimumValue}',
+                border: const OutlineInputBorder(),
+                errorBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: theme.colorScheme.error),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: theme.colorScheme.error),
+                ),
               ),
-            ],
-            onChanged: (String text) {
-              widget.notifier.value = int.parse(text);
-            },
+              validator: (value) {
+                if (value.isNullOrEmpty) {
+                  return textFieldValidationText;
+                }
+                final intValue = int.tryParse(value!);
+                if (intValue == null || intValue < widget.minimumValue) {
+                  return textFieldValidationText;
+                }
+                return null;
+              },
+              onChanged: (String text) {
+                if (_formKey.currentState!.validate()) {
+                  int value;
+                  try {
+                    value = int.parse(text);
+                  } catch (_) {
+                    value = 0;
+                  }
+                  widget.notifier.value = value;
+                }
+              },
+            ),
           ),
         ),
       ],

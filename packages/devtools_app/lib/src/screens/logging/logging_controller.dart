@@ -31,10 +31,7 @@ import 'metadata.dart';
 
 final _log = Logger('logging_controller');
 
-// For performance reasons, we drop old logs in batches, so the log will grow
-// to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
-const kMaxLogItemsLowerBound = 5000;
-const kMaxLogItemsUpperBound = 5500;
+const defaultLogBufferReductionSize = 500;
 final timeFormat = DateFormat('HH:mm:ss.SSS');
 final dateTimeFormat = DateFormat('HH:mm:ss.SSS (MM/dd/yy)');
 
@@ -116,6 +113,13 @@ class LoggingController extends DisposableController
     }
     _handleBusEvents();
     initFilterController();
+
+    addAutoDisposeListener(
+      preferences.logging.retentionLimit,
+      // When the retention limit setting changes, trim the logs to the exact
+      // length of the limit.
+      () => _updateForRetentionLimit(trimWithBuffer: false),
+    );
   }
 
   static const _minLogLevelFilterId = 'min-log-level';
@@ -203,12 +207,12 @@ class LoggingController extends DisposableController
   @override
   ValueNotifier<String>? get filterTagNotifier => preferences.logging.filterTag;
 
-  final _logStatusController = StreamController<String>.broadcast();
-
   /// A stream of events for the textual description of the log contents.
   ///
   /// See also [statusText].
   Stream<String> get onLogStatusChanged => _logStatusController.stream;
+
+  final _logStatusController = StreamController<String>.broadcast();
 
   List<LogData> data = <LogData>[];
 
@@ -536,25 +540,35 @@ class LoggingController extends DisposableController
   }
 
   void log(LogData log) {
-    List<LogData> currentLogs = List.of(data);
+    data.add(log);
+    _updateForRetentionLimit(updateData: false);
+    _updateData(data);
+  }
 
-    // Insert the new item and clamped the list to kMaxLogItemsLength.
-    currentLogs.add(log);
-
-    // Note: We need to drop rows from the start because we want to drop old
-    // rows but because that's expensive, we only do it periodically (eg. when
-    // the list is 500 rows more).
-    if (currentLogs.length > kMaxLogItemsUpperBound) {
-      int itemsToRemove = currentLogs.length - kMaxLogItemsLowerBound;
+  void _updateForRetentionLimit({
+    bool trimWithBuffer = true,
+    bool updateData = true,
+  }) {
+    // For performance reasons, we drop old logs in batches. Because it is
+    // expensive to drop from the beginning of a list, we only do it
+    // periodically (e.g. drop [_defaultBufferReductionSize] logs when the log
+    // retention limit has been reached.
+    final retentionLimit = preferences.logging.retentionLimit.value;
+    if (data.length > retentionLimit) {
+      final reduceToSize = math.max(
+        retentionLimit - (trimWithBuffer ? defaultLogBufferReductionSize : 0),
+        0,
+      );
+      int dropUntilIndex = data.length - reduceToSize;
       // Ensure we remove an even number of rows to keep the alternating
       // background in-sync.
-      if (itemsToRemove % 2 == 1) {
-        itemsToRemove--;
+      if (dropUntilIndex % 2 == 1) {
+        dropUntilIndex--;
       }
-      currentLogs = currentLogs.sublist(itemsToRemove);
+      if (updateData) {
+        _updateData(data.sublist(math.max(dropUntilIndex, 0)));
+      }
     }
-
-    _updateData(currentLogs);
   }
 
   static RemoteDiagnosticsNode? _findFirstSummary(RemoteDiagnosticsNode node) {

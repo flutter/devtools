@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
@@ -23,7 +24,6 @@ class LoggingControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<LoggingController>(context);
-    final hasData = controller.filteredData.value.isNotEmpty;
     return Row(
       children: [
         ClearButton(
@@ -35,12 +35,16 @@ class LoggingControls extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         Expanded(
           // TODO(kenz): fix focus issue when state is refreshed
-          child: SearchField<LoggingController>(
-            searchFieldWidth: isScreenWiderThan(context, loggingMinVerboseWidth)
-                ? wideSearchFieldWidth
-                : defaultSearchFieldWidth,
-            searchController: controller,
-            searchFieldEnabled: hasData,
+          child: ValueListenableBuilder(
+            valueListenable: controller.filteredData,
+            builder: (context, _, _) => SearchField<LoggingController>(
+              searchFieldWidth:
+                  isScreenWiderThan(context, loggingMinVerboseWidth)
+                      ? wideSearchFieldWidth
+                      : defaultSearchFieldWidth,
+              searchController: controller,
+              searchFieldEnabled: controller.filteredData.value.isNotEmpty,
+            ),
           ),
         ),
         const SizedBox(width: denseSpacing),
@@ -76,27 +80,54 @@ class LoggingControls extends StatelessWidget {
   }
 }
 
-class LoggingSettingsDialog extends StatelessWidget {
+class LoggingSettingsDialog extends StatefulWidget {
   const LoggingSettingsDialog({super.key});
 
   @override
+  State<LoggingSettingsDialog> createState() => _LoggingSettingsDialogState();
+}
+
+class _LoggingSettingsDialogState extends State<LoggingSettingsDialog> {
+  static const _retentionLimitHeight = 48.0;
+
+  final temporaryRetentionLimit =
+      ValueNotifier<int>(preferences.logging.retentionLimit.value);
+
+  @override
+  void dispose() {
+    temporaryRetentionLimit.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return DevToolsDialog(
       title: const DialogTitleText('Logging Settings'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...dialogSubHeader(
-            theme,
-            'General',
+          SizedBox(
+            height: _retentionLimitHeight,
+            child: PositiveIntegerSetting(
+              title: 'Limit for the number of logs retained.',
+              subTitle: 'Once the limit is reached, the first '
+                  '$defaultLogBufferReductionSize logs will be dropped.',
+              notifier: temporaryRetentionLimit,
+              minimumValue: defaultLogBufferReductionSize,
+            ),
           ),
           const StructuredErrorsToggle(),
         ],
       ),
-      actions: const [
-        DialogCloseButton(),
+      actions: [
+        DialogApplyButton(
+          onPressed: () {
+            preferences.logging.retentionLimit.value =
+                temporaryRetentionLimit.value;
+          },
+        ),
+        const DialogCloseButton(),
       ],
     );
   }

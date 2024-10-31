@@ -71,6 +71,7 @@ class NotificationService {
     String? reportExplanation,
     bool isDismissible = true,
     bool isReportable = true,
+    bool allowDuplicates = false,
   }) {
     final reportErrorAction = NotificationAction(
       label: 'Report error',
@@ -105,7 +106,7 @@ class NotificationService {
             ? NotificationMessage.defaultDuration * 2
             : NotificationMessage.defaultDuration,
       ),
-      allowDuplicates: false,
+      allowDuplicates: allowDuplicates,
     );
   }
 
