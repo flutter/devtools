@@ -742,7 +742,7 @@ class InspectorController extends DisposableController
         final isImplementationWidget = !isInTree && !hasParent;
         if (isImplementationWidget) {
           notificationService.pushError(
-            'Selected an implementation widget. Please toggle "Show Implementation Widgets" and re-select it to inspect.',
+            'Selected an implementation widget. Please toggle "Show Implementation Widgets" and select a widget from the device again.',
             allowDuplicates: true,
             isReportable: false,
           );
