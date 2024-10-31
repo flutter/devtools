@@ -146,3 +146,33 @@ extension StringUtilities on String {
     return true;
   }
 }
+
+/// Utility extension methods to the [Color] class.
+extension ColorExtension on Color {
+  /// Return a slightly darker color than the current color.
+  Color darken([double percent = 0.05]) {
+    assert(0.0 <= percent && percent <= 1.0);
+    percent = 1.0 - percent;
+
+    final c = this;
+    return Color.from(
+      alpha: c.a,
+      red: c.r * percent,
+      green: c.g * percent,
+      blue: c.b * percent,
+    );
+  }
+
+  /// Return a slightly brighter color than the current color.
+  Color brighten([double percent = 0.05]) {
+    assert(0.0 <= percent && percent <= 1.0);
+
+    final c = this;
+    return Color.from(
+      alpha: c.a,
+      red: c.r + ((1.0 - c.r) * percent),
+      green: c.g + ((1.0 - c.g) * percent),
+      blue: c.b + ((1.0 - c.b) * percent),
+    );
+  }
+}

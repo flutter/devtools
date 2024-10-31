@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../utils.dart';
 import '../ui_utils.dart';
 import 'ide_theme.dart';
 
@@ -367,7 +368,7 @@ extension DevToolsSharedColorScheme on ColorScheme {
   Color get alternatingBackgroundColor1 => surface;
 
   Color get alternatingBackgroundColor2 =>
-      isLight ? surface.darken(percent: 6) : surface.lighten(percent: 6);
+      isLight ? surface.darken(0.06) : surface.brighten(0.06);
 
   Color get selectedRowBackgroundColor =>
       isLight ? const Color(0xFFC7C6CA) : const Color(0xFF5E5E62);
@@ -602,24 +603,4 @@ ButtonStyle _generateButtonStyle({
     );
   }
   return buttonStyle;
-}
-
-extension on Color {
-  Color darken({int percent = 10}) {
-    assert(1 <= percent && percent <= 100);
-    final p = percent / 100;
-    final hslColor = HSLColor.fromColor(this);
-    return hslColor
-        .withLightness(math.max(0.0, hslColor.lightness - p))
-        .toColor();
-  }
-
-  Color lighten({int percent = 10}) {
-    assert(1 <= percent && percent <= 100);
-    final p = percent / 100;
-    final hslColor = HSLColor.fromColor(this);
-    return hslColor
-        .withLightness(math.min(1.0, hslColor.lightness + p))
-        .toColor();
-  }
 }
