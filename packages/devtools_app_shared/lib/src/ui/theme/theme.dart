@@ -73,63 +73,64 @@ ThemeData _baseTheme({
   // TODO(kenz): do we need to pass in the foreground color from the [IdeTheme]
   // as well as the background color?
   return theme.copyWith(
-      tabBarTheme: theme.tabBarTheme.copyWith(
-        tabAlignment: TabAlignment.start,
-        dividerColor: Colors.transparent,
-        labelStyle: theme.regularTextStyle,
-        labelPadding:
-            const EdgeInsets.symmetric(horizontal: defaultTabBarPadding),
+    tabBarTheme: theme.tabBarTheme.copyWith(
+      tabAlignment: TabAlignment.start,
+      dividerColor: Colors.transparent,
+      labelStyle: theme.regularTextStyle,
+      labelPadding:
+          const EdgeInsets.symmetric(horizontal: defaultTabBarPadding),
+    ),
+    canvasColor: backgroundColor,
+    scaffoldBackgroundColor: backgroundColor,
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        padding: const EdgeInsets.all(densePadding),
+        minimumSize: Size(defaultButtonHeight, defaultButtonHeight),
+        fixedSize: Size(defaultButtonHeight, defaultButtonHeight),
       ),
-      canvasColor: backgroundColor,
-      scaffoldBackgroundColor: backgroundColor,
-      iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          padding: const EdgeInsets.all(densePadding),
-          minimumSize: Size(defaultButtonHeight, defaultButtonHeight),
-          fixedSize: Size(defaultButtonHeight, defaultButtonHeight),
-        ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: Size.fromHeight(defaultButtonHeight),
+        foregroundColor: theme.colorScheme.onSurface,
+        padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
       ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          minimumSize: Size(buttonMinWidth, defaultButtonHeight),
-          fixedSize: Size.fromHeight(defaultButtonHeight),
-          foregroundColor: theme.colorScheme.onSurface,
-          padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-        ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.all(densePadding),
+        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.all(densePadding),
-          minimumSize: Size(buttonMinWidth, defaultButtonHeight),
-          fixedSize: Size.fromHeight(defaultButtonHeight),
-        ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: Size.fromHeight(defaultButtonHeight),
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          minimumSize: Size(buttonMinWidth, defaultButtonHeight),
-          fixedSize: Size.fromHeight(defaultButtonHeight),
-          backgroundColor: theme.colorScheme.primary,
-          foregroundColor: theme.colorScheme.onPrimary,
-          padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-        ),
+    ),
+    menuButtonTheme: MenuButtonThemeData(
+      style: ButtonStyle(
+        textStyle: WidgetStatePropertyAll<TextStyle>(theme.regularTextStyle),
+        fixedSize: const WidgetStatePropertyAll<Size>(Size.fromHeight(24.0)),
       ),
-      menuButtonTheme: MenuButtonThemeData(
-        style: ButtonStyle(
-          textStyle: WidgetStatePropertyAll<TextStyle>(theme.regularTextStyle),
-          fixedSize: const WidgetStatePropertyAll<Size>(Size.fromHeight(24.0)),
-        ),
-      ),
-      dropdownMenuTheme: DropdownMenuThemeData(
-        textStyle: theme.regularTextStyle,
-      ),
-      progressIndicatorTheme: ProgressIndicatorThemeData(
-        linearMinHeight: defaultLinearProgressIndicatorHeight,
-      ),
-      primaryTextTheme: _devToolsTextTheme(theme, theme.primaryTextTheme),
-      textTheme: _devToolsTextTheme(theme, theme.textTheme),
-      colorScheme: theme.colorScheme.copyWith(
-        surface: backgroundColor,
-      ));
+    ),
+    dropdownMenuTheme: DropdownMenuThemeData(
+      textStyle: theme.regularTextStyle,
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      linearMinHeight: defaultLinearProgressIndicatorHeight,
+    ),
+    primaryTextTheme: _devToolsTextTheme(theme, theme.primaryTextTheme),
+    textTheme: _devToolsTextTheme(theme, theme.textTheme),
+    colorScheme: theme.colorScheme.copyWith(
+      surface: backgroundColor,
+    ),
+  );
 }
 
 TextTheme _devToolsTextTheme(ThemeData theme, TextTheme textTheme) {
@@ -366,7 +367,7 @@ extension DevToolsSharedColorScheme on ColorScheme {
   Color get alternatingBackgroundColor1 => surface;
 
   Color get alternatingBackgroundColor2 =>
-      isLight ? surface.darken() : surface.lighten();
+      isLight ? surface.darken(percent: 6) : surface.lighten(percent: 6);
 
   Color get selectedRowBackgroundColor =>
       isLight ? const Color(0xFFC7C6CA) : const Color(0xFF5E5E62);

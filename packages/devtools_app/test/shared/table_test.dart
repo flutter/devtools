@@ -1708,7 +1708,7 @@ void main() {
 
         // Expected ARGB color values.
         const color1Value =
-            '(a: 1.0, r: 0.9490196078431372, g: 0.9411764705882353, b: 0.9568627450980393)';
+            '(a: 1.0, r: 0.9411764705882353, g: 0.9411764705882353, b: 0.9411764705882353)';
         const color2Value = '(a: 1.0, r: 1.0, g: 1.0, b: 1.0)';
         const rowSelectedColorValue = '(a: 1.0, r: 1.0, g: 1.0, b: 1.0)';
 
