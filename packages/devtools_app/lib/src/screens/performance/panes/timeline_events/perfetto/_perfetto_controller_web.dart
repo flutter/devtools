@@ -167,7 +167,6 @@ class PerfettoControllerImpl extends PerfettoController {
     _perfettoIFrame = HTMLIFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
-      // ignore: unsafe_html
       ..src = perfettoUrl
       ..allow = 'usb';
     _perfettoIFrame.style

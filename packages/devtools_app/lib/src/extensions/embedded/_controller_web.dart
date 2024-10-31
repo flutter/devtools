@@ -87,7 +87,6 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     _extensionIFrame = HTMLIFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
-      // ignore: unsafe_html
       ..src = extensionUrl
       ..allow = 'usb';
     _extensionIFrame.style
