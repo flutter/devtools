@@ -5,11 +5,8 @@
 // TODO(kenz): remove once min flutter version of devtools_app_shared >= 3.25
 // ignore_for_file: deprecated_member_use, analysis performed with newer flutter version than min sdk
 
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
-import '../../../utils.dart';
 import '../ui_utils.dart';
 import 'ide_theme.dart';
 

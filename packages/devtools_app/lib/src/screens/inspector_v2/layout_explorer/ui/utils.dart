@@ -5,7 +5,6 @@
 import 'dart:ui';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/diagnostics/diagnostics_node.dart';

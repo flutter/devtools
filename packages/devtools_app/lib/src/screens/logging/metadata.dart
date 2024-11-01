@@ -6,7 +6,6 @@ import 'dart:convert';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
-import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
