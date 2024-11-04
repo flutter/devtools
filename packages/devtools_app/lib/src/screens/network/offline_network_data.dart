@@ -5,7 +5,6 @@
 import 'package:devtools_shared/devtools_shared.dart';
 
 import '../../shared/http/http_request_data.dart';
-import '../../shared/primitives/utils.dart';
 import '../network/network_controller.dart';
 import 'network_model.dart';
 
@@ -15,8 +14,8 @@ import 'network_model.dart';
 class OfflineNetworkData with Serializable {
   OfflineNetworkData({
     required this.httpRequestData,
-    this.selectedRequestId,
     required this.socketData,
+    this.selectedRequestId,
   });
 
   /// Creates an instance of [OfflineNetworkData] from a JSON map.
@@ -62,7 +61,7 @@ class OfflineNetworkData with Serializable {
     );
   }
 
-  bool get isEmpty => httpRequestData.isNullOrEmpty && socketData.isNullOrEmpty;
+  bool get isEmpty => httpRequestData.isEmpty && socketData.isEmpty;
 
   /// List of current [DartIOHttpRequestData] network requests.
   final List<DartIOHttpRequestData> httpRequestData;
