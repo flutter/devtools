@@ -22,14 +22,14 @@ class OfflineNetworkData with Serializable {
   /// Creates an instance of [OfflineNetworkData] from a JSON map.
   factory OfflineNetworkData.fromJson(Map<String, Object?> json) {
     final httpRequestJsonList =
-        json[OfflineDataKeys.httpRequestData.name] as List<Object>?;
+        json[_OfflineDataKeys.httpRequestData.name] as List<Object>?;
 
     // Deserialize httpRequestData
     final httpRequestData = httpRequestJsonList
             ?.map((e) {
               if (e is Map<String, Object?>) {
                 final requestData =
-                    e[OfflineDataKeys.request.name] as Map<String, Object?>?;
+                    e[_OfflineDataKeys.request.name] as Map<String, Object?>?;
                 return requestData != null
                     ? DartIOHttpRequestData.fromJson(requestData, null, null)
                     : null;
@@ -42,7 +42,7 @@ class OfflineNetworkData with Serializable {
 
     // Deserialize socketData
     final socketJsonList =
-        json[OfflineDataKeys.socketData.name] as List<Object>?;
+        json[_OfflineDataKeys.socketData.name] as List<Object>?;
     final socketData = socketJsonList
             ?.map((e) {
               if (e is Map<String, Object?>) {
@@ -57,7 +57,7 @@ class OfflineNetworkData with Serializable {
     return OfflineNetworkData(
       httpRequestData: httpRequestData,
       selectedRequestId:
-          json[OfflineDataKeys.selectedRequestId.name] as String?,
+          json[_OfflineDataKeys.selectedRequestId.name] as String?,
       socketData: socketData,
     );
   }
@@ -70,24 +70,23 @@ class OfflineNetworkData with Serializable {
   /// The ID of the currently selected request, if any.
   final String? selectedRequestId;
 
-  /// Socket statistics
+  /// The list of socket statistics for the offline network data.
   final List<Socket> socketData;
 
   /// Converts the current offline data to a JSON format.
   @override
   Map<String, Object?> toJson() {
     return {
-      OfflineDataKeys.httpRequestData.name:
+      _OfflineDataKeys.httpRequestData.name:
           httpRequestData.map((e) => e.toJson()).toList(),
-      OfflineDataKeys.selectedRequestId.name: selectedRequestId,
-      OfflineDataKeys.socketData.name: socketData,
-      OfflineDataKeys.socketData.name:
+      _OfflineDataKeys.selectedRequestId.name: selectedRequestId,
+      _OfflineDataKeys.socketData.name:
           socketData.map((e) => e.toJson()).toList(),
     };
   }
 }
 
-enum OfflineDataKeys {
+enum _OfflineDataKeys {
   httpRequestData,
   selectedRequestId,
   socketData,

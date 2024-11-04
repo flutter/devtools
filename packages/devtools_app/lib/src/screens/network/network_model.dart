@@ -87,6 +87,15 @@ abstract class NetworkRequest
 class Socket extends NetworkRequest {
   Socket(this._socket, this._timelineMicrosBase);
 
+  factory Socket.fromJson(Map<String, Object?> json) {
+    return Socket(
+      SocketStatistic.parse(
+        json[SocketJsonKey.socket.name] as Map<String, Object?>,
+      )!,
+      json[SocketJsonKey.timelineMicrosBase.name] as int,
+    );
+  }
+
   int _timelineMicrosBase;
 
   SocketStatistic _socket;
@@ -184,13 +193,6 @@ class Socket extends NetworkRequest {
   int get hashCode => id.hashCode;
 
   SocketStatistic get socketData => _socket;
-
-  static Socket fromJson(Map<String, Object?> json) {
-    return Socket(
-      SocketStatistic.parse(json['socket'] as Map<String, dynamic>)!,
-      json['timelineMicrosBase'] as int,
-    );
-  }
 
   @override
   Map<String, Object?> toJson() {
