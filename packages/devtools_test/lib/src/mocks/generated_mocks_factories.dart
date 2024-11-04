@@ -225,14 +225,3 @@ MockLoggingController createMockLoggingControllerWithDefaults({
 
   return mockLoggingController;
 }
-
-MockLoggingControllerV2 createMockLoggingControllerV2WithDefaults() {
-  provideDummy<ListValueNotifier<LogDataV2>>(
-    ListValueNotifier<LogDataV2>([]),
-  );
-  final mockLoggingController = MockLoggingControllerV2();
-  when(mockLoggingController.loggingModel).thenReturn(LoggingTableModel());
-  when(mockLoggingController.selectedLog)
-      .thenReturn(ValueNotifier<LogDataV2?>(null));
-  return mockLoggingController;
-}

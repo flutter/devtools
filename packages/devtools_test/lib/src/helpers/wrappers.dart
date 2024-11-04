@@ -87,7 +87,6 @@ Widget wrapWithControllers(
   Widget widget, {
   InspectorScreenController? inspector,
   LoggingController? logging,
-  LoggingControllerV2? loggingV2,
   MemoryController? memory,
   PerformanceController? performance,
   ProfilerScreenController? profiler,
@@ -105,8 +104,6 @@ Widget wrapWithControllers(
     if (inspector != null)
       Provider<InspectorScreenController>.value(value: inspector),
     if (logging != null) Provider<LoggingController>.value(value: logging),
-    if (loggingV2 != null)
-      Provider<LoggingControllerV2>.value(value: loggingV2),
     if (memory != null) Provider<MemoryController>.value(value: memory),
     if (performance != null)
       Provider<PerformanceController>.value(value: performance),
