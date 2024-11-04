@@ -16,7 +16,8 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import 'logging_controller.dart';
-import 'shared/constants.dart';
+
+const _loggingMinVerboseWidth = 650.0;
 
 class LoggingControls extends StatelessWidget {
   const LoggingControls({super.key});
@@ -30,7 +31,7 @@ class LoggingControls extends StatelessWidget {
           onPressed: controller.clear,
           gaScreen: gac.logging,
           gaSelection: gac.clear,
-          minScreenWidthForTextBeforeScaling: loggingMinVerboseWidth,
+          minScreenWidthForTextBeforeScaling: _loggingMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         Expanded(
@@ -39,7 +40,7 @@ class LoggingControls extends StatelessWidget {
             valueListenable: controller.filteredData,
             builder: (context, _, _) => SearchField<LoggingController>(
               searchFieldWidth:
-                  isScreenWiderThan(context, loggingMinVerboseWidth)
+                  isScreenWiderThan(context, _loggingMinVerboseWidth)
                       ? wideSearchFieldWidth
                       : defaultSearchFieldWidth,
               searchController: controller,
