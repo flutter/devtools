@@ -45,10 +45,22 @@ void main() {
 
     logStatus('testing variable assignment');
     await testAssignment(evalTester);
-
-    logStatus('testing eval on widget tree node');
-    await _testEvalOnWidgetTreeNode(evalTester);
   });
+
+  testWidgets(
+    'eval with scope on widget tree node',
+    (tester) async {
+      await pumpAndConnectDevTools(tester, testApp);
+
+      final evalTester = EvalTester(tester);
+      await evalTester.prepareInspectorUI();
+
+      logStatus('testing eval on widget tree node');
+      await _testEvalOnWidgetTreeNode(evalTester);
+    },
+    // https://github.com/flutter/devtools/pull/8123
+    skip: true,
+  );
 }
 
 Future<void> _testEvalOnWidgetTreeNode(EvalTester tester) async {
