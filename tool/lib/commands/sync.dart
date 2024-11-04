@@ -22,6 +22,9 @@ class SyncCommand extends Command {
       CliCommand.git(['pull', 'upstream', 'master']),
     );
     await processManager.runProcess(
+      CliCommand.tool(['update-flutter-sdk']),
+    );
+    await processManager.runProcess(
       CliCommand.tool(['generate-code', '--upgrade']),
     );
   }
