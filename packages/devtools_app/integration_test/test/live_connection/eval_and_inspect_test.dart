@@ -58,7 +58,7 @@ void main() {
       logStatus('testing eval on widget tree node');
       await _testEvalOnWidgetTreeNode(evalTester);
     },
-    // https://github.com/flutter/devtools/pull/8123
+    // https://github.com/flutter/devtools/issues/8389
     skip: true,
   );
 }
