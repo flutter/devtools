@@ -7,7 +7,6 @@ import 'dart:ui';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../inspector/layout_explorer/ui/dimension.dart';
