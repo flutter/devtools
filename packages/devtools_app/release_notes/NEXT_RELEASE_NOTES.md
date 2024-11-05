@@ -49,6 +49,8 @@ TODO: Remove this section if there are not any general updates.
 * Fetch log details immediately upon receiving logs so that log data is not lost
 due to lazy loading. - [#8421](https://github.com/flutter/devtools/pull/8421)
 
+* Reduce initial page load time. - [#8500](https://github.com/flutter/devtools/pull/8500)
+
 * Added support for displaying metadata, such as log
 severity, category, zone, and isolate -
 [#8419](https://github.com/flutter/devtools/pull/8419),

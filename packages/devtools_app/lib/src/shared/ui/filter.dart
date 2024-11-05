@@ -186,10 +186,7 @@ class FilterDialog<T> extends StatefulWidget {
     super.key,
     required this.controller,
     required this.filteredItem,
-    this.includeQueryFilter = true,
-  })  : assert(
-          !includeQueryFilter || controller.queryFilterArgs.isNotEmpty,
-        ),
+  })  : assert(controller.queryFilterArgs.isNotEmpty),
         settingFilterValuesAtOpen = List.generate(
           controller.activeFilter.value.settingFilters.length,
           (index) =>
@@ -199,8 +196,6 @@ class FilterDialog<T> extends StatefulWidget {
   final FilterControllerMixin<T> controller;
 
   final String filteredItem;
-
-  final bool includeQueryFilter;
 
   final List<Object> settingFilterValuesAtOpen;
 
@@ -244,32 +239,6 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.includeQueryFilter) ...[
-            DevToolsClearableTextField(
-              autofocus: true,
-              labelText: 'Filter Query',
-              controller: queryTextFieldController,
-              additionalSuffixActions: [
-                DevToolsToggleButton(
-                  icon: Codicons.regex,
-                  message: 'Use regular expressions',
-                  outlined: false,
-                  isSelected: pendingUseRegExp,
-                  onPressed: () => setState(() {
-                    pendingUseRegExp = !pendingUseRegExp;
-                  }),
-                ),
-              ],
-            ),
-            const SizedBox(height: defaultSpacing),
-            if (widget.controller.queryFilterArgs.isNotEmpty) ...[
-              _FilterSyntax(
-                controller: widget.controller,
-                filteredItem: widget.filteredItem,
-              ),
-              const SizedBox(height: defaultSpacing),
-            ],
-          ],
           for (final filter in widget.controller.settingFilters) ...[
             if (filter is ToggleFilter<T>)
               _ToggleFilterElement(filter: filter)
@@ -285,9 +254,7 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
     widget.controller
       ..useRegExp.value = pendingUseRegExp
       ..setActiveFilter(
-        query: widget.includeQueryFilter
-            ? queryTextFieldController.value.text
-            : null,
+        query: widget.controller.activeFilter.value.queryFilter.query,
         settingFilters: widget.controller.settingFilters,
       );
   }
@@ -715,7 +682,6 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                                     builder: (context) => FilterDialog(
                                       controller: widget.controller,
                                       filteredItem: widget.filteredItem,
-                                      includeQueryFilter: false,
                                     ),
                                   ),
                                 );

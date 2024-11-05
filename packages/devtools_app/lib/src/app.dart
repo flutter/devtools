@@ -31,8 +31,6 @@ import 'screens/inspector_shared/inspector_screen.dart';
 import 'screens/inspector_shared/inspector_screen_controller.dart';
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
-import 'screens/logging/logging_screen_v2/logging_controller_v2.dart';
-import 'screens/logging/logging_screen_v2/logging_screen_v2.dart';
 import 'screens/memory/framework/memory_controller.dart';
 import 'screens/memory/framework/memory_screen.dart';
 import 'screens/network/network_controller.dart';
@@ -677,15 +675,10 @@ List<DevToolsScreen> defaultScreens({
       NetworkScreen(),
       createController: (_) => NetworkController(),
     ),
-    FeatureFlags.loggingV2
-        ? DevToolsScreen<LoggingControllerV2>(
-            LoggingScreenV2(),
-            createController: (_) => LoggingControllerV2(),
-          )
-        : DevToolsScreen<LoggingController>(
-            LoggingScreen(),
-            createController: (_) => LoggingController(),
-          ),
+    DevToolsScreen<LoggingController>(
+      LoggingScreen(),
+      createController: (_) => LoggingController(),
+    ),
     DevToolsScreen<void>(ProviderScreen()),
     DevToolsScreen<AppSizeController>(
       AppSizeScreen(),

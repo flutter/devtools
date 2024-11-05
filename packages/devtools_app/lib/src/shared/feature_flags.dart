@@ -84,11 +84,6 @@ abstract class FeatureFlags {
   /// once extension support is added in g3.
   static bool devToolsExtensions = isExternalBuild;
 
-  /// Flag to enable the new Logging experience.
-  ///
-  /// https://github.com/flutter/devtools/issues/7703
-  static bool loggingV2 = enableExperiments;
-
   /// Flag to enable debugging via DAP.
   ///
   /// https://github.com/flutter/devtools/issues/6056
@@ -112,7 +107,6 @@ abstract class FeatureFlags {
     'widgetRebuildStats': widgetRebuildStats,
     'memorySaveLoad': memorySaveLoad,
     'deepLinkIosCheck': deepLinkIosCheck,
-    'loggingV2': loggingV2,
     'dapDebugging': dapDebugging,
     'inspectorV2': inspectorV2,
     'wasmOptInSetting': wasmOptInSetting,
