@@ -1640,8 +1640,7 @@ void main() {
         final crackleFinder = find.byKey(const Key('Crackle'));
 
         // Expected ARGB color values.
-        const color1Value =
-            '(a: 1.0, r: 0.9490196078431372, g: 0.9411764705882353, b: 0.9568627450980393)';
+        const color1Value = '(a: 1.0, r: 0.94, g: 0.94, b: 0.94)';
         const color2Value = '(a: 1.0, r: 1.0, g: 1.0, b: 1.0)';
         const rowSelectedColorValue = '(a: 1.0, r: 1.0, g: 1.0, b: 1.0)';
 
