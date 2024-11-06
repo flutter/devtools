@@ -210,7 +210,7 @@ class LicenseHeader {
   }) async {
     final stream =
         file.openRead(0, byteCount).transform(utf8.decoder).handleError(
-              (e) => throw Exception(
+              (e) => throw StateError(
                 'License header expected, but error reading file - $e',
               ),
             );
@@ -247,7 +247,7 @@ class LicenseHeader {
   /// the [replacementHeader].
   ///
   /// Reads and writes the entire file contents all at once, so performance may
-  ///  degrade for large files.
+  /// degrade for large files.
   File rewriteLicenseHeader({
     required File file,
     required String existingHeader,

@@ -309,13 +309,13 @@ text that should be added to the file. */''',
           replacementLicenseText: 'test',
           byteCount: 50,
         );
-      } on Exception catch (e) {
+      } on StateError catch (e) {
         errorMessage = e.toString();
       }
       expect(
         errorMessage,
         contains(
-          'Exception: License header expected, but error reading file - PathNotFoundException',
+          'Bad state: License header expected, but error reading file - PathNotFoundException',
         ),
       );
     });
