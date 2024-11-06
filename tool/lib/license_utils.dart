@@ -15,6 +15,12 @@ import 'package:yaml/yaml.dart';
 /// The [LicenseConfig] reads in config data from a YAML file into an
 /// object that can be used to update license headers.
 ///
+/// The 'repo wide check' test in [license_utils_test.dart] runs this logic to
+/// ensure that proper license headers are enforced.
+///
+/// It is also designed so that it be used by the dt command or
+/// from a standalone script/application in the future.
+///
 /// Sample config file:
 /// ---
 /// # sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
@@ -157,38 +163,18 @@ class LicenseConfig {
   }
 }
 
-/// Map containing:
-/// - existing license text for key [LicenseHeader.existingHeaderKey]
-/// - replacement license text for key [LicenseHeader.replacementHeaderKey]
-typedef ReplacementInfo = Map<String, String>;
-
-/// Map containing:
-/// - list of included paths for key [LicenseHeader.includedPathsKey]
-/// - list of updated paths for key [LicenseHeader.updatedPathsKey]
-typedef ProcessedPaths = Map<String, List<String>>;
-
 /// This class contains license update related business logic for
 /// [license_utils.dart].
 ///
 /// The [LicenseHeader] uses config data from [LicenseConfig] to update
 /// license text in configured files.
 class LicenseHeader {
-  /// Key for license text that exists
-  static const existingHeaderKey = 'existing_header';
-
-  /// Key for license text to replace
-  static const replacementHeaderKey = 'replacement_header';
-
-  /// Key for paths that should be included in the license replacement check
-  static const includedPathsKey = 'included_paths';
-
-  /// Key for paths that are updated during license replacement
-  static const updatedPathsKey = 'update_paths';
-
   /// Processes the [file] for replacement information.
   ///
   /// If the [file] contains the given [existingLicenseText] within the first
-  /// number of [byteCount] bytes, return the [ReplacementInfo].
+  /// number of [byteCount] bytes, return a Record containing:
+  /// - existingHeader: existing license header text
+  /// - replacementHeader: replacement license header text
   ///
   /// If the file can't be read or no match is found, throws an exception.
   ///
@@ -201,7 +187,8 @@ class LicenseHeader {
   /// 3. current year, if no [defaultStoredValue] is provided
   ///
   /// For now, only up to one stored value is supported.
-  Future<ReplacementInfo> getReplacementInfo({
+  Future<({String existingHeader, String replacementHeader})>
+      getReplacementInfo({
     required File file,
     required String existingLicenseText,
     required String replacementLicenseText,
@@ -223,10 +210,10 @@ class LicenseHeader {
           '<$storedName>',
           defaultStoredValue ?? DateTime.now().year.toString(),
         );
-        return {
-          existingHeaderKey: existingLicenseText,
-          replacementHeaderKey: replacementLicenseText,
-        };
+        return (
+          existingHeader: existingLicenseText,
+          replacementHeader: replacementLicenseText,
+        );
       }
       // Return a non-empty map for the case where there is a stored value
       // requested (i.e. when there is a '<value>' defined in the license text)
@@ -240,7 +227,7 @@ class LicenseHeader {
         );
       }
     }
-    throw Exception('License header expected in ${file.path}, but not found!');
+    throw StateError('License header expected in ${file.path}, but not found!');
   }
 
   /// Returns a copy of the given [file] with the [existingHeader] replaced by
@@ -264,22 +251,24 @@ class LicenseHeader {
   }
 
   /// Bulk update license headers for files in the [directory] as configured
-  /// in the [config] and return [ProcessedPaths]
+  /// in the [config] and return a processed paths Record containing:
+  /// - list of included paths
+  /// - list of updated paths
   ///
-  /// If [dryRun] is set, return [ProcessedPaths], but no files will be
-  /// actually be updated.
-  Future<ProcessedPaths> bulkUpdate({
+  /// If [dryRun] is set, return the processed paths Record, but no files will
+  /// be actually be updated.
+  Future<({List<String> includedPaths, List<String> updatedPaths})> bulkUpdate({
     required Directory directory,
     required LicenseConfig config,
     bool dryRun = false,
   }) async {
-    final includedPaths = <String>[];
-    final updatedPaths = <String>[];
+    final includedPathsList = <String>[];
+    final updatedPathsList = <String>[];
     final files =
         directory.listSync(recursive: true).whereType<File>().toList();
     for (final file in files) {
       if (!config.shouldExclude(file)) {
-        includedPaths.add(file.path);
+        includedPathsList.add(file.path);
         final extension = p.extension(file.path);
         final removeIndices = config.getRemoveIndicesForExtension(extension);
         for (final removeIndex in removeIndices) {
@@ -298,18 +287,15 @@ class LicenseHeader {
             replacementLicenseText: replacementLicenseText,
             byteCount: byteCount as int,
           );
-          if (replacementInfo
-              case {
-                LicenseHeader.existingHeaderKey: final existingHeader,
-                LicenseHeader.replacementHeaderKey: final replacementHeader
-              }) {
+          if (replacementInfo.existingHeader.isNotEmpty &&
+              replacementInfo.replacementHeader.isNotEmpty) {
             if (dryRun) {
-              updatedPaths.add(file.path);
+              updatedPathsList.add(file.path);
             } else {
               final rewrittenFile = rewriteLicenseHeader(
                 file: file,
-                existingHeader: existingHeader,
-                replacementHeader: replacementHeader,
+                existingHeader: replacementInfo.existingHeader,
+                replacementHeader: replacementInfo.replacementHeader,
               );
               if (rewrittenFile.lengthSync() > 0) {
                 file.writeAsStringSync(
@@ -317,7 +303,7 @@ class LicenseHeader {
                   mode: FileMode.writeOnly,
                   flush: true,
                 );
-                updatedPaths.add(file.path);
+                updatedPathsList.add(file.path);
               }
               rewrittenFile.deleteSync();
             }
@@ -325,13 +311,13 @@ class LicenseHeader {
         }
       }
     }
-    return {
-      includedPathsKey: includedPaths,
-      updatedPathsKey: updatedPaths,
-    };
+    return (
+      includedPaths: includedPathsList,
+      updatedPaths: updatedPathsList,
+    );
   }
 
-  ReplacementInfo _processHeaders({
+  ({String existingHeader, String replacementHeader}) _processHeaders({
     required String storedName,
     required String existingLicenseText,
     required String replacementLicenseText,
@@ -360,13 +346,13 @@ class LicenseHeader {
           '<$storedName>',
           storedValue ?? DateTime.now().year.toString(),
         );
-        return {
-          LicenseHeader.existingHeaderKey: existingHeaderValue ?? '',
-          LicenseHeader.replacementHeaderKey: replacementHeaderValue,
-        };
+        return (
+          existingHeader: existingHeaderValue ?? '',
+          replacementHeader: replacementHeaderValue,
+        );
       }
     }
-    return const {};
+    return const (existingHeader: '', replacementHeader: '');
   }
 
   // TODO(mossmana) Add support for multiple stored names

@@ -199,15 +199,13 @@ text that should be removed from the file. */
           '''// This is some $currentYear multiline license
 // text that should be added to the file.''';
 
-      expect(replacementInfo.containsKey('existing_header'), true);
       expect(
-        replacementInfo['existing_header'],
+        replacementInfo.existingHeader,
         equals(expectedExistingHeader),
       );
 
-      expect(replacementInfo.containsKey('replacement_header'), true);
       expect(
-        replacementInfo['replacement_header'],
+        replacementInfo.replacementHeader,
         equals(expectedReplacementHeader),
       );
     });
@@ -255,23 +253,13 @@ text that should be added to the file. */''',
         );
 
         expect(
-          replacementInfo.containsKey('existing_header'),
-          true,
-          reason: 'Failed on iteration $i',
-        );
-        expect(
-          replacementInfo['existing_header'],
+          replacementInfo.existingHeader,
           equals(expectedExistingHeaders[i]),
           reason: 'Failed on iteration $i',
         );
 
         expect(
-          replacementInfo.containsKey('replacement_header'),
-          true,
-          reason: 'Failed on iteration $i',
-        );
-        expect(
-          replacementInfo['replacement_header'],
+          replacementInfo.replacementHeader,
           equals(expectedReplacementHeaders[i]),
           reason: 'Failed on iteration $i',
         );
@@ -288,13 +276,13 @@ text that should be added to the file. */''',
           replacementLicenseText: 'test',
           byteCount: 50,
         );
-      } on Exception catch (e) {
+      } on StateError catch (e) {
         errorMessage = e.toString();
       }
       expect(
         errorMessage,
         equals(
-          'Exception: License header expected in ${testFile9.path}, but not found!',
+          'Bad state: License header expected in ${testFile9.path}, but not found!',
         ),
       );
     });
@@ -364,30 +352,30 @@ text that should be added to the file. */''',
       );
       final contentsAfterUpdate = testFile1.readAsStringSync();
 
-      final includedPaths = results[LicenseHeader.includedPathsKey];
+      final includedPaths = results.includedPaths;
       expect(includedPaths, isNotNull);
-      expect(includedPaths?.length, equals(7));
+      expect(includedPaths.length, equals(7));
       // Order is not guaranteed
-      expect(includedPaths?.contains(testFile1.path), true);
+      expect(includedPaths.contains(testFile1.path), true);
       expect(contentsBeforeUpdate, isNot(equals(contentsAfterUpdate)));
-      expect(includedPaths?.contains(testFile2.path), true);
-      expect(includedPaths?.contains(testFile3.path), true);
-      expect(includedPaths?.contains(testFile7.path), true);
-      expect(includedPaths?.contains(testFile8.path), true);
-      expect(includedPaths?.contains(testFile9.path), true);
-      expect(includedPaths?.contains(testFile10.path), true);
+      expect(includedPaths.contains(testFile2.path), true);
+      expect(includedPaths.contains(testFile3.path), true);
+      expect(includedPaths.contains(testFile7.path), true);
+      expect(includedPaths.contains(testFile8.path), true);
+      expect(includedPaths.contains(testFile9.path), true);
+      expect(includedPaths.contains(testFile10.path), true);
 
-      final updatedPaths = results[LicenseHeader.updatedPathsKey];
+      final updatedPaths = results.updatedPaths;
       expect(updatedPaths, isNotNull);
       // testFile9 and testFile10 are intentionally misconfigured and so they
       // won't be updated even though they are on the include list.
-      expect(updatedPaths?.length, equals(5));
+      expect(updatedPaths.length, equals(5));
       // Order is not guaranteed
-      expect(updatedPaths?.contains(testFile1.path), true);
-      expect(updatedPaths?.contains(testFile2.path), true);
-      expect(updatedPaths?.contains(testFile3.path), true);
-      expect(updatedPaths?.contains(testFile7.path), true);
-      expect(updatedPaths?.contains(testFile8.path), true);
+      expect(updatedPaths.contains(testFile1.path), true);
+      expect(updatedPaths.contains(testFile2.path), true);
+      expect(updatedPaths.contains(testFile3.path), true);
+      expect(updatedPaths.contains(testFile7.path), true);
+      expect(updatedPaths.contains(testFile8.path), true);
     });
 
     test('license headers bulk update can be dry run', () async {
@@ -403,10 +391,10 @@ text that should be added to the file. */''',
       );
       final contentsAfterUpdate = testFile1.readAsStringSync();
 
-      final updatedPaths = results[LicenseHeader.updatedPathsKey];
+      final updatedPaths = results.updatedPaths;
       expect(updatedPaths, isNotNull);
-      expect(updatedPaths?.length, equals(5));
-      expect(updatedPaths?.contains(testFile1.path), true);
+      expect(updatedPaths.length, equals(5));
+      expect(updatedPaths.contains(testFile1.path), true);
       expect(contentsBeforeUpdate, equals(contentsAfterUpdate));
     });
   });
@@ -460,10 +448,11 @@ text that should be added to the file. */''',
               replacementLicenseText: '',
               byteCount: goodReplacementLicenseText.length,
             );
-            if (replacementInfo.isEmpty) {
+            if (replacementInfo.existingHeader.isEmpty ||
+                replacementInfo.replacementHeader.isEmpty) {
               failedPaths.add(file.path);
             }
-          } on Exception {
+          } on StateError {
             failedPaths.add(file.path);
           }
         }
@@ -479,7 +468,8 @@ text that should be added to the file. */''',
   );
 }
 
-Future<Map<String, String>> _getTestReplacementInfo({
+Future<({String existingHeader, String replacementHeader})>
+    _getTestReplacementInfo({
   required File testFile,
   required String existingLicenseText,
   required String replacementLicenseText,
