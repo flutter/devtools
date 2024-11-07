@@ -18,6 +18,7 @@ import 'package:web/web.dart';
 
 import '../dtd_manager_extensions.dart';
 import '../globals.dart';
+import '../primitives/utils.dart';
 import '../query_parameters.dart';
 import '../server/server.dart' as server;
 import '../utils.dart';
@@ -640,21 +641,32 @@ void impression(
 
 String? _lastGaError;
 
+/// Reports an error to analytics.
+///
+/// [errorMessage] is the description of the error.
+/// [stackTraceSubstrings] is the stack trace broken up into substrings of
+/// size [ga4ParamValueCharacterLimit] so that we can send the stack trace in
+/// chunks to GA4 through unified_analytics.
 void reportError(
   String errorMessage, {
+  List<String> stackTraceSubstrings = const <String>[],
   bool fatal = false,
 }) {
   // Don't keep recording same last error.
   if (_lastGaError == errorMessage) return;
   _lastGaError = errorMessage;
 
-  final gTagException = GtagExceptionDevTools._create(
-    errorMessage,
+  final gTagExceptionWithStackTrace = GtagExceptionDevTools._create(
+    // Include the stack trace in the message for legacy analytics.
+    '$errorMessage\n${stackTraceSubstrings.join()}',
     fatal: fatal,
   );
-  GTag.exception(gaExceptionProvider: () => gTagException);
+  GTag.exception(gaExceptionProvider: () => gTagExceptionWithStackTrace);
 
-  final uaEvent = _uaEventFromGtagException(gTagException);
+  final uaEvent = _uaEventFromGtagException(
+    GtagExceptionDevTools._create(errorMessage, fatal: fatal),
+    stackTraceSubstrings: stackTraceSubstrings,
+  );
   unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
@@ -886,6 +898,8 @@ void _sendEventForScreen(String screenName, GtagEventDevTools gtagEvent) {
 }
 
 ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
+  // Any dimensions or metrics that have a null value will be removed from
+  // the event data in the [ua.Event.devtoolsEvent] constructor.
   return ua.Event.devtoolsEvent(
     eventCategory: gtagEvent.event_category!,
     label: gtagEvent.event_label!,
@@ -898,11 +912,15 @@ ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
     devtoolsChrome: gtagEvent.devtools_chrome,
     devtoolsVersion: gtagEvent.devtools_version,
     ideLaunched: gtagEvent.ide_launched,
+    ideLaunchedFeature: gtagEvent.ide_launched_feature,
     isExternalBuild: gtagEvent.is_external_build,
     isEmbedded: gtagEvent.is_embedded,
-    ideLaunchedFeature: gtagEvent.ide_launched_feature,
     isWasm: gtagEvent.is_wasm,
     g3Username: gtagEvent.g3_username,
+    // Only 25 entries are permitted for GA4 event parameters, but since not
+    // all of the below metrics will be non-null at the same time, it is okay to
+    // include all the metrics here. The [ua.Event.devtoolsEvent] constructor
+    // will remove any entries with a null value from the sent event parameters.
     uiDurationMicros: gtagEvent.ui_duration_micros,
     rasterDurationMicros: gtagEvent.raster_duration_micros,
     shaderCompilationDurationMicros:
@@ -922,11 +940,27 @@ ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
   );
 }
 
-ua.Event _uaEventFromGtagException(GtagExceptionDevTools gtagException) {
+ua.Event _uaEventFromGtagException(
+  GtagExceptionDevTools gtagException, {
+  List<String> stackTraceSubstrings = const <String>[],
+}) {
+  // Any data entries that have a null value will be removed from the event data
+  // in the [ua.Event.exception] constructor.
   return ua.Event.exception(
     exception: gtagException.description ?? 'unknown exception',
     data: {
       'fatal': gtagException.fatal,
+      // Each stack trace substring of length [ga4ParamValueCharacterLimit]
+      // contains information for ~1 stack frame, so including 8 chunks should
+      // give us enough information to understand the source of the exception.
+      'stackTraceChunk0': stackTraceSubstrings.safeGet(0),
+      'stackTraceChunk1': stackTraceSubstrings.safeGet(1),
+      'stackTraceChunk2': stackTraceSubstrings.safeGet(2),
+      'stackTraceChunk3': stackTraceSubstrings.safeGet(3),
+      'stackTraceChunk4': stackTraceSubstrings.safeGet(4),
+      'stackTraceChunk5': stackTraceSubstrings.safeGet(5),
+      'stackTraceChunk6': stackTraceSubstrings.safeGet(6),
+      'stackTraceChunk7': stackTraceSubstrings.safeGet(7),
       'userApp': gtagException.user_app,
       'userBuild': gtagException.user_build,
       'userPlatform': gtagException.user_platform,
@@ -934,25 +968,14 @@ ua.Event _uaEventFromGtagException(GtagExceptionDevTools gtagException) {
       'devtoolsChrome': gtagException.devtools_chrome,
       'devtoolsVersion': gtagException.devtools_version,
       'ideLaunched': gtagException.ide_launched,
+      'ideLaunchedFeature': gtagException.ide_launched_feature,
       'isExternalBuild': gtagException.is_external_build,
       'isEmbedded': gtagException.is_embedded,
-      'ideLaunchedFeature': gtagException.ide_launched_feature,
       'isWasm': gtagException.is_wasm,
       'g3Username': gtagException.g3_username,
-      'uiDurationMicros': gtagException.ui_duration_micros,
-      'rasterDurationMicros': gtagException.raster_duration_micros,
-      'shaderCompilationDurationMicros':
-          gtagException.shader_compilation_duration_micros,
-      'traceEventCount': gtagException.trace_event_count,
-      'cpuSampleCount': gtagException.cpu_sample_count,
-      'cpuStackDepth': gtagException.cpu_stack_depth,
-      'heapDiffObjectsBefore': gtagException.heap_diff_objects_before,
-      'heapDiffObjectsAfter': gtagException.heap_diff_objects_after,
-      'heapObjectsTotal': gtagException.heap_objects_total,
-      'rootSetCount': gtagException.root_set_count,
-      'rowCount': gtagException.row_count,
-      'inspectorTreeControllerId': gtagException.inspector_tree_controller_id,
-      'isV2Inspector': gtagException.is_v2_inspector,
+      // Do not include metrics in exceptions because GA4 event parameter are
+      // limited to 25 entries, and we need to reserve entries for the stack
+      // trace chunks.
     },
   );
 }

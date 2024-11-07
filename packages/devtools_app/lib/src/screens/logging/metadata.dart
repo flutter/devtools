@@ -9,7 +9,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-import '../../shared/common_widgets.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/icons.dart';
 import 'logging_controller.dart';

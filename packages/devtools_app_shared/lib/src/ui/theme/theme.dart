@@ -125,6 +125,9 @@ ThemeData _baseTheme({
     ),
     primaryTextTheme: _devToolsTextTheme(theme, theme.primaryTextTheme),
     textTheme: _devToolsTextTheme(theme, theme.textTheme),
+    colorScheme: theme.colorScheme.copyWith(
+      surface: backgroundColor,
+    ),
   );
 }
 
@@ -359,11 +362,10 @@ extension DevToolsSharedColorScheme on ColorScheme {
   Color get _devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
 
-  Color get alternatingBackgroundColor1 =>
-      isLight ? Colors.white : const Color(0xFF1B1B1F);
+  Color get alternatingBackgroundColor1 => surface;
 
   Color get alternatingBackgroundColor2 =>
-      isLight ? const Color(0xFFF2F0F4) : const Color(0xFF303033);
+      isLight ? surface.darken(0.06) : surface.brighten(0.06);
 
   Color get selectedRowBackgroundColor =>
       isLight ? const Color(0xFFC7C6CA) : const Color(0xFF5E5E62);
