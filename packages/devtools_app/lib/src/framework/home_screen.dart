@@ -256,6 +256,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
   }
 
   Future<void> _connect() async {
+    throw Exception('My test exception');
     assert(!actionInProgress);
     await blockWhileInProgress(_connectHelper);
   }

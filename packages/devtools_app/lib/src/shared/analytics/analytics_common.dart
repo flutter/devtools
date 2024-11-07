@@ -23,3 +23,6 @@
 /// Then, add your fields to the [GtagEventDevTools] factory constructor and add
 /// a corresponding getter in the class.
 abstract class ScreenAnalyticsMetrics {}
+
+/// The character limit for each event parameter value sent to GA4.
+const ga4ParamValueCharacterLimit = 100;

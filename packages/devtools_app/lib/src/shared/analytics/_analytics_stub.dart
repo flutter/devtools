@@ -97,6 +97,7 @@ void impression(
 
 void reportError(
   String errorMessage, {
+  List<String> stackTraceSubstrings = const <String>[],
   bool fatal = false,
 }) {}
 
