@@ -111,6 +111,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     int? inspector_tree_controller_id, // metric12
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
+    bool? is_v2_inspector, // metric15
   });
 
   factory GtagEventDevTools._create({
@@ -181,6 +182,8 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
       inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.inspectorTreeControllerId
           : null,
+      is_v2_inspector:
+          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
       // [DeepLinkScreenMetrics]
       android_app_id: screenMetrics is DeepLinkScreenMetrics
           ? screenMetrics.androidAppId
@@ -219,6 +222,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   external int? get root_set_count;
   external int? get row_count;
   external int? get inspector_tree_controller_id;
+  external bool? get is_v2_inspector;
   external String? get android_app_id;
   external String? get ios_bundle_id;
 }
@@ -273,6 +277,8 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     int? root_set_count, // metric10
     int? row_count, // metric11
     int? inspector_tree_controller_id, // metric12
+    bool? is_v2_inspector, // metric15
+    // Deep links screen metrics. See [DeepLinkScreenMetrics].
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
   });
@@ -339,6 +345,8 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
       inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.inspectorTreeControllerId
           : null,
+      is_v2_inspector:
+          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
       // [DeepLinkScreenMetrics]
       android_app_id: screenMetrics is DeepLinkScreenMetrics
           ? screenMetrics.androidAppId
@@ -379,6 +387,7 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
   external int? get inspector_tree_controller_id;
   external String? get android_app_id;
   external String? get ios_bundle_id;
+  external bool? get is_v2_inspector;
 }
 
 /// Whether google analytics are enabled.
@@ -909,6 +918,7 @@ ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
     inspectorTreeControllerId: gtagEvent.inspector_tree_controller_id,
     androidAppId: gtagEvent.android_app_id,
     iosBundleId: gtagEvent.ios_bundle_id,
+    isV2Inspector: gtagEvent.is_v2_inspector,
   );
 }
 
@@ -942,6 +952,7 @@ ua.Event _uaEventFromGtagException(GtagExceptionDevTools gtagException) {
       'rootSetCount': gtagException.root_set_count,
       'rowCount': gtagException.row_count,
       'inspectorTreeControllerId': gtagException.inspector_tree_controller_id,
+      'isV2Inspector': gtagException.is_v2_inspector,
     },
   );
 }
