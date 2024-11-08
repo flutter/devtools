@@ -111,8 +111,11 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     int? root_set_count, // metric10
     int? row_count, // metric11
     int? inspector_tree_controller_id, // metric12
+    // Deep Link screen metrics. See [DeepLinkScreenMetrics].
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
+    // Inspector screen metrics. See [InspectorScreenMetrics].
+    bool? is_v2_inspector, // metric15
   });
 
   factory GtagEventDevTools._create({
@@ -192,6 +195,9 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
       ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
           ? screenMetrics.iosBundleId
           : null,
+      // [InspectorScreenMetrics]
+      is_v2_inspector:
+          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
     );
   }
 
@@ -227,6 +233,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   external int? get inspector_tree_controller_id;
   external String? get android_app_id;
   external String? get ios_bundle_id;
+  external bool? get is_v2_inspector;
 }
 
 extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
@@ -280,8 +287,11 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     int? root_set_count, // metric10
     int? row_count, // metric11
     int? inspector_tree_controller_id, // metric12
+    // Deep Link screen metrics. See [DeepLinkScreenMetrics].
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
+    // Inspector screen metrics. See [InspectorScreenMetrics].
+    bool? is_v2_inspector, // metric15
   });
 
   factory GtagExceptionDevTools._create(
@@ -353,6 +363,9 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
       ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
           ? screenMetrics.iosBundleId
           : null,
+      // [InspectorScreenMetrics]
+      is_v2_inspector:
+          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
     );
   }
 
@@ -386,6 +399,7 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
   external int? get inspector_tree_controller_id;
   external String? get android_app_id;
   external String? get ios_bundle_id;
+  external bool? get is_v2_inspector;
 }
 
 /// Whether google analytics are enabled.
@@ -920,23 +934,24 @@ ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
     // all of the below metrics will be non-null at the same time, it is okay to
     // include all the metrics here. The [ua.Event.devtoolsEvent] constructor
     // will remove any entries with a null value from the sent event parameters.
-    additionalMetrics: {
-      'uiDurationMicros': gtagEvent.ui_duration_micros,
-      'rasterDurationMicros': gtagEvent.raster_duration_micros,
-      'shaderCompilationDurationMicros':
+    additionalMetrics: _DevToolsEventMetrics(
+      uiDurationMicros: gtagEvent.ui_duration_micros,
+      rasterDurationMicros: gtagEvent.raster_duration_micros,
+      shaderCompilationDurationMicros:
           gtagEvent.shader_compilation_duration_micros,
-      'traceEventCount': gtagEvent.trace_event_count,
-      'cpuSampleCount': gtagEvent.cpu_sample_count,
-      'cpuStackDepth': gtagEvent.cpu_stack_depth,
-      'heapDiffObjectsBefore': gtagEvent.heap_diff_objects_before,
-      'heapDiffObjectsAfter': gtagEvent.heap_diff_objects_after,
-      'heapObjectsTotal': gtagEvent.heap_objects_total,
-      'rootSetCount': gtagEvent.root_set_count,
-      'rowCount': gtagEvent.row_count,
-      'inspectorTreeControllerId': gtagEvent.inspector_tree_controller_id,
-      'androidAppId': gtagEvent.android_app_id,
-      'iosBundleId': gtagEvent.ios_bundle_id,
-    },
+      traceEventCount: gtagEvent.trace_event_count,
+      cpuSampleCount: gtagEvent.cpu_sample_count,
+      cpuStackDepth: gtagEvent.cpu_stack_depth,
+      heapDiffObjectsBefore: gtagEvent.heap_diff_objects_before,
+      heapDiffObjectsAfter: gtagEvent.heap_diff_objects_after,
+      heapObjectsTotal: gtagEvent.heap_objects_total,
+      rootSetCount: gtagEvent.root_set_count,
+      rowCount: gtagEvent.row_count,
+      inspectorTreeControllerId: gtagEvent.inspector_tree_controller_id,
+      isV2Inspector: gtagEvent.is_v2_inspector,
+      androidAppId: gtagEvent.android_app_id,
+      iosBundleId: gtagEvent.ios_bundle_id,
+    ),
   );
 }
 
@@ -978,4 +993,68 @@ ua.Event _uaEventFromGtagException(
       // trace chunks.
     },
   );
+}
+
+final class _DevToolsEventMetrics extends ua.CustomMetrics {
+  _DevToolsEventMetrics({
+    required this.rasterDurationMicros,
+    required this.shaderCompilationDurationMicros,
+    required this.traceEventCount,
+    required this.cpuSampleCount,
+    required this.cpuStackDepth,
+    required this.heapDiffObjectsBefore,
+    required this.heapDiffObjectsAfter,
+    required this.heapObjectsTotal,
+    required this.rootSetCount,
+    required this.rowCount,
+    required this.inspectorTreeControllerId,
+    required this.isV2Inspector,
+    required this.androidAppId,
+    required this.iosBundleId,
+    required this.uiDurationMicros,
+  });
+
+  // [PerformanceScreenMetrics]
+  final int? uiDurationMicros;
+  final int? rasterDurationMicros;
+  final int? shaderCompilationDurationMicros;
+  final int? traceEventCount;
+
+  // [ProfilerScreenMetrics]
+  final int? cpuSampleCount;
+  final int? cpuStackDepth;
+
+  // [MemoryScreenMetrics]
+  final int? heapDiffObjectsBefore;
+  final int? heapDiffObjectsAfter;
+  final int? heapObjectsTotal;
+
+  // [InspectorScreenMetrics]
+  final int? rootSetCount;
+  final int? rowCount;
+  final int? inspectorTreeControllerId;
+  final bool? isV2Inspector;
+
+  // [DeepLinkScreenMetrics]
+  final String? androidAppId;
+  final String? iosBundleId;
+
+  @override
+  Map<String, Object> toMap() => (<String, Object?>{
+        'uiDurationMicros': uiDurationMicros,
+        'rasterDurationMicros': rasterDurationMicros,
+        'shaderCompilationDurationMicros': shaderCompilationDurationMicros,
+        'traceEventCount': traceEventCount,
+        'cpuSampleCount': cpuSampleCount,
+        'cpuStackDepth': cpuStackDepth,
+        'heapDiffObjectsBefore': heapDiffObjectsBefore,
+        'heapDiffObjectsAfter': heapDiffObjectsAfter,
+        'heapObjectsTotal': heapObjectsTotal,
+        'rootSetCount': rootSetCount,
+        'rowCount': rowCount,
+        'inspectorTreeControllerId': inspectorTreeControllerId,
+        'isV2Inspector': isV2Inspector,
+        'androidAppId': androidAppId,
+        'iosBundleId': iosBundleId,
+      }..removeWhere((key, value) => value == null)) as Map<String, Object>;
 }
