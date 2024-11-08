@@ -434,7 +434,7 @@ void screen(String screenName, [int value = 0]) {
     value: value,
     send_to: gaDevToolsPropertyId(),
   );
-  _sendEventForScreen(gtagEvent);
+  _sendEvent(gtagEvent);
 }
 
 String _operationKey(String screenName, String timedOperation) {
@@ -581,7 +581,7 @@ void _timing(
     send_to: gaDevToolsPropertyId(),
     screenMetrics: screenMetrics,
   );
-  _sendEventForScreen(gtagEvent);
+  _sendEvent(gtagEvent);
 }
 
 /// Sends an analytics event to signal that something in DevTools was selected.
@@ -609,7 +609,7 @@ void select(
     screenMetrics:
         screenMetricsProvider != null ? screenMetricsProvider() : null,
   );
-  _sendEventForScreen(gtagEvent);
+  _sendEvent(gtagEvent);
 }
 
 /// Sends an analytics event to signal that something in DevTools was viewed.
@@ -634,7 +634,7 @@ void impression(
     screenMetrics:
         screenMetricsProvider != null ? screenMetricsProvider() : null,
   );
-  _sendEventForScreen(gtagEvent);
+  _sendEvent(gtagEvent);
 }
 
 String? _lastGaError;
@@ -886,7 +886,7 @@ void legacyOnSetupAnalytics() {
   jsHookupListenerForGA();
 }
 
-void _sendEventForScreen(GtagEventDevTools gtagEvent) {
+void _sendEvent(GtagEventDevTools gtagEvent) {
   GTag.event(
     gtagEvent.screen!,
     gaEventProvider: () => gtagEvent,
