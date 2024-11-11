@@ -1056,5 +1056,6 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
         'isV2Inspector': isV2Inspector,
         'androidAppId': androidAppId,
         'iosBundleId': iosBundleId,
-      }..removeWhere((key, value) => value == null)) as Map<String, Object>;
+      }..removeWhere((key, value) => value == null))
+          .cast<String, Object>();
 }
