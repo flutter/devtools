@@ -24,7 +24,7 @@ dependencies:
   devtools_app_shared: ^0.2.2
   devtools_extensions: ^0.3.0-wip
   devtools_shared: ^10.0.1
-  dtd: ^2.3.0
+  dtd: ^2.4.0
   file: ^7.0.0
   file_selector: ^1.0.0
   fixnum: ^1.1.0
