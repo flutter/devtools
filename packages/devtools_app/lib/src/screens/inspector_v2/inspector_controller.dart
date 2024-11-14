@@ -598,6 +598,9 @@ class InspectorController extends DisposableController
       );
       // Persist the selected node after refreshing the widget tree:
       refreshSelection(currentSelectedNode?.diagnostic);
+
+      // If the user is searching the tree, refresh the search matches.
+      inspectorTree.refreshSearchMatches();
     }
   }
 
