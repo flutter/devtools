@@ -41,19 +41,16 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
         if (node == null) {
           return const RoundedOutlinedBorder(
             child: Center(
-            child: Text(
-              'Select a widget to view its layout and properties.',
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.clip,
-            ),
+              child: Text(
+                'Select a widget to view its layout and properties.',
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.clip,
+              ),
             ),
           );
         }
 
-        return DetailsTable(
-          controller: controller,
-          node: node,
-        );
+        return DetailsTable(controller: controller, node: node);
       },
     );
   }
