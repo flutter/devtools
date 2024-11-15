@@ -480,9 +480,7 @@ UniversalLinkSettings fakeUniversalLinkSettings(List<String> domains) {
   "bundleIdentifier": "app.id",
   "teamIdentifier": "AAAABBBB",
   "associatedDomains": [
-    ${domains.map(
-            (d) => '"$d"',
-          ).join(',')}
+    ${domains.map((d) => '"$d"').join(',')}
   ]
 }
 ''');

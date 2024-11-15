@@ -105,9 +105,10 @@ void main() {
         extentMicros: 100,
         processId: 'test',
       );
-      final originalData = controller.cpuProfileStore.lookupProfile(
-        label: CpuProfilerController.userTagNone,
-      )!;
+      final originalData =
+          controller.cpuProfileStore.lookupProfile(
+            label: CpuProfilerController.userTagNone,
+          )!;
       expect(
         originalData.functionProfile.stackFrames.values.length,
         equals(17),
@@ -117,10 +118,10 @@ void main() {
       expect(filteredData.stackFrames.values.length, equals(12));
 
       // The native frame filter is applied by default.
-      final originalNativeFrames = originalData
-          .functionProfile.stackFrames.values
-          .where((sf) => sf.isNative)
-          .toList();
+      final originalNativeFrames =
+          originalData.functionProfile.stackFrames.values
+              .where((sf) => sf.isNative)
+              .toList();
       final filteredNativeFrames =
           filteredData.stackFrames.values.where((sf) => sf.isNative).toList();
       expect(originalNativeFrames.length, equals(5));
@@ -134,9 +135,10 @@ void main() {
         extentMicros: 100,
         processId: 'test',
       );
-      final originalData = controller.cpuProfileStore.lookupProfile(
-        label: CpuProfilerController.userTagNone,
-      )!;
+      final originalData =
+          controller.cpuProfileStore.lookupProfile(
+            label: CpuProfilerController.userTagNone,
+          )!;
       expect(
         originalData.functionProfile.stackFrames.values.length,
         equals(17),
@@ -188,9 +190,10 @@ void main() {
         extentMicros: 100,
         processId: 'test',
       );
-      final originalData = controller.cpuProfileStore.lookupProfile(
-        label: CpuProfilerController.userTagNone,
-      )!;
+      final originalData =
+          controller.cpuProfileStore.lookupProfile(
+            label: CpuProfilerController.userTagNone,
+          )!;
       expect(
         originalData.functionProfile.stackFrames.values.length,
         equals(17),
@@ -242,16 +245,10 @@ void main() {
     test('selectCpuStackFrame', () async {
       final dataNotifierValue = controller.dataNotifier.value!;
 
-      expect(
-        dataNotifierValue.selectedStackFrame,
-        isNull,
-      );
+      expect(dataNotifierValue.selectedStackFrame, isNull);
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
       controller.selectCpuStackFrame(testStackFrame);
-      expect(
-        dataNotifierValue.selectedStackFrame,
-        equals(testStackFrame),
-      );
+      expect(dataNotifierValue.selectedStackFrame, equals(testStackFrame));
       expect(
         controller.selectedCpuStackFrameNotifier.value,
         equals(testStackFrame),
@@ -327,8 +324,9 @@ void main() {
     test('processDataForTag', () async {
       await disableAllFiltering();
 
-      final cpuProfileDataWithTags =
-          CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
+      final cpuProfileDataWithTags = CpuProfileData.fromJson(
+        cpuProfileDataWithUserTagsJson,
+      );
       await controller.transformer.processData(
         cpuProfileDataWithTags,
         processId: 'test',
@@ -345,13 +343,16 @@ void main() {
 
       expect(
         dataNotifierValue
-            .cpuProfileRoot.profileMetaData.time!.duration.inMicroseconds,
+            .cpuProfileRoot
+            .profileMetaData
+            .time!
+            .duration
+            .inMicroseconds,
         equals(250),
       );
       expect(
         dataNotifierValue.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
+        equals('''
   all - children: 1 - excl: 0 - incl: 5
     Frame1 - children: 2 - excl: 0 - incl: 5
       Frame2 - children: 2 - excl: 0 - incl: 2
@@ -359,48 +360,41 @@ void main() {
         Frame4 - children: 0 - excl: 1 - incl: 1
       Frame5 - children: 1 - excl: 2 - incl: 3
         Frame6 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+'''),
       );
 
       await controller.loadDataWithTag('userTagA');
       expect(
         controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
+        equals('''
   all - children: 1 - excl: 0 - incl: 2
     Frame1 - children: 2 - excl: 0 - incl: 2
       Frame2 - children: 1 - excl: 0 - incl: 1
         Frame3 - children: 0 - excl: 1 - incl: 1
       Frame5 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+'''),
       );
 
       await controller.loadDataWithTag('userTagB');
       expect(
         controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
+        equals('''
   all - children: 1 - excl: 0 - incl: 1
     Frame1 - children: 1 - excl: 0 - incl: 1
       Frame2 - children: 1 - excl: 0 - incl: 1
         Frame4 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+'''),
       );
 
       await controller.loadDataWithTag('userTagC');
       expect(
         controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
+        equals('''
   all - children: 1 - excl: 0 - incl: 2
     Frame1 - children: 1 - excl: 0 - incl: 2
       Frame5 - children: 1 - excl: 1 - incl: 2
         Frame6 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+'''),
       );
 
       await controller.loadDataWithTag(CpuProfilerController.groupByUserTag);
@@ -421,8 +415,9 @@ void main() {
         controller.activeFilter.value.settingFilters[0].setting.value,
         isTrue,
       );
-      final cpuProfileDataWithTags =
-          CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
+      final cpuProfileDataWithTags = CpuProfileData.fromJson(
+        cpuProfileDataWithUserTagsJson,
+      );
       await controller.transformer.processData(
         cpuProfileDataWithTags,
         processId: 'test',
@@ -442,8 +437,7 @@ void main() {
       );
       expect(
         cpuProfileRoot.profileAsString(),
-        equals(
-          '''
+        equals('''
   all - children: 1 - excl: 0 - incl: 5
     Frame1 - children: 2 - excl: 0 - incl: 5
       Frame2 - children: 2 - excl: 0 - incl: 2
@@ -451,50 +445,42 @@ void main() {
         Frame4 - children: 0 - excl: 1 - incl: 1
       Frame5 - children: 1 - excl: 2 - incl: 3
         Frame6 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+'''),
       );
 
       await controller.loadDataWithTag('userTagA');
       expect(
         controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
+        equals('''
   all - children: 2 - excl: 0 - incl: 2
     Frame2 - children: 0 - excl: 1 - incl: 1
     Frame5 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+'''),
       );
 
       await controller.loadDataWithTag('userTagB');
       expect(
         controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
+        equals('''
   all - children: 1 - excl: 0 - incl: 1
     Frame2 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+'''),
       );
 
       await controller.loadDataWithTag('userTagC');
       expect(
         controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
+        equals('''
   all - children: 1 - excl: 0 - incl: 2
     Frame5 - children: 1 - excl: 1 - incl: 2
       Frame6 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+'''),
       );
 
       await controller.loadDataWithTag(CpuProfilerController.groupByUserTag);
       expect(
         controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
+        equals('''
   all - children: 3 - excl: 0 - incl: 5
     userTagA - children: 2 - excl: 0 - incl: 2
       Frame2 - children: 0 - excl: 1 - incl: 1
@@ -504,15 +490,13 @@ void main() {
     userTagC - children: 1 - excl: 0 - incl: 2
       Frame5 - children: 1 - excl: 1 - incl: 2
         Frame6 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+'''),
       );
 
       await controller.loadDataWithTag(CpuProfilerController.groupByVmTag);
       expect(
         controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
+        equals('''
   all - children: 3 - excl: 0 - incl: 5
     vmTagA - children: 2 - excl: 0 - incl: 2
       Frame2 - children: 0 - excl: 1 - incl: 1
@@ -522,8 +506,7 @@ void main() {
     vmTagC - children: 1 - excl: 0 - incl: 2
       Frame5 - children: 1 - excl: 1 - incl: 2
         Frame6 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+'''),
       );
     });
 
@@ -540,24 +523,15 @@ void main() {
 
     test('disposes', () {
       controller.dispose();
-      expect(
-        () {
-          controller.dataNotifier.addListener(() {});
-        },
-        throwsA(anything),
-      );
-      expect(
-        () {
-          controller.selectedCpuStackFrameNotifier.addListener(() {});
-        },
-        throwsA(anything),
-      );
-      expect(
-        () {
-          controller.profilerBusyStatus.addListener(() {});
-        },
-        throwsA(anything),
-      );
+      expect(() {
+        controller.dataNotifier.addListener(() {});
+      }, throwsA(anything));
+      expect(() {
+        controller.selectedCpuStackFrameNotifier.addListener(() {});
+      }, throwsA(anything));
+      expect(() {
+        controller.profilerBusyStatus.addListener(() {});
+      }, throwsA(anything));
     });
   });
 }

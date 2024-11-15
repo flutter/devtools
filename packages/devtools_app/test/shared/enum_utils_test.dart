@@ -37,9 +37,4 @@ void main() {
   });
 }
 
-enum Size with EnumIndexOrdering {
-  xs,
-  s,
-  m,
-  xl,
-}
+enum Size with EnumIndexOrdering { xs, s, m, xl }

@@ -32,9 +32,7 @@ class PerformanceSettingsDialog extends StatelessWidget {
           ),
         ],
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }
@@ -50,8 +48,9 @@ class FlutterSettings extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CheckboxSetting(
-          notifier: flutterFramesController.badgeTabForJankyFrames
-              as ValueNotifier<bool?>,
+          notifier:
+              flutterFramesController.badgeTabForJankyFrames
+                  as ValueNotifier<bool?>,
           title: 'Badge Performance tab when Flutter UI jank is detected',
         ),
       ],

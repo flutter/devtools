@@ -114,9 +114,10 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
       _callers = <MethodTableGraphNode>[];
       _callees = <MethodTableGraphNode>[];
     } else {
-      _callers = _selectedGraphNode!.predecessors
-          .cast<MethodTableGraphNode>()
-          .toList();
+      _callers =
+          _selectedGraphNode!.predecessors
+              .cast<MethodTableGraphNode>()
+              .toList();
       _callees =
           _selectedGraphNode!.successors.cast<MethodTableGraphNode>().toList();
     }
@@ -139,10 +140,7 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
         children: [
           Flexible(
             child: OutlineDecoration.onlyBottom(
-              child: _CallersTable(
-                widget.methodTableController,
-                _callers,
-              ),
+              child: _CallersTable(widget.methodTableController, _callers),
             ),
           ),
           DevToolsTooltip(
@@ -162,10 +160,7 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
           ),
           Flexible(
             child: OutlineDecoration.onlyTop(
-              child: _CalleesTable(
-                widget.methodTableController,
-                _callees,
-              ),
+              child: _CalleesTable(widget.methodTableController, _callees),
             ),
           ),
         ],
@@ -177,8 +172,9 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
 /// A table of predecessors (callers) for a single method in a method table.
 class _CallersTable extends StatelessWidget {
   _CallersTable(this._methodTableController, this._callers) {
-    _callerTimeColumn =
-        _CallerTimeColumn(methodTableController: _methodTableController);
+    _callerTimeColumn = _CallerTimeColumn(
+      methodTableController: _methodTableController,
+    );
     columns = List<ColumnData<MethodTableGraphNode>>.unmodifiable([
       _callerTimeColumn,
       methodColumn,
@@ -213,8 +209,9 @@ class _CallersTable extends StatelessWidget {
 /// A table of successors (callees) for a single method in a method table.
 class _CalleesTable extends StatelessWidget {
   _CalleesTable(this._methodTableController, this._callees) {
-    _calleeTimeColumn =
-        _CalleeTimeColumn(methodTableController: _methodTableController);
+    _calleeTimeColumn = _CalleeTimeColumn(
+      methodTableController: _methodTableController,
+    );
     _columns = List<ColumnData<MethodTableGraphNode>>.unmodifiable([
       _calleeTimeColumn,
       _methodColumn,
@@ -248,11 +245,7 @@ class _CalleesTable extends StatelessWidget {
 
 class _MethodColumn extends ColumnData<MethodTableGraphNode>
     implements ColumnRenderer<MethodTableGraphNode> {
-  _MethodColumn()
-      : super.wide(
-          'Method',
-          minWidthPx: _methodColumnMinWidth,
-        );
+  _MethodColumn() : super.wide('Method', minWidthPx: _methodColumnMinWidth);
 
   @override
   String getValue(MethodTableGraphNode dataObject) => dataObject.name;
@@ -284,50 +277,48 @@ const _callGraphColumnWidth = 70.0;
 
 class _SelfTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
   _SelfTimeColumn()
-      : super(
-          title: 'Self %',
-          percentageOnly: true,
-          timeProvider: (node) => node.selfTime,
-          percentAsDoubleProvider: (node) => node.selfTimeRatio,
-          secondaryCompare: (node) => node.name,
-          columnWidth: _totalAndSelfColumnWidth,
-        );
+    : super(
+        title: 'Self %',
+        percentageOnly: true,
+        timeProvider: (node) => node.selfTime,
+        percentAsDoubleProvider: (node) => node.selfTimeRatio,
+        secondaryCompare: (node) => node.name,
+        columnWidth: _totalAndSelfColumnWidth,
+      );
 }
 
 class _TotalTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
   _TotalTimeColumn()
-      : super(
-          title: 'Total %',
-          percentageOnly: true,
-          timeProvider: (node) => node.totalTime,
-          percentAsDoubleProvider: (node) => node.totalTimeRatio,
-          secondaryCompare: (node) => node.name,
-          columnWidth: _totalAndSelfColumnWidth,
-        );
+    : super(
+        title: 'Total %',
+        percentageOnly: true,
+        timeProvider: (node) => node.totalTime,
+        percentAsDoubleProvider: (node) => node.totalTimeRatio,
+        secondaryCompare: (node) => node.name,
+        columnWidth: _totalAndSelfColumnWidth,
+      );
 }
 
 class _CallerTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
-  _CallerTimeColumn({
-    required MethodTableController methodTableController,
-  }) : super(
-          title: 'Caller %',
-          percentageOnly: true,
-          percentAsDoubleProvider: (node) =>
-              methodTableController.callerPercentageFor(node),
-          secondaryCompare: (node) => node.name,
-          columnWidth: _callGraphColumnWidth,
-        );
+  _CallerTimeColumn({required MethodTableController methodTableController})
+    : super(
+        title: 'Caller %',
+        percentageOnly: true,
+        percentAsDoubleProvider:
+            (node) => methodTableController.callerPercentageFor(node),
+        secondaryCompare: (node) => node.name,
+        columnWidth: _callGraphColumnWidth,
+      );
 }
 
 class _CalleeTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
-  _CalleeTimeColumn({
-    required MethodTableController methodTableController,
-  }) : super(
-          title: 'Callee %',
-          percentageOnly: true,
-          percentAsDoubleProvider: (node) =>
-              methodTableController.calleePercentageFor(node),
-          secondaryCompare: (node) => node.name,
-          columnWidth: _callGraphColumnWidth,
-        );
+  _CalleeTimeColumn({required MethodTableController methodTableController})
+    : super(
+        title: 'Callee %',
+        percentageOnly: true,
+        percentAsDoubleProvider:
+            (node) => methodTableController.calleePercentageFor(node),
+        secondaryCompare: (node) => node.name,
+        columnWidth: _callGraphColumnWidth,
+      );
 }

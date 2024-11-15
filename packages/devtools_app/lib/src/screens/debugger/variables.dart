@@ -36,18 +36,15 @@ class Variables extends StatelessWidget {
     } else {
       return TreeView<DartObjectNode>(
         dataRootsListenable: serviceConnection.appState.variables,
-        dataDisplayProvider: (variable, onPressed) => DisplayProvider(
-          variable: variable,
-          onTap: onPressed,
-        ),
+        dataDisplayProvider:
+            (variable, onPressed) =>
+                DisplayProvider(variable: variable, onTap: onPressed),
         onItemSelected: onItemPressed,
       );
     }
   }
 
-  Future<void> onDapItemExpanded(
-    DapObjectNode node,
-  ) async {
+  Future<void> onDapItemExpanded(DapObjectNode node) async {
     if (node.isExpanded) {
       for (final child in node.children) {
         await child.fetchChildren();
@@ -55,9 +52,7 @@ class Variables extends StatelessWidget {
     }
   }
 
-  Future<void> onItemPressed(
-    DartObjectNode v,
-  ) async {
+  Future<void> onItemPressed(DartObjectNode v) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
       await Future.wait(v.children.map(buildVariablesTree));

@@ -87,9 +87,9 @@ void main() {
         layouts: layoutsTraced,
         paints: paintsTraced,
       );
-      when(frameAnalysis.longestUiPhase).thenReturn(
-        longestUiPhase ?? mockBuildPhase,
-      );
+      when(
+        frameAnalysis.longestUiPhase,
+      ).thenReturn(longestUiPhase ?? mockBuildPhase);
       when(frameAnalysis.saveLayerCount).thenReturn(saveLayerCount);
       when(frameAnalysis.intrinsicOperationsCount).thenReturn(intrinsicsCount);
     }
@@ -108,29 +108,27 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize(
-      'does show hints for janky frame',
-      windowSize,
-      (WidgetTester tester) async {
-        createMockFrameAnalysis(
-          frameAnalysis: mockFrameAnalysis,
-          frame: jankyFrame,
-        );
-        await pumpHints(tester, mockFrameAnalysis);
+    testWidgetsWithWindowSize('does show hints for janky frame', windowSize, (
+      WidgetTester tester,
+    ) async {
+      createMockFrameAnalysis(
+        frameAnalysis: mockFrameAnalysis,
+        frame: jankyFrame,
+      );
+      await pumpHints(tester, mockFrameAnalysis);
 
-        expect(
-          find.text('No suggestions for this frame - no jank detected.'),
-          findsNothing,
-        );
-        expect(find.text('UI Jank Detected'), findsOneWidget);
-        expect(find.byType(EnhanceTracingHint), findsOneWidget);
-        expect(find.byType(IntrinsicOperationsHint), findsNothing);
-        expect(find.text('Raster Jank Detected'), findsOneWidget);
-        expect(find.byType(GeneralRasterJankHint), findsOneWidget);
-        expect(find.byType(CanvasSaveLayerHint), findsNothing);
-        expect(find.byType(ShaderCompilationHint), findsNothing);
-      },
-    );
+      expect(
+        find.text('No suggestions for this frame - no jank detected.'),
+        findsNothing,
+      );
+      expect(find.text('UI Jank Detected'), findsOneWidget);
+      expect(find.byType(EnhanceTracingHint), findsOneWidget);
+      expect(find.byType(IntrinsicOperationsHint), findsNothing);
+      expect(find.text('Raster Jank Detected'), findsOneWidget);
+      expect(find.byType(GeneralRasterJankHint), findsOneWidget);
+      expect(find.byType(CanvasSaveLayerHint), findsNothing);
+      expect(find.byType(ShaderCompilationHint), findsNothing);
+    });
 
     group('enhance tracing hints', () {
       testWidgetsWithWindowSize(
@@ -285,77 +283,71 @@ void main() {
       );
     });
 
-    testWidgetsWithWindowSize(
-      'shows intrinsic operations hint',
-      windowSize,
-      (WidgetTester tester) async {
-        createMockFrameAnalysis(
-          frameAnalysis: mockFrameAnalysis,
-          frame: jankyFrame,
-          intrinsicsCount: 5,
-        );
-        await pumpHints(tester, mockFrameAnalysis);
+    testWidgetsWithWindowSize('shows intrinsic operations hint', windowSize, (
+      WidgetTester tester,
+    ) async {
+      createMockFrameAnalysis(
+        frameAnalysis: mockFrameAnalysis,
+        frame: jankyFrame,
+        intrinsicsCount: 5,
+      );
+      await pumpHints(tester, mockFrameAnalysis);
 
-        expect(find.byType(IntrinsicOperationsHint), findsOneWidget);
-        expect(
-          find.richTextContaining(
-            'Intrinsic passes were performed 5 times during this frame. This '
-            'may negatively affect your app\'s performance.',
-          ),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(find.byType(IntrinsicOperationsHint), findsOneWidget);
+      expect(
+        find.richTextContaining(
+          'Intrinsic passes were performed 5 times during this frame. This '
+          'may negatively affect your app\'s performance.',
+        ),
+        findsOneWidget,
+      );
+    });
 
-    testWidgetsWithWindowSize(
-      'shows canvas save layer hint',
-      windowSize,
-      (WidgetTester tester) async {
-        createMockFrameAnalysis(
-          frameAnalysis: mockFrameAnalysis,
-          frame: jankyFrame,
-          saveLayerCount: 5,
-        );
-        await pumpHints(tester, mockFrameAnalysis);
+    testWidgetsWithWindowSize('shows canvas save layer hint', windowSize, (
+      WidgetTester tester,
+    ) async {
+      createMockFrameAnalysis(
+        frameAnalysis: mockFrameAnalysis,
+        frame: jankyFrame,
+        saveLayerCount: 5,
+      );
+      await pumpHints(tester, mockFrameAnalysis);
 
-        expect(find.byType(CanvasSaveLayerHint), findsOneWidget);
-        expect(
-          find.richTextContaining(
-            'Canvas.saveLayer() was called 5 times during this frame. This '
-            'may negatively affect your app\'s performance.',
-          ),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(find.byType(CanvasSaveLayerHint), findsOneWidget);
+      expect(
+        find.richTextContaining(
+          'Canvas.saveLayer() was called 5 times during this frame. This '
+          'may negatively affect your app\'s performance.',
+        ),
+        findsOneWidget,
+      );
+    });
 
-    testWidgetsWithWindowSize(
-      'shows shader compilation hint',
-      windowSize,
-      (WidgetTester tester) async {
-        createMockFrameAnalysis(
-          frameAnalysis: mockFrameAnalysis,
-          frame: testFrameWithShaderJank,
-        );
-        await pumpHints(tester, mockFrameAnalysis);
+    testWidgetsWithWindowSize('shows shader compilation hint', windowSize, (
+      WidgetTester tester,
+    ) async {
+      createMockFrameAnalysis(
+        frameAnalysis: mockFrameAnalysis,
+        frame: testFrameWithShaderJank,
+      );
+      await pumpHints(tester, mockFrameAnalysis);
 
-        expect(find.byType(ShaderCompilationHint), findsOneWidget);
-        expect(
-          find.richTextContaining(
-            ' of shader compilation occurred during this frame. This may '
-            'negatively affect your app\'s performance',
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.richTextContaining(
-            ' Note: pre-compiling shaders is a legacy solution with many '
-            'pitfalls. Try',
-          ),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(find.byType(ShaderCompilationHint), findsOneWidget);
+      expect(
+        find.richTextContaining(
+          ' of shader compilation occurred during this frame. This may '
+          'negatively affect your app\'s performance',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.richTextContaining(
+          ' Note: pre-compiling shaders is a legacy solution with many '
+          'pitfalls. Try',
+        ),
+        findsOneWidget,
+      );
+    });
 
     testWidgetsWithWindowSize(
       'does not show impeller link on android',

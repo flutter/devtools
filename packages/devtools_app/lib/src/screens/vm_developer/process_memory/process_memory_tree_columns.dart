@@ -25,10 +25,10 @@ class DescriptionColumn extends ColumnData<TreemapNode> {
 
 class MemoryColumn extends SizeAndPercentageColumn<TreemapNode> {
   MemoryColumn({required VMProcessMemoryViewController controller})
-      : super(
-          title: 'Memory Usage',
-          sizeProvider: (node) => node.byteSize,
-          percentAsDoubleProvider: (node) =>
-              node.byteSize / controller.treeRoot.value!.byteSize,
-        );
+    : super(
+        title: 'Memory Usage',
+        sizeProvider: (node) => node.byteSize,
+        percentAsDoubleProvider:
+            (node) => node.byteSize / controller.treeRoot.value!.byteSize,
+      );
 }

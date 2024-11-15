@@ -94,10 +94,9 @@ class BannerMessagesController {
 
   @visibleForTesting
   bool isMessageVisible(BannerMessage message) {
-    return _messagesForScreen(message.screenId)
-        .value
-        .where((m) => m.key == message.key)
-        .isNotEmpty;
+    return _messagesForScreen(
+      message.screenId,
+    ).value.where((m) => m.key == message.key).isNotEmpty;
   }
 
   ListValueNotifier<BannerMessage> _messagesForScreen(String screenId) {
@@ -126,14 +125,10 @@ class BannerMessages extends StatelessWidget {
         ValueListenableBuilder<List<BannerMessage>>(
           valueListenable: messagesForScreen,
           builder: (context, messages, _) {
-            return Column(
-              children: messages,
-            );
+            return Column(children: messages);
           },
         ),
-        Expanded(
-          child: screen.build(context),
-        ),
+        Expanded(child: screen.build(context)),
       ],
     );
   }
@@ -170,9 +165,10 @@ class BannerMessage extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Card(
-      color: messageType == BannerMessageType.error
-          ? colorScheme.errorContainer
-          : colorScheme.warningContainer,
+      color:
+          messageType == BannerMessageType.error
+              ? colorScheme.errorContainer
+              : colorScheme.warningContainer,
       margin: const EdgeInsets.only(bottom: intermediateSpacing),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -193,18 +189,20 @@ class BannerMessage extends StatelessWidget {
                         ? Icons.error_outline
                         : Icons.warning_amber_outlined,
                     size: actionsIconSize,
-                    color: messageType == BannerMessageType.error
-                        ? colorScheme.onErrorContainer
-                        : colorScheme.onWarningContainer,
+                    color:
+                        messageType == BannerMessageType.error
+                            ? colorScheme.onErrorContainer
+                            : colorScheme.onWarningContainer,
                   ),
                 ),
                 Expanded(
                   child: RichText(
                     text: TextSpan(
                       style: theme.regularTextStyle.copyWith(
-                        color: messageType == BannerMessageType.error
-                            ? colorScheme.onErrorContainer
-                            : colorScheme.onWarningContainer,
+                        color:
+                            messageType == BannerMessageType.error
+                                ? colorScheme.onErrorContainer
+                                : colorScheme.onWarningContainer,
                       ),
                       children: textSpans,
                     ),
@@ -215,12 +213,13 @@ class BannerMessage extends StatelessWidget {
                   icon: Icon(
                     Icons.close,
                     size: actionsIconSize,
-                    color: messageType == BannerMessageType.error
-                        ? colorScheme.onErrorContainer
-                        : colorScheme.onWarningContainer,
+                    color:
+                        messageType == BannerMessageType.error
+                            ? colorScheme.onErrorContainer
+                            : colorScheme.onWarningContainer,
                   ),
-                  onPressed: () =>
-                      bannerMessages.removeMessage(this, dismiss: true),
+                  onPressed:
+                      () => bannerMessages.removeMessage(this, dismiss: true),
                 ),
               ],
             ),
@@ -236,9 +235,7 @@ class _BannerError extends BannerMessage {
     required Key super.key,
     required List<TextSpan> super.textSpans,
     required super.screenId,
-  }) : super(
-          messageType: BannerMessageType.error,
-        );
+  }) : super(messageType: BannerMessageType.error);
 }
 
 // TODO(kenz): add "Do not show this again" option to warnings.
@@ -274,9 +271,7 @@ class DebugModePerformanceMessage {
           screenId: screenId,
           style: theme.warningMessageLinkStyle,
         ),
-        const TextSpan(
-          text: '.',
-        ),
+        const TextSpan(text: '.'),
       ],
       screenId: screenId,
     );
@@ -330,7 +325,8 @@ class ShaderJankMessage {
       key: Key('ShaderJankMessage - $screenId'),
       textSpans: [
         TextSpan(
-          text: 'Shader compilation jank detected. $jankyFramesCount '
+          text:
+              'Shader compilation jank detected. $jankyFramesCount '
               '${pluralize('frame', jankyFramesCount)} janked with a total of '
               '$jankDurationText spent in shader compilation. To pre-compile '
               'shaders, see the instructions at ',
@@ -349,7 +345,8 @@ class ShaderJankMessage {
         const TextSpan(text: '.'),
         if (serviceConnection.serviceManager.connectedApp!.isIosApp) ...[
           const TextSpan(
-            text: '\n\nNote: this is a legacy solution with many pitfalls. '
+            text:
+                '\n\nNote: this is a legacy solution with many pitfalls. '
                 'Try ',
           ),
           GaLinkTextSpan(
@@ -363,9 +360,7 @@ class ShaderJankMessage {
             context: context,
             style: theme.errorMessageLinkStyle,
           ),
-          const TextSpan(
-            text: ' instead!',
-          ),
+          const TextSpan(text: ' instead!'),
         ],
       ],
       screenId: screenId,
@@ -375,7 +370,7 @@ class ShaderJankMessage {
 
 class HighCpuSamplingRateMessage {
   HighCpuSamplingRateMessage(this.screenId)
-      : key = Key('HighCpuSamplingRateMessage - $screenId');
+    : key = Key('HighCpuSamplingRateMessage - $screenId');
 
   final Key key;
 
@@ -412,7 +407,7 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
 
 class HttpLoggingEnabledMessage {
   HttpLoggingEnabledMessage(this.screenId)
-      : key = Key('HttpLoggingEnabledMessage - $screenId');
+    : key = Key('HttpLoggingEnabledMessage - $screenId');
 
   final Key key;
 
@@ -431,15 +426,16 @@ HTTP traffic is being logged for debugging purposes. This may result in increase
         TextSpan(
           text: 'disabling http logging',
           style: theme.warningMessageLinkStyle,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              await http_service.toggleHttpRequestLogging(false).then((_) {
-                if (!http_service.httpLoggingEnabled) {
-                  notificationService.push('Http logging disabled.');
-                  bannerMessages.removeMessage(message);
-                }
-              });
-            },
+          recognizer:
+              TapGestureRecognizer()
+                ..onTap = () async {
+                  await http_service.toggleHttpRequestLogging(false).then((_) {
+                    if (!http_service.httpLoggingEnabled) {
+                      notificationService.push('Http logging disabled.');
+                      bannerMessages.removeMessage(message);
+                    }
+                  });
+                },
         ),
         const TextSpan(
           text: ' before profiling the memory of your application.',
@@ -470,9 +466,7 @@ For the most accurate absolute memory stats, relaunch your application in ''',
           screenId: screenId,
           style: Theme.of(context).warningMessageLinkStyle,
         ),
-        const TextSpan(
-          text: '.',
-        ),
+        const TextSpan(text: '.'),
       ],
       screenId: screenId,
     );
@@ -522,10 +516,7 @@ void maybePushDebugModePerformanceMessage(
   }
 }
 
-void maybePushDebugModeMemoryMessage(
-  BuildContext context,
-  String screenId,
-) {
+void maybePushDebugModeMemoryMessage(BuildContext context, String screenId) {
   if (offlineDataController.showingOfflineData.value) return;
   if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
       false) {
@@ -533,10 +524,7 @@ void maybePushDebugModeMemoryMessage(
   }
 }
 
-void maybePushHttpLoggingMessage(
-  BuildContext context,
-  String screenId,
-) {
+void maybePushHttpLoggingMessage(BuildContext context, String screenId) {
   if (http_service.httpLoggingEnabled) {
     bannerMessages.addMessage(
       HttpLoggingEnabledMessage(screenId).build(context),
@@ -555,14 +543,14 @@ void pushDebuggerIdeRecommendationMessage(
 
 extension BannerMessageThemeExtension on ThemeData {
   TextStyle get warningMessageLinkStyle => regularTextStyle.copyWith(
-        decoration: TextDecoration.underline,
-        color: colorScheme.onWarningContainerLink,
-      );
+    decoration: TextDecoration.underline,
+    color: colorScheme.onWarningContainerLink,
+  );
 
   TextStyle get errorMessageLinkStyle => regularTextStyle.copyWith(
-        decoration: TextDecoration.underline,
-        color: colorScheme.onErrorContainerLink,
-      );
+    decoration: TextDecoration.underline,
+    color: colorScheme.onErrorContainerLink,
+  );
 }
 
 GaLinkTextSpan _runInProfileModeTextSpan(

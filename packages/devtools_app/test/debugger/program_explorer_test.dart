@@ -42,21 +42,18 @@ void main() {
     });
 
     testWidgets('builds when not initialized', (WidgetTester tester) async {
-      when(mockProgramExplorerController.initialized)
-          .thenReturn(const FixedValueListenable(false));
+      when(
+        mockProgramExplorerController.initialized,
+      ).thenReturn(const FixedValueListenable(false));
       await tester.pumpWidget(
-        wrap(
-          ProgramExplorer(controller: mockProgramExplorerController),
-        ),
+        wrap(ProgramExplorer(controller: mockProgramExplorerController)),
       );
       expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
     });
 
     testWidgets('builds when initialized', (WidgetTester tester) async {
       await tester.pumpWidget(
-        wrap(
-          ProgramExplorer(controller: mockProgramExplorerController),
-        ),
+        wrap(ProgramExplorer(controller: mockProgramExplorerController)),
       );
       expect(find.byType(AreaPaneHeader), findsNWidgets(2));
       expect(find.text('File Explorer'), findsOneWidget);
@@ -74,17 +71,19 @@ void main() {
     setUpAll(() {
       fakeServiceConnection = FakeServiceConnectionManager();
 
-      when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
-          .thenReturn(false);
-      when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
-          .thenReturn(false);
+      when(
+        fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow,
+      ).thenReturn(false);
+      when(
+        fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow,
+      ).thenReturn(false);
 
       final mockScriptManager = MockScriptManager();
       //`then` is used
       // ignore: discarded_futures
-      when(mockScriptManager.getScript(any)).thenAnswer(
-        (_) => Future<Script>.value(testScript),
-      );
+      when(
+        mockScriptManager.getScript(any),
+      ).thenAnswer((_) => Future<Script>.value(testScript));
 
       setGlobal(ScriptManager, mockScriptManager);
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
@@ -97,8 +96,11 @@ void main() {
     ) async {
       final programExplorerController = TestProgramExplorerController(
         initializer: (controller) {
-          final libraryNode =
-              VMServiceObjectNode(controller, 'fooLib', testLib);
+          final libraryNode = VMServiceObjectNode(
+            controller,
+            'fooLib',
+            testLib,
+          );
           libraryNode.script = testScript;
           libraryNode.location = ScriptLocation(testScript);
           controller.rootObjectNodesInternal.add(libraryNode);
@@ -106,13 +108,7 @@ void main() {
       );
       final explorer = ProgramExplorer(controller: programExplorerController);
       await programExplorerController.initialize();
-      await tester.pumpWidget(
-        wrap(
-          Builder(
-            builder: explorer.build,
-          ),
-        ),
-      );
+      await tester.pumpWidget(wrap(Builder(builder: explorer.build)));
       expect(programExplorerController.initialized.value, true);
       expect(programExplorerController.rootObjectNodes.value.numNodes, 1);
       return programExplorerController;
@@ -142,54 +138,49 @@ void main() {
       }
     });
 
-    testWidgets(
-      'selection',
-      (WidgetTester tester) async {
-        final programExplorerController =
-            await initializeProgramExplorer(tester);
-        final libNode = programExplorerController.rootObjectNodes.value.first;
+    testWidgets('selection', (WidgetTester tester) async {
+      final programExplorerController = await initializeProgramExplorer(tester);
+      final libNode = programExplorerController.rootObjectNodes.value.first;
 
-        // No node has been selected yet, so the outline should be empty.
-        expect(programExplorerController.outlineNodes.value.isEmpty, true);
-        expect(programExplorerController.scriptSelection, isNull);
-        expect(
-          programExplorerController.outlineNodes.value
-              .where((e) => e.isSelected),
-          isEmpty,
-        );
+      // No node has been selected yet, so the outline should be empty.
+      expect(programExplorerController.outlineNodes.value.isEmpty, true);
+      expect(programExplorerController.scriptSelection, isNull);
+      expect(
+        programExplorerController.outlineNodes.value.where((e) => e.isSelected),
+        isEmpty,
+      );
 
-        // Select the library node and ensure the outline is populated.
-        final libNodeFinder = find.text(libNode.name);
-        expect(libNodeFinder, findsOneWidget);
-        await tester.tap(libNodeFinder);
-        await tester.pumpAndSettle();
+      // Select the library node and ensure the outline is populated.
+      final libNodeFinder = find.text(libNode.name);
+      expect(libNodeFinder, findsOneWidget);
+      await tester.tap(libNodeFinder);
+      await tester.pumpAndSettle();
 
-        expect(programExplorerController.scriptSelection, libNode);
-        expect(
-          programExplorerController.outlineNodes.value
-              .where((e) => e.isSelected),
-          isEmpty,
-        );
+      expect(programExplorerController.scriptSelection, libNode);
+      expect(
+        programExplorerController.outlineNodes.value.where((e) => e.isSelected),
+        isEmpty,
+      );
 
-        // There should be three children total, one root with two children.
-        expect(programExplorerController.outlineNodes.value.length, 1);
-        expect(programExplorerController.outlineNodes.value.numNodes, 3);
+      // There should be three children total, one root with two children.
+      expect(programExplorerController.outlineNodes.value.length, 1);
+      expect(programExplorerController.outlineNodes.value.numNodes, 3);
 
-        // Select one of them and check that the outline selection has been
-        // updated.
-        final outlineNode = programExplorerController.outlineNodes.value.first;
-        final outlineNodeFinder = find.text(outlineNode.name);
-        expect(outlineNodeFinder, findsOneWidget);
-        await tester.tap(outlineNodeFinder);
-        await tester.pumpAndSettle();
+      // Select one of them and check that the outline selection has been
+      // updated.
+      final outlineNode = programExplorerController.outlineNodes.value.first;
+      final outlineNodeFinder = find.text(outlineNode.name);
+      expect(outlineNodeFinder, findsOneWidget);
+      await tester.tap(outlineNodeFinder);
+      await tester.pumpAndSettle();
 
-        expect(programExplorerController.scriptSelection, libNode);
-        expect(
-          programExplorerController.outlineNodes.value
-              .singleWhereOrNull((e) => e.isSelected),
-          outlineNode,
-        );
-      },
-    );
+      expect(programExplorerController.scriptSelection, libNode);
+      expect(
+        programExplorerController.outlineNodes.value.singleWhereOrNull(
+          (e) => e.isSelected,
+        ),
+        outlineNode,
+      );
+    });
   });
 }

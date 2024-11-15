@@ -31,20 +31,20 @@ class ErrorBadgeManager extends DisposableController
   };
   final _activeErrors =
       <String, ValueNotifier<LinkedHashMap<String, DevToolsError>>>{
-    InspectorScreen.id: ValueNotifier<LinkedHashMap<String, DevToolsError>>(
-      LinkedHashMap<String, DevToolsError>(),
-    ),
-  };
+        InspectorScreen.id: ValueNotifier<LinkedHashMap<String, DevToolsError>>(
+          LinkedHashMap<String, DevToolsError>(),
+        ),
+      };
 
   void vmServiceOpened(VmServiceWrapper service) {
     // Ensure structured errors are enabled.
     unawaited(
       serviceConnection.serviceManager.serviceExtensionManager
           .setServiceExtensionState(
-        extensions.structuredErrors.extension,
-        enabled: true,
-        value: true,
-      ),
+            extensions.structuredErrors.extension,
+            enabled: true,
+            value: true,
+          ),
     );
 
     // Log Flutter extension events.
@@ -73,11 +73,16 @@ class ErrorBadgeManager extends DisposableController
   InspectableWidgetError? _extractInspectableError(Event error) {
     // TODO(dantup): Switch to using the inspectorService from the serviceManager
     //  once Jacob's change to add it lands.
-    final node =
-        RemoteDiagnosticsNode(error.extensionData!.data, null, false, null);
+    final node = RemoteDiagnosticsNode(
+      error.extensionData!.data,
+      null,
+      false,
+      null,
+    );
 
-    final errorSummaryNode =
-        node.inlineProperties.firstWhereOrNull((p) => p.type == 'ErrorSummary');
+    final errorSummaryNode = node.inlineProperties.firstWhereOrNull(
+      (p) => p.type == 'ErrorSummary',
+    );
     final errorMessage = errorSummaryNode?.description;
     if (errorMessage == null) {
       return null;
@@ -92,8 +97,9 @@ class ErrorBadgeManager extends DisposableController
       return null;
     }
 
-    final queryParams =
-        DevToolsQueryParams.fromUrl(devToolsUrlNode.getStringMember('value')!);
+    final queryParams = DevToolsQueryParams.fromUrl(
+      devToolsUrlNode.getStringMember('value')!,
+    );
     final inspectorRef = queryParams.inspectorRef ?? '';
 
     return InspectableWidgetError(errorMessage, inspectorRef);
@@ -149,8 +155,9 @@ class ErrorBadgeManager extends DisposableController
     if (errors == null) return;
 
     final oldCount = errors.value.length;
-    final newValue =
-        Map.fromEntries(errors.value.entries.where((e) => isValid(e.key)));
+    final newValue = Map.fromEntries(
+      errors.value.entries.where((e) => isValid(e.key)),
+    );
     if (newValue.length != oldCount) {
       errors.value = newValue as LinkedHashMap<String, DevToolsError>;
     }

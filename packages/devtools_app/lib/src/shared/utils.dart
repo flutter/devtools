@@ -31,12 +31,10 @@ final _log = Logger('lib/src/shared/utils');
 
 /// Logging to debug console only in debug runs.
 void debugLogger(String message) {
-  assert(
-    () {
-      _log.info(message);
-      return true;
-    }(),
-  );
+  assert(() {
+    _log.info(message);
+    return true;
+  }());
 }
 
 /// Whether DevTools is using a dark theme.
@@ -101,11 +99,7 @@ List<ConnectionDescription> generateDeviceDescription(
     vmServiceConnection = ConnectionDescription(
       title: 'VM Service Connection',
       description: description,
-      actions: [
-        CopyToClipboardControl(
-          dataProvider: () => description,
-        ),
-      ],
+      actions: [CopyToClipboardControl(dataProvider: () => description)],
     );
   }
 
@@ -124,7 +118,8 @@ List<ConnectionDescription> generateDeviceDescription(
       ),
       ConnectionDescription(
         title: 'Framework / Engine',
-        description: '${flutterVersion.frameworkRevision} / '
+        description:
+            '${flutterVersion.frameworkRevision} / '
             '${flutterVersion.engineRevision}',
       ),
     },
@@ -148,8 +143,9 @@ List<String> issueLinkDetails() {
       connectedApp,
       includeVmServiceConnection: false,
     );
-    final deviceDescription = descriptionEntries
-        .map((entry) => '${entry.title}: ${entry.description}');
+    final deviceDescription = descriptionEntries.map(
+      (entry) => '${entry.title}: ${entry.description}',
+    );
     issueDescriptionItems.addAll([
       '**Connected Device**:',
       ...deviceDescription,
@@ -252,10 +248,8 @@ class DebounceTimer {
   /// [callback] is triggered once immediately, and then every [duration] the
   /// timer checks to see if the previous [callback] call has finished running.
   /// If it has finished, then then next call to [callback] will begin.
-  DebounceTimer.periodic(
-    Duration duration,
-    Future<void> Function() callback,
-  ) : _callback = callback {
+  DebounceTimer.periodic(Duration duration, Future<void> Function() callback)
+    : _callback = callback {
     // Start running the first call to the callback.
     _runCallback();
 
@@ -347,9 +341,11 @@ class InterruptableChunkWorker {
 
       final chunkUpperIndexLimit = min(length, chunkStartingIndex + _chunkSize);
 
-      for (int indexIterator = chunkStartingIndex;
-          indexIterator < chunkUpperIndexLimit;
-          indexIterator++) {
+      for (
+        int indexIterator = chunkStartingIndex;
+        indexIterator < chunkUpperIndexLimit;
+        indexIterator++
+      ) {
         // If our localWorkId is no longer active, then do not continue working
         if (localWorkId != _workId) return completer.complete(false);
         callback(indexIterator);

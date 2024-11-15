@@ -20,18 +20,8 @@ class _ClassTest {
 }
 
 final _classTests = [
-  _ClassTest(
-    'empty',
-    '',
-    isCore: true,
-    isDartOrFlutter: false,
-  ),
-  _ClassTest(
-    'non-package',
-    'something',
-    isCore: true,
-    isDartOrFlutter: false,
-  ),
+  _ClassTest('empty', '', isCore: true, isDartOrFlutter: false),
+  _ClassTest('non-package', 'something', isCore: true, isDartOrFlutter: false),
   _ClassTest(
     'dart-from-snapshot',
     'dart.something',
@@ -68,8 +58,10 @@ void main() {
   group('$HeapClassName', () {
     for (final t in _classTests) {
       test('isCore and isDartOrFlutter for ${t.name}', () {
-        final theClass =
-            HeapClassName.fromPath(className: 'x', library: t.library);
+        final theClass = HeapClassName.fromPath(
+          className: 'x',
+          library: t.library,
+        );
         expect(theClass.isPackageless, t.isCore);
         expect(theClass.isDartOrFlutter, t.isDartOrFlutter);
       });

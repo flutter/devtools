@@ -38,10 +38,12 @@ void main(List<String> args) {
     }
   }
 
-  final baselineResults =
-      BenchmarkResults.parse(jsonDecode(baselineFile.readAsStringSync()));
-  final testResults =
-      BenchmarkResults.parse(jsonDecode(testFile.readAsStringSync()));
+  final baselineResults = BenchmarkResults.parse(
+    jsonDecode(baselineFile.readAsStringSync()),
+  );
+  final testResults = BenchmarkResults.parse(
+    jsonDecode(testFile.readAsStringSync()),
+  );
   compareBenchmarks(
     baselineResults,
     testResults,

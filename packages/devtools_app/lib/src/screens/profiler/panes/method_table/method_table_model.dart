@@ -20,9 +20,9 @@ class MethodTableGraphNode extends GraphNode with SearchableDataMixin {
     required int selfCount,
     required this.profileMetaData,
     required this.stackFrameIds,
-  })  : _totalCount = totalCount,
-        _selfCount = selfCount,
-        _sourceUri = uriWithSourceLine(packageUri, sourceLine);
+  }) : _totalCount = totalCount,
+       _selfCount = selfCount,
+       _sourceUri = uriWithSourceLine(packageUri, sourceLine);
 
   factory MethodTableGraphNode.fromStackFrame(CpuStackFrame frame) {
     return MethodTableGraphNode(
@@ -67,19 +67,18 @@ class MethodTableGraphNode extends GraphNode with SearchableDataMixin {
       safeDivide(selfCount, profileMetaData.sampleCount);
 
   Duration get selfTime => Duration(
-        microseconds:
-            (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds)
-                .round(),
-      );
+    microseconds:
+        (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds).round(),
+  );
 
   double get totalTimeRatio =>
       safeDivide(totalCount, profileMetaData.sampleCount);
 
   Duration get totalTime => Duration(
-        microseconds:
-            (totalTimeRatio * profileMetaData.time!.duration.inMicroseconds)
-                .round(),
-      );
+    microseconds:
+        (totalTimeRatio * profileMetaData.time!.duration.inMicroseconds)
+            .round(),
+  );
 
   void merge(MethodTableGraphNode other, {required bool mergeTotalTime}) {
     if (!shallowEquals(other)) return;
@@ -113,9 +112,7 @@ class MethodTableGraphNode extends GraphNode with SearchableDataMixin {
           .cast<MethodTableGraphNode>()
           // Sort in descending order.
           .sorted((a, b) => percentCallback(b).compareTo(percentCallback(a)))
-          .map(
-            (node) => '${node.display} - ${percent(percentCallback(node))}',
-          )
+          .map((node) => '${node.display} - ${percent(percentCallback(node))}')
           .join(newLineAndIndent);
     }
 

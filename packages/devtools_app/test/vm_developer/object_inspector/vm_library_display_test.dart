@@ -50,56 +50,52 @@ void main() {
       when(mockLibraryObject.scriptRef).thenReturn(testScript);
     });
 
-    testWidgetsWithWindowSize(
-      ' - basic layout',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            VmLibraryDisplay(
-              library: mockLibraryObject,
-              controller: ObjectInspectorViewController(),
-            ),
+    testWidgetsWithWindowSize(' - basic layout', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          VmLibraryDisplay(
+            library: mockLibraryObject,
+            controller: ObjectInspectorViewController(),
           ),
-        );
+        ),
+      );
 
-        expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-        expect(find.byType(VMInfoCard), findsOneWidget);
-        expect(find.text('General Information'), findsOneWidget);
-        expect(find.text('1.0 KB'), findsOneWidget);
-        expect(find.text('URI:'), findsOneWidget);
-        expect(find.text('fooLib.dart', findRichText: true), findsOneWidget);
-        expect(find.text('VM Name:'), findsOneWidget);
-        expect(find.text('fooDartLibrary'), findsOneWidget);
+      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
+      expect(find.text('General Information'), findsOneWidget);
+      expect(find.text('1.0 KB'), findsOneWidget);
+      expect(find.text('URI:'), findsOneWidget);
+      expect(find.text('fooLib.dart', findRichText: true), findsOneWidget);
+      expect(find.text('VM Name:'), findsOneWidget);
+      expect(find.text('fooDartLibrary'), findsOneWidget);
 
-        expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+      expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
-        expect(find.byType(RetainingPathWidget), findsOneWidget);
+      expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-        expect(find.byType(InboundReferencesTree), findsOneWidget);
+      expect(find.byType(InboundReferencesTree), findsOneWidget);
 
-        expect(find.byType(LibraryDependencies), findsOneWidget);
-      },
-    );
+      expect(find.byType(LibraryDependencies), findsOneWidget);
+    });
 
-    testWidgetsWithWindowSize(
-      ' - with null dependencies',
-      windowSize,
-      (WidgetTester tester) async {
-        testLibCopy.dependencies = null;
+    testWidgetsWithWindowSize(' - with null dependencies', windowSize, (
+      WidgetTester tester,
+    ) async {
+      testLibCopy.dependencies = null;
 
-        await tester.pumpWidget(
-          wrap(
-            VmLibraryDisplay(
-              library: mockLibraryObject,
-              controller: ObjectInspectorViewController(),
-            ),
+      await tester.pumpWidget(
+        wrap(
+          VmLibraryDisplay(
+            library: mockLibraryObject,
+            controller: ObjectInspectorViewController(),
           ),
-        );
+        ),
+      );
 
-        expect(find.byType(LibraryDependencies), findsNothing);
-      },
-    );
+      expect(find.byType(LibraryDependencies), findsNothing);
+    });
   });
 
   group('test LibraryDependencyExtension description method: ', () {
@@ -121,19 +117,11 @@ void main() {
       targetLib2.name = 'dart:math';
       targetLib3.name = 'dart:collection';
 
-      dependency1 = LibraryDependency(
-        isImport: true,
-        target: targetLib1,
-      );
+      dependency1 = LibraryDependency(isImport: true, target: targetLib1);
 
-      dependency2 = LibraryDependency(
-        isImport: false,
-        target: targetLib2,
-      );
+      dependency2 = LibraryDependency(isImport: false, target: targetLib2);
 
-      dependency3 = LibraryDependency(
-        target: targetLib3,
-      );
+      dependency3 = LibraryDependency(target: targetLib3);
 
       dependency1.target = targetLib1;
       dependency2.target = targetLib2;
@@ -190,17 +178,15 @@ void main() {
     late List<LibraryDependency> dependencies;
 
     setUpAll(() {
-      dependency = LibraryDependency(
-        isImport: true,
-        target: testLib,
-      );
+      dependency = LibraryDependency(isImport: true, target: testLib);
 
       dependencies = [dependency, dependency, dependency];
     });
 
     testWidgets('builds widget', (WidgetTester tester) async {
-      await tester
-          .pumpWidget(wrap(LibraryDependencies(dependencies: dependencies)));
+      await tester.pumpWidget(
+        wrap(LibraryDependencies(dependencies: dependencies)),
+      );
 
       expect(find.byType(VmExpansionTile), findsOneWidget);
       expect(find.text('Dependencies (3)'), findsOneWidget);

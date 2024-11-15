@@ -42,8 +42,9 @@ void main() {
     );
     setGlobal(PreferencesController, PreferencesController());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
-    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'),
+    ).thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
 
     resetRef();
@@ -55,10 +56,7 @@ void main() {
     DebuggerController controller,
   ) async {
     await tester.pumpWidget(
-      wrapWithControllers(
-        const DebuggerWindows(),
-        debugger: controller,
-      ),
+      wrapWithControllers(const DebuggerWindows(), debugger: controller),
     );
   }
 
@@ -103,78 +101,66 @@ void main() {
     expect(group200To299Finder, findsOneWidget);
   }
 
-  testWidgetsWithWindowSize(
-    'Variables shows items',
-    windowSize,
-    (WidgetTester tester) async {
-      fakeServiceConnection.appState.setVariables(
-        [
-          buildListVariable(),
-          buildMapVariable(),
-          buildStringVariable('test str'),
-          buildBooleanVariable(true),
-          buildSetVariable(),
-        ],
-      );
-      await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Variables'), findsOneWidget);
+  testWidgetsWithWindowSize('Variables shows items', windowSize, (
+    WidgetTester tester,
+  ) async {
+    fakeServiceConnection.appState.setVariables([
+      buildListVariable(),
+      buildMapVariable(),
+      buildStringVariable('test str'),
+      buildBooleanVariable(true),
+      buildSetVariable(),
+    ]);
+    await pumpDebuggerScreen(tester, debuggerController);
+    expect(find.text('Variables'), findsOneWidget);
 
-      final listFinder = find.text('Root 1: List (2 items)');
+    final listFinder = find.text('Root 1: List (2 items)');
 
-      expect(listFinder, findsOneWidget);
+    expect(listFinder, findsOneWidget);
 
-      final mapFinder = find.textContaining(
-        'Root 2: Map (2 items)',
-      );
-      final mapElement1Finder = find.textContaining("['key1']: 1.0");
-      final mapElement2Finder = find.textContaining("['key2']: 2.0");
+    final mapFinder = find.textContaining('Root 2: Map (2 items)');
+    final mapElement1Finder = find.textContaining("['key1']: 1.0");
+    final mapElement2Finder = find.textContaining("['key2']: 2.0");
 
-      expect(listFinder, findsOneWidget);
-      expect(mapFinder, findsOneWidget);
-      expect(
-        find.textContaining("Root 3: 'test str...'"),
-        findsOneWidget,
-      );
-      expect(
-        find.textContaining('Root 4: true'),
-        findsOneWidget,
-      );
+    expect(listFinder, findsOneWidget);
+    expect(mapFinder, findsOneWidget);
+    expect(find.textContaining("Root 3: 'test str...'"), findsOneWidget);
+    expect(find.textContaining('Root 4: true'), findsOneWidget);
 
-      // Initially list is not expanded.
-      expect(find.textContaining('0: 3'), findsNothing);
-      expect(find.textContaining('1: 4'), findsNothing);
+    // Initially list is not expanded.
+    expect(find.textContaining('0: 3'), findsNothing);
+    expect(find.textContaining('1: 4'), findsNothing);
 
-      // Expand list.
-      await tester.tap(listFinder);
-      await tester.pump();
-      expect(find.textContaining('0: 0'), findsOneWidget);
-      expect(find.textContaining('1: 1'), findsOneWidget);
+    // Expand list.
+    await tester.tap(listFinder);
+    await tester.pump();
+    expect(find.textContaining('0: 0'), findsOneWidget);
+    expect(find.textContaining('1: 1'), findsOneWidget);
 
-      // Initially map is not expanded.
-      expect(mapElement1Finder, findsNothing);
-      expect(mapElement2Finder, findsNothing);
+    // Initially map is not expanded.
+    expect(mapElement1Finder, findsNothing);
+    expect(mapElement2Finder, findsNothing);
 
-      // Expand map.
-      await tester.tap(mapFinder);
-      await tester.pump();
-      expect(mapElement1Finder, findsOneWidget);
-      expect(mapElement2Finder, findsOneWidget);
+    // Expand map.
+    await tester.tap(mapFinder);
+    await tester.pump();
+    expect(mapElement1Finder, findsOneWidget);
+    expect(mapElement2Finder, findsOneWidget);
 
-      // Expect a tooltip for the set instance.
-      final setFinder = find.text('Root 5: Set (2 items)');
-      expect(setFinder, findsOneWidget);
+    // Expect a tooltip for the set instance.
+    final setFinder = find.text('Root 5: Set (2 items)');
+    expect(setFinder, findsOneWidget);
 
-      // Initially set is not expanded.
-      expect(find.textContaining('set value 0'), findsNothing);
-      expect(find.textContaining('set value 1'), findsNothing);
+    // Initially set is not expanded.
+    expect(find.textContaining('set value 0'), findsNothing);
+    expect(find.textContaining('set value 1'), findsNothing);
 
-      // Expand set
-      await tester.tap(setFinder);
-      await tester.pump();
-      expect(find.textContaining('set value 0'), findsOneWidget);
-      expect(find.textContaining('set value 1'), findsOneWidget);
-    },
-  );
+    // Expand set
+    await tester.tap(setFinder);
+    await tester.pump();
+    expect(find.textContaining('set value 0'), findsOneWidget);
+    expect(find.textContaining('set value 1'), findsOneWidget);
+  });
 
   testWidgetsWithWindowSize(
     'Children in large list variables are grouped',

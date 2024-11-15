@@ -59,8 +59,7 @@ const _debugDevToolsExtensions = false;
 
 List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions({
   bool includeRuntime = true,
-}) =>
-    StubDevToolsExtensions.extensions(includeRuntime: includeRuntime);
+}) => StubDevToolsExtensions.extensions(includeRuntime: includeRuntime);
 
 ExtensionEnabledState debugHandleExtensionEnabledState({
   required String extensionName,
@@ -195,18 +194,13 @@ abstract class StubDevToolsExtensions {
   /// connection.
   static List<DevToolsExtensionConfig> extensions({
     bool includeRuntime = true,
-  }) =>
-      [
-        if (includeRuntime) ...[
-          fooExtension,
-          providerExtension,
-          someToolExtension,
-        ],
-        barExtension,
-        newerBarExtension,
-        bazExtension,
-        duplicateFooExtension,
-      ];
+  }) => [
+    if (includeRuntime) ...[fooExtension, providerExtension, someToolExtension],
+    barExtension,
+    newerBarExtension,
+    bazExtension,
+    duplicateFooExtension,
+  ];
 }
 
 /// Enable this flag to debug the DevTools survey logic.
@@ -219,24 +213,22 @@ bool debugSurvey = false;
 /// The survey metadata that will be used instead of the live data from
 /// 'https://storage.googleapis.com/flutter-uxr/surveys/devtools-survey-metadata.json'
 /// when [debugSurvey] is true.
-final debugSurveyMetadata = DevToolsSurvey.fromJson(
-  {
-    '_comments': [
-      'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',
-      'title should not exceed 45 characters.',
-      'startDate and endDate should follow ISO 8601 standard with a timezone offset.',
-    ],
-    'uniqueId': '2024-Q2',
-    'title': 'Take our survey to help us improve DevTools!',
-    'url': 'https://google.qualtrics.com/jfe/form/SV_2l4XcyscF8mQtDM',
-    'startDate': '2024-06-18T09:00:00-07:00',
-    'endDate': '2024-07-02T09:00:00-07:00',
-    'minDevToolsVersion': '2.35.0',
-    // This list is optional and can be used to limit the survey to a specific
-    // set of users based on their development environment.
-    'devEnvironments': ['Android-Studio', 'IntelliJ-IDEA', 'VSCode', 'CLI'],
-  },
-);
+final debugSurveyMetadata = DevToolsSurvey.fromJson({
+  '_comments': [
+    'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',
+    'title should not exceed 45 characters.',
+    'startDate and endDate should follow ISO 8601 standard with a timezone offset.',
+  ],
+  'uniqueId': '2024-Q2',
+  'title': 'Take our survey to help us improve DevTools!',
+  'url': 'https://google.qualtrics.com/jfe/form/SV_2l4XcyscF8mQtDM',
+  'startDate': '2024-06-18T09:00:00-07:00',
+  'endDate': '2024-07-02T09:00:00-07:00',
+  'minDevToolsVersion': '2.35.0',
+  // This list is optional and can be used to limit the survey to a specific
+  // set of users based on their development environment.
+  'devEnvironments': ['Android-Studio', 'IntelliJ-IDEA', 'VSCode', 'CLI'],
+});
 
 /// Enable this flag to debug Perfetto trace processing in the Performance
 /// screen.
@@ -264,10 +256,7 @@ const debugTimers = !kReleaseMode && false;
 /// run to stdout.
 ///
 /// This will only time the operation when [debugTimers] is true.
-void debugTimeSync(
-  void Function() callback, {
-  required String debugName,
-}) {
+void debugTimeSync(void Function() callback, {required String debugName}) {
   if (!debugTimers) {
     callback();
     return;

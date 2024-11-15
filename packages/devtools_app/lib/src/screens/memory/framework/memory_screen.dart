@@ -97,9 +97,7 @@ class _DisconnectedMemoryScreenBodyState
             roundedTopBorder: false,
             includeTopBorder: false,
           ),
-          Expanded(
-            child: DiffPane(diffController: diffController),
-          ),
+          Expanded(child: DiffPane(diffController: diffController)),
         ],
       ),
     );

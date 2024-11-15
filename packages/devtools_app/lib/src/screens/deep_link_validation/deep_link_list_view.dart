@@ -23,11 +23,7 @@ const _kNotificationCardSize = Size(475, 132);
 const _kSearchFieldFullWidth = 314.0;
 const _kSearchFieldSplitScreenWidth = 280.0;
 
-enum TableViewType {
-  domainView,
-  pathView,
-  singleUrlView,
-}
+enum TableViewType { domainView, pathView, singleUrlView }
 
 /// A view that display all deep links for the app.
 class DeepLinkListView extends StatefulWidget {
@@ -144,32 +140,28 @@ class _ValidatedDeepLinksView extends StatelessWidget {
         if (displayOptions.showSplitScreen) {
           return Row(
             children: [
-              Expanded(
-                child: _AllDeepLinkDataTable(controller: controller),
-              ),
-              VerticalDivider(
-                width: 1.0,
-                color: Theme.of(context).focusColor,
-              ),
+              Expanded(child: _AllDeepLinkDataTable(controller: controller)),
+              VerticalDivider(width: 1.0, color: Theme.of(context).focusColor),
               Expanded(
                 child: ValueListenableBuilder<LinkData?>(
                   valueListenable: controller.selectedLink,
-                  builder: (context, _, _) => TabBarView(
-                    children: [
-                      ValidationDetailView(
-                        controller: controller,
-                        viewType: TableViewType.domainView,
+                  builder:
+                      (context, _, _) => TabBarView(
+                        children: [
+                          ValidationDetailView(
+                            controller: controller,
+                            viewType: TableViewType.domainView,
+                          ),
+                          ValidationDetailView(
+                            controller: controller,
+                            viewType: TableViewType.pathView,
+                          ),
+                          ValidationDetailView(
+                            controller: controller,
+                            viewType: TableViewType.singleUrlView,
+                          ),
+                        ],
                       ),
-                      ValidationDetailView(
-                        controller: controller,
-                        viewType: TableViewType.pathView,
-                      ),
-                      ValidationDetailView(
-                        controller: controller,
-                        viewType: TableViewType.singleUrlView,
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ],
@@ -183,9 +175,7 @@ class _ValidatedDeepLinksView extends StatelessWidget {
               pathErrorCount: displayOptions.pathErrorCount,
               controller: controller,
             ),
-            Expanded(
-              child: _AllDeepLinkDataTable(controller: controller),
-            ),
+            Expanded(child: _AllDeepLinkDataTable(controller: controller)),
           ],
         );
       },
@@ -236,8 +226,9 @@ class _DataTable extends StatelessWidget {
           ],
         ],
         selectionNotifier: controller.selectedLink,
-        defaultSortColumn: (viewType == TableViewType.pathView ? path : domain)
-            as ColumnData<LinkData>,
+        defaultSortColumn:
+            (viewType == TableViewType.pathView ? path : domain)
+                as ColumnData<LinkData>,
         defaultSortDirection: SortDirection.ascending,
         sortOriginalData: true,
         onItemSelected: (linkdata) {
@@ -279,8 +270,12 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
             _ConfigurationDropdown(
               title: 'iOS Configuration:',
               valueListenable: controller.selectedIosConfigurationIndex,
-              configurations: controller
-                  .selectedProject.value!.iosBuildOptions.configurations,
+              configurations:
+                  controller
+                      .selectedProject
+                      .value!
+                      .iosBuildOptions
+                      .configurations,
               onChanged: controller.updateSelectedIosConfigurationIndex,
             ),
             const SizedBox(width: denseSpacing),
@@ -337,9 +332,7 @@ class _ConfigurationDropdown extends StatelessWidget {
 }
 
 class _AllDeepLinkDataTable extends StatelessWidget {
-  const _AllDeepLinkDataTable({
-    required this.controller,
-  });
+  const _AllDeepLinkDataTable({required this.controller});
 
   final DeepLinksController controller;
 
@@ -359,19 +352,18 @@ class _AllDeepLinkDataTable extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                  child: Text(
-                    'All deep links',
-                    style: textTheme.titleMedium,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: defaultSpacing,
                   ),
+                  child: Text('All deep links', style: textTheme.titleMedium),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
                   child: SizedBox(
-                    width: controller.displayOptions.showSplitScreen
-                        ? _kSearchFieldSplitScreenWidth
-                        : _kSearchFieldFullWidth,
+                    width:
+                        controller.displayOptions.showSplitScreen
+                            ? _kSearchFieldSplitScreenWidth
+                            : _kSearchFieldFullWidth,
                     child: DevToolsClearableTextField(
                       labelText: '',
                       hintText: 'Search a URL, domain or path',
@@ -391,14 +383,8 @@ class _AllDeepLinkDataTable extends StatelessWidget {
           height: defaultHeaderHeight,
           child: TabBar(
             tabs: [
-              DevToolsTab.create(
-                tabName: 'Domain view',
-                gaPrefix: gaPrefix,
-              ),
-              DevToolsTab.create(
-                tabName: 'Path view',
-                gaPrefix: gaPrefix,
-              ),
+              DevToolsTab.create(tabName: 'Domain view', gaPrefix: gaPrefix),
+              DevToolsTab.create(tabName: 'Path view', gaPrefix: gaPrefix),
               DevToolsTab.create(
                 tabName: 'Single URL view',
                 gaPrefix: gaPrefix,
@@ -411,25 +397,26 @@ class _AllDeepLinkDataTable extends StatelessWidget {
         Expanded(
           child: ValueListenableBuilder<ValidatedLinkDatas>(
             valueListenable: controller.displayLinkDatasNotifier,
-            builder: (context, linkDatas, _) => TabBarView(
-              children: [
-                _DataTable(
-                  viewType: TableViewType.domainView,
-                  linkDatas: linkDatas.byDomain,
-                  controller: controller,
+            builder:
+                (context, linkDatas, _) => TabBarView(
+                  children: [
+                    _DataTable(
+                      viewType: TableViewType.domainView,
+                      linkDatas: linkDatas.byDomain,
+                      controller: controller,
+                    ),
+                    _DataTable(
+                      viewType: TableViewType.pathView,
+                      linkDatas: linkDatas.byPath,
+                      controller: controller,
+                    ),
+                    _DataTable(
+                      viewType: TableViewType.singleUrlView,
+                      linkDatas: linkDatas.all,
+                      controller: controller,
+                    ),
+                  ],
                 ),
-                _DataTable(
-                  viewType: TableViewType.pathView,
-                  linkDatas: linkDatas.byPath,
-                  controller: controller,
-                ),
-                _DataTable(
-                  viewType: TableViewType.singleUrlView,
-                  linkDatas: linkDatas.all,
-                  controller: controller,
-                ),
-              ],
-            ),
           ),
         ),
       ],
@@ -471,8 +458,9 @@ class _NotificationCardSection extends StatelessWidget {
                     controller.updateDisplayOptions(showSplitScreen: true);
                   },
                   child: const Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: intermediateSpacing),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: intermediateSpacing,
+                    ),
                     child: Text('Fix domain'),
                   ),
                 ),
@@ -492,8 +480,9 @@ class _NotificationCardSection extends StatelessWidget {
                     controller.updateDisplayOptions(showSplitScreen: true);
                   },
                   child: const Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: intermediateSpacing),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: intermediateSpacing,
+                    ),
                     child: Text('Fix path'),
                   ),
                 ),
@@ -543,10 +532,7 @@ class NotificationCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title),
-                    Text(
-                      description,
-                      style: theme.subtleTextStyle,
-                    ),
+                    Text(description, style: theme.subtleTextStyle),
                     Expanded(
                       child: Align(
                         alignment: Alignment.bottomRight,

@@ -22,10 +22,7 @@ void main() {
           RemoteDiagnosticsNode.jsonHashCode(json1),
           RemoteDiagnosticsNode.jsonHashCode(json2),
         );
-        expect(
-          RemoteDiagnosticsNode.jsonEquality(json1, json2),
-          isTrue,
-        );
+        expect(RemoteDiagnosticsNode.jsonEquality(json1, json2), isTrue);
       });
 
       test('equality is deep', () {
@@ -37,10 +34,7 @@ void main() {
           'b': <String, dynamic>{'y': 3, 'x': 2},
           'a': 1,
         };
-        expect(
-          RemoteDiagnosticsNode.jsonEquality(json1, json2),
-          isFalse,
-        );
+        expect(RemoteDiagnosticsNode.jsonEquality(json1, json2), isFalse);
       });
     });
 
@@ -57,18 +51,16 @@ void main() {
 
       final implementationNodeWithMultipleChildren =
           buildImplementationNodeJson(
-        description: 'ImplementationNodeWithMultipleChildren',
-        children: [
-          implementationNodeWithNoChildren,
-          implementationNodeWithSingleChild,
-        ],
-      );
+            description: 'ImplementationNodeWithMultipleChildren',
+            children: [
+              implementationNodeWithNoChildren,
+              implementationNodeWithSingleChild,
+            ],
+          );
 
       final projectNodeWithSingleChild = buildProjectNodeJson(
         description: 'ProjectNodeWithSingleChild',
-        children: [
-          implementationNodeWithSingleChild,
-        ],
+        children: [implementationNodeWithSingleChild],
       );
 
       RemoteDiagnosticsNode buildHideableNode() {
@@ -77,8 +69,10 @@ void main() {
         final parent = buildNode(implementationNodeWithSingleChild);
         // Build the node as an implementation node (to be hideable, a node must
         // be an implementation node):
-        final node =
-            buildNode(implementationNodeWithSingleChild, parent: parent);
+        final node = buildNode(
+          implementationNodeWithSingleChild,
+          parent: parent,
+        );
         // Build a child for the node (to be hideable, a node must have at most
         // one child):
         buildNode(implementationNodeWithNoChildren, parent: node);
@@ -96,29 +90,28 @@ void main() {
       }
 
       group('hidden group determination', () {
-        test(
-          'if node was created by the local project, it is not hideable',
-          () {
-            // Build the parent for the node (to be hideable, a node must be the
-            // only child of its parent):
-            final parent = buildNode(implementationNodeWithSingleChild);
-            // Build the node as a project node (project nodes are NOT hideable):
-            final node = buildNode(projectNodeWithSingleChild, parent: parent);
-            // Build a child for the node (to be hideable, a node must have at most
-            // one child):
-            buildNode(projectNodeWithSingleChild, parent: node);
+        test('if node was created by the local project, it is not hideable', () {
+          // Build the parent for the node (to be hideable, a node must be the
+          // only child of its parent):
+          final parent = buildNode(implementationNodeWithSingleChild);
+          // Build the node as a project node (project nodes are NOT hideable):
+          final node = buildNode(projectNodeWithSingleChild, parent: parent);
+          // Build a child for the node (to be hideable, a node must have at most
+          // one child):
+          buildNode(projectNodeWithSingleChild, parent: node);
 
-            expect(node.inHideableGroup, isFalse);
-          },
-        );
+          expect(node.inHideableGroup, isFalse);
+        });
 
         test('if a node has any siblings, it is not hideable', () {
           // Build the parent for the node (nodes with siblings are NOT hideable):
           final parent = buildNode(implementationNodeWithMultipleChildren);
           // Build the node as an implementation node (to be hideable, a node must
           // be an implementation node):
-          final node =
-              buildNode(implementationNodeWithSingleChild, parent: parent);
+          final node = buildNode(
+            implementationNodeWithSingleChild,
+            parent: parent,
+          );
           // Build a child for the node (to be hideable, a node must have at most
           // one child):
           buildNode(implementationNodeWithNoChildren, parent: node);
@@ -134,8 +127,10 @@ void main() {
           final parent = buildNode(implementationNodeWithSingleChild);
           // Build the node as an implementation node (to be hideable, a node must
           // be an implementation node):
-          final node =
-              buildNode(implementationNodeWithMultipleChildren, parent: parent);
+          final node = buildNode(
+            implementationNodeWithMultipleChildren,
+            parent: parent,
+          );
           // Build multiple children for the node (nodes with multiple children
           // are NOT hideable):
           buildNode(implementationNodeWithNoChildren, parent: node);
@@ -228,12 +223,9 @@ void main() {
         test('subordinates cannot change hideable state', () {
           final node = buildHideableGroupLeaderWithNSubordinates(2);
 
-          expect(
-            () {
-              node.hideableGroupSubordinates![0].toggleHiddenGroup();
-            },
-            throwsAssertionError,
-          );
+          expect(() {
+            node.hideableGroupSubordinates![0].toggleHiddenGroup();
+          }, throwsAssertionError);
         });
 
         test('hideable group subordinates have correct leader', () {
@@ -252,10 +244,7 @@ void main() {
         test('hideable group leader of leader is itself', () {
           final node = buildHideableGroupLeaderWithNSubordinates(2);
 
-          expect(
-            node.hideableGroupLeader,
-            equals(node),
-          );
+          expect(node.hideableGroupLeader, equals(node));
         });
       });
     });
@@ -265,41 +254,37 @@ void main() {
 Map<String, dynamic> buildImplementationNodeJson({
   required List<Map<String, dynamic>> children,
   String? description,
-}) =>
-    buildNodeJson(
-      description: description ?? 'ImplementationNode',
-      createdByLocalProject: false,
-      children: children,
-    );
+}) => buildNodeJson(
+  description: description ?? 'ImplementationNode',
+  createdByLocalProject: false,
+  children: children,
+);
 
 Map<String, dynamic> buildProjectNodeJson({
   required List<Map<String, dynamic>> children,
   String? description,
-}) =>
-    buildNodeJson(
-      description: description ?? 'ProjectNode',
-      createdByLocalProject: true,
-      children: children,
-    );
+}) => buildNodeJson(
+  description: description ?? 'ProjectNode',
+  createdByLocalProject: true,
+  children: children,
+);
 
 Map<String, dynamic> buildNodeJson({
   required String description,
   required bool createdByLocalProject,
   required List<Map<String, dynamic>> children,
-}) =>
-    <String, dynamic>{
-      'description': description,
-      'createdByLocalProject': createdByLocalProject,
-      'hasChildren': children.isNotEmpty,
-      'children': children,
-    };
+}) => <String, dynamic>{
+  'description': description,
+  'createdByLocalProject': createdByLocalProject,
+  'hasChildren': children.isNotEmpty,
+  'children': children,
+};
 RemoteDiagnosticsNode buildNode(
   Map<String, dynamic> nodeJson, {
   RemoteDiagnosticsNode? parent,
-}) =>
-    RemoteDiagnosticsNode(
-      nodeJson,
-      MockInspectorObjectGroupBase(),
-      false,
-      parent,
-    );
+}) => RemoteDiagnosticsNode(
+  nodeJson,
+  MockInspectorObjectGroupBase(),
+  false,
+  parent,
+);

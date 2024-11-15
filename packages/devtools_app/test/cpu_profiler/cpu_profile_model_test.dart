@@ -28,20 +28,20 @@ void main() {
       );
     });
 
-    test(
-      'empty frame regression test',
-      () {
-        final cpuProfileEmptyData =
-            CpuProfileData.fromJson(cpuProfileResponseEmptyJson);
-        expect(
-          cpuProfileEmptyData.profileMetaData.time!.end!.inMilliseconds,
-          47377796,
-        );
-        final filtered =
-            CpuProfileData.filterFrom(cpuProfileEmptyData, (_) => true);
-        expect(filtered.profileMetaData.time!.end!.inMilliseconds, 0);
-      },
-    );
+    test('empty frame regression test', () {
+      final cpuProfileEmptyData = CpuProfileData.fromJson(
+        cpuProfileResponseEmptyJson,
+      );
+      expect(
+        cpuProfileEmptyData.profileMetaData.time!.end!.inMilliseconds,
+        47377796,
+      );
+      final filtered = CpuProfileData.filterFrom(
+        cpuProfileEmptyData,
+        (_) => true,
+      );
+      expect(filtered.profileMetaData.time!.end!.inMilliseconds, 0);
+    });
 
     test('init from parse', () {
       expect(
@@ -72,10 +72,7 @@ void main() {
           ..end = const Duration(microseconds: 47377799063),
       );
 
-      expect(
-        subProfile.stackFramesJson,
-        equals(subProfileStackFrames),
-      );
+      expect(subProfile.stackFramesJson, equals(subProfileStackFrames));
       expect(
         subProfile.cpuSamples.map((sample) => sample.json),
         equals(subProfileTraceEvents),
@@ -92,10 +89,7 @@ void main() {
         cpuProfileData,
         (stackFrame) => !stackFrame.packageUri.startsWith('dart:'),
       );
-      expect(
-        filteredProfile.stackFramesJson,
-        equals(filteredStackFrames),
-      );
+      expect(filteredProfile.stackFramesJson, equals(filteredStackFrames));
       expect(
         filteredProfile.cpuSamples.map((sample) => sample.toJson),
         equals(filteredCpuSampleTraceEvents),
@@ -115,39 +109,33 @@ void main() {
       expect(cpuProfileData.toJson(), equals(goldenCpuProfileDataJson));
     });
 
-    test(
-      'converts golden samples to golden cpu profile data',
-      () async {
-        final generatedCpuProfileData =
-            await CpuProfileData.generateFromCpuSamples(
-          isolateId: goldenSamplesIsolate,
-          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
-        );
+    test('converts golden samples to golden cpu profile data', () async {
+      final generatedCpuProfileData =
+          await CpuProfileData.generateFromCpuSamples(
+            isolateId: goldenSamplesIsolate,
+            cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!,
+          );
 
-        expect(
-          generatedCpuProfileData.toJson(),
-          equals(goldenCpuProfileDataJson),
-        );
-      },
-    );
+      expect(
+        generatedCpuProfileData.toJson(),
+        equals(goldenCpuProfileDataJson),
+      );
+    });
 
-    test(
-      'to json defaults packageUri to resolvedUrl',
-      () {
-        const id = '140357727781376-12';
+    test('to json defaults packageUri to resolvedUrl', () {
+      const id = '140357727781376-12';
 
-        final profileData = Map.of(goldenCpuProfileDataJson);
-        final stackFrame = goldenCpuProfileStackFrames[id] as Map;
-        final stackFrameData = {id: stackFrame};
-        profileData['stackFrames'] = stackFrameData;
-        stackFrameData[id]!.remove(CpuProfileData.resolvedPackageUriKey);
+      final profileData = Map.of(goldenCpuProfileDataJson);
+      final stackFrame = goldenCpuProfileStackFrames[id] as Map;
+      final stackFrameData = {id: stackFrame};
+      profileData['stackFrames'] = stackFrameData;
+      stackFrameData[id]!.remove(CpuProfileData.resolvedPackageUriKey);
 
-        final parsedProfileData = CpuProfileData.fromJson(profileData);
+      final parsedProfileData = CpuProfileData.fromJson(profileData);
 
-        final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
-        expect(jsonPackageUri, stackFrame['resolvedUrl']);
-      },
-    );
+      final jsonPackageUri = parsedProfileData.stackFrames[id]!.packageUri;
+      expect(jsonPackageUri, stackFrame['resolvedUrl']);
+    });
 
     test('generateFromCpuSamples handles duplicate resolvedUrls', () async {
       const resolvedUrl = 'the/resolved/Url';
@@ -274,34 +262,50 @@ void main() {
       expect(testStackFrame.ancestorIds.toList(), ['cpuProfileRoot']);
       expect(stackFrameA.ancestorIds.toList(), ['cpuProfileRoot']);
       expect(stackFrameB.ancestorIds.toList(), ['id_0', 'cpuProfileRoot']);
-      expect(
-        stackFrameC.ancestorIds.toList(),
-        ['id_1', 'id_0', 'cpuProfileRoot'],
-      );
-      expect(
-        stackFrameD.ancestorIds.toList(),
-        ['id_1', 'id_0', 'cpuProfileRoot'],
-      );
-      expect(
-        stackFrameE.ancestorIds.toList(),
-        ['id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
-      );
-      expect(
-        stackFrameF.ancestorIds.toList(),
-        ['id_4', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
-      );
-      expect(
-        stackFrameF2.ancestorIds.toList(),
-        ['id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
-      );
-      expect(
-        stackFrameC2.ancestorIds.toList(),
-        ['id_5', 'id_4', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
-      );
-      expect(
-        stackFrameC3.ancestorIds.toList(),
-        ['id_6', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
-      );
+      expect(stackFrameC.ancestorIds.toList(), [
+        'id_1',
+        'id_0',
+        'cpuProfileRoot',
+      ]);
+      expect(stackFrameD.ancestorIds.toList(), [
+        'id_1',
+        'id_0',
+        'cpuProfileRoot',
+      ]);
+      expect(stackFrameE.ancestorIds.toList(), [
+        'id_3',
+        'id_1',
+        'id_0',
+        'cpuProfileRoot',
+      ]);
+      expect(stackFrameF.ancestorIds.toList(), [
+        'id_4',
+        'id_3',
+        'id_1',
+        'id_0',
+        'cpuProfileRoot',
+      ]);
+      expect(stackFrameF2.ancestorIds.toList(), [
+        'id_3',
+        'id_1',
+        'id_0',
+        'cpuProfileRoot',
+      ]);
+      expect(stackFrameC2.ancestorIds.toList(), [
+        'id_5',
+        'id_4',
+        'id_3',
+        'id_1',
+        'id_0',
+        'cpuProfileRoot',
+      ]);
+      expect(stackFrameC3.ancestorIds.toList(), [
+        'id_6',
+        'id_3',
+        'id_1',
+        'id_0',
+        'cpuProfileRoot',
+      ]);
     });
 
     test('shallowCopy', () {
@@ -390,14 +394,8 @@ void main() {
     });
 
     test('tooltip', () {
-      expect(
-        testTagRootedStackFrame.tooltip,
-        equals('[Tag] TagA - 10.0 ms'),
-      );
-      expect(
-        stackFrameA.tooltip,
-        equals('[Native] A - 10.0 ms'),
-      );
+      expect(testTagRootedStackFrame.tooltip, equals('[Tag] TagA - 10.0 ms'));
+      expect(stackFrameA.tooltip, equals('[Native] A - 10.0 ms'));
       expect(
         stackFrameB.tooltip,
         equals('[Dart] B - 10.0 ms - dart:async/zone.dart:2222'),

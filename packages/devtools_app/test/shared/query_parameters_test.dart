@@ -34,10 +34,12 @@ void main() {
       });
 
       expect(params.vmServiceUri, 'some_uri');
-      expect(
-        params.hiddenScreens,
-        {'foo', 'bar', 'extensions', 'all-except-extensions'},
-      );
+      expect(params.hiddenScreens, {
+        'foo',
+        'bar',
+        'extensions',
+        'all-except-extensions',
+      });
       expect(params.hideExtensions, true);
       expect(params.hideAllExceptExtensions, true);
       expect(params.offlineScreenId, 'performance');
@@ -142,29 +144,20 @@ void main() {
         DevToolsQueryParams.fromUrl(
           'http://localhost:123/?key=value.json&key2=123',
         ),
-        equals({
-          'key': 'value.json',
-          'key2': '123',
-        }),
+        equals({'key': 'value.json', 'key2': '123'}),
       );
       expect(
         DevToolsQueryParams.fromUrl(
           'http://localhost:123/?key=value.json&key2=123',
         ),
-        equals({
-          'key': 'value.json',
-          'key2': '123',
-        }),
+        equals({'key': 'value.json', 'key2': '123'}),
       );
       for (final meta in ScreenMetaData.values) {
         expect(
           DevToolsQueryParams.fromUrl(
             'http://localhost:9101/${meta.id}?key=value.json&key2=123',
           ),
-          equals({
-            'key': 'value.json',
-            'key2': '123',
-          }),
+          equals({'key': 'value.json', 'key2': '123'}),
         );
       }
     });

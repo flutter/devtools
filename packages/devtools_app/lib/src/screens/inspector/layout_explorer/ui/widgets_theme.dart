@@ -5,10 +5,7 @@
 import 'package:flutter/material.dart';
 
 class WidgetTheme {
-  const WidgetTheme({
-    this.iconAsset,
-    this.color = otherWidgetColor,
-  });
+  const WidgetTheme({this.iconAsset, this.color = otherWidgetColor});
 
   final String? iconAsset;
   final Color color;
@@ -175,15 +172,17 @@ class WidgetTheme {
     'Tab': tabTheme,
     'TabBar': tabTheme,
     'TabBarView': tabTheme,
-    'BottomNavigationBar':
-        WidgetTheme(iconAsset: WidgetIcons.bottomNavigationBar),
+    'BottomNavigationBar': WidgetTheme(
+      iconAsset: WidgetIcons.bottomNavigationBar,
+    ),
     'CupertinoTabScaffold': tabTheme,
     'CupertinoTabView': tabTheme,
 
     // Other
     'Scaffold': WidgetTheme(iconAsset: WidgetIcons.scaffold),
-    'CircularProgressIndicator':
-        WidgetTheme(iconAsset: WidgetIcons.circularProgress),
+    'CircularProgressIndicator': WidgetTheme(
+      iconAsset: WidgetIcons.circularProgress,
+    ),
     'Card': WidgetTheme(iconAsset: WidgetIcons.card),
     'Divider': WidgetTheme(iconAsset: WidgetIcons.divider),
     'AlertDialog': WidgetTheme(iconAsset: WidgetIcons.alertDialog),

@@ -4,8 +4,4 @@
 
 export '_logger_io.dart' if (dart.library.js_interop) '_logger_web.dart';
 
-enum LogLevel {
-  debug,
-  warning,
-  error,
-}
+enum LogLevel { debug, warning, error }

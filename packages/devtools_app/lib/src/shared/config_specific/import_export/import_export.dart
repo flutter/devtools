@@ -14,7 +14,8 @@ import '../../screen.dart';
 import '../../utils.dart';
 import '_export_desktop.dart' if (dart.library.js_interop) '_export_web.dart';
 
-const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
+const nonDevToolsFileMessage =
+    'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
     ' exported from DevTools.';
 
@@ -34,9 +35,7 @@ enum DevToolsExportKeys {
 }
 
 class ImportController {
-  ImportController(
-    this._pushSnapshotScreenForImport,
-  );
+  ImportController(this._pushSnapshotScreenForImport);
 
   static const repeatImportTimeBufferMs = 500;
 
@@ -59,7 +58,8 @@ class ImportController {
     previousImportTime = now;
 
     final json = jsonFile.data;
-    final isDevToolsSnapshot = json is Map<String, Object?> &&
+    final isDevToolsSnapshot =
+        json is Map<String, Object?> &&
         json[DevToolsExportKeys.devToolsSnapshot.name] == true;
     if (!isDevToolsSnapshot) {
       notificationService.push(nonDevToolsFileMessage);
@@ -89,8 +89,9 @@ class ImportController {
       }
     }
 
-    final connectedApp =
-        OfflineConnectedApp.parse(devToolsOfflineData.connectedApp);
+    final connectedApp = OfflineConnectedApp.parse(
+      devToolsOfflineData.connectedApp,
+    );
     offlineDataController
       ..startShowingOfflineData(offlineApp: connectedApp)
       ..offlineDataJson = devToolsOfflineData.json;
@@ -153,10 +154,7 @@ abstract class ExportController {
   }
 
   /// Saves [content] to the [fileName].
-  void saveFile<T>({
-    required T content,
-    required String fileName,
-  });
+  void saveFile<T>({required T content, required String fileName});
 
   Map<String, Object?> generateDataForExport({
     required Map<String, Object?> offlineScreenData,
@@ -165,7 +163,8 @@ abstract class ExportController {
     final contents = {
       DevToolsExportKeys.devToolsSnapshot.name: true,
       DevToolsExportKeys.devToolsVersion.name: devToolsVersion,
-      DevToolsExportKeys.connectedApp.name: connectedApp?.toJson() ??
+      DevToolsExportKeys.connectedApp.name:
+          connectedApp?.toJson() ??
           serviceConnection.serviceManager.connectedApp!.toJson(),
       ...offlineScreenData,
     };
@@ -176,9 +175,6 @@ abstract class ExportController {
 
   String encode(Map<String, Object?> offlineScreenData) {
     final data = generateDataForExport(offlineScreenData: offlineScreenData);
-    return jsonEncode(
-      data,
-      toEncodable: toEncodable,
-    );
+    return jsonEncode(data, toEncodable: toEncodable);
   }
 }

@@ -40,8 +40,10 @@ mixin CollapsibleAnimationMixin<T extends StatefulWidget>
     super.initState();
     expandController = defaultAnimationController(this);
     expandCurve = defaultCurvedAnimation(expandController);
-    expandArrowAnimation =
-        Tween<double>(begin: 0.75, end: 1.0).animate(expandCurve);
+    expandArrowAnimation = Tween<double>(
+      begin: 0.75,
+      end: 1.0,
+    ).animate(expandCurve);
     if (isExpanded) {
       expandController.value = 1.0;
     }

@@ -45,10 +45,7 @@ void main() {
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
     cpuProfileData = CpuProfileData.fromJson(goldenCpuProfileDataJson);
-    await transformer.processData(
-      cpuProfileData,
-      processId: 'test',
-    );
+    await transformer.processData(cpuProfileData, processId: 'test');
 
     setGlobal(
       DevToolsEnvironmentParameters,
@@ -60,90 +57,69 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     final mockScriptManager = MockScriptManager();
-    when(mockScriptManager.sortedScripts).thenReturn(
-      ValueNotifier<List<ScriptRef>>([]),
-    );
-    when(mockScriptManager.scriptRefForUri(any)).thenReturn(
-      ScriptRef(
-        uri: 'package:test/script.dart',
-        id: 'script.dart',
-      ),
-    );
+    when(
+      mockScriptManager.sortedScripts,
+    ).thenReturn(ValueNotifier<List<ScriptRef>>([]));
+    when(
+      mockScriptManager.scriptRefForUri(any),
+    ).thenReturn(ScriptRef(uri: 'package:test/script.dart', id: 'script.dart'));
     setGlobal(ScriptManager, mockScriptManager);
   });
 
   group('CpuProfiler', () {
     const windowSize = Size(2000.0, 1000.0);
 
-    testWidgetsWithWindowSize(
-      'builds for empty cpuProfileData',
-      windowSize,
-      (WidgetTester tester) async {
-        cpuProfileData = CpuProfileData.fromJson(emptyCpuProfileDataJson);
-        cpuProfiler = CpuProfiler(
-          data: cpuProfileData,
-          controller: controller,
-        );
-        await tester.pumpWidget(wrap(cpuProfiler));
-        expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byType(CpuBottomUpTable), findsOneWidget);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
-        expect(find.byType(CpuMethodTable), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(CpuProfileStats), findsOneWidget);
-        expect(find.byType(UserTagDropdown), findsOneWidget);
-        expect(find.byType(ExpandAllButton), findsOneWidget);
-        expect(find.byType(CollapseAllButton), findsOneWidget);
-        expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(
-          find.byType(SearchField<MethodTableController>),
-          findsNothing,
-        );
-        expect(
-          find.byType(SearchField<CpuProfilerController>),
-          findsNothing,
-        );
-        expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
-      },
-    );
+    testWidgetsWithWindowSize('builds for empty cpuProfileData', windowSize, (
+      WidgetTester tester,
+    ) async {
+      cpuProfileData = CpuProfileData.fromJson(emptyCpuProfileDataJson);
+      cpuProfiler = CpuProfiler(data: cpuProfileData, controller: controller);
+      await tester.pumpWidget(wrap(cpuProfiler));
+      expect(find.byType(TabBar), findsOneWidget);
+      expect(find.byType(CpuBottomUpTable), findsOneWidget);
+      expect(find.byType(CpuCallTreeTable), findsNothing);
+      expect(find.byType(CpuMethodTable), findsNothing);
+      expect(find.byType(CpuProfileFlameChart), findsNothing);
+      expect(find.byType(CpuProfileStats), findsOneWidget);
+      expect(find.byType(UserTagDropdown), findsOneWidget);
+      expect(find.byType(ExpandAllButton), findsOneWidget);
+      expect(find.byType(CollapseAllButton), findsOneWidget);
+      expect(find.byType(FlameChartHelpButton), findsNothing);
+      expect(find.byType(SearchField<MethodTableController>), findsNothing);
+      expect(find.byType(SearchField<CpuProfilerController>), findsNothing);
+      expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
+      expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
+      expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
+      expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
+    });
 
-    testWidgetsWithWindowSize(
-      'builds for valid cpuProfileData',
-      windowSize,
-      (WidgetTester tester) async {
-        cpuProfiler = CpuProfiler(
-          data: cpuProfileData,
-          controller: controller,
-        );
-        await tester.pumpWidget(wrap(cpuProfiler));
-        expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byType(CpuBottomUpTable), findsOneWidget);
-        expect(find.byType(CpuProfileStats), findsOneWidget);
-        expect(find.byType(UserTagDropdown), findsOneWidget);
-        expect(find.byType(ExpandAllButton), findsOneWidget);
-        expect(find.byType(CollapseAllButton), findsOneWidget);
-        expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(
-          find.byType(SearchField<MethodTableController>),
-          findsNothing,
-        );
-        expect(
-          find.byType(SearchField<CpuProfilerController>),
-          findsNothing,
-        );
-        expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
-      },
-    );
+    testWidgetsWithWindowSize('builds for valid cpuProfileData', windowSize, (
+      WidgetTester tester,
+    ) async {
+      cpuProfiler = CpuProfiler(data: cpuProfileData, controller: controller);
+      await tester.pumpWidget(wrap(cpuProfiler));
+      expect(find.byType(TabBar), findsOneWidget);
+      expect(find.byType(CpuBottomUpTable), findsOneWidget);
+      expect(find.byType(CpuProfileStats), findsOneWidget);
+      expect(find.byType(UserTagDropdown), findsOneWidget);
+      expect(find.byType(ExpandAllButton), findsOneWidget);
+      expect(find.byType(CollapseAllButton), findsOneWidget);
+      expect(find.byType(FlameChartHelpButton), findsNothing);
+      expect(find.byType(SearchField<MethodTableController>), findsNothing);
+      expect(find.byType(SearchField<CpuProfilerController>), findsNothing);
+      expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
+      expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
+      expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
+      expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
+    });
 
     Future<void> loadData(ProfilerScreenController controller) async {
-      for (final filter in controller
-          .cpuProfilerController.activeFilter.value.settingFilters) {
+      for (final filter
+          in controller
+              .cpuProfilerController
+              .activeFilter
+              .value
+              .settingFilters) {
         filter.setting.value = false;
       }
       final data = CpuProfilePair(
@@ -176,8 +152,9 @@ void main() {
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
-        cpuProfileData =
-            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
+        cpuProfileData = CpuProfileData.fromJson(
+          cpuProfileDataWithUserTagsJson,
+        );
       });
 
       testWidgetsWithWindowSize(
@@ -286,133 +263,99 @@ void main() {
       );
     });
 
-    testWidgetsWithWindowSize(
-      'switches tabs',
-      windowSize,
-      (WidgetTester tester) async {
-        cpuProfiler = CpuProfiler(
-          data: cpuProfileData,
-          controller: controller,
-        );
-        await tester.pumpWidget(wrap(cpuProfiler));
-        expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byType(CpuBottomUpTable), findsOneWidget);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
-        expect(find.byType(CpuMethodTable), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(DevToolsFilterButton), findsOneWidget);
-        expect(find.byType(UserTagDropdown), findsOneWidget);
-        expect(find.byType(ExpandAllButton), findsOneWidget);
-        expect(find.byType(CollapseAllButton), findsOneWidget);
-        expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(ModeDropdown), findsNothing);
-        expect(
-          find.byType(SearchField<MethodTableController>),
-          findsNothing,
-        );
-        expect(
-          find.byType(SearchField<CpuProfilerController>),
-          findsNothing,
-        );
+    testWidgetsWithWindowSize('switches tabs', windowSize, (
+      WidgetTester tester,
+    ) async {
+      cpuProfiler = CpuProfiler(data: cpuProfileData, controller: controller);
+      await tester.pumpWidget(wrap(cpuProfiler));
+      expect(find.byType(TabBar), findsOneWidget);
+      expect(find.byType(CpuBottomUpTable), findsOneWidget);
+      expect(find.byType(CpuCallTreeTable), findsNothing);
+      expect(find.byType(CpuMethodTable), findsNothing);
+      expect(find.byType(CpuProfileFlameChart), findsNothing);
+      expect(find.byType(DevToolsFilterButton), findsOneWidget);
+      expect(find.byType(UserTagDropdown), findsOneWidget);
+      expect(find.byType(ExpandAllButton), findsOneWidget);
+      expect(find.byType(CollapseAllButton), findsOneWidget);
+      expect(find.byType(FlameChartHelpButton), findsNothing);
+      expect(find.byType(ModeDropdown), findsNothing);
+      expect(find.byType(SearchField<MethodTableController>), findsNothing);
+      expect(find.byType(SearchField<CpuProfilerController>), findsNothing);
 
-        await tester.tap(find.text('Call Tree'));
-        await tester.pumpAndSettle();
-        expect(find.byType(CpuBottomUpTable), findsNothing);
-        expect(find.byType(CpuCallTreeTable), findsOneWidget);
-        expect(find.byType(CpuMethodTable), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(DevToolsFilterButton), findsOneWidget);
-        expect(find.byType(UserTagDropdown), findsOneWidget);
-        expect(find.byType(ExpandAllButton), findsOneWidget);
-        expect(find.byType(CollapseAllButton), findsOneWidget);
-        expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(ModeDropdown), findsNothing);
-        expect(
-          find.byType(SearchField<MethodTableController>),
-          findsNothing,
-        );
-        expect(
-          find.byType(SearchField<CpuProfilerController>),
-          findsNothing,
-        );
+      await tester.tap(find.text('Call Tree'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byType(CpuCallTreeTable), findsOneWidget);
+      expect(find.byType(CpuMethodTable), findsNothing);
+      expect(find.byType(CpuProfileFlameChart), findsNothing);
+      expect(find.byType(DevToolsFilterButton), findsOneWidget);
+      expect(find.byType(UserTagDropdown), findsOneWidget);
+      expect(find.byType(ExpandAllButton), findsOneWidget);
+      expect(find.byType(CollapseAllButton), findsOneWidget);
+      expect(find.byType(FlameChartHelpButton), findsNothing);
+      expect(find.byType(ModeDropdown), findsNothing);
+      expect(find.byType(SearchField<MethodTableController>), findsNothing);
+      expect(find.byType(SearchField<CpuProfilerController>), findsNothing);
 
-        await tester.tap(find.text('Method Table'));
-        await tester.pumpAndSettle();
-        expect(find.byType(CpuBottomUpTable), findsNothing);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
-        expect(find.byType(CpuMethodTable), findsOneWidget);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(DevToolsFilterButton), findsOneWidget);
-        expect(find.byType(UserTagDropdown), findsOneWidget);
-        expect(find.byType(ExpandAllButton), findsNothing);
-        expect(find.byType(CollapseAllButton), findsNothing);
-        expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(ModeDropdown), findsNothing);
-        expect(
-          find.byType(SearchField<MethodTableController>),
-          findsOneWidget,
-        );
-        expect(
-          find.byType(SearchField<CpuProfilerController>),
-          findsNothing,
-        );
+      await tester.tap(find.text('Method Table'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byType(CpuCallTreeTable), findsNothing);
+      expect(find.byType(CpuMethodTable), findsOneWidget);
+      expect(find.byType(CpuProfileFlameChart), findsNothing);
+      expect(find.byType(DevToolsFilterButton), findsOneWidget);
+      expect(find.byType(UserTagDropdown), findsOneWidget);
+      expect(find.byType(ExpandAllButton), findsNothing);
+      expect(find.byType(CollapseAllButton), findsNothing);
+      expect(find.byType(FlameChartHelpButton), findsNothing);
+      expect(find.byType(ModeDropdown), findsNothing);
+      expect(find.byType(SearchField<MethodTableController>), findsOneWidget);
+      expect(find.byType(SearchField<CpuProfilerController>), findsNothing);
 
-        await tester.tap(find.text('CPU Flame Chart'));
-        await tester.pumpAndSettle();
-        expect(find.byType(CpuBottomUpTable), findsNothing);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
-        expect(find.byType(CpuMethodTable), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsOneWidget);
-        expect(find.byType(DevToolsFilterButton), findsOneWidget);
-        expect(find.byType(UserTagDropdown), findsOneWidget);
-        expect(find.byType(ExpandAllButton), findsNothing);
-        expect(find.byType(CollapseAllButton), findsNothing);
-        expect(find.byType(FlameChartHelpButton), findsOneWidget);
-        expect(find.byType(ModeDropdown), findsNothing);
-        expect(
-          find.byType(SearchField<MethodTableController>),
-          findsNothing,
-        );
-        expect(
-          find.byType(SearchField<CpuProfilerController>),
-          findsOneWidget,
-        );
-      },
-    );
+      await tester.tap(find.text('CPU Flame Chart'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CpuBottomUpTable), findsNothing);
+      expect(find.byType(CpuCallTreeTable), findsNothing);
+      expect(find.byType(CpuMethodTable), findsNothing);
+      expect(find.byType(CpuProfileFlameChart), findsOneWidget);
+      expect(find.byType(DevToolsFilterButton), findsOneWidget);
+      expect(find.byType(UserTagDropdown), findsOneWidget);
+      expect(find.byType(ExpandAllButton), findsNothing);
+      expect(find.byType(CollapseAllButton), findsNothing);
+      expect(find.byType(FlameChartHelpButton), findsOneWidget);
+      expect(find.byType(ModeDropdown), findsNothing);
+      expect(find.byType(SearchField<MethodTableController>), findsNothing);
+      expect(find.byType(SearchField<CpuProfilerController>), findsOneWidget);
+    });
 
-    testWidgetsWithWindowSize(
-      'can expand and collapse data',
-      windowSize,
-      (WidgetTester tester) async {
-        cpuProfiler = CpuProfiler(
-          data: cpuProfileData,
-          controller: controller,
-        );
-        await tester.pumpWidget(wrap(cpuProfiler));
-        await tester.tap(find.text('Call Tree'));
-        await tester.pumpAndSettle();
+    testWidgetsWithWindowSize('can expand and collapse data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      cpuProfiler = CpuProfiler(data: cpuProfileData, controller: controller);
+      await tester.pumpWidget(wrap(cpuProfiler));
+      await tester.tap(find.text('Call Tree'));
+      await tester.pumpAndSettle();
 
-        expect(cpuProfileData.cpuProfileRoot.isExpanded, isFalse);
-        await tester.tap(find.byType(ExpandAllButton));
-        expect(cpuProfiler.callTreeRoots.first.isExpanded, isTrue);
-        await tester.tap(find.byType(CollapseAllButton));
-        expect(cpuProfiler.callTreeRoots.first.isExpanded, isFalse);
+      expect(cpuProfileData.cpuProfileRoot.isExpanded, isFalse);
+      await tester.tap(find.byType(ExpandAllButton));
+      expect(cpuProfiler.callTreeRoots.first.isExpanded, isTrue);
+      await tester.tap(find.byType(CollapseAllButton));
+      expect(cpuProfiler.callTreeRoots.first.isExpanded, isFalse);
 
-        await tester.tap(find.text('Bottom Up'));
-        await tester.pumpAndSettle();
-        for (final root in cpuProfiler.bottomUpRoots) {
-          expect(root.isExpanded, isFalse);
-        }
-        await tester.tap(find.byType(ExpandAllButton));
-        for (final root in cpuProfiler.bottomUpRoots) {
-          expect(root.isExpanded, isTrue);
-        }
-        await tester.tap(find.byType(CollapseAllButton));
-        for (final root in cpuProfiler.bottomUpRoots) {
-          expect(root.isExpanded, isFalse);
-        }
-      },
-    );
+      await tester.tap(find.text('Bottom Up'));
+      await tester.pumpAndSettle();
+      for (final root in cpuProfiler.bottomUpRoots) {
+        expect(root.isExpanded, isFalse);
+      }
+      await tester.tap(find.byType(ExpandAllButton));
+      for (final root in cpuProfiler.bottomUpRoots) {
+        expect(root.isExpanded, isTrue);
+      }
+      await tester.tap(find.byType(CollapseAllButton));
+      for (final root in cpuProfiler.bottomUpRoots) {
+        expect(root.isExpanded, isFalse);
+      }
+    });
 
     group('UserTag filters', () {
       late ProfilerScreenController controller;
@@ -424,8 +367,9 @@ void main() {
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
-        cpuProfileData =
-            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
+        cpuProfileData = CpuProfileData.fromJson(
+          cpuProfileDataWithUserTagsJson,
+        );
         await controller.cpuProfilerController.transformer.processData(
           cpuProfileData,
           processId: 'test',
@@ -445,145 +389,159 @@ void main() {
         );
       });
 
-      testWidgetsWithWindowSize(
-        'can filter data by user tag',
-        windowSize,
-        (WidgetTester tester) async {
-          await tester.runAsync(() async {
-            // We need to pump the entire `ProfilerScreenBody` widget because the
-            // CpuProfiler widget has `cpuProfileData` passed in from there, and
-            // CpuProfiler needs to be rebuilt on data updates.
-            await tester.pumpWidget(
-              wrapWithControllers(
-                const ProfilerScreenBody(),
-                profiler: controller,
-              ),
-            );
-            await tester.pump();
+      testWidgetsWithWindowSize('can filter data by user tag', windowSize, (
+        WidgetTester tester,
+      ) async {
+        await tester.runAsync(() async {
+          // We need to pump the entire `ProfilerScreenBody` widget because the
+          // CpuProfiler widget has `cpuProfileData` passed in from there, and
+          // CpuProfiler needs to be rebuilt on data updates.
+          await tester.pumpWidget(
+            wrapWithControllers(
+              const ProfilerScreenBody(),
+              profiler: controller,
+            ),
+          );
+          await tester.pump();
 
-            expect(controller.cpuProfilerController.userTags.length, equals(3));
+          expect(controller.cpuProfilerController.userTags.length, equals(3));
 
-            expect(find.byType(UserTagDropdown), findsOneWidget);
-            // There is a Text widget and a RichText widget.
-            expect(
-              find.text('Filter by tag: userTagA', skipOffstage: false),
-              findsWidgets,
-            );
-            expect(
-              find.text('Filter by tag: userTagB', skipOffstage: false),
-              findsWidgets,
-            );
-            expect(
-              find.text('Filter by tag: userTagC', skipOffstage: false),
-              findsWidgets,
-            );
-            expect(
-              find.text('Group by: User Tag', skipOffstage: false),
-              findsWidgets,
-            );
+          expect(find.byType(UserTagDropdown), findsOneWidget);
+          // There is a Text widget and a RichText widget.
+          expect(
+            find.text('Filter by tag: userTagA', skipOffstage: false),
+            findsWidgets,
+          );
+          expect(
+            find.text('Filter by tag: userTagB', skipOffstage: false),
+            findsWidgets,
+          );
+          expect(
+            find.text('Filter by tag: userTagC', skipOffstage: false),
+            findsWidgets,
+          );
+          expect(
+            find.text('Group by: User Tag', skipOffstage: false),
+            findsWidgets,
+          );
 
-            await tester.tap(find.text('Call Tree'));
-            await tester.pumpAndSettle();
-            expect(find.byType(CpuCallTreeTable), findsOneWidget);
-            await tester.tap(find.text('Expand All'));
-            await tester.pumpAndSettle();
+          await tester.tap(find.text('Call Tree'));
+          await tester.pumpAndSettle();
+          expect(find.byType(CpuCallTreeTable), findsOneWidget);
+          await tester.tap(find.text('Expand All'));
+          await tester.pumpAndSettle();
 
-            expect(
-              controller.cpuProfileData!.profileMetaData.time!.duration
-                  .inMicroseconds,
-              equals(250),
-            );
+          expect(
+            controller
+                .cpuProfileData!
+                .profileMetaData
+                .time!
+                .duration
+                .inMicroseconds,
+            equals(250),
+          );
 
-            expect(find.richTextContaining('Frame1'), findsOneWidget);
-            expect(find.richTextContaining('Frame2'), findsOneWidget);
-            expect(find.richTextContaining('Frame3'), findsOneWidget);
-            expect(find.richTextContaining('Frame4'), findsOneWidget);
-            expect(find.richTextContaining('Frame5'), findsOneWidget);
-            expect(find.richTextContaining('Frame6'), findsOneWidget);
-            expect(find.text('userTagA'), findsNothing);
-            expect(find.text('userTagB'), findsNothing);
-            expect(find.text('userTagC'), findsNothing);
+          expect(find.richTextContaining('Frame1'), findsOneWidget);
+          expect(find.richTextContaining('Frame2'), findsOneWidget);
+          expect(find.richTextContaining('Frame3'), findsOneWidget);
+          expect(find.richTextContaining('Frame4'), findsOneWidget);
+          expect(find.richTextContaining('Frame5'), findsOneWidget);
+          expect(find.richTextContaining('Frame6'), findsOneWidget);
+          expect(find.text('userTagA'), findsNothing);
+          expect(find.text('userTagB'), findsNothing);
+          expect(find.text('userTagC'), findsNothing);
 
-            await tester.tap(find.byType(UserTagDropdown));
-            await tester.pumpAndSettle();
-            await tester.tap(find.text('Filter by tag: userTagA').last);
+          await tester.tap(find.byType(UserTagDropdown));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Filter by tag: userTagA').last);
 
-            // Await a small delay to allow the CpuProfilerController to finish
-            // processing data for the new user tag.
-            await Future.delayed(const Duration(seconds: 1));
-            await tester.pumpAndSettle();
+          // Await a small delay to allow the CpuProfilerController to finish
+          // processing data for the new user tag.
+          await Future.delayed(const Duration(seconds: 1));
+          await tester.pumpAndSettle();
 
-            await tester.tap(find.text('Expand All'));
-            await tester.pumpAndSettle();
-            expect(
-              controller.cpuProfileData!.profileMetaData.time!.duration
-                  .inMicroseconds,
-              equals(100),
-            );
-            expect(find.richTextContaining('Frame1'), findsNothing);
-            expect(find.richTextContaining('Frame2'), findsOneWidget);
-            expect(find.richTextContaining('Frame3'), findsNothing);
-            expect(find.richTextContaining('Frame4'), findsNothing);
-            expect(find.richTextContaining('Frame5'), findsOneWidget);
-            expect(find.richTextContaining('Frame6'), findsNothing);
-            expect(find.text('userTagA'), findsNothing);
-            expect(find.text('userTagB'), findsNothing);
-            expect(find.text('userTagC'), findsNothing);
+          await tester.tap(find.text('Expand All'));
+          await tester.pumpAndSettle();
+          expect(
+            controller
+                .cpuProfileData!
+                .profileMetaData
+                .time!
+                .duration
+                .inMicroseconds,
+            equals(100),
+          );
+          expect(find.richTextContaining('Frame1'), findsNothing);
+          expect(find.richTextContaining('Frame2'), findsOneWidget);
+          expect(find.richTextContaining('Frame3'), findsNothing);
+          expect(find.richTextContaining('Frame4'), findsNothing);
+          expect(find.richTextContaining('Frame5'), findsOneWidget);
+          expect(find.richTextContaining('Frame6'), findsNothing);
+          expect(find.text('userTagA'), findsNothing);
+          expect(find.text('userTagB'), findsNothing);
+          expect(find.text('userTagC'), findsNothing);
 
-            await tester.tap(find.byType(UserTagDropdown));
-            await tester.pumpAndSettle();
-            await tester.tap(find.text('Filter by tag: userTagB').last);
+          await tester.tap(find.byType(UserTagDropdown));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Filter by tag: userTagB').last);
 
-            // Await a small delay to allow the CpuProfilerController to finish
-            // processing data for the new user tag.
-            await Future.delayed(const Duration(seconds: 1));
-            await tester.pumpAndSettle();
+          // Await a small delay to allow the CpuProfilerController to finish
+          // processing data for the new user tag.
+          await Future.delayed(const Duration(seconds: 1));
+          await tester.pumpAndSettle();
 
-            await tester.tap(find.text('Expand All'));
-            await tester.pumpAndSettle();
-            expect(
-              controller.cpuProfileData!.profileMetaData.time!.duration
-                  .inMicroseconds,
-              equals(50),
-            );
-            expect(find.richTextContaining('Frame1'), findsNothing);
-            expect(find.richTextContaining('Frame2'), findsOneWidget);
-            expect(find.richTextContaining('Frame3'), findsNothing);
-            expect(find.richTextContaining('Frame4'), findsNothing);
-            expect(find.richTextContaining('Frame5'), findsNothing);
-            expect(find.richTextContaining('Frame6'), findsNothing);
-            expect(find.text('userTagA'), findsNothing);
-            expect(find.text('userTagB'), findsNothing);
-            expect(find.text('userTagC'), findsNothing);
+          await tester.tap(find.text('Expand All'));
+          await tester.pumpAndSettle();
+          expect(
+            controller
+                .cpuProfileData!
+                .profileMetaData
+                .time!
+                .duration
+                .inMicroseconds,
+            equals(50),
+          );
+          expect(find.richTextContaining('Frame1'), findsNothing);
+          expect(find.richTextContaining('Frame2'), findsOneWidget);
+          expect(find.richTextContaining('Frame3'), findsNothing);
+          expect(find.richTextContaining('Frame4'), findsNothing);
+          expect(find.richTextContaining('Frame5'), findsNothing);
+          expect(find.richTextContaining('Frame6'), findsNothing);
+          expect(find.text('userTagA'), findsNothing);
+          expect(find.text('userTagB'), findsNothing);
+          expect(find.text('userTagC'), findsNothing);
 
-            await tester.tap(find.byType(UserTagDropdown));
-            await tester.pumpAndSettle();
-            await tester.tap(find.text('Filter by tag: userTagC').last);
+          await tester.tap(find.byType(UserTagDropdown));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Filter by tag: userTagC').last);
 
-            // Await a small delay to allow the CpuProfilerController to finish
-            // processing data for the new user tag.
-            await Future.delayed(const Duration(seconds: 1));
-            await tester.pumpAndSettle();
+          // Await a small delay to allow the CpuProfilerController to finish
+          // processing data for the new user tag.
+          await Future.delayed(const Duration(seconds: 1));
+          await tester.pumpAndSettle();
 
-            await tester.tap(find.text('Expand All'));
-            await tester.pumpAndSettle();
-            expect(
-              controller.cpuProfileData!.profileMetaData.time!.duration
-                  .inMicroseconds,
-              equals(100),
-            );
-            expect(find.richTextContaining('Frame1'), findsNothing);
-            expect(find.richTextContaining('Frame2'), findsNothing);
-            expect(find.richTextContaining('Frame3'), findsNothing);
-            expect(find.richTextContaining('Frame4'), findsNothing);
-            expect(find.richTextContaining('Frame5'), findsOneWidget);
-            expect(find.richTextContaining('Frame6'), findsOneWidget);
-            expect(find.text('userTagA'), findsNothing);
-            expect(find.text('userTagB'), findsNothing);
-            expect(find.text('userTagC'), findsNothing);
-          });
-        },
-      );
+          await tester.tap(find.text('Expand All'));
+          await tester.pumpAndSettle();
+          expect(
+            controller
+                .cpuProfileData!
+                .profileMetaData
+                .time!
+                .duration
+                .inMicroseconds,
+            equals(100),
+          );
+          expect(find.richTextContaining('Frame1'), findsNothing);
+          expect(find.richTextContaining('Frame2'), findsNothing);
+          expect(find.richTextContaining('Frame3'), findsNothing);
+          expect(find.richTextContaining('Frame4'), findsNothing);
+          expect(find.richTextContaining('Frame5'), findsOneWidget);
+          expect(find.richTextContaining('Frame6'), findsOneWidget);
+          expect(find.text('userTagA'), findsNothing);
+          expect(find.text('userTagB'), findsNothing);
+          expect(find.text('userTagC'), findsNothing);
+        });
+      });
     });
 
     group('Group by', () {
@@ -597,8 +555,9 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         preferences.toggleVmDeveloperMode(true);
-        cpuProfileData =
-            CpuProfileData.fromJson(cpuProfileDataWithUserTagsJson);
+        cpuProfileData = CpuProfileData.fromJson(
+          cpuProfileDataWithUserTagsJson,
+        );
         await loadData(controller);
       });
 
@@ -700,9 +659,10 @@ void main() {
         sampleCount: 100,
         samplePeriod: 100,
         stackDepth: 128,
-        time: TimeRange()
-          ..start = const Duration()
-          ..end = const Duration(microseconds: 10000),
+        time:
+            TimeRange()
+              ..start = const Duration()
+              ..end = const Duration(microseconds: 10000),
       );
       await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
       await tester.pumpAndSettle();
@@ -732,43 +692,43 @@ void main() {
       expect(find.text('Sampling depth: 128'), findsOneWidget);
     });
 
-    testWidgets(
-      'displays correctly for invalid data',
-      (WidgetTester tester) async {
-        final metadata = CpuProfileMetaData(
-          sampleCount: 100,
-          samplePeriod: 0,
-          stackDepth: 128,
-          time: TimeRange()
-            ..start = const Duration()
-            ..end = const Duration(microseconds: 10000),
-        );
-        await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
-        await tester.pumpAndSettle();
+    testWidgets('displays correctly for invalid data', (
+      WidgetTester tester,
+    ) async {
+      final metadata = CpuProfileMetaData(
+        sampleCount: 100,
+        samplePeriod: 0,
+        stackDepth: 128,
+        time:
+            TimeRange()
+              ..start = const Duration()
+              ..end = const Duration(microseconds: 10000),
+      );
+      await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
+      await tester.pumpAndSettle();
 
-        expect(
-          find.byTooltip('The duration of time spanned by the CPU samples'),
-          findsOneWidget,
-        );
-        expect(
-          find.byTooltip('The number of samples included in the profile'),
-          findsOneWidget,
-        );
-        expect(
-          find.byTooltip(
-            'The frequency at which samples are collected by the profiler',
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.byTooltip('The maximum stack trace depth of a collected sample'),
-          findsOneWidget,
-        );
-        expect(find.text('Duration: 10.0 ms'), findsOneWidget);
-        expect(find.text('Sample count: 100'), findsOneWidget);
-        expect(find.text('Sampling rate: -- Hz'), findsOneWidget);
-        expect(find.text('Sampling depth: 128'), findsOneWidget);
-      },
-    );
+      expect(
+        find.byTooltip('The duration of time spanned by the CPU samples'),
+        findsOneWidget,
+      );
+      expect(
+        find.byTooltip('The number of samples included in the profile'),
+        findsOneWidget,
+      );
+      expect(
+        find.byTooltip(
+          'The frequency at which samples are collected by the profiler',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byTooltip('The maximum stack trace depth of a collected sample'),
+        findsOneWidget,
+      );
+      expect(find.text('Duration: 10.0 ms'), findsOneWidget);
+      expect(find.text('Sample count: 100'), findsOneWidget);
+      expect(find.text('Sampling rate: -- Hz'), findsOneWidget);
+      expect(find.text('Sampling depth: 128'), findsOneWidget);
+    });
   });
 }

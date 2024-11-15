@@ -141,9 +141,10 @@ void main() {
           break;
       }
 
-      final detailsComputer = computedDetails == null
-          ? null
-          : () => Future.delayed(
+      final detailsComputer =
+          computedDetails == null
+              ? null
+              : () => Future.delayed(
                 const Duration(seconds: 1),
                 () => computedDetails!,
               );
@@ -165,13 +166,16 @@ void main() {
       mockLoggingController = MockLoggingController();
       when(mockLoggingController.data).thenReturn([]);
       when(mockLoggingController.search).thenReturn('');
-      when(mockLoggingController.searchMatches)
-          .thenReturn(ValueNotifier<List<LogData>>([]));
-      when(mockLoggingController.searchInProgressNotifier)
-          .thenReturn(ValueNotifier<bool>(false));
+      when(
+        mockLoggingController.searchMatches,
+      ).thenReturn(ValueNotifier<List<LogData>>([]));
+      when(
+        mockLoggingController.searchInProgressNotifier,
+      ).thenReturn(ValueNotifier<bool>(false));
       when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
-      when(mockLoggingController.filteredData)
-          .thenReturn(ListValueNotifier<LogData>([]));
+      when(
+        mockLoggingController.filteredData,
+      ).thenReturn(ListValueNotifier<LogData>([]));
 
       fakeServiceConnection = FakeServiceConnectionManager();
       final app = fakeServiceConnection.serviceManager.connectedApp!;
@@ -184,54 +188,56 @@ void main() {
       //     .thenReturn(ValueNotifier<int>(0));
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       when(mockLoggingController.data).thenReturn(fakeLogData);
-      when(mockLoggingController.filteredData)
-          .thenReturn(ListValueNotifier<LogData>(fakeLogData));
+      when(
+        mockLoggingController.filteredData,
+      ).thenReturn(ListValueNotifier<LogData>(fakeLogData));
     });
 
-    testWidgetsWithWindowSize(
-      'can process Ansi codes',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpLoggingScreen(tester);
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(ValueKey(fakeLogData[5])));
-        await tester.pumpAndSettle();
+    testWidgetsWithWindowSize('can process Ansi codes', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpLoggingScreen(tester);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(ValueKey(fakeLogData[5])));
+      await tester.pumpAndSettle();
 
-        // Entry in tree.
+      // Entry in tree.
+      expect(
+        find.richText('Ansi color codes processed for log 5'),
+        findsOneWidget,
+        reason:
+            'Processed text without ansi codes should exist in logs and '
+            'details sections.',
+      );
+
+      // Entry in details panel.
+      final finder = find.selectableText(
+        'Ansi color codes processed for log 5',
+      );
+
+      expect(
+        find.richText('Ansi color codes processed for log 5'),
+        findsOneWidget,
+        reason:
+            'Processed text without ansi codes should exist in logs and '
+            'details sections.',
+      );
+
+      finder.evaluate().forEach((element) {
+        final richText = element.widget as RichText;
+        final textSpan = richText.text as TextSpan;
+        final secondSpan = textSpan.children![1] as TextSpan;
         expect(
-          find.richText('Ansi color codes processed for log 5'),
-          findsOneWidget,
-          reason: 'Processed text without ansi codes should exist in logs and '
-              'details sections.',
+          secondSpan.text,
+          'log 5',
+          reason: 'Text with ansi code should be in separate span',
         );
-
-        // Entry in details panel.
-        final finder =
-            find.selectableText('Ansi color codes processed for log 5');
-
         expect(
-          find.richText('Ansi color codes processed for log 5'),
-          findsOneWidget,
-          reason: 'Processed text without ansi codes should exist in logs and '
-              'details sections.',
+          secondSpan.style!.backgroundColor,
+          const Color.fromRGBO(215, 95, 135, 1),
         );
-
-        finder.evaluate().forEach((element) {
-          final richText = element.widget as RichText;
-          final textSpan = richText.text as TextSpan;
-          final secondSpan = textSpan.children![1] as TextSpan;
-          expect(
-            secondSpan.text,
-            'log 5',
-            reason: 'Text with ansi code should be in separate span',
-          );
-          expect(
-            secondSpan.style!.backgroundColor,
-            const Color.fromRGBO(215, 95, 135, 1),
-          );
-        });
-      },
-    );
+      });
+    });
   });
 
   group('Debugger Screen', () {
@@ -292,8 +298,9 @@ void main() {
 
         await pumpConsole(tester, debuggerController);
 
-        final finder =
-            find.selectableText('Ansi color codes processed for console');
+        final finder = find.selectableText(
+          'Ansi color codes processed for console',
+        );
         expect(finder, findsOneWidget);
         finder.evaluate().forEach((element) {
           final selectableText = element.widget as SelectableText;

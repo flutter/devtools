@@ -133,7 +133,8 @@ class FlutterTimelineEventProcessor {
   TimelineEventType _inferTrackType(PerfettoTrackEvent event) {
     // Whether the UI and Raster events are expected to come on a single track.
     // This is expected when DevTools is connected to a flutter-tester device.
-    final singleTrackType = uiTrackId != null &&
+    final singleTrackType =
+        uiTrackId != null &&
         rasterTrackId != null &&
         uiTrackId == rasterTrackId;
 

@@ -24,17 +24,13 @@ void main() {
       double? width,
       double? height,
     }) async {
-      final wrappedWidget = SizedBox(
-        width: width,
-        height: height,
-        child: flex,
-      );
+      final wrappedWidget = SizedBox(width: width, height: height, child: flex);
       final rootNodeDiagnostics =
           await widgetToLayoutExplorerRemoteDiagnosticsNode(
-        widget: wrappedWidget,
-        tester: tester,
-        subtreeDepth: subtreeDepth,
-      );
+            widget: wrappedWidget,
+            tester: tester,
+            subtreeDepth: subtreeDepth,
+          );
       final flexDiagnostics = rootNodeDiagnostics.childrenNow.first;
       return FlexLayoutProperties.fromDiagnostics(flexDiagnostics);
     }
@@ -46,8 +42,10 @@ void main() {
           textDirection: TextDirection.ltr,
           children: [SizedBox()],
         );
-        final flexProperties =
-            await toFlexLayoutProperties(widget, tester: tester);
+        final flexProperties = await toFlexLayoutProperties(
+          widget,
+          tester: tester,
+        );
         expect(flexProperties.direction, Axis.horizontal);
         expect(flexProperties.mainAxisAlignment, MainAxisAlignment.start);
         expect(flexProperties.mainAxisSize, MainAxisSize.max);
@@ -63,28 +61,27 @@ void main() {
         verticalDirection: VerticalDirection.up,
         children: [SizedBox()],
       );
-      final columnProperties =
-          await toFlexLayoutProperties(columnWidget, tester: tester);
+      final columnProperties = await toFlexLayoutProperties(
+        columnWidget,
+        tester: tester,
+      );
       expect(columnProperties.startIsTopLeft, false);
 
       const rowWidget = Row(
         textDirection: TextDirection.rtl,
         children: [SizedBox()],
       );
-      final rowProperties =
-          await toFlexLayoutProperties(rowWidget, tester: tester);
+      final rowProperties = await toFlexLayoutProperties(
+        rowWidget,
+        tester: tester,
+      );
       expect(rowProperties.startIsTopLeft, false);
     });
 
     testWidgets(
       'displayChildren is the same as children when start is top left',
       (tester) async {
-        final widget = Column(
-          children: [
-            const SizedBox(),
-            Container(),
-          ],
-        );
+        final widget = Column(children: [const SizedBox(), Container()]);
         final properties = await toFlexLayoutProperties(widget, tester: tester);
         expect(properties.startIsTopLeft, true);
         expect(properties.displayChildren[0].description, 'SizedBox');
@@ -97,10 +94,7 @@ void main() {
       (tester) async {
         final widget = Column(
           verticalDirection: VerticalDirection.up,
-          children: [
-            const SizedBox(),
-            Container(),
-          ],
+          children: [const SizedBox(), Container()],
         );
         final properties = await toFlexLayoutProperties(widget, tester: tester);
         expect(properties.startIsTopLeft, false);
@@ -116,23 +110,17 @@ void main() {
 
       List<RenderProperties> childrenRenderProperties(
         FlexLayoutProperties properties,
-      ) =>
-          properties.childrenRenderProperties(
-            smallestRenderWidth: minRenderWidth,
-            largestRenderWidth: defaultMaxRenderWidth,
-            smallestRenderHeight: minRenderHeight,
-            largestRenderHeight: defaultMaxRenderHeight,
-            maxSizeAvailable: maxSizeAvailable,
-          );
+      ) => properties.childrenRenderProperties(
+        smallestRenderWidth: minRenderWidth,
+        largestRenderWidth: defaultMaxRenderWidth,
+        smallestRenderHeight: minRenderHeight,
+        largestRenderHeight: defaultMaxRenderHeight,
+        maxSizeAvailable: maxSizeAvailable,
+      );
 
       final childrenWidgets = <Widget>[
-        const SizedBox(
-          width: 50.0,
-        ),
-        const SizedBox(
-          width: 75.0,
-          height: 25.0,
-        ),
+        const SizedBox(width: 50.0),
+        const SizedBox(width: 75.0, height: 25.0),
       ];
 
       testWidgets(
@@ -228,17 +216,15 @@ void main() {
           Row buildWidget({
             required bool flipMainAxis,
             required MainAxisAlignment mainAxisAlignment,
-          }) =>
-              Row(
-                textDirection:
-                    flipMainAxis ? TextDirection.rtl : TextDirection.ltr,
-                mainAxisAlignment: flipMainAxis
-                    ? mainAxisAlignment.reversed
-                    : mainAxisAlignment,
-                children: flipMainAxis
+          }) => Row(
+            textDirection: flipMainAxis ? TextDirection.rtl : TextDirection.ltr,
+            mainAxisAlignment:
+                flipMainAxis ? mainAxisAlignment.reversed : mainAxisAlignment,
+            children:
+                flipMainAxis
                     ? childrenWidgets.reversed.toList()
                     : childrenWidgets,
-              );
+          );
           for (final mainAxisAlignment in MainAxisAlignment.values) {
             final originalWidgetRenderProperties = childrenRenderProperties(
               await toFlexLayoutProperties(
@@ -281,9 +267,7 @@ void main() {
         width: size.width,
         height: size.height,
         constraints: constraints,
-        child: const Row(
-          children: [SizedBox()],
-        ),
+        child: const Row(children: [SizedBox()]),
       );
       final diagnosticsNode = await widgetToLayoutExplorerRemoteDiagnosticsNode(
         widget: widget,
@@ -312,9 +296,9 @@ void main() {
         );
         final constrainedBoxDiagnosticsNode =
             await widgetToLayoutExplorerRemoteDiagnosticsNode(
-          widget: widget,
-          tester: tester,
-        );
+              widget: widget,
+              tester: tester,
+            );
         final sizedBoxDiagnosticsNode =
             constrainedBoxDiagnosticsNode.childrenNow.first;
         final layoutProperties = LayoutProperties(sizedBoxDiagnosticsNode);
@@ -337,9 +321,9 @@ void main() {
         );
         final constrainedBoxDiagnosticsNode =
             await widgetToLayoutExplorerRemoteDiagnosticsNode(
-          widget: widget,
-          tester: tester,
-        );
+              widget: widget,
+              tester: tester,
+            );
         final sizedBoxDiagnosticsNode =
             constrainedBoxDiagnosticsNode.childrenNow.first;
         final layoutProperties = LayoutProperties(sizedBoxDiagnosticsNode);
@@ -354,16 +338,12 @@ void main() {
       });
 
       testWidgets('unconstrained width', (tester) async {
-        final widget = Row(
-          children: [
-            Container(),
-          ],
-        );
+        final widget = Row(children: [Container()]);
         final rowDiagnosticsNode =
             await widgetToLayoutExplorerRemoteDiagnosticsNode(
-          widget: widget,
-          tester: tester,
-        );
+              widget: widget,
+              tester: tester,
+            );
         final containerDiagnosticsNode = rowDiagnosticsNode.childrenNow.first;
         final layoutProperties = LayoutProperties(containerDiagnosticsNode);
         expect(
@@ -373,16 +353,12 @@ void main() {
       });
 
       testWidgets('unconstrained height', (tester) async {
-        final widget = Column(
-          children: [
-            Container(),
-          ],
-        );
+        final widget = Column(children: [Container()]);
         final columnDiagnosticsNode =
             await widgetToLayoutExplorerRemoteDiagnosticsNode(
-          widget: widget,
-          tester: tester,
-        );
+              widget: widget,
+              tester: tester,
+            );
         final containerDiagnosticsNode =
             columnDiagnosticsNode.childrenNow.first;
         final layoutProperties = LayoutProperties(containerDiagnosticsNode);
@@ -395,11 +371,7 @@ void main() {
 
     testWidgets('describeWidth and describeHeight', (tester) async {
       const width = 432.5, height = 56.0;
-      final widget = SizedBox(
-        width: width,
-        height: height,
-        child: Container(),
-      );
+      final widget = SizedBox(width: width, height: height, child: Container());
       final sizedBoxNode = await widgetToLayoutExplorerRemoteDiagnosticsNode(
         widget: widget,
         tester: tester,

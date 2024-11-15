@@ -42,10 +42,7 @@ class ProfilerScreenControls extends StatelessWidget {
             child: ExitOfflineButton(gaScreen: gac.cpuProfiler),
           )
         else ...[
-          _PrimaryControls(
-            controller: controller,
-            recording: recording,
-          ),
+          _PrimaryControls(controller: controller, recording: recording),
           const SizedBox(width: defaultSpacing),
           _SecondaryControls(
             controller: controller,
@@ -58,10 +55,7 @@ class ProfilerScreenControls extends StatelessWidget {
 }
 
 class _PrimaryControls extends StatelessWidget {
-  const _PrimaryControls({
-    required this.controller,
-    required this.recording,
-  });
+  const _PrimaryControls({required this.controller, required this.recording});
 
   static const _primaryControlsMinIncludeTextWidth = 1170.0;
 
@@ -113,20 +107,24 @@ class _SecondaryControls extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         if (serviceConnection
-            .serviceManager.connectedApp!.isFlutterNativeAppNow)
+            .serviceManager
+            .connectedApp!
+            .isFlutterNativeAppNow)
           GaDevToolsButton(
             icon: Icons.timer,
             label: 'Profile app start up',
-            tooltip: 'Load all Dart CPU samples that occurred before \n'
+            tooltip:
+                'Load all Dart CPU samples that occurred before \n'
                 'the first Flutter frame was drawn (if available)',
             tooltipPadding: const EdgeInsets.all(denseSpacing),
             gaScreen: gac.cpuProfiler,
             gaSelection: gac.CpuProfilerEvents.profileAppStartUp.name,
             minScreenWidthForTextBeforeScaling:
                 _profilingControlsMinScreenWidthForText,
-            onPressed: !profilerBusy
-                ? controller.cpuProfilerController.loadAppStartUpProfile
-                : null,
+            onPressed:
+                !profilerBusy
+                    ? controller.cpuProfilerController.loadAppStartUpProfile
+                    : null,
           ),
         const SizedBox(width: denseSpacing),
         RefreshButton(
@@ -136,9 +134,10 @@ class _SecondaryControls extends StatelessWidget {
           gaSelection: gac.CpuProfilerEvents.loadAllCpuSamples.name,
           minScreenWidthForTextBeforeScaling:
               _profilingControlsMinScreenWidthForText,
-          onPressed: !profilerBusy
-              ? controller.cpuProfilerController.loadAllSamples
-              : null,
+          onPressed:
+              !profilerBusy
+                  ? controller.cpuProfilerController.loadAllSamples
+                  : null,
         ),
         const SizedBox(width: denseSpacing),
         CpuSamplingRateDropdown(
@@ -149,11 +148,12 @@ class _SecondaryControls extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         OpenSaveButtonGroup(
           screenId: ScreenMetaData.cpuProfiler.id,
-          onSave: !profilerBusy &&
-                  controller.cpuProfileData != null &&
-                  controller.cpuProfileData?.isEmpty == false
-              ? _exportPerformance
-              : null,
+          onSave:
+              !profilerBusy &&
+                      controller.cpuProfileData != null &&
+                      controller.cpuProfileData?.isEmpty == false
+                  ? _exportPerformance
+                  : null,
         ),
       ],
     );

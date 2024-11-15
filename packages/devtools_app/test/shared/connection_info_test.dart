@@ -18,9 +18,7 @@ void main() {
   const windowSize = Size(2000.0, 1000.0);
 
   group('Connection info', () {
-    void initServiceManager({
-      bool flutterVersionServiceAvailable = true,
-    }) {
+    void initServiceManager({bool flutterVersionServiceAvailable = true}) {
       final availableServices = [
         if (flutterVersionServiceAvailable) flutterVersionService.service,
       ];
@@ -29,10 +27,12 @@ void main() {
       );
       when(fakeServiceConnection.serviceManager.vm.version).thenReturn('1.9.1');
       when(fakeServiceConnection.serviceManager.vm.targetCPU).thenReturn('x64');
-      when(fakeServiceConnection.serviceManager.vm.architectureBits)
-          .thenReturn(64);
-      when(fakeServiceConnection.serviceManager.vm.operatingSystem)
-          .thenReturn('android');
+      when(
+        fakeServiceConnection.serviceManager.vm.architectureBits,
+      ).thenReturn(64);
+      when(
+        fakeServiceConnection.serviceManager.vm.operatingSystem,
+      ).thenReturn('android');
       final app = fakeServiceConnection.serviceManager.connectedApp!;
       mockConnectedApp(
         app,
@@ -48,68 +48,59 @@ void main() {
       initServiceManager();
     });
 
-    testWidgetsWithWindowSize(
-      'builds summary for dart web app',
-      windowSize,
-      (WidgetTester tester) async {
-        final app = fakeServiceConnection.serviceManager.connectedApp!;
-        mockWebVm(fakeServiceConnection.serviceManager.vm);
-        mockConnectedApp(
-          app,
-          isFlutterApp: false,
-          isProfileBuild: false,
-          isWebApp: true,
-        );
+    testWidgetsWithWindowSize('builds summary for dart web app', windowSize, (
+      WidgetTester tester,
+    ) async {
+      final app = fakeServiceConnection.serviceManager.connectedApp!;
+      mockWebVm(fakeServiceConnection.serviceManager.vm);
+      mockConnectedApp(
+        app,
+        isFlutterApp: false,
+        isProfileBuild: false,
+        isWebApp: true,
+      );
 
-        await tester.pumpWidget(wrap(const ConnectedAppSummary()));
-        expect(find.text('CPU / OS: '), findsOneWidget);
-        expect(find.text('Web macos'), findsOneWidget);
-        expect(find.text('Dart Version: '), findsOneWidget);
-        expect(find.text('1.9.1'), findsOneWidget);
-        expect(find.text('Flutter Version: '), findsNothing);
-        expect(find.text('Framework / Engine: '), findsNothing);
-        expect(find.text('Connected app type: '), findsOneWidget);
-        expect(find.text('Dart web'), findsOneWidget);
-        expect(find.text('VM Service Connection: '), findsOneWidget);
-        expect(
-          find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'),
-          findsOneWidget,
-        );
-        expect(find.byType(CopyToClipboardControl), findsOneWidget);
-      },
-    );
+      await tester.pumpWidget(wrap(const ConnectedAppSummary()));
+      expect(find.text('CPU / OS: '), findsOneWidget);
+      expect(find.text('Web macos'), findsOneWidget);
+      expect(find.text('Dart Version: '), findsOneWidget);
+      expect(find.text('1.9.1'), findsOneWidget);
+      expect(find.text('Flutter Version: '), findsNothing);
+      expect(find.text('Framework / Engine: '), findsNothing);
+      expect(find.text('Connected app type: '), findsOneWidget);
+      expect(find.text('Dart web'), findsOneWidget);
+      expect(find.text('VM Service Connection: '), findsOneWidget);
+      expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+      expect(find.byType(CopyToClipboardControl), findsOneWidget);
+    });
 
-    testWidgetsWithWindowSize(
-      'builds dialog for dart CLI app',
-      windowSize,
-      (WidgetTester tester) async {
-        final app = fakeServiceConnection.serviceManager.connectedApp!;
-        when(fakeServiceConnection.serviceManager.vm.operatingSystem)
-            .thenReturn('macos');
-        mockConnectedApp(
-          app,
-          isFlutterApp: false,
-          isProfileBuild: false,
-          isWebApp: false,
-        );
+    testWidgetsWithWindowSize('builds dialog for dart CLI app', windowSize, (
+      WidgetTester tester,
+    ) async {
+      final app = fakeServiceConnection.serviceManager.connectedApp!;
+      when(
+        fakeServiceConnection.serviceManager.vm.operatingSystem,
+      ).thenReturn('macos');
+      mockConnectedApp(
+        app,
+        isFlutterApp: false,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
 
-        await tester.pumpWidget(wrap(const ConnectedAppSummary()));
-        expect(find.text('CPU / OS: '), findsOneWidget);
-        expect(find.text('x64 (64 bit) macos'), findsOneWidget);
-        expect(find.text('Dart Version: '), findsOneWidget);
-        expect(find.text('1.9.1'), findsOneWidget);
-        expect(find.text('Flutter Version: '), findsNothing);
-        expect(find.text('Framework / Engine: '), findsNothing);
-        expect(find.text('Connected app type: '), findsOneWidget);
-        expect(find.text('Dart CLI'), findsOneWidget);
-        expect(find.text('VM Service Connection: '), findsOneWidget);
-        expect(
-          find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'),
-          findsOneWidget,
-        );
-        expect(find.byType(CopyToClipboardControl), findsOneWidget);
-      },
-    );
+      await tester.pumpWidget(wrap(const ConnectedAppSummary()));
+      expect(find.text('CPU / OS: '), findsOneWidget);
+      expect(find.text('x64 (64 bit) macos'), findsOneWidget);
+      expect(find.text('Dart Version: '), findsOneWidget);
+      expect(find.text('1.9.1'), findsOneWidget);
+      expect(find.text('Flutter Version: '), findsNothing);
+      expect(find.text('Framework / Engine: '), findsNothing);
+      expect(find.text('Connected app type: '), findsOneWidget);
+      expect(find.text('Dart CLI'), findsOneWidget);
+      expect(find.text('VM Service Connection: '), findsOneWidget);
+      expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+      expect(find.byType(CopyToClipboardControl), findsOneWidget);
+    });
 
     testWidgetsWithWindowSize(
       'builds dialog for flutter native app (debug)',

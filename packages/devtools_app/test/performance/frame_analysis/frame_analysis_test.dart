@@ -54,50 +54,44 @@ void main() {
             frame: frame,
             enhanceTracingController: mockEnhanceTracingController,
             rebuildCountModel: rebuildCountModel,
-            displayRefreshRateNotifier:
-                const FixedValueListenable<double>(defaultRefreshRate),
+            displayRefreshRateNotifier: const FixedValueListenable<double>(
+              defaultRefreshRate,
+            ),
           ),
         ),
       );
       expect(find.byType(FlutterFrameAnalysisView), findsOneWidget);
     }
 
-    testWidgetsWithWindowSize(
-      'builds with null data',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpAnalysisView(
-          tester,
-          FlutterFrame6.frameWithoutTimelineEvents,
-        );
+    testWidgetsWithWindowSize('builds with null data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpAnalysisView(tester, FlutterFrame6.frameWithoutTimelineEvents);
 
-        expect(
-          find.textContaining(
-            'No timeline event analysis data available for this frame.',
-          ),
-          findsOneWidget,
-        );
-        expect(find.byType(FrameHints), findsNothing);
-        expect(find.byType(FrameTimeVisualizer), findsNothing);
-      },
-    );
+      expect(
+        find.textContaining(
+          'No timeline event analysis data available for this frame.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(FrameHints), findsNothing);
+      expect(find.byType(FrameTimeVisualizer), findsNothing);
+    });
 
-    testWidgetsWithWindowSize(
-      'builds with non-null data',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpAnalysisView(tester, frame);
+    testWidgetsWithWindowSize('builds with non-null data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpAnalysisView(tester, frame);
 
-        expect(
-          find.textContaining(
-            'No timeline event  analysis data available for this frame.',
-          ),
-          findsNothing,
-        );
-        expect(find.byType(FrameHints), findsOneWidget);
-        expect(find.byType(FrameTimeVisualizer), findsOneWidget);
-      },
-    );
+      expect(
+        find.textContaining(
+          'No timeline event  analysis data available for this frame.',
+        ),
+        findsNothing,
+      );
+      expect(find.byType(FrameHints), findsOneWidget);
+      expect(find.byType(FrameTimeVisualizer), findsOneWidget);
+    });
 
     group('FrameTimeVisualizer', () {
       Future<void> pumpVisualizer(
@@ -110,40 +104,38 @@ void main() {
         expect(find.byType(FrameTimeVisualizer), findsOneWidget);
       }
 
-      testWidgetsWithWindowSize(
-        'builds successfully',
-        windowSize,
-        (WidgetTester tester) async {
-          await pumpVisualizer(tester, frame.frameAnalysis!);
+      testWidgetsWithWindowSize('builds successfully', windowSize, (
+        WidgetTester tester,
+      ) async {
+        await pumpVisualizer(tester, frame.frameAnalysis!);
 
-          expect(find.text('UI phases:'), findsOneWidget);
-          expect(find.textContaining('Build - '), findsOneWidget);
+        expect(find.text('UI phases:'), findsOneWidget);
+        expect(find.textContaining('Build - '), findsOneWidget);
 
-          // The flex values are too small to show the text for these phases.
-          expect(find.textContaining('Layout - '), findsNothing);
-          expect(find.textContaining('Paint - '), findsNothing);
+        // The flex values are too small to show the text for these phases.
+        expect(find.textContaining('Layout - '), findsNothing);
+        expect(find.textContaining('Paint - '), findsNothing);
 
-          expect(find.byIcon(Icons.build), findsOneWidget);
-          expect(find.byIcon(Icons.auto_awesome_mosaic), findsOneWidget);
-          expect(find.byIcon(Icons.format_paint), findsOneWidget);
+        expect(find.byIcon(Icons.build), findsOneWidget);
+        expect(find.byIcon(Icons.auto_awesome_mosaic), findsOneWidget);
+        expect(find.byIcon(Icons.format_paint), findsOneWidget);
 
-          expect(find.text('Raster phase:'), findsOneWidget);
-          expect(find.textContaining('Raster - '), findsOneWidget);
-          expect(find.byIcon(Icons.grid_on), findsOneWidget);
+        expect(find.text('Raster phase:'), findsOneWidget);
+        expect(find.textContaining('Raster - '), findsOneWidget);
+        expect(find.byIcon(Icons.grid_on), findsOneWidget);
 
-          expect(find.text('Raster phases:'), findsNothing);
-          expect(find.textContaining('Shader compilation'), findsNothing);
-          expect(find.textContaining('Other raster'), findsNothing);
-          expect(find.byIcon(Icons.image_outlined), findsNothing);
+        expect(find.text('Raster phases:'), findsNothing);
+        expect(find.textContaining('Shader compilation'), findsNothing);
+        expect(find.textContaining('Other raster'), findsNothing);
+        expect(find.byIcon(Icons.image_outlined), findsNothing);
 
-          await expectLater(
-            find.byType(FrameTimeVisualizer),
-            matchesDevToolsGolden(
-              '../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer.png',
-            ),
-          );
-        },
-      );
+        await expectLater(
+          find.byType(FrameTimeVisualizer),
+          matchesDevToolsGolden(
+            '../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer.png',
+          ),
+        );
+      });
 
       testWidgetsWithWindowSize(
         'builds with icons only for narrow screen',

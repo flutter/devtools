@@ -19,13 +19,13 @@ import '../shared/utils.dart';
 /// DevTools app.
 class ExampleConditionalScreen extends Screen {
   const ExampleConditionalScreen()
-      : super.conditional(
-          id: id,
-          requiresLibrary: 'package:flutter/',
-          title: 'Example',
-          icon: Icons.palette,
-          worksWithOfflineData: true,
-        );
+    : super.conditional(
+        id: id,
+        requiresLibrary: 'package:flutter/',
+        title: 'Example',
+        icon: Icons.palette,
+        worksWithOfflineData: true,
+      );
 
   static const id = 'example';
 
@@ -46,8 +46,10 @@ class _ExampleConditionalScreenBody extends StatefulWidget {
 class _ExampleConditionalScreenBodyState
     extends State<_ExampleConditionalScreenBody>
     with
-        ProvidedControllerMixin<ExampleController,
-            _ExampleConditionalScreenBody> {
+        ProvidedControllerMixin<
+          ExampleController,
+          _ExampleConditionalScreenBody
+        > {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -73,8 +75,9 @@ class ExampleController extends DisposableController
     unawaited(_init());
   }
 
-  final data =
-      ValueNotifier<ExampleScreenData>(ExampleScreenData('Example screen'));
+  final data = ValueNotifier<ExampleScreenData>(
+    ExampleScreenData('Example screen'),
+  );
 
   final _initialized = Completer<void>();
 

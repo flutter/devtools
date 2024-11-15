@@ -85,11 +85,12 @@ class VmServiceWrapper extends VmService {
 
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
 
-  Completer<bool> _allFuturesCompleter = Completer<bool>()
-    // Mark the future as completed by default so if we don't track any
-    // futures but someone tries to wait on [allFuturesCompleted] they don't
-    // hang. The first tracked future will replace this with a new completer.
-    ..complete(true);
+  Completer<bool> _allFuturesCompleter =
+      Completer<bool>()
+        // Mark the future as completed by default so if we don't track any
+        // futures but someone tries to wait on [allFuturesCompleted] they don't
+        // hang. The first tracked future will replace this with a new completer.
+        ..complete(true);
 
   // A local cache of "fake" service objects. Used to convert JSON objects to
   // VM service response formats to be used with APIs that require them.
@@ -163,12 +164,7 @@ class VmServiceWrapper extends VmService {
     if (cachedObj != null) {
       return Future.value(cachedObj);
     }
-    return super.getObject(
-      isolateId,
-      objectId,
-      offset: offset,
-      count: count,
-    );
+    return super.getObject(isolateId, objectId, offset: offset, count: count);
   }
 
   Future<HeapSnapshotGraph> getHeapSnapshotGraph(
@@ -341,10 +337,7 @@ class VmServiceWrapper extends VmService {
   ///
   /// All logs from this run will have matching unique ids, so that they can
   /// be associated together in the logs.
-  Future<T> _maybeLogWrappedFuture<T>(
-    String name,
-    Future<T> future,
-  ) async {
+  Future<T> _maybeLogWrappedFuture<T>(String name, Future<T> future) async {
     // If the logger is not accepting FINE logs, then we won't be logging any
     // messages. So just return the [future] as-is.
     if (!_log.isLoggable(Level.FINE)) return future;
@@ -356,10 +349,7 @@ class VmServiceWrapper extends VmService {
       _log.fine('[$logId]-wrapFuture($name,...): Succeeded');
       return result;
     } catch (error) {
-      _log.severe(
-        '[$logId]-wrapFuture($name,...): Failed',
-        error,
-      );
+      _log.severe('[$logId]-wrapFuture($name,...): Failed', error);
       rethrow;
     }
   }
@@ -418,18 +408,14 @@ class VmServiceWrapper extends VmService {
   }
 
   /// Forces the VM to perform a full garbage collection.
-  Future<Success?> collectAllGarbage() => _privateRpcInvoke(
-        'collectAllGarbage',
-        parser: Success.parse,
-      );
+  Future<Success?> collectAllGarbage() =>
+      _privateRpcInvoke('collectAllGarbage', parser: Success.parse);
 
   Future<InstanceRef?> getReachableSize(String isolateId, String targetId) =>
       _privateRpcInvoke(
         'getReachableSize',
         isolateId: isolateId,
-        args: {
-          'targetId': targetId,
-        },
+        args: {'targetId': targetId},
         parser: InstanceRef.parse,
       );
 
@@ -437,17 +423,15 @@ class VmServiceWrapper extends VmService {
       _privateRpcInvoke(
         'getRetainedSize',
         isolateId: isolateId,
-        args: {
-          'targetId': targetId,
-        },
+        args: {'targetId': targetId},
         parser: InstanceRef.parse,
       );
 
   Future<ObjectStore?> getObjectStore(String isolateId) => _privateRpcInvoke(
-        'getObjectStore',
-        isolateId: isolateId,
-        parser: ObjectStore.parse,
-      );
+    'getObjectStore',
+    isolateId: isolateId,
+    parser: ObjectStore.parse,
+  );
 
   Future<dap.VariablesResponseBody?> dapVariablesRequest(
     dap.VariablesArguments args,
@@ -455,9 +439,7 @@ class VmServiceWrapper extends VmService {
     final response = await _sendDapRequest('variables', args: args);
     if (response == null) return null;
 
-    return dap.VariablesResponseBody.fromJson(
-      response as Map<String, Object?>,
-    );
+    return dap.VariablesResponseBody.fromJson(response as Map<String, Object?>);
   }
 
   Future<dap.ScopesResponseBody?> dapScopesRequest(
@@ -466,9 +448,7 @@ class VmServiceWrapper extends VmService {
     final response = await _sendDapRequest('scopes', args: args);
     if (response == null) return null;
 
-    return dap.ScopesResponseBody.fromJson(
-      response as Map<String, Object?>,
-    );
+    return dap.ScopesResponseBody.fromJson(response as Map<String, Object?>);
   }
 
   Future<dap.StackTraceResponseBody?> dapStackTraceRequest(
@@ -496,11 +476,7 @@ class VmServiceWrapper extends VmService {
 
     final response = await sendDapRequest(
       jsonEncode(
-        dap.Request(
-          command: command,
-          seq: _dapSeq++,
-          arguments: args,
-        ),
+        dap.Request(command: command, seq: _dapSeq++, arguments: args),
       ),
     );
 

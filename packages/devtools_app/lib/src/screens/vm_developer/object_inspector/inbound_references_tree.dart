@@ -35,9 +35,7 @@ class InboundReferencesTreeNode extends TreeNode<InboundReferencesTreeNode> {
     }
 
     return switch (objectRef) {
-      ClassRef(:final name) ||
-      FuncRef(:final name) ||
-      FieldRef(:final name) =>
+      ClassRef(:final name) || FuncRef(:final name) || FieldRef(:final name) =>
         name,
       LibraryRef(:final name, :final uri) => name.isNullOrEmpty ? uri : name,
       ScriptRef(:final uri) => fileNameFromUri(uri),
@@ -65,18 +63,13 @@ class InboundReferencesTreeNode extends TreeNode<InboundReferencesTreeNode> {
   String _inboundRefDescription(InboundReference inboundRef, int? offset) {
     final parentListIndex = inboundRef.parentListIndex;
     if (parentListIndex != null) {
-      return 'Referenced by ${_parentListElementDescription(
-        parentListIndex,
-        inboundRef.source,
-      )}';
+      return 'Referenced by ${_parentListElementDescription(parentListIndex, inboundRef.source)}';
     }
 
     final description = StringBuffer('Referenced by ');
 
     if (offset != null) {
-      description.write(
-        'offset $offset of ',
-      );
+      description.write('offset $offset of ');
     }
 
     if (inboundRef.parentField is int) {
@@ -86,14 +79,10 @@ class InboundReferencesTreeNode extends TreeNode<InboundReferencesTreeNode> {
       assert((inboundRef.source as InstanceRef).kind == InstanceKind.kRecord);
       description.write('${inboundRef.parentField} of ');
     } else if (inboundRef.parentField is FieldRef) {
-      description.write(
-        '${_objectName(inboundRef.parentField)} of ',
-      );
+      description.write('${_objectName(inboundRef.parentField)} of ');
     }
 
-    description.write(
-      _objectDescription(inboundRef.source) ?? '<object>',
-    );
+    description.write(_objectDescription(inboundRef.source) ?? '<object>');
 
     return description.toString();
   }

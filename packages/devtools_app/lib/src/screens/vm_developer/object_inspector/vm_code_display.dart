@@ -26,11 +26,7 @@ abstract class _CodeColumnData<T> extends ColumnData<T> {
 }
 
 class _AddressColumn extends _CodeColumnData<Instruction> {
-  _AddressColumn()
-      : super(
-          'Address',
-          fixedWidthPx: 160,
-        );
+  _AddressColumn() : super('Address', fixedWidthPx: 160);
 
   @override
   int getValue(Instruction dataObject) {
@@ -45,11 +41,7 @@ class _AddressColumn extends _CodeColumnData<Instruction> {
 }
 
 class _AddressRangeColumn extends _CodeColumnData<InliningEntry> {
-  _AddressRangeColumn()
-      : super(
-          'Address Range',
-          fixedWidthPx: 300,
-        );
+  _AddressRangeColumn() : super('Address Range', fixedWidthPx: 300);
 
   @override
   String getValue(InliningEntry dataObject) {
@@ -79,9 +71,7 @@ class _FunctionsColumn extends _CodeColumnData<InliningEntry>
             object: function,
             onTap: controller.findAndSelectNodeForObject,
           ),
-          const SizedBox(
-            width: denseSpacing,
-          ),
+          const SizedBox(width: denseSpacing),
         ],
       ],
     );
@@ -162,11 +152,7 @@ class _ProfileRangeTicksColumn extends _CodeColumnData<InliningEntry> {
 
 class _InstructionColumn extends _CodeColumnData<Instruction>
     implements ColumnRenderer<Instruction> {
-  _InstructionColumn()
-      : super(
-          'Disassembly',
-          fixedWidthPx: 240,
-        );
+  _InstructionColumn() : super('Disassembly', fixedWidthPx: 240);
 
   @override
   Object? getValue(Instruction dataObject) {
@@ -184,10 +170,7 @@ class _InstructionColumn extends _CodeColumnData<Instruction>
     final theme = Theme.of(context);
     return Text.rich(
       style: theme.fixedFontStyle,
-      _highlightAssemblyCode(
-        context,
-        data.instruction,
-      ),
+      _highlightAssemblyCode(context, data.instruction),
     );
   }
 
@@ -202,18 +185,14 @@ class _InstructionColumn extends _CodeColumnData<Instruction>
   ) {
     return TextSpan(
       text: _getLastMatch(scanner),
-      style: TextStyle(
-        color: colorScheme.controlFlowSyntaxColor,
-      ),
+      style: TextStyle(color: colorScheme.controlFlowSyntaxColor),
     );
   }
 
   TextSpan _buildRegisterSpan(ColorScheme colorScheme, StringScanner scanner) {
     return TextSpan(
       text: _getLastMatch(scanner),
-      style: TextStyle(
-        color: colorScheme.variableSyntaxColor,
-      ),
+      style: TextStyle(color: colorScheme.variableSyntaxColor),
     );
   }
 
@@ -225,9 +204,7 @@ class _InstructionColumn extends _CodeColumnData<Instruction>
     final match = _getLastMatch(scanner);
     return TextSpan(
       text: isHex ? '0x${match.substring(2).toUpperCase()}' : match,
-      style: TextStyle(
-        color: colorScheme.numericConstantSyntaxColor,
-      ),
+      style: TextStyle(color: colorScheme.numericConstantSyntaxColor),
     );
   }
 
@@ -254,11 +231,7 @@ class _InstructionColumn extends _CodeColumnData<Instruction>
       } else if (scanner.scan(registerRegExp)) {
         spans.add(_buildRegisterSpan(colorScheme, scanner));
       } else {
-        spans.add(
-          TextSpan(
-            text: String.fromCharCode(scanner.readChar()),
-          ),
-        );
+        spans.add(TextSpan(text: String.fromCharCode(scanner.readChar())));
       }
     }
     return TextSpan(children: spans);
@@ -350,10 +323,7 @@ class VmCodeDisplay extends StatelessWidget {
     CodeObject code,
   ) {
     return [
-      selectableTextBuilderMapEntry(
-        'Kind',
-        code.obj.kind,
-      ),
+      selectableTextBuilderMapEntry('Kind', code.obj.kind),
       serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Function',
@@ -435,16 +405,8 @@ class CodeTable extends StatelessWidget {
     _InstructionColumn(),
     _DartObjectColumn(controller: controller),
     if (ticks != null) ...[
-      _ProfileTicksColumn(
-        'Total %',
-        ticks: code.ticksTable,
-        inclusive: true,
-      ),
-      _ProfileTicksColumn(
-        'Self %',
-        ticks: code.ticksTable,
-        inclusive: false,
-      ),
+      _ProfileTicksColumn('Total %', ticks: code.ticksTable, inclusive: true),
+      _ProfileTicksColumn('Self %', ticks: code.ticksTable, inclusive: false),
     ],
   ];
 
@@ -519,15 +481,12 @@ class CpuProfilerTicksTable {
 /// Tracks inclusive and exclusive CPU profiler ticks for a single
 /// [Instruction].
 class CodeTicks {
-  const CodeTicks({
-    required this.inclusiveTicks,
-    required this.exclusiveTicks,
-  });
+  const CodeTicks({required this.inclusiveTicks, required this.exclusiveTicks});
 
   CodeTicks operator +(CodeTicks other) => CodeTicks(
-        inclusiveTicks: inclusiveTicks + other.inclusiveTicks,
-        exclusiveTicks: exclusiveTicks + other.exclusiveTicks,
-      );
+    inclusiveTicks: inclusiveTicks + other.inclusiveTicks,
+    exclusiveTicks: exclusiveTicks + other.exclusiveTicks,
+  );
 
   final int exclusiveTicks;
   final int inclusiveTicks;

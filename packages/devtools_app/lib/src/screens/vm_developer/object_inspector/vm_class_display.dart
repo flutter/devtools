@@ -38,11 +38,7 @@ class VmClassDisplay extends StatelessWidget {
           ),
         ),
         if (displayClassInstances)
-          Flexible(
-            child: ClassInstancesWidget(
-              instances: clazz.instances,
-            ),
-          ),
+          Flexible(child: ClassInstancesWidget(instances: clazz.instances)),
       ],
     );
     if (clazz.scriptRef != null) {
@@ -60,15 +56,10 @@ class VmClassDisplay extends StatelessWidget {
   // ClassInstancesWidget implementation is completed.
   /// Generates a list of key-value pairs (map entries) containing the general
   /// information of the class object [clazz].
-  List<MapEntry<String, WidgetBuilder>> _classDataRows(
-    ClassObject clazz,
-  ) {
+  List<MapEntry<String, WidgetBuilder>> _classDataRows(ClassObject clazz) {
     final superClass = clazz.obj.superClass;
     return [
-      ...vmObjectGeneralDataRows(
-        controller,
-        clazz,
-      ),
+      ...vmObjectGeneralDataRows(controller, clazz),
       if (superClass != null)
         serviceObjectLinkBuilderMapEntry(
           controller: controller,
@@ -88,10 +79,7 @@ class VmClassDisplay extends StatelessWidget {
 // all class instances. When done, remove the last row of the ClassInfoWidget.
 /// Displays information on the instances of the Class object.
 class ClassInstancesWidget extends StatelessWidget {
-  const ClassInstancesWidget({
-    super.key,
-    required this.instances,
-  });
+  const ClassInstancesWidget({super.key, required this.instances});
 
   final InstanceSet? instances;
 

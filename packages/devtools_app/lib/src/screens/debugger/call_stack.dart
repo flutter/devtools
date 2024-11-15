@@ -59,10 +59,7 @@ class _CallStackState extends State<CallStack>
     );
   }
 
-  Widget _buildStackFrame(
-    StackFrameAndSourcePosition frame,
-    bool selected,
-  ) {
+  Widget _buildStackFrame(StackFrameAndSourcePosition frame, bool selected) {
     final theme = Theme.of(context);
 
     Widget child;
@@ -79,10 +76,7 @@ class _CallStackState extends State<CallStack>
           const SizedBox(width: defaultSpacing, child: Divider()),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: densePadding),
-            child: Text(
-              frameDescription,
-              style: theme.regularTextStyle,
-            ),
+            child: Text(frameDescription, style: theme.regularTextStyle),
           ),
           const Expanded(child: Divider()),
         ],
@@ -98,9 +92,10 @@ class _CallStackState extends State<CallStack>
             if (locationDescription != null)
               TextSpan(
                 text: ' $locationDescription',
-                style: selected
-                    ? theme.selectedSubtleTextStyle
-                    : theme.subtleTextStyle,
+                style:
+                    selected
+                        ? theme.selectedSubtleTextStyle
+                        : theme.subtleTextStyle,
               ),
           ],
         ),
@@ -124,12 +119,13 @@ class _CallStackState extends State<CallStack>
     return isAsyncBreak
         ? result
         : DevToolsTooltip(
-            message: locationDescription == null
-                ? frameDescription
-                : '$frameDescription $locationDescription',
-            waitDuration: tooltipWaitLong,
-            child: result,
-          );
+          message:
+              locationDescription == null
+                  ? frameDescription
+                  : '$frameDescription $locationDescription',
+          waitDuration: tooltipWaitLong,
+          child: result,
+        );
   }
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {

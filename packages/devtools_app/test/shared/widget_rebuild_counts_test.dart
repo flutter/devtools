@@ -17,8 +17,9 @@ void main() {
     });
 
     RebuildLocation? getLocation(int locationId) {
-      return rebuildCountModel.locationStats.value
-          .firstWhereOrNull((entry) => entry.location.id == locationId);
+      return rebuildCountModel.locationStats.value.firstWhereOrNull(
+        (entry) => entry.location.id == locationId,
+      );
     }
 
     RebuildLocation? getLocationForFrame({

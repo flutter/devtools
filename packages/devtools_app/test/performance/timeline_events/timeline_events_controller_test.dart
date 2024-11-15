@@ -27,12 +27,14 @@ void main() {
     late TimelineEventsController eventsController;
 
     setUp(() {
-      when(fakeServiceManager.serviceManager.connectedApp!.isProfileBuild)
-          .thenAnswer((realInvocation) => Future.value(false));
+      when(
+        fakeServiceManager.serviceManager.connectedApp!.isProfileBuild,
+      ).thenAnswer((realInvocation) => Future.value(false));
       final initializedCompleter = Completer<bool>();
       initializedCompleter.complete(true);
-      when(fakeServiceManager.serviceManager.connectedApp!.initialized)
-          .thenReturn(initializedCompleter);
+      when(
+        fakeServiceManager.serviceManager.connectedApp!.initialized,
+      ).thenReturn(initializedCompleter);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(OfflineDataController, OfflineDataController());
@@ -40,12 +42,15 @@ void main() {
       performanceController = createMockPerformanceControllerWithDefaults();
       eventsController = TimelineEventsController(performanceController);
       final flutterFramesController = MockFlutterFramesController();
-      when(performanceController.timelineEventsController)
-          .thenReturn(eventsController);
-      when(performanceController.flutterFramesController)
-          .thenReturn(flutterFramesController);
-      when(flutterFramesController.hasUnassignedFlutterFrame(any))
-          .thenReturn(false);
+      when(
+        performanceController.timelineEventsController,
+      ).thenReturn(eventsController);
+      when(
+        performanceController.flutterFramesController,
+      ).thenReturn(flutterFramesController);
+      when(
+        flutterFramesController.hasUnassignedFlutterFrame(any),
+      ).thenReturn(false);
     });
 
     test('can setOfflineData', () async {
@@ -61,8 +66,9 @@ void main() {
         offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
       final offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
-      when(performanceController.offlinePerformanceData)
-          .thenReturn(offlineData);
+      when(
+        performanceController.offlinePerformanceData,
+      ).thenReturn(offlineData);
       await eventsController.setOfflineData(offlineData);
 
       expect(eventsController.fullPerfettoTrace, isNotEmpty);

@@ -93,10 +93,7 @@ class DevToolsAppBar extends StatelessWidget {
       flexibleSpace = Align(
         alignment: Alignment.centerLeft,
         child: Padding(
-          padding: EdgeInsets.only(
-            top: densePadding,
-            right: rightPadding,
-          ),
+          padding: EdgeInsets.only(top: densePadding, right: rightPadding),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -223,7 +220,7 @@ class TabOverflowButton extends StatelessWidget {
 @visibleForTesting
 class SelectedTabWrapper extends StatelessWidget {
   SelectedTabWrapper({super.key, required this.child, double? width})
-      : width = width ?? buttonMinWidth;
+    : width = width ?? buttonMinWidth;
 
   final Widget child;
 

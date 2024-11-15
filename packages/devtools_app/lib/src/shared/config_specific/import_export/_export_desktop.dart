@@ -15,10 +15,7 @@ class ExportControllerDesktop extends ExportController {
   static final _fs = FileSystemDesktop();
 
   @override
-  void saveFile<T>({
-    required T content,
-    required String fileName,
-  }) {
+  void saveFile<T>({required T content, required String fileName}) {
     _fs.writeContentsToFile<T>(fileName, content);
   }
 }

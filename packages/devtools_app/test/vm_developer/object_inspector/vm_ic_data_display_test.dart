@@ -38,10 +38,7 @@ void main() {
     when(mockICDataObject.obj).thenReturn(
       ICData(
         id: 'ic-data-id',
-        owner: ClassRef(
-          id: 'cls-id',
-          name: 'func',
-        ),
+        owner: ClassRef(id: 'cls-id', name: 'func'),
         selector: 'foo',
         size: 64,
         argumentsDescriptor: Instance(id: 'inst-1', length: 0, elements: []),
@@ -53,40 +50,38 @@ void main() {
   });
 
   group('IC data display test', () {
-    testWidgetsWithWindowSize(
-      'basic layout',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            VmICDataDisplay(
-              icData: mockICDataObject,
-              controller: ObjectInspectorViewController(),
-            ),
+    testWidgetsWithWindowSize('basic layout', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          VmICDataDisplay(
+            icData: mockICDataObject,
+            controller: ObjectInspectorViewController(),
           ),
-        );
+        ),
+      );
 
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-        expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-        expect(find.byType(VMInfoCard), findsOneWidget);
-        expect(find.text('General Information'), findsOneWidget);
-        expect(find.text('Object Class:'), findsOneWidget);
-        expect(find.text('ICData'), findsOneWidget);
-        expect(find.text('Shallow Size:'), findsOneWidget);
-        expect(find.text('Retained Size:'), findsOneWidget);
-        expect(find.text('Selector:'), findsOneWidget);
-        expect(find.text('foo'), findsOneWidget);
+      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
+      expect(find.text('General Information'), findsOneWidget);
+      expect(find.text('Object Class:'), findsOneWidget);
+      expect(find.text('ICData'), findsOneWidget);
+      expect(find.text('Shallow Size:'), findsOneWidget);
+      expect(find.text('Retained Size:'), findsOneWidget);
+      expect(find.text('Selector:'), findsOneWidget);
+      expect(find.text('foo'), findsOneWidget);
 
-        expect(find.text('64 B'), findsOneWidget);
-        expect(find.text('Owner:'), findsOneWidget);
-        expect(find.text('func', findRichText: true), findsOneWidget);
+      expect(find.text('64 B'), findsOneWidget);
+      expect(find.text('Owner:'), findsOneWidget);
+      expect(find.text('func', findRichText: true), findsOneWidget);
 
-        expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
-        expect(find.byType(RetainingPathWidget), findsOneWidget);
-        expect(find.byType(InboundReferencesTree), findsOneWidget);
-        expect(find.byType(ExpansionTileInstanceList), findsNWidgets(2));
-      },
-    );
+      expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+      expect(find.byType(RetainingPathWidget), findsOneWidget);
+      expect(find.byType(InboundReferencesTree), findsOneWidget);
+      expect(find.byType(ExpansionTileInstanceList), findsNWidgets(2));
+    });
   });
 }

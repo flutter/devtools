@@ -21,10 +21,7 @@ import '../ui/widgets_theme.dart';
 
 /// Layout visualizer for a widget with a box-layout.
 class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
-  const BoxLayoutExplorerWidget(
-    super.inspectorController, {
-    super.key,
-  });
+  const BoxLayoutExplorerWidget(super.inspectorController, {super.key});
 
   static bool shouldDisplay(RemoteDiagnosticsNode _) {
     // Pretend this layout explorer is always available. This layout explorer
@@ -41,8 +38,9 @@ class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
       BoxLayoutExplorerWidgetState();
 }
 
-class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
-    BoxLayoutExplorerWidget, LayoutProperties> {
+class BoxLayoutExplorerWidgetState
+    extends
+        LayoutExplorerWidgetState<BoxLayoutExplorerWidget, LayoutProperties> {
   @override
   RemoteDiagnosticsNode? getRoot(RemoteDiagnosticsNode? node) {
     final nodeLocal = node;
@@ -79,9 +77,10 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     setState(() {
       // This implementation will need to change if we support showing more than
       // a single widget in the box visualization for the layout explorer.
-      highlighted = newProperties != null && selectedNode == newProperties.node
-          ? newProperties
-          : null;
+      highlighted =
+          newProperties != null && selectedNode == newProperties.node
+              ? newProperties
+              : null;
     });
   }
 
@@ -169,7 +168,8 @@ class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final parentProperties = this.parentProperties ??
+    final parentProperties =
+        this.parentProperties ??
         propertiesLocal; // Fall back to this node's properties if there is no parent.
 
     final parentSize = parentProperties.size;

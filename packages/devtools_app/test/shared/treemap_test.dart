@@ -64,42 +64,30 @@ void main() {
     final grandchild2 = TreemapNode(name: 'package:grandchild2');
     final greatGrandchild1 = TreemapNode(name: 'package:greatGrandchild1');
     final greatGrandchild2 = TreemapNode(name: 'package:greatGrandchild2');
-    final testRoot = TreemapNode(name: 'libapp.so (Dart AOT)')
-      ..addAllChildren([
-        child1
-          ..addChild(
-            grandchild1
-              ..addChild(
-                greatGrandchild1,
-              ),
-          ),
-        child2
-          ..addChild(
-            grandchild2
-              ..addChild(
-                greatGrandchild2,
-              ),
-          ),
-      ]);
+    final testRoot = TreemapNode(name: 'libapp.so (Dart AOT)')..addAllChildren([
+      child1..addChild(grandchild1..addChild(greatGrandchild1)),
+      child2..addChild(grandchild2..addChild(greatGrandchild2)),
+    ]);
 
-    final nodeWithDuplicatePackageNameGrandchild =
-        TreemapNode(name: 'grandchild');
+    final nodeWithDuplicatePackageNameGrandchild = TreemapNode(
+      name: 'grandchild',
+    );
     final nodeWithDuplicatePackageNameChild1 = TreemapNode(name: 'package:a');
     final nodeWithDuplicatePackageNameChild2 = TreemapNode(name: '<Type>');
     final nodeWithDuplicatePackageName = TreemapNode(name: 'package:a');
     TreemapNode(name: 'libapp.so (Dart AOT)').addChild(
-      nodeWithDuplicatePackageName
-        ..addAllChildren([
-          nodeWithDuplicatePackageNameChild1
-            ..addChild(nodeWithDuplicatePackageNameGrandchild),
-          nodeWithDuplicatePackageNameChild2,
-        ]),
+      nodeWithDuplicatePackageName..addAllChildren([
+        nodeWithDuplicatePackageNameChild1
+          ..addChild(nodeWithDuplicatePackageNameGrandchild),
+        nodeWithDuplicatePackageNameChild2,
+      ]),
     );
 
     final dartLibraryChild = TreemapNode(name: 'dart lib child');
     final dartLibraryNode = TreemapNode(name: 'dart:core');
-    TreemapNode(name: 'libapp.so (Dart AOT)')
-        .addChild(dartLibraryNode..addChild(dartLibraryChild));
+    TreemapNode(
+      name: 'libapp.so (Dart AOT)',
+    ).addChild(dartLibraryNode..addChild(dartLibraryChild));
 
     test('packagePath returns correct values', () {
       expect(testRoot.packagePath(), equals([]));
@@ -174,22 +162,19 @@ void main() {
       root = await _loadSnapshotJsonAsTree(instructionSizes);
     });
 
-    testWidgetsWithWindowSize(
-      'builds treemap with expected data',
-      windowSize,
-      (WidgetTester tester) async {
-        const treemapKey = Key('Treemap');
-        await pumpTreemapWidget(tester, treemapKey);
+    testWidgetsWithWindowSize('builds treemap with expected data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      const treemapKey = Key('Treemap');
+      await pumpTreemapWidget(tester, treemapKey);
 
-        expect(find.byKey(treemapKey), findsOneWidget);
+      expect(find.byKey(treemapKey), findsOneWidget);
 
-        await expectLater(
-          find.byKey(treemapKey),
-          matchesDevToolsGolden('../test_infra/goldens/treemap_sizes.png'),
-        );
-      },
-      skip: kIsWeb,
-    );
+      await expectLater(
+        find.byKey(treemapKey),
+        matchesDevToolsGolden('../test_infra/goldens/treemap_sizes.png'),
+      );
+    }, skip: kIsWeb);
   });
 
   group('Treemap from v8 snapshot', () {
@@ -197,24 +182,21 @@ void main() {
       root = await _loadSnapshotJsonAsTree(newV8);
     });
 
-    testWidgetsWithWindowSize(
-      'builds treemap with expected data',
-      windowSize,
-      (WidgetTester tester) async {
-        const treemapKey = Key('Treemap');
-        await pumpTreemapWidget(tester, treemapKey);
+    testWidgetsWithWindowSize('builds treemap with expected data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      const treemapKey = Key('Treemap');
+      await pumpTreemapWidget(tester, treemapKey);
 
-        expect(find.byKey(treemapKey), findsOneWidget);
+      expect(find.byKey(treemapKey), findsOneWidget);
 
-        await expectLater(
-          find.byKey(treemapKey),
-          matchesDevToolsGolden('../test_infra/goldens/treemap_v8.png'),
-        );
-        // Await delay for golden comparison.
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-      },
-      skip: kIsWeb,
-    );
+      await expectLater(
+        find.byKey(treemapKey),
+        matchesDevToolsGolden('../test_infra/goldens/treemap_v8.png'),
+      );
+      // Await delay for golden comparison.
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+    }, skip: kIsWeb);
   });
 
   group('Treemap from APK analysis', () {
@@ -222,24 +204,21 @@ void main() {
       root = await _loadSnapshotJsonAsTree(apkAnalysis);
     });
 
-    testWidgetsWithWindowSize(
-      'builds treemap with expected data',
-      windowSize,
-      (WidgetTester tester) async {
-        const treemapKey = Key('Treemap');
-        await pumpTreemapWidget(tester, treemapKey);
+    testWidgetsWithWindowSize('builds treemap with expected data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      const treemapKey = Key('Treemap');
+      await pumpTreemapWidget(tester, treemapKey);
 
-        expect(find.byKey(treemapKey), findsOneWidget);
+      expect(find.byKey(treemapKey), findsOneWidget);
 
-        await expectLater(
-          find.byKey(treemapKey),
-          matchesDevToolsGolden('../test_infra/goldens/treemap_apk.png'),
-        );
-        // Await delay for golden comparison.
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-      },
-      skip: kIsWeb,
-    );
+      await expectLater(
+        find.byKey(treemapKey),
+        matchesDevToolsGolden('../test_infra/goldens/treemap_apk.png'),
+      );
+      // Await delay for golden comparison.
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+    }, skip: kIsWeb);
   });
 }
 

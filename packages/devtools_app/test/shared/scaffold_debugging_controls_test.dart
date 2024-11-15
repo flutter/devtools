@@ -25,21 +25,21 @@ void main() {
         mockServiceConnection.serviceManager as MockServiceManager;
 
     when(mockServiceManager.service).thenReturn(null);
-    when(mockServiceManager.connectedState).thenReturn(
-      ValueNotifier<ConnectedState>(const ConnectedState(false)),
-    );
+    when(
+      mockServiceManager.connectedState,
+    ).thenReturn(ValueNotifier<ConnectedState>(const ConnectedState(false)));
     when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-    when(mockServiceConnection.appState).thenReturn(
-      AppState(
-        mockServiceManager.isolateManager.selectedIsolate,
-      ),
-    );
+    when(
+      mockServiceConnection.appState,
+    ).thenReturn(AppState(mockServiceManager.isolateManager.selectedIsolate));
 
     final mockErrorBadgeManager = MockErrorBadgeManager();
-    when(mockServiceConnection.errorBadgeManager)
-        .thenReturn(mockErrorBadgeManager);
-    when(mockErrorBadgeManager.errorCountNotifier(any))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      mockServiceConnection.errorBadgeManager,
+    ).thenReturn(mockErrorBadgeManager);
+    when(
+      mockErrorBadgeManager.errorCountNotifier(any),
+    ).thenReturn(ValueNotifier<int>(0));
 
     setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(FrameworkController, FrameworkController());
@@ -50,50 +50,48 @@ void main() {
     setGlobal(BannerMessagesController, BannerMessagesController());
   });
 
-  testWidgets(
-    'displays floating debugger controls',
-    (WidgetTester tester) async {
-      final connectedApp = MockConnectedApp();
-      mockConnectedApp(
-        connectedApp,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
-      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
-      when(mockServiceManager.connectedApp).thenReturn(connectedApp);
-      when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-      when(mockServiceConnection.appState).thenReturn(
-        AppState(
-          mockServiceManager.isolateManager.selectedIsolate,
-        ),
-      );
-      final mockDebuggerController = MockDebuggerController();
-      final state = serviceConnection
-          .serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
-      when(state.isPaused).thenReturn(ValueNotifier(true));
-      when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
+  testWidgets('displays floating debugger controls', (
+    WidgetTester tester,
+  ) async {
+    final connectedApp = MockConnectedApp();
+    mockConnectedApp(
+      connectedApp,
+      isFlutterApp: true,
+      isProfileBuild: false,
+      isWebApp: false,
+    );
+    when(mockServiceManager.connectedAppInitialized).thenReturn(true);
+    when(mockServiceManager.connectedApp).thenReturn(connectedApp);
+    when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
+    when(
+      mockServiceConnection.appState,
+    ).thenReturn(AppState(mockServiceManager.isolateManager.selectedIsolate));
+    final mockDebuggerController = MockDebuggerController();
+    final state =
+        serviceConnection.serviceManager.isolateManager.mainIsolateState!
+            as MockIsolateState;
+    when(state.isPaused).thenReturn(ValueNotifier(true));
+    when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
 
-      await tester.pumpWidget(
-        wrapWithControllers(
-          DevToolsScaffold(
-            page: _screen1.screenId,
-            screens: const [_screen1, _screen2],
-          ),
-          debugger: mockDebuggerController,
-          analytics: AnalyticsController(
-            enabled: false,
-            shouldShowConsentMessage: false,
-            consentMessage: 'fake message',
-          ),
-          releaseNotes: ReleaseNotesController(),
+    await tester.pumpWidget(
+      wrapWithControllers(
+        DevToolsScaffold(
+          page: _screen1.screenId,
+          screens: const [_screen1, _screen2],
         ),
-      );
-      expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(_k2), findsNothing);
-      expect(find.byType(FloatingDebuggerControls), findsOneWidget);
-    },
-  );
+        debugger: mockDebuggerController,
+        analytics: AnalyticsController(
+          enabled: false,
+          shouldShowConsentMessage: false,
+          consentMessage: 'fake message',
+        ),
+        releaseNotes: ReleaseNotesController(),
+      ),
+    );
+    expect(find.byKey(_k1), findsOneWidget);
+    expect(find.byKey(_k2), findsNothing);
+    expect(find.byType(FloatingDebuggerControls), findsOneWidget);
+  });
 }
 
 class _TestScreen extends Screen {
@@ -103,12 +101,12 @@ class _TestScreen extends Screen {
     bool showFloatingDebuggerControls = true,
     Key? tabKey,
   }) : super(
-          name,
-          title: name,
-          icon: Icons.computer,
-          tabKey: tabKey,
-          showFloatingDebuggerControls: showFloatingDebuggerControls,
-        );
+         name,
+         title: name,
+         icon: Icons.computer,
+         tabKey: tabKey,
+         showFloatingDebuggerControls: showFloatingDebuggerControls,
+       );
 
   final String name;
   final Key key;

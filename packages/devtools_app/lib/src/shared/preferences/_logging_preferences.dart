@@ -13,8 +13,9 @@ class LoggingPreferencesController extends DisposableController
 
   /// The [LoggingDetailsFormat] to use when displaying a log in the log details
   /// view.
-  final detailsFormat =
-      ValueNotifier<LoggingDetailsFormat>(_defaultDetailsFormat);
+  final detailsFormat = ValueNotifier<LoggingDetailsFormat>(
+    _defaultDetailsFormat,
+  );
 
   /// The active filter tag for the logging screen.
   ///
@@ -35,39 +36,35 @@ class LoggingPreferencesController extends DisposableController
   Future<void> init() async {
     retentionLimit.value =
         int.tryParse(await storage.getValue(_retentionLimitStorageId) ?? '') ??
-            _defaultRetentionLimit;
-    addAutoDisposeListener(
-      retentionLimit,
-      () {
-        storage.setValue(
-          _retentionLimitStorageId,
-          retentionLimit.value.toString(),
-        );
-        ga.select(
-          gac.logging,
-          gac.LoggingEvents.changeRetentionLimit.name,
-          value: retentionLimit.value,
-        );
-      },
-    );
+        _defaultRetentionLimit;
+    addAutoDisposeListener(retentionLimit, () {
+      storage.setValue(
+        _retentionLimitStorageId,
+        retentionLimit.value.toString(),
+      );
+      ga.select(
+        gac.logging,
+        gac.LoggingEvents.changeRetentionLimit.name,
+        value: retentionLimit.value,
+      );
+    });
 
-    final detailsFormatValueFromStorage =
-        await storage.getValue(detailsFormatStorageId);
-    detailsFormat.value = LoggingDetailsFormat.values.firstWhereOrNull(
+    final detailsFormatValueFromStorage = await storage.getValue(
+      detailsFormatStorageId,
+    );
+    detailsFormat.value =
+        LoggingDetailsFormat.values.firstWhereOrNull(
           (value) => detailsFormatValueFromStorage == value.name,
         ) ??
         _defaultDetailsFormat;
-    addAutoDisposeListener(
-      detailsFormat,
-      () {
-        storage.setValue(detailsFormatStorageId, detailsFormat.value.name);
-        ga.select(
-          gac.logging,
-          gac.LoggingEvents.changeDetailsFormat.name,
-          value: detailsFormat.value.index,
-        );
-      },
-    );
+    addAutoDisposeListener(detailsFormat, () {
+      storage.setValue(detailsFormatStorageId, detailsFormat.value.name);
+      ga.select(
+        gac.logging,
+        gac.LoggingEvents.changeDetailsFormat.name,
+        value: detailsFormat.value.index,
+      );
+    });
 
     filterTag.value = await storage.getValue(filterStorageId) ?? '';
     addAutoDisposeListener(

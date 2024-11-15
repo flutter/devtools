@@ -49,10 +49,7 @@ class HeapClassDetails extends StatelessWidget {
           );
         }
 
-        return RetainingPathView(
-          data: pathData,
-          controller: pathController,
-        );
+        return RetainingPathView(data: pathData, controller: pathController);
       },
     );
 
@@ -60,12 +57,8 @@ class HeapClassDetails extends StatelessWidget {
       axis: Axis.horizontal,
       initialFractions: const [0.7, 0.3],
       children: [
-        OutlineDecoration.onlyRight(
-          child: retainingPathsTable,
-        ),
-        OutlineDecoration.onlyLeft(
-          child: selectedPathView,
-        ),
+        OutlineDecoration.onlyRight(child: retainingPathsTable),
+        OutlineDecoration.onlyLeft(child: selectedPathView),
       ],
     );
   }

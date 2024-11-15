@@ -34,17 +34,15 @@ void main() {
 
     test('process response with missing leaf frame', () {
       bool runTest() {
-        final cpuProfileDataWithMissingLeaf =
-            CpuProfileData.fromJson(responseWithMissingLeafFrame);
-        expect(
-          () async {
-            await cpuProfileTransformer.processData(
-              cpuProfileDataWithMissingLeaf,
-              processId: 'test',
-            );
-          },
-          throwsA(const TypeMatcher<AssertionError>()),
+        final cpuProfileDataWithMissingLeaf = CpuProfileData.fromJson(
+          responseWithMissingLeafFrame,
         );
+        expect(() async {
+          await cpuProfileTransformer.processData(
+            cpuProfileDataWithMissingLeaf,
+            processId: 'test',
+          );
+        }, throwsA(const TypeMatcher<AssertionError>()));
         return true;
       }
 

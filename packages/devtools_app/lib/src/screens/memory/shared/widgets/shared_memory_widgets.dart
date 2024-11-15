@@ -73,12 +73,7 @@ class ClassTypeLegend extends StatelessWidget {
       children: [
         const Text('Class type legend:'),
         ...ClassType.values.map(
-          (t) => Row(
-            children: [
-              t.icon,
-              Text(' ${t.aliasDescription}'),
-            ],
-          ),
+          (t) => Row(children: [t.icon, Text(' ${t.aliasDescription}')]),
         ),
       ],
     );

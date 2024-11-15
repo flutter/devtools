@@ -18,15 +18,16 @@ class Devices extends StatelessWidget {
     required Map<String, EditorDevice> devices,
     required this.selectedDeviceId,
     super.key,
-  })  : supportedDevices = {
-          for (final MapEntry(key: id, value: device) in devices.entries)
-            if (device.supported) id: device,
-        },
-        unsupportedDevicePlatformTypes = devices.values
-            .where((device) => !device.supported)
-            .map((device) => device.platformType)
-            .nonNulls
-            .toSet();
+  }) : supportedDevices = {
+         for (final MapEntry(key: id, value: device) in devices.entries)
+           if (device.supported) id: device,
+       },
+       unsupportedDevicePlatformTypes =
+           devices.values
+               .where((device) => !device.supported)
+               .map((device) => device.platformType)
+               .nonNulls
+               .toSet();
 
   final EditorClient editor;
   final Map<String, EditorDevice> supportedDevices;
@@ -39,10 +40,7 @@ class Devices extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Devices',
-          style: theme.textTheme.titleMedium,
-        ),
+        Text('Devices', style: theme.textTheme.titleMedium),
         if (supportedDevices.isEmpty)
           const Text('Connect a device or enable web/desktop platforms.')
         else
@@ -56,10 +54,7 @@ class Devices extends StatelessWidget {
                   isSelected: device.id == selectedDeviceId,
                 ),
               for (final platformType in unsupportedDevicePlatformTypes)
-                _createPlatformTypeEnablerRow(
-                  theme,
-                  platformType,
-                ),
+                _createPlatformTypeEnablerRow(theme, platformType),
             ],
           ),
       ],
@@ -72,9 +67,10 @@ class Devices extends StatelessWidget {
     required bool isSelected,
   }) {
     final backgroundColor = isSelected ? theme.colorScheme.secondary : null;
-    final foregroundColor = isSelected
-        ? theme.colorScheme.onSecondary
-        : theme.colorScheme.onSurface;
+    final foregroundColor =
+        isSelected
+            ? theme.colorScheme.onSecondary
+            : theme.colorScheme.onSurface;
 
     return TableRow(
       decoration: BoxDecoration(color: backgroundColor),

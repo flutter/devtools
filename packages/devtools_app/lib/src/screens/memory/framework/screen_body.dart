@@ -74,13 +74,8 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
               onSave: controller.exportData,
             ),
             const SizedBox(height: intermediateSpacing),
-            MemoryChartPane(
-              chart: controller.chart,
-              keyFocusNode: _focusNode,
-            ),
-            Expanded(
-              child: MemoryTabView(controller),
-            ),
+            MemoryChartPane(chart: controller.chart, keyFocusNode: _focusNode),
+            Expanded(child: MemoryTabView(controller)),
           ],
         );
       },

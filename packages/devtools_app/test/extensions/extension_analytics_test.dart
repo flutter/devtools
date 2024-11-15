@@ -8,82 +8,76 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DevTools extension analytics', () {
-    test(
-      'uses extension name for public package',
-      () {
-        final public = StubDevToolsExtensions.providerExtension;
-        expect(public.isPubliclyHosted, true);
-        expect(public.name, 'provider');
-        expect(public.analyticsSafeName, 'provider');
-        expect(
-          DevToolsExtensionEvents.extensionScreenName(public),
-          'extension-provider',
-        );
-        expect(
-          DevToolsExtensionEvents.extensionFeedback(public),
-          'extensionFeedback-provider',
-        );
-        expect(
-          DevToolsExtensionEvents.extensionEnableManual(public),
-          'extensionEnable-manual-provider',
-        );
-        expect(
-          DevToolsExtensionEvents.extensionEnablePrompt(public),
-          'extensionEnable-prompt-provider',
-        );
-        expect(
-          DevToolsExtensionEvents.extensionDisableManual(public),
-          'extensionDisable-manual-provider',
-        );
+    test('uses extension name for public package', () {
+      final public = StubDevToolsExtensions.providerExtension;
+      expect(public.isPubliclyHosted, true);
+      expect(public.name, 'provider');
+      expect(public.analyticsSafeName, 'provider');
+      expect(
+        DevToolsExtensionEvents.extensionScreenName(public),
+        'extension-provider',
+      );
+      expect(
+        DevToolsExtensionEvents.extensionFeedback(public),
+        'extensionFeedback-provider',
+      );
+      expect(
+        DevToolsExtensionEvents.extensionEnableManual(public),
+        'extensionEnable-manual-provider',
+      );
+      expect(
+        DevToolsExtensionEvents.extensionEnablePrompt(public),
+        'extensionEnable-prompt-provider',
+      );
+      expect(
+        DevToolsExtensionEvents.extensionDisableManual(public),
+        'extensionDisable-manual-provider',
+      );
 
-        expect(
-          DevToolsExtensionEvents.extensionDisablePrompt(public),
-          'extensionDisable-prompt-provider',
-        );
-        expect(
-          DevToolsExtensionEvents.extensionForceReload(public),
-          'extensionForceReload-provider',
-        );
-      },
-    );
+      expect(
+        DevToolsExtensionEvents.extensionDisablePrompt(public),
+        'extensionDisable-prompt-provider',
+      );
+      expect(
+        DevToolsExtensionEvents.extensionForceReload(public),
+        'extensionForceReload-provider',
+      );
+    });
 
-    test(
-      'does not use extension name for private package',
-      () {
-        final private = StubDevToolsExtensions.fooExtension;
-        expect(private.isPubliclyHosted, false);
-        expect(private.name, 'foo');
-        expect(private.analyticsSafeName, 'private');
-        expect(
-          DevToolsExtensionEvents.extensionScreenName(private),
-          'extension-private',
-        );
-        expect(
-          DevToolsExtensionEvents.extensionFeedback(private),
-          'extensionFeedback-private',
-        );
-        expect(
-          DevToolsExtensionEvents.extensionEnableManual(private),
-          'extensionEnable-manual-private',
-        );
-        expect(
-          DevToolsExtensionEvents.extensionEnablePrompt(private),
-          'extensionEnable-prompt-private',
-        );
-        expect(
-          DevToolsExtensionEvents.extensionDisableManual(private),
-          'extensionDisable-manual-private',
-        );
+    test('does not use extension name for private package', () {
+      final private = StubDevToolsExtensions.fooExtension;
+      expect(private.isPubliclyHosted, false);
+      expect(private.name, 'foo');
+      expect(private.analyticsSafeName, 'private');
+      expect(
+        DevToolsExtensionEvents.extensionScreenName(private),
+        'extension-private',
+      );
+      expect(
+        DevToolsExtensionEvents.extensionFeedback(private),
+        'extensionFeedback-private',
+      );
+      expect(
+        DevToolsExtensionEvents.extensionEnableManual(private),
+        'extensionEnable-manual-private',
+      );
+      expect(
+        DevToolsExtensionEvents.extensionEnablePrompt(private),
+        'extensionEnable-prompt-private',
+      );
+      expect(
+        DevToolsExtensionEvents.extensionDisableManual(private),
+        'extensionDisable-manual-private',
+      );
 
-        expect(
-          DevToolsExtensionEvents.extensionDisablePrompt(private),
-          'extensionDisable-prompt-private',
-        );
-        expect(
-          DevToolsExtensionEvents.extensionForceReload(private),
-          'extensionForceReload-private',
-        );
-      },
-    );
+      expect(
+        DevToolsExtensionEvents.extensionDisablePrompt(private),
+        'extensionDisable-prompt-private',
+      );
+      expect(
+        DevToolsExtensionEvents.extensionForceReload(private),
+        'extensionForceReload-private',
+      );
+    });
   });
 }

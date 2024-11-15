@@ -24,12 +24,12 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
         ColumnRenderer<SingleClassData>,
         ColumnHeaderRenderer<SingleClassData> {
   _ClassNameColumn(this.data)
-      : super(
-          'Class',
-          titleTooltip: 'Class name',
-          fixedWidthPx: scaleByFontFactor(200.0),
-          alignment: ColumnAlignment.left,
-        );
+    : super(
+        'Class',
+        titleTooltip: 'Class name',
+        fixedWidthPx: scaleByFontFactor(200.0),
+        alignment: ColumnAlignment.left,
+      );
 
   final ClassesTableSingleData data;
 
@@ -74,12 +74,12 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
 class _InstanceColumn extends ColumnData<SingleClassData>
     implements ColumnRenderer<SingleClassData> {
   _InstanceColumn(this.classData)
-      : super(
-          'Instances',
-          titleTooltip: nonGcableInstancesColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(80.0),
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        'Instances',
+        titleTooltip: nonGcableInstancesColumnTooltip,
+        fixedWidthPx: scaleByFontFactor(80.0),
+        alignment: ColumnAlignment.right,
+      );
 
   final ClassesTableSingleData classData;
 
@@ -108,12 +108,12 @@ class _InstanceColumn extends ColumnData<SingleClassData>
 
 class _ShallowSizeColumn extends ColumnData<SingleClassData> {
   _ShallowSizeColumn()
-      : super(
-          'Shallow Dart Size',
-          titleTooltip: SizeType.shallow.description,
-          fixedWidthPx: scaleByFontFactor(120.0),
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        'Shallow Dart Size',
+        titleTooltip: SizeType.shallow.description,
+        fixedWidthPx: scaleByFontFactor(120.0),
+        alignment: ColumnAlignment.right,
+      );
 
   @override
   int getValue(SingleClassData data) => data.objects.shallowSize;
@@ -122,20 +122,18 @@ class _ShallowSizeColumn extends ColumnData<SingleClassData> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleClassData data) => prettyPrintBytes(
-        getValue(data),
-        includeUnit: true,
-      )!;
+  String getDisplayValue(SingleClassData data) =>
+      prettyPrintBytes(getValue(data), includeUnit: true)!;
 }
 
 class _RetainedSizeColumn extends ColumnData<SingleClassData> {
   _RetainedSizeColumn(this.classData)
-      : super(
-          'Retained Dart Size',
-          titleTooltip: SizeType.retained.description,
-          fixedWidthPx: scaleByFontFactor(130.0),
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        'Retained Dart Size',
+        titleTooltip: SizeType.retained.description,
+        fixedWidthPx: scaleByFontFactor(130.0),
+        alignment: ColumnAlignment.right,
+      );
 
   final ClassesTableSingleData classData;
 
@@ -151,8 +149,10 @@ class _RetainedSizeColumn extends ColumnData<SingleClassData> {
 
     final bytes = prettyPrintRetainedSize(value)!;
 
-    final percents =
-        percent(value / classData.totalHeapSize(), fractionDigits: 0);
+    final percents = percent(
+      value / classData.totalHeapSize(),
+      fractionDigits: 0,
+    );
 
     return '$bytes ($percents)';
   }
@@ -198,10 +198,11 @@ class ClassesTableSingle extends StatelessWidget {
       dataKey: dataKey,
       keyFactory: (e) => Key(e.className.fullName),
       selectionNotifier: classesData.selection,
-      onItemSelected: (_) => ga.select(
-        gac.memory,
-        gac.MemoryEvents.diffClassSingleSelect.name,
-      ),
+      onItemSelected:
+          (_) => ga.select(
+            gac.memory,
+            gac.MemoryEvents.diffClassSingleSelect.name,
+          ),
       defaultSortColumn: _columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
