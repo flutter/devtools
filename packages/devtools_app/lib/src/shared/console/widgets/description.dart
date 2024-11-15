@@ -82,8 +82,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   static double approximateNodeWidth(RemoteDiagnosticsNode? diagnostic) {
     // If we have rendered this node, then we know it's text style,
     // otherwise assume defaultFontSize for the TextStyle.
-    final textStyle =
-        diagnostic?.descriptionTextStyleFromBuild ??
+    final textStyle = diagnostic?.descriptionTextStyleFromBuild ??
         TextStyle(fontSize: defaultFontSize);
 
     final spans = DiagnosticsNodeDescription.buildDescriptionTextSpans(
@@ -189,22 +188,20 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     diagnostic?.descriptionTextStyleFromBuild = textStyle;
 
     final textSpan = TextSpan(
-      children:
-          buildDescriptionTextSpans(
-            description: description,
-            textStyle: textStyle,
-            colorScheme: colorScheme,
-            diagnostic: diagnostic,
-            searchValue: searchValue,
-            nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
-          ).toList(),
+      children: buildDescriptionTextSpans(
+        description: description,
+        textStyle: textStyle,
+        colorScheme: colorScheme,
+        diagnostic: diagnostic,
+        searchValue: searchValue,
+        nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
+      ).toList(),
     );
 
     final diagnosticLocal = diagnostic!;
     final inspectorService = serviceConnection.inspectorService!;
     final isNullValue = description == 'null';
-    final isPrimitiveValue =
-        [
+    final isPrimitiveValue = [
           'StringProperty',
           'IntProperty',
           'DoubleProperty',
@@ -213,12 +210,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         description == 'false';
 
     return HoverCardTooltip.async(
-      enabled:
-          () =>
-              preferences.inspector.hoverEvalModeEnabled.value &&
-              diagnosticLocal.objectGroupApi != null &&
-              !isPrimitiveValue &&
-              !isNullValue,
+      enabled: () =>
+          preferences.inspector.hoverEvalModeEnabled.value &&
+          diagnosticLocal.objectGroupApi != null &&
+          !isPrimitiveValue &&
+          !isNullValue,
       asyncGenerateHoverCardData: ({
         required event,
         required isHoverStale,
@@ -272,10 +268,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final icon =
-        customIconName != null
-            ? RemoteDiagnosticsNode.iconMaker.fromWidgetName(customIconName)
-            : diagnosticLocal.icon;
+    final icon = customIconName != null
+        ? RemoteDiagnosticsNode.iconMaker.fromWidgetName(customIconName)
+        : diagnosticLocal.icon;
 
     final children = <Widget>[];
 
@@ -300,7 +295,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       final showDefaultValueLabel =
           diagnosticLocal.level == DiagnosticLevel.fine &&
-          diagnosticLocal.hasDefaultValue;
+              diagnosticLocal.hasDefaultValue;
 
       // Show the "default" value label at the start if the property name isn't
       // included:
@@ -336,10 +331,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               final green = JsonUtils.getIntMember(properties, 'green');
               final blue = JsonUtils.getIntMember(properties, 'blue');
               String radix(int chan) => chan.toRadixString(16).padLeft(2, '0');
-              description =
-                  alpha == 255
-                      ? '#${radix(red)}${radix(green)}${radix(blue)}'
-                      : '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
+              description = alpha == 255
+                  ? '#${radix(red)}${radix(green)}${radix(blue)}'
+                  : '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
 
               final color = Color.fromARGB(alpha, red, green, blue);
               children.add(_paddedIcon(_colorIconMaker.getCustomIcon(color)));
@@ -486,10 +480,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           text: errorText,
           // When the node is selected, the background will be an error
           // color so don't render the text the same color.
-          style:
-              isSelected
-                  ? DiagnosticsTextStyles.regular(colorScheme)
-                  : DiagnosticsTextStyles.error(colorScheme),
+          style: isSelected
+              ? DiagnosticsTextStyles.regular(colorScheme)
+              : DiagnosticsTextStyles.error(colorScheme),
         ),
       ),
     );
@@ -582,14 +575,14 @@ class DescriptionDisplay extends StatelessWidget {
     this.actionLabel,
     this.actionCallback,
     this.overflow = TextOverflow.ellipsis,
-  }) : assert(
-         multiline ? actionLabel == null : true,
-         'Action labels are not supported for multiline descriptions',
-       ),
-       assert(
-         (actionLabel == null) == (actionCallback == null),
-         'Actions require both a label and a callback',
-       );
+  })  : assert(
+          multiline ? actionLabel == null : true,
+          'Action labels are not supported for multiline descriptions',
+        ),
+        assert(
+          (actionLabel == null) == (actionCallback == null),
+          'Actions require both a label and a callback',
+        );
 
   final TextSpan text;
   final bool multiline;
