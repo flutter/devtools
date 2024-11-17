@@ -21,7 +21,7 @@ class OfflineNetworkData with Serializable {
   /// Creates an instance of [OfflineNetworkData] from a JSON map.
   factory OfflineNetworkData.fromJson(Map<String, Object?> json) {
     final httpRequestJsonList =
-        json[_OfflineDataKeys.httpRequestData.name] as List<Object>?;
+        json[_OfflineDataKeys.httpRequestData.name] as List<Object?>?;
 
     // Deserialize httpRequestData
     final httpRequestData = httpRequestJsonList
@@ -41,7 +41,7 @@ class OfflineNetworkData with Serializable {
 
     // Deserialize socketData
     final socketJsonList =
-        json[_OfflineDataKeys.socketData.name] as List<Object>?;
+        json[_OfflineDataKeys.socketData.name] as List<Object?>?;
     final socketData = socketJsonList
             ?.map((e) {
               if (e is Map<String, Object?>) {
