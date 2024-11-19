@@ -13,6 +13,8 @@ import '../../service/editor/api_classes.dart';
 import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
+import '../ide_shared/property_editor/property_editor_sidebar.dart';
 import 'debug_sessions.dart';
 import 'devices.dart';
 import 'devtools/devtools_view.dart';
@@ -54,7 +56,7 @@ class _EditorSidebarPanelState extends State<EditorSidebarPanel> {
             builder: (context, snapshot) =>
                 switch ((snapshot.connectionState, snapshot.data)) {
               (ConnectionState.done, final editor?) =>
-                _EditorConnectedPanel(editor),
+                _EditorConnectedPanel(editor, dtd: widget.dtd),
               _ => const CenteredCircularProgressIndicator(),
             },
           ),
@@ -66,9 +68,10 @@ class _EditorSidebarPanelState extends State<EditorSidebarPanel> {
 
 /// The panel shown once we know an editor is available.
 class _EditorConnectedPanel extends StatefulWidget {
-  const _EditorConnectedPanel(this.editor);
+  const _EditorConnectedPanel(this.editor, {required this.dtd});
 
   final EditorClient editor;
+  final DartToolingDaemon dtd;
 
   @override
   State<_EditorConnectedPanel> createState() => _EditorConnectedPanelState();
@@ -189,6 +192,11 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
                 DevToolsSidebarOptions(
                   editor: widget.editor,
                   debugSessions: debugSessions,
+                ),
+              if (FeatureFlags.propertyEditor)
+                PropertyEditorSidebar(
+                  editor: widget.editor,
+                  dtd: widget.dtd,
                 ),
             ],
           ),
