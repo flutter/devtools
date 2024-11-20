@@ -80,15 +80,13 @@ class CpuProfileTransformer {
     _setExclusiveSampleCountsAndTags(cpuProfileData);
     cpuProfileData.processed = true;
 
-    // TODO(kenz): investigate why this assert is firing again.
-    // https://github.com/flutter/devtools/issues/1529.
-//    assert(
-//      cpuProfileData.profileMetaData.sampleCount ==
-//          cpuProfileData.cpuProfileRoot.inclusiveSampleCount,
-//      'SampleCount from response (${cpuProfileData.profileMetaData.sampleCount})'
-//      ' != sample count from root '
-//      '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
-//    );
+    assert(
+      cpuProfileData.profileMetaData.sampleCount ==
+          cpuProfileData.cpuProfileRoot.inclusiveSampleCount,
+      'SampleCount from response (${cpuProfileData.profileMetaData.sampleCount})'
+      ' != sample count from root '
+      '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
+    );
 
     // Reset the transformer after processing.
     reset();
