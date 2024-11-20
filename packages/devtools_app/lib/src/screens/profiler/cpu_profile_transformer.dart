@@ -80,13 +80,13 @@ class CpuProfileTransformer {
     _setExclusiveSampleCountsAndTags(cpuProfileData);
     cpuProfileData.processed = true;
 
-   assert(
-     cpuProfileData.profileMetaData.sampleCount ==
-         cpuProfileData.cpuProfileRoot.inclusiveSampleCount,
-     'SampleCount from response (${cpuProfileData.profileMetaData.sampleCount})'
-     ' != sample count from root '
-     '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
-   );
+    assert(
+      cpuProfileData.profileMetaData.sampleCount ==
+          cpuProfileData.cpuProfileRoot.inclusiveSampleCount,
+      'SampleCount from response (${cpuProfileData.profileMetaData.sampleCount})'
+      ' != sample count from root '
+      '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
+    );
 
     // Reset the transformer after processing.
     reset();
