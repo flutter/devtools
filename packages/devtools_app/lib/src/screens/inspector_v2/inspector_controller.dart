@@ -23,6 +23,8 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
@@ -367,6 +369,20 @@ class InspectorController extends DisposableController
     filterErrors();
 
     return _waitForPendingUpdateDone();
+  }
+
+  Future<void> refreshInspector() async {
+    // If the user is force refreshing the inspector before the first load has
+    // completed, this could indicate a slow load time or that the inspector
+    // failed to load the tree once available.
+    if (!firstInspectorTreeLoadCompleted) {
+      // We do not want to complete this timing operation because the force
+      // refresh will skew the results.
+      ga.cancelTimingOperation(InspectorScreen.id, gac.pageReady);
+      ga.select(gac.inspector, gac.refreshEmptyTree);
+      firstInspectorTreeLoadCompleted = true;
+    }
+    await onForceRefresh();
   }
 
   void filterErrors() {

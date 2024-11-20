@@ -213,23 +213,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     ga.select(gac.inspector, gac.refresh);
     unawaited(
       blockWhileInProgress(() async {
-        // If the user is force refreshing the inspector before the first load has
-        // completed, this could indicate a slow load time or that the inspector
-        // failed to load the tree once available.
-        if (!controller.firstInspectorTreeLoadCompleted) {
-          // We do not want to complete this timing operation because the force
-          // refresh will skew the results.
-          ga.cancelTimingOperation(
-            InspectorScreen.id,
-            gac.pageReady,
-          );
-          ga.select(
-            gac.inspector,
-            gac.refreshEmptyTree,
-          );
-          controller.firstInspectorTreeLoadCompleted = true;
-        }
-        await controller.onForceRefresh();
+        await controller.refreshInspector();
       }),
     );
   }
