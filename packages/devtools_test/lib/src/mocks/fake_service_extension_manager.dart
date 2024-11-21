@@ -87,12 +87,13 @@ base class FakeServiceExtensionManager extends Fake
     if (extension != null) {
       final value = _getExtensionValueFromJson(name, valueFromJson);
 
-      final enabled = extension is ToggleableServiceExtension
-          ? value == extension.enabledValue
-          // For extensions that have more than two states
-          // (enabled / disabled), we will always consider them to be
-          // enabled with the current value.
-          : true;
+      final enabled =
+          extension is ToggleableServiceExtension
+              ? value == extension.enabledValue
+              // For extensions that have more than two states
+              // (enabled / disabled), we will always consider them to be
+              // enabled with the current value.
+              : true;
 
       await setServiceExtensionState(
         name,
@@ -148,16 +149,13 @@ base class FakeServiceExtensionManager extends Fake
   }
 
   ValueNotifier<ServiceExtensionState> _serviceExtensionState(String name) {
-    return _serviceExtensionStateController.putIfAbsent(
-      name,
-      () {
-        return ValueNotifier<ServiceExtensionState>(
-          _enabledServiceExtensions.containsKey(name)
-              ? _enabledServiceExtensions[name]!
-              : ServiceExtensionState(enabled: false, value: null),
-        );
-      },
-    );
+    return _serviceExtensionStateController.putIfAbsent(name, () {
+      return ValueNotifier<ServiceExtensionState>(
+        _enabledServiceExtensions.containsKey(name)
+            ? _enabledServiceExtensions[name]!
+            : ServiceExtensionState(enabled: false, value: null),
+      );
+    });
   }
 
   Future<void> _restoreExtensionFromDevice(String name) async {

@@ -20,7 +20,7 @@ import '../test_data/sample_data.dart';
 Future<void> resetHistory() async {
   await (ui.PlatformDispatcher.instance.views.single
           // ignore: avoid-dynamic, necessary here.
-          as dynamic /* EngineFlutterWindow */)
+          as dynamic /* EngineFlutterWindow */ )
       // This dynamic call is necessary as `EngineFlutterWindow` is declared in
       // the web-specific implementation of the Flutter Engine, at
       // `lib/web_ui/lib/src/engine/window.dart` in the Flutter engine
@@ -39,8 +39,9 @@ Future<void> pumpAndConnectDevTools(
 
 Future<void> closeReleaseNotesViewer(WidgetTester tester) async {
   // If the release notes viewer is open, close it.
-  final releaseNotesView =
-      tester.widget<ReleaseNotesViewer>(find.byType(ReleaseNotesViewer));
+  final releaseNotesView = tester.widget<ReleaseNotesViewer>(
+    find.byType(ReleaseNotesViewer),
+  );
   if (releaseNotesView.controller.isVisible.value) {
     final closeReleaseNotesButton = find.descendant(
       of: find.byType(ReleaseNotesViewer),
@@ -147,11 +148,8 @@ Future<void> verifyScreenshot(
 }) async {
   const updateGoldens = bool.fromEnvironment('update_goldens');
   logStatus('verify $screenshotName screenshot');
-  await binding.takeScreenshot(
-    screenshotName,
-    {
-      'update_goldens': updateGoldens,
-      'last_screenshot': lastScreenshot,
-    },
-  );
+  await binding.takeScreenshot(screenshotName, {
+    'update_goldens': updateGoldens,
+    'last_screenshot': lastScreenshot,
+  });
 }
