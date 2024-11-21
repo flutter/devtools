@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/widgets.dart';
 
@@ -38,11 +39,13 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
       builder: (context, _, _) {
         final node = selectedNode;
         if (node == null) {
-          return const Center(
-            child: Text(
-              'Select a widget to view its layout and properties.',
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.clip,
+          return const RoundedOutlinedBorder(
+            child: Center(
+              child: Text(
+                'Select a widget to view its layout and properties.',
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.clip,
+              ),
             ),
           );
         }
