@@ -3,21 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../service/editor/editor_client.dart';
-
 class PropertyEditorSidebar extends StatelessWidget {
-  const PropertyEditorSidebar({
-    required this.editor,
-    required this.dtd,
-    super.key,
-  });
-
-  final EditorClient editor;
-  final DartToolingDaemon dtd;
+  const PropertyEditorSidebar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -215,9 +205,9 @@ class _WidgetProperty {
     this.isDefault = false,
     this.errorText,
     this.options,
-    // ignore: unused_element, TODO(elliette): Support colors.
+    // ignore: unused_element, TODO(https://github.com/flutter/devtools/issues/8532): Support colors.
     this.swatches,
-    // ignore: unused_element, TODO(elliette): Support objects.
+    // ignore: unused_element, TODO(https://github.com/flutter/devtools/issues/8532): Support objects.
     this.properties,
   });
 
@@ -238,6 +228,7 @@ class _WidgetProperty {
   String get valueDisplay => displayValue ?? value.toString();
 }
 
+// TODO(https://github.com/flutter/devtools/issues/8531): Connect to DTD and delete hard-coded properties.
 const _titleProperty = _WidgetProperty(
   name: 'title',
   value: 'Hello world!',

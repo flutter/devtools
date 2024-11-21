@@ -56,7 +56,7 @@ class _EditorSidebarPanelState extends State<EditorSidebarPanel> {
             builder: (context, snapshot) =>
                 switch ((snapshot.connectionState, snapshot.data)) {
               (ConnectionState.done, final editor?) =>
-                _EditorConnectedPanel(editor, dtd: widget.dtd),
+                _EditorConnectedPanel(editor),
               _ => const CenteredCircularProgressIndicator(),
             },
           ),
@@ -68,10 +68,9 @@ class _EditorSidebarPanelState extends State<EditorSidebarPanel> {
 
 /// The panel shown once we know an editor is available.
 class _EditorConnectedPanel extends StatefulWidget {
-  const _EditorConnectedPanel(this.editor, {required this.dtd});
+  const _EditorConnectedPanel(this.editor);
 
   final EditorClient editor;
-  final DartToolingDaemon dtd;
 
   @override
   State<_EditorConnectedPanel> createState() => _EditorConnectedPanelState();
@@ -194,10 +193,7 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
                   debugSessions: debugSessions,
                 ),
               if (FeatureFlags.propertyEditor)
-                PropertyEditorSidebar(
-                  editor: widget.editor,
-                  dtd: widget.dtd,
-                ),
+                const PropertyEditorSidebar(),
             ],
           ),
         ),
