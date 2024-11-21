@@ -38,8 +38,9 @@ abstract class ServiceExtensionInterface {
 /// A subclass of [extensions.ToggleableServiceExtension] that includes metadata
 /// for displaying and interacting with a toggleable service extension in the
 /// DevTools UI.
-class ToggleableServiceExtensionDescription<T extends Object> extends extensions
-    .ToggleableServiceExtension implements ServiceExtensionInterface {
+class ToggleableServiceExtensionDescription<T extends Object>
+    extends extensions.ToggleableServiceExtension
+    implements ServiceExtensionInterface {
   ToggleableServiceExtensionDescription._({
     required super.extension,
     required super.enabledValue,
@@ -56,10 +57,10 @@ class ToggleableServiceExtensionDescription<T extends Object> extends extensions
     this.iconAsset,
     this.iconData,
     this.shortTitle,
-  })  : displayValues =
-            [enabledValue, disabledValue].map((v) => v.toString()).toList(),
-        assert((iconAsset == null) != (iconData == null)),
-        assert((documentationUrl == null) == (gaDocsItem == null));
+  }) : displayValues =
+           [enabledValue, disabledValue].map((v) => v.toString()).toList(),
+       assert((iconAsset == null) != (iconData == null)),
+       assert((documentationUrl == null) == (gaDocsItem == null));
 
   factory ToggleableServiceExtensionDescription.from(
     extensions.ToggleableServiceExtension<T> extension, {
@@ -149,10 +150,10 @@ class ServiceExtensionDescription<T> extends extensions.ServiceExtension<T>
     this.documentationUrl,
     this.shortTitle,
     this.gaDocsItem,
-  })  : displayValues =
-            displayValues ?? values.map((v) => v.toString()).toList(),
-        assert((iconAsset == null) != (iconData == null)),
-        assert((documentationUrl == null) == (gaDocsItem == null));
+  }) : displayValues =
+           displayValues ?? values.map((v) => v.toString()).toList(),
+       assert((iconAsset == null) != (iconData == null)),
+       assert((documentationUrl == null) == (gaDocsItem == null));
 
   factory ServiceExtensionDescription.from(
     extensions.ServiceExtension<T> extension, {
@@ -294,8 +295,9 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   gaDocsItem: gac.PerformanceDocs.trackWidgetBuildsDocs.name,
 );
 
-final profileUserWidgetBuilds =
-    ToggleableServiceExtensionDescription<bool>.from(
+final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<
+  bool
+>.from(
   extensions.profileUserWidgetBuilds,
   title: 'Trace user-created widget builds',
   iconAsset: 'icons/trackwidget-white.png',
@@ -308,31 +310,33 @@ final profileUserWidgetBuilds =
 
 final profileRenderObjectPaints =
     ToggleableServiceExtensionDescription<bool>.from(
-  extensions.profileRenderObjectPaints,
-  title: 'Trace paints',
-  iconData: Icons.format_paint,
-  gaScreenName: gac.performance,
-  gaItem: gac.PerformanceEvents.trackPaints.name,
-  description: 'Adds an event to the timeline for every RenderObject painted.',
-  tooltip: '',
-  documentationUrl:
-      'https://docs.flutter.dev/tools/devtools/performance#track-paints',
-  gaDocsItem: gac.PerformanceDocs.trackPaintsDocs.name,
-);
+      extensions.profileRenderObjectPaints,
+      title: 'Trace paints',
+      iconData: Icons.format_paint,
+      gaScreenName: gac.performance,
+      gaItem: gac.PerformanceEvents.trackPaints.name,
+      description:
+          'Adds an event to the timeline for every RenderObject painted.',
+      tooltip: '',
+      documentationUrl:
+          'https://docs.flutter.dev/tools/devtools/performance#track-paints',
+      gaDocsItem: gac.PerformanceDocs.trackPaintsDocs.name,
+    );
 
 final profileRenderObjectLayouts =
     ToggleableServiceExtensionDescription<bool>.from(
-  extensions.profileRenderObjectLayouts,
-  title: 'Trace layouts',
-  iconData: Icons.auto_awesome_mosaic,
-  gaScreenName: gac.performance,
-  gaItem: gac.PerformanceEvents.trackLayouts.name,
-  description: 'Adds an event to the timeline for every RenderObject layout.',
-  tooltip: '',
-  documentationUrl:
-      'https://docs.flutter.dev/tools/devtools/performance#track-layouts',
-  gaDocsItem: gac.PerformanceDocs.trackLayoutsDocs.name,
-);
+      extensions.profileRenderObjectLayouts,
+      title: 'Trace layouts',
+      iconData: Icons.auto_awesome_mosaic,
+      gaScreenName: gac.performance,
+      gaItem: gac.PerformanceEvents.trackLayouts.name,
+      description:
+          'Adds an event to the timeline for every RenderObject layout.',
+      tooltip: '',
+      documentationUrl:
+          'https://docs.flutter.dev/tools/devtools/performance#track-layouts',
+      gaDocsItem: gac.PerformanceDocs.trackLayoutsDocs.name,
+    );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>.from(
   extensions.repaintRainbow,
@@ -405,8 +409,9 @@ option disabled, try to reduce the use of opacity effects in your app.''',
   gaDocsItem: gac.PerformanceDocs.disableOpacityLayersDocs.name,
 );
 
-final disablePhysicalShapeLayers =
-    ToggleableServiceExtensionDescription<bool>.from(
+final disablePhysicalShapeLayers = ToggleableServiceExtensionDescription<
+  bool
+>.from(
   extensions.disablePhysicalShapeLayers,
   title: 'Render Physical Shape layers',
   iconData: Icons.format_shapes,
@@ -424,17 +429,18 @@ use of physical modeling effects in your app.''',
 
 final httpEnableTimelineLogging =
     ToggleableServiceExtensionDescription<bool>.from(
-  extensions.httpEnableTimelineLogging,
-  title: 'Whether HTTP timeline logging is enabled',
-  iconData: Icons.http,
-  gaScreenName: null,
-  gaItem: null,
-  tooltip: 'Toggle HTTP timeline logging',
-);
+      extensions.httpEnableTimelineLogging,
+      title: 'Whether HTTP timeline logging is enabled',
+      iconData: Icons.http,
+      gaScreenName: null,
+      gaItem: null,
+      tooltip: 'Toggle HTTP timeline logging',
+    );
 
 // Legacy extension to show the inspector and enable inspector select mode.
-final toggleOnDeviceWidgetInspector =
-    ToggleableServiceExtensionDescription<bool>.from(
+final toggleOnDeviceWidgetInspector = ToggleableServiceExtensionDescription<
+  bool
+>.from(
   extensions.toggleOnDeviceWidgetInspector,
   // Technically this enables the on-device widget inspector but for older
   // versions of package:flutter it makes sense to describe this extension as
@@ -473,13 +479,13 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>.from(
 /// mode is triggered.
 final enableOnDeviceInspector =
     ToggleableServiceExtensionDescription<bool>.from(
-  extensions.enableOnDeviceInspector,
-  title: 'Enable on-device inspector',
-  iconAsset: 'icons/general/locate@2x.png',
-  gaScreenName: gac.inspector,
-  gaItem: gac.enableOnDeviceInspector,
-  tooltip: 'Toggle on-device inspector',
-);
+      extensions.enableOnDeviceInspector,
+      title: 'Enable on-device inspector',
+      iconAsset: 'icons/general/locate@2x.png',
+      gaScreenName: gac.inspector,
+      gaItem: gac.enableOnDeviceInspector,
+      tooltip: 'Toggle on-device inspector',
+    );
 
 final structuredErrors = ToggleableServiceExtensionDescription<bool>.from(
   extensions.structuredErrors,
@@ -503,8 +509,9 @@ summary of these counts using the Rebuild Stats tool.''',
   // TODO(https://github.com/flutter/website/issues/10666): link docs
 );
 
-final profilePlatformChannels =
-    ToggleableServiceExtensionDescription<bool>.from(
+final profilePlatformChannels = ToggleableServiceExtensionDescription<
+  bool
+>.from(
   extensions.profilePlatformChannels,
   title: 'Trace platform channels',
   iconAsset: 'icons/trackwidget-white.png',

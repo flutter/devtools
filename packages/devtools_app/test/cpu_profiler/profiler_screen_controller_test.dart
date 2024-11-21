@@ -12,8 +12,9 @@ void main() {
   group('ProfilerScreenController', () {
     late ProfilerScreenController controller;
     final fakeServiceConnection = FakeServiceConnectionManager();
-    when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterAppNow)
-        .thenReturn(false);
+    when(
+      fakeServiceConnection.serviceManager.connectedApp!.isFlutterAppNow,
+    ).thenReturn(false);
 
     setUp(() {
       setGlobal(
@@ -36,27 +37,18 @@ void main() {
 
     test('disposes', () {
       controller.dispose();
-      expect(
-        () {
-          controller.recordingNotifier.addListener(() {});
-        },
-        throwsA(anything),
-      );
+      expect(() {
+        controller.recordingNotifier.addListener(() {});
+      }, throwsA(anything));
 
-      expect(
-        () {
-          controller.cpuProfilerController.dataNotifier.addListener(() {});
-        },
-        throwsA(anything),
-      );
+      expect(() {
+        controller.cpuProfilerController.dataNotifier.addListener(() {});
+      }, throwsA(anything));
 
-      expect(
-        () {
-          controller.cpuProfilerController.selectedCpuStackFrameNotifier
-              .addListener(() {});
-        },
-        throwsA(anything),
-      );
+      expect(() {
+        controller.cpuProfilerController.selectedCpuStackFrameNotifier
+            .addListener(() {});
+      }, throwsA(anything));
     });
   });
 }

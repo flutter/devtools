@@ -20,7 +20,7 @@ String _adaptRootPackageForFilter(String? rootPackage) {
 
 class ClassFilterButton extends StatelessWidget {
   ClassFilterButton(this.data, {super.key})
-      : _rootPackage = _adaptRootPackageForFilter(data.rootPackage);
+    : _rootPackage = _adaptRootPackageForFilter(data.rootPackage);
 
   final ClassFilterData data;
   final String _rootPackage;
@@ -32,19 +32,17 @@ class ClassFilterButton extends StatelessWidget {
       builder: (context, filter, _) {
         return DevToolsFilterButton(
           onPressed: () {
-            ga.select(
-              gac.memory,
-              gac.MemoryEvents.diffSnapshotFilter.name,
-            );
+            ga.select(gac.memory, gac.MemoryEvents.diffSnapshotFilter.name);
 
             unawaited(
               showDialog(
                 context: context,
-                builder: (context) => ClassFilterDialog(
-                  filter,
-                  onChanged: data.onChanged,
-                  rootPackage: _rootPackage,
-                ),
+                builder:
+                    (context) => ClassFilterDialog(
+                      filter,
+                      onChanged: data.onChanged,
+                      rootPackage: _rootPackage,
+                    ),
               ),
             );
           },
@@ -114,27 +112,24 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
         );
 
     Widget textField(TextEditingController controller) => Padding(
-          padding: EdgeInsets.only(left: textFieldLeftPadding),
-          child: TextField(
-            style: Theme.of(context).regularTextStyle,
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.all(denseSpacing),
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.multiline,
-            maxLines: null,
-            controller: controller,
-          ),
-        );
+      padding: EdgeInsets.only(left: textFieldLeftPadding),
+      child: TextField(
+        style: Theme.of(context).regularTextStyle,
+        decoration: const InputDecoration(
+          contentPadding: EdgeInsets.all(denseSpacing),
+          border: OutlineInputBorder(),
+        ),
+        keyboardType: TextInputType.multiline,
+        maxLines: null,
+        controller: controller,
+      ),
+    );
 
     return StateUpdateDialog(
       title: 'Filter Classes and Packages',
       helpBuilder: _helpBuilder,
       onResetDefaults: () {
-        ga.select(
-          gac.memory,
-          gac.MemoryEvents.diffSnapshotFilterReset.name,
-        );
+        ga.select(gac.memory, gac.MemoryEvents.diffSnapshotFilterReset.name);
         setState(() => _loadStateFromFilter(ClassFilter.theDefault()));
       },
       onApply: () {
@@ -176,10 +171,7 @@ Widget _helpBuilder(BuildContext context) {
         (t) => Row(
           children: [
             t.icon,
-            Text(
-              ' ${t.alias} - for ${t.aliasDescription}',
-              style: textStyle,
-            ),
+            Text(' ${t.alias} - for ${t.aliasDescription}', style: textStyle),
             CopyToClipboardControl(
               dataProvider: () => t.alias,
               size: tableIconSize,
@@ -191,7 +183,8 @@ Widget _helpBuilder(BuildContext context) {
   );
 }
 
-const _helpText = 'Choose and customize the filter.\n'
+const _helpText =
+    'Choose and customize the filter.\n'
     'List full or partial class names separated by new lines. For example:\n\n'
     '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
     '  MyClass\n'

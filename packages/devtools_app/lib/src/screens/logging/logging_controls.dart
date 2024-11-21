@@ -38,14 +38,15 @@ class LoggingControls extends StatelessWidget {
           // TODO(kenz): fix focus issue when state is refreshed
           child: ValueListenableBuilder(
             valueListenable: controller.filteredData,
-            builder: (context, _, _) => SearchField<LoggingController>(
-              searchFieldWidth:
-                  isScreenWiderThan(context, _loggingMinVerboseWidth)
-                      ? wideSearchFieldWidth
-                      : defaultSearchFieldWidth,
-              searchController: controller,
-              searchFieldEnabled: controller.filteredData.value.isNotEmpty,
-            ),
+            builder:
+                (context, _, _) => SearchField<LoggingController>(
+                  searchFieldWidth:
+                      isScreenWiderThan(context, _loggingMinVerboseWidth)
+                          ? wideSearchFieldWidth
+                          : defaultSearchFieldWidth,
+                  searchController: controller,
+                  searchFieldEnabled: controller.filteredData.value.isNotEmpty,
+                ),
           ),
         ),
         const SizedBox(width: denseSpacing),
@@ -57,9 +58,10 @@ class LoggingControls extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         CopyToClipboardControl(
-          dataProvider: () => controller.filteredData.value
-              .map((e) => '${e.timestamp} [${e.kind}] ${e.prettyPrinted()}')
-              .joinWithTrailing('\n'),
+          dataProvider:
+              () => controller.filteredData.value
+                  .map((e) => '${e.timestamp} [${e.kind}] ${e.prettyPrinted()}')
+                  .joinWithTrailing('\n'),
           tooltip: 'Copy filtered logs',
         ),
         const SizedBox(width: denseSpacing),
@@ -91,8 +93,9 @@ class LoggingSettingsDialog extends StatefulWidget {
 class _LoggingSettingsDialogState extends State<LoggingSettingsDialog> {
   static const _retentionLimitHeight = 48.0;
 
-  final temporaryRetentionLimit =
-      ValueNotifier<int>(preferences.logging.retentionLimit.value);
+  final temporaryRetentionLimit = ValueNotifier<int>(
+    preferences.logging.retentionLimit.value,
+  );
 
   @override
   void dispose() {
@@ -112,7 +115,8 @@ class _LoggingSettingsDialogState extends State<LoggingSettingsDialog> {
             height: _retentionLimitHeight,
             child: PositiveIntegerSetting(
               title: 'Limit for the number of logs retained.',
-              subTitle: 'Once the limit is reached, the first '
+              subTitle:
+                  'Once the limit is reached, the first '
                   '$defaultLogBufferReductionSize logs will be dropped.',
               notifier: temporaryRetentionLimit,
               minimumValue: defaultLogBufferReductionSize,

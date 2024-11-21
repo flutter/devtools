@@ -42,9 +42,7 @@ class NetworkService {
   /// would have occurred, so the refresh time is not updated. Otherwise,
   /// [NetworkController.lastHttpDataRefreshTime] is updated to the current
   /// time.
-  void updateLastHttpDataRefreshTime({
-    bool alreadyRecordingHttp = false,
-  }) {
+  void updateLastHttpDataRefreshTime({bool alreadyRecordingHttp = false}) {
     if (!alreadyRecordingHttp) {
       networkController.lastHttpDataRefreshTime = DateTime.now();
     }
@@ -128,8 +126,8 @@ class NetworkService {
     if (service == null) return;
     await service.forEachIsolate((isolate) async {
       final isolateId = isolate.id!;
-      final socketProfilingAvailable =
-          await service.isSocketProfilingAvailableWrapper(isolateId);
+      final socketProfilingAvailable = await service
+          .isSocketProfilingAvailableWrapper(isolateId);
       if (socketProfilingAvailable) {
         final future = service.clearSocketProfileWrapper(isolateId);
         // The above call won't complete immediately if the isolate is paused, so
@@ -148,8 +146,8 @@ class NetworkService {
     if (service == null) return;
     await service.forEachIsolate((isolate) async {
       final isolateId = isolate.id!;
-      final socketProfilingAvailable =
-          await service.isSocketProfilingAvailableWrapper(isolateId);
+      final socketProfilingAvailable = await service
+          .isSocketProfilingAvailableWrapper(isolateId);
       if (socketProfilingAvailable) {
         final future = service.socketProfilingEnabledWrapper(isolateId, state);
         // The above call won't complete immediately if the isolate is paused, so

@@ -34,8 +34,10 @@ mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
 
   set inclusiveSampleCount(int? count) => _inclusiveSampleCount = count;
 
-  late double totalTimeRatio =
-      safeDivide(inclusiveSampleCount, profileMetaData.sampleCount);
+  late double totalTimeRatio = safeDivide(
+    inclusiveSampleCount,
+    profileMetaData.sampleCount,
+  );
 
   late Duration totalTime = Duration(
     microseconds:
@@ -43,23 +45,21 @@ mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
             .round(),
   );
 
-  late double selfTimeRatio =
-      safeDivide(exclusiveSampleCount, profileMetaData.sampleCount);
+  late double selfTimeRatio = safeDivide(
+    exclusiveSampleCount,
+    profileMetaData.sampleCount,
+  );
 
   late Duration selfTime = Duration(
     microseconds:
         (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds).round(),
   );
 
-  double get inclusiveSampleRatio => safeDivide(
-        inclusiveSampleCount,
-        profileMetaData.sampleCount,
-      );
+  double get inclusiveSampleRatio =>
+      safeDivide(inclusiveSampleCount, profileMetaData.sampleCount);
 
-  double get exclusiveSampleRatio => safeDivide(
-        exclusiveSampleCount,
-        profileMetaData.sampleCount,
-      );
+  double get exclusiveSampleRatio =>
+      safeDivide(exclusiveSampleCount, profileMetaData.sampleCount);
 
   /// Returns the number of samples this data node is a part of.
   ///
@@ -96,10 +96,7 @@ mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
 }
 
 class ProfileMetaData {
-  const ProfileMetaData({
-    required this.sampleCount,
-    required this.time,
-  });
+  const ProfileMetaData({required this.sampleCount, required this.time});
 
   final int sampleCount;
 
@@ -297,12 +294,7 @@ class MethodAndSourceDisplay extends StatelessWidget {
           ).buildTextSpan(context),
         );
       } else {
-        sourceTextSpans.add(
-          TextSpan(
-            text: sourceDisplay,
-            style: fontStyle,
-          ),
-        );
+        sourceTextSpans.add(TextSpan(text: sourceDisplay, style: fontStyle));
       }
     }
     final richText = RichText(
@@ -319,9 +311,7 @@ class MethodAndSourceDisplay extends StatelessWidget {
       // does not extend all the way to the end of the row.
       return Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(child: richText),
-        ],
+        children: [Flexible(child: richText)],
       );
     }
     return richText;

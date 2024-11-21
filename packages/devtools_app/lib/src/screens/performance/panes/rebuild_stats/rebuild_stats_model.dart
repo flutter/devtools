@@ -307,7 +307,7 @@ class RebuildLocation {
 /// the last route change.
 class RebuildLocationStats {
   RebuildLocationStats(this.location, {required int numStats})
-      : buildCounts = List<int>.filled(numStats, 0);
+    : buildCounts = List<int>.filled(numStats, 0);
   final Location location;
   final List<int> buildCounts;
 }
@@ -321,14 +321,12 @@ List<RebuildLocationStats> combineStats(
     final statsForIndex = rebuildStats[i];
     for (final entry in statsForIndex) {
       output
-          .putIfAbsent(
-            entry.location,
-            () => RebuildLocationStats(
-              entry.location,
-              numStats: numStats,
-            ),
-          )
-          .buildCounts[i] = entry.buildCount;
+              .putIfAbsent(
+                entry.location,
+                () => RebuildLocationStats(entry.location, numStats: numStats),
+              )
+              .buildCounts[i] =
+          entry.buildCount;
     }
   }
   return output.values.toList(growable: false);

@@ -12,17 +12,15 @@ import 'cpu_profile_columns.dart';
 
 /// A table of the CPU's top-down call tree.
 class CpuCallTreeTable extends StatelessWidget {
-  const CpuCallTreeTable({
-    required this.dataRoots,
-    super.key,
-  });
+  const CpuCallTreeTable({required this.dataRoots, super.key});
 
   static final methodColumn = MethodAndSourceColumn();
 
   static final selfTimeColumn = SelfTimeColumn(titleTooltip: selfTimeTooltip);
 
-  static final totalTimeColumn =
-      TotalTimeColumn(titleTooltip: totalTimeTooltip);
+  static final totalTimeColumn = TotalTimeColumn(
+    titleTooltip: totalTimeTooltip,
+  );
 
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
     totalTimeColumn,

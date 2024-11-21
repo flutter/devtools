@@ -62,23 +62,21 @@ void main() {
   });
 
   group('screenshot tests', () {
-    testWidgetsWithWindowSize(
-      'initial load',
-      windowSize,
-      (WidgetTester tester) async {
-        expect(serviceConnection.serviceManager.service, equals(env.service));
-        expect(serviceConnection.serviceManager.isolateManager, isNotNull);
+    testWidgetsWithWindowSize('initial load', windowSize, (
+      WidgetTester tester,
+    ) async {
+      expect(serviceConnection.serviceManager.service, equals(env.service));
+      expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
-        await _loadInspectorUI(tester);
+      await _loadInspectorUI(tester);
 
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_initial_load.png',
-          ),
-        );
-      },
-    );
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/integration_inspector_v2_initial_load.png',
+        ),
+      );
+    });
 
     testWidgetsWithWindowSize(
       'loads after a hot-restart',
@@ -112,35 +110,33 @@ void main() {
       skip: true, // https://github.com/flutter/devtools/issues/8179
     );
 
-    testWidgetsWithWindowSize(
-      'widget selection',
-      windowSize,
-      (WidgetTester tester) async {
-        await _loadInspectorUI(tester);
+    testWidgetsWithWindowSize('widget selection', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await _loadInspectorUI(tester);
 
-        // Select the Center widget (row index #16)
-        await tester.tap(find.richText('Center'));
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_select_center.png',
-          ),
-        );
+      // Select the Center widget (row index #16)
+      await tester.tap(find.richText('Center'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/integration_inspector_v2_select_center.png',
+        ),
+      );
 
-        // Verify the properties are displayed:
-        verifyPropertyIsVisible(
-          name: 'alignment',
-          value: 'Alignment.center',
-          tester: tester,
-        );
-        verifyPropertyIsVisible(
-          name: 'dependencies',
-          value: '[Directionality]',
-          tester: tester,
-        );
-      },
-    );
+      // Verify the properties are displayed:
+      verifyPropertyIsVisible(
+        name: 'alignment',
+        value: 'Alignment.center',
+        tester: tester,
+      );
+      verifyPropertyIsVisible(
+        name: 'dependencies',
+        value: '[Directionality]',
+        tester: tester,
+      );
+    });
 
     testWidgetsWithWindowSize(
       'expand and collapse implementation widgets',
@@ -194,111 +190,102 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize(
-      'search for implementation widgets',
-      windowSize,
-      (WidgetTester tester) async {
-        await _loadInspectorUI(tester);
-
-        // Before searching, confirm the HeroControllerScope is hidden:
-        final hideableNodeFinder = findNodeMatching('HeroControllerScope');
-        expect(hideableNodeFinder, findsNothing);
-
-        // Search for the HeroControllerScope:
-        final searchButtonFinder = find.ancestor(
-          of: find.byIcon(Icons.search),
-          matching: find.byType(ToolbarAction),
-        );
-        await tester.tap(searchButtonFinder);
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await tester.enterText(find.byType(TextField), 'HeroControllerScope');
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await tester.tap(find.byIcon(Icons.close));
-        await tester.pumpAndSettle(inspectorChangeSettleTime);
-
-        // Confirm the HeroControllerScope is visible and selected:
-        expect(hideableNodeFinder, findsOneWidget);
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_hideable_widget_selected_from_search.png',
-          ),
-        );
-      },
-    );
-  });
-
-  testWidgetsWithWindowSize(
-    'hide all implementation widgets',
-    windowSize,
-    (WidgetTester tester) async {
+    testWidgetsWithWindowSize('search for implementation widgets', windowSize, (
+      WidgetTester tester,
+    ) async {
       await _loadInspectorUI(tester);
 
-      // Give time for the initial animation to complete.
+      // Before searching, confirm the HeroControllerScope is hidden:
+      final hideableNodeFinder = findNodeMatching('HeroControllerScope');
+      expect(hideableNodeFinder, findsNothing);
+
+      // Search for the HeroControllerScope:
+      final searchButtonFinder = find.ancestor(
+        of: find.byIcon(Icons.search),
+        matching: find.byType(ToolbarAction),
+      );
+      await tester.tap(searchButtonFinder);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await tester.enterText(find.byType(TextField), 'HeroControllerScope');
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-      // Confirm the hidden widgets are visible behind affordances like "X more
-      // widgets".
-      expect(
-        find.richTextContaining('more widgets...'),
-        findsWidgets,
-      );
-
-      // Tap the "Show Implementation Widgets" button (selected by default).
-      final showImplementationWidgetsButton = find.descendant(
-        of: find.byType(DevToolsToggleButton),
-        matching: find.text('Show Implementation Widgets'),
-      );
-      expect(showImplementationWidgetsButton, findsOneWidget);
-      await tester.tap(showImplementationWidgetsButton);
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
-
-      // Confirm that the hidden widgets are no longer visible.
-      expect(find.richTextContaining('more widgets...'), findsNothing);
+      // Confirm the HeroControllerScope is visible and selected:
+      expect(hideableNodeFinder, findsOneWidget);
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../test_infra/goldens/integration_inspector_v2_implementation_widgets_hidden.png',
+          '../test_infra/goldens/integration_inspector_v2_hideable_widget_selected_from_search.png',
         ),
       );
+    });
+  });
 
-      // Refresh the tree.
-      final refreshTreeButton = find.descendant(
-        of: find.byType(ToolbarAction),
-        matching: find.byIcon(Icons.refresh),
-      );
+  testWidgetsWithWindowSize('hide all implementation widgets', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await _loadInspectorUI(tester);
 
-      await tester.tap(refreshTreeButton);
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
+    // Give time for the initial animation to complete.
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-      // Confirm that the hidden widgets are still not visible.
-      expect(find.richTextContaining('more widgets...'), findsNothing);
-    },
-  );
+    // Confirm the hidden widgets are visible behind affordances like "X more
+    // widgets".
+    expect(find.richTextContaining('more widgets...'), findsWidgets);
 
-  testWidgetsWithWindowSize(
-    'can revert to legacy inspector',
-    windowSize,
-    (WidgetTester tester) async {
-      await _loadInspectorUI(tester);
+    // Tap the "Show Implementation Widgets" button (selected by default).
+    final showImplementationWidgetsButton = find.descendant(
+      of: find.byType(DevToolsToggleButton),
+      matching: find.text('Show Implementation Widgets'),
+    );
+    expect(showImplementationWidgetsButton, findsOneWidget);
+    await tester.tap(showImplementationWidgetsButton);
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-      // Select the Center widget (row index #16)
-      await tester.tap(find.richText('Center'));
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
+    // Confirm that the hidden widgets are no longer visible.
+    expect(find.richTextContaining('more widgets...'), findsNothing);
+    await expectLater(
+      find.byType(InspectorScreenBody),
+      matchesDevToolsGolden(
+        '../test_infra/goldens/integration_inspector_v2_implementation_widgets_hidden.png',
+      ),
+    );
 
-      // Disable Inspector V2:
-      await toggleV2Inspector(tester);
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
+    // Refresh the tree.
+    final refreshTreeButton = find.descendant(
+      of: find.byType(ToolbarAction),
+      matching: find.byIcon(Icons.refresh),
+    );
 
-      // Verify the legacy inspector is visible:
-      await expectLater(
-        find.byType(legacy.InspectorScreenBody),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/integration_inspector_v2_revert_to_legacy.png',
-        ),
-      );
-    },
-  );
+    await tester.tap(refreshTreeButton);
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+    // Confirm that the hidden widgets are still not visible.
+    expect(find.richTextContaining('more widgets...'), findsNothing);
+  });
+
+  testWidgetsWithWindowSize('can revert to legacy inspector', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await _loadInspectorUI(tester);
+
+    // Select the Center widget (row index #16)
+    await tester.tap(find.richText('Center'));
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+    // Disable Inspector V2:
+    await toggleV2Inspector(tester);
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+    // Verify the legacy inspector is visible:
+    await expectLater(
+      find.byType(legacy.InspectorScreenBody),
+      matchesDevToolsGolden(
+        '../test_infra/goldens/integration_inspector_v2_revert_to_legacy.png',
+      ),
+    );
+  });
 
   // Test to verify https://github.com/flutter/devtools/issues/8487 is fixed.
   testWidgetsWithWindowSize(
@@ -361,8 +348,9 @@ void main() {
       ];
 
       await _loadInspectorUI(tester);
-      final state = tester.state(find.byType(InspectorScreenBody))
-          as InspectorScreenBodyState;
+      final state =
+          tester.state(find.byType(InspectorScreenBody))
+              as InspectorScreenBodyState;
       final rowsInTree = state.controller.inspectorTree.rowsInTree.value;
 
       for (final row in rowsInTree) {
@@ -382,8 +370,9 @@ void main() {
           isTrue,
         );
         expect(
-          detailKeys
-              .none((detail) => extraneousDetailsForTreeNode.contains(detail)),
+          detailKeys.none(
+            (detail) => extraneousDetailsForTreeNode.contains(detail),
+          ),
           isTrue,
         );
       }
@@ -391,60 +380,54 @@ void main() {
   );
 
   group('widget errors', () {
-    testWidgetsWithWindowSize(
-      'show navigator and error labels',
-      windowSize,
-      (WidgetTester tester) async {
-        await env.setupEnvironment(
-          config: const FlutterRunConfiguration(
-            withDebugger: true,
-            entryScript: 'lib/overflow_errors.dart',
-          ),
-        );
-        expect(serviceConnection.serviceManager.service, equals(env.service));
-        expect(serviceConnection.serviceManager.isolateManager, isNotNull);
+    testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await env.setupEnvironment(
+        config: const FlutterRunConfiguration(
+          withDebugger: true,
+          entryScript: 'lib/overflow_errors.dart',
+        ),
+      );
+      expect(serviceConnection.serviceManager.service, equals(env.service));
+      expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
-        final screen = InspectorScreen();
-        await tester.pumpWidget(
-          wrapWithInspectorControllers(
-            Builder(builder: screen.build),
-          ),
-        );
-        await tester.pumpAndSettle(const Duration(seconds: 1));
-        await _waitForFlutterFrame(tester);
+      final screen = InspectorScreen();
+      await tester.pumpWidget(
+        wrapWithInspectorControllers(Builder(builder: screen.build)),
+      );
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await _waitForFlutterFrame(tester);
 
-        await env.flutter!.hotReload();
-        // Give time for the initial animation to complete.
+      await env.flutter!.hotReload();
+      // Give time for the initial animation to complete.
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/integration_inspector_v2_errors_1_initial_load.png',
+        ),
+      );
+
+      // Navigate so one of the errors is selected.
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
         await tester.pumpAndSettle(inspectorChangeSettleTime);
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_errors_1_initial_load.png',
-          ),
-        );
-
-        // Navigate so one of the errors is selected.
-        for (var i = 0; i < 2; i++) {
-          await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
-          await tester.pumpAndSettle(inspectorChangeSettleTime);
-        }
-        await expectLater(
-          find.byType(InspectorScreenBody),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/integration_inspector_v2_errors_2_error_selected.png',
-          ),
-        );
-      },
-    );
+      }
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/integration_inspector_v2_errors_2_error_selected.png',
+        ),
+      );
+    });
   });
 }
 
 Future<void> _loadInspectorUI(WidgetTester tester) async {
   final screen = InspectorScreen();
   await tester.pumpWidget(
-    wrapWithInspectorControllers(
-      Builder(builder: screen.build),
-    ),
+    wrapWithInspectorControllers(Builder(builder: screen.build)),
   );
   await tester.pump(const Duration(seconds: 1));
   await _waitForFlutterFrame(tester);
@@ -456,8 +439,9 @@ Future<void> _waitForFlutterFrame(
   WidgetTester tester, {
   bool isInitialLoad = true,
 }) async {
-  final state = tester.state(find.byType(InspectorScreenBody))
-      as InspectorScreenBodyState;
+  final state =
+      tester.state(find.byType(InspectorScreenBody))
+          as InspectorScreenBodyState;
   final controller = state.controller;
   while (!controller.flutterAppFrameReady) {
     // On the initial load, we might have instantiated the controller after the
@@ -471,9 +455,9 @@ Future<void> _waitForFlutterFrame(
 }
 
 Finder findNodeMatching(String text) => find.ancestor(
-      of: find.richTextContaining(text),
-      matching: find.byType(DescriptionDisplay),
-    );
+  of: find.richTextContaining(text),
+  matching: find.byType(DescriptionDisplay),
+);
 
 Finder findExpandCollapseButtonForNode({
   required String nodeDescription,

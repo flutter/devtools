@@ -21,23 +21,24 @@ enum StandaloneScreenType {
   Widget get screen {
     return switch (this) {
       StandaloneScreenType.vsCodeFlutterPanel => const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: CenteredMessage(
-            message: 'The Flutter sidebar for this SDK requires v3.96 or '
-                'newer of the Dart VS Code extension',
-          ),
+        padding: EdgeInsets.all(8.0),
+        child: CenteredMessage(
+          message:
+              'The Flutter sidebar for this SDK requires v3.96 or '
+              'newer of the Dart VS Code extension',
         ),
+      ),
       StandaloneScreenType.editorSidebar => ValueListenableBuilder(
-          // TODO(dantup): Add a timeout here so if dtdManager.connection
-          //  doesn't complete after some period we can give some kind of
-          //  useful message.
-          valueListenable: dtdManager.connection,
-          builder: (context, data, _) {
-            return data == null
-                ? const CenteredCircularProgressIndicator()
-                : EditorSidebarPanel(data);
-          },
-        ),
+        // TODO(dantup): Add a timeout here so if dtdManager.connection
+        //  doesn't complete after some period we can give some kind of
+        //  useful message.
+        valueListenable: dtdManager.connection,
+        builder: (context, data, _) {
+          return data == null
+              ? const CenteredCircularProgressIndicator()
+              : EditorSidebarPanel(data);
+        },
+      ),
     };
   }
 }

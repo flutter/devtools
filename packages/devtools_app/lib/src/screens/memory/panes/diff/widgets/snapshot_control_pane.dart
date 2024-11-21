@@ -29,10 +29,7 @@ class SnapshotControlPane extends StatelessWidget {
         children: [
           Row(
             children: [
-              _DiffDropdown(
-                current: current,
-                controller: controller,
-              ),
+              _DiffDropdown(current: current, controller: controller),
               const SizedBox(width: defaultSpacing),
               DownloadButton(
                 tooltip: 'Download data in CSV format',
@@ -47,9 +44,7 @@ class SnapshotControlPane extends StatelessWidget {
           ),
           if (current.heap!.footprint != null)
             Expanded(
-              child: _SnapshotSizeView(
-                footprint: current.heap!.footprint!,
-              ),
+              child: _SnapshotSizeView(footprint: current.heap!.footprint!),
             ),
         ],
       );
@@ -59,10 +54,7 @@ class SnapshotControlPane extends StatelessWidget {
 }
 
 class _DiffDropdown extends StatelessWidget {
-  _DiffDropdown({
-    required this.current,
-    required this.controller,
-  }) {
+  _DiffDropdown({required this.current, required this.controller}) {
     final list = controller.core.snapshots.value;
     final diffWith = current.diffWith.value;
     // Check if diffWith was deleted from list.
@@ -78,47 +70,47 @@ class _DiffDropdown extends StatelessWidget {
       controller.core.snapshots.value
           .whereType<SnapshotDataItem>()
           .where((item) => item.isProcessed)
-          .map(
-        (item) {
-          return DropdownMenuItem<SnapshotDataItem>(
-            value: item,
-            child: Text(item == current ? '-' : item.name),
-          );
-        },
-      ).toList();
+          .map((item) {
+            return DropdownMenuItem<SnapshotDataItem>(
+              value: item,
+              child: Text(item == current ? '-' : item.name),
+            );
+          })
+          .toList();
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SnapshotDataItem?>(
       valueListenable: current.diffWith,
-      builder: (_, diffWith, _) => Row(
-        children: [
-          const Text('Diff with:'),
-          const SizedBox(width: defaultSpacing),
-          RoundedDropDownButton<SnapshotDataItem>(
-            isDense: true,
-            value: current.diffWith.value ?? current,
-            onChanged: (SnapshotDataItem? value) {
-              late SnapshotDataItem? newDiffWith;
-              if ((value ?? current) == current) {
-                ga.select(
-                  gac.memory,
-                  gac.MemoryEvents.diffSnapshotDiffSelectOff.name,
-                );
-                newDiffWith = null;
-              } else {
-                ga.select(
-                  gac.memory,
-                  gac.MemoryEvents.diffSnapshotDiffSelect.name,
-                );
-                newDiffWith = value;
-              }
-              controller.setDiffing(current, newDiffWith);
-            },
-            items: items(),
+      builder:
+          (_, diffWith, _) => Row(
+            children: [
+              const Text('Diff with:'),
+              const SizedBox(width: defaultSpacing),
+              RoundedDropDownButton<SnapshotDataItem>(
+                isDense: true,
+                value: current.diffWith.value ?? current,
+                onChanged: (SnapshotDataItem? value) {
+                  late SnapshotDataItem? newDiffWith;
+                  if ((value ?? current) == current) {
+                    ga.select(
+                      gac.memory,
+                      gac.MemoryEvents.diffSnapshotDiffSelectOff.name,
+                    );
+                    newDiffWith = null;
+                  } else {
+                    ga.select(
+                      gac.memory,
+                      gac.MemoryEvents.diffSnapshotDiffSelect.name,
+                    );
+                    newDiffWith = value;
+                  }
+                  controller.setDiffing(current, newDiffWith);
+                },
+                items: items(),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
@@ -137,7 +129,8 @@ class _SnapshotSizeView extends StatelessWidget {
     return Text(
       items.entries
           .map<String>(
-            (e) => '${e.key}: '
+            (e) =>
+                '${e.key}: '
                 '${prettyPrintBytes(e.value, includeUnit: true, kbFractionDigits: 0)}',
           )
           // TODO(polina-c): consider using vertical divider instead of text.

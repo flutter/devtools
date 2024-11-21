@@ -15,9 +15,10 @@ Widget dimensionDescription(
   final text = Text.rich(
     description,
     textAlign: TextAlign.center,
-    style: overflow
-        ? overflowingDimensionIndicatorTextStyle(colorScheme)
-        : dimensionIndicatorTextStyle,
+    style:
+        overflow
+            ? overflowingDimensionIndicatorTextStyle(colorScheme)
+            : dimensionIndicatorTextStyle,
     overflow: TextOverflow.ellipsis,
   );
   if (overflow) {

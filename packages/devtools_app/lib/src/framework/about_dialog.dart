@@ -33,12 +33,11 @@ class DevToolsAboutDialog extends StatelessWidget {
               SelectableText('DevTools version $devToolsVersion'),
               const Text(' - '),
               InkWell(
-                child: Text(
-                  'release notes',
-                  style: theme.linkTextStyle,
-                ),
-                onTap: () =>
-                    unawaited(releaseNotesController.openLatestReleaseNotes()),
+                child: Text('release notes', style: theme.linkTextStyle),
+                onTap:
+                    () => unawaited(
+                      releaseNotesController.openLatestReleaseNotes(),
+                    ),
               ),
             ],
           ),
@@ -60,17 +59,11 @@ class DevToolsAboutDialog extends StatelessWidget {
             ],
           ),
           const Wrap(
-            children: [
-              Text('connect with us on '),
-              _DiscordLink(),
-              Text('.'),
-            ],
+            children: [Text('connect with us on '), _DiscordLink(), Text('.')],
           ),
         ],
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }
@@ -135,18 +128,19 @@ class _DiscordLink extends StatelessWidget {
 
 class OpenAboutAction extends ScaffoldAction {
   OpenAboutAction({super.key, super.color})
-      : super(
-          icon: Icons.help_outline,
-          tooltip: 'About DevTools',
-          onPressed: (context) {
-            unawaited(
-              showDialog(
-                context: context,
-                builder: (context) => DevToolsAboutDialog(
-                  Provider.of<ReleaseNotesController>(context),
-                ),
-              ),
-            );
-          },
-        );
+    : super(
+        icon: Icons.help_outline,
+        tooltip: 'About DevTools',
+        onPressed: (context) {
+          unawaited(
+            showDialog(
+              context: context,
+              builder:
+                  (context) => DevToolsAboutDialog(
+                    Provider.of<ReleaseNotesController>(context),
+                  ),
+            ),
+          );
+        },
+      );
 }

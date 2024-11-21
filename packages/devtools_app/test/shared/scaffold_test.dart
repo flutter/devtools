@@ -26,15 +26,17 @@ void main() {
         mockServiceConnection.serviceManager as MockServiceManager;
     when(mockServiceManager.service).thenReturn(null);
     when(mockServiceManager.connectedAppInitialized).thenReturn(false);
-    when(mockServiceManager.connectedState).thenReturn(
-      ValueNotifier<ConnectedState>(const ConnectedState(false)),
-    );
+    when(
+      mockServiceManager.connectedState,
+    ).thenReturn(ValueNotifier<ConnectedState>(const ConnectedState(false)));
 
     final mockErrorBadgeManager = MockErrorBadgeManager();
-    when(mockServiceConnection.errorBadgeManager)
-        .thenReturn(mockErrorBadgeManager);
-    when(mockErrorBadgeManager.errorCountNotifier(any))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      mockServiceConnection.errorBadgeManager,
+    ).thenReturn(mockErrorBadgeManager);
+    when(
+      mockErrorBadgeManager.errorCountNotifier(any),
+    ).thenReturn(ValueNotifier<int>(0));
 
     setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(FrameworkController, FrameworkController());
@@ -162,19 +164,18 @@ void main() {
     },
   );
 
-  testWidgets(
-    'displays tabs with only one screen',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapScaffold(
-          DevToolsScaffold(page: _screen1.screenId, screens: const [_screen1]),
-        ),
-      );
-      expect(find.byType(DevToolsAppBar), findsOneWidget);
-      expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(_t1), findsOneWidget);
-    },
-  );
+  testWidgets('displays tabs with only one screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapScaffold(
+        DevToolsScaffold(page: _screen1.screenId, screens: const [_screen1]),
+      ),
+    );
+    expect(find.byType(DevToolsAppBar), findsOneWidget);
+    expect(find.byKey(_k1), findsOneWidget);
+    expect(find.byKey(_t1), findsOneWidget);
+  });
 
   testWidgets('displays only the selected screen', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -203,39 +204,37 @@ void main() {
     expect(find.byKey(_k2), findsNothing);
   });
 
-  testWidgets(
-    'displays the requested initial page',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapScaffold(
-          DevToolsScaffold(
-            screens: const [_screen1, _screen2],
-            page: _screen2.screenId,
-          ),
+  testWidgets('displays the requested initial page', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapScaffold(
+        DevToolsScaffold(
+          screens: const [_screen1, _screen2],
+          page: _screen2.screenId,
         ),
-      );
-      expect(find.byType(DevToolsAppBar), findsOneWidget);
+      ),
+    );
+    expect(find.byType(DevToolsAppBar), findsOneWidget);
 
-      expect(find.byKey(_k1), findsNothing);
-      expect(find.byKey(_k2), findsOneWidget);
-    },
-  );
+    expect(find.byKey(_k1), findsNothing);
+    expect(find.byKey(_k2), findsOneWidget);
+  });
 
-  testWidgets(
-    'hides the app bar for EmbedMode.embedOne',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapScaffold(
-          DevToolsScaffold(
-            screens: const [_screen1, _screen2],
-            page: _screen2.screenId,
-            embedMode: EmbedMode.embedOne,
-          ),
+  testWidgets('hides the app bar for EmbedMode.embedOne', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapScaffold(
+        DevToolsScaffold(
+          screens: const [_screen1, _screen2],
+          page: _screen2.screenId,
+          embedMode: EmbedMode.embedOne,
         ),
-      );
-      expect(find.byType(DevToolsAppBar), findsNothing);
-    },
-  );
+      ),
+    );
+    expect(find.byType(DevToolsAppBar), findsNothing);
+  });
 
   testWidgets(
     'hides the app bar for EmbedMode.embedMany with a single simple screen',
@@ -252,46 +251,44 @@ void main() {
     },
   );
 
-  testWidgets(
-    'shows the app bar for EmbedMode.embedMany',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapScaffold(
-          DevToolsScaffold(
-            screens: const [_screen2],
-            page: _screen2.screenId,
-            embedMode: EmbedMode.embedMany,
-          ),
+  testWidgets('shows the app bar for EmbedMode.embedMany', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapScaffold(
+        DevToolsScaffold(
+          screens: const [_screen2],
+          page: _screen2.screenId,
+          embedMode: EmbedMode.embedMany,
         ),
-      );
-      expect(find.byType(DevToolsAppBar), findsOneWidget);
-    },
-  );
+      ),
+    );
+    expect(find.byType(DevToolsAppBar), findsOneWidget);
+  });
 
-  testWidgets(
-    'uses empty actions as default when embedded',
-    (WidgetTester tester) async {
-      var scaffold = DevToolsScaffold(
-        screens: const [_screen1, _screen2],
-        page: _screen1.screenId,
-      );
-      expect(scaffold.actions.length, 4);
+  testWidgets('uses empty actions as default when embedded', (
+    WidgetTester tester,
+  ) async {
+    var scaffold = DevToolsScaffold(
+      screens: const [_screen1, _screen2],
+      page: _screen1.screenId,
+    );
+    expect(scaffold.actions.length, 4);
 
-      scaffold = DevToolsScaffold(
-        screens: const [_screen1, _screen2],
-        page: _screen1.screenId,
-        embedMode: EmbedMode.embedOne,
-      );
-      expect(scaffold.actions, isEmpty);
+    scaffold = DevToolsScaffold(
+      screens: const [_screen1, _screen2],
+      page: _screen1.screenId,
+      embedMode: EmbedMode.embedOne,
+    );
+    expect(scaffold.actions, isEmpty);
 
-      scaffold = DevToolsScaffold(
-        screens: const [_screen1, _screen2],
-        page: _screen1.screenId,
-        embedMode: EmbedMode.embedMany,
-      );
-      expect(scaffold.actions, isEmpty);
-    },
-  );
+    scaffold = DevToolsScaffold(
+      screens: const [_screen1, _screen2],
+      page: _screen1.screenId,
+      embedMode: EmbedMode.embedMany,
+    );
+    expect(scaffold.actions, isEmpty);
+  });
 }
 
 class _TestScreen extends Screen {
@@ -301,12 +298,12 @@ class _TestScreen extends Screen {
     bool showFloatingDebuggerControls = true,
     Key? tabKey,
   }) : super(
-          name,
-          title: name,
-          icon: Icons.computer,
-          tabKey: tabKey,
-          showFloatingDebuggerControls: showFloatingDebuggerControls,
-        );
+         name,
+         title: name,
+         icon: Icons.computer,
+         tabKey: tabKey,
+         showFloatingDebuggerControls: showFloatingDebuggerControls,
+       );
 
   final String name;
   final Key key;

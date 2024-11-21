@@ -19,7 +19,8 @@ EditorDebugSession generateDebugSession({
     flutterMode: flutterMode,
     flutterDeviceId: deviceId,
     debuggerType: debuggerType,
-    projectRootPath: projectRootPath ??
+    projectRootPath:
+        projectRootPath ??
         (Platform.isWindows ? r'C:\mock\root\path' : '/mock/root/path'),
   );
 }

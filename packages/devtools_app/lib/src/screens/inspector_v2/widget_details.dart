@@ -47,10 +47,7 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
           );
         }
 
-        return DetailsTable(
-          controller: controller,
-          node: node,
-        );
+        return DetailsTable(controller: controller, node: node);
       },
     );
   }

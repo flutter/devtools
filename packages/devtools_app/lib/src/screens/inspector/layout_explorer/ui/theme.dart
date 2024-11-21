@@ -133,12 +133,7 @@ Widget buildUnderline() {
   return Container(
     height: 1.0,
     decoration: const BoxDecoration(
-      border: Border(
-        bottom: BorderSide(
-          color: textColor,
-          width: 0.0,
-        ),
-      ),
+      border: Border(bottom: BorderSide(color: textColor, width: 0.0)),
     ),
   );
 }

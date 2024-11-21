@@ -51,8 +51,10 @@ class SidePanelViewerState extends State<SidePanelViewer>
     super.initState();
 
     visibilityController = longAnimationController(this);
-    visibilityAnimation =
-        Tween<double>(begin: 1.0, end: 0).animate(visibilityController);
+    visibilityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0,
+    ).animate(visibilityController);
 
     _initListeners();
   }
@@ -160,9 +162,7 @@ class SidePanel extends AnimatedWidget {
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
           borderRadius: defaultBorderRadius,
-          side: BorderSide(
-            color: theme.focusColor,
-          ),
+          side: BorderSide(color: theme.focusColor),
         ),
         child: Column(
           children: [
@@ -180,12 +180,13 @@ class SidePanel extends AnimatedWidget {
             markdownData.isNullOrEmpty
                 ? Text(textIfMarkdownDataEmpty ?? '')
                 : Expanded(
-                    child: Markdown(
-                      data: markdownData!,
-                      onTapLink: (text, url, title) =>
-                          unawaited(launchUrlWithErrorHandling(url!)),
-                    ),
+                  child: Markdown(
+                    data: markdownData!,
+                    onTapLink:
+                        (text, url, title) =>
+                            unawaited(launchUrlWithErrorHandling(url!)),
                   ),
+                ),
           ],
         ),
       ),

@@ -13,10 +13,7 @@ import 'utils.dart';
 
 /// A dialog, that reports unexpected error and allows to copy details and create issue.
 class UnexpectedErrorDialog extends StatelessWidget {
-  const UnexpectedErrorDialog({
-    super.key,
-    required this.additionalInfo,
-  });
+  const UnexpectedErrorDialog({super.key, required this.additionalInfo});
 
   final String additionalInfo;
 
@@ -26,29 +23,28 @@ class UnexpectedErrorDialog extends StatelessWidget {
 
     return DevToolsDialog(
       title: const Text('Unexpected Error'),
-      content: Text(
-        additionalInfo,
-        style: theme.fixedFontStyle,
-      ),
+      content: Text(additionalInfo, style: theme.fixedFontStyle),
       actions: [
         DialogTextButton(
           child: const Text('Copy details'),
-          onPressed: () => unawaited(
-            copyToClipboard(
-              additionalInfo,
-              successMessage: 'Error details copied to clipboard',
-            ),
-          ),
+          onPressed:
+              () => unawaited(
+                copyToClipboard(
+                  additionalInfo,
+                  successMessage: 'Error details copied to clipboard',
+                ),
+              ),
         ),
         DialogTextButton(
           child: const Text('Create issue'),
-          onPressed: () => unawaited(
-            launchUrlWithErrorHandling(
-              devToolsEnvironmentParameters
-                  .issueTrackerLink(additionalInfo: additionalInfo)
-                  .url,
-            ),
-          ),
+          onPressed:
+              () => unawaited(
+                launchUrlWithErrorHandling(
+                  devToolsEnvironmentParameters
+                      .issueTrackerLink(additionalInfo: additionalInfo)
+                      .url,
+                ),
+              ),
         ),
         const DialogCloseButton(),
       ],

@@ -41,16 +41,15 @@ void main() {
       );
     });
 
-    testWidgets(
-      'builds dominator tree by default',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(callGraphWithDominators));
-        expect(find.text('Dominator Tree'), findsOneWidget);
-        expect(find.text('Call Graph'), findsNothing);
-        expect(find.byType(DominatorTree), findsOneWidget);
-        expect(find.byType(CallGraphView), findsNothing);
-      },
-    );
+    testWidgets('builds dominator tree by default', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(wrap(callGraphWithDominators));
+      expect(find.text('Dominator Tree'), findsOneWidget);
+      expect(find.text('Call Graph'), findsNothing);
+      expect(find.byType(DominatorTree), findsOneWidget);
+      expect(find.byType(CallGraphView), findsNothing);
+    });
 
     testWidgets('builds call graph', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(callGraphWithDominators));
@@ -92,18 +91,14 @@ void main() {
       expect(find.text('From'), findsOneWidget);
       expect(find.text('To'), findsOneWidget);
 
-      final fromTable = find
-          .byType(FlatTable<CallGraphNode>)
-          .evaluate()
-          .first
-          .widget as FlatTable;
+      final fromTable =
+          find.byType(FlatTable<CallGraphNode>).evaluate().first.widget
+              as FlatTable;
       expect(fromTable.data, isEmpty);
 
-      final toTable = find
-          .byType(FlatTable<CallGraphNode>)
-          .evaluate()
-          .last
-          .widget as FlatTable;
+      final toTable =
+          find.byType(FlatTable<CallGraphNode>).evaluate().last.widget
+              as FlatTable;
       expect(toTable.data.length, equals(17));
     });
 
@@ -114,27 +109,28 @@ void main() {
       expect(find.text('From'), findsOneWidget);
       expect(find.text('To'), findsOneWidget);
 
-      var fromTable = find
-          .byType(FlatTable<CallGraphNode>)
-          .evaluate()
-          .first
-          .widget as FlatTable;
+      var fromTable =
+          find.byType(FlatTable<CallGraphNode>).evaluate().first.widget
+              as FlatTable;
       expect(fromTable.data, isEmpty);
 
-      var toTable = find.byType(FlatTable<CallGraphNode>).evaluate().last.widget
-          as FlatTable;
+      var toTable =
+          find.byType(FlatTable<CallGraphNode>).evaluate().last.widget
+              as FlatTable;
       expect(toTable.data.length, equals(17));
 
       // Tap to re-root call graph.
       await tester.tap(find.richText('dart:math'));
       await tester.pumpAndSettle();
 
-      fromTable = find.byType(FlatTable<CallGraphNode>).evaluate().first.widget
-          as FlatTable;
+      fromTable =
+          find.byType(FlatTable<CallGraphNode>).evaluate().first.widget
+              as FlatTable;
       expect(fromTable.data.length, equals(3));
 
-      toTable = find.byType(FlatTable<CallGraphNode>).evaluate().last.widget
-          as FlatTable;
+      toTable =
+          find.byType(FlatTable<CallGraphNode>).evaluate().last.widget
+              as FlatTable;
       expect(toTable.data.length, equals(1));
     });
   });
@@ -155,11 +151,13 @@ void main() {
       expect(find.byKey(DominatorTree.dominatorTreeTableKey), findsOneWidget);
       expect(find.text('Package'), findsOneWidget);
 
-      final treeTable = find
-          .byKey(DominatorTree.dominatorTreeTableKey)
-          .evaluate()
-          .first
-          .widget as TreeTable;
+      final treeTable =
+          find
+                  .byKey(DominatorTree.dominatorTreeTableKey)
+                  .evaluate()
+                  .first
+                  .widget
+              as TreeTable;
       expect(treeTable.dataRoots.length, equals(1));
 
       final root = treeTable.dataRoots.first;
@@ -174,15 +172,18 @@ void main() {
     testWidgets('expands tree to selected node', (WidgetTester tester) async {
       dominatorTree = DominatorTree(
         dominatorTreeRoot: DominatorTreeNode.from(callGraph.root.dominatorRoot),
-        selectedNode: callGraph.root.dominated
-            .firstWhere((node) => node.display == 'package:code_size_package'),
+        selectedNode: callGraph.root.dominated.firstWhere(
+          (node) => node.display == 'package:code_size_package',
+        ),
       );
       await tester.pumpWidget(wrap(dominatorTree));
-      final treeTable = find
-          .byKey(DominatorTree.dominatorTreeTableKey)
-          .evaluate()
-          .first
-          .widget as TreeTable;
+      final treeTable =
+          find
+                  .byKey(DominatorTree.dominatorTreeTableKey)
+                  .evaluate()
+                  .first
+                  .widget
+              as TreeTable;
 
       final root = treeTable.dataRoots.first;
       expect(root.isExpanded, isTrue);

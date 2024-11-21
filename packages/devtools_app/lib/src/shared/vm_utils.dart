@@ -41,13 +41,10 @@ Future<InstanceRef?> findInstance(
     isolateId,
     classId,
     preferences.memory.refLimit.value,
-  ))
-      .instances
-      ?.firstWhereOrNull(
-        (instance) =>
-            (instance is InstanceRef) &&
-            (instance.identityHashCode == hashCode),
-      );
+  )).instances?.firstWhereOrNull(
+    (instance) =>
+        (instance is InstanceRef) && (instance.identityHashCode == hashCode),
+  );
 
   if (result is InstanceRef) return result;
   return null;

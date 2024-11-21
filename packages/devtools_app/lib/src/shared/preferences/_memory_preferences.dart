@@ -24,63 +24,42 @@ class MemoryPreferencesController extends DisposableController
   static const _refLimitStorageId = 'memory.refLimit';
 
   Future<void> init() async {
-    addAutoDisposeListener(
-      androidCollectionEnabled,
-      () {
-        storage.setValue(
-          _androidCollectionEnabledStorageId,
-          androidCollectionEnabled.value.toString(),
-        );
-        if (androidCollectionEnabled.value) {
-          ga.select(
-            gac.memory,
-            gac.MemoryEvents.androidChart.name,
-          );
-        }
-      },
-    );
+    addAutoDisposeListener(androidCollectionEnabled, () {
+      storage.setValue(
+        _androidCollectionEnabledStorageId,
+        androidCollectionEnabled.value.toString(),
+      );
+      if (androidCollectionEnabled.value) {
+        ga.select(gac.memory, gac.MemoryEvents.androidChart.name);
+      }
+    });
     androidCollectionEnabled.value = await boolValueFromStorage(
       _androidCollectionEnabledStorageId,
       defaultsTo: false,
     );
 
-    addAutoDisposeListener(
-      showChart,
-      () {
-        storage.setValue(
-          _showChartStorageId,
-          showChart.value.toString(),
-        );
+    addAutoDisposeListener(showChart, () {
+      storage.setValue(_showChartStorageId, showChart.value.toString());
 
-        ga.select(
-          gac.memory,
-          showChart.value
-              ? gac.MemoryEvents.showChart.name
-              : gac.MemoryEvents.hideChart.name,
-        );
-      },
-    );
+      ga.select(
+        gac.memory,
+        showChart.value
+            ? gac.MemoryEvents.showChart.name
+            : gac.MemoryEvents.hideChart.name,
+      );
+    });
     showChart.value = await boolValueFromStorage(
       _showChartStorageId,
       defaultsTo: true,
     );
 
-    addAutoDisposeListener(
-      refLimit,
-      () {
-        storage.setValue(
-          _refLimitStorageId,
-          refLimit.value.toString(),
-        );
+    addAutoDisposeListener(refLimit, () {
+      storage.setValue(_refLimitStorageId, refLimit.value.toString());
 
-        ga.select(
-          gac.memory,
-          gac.MemoryEvents.browseRefLimit.name,
-        );
-      },
-    );
+      ga.select(gac.memory, gac.MemoryEvents.browseRefLimit.name);
+    });
     refLimit.value =
         int.tryParse(await storage.getValue(_refLimitStorageId) ?? '') ??
-            _defaultRefLimit;
+        _defaultRefLimit;
   }
 }

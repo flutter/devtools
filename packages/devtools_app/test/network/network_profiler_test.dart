@@ -122,233 +122,225 @@ void main() {
       expect(controller.selectedRequest.value, isNull);
     }
 
-    testWidgetsWithWindowSize(
-      'builds proper content for state',
-      windowSize,
-      (WidgetTester tester) async {
-        controller = NetworkController();
-        await pumpNetworkScreen(tester);
+    testWidgetsWithWindowSize('builds proper content for state', windowSize, (
+      WidgetTester tester,
+    ) async {
+      controller = NetworkController();
+      await pumpNetworkScreen(tester);
 
-        await loadRequestsAndCheck(tester);
+      await loadRequestsAndCheck(tester);
 
-        expectNoSelection();
+      expectNoSelection();
 
-        Future<void> validateHeadersTab(DartIOHttpRequestData data) async {
-          // Switch to headers tab.
+      Future<void> validateHeadersTab(DartIOHttpRequestData data) async {
+        // Switch to headers tab.
+        await tester.tap(
+          find.descendant(
+            of: find.byType(DevToolsTab),
+            matching: find.text('Headers'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(NetworkRequestOverviewView), findsNothing);
+        expect(find.byType(HttpRequestHeadersView), findsOneWidget);
+        expect(find.byType(HttpResponseView), findsNothing);
+        expect(find.byType(HttpRequestCookiesView), findsNothing);
+
+        // TODO(kenz): move the headers tab validation into its own testing
+        // group (see NetworkRequestOverviewView test group).
+
+        // There should be three tiles: general, response headers, and request
+        // headers.
+        expect(find.byType(ExpansionTile), findsNWidgets(3));
+
+        // Check contents of general.
+        final ExpansionTile generalTile = tester.widget(
+          find.byKey(HttpRequestHeadersView.generalKey),
+        );
+
+        final numGeneralEntries = data.general.length;
+        expect(generalTile.children.length, numGeneralEntries);
+
+        // Check contents of request headers.
+        final ExpansionTile requestsTile = tester.widget(
+          find.byKey(HttpRequestHeadersView.requestHeadersKey),
+        );
+        final numRequestHeaders = data.requestHeaders?.length ?? 0;
+        expect(requestsTile.children.length, numRequestHeaders);
+
+        // Check contents of response headers.
+        final ExpansionTile responsesTile = tester.widget(
+          find.byKey(HttpRequestHeadersView.responseHeadersKey),
+        );
+        final numResponseHeaders = data.responseHeaders?.length ?? 0;
+        expect(responsesTile.children.length, numResponseHeaders);
+      }
+
+      Future<void> validateResponseTab(DartIOHttpRequestData data) async {
+        if (data.responseBody != null) {
+          // Switch to response tab.
           await tester.tap(
             find.descendant(
               of: find.byType(DevToolsTab),
-              matching: find.text('Headers'),
+              matching: find.text('Response'),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.byType(HttpResponseTrailingDropDown), findsOneWidget);
+          expect(find.byType(HttpViewTrailingCopyButton), findsOneWidget);
+          expect(find.byType(NetworkRequestOverviewView), findsNothing);
+          expect(find.byType(HttpRequestHeadersView), findsNothing);
+          expect(find.byType(HttpResponseView), findsOneWidget);
+          expect(find.byType(HttpRequestCookiesView), findsNothing);
+        }
+      }
+
+      Future<void> validateOverviewTab() async {
+        // Switch to overview tab.
+        await tester.tap(
+          find.descendant(
+            of: find.byType(DevToolsTab),
+            matching: find.text('Overview'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(NetworkRequestOverviewView), findsOneWidget);
+        expect(find.byType(HttpRequestHeadersView), findsNothing);
+        expect(find.byType(HttpResponseView), findsNothing);
+        expect(find.byType(HttpRequestCookiesView), findsNothing);
+      }
+
+      Future<void> validateCookiesTab(DartIOHttpRequestData data) async {
+        final httpRequest =
+            controller.selectedRequest.value as DartIOHttpRequestData;
+        final hasCookies = httpRequest.hasCookies;
+
+        if (hasCookies) {
+          // Switch to cookies tab.
+          await tester.tap(
+            find.descendant(
+              of: find.byType(DevToolsTab),
+              matching: find.text('Cookies'),
             ),
           );
           await tester.pumpAndSettle();
 
           expect(find.byType(NetworkRequestOverviewView), findsNothing);
-          expect(find.byType(HttpRequestHeadersView), findsOneWidget);
-          expect(find.byType(HttpResponseView), findsNothing);
-          expect(find.byType(HttpRequestCookiesView), findsNothing);
-
-          // TODO(kenz): move the headers tab validation into its own testing
-          // group (see NetworkRequestOverviewView test group).
-
-          // There should be three tiles: general, response headers, and request
-          // headers.
-          expect(find.byType(ExpansionTile), findsNWidgets(3));
-
-          // Check contents of general.
-          final ExpansionTile generalTile =
-              tester.widget(find.byKey(HttpRequestHeadersView.generalKey));
-
-          final numGeneralEntries = data.general.length;
-          expect(generalTile.children.length, numGeneralEntries);
-
-          // Check contents of request headers.
-          final ExpansionTile requestsTile = tester
-              .widget(find.byKey(HttpRequestHeadersView.requestHeadersKey));
-          final numRequestHeaders = data.requestHeaders?.length ?? 0;
-          expect(requestsTile.children.length, numRequestHeaders);
-
-          // Check contents of response headers.
-          final ExpansionTile responsesTile = tester
-              .widget(find.byKey(HttpRequestHeadersView.responseHeadersKey));
-          final numResponseHeaders = data.responseHeaders?.length ?? 0;
-          expect(responsesTile.children.length, numResponseHeaders);
-        }
-
-        Future<void> validateResponseTab(DartIOHttpRequestData data) async {
-          if (data.responseBody != null) {
-            // Switch to response tab.
-            await tester.tap(
-              find.descendant(
-                of: find.byType(DevToolsTab),
-                matching: find.text('Response'),
-              ),
-            );
-            await tester.pumpAndSettle();
-
-            expect(find.byType(HttpResponseTrailingDropDown), findsOneWidget);
-            expect(find.byType(HttpViewTrailingCopyButton), findsOneWidget);
-            expect(find.byType(NetworkRequestOverviewView), findsNothing);
-            expect(find.byType(HttpRequestHeadersView), findsNothing);
-            expect(find.byType(HttpResponseView), findsOneWidget);
-            expect(find.byType(HttpRequestCookiesView), findsNothing);
-          }
-        }
-
-        Future<void> validateOverviewTab() async {
-          // Switch to overview tab.
-          await tester.tap(
-            find.descendant(
-              of: find.byType(DevToolsTab),
-              matching: find.text('Overview'),
-            ),
-          );
-          await tester.pumpAndSettle();
-
-          expect(find.byType(NetworkRequestOverviewView), findsOneWidget);
           expect(find.byType(HttpRequestHeadersView), findsNothing);
           expect(find.byType(HttpResponseView), findsNothing);
-          expect(find.byType(HttpRequestCookiesView), findsNothing);
-        }
+          expect(find.byType(HttpRequestCookiesView), findsOneWidget);
 
-        Future<void> validateCookiesTab(DartIOHttpRequestData data) async {
-          final httpRequest =
-              controller.selectedRequest.value as DartIOHttpRequestData;
-          final hasCookies = httpRequest.hasCookies;
+          // TODO(kenz): move the cookie tab validation into its own testing
+          // group (see NetworkRequestOverviewView test group).
 
-          if (hasCookies) {
-            // Switch to cookies tab.
-            await tester.tap(
-              find.descendant(
-                of: find.byType(DevToolsTab),
-                matching: find.text('Cookies'),
-              ),
-            );
-            await tester.pumpAndSettle();
+          // Checks the contents of a cookies table to ensure it's well formed.
+          void validateCookieTable(List<Cookie> cookies, Key key) {
+            expect(find.byKey(key), findsOneWidget);
+            final cookieCount = cookies.length;
+            final DataTable cookiesTable = tester.widget(find.byKey(key));
+            expect(cookiesTable.rows.length, cookieCount);
+          }
 
-            expect(find.byType(NetworkRequestOverviewView), findsNothing);
-            expect(find.byType(HttpRequestHeadersView), findsNothing);
-            expect(find.byType(HttpResponseView), findsNothing);
-            expect(find.byType(HttpRequestCookiesView), findsOneWidget);
-
-            // TODO(kenz): move the cookie tab validation into its own testing
-            // group (see NetworkRequestOverviewView test group).
-
-            // Checks the contents of a cookies table to ensure it's well formed.
-            void validateCookieTable(List<Cookie> cookies, Key key) {
-              expect(
-                find.byKey(key),
-                findsOneWidget,
-              );
-              final cookieCount = cookies.length;
-              final DataTable cookiesTable = tester.widget(
-                find.byKey(key),
-              );
-              expect(cookiesTable.rows.length, cookieCount);
-            }
-
-            // Check the request cookies table.
-            if (data.requestCookies.isNotEmpty) {
-              validateCookieTable(
-                data.requestCookies,
-                HttpRequestCookiesView.requestCookiesKey,
-              );
-            }
-
-            // Check the response cookies table.
-            if (data.responseCookies.isNotEmpty) {
-              validateCookieTable(
-                data.responseCookies,
-                HttpRequestCookiesView.responseCookiesKey,
-              );
-            }
-          } else {
-            // The cookies tab shouldn't be displayed if there are no cookies
-            // associated with the request.
-            expect(
-              find.descendant(
-                of: find.byType(DevToolsTab),
-                matching: find.text('Cookies'),
-              ),
-              findsNothing,
+          // Check the request cookies table.
+          if (data.requestCookies.isNotEmpty) {
+            validateCookieTable(
+              data.requestCookies,
+              HttpRequestCookiesView.requestCookiesKey,
             );
           }
-        }
 
-        for (final request in controller.requests.value) {
-          controller.selectedRequest.value = request;
-          await tester.pumpAndSettle();
-          expect(find.text('No request selected'), findsNothing);
-
-          final selection = controller.selectedRequest.value!;
-          if (selection is DartIOHttpRequestData) {
-            await validateHeadersTab(selection);
-            await validateResponseTab(selection);
-            await validateCookiesTab(selection);
+          // Check the response cookies table.
+          if (data.responseCookies.isNotEmpty) {
+            validateCookieTable(
+              data.responseCookies,
+              HttpRequestCookiesView.responseCookiesKey,
+            );
           }
-          await validateOverviewTab();
+        } else {
+          // The cookies tab shouldn't be displayed if there are no cookies
+          // associated with the request.
+          expect(
+            find.descendant(
+              of: find.byType(DevToolsTab),
+              matching: find.text('Cookies'),
+            ),
+            findsNothing,
+          );
         }
+      }
 
-        // Pause recording.
-        await tester.tap(find.byType(StartStopRecordingButton));
-        await tester.pump();
+      for (final request in controller.requests.value) {
+        controller.selectedRequest.value = request;
+        await tester.pumpAndSettle();
+        expect(find.text('No request selected'), findsNothing);
 
-        await clearTimeouts(tester);
-      },
-    );
+        final selection = controller.selectedRequest.value!;
+        if (selection is DartIOHttpRequestData) {
+          await validateHeadersTab(selection);
+          await validateResponseTab(selection);
+          await validateCookiesTab(selection);
+        }
+        await validateOverviewTab();
+      }
+
+      // Pause recording.
+      await tester.tap(find.byType(StartStopRecordingButton));
+      await tester.pump();
+
+      await clearTimeouts(tester);
+    });
 
     // Regression test for https://github.com/flutter/devtools/issues/3286.
-    testWidgetsWithWindowSize(
-      'can select by clicking on url',
-      windowSize,
-      (WidgetTester tester) async {
-        // Load the network profiler screen.
-        controller = NetworkController();
-        await pumpNetworkScreen(tester);
+    testWidgetsWithWindowSize('can select by clicking on url', windowSize, (
+      WidgetTester tester,
+    ) async {
+      // Load the network profiler screen.
+      controller = NetworkController();
+      await pumpNetworkScreen(tester);
 
-        // Populate the screen with requests.
-        await loadRequestsAndCheck(tester);
+      // Populate the screen with requests.
+      await loadRequestsAndCheck(tester);
 
-        expectNoSelection();
+      expectNoSelection();
 
-        final textElement = tester.element(
-          find
-              .text(
-                'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
-              )
-              .first,
-        );
-        final selectableTextWidget =
-            textElement.findAncestorWidgetOfExactType<SelectableText>()!;
-        await tester.tap(find.byWidget(selectableTextWidget));
-        await tester.pumpAndSettle();
+      final textElement = tester.element(
+        find
+            .text(
+              'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
+            )
+            .first,
+      );
+      final selectableTextWidget =
+          textElement.findAncestorWidgetOfExactType<SelectableText>()!;
+      await tester.tap(find.byWidget(selectableTextWidget));
+      await tester.pumpAndSettle();
 
-        expect(controller.selectedRequest.value, isNotNull);
-        expect(find.text('No request selected'), findsNothing);
-      },
-    );
+      expect(controller.selectedRequest.value, isNotNull);
+      expect(find.text('No request selected'), findsNothing);
+    });
 
-    testWidgetsWithWindowSize(
-      'clear results',
-      windowSize,
-      (WidgetTester tester) async {
-        // Load the network profiler screen.
-        controller = NetworkController();
-        await pumpNetworkScreen(tester);
+    testWidgetsWithWindowSize('clear results', windowSize, (
+      WidgetTester tester,
+    ) async {
+      // Load the network profiler screen.
+      controller = NetworkController();
+      await pumpNetworkScreen(tester);
 
-        // Populate the screen with requests.
-        await loadRequestsAndCheck(tester);
+      // Populate the screen with requests.
+      await loadRequestsAndCheck(tester);
 
-        // Pause the profiler.
-        await tester.tap(find.byType(StartStopRecordingButton));
-        await tester.pumpAndSettle();
+      // Pause the profiler.
+      await tester.tap(find.byType(StartStopRecordingButton));
+      await tester.pumpAndSettle();
 
-        // Clear the results.
-        await tester.tap(find.byType(ClearButton));
-        // Wait to ensure all the timers have been cancelled.
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-      },
-    );
+      // Clear the results.
+      await tester.tap(find.byType(ClearButton));
+      // Wait to ensure all the timers have been cancelled.
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+    });
   });
 
   group('NetworkRequestOverviewView', () {
@@ -359,62 +351,51 @@ void main() {
       expect(find.byType(NetworkRequestOverviewView), findsOneWidget);
     }
 
-    testWidgetsWithWindowSize(
-      'displays for http request',
-      windowSize,
-      (tester) async {
-        final data = httpGet;
-        await pumpView(tester, data);
+    testWidgetsWithWindowSize('displays for http request', windowSize, (
+      tester,
+    ) async {
+      final data = httpGet;
+      await pumpView(tester, data);
 
-        // Verify general information.
-        expect(find.text('Request uri: '), findsOneWidget);
-        expect(
-          find.text(
-            'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
-          ),
-          findsOneWidget,
-        );
-        expect(find.text('Method: '), findsOneWidget);
-        expect(find.text('GET'), findsOneWidget);
-        expect(find.text('Status: '), findsOneWidget);
-        expect(find.text('200'), findsOneWidget);
-        expect(find.text('Port: '), findsOneWidget);
-        expect(find.text('45648'), findsOneWidget);
-        expect(find.text('Content type: '), findsOneWidget);
-        expect(find.text('[application/json; charset=utf-8]'), findsOneWidget);
+      // Verify general information.
+      expect(find.text('Request uri: '), findsOneWidget);
+      expect(
+        find.text(
+          'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Method: '), findsOneWidget);
+      expect(find.text('GET'), findsOneWidget);
+      expect(find.text('Status: '), findsOneWidget);
+      expect(find.text('200'), findsOneWidget);
+      expect(find.text('Port: '), findsOneWidget);
+      expect(find.text('45648'), findsOneWidget);
+      expect(find.text('Content type: '), findsOneWidget);
+      expect(find.text('[application/json; charset=utf-8]'), findsOneWidget);
 
-        // Verify timing information.
-        expect(find.text('Timing: '), findsOneWidget);
-        expect(find.text('Start time: '), findsOneWidget);
-        expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
-        expect(find.text('End time: '), findsOneWidget);
-        expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
-        expect(
-          find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
-          findsOneWidget,
-        );
-        expect(find.text('Connection established: '), findsOneWidget);
-        expect(
-          find.text('[0.0 ms - 529.0 ms] → 529.0 ms total'),
-          findsOneWidget,
-        );
-        expect(find.text('Request sent: '), findsOneWidget);
-        expect(
-          find.text('[529.0 ms - 529.0 ms] → 0.0 ms total'),
-          findsOneWidget,
-        );
-        expect(find.text('Waiting (TTFB): '), findsOneWidget);
-        expect(
-          find.text('[529.0 ms - 810.7 ms] → 281.7 ms total'),
-          findsOneWidget,
-        );
-        expect(find.text('Content Download: '), findsOneWidget);
-        expect(
-          find.text('[810.7 ms - 811.7 ms] → 1.0 ms total'),
-          findsOneWidget,
-        );
-      },
-    );
+      // Verify timing information.
+      expect(find.text('Timing: '), findsOneWidget);
+      expect(find.text('Start time: '), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
+      expect(find.text('End time: '), findsOneWidget);
+      expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
+      expect(
+        find.byKey(NetworkRequestOverviewView.httpTimingGraphKey),
+        findsOneWidget,
+      );
+      expect(find.text('Connection established: '), findsOneWidget);
+      expect(find.text('[0.0 ms - 529.0 ms] → 529.0 ms total'), findsOneWidget);
+      expect(find.text('Request sent: '), findsOneWidget);
+      expect(find.text('[529.0 ms - 529.0 ms] → 0.0 ms total'), findsOneWidget);
+      expect(find.text('Waiting (TTFB): '), findsOneWidget);
+      expect(
+        find.text('[529.0 ms - 810.7 ms] → 281.7 ms total'),
+        findsOneWidget,
+      );
+      expect(find.text('Content Download: '), findsOneWidget);
+      expect(find.text('[810.7 ms - 811.7 ms] → 1.0 ms total'), findsOneWidget);
+    });
 
     testWidgetsWithWindowSize(
       'displays for http request with error',
@@ -459,10 +440,7 @@ void main() {
 
         // Verify general information.
         expect(find.text('Request uri: '), findsOneWidget);
-        expect(
-          find.text('[2606:4700:3037::ac43:bd8f]:443'),
-          findsOneWidget,
-        );
+        expect(find.text('[2606:4700:3037::ac43:bd8f]:443'), findsOneWidget);
         expect(find.text('Method: '), findsOneWidget);
         expect(find.text('SOCKET'), findsOneWidget);
         expect(find.text('Status: '), findsOneWidget);
@@ -512,10 +490,7 @@ void main() {
 
         // Verify general information.
         expect(find.text('Request uri: '), findsOneWidget);
-        expect(
-          find.text('[2606:4700:3037::ac43:0000]:80'),
-          findsOneWidget,
-        );
+        expect(find.text('[2606:4700:3037::ac43:0000]:80'), findsOneWidget);
         expect(find.text('Method: '), findsOneWidget);
         expect(find.text('SOCKET'), findsOneWidget);
         expect(find.text('Status: '), findsOneWidget);

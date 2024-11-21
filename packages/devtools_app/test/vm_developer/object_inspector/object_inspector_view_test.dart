@@ -31,17 +31,19 @@ void main() {
     fakeServiceConnection = FakeServiceConnectionManager();
     scriptManager = MockScriptManager();
 
-    when(scriptManager.sortedScripts).thenReturn(
-      ValueNotifier(<ScriptRef>[testScript]),
-    );
+    when(
+      scriptManager.sortedScripts,
+    ).thenReturn(ValueNotifier(<ScriptRef>[testScript]));
     // ignore: discarded_futures, test code.
-    when(scriptManager.retrieveAndSortScripts(any)).thenAnswer(
-      (_) => Future.value([testScript]),
-    );
-    when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
-        .thenReturn(false);
-    when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
-        .thenReturn(false);
+    when(
+      scriptManager.retrieveAndSortScripts(any),
+    ).thenAnswer((_) => Future.value([testScript]));
+    when(
+      fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow,
+    ).thenReturn(false);
+    when(
+      fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow,
+    ).thenReturn(false);
 
     setGlobal(
       DevToolsEnvironmentParameters,
@@ -56,29 +58,25 @@ void main() {
     VmServiceWrapper.enablePrivateRpcs = true;
   });
 
-  testWidgetsWithWindowSize(
-    'builds screen',
-    windowSize,
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapWithControllers(
-          Builder(
-            builder: objectInspector.build,
-          ),
-          vmDeveloperTools: VMDeveloperToolsController(
-            objectInspectorViewController: ObjectInspectorViewController(
-              classHierarchyController: TestClassHierarchyExplorerController(),
-            ),
+  testWidgetsWithWindowSize('builds screen', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapWithControllers(
+        Builder(builder: objectInspector.build),
+        vmDeveloperTools: VMDeveloperToolsController(
+          objectInspectorViewController: ObjectInspectorViewController(
+            classHierarchyController: TestClassHierarchyExplorerController(),
           ),
         ),
-      );
-      expect(find.byType(SplitPane), findsNWidgets(2));
-      expect(find.byType(ProgramExplorer), findsOneWidget);
-      expect(find.byType(ObjectViewport), findsOneWidget);
-      expect(find.text('Program Explorer'), findsOneWidget);
-      expect(find.text('Outline'), findsOneWidget);
-      expect(find.text('No object selected.'), findsOneWidget);
-      expect(find.byTooltip('Refresh'), findsOneWidget);
-    },
-  );
+      ),
+    );
+    expect(find.byType(SplitPane), findsNWidgets(2));
+    expect(find.byType(ProgramExplorer), findsOneWidget);
+    expect(find.byType(ObjectViewport), findsOneWidget);
+    expect(find.text('Program Explorer'), findsOneWidget);
+    expect(find.text('Outline'), findsOneWidget);
+    expect(find.text('No object selected.'), findsOneWidget);
+    expect(find.byTooltip('Refresh'), findsOneWidget);
+  });
 }

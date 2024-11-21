@@ -8,9 +8,7 @@ Future<List<String>> requestAndroidBuildVariants(String path) async {
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: DeeplinkApi.androidBuildVariants,
-      queryParameters: {
-        DeeplinkApi.deeplinkRootPathPropertyName: path,
-      },
+      queryParameters: {DeeplinkApi.deeplinkRootPathPropertyName: path},
     );
     final resp = await request(uri.toString());
     if (resp?.statusOk ?? false) {
@@ -51,9 +49,7 @@ Future<XcodeBuildOptions> requestIosBuildOptions(String path) async {
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: DeeplinkApi.iosBuildOptions,
-      queryParameters: {
-        DeeplinkApi.deeplinkRootPathPropertyName: path,
-      },
+      queryParameters: {DeeplinkApi.deeplinkRootPathPropertyName: path},
     );
     final resp = await request(uri.toString());
     if (resp?.statusOk ?? false) {

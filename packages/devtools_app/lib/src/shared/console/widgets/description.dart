@@ -79,12 +79,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
   /// Approximates the width of the elements inside a [RemoteDiagnosticsNode]
   /// widget.
-  static double approximateNodeWidth(
-    RemoteDiagnosticsNode? diagnostic,
-  ) {
+  static double approximateNodeWidth(RemoteDiagnosticsNode? diagnostic) {
     // If we have rendered this node, then we know it's text style,
     // otherwise assume defaultFontSize for the TextStyle.
-    final textStyle = diagnostic?.descriptionTextStyleFromBuild ??
+    final textStyle =
+        diagnostic?.descriptionTextStyleFromBuild ??
         TextStyle(fontSize: defaultFontSize);
 
     final spans = DiagnosticsNodeDescription.buildDescriptionTextSpans(
@@ -110,8 +109,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         // If there is a description then a separator will show with the name.
         name += ': ';
       }
-      spanWidth +=
-          calculateTextSpanWidth(TextSpan(text: name, style: textStyle));
+      spanWidth += calculateTextSpanWidth(
+        TextSpan(text: name, style: textStyle),
+      );
     } else {
       final approximateIconWidth = IconKind.info.icon.width + iconPadding;
 
@@ -137,8 +137,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         if (match.group(2)?.isNotEmpty == true) {
           yield TextSpan(
             text: match.group(2),
-            style:
-                textStyle.merge(DiagnosticsTextStyles.unimportant(colorScheme)),
+            style: textStyle.merge(
+              DiagnosticsTextStyles.unimportant(colorScheme),
+            ),
           );
         }
         return;
@@ -161,10 +162,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       final preview = textPreview.replaceAll('\n', ' ');
       yield TextSpan(
         children: [
-          TextSpan(
-            text: ': ',
-            style: textStyle,
-          ),
+          TextSpan(text: ': ', style: textStyle),
           _buildHighlightedSearchPreview(
             preview,
             searchValue,
@@ -191,23 +189,25 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     diagnostic?.descriptionTextStyleFromBuild = textStyle;
 
     final textSpan = TextSpan(
-      children: buildDescriptionTextSpans(
-        description: description,
-        textStyle: textStyle,
-        colorScheme: colorScheme,
-        diagnostic: diagnostic,
-        searchValue: searchValue,
-        nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
-      ).toList(),
+      children:
+          buildDescriptionTextSpans(
+            description: description,
+            textStyle: textStyle,
+            colorScheme: colorScheme,
+            diagnostic: diagnostic,
+            searchValue: searchValue,
+            nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
+          ).toList(),
     );
 
     final diagnosticLocal = diagnostic!;
     final inspectorService = serviceConnection.inspectorService!;
 
     return HoverCardTooltip.async(
-      enabled: () =>
-          preferences.inspector.hoverEvalModeEnabled.value &&
-          diagnosticLocal.objectGroupApi != null,
+      enabled:
+          () =>
+              preferences.inspector.hoverEvalModeEnabled.value &&
+              diagnosticLocal.objectGroupApi != null,
       asyncGenerateHoverCardData: ({
         required event,
         required isHoverStale,
@@ -215,8 +215,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         final group = inspectorService.createObjectGroup('hover');
 
         if (isHoverStale()) return Future.value();
-        final value =
-            await group.toObservatoryInstanceRef(diagnosticLocal.valueRef);
+        final value = await group.toObservatoryInstanceRef(
+          diagnosticLocal.valueRef,
+        );
 
         final variable = DartObjectNode.fromValue(
           value: value,
@@ -237,11 +238,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
         return HoverCardData(
           title: diagnosticLocal.toStringShort(),
-          contents: Material(
-            child: ExpandableVariable(
-              variable: variable,
-            ),
-          ),
+          contents: Material(child: ExpandableVariable(variable: variable)),
         );
       },
       child: DescriptionDisplay(
@@ -264,9 +261,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final icon = customIconName != null
-        ? RemoteDiagnosticsNode.iconMaker.fromWidgetName(customIconName)
-        : diagnosticLocal.icon;
+    final icon =
+        customIconName != null
+            ? RemoteDiagnosticsNode.iconMaker.fromWidgetName(customIconName)
+            : diagnosticLocal.icon;
 
     final children = <Widget>[];
 
@@ -291,7 +289,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       final showDefaultValueLabel =
           diagnosticLocal.level == DiagnosticLevel.fine &&
-              diagnosticLocal.hasDefaultValue;
+          diagnosticLocal.hasDefaultValue;
 
       // Show the "default" value label at the start if the property name isn't
       // included:
@@ -306,10 +304,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       if (includeName && name?.isNotEmpty == true && diagnosticLocal.showName) {
         children.add(
-          Text(
-            '$name${diagnosticLocal.separator} ',
-            style: textStyle,
-          ),
+          Text('$name${diagnosticLocal.separator} ', style: textStyle),
         );
         // provide some contrast between the name and description if both are
         // present.
@@ -330,9 +325,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               final green = JsonUtils.getIntMember(properties, 'green');
               final blue = JsonUtils.getIntMember(properties, 'blue');
               String radix(int chan) => chan.toRadixString(16).padLeft(2, '0');
-              description = alpha == 255
-                  ? '#${radix(red)}${radix(green)}${radix(blue)}'
-                  : '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
+              description =
+                  alpha == 255
+                      ? '#${radix(red)}${radix(green)}${radix(blue)}'
+                      : '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
 
               final color = Color.fromARGB(alpha, red, green, blue);
               children.add(_paddedIcon(_colorIconMaker.getCustomIcon(color)));
@@ -391,29 +387,16 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           name != 'child') {
         if (name.startsWith('child ')) {
           children.add(
-            Text(
-              name,
-              style: DiagnosticsTextStyles.unimportant(colorScheme),
-            ),
+            Text(name, style: DiagnosticsTextStyles.unimportant(colorScheme)),
           );
         } else {
           children.add(Text(name, style: textStyle));
         }
 
         if (diagnosticLocal.showSeparator) {
-          children.add(
-            Text(
-              diagnosticLocal.separator,
-              style: textStyle,
-            ),
-          );
+          children.add(Text(diagnosticLocal.separator, style: textStyle));
           if (diagnosticLocal.separator != ' ' && descriptionText.isNotEmpty) {
-            children.add(
-              Text(
-                ' ',
-                style: textStyle,
-              ),
-            );
+            children.add(Text(' ', style: textStyle));
           }
         }
       }
@@ -451,20 +434,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         //  the nested row.
         diagnosticDescription = Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            diagnosticDescription,
-            _buildErrorText(colorScheme),
-          ],
+          children: [diagnosticDescription, _buildErrorText(colorScheme)],
         );
       } else if (multiline &&
           diagnosticLocal.hasCreationLocation &&
           !diagnosticLocal.isProperty) {
         diagnosticDescription = Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            diagnosticDescription,
-            _buildLocation(context),
-          ],
+          children: [diagnosticDescription, _buildLocation(context)],
         );
       }
 
@@ -498,9 +475,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           text: errorText,
           // When the node is selected, the background will be an error
           // color so don't render the text the same color.
-          style: isSelected
-              ? DiagnosticsTextStyles.regular(colorScheme)
-              : DiagnosticsTextStyles.error(colorScheme),
+          style:
+              isSelected
+                  ? DiagnosticsTextStyles.regular(colorScheme)
+                  : DiagnosticsTextStyles.error(colorScheme),
         ),
       ),
     );
@@ -513,25 +491,16 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     TextStyle highlightTextStyle,
   ) {
     if (searchValue == null || searchValue.isEmpty) {
-      return TextSpan(
-        text: '"$textPreview"',
-        style: textStyle,
-      );
+      return TextSpan(text: '"$textPreview"', style: textStyle);
     }
 
     if (textPreview.caseInsensitiveEquals(searchValue)) {
-      return TextSpan(
-        text: '"$textPreview"',
-        style: highlightTextStyle,
-      );
+      return TextSpan(text: '"$textPreview"', style: highlightTextStyle);
     }
 
     final matches = searchValue.caseInsensitiveAllMatches(textPreview);
     if (matches.isEmpty) {
-      return TextSpan(
-        text: '"$textPreview"',
-        style: textStyle,
-      );
+      return TextSpan(text: '"$textPreview"', style: textStyle);
     }
 
     final quoteSpan = TextSpan(text: '"', style: textStyle);
@@ -602,14 +571,14 @@ class DescriptionDisplay extends StatelessWidget {
     this.actionLabel,
     this.actionCallback,
     this.overflow = TextOverflow.ellipsis,
-  })  : assert(
-          multiline ? actionLabel == null : true,
-          'Action labels are not supported for multiline descriptions',
-        ),
-        assert(
-          (actionLabel == null) == (actionCallback == null),
-          'Actions require both a label and a callback',
-        );
+  }) : assert(
+         multiline ? actionLabel == null : true,
+         'Action labels are not supported for multiline descriptions',
+       ),
+       assert(
+         (actionLabel == null) == (actionCallback == null),
+         'Actions require both a label and a callback',
+       );
 
   final TextSpan text;
   final bool multiline;
@@ -627,10 +596,7 @@ class DescriptionDisplay extends StatelessWidget {
       return Row(
         children: [
           Flexible(
-            child: RichText(
-              overflow: TextOverflow.ellipsis,
-              text: text,
-            ),
+            child: RichText(overflow: TextOverflow.ellipsis, text: text),
           ),
           Flexible(
             child: TextButton(
@@ -638,18 +604,13 @@ class DescriptionDisplay extends StatelessWidget {
                 textStyle: Theme.of(context).regularTextStyle,
               ),
               onPressed: actionCallback,
-              child: Text(
-                actionLabel!,
-              ),
+              child: Text(actionLabel!),
             ),
           ),
         ],
       );
     }
 
-    return RichText(
-      overflow: overflow,
-      text: text,
-    );
+    return RichText(overflow: overflow, text: text);
   }
 }

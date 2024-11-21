@@ -30,12 +30,7 @@ class InstanceViewWithContextMenu extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Expanded(
-          child: Text(
-            nf.format(count),
-            textAlign: TextAlign.end,
-          ),
-        ),
+        Expanded(child: Text(nf.format(count), textAlign: TextAlign.end)),
         if (shouldShowMenu)
           ContextMenuButton(
             // ignore: avoid_redundant_argument_values, ensures consistency with [SizedBox] below.

@@ -16,13 +16,10 @@ void main() {
     test('the callback happens immediately', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        DebounceTimer.periodic(
-          const Duration(seconds: 1),
-          () async {
-            callbackCounter++;
-            await Future<void>.delayed(const Duration(seconds: 60));
-          },
-        );
+        DebounceTimer.periodic(const Duration(seconds: 1), () async {
+          callbackCounter++;
+          await Future<void>.delayed(const Duration(seconds: 60));
+        });
         async.elapse(const Duration(milliseconds: 40));
         expect(callbackCounter, 1);
       });
@@ -31,13 +28,10 @@ void main() {
     test('only triggers another callback after the first is done', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        DebounceTimer.periodic(
-          const Duration(milliseconds: 500),
-          () async {
-            callbackCounter++;
-            await Future<void>.delayed(const Duration(seconds: 30));
-          },
-        );
+        DebounceTimer.periodic(const Duration(milliseconds: 500), () async {
+          callbackCounter++;
+          await Future<void>.delayed(const Duration(seconds: 30));
+        });
         async.elapse(const Duration(seconds: 31));
         expect(callbackCounter, 2);
       });
@@ -46,15 +40,10 @@ void main() {
     test('calls the callback at the beginning and then once per period', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        DebounceTimer.periodic(
-          const Duration(seconds: 1),
-          () async {
-            callbackCounter++;
-            await Future<void>.delayed(
-              const Duration(milliseconds: 1),
-            );
-          },
-        );
+        DebounceTimer.periodic(const Duration(seconds: 1), () async {
+          callbackCounter++;
+          await Future<void>.delayed(const Duration(milliseconds: 1));
+        });
         async.elapse(const Duration(milliseconds: 40500));
         expect(callbackCounter, 41);
       });
@@ -69,9 +58,7 @@ void main() {
             const Duration(seconds: 1),
             () async {
               callbackCounter++;
-              await Future<void>.delayed(
-                const Duration(milliseconds: 1),
-              );
+              await Future<void>.delayed(const Duration(milliseconds: 1));
             },
           );
           async.elapse(const Duration(milliseconds: 500));
@@ -94,9 +81,7 @@ void main() {
             const Duration(seconds: 1),
             () async {
               callbackCounter++;
-              await Future<void>.delayed(
-                const Duration(milliseconds: 1),
-              );
+              await Future<void>.delayed(const Duration(milliseconds: 1));
             },
           );
           async.elapse(const Duration(milliseconds: 20500));
@@ -141,17 +126,7 @@ void main() {
       const length = chunkSize * 3;
       final result = await worker.doWork(length);
       expect(result, true);
-      expect(indexes, [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-      ]);
+      expect(indexes, [0, 1, 2, 3, 4, 5, 6, 7, 8]);
       expect(progresses, [0.0, 3 / length, 6 / length, 9 / length]);
     });
 
@@ -159,18 +134,8 @@ void main() {
       const length = 5;
       final result = await worker.doWork(length);
       expect(result, true);
-      expect(indexes, [
-        0,
-        1,
-        2,
-        3,
-        4,
-      ]);
-      expect(progresses, [
-        0.0,
-        3 / length,
-        5 / length,
-      ]);
+      expect(indexes, [0, 1, 2, 3, 4]);
+      expect(progresses, [0.0, 3 / length, 5 / length]);
     });
 
     test('interrupted chunks', () async {
@@ -196,24 +161,8 @@ void main() {
       await result2Completer.future;
       expect(result1, false);
       expect(result2, true);
-      expect(indexes, [
-        0,
-        1,
-        2,
-        3,
-        0,
-        1,
-        2,
-        3,
-        4,
-      ]);
-      expect(progresses, [
-        0.0,
-        3 / length1,
-        0.0,
-        3 / length2,
-        1.0,
-      ]);
+      expect(indexes, [0, 1, 2, 3, 0, 1, 2, 3, 4]);
+      expect(progresses, [0.0, 3 / length1, 0.0, 3 / length2, 1.0]);
     });
   });
 

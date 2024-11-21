@@ -39,22 +39,22 @@ class ExpandableVariable extends StatelessWidget {
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
     return TreeView<DartObjectNode>(
-      dataRootsListenable:
-          FixedValueListenable<List<DartObjectNode>>([variable]),
-      dataDisplayProvider: dataDisplayProvider ??
+      dataRootsListenable: FixedValueListenable<List<DartObjectNode>>([
+        variable,
+      ]),
+      dataDisplayProvider:
+          dataDisplayProvider ??
           (variable, onPressed) => DisplayProvider(
-                variable: variable,
-                onTap: onPressed,
-                onCopy: onCopy,
-              ),
+            variable: variable,
+            onTap: onPressed,
+            onCopy: onCopy,
+          ),
       onItemSelected: onItemPressed,
       isSelectable: isSelectable,
     );
   }
 
-  Future<void> onItemPressed(
-    DartObjectNode v,
-  ) async {
+  Future<void> onItemPressed(DartObjectNode v) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
       await Future.wait(v.children.map(buildVariablesTree));

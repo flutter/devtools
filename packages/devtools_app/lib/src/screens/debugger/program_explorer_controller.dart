@@ -17,9 +17,7 @@ class ProgramExplorerController extends DisposableController
     with AutoDisposeControllerMixin {
   /// [showCodeNodes] controls whether or not [Code] nodes are displayed in the
   /// outline view.
-  ProgramExplorerController({
-    this.showCodeNodes = false,
-  });
+  ProgramExplorerController({this.showCodeNodes = false});
 
   /// The outline view nodes for the currently selected library.
   ValueListenable<List<VMServiceObjectNode>> get outlineNodes => _outlineNodes;
@@ -73,22 +71,20 @@ class ProgramExplorerController extends DisposableController
 
     final isolate =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
-    final libraries = isolate != null
-        ? serviceConnection.serviceManager.isolateManager
-            .isolateState(isolate)
-            .isolateNow!
-            .libraries!
-        : <LibraryRef>[];
+    final libraries =
+        isolate != null
+            ? serviceConnection.serviceManager.isolateManager
+                .isolateState(isolate)
+                .isolateNow!
+                .libraries!
+            : <LibraryRef>[];
 
     if (scriptManager.sortedScripts.value.isEmpty && isolate != null) {
       await scriptManager.retrieveAndSortScripts(isolate);
     }
 
     // Build the initial tree.
-    final nodes = VMServiceObjectNode.createRootsFrom(
-      this,
-      libraries,
-    );
+    final nodes = VMServiceObjectNode.createRootsFrom(this, libraries);
     rootObjectNodesInternal.replaceAll(nodes);
     _initialized.value = true;
   }
@@ -97,10 +93,7 @@ class ProgramExplorerController extends DisposableController
     // Re-initialize after reload.
     // TODO(elliette): If file was opened from before the reload, we should try
     // to open that one instead of the entrypoint file.
-    addAutoDisposeListener(
-      scriptManager.sortedScripts,
-      refresh,
-    );
+    addAutoDisposeListener(scriptManager.sortedScripts, refresh);
   }
 
   Future<void> selectScriptNode(ScriptRef? script) async {
@@ -150,9 +143,10 @@ class ProgramExplorerController extends DisposableController
       final matchingNode = depthFirstTraversal(
         node,
         returnCondition: matchingNodeCondition,
-        exploreChildrenCondition: includeCollapsedNodes
-            ? null
-            : (VMServiceObjectNode node) => node.isExpanded,
+        exploreChildrenCondition:
+            includeCollapsedNodes
+                ? null
+                : (VMServiceObjectNode node) => node.isExpanded,
         action: (VMServiceObjectNode _) => index++,
       );
       if (matchingNode != null) return index;
@@ -251,14 +245,17 @@ class ProgramExplorerController extends DisposableController
   Future<void> populateNode(VMServiceObjectNode node) async {
     final object = node.object;
     final service = serviceConnection.serviceManager.service;
-    final isolateId = serviceConnection
-        .serviceManager.isolateManager.selectedIsolate.value!.id;
+    final isolateId =
+        serviceConnection
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value!
+            .id;
 
     Future<List<Obj>> getObjects(Iterable<ObjRef> objs) {
       return Future.wait(
-        objs.map(
-          (o) => service!.getObject(isolateId!, o.id!),
-        ),
+        objs.map((o) => service!.getObject(isolateId!, o.id!)),
       );
     }
 
@@ -285,10 +282,12 @@ class ProgramExplorerController extends DisposableController
                   // fetching it again.
                   if (func.unoptimizedCode != null &&
                       func.unoptimizedCode?.id! != code.id!) {
-                    unoptimizedCode = await service.getObject(
-                      isolateId,
-                      func.unoptimizedCode!.id!,
-                    ) as Code;
+                    unoptimizedCode =
+                        await service.getObject(
+                              isolateId,
+                              func.unoptimizedCode!.id!,
+                            )
+                            as Code;
                   }
                   func.unoptimizedCode = unoptimizedCode;
                 }
@@ -332,8 +331,13 @@ class ProgramExplorerController extends DisposableController
   /// which is the source location of the target [object].
   Future<VMServiceObjectNode> searchFileExplorer(ObjRef object) async {
     final service = serviceConnection.serviceManager.service!;
-    final isolateId = serviceConnection
-        .serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final isolateId =
+        serviceConnection
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value!
+            .id!;
 
     // If `object` is a library, it will always be a root node and is simple to
     // find.
@@ -370,10 +374,7 @@ class ProgramExplorerController extends DisposableController
     // If we couldn't find the target library as a root node, it's possible we
     // have a library defined using the `library` keyword by the user, which
     // will likely be under a directory node.
-    libNode ??= breadthFirstSearchObject(
-      scriptObj,
-      rootObjectNodes.value,
-    );
+    libNode ??= breadthFirstSearchObject(scriptObj, rootObjectNodes.value);
 
     // If the object's owning script URI is the same as the target library URI,
     // return the library node as the match.

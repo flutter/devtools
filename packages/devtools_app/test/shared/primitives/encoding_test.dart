@@ -33,11 +33,7 @@ void main() {
   });
 
   test('$IsolateRef', () {
-    final isolateRef = IsolateRef(
-      id: '1',
-      name: 'name',
-      number: '2',
-    );
+    final isolateRef = IsolateRef(id: '1', name: 'name', number: '2');
     final encodeDecode = IsolateRefEncodeDecode.instance;
 
     final encoded = encodeDecode.toEncodable(isolateRef);
@@ -52,10 +48,7 @@ void main() {
     final classRef = ClassRef(
       id: '1',
       name: 'name',
-      library: LibraryRef(
-        id: '2',
-        name: 'name',
-      ),
+      library: LibraryRef(id: '2', name: 'name'),
     );
     final encodeDecode = ClassRefEncodeDecode.instance;
 

@@ -57,9 +57,7 @@ Future<void> prepareMemoryUI(
   }
 }
 
-Future<void> takeHeapSnapshot(
-  WidgetTester tester,
-) async {
+Future<void> takeHeapSnapshot(WidgetTester tester) async {
   logStatus('Started taking snapshot.');
   // Take snapshot.
   const snapshotDuration = Duration(seconds: 20);

@@ -54,13 +54,14 @@ mixin FilterControllerMixin<T> on DisposableController
 
   void setActiveFilter({String? query, SettingFilters<T>? settingFilters}) {
     _activeFilter.value = Filter(
-      queryFilter: query != null
-          ? QueryFilter.parse(
-              query,
-              args: queryFilterArgs,
-              useRegExp: useRegExp.value,
-            )
-          : QueryFilter.empty(args: queryFilterArgs),
+      queryFilter:
+          query != null
+              ? QueryFilter.parse(
+                query,
+                args: queryFilterArgs,
+                useRegExp: useRegExp.value,
+              )
+              : QueryFilter.empty(args: queryFilterArgs),
       settingFilters: settingFilters ?? this.settingFilters,
     );
   }
@@ -101,8 +102,9 @@ mixin FilterControllerMixin<T> on DisposableController
   bool get isFilterActive {
     final filter = activeFilter.value;
     final queryFilterActive = !filter.queryFilter.isEmpty;
-    final settingFilterActive =
-        filter.settingFilters.any((filter) => filter.enabled);
+    final settingFilterActive = filter.settingFilters.any(
+      (filter) => filter.enabled,
+    );
     return queryFilterActive || settingFilterActive;
   }
 
@@ -148,16 +150,14 @@ mixin FilterControllerMixin<T> on DisposableController
     final settingFilterIds = settingFilters.map((filter) => filter.id);
     for (final settingFilterValue in valuesFromTag) {
       if (settingFilterIds.contains(settingFilterValue.id)) {
-        final settingFilter = settingFilters
-            .firstWhere((filter) => filter.id == settingFilterValue.id);
+        final settingFilter = settingFilters.firstWhere(
+          (filter) => filter.id == settingFilterValue.id,
+        );
         settingFilter.setting.value = settingFilterValue.value!;
       }
     }
 
-    setActiveFilter(
-      query: tag.query,
-      settingFilters: settingFilters,
-    );
+    setActiveFilter(query: tag.query, settingFilters: settingFilters);
   }
 
   void _resetToDefaultFilter() {
@@ -186,12 +186,12 @@ class FilterDialog<T> extends StatefulWidget {
     super.key,
     required this.controller,
     required this.filteredItem,
-  })  : assert(controller.queryFilterArgs.isNotEmpty),
-        settingFilterValuesAtOpen = List.generate(
-          controller.activeFilter.value.settingFilters.length,
-          (index) =>
-              controller.activeFilter.value.settingFilters[index].setting.value,
-        );
+  }) : assert(controller.queryFilterArgs.isNotEmpty),
+       settingFilterValuesAtOpen = List.generate(
+         controller.activeFilter.value.settingFilters.length,
+         (index) =>
+             controller.activeFilter.value.settingFilters[index].setting.value,
+       );
 
   final FilterControllerMixin<T> controller;
 
@@ -289,10 +289,7 @@ class _ToggleFilterElement extends StatelessWidget {
       ),
     );
     if (filter.tooltip != null) {
-      content = DevToolsTooltip(
-        message: filter.tooltip,
-        child: content,
-      );
+      content = DevToolsTooltip(message: filter.tooltip, child: content);
     }
     return content;
   }
@@ -337,10 +334,7 @@ class _SettingFilterElement extends StatelessWidget {
       ),
     );
     if (filter.tooltip != null) {
-      content = DevToolsTooltip(
-        message: filter.tooltip,
-        child: content,
-      );
+      content = DevToolsTooltip(message: filter.tooltip, child: content);
     }
     return content;
   }
@@ -365,10 +359,10 @@ class ToggleFilter<T> extends SettingFilter<T, bool> {
     required super.defaultValue,
     super.tooltip,
   }) : super(
-          possibleValues: [true, false],
-          includeCallback: (T element, bool _) => includeCallback(element),
-          enabledCallback: (bool filterValue) => filterValue,
-        );
+         possibleValues: [true, false],
+         includeCallback: (T element, bool _) => includeCallback(element),
+         enabledCallback: (bool filterValue) => filterValue,
+       );
 }
 
 /// A filter setting that can be set to any of the predefined values
@@ -387,14 +381,14 @@ class SettingFilter<T, V> {
     required this.possibleValues,
     this.possibleValueDisplays,
     this.tooltip,
-  })  : _includeCallback = includeCallback,
-        _enabledCallback = enabledCallback,
-        setting = ValueNotifier<V>(defaultValue),
-        assert(possibleValues.contains(defaultValue)),
-        assert(
-          possibleValueDisplays == null ||
-              possibleValues.length == possibleValueDisplays.length,
-        );
+  }) : _includeCallback = includeCallback,
+       _enabledCallback = enabledCallback,
+       setting = ValueNotifier<V>(defaultValue),
+       assert(possibleValues.contains(defaultValue)),
+       assert(
+         possibleValueDisplays == null ||
+             possibleValues.length == possibleValueDisplays.length,
+       );
 
   /// The unique id for this setting filter.
   ///
@@ -491,21 +485,25 @@ class QueryFilter {
         if (value.isNotEmpty) {
           for (final arg in args.values) {
             if (arg.matchesKey(part)) {
-              arg.isNegative =
-                  part.startsWith(QueryFilterArgument.negativePrefix);
-              final valueStrings =
-                  value.split(QueryFilterArgument.valueSeparator);
-              arg.values = useRegExp
-                  ? valueStrings
-                      .map((v) => RegExp(v, caseSensitive: false))
-                      .toList()
-                  : valueStrings;
+              arg.isNegative = part.startsWith(
+                QueryFilterArgument.negativePrefix,
+              );
+              final valueStrings = value.split(
+                QueryFilterArgument.valueSeparator,
+              );
+              arg.values =
+                  useRegExp
+                      ? valueStrings
+                          .map((v) => RegExp(v, caseSensitive: false))
+                          .toList()
+                      : valueStrings;
             }
           }
         }
       } else {
-        substringExpressions
-            .add(useRegExp ? RegExp(part, caseSensitive: false) : part);
+        substringExpressions.add(
+          useRegExp ? RegExp(part, caseSensitive: false) : part,
+        );
       }
     }
 
@@ -532,12 +530,13 @@ class QueryFilter {
 
   final bool isEmpty;
 
-  String get query => isEmpty
-      ? ''
-      : [
-          ...substringExpressions.toStringList(),
-          for (final arg in filterArguments.values) arg.display,
-        ].join(' ').trim();
+  String get query =>
+      isEmpty
+          ? ''
+          : [
+            ...substringExpressions.toStringList(),
+            for (final arg in filterArguments.values) arg.display,
+          ].join(' ').trim();
 }
 
 class QueryFilterArgument<T> {
@@ -591,9 +590,10 @@ class QueryFilterArgument<T> {
 
     var matches = false;
     for (final value in values) {
-      matches = substringMatch
-          ? dataValue.caseInsensitiveContains(value)
-          : dataValue.caseInsensitiveEquals(value);
+      matches =
+          substringMatch
+              ? dataValue.caseInsensitiveContains(value)
+              : dataValue.caseInsensitiveEquals(value);
       if (matches) break;
     }
     return isNegative ? !matches : matches;
@@ -663,35 +663,38 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                 autofocus: true,
                 hintText: 'Filter',
                 controller: queryTextFieldController,
-                prefixIcon: widget.controller.settingFilters.isNotEmpty
-                    ? Container(
-                        height: inputDecorationElementHeight,
-                        padding: const EdgeInsets.only(
-                          left: densePadding,
-                          right: denseSpacing,
-                        ),
-                        child: ValueListenableBuilder<Filter>(
-                          valueListenable: widget.controller.activeFilter,
-                          builder: (context, _, _) {
-                            return DevToolsFilterButton(
-                              message: 'More filters',
-                              onPressed: () {
-                                unawaited(
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => FilterDialog(
-                                      controller: widget.controller,
-                                      filteredItem: widget.filteredItem,
+                prefixIcon:
+                    widget.controller.settingFilters.isNotEmpty
+                        ? Container(
+                          height: inputDecorationElementHeight,
+                          padding: const EdgeInsets.only(
+                            left: densePadding,
+                            right: denseSpacing,
+                          ),
+                          child: ValueListenableBuilder<Filter>(
+                            valueListenable: widget.controller.activeFilter,
+                            builder: (context, _, _) {
+                              return DevToolsFilterButton(
+                                message: 'More filters',
+                                onPressed: () {
+                                  unawaited(
+                                    showDialog(
+                                      context: context,
+                                      builder:
+                                          (context) => FilterDialog(
+                                            controller: widget.controller,
+                                            filteredItem: widget.filteredItem,
+                                          ),
                                     ),
-                                  ),
-                                );
-                              },
-                              isFilterActive: widget.controller.isFilterActive,
-                            );
-                          },
-                        ),
-                      )
-                    : null,
+                                  );
+                                },
+                                isFilterActive:
+                                    widget.controller.isFilterActive,
+                              );
+                            },
+                          ),
+                        )
+                        : null,
                 additionalSuffixActions: [
                   if (widget.controller.queryFilterArgs.isNotEmpty)
                     InputDecorationSuffixButton.help(
@@ -758,16 +761,14 @@ class _FilterSyntax<T> extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          '''
+        Text('''
 Type a query to show or hide specific ${pluralize(filteredItem, 2)}.
 
 Any text that is not paired with an available filter key below will
 be queried against all available data for each $filteredItem.
 
 Available filters:
-''',
-        ),
+'''),
         Padding(
           padding: const EdgeInsets.only(left: defaultSpacing),
           child: Row(
@@ -778,10 +779,7 @@ Available filters:
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     for (final key in filterKeys)
-                      Text(
-                        key,
-                        style: usageTextStyle,
-                      ),
+                      Text(key, style: usageTextStyle),
                   ],
                 ),
               ),
@@ -792,10 +790,7 @@ Available filters:
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     for (final exampleUsage in filterExampleUsages)
-                      Text(
-                        '(e.g. $exampleUsage)',
-                        style: usageTextStyle,
-                      ),
+                      Text('(e.g. $exampleUsage)', style: usageTextStyle),
                   ],
                 ),
               ),
@@ -846,8 +841,8 @@ class FilterTag {
   final bool useRegExp;
 
   String get tag => [
-        query.trim(),
-        jsonEncode(settingFilterValues),
-        if (useRegExp) useRegExpTag,
-      ].join(filterTagSeparator);
+    query.trim(),
+    jsonEncode(settingFilterValues),
+    if (useRegExp) useRegExpTag,
+  ].join(filterTagSeparator);
 }

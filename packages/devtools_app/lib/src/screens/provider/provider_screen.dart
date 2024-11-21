@@ -18,7 +18,8 @@ class ProviderScreen extends Screen {
     return CenteredMessage(
       richMessage: [
         const TextSpan(
-          text: 'The Provider screen is now shipped as a DevTools extension.\n'
+          text:
+              'The Provider screen is now shipped as a DevTools extension.\n'
               'If you want to use this tool, please upgrade your ',
         ),
         TextSpan(

@@ -14,9 +14,8 @@ import 'package:devtools_app_shared/utils.dart';
 
 import 'flutter_test_driver.dart';
 
-typedef FlutterDriverFactory = FlutterTestDriver Function(
-  Directory testAppDirectory,
-);
+typedef FlutterDriverFactory =
+    FlutterTestDriver Function(Directory testAppDirectory);
 
 /// The default [FlutterDriverFactory] method. Runs a normal flutter app.
 FlutterRunTestDriver defaultFlutterRunDriver(Directory appDir) =>
@@ -29,8 +28,8 @@ class FlutterTestEnvironment {
     this._runConfig, {
     this.testAppDirectory = 'test/test_infra/fixtures/flutter_app',
     FlutterDriverFactory? flutterDriverFactory,
-  })  : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
-        _flutterExe = _parseFlutterExeFromEnv();
+  }) : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
+       _flutterExe = _parseFlutterExeFromEnv();
 
   static String _parseFlutterExeFromEnv() {
     const flutterExe = String.fromEnvironment('FLUTTER_CMD');
@@ -113,8 +112,9 @@ class FlutterTestEnvironment {
         // Update the run configuration if we have a new one.
         if (_isNewRunConfig(config)) _runConfig = config!;
 
-        _flutter = _flutterDriverFactory(Directory(testAppDirectory))
-            as FlutterRunTestDriver?;
+        _flutter =
+            _flutterDriverFactory(Directory(testAppDirectory))
+                as FlutterRunTestDriver?;
         await _flutter!.run(
           flutterExecutable: _flutterExe,
           runConfig: _runConfig,

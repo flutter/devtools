@@ -64,9 +64,11 @@ class CpuProfileTransformer {
       // Check to see if there are any empty tag roots as a result of filtering
       // and remove them.
       final nodeIndicesToRemove = <int>[];
-      for (int i = cpuProfileData.cpuProfileRoot.children.length - 1;
-          i >= 0;
-          --i) {
+      for (
+        int i = cpuProfileData.cpuProfileRoot.children.length - 1;
+        i >= 0;
+        --i
+      ) {
         final root = cpuProfileData.cpuProfileRoot.children[i];
         if (root.isTag && root.children.isEmpty) {
           nodeIndicesToRemove.add(i);
@@ -97,8 +99,10 @@ class CpuProfileTransformer {
     CpuProfileData cpuProfileData, {
     required String processId,
   }) {
-    final batchEnd =
-        math.min(_stackFramesProcessed + batchSize, _stackFramesCount);
+    final batchEnd = math.min(
+      _stackFramesProcessed + batchSize,
+      _stackFramesCount,
+    );
     for (int i = _stackFramesProcessed; i < batchEnd; i++) {
       if (processId != _activeProcessId) {
         throw ProcessCancelledException();

@@ -31,10 +31,7 @@ import 'process_memory_view_controller.dart';
 /// process's memory footprint.
 class VMProcessMemoryView extends VMDeveloperView {
   const VMProcessMemoryView()
-      : super(
-          title: 'Process Memory',
-          icon: Icons.memory,
-        );
+    : super(title: 'Process Memory', icon: Icons.memory);
 
   @override
   Widget build(BuildContext context) => VMProcessMemoryViewBody();
@@ -55,10 +52,10 @@ enum ProcessMemoryTab {
 
 class VMProcessMemoryViewBody extends StatefulWidget {
   VMProcessMemoryViewBody({super.key})
-      : tabs = [
-          _buildTab(ProcessMemoryTab.tree),
-          _buildTab(ProcessMemoryTab.treeMap),
-        ];
+    : tabs = [
+        _buildTab(ProcessMemoryTab.tree),
+        _buildTab(ProcessMemoryTab.treeMap),
+      ];
 
   static DevToolsTab _buildTab(ProcessMemoryTab processMemoryTab) {
     return DevToolsTab.create(
@@ -105,10 +102,8 @@ class _VMProcessMemoryViewBodyState extends State<VMProcessMemoryViewBody>
         ..dispose();
     }
 
-    _tabController = TabController(
-      length: widget.tabs.length,
-      vsync: this,
-    )..addListener(_onTabChanged);
+    _tabController = TabController(length: widget.tabs.length, vsync: this)
+      ..addListener(_onTabChanged);
     _tabControllerInitialized = true;
   }
 
@@ -178,9 +173,7 @@ class _VMProcessMemoryViewBodyState extends State<VMProcessMemoryViewBody>
 }
 
 class _ProcessMemoryTree extends StatelessWidget {
-  _ProcessMemoryTree({
-    required this.controller,
-  });
+  _ProcessMemoryTree({required this.controller});
 
   final VMProcessMemoryViewController controller;
 
@@ -200,12 +193,11 @@ class _ProcessMemoryTree extends StatelessWidget {
       valueListenable: controller.treeRoot,
       builder: (context, root, _) {
         return TreeTable<TreemapNode>(
-          keyFactory: (e) =>
-              PageStorageKey<String>('${e.name}+${e.depth}+${e.byteSize}'),
+          keyFactory:
+              (e) =>
+                  PageStorageKey<String>('${e.name}+${e.depth}+${e.byteSize}'),
           displayTreeGuidelines: true,
-          dataRoots: [
-            if (root != null) root,
-          ],
+          dataRoots: [if (root != null) root],
           dataKey: 'process-memory-tree',
           columns: columns,
           treeColumn: categoryColumn,
@@ -218,9 +210,7 @@ class _ProcessMemoryTree extends StatelessWidget {
 }
 
 class _ProcessMemoryTreeMap extends StatelessWidget {
-  const _ProcessMemoryTreeMap({
-    required this.controller,
-  });
+  const _ProcessMemoryTreeMap({required this.controller});
 
   final VMProcessMemoryViewController controller;
 

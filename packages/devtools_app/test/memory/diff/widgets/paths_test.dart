@@ -15,8 +15,9 @@ void main() {
       created: DateTime.now(),
     );
     await heap.calculate;
-    final data = heap.classes!.list
-        .firstWhere((c) => c.className.className == 'TheData');
+    final data = heap.classes!.list.firstWhere(
+      (c) => c.className.className == 'TheData',
+    );
 
     expect(data.byPath.length, greaterThan(90));
 

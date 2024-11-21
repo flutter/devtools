@@ -157,7 +157,8 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
         // offset controller.
         double delta = 0.0;
         if (widget.offsetController.position.hasContentDimensions) {
-          delta = widget.offsetController.offset -
+          delta =
+              widget.offsetController.offset -
               widget.offsetController.position.maxScrollExtent +
               widget.offsetController.position.minScrollExtent;
           if (widget.offsetController.position.hasViewportDimension) {
@@ -165,22 +166,21 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
             // The viewport dimension from the offsetController may be one frame
             // behind the true viewport dimension. We add this delta so the
             // scrollbar always appears stuck to the side of the viewport.
-            delta += widget.offsetControllerViewportDimension -
+            delta +=
+                widget.offsetControllerViewportDimension -
                 widget.offsetController.position.viewportDimension;
           }
         }
-        final offset = widget.axis == Axis.vertical
-            ? Offset(delta, 0.0)
-            : Offset(0.0, delta);
+        final offset =
+            widget.axis == Axis.vertical
+                ? Offset(delta, 0.0)
+                : Offset(0.0, delta);
         return Transform.translate(
           offset: offset,
           child: Scrollbar(
             thumbVisibility: widget.isAlwaysShown,
             controller: widget.controller,
-            child: Transform.translate(
-              offset: -offset,
-              child: child,
-            ),
+            child: Transform.translate(offset: -offset, child: child),
           ),
         );
       },
@@ -190,10 +190,7 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
 }
 
 /// Scrolls to [position] if [position] is not already visible in the scroll view.
-void maybeScrollToPosition(
-  ScrollController scrollController,
-  double position,
-) {
+void maybeScrollToPosition(ScrollController scrollController, double position) {
   final extentVisible = Range(
     scrollController.offset,
     scrollController.offset + scrollController.position.extentInside,
@@ -246,9 +243,7 @@ class ThemedColorPair {
 class ThemedColor {
   const ThemedColor({required this.light, required this.dark});
 
-  const ThemedColor.fromSingle(Color color)
-      : light = color,
-        dark = color;
+  const ThemedColor.fromSingle(Color color) : light = color, dark = color;
 
   final Color light;
 

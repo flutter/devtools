@@ -44,11 +44,10 @@ class EditorThemeManager extends DisposableController
     // Handle themeChanged from postMessage.
     autoDisposeStreamSubscription(
       onPostMessage.listen((event) {
-        if (event.data
-            case {
-              'method': 'editor.themeChanged',
-              'params': {'theme': final Map themeJson}
-            }) {
+        if (event.data case {
+          'method': 'editor.themeChanged',
+          'params': {'theme': final Map themeJson},
+        }) {
           try {
             _updateTheme(
               EditorTheme.fromJson(themeJson.cast<String, Object?>()),
@@ -73,8 +72,10 @@ class EditorThemeManager extends DisposableController
     }
 
     if (newTheme.backgroundColor != null) {
-      final newBackgroundColor =
-          tryParseColor(newTheme.backgroundColor!, logger: _log);
+      final newBackgroundColor = tryParseColor(
+        newTheme.backgroundColor!,
+        logger: _log,
+      );
       if (newBackgroundColor != null &&
           newBackgroundColor != currentTheme.backgroundColor) {
         updateQueryParameter(
@@ -85,8 +86,10 @@ class EditorThemeManager extends DisposableController
     }
 
     if (newTheme.foregroundColor != null) {
-      final newForegroundColor =
-          tryParseColor(newTheme.foregroundColor!, logger: _log);
+      final newForegroundColor = tryParseColor(
+        newTheme.foregroundColor!,
+        logger: _log,
+      );
       if (newForegroundColor != null &&
           newForegroundColor != currentTheme.foregroundColor) {
         updateQueryParameter(

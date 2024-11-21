@@ -18,8 +18,9 @@ void main() {
   group('NetworkScreen', () {
     setUp(() {
       fakeServiceConnection = FakeServiceConnectionManager();
-      when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
-          .thenReturn(false);
+      when(
+        fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow,
+      ).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
       when(

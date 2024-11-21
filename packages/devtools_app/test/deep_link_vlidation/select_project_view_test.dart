@@ -59,38 +59,36 @@ void main() {
       deepLinksController = TestDeepLinksController();
     });
 
-    testWidgetsWithWindowSize(
-      'builds content',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpSelectProjectView(tester);
-        expect(
-          find.textContaining('Select a local flutter project to check'),
-          findsOneWidget,
-        );
-        expect(find.byType(ProjectRootsDropdown), findsOneWidget);
-        expect(
-          find.textContaining('Don\'t see your project in the list?'),
-          findsOneWidget,
-        );
-        expect(find.byType(ProjectRootTextField), findsOneWidget);
+    testWidgetsWithWindowSize('builds content', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpSelectProjectView(tester);
+      expect(
+        find.textContaining('Select a local flutter project to check'),
+        findsOneWidget,
+      );
+      expect(find.byType(ProjectRootsDropdown), findsOneWidget);
+      expect(
+        find.textContaining('Don\'t see your project in the list?'),
+        findsOneWidget,
+      );
+      expect(find.byType(ProjectRootTextField), findsOneWidget);
 
-        expect(
-          find.descendant(
-            of: find.byType(ProjectRootsDropdown),
-            matching: find.byType(Column),
-          ),
-          findsNothing,
-        );
-        expect(
-          find.descendant(
-            of: find.byType(ProjectRootTextField),
-            matching: find.byType(Column),
-          ),
-          findsNothing,
-        );
-      },
-    );
+      expect(
+        find.descendant(
+          of: find.byType(ProjectRootsDropdown),
+          matching: find.byType(Column),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(ProjectRootTextField),
+          matching: find.byType(Column),
+        ),
+        findsNothing,
+      );
+    });
 
     testWidgetsWithWindowSize(
       'builds content for narrow screen',

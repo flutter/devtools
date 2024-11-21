@@ -37,12 +37,15 @@ class OpenSaveButtonGroup extends StatelessWidget {
           tooltip: 'Open a file that was previously saved from DevTools',
           onPressed: () async {
             ga.select(screenId, gac.openFile);
-            final importedFile =
-                await importFileFromPicker(acceptedTypes: const ['json']);
+            final importedFile = await importFileFromPicker(
+              acceptedTypes: const ['json'],
+            );
             if (importedFile != null) {
               // ignore: use_build_context_synchronously, intentional use.
-              Provider.of<ImportController>(context, listen: false)
-                  .importData(importedFile, expectedScreenId: screenId);
+              Provider.of<ImportController>(
+                context,
+                listen: false,
+              ).importData(importedFile, expectedScreenId: screenId);
             } else {
               notificationService.push(
                 'Something went wrong. Could not open selected file.',
@@ -53,12 +56,13 @@ class OpenSaveButtonGroup extends StatelessWidget {
         ButtonGroupItemData(
           icon: Icons.file_download,
           tooltip: 'Save this screen\'s data for offline viewing',
-          onPressed: onSave != null
-              ? () {
-                  ga.select(screenId, gac.saveFile);
-                  onSave!.call();
-                }
-              : null,
+          onPressed:
+              onSave != null
+                  ? () {
+                    ga.select(screenId, gac.saveFile);
+                    onSave!.call();
+                  }
+                  : null,
         ),
       ],
     );
@@ -122,10 +126,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (title != null) ...[
-          Text(
-            title,
-            style: TextStyle(fontSize: scaleByFontFactor(18.0)),
-          ),
+          Text(title, style: TextStyle(fontSize: scaleByFontFactor(18.0))),
           const SizedBox(height: extraLargeSpacing),
         ],
         CenteredMessage(message: widget.instructions),
@@ -156,10 +157,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
       children: [
         Expanded(
           // TODO(kenz): improve drag over highlight.
-          child: DragAndDrop(
-            handleDrop: _handleImportedFile,
-            child: child,
-          ),
+          child: DragAndDrop(handleDrop: _handleImportedFile, child: child),
         ),
       ],
     );
@@ -226,9 +224,10 @@ class _FileImportContainerState extends State<FileImportContainer> {
               gaSelection: widget.gaSelectionAction!,
               label: widget.actionText!,
               elevated: true,
-              onPressed: importedFile != null
-                  ? () => widget.onAction!(importedFile!)
-                  : null,
+              onPressed:
+                  importedFile != null
+                      ? () => widget.onAction!(importedFile!)
+                      : null,
             ),
           ],
         ),
@@ -237,8 +236,9 @@ class _FileImportContainerState extends State<FileImportContainer> {
   }
 
   Future<void> _importFile() async {
-    final importedFile =
-        await importFileFromPicker(acceptedTypes: widget.extensions);
+    final importedFile = await importFileFromPicker(
+      acceptedTypes: widget.extensions,
+    );
     if (importedFile != null) {
       _handleImportedFile(importedFile);
     }
@@ -357,7 +357,8 @@ class DualFileImportContainer extends StatefulWidget {
     DevToolsJsonFile firstImportedFile,
     DevToolsJsonFile secondImportedFile,
     void Function(String error) onError,
-  ) onAction;
+  )
+  onAction;
 
   @override
   State<DualFileImportContainer> createState() =>
@@ -450,13 +451,14 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
               label: widget.actionText,
               icon: Icons.highlight,
               elevated: true,
-              onPressed: firstImportedFile != null && secondImportedFile != null
-                  ? () => widget.onAction(
+              onPressed:
+                  firstImportedFile != null && secondImportedFile != null
+                      ? () => widget.onAction(
                         firstImportedFile!,
                         secondImportedFile!,
                         (error) => notificationService.push(error),
                       )
-                  : null,
+                      : null,
             ),
           ],
         ),

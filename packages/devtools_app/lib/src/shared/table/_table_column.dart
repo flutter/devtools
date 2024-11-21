@@ -57,7 +57,8 @@ class _ColumnHeader<T> extends StatelessWidget {
     ColumnData<T> column,
     SortDirection direction, {
     ColumnData<T>? secondarySortColumn,
-  })? onSortChanged;
+  })?
+  onSortChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -80,28 +81,30 @@ class _ColumnHeader<T> extends StatelessWidget {
           const SizedBox(width: densePadding),
         ],
         Expanded(
-          child: column.titleTooltip != null
-              ? DevToolsTooltip(
-                  message: column.titleTooltip,
-                  padding: const EdgeInsets.all(denseSpacing),
-                  child: title,
-                )
-              : title,
+          child:
+              column.titleTooltip != null
+                  ? DevToolsTooltip(
+                    message: column.titleTooltip,
+                    padding: const EdgeInsets.all(denseSpacing),
+                    child: title,
+                  )
+                  : title,
         ),
       ],
     );
 
     return column.includeHeader
         ? InkWell(
-            canRequestFocus: false,
-            onTap: column.supportsSorting
-                ? () => _handleSortChange(
-                      column,
-                      secondarySortColumn: secondarySortColumn,
-                    )
-                : null,
-            child: headerContent,
-          )
+          canRequestFocus: false,
+          onTap:
+              column.supportsSorting
+                  ? () => _handleSortChange(
+                    column,
+                    secondarySortColumn: secondarySortColumn,
+                  )
+                  : null,
+          child: headerContent,
+        )
         : headerContent;
   }
 
@@ -143,9 +146,7 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: defaultBorderSide(Theme.of(context)),
-        ),
+        border: Border(bottom: defaultBorderSide(Theme.of(context))),
       ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -190,11 +191,7 @@ class _ColumnGroupSpacer extends StatelessWidget {
         width: columnGroupSpacing,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Colors.black,
-              Theme.of(context).focusColor,
-              Colors.black,
-            ],
+            colors: [Colors.black, Theme.of(context).focusColor, Colors.black],
           ),
         ),
       ),

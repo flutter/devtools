@@ -23,17 +23,15 @@ import '../primitives/assignment.dart';
 import '../primitives/eval_history.dart';
 import 'help_dialog.dart';
 
-typedef AutoCompleteResultsFunction = Future<List<String>> Function(
-  EditingParts parts,
-  EvalService evalService,
-);
+typedef AutoCompleteResultsFunction =
+    Future<List<String>> Function(EditingParts parts, EvalService evalService);
 
 class ExpressionEvalField extends StatefulWidget {
   const ExpressionEvalField({
     super.key,
     AutoCompleteResultsFunction? getAutoCompleteResults,
   }) : getAutoCompleteResults =
-            getAutoCompleteResults ?? autoCompleteResultsFor;
+           getAutoCompleteResults ?? autoCompleteResultsFor;
 
   final AutoCompleteResultsFunction getAutoCompleteResults;
 
@@ -181,13 +179,11 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
           ..clearSearchAutoComplete()
           ..clearCurrentSuggestion();
       } else {
-        final results = matches
-            .sublist(
-              0,
-              min(defaultTopMatchesLimit, matches.length),
-            )
-            .map((match) => AutoCompleteMatch(match))
-            .toList();
+        final results =
+            matches
+                .sublist(0, min(defaultTopMatchesLimit, matches.length))
+                .map((match) => AutoCompleteMatch(match))
+                .toList();
 
         _autoCompleteController
           ..searchAutoComplete.value = results
@@ -233,33 +229,33 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.all(denseSpacing),
                   border: const OutlineInputBorder(),
-                  focusedBorder:
-                      const OutlineInputBorder(borderSide: BorderSide.none),
-                  enabledBorder:
-                      const OutlineInputBorder(borderSide: BorderSide.none),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
                   labelText: 'Eval. Enter "?" for help.',
                   labelStyle: Theme.of(context).subtleTextStyle,
                 ),
-                overlayXPositionBuilder:
-                    (String inputValue, TextStyle? inputStyle) {
+                overlayXPositionBuilder: (
+                  String inputValue,
+                  TextStyle? inputStyle,
+                ) {
                   // X-coordinate is equivalent to the width of the input text
                   // up to the last "." or the insertion point (cursor):
                   final indexOfDot = inputValue.lastIndexOf('.');
-                  final textSegment = indexOfDot != -1
-                      ? inputValue.substring(0, indexOfDot + 1)
-                      : inputValue;
+                  final textSegment =
+                      indexOfDot != -1
+                          ? inputValue.substring(0, indexOfDot + 1)
+                          : inputValue;
                   return calculateTextSpanWidth(
-                    TextSpan(
-                      text: textSegment,
-                      style: inputStyle,
-                    ),
+                    TextSpan(text: textSegment, style: inputStyle),
                   );
                 },
                 // Disable ligatures, so the suggestions of the auto complete work correcly.
                 style: Theme.of(context).fixedFontStyle.copyWith(
-                  fontFeatures: [
-                    const FontFeature.disable('liga'),
-                  ],
+                  fontFeatures: [const FontFeature.disable('liga')],
                 ),
               ),
             ),
@@ -306,10 +302,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     );
   }
 
-  List<String> _filterMatches(
-    List<String> previousMatches,
-    String activeWord,
-  ) {
+  List<String> _filterMatches(List<String> previousMatches, String activeWord) {
     return previousMatches
         .where((match) => match.startsWith(activeWord))
         .toList();
@@ -358,8 +351,10 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
           );
           return;
         }
-        response =
-            await evalService.evalInRunningApp(isolateRef, expressionText);
+        response = await evalService.evalInRunningApp(
+          isolateRef,
+          expressionText,
+        );
       }
 
       // Display the response to the user.
@@ -445,8 +440,9 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     if (assignment == null) return false;
     const kSuccess = true;
 
-    final variable = serviceConnection.consoleService
-        .itemAt(assignment.consoleItemIndex + 1);
+    final variable = serviceConnection.consoleService.itemAt(
+      assignment.consoleItemIndex + 1,
+    );
     final value = variable?.value;
     if (value is! InstanceRef) {
       _emitToConsole(
@@ -455,15 +451,23 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       return kSuccess;
     }
 
-    final isolateId = serviceConnection
-        .serviceManager.isolateManager.selectedIsolate.value?.id;
-    final isolateName = serviceConnection
-        .serviceManager.isolateManager.selectedIsolate.value?.name;
+    final isolateId =
+        serviceConnection
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value
+            ?.id;
+    final isolateName =
+        serviceConnection
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value
+            ?.name;
 
     if (isolateId == null || isolateName == null) {
-      _emitToConsole(
-        'Selected isolate cannot be detected.',
-      );
+      _emitToConsole('Selected isolate cannot be detected.');
       return kSuccess;
     }
 

@@ -12,7 +12,8 @@ const _benchmarkInitialPage = '';
 
 const _wasmQueryParameters = {'wasm': 'true'};
 
-String benchmarkPath({required bool useWasm}) => Uri(
+String benchmarkPath({required bool useWasm}) =>
+    Uri(
       path: _benchmarkInitialPage,
       queryParameters: useWasm ? _wasmQueryParameters : null,
     ).toString();

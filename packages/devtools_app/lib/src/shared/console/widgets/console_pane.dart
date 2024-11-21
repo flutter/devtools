@@ -17,35 +17,34 @@ import 'help_dialog.dart';
 
 class ConsolePaneHeader extends AreaPaneHeader {
   ConsolePaneHeader({super.key})
-      : super(
-          title: const Text('Console'),
-          roundedTopBorder: true,
-          actions: [
-            const ConsoleHelpLink(),
-            const SizedBox(width: densePadding),
-            CopyToClipboardControl(
-              dataProvider: () =>
-                  serviceConnection.consoleService.stdio.value.join('\n'),
-              buttonKey: ConsolePane.copyToClipboardButtonKey,
-            ),
-            const SizedBox(width: densePadding),
-            DeleteControl(
-              buttonKey: ConsolePane.clearStdioButtonKey,
-              tooltip: 'Clear console output',
-              onPressed: () => serviceConnection.consoleService.clearStdio(),
-            ),
-          ],
-        );
+    : super(
+        title: const Text('Console'),
+        roundedTopBorder: true,
+        actions: [
+          const ConsoleHelpLink(),
+          const SizedBox(width: densePadding),
+          CopyToClipboardControl(
+            dataProvider:
+                () => serviceConnection.consoleService.stdio.value.join('\n'),
+            buttonKey: ConsolePane.copyToClipboardButtonKey,
+          ),
+          const SizedBox(width: densePadding),
+          DeleteControl(
+            buttonKey: ConsolePane.clearStdioButtonKey,
+            tooltip: 'Clear console output',
+            onPressed: () => serviceConnection.consoleService.clearStdio(),
+          ),
+        ],
+      );
 }
 
 /// Display the stdout and stderr output from the process under debug.
 class ConsolePane extends StatelessWidget {
-  const ConsolePane({
-    super.key,
-  });
+  const ConsolePane({super.key});
 
-  static const copyToClipboardButtonKey =
-      Key('console_copy_to_clipboard_button');
+  static const copyToClipboardButtonKey = Key(
+    'console_copy_to_clipboard_button',
+  );
   static const clearStdioButtonKey = Key('console_clear_stdio_button');
 
   ValueListenable<List<ConsoleLine>> get stdio =>
@@ -63,14 +62,7 @@ class ConsolePane extends StatelessWidget {
     }
 
     return Column(
-      children: [
-        Expanded(
-          child: Console(
-            lines: stdio,
-            footer: footer,
-          ),
-        ),
-      ],
+      children: [Expanded(child: Console(lines: stdio, footer: footer))],
     );
   }
 }

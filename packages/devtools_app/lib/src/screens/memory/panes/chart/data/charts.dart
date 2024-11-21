@@ -107,14 +107,7 @@ const renderImage = 'image';
 
 /// Name of each trace being charted, index order is the trace index
 /// too (order of trace creation top-down order).
-enum VmTraceName {
-  external,
-  used,
-  capacity,
-  rSS,
-  rasterLayer,
-  rasterPicture,
-}
+enum VmTraceName { external, used, capacity, rSS, rasterLayer, rasterPicture }
 
 Map<String, Object?> traceRender({
   String? image,
@@ -238,15 +231,13 @@ class ChartsValues {
       for (final event
           in eventInfo.extensionEvents?.events ?? <ExtensionEvent>[]) {
         if (event.customEventName != null) {
-          events.add(
-            {
-              eventName: event.eventKind!,
-              customEvent: {
-                customEventName: event.customEventName,
-                customEventData: event.data,
-              },
+          events.add({
+            eventName: event.eventKind!,
+            customEvent: {
+              customEventName: event.customEventName,
+              customEventData: event.data,
             },
-          );
+          });
         } else {
           events.add({
             eventName: event.eventKind!,
@@ -318,8 +309,9 @@ class ChartsValues {
       dashed: true,
     );
 
-    final capacityValueDisplay =
-        formatNumeric(vmData[capacityJsonName] as num?);
+    final capacityValueDisplay = formatNumeric(
+      vmData[capacityJsonName] as num?,
+    );
     vmDataDisplayed['$allocatedDisplay $capacityValueDisplay'] = traceRender(
       color: traces[VmTraceName.capacity.index].characteristics.color,
       dashed: true,
@@ -330,21 +322,24 @@ class ChartsValues {
       color: traces[VmTraceName.used.index].characteristics.color,
     );
 
-    final externalValueDisplay =
-        formatNumeric(vmData[externalJsonName] as num?);
+    final externalValueDisplay = formatNumeric(
+      vmData[externalJsonName] as num?,
+    );
     vmDataDisplayed['$externalDisplay $externalValueDisplay'] = traceRender(
       color: traces[VmTraceName.external.index].characteristics.color,
     );
 
-    final layerValueDisplay =
-        formatNumeric(vmData[rasterLayerJsonName] as num?);
+    final layerValueDisplay = formatNumeric(
+      vmData[rasterLayerJsonName] as num?,
+    );
     vmDataDisplayed['$layerDisplay $layerValueDisplay'] = traceRender(
       color: traces[VmTraceName.rasterLayer.index].characteristics.color,
       dashed: true,
     );
 
-    final pictureValueDisplay =
-        formatNumeric(vmData[rasterPictureJsonName] as num?);
+    final pictureValueDisplay = formatNumeric(
+      vmData[rasterPictureJsonName] as num?,
+    );
     vmDataDisplayed['$pictureDisplay $pictureValueDisplay'] = traceRender(
       color: traces[VmTraceName.rasterPicture.index].characteristics.color,
       dashed: true,
@@ -363,62 +358,67 @@ class ChartsValues {
       final totalValueDisplay = formatNumeric(data[adbTotalJsonName] as num?);
       androidDataDisplayed['$androidTotalDisplay $totalValueDisplay'] =
           traceRender(
-        color: traces[AndroidTraceName.total.index].characteristics.color,
-        dashed: true,
-      );
+            color: traces[AndroidTraceName.total.index].characteristics.color,
+            dashed: true,
+          );
 
       // Other trace
       final otherValueDisplay = formatNumeric(data[adbOtherJsonName] as num?);
       androidDataDisplayed['$androidOtherDisplay $otherValueDisplay'] =
           traceRender(
-        color: traces[AndroidTraceName.other.index].characteristics.color,
-      );
+            color: traces[AndroidTraceName.other.index].characteristics.color,
+          );
 
       // Native heap trace
-      final nativeValueDisplay =
-          formatNumeric(data[adbNativeHeapJsonName] as num?);
+      final nativeValueDisplay = formatNumeric(
+        data[adbNativeHeapJsonName] as num?,
+      );
       androidDataDisplayed['$androidNativeDisplay $nativeValueDisplay'] =
           traceRender(
-        color: traces[AndroidTraceName.nativeHeap.index].characteristics.color,
-      );
+            color:
+                traces[AndroidTraceName.nativeHeap.index].characteristics.color,
+          );
 
       // Graphics trace
-      final graphicsValueDisplay =
-          formatNumeric(data[adbGraphicsJsonName] as num?);
+      final graphicsValueDisplay = formatNumeric(
+        data[adbGraphicsJsonName] as num?,
+      );
       androidDataDisplayed['$androidGraphicsDisplay $graphicsValueDisplay'] =
           traceRender(
-        color: traces[AndroidTraceName.graphics.index].characteristics.color,
-      );
+            color:
+                traces[AndroidTraceName.graphics.index].characteristics.color,
+          );
 
       // Code trace
       final codeValueDisplay = formatNumeric(data[adbCodeJsonName] as num?);
       androidDataDisplayed['$androidCodeDisplay $codeValueDisplay'] =
           traceRender(
-        color: traces[AndroidTraceName.code.index].characteristics.color,
-      );
+            color: traces[AndroidTraceName.code.index].characteristics.color,
+          );
 
       // Java heap trace
       final javaValueDisplay = formatNumeric(data[adbJavaHeapJsonName] as num?);
       androidDataDisplayed['$androidJavaDisplay $javaValueDisplay'] =
           traceRender(
-        color: traces[AndroidTraceName.javaHeap.index].characteristics.color,
-      );
+            color:
+                traces[AndroidTraceName.javaHeap.index].characteristics.color,
+          );
 
       // Stack trace
       final stackValueDisplay = formatNumeric(data[adbStackJsonName] as num?);
       androidDataDisplayed['$androidStackDisplay $stackValueDisplay'] =
           traceRender(
-        color: traces[AndroidTraceName.stack.index].characteristics.color,
-      );
+            color: traces[AndroidTraceName.stack.index].characteristics.color,
+          );
     }
 
     return androidDataDisplayed;
   }
 
   String? formatNumeric(num? number) => prettyPrintBytes(
-        number,
-        mbFractionDigits: 2,
-        includeUnit: true,
-        roundingPoint: 0.7,
-      );
+    number,
+    mbFractionDigits: 2,
+    includeUnit: true,
+    roundingPoint: 0.7,
+  );
 }

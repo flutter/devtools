@@ -97,9 +97,7 @@ void main() {
         entry.addAllChildren(
           InboundReferencesTreeNode.buildTreeRoots(
             TestInboundReferences(
-              references: [
-                InboundReference(source: testFunction),
-              ],
+              references: [InboundReference(source: testFunction)],
             ),
           ),
         );
@@ -108,24 +106,23 @@ void main() {
     });
   });
 
-  testWidgets(
-    'test RequestableSizeWidget while fetching data',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          RequestableSizeWidget(
-            fetching: ValueNotifier(true),
-            sizeProvider: () => mockClassObject.reachableSize,
-            requestFunction: mockClassObject.requestReachableSize,
-          ),
+  testWidgets('test RequestableSizeWidget while fetching data', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      wrap(
+        RequestableSizeWidget(
+          fetching: ValueNotifier(true),
+          sizeProvider: () => mockClassObject.reachableSize,
+          requestFunction: mockClassObject.requestReachableSize,
         ),
-      );
+      ),
+    );
 
-      await tester.pump();
+    await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    },
-  );
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
 
   testWidgets('test RequestableSizeWidget', (WidgetTester tester) async {
     when(mockClassObject.reachableSize).thenReturn(requestedSize);
@@ -292,10 +289,7 @@ void main() {
       await tester.tap(find.text('Inbound References'));
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Referenced by '),
-        findsNWidgets(5),
-      );
+      expect(find.text('Referenced by '), findsNWidgets(5));
 
       // Covers:
       //   - Referenced by fooParentField in Record
@@ -305,38 +299,20 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('element 1 of '), findsOneWidget);
-      expect(
-        find.text('Record', findRichText: true),
-        findsNWidgets(2),
-      );
+      expect(find.text('Record', findRichText: true), findsNWidgets(2));
 
       // Covers:
       //   - Referenced by fooField
       //   - Referenced by fooSuperClass
       //   - Referenced by fooFunction
-      expect(
-        find.text('fooField', findRichText: true),
-        findsOneWidget,
-      );
-      expect(
-        find.text('fooSuperClass', findRichText: true),
-        findsOneWidget,
-      );
-      expect(
-        find.text('fooFunction', findRichText: true),
-        findsOneWidget,
-      );
+      expect(find.text('fooField', findRichText: true), findsOneWidget);
+      expect(find.text('fooSuperClass', findRichText: true), findsOneWidget);
+      expect(find.text('fooFunction', findRichText: true), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.keyboard_arrow_down).first);
       await tester.pumpAndSettle();
-      expect(
-        find.text('Referenced by '),
-        findsNWidgets(6),
-      );
-      expect(
-        find.text('fooFunction', findRichText: true),
-        findsNWidgets(2),
-      );
+      expect(find.text('Referenced by '), findsNWidgets(6));
+      expect(find.text('fooFunction', findRichText: true), findsNWidgets(2));
     },
   );
 }

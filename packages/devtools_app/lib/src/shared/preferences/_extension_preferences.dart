@@ -13,20 +13,17 @@ class ExtensionsPreferencesController extends DisposableController
       '${gac.DevToolsExtensionEvents.showOnlyEnabledExtensionsSetting.name}';
 
   Future<void> init() async {
-    addAutoDisposeListener(
-      showOnlyEnabledExtensions,
-      () {
-        storage.setValue(
-          _showOnlyEnabledExtensionsId,
-          showOnlyEnabledExtensions.value.toString(),
-        );
-        ga.select(
-          gac.DevToolsExtensionEvents.extensionScreenId.name,
-          gac.DevToolsExtensionEvents.showOnlyEnabledExtensionsSetting.name,
-          value: showOnlyEnabledExtensions.value ? 1 : 0,
-        );
-      },
-    );
+    addAutoDisposeListener(showOnlyEnabledExtensions, () {
+      storage.setValue(
+        _showOnlyEnabledExtensionsId,
+        showOnlyEnabledExtensions.value.toString(),
+      );
+      ga.select(
+        gac.DevToolsExtensionEvents.extensionScreenId.name,
+        gac.DevToolsExtensionEvents.showOnlyEnabledExtensionsSetting.name,
+        value: showOnlyEnabledExtensions.value ? 1 : 0,
+      );
+    });
     showOnlyEnabledExtensions.value = await boolValueFromStorage(
       _showOnlyEnabledExtensionsId,
       defaultsTo: false,

@@ -26,8 +26,9 @@ class OfflinePerformanceData {
 
     final selectedFrameId = json.selectedFrameId;
     final frames = json.frames;
-    final selectedFrame =
-        frames.firstWhereOrNull((frame) => frame.id == selectedFrameId);
+    final selectedFrame = frames.firstWhereOrNull(
+      (frame) => frame.id == selectedFrameId,
+    );
 
     return OfflinePerformanceData(
       perfettoTraceBinary: json.traceBinary,
@@ -58,12 +59,12 @@ class OfflinePerformanceData {
   bool get isEmpty => perfettoTraceBinary == null;
 
   Map<String, Object?> toJson() => {
-        traceBinaryKey: perfettoTraceBinary,
-        flutterFramesKey: frames.map((frame) => frame.json).toList(),
-        selectedFrameIdKey: selectedFrame?.id,
-        displayRefreshRateKey: displayRefreshRate,
-        rebuildCountModelKey: rebuildCountModel?.toJson(),
-      };
+    traceBinaryKey: perfettoTraceBinary,
+    flutterFramesKey: frames.map((frame) => frame.json).toList(),
+    selectedFrameIdKey: selectedFrame?.id,
+    displayRefreshRateKey: displayRefreshRate,
+    rebuildCountModelKey: rebuildCountModel?.toJson(),
+  };
 }
 
 extension type _PerformanceDataJson(Map<String, Object?> json) {
@@ -98,8 +99,8 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
 
 class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
   FlutterTimelineEvent(PerfettoTrackEvent firstTrackEvent)
-      : trackEvents = [firstTrackEvent],
-        type = firstTrackEvent.timelineEventType {
+    : trackEvents = [firstTrackEvent],
+      type = firstTrackEvent.timelineEventType {
     time.start = Duration(microseconds: firstTrackEvent.timestampMicros);
   }
 
@@ -137,9 +138,10 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
     }
     copy
       ..type = type
-      ..time = (TimeRange()
-        ..start = time.start
-        ..end = time.end);
+      ..time =
+          (TimeRange()
+            ..start = time.start
+            ..end = time.end);
     return copy;
   }
 
@@ -180,8 +182,4 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
   }
 }
 
-enum TimelineEventType {
-  ui,
-  raster,
-  other,
-}
+enum TimelineEventType { ui, raster, other }

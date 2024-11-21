@@ -51,12 +51,15 @@ class _EditorSidebarPanelState extends State<EditorSidebarPanel> {
         Expanded(
           child: FutureBuilder(
             future: _editor,
-            builder: (context, snapshot) =>
-                switch ((snapshot.connectionState, snapshot.data)) {
-              (ConnectionState.done, final editor?) =>
-                _EditorConnectedPanel(editor),
-              _ => const CenteredCircularProgressIndicator(),
-            },
+            builder:
+                (context, snapshot) => switch ((
+                  snapshot.connectionState,
+                  snapshot.data,
+                )) {
+                  (ConnectionState.done, final editor?) =>
+                    _EditorConnectedPanel(editor),
+                  _ => const CenteredCircularProgressIndicator(),
+                },
           ),
         ),
       ],

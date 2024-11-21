@@ -54,9 +54,7 @@ class SimulatedEditor {
       _registerService(
         EditorMethod.openDevToolsPage,
         _openDevToolsPage,
-        capabilities: {
-          Field.supportsForceExternal: true,
-        },
+        capabilities: {Field.supportsForceExternal: true},
       ),
       _registerService(EditorMethod.enablePlatformType, _enablePlatformType),
     ]);
@@ -126,16 +124,11 @@ class SimulatedEditor {
     );
   }
 
-  static const _successResponse = {
-    'type': 'Success',
-  };
+  static const _successResponse = {'type': 'Success'};
 
   Future<Map<String, Object?>> _getDevices(Parameters params) async {
     final result = await getDevices();
-    return Future.value({
-      'type': 'GetDevicesResult',
-      ...result.toJson(),
-    });
+    return Future.value({'type': 'GetDevicesResult', ...result.toJson()});
   }
 
   Future<Map<String, Object?>> _selectDevice(Parameters params) async {
@@ -145,10 +138,7 @@ class SimulatedEditor {
 
   Future<Map<String, Object?>> _getDebugSessions(Parameters params) async {
     final result = await getDebugSessions();
-    return Future.value({
-      'type': 'GetDebugSessionsResult',
-      ...result.toJson(),
-    });
+    return Future.value({'type': 'GetDebugSessionsResult', ...result.toJson()});
   }
 
   Future<Map<String, Object?>> _hotReload(Parameters params) async {
@@ -278,9 +268,7 @@ class SimulatedEditor {
   }
 
   FutureOr<GetDebugSessionsResult> getDebugSessions() {
-    return GetDebugSessionsResult(
-      debugSessions: debugSessions.values.toList(),
-    );
+    return GetDebugSessionsResult(debugSessions: debugSessions.values.toList());
   }
 
   FutureOr<void> selectDevice(String? deviceId) {
@@ -294,12 +282,11 @@ class SimulatedEditor {
   FutureOr<void> enablePlatformType(String platformType) {
     for (var MapEntry(key: id, value: device) in devices.entries) {
       if (!device.supported && device.platformType == platformType) {
-        device = devices[id] = EditorDevice.fromJson(
-          {
-            ...device.toJson(),
-            'supported': true,
-          },
-        );
+        device =
+            devices[id] = EditorDevice.fromJson({
+              ...device.toJson(),
+              'supported': true,
+            });
         sendDeviceChanged(device);
       }
     }

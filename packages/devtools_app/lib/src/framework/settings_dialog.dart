@@ -19,18 +19,18 @@ import '../shared/server/server.dart';
 
 class OpenSettingsAction extends ScaffoldAction {
   OpenSettingsAction({super.key, super.color})
-      : super(
-          icon: Icons.settings_outlined,
-          tooltip: 'Settings',
-          onPressed: (context) {
-            unawaited(
-              showDialog(
-                context: context,
-                builder: (context) => const SettingsDialog(),
-              ),
-            );
-          },
-        );
+    : super(
+        icon: Icons.settings_outlined,
+        tooltip: 'Settings',
+        onPressed: (context) {
+          unawaited(
+            showDialog(
+              context: context,
+              builder: (context) => const SettingsDialog(),
+            ),
+          );
+        },
+      );
 }
 
 class SettingsDialog extends StatelessWidget {
@@ -61,9 +61,10 @@ class SettingsDialog extends StatelessWidget {
               child: CheckboxSetting(
                 title: 'Enable analytics',
                 notifier: analyticsController.analyticsEnabled,
-                onChanged: (enable) => unawaited(
-                  analyticsController.toggleAnalyticsEnabled(enable),
-                ),
+                onChanged:
+                    (enable) => unawaited(
+                      analyticsController.toggleAnalyticsEnabled(enable),
+                    ),
                 gaScreen: gac.settingsDialog,
                 gaItem: gac.analytics,
               ),
@@ -98,8 +99,9 @@ class SettingsDialog extends StatelessWidget {
             if (FeatureFlags.inspectorV2)
               Flexible(
                 child: CheckboxSetting(
-                  notifier: preferences.inspector.inspectorV2Enabled
-                      as ValueNotifier<bool?>,
+                  notifier:
+                      preferences.inspector.inspectorV2Enabled
+                          as ValueNotifier<bool?>,
                   title: 'Enable the new Inspector',
                   description: 'Try out the redesigned Flutter Inspector.',
                   gaItem: gac.inspectorV2Enabled,
@@ -111,9 +113,7 @@ class SettingsDialog extends StatelessWidget {
           const _VerboseLoggingSetting(),
         ],
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }
@@ -146,10 +146,11 @@ class _VerboseLoggingSetting extends StatelessWidget {
               gaSelection: gac.copyLogs,
               minScreenWidthForTextBeforeScaling:
                   _minScreenWidthForTextBeforeScaling,
-              onPressed: () async => await copyToClipboard(
-                LogStorage.root.toString(),
-                successMessage: 'Successfully copied logs',
-              ),
+              onPressed:
+                  () async => await copyToClipboard(
+                    LogStorage.root.toString(),
+                    successMessage: 'Successfully copied logs',
+                  ),
             ),
             const SizedBox(width: denseSpacing),
             ClearButton(

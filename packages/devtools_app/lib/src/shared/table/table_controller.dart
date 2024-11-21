@@ -19,11 +19,7 @@ import 'table_data.dart';
 ///   - [FlatTablePinBehavior.pinCopyToTop] creates a copy of the original item
 ///     and inserts it into the list of pinned items, leaving the original item
 ///     in the list of unpinned items.
-enum FlatTablePinBehavior {
-  none,
-  pinOriginalToTop,
-  pinCopyToTop,
-}
+enum FlatTablePinBehavior { none, pinOriginalToTop, pinCopyToTop }
 
 class FlatTableController<T> extends TableControllerBase<T> {
   FlatTableController({
@@ -74,9 +70,7 @@ class FlatTableController<T> extends TableControllerBase<T> {
     if (sortOriginalData) {
       _modifiableOriginalData = data;
     } else {
-      _unmodifiableOriginalData = UnmodifiableListView(
-        List<T>.of(data),
-      );
+      _unmodifiableOriginalData = UnmodifiableListView(List<T>.of(data));
     }
 
     // Look up the UI state for [key], and sort accordingly.
@@ -156,8 +150,8 @@ class TreeTableController<T extends TreeNode<T>>
     super.columnGroups,
     required this.treeColumn,
     this.autoExpandRoots = false,
-  })  : assert(columns.contains(treeColumn)),
-        assert(columns.contains(defaultSortColumn));
+  }) : assert(columns.contains(treeColumn)),
+       assert(columns.contains(defaultSortColumn));
 
   /// The column of the table to treat as expandable.
   final TreeColumnData<T> treeColumn;
@@ -178,7 +172,9 @@ class TreeTableController<T extends TreeNode<T>>
     }
     // TODO(kenz): instead of using the maximum tree depth, consider using the
     // maximum depth of expanded nodes.
-    maxTableDepth = dataRoots.map((root) => root.depth).fold(
+    maxTableDepth = dataRoots
+        .map((root) => root.depth)
+        .fold(
           0,
           (currentMaxDepth, nextDepth) => max(currentMaxDepth, nextDepth),
         );
@@ -202,12 +198,12 @@ class TreeTableController<T extends TreeNode<T>>
   }) {
     pinnedData = <T>[];
     int sortFunction(T a, T b) => _compareData<T>(
-          a,
-          b,
-          column,
-          direction,
-          secondarySortColumn: secondarySortColumn,
-        );
+      a,
+      b,
+      column,
+      direction,
+      secondarySortColumn: secondarySortColumn,
+    );
     void sort(T dataObject) {
       dataObject.children
         ..sort(sortFunction)
@@ -275,8 +271,9 @@ abstract class TableControllerBase<T> extends DisposableController {
   ScrollController? verticalScrollController;
 
   void initScrollController([double initialScrollOffset = 0.0]) {
-    verticalScrollController =
-        ScrollController(initialScrollOffset: initialScrollOffset);
+    verticalScrollController = ScrollController(
+      initialScrollOffset: initialScrollOffset,
+    );
   }
 
   void storeScrollPosition() {
@@ -358,10 +355,8 @@ abstract class TableControllerBase<T> extends DisposableController {
 }
 
 class TableData<T> {
-  const TableData({
-    required this.data,
-    String? key,
-  }) : key = key ?? defaultDataKey;
+  const TableData({required this.data, String? key})
+    : key = key ?? defaultDataKey;
 
   factory TableData.empty() => TableData<T>(data: const []);
 
