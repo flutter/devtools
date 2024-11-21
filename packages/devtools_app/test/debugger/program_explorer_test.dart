@@ -79,9 +79,9 @@ void main() {
       ).thenReturn(false);
 
       final mockScriptManager = MockScriptManager();
-      //`then` is used
-      // ignore: discarded_futures
       when(
+        //`then` is used
+        // ignore: discarded_futures
         mockScriptManager.getScript(any),
       ).thenAnswer((_) => Future<Script>.value(testScript));
 

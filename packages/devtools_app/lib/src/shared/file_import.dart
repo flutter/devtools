@@ -41,8 +41,8 @@ class OpenSaveButtonGroup extends StatelessWidget {
               acceptedTypes: const ['json'],
             );
             if (importedFile != null) {
-              // ignore: use_build_context_synchronously, intentional use.
               Provider.of<ImportController>(
+                // ignore: use_build_context_synchronously, intentional use.
                 context,
                 listen: false,
               ).importData(importedFile, expectedScreenId: screenId);

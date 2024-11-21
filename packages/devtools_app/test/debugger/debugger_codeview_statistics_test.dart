@@ -77,9 +77,9 @@ void main() {
       mockCodeViewController.showProfileInformation,
     ).thenReturn(showProfileHits);
     refreshCodeCoverageInvoked = false;
-    // TODO(jacobr): is there a better way to clean this up?
-    // ignore: discarded_futures
     when(
+      // TODO(jacobr): is there a better way to clean this up?
+      // ignore: discarded_futures
       mockCodeViewController.refreshCodeStatistics(),
     ).thenAnswer((_) async => refreshCodeCoverageInvoked = true);
     when(codeViewController.navigationInProgress).thenReturn(false);
