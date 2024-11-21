@@ -15,10 +15,7 @@ class PropertyEditorSidebar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Property Editor',
-          style: theme.textTheme.titleMedium,
-        ),
+        Text('Property Editor', style: theme.textTheme.titleMedium),
         const _PropertiesList(),
       ],
     );
@@ -29,17 +26,16 @@ class _PropertiesList extends StatelessWidget {
   const _PropertiesList();
 
   static const itemPadding = densePadding;
+  static const itemDivider = Divider(thickness: 1.0);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Divider(thickness: 1.0),
+        itemDivider,
         for (final property in _properties) ...[
-          _EditablePropertyItem(
-            property: property,
-          ),
-          const Divider(thickness: 1.0),
+          _EditablePropertyItem(property: property),
+          itemDivider,
         ],
       ],
     );
@@ -47,9 +43,7 @@ class _PropertiesList extends StatelessWidget {
 }
 
 class _EditablePropertyItem extends StatelessWidget {
-  const _EditablePropertyItem({
-    required this.property,
-  });
+  const _EditablePropertyItem({required this.property});
 
   final _WidgetProperty property;
 
@@ -66,11 +60,7 @@ class _EditablePropertyItem extends StatelessWidget {
           ),
         ),
         if (property.isRequired || property.isDefault) ...[
-          Flexible(
-            child: _PropertyLabels(
-              property: property,
-            ),
-          ),
+          Flexible(child: _PropertyLabels(property: property)),
         ] else
           const Spacer(),
       ],
@@ -79,9 +69,7 @@ class _EditablePropertyItem extends StatelessWidget {
 }
 
 class _PropertyLabels extends StatelessWidget {
-  const _PropertyLabels({
-    required this.property,
-  });
+  const _PropertyLabels({required this.property});
 
   final _WidgetProperty property;
 
@@ -96,9 +84,7 @@ class _PropertyLabels extends StatelessWidget {
       children: [
         if (isRequired)
           Padding(
-            padding: const EdgeInsets.all(
-              _PropertiesList.itemPadding,
-            ),
+            padding: const EdgeInsets.all(_PropertiesList.itemPadding),
             child: RoundedLabel(
               labelText: 'required',
               backgroundColor: colorScheme.primary,
@@ -116,9 +102,7 @@ class _PropertyLabels extends StatelessWidget {
 }
 
 class _PropertyInput extends StatelessWidget {
-  const _PropertyInput({
-    required this.property,
-  });
+  const _PropertyInput({required this.property});
 
   final _WidgetProperty property;
 
@@ -140,13 +124,14 @@ class _PropertyInput extends StatelessWidget {
         return DropdownButtonFormField(
           value: property.valueDisplay,
           decoration: decoration,
-          items: (options ?? []).map((option) {
-            return DropdownMenuItem(
-              value: option,
-              onTap: () {},
-              child: Text(option),
-            );
-          }).toList(),
+          items:
+              (options ?? []).map((option) {
+                return DropdownMenuItem(
+                  value: option,
+                  onTap: () {},
+                  child: Text(option),
+                );
+              }).toList(),
           onChanged: (_) {},
         );
       case 'double':
@@ -157,9 +142,7 @@ class _PropertyInput extends StatelessWidget {
           enabled: property.isEditable,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: _inputValidator,
-          inputFormatters: [
-            FilteringTextInputFormatter.singleLineFormatter,
-          ],
+          inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
           decoration: decoration,
           style: Theme.of(context).fixedFontStyle,
           onChanged: (_) {},

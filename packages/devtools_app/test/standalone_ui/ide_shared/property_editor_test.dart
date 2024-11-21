@@ -77,14 +77,14 @@ void main() {
 }
 
 Finder _findTextFormField(String inputName) => find.ancestor(
-      of: find.text(inputName),
-      matching: find.byType(TextFormField),
-    );
+  of: find.text(inputName),
+  matching: find.byType(TextFormField),
+);
 
 Finder _findDropdownButtonFormField(String inputName) => find.ancestor(
-      of: find.text(inputName),
-      matching: find.byType(DropdownButtonFormField<String>),
-    );
+  of: find.text(inputName),
+  matching: find.byType(DropdownButtonFormField<String>),
+);
 
 Future<void> _verifyDropdownMenuItems(
   Finder dropdownButton, {
