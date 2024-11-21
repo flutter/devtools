@@ -79,9 +79,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         Expanded(
           child: SplitPane(
             axis: splitAxis,
-            initialFractions: splitAxis == Axis.vertical
-                ? const [0.8, 0.2]
-                : const [0.7, 0.3],
+            initialFractions:
+                splitAxis == Axis.vertical
+                    ? const [0.8, 0.2]
+                    : const [0.7, 0.3],
             children: [
               RoundedOutlinedBorder(
                 clip: true,

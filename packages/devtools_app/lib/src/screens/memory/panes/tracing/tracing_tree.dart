@@ -28,10 +28,7 @@ class AllocationTracingTree extends StatefulWidget {
 
   static final _bottomUpTab = _buildTab(tabName: 'Bottom Up');
   static final _callTreeTab = _buildTab(tabName: 'Call Tree');
-  static final tabs = [
-    _bottomUpTab,
-    _callTreeTab,
-  ];
+  static final tabs = [_bottomUpTab, _callTreeTab];
 
   static DevToolsTab _buildTab({Key? key, required String tabName}) {
     return DevToolsTab.create(
@@ -78,7 +75,8 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
               return const _TracingInstructions();
             } else if (!selection.traceAllocations) {
               return _TracingInstructions(
-                prefix: 'Allocation tracing is not enabled for class '
+                prefix:
+                    'Allocation tracing is not enabled for class '
                     '${selection.clazz.name}.',
               );
             } else if (selection.traceAllocations &&
@@ -124,9 +122,7 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
 }
 
 class _TracingInstructions extends StatelessWidget {
-  const _TracingInstructions({
-    this.prefix,
-  });
+  const _TracingInstructions({this.prefix});
 
   final String? prefix;
 
@@ -138,9 +134,7 @@ class _TracingInstructions extends StatelessWidget {
     }
     return Markdown(
       data: data,
-      styleSheet: MarkdownStyleSheet(
-        p: Theme.of(context).regularTextStyle,
-      ),
+      styleSheet: MarkdownStyleSheet(p: Theme.of(context).regularTextStyle),
     );
   }
 }
@@ -180,9 +174,7 @@ class _TracingTreeHeader extends StatelessWidget {
       title: Text.rich(
         TextSpan(
           children: [
-            const TextSpan(
-              text: 'Traced allocations for: ',
-            ),
+            const TextSpan(text: 'Traced allocations for: '),
             TextSpan(
               style: theme.fixedFontStyle,
               text: controller.selection.value.selectedClass.value?.clazz.name!,
@@ -204,25 +196,23 @@ class _TracingTreeHeader extends StatelessWidget {
         ExpandAllButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvents.tracingTreeExpandAll.name,
-          onPressed: () => updateTreeStateCallback(
-            () {
-              for (final root in _currentDataRoots) {
-                root.expandCascading();
-              }
-            },
-          ),
+          onPressed:
+              () => updateTreeStateCallback(() {
+                for (final root in _currentDataRoots) {
+                  root.expandCascading();
+                }
+              }),
         ),
         const SizedBox(width: denseSpacing),
         CollapseAllButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvents.tracingTreeCollapseAll.name,
-          onPressed: () => updateTreeStateCallback(
-            () {
-              for (final root in _currentDataRoots) {
-                root.collapseCascading();
-              }
-            },
-          ),
+          onPressed:
+              () => updateTreeStateCallback(() {
+                for (final root in _currentDataRoots) {
+                  root.collapseCascading();
+                }
+              }),
         ),
       ],
     );
@@ -238,11 +228,11 @@ class _TracingTreeHeader extends StatelessWidget {
 
 class _InclusiveCountColumn extends ColumnData<CpuStackFrame> {
   _InclusiveCountColumn()
-      : super(
-          'Inclusive',
-          titleTooltip: _tooltip,
-          fixedWidthPx: scaleByFontFactor(_countColumnWidth),
-        );
+    : super(
+        'Inclusive',
+        titleTooltip: _tooltip,
+        fixedWidthPx: scaleByFontFactor(_countColumnWidth),
+      );
 
   static const _tooltip =
       'The number of instances allocated by calls made from a stack frame.';
@@ -271,11 +261,11 @@ class _InclusiveCountColumn extends ColumnData<CpuStackFrame> {
 
 class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
   _ExclusiveCountColumn()
-      : super(
-          'Exclusive',
-          titleTooltip: _tooltip,
-          fixedWidthPx: scaleByFontFactor(_countColumnWidth),
-        );
+    : super(
+        'Exclusive',
+        titleTooltip: _tooltip,
+        fixedWidthPx: scaleByFontFactor(_countColumnWidth),
+      );
 
   static const _tooltip =
       'The number of instances allocated directly by a stack frame.';
@@ -304,10 +294,7 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 
 /// A table of an allocation profile tree.
 class TracingTable extends StatelessWidget {
-  const TracingTable({
-    super.key,
-    required this.dataRoots,
-  });
+  const TracingTable({super.key, required this.dataRoots});
 
   static final treeColumn = MethodAndSourceColumn();
   static final startingSortColumn = _InclusiveCountColumn();

@@ -4,13 +4,13 @@ publish_to: none
 
 # Note: this version should only be updated by running the 'dt update-version'
 # command that updates the version here and in 'devtools.dart'.
-version: 2.41.0-dev.2
+version: 2.41.0-dev.3
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
 environment:
-  sdk: ">=3.7.0-41.0.dev <4.0.0"
-  flutter: ">=3.27.0-1.0.pre.123"
+  sdk: ">=3.7.0-160.0.dev <4.0.0"
+  flutter: ">=3.27.0-1.0.pre.563"
 
 dependencies:
   ansi_up: ^1.0.0

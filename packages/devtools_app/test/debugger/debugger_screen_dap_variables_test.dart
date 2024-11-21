@@ -45,15 +45,14 @@ void main() {
     );
     setGlobal(PreferencesController, PreferencesController());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
-    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'),
+    ).thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
   });
 
   tearDown(() {
-    fakeServiceConnection.appState.setDapVariables(
-      [],
-    );
+    fakeServiceConnection.appState.setDapVariables([]);
   });
 
   Future<void> pumpDebuggerScreen(
@@ -61,90 +60,75 @@ void main() {
     DebuggerController controller,
   ) async {
     await tester.pumpWidget(
-      wrapWithControllers(
-        const DebuggerWindows(),
-        debugger: controller,
-      ),
+      wrapWithControllers(const DebuggerWindows(), debugger: controller),
     );
   }
 
-  testWidgetsWithWindowSize(
-    'Shows non-expandable variables',
-    windowSize,
-    (WidgetTester tester) async {
-      final node = DapObjectNode(
-        service: vmService,
-        variable: dap.Variable(
-          name: 'myInt',
-          value: '10',
-          variablesReference: 0,
-        ),
+  testWidgetsWithWindowSize('Shows non-expandable variables', windowSize, (
+    WidgetTester tester,
+  ) async {
+    final node = DapObjectNode(
+      service: vmService,
+      variable: dap.Variable(name: 'myInt', value: '10', variablesReference: 0),
+    );
+
+    fakeServiceConnection.appState.setDapVariables([node]);
+    await pumpDebuggerScreen(tester, debuggerController);
+    expect(find.text('Variables'), findsOneWidget);
+
+    // Variables should include the int.
+    final intFinder = find.text('myInt: 10');
+    expect(intFinder, findsOneWidget);
+
+    // The int is not expandable.
+    final expandArrowFinder = find.byIcon(Icons.keyboard_arrow_down);
+    expect(expandArrowFinder, findsNothing);
+  });
+
+  testWidgetsWithWindowSize('Shows expandable variables', windowSize, (
+    WidgetTester tester,
+  ) async {
+    when(vmService.dapVariablesRequest(any)).thenAnswer((_) async {
+      return dap.VariablesResponseBody(
+        variables: [
+          dap.Variable(
+            name: 'myString',
+            value: '"myString"',
+            variablesReference: 0,
+          ),
+        ],
       );
+    });
 
-      fakeServiceConnection.appState.setDapVariables(
-        [node],
-      );
-      await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Variables'), findsOneWidget);
+    final node = DapObjectNode(
+      service: vmService,
+      variable: dap.Variable(
+        name: 'myList',
+        value: 'List (1 item)',
+        variablesReference: 1,
+      ),
+    );
+    await node.fetchChildren();
 
-      // Variables should include the int.
-      final intFinder = find.text('myInt: 10');
-      expect(intFinder, findsOneWidget);
+    fakeServiceConnection.appState.setDapVariables([node]);
+    await pumpDebuggerScreen(tester, debuggerController);
+    expect(find.text('Variables'), findsOneWidget);
 
-      // The int is not expandable.
-      final expandArrowFinder = find.byIcon(Icons.keyboard_arrow_down);
-      expect(expandArrowFinder, findsNothing);
-    },
-  );
+    // Variables should include the list.
+    final listFinder = find.text('myList: List (1 item)');
+    expect(listFinder, findsOneWidget);
 
-  testWidgetsWithWindowSize(
-    'Shows expandable variables',
-    windowSize,
-    (WidgetTester tester) async {
-      when(vmService.dapVariablesRequest(any)).thenAnswer((_) async {
-        return dap.VariablesResponseBody(
-          variables: [
-            dap.Variable(
-              name: 'myString',
-              value: '"myString"',
-              variablesReference: 0,
-            ),
-          ],
-        );
-      });
+    // Initially the string is not visible.
+    final stringFinder = find.text('myString: "myString"');
+    expect(stringFinder, findsNothing);
 
-      final node = DapObjectNode(
-        service: vmService,
-        variable: dap.Variable(
-          name: 'myList',
-          value: 'List (1 item)',
-          variablesReference: 1,
-        ),
-      );
-      await node.fetchChildren();
+    // Expand the list.
+    final expandArrowFinder = find.byIcon(Icons.keyboard_arrow_down);
+    expect(expandArrowFinder, findsOneWidget);
+    await tester.tap(expandArrowFinder.first);
+    await tester.pump();
 
-      fakeServiceConnection.appState.setDapVariables(
-        [node],
-      );
-      await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.text('Variables'), findsOneWidget);
-
-      // Variables should include the list.
-      final listFinder = find.text('myList: List (1 item)');
-      expect(listFinder, findsOneWidget);
-
-      // Initially the string is not visible.
-      final stringFinder = find.text('myString: "myString"');
-      expect(stringFinder, findsNothing);
-
-      // Expand the list.
-      final expandArrowFinder = find.byIcon(Icons.keyboard_arrow_down);
-      expect(expandArrowFinder, findsOneWidget);
-      await tester.tap(expandArrowFinder.first);
-      await tester.pump();
-
-      // String is now visible.
-      expect(stringFinder, findsOneWidget);
-    },
-  );
+    // String is now visible.
+    expect(stringFinder, findsOneWidget);
+  });
 }

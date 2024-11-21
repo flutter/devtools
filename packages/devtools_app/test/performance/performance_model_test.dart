@@ -60,7 +60,8 @@ void main() {
           expect(
             node.isUiEvent,
             true,
-            reason: 'Expected ${node.name} event to have type '
+            reason:
+                'Expected ${node.name} event to have type '
                 '${TimelineEventType.ui}.',
           );
         },
@@ -74,7 +75,8 @@ void main() {
           expect(
             node.isRasterEvent,
             true,
-            reason: 'Expected ${node.name} event to have type '
+            reason:
+                'Expected ${node.name} event to have type '
                 '${TimelineEventType.raster}.',
           );
         },

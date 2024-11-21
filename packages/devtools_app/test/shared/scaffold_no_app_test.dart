@@ -25,15 +25,17 @@ void main() {
         mockServiceConnection.serviceManager as MockServiceManager;
     when(mockServiceManager.service).thenReturn(null);
     when(mockServiceManager.connectedAppInitialized).thenReturn(false);
-    when(mockServiceManager.connectedState).thenReturn(
-      ValueNotifier<ConnectedState>(const ConnectedState(false)),
-    );
+    when(
+      mockServiceManager.connectedState,
+    ).thenReturn(ValueNotifier<ConnectedState>(const ConnectedState(false)));
 
     final mockErrorBadgeManager = MockErrorBadgeManager();
-    when(mockServiceConnection.errorBadgeManager)
-        .thenReturn(mockErrorBadgeManager);
-    when(mockErrorBadgeManager.errorCountNotifier(any))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      mockServiceConnection.errorBadgeManager,
+    ).thenReturn(mockErrorBadgeManager);
+    when(
+      mockErrorBadgeManager.errorCountNotifier(any),
+    ).thenReturn(ValueNotifier<int>(0));
 
     setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(FrameworkController, FrameworkController());
@@ -82,12 +84,12 @@ class _TestScreen extends Screen {
     bool showFloatingDebuggerControls = true,
     Key? tabKey,
   }) : super(
-          name,
-          title: name,
-          icon: Icons.computer,
-          tabKey: tabKey,
-          showFloatingDebuggerControls: showFloatingDebuggerControls,
-        );
+         name,
+         title: name,
+         icon: Icons.computer,
+         tabKey: tabKey,
+         showFloatingDebuggerControls: showFloatingDebuggerControls,
+       );
 
   final String name;
   final Key key;

@@ -56,24 +56,21 @@ void setupClipboardCopyListener({
   // This intercepts the Clipboard.setData SystemChannel message,
   // and stores the contents that were (attempted) to be copied.
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .setMockMethodCallHandler(
-    SystemChannels.platform,
-    (MethodCall call) {
-      switch (call.method) {
-        case 'Clipboard.setData':
-          clipboardContentsCallback((call.arguments as Map)['text']);
-          break;
-        case 'Clipboard.getData':
-          return Future.value(<String, Object?>{});
-        case 'Clipboard.hasStrings':
-          return Future.value(<String, Object?>{'value': true});
-        default:
-          break;
-      }
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall call) {
+        switch (call.method) {
+          case 'Clipboard.setData':
+            clipboardContentsCallback((call.arguments as Map)['text']);
+            break;
+          case 'Clipboard.getData':
+            return Future.value(<String, Object?>{});
+          case 'Clipboard.hasStrings':
+            return Future.value(<String, Object?>{'value': true});
+          default:
+            break;
+        }
 
-      return Future.value(true);
-    },
-  );
+        return Future.value(true);
+      });
 }
 
 Future<String> loadPageHtmlContent(String url) async {
@@ -82,12 +79,9 @@ Future<String> loadPageHtmlContent(String url) async {
 
   final completer = Completer<String>();
   final content = StringBuffer();
-  response.transform(utf8.decoder).listen(
-    (data) {
-      content.write(data);
-    },
-    onDone: () => completer.complete(content.toString()),
-  );
+  response.transform(utf8.decoder).listen((data) {
+    content.write(data);
+  }, onDone: () => completer.complete(content.toString()));
   await completer.future;
   return content.toString();
 }

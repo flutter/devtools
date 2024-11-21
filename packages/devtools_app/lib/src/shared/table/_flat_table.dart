@@ -34,14 +34,15 @@ class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable<T> {
     super.rowHeight,
     super.selectionNotifier,
   }) : super(
-          searchMatchesNotifier: searchController.searchMatches,
-          activeSearchMatchNotifier: searchController.activeSearchMatch,
-          onDataSorted: () => WidgetsBinding.instance.addPostFrameCallback((_) {
-            // This needs to be in a post frame callback so that the search
-            // matches are not updated in the middle of a table build.
-            searchController.refreshSearchMatches();
-          }),
-        );
+         searchMatchesNotifier: searchController.searchMatches,
+         activeSearchMatchNotifier: searchController.activeSearchMatch,
+         onDataSorted:
+             () => WidgetsBinding.instance.addPostFrameCallback((_) {
+               // This needs to be in a post frame callback so that the search
+               // matches are not updated in the middle of a table build.
+               searchController.refreshSearchMatches();
+             }),
+       );
 }
 
 /// A table that displays in a collection of [data], based on a collection of
@@ -276,7 +277,8 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     FlatTable<T> oldWidget,
     FlatTable<T> newWidget,
   ) {
-    final columnsChanged = !collectionEquals(
+    final columnsChanged =
+        !collectionEquals(
           oldWidget.columns.map((c) => c.config),
           newWidget.columns.map((c) => c.config),
         ) ||
@@ -290,26 +292,27 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     Widget buildTable(List<double> columnWidths) => DevToolsTable<T>(
-          tableController: tableController,
-          columnWidths: columnWidths,
-          autoScrollContent: widget.autoScrollContent,
-          startScrolledAtBottom: widget.startScrolledAtBottom,
-          rowBuilder: _buildRow,
-          activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
-          rowItemExtent: widget.rowHeight ?? defaultRowHeight,
-          preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
-          tallHeaders: widget.tallHeaders,
-          headerColor: widget.headerColor,
-          fillWithEmptyRows: widget.fillWithEmptyRows,
-          enableHoverHandling: widget.enableHoverHandling,
-        );
+      tableController: tableController,
+      columnWidths: columnWidths,
+      autoScrollContent: widget.autoScrollContent,
+      startScrolledAtBottom: widget.startScrolledAtBottom,
+      rowBuilder: _buildRow,
+      activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+      rowItemExtent: widget.rowHeight ?? defaultRowHeight,
+      preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+      tallHeaders: widget.tallHeaders,
+      headerColor: widget.headerColor,
+      fillWithEmptyRows: widget.fillWithEmptyRows,
+      enableHoverHandling: widget.enableHoverHandling,
+    );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
-        builder: (context, constraints) => buildTable(
-          tableController.computeColumnWidthsSizeToFit(
-            constraints.maxWidth,
-          ),
-        ),
+        builder:
+            (context, constraints) => buildTable(
+              tableController.computeColumnWidthsSizeToFit(
+                constraints.maxWidth,
+              ),
+            ),
       );
     }
     return buildTable(tableController.columnWidths!);

@@ -20,39 +20,33 @@ class PerformancePreferencesController extends DisposableController
       '${gac.performance}.${gac.PerformanceEvents.includeCpuSamplesInTimeline.name}';
 
   Future<void> init() async {
-    addAutoDisposeListener(
-      showFlutterFramesChart,
-      () {
-        storage.setValue(
-          _showFlutterFramesChartId,
-          showFlutterFramesChart.value.toString(),
-        );
-        ga.select(
-          gac.performance,
-          gac.PerformanceEvents.framesChartVisibility.name,
-          value: showFlutterFramesChart.value ? 1 : 0,
-        );
-      },
-    );
+    addAutoDisposeListener(showFlutterFramesChart, () {
+      storage.setValue(
+        _showFlutterFramesChartId,
+        showFlutterFramesChart.value.toString(),
+      );
+      ga.select(
+        gac.performance,
+        gac.PerformanceEvents.framesChartVisibility.name,
+        value: showFlutterFramesChart.value ? 1 : 0,
+      );
+    });
     showFlutterFramesChart.value = await boolValueFromStorage(
       _showFlutterFramesChartId,
       defaultsTo: true,
     );
 
-    addAutoDisposeListener(
-      includeCpuSamplesInTimeline,
-      () {
-        storage.setValue(
-          _includeCpuSamplesInTimelineId,
-          includeCpuSamplesInTimeline.value.toString(),
-        );
-        ga.select(
-          gac.performance,
-          gac.PerformanceEvents.includeCpuSamplesInTimeline.name,
-          value: includeCpuSamplesInTimeline.value ? 1 : 0,
-        );
-      },
-    );
+    addAutoDisposeListener(includeCpuSamplesInTimeline, () {
+      storage.setValue(
+        _includeCpuSamplesInTimelineId,
+        includeCpuSamplesInTimeline.value.toString(),
+      );
+      ga.select(
+        gac.performance,
+        gac.PerformanceEvents.includeCpuSamplesInTimeline.name,
+        value: includeCpuSamplesInTimeline.value ? 1 : 0,
+      );
+    });
     includeCpuSamplesInTimeline.value = await boolValueFromStorage(
       _includeCpuSamplesInTimelineId,
       defaultsTo: false,

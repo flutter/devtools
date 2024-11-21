@@ -47,10 +47,7 @@ class VmLibraryDisplay extends StatelessWidget {
     LibraryObject library,
   ) {
     return [
-      ...vmObjectGeneralDataRows(
-        controller,
-        library,
-      ),
+      ...vmObjectGeneralDataRows(controller, library),
       serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'URI',
@@ -58,20 +55,14 @@ class VmLibraryDisplay extends StatelessWidget {
         object:
             (library.obj.uri?.isEmpty ?? false) ? library.script! : library.obj,
       ),
-      selectableTextBuilderMapEntry(
-        'VM Name',
-        library.vmName,
-      ),
+      selectableTextBuilderMapEntry('VM Name', library.vmName),
     ];
   }
 }
 
 /// An expandable tile displaying a list of library dependencies
 class LibraryDependencies extends StatelessWidget {
-  const LibraryDependencies({
-    super.key,
-    required this.dependencies,
-  });
+  const LibraryDependencies({super.key, required this.dependencies});
 
   final List<LibraryDependency> dependencies;
 
@@ -82,12 +73,7 @@ class LibraryDependencies extends StatelessWidget {
       for (final dep in dependencies)
         Row(
           children: [
-            Flexible(
-              child: SelectableText(
-                dep.description,
-                style: textStyle,
-              ),
-            ),
+            Flexible(child: SelectableText(dep.description, style: textStyle)),
           ],
         ),
     ];
@@ -97,10 +83,7 @@ class LibraryDependencies extends StatelessWidget {
   Widget build(BuildContext context) {
     return VmExpansionTile(
       title: 'Dependencies (${dependencies.length})',
-      children: prettyRows(
-        context,
-        dependencyRows(context),
-      ),
+      children: prettyRows(context, dependencyRows(context)),
     );
   }
 }
@@ -117,9 +100,7 @@ extension LibraryDependencyExtension on LibraryDependency {
 
     addSpace();
 
-    description.write(
-      target?.name ?? target?.uri ?? '<Library name>',
-    );
+    description.write(target?.name ?? target?.uri ?? '<Library name>');
 
     final libPrefix = prefix;
 

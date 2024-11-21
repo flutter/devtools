@@ -179,8 +179,9 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   /// Exports the current screen data to a .json file and downloads the file to
   /// the user's Downloads directory.
   void exportData() {
-    final encodedData =
-        _exportController.encode(prepareOfflineScreenData().toJson());
+    final encodedData = _exportController.encode(
+      prepareOfflineScreenData().toJson(),
+    );
     _exportController.downloadFile(encodedData);
   }
 
@@ -233,7 +234,7 @@ class OfflineScreenData {
   final Map<String, Object?> data;
 
   Map<String, Object?> toJson() => {
-        DevToolsExportKeys.activeScreenId.name: screenId,
-        screenId: data,
-      };
+    DevToolsExportKeys.activeScreenId.name: screenId,
+    screenId: data,
+  };
 }

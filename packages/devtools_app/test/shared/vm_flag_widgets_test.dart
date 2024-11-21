@@ -46,10 +46,7 @@ void main() {
     testWidgets('displays with default content', (WidgetTester tester) async {
       await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
-      expect(
-        find.byKey(CpuSamplingRateDropdown.dropdownKey),
-        findsOneWidget,
-      );
+      expect(find.byKey(CpuSamplingRateDropdown.dropdownKey), findsOneWidget);
       expect(
         find.text(CpuSamplingRate.low.display, skipOffstage: false),
         findsOneWidget,
@@ -62,8 +59,9 @@ void main() {
         find.text(CpuSamplingRate.high.display, skipOffstage: false),
         findsOneWidget,
       );
-      final AnalyticsDropDownButton<String> dropdownButton =
-          tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
+      final AnalyticsDropDownButton<String> dropdownButton = tester.widget(
+        find.byKey(CpuSamplingRateDropdown.dropdownKey),
+      );
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
     });
 
@@ -82,8 +80,9 @@ void main() {
         find.text(CpuSamplingRate.high.display, skipOffstage: false),
         findsOneWidget,
       );
-      AnalyticsDropDownButton<String> dropdownButton =
-          tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
+      AnalyticsDropDownButton<String> dropdownButton = tester.widget(
+        find.byKey(CpuSamplingRateDropdown.dropdownKey),
+      );
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
 
       var profilePeriodFlag =
@@ -98,8 +97,9 @@ void main() {
       await tester.pumpAndSettle(); // finish the menu animation
       await tester.tap(find.text(CpuSamplingRate.high.display).last);
       await tester.pumpAndSettle(); // finish the menu animation
-      dropdownButton =
-          tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
+      dropdownButton = tester.widget(
+        find.byKey(CpuSamplingRateDropdown.dropdownKey),
+      );
       expect(dropdownButton.value, equals(CpuSamplingRate.high.value));
 
       profilePeriodFlag =
@@ -120,8 +120,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text(CpuSamplingRate.low.display).last);
       await tester.pumpAndSettle();
-      dropdownButton =
-          tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
+      dropdownButton = tester.widget(
+        find.byKey(CpuSamplingRateDropdown.dropdownKey),
+      );
       expect(dropdownButton.value, equals(CpuSamplingRate.low.value));
 
       profilePeriodFlag =
@@ -145,49 +146,49 @@ void main() {
     }) async {
       await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
-      final dropdownButtonFinder =
-          find.byKey(CpuSamplingRateDropdown.dropdownKey);
-      AnalyticsDropDownButton<String> dropdownButton =
-          tester.widget(dropdownButtonFinder);
+      final dropdownButtonFinder = find.byKey(
+        CpuSamplingRateDropdown.dropdownKey,
+      );
+      AnalyticsDropDownButton<String> dropdownButton = tester.widget(
+        dropdownButtonFinder,
+      );
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
 
-      await serviceConnection.serviceManager.service!
-          .setFlag(profilePeriod, newFlagValue);
+      await serviceConnection.serviceManager.service!.setFlag(
+        profilePeriod,
+        newFlagValue,
+      );
       await tester.pumpAndSettle();
       dropdownButton = tester.widget(dropdownButtonFinder);
       expect(dropdownButton.value, equals(expectedFlagValue));
     }
 
-    testWidgets(
-      'updates value for safe flag change',
-      (WidgetTester tester) async {
-        testUpdatesForFlagChange(
-          tester,
-          newFlagValue: CpuSamplingRate.high.value,
-          expectedFlagValue: CpuSamplingRate.high.value,
-        );
-      },
-    );
+    testWidgets('updates value for safe flag change', (
+      WidgetTester tester,
+    ) async {
+      testUpdatesForFlagChange(
+        tester,
+        newFlagValue: CpuSamplingRate.high.value,
+        expectedFlagValue: CpuSamplingRate.high.value,
+      );
+    });
 
-    testWidgets(
-      'updates value for unsafe flag change',
-      (WidgetTester tester) async {
-        // 999 is not a value in the dropdown list.
-        testUpdatesForFlagChange(
-          tester,
-          newFlagValue: '999',
-          expectedFlagValue: CpuSamplingRate.medium.value,
-        );
-      },
-    );
+    testWidgets('updates value for unsafe flag change', (
+      WidgetTester tester,
+    ) async {
+      // 999 is not a value in the dropdown list.
+      testUpdatesForFlagChange(
+        tester,
+        newFlagValue: '999',
+        expectedFlagValue: CpuSamplingRate.medium.value,
+      );
+    });
   });
 
   group('VMFlagsDialog', () {
     late FakeServiceConnectionManager fakeServiceConnection;
 
-    void initServiceManager({
-      bool flutterVersionServiceAvailable = true,
-    }) {
+    void initServiceManager({bool flutterVersionServiceAvailable = true}) {
       final availableServices = [
         if (flutterVersionServiceAvailable) flutterVersionService.service,
       ];
@@ -229,7 +230,5 @@ Future<Flag?> getProfileGranularityFlag(
 ) async {
   final flagList =
       (await serviceManager.serviceManager.service!.getFlagList()).flags!;
-  return flagList.firstWhereOrNull(
-    (flag) => flag.name == profilePeriod,
-  );
+  return flagList.firstWhereOrNull((flag) => flag.name == profilePeriod);
 }

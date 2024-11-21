@@ -20,8 +20,9 @@ import 'primitives/source_location.dart';
 
 final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
 
-final treeStyleUtils =
-    EnumUtils<DiagnosticsTreeStyle>(DiagnosticsTreeStyle.values);
+final treeStyleUtils = EnumUtils<DiagnosticsTreeStyle>(
+  DiagnosticsTreeStyle.values,
+);
 
 /// Defines diagnostics data for a [value].
 ///
@@ -79,10 +80,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     final width = json['width'] as String?;
     final height = json['height'] as String?;
     if (width == null || height == null) return null;
-    return Size(
-      double.parse(width),
-      double.parse(height),
-    );
+    return Size(double.parse(width), double.parse(height));
   }
 
   static FlexFit deserializeFlexFit(String? flexFit) {
@@ -147,8 +145,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   RemoteDiagnosticsNode? _parentRenderElement;
 
   BoxConstraints get constraints => deserializeConstraints(
-        json['constraints'] as Map<String, Object?>? ?? {},
-      );
+    json['constraints'] as Map<String, Object?>? ?? {},
+  );
 
   BoxParentData get parentData =>
       deserializeParentData(json['parentData'] as Map<String, Object?>? ?? {});
@@ -252,8 +250,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// Description to show if the node has no displayed properties or children.
   String? getEmptyBodyDescription() => getStringMember('emptyBodyDescription');
 
-  late DiagnosticsTreeStyle style =
-      getStyleMember('style', DiagnosticsTreeStyle.sparse);
+  late DiagnosticsTreeStyle style = getStyleMember(
+    'style',
+    DiagnosticsTreeStyle.sparse,
+  );
 
   /// Dart class defining the diagnostic node.
   /// For example, DiagnosticProperty<Color>, IntProperty, StringProperty, etc.
@@ -559,8 +559,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
         default:
           return _valueProperties = Future.value();
       }
-      _valueProperties =
-          objectGroupApi?.getDartObjectProperties(valueRef, propertyNames);
+      _valueProperties = objectGroupApi?.getDartObjectProperties(
+        valueRef,
+        propertyNames,
+      );
     }
     return _valueProperties;
   }
@@ -662,8 +664,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     final newHiddenValue = !_groupIsHidden;
     _groupIsHidden = newHiddenValue;
     if (isHideableGroupLeader) {
-      _hideableGroupSubordinates
-          ?.forEach((node) => node.groupIsHidden = newHiddenValue);
+      _hideableGroupSubordinates?.forEach(
+        (node) => node.groupIsHidden = newHiddenValue,
+      );
     }
   }
 
@@ -697,11 +700,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() {
-    return objectGroupApi!.getChildren(
-      valueRef,
-      isSummaryTree,
-      this,
-    );
+    return objectGroupApi!.getChildren(valueRef, isSummaryTree, this);
   }
 
   void _maybePopulateChildren() {
@@ -713,8 +712,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (jsonArray?.isNotEmpty == true) {
       final nodes = <RemoteDiagnosticsNode>[];
       for (final element in jsonArray!.cast<Map<String, Object?>>()) {
-        final child =
-            RemoteDiagnosticsNode(element, objectGroupApi, false, parent);
+        final child = RemoteDiagnosticsNode(
+          element,
+          objectGroupApi,
+          false,
+          parent,
+        );
         child.parent = this;
         nodes.add(child);
       }

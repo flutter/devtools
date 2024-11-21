@@ -45,10 +45,7 @@ class NetworkScreen extends Screen {
     final networkController = Provider.of<NetworkController>(context);
     final color = Theme.of(context).colorScheme.onPrimary;
     return MultiValueListenableBuilder(
-      listenables: [
-        networkController.requests,
-        networkController.filteredData,
-      ],
+      listenables: [networkController.requests, networkController.filteredData],
       builder: (context, values, child) {
         final networkRequests = values.first as List<NetworkRequest>;
         final filteredRequests = values.second as List<NetworkRequest>;
@@ -73,11 +70,12 @@ class NetworkScreen extends Screen {
           return SizedBox(
             width: smallProgressSize,
             height: smallProgressSize,
-            child: recording
-                ? SmallCircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
-                  )
-                : const SizedBox(),
+            child:
+                recording
+                    ? SmallCircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                    )
+                    : const SizedBox(),
           );
         },
       ),
@@ -135,9 +133,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
       children: [
         _NetworkProfilerControls(controller: controller),
         const SizedBox(height: intermediateSpacing),
-        Expanded(
-          child: _NetworkProfilerBody(controller: controller),
-        ),
+        Expanded(child: _NetworkProfilerBody(controller: controller)),
       ],
     );
   }
@@ -146,9 +142,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 /// The row of controls that control the Network profiler (e.g., record, pause,
 /// clear, search, filter, etc.).
 class _NetworkProfilerControls extends StatefulWidget {
-  const _NetworkProfilerControls({
-    required this.controller,
-  });
+  const _NetworkProfilerControls({required this.controller});
 
   static const _includeTextWidth = 810.0;
 
@@ -185,11 +179,12 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
       children: [
         StartStopRecordingButton(
           recording: _recording,
-          onPressed: () async =>
-              await widget.controller.togglePolling(!_recording),
-          tooltipOverride: _recording
-              ? 'Stop recording network traffic'
-              : 'Resume recording network traffic',
+          onPressed:
+              () async => await widget.controller.togglePolling(!_recording),
+          tooltipOverride:
+              _recording
+                  ? 'Stop recording network traffic'
+                  : 'Resume recording network traffic',
           minScreenWidthForTextBeforeScaling: double.infinity,
           gaScreen: gac.network,
           gaSelection: _recording ? gac.pause : gac.resume,
@@ -217,9 +212,10 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           child: SearchField<NetworkController>(
             searchController: widget.controller,
             searchFieldEnabled: hasRequests,
-            searchFieldWidth: screenWidth <= MediaSize.xs
-                ? defaultSearchFieldWidth
-                : wideSearchFieldWidth,
+            searchFieldWidth:
+                screenWidth <= MediaSize.xs
+                    ? defaultSearchFieldWidth
+                    : wideSearchFieldWidth,
           ),
         ),
         const SizedBox(width: denseSpacing),
@@ -325,11 +321,11 @@ class NetworkRequestsTable extends StatelessWidget {
 class AddressColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
   AddressColumn()
-      : super.wide(
-          'Address',
-          minWidthPx: scaleByFontFactor(isEmbedded() ? 100 : 150.0),
-          showTooltip: true,
-        );
+    : super.wide(
+        'Address',
+        minWidthPx: scaleByFontFactor(isEmbedded() ? 100 : 150.0),
+        showTooltip: true,
+      );
 
   @override
   String getValue(NetworkRequest dataObject) {
@@ -370,11 +366,11 @@ class MethodColumn extends ColumnData<NetworkRequest> {
 class ActionsColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
   ActionsColumn()
-      : super(
-          '',
-          fixedWidthPx: scaleByFontFactor(32),
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        '',
+        fixedWidthPx: scaleByFontFactor(32),
+        alignment: ColumnAlignment.right,
+      );
 
   static const _actionSplashRadius = 16.0;
 
@@ -445,12 +441,12 @@ class ActionsColumn extends ColumnData<NetworkRequest>
 class StatusColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
   StatusColumn()
-      : super(
-          'Status',
-          alignment: ColumnAlignment.right,
-          headerAlignment: TextAlign.right,
-          fixedWidthPx: scaleByFontFactor(50),
-        );
+    : super(
+        'Status',
+        alignment: ColumnAlignment.right,
+        headerAlignment: TextAlign.right,
+        fixedWidthPx: scaleByFontFactor(50),
+      );
 
   @override
   String? getValue(NetworkRequest dataObject) {
@@ -473,21 +469,22 @@ class StatusColumn extends ColumnData<NetworkRequest>
     final theme = Theme.of(context);
     return Text(
       getDisplayValue(data),
-      style: data.didFail
-          ? TextStyle(color: theme.colorScheme.error)
-          : theme.regularTextStyle,
+      style:
+          data.didFail
+              ? TextStyle(color: theme.colorScheme.error)
+              : theme.regularTextStyle,
     );
   }
 }
 
 class TypeColumn extends ColumnData<NetworkRequest> {
   TypeColumn()
-      : super(
-          'Type',
-          alignment: ColumnAlignment.right,
-          headerAlignment: TextAlign.right,
-          fixedWidthPx: scaleByFontFactor(50),
-        );
+    : super(
+        'Type',
+        alignment: ColumnAlignment.right,
+        headerAlignment: TextAlign.right,
+        fixedWidthPx: scaleByFontFactor(50),
+      );
 
   @override
   String getValue(NetworkRequest dataObject) {
@@ -502,12 +499,12 @@ class TypeColumn extends ColumnData<NetworkRequest> {
 
 class DurationColumn extends ColumnData<NetworkRequest> {
   DurationColumn()
-      : super(
-          'Duration',
-          alignment: ColumnAlignment.right,
-          headerAlignment: TextAlign.right,
-          fixedWidthPx: scaleByFontFactor(75),
-        );
+    : super(
+        'Duration',
+        alignment: ColumnAlignment.right,
+        headerAlignment: TextAlign.right,
+        fixedWidthPx: scaleByFontFactor(75),
+      );
 
   @override
   int? getValue(NetworkRequest dataObject) {
@@ -519,21 +516,18 @@ class DurationColumn extends ColumnData<NetworkRequest> {
     final ms = getValue(dataObject);
     return ms == null
         ? 'Pending'
-        : durationText(
-            Duration(milliseconds: ms),
-            fractionDigits: 0,
-          );
+        : durationText(Duration(milliseconds: ms), fractionDigits: 0);
   }
 }
 
 class TimestampColumn extends ColumnData<NetworkRequest> {
   TimestampColumn()
-      : super(
-          'Timestamp',
-          alignment: ColumnAlignment.right,
-          headerAlignment: TextAlign.right,
-          fixedWidthPx: scaleByFontFactor(115),
-        );
+    : super(
+        'Timestamp',
+        alignment: ColumnAlignment.right,
+        headerAlignment: TextAlign.right,
+        fixedWidthPx: scaleByFontFactor(115),
+      );
 
   @override
   DateTime? getValue(NetworkRequest dataObject) {

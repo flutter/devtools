@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
@@ -62,37 +60,28 @@ class GenerateCodeCommand extends Command {
     );
 
     await runOverPackages(
-      CliCommand.flutter(
-        [
-          'pub',
-          'run',
-          'build_runner',
-          'build',
-          '--delete-conflicting-outputs',
-        ],
-      ),
+      CliCommand.flutter([
+        'pub',
+        'run',
+        'build_runner',
+        'build',
+        '--delete-conflicting-outputs',
+      ]),
       commandDescription: 'build_runner build',
     );
 
-    print('Adding lint ignores for mocks');
-    final mockFile = File(
-      path.join(
-        repo.repoPath,
-        'packages',
-        'devtools_test',
-        'lib',
-        'src',
-        'mocks',
-        'generated.mocks.dart',
-      ),
+    // Format the generated code so that the dart format check does not fail on
+    // the CI.
+    await processManager.runProcess(
+      CliCommand.dart(['format', path.join('test', 'test_infra', 'scenes')]),
+      workingDirectory: repo.devtoolsAppDirectoryPath,
     );
-    var mockFileContents = mockFile.readAsStringSync();
-    if (!mockFileContents.contains('require_trailing_commas')) {
-      mockFileContents = mockFileContents.replaceFirst(
-        '// ignore_for_file:',
-        '// ignore_for_file: require_trailing_commas\n// ignore_for_file:',
-      );
-      mockFile.writeAsStringSync(mockFileContents);
-    }
+    await processManager.runProcess(
+      CliCommand.dart([
+        'format',
+        path.join('lib', 'src', 'mocks', 'generated.mocks.dart'),
+      ]),
+      workingDirectory: path.join(repo.repoPath, 'packages', 'devtools_test'),
+    );
   }
 }

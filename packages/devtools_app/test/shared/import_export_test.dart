@@ -22,20 +22,19 @@ void main() {
     ];
 
     final sortedByTime = dates.sorted().map(
-          (t) => ExportController.generateFileName(
-            time: t,
-            type: ExportFileType.json,
-          ),
-        );
+      (t) =>
+          ExportController.generateFileName(time: t, type: ExportFileType.json),
+    );
 
-    final sortedByFileName = dates
-        .map(
-          (t) => ExportController.generateFileName(
-            time: t,
-            type: ExportFileType.json,
-          ),
-        )
-        .sorted();
+    final sortedByFileName =
+        dates
+            .map(
+              (t) => ExportController.generateFileName(
+                time: t,
+                type: ExportFileType.json,
+              ),
+            )
+            .sorted();
 
     expect(sortedByTime, sortedByFileName);
   });
@@ -71,9 +70,7 @@ void main() {
       );
 
       await Future.delayed(
-        const Duration(
-          milliseconds: ImportController.repeatImportTimeBufferMs,
-        ),
+        const Duration(milliseconds: ImportController.repeatImportTimeBufferMs),
       );
       importController.importData(nonDevToolsFileJsonWithListData);
       expect(notifications.activeMessages.length, equals(2));
@@ -83,9 +80,7 @@ void main() {
       );
 
       await Future.delayed(
-        const Duration(
-          milliseconds: ImportController.repeatImportTimeBufferMs,
-        ),
+        const Duration(milliseconds: ImportController.repeatImportTimeBufferMs),
       );
       importController.importData(devToolsFileJson);
       expect(notifications.activeMessages.length, equals(3));

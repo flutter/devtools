@@ -90,13 +90,11 @@ void main() {
         await showScript(mockScriptRef);
         await tester.pumpAndSettle();
 
-        expectFirstNLinesContain(
-          [
-            '// Copyright 2019 The Flutter team. All rights reserved',
-            '// Use of this source code is governed by a BSD-style license that can be',
-            '// found in the LICENSE file.',
-          ],
-        );
+        expectFirstNLinesContain([
+          '// Copyright 2019 The Flutter team. All rights reserved',
+          '// Use of this source code is governed by a BSD-style license that can be',
+          '// found in the LICENSE file.',
+        ]);
       },
     );
 
@@ -112,60 +110,50 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize(
-      'script name is visible',
-      smallWindowSize,
-      (WidgetTester tester) async {
-        await pumpDebuggerScreen(tester, mockDebuggerController);
-        await showScript(mockScriptRef);
-        await tester.pumpAndSettle();
+    testWidgetsWithWindowSize('script name is visible', smallWindowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpDebuggerScreen(tester, mockDebuggerController);
+      await showScript(mockScriptRef);
+      await tester.pumpAndSettle();
 
-        expect(
-          find.text('package:gallery/main.dart'),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(find.text('package:gallery/main.dart'), findsOneWidget);
+    });
   });
 
   group('for a script with > 100000 lines', () {
     setUpAll(() {
-      when(scriptManager.getScriptCached(mockLargeScriptRef))
-          .thenReturn(mockLargeScript);
+      when(
+        scriptManager.getScriptCached(mockLargeScriptRef),
+      ).thenReturn(mockLargeScript);
     });
 
-    testWidgetsWithWindowSize(
-      'script name is visible',
-      smallWindowSize,
-      (WidgetTester tester) async {
-        await pumpDebuggerScreen(tester, mockDebuggerController);
-        await showScript(mockLargeScriptRef);
-        await tester.pumpAndSettle();
+    testWidgetsWithWindowSize('script name is visible', smallWindowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpDebuggerScreen(tester, mockDebuggerController);
+      await showScript(mockLargeScriptRef);
+      await tester.pumpAndSettle();
 
-        expect(
-          find.text('package:front_end/src/fasta/kernel/body_builder.dart'),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(
+        find.text('package:front_end/src/fasta/kernel/body_builder.dart'),
+        findsOneWidget,
+      );
+    });
 
-    testWidgetsWithWindowSize(
-      'lines of the script are visible',
-      smallWindowSize,
-      (WidgetTester tester) async {
-        await pumpDebuggerScreen(tester, mockDebuggerController);
-        await showScript(mockLargeScriptRef);
-        await tester.pumpAndSettle();
+    testWidgetsWithWindowSize('lines of the script are visible', smallWindowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpDebuggerScreen(tester, mockDebuggerController);
+      await showScript(mockLargeScriptRef);
+      await tester.pumpAndSettle();
 
-        expectFirstNLinesContain(
-          [
-            '// Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file',
-            '// for details. All rights reserved. Use of this source code is governed by a',
-            '// BSD-style license that can be found in the LICENSE file.',
-          ],
-        );
-      },
-    );
+      expectFirstNLinesContain([
+        '// Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file',
+        '// for details. All rights reserved. Use of this source code is governed by a',
+        '// BSD-style license that can be found in the LICENSE file.',
+      ]);
+    });
 
     testWidgetsWithWindowSize(
       'lines of the script are not highlighted',
@@ -183,33 +171,26 @@ void main() {
   group('for a script with no source', () {
     setUpAll(() {
       when(scriptManager.getScriptCached(mockScriptRef)).thenReturn(mockScript);
-      when(scriptManager.getScriptCached(mockEmptyScriptRef))
-          .thenReturn(mockEmptyScript);
+      when(
+        scriptManager.getScriptCached(mockEmptyScriptRef),
+      ).thenReturn(mockEmptyScript);
     });
 
-    testWidgetsWithWindowSize(
-      'script name does not update',
-      smallWindowSize,
-      (WidgetTester tester) async {
-        await pumpDebuggerScreen(tester, mockDebuggerController);
-        await showScript(mockScriptRef);
-        await tester.pumpAndSettle();
+    testWidgetsWithWindowSize('script name does not update', smallWindowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpDebuggerScreen(tester, mockDebuggerController);
+      await showScript(mockScriptRef);
+      await tester.pumpAndSettle();
 
-        expect(
-          find.text('package:gallery/main.dart'),
-          findsOneWidget,
-        );
+      expect(find.text('package:gallery/main.dart'), findsOneWidget);
 
-        await pumpDebuggerScreen(tester, mockDebuggerController);
-        await showScript(mockEmptyScriptRef);
-        await tester.pumpAndSettle();
+      await pumpDebuggerScreen(tester, mockDebuggerController);
+      await showScript(mockEmptyScriptRef);
+      await tester.pumpAndSettle();
 
-        expect(
-          find.text('package:gallery/main.dart'),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(find.text('package:gallery/main.dart'), findsOneWidget);
+    });
 
     testWidgetsWithWindowSize(
       'lines of the script do not update',
@@ -219,47 +200,42 @@ void main() {
         await showScript(mockScriptRef);
         await tester.pumpAndSettle();
 
-        expectFirstNLinesContain(
-          [
-            '// Copyright 2019 The Flutter team. All rights reserved',
-            '// Use of this source code is governed by a BSD-style license that can be',
-            '// found in the LICENSE file.',
-          ],
-        );
+        expectFirstNLinesContain([
+          '// Copyright 2019 The Flutter team. All rights reserved',
+          '// Use of this source code is governed by a BSD-style license that can be',
+          '// found in the LICENSE file.',
+        ]);
 
         await pumpDebuggerScreen(tester, mockDebuggerController);
         await showScript(mockEmptyScriptRef);
         await tester.pumpAndSettle();
 
-        expectFirstNLinesContain(
-          [
-            '// Copyright 2019 The Flutter team. All rights reserved',
-            '// Use of this source code is governed by a BSD-style license that can be',
-            '// found in the LICENSE file.',
-          ],
-        );
+        expectFirstNLinesContain([
+          '// Copyright 2019 The Flutter team. All rights reserved',
+          '// Use of this source code is governed by a BSD-style license that can be',
+          '// found in the LICENSE file.',
+        ]);
       },
     );
 
-    testWidgetsWithWindowSize(
-      'an error message is shown',
-      smallWindowSize,
-      (WidgetTester tester) async {
-        await pumpDebuggerScreen(tester, mockDebuggerController);
-        // Dismiss any previous notifications:
-        notificationService
-            .dismiss('Failed to parse package:gallery/src/unknown.dart.');
-        await tester.pumpAndSettle();
+    testWidgetsWithWindowSize('an error message is shown', smallWindowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpDebuggerScreen(tester, mockDebuggerController);
+      // Dismiss any previous notifications:
+      notificationService.dismiss(
+        'Failed to parse package:gallery/src/unknown.dart.',
+      );
+      await tester.pumpAndSettle();
 
-        await showScript(mockEmptyScriptRef);
-        await tester.pumpAndSettle();
+      await showScript(mockEmptyScriptRef);
+      await tester.pumpAndSettle();
 
-        expect(
-          notificationService.activeMessages.first.text,
-          equals('Failed to parse package:gallery/src/unknown.dart.'),
-        );
-      },
-    );
+      expect(
+        notificationService.activeMessages.first.text,
+        equals('Failed to parse package:gallery/src/unknown.dart.'),
+      );
+    });
   });
 }
 

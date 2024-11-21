@@ -69,10 +69,11 @@ void main() {
     test('predecessor and successor edge counts are accurate', () {
       expect(testNodeA.predecessorEdgeCounts.keys, isEmpty);
       expect(testNodeA.predecessorEdgeCounts.values, isEmpty);
-      expect(
-        testNodeA.successorEdgeCounts.keys,
-        [testNodeB, testNodeC, testNodeD],
-      );
+      expect(testNodeA.successorEdgeCounts.keys, [
+        testNodeB,
+        testNodeC,
+        testNodeD,
+      ]);
       expect(testNodeA.successorEdgeCounts.values, [2, 3, 1]);
 
       expect(testNodeB.predecessorEdgeCounts.keys, [testNodeA, testNodeF]);

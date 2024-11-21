@@ -38,9 +38,9 @@ class StatusLine extends StatelessWidget {
 
   /// The padding around the footer in the DevTools UI.
   EdgeInsets get padding => const EdgeInsets.symmetric(
-        horizontal: defaultSpacing,
-        vertical: densePadding,
-      );
+    horizontal: defaultSpacing,
+    vertical: densePadding,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -136,9 +136,10 @@ class StatusLine extends StatelessWidget {
             description = vm.deviceDisplay;
           }
 
-          final color = highlightForConnection
-              ? theme.colorScheme.onPrimary
-              : theme.regularTextStyle.color;
+          final color =
+              highlightForConnection
+                  ? theme.colorScheme.onPrimary
+                  : theme.regularTextStyle.color;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -149,11 +150,12 @@ class StatusLine extends StatelessWidget {
                   return SizedBox(
                     width: smallProgressSize,
                     height: smallProgressSize,
-                    child: isBusy
-                        ? SmallCircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color?>(color),
-                          )
-                        : const SizedBox(),
+                    child:
+                        isBusy
+                            ? SmallCircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color?>(color),
+                            )
+                            : const SizedBox(),
                   );
                 },
               ),
@@ -162,10 +164,12 @@ class StatusLine extends StatelessWidget {
                 message: 'Connected device',
                 child: Text(
                   description,
-                  style: highlightForConnection
-                      ? theme.regularTextStyle
-                          .copyWith(color: theme.colorScheme.onPrimary)
-                      : theme.regularTextStyle,
+                  style:
+                      highlightForConnection
+                          ? theme.regularTextStyle.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                          )
+                          : theme.regularTextStyle,
                   overflow: TextOverflow.clip,
                 ),
               ),
@@ -175,18 +179,13 @@ class StatusLine extends StatelessWidget {
           return child!;
         }
       },
-      child: screenWidth <= MediaSize.xxs
-          ? DevToolsTooltip(
-              message: noConnectionMsg,
-              child: Icon(
-                Icons.warning_amber_rounded,
-                size: actionsIconSize,
-              ),
-            )
-          : Text(
-              noConnectionMsg,
-              style: theme.regularTextStyle,
-            ),
+      child:
+          screenWidth <= MediaSize.xxs
+              ? DevToolsTooltip(
+                message: noConnectionMsg,
+                child: Icon(Icons.warning_amber_rounded, size: actionsIconSize),
+              )
+              : Text(noConnectionMsg, style: theme.regularTextStyle),
     );
   }
 }
@@ -216,7 +215,8 @@ class DocumentationLink extends StatelessWidget {
       icon: Icons.library_books_outlined,
       link: GaLink(
         display: screenWidth <= MediaSize.xs ? 'Docs' : 'Read docs',
-        url: screen.docsUrl ??
+        url:
+            screen.docsUrl ??
             'https://docs.flutter.dev/tools/devtools/$docPageId',
         gaScreenName: screen.screenId,
         gaSelectedItemDescription: gac.documentationLink,
@@ -270,10 +270,7 @@ class IsolateSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final isolateManager = serviceConnection.serviceManager.isolateManager;
     return MultiValueListenableBuilder(
-      listenables: [
-        isolateManager.isolates,
-        isolateManager.selectedIsolate,
-      ],
+      listenables: [isolateManager.isolates, isolateManager.selectedIsolate],
       builder: (context, values, _) {
         final theme = Theme.of(context);
         final isolates = values.first as List<IsolateRef>;
@@ -282,17 +279,17 @@ class IsolateSelector extends StatelessWidget {
           tooltip: 'Selected Isolate',
           initialValue: selectedIsolateRef,
           onSelected: isolateManager.selectIsolate,
-          itemBuilder: (BuildContext context) => isolates.map(
-            (ref) {
-              return PopupMenuItem<IsolateRef>(
-                value: ref,
-                child: IsolateOption(
-                  ref,
-                  color: theme.colorScheme.onSurface,
-                ),
-              );
-            },
-          ).toList(),
+          itemBuilder:
+              (BuildContext context) =>
+                  isolates.map((ref) {
+                    return PopupMenuItem<IsolateRef>(
+                      value: ref,
+                      child: IsolateOption(
+                        ref,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    );
+                  }).toList(),
           child: IsolateOption(
             isolateManager.selectedIsolate.value,
             color: theme.colorScheme.onPrimary,
@@ -304,11 +301,7 @@ class IsolateSelector extends StatelessWidget {
 }
 
 class IsolateOption extends StatelessWidget {
-  const IsolateOption(
-    this.ref, {
-    required this.color,
-    super.key,
-  });
+  const IsolateOption(this.ref, {required this.color, super.key});
 
   final IsolateRef? ref;
 

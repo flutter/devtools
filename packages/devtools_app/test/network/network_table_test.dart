@@ -51,9 +51,9 @@ void main() {
     });
 
     DartIOHttpRequestData findRequestById(String id) {
-      return requests
-          .whereType<DartIOHttpRequestData>()
-          .firstWhere((request) => request.id == id);
+      return requests.whereType<DartIOHttpRequestData>().firstWhere(
+        (request) => request.id == id,
+      );
     }
 
     test('UriColumn', () {

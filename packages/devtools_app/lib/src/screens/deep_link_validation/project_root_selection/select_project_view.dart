@@ -99,9 +99,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
           content: Text(
             'It looks like you have selected a non-Flutter project. Please select a Flutter project instead.',
           ),
-          actions: [
-            DialogCloseButton(),
-          ],
+          actions: [DialogCloseButton()],
         );
       },
     );
@@ -202,10 +200,7 @@ class _LoadingProjectView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Project loading...',
-            style: theme.regularTextStyle,
-          ),
+          Text('Project loading...', style: theme.regularTextStyle),
           Container(
             width: _kLinearProgressIndicatorWidth,
             padding: const EdgeInsets.symmetric(vertical: densePadding),

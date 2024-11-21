@@ -60,11 +60,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       return _outline;
     }
 
-    final root = VMServiceObjectNode(
-      controller,
-      '<root>',
-      ObjRef(id: '0'),
-    );
+    final root = VMServiceObjectNode(controller, '<root>', ObjRef(id: '0'));
 
     String uri;
     Library lib;
@@ -84,15 +80,17 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       // script's URI.
       if (libNode == null) {
         final service = serviceConnection.serviceManager.service!;
-        final isolate = serviceConnection
-            .serviceManager.isolateManager.selectedIsolate.value!;
+        final isolate =
+            serviceConnection
+                .serviceManager
+                .isolateManager
+                .selectedIsolate
+                .value!;
         final libRef = serviceConnection.serviceManager.isolateManager
             .isolateState(isolate)
             .isolateNow!
             .libraries!
-            .firstWhere(
-              (lib) => script!.uri!.startsWith(lib.uri!),
-            );
+            .firstWhere((lib) => script!.uri!.startsWith(lib.uri!));
         lib = await service.getObject(isolate.id!, libRef.id!) as Library;
       } else {
         lib = libNode.object as Library;
@@ -118,11 +116,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     }
     for (final function in lib.functions!) {
       if (function.location?.script?.uri == uri) {
-        final node = VMServiceObjectNode(
-          controller,
-          function.name,
-          function,
-        );
+        final node = VMServiceObjectNode(controller, function.name, function);
         await controller.populateNode(node);
         _buildCodeNodes(node.object as Func, node);
         root.addChild(node);
@@ -131,11 +125,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
     for (final field in lib.variables!) {
       if (field.location?.script?.uri == uri) {
-        final node = VMServiceObjectNode(
-          controller,
-          field.name,
-          field,
-        );
+        final node = VMServiceObjectNode(controller, field.name, field);
         await controller.populateNode(node);
         root.addChild(node);
       }
@@ -178,9 +168,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // Clear out the _childrenAsMap map.
     root._trimChildrenAsMapEntries();
 
-    final processed = root.children
-        .map((e) => e._collapseSingleChildDirectoryNodes())
-        .toList();
+    final processed =
+        root.children
+            .map((e) => e._collapseSingleChildDirectoryNodes())
+            .toList();
     root.children.clear();
     root.addAllChildren(processed);
 
@@ -194,8 +185,14 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // Place the root library's parent node at the top of the explorer if it's
     // part of a package. Otherwise, it's a file path and its directory should
     // appear near the top of the list anyway.
-    final rootLibUri = serviceConnection.serviceManager.isolateManager
-        .mainIsolateState?.isolateNow?.rootLib?.uri;
+    final rootLibUri =
+        serviceConnection
+            .serviceManager
+            .isolateManager
+            .mainIsolateState
+            ?.isolateNow
+            ?.rootLib
+            ?.uri;
     if (rootLibUri != null) {
       if (rootLibUri.startsWith('package:') ||
           rootLibUri.startsWith('google3:')) {
@@ -224,11 +221,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
     for (final part in parts) {
       // Directory nodes shouldn't be selectable unless they're a library node.
-      node = node._lookupOrCreateChild(
-        part,
-        null,
-        isSelectable: false,
-      );
+      node = node._lookupOrCreateChild(part, null, isSelectable: false);
     }
 
     node = node._lookupOrCreateChild(name, script);
@@ -251,13 +244,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     }
     final code = function.code;
     if (code != null) {
-      node.addChild(
-        VMServiceObjectNode(
-          controller,
-          code.name,
-          code,
-        ),
-      );
+      node.addChild(VMServiceObjectNode(controller, code.name, code));
       final unoptimizedCode = function.unoptimizedCode;
       // It's possible for `function.code` to be unoptimized code, so don't
       // create a duplicate node in that situation.
@@ -314,11 +301,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       }
       return this;
     }
-    final updated = children
-        .map(
-          (e) => e._collapseSingleChildDirectoryNodes(),
-        )
-        .toList();
+    final updated =
+        children.map((e) => e._collapseSingleChildDirectoryNodes()).toList();
     children.clear();
     addAllChildren(updated);
     return this;
@@ -361,14 +345,12 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
     if (scriptRef != null) {
       final fetchedScript = await scriptManager.getScript(scriptRef);
-      final position = tokenPos == 0
-          ? null
-          : SourcePosition.calculatePosition(fetchedScript!, tokenPos!);
+      final position =
+          tokenPos == 0
+              ? null
+              : SourcePosition.calculatePosition(fetchedScript!, tokenPos!);
 
-      location = ScriptLocation(
-        scriptRef,
-        location: position,
-      );
+      location = ScriptLocation(scriptRef, location: position);
     }
   }
 

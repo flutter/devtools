@@ -29,8 +29,10 @@ class ConnectedAppSummary extends StatelessWidget {
       return const SizedBox();
     }
 
-    final connectionDescriptionEntries =
-        generateDeviceDescription(vm, connectedApp);
+    final connectionDescriptionEntries = generateDeviceDescription(
+      vm,
+      connectedApp,
+    );
 
     // Ensure the screen is large enough to render two columns, even if
     // [narrowView] is false.
@@ -78,10 +80,7 @@ class _ConnectionDescriptionColumn extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text('${entry.title}: ', style: boldText),
-                SelectableText(
-                  entry.description,
-                  style: theme.subtleTextStyle,
-                ),
+                SelectableText(entry.description, style: theme.subtleTextStyle),
                 if (entry.actions.isNotEmpty) ...entry.actions,
               ],
             ),

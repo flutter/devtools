@@ -36,13 +36,11 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...dialogSubHeader(
-                  theme,
-                  'General',
-                ),
+                ...dialogSubHeader(theme, 'General'),
                 CheckboxSetting(
-                  notifier: preferences.inspector.hoverEvalModeEnabled
-                      as ValueNotifier<bool?>,
+                  notifier:
+                      preferences.inspector.hoverEvalModeEnabled
+                          as ValueNotifier<bool?>,
                   title: 'Enable hover inspection',
                   description:
                       'Hovering over any widget displays its properties and values.',
@@ -51,8 +49,9 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                 const SizedBox(height: largeSpacing),
                 if (inspectorV2Enabled) ...[
                   CheckboxSetting(
-                    notifier: preferences.inspector.autoRefreshEnabled
-                        as ValueNotifier<bool?>,
+                    notifier:
+                        preferences.inspector.autoRefreshEnabled
+                            as ValueNotifier<bool?>,
                     title: 'Enable auto-refreshing of the widget tree',
                     description:
                         'The widget tree will automatically be refreshed after a hot-reload.',
@@ -85,15 +84,11 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                   style: theme.subtleTextStyle,
                 ),
                 const SizedBox(height: denseSpacing),
-                const Expanded(
-                  child: PubRootDirectorySection(),
-                ),
+                const Expanded(child: PubRootDirectorySection()),
               ],
             ),
           ),
-          actions: const [
-            DialogCloseButton(),
-          ],
+          actions: const [DialogCloseButton()],
         );
       },
     );
@@ -146,13 +141,11 @@ class InspectorDefaultDetailsViewOption extends StatelessWidget {
   void _onChanged(InspectorDetailsViewType? value) {
     if (value != null) {
       preferences.inspector.setDefaultInspectorDetailsView(value);
-      final item = value.name == InspectorDetailsViewType.layoutExplorer.name
-          ? gac.defaultDetailsViewToLayoutExplorer
-          : gac.defaultDetailsViewToWidgetDetails;
-      ga.select(
-        gac.inspector,
-        item,
-      );
+      final item =
+          value.name == InspectorDetailsViewType.layoutExplorer.name
+              ? gac.defaultDetailsViewToLayoutExplorer
+              : gac.defaultDetailsViewToWidgetDetails;
+      ga.select(gac.inspector, item);
     }
   }
 }
@@ -174,16 +167,18 @@ class PubRootDirectorySection extends StatelessWidget {
             entries: preferences.inspector.pubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
             isRefreshing: preferences.inspector.isRefreshingPubRootDirectories,
-            onEntryAdded: (p0) => unawaited(
-              preferences.inspector.addPubRootDirectories(
-                [p0],
-                shouldCache: true,
-              ),
-            ),
-            onEntryRemoved: (p0) =>
-                unawaited(preferences.inspector.removePubRootDirectories([p0])),
-            onRefreshTriggered: () =>
-                unawaited(preferences.inspector.loadPubRootDirectories()),
+            onEntryAdded:
+                (p0) => unawaited(
+                  preferences.inspector.addPubRootDirectories([
+                    p0,
+                  ], shouldCache: true),
+                ),
+            onEntryRemoved:
+                (p0) => unawaited(
+                  preferences.inspector.removePubRootDirectories([p0]),
+                ),
+            onRefreshTriggered:
+                () => unawaited(preferences.inspector.loadPubRootDirectories()),
           ),
         );
       },

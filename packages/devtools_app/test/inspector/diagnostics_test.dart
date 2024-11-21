@@ -15,8 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DiagnosticsNodeDescription', () {
-    final renderObjectJson = jsonDecode(
-      '''
+    final renderObjectJson = jsonDecode('''
         {
           "properties": [
             {
@@ -45,8 +44,7 @@ void main() {
             }
           ]
         }
-      ''',
-    );
+      ''');
     setUp(() {
       setGlobal(
         DevToolsEnvironmentParameters,
@@ -75,238 +73,230 @@ void main() {
 
       setUp(() {
         preferences.inspector.setHoverEvalMode(true);
-        diagnosticsNodeDescription = DiagnosticsNodeDescription(
-          diagnostic,
-        );
+        diagnosticsNodeDescription = DiagnosticsNodeDescription(diagnostic);
       });
 
-      testWidgets(
-        'can be enabled from preferences',
-        (WidgetTester tester) async {
-          await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+      testWidgets('can be enabled from preferences', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
-          final hoverCardTooltip =
-              tester.widget(find.byType(HoverCardTooltip)) as HoverCardTooltip;
-          expect(hoverCardTooltip.enabled(), true);
-        },
-      );
+        final hoverCardTooltip =
+            tester.widget(find.byType(HoverCardTooltip)) as HoverCardTooltip;
+        expect(hoverCardTooltip.enabled(), true);
+      });
 
-      testWidgets(
-        'can be disabled from preferences',
-        (WidgetTester tester) async {
-          preferences.inspector.setHoverEvalMode(false);
+      testWidgets('can be disabled from preferences', (
+        WidgetTester tester,
+      ) async {
+        preferences.inspector.setHoverEvalMode(false);
 
-          await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+        await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
-          final hoverCardTooltip =
-              tester.widget(find.byType(HoverCardTooltip)) as HoverCardTooltip;
-          expect(hoverCardTooltip.enabled(), false);
-        },
-      );
+        final hoverCardTooltip =
+            tester.widget(find.byType(HoverCardTooltip)) as HoverCardTooltip;
+        expect(hoverCardTooltip.enabled(), false);
+      });
 
-      testWidgets(
-        'disabled when inspector service not set',
-        (WidgetTester tester) async {
-          final diagnosticWithoutService = RemoteDiagnosticsNode(
-            nodeJson,
-            null,
-            false,
-            null,
-          );
-          diagnosticsNodeDescription = DiagnosticsNodeDescription(
-            diagnosticWithoutService,
-          );
+      testWidgets('disabled when inspector service not set', (
+        WidgetTester tester,
+      ) async {
+        final diagnosticWithoutService = RemoteDiagnosticsNode(
+          nodeJson,
+          null,
+          false,
+          null,
+        );
+        diagnosticsNodeDescription = DiagnosticsNodeDescription(
+          diagnosticWithoutService,
+        );
 
-          await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+        await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
-          final hoverCardTooltip =
-              tester.widget(find.byType(HoverCardTooltip)) as HoverCardTooltip;
-          expect(hoverCardTooltip.enabled(), false);
-        },
-      );
+        final hoverCardTooltip =
+            tester.widget(find.byType(HoverCardTooltip)) as HoverCardTooltip;
+        expect(hoverCardTooltip.enabled(), false);
+      });
     });
 
     group('approximateNodeWidth', () {
       const epsilon = 7.0;
-      testWidgets(
-        'property diagnostics node with name and description',
-        (WidgetTester tester) async {
-          final nodeJson = <String, Object?>{
-            'widgetRuntimeType': 'Row',
-            'renderObject': renderObjectJson,
-            'hasChildren': false,
-            'children': [],
-            'description':
-                'this is a showname description, which will show up after the name',
-            'showName': true,
-            'name': 'THE NAME to be shown',
-          };
-          final diagnosticWithoutService = RemoteDiagnosticsNode(
-            nodeJson,
-            null,
-            true,
-            null,
-          );
-          final diagnosticsNodeDescription = DiagnosticsNodeDescription(
-            diagnosticWithoutService,
-          );
+      testWidgets('property diagnostics node with name and description', (
+        WidgetTester tester,
+      ) async {
+        final nodeJson = <String, Object?>{
+          'widgetRuntimeType': 'Row',
+          'renderObject': renderObjectJson,
+          'hasChildren': false,
+          'children': [],
+          'description':
+              'this is a showname description, which will show up after the name',
+          'showName': true,
+          'name': 'THE NAME to be shown',
+        };
+        final diagnosticWithoutService = RemoteDiagnosticsNode(
+          nodeJson,
+          null,
+          true,
+          null,
+        );
+        final diagnosticsNodeDescription = DiagnosticsNodeDescription(
+          diagnosticWithoutService,
+        );
 
-          await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+        await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
-          final approximatedWidth =
-              DiagnosticsNodeDescription.approximateNodeWidth(
-            diagnosticWithoutService,
-          );
+        final approximatedWidth =
+            DiagnosticsNodeDescription.approximateNodeWidth(
+              diagnosticWithoutService,
+            );
 
-          final diagnosticsNodeFind = find.byType(DiagnosticsNodeDescription);
-          // There are many rich texts, containg the name, and description.
-          final allRichTexts = find
-              .descendant(
-                of: diagnosticsNodeFind,
-                matching: find.byType(RichText),
-              )
-              .evaluate()
-              .map((e) => e.widget as RichText);
-          final measuredWidthOfAllRichTexts = allRichTexts.fold<double>(
-            0,
-            (previousValue, richText) =>
-                previousValue +
-                calculateTextSpanWidth(
-                  richText.text as TextSpan,
-                ),
-          );
-          expect(
-            approximatedWidth,
-            moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: epsilon),
-          );
-        },
-      );
+        final diagnosticsNodeFind = find.byType(DiagnosticsNodeDescription);
+        // There are many rich texts, containg the name, and description.
+        final allRichTexts = find
+            .descendant(
+              of: diagnosticsNodeFind,
+              matching: find.byType(RichText),
+            )
+            .evaluate()
+            .map((e) => e.widget as RichText);
+        final measuredWidthOfAllRichTexts = allRichTexts.fold<double>(
+          0,
+          (previousValue, richText) =>
+              previousValue + calculateTextSpanWidth(richText.text as TextSpan),
+        );
+        expect(
+          approximatedWidth,
+          moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: epsilon),
+        );
+      });
 
-      testWidgets(
-        'diagnostics node with icon and description',
-        (WidgetTester tester) async {
-          final nodeJson = <String, Object?>{
-            'widgetRuntimeType': 'Row',
-            'renderObject': renderObjectJson,
-            'hasChildren': false,
-            'description': 'This is the description',
-            'children': [],
-            'showName': false,
-          };
-          final diagnosticWithoutService = RemoteDiagnosticsNode(
-            nodeJson,
-            null,
-            false,
-            null,
-          );
-          final diagnosticsNodeDescription = DiagnosticsNodeDescription(
-            diagnosticWithoutService,
-          );
+      testWidgets('diagnostics node with icon and description', (
+        WidgetTester tester,
+      ) async {
+        final nodeJson = <String, Object?>{
+          'widgetRuntimeType': 'Row',
+          'renderObject': renderObjectJson,
+          'hasChildren': false,
+          'description': 'This is the description',
+          'children': [],
+          'showName': false,
+        };
+        final diagnosticWithoutService = RemoteDiagnosticsNode(
+          nodeJson,
+          null,
+          false,
+          null,
+        );
+        final diagnosticsNodeDescription = DiagnosticsNodeDescription(
+          diagnosticWithoutService,
+        );
 
-          await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+        await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
-          final approximatedTextWidth =
-              DiagnosticsNodeDescription.approximateNodeWidth(
-            diagnosticWithoutService,
-          );
+        final approximatedTextWidth =
+            DiagnosticsNodeDescription.approximateNodeWidth(
+              diagnosticWithoutService,
+            );
 
-          final diagnosticsNodeFind = find.byType(DiagnosticsNodeDescription);
-          // The icon is part of the clickable width, so we include it.
-          final measuredIconWidth = tester
-              .getSize(
-                find.descendant(
-                  of: diagnosticsNodeFind,
-                  matching: find.byType(AssetImageIcon),
-                ),
-              )
-              .width;
+        final diagnosticsNodeFind = find.byType(DiagnosticsNodeDescription);
+        // The icon is part of the clickable width, so we include it.
+        final measuredIconWidth =
+            tester
+                .getSize(
+                  find.descendant(
+                    of: diagnosticsNodeFind,
+                    matching: find.byType(AssetImageIcon),
+                  ),
+                )
+                .width;
 
-          // There is only one rich text widget, containing the description.
-          final richTextWidget = find
-              .descendant(
-                of: diagnosticsNodeFind,
-                matching: find.byType(RichText),
-              )
-              .first
-              .evaluate()
-              .first
-              .widget as RichText;
-          final measuredTextWidth =
-              calculateTextSpanWidth(richTextWidget.text as TextSpan);
+        // There is only one rich text widget, containing the description.
+        final richTextWidget =
+            find
+                    .descendant(
+                      of: diagnosticsNodeFind,
+                      matching: find.byType(RichText),
+                    )
+                    .first
+                    .evaluate()
+                    .first
+                    .widget
+                as RichText;
+        final measuredTextWidth = calculateTextSpanWidth(
+          richTextWidget.text as TextSpan,
+        );
 
-          expect(
-            approximatedTextWidth,
-            moreOrLessEquals(
-              measuredTextWidth + measuredIconWidth,
-              epsilon: epsilon,
-            ),
-          );
-        },
-      );
+        expect(
+          approximatedTextWidth,
+          moreOrLessEquals(
+            measuredTextWidth + measuredIconWidth,
+            epsilon: epsilon,
+          ),
+        );
+      });
 
-      testWidgets(
-        'error node with different fontSize',
-        (WidgetTester tester) async {
-          // Nodes with normal levels default to using the default fontSize, so
-          // using an error level node allows us to test different font sizes.
-          final nodeJson = <String, Object?>{
-            'widgetRuntimeType': 'Row',
-            'renderObject': renderObjectJson,
-            'hasChildren': false,
-            'children': [],
-            'description':
-                'this is a showname description, which will show up after the name',
-            'showName': true,
-            'name': 'THE NAME to be shown',
-            'level': 'error',
-          };
-          final diagnosticWithoutService = RemoteDiagnosticsNode(
-            nodeJson,
-            null,
-            false,
-            null,
-          );
+      testWidgets('error node with different fontSize', (
+        WidgetTester tester,
+      ) async {
+        // Nodes with normal levels default to using the default fontSize, so
+        // using an error level node allows us to test different font sizes.
+        final nodeJson = <String, Object?>{
+          'widgetRuntimeType': 'Row',
+          'renderObject': renderObjectJson,
+          'hasChildren': false,
+          'children': [],
+          'description':
+              'this is a showname description, which will show up after the name',
+          'showName': true,
+          'name': 'THE NAME to be shown',
+          'level': 'error',
+        };
+        final diagnosticWithoutService = RemoteDiagnosticsNode(
+          nodeJson,
+          null,
+          false,
+          null,
+        );
 
-          //Use a textStyle that is much larger than the normal style
-          const textStyle = TextStyle(fontSize: 24.0, fontFamily: 'Roboto');
-          final diagnosticsNodeDescription = DiagnosticsNodeDescription(
-            diagnosticWithoutService,
-            style: textStyle,
-          );
+        //Use a textStyle that is much larger than the normal style
+        const textStyle = TextStyle(fontSize: 24.0, fontFamily: 'Roboto');
+        final diagnosticsNodeDescription = DiagnosticsNodeDescription(
+          diagnosticWithoutService,
+          style: textStyle,
+        );
 
-          await tester.pumpWidget(wrap(diagnosticsNodeDescription));
+        await tester.pumpWidget(wrap(diagnosticsNodeDescription));
 
-          final approximatedWidth =
-              DiagnosticsNodeDescription.approximateNodeWidth(
-            diagnosticWithoutService,
-          );
+        final approximatedWidth =
+            DiagnosticsNodeDescription.approximateNodeWidth(
+              diagnosticWithoutService,
+            );
 
-          final diagnosticsNodeFind = find.byType(DiagnosticsNodeDescription);
-          // There are many rich texts, containg the name, and description.
-          final allRichTexts = find
-              .descendant(
-                of: diagnosticsNodeFind,
-                matching: find.byType(RichText),
-              )
-              .evaluate()
-              .map((e) => e.widget as RichText);
+        final diagnosticsNodeFind = find.byType(DiagnosticsNodeDescription);
+        // There are many rich texts, containg the name, and description.
+        final allRichTexts = find
+            .descendant(
+              of: diagnosticsNodeFind,
+              matching: find.byType(RichText),
+            )
+            .evaluate()
+            .map((e) => e.widget as RichText);
 
-          final measuredWidthOfAllRichTexts =
-              allRichTexts.fold<double>(0, (previousValue, richText) {
-            final originalTextSpan = richText.text as TextSpan;
+        final measuredWidthOfAllRichTexts = allRichTexts.fold<double>(0, (
+          previousValue,
+          richText,
+        ) {
+          final originalTextSpan = richText.text as TextSpan;
 
-            return previousValue +
-                calculateTextSpanWidth(
-                  originalTextSpan,
-                );
-          });
+          return previousValue + calculateTextSpanWidth(originalTextSpan);
+        });
 
-          expect(
-            approximatedWidth,
-            moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: epsilon),
-          );
-        },
-      );
+        expect(
+          approximatedWidth,
+          moreOrLessEquals(measuredWidthOfAllRichTexts, epsilon: epsilon),
+        );
+      });
     });
   });
 }

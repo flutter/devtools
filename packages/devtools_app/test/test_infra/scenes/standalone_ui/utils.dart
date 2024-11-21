@@ -39,10 +39,7 @@ Future<LoggedChannel> createLoggedWebSocketChannel(Uri wsUri) async {
   );
 
   return (
-    channel: StreamChannel<String>(
-      loggedInput,
-      loggedOutputController.sink,
-    ),
+    channel: StreamChannel<String>(loggedInput, loggedOutputController.sink),
     log: logController.stream,
   );
 }

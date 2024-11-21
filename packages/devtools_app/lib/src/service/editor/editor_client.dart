@@ -60,16 +60,14 @@ class EditorClient extends DisposableController
           return;
         }
 
-        final info = isRegistered
-            ? ServiceRegistered(
-                service: service,
-                method: method,
-                capabilities: capabilities,
-              )
-            : ServiceUnregistered(
-                service: service,
-                method: method,
-              );
+        final info =
+            isRegistered
+                ? ServiceRegistered(
+                  service: service,
+                  method: method,
+                  capabilities: capabilities,
+                )
+                : ServiceUnregistered(service: service, method: method);
         _editorServiceChangedController.add(info);
       }),
     );
@@ -83,12 +81,15 @@ class EditorClient extends DisposableController
           // the rest.
           null => null,
           EditorEventKind.deviceAdded => DeviceAddedEvent.fromJson(data.data),
-          EditorEventKind.deviceRemoved =>
-            DeviceRemovedEvent.fromJson(data.data),
-          EditorEventKind.deviceChanged =>
-            DeviceChangedEvent.fromJson(data.data),
-          EditorEventKind.deviceSelected =>
-            DeviceSelectedEvent.fromJson(data.data),
+          EditorEventKind.deviceRemoved => DeviceRemovedEvent.fromJson(
+            data.data,
+          ),
+          EditorEventKind.deviceChanged => DeviceChangedEvent.fromJson(
+            data.data,
+          ),
+          EditorEventKind.deviceSelected => DeviceSelectedEvent.fromJson(
+            data.data,
+          ),
           EditorEventKind.debugSessionStarted =>
             DebugSessionStartedEvent.fromJson(data.data),
           EditorEventKind.debugSessionChanged =>
@@ -215,11 +216,7 @@ class EditorClient extends DisposableController
     EditorMethod method, {
     Map<String, Object?>? params,
   }) {
-    return _dtd.call(
-      editorServiceName,
-      method.name,
-      params: params,
-    );
+    return _dtd.call(editorServiceName, method.name, params: params);
   }
 }
 
@@ -247,8 +244,5 @@ class ServiceRegistered extends ServiceRegistrationChange {
 
 /// Represents a service method that was unregistered.
 class ServiceUnregistered extends ServiceRegistrationChange {
-  ServiceUnregistered({
-    required super.service,
-    required super.method,
-  });
+  ServiceUnregistered({required super.service, required super.method});
 }

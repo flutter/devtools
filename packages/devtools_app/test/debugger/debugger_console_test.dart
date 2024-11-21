@@ -22,10 +22,12 @@ void main() {
 
   const windowSize = Size(4000.0, 4000.0);
 
-  when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
-      .thenReturn(false);
-  when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
-      .thenReturn(false);
+  when(
+    fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow,
+  ).thenReturn(false);
+  when(
+    fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow,
+  ).thenReturn(false);
   setGlobal(ServiceConnectionManager, fakeServiceConnection);
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, MockScriptManager());
@@ -37,8 +39,9 @@ void main() {
   );
   setGlobal(PreferencesController, PreferencesController());
   fakeServiceConnection.consoleService.ensureServiceInitialized();
-  when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
-      .thenReturn(ValueNotifier<int>(0));
+  when(
+    fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'),
+  ).thenReturn(ValueNotifier<int>(0));
 
   Future<void> pumpConsole(
     WidgetTester tester,

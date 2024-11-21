@@ -33,15 +33,12 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(OfflineDataController, OfflineDataController());
     final mockScriptManager = MockScriptManager();
-    when(mockScriptManager.sortedScripts).thenReturn(
-      ValueNotifier<List<ScriptRef>>([]),
-    );
-    when(mockScriptManager.scriptRefForUri(any)).thenReturn(
-      ScriptRef(
-        uri: 'package:test/script.dart',
-        id: 'script.dart',
-      ),
-    );
+    when(
+      mockScriptManager.sortedScripts,
+    ).thenReturn(ValueNotifier<List<ScriptRef>>([]));
+    when(
+      mockScriptManager.scriptRefForUri(any),
+    ).thenReturn(ScriptRef(uri: 'package:test/script.dart', id: 'script.dart'));
     setGlobal(ScriptManager, mockScriptManager);
     final data = CpuProfileData.fromJson(simpleCpuProfile2);
     await CpuProfileTransformer().processData(data, processId: 'test');
@@ -54,86 +51,78 @@ void main() {
 
   Future<void> pumpMethodTable(WidgetTester tester) async {
     await tester.pumpWidget(
-      wrap(
-        CpuMethodTable(
-          methodTableController: methodTableController,
-        ),
-      ),
+      wrap(CpuMethodTable(methodTableController: methodTableController)),
     );
     await tester.pumpAndSettle();
     expect(find.byType(CpuMethodTable), findsOneWidget);
   }
 
   group('$CpuMethodTable', () {
-    testWidgetsWithWindowSize(
-      'loads methods with no selection',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpMethodTable(tester);
-        expect(
-          find.byType(SearchableFlatTable<MethodTableGraphNode>),
-          findsOneWidget,
-        );
-        expect(find.text('Method'), findsOneWidget);
-        expect(find.text('Total %'), findsOneWidget);
-        expect(find.text('Self %'), findsOneWidget);
-        expect(find.text('Caller %'), findsNothing);
-        expect(find.text('Callee %'), findsNothing);
-        expect(
-          find.text('Select a method to view its call graph.'),
-          findsOneWidget,
-        );
-        await expectLater(
-          find.byType(CpuMethodTable),
-          matchesDevToolsGolden(
-            '../../test_infra/goldens/cpu_profiler/method_table_no_selection.png',
-          ),
-        );
-      },
-    );
+    testWidgetsWithWindowSize('loads methods with no selection', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpMethodTable(tester);
+      expect(
+        find.byType(SearchableFlatTable<MethodTableGraphNode>),
+        findsOneWidget,
+      );
+      expect(find.text('Method'), findsOneWidget);
+      expect(find.text('Total %'), findsOneWidget);
+      expect(find.text('Self %'), findsOneWidget);
+      expect(find.text('Caller %'), findsNothing);
+      expect(find.text('Callee %'), findsNothing);
+      expect(
+        find.text('Select a method to view its call graph.'),
+        findsOneWidget,
+      );
+      await expectLater(
+        find.byType(CpuMethodTable),
+        matchesDevToolsGolden(
+          '../../test_infra/goldens/cpu_profiler/method_table_no_selection.png',
+        ),
+      );
+    });
 
-    testWidgetsWithWindowSize(
-      'loads methods with selection',
-      windowSize,
-      (WidgetTester tester) async {
-        final interestingNode = methodTableController.methods.value.first;
-        expect(interestingNode.name, 'A');
-        expect(interestingNode.predecessors, isNotEmpty);
-        expect(interestingNode.successors, isNotEmpty);
+    testWidgetsWithWindowSize('loads methods with selection', windowSize, (
+      WidgetTester tester,
+    ) async {
+      final interestingNode = methodTableController.methods.value.first;
+      expect(interestingNode.name, 'A');
+      expect(interestingNode.predecessors, isNotEmpty);
+      expect(interestingNode.successors, isNotEmpty);
 
-        methodTableController.selectedNode.value = interestingNode;
-        await pumpMethodTable(tester);
-        expect(
-          find.byType(SearchableFlatTable<MethodTableGraphNode>),
-          findsOneWidget,
-        );
-        expect(find.byType(FlatTable<MethodTableGraphNode>), findsNWidgets(2));
-        expect(find.text('Method'), findsNWidgets(3));
-        expect(find.text('Total %'), findsOneWidget);
-        expect(find.text('Self %'), findsOneWidget);
-        expect(find.text('Caller %'), findsOneWidget);
-        expect(find.text('Callee %'), findsOneWidget);
-        expect(
-          find.text('Select a method to view its call graph.'),
-          findsNothing,
-        );
-        await expectLater(
-          find.byType(CpuMethodTable),
-          matchesDevToolsGolden(
-            '../../test_infra/goldens/cpu_profiler/method_table_with_selection.png',
-          ),
-        );
+      methodTableController.selectedNode.value = interestingNode;
+      await pumpMethodTable(tester);
+      expect(
+        find.byType(SearchableFlatTable<MethodTableGraphNode>),
+        findsOneWidget,
+      );
+      expect(find.byType(FlatTable<MethodTableGraphNode>), findsNWidgets(2));
+      expect(find.text('Method'), findsNWidgets(3));
+      expect(find.text('Total %'), findsOneWidget);
+      expect(find.text('Self %'), findsOneWidget);
+      expect(find.text('Caller %'), findsOneWidget);
+      expect(find.text('Callee %'), findsOneWidget);
+      expect(
+        find.text('Select a method to view its call graph.'),
+        findsNothing,
+      );
+      await expectLater(
+        find.byType(CpuMethodTable),
+        matchesDevToolsGolden(
+          '../../test_infra/goldens/cpu_profiler/method_table_with_selection.png',
+        ),
+      );
 
-        methodTableController.selectedNode.value =
-            methodTableController.methods.value.last;
-        await tester.pumpAndSettle();
-        await expectLater(
-          find.byType(CpuMethodTable),
-          matchesDevToolsGolden(
-            '../../test_infra/goldens/cpu_profiler/method_table_with_selection_2.png',
-          ),
-        );
-      },
-    );
+      methodTableController.selectedNode.value =
+          methodTableController.methods.value.last;
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(CpuMethodTable),
+        matchesDevToolsGolden(
+          '../../test_infra/goldens/cpu_profiler/method_table_with_selection_2.png',
+        ),
+      );
+    });
   });
 }

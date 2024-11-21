@@ -29,13 +29,12 @@ void main() {
     mockServiceConnection = createMockServiceConnectionWithDefaults();
     mockServiceManager =
         mockServiceConnection.serviceManager as MockServiceManager;
-    when(mockServiceConnection.appState).thenReturn(
-      AppState(
-        mockServiceManager.isolateManager.selectedIsolate,
-      ),
-    );
-    when(unawaited(mockServiceManager.runDeviceBusyTask(any)))
-        .thenAnswer((_) => Future<void>.value());
+    when(
+      mockServiceConnection.appState,
+    ).thenReturn(AppState(mockServiceManager.isolateManager.selectedIsolate));
+    when(
+      unawaited(mockServiceManager.runDeviceBusyTask(any)),
+    ).thenAnswer((_) => Future<void>.value());
     when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
     setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(NotificationService, NotificationService());
@@ -57,29 +56,23 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
     });
 
-    testWidgetsWithContext(
-      'performs a hot reload when pressed',
-      (WidgetTester tester) async {
-        registerServiceExtension(mockServiceManager, hotReload);
-        const button = HotReloadButton();
-        await tester.pumpWidget(
-          wrap(
-            wrapWithNotifications(
-              const Scaffold(body: Center(child: button)),
-            ),
-          ),
-        );
-        expect(find.byWidget(button), findsOneWidget);
-        await tester.pumpAndSettle();
-        expect(reloads, 0);
-        await tester.tap(find.byWidget(button));
-        await tester.pumpAndSettle();
-        expect(reloads, 1);
-      },
-      context: {
-        MessageBus: MessageBus(),
-      },
-    );
+    testWidgetsWithContext('performs a hot reload when pressed', (
+      WidgetTester tester,
+    ) async {
+      registerServiceExtension(mockServiceManager, hotReload);
+      const button = HotReloadButton();
+      await tester.pumpWidget(
+        wrap(
+          wrapWithNotifications(const Scaffold(body: Center(child: button))),
+        ),
+      );
+      expect(find.byWidget(button), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(reloads, 0);
+      await tester.tap(find.byWidget(button));
+      await tester.pumpAndSettle();
+      expect(reloads, 1);
+    }, context: {MessageBus: MessageBus()});
 
     testWidgets(
       'does not perform a hot reload when the extension is not registered.',
@@ -90,8 +83,9 @@ void main() {
           serviceAvailable: false,
         );
         const button = HotReloadButton();
-        await tester
-            .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
+        await tester.pumpWidget(
+          wrap(const Scaffold(body: Center(child: button))),
+        );
         expect(find.byWidget(button), findsOneWidget);
         await tester.pumpAndSettle();
         expect(reloads, 0);
@@ -116,29 +110,23 @@ void main() {
       });
     });
 
-    testWidgetsWithContext(
-      'performs a hot restart when pressed',
-      (WidgetTester tester) async {
-        registerServiceExtension(mockServiceManager, hotRestart);
-        const button = HotRestartButton();
-        await tester.pumpWidget(
-          wrap(
-            wrapWithNotifications(
-              const Scaffold(body: Center(child: button)),
-            ),
-          ),
-        );
-        expect(find.byWidget(button), findsOneWidget);
-        await tester.pumpAndSettle();
-        expect(restarts, 0);
-        await tester.tap(find.byWidget(button));
-        await tester.pumpAndSettle();
-        expect(restarts, 1);
-      },
-      context: {
-        MessageBus: MessageBus(),
-      },
-    );
+    testWidgetsWithContext('performs a hot restart when pressed', (
+      WidgetTester tester,
+    ) async {
+      registerServiceExtension(mockServiceManager, hotRestart);
+      const button = HotRestartButton();
+      await tester.pumpWidget(
+        wrap(
+          wrapWithNotifications(const Scaffold(body: Center(child: button))),
+        ),
+      );
+      expect(find.byWidget(button), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(restarts, 0);
+      await tester.tap(find.byWidget(button));
+      await tester.pumpAndSettle();
+      expect(restarts, 1);
+    }, context: {MessageBus: MessageBus()});
 
     testWidgets(
       'does not perform a hot restart when the service is not available',
@@ -149,8 +137,9 @@ void main() {
           serviceAvailable: false,
         );
         const button = HotRestartButton();
-        await tester
-            .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
+        await tester.pumpWidget(
+          wrap(const Scaffold(body: Center(child: button))),
+        );
         expect(find.byWidget(button), findsOneWidget);
         await tester.pumpAndSettle();
         expect(restarts, 0);
@@ -173,7 +162,8 @@ void main() {
               as FakeServiceExtensionManager)
           .fakeFrame();
       serviceState = mockServiceConnection
-          .serviceManager.serviceExtensionManager
+          .serviceManager
+          .serviceExtensionManager
           .getServiceExtensionState(extensions.structuredErrors.extension);
       serviceState.addListener(serviceStateListener);
     });
@@ -188,8 +178,9 @@ void main() {
           .fakeAddServiceExtension(extensions.structuredErrors.extension);
 
       const button = StructuredErrorsToggle();
-      await tester
-          .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
+      await tester.pumpWidget(
+        wrap(const Scaffold(body: Center(child: button))),
+      );
       expect(find.byWidget(button), findsOneWidget);
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
@@ -202,36 +193,34 @@ void main() {
       expect(mostRecentState.value, false);
     });
 
-    testWidgets(
-      'updates based on the service extension',
-      (WidgetTester tester) async {
-        await (mockServiceManager.serviceExtensionManager
-                as FakeServiceExtensionManager)
-            .fakeAddServiceExtension(extensions.structuredErrors.extension);
-        const button = StructuredErrorsToggle();
-        await tester
-            .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
-        expect(find.byWidget(button), findsOneWidget);
+    testWidgets('updates based on the service extension', (
+      WidgetTester tester,
+    ) async {
+      await (mockServiceManager.serviceExtensionManager
+              as FakeServiceExtensionManager)
+          .fakeAddServiceExtension(extensions.structuredErrors.extension);
+      const button = StructuredErrorsToggle();
+      await tester.pumpWidget(
+        wrap(const Scaffold(body: Center(child: button))),
+      );
+      expect(find.byWidget(button), findsOneWidget);
 
-        await mockServiceManager.serviceExtensionManager
-            .setServiceExtensionState(
-          extensions.structuredErrors.extension,
-          enabled: true,
-          value: true,
-        );
-        await tester.pumpAndSettle();
-        expect(toggle.value, true, reason: 'The extension is enabled.');
+      await mockServiceManager.serviceExtensionManager.setServiceExtensionState(
+        extensions.structuredErrors.extension,
+        enabled: true,
+        value: true,
+      );
+      await tester.pumpAndSettle();
+      expect(toggle.value, true, reason: 'The extension is enabled.');
 
-        await mockServiceManager.serviceExtensionManager
-            .setServiceExtensionState(
-          extensions.structuredErrors.extension,
-          enabled: false,
-          value: false,
-        );
-        await tester.pumpAndSettle();
-        expect(toggle.value, false, reason: 'The extension is disabled.');
-      },
-    );
+      await mockServiceManager.serviceExtensionManager.setServiceExtensionState(
+        extensions.structuredErrors.extension,
+        enabled: false,
+        value: false,
+      );
+      await tester.pumpAndSettle();
+      expect(toggle.value, false, reason: 'The extension is disabled.');
+    });
   });
 }
 

@@ -190,9 +190,7 @@ class FlutterSdk {
       }
     }
 
-    throw Exception(
-      'Unable to locate the Flutter SDK on PATH',
-    );
+    throw Exception('Unable to locate the Flutter SDK on PATH');
   }
 
   final String sdkPath;

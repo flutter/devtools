@@ -23,11 +23,7 @@ abstract class _ObjectPoolColumnData extends ColumnData<ObjectPoolEntry> {
 }
 
 class _AddressColumn extends _ObjectPoolColumnData {
-  _AddressColumn()
-      : super(
-          'Offset',
-          fixedWidthPx: 160,
-        );
+  _AddressColumn() : super('Offset', fixedWidthPx: 160);
 
   @override
   int getValue(ObjectPoolEntry dataObject) {

@@ -35,14 +35,14 @@ class CpuProfiler extends StatefulWidget {
     required this.data,
     required this.controller,
     List<Key>? searchableTabKeys,
-  })  : callTreeRoots = data.callTreeRoots,
-        bottomUpRoots = data.bottomUpRoots,
-        tabs = [
-          _buildTab(ProfilerTab.bottomUp),
-          _buildTab(ProfilerTab.callTree),
-          _buildTab(ProfilerTab.methodTable),
-          _buildTab(ProfilerTab.cpuFlameChart),
-        ];
+  }) : callTreeRoots = data.callTreeRoots,
+       bottomUpRoots = data.bottomUpRoots,
+       tabs = [
+         _buildTab(ProfilerTab.bottomUp),
+         _buildTab(ProfilerTab.callTree),
+         _buildTab(ProfilerTab.methodTable),
+         _buildTab(ProfilerTab.cpuFlameChart),
+       ];
 
   static DevToolsTab _buildTab(ProfilerTab profilerTab) {
     return DevToolsTab.create(
@@ -113,10 +113,7 @@ class _CpuProfilerState extends State<CpuProfiler>
       _tabController.removeListener(_onTabChanged);
       _tabController.dispose();
     }
-    _tabController = TabController(
-      length: widget.tabs.length,
-      vsync: this,
-    );
+    _tabController = TabController(length: widget.tabs.length, vsync: this);
     _tabControllerInitialized = true;
 
     if (widget.controller.selectedProfilerTabIndex >= _tabController.length) {
@@ -286,24 +283,21 @@ class _CpuProfilerState extends State<CpuProfiler>
     unawaited(
       showDialog(
         context: context,
-        builder: (context) => FilterDialog<CpuStackFrame>(
-          controller: widget.controller,
-          filteredItem: 'stack frame',
-        ),
+        builder:
+            (context) => FilterDialog<CpuStackFrame>(
+              controller: widget.controller,
+              filteredItem: 'stack frame',
+            ),
       ),
     );
   }
 
   List<Widget> _buildProfilerViews() {
     final bottomUp = KeepAliveWrapper(
-      child: CpuBottomUpTable(
-        bottomUpRoots: widget.bottomUpRoots,
-      ),
+      child: CpuBottomUpTable(bottomUpRoots: widget.bottomUpRoots),
     );
     final callTree = KeepAliveWrapper(
-      child: CpuCallTreeTable(
-        dataRoots: widget.callTreeRoots,
-      ),
+      child: CpuCallTreeTable(dataRoots: widget.callTreeRoots),
     );
     final methodTable = KeepAliveWrapper(
       child: CpuMethodTable(
@@ -325,21 +319,17 @@ class _CpuProfilerState extends State<CpuProfiler>
         },
       ),
     );
-    return [
-      bottomUp,
-      callTree,
-      methodTable,
-      cpuFlameChart,
-    ];
+    return [bottomUp, callTree, methodTable, cpuFlameChart];
   }
 
   void _performOnDataRoots(
     void Function(CpuStackFrame root) callback,
     Tab currentTab,
   ) {
-    final roots = currentTab.key == ProfilerTab.callTree.key
-        ? widget.callTreeRoots
-        : widget.bottomUpRoots;
+    final roots =
+        currentTab.key == ProfilerTab.callTree.key
+            ? widget.callTreeRoots
+            : widget.bottomUpRoots;
     setState(() {
       roots.forEach(callback);
     });
@@ -360,15 +350,14 @@ class CpuProfileStats extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final samplePeriodValid = metadata.samplePeriod > 0;
-    final samplingPeriodDisplay = samplePeriodValid
-        ? const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod
-        : '--';
+    final samplingPeriodDisplay =
+        samplePeriodValid
+            ? const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod
+            : '--';
     return RoundedOutlinedBorder.onlyBottom(
       child: Container(
         height: _statsRowHeight,
-        padding: const EdgeInsets.symmetric(
-          horizontal: defaultSpacing,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

@@ -18,10 +18,7 @@ class InspectorSourceLocation {
   final Map<String, Object?> json;
   final InspectorSourceLocation? parent;
 
-  String? get path => JsonUtils.getStringMember(
-        json,
-        _JsonFields.file,
-      );
+  String? get path => JsonUtils.getStringMember(json, _JsonFields.file);
 
   String? getFile() {
     final fileName = path;

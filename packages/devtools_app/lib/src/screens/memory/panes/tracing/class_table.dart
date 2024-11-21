@@ -23,13 +23,13 @@ const _defaultNumberFieldWidth = 70.0;
 class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
   _TraceCheckBoxColumn({required this.controller})
-      : super(
-          'Trace',
-          titleTooltip:
-              'Enable or disable allocation tracing for a specific type',
-          fixedWidthPx: scaleByFontFactor(40.0),
-          alignment: ColumnAlignment.left,
-        );
+    : super(
+        'Trace',
+        titleTooltip:
+            'Enable or disable allocation tracing for a specific type',
+        fixedWidthPx: scaleByFontFactor(40.0),
+        alignment: ColumnAlignment.left,
+      );
 
   final TracePaneController controller;
 
@@ -99,12 +99,12 @@ class _ClassNameColumn extends ColumnData<TracedClass>
 
 class _InstancesColumn extends ColumnData<TracedClass> {
   _InstancesColumn()
-      : super(
-          'Delta',
-          titleTooltip:
-              'Number of instances, allocated after the class was selected for tracing.',
-          fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
-        );
+    : super(
+        'Delta',
+        titleTooltip:
+            'Number of instances, allocated after the class was selected for tracing.',
+        fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+      );
 
   @override
   int getValue(TracedClass dataObject) {
@@ -135,8 +135,9 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
   void initState() {
     super.initState();
 
-    _classNameColumn =
-        _ClassNameColumn(rootPackage: widget.controller.rootPackage);
+    _classNameColumn = _ClassNameColumn(
+      rootPackage: widget.controller.rootPackage,
+    );
 
     _checkboxColumn = _TraceCheckBoxColumn(controller: widget.controller);
     columns = <ColumnData<TracedClass>>[
@@ -152,10 +153,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
   void _sendFilterEditGaEvent() {
     final now = DateTime.now();
     if (now.difference(_editFilterGaSent) < _editFilterGaThrottling) return;
-    ga.select(
-      gac.memory,
-      gac.MemoryEvents.tracingClassFilter.name,
-    );
+    ga.select(gac.memory, gac.MemoryEvents.tracingClassFilter.name);
     _editFilterGaSent = now;
   }
 

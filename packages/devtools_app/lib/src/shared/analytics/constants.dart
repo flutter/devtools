@@ -91,11 +91,7 @@ final defaultDetailsViewToLayoutExplorer =
 final defaultDetailsViewToWidgetDetails =
     InspectorDetailsViewType.widgetDetailsTree.name;
 
-enum HomeScreenEvents {
-  connectToApp,
-  connectToNewApp,
-  viewVmFlags,
-}
+enum HomeScreenEvents { connectToApp, connectToNewApp, viewVmFlags }
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';

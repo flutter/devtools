@@ -93,8 +93,9 @@ class HeapData {
           continue;
         }
 
-        final className =
-            HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
+        final className = HeapClassName.fromHeapSnapshotClass(
+          graph.classes[object.classId],
+        );
 
         // Ignore sentinels, because their size is not known.
         if (className.isSentinel) {
@@ -105,10 +106,7 @@ class HeapData {
         reachableSize += object.shallowSize;
 
         nameToClass
-            .putIfAbsent(
-              className,
-              () => SingleClassData(className: className),
-            )
+            .putIfAbsent(className, () => SingleClassData(className: className))
             .countInstance(
               graph,
               index: i,

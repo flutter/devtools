@@ -45,9 +45,10 @@ TextStyle semibold(TextStyle style) =>
 TextStyle primaryColor(TextStyle style, BuildContext context) {
   final theme = Theme.of(context);
   return style.copyWith(
-    color: (theme.brightness == Brightness.light)
-        ? theme.primaryColor
-        : theme.colorScheme.secondary,
+    color:
+        (theme.brightness == Brightness.light)
+            ? theme.primaryColor
+            : theme.colorScheme.secondary,
     fontWeight: FontWeight.w400,
   );
 }
@@ -80,13 +81,14 @@ class GaDevToolsButton extends DevToolsButton {
     super.outlined,
     super.tooltipPadding,
   }) : super(
-          onPressed: onPressed != null
-              ? () {
-                  ga.select(gaScreen, gaSelection);
-                  onPressed();
-                }
-              : null,
-        );
+         onPressed:
+             onPressed != null
+                 ? () {
+                   ga.select(gaScreen, gaSelection);
+                   onPressed();
+                 }
+                 : null,
+       );
 
   factory GaDevToolsButton.iconOnly({
     required IconData icon,
@@ -117,10 +119,7 @@ class PauseButton extends GaDevToolsButton {
     super.outlined = true,
     super.minScreenWidthForTextBeforeScaling,
     bool iconOnly = false,
-  }) : super(
-          label: iconOnly ? null : 'Pause',
-          icon: Icons.pause,
-        );
+  }) : super(label: iconOnly ? null : 'Pause', icon: Icons.pause);
 }
 
 class ResumeButton extends GaDevToolsButton {
@@ -133,10 +132,7 @@ class ResumeButton extends GaDevToolsButton {
     super.outlined = true,
     super.minScreenWidthForTextBeforeScaling,
     bool iconOnly = false,
-  }) : super(
-          label: iconOnly ? null : 'Resume',
-          icon: Icons.play_arrow,
-        );
+  }) : super(label: iconOnly ? null : 'Resume', icon: Icons.play_arrow);
 }
 
 /// A button that groups pause and resume controls and automatically manages
@@ -245,11 +241,11 @@ class StartStopRecordingButton extends GaDevToolsButton {
     Color? colorOverride,
     String? labelOverride,
   }) : super(
-          icon: _icon(recording),
-          label: labelOverride ?? _label(recording),
-          color: colorOverride ?? _color(recording),
-          tooltip: tooltipOverride ?? _tooltip(recording),
-        );
+         icon: _icon(recording),
+         label: labelOverride ?? _label(recording),
+         color: colorOverride ?? _color(recording),
+         tooltip: tooltipOverride ?? _tooltip(recording),
+       );
 
   static IconData _icon(bool recording) =>
       recording ? Icons.stop : Icons.fiber_manual_record;
@@ -283,10 +279,10 @@ class RecordButton extends GaDevToolsButton {
     super.tooltip = 'Start recording',
     String? labelOverride,
   }) : super(
-          onPressed: recording ? null : onPressed,
-          icon: Icons.fiber_manual_record,
-          label: labelOverride ?? 'Record',
-        );
+         onPressed: recording ? null : onPressed,
+         icon: Icons.fiber_manual_record,
+         label: labelOverride ?? 'Record',
+       );
 }
 
 /// Button to stop recording data.
@@ -305,10 +301,10 @@ class StopRecordingButton extends GaDevToolsButton {
     super.minScreenWidthForTextBeforeScaling,
     super.tooltip = 'Stop recording',
   }) : super(
-          onPressed: !recording ? null : onPressed,
-          icon: Icons.stop,
-          label: 'Stop',
-        );
+         onPressed: !recording ? null : onPressed,
+         icon: Icons.stop,
+         label: 'Stop',
+       );
 }
 
 class SettingsOutlinedButton extends GaDevToolsButton {
@@ -328,10 +324,7 @@ class HelpButton extends GaDevToolsButton {
     required super.gaSelection,
     required super.onPressed,
     super.outlined = true,
-  }) : super(
-          icon: Icons.help_outline,
-          tooltip: 'Help',
-        );
+  }) : super(icon: Icons.help_outline, tooltip: 'Help');
 }
 
 class ExpandAllButton extends StatelessWidget {
@@ -510,9 +503,7 @@ class ProcessingInfo extends StatelessWidget {
           const SizedBox(height: defaultSpacing),
           SizedBox(
             width: 200.0,
-            child: LinearProgressIndicator(
-              value: progressValue,
-            ),
+            child: LinearProgressIndicator(value: progressValue),
           ),
         ],
       ),
@@ -570,9 +561,7 @@ class OfflineAwareControls extends StatelessWidget {
                 padding: const EdgeInsets.only(right: defaultSpacing),
                 child: ExitOfflineButton(gaScreen: gaScreen),
               ),
-            Expanded(
-              child: controlsBuilder(offline),
-            ),
+            Expanded(child: controlsBuilder(offline)),
           ],
         );
       },
@@ -694,10 +683,7 @@ class SmallAction extends StatelessWidget {
 
     return tooltip == null
         ? button
-        : DevToolsTooltip(
-            message: tooltip,
-            child: button,
-          );
+        : DevToolsTooltip(message: tooltip, child: button);
   }
 }
 
@@ -711,9 +697,9 @@ abstract class ScaffoldAction extends StatelessWidget {
     this.iconAsset,
     this.color,
   }) : assert(
-          (icon == null) != (iconAsset == null),
-          'Exactly one of icon and iconAsset must be specified.',
-        );
+         (icon == null) != (iconAsset == null),
+         'Exactly one of icon and iconAsset must be specified.',
+       );
 
   /// The icon to use for this scaffold action.
   ///
@@ -806,10 +792,7 @@ class OutlinedRowGroup extends StatelessWidget {
         ),
       ]);
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: childrenWithOutlines,
-    );
+    return Row(mainAxisSize: MainAxisSize.min, children: childrenWithOutlines);
   }
 }
 
@@ -828,9 +811,9 @@ class ThickDivider extends StatelessWidget {
 }
 
 BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
-      border: Border.all(color: Theme.of(context).focusColor),
-      borderRadius: defaultBorderRadius,
-    );
+  border: Border.all(color: Theme.of(context).focusColor),
+  borderRadius: defaultBorderRadius,
+);
 
 class LeftBorder extends StatelessWidget {
   const LeftBorder({super.key, this.child});
@@ -839,8 +822,9 @@ class LeftBorder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final leftBorder =
-        Border(left: BorderSide(color: Theme.of(context).focusColor));
+    final leftBorder = Border(
+      left: BorderSide(color: Theme.of(context).focusColor),
+    );
 
     return Container(
       decoration: BoxDecoration(border: leftBorder),
@@ -858,11 +842,8 @@ final goldenRatio = 1 + sqrt(5) / 2;
 ///
 /// Only one of [message] or [richMessage] can be specified.
 class CenteredMessage extends StatelessWidget {
-  const CenteredMessage({
-    this.message,
-    this.richMessage,
-    super.key,
-  }) : assert((message == null) != (richMessage == null));
+  const CenteredMessage({this.message, this.richMessage, super.key})
+    : assert((message == null) != (richMessage == null));
 
   final String? message;
 
@@ -878,9 +859,7 @@ class CenteredMessage extends StatelessWidget {
         style: Theme.of(context).regularTextStyle,
       );
     } else {
-      child = RichText(
-        text: TextSpan(children: richMessage),
-      );
+      child = RichText(text: TextSpan(children: richMessage));
     }
     return Center(child: child);
   }
@@ -893,17 +872,11 @@ class CenteredCircularProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const indicator = Center(
-      child: CircularProgressIndicator(),
-    );
+    const indicator = Center(child: CircularProgressIndicator());
 
     if (size == null) return indicator;
 
-    return SizedBox(
-      width: size,
-      height: size,
-      child: indicator,
-    );
+    return SizedBox(width: size, height: size, child: indicator);
   }
 }
 
@@ -1103,19 +1076,13 @@ class TextViewer extends StatelessWidget {
     } else {
       displayText = text;
     }
-    return SelectableText(
-      displayText,
-      style: style,
-    );
+    return SelectableText(displayText, style: style);
   }
 }
 
 class JsonViewer extends StatefulWidget {
-  JsonViewer({
-    super.key,
-    required this.encodedJson,
-    this.scrollable = true,
-  }) : assert(encodedJson.isNotEmpty);
+  JsonViewer({super.key, required this.encodedJson, this.scrollable = true})
+    : assert(encodedJson.isNotEmpty);
 
   final String encodedJson;
   final bool scrollable;
@@ -1129,9 +1096,7 @@ class _JsonViewerState extends State<JsonViewer> {
   late DartObjectNode variable;
   static const jsonEncoder = JsonEncoder.withIndent('  ');
 
-  Future<void> _buildAndExpand(
-    DartObjectNode variable,
-  ) async {
+  Future<void> _buildAndExpand(DartObjectNode variable) async {
     // Build the root node
     await buildVariablesTree(variable);
     // Build the contents of all children
@@ -1183,8 +1148,9 @@ class _JsonViewerState extends State<JsonViewer> {
     super.dispose();
     // Remove the JSON object from the fake service cache to avoid holding on
     // to large objects indefinitely.
-    serviceConnection.serviceManager.service!.fakeServiceCache
-        .removeJsonObject(variable.value as Instance);
+    serviceConnection.serviceManager.service!.fakeServiceCache.removeJsonObject(
+      variable.value as Instance,
+    );
   }
 
   @override
@@ -1212,15 +1178,10 @@ class _JsonViewerState extends State<JsonViewer> {
       },
     );
     if (widget.scrollable) {
-      child = SingleChildScrollView(
-        child: child,
-      );
+      child = SingleChildScrollView(child: child);
     }
     return SelectionArea(
-      child: Padding(
-        padding: const EdgeInsets.all(denseSpacing),
-        child: child,
-      ),
+      child: Padding(padding: const EdgeInsets.all(denseSpacing), child: child),
     );
   }
 }
@@ -1254,10 +1215,7 @@ class MoreInfoLink extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text(
-              'More info',
-              style: theme.linkTextStyle,
-            ),
+            Text('More info', style: theme.linkTextStyle),
             const SizedBox(width: densePadding),
             Icon(
               Icons.launch,
@@ -1295,11 +1253,7 @@ class LinkIconLabel extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: defaultIconSize,
-            color: color,
-          ),
+          Icon(icon, size: defaultIconSize, color: color),
           const SizedBox(width: densePadding),
           Padding(
             padding: const EdgeInsets.only(bottom: densePadding),
@@ -1329,17 +1283,14 @@ class GaLinkTextSpan extends LinkTextSpan {
     required super.context,
     TextStyle? style,
   }) : super(
-          link: link,
-          onTap: () {
-            if (link.gaScreenName != null &&
-                link.gaSelectedItemDescription != null) {
-              ga.select(
-                link.gaScreenName!,
-                link.gaSelectedItemDescription!,
-              );
-            }
-          },
-        );
+         link: link,
+         onTap: () {
+           if (link.gaScreenName != null &&
+               link.gaSelectedItemDescription != null) {
+             ga.select(link.gaScreenName!, link.gaSelectedItemDescription!);
+           }
+         },
+       );
 }
 
 class GaLink extends Link {
@@ -1355,11 +1306,7 @@ class GaLink extends Link {
 }
 
 class Legend extends StatelessWidget {
-  const Legend({
-    super.key,
-    required this.entries,
-    this.dense = false,
-  });
+  const Legend({super.key, required this.entries, this.dense = false});
 
   double get legendSquareSize =>
       dense ? scaleByFontFactor(12.0) : scaleByFontFactor(16.0);
@@ -1372,13 +1319,7 @@ class Legend extends StatelessWidget {
   Widget build(BuildContext context) {
     final textStyle = dense ? Theme.of(context).legendTextStyle : null;
     final legendItems = entries
-        .map(
-          (entry) => _legendItem(
-            entry.description,
-            entry.color,
-            textStyle,
-          ),
-        )
+        .map((entry) => _legendItem(entry.description, entry.color, textStyle))
         .toList()
         .joinWith(const SizedBox(height: denseRowSpacing));
     return Column(
@@ -1396,10 +1337,7 @@ class Legend extends StatelessWidget {
           color: color,
         ),
         const SizedBox(width: denseSpacing),
-        Text(
-          description,
-          style: style,
-        ),
+        Text(description, style: style),
       ],
     );
   }
@@ -1441,19 +1379,20 @@ class CopyToClipboardControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onPressed = dataProvider == null
-        ? null
-        : () {
-            if (gaScreen != null && gaItem != null) {
-              ga.select(gaScreen!, gaItem!);
-            }
-            unawaited(
-              copyToClipboard(
-                dataProvider!() ?? '',
-                successMessage: successMessage,
-              ),
-            );
-          };
+    final onPressed =
+        dataProvider == null
+            ? null
+            : () {
+              if (gaScreen != null && gaItem != null) {
+                ga.select(gaScreen!, gaItem!);
+              }
+              unawaited(
+                copyToClipboard(
+                  dataProvider!() ?? '',
+                  successMessage: successMessage,
+                ),
+              );
+            };
     final size = this.size ?? defaultIconSize;
     return SizedBox(
       height: size,
@@ -1673,10 +1612,7 @@ class CheckboxSetting extends StatelessWidget {
               child: Row(
                 children: [
                   RichText(
-                    text: TextSpan(
-                      text: ' • ',
-                      style: theme.subtleTextStyle,
-                    ),
+                    text: TextSpan(text: ' • ', style: theme.subtleTextStyle),
                   ),
                   Flexible(
                     child: RichText(
@@ -1740,18 +1676,12 @@ class SwitchSetting extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (isScreenWiderThan(
-            context,
-            minScreenWidthForTextBeforeScaling,
-          ))
+          if (isScreenWiderThan(context, minScreenWidthForTextBeforeScaling))
             Flexible(
               child: RichText(
                 overflow: TextOverflow.visible,
                 maxLines: 3,
-                text: TextSpan(
-                  text: title,
-                  style: theme.regularTextStyle,
-                ),
+                text: TextSpan(text: title, style: theme.regularTextStyle),
               ),
             ),
           NotifierSwitch(
@@ -1789,25 +1719,21 @@ class PubWarningText extends StatelessWidget {
     final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
     return SelectableText.rich(
       TextSpan(
-        text: 'Warning: you should no longer be launching DevTools from'
+        text:
+            'Warning: you should no longer be launching DevTools from'
             ' pub.\n\n',
         style: theme.subtleTextStyle.copyWith(color: theme.colorScheme.error),
         children: [
           TextSpan(
-            text: 'DevTools version 2.8.0 will be the last version to '
+            text:
+                'DevTools version 2.8.0 will be the last version to '
                 'be shipped on pub. As of $sdkName\nversion >= '
                 '$minSdkVersion, DevTools should be launched by running '
                 'the ',
             style: theme.subtleTextStyle,
           ),
-          TextSpan(
-            text: '`dart devtools`',
-            style: theme.subtleFixedFontStyle,
-          ),
-          TextSpan(
-            text: '\ncommand.',
-            style: theme.subtleTextStyle,
-          ),
+          TextSpan(text: '`dart devtools`', style: theme.subtleFixedFontStyle),
+          TextSpan(text: '\ncommand.', style: theme.subtleTextStyle),
         ],
       ),
     );
@@ -1866,11 +1792,7 @@ class _BlinkingIconState extends State<BlinkingIcon> {
   }
 
   Widget _icon({Color? color}) {
-    return Icon(
-      widget.icon,
-      size: widget.size,
-      color: color,
-    );
+    return Icon(widget.icon, size: widget.size, color: color);
   }
 }
 
@@ -1897,7 +1819,8 @@ class MultiValueListenableBuilder extends StatefulWidget {
     BuildContext context,
     List<Object?> values,
     Widget? child,
-  ) builder;
+  )
+  builder;
 
   final Widget? child;
 
@@ -1907,7 +1830,8 @@ class MultiValueListenableBuilder extends StatefulWidget {
 }
 
 class _MultiValueListenableBuilderState
-    extends State<MultiValueListenableBuilder> with AutoDisposeMixin {
+    extends State<MultiValueListenableBuilder>
+    with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
@@ -1916,28 +1840,20 @@ class _MultiValueListenableBuilderState
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(
-      context,
-      [for (final listenable in widget.listenables) listenable.value],
-      widget.child,
-    );
+    return widget.builder(context, [
+      for (final listenable in widget.listenables) listenable.value,
+    ], widget.child);
   }
 }
 
 class SmallCircularProgressIndicator extends StatelessWidget {
-  const SmallCircularProgressIndicator({
-    super.key,
-    required this.valueColor,
-  });
+  const SmallCircularProgressIndicator({super.key, required this.valueColor});
 
   final Animation<Color?> valueColor;
 
   @override
   Widget build(BuildContext context) {
-    return CircularProgressIndicator(
-      strokeWidth: 2,
-      valueColor: valueColor,
-    );
+    return CircularProgressIndicator(strokeWidth: 2, valueColor: valueColor);
   }
 }
 
@@ -1960,9 +1876,7 @@ class ElevatedCard extends StatelessWidget {
     return Card(
       elevation: defaultElevation,
       color: Theme.of(context).scaffoldBackgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: defaultBorderRadius,
-      ),
+      shape: RoundedRectangleBorder(borderRadius: defaultBorderRadius),
       child: Container(
         width: width,
         height: height,
@@ -2084,10 +1998,7 @@ class VerticalLineSpacer extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _paddingWidth),
       child: OutlineDecoration.onlyLeft(
-        child: SizedBox(
-          width: _lineWidth,
-          height: height,
-        ),
+        child: SizedBox(width: _lineWidth, height: height),
       ),
     );
   }
@@ -2185,8 +2096,11 @@ class ContextMenuButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return MenuAnchor(
       menuChildren: menuChildren,
-      builder:
-          (BuildContext context, MenuController controller, Widget? child) {
+      builder: (
+        BuildContext context,
+        MenuController controller,
+        Widget? child,
+      ) {
         return SizedBox(
           width: buttonWidth,
           child: ToolbarAction(
@@ -2246,8 +2160,8 @@ class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
       () => _textEditingController.text = widget.notifier.value.toString(),
     );
 
-    _textEditingController = TextEditingController()
-      ..text = widget.notifier.value.toString();
+    _textEditingController =
+        TextEditingController()..text = widget.notifier.value.toString();
   }
 
   @override
@@ -2268,10 +2182,7 @@ class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(widget.title),
-              Text(
-                widget.subTitle,
-                style: theme.subtleTextStyle,
-              ),
+              Text(widget.subTitle, style: theme.subtleTextStyle),
             ],
           ),
         ),

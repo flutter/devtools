@@ -3,6 +3,4 @@
 // found in the LICENSE file.
 
 // TODO(jacobr): add render, semantics, and layer trees.
-enum FlutterTreeType {
-  widget,
-}
+enum FlutterTreeType { widget }

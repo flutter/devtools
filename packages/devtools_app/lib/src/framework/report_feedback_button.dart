@@ -16,19 +16,16 @@ import '../shared/utils.dart';
 /// browser.
 class ReportFeedbackButton extends ScaffoldAction {
   ReportFeedbackButton({super.key, super.color})
-      : super(
-          icon: Icons.bug_report_outlined,
-          tooltip: 'Report feedback',
-          onPressed: (_) {
-            ga.select(
-              gac.devToolsMain,
-              gac.feedbackButton,
-            );
-            unawaited(
-              launchUrlWithErrorHandling(
-                devToolsEnvironmentParameters.issueTrackerLink().url,
-              ),
-            );
-          },
-        );
+    : super(
+        icon: Icons.bug_report_outlined,
+        tooltip: 'Report feedback',
+        onPressed: (_) {
+          ga.select(gac.devToolsMain, gac.feedbackButton);
+          unawaited(
+            launchUrlWithErrorHandling(
+              devToolsEnvironmentParameters.issueTrackerLink().url,
+            ),
+          );
+        },
+      );
 }

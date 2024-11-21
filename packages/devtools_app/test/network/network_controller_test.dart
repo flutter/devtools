@@ -293,26 +293,23 @@ void main() {
       };
 
       final request1Pending = HttpProfileRequest.parse(httpBaseObject)!;
-      final request1Done = HttpProfileRequest.parse({
-        ...httpBaseObject,
-        'endTime': endTime,
-        'response': {
-          'startTime': startTime,
-          'endTime': endTime,
-          'redirects': [],
-          'statusCode': 200,
-        },
-      })!;
-      final request2Pending = HttpProfileRequest.parse({
-        ...httpBaseObject,
-        'id': '102',
-      })!;
+      final request1Done =
+          HttpProfileRequest.parse({
+            ...httpBaseObject,
+            'endTime': endTime,
+            'response': {
+              'startTime': startTime,
+              'endTime': endTime,
+              'redirects': [],
+              'statusCode': 200,
+            },
+          })!;
+      final request2Pending =
+          HttpProfileRequest.parse({...httpBaseObject, 'id': '102'})!;
 
       final socketStats1Pending = SocketStatistic.parse({...socketStatObject})!;
-      final socketStats1Done = SocketStatistic.parse({
-        ...socketStatObject,
-        'endTime': endTime,
-      })!;
+      final socketStats1Done =
+          SocketStatistic.parse({...socketStatObject, 'endTime': endTime})!;
 
       final socketStats2Pending =
           SocketStatistic.parse({...socketStatObject, 'id': '22'})!;
@@ -350,8 +347,9 @@ void main() {
           // Check that all requests ids are present and that the endtimes have
           // been updated accordingly
           expect(
-            currentNetworkRequests.value
-                .map((e) => [e.id, e.endTimestamp?.microsecondsSinceEpoch]),
+            currentNetworkRequests.value.map(
+              (e) => [e.id, e.endTimestamp?.microsecondsSinceEpoch],
+            ),
             [
               ['101', endTime],
               ['102', null],

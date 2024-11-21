@@ -17,7 +17,8 @@ extension BuildCommandArgsExtension on ArgParser {
       BuildCommandArgs.buildMode.flagName,
       allowed: ['debug', 'profile', 'release'],
       defaultsTo: 'release',
-      help: 'The build mode to use for the DevTools web app. This should only'
+      help:
+          'The build mode to use for the DevTools web app. This should only'
           ' be "debug" or "profile" for the purpose of local development.',
     );
   }
@@ -27,7 +28,8 @@ extension BuildCommandArgsExtension on ArgParser {
       BuildCommandArgs.pubGet.flagName,
       negatable: true,
       defaultsTo: true,
-      help: 'Whether to run `dt pub-get --only-main` before building'
+      help:
+          'Whether to run `dt pub-get --only-main` before building'
           ' the DevTools web app.',
     );
   }
@@ -46,7 +48,8 @@ extension BuildCommandArgsExtension on ArgParser {
       BuildCommandArgs.updateFlutter.flagName,
       negatable: true,
       defaultsTo: true,
-      help: 'Whether to update the Flutter SDK contained in the '
+      help:
+          'Whether to update the Flutter SDK contained in the '
           '"tool/flutter-sdk" directory.',
     );
   }

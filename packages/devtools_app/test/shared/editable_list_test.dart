@@ -15,9 +15,7 @@ import '../test_infra/utils/test_utils.dart';
 void main() {
   const windowSize = Size(1000.0, 1000.0);
   const label = 'This is the EditableList label';
-  ListValueNotifier<String> entries([
-    List<String> values = const <String>[],
-  ]) {
+  ListValueNotifier<String> entries([List<String> values = const <String>[]]) {
     return ListValueNotifier<String>(values);
   }
 
@@ -25,141 +23,123 @@ void main() {
   setGlobal(NotificationService, NotificationService());
 
   group('EditableList', () {
-    testWidgetsWithWindowSize(
-      'shows the label',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrapSimple(
-            EditableList(
-              entries: entries([]),
-              textFieldLabel: label,
-              gaRefreshSelection: '',
-              gaScreen: '',
-            ),
+    testWidgetsWithWindowSize('shows the label', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapSimple(
+          EditableList(
+            entries: entries([]),
+            textFieldLabel: label,
+            gaRefreshSelection: '',
+            gaScreen: '',
           ),
-        );
-        expect(find.text(label), findsOneWidget);
-      },
-    );
+        ),
+      );
+      expect(find.text(label), findsOneWidget);
+    });
 
-    testWidgetsWithWindowSize(
-      'triggers add',
-      windowSize,
-      (WidgetTester tester) async {
-        const valueToAdd = 'this is the value that will be added';
-        String? entryThatWasRequestedForAdd;
-        final widget = EditableList(
-          entries: entries(),
-          textFieldLabel: label,
-          onEntryAdded: (e) {
-            entryThatWasRequestedForAdd = e;
-          },
-          gaRefreshSelection: '',
-          gaScreen: '',
-        );
-        await tester.pumpWidget(
-          wrapSimple(widget),
-        );
+    testWidgetsWithWindowSize('triggers add', windowSize, (
+      WidgetTester tester,
+    ) async {
+      const valueToAdd = 'this is the value that will be added';
+      String? entryThatWasRequestedForAdd;
+      final widget = EditableList(
+        entries: entries(),
+        textFieldLabel: label,
+        onEntryAdded: (e) {
+          entryThatWasRequestedForAdd = e;
+        },
+        gaRefreshSelection: '',
+        gaScreen: '',
+      );
+      await tester.pumpWidget(wrapSimple(widget));
 
-        final actionBar = find.byType(EditableListActionBar);
-        final textField = find.descendant(
-          of: actionBar,
-          matching: find.byType(TextField),
-        );
-        final addEntryButton = find.descendant(
-          of: actionBar,
-          matching: find.text('Add'),
-        );
-        await tester.enterText(textField, valueToAdd);
-        await tester.tap(addEntryButton);
-        await tester.pump();
+      final actionBar = find.byType(EditableListActionBar);
+      final textField = find.descendant(
+        of: actionBar,
+        matching: find.byType(TextField),
+      );
+      final addEntryButton = find.descendant(
+        of: actionBar,
+        matching: find.text('Add'),
+      );
+      await tester.enterText(textField, valueToAdd);
+      await tester.tap(addEntryButton);
+      await tester.pump();
 
-        expect(entryThatWasRequestedForAdd, equals(valueToAdd));
-      },
-    );
+      expect(entryThatWasRequestedForAdd, equals(valueToAdd));
+    });
 
-    testWidgetsWithWindowSize(
-      'triggers refresh',
-      windowSize,
-      (WidgetTester tester) async {
-        var refreshWasCalled = false;
-        final widget = EditableList(
-          entries: entries(),
-          textFieldLabel: label,
-          onRefreshTriggered: () {
-            refreshWasCalled = true;
-          },
-          gaRefreshSelection: '',
-          gaScreen: '',
-        );
-        await tester.pumpWidget(
-          wrapSimple(widget),
-        );
-        final refreshButton = find.byType(RefreshButton);
+    testWidgetsWithWindowSize('triggers refresh', windowSize, (
+      WidgetTester tester,
+    ) async {
+      var refreshWasCalled = false;
+      final widget = EditableList(
+        entries: entries(),
+        textFieldLabel: label,
+        onRefreshTriggered: () {
+          refreshWasCalled = true;
+        },
+        gaRefreshSelection: '',
+        gaScreen: '',
+      );
+      await tester.pumpWidget(wrapSimple(widget));
+      final refreshButton = find.byType(RefreshButton);
 
-        await tester.tap(refreshButton);
-        await tester.pump();
+      await tester.tap(refreshButton);
+      await tester.pump();
 
-        expect(refreshWasCalled, isTrue);
-      },
-    );
+      expect(refreshWasCalled, isTrue);
+    });
 
-    testWidgetsWithWindowSize(
-      'triggers remove',
-      windowSize,
-      (WidgetTester tester) async {
-        const valueToRemove = 'this is the value that will be removed';
-        String? entryThatWasRemoved;
-        final widget = EditableList(
-          entries: entries([valueToRemove]),
-          textFieldLabel: label,
-          onEntryRemoved: (e) {
-            entryThatWasRemoved = e;
-          },
-          gaRefreshSelection: '',
-          gaScreen: '',
-        );
-        await tester.pumpWidget(
-          wrapSimple(widget),
-        );
-        final removeButton = find.byType(EditableListRemoveDirectoryButton);
+    testWidgetsWithWindowSize('triggers remove', windowSize, (
+      WidgetTester tester,
+    ) async {
+      const valueToRemove = 'this is the value that will be removed';
+      String? entryThatWasRemoved;
+      final widget = EditableList(
+        entries: entries([valueToRemove]),
+        textFieldLabel: label,
+        onEntryRemoved: (e) {
+          entryThatWasRemoved = e;
+        },
+        gaRefreshSelection: '',
+        gaScreen: '',
+      );
+      await tester.pumpWidget(wrapSimple(widget));
+      final removeButton = find.byType(EditableListRemoveDirectoryButton);
 
-        await tester.tap(removeButton);
-        await tester.pump();
+      await tester.tap(removeButton);
+      await tester.pump();
 
-        expect(entryThatWasRemoved, equals(valueToRemove));
-      },
-    );
+      expect(entryThatWasRemoved, equals(valueToRemove));
+    });
 
-    testWidgetsWithWindowSize(
-      'copies an entry',
-      windowSize,
-      (WidgetTester tester) async {
-        String? clipboardContents;
-        setupClipboardCopyListener(
-          clipboardContentsCallback: (contents) {
-            clipboardContents = contents ?? '';
-          },
-        );
-        const valueToCopy = 'this is the value that will be copied';
-        final widget = EditableList(
-          entries: entries([valueToCopy]),
-          textFieldLabel: label,
-          gaRefreshSelection: '',
-          gaScreen: '',
-        );
-        await tester.pumpWidget(
-          wrapSimple(widget),
-        );
-        final copyButton = find.byType(EditableListCopyDirectoryButton);
+    testWidgetsWithWindowSize('copies an entry', windowSize, (
+      WidgetTester tester,
+    ) async {
+      String? clipboardContents;
+      setupClipboardCopyListener(
+        clipboardContentsCallback: (contents) {
+          clipboardContents = contents ?? '';
+        },
+      );
+      const valueToCopy = 'this is the value that will be copied';
+      final widget = EditableList(
+        entries: entries([valueToCopy]),
+        textFieldLabel: label,
+        gaRefreshSelection: '',
+        gaScreen: '',
+      );
+      await tester.pumpWidget(wrapSimple(widget));
+      final copyButton = find.byType(EditableListCopyDirectoryButton);
 
-        await tester.tap(copyButton);
-        await tester.pump();
+      await tester.tap(copyButton);
+      await tester.pump();
 
-        expect(clipboardContents, equals(valueToCopy));
-      },
-    );
+      expect(clipboardContents, equals(valueToCopy));
+    });
 
     group('defaults', () {
       testWidgetsWithWindowSize(
@@ -174,9 +154,7 @@ void main() {
             gaRefreshSelection: '',
             gaScreen: '',
           );
-          await tester.pumpWidget(
-            wrapSimple(widget),
-          );
+          await tester.pumpWidget(wrapSimple(widget));
 
           final actionBar = find.byType(EditableListActionBar);
           final textField = find.descendant(
@@ -207,9 +185,7 @@ void main() {
             gaRefreshSelection: '',
             gaScreen: '',
           );
-          await tester.pumpWidget(
-            wrapSimple(widget),
-          );
+          await tester.pumpWidget(wrapSimple(widget));
           final removeButton = find.byType(EditableListRemoveDirectoryButton);
 
           await tester.tap(removeButton);

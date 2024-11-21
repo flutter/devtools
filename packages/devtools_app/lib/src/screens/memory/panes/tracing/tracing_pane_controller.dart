@@ -15,11 +15,7 @@ import '../../../../shared/globals.dart';
 import 'tracing_data.dart';
 
 @visibleForTesting
-enum Json {
-  stateForIsolate,
-  selection,
-  rootPackage;
-}
+enum Json { stateForIsolate, selection, rootPackage }
 
 class TracePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
@@ -29,10 +25,9 @@ class TracePaneController extends DisposableController
     required this.rootPackage,
   }) {
     this.stateForIsolate = stateForIsolate ?? {};
-    final isolate = this
-        .stateForIsolate
-        .values
-        .firstWhereOrNull((i) => i.isolate.id == selectedIsolateId);
+    final isolate = this.stateForIsolate.values.firstWhereOrNull(
+      (i) => i.isolate.id == selectedIsolateId,
+    );
     if (selectedIsolateId != null && isolate == null) {
       throw ArgumentError(
         '$selectedIsolateId must be a key in stateForIsolate',

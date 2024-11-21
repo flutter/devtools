@@ -16,8 +16,9 @@ void main() {
     late FakeServiceConnectionManager fakeServiceConnection;
 
     setUp(() async {
-      fakeServiceConnection =
-          FakeServiceConnectionManager(availableLibraries: []);
+      fakeServiceConnection = FakeServiceConnectionManager(
+        availableLibraries: [],
+      );
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
@@ -28,9 +29,9 @@ void main() {
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(OfflineDataController, OfflineDataController());
       final scriptManager = MockScriptManager();
-      when(scriptManager.sortedScripts).thenReturn(
-        const FixedValueListenable<List<ScriptRef>>([]),
-      );
+      when(
+        scriptManager.sortedScripts,
+      ).thenReturn(const FixedValueListenable<List<ScriptRef>>([]));
       setGlobal(ScriptManager, scriptManager);
 
       await whenValueNonNull(
@@ -45,8 +46,9 @@ void main() {
       SemanticVersion? flutterVersion,
     }) {
       if (web) {
-        fakeServiceConnection.serviceManager.availableLibraries
-            .add('dart:js_interop');
+        fakeServiceConnection.serviceManager.availableLibraries.add(
+          'dart:js_interop',
+        );
       }
       mockConnectedApp(
         fakeServiceConnection.serviceManager.connectedApp!,
@@ -55,8 +57,9 @@ void main() {
         isWebApp: web,
       );
       if (flutter) {
-        fakeServiceConnection.serviceManager.availableLibraries
-            .add('package:flutter/src/widgets/binding.dart');
+        fakeServiceConnection.serviceManager.availableLibraries.add(
+          'package:flutter/src/widgets/binding.dart',
+        );
       }
       flutterVersion ??= SemanticVersion(major: 2, minor: 3, patch: 1);
       mockFlutterVersion(
@@ -109,115 +112,111 @@ void main() {
       );
     });
 
-    testWidgets(
-      'are correct for Flutter (non-web) debug app',
-      (WidgetTester tester) async {
-        setupMockValues(flutter: true);
+    testWidgets('are correct for Flutter (non-web) debug app', (
+      WidgetTester tester,
+    ) async {
+      setupMockValues(flutter: true);
 
-        expect(
-          visibleScreenTypes,
-          equals([
-            HomeScreen,
-            InspectorScreen,
-            // LegacyPerformanceScreen,
-            PerformanceScreen,
-            ProfilerScreen,
-            MemoryScreen,
-            DebuggerScreen,
-            NetworkScreen,
-            LoggingScreen,
-            AppSizeScreen,
-            DeepLinksScreen,
-            // VMDeveloperToolsScreen,
-          ]),
-        );
-      },
-    );
+      expect(
+        visibleScreenTypes,
+        equals([
+          HomeScreen,
+          InspectorScreen,
+          // LegacyPerformanceScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          DebuggerScreen,
+          NetworkScreen,
+          LoggingScreen,
+          AppSizeScreen,
+          DeepLinksScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
+    });
 
-    testWidgets(
-      'are correct for Flutter (non-web) profile app',
-      (WidgetTester tester) async {
-        setupMockValues(flutter: true, debugMode: false);
+    testWidgets('are correct for Flutter (non-web) profile app', (
+      WidgetTester tester,
+    ) async {
+      setupMockValues(flutter: true, debugMode: false);
 
-        expect(
-          visibleScreenTypes,
-          equals([
-            HomeScreen,
-            // InspectorScreen,
-            // LegacyPerformanceScreen,
-            PerformanceScreen,
-            ProfilerScreen,
-            MemoryScreen,
-            // DebuggerScreen,
-            NetworkScreen,
-            LoggingScreen,
-            AppSizeScreen,
-            DeepLinksScreen,
-            // VMDeveloperToolsScreen,
-          ]),
-        );
-      },
-    );
+      expect(
+        visibleScreenTypes,
+        equals([
+          HomeScreen,
+          // InspectorScreen,
+          // LegacyPerformanceScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          // DebuggerScreen,
+          NetworkScreen,
+          LoggingScreen,
+          AppSizeScreen,
+          DeepLinksScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
+    });
 
-    testWidgets(
-      'are correct for Flutter web debug app',
-      (WidgetTester tester) async {
-        setupMockValues(flutter: true, web: true);
+    testWidgets('are correct for Flutter web debug app', (
+      WidgetTester tester,
+    ) async {
+      setupMockValues(flutter: true, web: true);
 
-        expect(
-          visibleScreenTypes,
-          equals([
-            HomeScreen,
-            InspectorScreen,
-            // LegacyPerformanceScreen,
-            PerformanceScreen,
-            // ProfilerScreen,
-            // MemoryScreen,
-            DebuggerScreen,
-            // NetworkScreen,
-            LoggingScreen,
-            // AppSizeScreen,
-            // DeepLinksScreen,
-            // VMDeveloperToolsScreen,
-          ]),
-        );
-      },
-    );
+      expect(
+        visibleScreenTypes,
+        equals([
+          HomeScreen,
+          InspectorScreen,
+          // LegacyPerformanceScreen,
+          PerformanceScreen,
+          // ProfilerScreen,
+          // MemoryScreen,
+          DebuggerScreen,
+          // NetworkScreen,
+          LoggingScreen,
+          // AppSizeScreen,
+          // DeepLinksScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
+    });
 
-    testWidgets(
-      'are correct for Flutter app on old Flutter version',
-      (WidgetTester tester) async {
-        setupMockValues(
-          flutter: true,
-          flutterVersion: SemanticVersion(
-            major: 2,
-            minor: 3,
-            // Specifying patch makes the version number more readable.
-            // ignore: avoid_redundant_argument_values
-            patch: 0,
-            preReleaseMajor: 15,
-            preReleaseMinor: 0,
-          ),
-        );
+    testWidgets('are correct for Flutter app on old Flutter version', (
+      WidgetTester tester,
+    ) async {
+      setupMockValues(
+        flutter: true,
+        flutterVersion: SemanticVersion(
+          major: 2,
+          minor: 3,
+          // Specifying patch makes the version number more readable.
+          // ignore: avoid_redundant_argument_values
+          patch: 0,
+          preReleaseMajor: 15,
+          preReleaseMinor: 0,
+        ),
+      );
 
-        expect(
-          visibleScreenTypes,
-          equals([
-            HomeScreen,
-            InspectorScreen,
-            PerformanceScreen,
-            ProfilerScreen,
-            MemoryScreen,
-            DebuggerScreen,
-            NetworkScreen,
-            LoggingScreen,
-            AppSizeScreen,
-            DeepLinksScreen,
-            // VMDeveloperToolsScreen,
-          ]),
-        );
-      },
-    );
+      expect(
+        visibleScreenTypes,
+        equals([
+          HomeScreen,
+          InspectorScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          DebuggerScreen,
+          NetworkScreen,
+          LoggingScreen,
+          AppSizeScreen,
+          DeepLinksScreen,
+          // VMDeveloperToolsScreen,
+        ]),
+      );
+    });
 
     testWidgets('are correct when offline', (WidgetTester tester) async {
       offlineDataController.startShowingOfflineData(
@@ -244,36 +243,36 @@ void main() {
       offlineDataController.stopShowingOfflineData();
     });
 
-    testWidgets(
-      'are correct for Dart CLI app with VM developer mode enabled',
-      (WidgetTester tester) async {
-        preferences.toggleVmDeveloperMode(true);
-        setupMockValues();
-        expect(
-          visibleScreenTypes,
-          equals([
-            HomeScreen,
-            // InspectorScreen,
-            // LegacyPerformanceScreen,
-            PerformanceScreen,
-            ProfilerScreen,
-            MemoryScreen,
-            DebuggerScreen,
-            NetworkScreen,
-            LoggingScreen,
-            AppSizeScreen,
-            DeepLinksScreen,
-            VMDeveloperToolsScreen,
-          ]),
-        );
-        preferences.toggleVmDeveloperMode(false);
-      },
-    );
+    testWidgets('are correct for Dart CLI app with VM developer mode enabled', (
+      WidgetTester tester,
+    ) async {
+      preferences.toggleVmDeveloperMode(true);
+      setupMockValues();
+      expect(
+        visibleScreenTypes,
+        equals([
+          HomeScreen,
+          // InspectorScreen,
+          // LegacyPerformanceScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          DebuggerScreen,
+          NetworkScreen,
+          LoggingScreen,
+          AppSizeScreen,
+          DeepLinksScreen,
+          VMDeveloperToolsScreen,
+        ]),
+      );
+      preferences.toggleVmDeveloperMode(false);
+    });
   });
 }
 
-List<Type> get visibleScreenTypes => defaultScreens()
-    .map((s) => s.screen)
-    .where((s) => shouldShowScreen(s).show)
-    .map((s) => s.runtimeType)
-    .toList();
+List<Type> get visibleScreenTypes =>
+    defaultScreens()
+        .map((s) => s.screen)
+        .where((s) => shouldShowScreen(s).show)
+        .map((s) => s.runtimeType)
+        .toList();

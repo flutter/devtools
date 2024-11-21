@@ -17,10 +17,7 @@ class ExportControllerWeb extends ExportController {
   ExportControllerWeb() : super.impl();
 
   @override
-  void saveFile<T>({
-    required T content,
-    required String fileName,
-  }) {
+  void saveFile<T>({required T content, required String fileName}) {
     final element = document.createElement('a') as HTMLAnchorElement;
 
     final Blob blob;

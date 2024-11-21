@@ -46,10 +46,7 @@ void main() {
       expect(controller.useRegExp.value, isFalse);
 
       controller.setActiveFilter();
-      expect(
-        controller.filteredData.value.toString(),
-        _sampleData.toString(),
-      );
+      expect(controller.filteredData.value.toString(), _sampleData.toString());
 
       // Only query filter.
       controller.setActiveFilter(query: 'Ba');
@@ -81,9 +78,7 @@ void main() {
 
       // Only toggle filter.
       controller.settingFilters[2].setting.value = true;
-      controller.setActiveFilter(
-        settingFilters: controller.settingFilters,
-      );
+      controller.setActiveFilter(settingFilters: controller.settingFilters);
       expect(
         controller.filteredData.value.toString(),
         equals(
@@ -106,10 +101,7 @@ void main() {
       controller.settingFilters[1].setting.value = false;
       controller.settingFilters[2].setting.value = false;
       controller.setActiveFilter(query: 'abcdefg');
-      expect(
-        controller.filteredData.value.toString(),
-        equals('[]'),
-      );
+      expect(controller.filteredData.value.toString(), equals('[]'));
     });
 
     test('filterData applies regexp query filters when enabled', () {
@@ -118,10 +110,7 @@ void main() {
       controller.useRegExp.value = true;
 
       controller.setActiveFilter();
-      expect(
-        controller.filteredData.value.toString(),
-        _sampleData.toString(),
-      );
+      expect(controller.filteredData.value.toString(), _sampleData.toString());
 
       // Regexp filter argument match.
       controller.setActiveFilter(query: 'cat:foo.*');
@@ -134,17 +123,13 @@ void main() {
       controller.setActiveFilter(query: '-cat:foo.*');
       expect(
         controller.filteredData.value.toString(),
-        equals(
-          '[4-Shepherd-dog-1, 5-Basset Hound-dog-3, 6-Husky-dog-5]',
-        ),
+        equals('[4-Shepherd-dog-1, 5-Basset Hound-dog-3, 6-Husky-dog-5]'),
       );
       // Regexp substring match.
       controller.setActiveFilter(query: '.*bar');
       expect(
         controller.filteredData.value.toString(),
-        equals(
-          '[1-FooBar-foobar-3, 2-Bar-foobar-4, 9-Meal bar-food-3]',
-        ),
+        equals('[1-FooBar-foobar-3, 2-Bar-foobar-4, 9-Meal bar-food-3]'),
       );
 
       // Disable regexp filters and verify filter behavior changes.
@@ -154,10 +139,7 @@ void main() {
       controller.setActiveFilter(query: 'cat:foo.*');
       expect(controller.filteredData.value, isEmpty);
       controller.setActiveFilter(query: '-cat:foo.*');
-      expect(
-        controller.filteredData.value.toString(),
-        _sampleData.toString(),
-      );
+      expect(controller.filteredData.value.toString(), _sampleData.toString());
 
       // Regexp substring match.
       controller.setActiveFilter(query: '.*bar');
@@ -277,11 +259,7 @@ void main() {
       controller.useRegExp.value = false;
 
       controller.setFilterFromTag(
-        FilterTag(
-          query: '',
-          settingFilterValues: [],
-          useRegExp: false,
-        ),
+        FilterTag(query: '', settingFilterValues: [], useRegExp: false),
       );
       var activeFilter = controller.activeFilter.value;
       expect(activeFilter.queryFilter.query, '');
@@ -350,11 +328,7 @@ void main() {
       );
       expect(tag.tag, '|[{"some-id":false},{"other-id":3}]');
 
-      tag = FilterTag(
-        query: '',
-        settingFilterValues: [],
-        useRegExp: false,
-      );
+      tag = FilterTag(query: '', settingFilterValues: [], useRegExp: false);
       expect(tag.tag, '|[]');
     });
 
@@ -420,40 +394,41 @@ class _TestController extends DisposableController
 
   @override
   SettingFilters<_TestDataClass> createSettingFilters() => [
-        SettingFilter<_TestDataClass, int>(
-          id: 'min-rating-level',
-          name: 'Hide items below the minimum rating level',
-          includeCallback: (_TestDataClass element, int currentFilterValue) =>
+    SettingFilter<_TestDataClass, int>(
+      id: 'min-rating-level',
+      name: 'Hide items below the minimum rating level',
+      includeCallback:
+          (_TestDataClass element, int currentFilterValue) =>
               element.rating >= currentFilterValue,
-          enabledCallback: (int filterValue) => filterValue > 1,
-          possibleValues: [1, 2, 3, 4, 5],
-          defaultValue: 2,
-        ),
-        ToggleFilter<_TestDataClass>(
-          id: 'multiple-2',
-          name: 'Hide multiples of 2',
-          includeCallback: (data) => data.id % 2 != 0,
-          defaultValue: true,
-        ),
-        ToggleFilter<_TestDataClass>(
-          id: 'multiple-3',
-          name: 'Hide multiples of 3',
-          includeCallback: (data) => data.id % 3 != 0,
-          defaultValue: false,
-        ),
-      ];
+      enabledCallback: (int filterValue) => filterValue > 1,
+      possibleValues: [1, 2, 3, 4, 5],
+      defaultValue: 2,
+    ),
+    ToggleFilter<_TestDataClass>(
+      id: 'multiple-2',
+      name: 'Hide multiples of 2',
+      includeCallback: (data) => data.id % 2 != 0,
+      defaultValue: true,
+    ),
+    ToggleFilter<_TestDataClass>(
+      id: 'multiple-3',
+      name: 'Hide multiples of 3',
+      includeCallback: (data) => data.id % 3 != 0,
+      defaultValue: false,
+    ),
+  ];
 
   static const categoryFilterId = 'category-filter';
 
   @override
   Map<String, QueryFilterArgument<_TestDataClass>> createQueryFilterArgs() => {
-        categoryFilterId: QueryFilterArgument<_TestDataClass>(
-          keys: ['cat', 'c'],
-          exampleUsages: ['cat:foo', '-c:bar'],
-          dataValueProvider: (data) => data.category,
-          substringMatch: false,
-        ),
-      };
+    categoryFilterId: QueryFilterArgument<_TestDataClass>(
+      keys: ['cat', 'c'],
+      exampleUsages: ['cat:foo', '-c:bar'],
+      dataValueProvider: (data) => data.category,
+      substringMatch: false,
+    ),
+  };
 
   @override
   void filterData(Filter<_TestDataClass> filter) {
@@ -474,7 +449,8 @@ class _TestController extends DisposableController
       final queryFilter = filter.queryFilter;
       if (!queryFilter.isEmpty) {
         final filteredOutByQueryFilterArgument = queryFilter
-            .filterArguments.values
+            .filterArguments
+            .values
             .any((argument) => !argument.matchesValue(element));
         if (filteredOutByQueryFilterArgument) return false;
 

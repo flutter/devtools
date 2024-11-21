@@ -65,20 +65,19 @@ void main() {
       mockVmObject(mockClassObject);
     });
 
-    testWidgetsWithWindowSize(
-      'viewport shows class display',
-      windowSize,
-      (WidgetTester tester) async {
-        testObjectInspectorViewController.fakeObjectHistory
-            .setCurrentObject(mockClassObject);
-        await tester.pumpWidget(
-          wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-        );
-        expect(ObjectViewport.viewportTitle(mockClassObject), 'Class FooClass');
-        expect(find.text('Class FooClass'), findsOneWidget);
-        expect(find.byType(VmClassDisplay), findsOneWidget);
-      },
-    );
+    testWidgetsWithWindowSize('viewport shows class display', windowSize, (
+      WidgetTester tester,
+    ) async {
+      testObjectInspectorViewController.fakeObjectHistory.setCurrentObject(
+        mockClassObject,
+      );
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(ObjectViewport.viewportTitle(mockClassObject), 'Class FooClass');
+      expect(find.text('Class FooClass'), findsOneWidget);
+      expect(find.byType(VmClassDisplay), findsOneWidget);
+    });
   });
 
   group('test for field object:', () {
@@ -90,22 +89,21 @@ void main() {
       mockVmObject(mockFieldObject);
     });
 
-    testWidgetsWithWindowSize(
-      'viewport shows field display',
-      windowSize,
-      (WidgetTester tester) async {
-        testObjectInspectorViewController.fakeObjectHistory
-            .setCurrentObject(mockFieldObject);
+    testWidgetsWithWindowSize('viewport shows field display', windowSize, (
+      WidgetTester tester,
+    ) async {
+      testObjectInspectorViewController.fakeObjectHistory.setCurrentObject(
+        mockFieldObject,
+      );
 
-        await tester.pumpWidget(
-          wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-        );
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
 
-        expect(ObjectViewport.viewportTitle(mockFieldObject), 'Field fooField');
-        expect(find.text('Field fooField'), findsOneWidget);
-        expect(find.byType(VmFieldDisplay), findsOneWidget);
-      },
-    );
+      expect(ObjectViewport.viewportTitle(mockFieldObject), 'Field fooField');
+      expect(find.text('Field fooField'), findsOneWidget);
+      expect(find.byType(VmFieldDisplay), findsOneWidget);
+    });
   });
 
   group('test for function object:', () {
@@ -122,25 +120,24 @@ void main() {
       mockVmObject(mockFuncObject);
       when(mockFuncObject.obj).thenReturn(testFunctionCopy);
     });
-    testWidgetsWithWindowSize(
-      'viewport shows function display',
-      windowSize,
-      (WidgetTester tester) async {
-        testObjectInspectorViewController.fakeObjectHistory
-            .setCurrentObject(mockFuncObject);
+    testWidgetsWithWindowSize('viewport shows function display', windowSize, (
+      WidgetTester tester,
+    ) async {
+      testObjectInspectorViewController.fakeObjectHistory.setCurrentObject(
+        mockFuncObject,
+      );
 
-        await tester.pumpWidget(
-          wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-        );
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
 
-        expect(
-          ObjectViewport.viewportTitle(mockFuncObject),
-          'Function fooFunction',
-        );
-        expect(find.text('Function fooFunction'), findsOneWidget);
-        expect(find.byType(VmFuncDisplay), findsOneWidget);
-      },
-    );
+      expect(
+        ObjectViewport.viewportTitle(mockFuncObject),
+        'Function fooFunction',
+      );
+      expect(find.text('Function fooFunction'), findsOneWidget);
+      expect(find.byType(VmFuncDisplay), findsOneWidget);
+    });
   });
 
   group('test for script object:', () {
@@ -152,23 +149,22 @@ void main() {
       mockVmObject(mockScriptObject);
     });
 
-    testWidgetsWithWindowSize(
-      'viewport shows script display',
-      windowSize,
-      (WidgetTester tester) async {
-        testObjectInspectorViewController.fakeObjectHistory
-            .setCurrentObject(mockScriptObject);
-        await tester.pumpWidget(
-          wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-        );
-        expect(
-          ObjectViewport.viewportTitle(mockScriptObject),
-          'Script fooScript.dart',
-        );
-        expect(find.text('Script fooScript.dart'), findsOneWidget);
-        expect(find.byType(VmScriptDisplay), findsOneWidget);
-      },
-    );
+    testWidgetsWithWindowSize('viewport shows script display', windowSize, (
+      WidgetTester tester,
+    ) async {
+      testObjectInspectorViewController.fakeObjectHistory.setCurrentObject(
+        mockScriptObject,
+      );
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(
+        ObjectViewport.viewportTitle(mockScriptObject),
+        'Script fooScript.dart',
+      );
+      expect(find.text('Script fooScript.dart'), findsOneWidget);
+      expect(find.byType(VmScriptDisplay), findsOneWidget);
+    });
   });
 
   group('test for library object:', () {
@@ -181,8 +177,9 @@ void main() {
     });
 
     testWidgets('viewport shows library display', (WidgetTester tester) async {
-      testObjectInspectorViewController.fakeObjectHistory
-          .setCurrentObject(mockLibraryObject);
+      testObjectInspectorViewController.fakeObjectHistory.setCurrentObject(
+        mockLibraryObject,
+      );
       await tester.pumpWidget(
         wrap(ObjectViewport(controller: testObjectInspectorViewController)),
       );
@@ -193,24 +190,26 @@ void main() {
   });
 
   group('test for instance object:', () {
-    testWidgets(
-      'builds display for Instance Object',
-      (WidgetTester tester) async {
-        final testInstanceObject =
-            TestInstanceObject(ref: testInstance, testInstance: testInstance);
-        testObjectInspectorViewController.fakeObjectHistory
-            .setCurrentObject(testInstanceObject);
-        await tester.pumpWidget(
-          wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-        );
-        expect(
-          ObjectViewport.viewportTitle(testInstanceObject),
-          'Instance of fooSuperClass',
-        );
-        expect(find.text('Instance of fooSuperClass'), findsOneWidget);
-        expect(find.byType(VmInstanceDisplay), findsOneWidget);
-      },
-    );
+    testWidgets('builds display for Instance Object', (
+      WidgetTester tester,
+    ) async {
+      final testInstanceObject = TestInstanceObject(
+        ref: testInstance,
+        testInstance: testInstance,
+      );
+      testObjectInspectorViewController.fakeObjectHistory.setCurrentObject(
+        testInstanceObject,
+      );
+      await tester.pumpWidget(
+        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+      );
+      expect(
+        ObjectViewport.viewportTitle(testInstanceObject),
+        'Instance of fooSuperClass',
+      );
+      expect(find.text('Instance of fooSuperClass'), findsOneWidget);
+      expect(find.byType(VmInstanceDisplay), findsOneWidget);
+    });
   });
 
   group('test ObjectHistory', () {

@@ -71,37 +71,37 @@ void main() {
   }
 
   group('InspectorTreeController', () {
-    testWidgets(
-      'Row with negative index regression test',
-      (WidgetTester tester) async {
-        final treeController = InspectorTreeController()
-          ..config = InspectorTreeConfig(
-            onNodeAdded: (_, _) {},
-            onClientActiveChange: (_) {},
-          );
-        await pumpInspectorTree(tester, treeController: treeController);
+    testWidgets('Row with negative index regression test', (
+      WidgetTester tester,
+    ) async {
+      final treeController =
+          InspectorTreeController()
+            ..config = InspectorTreeConfig(
+              onNodeAdded: (_, _) {},
+              onClientActiveChange: (_) {},
+            );
+      await pumpInspectorTree(tester, treeController: treeController);
 
-        expect(treeController.rowForOffset(const Offset(0, -100.0)), isNull);
-        expect(treeController.rowOffset(-1), equals(0));
+      expect(treeController.rowForOffset(const Offset(0, -100.0)), isNull);
+      expect(treeController.rowOffset(-1), equals(0));
 
-        expect(treeController.rowForOffset(const Offset(0, 0.0)), isNull);
-        expect(treeController.rowOffset(0), equals(0));
+      expect(treeController.rowForOffset(const Offset(0, 0.0)), isNull);
+      expect(treeController.rowOffset(0), equals(0));
 
-        treeController.root = InspectorTreeNode()
-          ..appendChild(InspectorTreeNode());
+      treeController.root =
+          InspectorTreeNode()..appendChild(InspectorTreeNode());
 
-        await pumpInspectorTree(tester, treeController: treeController);
+      await pumpInspectorTree(tester, treeController: treeController);
 
-        expect(treeController.rowForOffset(const Offset(0, -20))!.index, 0);
-        expect(treeController.rowOffset(-1), equals(0));
-        expect(treeController.rowForOffset(const Offset(0, 0.0)), isNotNull);
-        expect(treeController.rowOffset(0), equals(0));
+      expect(treeController.rowForOffset(const Offset(0, -20))!.index, 0);
+      expect(treeController.rowOffset(-1), equals(0));
+      expect(treeController.rowForOffset(const Offset(0, 0.0)), isNotNull);
+      expect(treeController.rowOffset(0), equals(0));
 
-        // This operation would previously throw an exception in debug builds
-        // and infinite loop in release builds.
-        treeController.scrollToRect(const Rect.fromLTWH(0, -20, 100, 100));
-      },
-    );
+      // This operation would previously throw an exception in debug builds
+      // and infinite loop in release builds.
+      treeController.scrollToRect(const Rect.fromLTWH(0, -20, 100, 100));
+    });
   });
 
   group('Inspector tree content preview', () {
@@ -120,12 +120,7 @@ void main() {
     testWidgets('Shows preview from Text.rich', (WidgetTester tester) async {
       final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
         widget: const Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(text: 'Rich '),
-              TextSpan(text: 'text'),
-            ],
-          ),
+          TextSpan(children: [TextSpan(text: 'Rich '), TextSpan(text: 'text')]),
         ),
         tester: tester,
       );
@@ -136,22 +131,18 @@ void main() {
       expect(find.richText('Text: "Rich text"'), findsOneWidget);
     });
 
-    testWidgets(
-      'Strips new lines from text preview',
-      (WidgetTester tester) async {
-        final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
-          widget: const Text('Multiline\ntext\n\ncontent'),
-          tester: tester,
-        );
+    testWidgets('Strips new lines from text preview', (
+      WidgetTester tester,
+    ) async {
+      final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
+        widget: const Text('Multiline\ntext\n\ncontent'),
+        tester: tester,
+      );
 
-        final treeController = inspectorTreeControllerFromNode(diagnosticNode);
-        await pumpInspectorTree(tester, treeController: treeController);
+      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
+      await pumpInspectorTree(tester, treeController: treeController);
 
-        expect(
-          find.richText('Text: "Multiline text  content"'),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(find.richText('Text: "Multiline text  content"'), findsOneWidget);
+    });
   });
 }

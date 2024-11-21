@@ -13,19 +13,20 @@ typedef References = List<int> Function(int index);
 /// Shallow size of the given object.
 typedef ShallowSize = int Function(int index);
 
-typedef ShortestRetainersResult = ({
-  /// Retainer for each object in the graph.
-  ///
-  /// When a value at index i is 0, it means the object at index i
-  /// has no retainers.
-  /// Null is not used for no-retainer to save memory footprint.
-  List<int> retainers,
+typedef ShortestRetainersResult =
+    ({
+      /// Retainer for each object in the graph.
+      ///
+      /// When a value at index i is 0, it means the object at index i
+      /// has no retainers.
+      /// Null is not used for no-retainer to save memory footprint.
+      List<int> retainers,
 
-  /// Retained size for each object in the graph.
-  ///
-  /// If an object is unreachable, its retained size is 0.
-  List<int>? retainedSizes,
-});
+      /// Retained size for each object in the graph.
+      ///
+      /// If an object is unreachable, its retained size is 0.
+      List<int>? retainedSizes,
+    });
 
 /// Index of the sentinel object.
 const _sentinelIndex = 0;

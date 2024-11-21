@@ -46,8 +46,10 @@ class InspectorScreenSwitcher extends StatefulWidget {
 class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<InspectorScreenController,
-            InspectorScreenSwitcher> {
+        ProvidedControllerMixin<
+          InspectorScreenController,
+          InspectorScreenSwitcher
+        > {
   bool get shouldShowInspectorV2 =>
       FeatureFlags.inspectorV2 &&
       preferences.inspector.inspectorV2Enabled.value;
@@ -58,10 +60,12 @@ class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
     if (!initController()) return;
 
     addAutoDisposeListener(preferences.inspector.inspectorV2Enabled, () async {
-      controller.legacyInspectorController
-          .setVisibleToUser(!shouldShowInspectorV2);
-      await controller.v2InspectorController
-          .setVisibleToUser(shouldShowInspectorV2);
+      controller.legacyInspectorController.setVisibleToUser(
+        !shouldShowInspectorV2,
+      );
+      await controller.v2InspectorController.setVisibleToUser(
+        shouldShowInspectorV2,
+      );
     });
   }
 

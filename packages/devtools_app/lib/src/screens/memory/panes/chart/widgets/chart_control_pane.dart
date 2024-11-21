@@ -87,11 +87,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
           ),
         ],
         const SizedBox(height: denseSpacing),
-        Row(
-          children: [
-            _LegendButton(chartController: widget.chart),
-          ],
-        ),
+        Row(children: [_LegendButton(chartController: widget.chart)]),
         const SizedBox(height: denseSpacing),
         IntervalDropdown(chartController: widget.chart),
         const SizedBox(height: denseSpacing),
@@ -110,17 +106,19 @@ class _LegendButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: chartController.data.isLegendVisible,
-      builder: (_, legendVisible, _) => GaDevToolsButton(
-        onPressed: chartController.data.toggleLegendVisibility,
-        gaScreen: gac.memory,
-        gaSelection: legendVisible
-            ? gac.MemoryEvents.hideChartLegend.name
-            : gac.MemoryEvents.showChartLegend.name,
-        icon: legendVisible ? Icons.close : Icons.storage,
-        label: 'Legend',
-        tooltip: 'Toggle visibility of the chart legend',
-        minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
-      ),
+      builder:
+          (_, legendVisible, _) => GaDevToolsButton(
+            onPressed: chartController.data.toggleLegendVisibility,
+            gaScreen: gac.memory,
+            gaSelection:
+                legendVisible
+                    ? gac.MemoryEvents.hideChartLegend.name
+                    : gac.MemoryEvents.showChartLegend.name,
+            icon: legendVisible ? Icons.close : Icons.storage,
+            label: 'Legend',
+            tooltip: 'Toggle visibility of the chart legend',
+            minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+          ),
     );
   }
 }
@@ -140,8 +138,9 @@ class _ChartHelpLink extends StatelessWidget {
         MoreInfoLink(
           url: DocLinks.chart.value,
           gaScreenName: '',
-          gaSelectedItemDescription:
-              gac.topicDocumentationLink(_documentationTopic),
+          gaSelectedItemDescription: gac.topicDocumentationLink(
+            _documentationTopic,
+          ),
         ),
       ],
       child: const Column(

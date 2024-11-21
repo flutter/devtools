@@ -43,9 +43,7 @@ class MemorySettingsDialog extends StatelessWidget {
           ],
         ),
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }

@@ -9,8 +9,9 @@ void main() {
   group('url utils', () {
     group('extractCurrentPageFromUrl', () {
       test('parses the current page from the path', () {
-        final page =
-            extractCurrentPageFromUrl('http://localhost:9000/inspector?uri=x');
+        final page = extractCurrentPageFromUrl(
+          'http://localhost:9000/inspector?uri=x',
+        );
         expect(page, 'inspector');
       });
 
@@ -62,10 +63,7 @@ void main() {
           });
 
           test('maps legacy URIs with no page names', () {
-            expect(
-              mapLegacyUrl('$prefix/#/?foo=bar'),
-              '$prefix/?foo=bar',
-            );
+            expect(mapLegacyUrl('$prefix/#/?foo=bar'), '$prefix/?foo=bar');
           });
         });
       }

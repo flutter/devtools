@@ -42,15 +42,18 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
             style: theme.subtleTextStyle,
           ),
           if (serviceConnection
-              .serviceManager.connectedApp!.isProfileBuildNow!) ...[
+              .serviceManager
+              .connectedApp!
+              .isProfileBuildNow!) ...[
             const SizedBox(height: denseSpacing),
             RichText(
               text: TextSpan(
                 text:
                     "These debugging options aren't available in profile mode. "
                     'To use them, run your app in debug mode.',
-                style: theme.subtleTextStyle
-                    .copyWith(color: theme.colorScheme.error),
+                style: theme.subtleTextStyle.copyWith(
+                  color: theme.colorScheme.error,
+                ),
               ),
             ),
           ],

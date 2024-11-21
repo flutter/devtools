@@ -125,10 +125,7 @@ LinkedHashMap<String, InspectableWidgetError> _generateErrors(int count) =>
         count,
         (index) => MapEntry(
           'error-$index',
-          InspectableWidgetError(
-            'Error $index',
-            'error-$index',
-          ),
+          InspectableWidgetError('Error $index', 'error-$index'),
         ),
       ),
     );

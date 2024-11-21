@@ -80,9 +80,4 @@ class NetworkEventCustomFieldKeys {
   static const events = '_events';
 }
 
-enum NetworkEventCustomFieldRemappedKeys {
-  isolateId,
-  id,
-  startTime,
-  events,
-}
+enum NetworkEventCustomFieldRemappedKeys { isolateId, id, startTime, events }

@@ -30,10 +30,7 @@ void main() {
       controller = controllerToUse;
     }
 
-    return Provider<AnalyticsController>.value(
-      value: controller,
-      child: child,
-    );
+    return Provider<AnalyticsController>.value(value: controller, child: child);
   }
 
   test('Unit test parseAnalyticsConsentMessage with consent message', () {
@@ -100,9 +97,7 @@ void main() {
             );
             expect(didMarkConsentMessageAsShown, isFalse);
             final prompt = wrapWithAnalytics(
-              const AnalyticsPrompt(
-                child: Text('Child Text'),
-              ),
+              const AnalyticsPrompt(child: Text('Child Text')),
             );
             await tester.pumpWidget(wrap(prompt));
             await tester.pump();
@@ -149,9 +144,7 @@ void main() {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isFalse);
             final prompt = wrapWithAnalytics(
-              const AnalyticsPrompt(
-                child: Text('Child Text'),
-              ),
+              const AnalyticsPrompt(child: Text('Child Text')),
             );
             await tester.pumpWidget(wrap(prompt));
             await tester.pump();
@@ -173,25 +166,21 @@ void main() {
         );
       });
 
-      testWidgetsWithWindowSize(
-        'displays the child',
-        windowSize,
-        (WidgetTester tester) async {
-          final prompt = wrapWithAnalytics(
-            const AnalyticsPrompt(
-              child: Text('Child Text'),
-            ),
-            controllerToUse: AnalyticsController(
-              enabled: true,
-              shouldShowConsentMessage: false,
-              consentMessage: 'fake message',
-            ),
-          );
-          await tester.pumpWidget(wrap(prompt));
-          await tester.pump();
-          expect(find.text('Child Text'), findsOneWidget);
-        },
-      );
+      testWidgetsWithWindowSize('displays the child', windowSize, (
+        WidgetTester tester,
+      ) async {
+        final prompt = wrapWithAnalytics(
+          const AnalyticsPrompt(child: Text('Child Text')),
+          controllerToUse: AnalyticsController(
+            enabled: true,
+            shouldShowConsentMessage: false,
+            consentMessage: 'fake message',
+          ),
+        );
+        await tester.pumpWidget(wrap(prompt));
+        await tester.pump();
+        expect(find.text('Child Text'), findsOneWidget);
+      });
     });
 
     group('without analytics enabled', () {
@@ -214,9 +203,7 @@ void main() {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isTrue);
             final prompt = wrapWithAnalytics(
-              const AnalyticsPrompt(
-                child: Text('Child Text'),
-              ),
+              const AnalyticsPrompt(child: Text('Child Text')),
             );
             await tester.pumpWidget(wrap(prompt));
             await tester.pump();
@@ -244,9 +231,7 @@ void main() {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isTrue);
             final prompt = wrapWithAnalytics(
-              const AnalyticsPrompt(
-                child: Text('Child Text'),
-              ),
+              const AnalyticsPrompt(child: Text('Child Text')),
             );
             await tester.pumpWidget(wrap(prompt));
             await tester.pump();
@@ -276,9 +261,7 @@ void main() {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isTrue);
             final prompt = wrapWithAnalytics(
-              const AnalyticsPrompt(
-                child: Text('Child Text'),
-              ),
+              const AnalyticsPrompt(child: Text('Child Text')),
             );
             await tester.pumpWidget(wrap(prompt));
             await tester.pump();
@@ -308,9 +291,7 @@ void main() {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isTrue);
             final prompt = wrapWithAnalytics(
-              const AnalyticsPrompt(
-                child: Text('Child Text'),
-              ),
+              const AnalyticsPrompt(child: Text('Child Text')),
             );
             await tester.pumpWidget(wrap(prompt));
             await tester.pump();
@@ -353,9 +334,7 @@ void main() {
             expect(controller.analyticsEnabled.value, isFalse);
             expect(didCallEnableAnalytics, isFalse);
             final prompt = wrapWithAnalytics(
-              const AnalyticsPrompt(
-                child: Text('Child Text'),
-              ),
+              const AnalyticsPrompt(child: Text('Child Text')),
             );
             await tester.pumpWidget(wrap(prompt));
             await tester.pump();
@@ -377,25 +356,21 @@ void main() {
         );
       });
 
-      testWidgetsWithWindowSize(
-        'displays the child',
-        windowSize,
-        (WidgetTester tester) async {
-          final prompt = wrapWithAnalytics(
-            const AnalyticsPrompt(
-              child: Text('Child Text'),
-            ),
-            controllerToUse: AnalyticsController(
-              enabled: false,
-              shouldShowConsentMessage: false,
-              consentMessage: 'fake message',
-            ),
-          );
-          await tester.pumpWidget(wrap(prompt));
-          await tester.pump();
-          expect(find.text('Child Text'), findsOneWidget);
-        },
-      );
+      testWidgetsWithWindowSize('displays the child', windowSize, (
+        WidgetTester tester,
+      ) async {
+        final prompt = wrapWithAnalytics(
+          const AnalyticsPrompt(child: Text('Child Text')),
+          controllerToUse: AnalyticsController(
+            enabled: false,
+            shouldShowConsentMessage: false,
+            consentMessage: 'fake message',
+          ),
+        );
+        await tester.pumpWidget(wrap(prompt));
+        await tester.pump();
+        expect(find.text('Child Text'), findsOneWidget);
+      });
     });
   });
 }

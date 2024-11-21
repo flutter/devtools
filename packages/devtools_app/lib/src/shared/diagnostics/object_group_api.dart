@@ -15,8 +15,7 @@ abstract class InspectorObjectGroupApi<T extends DiagnosticableTree>
   Future<bool> setSelectionInspector(
     InspectorInstanceRef selection,
     bool uiAlreadyUpdated,
-  ) =>
-      throw UnimplementedError();
+  ) => throw UnimplementedError();
 
   Future<Map<String, InstanceRef>?> getEnumPropertyValues(
     InspectorInstanceRef ref,

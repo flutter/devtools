@@ -119,25 +119,25 @@ abstract class FrameworkCore {
         final service = await connect<VmServiceWrapper>(
           uri: uri,
           finishedCompleter: finishedCompleter,
-          serviceFactory: ({
-            // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
-            required Stream<dynamic> /*String|List<int>*/ inStream,
-            required void Function(String message) writeMessage,
-            Log? log,
-            DisposeHandler? disposeHandler,
-            Future? streamClosed,
-            String? wsUri,
-            bool trackFutures = false,
-          }) =>
-              VmServiceWrapper.defaultFactory(
-            inStream: inStream,
-            writeMessage: writeMessage,
-            log: log,
-            disposeHandler: disposeHandler,
-            streamClosed: streamClosed,
-            wsUri: wsUri,
-            trackFutures: integrationTestMode,
-          ),
+          serviceFactory:
+              ({
+                // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
+                required Stream<dynamic> /*String|List<int>*/ inStream,
+                required void Function(String message) writeMessage,
+                Log? log,
+                DisposeHandler? disposeHandler,
+                Future? streamClosed,
+                String? wsUri,
+                bool trackFutures = false,
+              }) => VmServiceWrapper.defaultFactory(
+                inStream: inStream,
+                writeMessage: writeMessage,
+                log: log,
+                disposeHandler: disposeHandler,
+                streamClosed: streamClosed,
+                wsUri: wsUri,
+                trackFutures: integrationTestMode,
+              ),
         );
 
         await serviceConnection.serviceManager.vmServiceOpened(
@@ -162,10 +162,7 @@ abstract class FrameworkCore {
   }
 
   static void _defaultErrorReporter(String title, Object error) {
-    notificationService.pushError(
-      '$title, $error',
-      isReportable: false,
-    );
+    notificationService.pushError('$title, $error', isReportable: false);
   }
 }
 
@@ -191,9 +188,9 @@ Future<void> _initDTDConnection() async {
       );
 
       if (dtdManager.connection.value != null) {
-        FrameworkCore._themeManager =
-            EditorThemeManager(dtdManager.connection.value!)
-              ..listenForThemeChanges();
+        FrameworkCore._themeManager = EditorThemeManager(
+          dtdManager.connection.value!,
+        )..listenForThemeChanges();
       }
     } else {
       _log.info('No DTD uri provided from the server during initialization.');

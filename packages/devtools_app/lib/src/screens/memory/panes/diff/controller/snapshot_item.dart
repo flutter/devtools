@@ -23,13 +23,7 @@ class SnapshotDocItem extends SnapshotItem {
 }
 
 @visibleForTesting
-enum Json {
-  defaultName,
-  displayNumber,
-  graph,
-  created,
-  nameOverride;
-}
+enum Json { defaultName, displayNumber, graph, created, nameOverride }
 
 class SnapshotDataItem extends SnapshotItem
     with Serializable
@@ -47,14 +41,17 @@ class SnapshotDataItem extends SnapshotItem
       nameOverride: json[Json.nameOverride.name] as String?,
     );
 
-    final graph = HeapSnapshotGraphEncodeDecode.instance
-        .decodeNullable(json[Json.graph.name]);
+    final graph = HeapSnapshotGraphEncodeDecode.instance.decodeNullable(
+      json[Json.graph.name],
+    );
     if (graph == null) return result;
 
     final loader = HeapGraphLoaderDirect(
       graph: graph,
-      created: DateTimeEncodeDecode.instance
-              .decodeNullable(json[Json.created.name]) ??
+      created:
+          DateTimeEncodeDecode.instance.decodeNullable(
+            json[Json.created.name],
+          ) ??
           DateTime.now(),
     );
 

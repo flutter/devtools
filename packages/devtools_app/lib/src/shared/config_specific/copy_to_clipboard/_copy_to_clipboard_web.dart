@@ -10,10 +10,7 @@ void copyToClipboardVSCode(String data) {
   // listening for this command, then it will attempt to copy the contents
   // to the clipboard in the context of the parent frame.
   window.parent?.postMessage(
-    {
-      'command': 'clipboard-write',
-      'data': data,
-    }.jsify(),
+    {'command': 'clipboard-write', 'data': data}.jsify(),
     '*'.toJS,
   );
 }

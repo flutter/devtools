@@ -26,10 +26,10 @@ class AdaptedProfile with Serializable {
     required this.newSpaceGCStats,
     required this.oldSpaceGCStats,
     required this.totalGCStats,
-  })  : filter = ClassFilter.empty(),
-        _total = total,
-        _items = items,
-        _itemsFiltered = items;
+  }) : filter = ClassFilter.empty(),
+       _total = total,
+       _items = items,
+       _itemsFiltered = items;
 
   factory AdaptedProfile.fromAllocationProfile(
     AllocationProfile profile,
@@ -38,10 +38,11 @@ class AdaptedProfile with Serializable {
   ) {
     final adaptedProfile = AdaptedProfile._(
       total: ProfileRecord.total(profile),
-      items: (profile.members ?? [])
-          .where((e) => (e.instancesCurrent ?? 0) > 0)
-          .map((e) => ProfileRecord.fromClassHeapStats(e))
-          .toList(),
+      items:
+          (profile.members ?? [])
+              .where((e) => (e.instancesCurrent ?? 0) > 0)
+              .map((e) => ProfileRecord.fromClassHeapStats(e))
+              .toList(),
       newSpaceGCStats: profile.newSpaceGCStats,
       oldSpaceGCStats: profile.oldSpaceGCStats,
       totalGCStats: profile.totalGCStats,
@@ -54,9 +55,9 @@ class AdaptedProfile with Serializable {
     AdaptedProfile profile,
     this.filter,
     String? rootPackage,
-  )   : newSpaceGCStats = profile.newSpaceGCStats,
-        oldSpaceGCStats = profile.oldSpaceGCStats,
-        totalGCStats = profile.totalGCStats {
+  ) : newSpaceGCStats = profile.newSpaceGCStats,
+      oldSpaceGCStats = profile.oldSpaceGCStats,
+      totalGCStats = profile.totalGCStats {
     _items = profile._items;
     _total = profile._total;
 
@@ -73,9 +74,10 @@ class AdaptedProfile with Serializable {
   factory AdaptedProfile.fromJson(Map<String, dynamic> json) {
     return AdaptedProfile._(
       total: ProfileRecord.fromJson(json[_ProfileJson.total]),
-      items: (json[_ProfileJson.items] as List)
-          .map((e) => ProfileRecord.fromJson(e))
-          .toList(),
+      items:
+          (json[_ProfileJson.items] as List)
+              .map((e) => ProfileRecord.fromJson(e))
+              .toList(),
       newSpaceGCStats: GCStats.fromJson(json[_ProfileJson.newGC]),
       oldSpaceGCStats: GCStats.fromJson(json[_ProfileJson.oldGC]),
       totalGCStats: GCStats.fromJson(json[_ProfileJson.totalGC]),
@@ -160,7 +162,8 @@ class ProfileRecord with PinnableListEntry, Serializable {
       isTotal: false,
       heapClass: HeapClassName.fromClassRef(stats.classRef),
       totalInstances: stats.instancesCurrent ?? 0,
-      totalSize: stats.bytesCurrent! +
+      totalSize:
+          stats.bytesCurrent! +
           stats.oldSpace.externalSize +
           stats.newSpace.externalSize,
       totalDartHeapSize: stats.bytesCurrent!,
@@ -178,22 +181,22 @@ class ProfileRecord with PinnableListEntry, Serializable {
   }
 
   ProfileRecord.total(AllocationProfile profile)
-      : isTotal = true,
-        heapClass =
-            HeapClassName.fromPath(className: 'All Classes', library: ''),
-        totalInstances = null,
-        totalSize = (profile.memoryUsage?.externalUsage ?? 0) +
-            (profile.memoryUsage?.heapUsage ?? 0),
-        totalDartHeapSize = profile.memoryUsage?.heapUsage ?? 0,
-        totalExternalSize = profile.memoryUsage?.externalUsage ?? 0,
-        newSpaceInstances = null,
-        newSpaceSize = null,
-        newSpaceDartHeapSize = null,
-        newSpaceExternalSize = null,
-        oldSpaceInstances = null,
-        oldSpaceSize = null,
-        oldSpaceDartHeapSize = null,
-        oldSpaceExternalSize = null {
+    : isTotal = true,
+      heapClass = HeapClassName.fromPath(className: 'All Classes', library: ''),
+      totalInstances = null,
+      totalSize =
+          (profile.memoryUsage?.externalUsage ?? 0) +
+          (profile.memoryUsage?.heapUsage ?? 0),
+      totalDartHeapSize = profile.memoryUsage?.heapUsage ?? 0,
+      totalExternalSize = profile.memoryUsage?.externalUsage ?? 0,
+      newSpaceInstances = null,
+      newSpaceSize = null,
+      newSpaceDartHeapSize = null,
+      newSpaceExternalSize = null,
+      oldSpaceInstances = null,
+      oldSpaceSize = null,
+      oldSpaceDartHeapSize = null,
+      oldSpaceExternalSize = null {
     _verifyIntegrity();
   }
 
