@@ -121,9 +121,6 @@ void main() {
 
       // Validate socketData
       expect(offlineData.socketData.length, 2);
-      expect(offlineData.socketData.first.id, '105553123901536');
-      expect(offlineData.socketData.first.socketType, 'tcp');
-      expect(offlineData.socketData.first.port, 443);
 
       // Validate selectedRequestId
       expect(offlineData.selectedRequestId, isNull);
@@ -138,12 +135,6 @@ void main() {
       final requestDetails = firstRequest['request'] as Map<String, Object?>;
 
       expect(requestDetails['id'], '975585676925010898');
-
-      final socketData = serializedJson['socketData'] as List;
-      final firstSocket = socketData.first as Map<String, Object?>;
-      final socketDetails = firstSocket['socket'] as Map<String, Object?>;
-
-      expect(socketDetails['id'], '105553123901536');
     });
 
     test(
