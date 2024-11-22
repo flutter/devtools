@@ -239,10 +239,7 @@ void main() {
         debuggerController.matchesForSearch('hello world').toString(),
         equals('[5:28-39, 6:9-20]'),
       );
-      expect(
-        debuggerController.matchesForSearch('').toString(),
-        equals('[]'),
-      );
+      expect(debuggerController.matchesForSearch('').toString(), equals('[]'));
     });
   });
 }

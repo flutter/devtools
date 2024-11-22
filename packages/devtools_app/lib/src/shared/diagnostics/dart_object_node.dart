@@ -29,8 +29,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     this.artificialName = false,
     this.artificialValue = false,
     this.isRerootable = false,
-  })  : _offset = offset,
-        _childCount = childCount {
+  }) : _offset = offset,
+       _childCount = childCount {
     indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
   }
 
@@ -130,18 +130,18 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       artificialValue: true,
       childCount: list?.length ?? 0,
     )..addAllChildren([
-        if (list != null)
-          for (int i = 0; i < list.length; ++i)
-            DartObjectNode.fromValue(
-              name: '[$i]',
-              value: displayNameBuilder?.call(list[i]) ?? list[i],
-              isolateRef: isolateRef,
-              artificialName: true,
-              artificialValue: artificialChildValues,
-            )..addAllChildren([
-                if (childBuilder != null) ...childBuilder(list[i]),
-              ]),
-      ]);
+      if (list != null)
+        for (int i = 0; i < list.length; ++i)
+          DartObjectNode.fromValue(
+            name: '[$i]',
+            value: displayNameBuilder?.call(list[i]) ?? list[i],
+            isolateRef: isolateRef,
+            artificialName: true,
+            artificialValue: artificialChildValues,
+          )..addAllChildren([
+            if (childBuilder != null) ...childBuilder(list[i]),
+          ]),
+    ]);
   }
 
   factory DartObjectNode.create(
@@ -151,18 +151,12 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     final value = variable.value;
     return DartObjectNode._(
       name: variable.name,
-      ref: GenericInstanceRef(
-        isolateRef: isolateRef,
-        value: value,
-      ),
+      ref: GenericInstanceRef(isolateRef: isolateRef, value: value),
     );
   }
 
   factory DartObjectNode.text(String text) {
-    return DartObjectNode._(
-      text: text,
-      artificialName: true,
-    );
+    return DartObjectNode._(text: text, artificialName: true);
   }
 
   factory DartObjectNode.grouping(
@@ -316,9 +310,10 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         // to `children.length` if it's not provide (this means we don't get
         // the count until the record is expanded):
         final count = value.length ?? children.length;
-        valueStr = count == 0
-            ? 'Record'
-            : 'Record ($count ${pluralize('field', count)})';
+        valueStr =
+            count == 0
+                ? 'Record'
+                : 'Record ($count ${pluralize('field', count)})';
       } else if (value.valueAsString == null) {
         valueStr = value.classRef?.name ?? '';
       } else {

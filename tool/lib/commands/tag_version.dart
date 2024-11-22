@@ -26,8 +26,10 @@ class TagVersionCommand extends Command {
     final log = Logger.standard();
 
     final repo = DevToolsRepo.getInstance();
-    final devtoolsAppPubspecPath =
-        path.join(repo.devtoolsAppDirectoryPath, 'pubspec.yaml');
+    final devtoolsAppPubspecPath = path.join(
+      repo.devtoolsAppDirectoryPath,
+      'pubspec.yaml',
+    );
     final devtoolsAppPubspec = File(devtoolsAppPubspecPath);
     if (!devtoolsAppPubspec.existsSync()) {
       throw FileSystemException(

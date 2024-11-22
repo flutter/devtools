@@ -42,11 +42,9 @@ class VMProcessMemoryViewController extends DisposableController {
     currentRoot.addChild(
       TreemapNode(
         name: 'Other',
-        byteSize: currentRoot.byteSize -
-            currentRoot.children.fold<int>(
-              0,
-              (sum, e) => sum + e.byteSize,
-            ),
+        byteSize:
+            currentRoot.byteSize -
+            currentRoot.children.fold<int>(0, (sum, e) => sum + e.byteSize),
       ),
     );
 

@@ -54,11 +54,7 @@ Future<void> _addDiagnosticsIfNeeded(
     if (properties == null || service == null || isolateRef == null) return;
     await _addExpandableChildren(
       variable,
-      await createVariablesForDiagnostics(
-        service,
-        properties,
-        isolateRef,
-      ),
+      await createVariablesForDiagnostics(service, properties, isolateRef),
       expandAll: true,
     );
   }
@@ -186,12 +182,7 @@ void _addChildrenToInstanceVariable({
 }) {
   switch (value.kind) {
     case InstanceKind.kMap:
-      variable.addAllChildren(
-        createVariablesForMap(
-          value,
-          isolateRef,
-        ),
-      );
+      variable.addAllChildren(createVariablesForMap(value, isolateRef));
       break;
     case InstanceKind.kList:
       variable.addAllChildren(
@@ -199,9 +190,7 @@ void _addChildrenToInstanceVariable({
       );
       break;
     case InstanceKind.kRecord:
-      variable.addAllChildren(
-        createVariablesForRecords(value, isolateRef),
-      );
+      variable.addAllChildren(createVariablesForRecords(value, isolateRef));
       break;
     case InstanceKind.kUint8ClampedList:
     case InstanceKind.kUint8List:
@@ -217,29 +206,19 @@ void _addChildrenToInstanceVariable({
     case InstanceKind.kInt32x4List:
     case InstanceKind.kFloat32x4List:
     case InstanceKind.kFloat64x2List:
-      variable.addAllChildren(
-        createVariablesForBytes(value, isolateRef),
-      );
+      variable.addAllChildren(createVariablesForBytes(value, isolateRef));
       break;
     case InstanceKind.kRegExp:
-      variable.addAllChildren(
-        createVariablesForRegExp(value, isolateRef),
-      );
+      variable.addAllChildren(createVariablesForRegExp(value, isolateRef));
       break;
     case InstanceKind.kClosure:
-      variable.addAllChildren(
-        createVariablesForClosure(value, isolateRef),
-      );
+      variable.addAllChildren(createVariablesForClosure(value, isolateRef));
       break;
     case InstanceKind.kReceivePort:
-      variable.addAllChildren(
-        createVariablesForReceivePort(value, isolateRef),
-      );
+      variable.addAllChildren(createVariablesForReceivePort(value, isolateRef));
       break;
     case InstanceKind.kType:
-      variable.addAllChildren(
-        createVariablesForType(value, isolateRef),
-      );
+      variable.addAllChildren(createVariablesForType(value, isolateRef));
       break;
     case InstanceKind.kTypeParameter:
       variable.addAllChildren(
@@ -257,9 +236,7 @@ void _addChildrenToInstanceVariable({
       );
       break;
     case InstanceKind.kStackTrace:
-      variable.addAllChildren(
-        createVariablesForStackTrace(value, isolateRef),
-      );
+      variable.addAllChildren(createVariablesForStackTrace(value, isolateRef));
       break;
     case InstanceKind.kMirrorReference:
       variable.addAllChildren(
@@ -267,9 +244,7 @@ void _addChildrenToInstanceVariable({
       );
       break;
     case InstanceKind.kUserTag:
-      variable.addAllChildren(
-        createVariablesForUserTag(value, isolateRef),
-      );
+      variable.addAllChildren(createVariablesForUserTag(value, isolateRef));
       break;
     default:
       break;
@@ -281,11 +256,7 @@ void _addChildrenToInstanceVariable({
 
   if (value.fields != null && value.kind != InstanceKind.kRecord) {
     variable.addAllChildren(
-      createVariablesForFields(
-        value,
-        isolateRef,
-        existingNames: existingNames,
-      ),
+      createVariablesForFields(value, isolateRef, existingNames: existingNames),
     );
   }
 }
@@ -300,15 +271,11 @@ Future<void> _addValueItems(
     switch (value.runtimeType) {
       case const (Func):
         final function = value as Func;
-        variable.addAllChildren(
-          createVariablesForFunc(function, isolateRef),
-        );
+        variable.addAllChildren(createVariablesForFunc(function, isolateRef));
         break;
       case const (Context):
         final context = value as Context;
-        variable.addAllChildren(
-          createVariablesForContext(context, isolateRef),
-        );
+        variable.addAllChildren(createVariablesForContext(context, isolateRef));
         break;
     }
   } else if (value is! String && value is! num && value is! bool) {
@@ -359,9 +326,7 @@ Future<void> _addInspectorItems(
             );
           } catch (e) {
             if (e is! SentinelException) {
-              _log.warning(
-                'Caught $e accessing the value of an object',
-              );
+              _log.warning('Caught $e accessing the value of an object');
             }
           }
         }
@@ -399,11 +364,7 @@ Future<void> buildVariablesTree(
   final diagnostic = ref.diagnostic;
   final value = variable.value;
 
-  await _addDiagnosticsIfNeeded(
-    diagnostic,
-    isolateRef,
-    variable,
-  );
+  await _addDiagnosticsIfNeeded(diagnostic, isolateRef, variable);
 
   try {
     if (ref is ObjectReferences) {
@@ -437,10 +398,7 @@ Future<void> buildVariablesTree(
     expandAll,
   );
 
-  await _addInspectorItems(
-    variable,
-    isolateRef,
-  );
+  await _addInspectorItems(variable, isolateRef);
 
   variable.treeInitializeComplete = true;
 }

@@ -214,37 +214,33 @@ DartObjectNode buildBooleanVariable(bool value) {
 }
 
 InstanceRef _buildInstanceRefForMap({required int length}) => InstanceRef(
-      id: _incrementRef(),
-      kind: InstanceKind.kMap,
-      classRef: ClassRef(
-        name: '_InternalLinkedHashmap',
-        id: _incrementRef(),
-        library: _libraryRef,
-      ),
-      length: length,
-    );
+  id: _incrementRef(),
+  kind: InstanceKind.kMap,
+  classRef: ClassRef(
+    name: '_InternalLinkedHashmap',
+    id: _incrementRef(),
+    library: _libraryRef,
+  ),
+  length: length,
+);
 
 InstanceRef _buildInstanceRefForList({required int length}) => InstanceRef(
-      id: _incrementRef(),
-      kind: InstanceKind.kList,
-      classRef: ClassRef(
-        name: '_GrowableList',
-        id: _incrementRef(),
-        library: _libraryRef,
-      ),
-      length: length,
-    );
+  id: _incrementRef(),
+  kind: InstanceKind.kList,
+  classRef: ClassRef(
+    name: '_GrowableList',
+    id: _incrementRef(),
+    library: _libraryRef,
+  ),
+  length: length,
+);
 
 InstanceRef _buildInstanceRefForSet({required int length}) => InstanceRef(
-      id: _incrementRef(),
-      kind: InstanceKind.kSet,
-      classRef: ClassRef(
-        name: '_Set',
-        id: _incrementRef(),
-        library: _libraryRef,
-      ),
-      length: length,
-    );
+  id: _incrementRef(),
+  kind: InstanceKind.kSet,
+  classRef: ClassRef(name: '_Set', id: _incrementRef(), library: _libraryRef),
+  length: length,
+);
 
 final _libraryRef = LibraryRef(
   name: 'some library',

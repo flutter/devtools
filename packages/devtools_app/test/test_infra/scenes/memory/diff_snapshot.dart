@@ -26,9 +26,7 @@ class DiffSnapshotScene extends Scene {
 
   @override
   Widget build(BuildContext context) {
-    return wrap(
-      SnapshotInstanceItemPane(controller: diffController),
-    );
+    return wrap(SnapshotInstanceItemPane(controller: diffController));
   }
 
   @override

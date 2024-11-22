@@ -197,12 +197,7 @@ class Trace {
       _symbolPath = Path();
 
       _symbolPath!.addRect(
-        Rect.fromLTWH(
-          0,
-          0,
-          characteristics.width,
-          characteristics.height,
-        ),
+        Rect.fromLTWH(0, 0, characteristics.width, characteristics.height),
       );
 
       _symbolPath!.close();
@@ -270,10 +265,7 @@ class TraceNotifier {
   TraceNotifier();
 }
 
-enum ChartType {
-  symbol,
-  line,
-}
+enum ChartType { symbol, line }
 
 enum ChartSymbol {
   ring, // Lined circle
@@ -365,16 +357,17 @@ class AxisScale {
     // Fractional part of range.
     final fraction = range / pow(10, exponent);
     // Nice, rounded fraction.
-    final niceFraction = round
-        ? fraction.roundToDouble()
-        : switch (fraction) {
-            <= 1 => 1.0,
-            <= 2 => 2.0,
-            <= 3 => 3.0,
-            <= 5 => 5.0,
-            <= 7 => 7.0,
-            _ => 10.0,
-          };
+    final niceFraction =
+        round
+            ? fraction.roundToDouble()
+            : switch (fraction) {
+              <= 1 => 1.0,
+              <= 2 => 2.0,
+              <= 3 => 3.0,
+              <= 5 => 5.0,
+              <= 7 => 7.0,
+              _ => 10.0,
+            };
 
     return niceFraction * pow(10, exponent);
   }

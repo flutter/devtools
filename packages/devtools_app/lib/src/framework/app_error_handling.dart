@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
@@ -14,6 +15,7 @@ import 'package:source_maps/source_maps.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 import '../shared/analytics/analytics.dart' as ga;
+import '../shared/analytics/analytics_common.dart';
 import '../shared/globals.dart';
 
 final _log = Logger('app_error_handling');
@@ -93,17 +95,28 @@ Future<void> _reportError(
   bool notifyUser = false,
   StackTrace? stack,
 }) async {
-  final terseStackTrace = await _mapAndTersify(stack);
-  final errorMessage = '$error\n$terseStackTrace';
+  final stackTrace = await _mapAndTersify(stack);
+  final terseStackTrace = stackTrace?.terse;
+  final errorMessageWithTerseStackTrace = '$error\n${terseStackTrace ?? ''}';
+  _log.severe('[$errorType]: $errorMessageWithTerseStackTrace', error, stack);
 
-  _log.severe('[$errorType]: $errorMessage', error, stack);
-  ga.reportError(errorMessage);
+  // Split the stack trace up into substrings of size
+  // [ga4ParamValueCharacterLimit] so that we can send the stack trace in chunks
+  // to GA4 through unified_analytics.
+  final stackTraceSubstrings =
+      stackTrace
+          .toString()
+          .characters
+          .slices(ga4ParamValueCharacterLimit)
+          .map((slice) => slice.join())
+          .toList();
+  ga.reportError('$error', stackTraceSubstrings: stackTraceSubstrings);
 
   // Show error message in a notification pop-up:
   if (notifyUser) {
     notificationService.pushError(
       error.toString(),
-      stackTrace: terseStackTrace,
+      stackTrace: terseStackTrace?.toString(),
     );
   }
 }
@@ -119,10 +132,9 @@ Future<SingleMapping?> _fetchSourceMapping() async {
 }
 
 Future<SingleMapping?> _initializeSourceMapping() async {
+  if (!kIsWeb) return null;
   try {
-    final sourceMapUri = Uri.parse(
-      'main.dart.${kIsWasm ? 'wasm' : 'js'}.map',
-    );
+    final sourceMapUri = Uri.parse('main.dart.${kIsWasm ? 'wasm' : 'js'}.map');
     final sourceMapFile = await get(sourceMapUri);
 
     return SingleMapping.fromJson(
@@ -135,25 +147,22 @@ Future<SingleMapping?> _initializeSourceMapping() async {
   }
 }
 
-Future<String> _mapAndTersify(StackTrace? stack) async {
+Future<stack_trace.Trace?> _mapAndTersify(StackTrace? stack) async {
   final originalStackTrace = stack;
-  if (originalStackTrace == null) return '';
+  if (originalStackTrace == null) return null;
 
   final mappedStackTrace = await _maybeMapStackTrace(originalStackTrace);
   // If mapping fails, revert back to the original stack trace:
-  final stackTrace = mappedStackTrace.toString().isEmpty
-      ? originalStackTrace
-      : mappedStackTrace;
-  return stack_trace.Trace.from(stackTrace).terse.toString();
+  final stackTrace =
+      mappedStackTrace.toString().isEmpty
+          ? originalStackTrace
+          : mappedStackTrace;
+  return stack_trace.Trace.from(stackTrace);
 }
 
 Future<StackTrace> _maybeMapStackTrace(StackTrace stack) async {
   final sourceMapping = await _fetchSourceMapping();
   return sourceMapping != null
-      ? mapStackTrace(
-          sourceMapping,
-          stack,
-          minified: true,
-        )
+      ? mapStackTrace(sourceMapping, stack, minified: true)
       : stack;
 }

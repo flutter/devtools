@@ -17,7 +17,9 @@ import '../../server/server_api_client.dart';
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
   // Clear out the unneeded HTML from index.html.
-  document.body!.querySelectorAll('.legacy-dart').forEach(
+  document.body!
+      .querySelectorAll('.legacy-dart')
+      .forEach(
         (Node element) {
           if (element.parentNode != null) {
             element.parentNode!.removeChild(element);

@@ -15,52 +15,50 @@ class LayoutExplorerSerializationDelegate
     super.subtreeDepth,
     required super.service,
   }) : super(
-          summaryTree: true,
-          addAdditionalPropertiesCallback: (node, delegate) {
-            final additionalJson = <String, Object>{};
-            final value = node.value;
-            if (value is Element) {
-              final renderObject = value.renderObject!;
-              additionalJson['renderObject'] =
-                  renderObject.toDiagnosticsNode().toJsonMap(
-                        delegate.copyWith(
-                          subtreeDepth: 0,
-                          includeProperties: true,
-                        ),
-                      );
-              // Required for test.
-              // ignore: invalid_use_of_protected_member
-              final constraints = renderObject.constraints;
+         summaryTree: true,
+         addAdditionalPropertiesCallback: (node, delegate) {
+           final additionalJson = <String, Object>{};
+           final value = node.value;
+           if (value is Element) {
+             final renderObject = value.renderObject!;
+             additionalJson['renderObject'] = renderObject
+                 .toDiagnosticsNode()
+                 .toJsonMap(
+                   delegate.copyWith(subtreeDepth: 0, includeProperties: true),
+                 );
+             // Required for test.
+             // ignore: invalid_use_of_protected_member
+             final constraints = renderObject.constraints;
 
-              final constraintsProperty = <String, Object>{
-                'type': constraints.runtimeType.toString(),
-                'description': constraints.toString(),
-              };
-              if (constraints is BoxConstraints) {
-                constraintsProperty.addAll(<String, Object>{
-                  'minWidth': constraints.minWidth.toString(),
-                  'minHeight': constraints.minHeight.toString(),
-                  'maxWidth': constraints.maxWidth.toString(),
-                  'maxHeight': constraints.maxHeight.toString(),
-                });
-              }
-              additionalJson['constraints'] = constraintsProperty;
+             final constraintsProperty = <String, Object>{
+               'type': constraints.runtimeType.toString(),
+               'description': constraints.toString(),
+             };
+             if (constraints is BoxConstraints) {
+               constraintsProperty.addAll(<String, Object>{
+                 'minWidth': constraints.minWidth.toString(),
+                 'minHeight': constraints.minHeight.toString(),
+                 'maxWidth': constraints.maxWidth.toString(),
+                 'maxHeight': constraints.maxHeight.toString(),
+               });
+             }
+             additionalJson['constraints'] = constraintsProperty;
 
-              if (renderObject is RenderBox) {
-                additionalJson['size'] = <String, Object>{
-                  'width': renderObject.size.width.toString(),
-                  'height': renderObject.size.height.toString(),
-                };
+             if (renderObject is RenderBox) {
+               additionalJson['size'] = <String, Object>{
+                 'width': renderObject.size.width.toString(),
+                 'height': renderObject.size.height.toString(),
+               };
 
-                final parentData = renderObject.parentData;
-                if (parentData is FlexParentData) {
-                  additionalJson['flexFactor'] = parentData.flex ?? 0;
-                  additionalJson['flexFit'] =
-                      (parentData.fit ?? FlexFit.tight).name;
-                }
-              }
-            }
-            return additionalJson;
-          },
-        );
+               final parentData = renderObject.parentData;
+               if (parentData is FlexParentData) {
+                 additionalJson['flexFactor'] = parentData.flex ?? 0;
+                 additionalJson['flexFit'] =
+                     (parentData.fit ?? FlexFit.tight).name;
+               }
+             }
+           }
+           return additionalJson;
+         },
+       );
 }

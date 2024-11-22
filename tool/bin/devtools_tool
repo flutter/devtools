@@ -5,4 +5,4 @@
 # TODO(kenz): remove this file in ~6 months (April 2025).
 
 echo Warning: devtools_tool has been replaced by dt. Please use dt instead.
-dt
+dt $@

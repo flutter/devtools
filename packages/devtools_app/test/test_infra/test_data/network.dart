@@ -199,9 +199,7 @@ final httpPostJson = <String, Object?>{
   'startTime': 2399492629,
   'endTime': 2400321715,
   'request': {
-    'headers': {
-      'transfer-encoding': [],
-    },
+    'headers': {'transfer-encoding': []},
     'connectionInfo': {
       'localPort': 55972,
       'remoteAddress': '2606:4700:3033::ac43:bdd9',
@@ -275,9 +273,7 @@ final httpPutJson = <String, Object?>{
   'startTime': 1205283313,
   'endTime': 1205859179,
   'request': {
-    'headers': {
-      'transfer-encoding': [],
-    },
+    'headers': {'transfer-encoding': []},
     'connectionInfo': {
       'localPort': 43684,
       'remoteAddress': '2606:4700:3033::ac43:bdd9',
@@ -353,9 +349,7 @@ final httpPatchJson = <String, Object?>{
   'startTime': 1910177192,
   'endTime': 1910722856,
   'request': {
-    'headers': {
-      'transfer-encoding': [],
-    },
+    'headers': {'transfer-encoding': []},
     'connectionInfo': {
       'localPort': 43864,
       'remoteAddress': '2606:4700:3033::ac43:bdd9',

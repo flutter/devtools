@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/shared.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/screen.dart';
+import '../../shared/utils.dart';
 import '../inspector/inspector_screen_body.dart' as legacy;
 import '../inspector_v2/inspector_screen_body.dart' as v2;
 import 'inspector_screen_controller.dart';
@@ -33,8 +35,39 @@ class InspectorScreen extends Screen {
       const InspectorScreenSwitcher();
 }
 
-class InspectorScreenSwitcher extends StatelessWidget {
+class InspectorScreenSwitcher extends StatefulWidget {
   const InspectorScreenSwitcher({super.key});
+
+  @override
+  State<InspectorScreenSwitcher> createState() =>
+      _InspectorScreenSwitcherState();
+}
+
+class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
+    with
+        AutoDisposeMixin,
+        ProvidedControllerMixin<
+          InspectorScreenController,
+          InspectorScreenSwitcher
+        > {
+  bool get shouldShowInspectorV2 =>
+      FeatureFlags.inspectorV2 &&
+      preferences.inspector.inspectorV2Enabled.value;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!initController()) return;
+
+    addAutoDisposeListener(preferences.inspector.inspectorV2Enabled, () async {
+      controller.legacyInspectorController.setVisibleToUser(
+        !shouldShowInspectorV2,
+      );
+      await controller.v2InspectorController.setVisibleToUser(
+        shouldShowInspectorV2,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +76,7 @@ class InspectorScreenSwitcher extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: preferences.inspector.inspectorV2Enabled,
       builder: (context, v2Enabled, _) {
-        if (FeatureFlags.inspectorV2 && v2Enabled) {
+        if (shouldShowInspectorV2) {
           return v2.InspectorScreenBody(
             controller: controller.v2InspectorController,
           );

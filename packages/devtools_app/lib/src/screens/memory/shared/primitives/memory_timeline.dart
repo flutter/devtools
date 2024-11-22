@@ -16,17 +16,16 @@ class MemoryTimeline with Serializable {
 
   factory MemoryTimeline.fromJson(Map<String, dynamic> json) {
     return MemoryTimeline(
-      data: (json[_jsonData] as List)
-          .map((e) => HeapSample.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      data:
+          (json[_jsonData] as List)
+              .map((e) => HeapSample.fromJson(e as Map<String, dynamic>))
+              .toList(),
     );
   }
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      _jsonData: data,
-    };
+    return {_jsonData: data};
   }
 
   static const _jsonData = 'data';
@@ -79,10 +78,8 @@ class MemoryTimeline with Serializable {
   static bool isCustomEvent(String extensionEvent) =>
       extensionEvent.startsWith(devToolsExtensionEvent);
 
-  static String customEventName(String extensionEventKind) =>
-      extensionEventKind.substring(
-        MemoryTimeline.devToolsExtensionEvent.length,
-      );
+  static String customEventName(String extensionEventKind) => extensionEventKind
+      .substring(MemoryTimeline.devToolsExtensionEvent.length);
 
   void addSample(HeapSample sample) {
     data.add(sample);
@@ -95,9 +92,15 @@ class MemoryTimeline with Serializable {
     Map<String, Object> json, {
     String? customEventName,
   }) {
-    final extensionEvent = customEventName == null
-        ? ExtensionEvent(timestamp, eventKind, json)
-        : ExtensionEvent.custom(timestamp, eventKind, customEventName, json);
+    final extensionEvent =
+        customEventName == null
+            ? ExtensionEvent(timestamp, eventKind, json)
+            : ExtensionEvent.custom(
+              timestamp,
+              eventKind,
+              customEventName,
+              json,
+            );
 
     _extensionEvents.add(extensionEvent);
   }
@@ -119,11 +122,6 @@ class MemoryTimeline with Serializable {
 
   void addGCEvent() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    _eventSamples.add(
-      EventSample.gcEvent(
-        timestamp,
-        events: extensionEvents,
-      ),
-    );
+    _eventSamples.add(EventSample.gcEvent(timestamp, events: extensionEvents));
   }
 }

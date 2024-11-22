@@ -40,8 +40,9 @@ void main() {
         );
 
         final progressIndicatorFinder = find.byType(LinearProgressIndicator);
-        LinearProgressIndicator progressIndicator =
-            tester.widget(progressIndicatorFinder);
+        LinearProgressIndicator progressIndicator = tester.widget(
+          progressIndicatorFinder,
+        );
 
         expect(progressIndicator.value, equals(0.0));
 

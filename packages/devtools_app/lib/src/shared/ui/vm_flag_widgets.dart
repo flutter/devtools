@@ -175,18 +175,20 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   }
 
   void _updateFromController() {
-    flags = (serviceConnection.vmFlagManager.flags.value?.flags ?? [])
-        .map((flag) => _DialogFlag(flag))
-        .toList();
+    flags =
+        (serviceConnection.vmFlagManager.flags.value?.flags ?? [])
+            .map((flag) => _DialogFlag(flag))
+            .toList();
     _refilter();
   }
 
   void _refilter() {
     final filter = filterController.text.trim().toLowerCase();
 
-    filteredFlags = filter.isEmpty
-        ? flags
-        : flags.where((flag) => flag.filterText.contains(filter)).toList();
+    filteredFlags =
+        filter.isEmpty
+            ? flags
+            : flags.where((flag) => flag.filterText.contains(filter)).toList();
   }
 
   @override
@@ -210,16 +212,10 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 875,
-            height: 375,
-            child: _FlagTable(filteredFlags),
-          ),
+          SizedBox(width: 875, height: 375, child: _FlagTable(filteredFlags)),
         ],
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }
@@ -250,11 +246,7 @@ class _FlagTable extends StatelessWidget {
 }
 
 class _NameColumn extends ColumnData<_DialogFlag> {
-  _NameColumn()
-      : super(
-          'Name',
-          fixedWidthPx: scaleByFontFactor(180),
-        );
+  _NameColumn() : super('Name', fixedWidthPx: scaleByFontFactor(180));
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.name ?? '';
@@ -262,10 +254,7 @@ class _NameColumn extends ColumnData<_DialogFlag> {
 
 class _DescriptionColumn extends ColumnData<_DialogFlag> {
   _DescriptionColumn()
-      : super.wide(
-          'Description',
-          minWidthPx: scaleByFontFactor(100),
-        );
+    : super.wide('Description', minWidthPx: scaleByFontFactor(100));
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.description ?? '';
@@ -279,12 +268,12 @@ class _DescriptionColumn extends ColumnData<_DialogFlag> {
 
 class _ValueColumn extends ColumnData<_DialogFlag> {
   _ValueColumn()
-      : super(
-          'Value',
-          fixedWidthPx: scaleByFontFactor(100),
-          headerAlignment: TextAlign.right,
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        'Value',
+        fixedWidthPx: scaleByFontFactor(100),
+        headerAlignment: TextAlign.right,
+        alignment: ColumnAlignment.right,
+      );
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.value ?? '';
@@ -295,9 +284,10 @@ class _ValueColumn extends ColumnData<_DialogFlag> {
 
 class _DialogFlag {
   _DialogFlag(this.flag)
-      : filterText = '${flag.name?.toLowerCase()}\n'
-            '${flag.comment?.toLowerCase()}\n'
-            '${flag.valueAsString?.toLowerCase()}';
+    : filterText =
+          '${flag.name?.toLowerCase()}\n'
+              '${flag.comment?.toLowerCase()}\n'
+              '${flag.valueAsString?.toLowerCase()}';
 
   final Flag flag;
   final String filterText;

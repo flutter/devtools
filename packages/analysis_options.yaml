@@ -43,7 +43,6 @@ linter:
     - avoid_function_literals_in_foreach_calls
     - avoid_init_to_null
     # - avoid_js_rounded_ints # only useful when targeting JS runtime
-    - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # not yet tested
     - avoid_print
     # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
@@ -114,7 +113,8 @@ linter:
     - prefer_relative_imports
     - prefer_single_quotes
     - prefer_typing_uninitialized_variables
-    - require_trailing_commas
+    # Obsolete with the new Dart formatter.
+    # - require_trailing_commas
     - recursive_getters
     - slash_for_doc_comments
     - sort_child_properties_last
@@ -138,7 +138,6 @@ linter:
     - unnecessary_statements
     - unnecessary_this
     - unrelated_type_equality_checks
-    - unsafe_html
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
     # - use_string_buffers # https://github.com/dart-lang/linter/pull/664
@@ -226,7 +225,8 @@ dart_code_metrics:
     # - prefer-moving-to-variable:
     #    allowed-duplicated-chains: 2
     # - prefer-static-class
-    - prefer-trailing-comma
+    # Obsolete with the new Dart formatter.
+    # - prefer-trailing-comma
     - always-remove-listener
     # - avoid-border-all Micro-optimization to avoid a const constructor.
     # - avoid-returning-widgets  This one is nice but has a lot of false positives.

@@ -65,8 +65,11 @@ final testRecordInstance = Instance(
   name: 'fooRecord',
 );
 
-final testSuperClass =
-    ClassRef(name: 'fooSuperClass', library: testLib, id: '1234');
+final testSuperClass = ClassRef(
+  name: 'fooSuperClass',
+  library: testLib,
+  id: '1234',
+);
 
 final testType = InstanceRef(
   kind: '',
@@ -93,10 +96,7 @@ final testRequestableSize = InstanceRef(
   valueAsString: '128',
 );
 
-final testParentField = Field(
-  name: 'fooParentField',
-  id: '1234',
-);
+final testParentField = Field(name: 'fooParentField', id: '1234');
 
 final testRetainingPath = RetainingPath(
   length: 1,
@@ -105,55 +105,22 @@ final testRetainingPath = RetainingPath(
 );
 
 final testRetainingObjects = [
-  RetainingObject(
-    value: testClass,
-  ),
-  RetainingObject(
-    value: testInstance,
-    parentListIndex: 1,
-  ),
-  RetainingObject(
-    value: testRecordInstance,
-    parentField: 1,
-  ),
-  RetainingObject(
-    value: testRecordInstance,
-    parentField: 'fooParentField',
-  ),
-  RetainingObject(
-    value: testInstance,
-    parentMapKey: testField,
-  ),
-  RetainingObject(
-    value: testField,
-    parentField: 'fooParentField',
-  ),
+  RetainingObject(value: testClass),
+  RetainingObject(value: testInstance, parentListIndex: 1),
+  RetainingObject(value: testRecordInstance, parentField: 1),
+  RetainingObject(value: testRecordInstance, parentField: 'fooParentField'),
+  RetainingObject(value: testInstance, parentMapKey: testField),
+  RetainingObject(value: testField, parentField: 'fooParentField'),
 ];
 
-final testInboundRefs = TestInboundReferences(
-  references: testInboundRefList,
-);
+final testInboundRefs = TestInboundReferences(references: testInboundRefList);
 
 final testInboundRefList = [
-  InboundReference(
-    source: testFunction,
-  ),
-  InboundReference(
-    source: testField,
-    parentField: testParentField,
-  ),
-  InboundReference(
-    source: testRecordInstance,
-    parentField: 'fooParentField',
-  ),
-  InboundReference(
-    source: testRecordInstance,
-    parentField: 1,
-  ),
-  InboundReference(
-    source: testInstance,
-    parentListIndex: 1,
-  ),
+  InboundReference(source: testFunction),
+  InboundReference(source: testField, parentField: testParentField),
+  InboundReference(source: testRecordInstance, parentField: 'fooParentField'),
+  InboundReference(source: testRecordInstance, parentField: 1),
+  InboundReference(source: testInstance, parentListIndex: 1),
 ];
 
 final testLoadTime = DateTime(2022, 8, 10, 6, 30);
@@ -204,9 +171,9 @@ class TestInstanceObject extends InstanceObject {
 
 void setUpMockScriptManager() {
   final mockScriptManager = MockScriptManager();
-  when(mockScriptManager.sortedScripts).thenReturn(
-    FixedValueListenable<List<ScriptRef>>([testScript]),
-  );
+  when(
+    mockScriptManager.sortedScripts,
+  ).thenReturn(FixedValueListenable<List<ScriptRef>>([testScript]));
   when(mockScriptManager.getScriptCached(any)).thenReturn(testScript);
   setGlobal(ScriptManager, mockScriptManager);
 }
@@ -219,9 +186,9 @@ void mockVmObject(VmObject object) {
   when(object.reachableSize).thenReturn(testRequestableSize);
   when(object.fetchingRetainedSize).thenReturn(ValueNotifier<bool>(false));
   when(object.retainedSize).thenReturn(null);
-  when(object.retainingPath).thenReturn(
-    ValueNotifier<RetainingPath?>(testRetainingPath),
-  );
+  when(
+    object.retainingPath,
+  ).thenReturn(ValueNotifier<RetainingPath?>(testRetainingPath));
   when(object.inboundReferencesTree).thenReturn(
     ListValueNotifier<InboundReferencesTreeNode>(
       InboundReferencesTreeNode.buildTreeRoots(testInboundRefs),

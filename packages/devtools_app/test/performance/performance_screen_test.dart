@@ -51,8 +51,9 @@ void main() {
         ),
       );
       when(
-        fakeServiceConnection.errorBadgeManager
-            .errorCountNotifier('performance'),
+        fakeServiceConnection.errorBadgeManager.errorCountNotifier(
+          'performance',
+        ),
       ).thenReturn(ValueNotifier<int>(0));
       final app = fakeServiceConnection.serviceManager.connectedApp!;
       when(app.initialized).thenReturn(Completer()..complete(true));
@@ -77,9 +78,7 @@ void main() {
     }) async {
       await tester.pumpWidget(
         wrapWithControllers(
-          Builder(
-            builder: PerformanceScreen().build,
-          ),
+          Builder(builder: PerformanceScreen().build),
           performance: controller,
         ),
       );
@@ -113,25 +112,23 @@ void main() {
       expect(find.text('Performance'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize(
-      'builds initial content',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.runAsync(() async {
-          await pumpPerformanceScreen(tester, runAsync: true);
-          await tester.pumpAndSettle();
-          expect(find.byType(PerformanceScreenBody), findsOneWidget);
-          expect(find.byType(WebPerformanceScreenBody), findsNothing);
-          expect(find.byType(PerformanceControls), findsOneWidget);
-          expect(find.byType(FlutterFramesChart), findsOneWidget);
-          expect(find.byType(TabbedPerformanceView), findsOneWidget);
-          expect(
-            find.text('Select a frame above to view analysis data.'),
-            findsOneWidget,
-          );
-        });
-      },
-    );
+    testWidgetsWithWindowSize('builds initial content', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.byType(PerformanceScreenBody), findsOneWidget);
+        expect(find.byType(WebPerformanceScreenBody), findsNothing);
+        expect(find.byType(PerformanceControls), findsOneWidget);
+        expect(find.byType(FlutterFramesChart), findsOneWidget);
+        expect(find.byType(TabbedPerformanceView), findsOneWidget);
+        expect(
+          find.text('Select a frame above to view analysis data.'),
+          findsOneWidget,
+        );
+      });
+    });
 
     testWidgetsWithWindowSize(
       'builds initial content for Dart web app',
@@ -145,9 +142,7 @@ void main() {
           isWebApp: true,
         );
         await tester.pumpWidget(
-          wrap(
-            Builder(builder: PerformanceScreen().build),
-          ),
+          wrap(Builder(builder: PerformanceScreen().build)),
         );
         await tester.pumpAndSettle();
         expect(find.byType(PerformanceScreenBody), findsNothing);
@@ -161,9 +156,7 @@ void main() {
 
         // Make sure NO Flutter-specific information is included:
         expect(
-          markdownFinder(
-            'The Flutter framework emits timeline events',
-          ),
+          markdownFinder('The Flutter framework emits timeline events'),
           findsNothing,
         );
       },
@@ -181,9 +174,7 @@ void main() {
           isWebApp: true,
         );
         await tester.pumpWidget(
-          wrap(
-            Builder(builder: PerformanceScreen().build),
-          ),
+          wrap(Builder(builder: PerformanceScreen().build)),
         );
         await tester.pumpAndSettle();
         expect(find.byType(PerformanceScreenBody), findsNothing);
@@ -197,9 +188,7 @@ void main() {
 
         // Make sure Flutter-specific information is included:
         expect(
-          markdownFinder(
-            'The Flutter framework emits timeline events',
-          ),
+          markdownFinder('The Flutter framework emits timeline events'),
           findsOneWidget,
         );
       },
@@ -308,40 +297,38 @@ void main() {
       //   },
       // );
 
-      testWidgetsWithWindowSize(
-        'opens enhance tracing overlay',
-        windowSize,
-        (WidgetTester tester) async {
-          await tester.runAsync(() async {
-            await pumpPerformanceScreen(tester, runAsync: true);
-            await tester.pumpAndSettle();
-            expect(find.text('Enhance Tracing'), findsOneWidget);
-            await tester.tap(find.text('Enhance Tracing'));
-            await tester.pumpAndSettle();
-            expect(
-              find.richTextContaining('frame times may be negatively affected'),
-              findsOneWidget,
-            );
-            expect(
-              find.richTextContaining(
-                'you will need to reproduce activity in your app',
-              ),
-              findsOneWidget,
-            );
-            expect(
-              find.richTextContaining('Trace widget builds'),
-              findsOneWidget,
-            );
-            expect(find.richTextContaining('Trace layouts'), findsOneWidget);
-            expect(find.richTextContaining('Trace paints'), findsOneWidget);
-            expect(
-              find.richTextContaining('Trace platform channels'),
-              findsOneWidget,
-            );
-            expect(find.byType(MoreInfoLink), findsNWidgets(4));
-          });
-        },
-      );
+      testWidgetsWithWindowSize('opens enhance tracing overlay', windowSize, (
+        WidgetTester tester,
+      ) async {
+        await tester.runAsync(() async {
+          await pumpPerformanceScreen(tester, runAsync: true);
+          await tester.pumpAndSettle();
+          expect(find.text('Enhance Tracing'), findsOneWidget);
+          await tester.tap(find.text('Enhance Tracing'));
+          await tester.pumpAndSettle();
+          expect(
+            find.richTextContaining('frame times may be negatively affected'),
+            findsOneWidget,
+          );
+          expect(
+            find.richTextContaining(
+              'you will need to reproduce activity in your app',
+            ),
+            findsOneWidget,
+          );
+          expect(
+            find.richTextContaining('Trace widget builds'),
+            findsOneWidget,
+          );
+          expect(find.richTextContaining('Trace layouts'), findsOneWidget);
+          expect(find.richTextContaining('Trace paints'), findsOneWidget);
+          expect(
+            find.richTextContaining('Trace platform channels'),
+            findsOneWidget,
+          );
+          expect(find.byType(MoreInfoLink), findsNWidgets(4));
+        });
+      });
 
       testWidgetsWithWindowSize(
         'opens more debugging options overlay',
@@ -390,7 +377,9 @@ void main() {
         (WidgetTester tester) async {
           when(
             fakeServiceConnection
-                .serviceManager.connectedApp!.isProfileBuildNow,
+                .serviceManager
+                .connectedApp!
+                .isProfileBuildNow,
           ).thenReturn(false);
 
           await tester.runAsync(() async {
@@ -415,5 +404,5 @@ void main() {
 }
 
 Finder markdownFinder(String textMatch) => find.byWidgetPredicate(
-      (widget) => widget is Markdown && widget.data.contains(textMatch),
-    );
+  (widget) => widget is Markdown && widget.data.contains(textMatch),
+);

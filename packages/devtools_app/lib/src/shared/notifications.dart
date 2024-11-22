@@ -48,16 +48,9 @@ class NotificationService {
   /// Includes a button to close the notification if [isDismissible] is true,
   /// otherwise the notification will be automatically dismissed after
   /// [NotificationMessage.defaultDuration].
-  bool push(
-    String message, {
-    bool isDismissible = false,
-  }) =>
-      pushNotification(
-        NotificationMessage(
-          message,
-          isDismissible: isDismissible,
-        ),
-      );
+  bool push(String message, {bool isDismissible = false}) => pushNotification(
+    NotificationMessage(message, isDismissible: isDismissible),
+  );
 
   /// Pushes an error notification with [errorMessage] as the text.
   ///
@@ -71,6 +64,7 @@ class NotificationService {
     String? reportExplanation,
     bool isDismissible = true,
     bool isReportable = true,
+    bool allowDuplicates = false,
   }) {
     final reportErrorAction = NotificationAction(
       label: 'Report error',
@@ -79,9 +73,10 @@ class NotificationService {
           if (reportExplanation != null) 'Explanation:\n$reportExplanation',
           if (stackTrace != null) 'Stack trace:\n$stackTrace',
         ];
-        final additionalInfo = additionalInfoParts.isNotEmpty
-            ? additionalInfoParts.join('\n\n')
-            : null;
+        final additionalInfo =
+            additionalInfoParts.isNotEmpty
+                ? additionalInfoParts.join('\n\n')
+                : null;
         unawaited(
           launchUrlWithErrorHandling(
             devToolsEnvironmentParameters
@@ -101,11 +96,12 @@ class NotificationService {
         isDismissible: isDismissible,
         actions: [if (isReportable) reportErrorAction],
         // Double the duration so that the user has time to report the error:
-        duration: isReportable
-            ? NotificationMessage.defaultDuration * 2
-            : NotificationMessage.defaultDuration,
+        duration:
+            isReportable
+                ? NotificationMessage.defaultDuration * 2
+                : NotificationMessage.defaultDuration,
       ),
-      allowDuplicates: false,
+      allowDuplicates: allowDuplicates,
     );
   }
 
@@ -167,9 +163,10 @@ class NotificationAction extends StatelessWidget {
     final theme = Theme.of(context);
     return DevToolsButton(
       label: label,
-      color: isPrimary
-          ? theme.colorScheme.onPrimary
-          : theme.colorScheme.onSecondaryContainer,
+      color:
+          isPrimary
+              ? theme.colorScheme.onPrimary
+              : theme.colorScheme.onSecondaryContainer,
       elevated: isPrimary,
       outlined: !isPrimary,
       onPressed: onPressed,

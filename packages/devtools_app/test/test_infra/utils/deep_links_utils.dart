@@ -72,10 +72,12 @@ class TestDeepLinksController extends DeepLinksController {
 
   @override
   Future<void> validateLinks() async {
-    androidAppLinks[selectedAndroidVariantIndex.value] =
-        fakeAppLinkSettings(fakeAndroidDeepLinks);
-    iosLinks[selectedIosConfigurationIndex.value] =
-        fakeUniversalLinkSettings(fakeIosDomains);
+    androidAppLinks[selectedAndroidVariantIndex.value] = fakeAppLinkSettings(
+      fakeAndroidDeepLinks,
+    );
+    iosLinks[selectedIosConfigurationIndex.value] = fakeUniversalLinkSettings(
+      fakeIosDomains,
+    );
 
     await super.validateLinks();
   }

@@ -31,23 +31,17 @@ import 'metadata.dart';
 
 final _log = Logger('logging_controller');
 
-// For performance reasons, we drop old logs in batches, so the log will grow
-// to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
-const kMaxLogItemsLowerBound = 5000;
-const kMaxLogItemsUpperBound = 5500;
+const defaultLogBufferReductionSize = 500;
 final timeFormat = DateFormat('HH:mm:ss.SSS');
 final dateTimeFormat = DateFormat('HH:mm:ss.SSS (MM/dd/yy)');
 
 bool _verboseDebugging = false;
 
-typedef OnShowDetails = void Function({
-  String? text,
-  InspectorTreeController? tree,
-});
+typedef OnShowDetails =
+    void Function({String? text, InspectorTreeController? tree});
 
-typedef CreateLoggingTree = InspectorTreeController Function({
-  VoidCallback? onSelectionChange,
-});
+typedef CreateLoggingTree =
+    InspectorTreeController Function({VoidCallback? onSelectionChange});
 
 typedef ZoneDescription = ({String? name, int? identityHashCode});
 
@@ -99,14 +93,10 @@ class LoggingController extends DisposableController
         _handleConnectionStart(serviceConnection.serviceManager.service!);
 
         autoDisposeStreamSubscription(
-          serviceConnection.serviceManager.service!.onIsolateEvent
-              .listen((event) {
-            messageBus.addEvent(
-              BusEvent(
-                'debugger',
-                data: event,
-              ),
-            );
+          serviceConnection.serviceManager.service!.onIsolateEvent.listen((
+            event,
+          ) {
+            messageBus.addEvent(BusEvent('debugger', data: event));
           }),
         );
       }
@@ -116,6 +106,13 @@ class LoggingController extends DisposableController
     }
     _handleBusEvents();
     initFilterController();
+
+    addAutoDisposeListener(
+      preferences.logging.retentionLimit,
+      // When the retention limit setting changes, trim the logs to the exact
+      // length of the limit.
+      () => _updateForRetentionLimit(trimWithBuffer: false),
+    );
   }
 
   static const _minLogLevelFilterId = 'min-log-level';
@@ -132,8 +129,9 @@ class LoggingController extends DisposableController
     SettingFilter<LogData, int>(
       id: _minLogLevelFilterId,
       name: 'Hide logs below the minimum log level',
-      includeCallback: (LogData element, int currentFilterValue) =>
-          element.level >= currentFilterValue,
+      includeCallback:
+          (LogData element, int currentFilterValue) =>
+              element.level >= currentFilterValue,
       enabledCallback: (int filterValue) => filterValue > Level.ALL.value,
       possibleValues: _possibleLogLevels.map((l) => l.value).toList(),
       possibleValueDisplays: _possibleLogLevels.map((l) => l.name).toList(),
@@ -143,18 +141,26 @@ class LoggingController extends DisposableController
         true) ...[
       ToggleFilter<LogData>(
         id: _verboseFlutterFrameworkFilterId,
-        name: 'Hide verbose Flutter framework logs (initialization, frame '
+        name:
+            'Hide verbose Flutter framework logs (initialization, frame '
             'times, image sizes)',
-        includeCallback: (log) => !_verboseFlutterFrameworkLogKinds
-            .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+        includeCallback:
+            (log) =>
+                !_verboseFlutterFrameworkLogKinds.any(
+                  (kind) => kind.caseInsensitiveEquals(log.kind),
+                ),
         defaultValue: true,
       ),
       ToggleFilter<LogData>(
         id: _verboseFlutterServiceFilterId,
-        name: 'Hide verbose Flutter service logs (service extension state '
+        name:
+            'Hide verbose Flutter service logs (service extension state '
             'changes)',
-        includeCallback: (log) => !_verboseFlutterServiceLogKinds
-            .any((kind) => kind.caseInsensitiveEquals(log.kind)),
+        includeCallback:
+            (log) =>
+                !_verboseFlutterServiceLogKinds.any(
+                  (kind) => kind.caseInsensitiveEquals(log.kind),
+                ),
         defaultValue: true,
       ),
     ],
@@ -167,8 +173,8 @@ class LoggingController extends DisposableController
   ];
 
   static final _possibleLogLevels = Level.LEVELS
-      // Omit Level.OFF from the possible minimum levels.
-      .where((level) => level != Level.OFF);
+  // Omit Level.OFF from the possible minimum levels.
+  .where((level) => level != Level.OFF);
 
   static const _kindFilterId = 'logging-kind-filter';
   static const _isolateFilterId = 'logging-isolate-filter';
@@ -203,12 +209,12 @@ class LoggingController extends DisposableController
   @override
   ValueNotifier<String>? get filterTagNotifier => preferences.logging.filterTag;
 
-  final _logStatusController = StreamController<String>.broadcast();
-
   /// A stream of events for the textual description of the log contents.
   ///
   /// See also [statusText].
   Stream<String> get onLogStatusChanged => _logStatusController.stream;
+
+  final _logStatusController = StreamController<String>.broadcast();
 
   List<LogData> data = <LogData>[];
 
@@ -241,9 +247,11 @@ class LoggingController extends DisposableController
 
     String label;
 
-    label = totalCount == showingCount
-        ? nf.format(totalCount)
-        : 'showing ${nf.format(showingCount)} of ' '${nf.format(totalCount)}';
+    label =
+        totalCount == showingCount
+            ? nf.format(totalCount)
+            : 'showing ${nf.format(showingCount)} of '
+                '${nf.format(totalCount)}';
 
     label = '$label ${pluralize('event', totalCount)}';
 
@@ -345,8 +353,9 @@ class LoggingController extends DisposableController
         ),
       );
     } else if (e.extensionKind == FlutterEvent.serviceExtensionStateChanged) {
-      final changedInfo =
-          ServiceExtensionStateChangedInfo.from(e.extensionData!.data);
+      final changedInfo = ServiceExtensionStateChangedInfo.from(
+        e.extensionData!.data,
+      );
 
       log(
         LogData(
@@ -408,7 +417,8 @@ class LoggingController extends DisposableController
 
     final time = ((newSpace.time! + oldSpace.time!) * 1000).round();
 
-    final summary = '${isolateRef['name']} • '
+    final summary =
+        '${isolateRef['name']} • '
         '${e.json!['reason']} collection in $time ms • '
         '${printBytes(usedBytes, unit: ByteUnit.mb, includeUnit: true)} used of '
         '${printBytes(capacityBytes, unit: ByteUnit.mb, includeUnit: true)}';
@@ -438,8 +448,9 @@ class LoggingController extends DisposableController
 
     final logRecord = _LogRecord(eventJson['logRecord']);
 
-    String? loggerName =
-        _valueAsString(InstanceRef.parse(logRecord.loggerName));
+    String? loggerName = _valueAsString(
+      InstanceRef.parse(logRecord.loggerName),
+    );
     if (loggerName == null || loggerName.isEmpty) {
       loggerName = 'log';
     }
@@ -473,16 +484,22 @@ class LoggingController extends DisposableController
         _isNotNull(stackTrace)) {
       detailsComputer = () async {
         // Get the full string value of the message.
-        String result =
-            await _retrieveFullStringValue(service, e.isolate!, messageRef);
+        String result = await _retrieveFullStringValue(
+          service,
+          e.isolate!,
+          messageRef,
+        );
 
         // Get information about the error object. Some users of the
         // dart:developer log call may pass a data payload in the `error`
         // field, encoded as a json encoded string, so handle that case.
         if (_isNotNull(error)) {
           if (error!.valueAsString != null) {
-            final errorString =
-                await _retrieveFullStringValue(service, e.isolate!, error);
+            final errorString = await _retrieveFullStringValue(
+              service,
+              e.isolate!,
+              error,
+            );
             result += '\n\n$errorString';
           } else {
             // Call `toString()` on the error object and display that.
@@ -536,25 +553,53 @@ class LoggingController extends DisposableController
   }
 
   void log(LogData log) {
-    List<LogData> currentLogs = List.of(data);
+    data.add(log);
+    if (includeLogForFilter(log, filter: activeFilter.value)) {
+      // This will notify since [filteredData] is a [ListValueNotifier].
+      filteredData.add(log);
+    }
+    // TODO(kenz): we don't need to re-filter the data from this method if we
+    // trim the logs for the retention limit. This would require some
+    // refactoring to the _updateData method to support updating the notifiers
+    // without re-filtering all the data.
+    // If we need to trim logs to meet the retention limit, this will call
+    // [_updateData] and perform a re-filter of all the logs.
+    _updateForRetentionLimit();
 
-    // Insert the new item and clamped the list to kMaxLogItemsLength.
-    currentLogs.add(log);
+    // TODO(kenz): this will traverse all the logs to refresh search matches.
+    // We don't need to do this. We could optimize further by updating the
+    // search match status for the individual log and for the controller without
+    // traversing the entire data set. This is a no-op when the search value is
+    // empty, but this cost is O(N*N) when a search value is present.
+    refreshSearchMatches();
 
-    // Note: We need to drop rows from the start because we want to drop old
-    // rows but because that's expensive, we only do it periodically (eg. when
-    // the list is 500 rows more).
-    if (currentLogs.length > kMaxLogItemsUpperBound) {
-      int itemsToRemove = currentLogs.length - kMaxLogItemsLowerBound;
+    _updateStatus();
+  }
+
+  void _updateForRetentionLimit({
+    bool trimWithBuffer = true,
+    bool updateData = true,
+  }) {
+    // For performance reasons, we drop old logs in batches. Because it is
+    // expensive to drop from the beginning of a list, we only do it
+    // periodically (e.g. drop [_defaultBufferReductionSize] logs when the log
+    // retention limit has been reached.
+    final retentionLimit = preferences.logging.retentionLimit.value;
+    if (data.length > retentionLimit) {
+      final reduceToSize = math.max(
+        retentionLimit - (trimWithBuffer ? defaultLogBufferReductionSize : 0),
+        0,
+      );
+      int dropUntilIndex = data.length - reduceToSize;
       // Ensure we remove an even number of rows to keep the alternating
       // background in-sync.
-      if (itemsToRemove % 2 == 1) {
-        itemsToRemove--;
+      if (dropUntilIndex % 2 == 1) {
+        dropUntilIndex--;
       }
-      currentLogs = currentLogs.sublist(itemsToRemove);
+      if (updateData) {
+        _updateData(data.sublist(math.max(dropUntilIndex, 0)));
+      }
     }
-
-    _updateData(currentLogs);
   }
 
   static RemoteDiagnosticsNode? _findFirstSummary(RemoteDiagnosticsNode node) {
@@ -662,65 +707,65 @@ class LoggingController extends DisposableController
   @override
   Iterable<LogData> get currentDataToSearchThrough => filteredData.value;
 
+  bool includeLogForFilter(LogData log, {required Filter filter}) {
+    final filteredOutBySettingFilters = filter.settingFilters.any(
+      (settingFilter) => !settingFilter.includeData(log),
+    );
+    if (filteredOutBySettingFilters) return false;
+
+    final queryFilter = filter.queryFilter;
+    if (!queryFilter.isEmpty) {
+      final filteredOutByQueryFilterArgument = queryFilter
+          .filterArguments
+          .values
+          .any((argument) => !argument.matchesValue(log));
+      if (filteredOutByQueryFilterArgument) return false;
+
+      if (filter.queryFilter.substringExpressions.isNotEmpty) {
+        for (final substring in filter.queryFilter.substringExpressions) {
+          final matchesKind = log.kind.caseInsensitiveContains(substring);
+          if (matchesKind) return true;
+
+          final matchesLevel = log.levelName.caseInsensitiveContains(substring);
+          if (matchesLevel) return true;
+
+          final matchesIsolateName =
+              log.isolateRef?.name?.caseInsensitiveContains(substring) ?? false;
+          if (matchesIsolateName) return true;
+
+          final zone = log.zone;
+          final matchesZoneName =
+              zone?.name?.caseInsensitiveContains(substring) ?? false;
+          final matchesZoneIdentity =
+              zone?.identityHashCode?.toString().caseInsensitiveContains(
+                substring,
+              ) ??
+              false;
+          if (matchesZoneName || matchesZoneIdentity) return true;
+
+          final matchesSummary =
+              log.summary != null &&
+              log.summary!.caseInsensitiveContains(substring);
+          if (matchesSummary) return true;
+
+          final matchesDetails =
+              log.details != null &&
+              log.details!.caseInsensitiveContains(substring);
+          if (matchesDetails) return true;
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+
   @override
   void filterData(Filter<LogData> filter) {
     super.filterData(filter);
-
-    bool filterCallback(LogData log) {
-      final filteredOutBySettingFilters = filter.settingFilters.any(
-        (settingFilter) => !settingFilter.includeData(log),
-      );
-      if (filteredOutBySettingFilters) return false;
-
-      final queryFilter = filter.queryFilter;
-      if (!queryFilter.isEmpty) {
-        final filteredOutByQueryFilterArgument = queryFilter
-            .filterArguments.values
-            .any((argument) => !argument.matchesValue(log));
-        if (filteredOutByQueryFilterArgument) return false;
-
-        if (filter.queryFilter.substringExpressions.isNotEmpty) {
-          for (final substring in filter.queryFilter.substringExpressions) {
-            final matchesKind = log.kind.caseInsensitiveContains(substring);
-            if (matchesKind) return true;
-
-            final matchesLevel =
-                log.levelName.caseInsensitiveContains(substring);
-            if (matchesLevel) return true;
-
-            final matchesIsolateName =
-                log.isolateRef?.name?.caseInsensitiveContains(substring) ??
-                    false;
-            if (matchesIsolateName) return true;
-
-            final zone = log.zone;
-            final matchesZoneName =
-                zone?.name?.caseInsensitiveContains(substring) ?? false;
-            final matchesZoneIdentity = zone?.identityHashCode
-                    ?.toString()
-                    .caseInsensitiveContains(substring) ??
-                false;
-            if (matchesZoneName || matchesZoneIdentity) return true;
-
-            final matchesSummary = log.summary != null &&
-                log.summary!.caseInsensitiveContains(substring);
-            if (matchesSummary) return true;
-
-            final matchesDetails = log.details != null &&
-                log.details!.caseInsensitiveContains(substring);
-            if (matchesDetails) return true;
-          }
-          return false;
-        }
-      }
-
-      return true;
-    }
-
     filteredData
       ..clear()
       ..addAll(
-        data.where(filterCallback).toList(),
+        data.where((log) => includeLogForFilter(log, filter: filter)).toList(),
       );
   }
 }
@@ -856,17 +901,15 @@ class LogData with SearchableDataMixin {
     final originalDetails = _details;
     // Fetch details immediately on creation.
     unawaited(
-      compute().catchError(
-        (Object? error) {
-          // On error, set the value of details to its original value.
-          _details = originalDetails;
-          _detailsComputed.value = true;
-          error_handling.reportError(
-            'Error fetching details for $kind log'
-            '${error != null ? ': $error' : ''}.',
-          );
-        },
-      ),
+      compute().catchError((Object? error) {
+        // On error, set the value of details to its original value.
+        _details = originalDetails;
+        _detailsComputed.value = true;
+        error_handling.reportError(
+          'Error fetching details for $kind log'
+          '${error != null ? ': $error' : ''}.',
+        );
+      }),
     );
   }
 

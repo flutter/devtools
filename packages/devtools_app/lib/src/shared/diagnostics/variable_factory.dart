@@ -305,8 +305,9 @@ Future<DartObjectNode> _buildVariable(
   InspectorObjectGroupApi<RemoteDiagnosticsNode> objectGroup,
   IsolateRef? isolateRef,
 ) async {
-  final instanceRef =
-      await objectGroup.toObservatoryInstanceRef(diagnostic.valueRef);
+  final instanceRef = await objectGroup.toObservatoryInstanceRef(
+    diagnostic.valueRef,
+  );
   return DartObjectNode.fromValue(
     name: diagnostic.name,
     value: instanceRef,
@@ -469,10 +470,7 @@ List<DartObjectNode> createVariablesForSets(
 ) {
   final elements = instance.elements ?? [];
   return elements.map((element) {
-    return DartObjectNode.fromValue(
-      value: element,
-      isolateRef: isolateRef,
-    );
+    return DartObjectNode.fromValue(value: element, isolateRef: isolateRef);
   }).toList();
 }
 
@@ -555,10 +553,7 @@ List<DartObjectNode> createVariablesForFields(
     final name = field.name;
     if (name is! String) {
       result.add(
-        DartObjectNode.fromValue(
-          value: field.value,
-          isolateRef: isolateRef,
-        ),
+        DartObjectNode.fromValue(value: field.value, isolateRef: isolateRef),
       );
     } else {
       if (existingNames != null && existingNames.contains(name)) continue;

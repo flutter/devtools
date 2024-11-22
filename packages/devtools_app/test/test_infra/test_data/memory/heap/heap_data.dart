@@ -17,10 +17,7 @@ abstract class HeapTest {
 }
 
 class GoldenHeapTest extends HeapTest {
-  GoldenHeapTest({
-    required super.appClassName,
-    required this.fileName,
-  });
+  GoldenHeapTest({required super.appClassName, required this.fileName});
 
   final String fileName;
 
@@ -33,9 +30,7 @@ class GoldenHeapTest extends HeapTest {
 }
 
 class MockedHeapTest extends HeapTest {
-  MockedHeapTest({
-    required super.appClassName,
-  });
+  MockedHeapTest({required super.appClassName});
 
   @override
   Future<HeapSnapshotGraph> loadHeap() async {
@@ -81,20 +76,8 @@ class HeapGraphLoaderProvided implements HeapGraphLoader {
 }
 
 List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
-  GoldenHeapTest(
-    fileName: 'counter_snapshot1',
-    appClassName: 'MyApp',
-  ),
-  GoldenHeapTest(
-    fileName: 'counter_snapshot2',
-    appClassName: 'MyApp',
-  ),
-  GoldenHeapTest(
-    fileName: 'counter_snapshot3',
-    appClassName: 'MyApp',
-  ),
-  GoldenHeapTest(
-    fileName: 'counter_snapshot4',
-    appClassName: 'MyApp',
-  ),
+  GoldenHeapTest(fileName: 'counter_snapshot1', appClassName: 'MyApp'),
+  GoldenHeapTest(fileName: 'counter_snapshot2', appClassName: 'MyApp'),
+  GoldenHeapTest(fileName: 'counter_snapshot3', appClassName: 'MyApp'),
+  GoldenHeapTest(fileName: 'counter_snapshot4', appClassName: 'MyApp'),
 ];

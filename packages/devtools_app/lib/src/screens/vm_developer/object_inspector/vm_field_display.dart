@@ -38,15 +38,10 @@ class VmFieldDisplay extends StatelessWidget {
 
   /// Generates a list of key-value pairs (map entries) containing the general
   /// information of the field object [field].
-  List<MapEntry<String, WidgetBuilder>> _fieldDataRows(
-    FieldObject field,
-  ) {
+  List<MapEntry<String, WidgetBuilder>> _fieldDataRows(FieldObject field) {
     final staticValue = field.obj.staticValue;
     return [
-      ...vmObjectGeneralDataRows(
-        controller,
-        field,
-      ),
+      ...vmObjectGeneralDataRows(controller, field),
       selectableTextBuilderMapEntry(
         'Observed types',
         _fieldObservedTypes(field),

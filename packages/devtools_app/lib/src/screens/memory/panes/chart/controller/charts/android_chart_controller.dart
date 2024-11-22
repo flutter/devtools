@@ -30,10 +30,7 @@ class AndroidChartController extends ChartController {
     this.memoryTimeline, {
     required this.paused,
     List<int> sharedLabels = const <int>[],
-  }) : super(
-          name: 'Android',
-          sharedLabelTimestamps: sharedLabels,
-        ) {
+  }) : super(name: 'Android', sharedLabelTimestamps: sharedLabels) {
     setupData();
 
     addAutoDisposeListener(memoryTimeline.sampleAdded, () {
@@ -276,19 +273,13 @@ class AndroidChartController extends ChartController {
     final graphicValue = adb.graphics.toDouble();
     addDataToTrace(
       AndroidTraceName.graphics.index,
-      chart_trace.Data(
-        timestamp,
-        graphicValue,
-      ),
+      chart_trace.Data(timestamp, graphicValue),
     );
 
     final nativeHeapValue = adb.nativeHeap.toDouble();
     addDataToTrace(
       AndroidTraceName.nativeHeap.index,
-      chart_trace.Data(
-        timestamp,
-        nativeHeapValue,
-      ),
+      chart_trace.Data(timestamp, nativeHeapValue),
     );
 
     final javaHeapValue = adb.javaHeap.toDouble();

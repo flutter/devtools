@@ -12,16 +12,15 @@ import 'package:flutter_test/flutter_test.dart';
 InspectorTreeController inspectorTreeControllerFromNode(
   RemoteDiagnosticsNode node,
 ) {
-  final controller = InspectorTreeController()
-    ..config = InspectorTreeConfig(
-      onNodeAdded: (_, _) {},
-      onClientActiveChange: (_) {},
-    );
+  final controller =
+      InspectorTreeController()
+        ..config = InspectorTreeConfig(
+          onNodeAdded: (_, _) {},
+          onClientActiveChange: (_) {},
+        );
 
-  controller.root = InspectorTreeNode()
-    ..appendChild(
-      InspectorTreeNode()..diagnostic = node,
-    );
+  controller.root =
+      InspectorTreeNode()..appendChild(InspectorTreeNode()..diagnostic = node);
 
   return controller;
 }
@@ -34,28 +33,28 @@ Future<RemoteDiagnosticsNode> widgetToInspectorTreeDiagnosticsNode({
 }) async {
   await tester.pumpWidget(wrap(widget));
   final element = find.byWidget(widget).evaluate().first;
-  final nodeJson =
-      element.toDiagnosticsNode(style: DiagnosticsTreeStyle.dense).toJsonMap(
-            InspectorSerializationDelegate(
-              service: WidgetInspectorService.instance,
-              subtreeDepth: 1000000,
-              summaryTree: true,
-              addAdditionalPropertiesCallback: (node, delegate) {
-                final additionalJson = <String, Object>{};
+  final nodeJson = element
+      .toDiagnosticsNode(style: DiagnosticsTreeStyle.dense)
+      .toJsonMap(
+        InspectorSerializationDelegate(
+          service: WidgetInspectorService.instance,
+          subtreeDepth: 1000000,
+          summaryTree: true,
+          addAdditionalPropertiesCallback: (node, delegate) {
+            final additionalJson = <String, Object>{};
 
-                final value = node.value;
-                if (value is Element) {
-                  final renderObject = value.renderObject;
-                  if (renderObject is RenderParagraph) {
-                    additionalJson['textPreview'] =
-                        renderObject.text.toPlainText();
-                  }
-                }
+            final value = node.value;
+            if (value is Element) {
+              final renderObject = value.renderObject;
+              if (renderObject is RenderParagraph) {
+                additionalJson['textPreview'] = renderObject.text.toPlainText();
+              }
+            }
 
-                return additionalJson;
-              },
-            ),
-          );
+            return additionalJson;
+          },
+        ),
+      );
 
   return RemoteDiagnosticsNode(nodeJson, null, false, null);
 }

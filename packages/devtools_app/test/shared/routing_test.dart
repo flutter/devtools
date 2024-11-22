@@ -28,15 +28,11 @@ void main() {
 
   const page = 'Test';
   const defaultArgs = <String, String>{};
-  const updatedArgs = <String, String>{
-    'arg': 'foo',
-  };
+  const updatedArgs = <String, String>{'arg': 'foo'};
 
   final originalState = DevToolsNavigationState(
     kind: 'Test',
-    state: {
-      'state': '1',
-    },
+    state: {'state': '1'},
   );
 
   late final duplicateOriginalState = DevToolsNavigationState(
@@ -46,9 +42,7 @@ void main() {
 
   final updatedState = DevToolsNavigationState(
     kind: 'Test',
-    state: {
-      'state': '2',
-    },
+    state: {'state': '2'},
   );
 
   setUp(() {

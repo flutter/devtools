@@ -54,11 +54,14 @@ class LinkedScrollControllerGroup {
 
   /// Creates a new controller that is linked to any existing ones.
   ScrollController addAndGet() {
-    final initialScrollOffset = _attachedControllers.isEmpty
-        ? 0.0
-        : _attachedControllers.first.position.pixels;
-    final controller =
-        _LinkedScrollController(this, initialScrollOffset: initialScrollOffset);
+    final initialScrollOffset =
+        _attachedControllers.isEmpty
+            ? 0.0
+            : _attachedControllers.first.position.pixels;
+    final controller = _LinkedScrollController(
+      this,
+      initialScrollOffset: initialScrollOffset,
+    );
     _allControllers.add(controller);
     controller.addListener(_offsetNotifier.notifyListeners);
     return controller;

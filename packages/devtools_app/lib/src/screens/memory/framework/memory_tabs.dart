@@ -39,39 +39,33 @@ class MemoryTabView extends StatelessWidget {
   }
 
   TabAndView _diff() => (
-        tab: DevToolsTab.create(
-          key: MemoryScreenKeys.diffTab,
-          gaPrefix: _gaPrefix,
-          tabName: 'Diff Snapshots',
-        ),
-        tabView: KeepAliveWrapper(
-          child: DiffPane(
-            diffController: controller.diff,
-          ),
-        ),
-      );
+    tab: DevToolsTab.create(
+      key: MemoryScreenKeys.diffTab,
+      gaPrefix: _gaPrefix,
+      tabName: 'Diff Snapshots',
+    ),
+    tabView: KeepAliveWrapper(child: DiffPane(diffController: controller.diff)),
+  );
 
   TabAndView _profile() => (
-        tab: DevToolsTab.create(
-          key: MemoryScreenKeys.profileTab,
-          tabName: 'Profile Memory',
-          gaPrefix: _gaPrefix,
-        ),
-        tabView: KeepAliveWrapper(
-          child: AllocationProfileTableView(
-            controller: controller.profile!,
-          ),
-        ),
-      );
+    tab: DevToolsTab.create(
+      key: MemoryScreenKeys.profileTab,
+      tabName: 'Profile Memory',
+      gaPrefix: _gaPrefix,
+    ),
+    tabView: KeepAliveWrapper(
+      child: AllocationProfileTableView(controller: controller.profile!),
+    ),
+  );
 
   TabAndView _trace() => (
-        tab: DevToolsTab.create(
-          key: MemoryScreenKeys.traceTab,
-          tabName: 'Trace Instances',
-          gaPrefix: _gaPrefix,
-        ),
-        tabView: KeepAliveWrapper(
-          child: TracingPane(controller: controller.trace!),
-        ),
-      );
+    tab: DevToolsTab.create(
+      key: MemoryScreenKeys.traceTab,
+      tabName: 'Trace Instances',
+      gaPrefix: _gaPrefix,
+    ),
+    tabView: KeepAliveWrapper(
+      child: TracingPane(controller: controller.trace!),
+    ),
+  );
 }

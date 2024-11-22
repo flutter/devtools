@@ -32,13 +32,10 @@ class _HeapObjects {
 }
 
 class LiveClassSampler {
-  LiveClassSampler(
-    this.heapClass, {
-    ObjectSet? objects,
-    HeapData? heap,
-  })  : assert(objects?.indexes.isNotEmpty ?? true),
-        assert((objects == null) == (heap == null)),
-        _objects = objects == null ? null : _HeapObjects(objects, heap!);
+  LiveClassSampler(this.heapClass, {ObjectSet? objects, HeapData? heap})
+    : assert(objects?.indexes.isNotEmpty ?? true),
+      assert((objects == null) == (heap == null)),
+      _objects = objects == null ? null : _HeapObjects(objects, heap!);
 
   final HeapClassName heapClass;
   final _HeapObjects? _objects;
@@ -55,11 +52,10 @@ class LiveClassSampler {
 
       final object =
           (await serviceConnection.serviceManager.service!.getInstances(
-        isolateId,
-        theClass.id!,
-        1,
-      ))
-              .instances?[0];
+            isolateId,
+            theClass.id!,
+            1,
+          )).instances?[0];
 
       if (object is InstanceRef) return object;
       return null;
@@ -109,8 +105,9 @@ class LiveClassSampler {
   }
 
   bool get isEvalEnabled =>
-      heapClass
-          .classType(serviceConnection.serviceManager.rootInfoNow().package) !=
+      heapClass.classType(
+        serviceConnection.serviceManager.rootInfoNow().package,
+      ) !=
       ClassType.runtime;
 
   Future<void> allLiveToConsole({
@@ -161,11 +158,8 @@ class LiveClassSampler {
 }
 
 class SnapshotClassSampler extends LiveClassSampler {
-  SnapshotClassSampler(
-    super.heapClass,
-    ObjectSet objects,
-    HeapData heap,
-  ) : super(heap: heap, objects: objects);
+  SnapshotClassSampler(super.heapClass, ObjectSet objects, HeapData heap)
+    : super(heap: heap, objects: objects);
 
   Future<void> oneLiveStaticToConsole({required String sourceFeature}) async {
     ga.select(
@@ -176,11 +170,13 @@ class SnapshotClassSampler extends LiveClassSampler {
     final heapObjects = _objects!;
     final instances = (await _liveInstances())?.instances;
 
-    final instanceRef = instances?.firstWhereOrNull(
-      (objRef) =>
-          objRef is InstanceRef &&
-          heapObjects.codes.contains(objRef.identityHashCode),
-    ) as InstanceRef?;
+    final instanceRef =
+        instances?.firstWhereOrNull(
+              (objRef) =>
+                  objRef is InstanceRef &&
+                  heapObjects.codes.contains(objRef.identityHashCode),
+            )
+            as InstanceRef?;
 
     if (instanceRef == null) {
       serviceConnection.consoleService.appendStdio(

@@ -122,18 +122,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     final widgetTrees = SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
-      children: [
-        inspectorTree,
-        WidgetDetails(controller: controller),
-      ],
+      children: [inspectorTree, WidgetDetails(controller: controller)],
     );
     return Column(
       children: <Widget>[
         InspectorControls(controller: controller),
         const SizedBox(height: intermediateSpacing),
-        Expanded(
-          child: widgetTrees,
-        ),
+        Expanded(child: widgetTrees),
       ],
     );
   }
@@ -149,24 +144,28 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 constraints: constraints,
                 onRefreshInspectorPressed: _refreshInspector,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
-                searchFieldBuilder: () =>
-                    StatelessSearchField<InspectorTreeRow>(
-                  controller: _inspectorTreeController,
-                  searchFieldEnabled: true,
-                  shouldRequestFocus: searchVisible,
-                  supportsNavigation: true,
-                  onClose: _onSearchVisibleToggle,
-                ),
+                searchFieldBuilder:
+                    () => StatelessSearchField<InspectorTreeRow>(
+                      controller: _inspectorTreeController,
+                      searchFieldEnabled: true,
+                      shouldRequestFocus: searchVisible,
+                      supportsNavigation: true,
+                      onClose: _onSearchVisibleToggle,
+                    ),
               ),
               Expanded(
                 child: ValueListenableBuilder(
                   valueListenable: serviceConnection.errorBadgeManager
                       .erroredItemsForPage(InspectorScreen.id),
                   builder: (_, LinkedHashMap<String, DevToolsError> errors, _) {
-                    final inspectableErrors = errors.map(
-                      (key, value) =>
-                          MapEntry(key, value as InspectableWidgetError),
-                    ) as LinkedHashMap<String, InspectableWidgetError>;
+                    final inspectableErrors =
+                        errors.map(
+                              (key, value) => MapEntry(
+                                key,
+                                value as InspectableWidgetError,
+                              ),
+                            )
+                            as LinkedHashMap<String, InspectableWidgetError>;
                     return Stack(
                       children: [
                         InspectorTree(
@@ -179,15 +178,17 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                         if (errors.isNotEmpty)
                           ValueListenableBuilder<int?>(
                             valueListenable: controller.selectedErrorIndex,
-                            builder: (_, selectedErrorIndex, _) => Positioned(
-                              top: 0,
-                              right: 0,
-                              child: ErrorNavigator(
-                                errors: inspectableErrors,
-                                errorIndex: selectedErrorIndex,
-                                onSelectError: controller.selectErrorByIndex,
-                              ),
-                            ),
+                            builder:
+                                (_, selectedErrorIndex, _) => Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: ErrorNavigator(
+                                    errors: inspectableErrors,
+                                    errorIndex: selectedErrorIndex,
+                                    onSelectError:
+                                        controller.selectErrorByIndex,
+                                  ),
+                                ),
                           ),
                       ],
                     );
@@ -212,23 +213,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     ga.select(gac.inspector, gac.refresh);
     unawaited(
       blockWhileInProgress(() async {
-        // If the user is force refreshing the inspector before the first load has
-        // completed, this could indicate a slow load time or that the inspector
-        // failed to load the tree once available.
-        if (!controller.firstInspectorTreeLoadCompleted) {
-          // We do not want to complete this timing operation because the force
-          // refresh will skew the results.
-          ga.cancelTimingOperation(
-            InspectorScreen.id,
-            gac.pageReady,
-          );
-          ga.select(
-            gac.inspector,
-            gac.refreshEmptyTree,
-          );
-          controller.firstInspectorTreeLoadCompleted = true;
-        }
-        await controller.onForceRefresh();
+        await controller.refreshInspector();
       }),
     );
   }
@@ -269,18 +254,18 @@ class InspectorTreeControls extends StatelessWidget {
               ),
               ...!isSearchVisible
                   ? [
-                      const Spacer(),
-                      ToolbarAction(
-                        icon: Icons.search,
-                        onPressed: onSearchVisibleToggle,
-                        tooltip: 'Search Tree',
-                      ),
-                    ]
+                    const Spacer(),
+                    ToolbarAction(
+                      icon: Icons.search,
+                      onPressed: onSearchVisibleToggle,
+                      tooltip: 'Search Tree',
+                    ),
+                  ]
                   : [
-                      constraints.maxWidth >= _searchBreakpoint
-                          ? _buildSearchControls()
-                          : const Spacer(),
-                    ],
+                    constraints.maxWidth >= _searchBreakpoint
+                        ? _buildSearchControls()
+                        : const Spacer(),
+                  ],
               ToolbarAction(
                 icon: Icons.refresh,
                 onPressed: onRefreshInspectorPressed,
@@ -290,10 +275,7 @@ class InspectorTreeControls extends StatelessWidget {
           ),
         ),
         if (isSearchVisible && constraints.maxWidth < _searchBreakpoint)
-          _controlsContainer(
-            context,
-            Row(children: [_buildSearchControls()]),
-          ),
+          _controlsContainer(context, Row(children: [_buildSearchControls()])),
       ],
     );
   }
@@ -302,9 +284,7 @@ class InspectorTreeControls extends StatelessWidget {
     return Container(
       height: defaultHeaderHeight,
       decoration: BoxDecoration(
-        border: Border(
-          bottom: defaultBorderSide(Theme.of(context)),
-        ),
+        border: Border(bottom: defaultBorderSide(Theme.of(context))),
       ),
       child: child,
     );
@@ -337,9 +317,10 @@ class ErrorNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final label = errorIndex != null
-        ? 'Error ${errorIndex! + 1}/${errors.length}'
-        : 'Errors: ${errors.length}';
+    final label =
+        errorIndex != null
+            ? 'Error ${errorIndex! + 1}/${errors.length}'
+            : 'Errors: ${errors.length}';
     return Container(
       color: colorScheme.errorContainer,
       child: Padding(
@@ -353,9 +334,7 @@ class ErrorNavigator extends StatelessWidget {
               padding: const EdgeInsets.only(right: denseSpacing),
               child: Text(
                 label,
-                style: TextStyle(
-                  color: colorScheme.onErrorContainer,
-                ),
+                style: TextStyle(color: colorScheme.onErrorContainer),
               ),
             ),
             _ErrorNavigatorButton(

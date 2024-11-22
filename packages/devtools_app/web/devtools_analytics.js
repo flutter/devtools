@@ -44,6 +44,9 @@ function initializeGA() {
       'metric10': 'root_set_count',
       'metric11': 'row_count',
       'metric12': 'inspector_tree_controller_id',
+      'metric13': 'android_app_id',
+      'metric14': 'ios_bundle_id',
+      'metric15': 'is_v2_inspector',
     },
     cookie_flags: 'SameSite=None;Secure',
   });

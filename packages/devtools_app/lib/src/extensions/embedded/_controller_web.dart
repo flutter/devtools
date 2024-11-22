@@ -57,9 +57,10 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     );
     final queryParams = {
       ...DevToolsQueryParams.load().params,
-      ExtensionEventParameters.theme: isDarkThemeEnabled()
-          ? ExtensionEventParameters.themeValueDark
-          : ExtensionEventParameters.themeValueLight,
+      ExtensionEventParameters.theme:
+          isDarkThemeEnabled()
+              ? ExtensionEventParameters.themeValueDark
+              : ExtensionEventParameters.themeValueLight,
       if (dtdManager.uri != null) 'dtdUri': dtdManager.uri.toString(),
     };
     return Uri.parse(baseUri).copyWith(queryParameters: queryParams).toString();
@@ -84,12 +85,12 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     );
     _initialized = true;
 
-    _extensionIFrame = HTMLIFrameElement()
-      // This url is safe because we built it ourselves and it does not include
-      // any user input.
-      // ignore: unsafe_html
-      ..src = extensionUrl
-      ..allow = 'usb';
+    _extensionIFrame =
+        HTMLIFrameElement()
+          // This url is safe because we built it ourselves and it does not include
+          // any user input.
+          ..src = extensionUrl
+          ..allow = 'usb';
     _extensionIFrame.style
       ..border = 'none'
       ..height = '100%'

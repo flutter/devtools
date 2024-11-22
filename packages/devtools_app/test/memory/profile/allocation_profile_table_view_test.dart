@@ -94,10 +94,7 @@ void main() {
           // Usage
           expect(
             find.text(
-              prettyPrintBytes(
-                stats.usage,
-                includeUnit: true,
-              )!,
+              prettyPrintBytes(stats.usage, includeUnit: true)!,
               findRichText: true,
             ),
             findsWidgets,
@@ -106,10 +103,7 @@ void main() {
           // Capacity
           expect(
             find.text(
-              prettyPrintBytes(
-                stats.capacity,
-                includeUnit: true,
-              )!,
+              prettyPrintBytes(stats.capacity, includeUnit: true)!,
               findRichText: true,
             ),
             findsWidgets,
@@ -129,10 +123,7 @@ void main() {
 
           // # of collections
           expect(
-            find.text(
-              stats.collections.toString(),
-              findRichText: true,
-            ),
+            find.text(stats.collections.toString(), findRichText: true),
             findsWidgets,
           );
         }
@@ -143,203 +134,189 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize(
-      'manually refreshes',
-      windowSize,
-      (WidgetTester tester) async {
-        await scene.pump(tester);
+    testWidgetsWithWindowSize('manually refreshes', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await scene.pump(tester);
 
-        final allocationProfileController = scene.controller.profile!;
-        await navigateToAllocationProfile(tester, allocationProfileController);
+      final allocationProfileController = scene.controller.profile!;
+      await navigateToAllocationProfile(tester, allocationProfileController);
 
-        // We'll clear it for now so we can tell when it's refreshed.
-        allocationProfileController.clearCurrentProfile();
-        await tester.pump();
+      // We'll clear it for now so we can tell when it's refreshed.
+      allocationProfileController.clearCurrentProfile();
+      await tester.pump();
 
-        // Refresh the profile.
-        await tester.tap(
-          find.byIcon(Icons.refresh).first,
-        );
-        await tester.pumpAndSettle();
+      // Refresh the profile.
+      await tester.tap(find.byIcon(Icons.refresh).first);
+      await tester.pumpAndSettle();
 
-        // Ensure that we have populated the current allocation profile.
-        expect(
-          allocationProfileController.currentAllocationProfile.value,
-          isNotNull,
-        );
+      // Ensure that we have populated the current allocation profile.
+      expect(
+        allocationProfileController.currentAllocationProfile.value,
+        isNotNull,
+      );
 
-        expect(find.text('Class'), findsOneWidget);
-      },
-    );
+      expect(find.text('Class'), findsOneWidget);
+    });
 
-    testWidgetsWithWindowSize(
-      'refreshes on GC',
-      windowSize,
-      (WidgetTester tester) async {
-        await scene.pump(tester);
+    testWidgetsWithWindowSize('refreshes on GC', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await scene.pump(tester);
 
-        final allocationProfileController = scene.controller.profile!;
+      final allocationProfileController = scene.controller.profile!;
 
-        await navigateToAllocationProfile(tester, allocationProfileController);
+      await navigateToAllocationProfile(tester, allocationProfileController);
 
-        // We'll clear it for now so we can tell when it's refreshed.
-        allocationProfileController.clearCurrentProfile();
-        await tester.pump();
+      // We'll clear it for now so we can tell when it's refreshed.
+      allocationProfileController.clearCurrentProfile();
+      await tester.pump();
 
-        // Emit a GC event and confirm we don't perform a refresh.
-        final fakeService = scene.fakeServiceConnection.serviceManager.service
-            as FakeVmServiceWrapper;
-        fakeService.emitGCEvent();
-        expect(
-          allocationProfileController.currentAllocationProfile.value,
-          isNull,
-        );
+      // Emit a GC event and confirm we don't perform a refresh.
+      final fakeService =
+          scene.fakeServiceConnection.serviceManager.service
+              as FakeVmServiceWrapper;
+      fakeService.emitGCEvent();
+      expect(
+        allocationProfileController.currentAllocationProfile.value,
+        isNull,
+      );
 
-        // Enable "Refresh on GC" functionality.
-        await tester.tap(
-          find.text('Refresh on GC').first,
-        );
-        await tester.pump();
+      // Enable "Refresh on GC" functionality.
+      await tester.tap(find.text('Refresh on GC').first);
+      await tester.pump();
 
-        // Emit a GC event to trigger a refresh.
-        fakeService.emitGCEvent();
-        // Time to refresh.
-        await tester.runAsync(() => Future.delayed(const Duration(seconds: 1)));
-        await tester.pumpAndSettle();
+      // Emit a GC event to trigger a refresh.
+      fakeService.emitGCEvent();
+      // Time to refresh.
+      await tester.runAsync(() => Future.delayed(const Duration(seconds: 1)));
+      await tester.pumpAndSettle();
 
-        // Ensure that we have populated the current allocation profile.
-        expect(
-          allocationProfileController.currentAllocationProfile.value,
-          isNotNull,
-        );
-      },
-    );
+      // Ensure that we have populated the current allocation profile.
+      expect(
+        allocationProfileController.currentAllocationProfile.value,
+        isNotNull,
+      );
+    });
 
     // Regression test for https://github.com/flutter/devtools/issues/4484.
-    testWidgetsWithWindowSize(
-      'sorts correctly',
-      windowSize,
-      (WidgetTester tester) async {
-        await scene.pump(tester);
+    testWidgetsWithWindowSize('sorts correctly', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await scene.pump(tester);
 
-        final table = find.byType(FlatTable<ProfileRecord>);
-        expect(table, findsOneWidget);
+      final table = find.byType(FlatTable<ProfileRecord>);
+      expect(table, findsOneWidget);
 
-        final cls = find.text('Class');
-        final instances = find.text('Instances');
-        final size = find.text('Total Size');
-        final dartHeap = find.text('Dart Heap');
+      final cls = find.text('Class');
+      final instances = find.text('Instances');
+      final size = find.text('Total Size');
+      final dartHeap = find.text('Dart Heap');
 
-        final columns = <Finder>[
-          cls,
-          instances,
-          size,
-          dartHeap,
-        ];
+      final columns = <Finder>[cls, instances, size, dartHeap];
 
-        for (final columnFinder in columns) {
-          expect(columnFinder, findsOneWidget);
-        }
+      for (final columnFinder in columns) {
+        expect(columnFinder, findsOneWidget);
+      }
 
-        final state = tester.state<FlatTableState<ProfileRecord>>(table.first);
-        var data = state.tableController.tableData.value.data;
+      final state = tester.state<FlatTableState<ProfileRecord>>(table.first);
+      var data = state.tableController.tableData.value.data;
 
-        // Initial state should be sorted by size, largest to smallest.
-        int lastValue = data.first.totalDartHeapSize;
-        for (final element in data) {
-          expect(element.totalDartHeapSize <= lastValue, isTrue);
-          lastValue = element.totalDartHeapSize;
-        }
+      // Initial state should be sorted by size, largest to smallest.
+      int lastValue = data.first.totalDartHeapSize;
+      for (final element in data) {
+        expect(element.totalDartHeapSize <= lastValue, isTrue);
+        lastValue = element.totalDartHeapSize;
+      }
 
-        // Sort by size, smallest to largest.
-        await tester.tap(size);
-        await tester.pumpAndSettle();
+      // Sort by size, smallest to largest.
+      await tester.tap(size);
+      await tester.pumpAndSettle();
 
-        data = state.tableController.tableData.value.data;
+      data = state.tableController.tableData.value.data;
 
-        lastValue = data.first.totalDartHeapSize;
-        for (final element in data) {
-          expect(element.totalDartHeapSize >= lastValue, isTrue);
-          lastValue = element.totalDartHeapSize;
-        }
+      lastValue = data.first.totalDartHeapSize;
+      for (final element in data) {
+        expect(element.totalDartHeapSize >= lastValue, isTrue);
+        lastValue = element.totalDartHeapSize;
+      }
 
-        // Sort by class name, alphabetically
-        await tester.tap(cls);
-        await tester.pumpAndSettle();
+      // Sort by class name, alphabetically
+      await tester.tap(cls);
+      await tester.pumpAndSettle();
 
-        data = state.tableController.tableData.value.data;
+      data = state.tableController.tableData.value.data;
 
-        String lastClassName = data.first.heapClass.className;
-        for (final element in data) {
-          final name = element.heapClass.className;
-          expect(name.compareTo(lastClassName) >= 0, isTrue);
-          lastClassName = name;
-        }
+      String lastClassName = data.first.heapClass.className;
+      for (final element in data) {
+        final name = element.heapClass.className;
+        expect(name.compareTo(lastClassName) >= 0, isTrue);
+        lastClassName = name;
+      }
 
-        // Sort by class name, reverse alphabetical order
-        await tester.tap(cls);
-        await tester.pumpAndSettle();
+      // Sort by class name, reverse alphabetical order
+      await tester.tap(cls);
+      await tester.pumpAndSettle();
 
-        data = state.tableController.tableData.value.data;
+      data = state.tableController.tableData.value.data;
 
-        lastClassName = data.first.heapClass.className;
-        for (final element in data) {
-          final name = element.heapClass.className;
-          expect(name.compareTo(lastClassName) <= 0, isTrue);
-          lastClassName = name;
-        }
+      lastClassName = data.first.heapClass.className;
+      for (final element in data) {
+        final name = element.heapClass.className;
+        expect(name.compareTo(lastClassName) <= 0, isTrue);
+        lastClassName = name;
+      }
 
-        // Sort by instance count, largest to smallest.
-        await tester.tap(instances);
-        await tester.pumpAndSettle();
+      // Sort by instance count, largest to smallest.
+      await tester.tap(instances);
+      await tester.pumpAndSettle();
 
-        data = state.tableController.tableData.value.data;
+      data = state.tableController.tableData.value.data;
 
-        lastValue = data.first.totalInstances!;
-        for (final element in data) {
-          if (element.isTotal) continue;
-          expect(element.totalInstances! <= lastValue, isTrue);
-          lastValue = element.totalInstances!;
-        }
+      lastValue = data.first.totalInstances!;
+      for (final element in data) {
+        if (element.isTotal) continue;
+        expect(element.totalInstances! <= lastValue, isTrue);
+        lastValue = element.totalInstances!;
+      }
 
-        // Sort by instance count, smallest to largest.
-        await tester.tap(instances);
-        await tester.pumpAndSettle();
+      // Sort by instance count, smallest to largest.
+      await tester.tap(instances);
+      await tester.pumpAndSettle();
 
-        data = state.tableController.tableData.value.data;
+      data = state.tableController.tableData.value.data;
 
-        lastValue = data.first.totalInstances!;
-        for (final element in data) {
-          expect(element.totalInstances! >= lastValue, isTrue);
-          lastValue = element.totalInstances!;
-        }
+      lastValue = data.first.totalInstances!;
+      for (final element in data) {
+        expect(element.totalInstances! >= lastValue, isTrue);
+        lastValue = element.totalInstances!;
+      }
 
-        // Sort by dart heap size, largest to smallest.
-        await tester.tap(dartHeap);
-        await tester.pumpAndSettle();
+      // Sort by dart heap size, largest to smallest.
+      await tester.tap(dartHeap);
+      await tester.pumpAndSettle();
 
-        data = state.tableController.tableData.value.data;
+      data = state.tableController.tableData.value.data;
 
-        lastValue = data.first.totalDartHeapSize;
-        for (final element in data) {
-          final internalSize = element.totalDartHeapSize;
-          expect(internalSize <= lastValue, isTrue);
-          lastValue = internalSize;
-        }
+      lastValue = data.first.totalDartHeapSize;
+      for (final element in data) {
+        final internalSize = element.totalDartHeapSize;
+        expect(internalSize <= lastValue, isTrue);
+        lastValue = internalSize;
+      }
 
-        // Sort by dart heap size, smallest to largest.
-        await tester.tap(dartHeap);
-        await tester.pumpAndSettle();
+      // Sort by dart heap size, smallest to largest.
+      await tester.tap(dartHeap);
+      await tester.pumpAndSettle();
 
-        data = state.tableController.tableData.value.data;
+      data = state.tableController.tableData.value.data;
 
-        lastValue = data.first.totalDartHeapSize;
-        for (final element in data) {
-          final internalSize = element.totalDartHeapSize;
-          expect(internalSize >= lastValue, isTrue);
-          lastValue = internalSize;
-        }
-      },
-    );
+      lastValue = data.first.totalDartHeapSize;
+      for (final element in data) {
+        final internalSize = element.totalDartHeapSize;
+        expect(internalSize >= lastValue, isTrue);
+        lastValue = internalSize;
+      }
+    });
   });
 }

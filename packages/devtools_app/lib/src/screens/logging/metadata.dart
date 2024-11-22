@@ -9,7 +9,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-import '../../shared/common_widgets.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/icons.dart';
 import 'logging_controller.dart';
@@ -162,13 +161,15 @@ abstract class MetadataChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(_borderRadius),
-          border: outlined
-              ? Border.all(color: theme.colorScheme.subtleTextColor)
-              : null,
+          border:
+              outlined
+                  ? Border.all(color: theme.colorScheme.subtleTextColor)
+                  : null,
         ),
-        margin: includeLeadingMargin
-            ? const EdgeInsets.only(left: denseSpacing)
-            : null,
+        margin:
+            includeLeadingMargin
+                ? const EdgeInsets.only(left: denseSpacing)
+                : null,
         padding: const EdgeInsets.symmetric(
           horizontal: horizontalPadding,
           vertical: verticalPadding,
@@ -324,9 +325,10 @@ class ZoneChip extends MetadataChip {
     super.foregroundColor,
     super.outlined = false,
   }) : super(
-          text: name,
-          tooltip: identityHashCode != null
-              ? 'Zone identityHashCode: $identityHashCode'
-              : null,
-        );
+         text: name,
+         tooltip:
+             identityHashCode != null
+                 ? 'Zone identityHashCode: $identityHashCode'
+                 : null,
+       );
 }

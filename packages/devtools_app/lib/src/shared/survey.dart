@@ -74,16 +74,15 @@ class SurveyService {
       final actions = [
         NotificationAction(
           label: _noThanksLabel,
-          onPressed: () => _noThanksPressed(
-            message: message,
-          ),
+          onPressed: () => _noThanksPressed(message: message),
         ),
         NotificationAction(
           label: _takeSurveyLabel,
-          onPressed: () => _takeSurveyPressed(
-            surveyUrl: _generateSurveyUrl(survey.url!),
-            message: message,
-          ),
+          onPressed:
+              () => _takeSurveyPressed(
+                surveyUrl: _generateSurveyUrl(survey.url!),
+                message: message,
+              ),
           isPrimary: true,
         ),
       ];
@@ -143,9 +142,7 @@ class SurveyService {
     return null;
   }
 
-  void _noThanksPressed({
-    required String message,
-  }) async {
+  void _noThanksPressed({required String message}) async {
     await server.setSurveyActionTaken();
     notificationService.dismiss(message);
   }
@@ -183,9 +180,10 @@ class DevToolsSurvey {
         endDateAsString != null ? DateTime.parse(endDateAsString) : null;
     final title = json[_titleKey] as String?;
     final surveyUrl = json[_urlKey] as String?;
-    final minDevToolsVersion = minVersionAsString != null
-        ? SemanticVersion.parse(minVersionAsString)
-        : null;
+    final minDevToolsVersion =
+        minVersionAsString != null
+            ? SemanticVersion.parse(minVersionAsString)
+            : null;
     final devEnvironments =
         (json[_devEnvironmentsKey] as List?)?.cast<String>().toList();
     return DevToolsSurvey._(
@@ -239,17 +237,19 @@ class DevToolsSurvey {
 }
 
 extension ShowSurveyExtension on DevToolsSurvey {
-  bool get meetsDateRequirement => (startDate == null || endDate == null)
-      ? false
-      : Range(
-          startDate!.millisecondsSinceEpoch,
-          endDate!.millisecondsSinceEpoch,
-        ).contains(clock.now().millisecondsSinceEpoch);
+  bool get meetsDateRequirement =>
+      (startDate == null || endDate == null)
+          ? false
+          : Range(
+            startDate!.millisecondsSinceEpoch,
+            endDate!.millisecondsSinceEpoch,
+          ).contains(clock.now().millisecondsSinceEpoch);
 
   bool get meetsMinVersionRequirement =>
       minDevToolsVersion == null ||
-      SemanticVersion.parse(devToolsVersion)
-          .isSupported(minSupportedVersion: minDevToolsVersion!);
+      SemanticVersion.parse(
+        devToolsVersion,
+      ).isSupported(minSupportedVersion: minDevToolsVersion!);
 
   bool get meetsEnvironmentRequirement =>
       devEnvironments == null || devEnvironments!.contains(ga.ideLaunched);

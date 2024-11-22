@@ -22,59 +22,55 @@ void main() {
     }
 
     test('tracks work', () {
-      _wrapAndRunAsync(
-        (async) async {
-          final tracker = FutureWorkTracker();
-          expect(tracker.active.value, isFalse);
+      _wrapAndRunAsync((async) async {
+        final tracker = FutureWorkTracker();
+        expect(tracker.active.value, isFalse);
 
-          final completer1 = Completer<Object?>();
-          unawaited(tracker.track(() => completer1.future));
-          advanceClock(async);
-          expect(tracker.active.value, isTrue);
+        final completer1 = Completer<Object?>();
+        unawaited(tracker.track(() => completer1.future));
+        advanceClock(async);
+        expect(tracker.active.value, isTrue);
 
-          final completer2 = Completer<Object?>();
-          unawaited(tracker.track(() => completer2.future));
-          advanceClock(async);
-          expect(tracker.active.value, isTrue);
+        final completer2 = Completer<Object?>();
+        unawaited(tracker.track(() => completer2.future));
+        advanceClock(async);
+        expect(tracker.active.value, isTrue);
 
-          completer1.complete(null);
-          unawaited(completer1.future);
-          advanceClock(async);
-          expect(tracker.active.value, isTrue);
+        completer1.complete(null);
+        unawaited(completer1.future);
+        advanceClock(async);
+        expect(tracker.active.value, isTrue);
 
-          completer2.complete(null);
-          unawaited(completer2.future);
-          advanceClock(async);
-          expect(tracker.active.value, isFalse);
-        },
-      );
+        completer2.complete(null);
+        unawaited(completer2.future);
+        advanceClock(async);
+        expect(tracker.active.value, isFalse);
+      });
     });
 
     test('tracks work after clear', () {
-      _wrapAndRunAsync(
-        (async) async {
-          final tracker = FutureWorkTracker();
-          expect(tracker.active.value, isFalse);
+      _wrapAndRunAsync((async) async {
+        final tracker = FutureWorkTracker();
+        expect(tracker.active.value, isFalse);
 
-          final completer1 = Completer<Object?>();
-          unawaited(tracker.track(() => completer1.future));
-          advanceClock(async);
-          expect(tracker.active.value, isTrue);
+        final completer1 = Completer<Object?>();
+        unawaited(tracker.track(() => completer1.future));
+        advanceClock(async);
+        expect(tracker.active.value, isTrue);
 
-          tracker.clear();
-          expect(tracker.active.value, isFalse);
+        tracker.clear();
+        expect(tracker.active.value, isFalse);
 
-          final completer2 = Completer<Object?>();
-          unawaited(tracker.track(() => completer2.future));
-          advanceClock(async);
-          expect(tracker.active.value, isTrue);
+        final completer2 = Completer<Object?>();
+        unawaited(tracker.track(() => completer2.future));
+        advanceClock(async);
+        expect(tracker.active.value, isTrue);
 
-          completer2.complete(null);
-          unawaited(completer2.future);
-          advanceClock(async);
-          expect(tracker.active.value, isFalse);
-        },
-      );
+        completer2.complete(null);
+        unawaited(completer2.future);
+        advanceClock(async);
+        expect(tracker.active.value, isFalse);
+      });
     });
 
     test('tracks failed work', () {

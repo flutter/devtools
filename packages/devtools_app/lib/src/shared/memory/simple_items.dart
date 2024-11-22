@@ -8,16 +8,10 @@ import 'package:file_selector/file_selector.dart';
 import 'package:vm_service/vm_service.dart';
 
 /// Direction of reference between objects in memory.
-enum RefDirection {
-  inbound,
-  outbound,
-}
+enum RefDirection { inbound, outbound }
 
 class MemoryFootprint {
-  MemoryFootprint({
-    required this.dart,
-    required this.reachable,
-  });
+  MemoryFootprint({required this.dart, required this.reachable});
 
   /// Reachable and unreachable total dart heap size.
   final int dart;

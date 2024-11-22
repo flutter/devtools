@@ -34,11 +34,7 @@ void main() {
 
     Future<void> pumpInitializer(WidgetTester tester) async {
       await tester.pumpWidget(
-        wrap(
-          Initializer(
-            builder: (_) => const SizedBox(key: initializedKey),
-          ),
-        ),
+        wrap(Initializer(builder: (_) => const SizedBox(key: initializedKey))),
       );
       await tester.pump();
     }
@@ -48,51 +44,49 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 3));
     }
 
-    testWidgets(
-      'immediately calls builder when connection exists',
-      (WidgetTester tester) async {
-        await pumpInitializer(tester);
-        expect(find.text(waitingText), findsNothing);
-        expect(find.text(cannotConnectText), findsNothing);
-        expect(find.byType(ConnectToNewAppButton), findsNothing);
-        expect(find.byKey(initializedKey), findsOneWidget);
+    testWidgets('immediately calls builder when connection exists', (
+      WidgetTester tester,
+    ) async {
+      await pumpInitializer(tester);
+      expect(find.text(waitingText), findsNothing);
+      expect(find.text(cannotConnectText), findsNothing);
+      expect(find.byType(ConnectToNewAppButton), findsNothing);
+      expect(find.byKey(initializedKey), findsOneWidget);
 
-        // Verify expectations are still true after the timer advances.
-        await advanceTimer(tester);
-        expect(find.text(waitingText), findsNothing);
-        expect(find.text(cannotConnectText), findsNothing);
-        expect(find.byType(ConnectToNewAppButton), findsNothing);
-        expect(find.byKey(initializedKey), findsOneWidget);
-      },
-    );
+      // Verify expectations are still true after the timer advances.
+      await advanceTimer(tester);
+      expect(find.text(waitingText), findsNothing);
+      expect(find.text(cannotConnectText), findsNothing);
+      expect(find.byType(ConnectToNewAppButton), findsNothing);
+      expect(find.byKey(initializedKey), findsOneWidget);
+    });
 
-    testWidgets(
-      'calls builder late if connection is established late',
-      (WidgetTester tester) async {
-        fakeServiceConnectionManager.serviceManager.setConnectedState(false);
+    testWidgets('calls builder late if connection is established late', (
+      WidgetTester tester,
+    ) async {
+      fakeServiceConnectionManager.serviceManager.setConnectedState(false);
 
-        await pumpInitializer(tester);
-        expect(find.text(waitingText), findsOneWidget);
-        expect(find.text(cannotConnectText), findsNothing);
-        expect(find.byType(ConnectToNewAppButton), findsNothing);
-        expect(find.byKey(initializedKey), findsNothing);
+      await pumpInitializer(tester);
+      expect(find.text(waitingText), findsOneWidget);
+      expect(find.text(cannotConnectText), findsNothing);
+      expect(find.byType(ConnectToNewAppButton), findsNothing);
+      expect(find.byKey(initializedKey), findsNothing);
 
-        fakeServiceConnectionManager.serviceManager.setConnectedState(true);
-        await tester.pump();
+      fakeServiceConnectionManager.serviceManager.setConnectedState(true);
+      await tester.pump();
 
-        expect(find.text(waitingText), findsNothing);
-        expect(find.text(cannotConnectText), findsNothing);
-        expect(find.byType(ConnectToNewAppButton), findsNothing);
-        expect(find.byKey(initializedKey), findsOneWidget);
+      expect(find.text(waitingText), findsNothing);
+      expect(find.text(cannotConnectText), findsNothing);
+      expect(find.byType(ConnectToNewAppButton), findsNothing);
+      expect(find.byKey(initializedKey), findsOneWidget);
 
-        // Verify expectations are still true after the timer advances.
-        await advanceTimer(tester);
-        expect(find.text(waitingText), findsNothing);
-        expect(find.text(cannotConnectText), findsNothing);
-        expect(find.byType(ConnectToNewAppButton), findsNothing);
-        expect(find.byKey(initializedKey), findsOneWidget);
-      },
-    );
+      // Verify expectations are still true after the timer advances.
+      await advanceTimer(tester);
+      expect(find.text(waitingText), findsNothing);
+      expect(find.text(cannotConnectText), findsNothing);
+      expect(find.byType(ConnectToNewAppButton), findsNothing);
+      expect(find.byKey(initializedKey), findsOneWidget);
+    });
 
     testWidgets(
       'shows cannot connect message if connection is not established',

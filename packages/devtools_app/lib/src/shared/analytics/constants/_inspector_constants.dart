@@ -5,6 +5,4 @@
 part of '../constants.dart';
 
 /// Events for opening documentation for the inspector tab.
-enum InspectorDocs {
-  packageDirectoriesDocs;
-}
+enum InspectorDocs { packageDirectoriesDocs }

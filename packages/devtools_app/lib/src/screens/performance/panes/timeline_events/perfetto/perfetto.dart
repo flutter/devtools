@@ -17,9 +17,7 @@ class EmbeddedPerfetto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Perfetto(
-      perfettoController: perfettoController,
-    );
+    return Perfetto(perfettoController: perfettoController);
   }
 }
 

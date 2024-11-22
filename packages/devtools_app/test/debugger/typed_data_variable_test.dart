@@ -44,15 +44,13 @@ void main() {
       length: 4,
     );
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
 
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -75,14 +73,12 @@ void main() {
       length: 4,
     );
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -105,14 +101,12 @@ void main() {
       length: 4,
     );
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -135,14 +129,12 @@ void main() {
       length: 4,
     );
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -156,40 +148,33 @@ void main() {
     ]);
   });
 
-  test(
-    'Creates bound variables for Uint64List instance',
-    () async {
-      final bytes =
-          Uint64List.fromList([0, 4294967296, 4294967297, 4294967298]);
-      final instance = Instance(
-        kind: InstanceKind.kUint64List,
-        id: objectId,
-        bytes: base64.encode(bytes.buffer.asUint8List()),
-        length: 4,
-      );
-      final variable = DartObjectNode.create(
-        BoundVariable(
-          name: 'test',
-          value: instance,
-        ),
-        isolateRef,
-      );
-      when(manager.serviceManager.service!.getObject(isolateId, objectId))
-          .thenAnswer((_) async {
-        return instance;
-      });
+  test('Creates bound variables for Uint64List instance', () async {
+    final bytes = Uint64List.fromList([0, 4294967296, 4294967297, 4294967298]);
+    final instance = Instance(
+      kind: InstanceKind.kUint64List,
+      id: objectId,
+      bytes: base64.encode(bytes.buffer.asUint8List()),
+      length: 4,
+    );
+    final variable = DartObjectNode.create(
+      BoundVariable(name: 'test', value: instance),
+      isolateRef,
+    );
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
+      return instance;
+    });
 
-      await buildVariablesTree(variable);
+    await buildVariablesTree(variable);
 
-      expect(variable.children, [
-        matchesVariable(name: '[0]', value: 0),
-        matchesVariable(name: '[1]', value: 4294967296),
-        matchesVariable(name: '[2]', value: 4294967297),
-        matchesVariable(name: '[3]', value: 4294967298),
-      ]);
-    },
-    skip: kIsWeb,
-  );
+    expect(variable.children, [
+      matchesVariable(name: '[0]', value: 0),
+      matchesVariable(name: '[1]', value: 4294967296),
+      matchesVariable(name: '[2]', value: 4294967297),
+      matchesVariable(name: '[3]', value: 4294967298),
+    ]);
+  }, skip: kIsWeb);
 
   test('Creates bound variables for Int8List instance', () async {
     final bytes = Int8List.fromList([0, 1, -2, 3]);
@@ -200,14 +185,12 @@ void main() {
       length: 4,
     );
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -230,14 +213,12 @@ void main() {
       length: 4,
     );
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -260,14 +241,12 @@ void main() {
       length: 4,
     );
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -281,44 +260,40 @@ void main() {
     ]);
   });
 
-  test(
-    'Creates bound variables for Int64List instance',
-    () async {
-      final bytes =
-          Int64List.fromList([0, 4294967296, -4294967297, 4294967298]);
-      final instance = Instance(
-        kind: InstanceKind.kInt64List,
-        id: objectId,
-        bytes: base64.encode(bytes.buffer.asUint8List()),
-        length: 4,
-      );
-      final variable = DartObjectNode.create(
-        BoundVariable(
-          name: 'test',
-          value: instance,
-        ),
-        isolateRef,
-      );
-      when(manager.serviceManager.service!.getObject(isolateId, objectId))
-          .thenAnswer((_) async {
-        return instance;
-      });
+  test('Creates bound variables for Int64List instance', () async {
+    final bytes = Int64List.fromList([0, 4294967296, -4294967297, 4294967298]);
+    final instance = Instance(
+      kind: InstanceKind.kInt64List,
+      id: objectId,
+      bytes: base64.encode(bytes.buffer.asUint8List()),
+      length: 4,
+    );
+    final variable = DartObjectNode.create(
+      BoundVariable(name: 'test', value: instance),
+      isolateRef,
+    );
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
+      return instance;
+    });
 
-      await buildVariablesTree(variable);
+    await buildVariablesTree(variable);
 
-      expect(variable.children, [
-        matchesVariable(name: '[0]', value: 0),
-        matchesVariable(name: '[1]', value: 4294967296),
-        matchesVariable(name: '[2]', value: -4294967297),
-        matchesVariable(name: '[3]', value: 4294967298),
-      ]);
-    },
-    skip: kIsWeb,
-  ); // Int64List cannot be instantiated on the web.
+    expect(variable.children, [
+      matchesVariable(name: '[0]', value: 0),
+      matchesVariable(name: '[1]', value: 4294967296),
+      matchesVariable(name: '[2]', value: -4294967297),
+      matchesVariable(name: '[3]', value: 4294967298),
+    ]);
+  }, skip: kIsWeb); // Int64List cannot be instantiated on the web.
 
   test('Creates bound variables for Float32List instance', () async {
-    final bytes =
-        Float32List.fromList([0, 2.2300031185150146, -4.610400199890137]);
+    final bytes = Float32List.fromList([
+      0,
+      2.2300031185150146,
+      -4.610400199890137,
+    ]);
     final instance = Instance(
       kind: InstanceKind.kFloat32List,
       id: objectId,
@@ -326,14 +301,12 @@ void main() {
       length: 4,
     );
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -356,14 +329,12 @@ void main() {
     );
 
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -377,8 +348,9 @@ void main() {
   });
 
   test('Creates bound variables for Int32x4List instance', () async {
-    final bytes =
-        Int32x4List.fromList([Int32x4.bool(true, false, true, false)]);
+    final bytes = Int32x4List.fromList([
+      Int32x4.bool(true, false, true, false),
+    ]);
     final instance = Instance(
       kind: InstanceKind.kInt32x4List,
       id: objectId,
@@ -387,14 +359,12 @@ void main() {
     );
 
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
     await buildVariablesTree(variable);
@@ -413,9 +383,9 @@ void main() {
   });
 
   test('Creates bound variables for Float32x4List instance', () async {
-    final bytes = Float32x4List.fromList(
-      [Float32x4(0.0, -232.1999969482422, 2.3299999237060547, 9.0)],
-    );
+    final bytes = Float32x4List.fromList([
+      Float32x4(0.0, -232.1999969482422, 2.3299999237060547, 9.0),
+    ]);
     final instance = Instance(
       kind: InstanceKind.kFloat32x4List,
       id: objectId,
@@ -424,14 +394,12 @@ void main() {
     );
 
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -459,14 +427,12 @@ void main() {
     );
 
     final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
+      BoundVariable(name: 'test', value: instance),
       isolateRef,
     );
-    when(manager.serviceManager.service!.getObject(isolateId, objectId))
-        .thenAnswer((_) async {
+    when(
+      manager.serviceManager.service!.getObject(isolateId, objectId),
+    ).thenAnswer((_) async {
       return instance;
     });
 
@@ -493,10 +459,7 @@ void main() {
         length: 332,
       );
       final variable = DartObjectNode.create(
-        BoundVariable(
-          name: 'test',
-          value: instance,
-        ),
+        BoundVariable(name: 'test', value: instance),
         isolateRef,
       );
 
@@ -520,10 +483,7 @@ void main() {
         length: 300,
       );
       final variable = DartObjectNode.create(
-        BoundVariable(
-          name: 'test',
-          value: instance,
-        ),
+        BoundVariable(name: 'test', value: instance),
         isolateRef,
       );
 
@@ -538,10 +498,7 @@ void main() {
   );
 }
 
-Matcher matchesVariable({
-  required String name,
-  required Object value,
-}) {
+Matcher matchesVariable({required String name, required Object value}) {
   return const TypeMatcher<DartObjectNode>().having(
     (v) => v,
     'boundVar',
@@ -551,14 +508,14 @@ Matcher matchesVariable({
   );
 }
 
-Matcher matchesVariableGroup({
-  required int start,
-  required int end,
-}) {
+Matcher matchesVariableGroup({required int start, required int end}) {
   return const TypeMatcher<DartObjectNode>().having(
     (v) => v,
     'boundVar',
-    const TypeMatcher<DartObjectNode>()
-        .having((v) => v.text, 'text', equals('[$start - $end]')),
+    const TypeMatcher<DartObjectNode>().having(
+      (v) => v.text,
+      'text',
+      equals('[$start - $end]'),
+    ),
   );
 }

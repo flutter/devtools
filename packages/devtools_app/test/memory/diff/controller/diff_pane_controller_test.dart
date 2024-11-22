@@ -5,7 +5,8 @@
 import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart'
-    as diff_pane_controller show Json;
+    as diff_pane_controller
+    show Json;
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';

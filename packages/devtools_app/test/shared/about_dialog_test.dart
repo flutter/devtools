@@ -20,12 +20,15 @@ void main() {
       aboutDialog = DevToolsAboutDialog(ReleaseNotesController());
       final fakeServiceConnection = FakeServiceConnectionManager();
       when(fakeServiceConnection.serviceManager.vm.version).thenReturn('1.9.1');
-      when(fakeServiceConnection.serviceManager.vm.targetCPU)
-          .thenReturn('arm64');
-      when(fakeServiceConnection.serviceManager.vm.architectureBits)
-          .thenReturn(64);
-      when(fakeServiceConnection.serviceManager.vm.operatingSystem)
-          .thenReturn('android');
+      when(
+        fakeServiceConnection.serviceManager.vm.targetCPU,
+      ).thenReturn('arm64');
+      when(
+        fakeServiceConnection.serviceManager.vm.architectureBits,
+      ).thenReturn(64);
+      when(
+        fakeServiceConnection.serviceManager.vm.operatingSystem,
+      ).thenReturn('android');
 
       mockConnectedApp(
         fakeServiceConnection.serviceManager.connectedApp!,
@@ -63,10 +66,7 @@ void main() {
       );
       expect(findSubstring('CONTRIBUTING'), findsOneWidget);
       expect(find.textContaining('connect with us on'), findsOneWidget);
-      expect(
-        findSubstring('Discord'),
-        findsOneWidget,
-      );
+      expect(findSubstring('Discord'), findsOneWidget);
     });
   });
 }

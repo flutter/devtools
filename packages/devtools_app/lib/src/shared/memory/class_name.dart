@@ -38,8 +38,7 @@ enum ClassType {
     alias: '\$project',
     aliasDescription: 'classes of the project',
     classTooltip: 'project class',
-  ),
-  ;
+  );
 
   const ClassType({
     required this.color,
@@ -83,7 +82,7 @@ class _Json {
 class HeapClassName with Serializable {
   @visibleForTesting
   HeapClassName({required String? library, required this.className})
-      : library = _normalizeLibrary(library);
+    : library = _normalizeLibrary(library);
 
   factory HeapClassName.fromJson(Map<String, dynamic> json) {
     return HeapClassName(
@@ -94,10 +93,7 @@ class HeapClassName with Serializable {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      _Json.className: className,
-      _Json.library: library,
-    };
+    return {_Json.className: className, _Json.library: library};
   }
 
   static final _instances = <HeapClassName>{};
@@ -116,12 +112,9 @@ class HeapClassName with Serializable {
   }
 
   static HeapClassName fromClassRef(ClassRef? classRef) => fromPath(
-        library: _library(
-          classRef?.library?.name,
-          classRef?.library?.uri,
-        ),
-        className: classRef?.name ?? '',
-      );
+    library: _library(classRef?.library?.name, classRef?.library?.uri),
+    className: classRef?.name ?? '',
+  );
 
   static HeapClassName fromHeapSnapshotClass(HeapSnapshotClass? theClass) =>
       fromPath(
@@ -203,7 +196,8 @@ class HeapClassName with Serializable {
   /// `dart:` or `package:`.
   /// Examples of such classes: Code, Function, Class, Field,
   /// number_symbols/NumberSymbols, vector_math_64/Matrix4.
-  late final isPackageless = library.isEmpty ||
+  late final isPackageless =
+      library.isEmpty ||
       (!library.startsWith(PackagePrefixes.dart) &&
           !library.startsWith(PackagePrefixes.genericDartPackage));
 
@@ -240,9 +234,9 @@ class HeapClassName with Serializable {
 
   static String _normalizeLibrary(String? library) =>
       (library ?? '').trim().replaceFirst(
-            RegExp('^${PackagePrefixes.dartInSnapshot}'),
-            PackagePrefixes.dart,
-          );
+        RegExp('^${PackagePrefixes.dartInSnapshot}'),
+        PackagePrefixes.dart,
+      );
 
   bool matches(ClassRef ref) {
     return HeapClassName.fromClassRef(ref) == this;

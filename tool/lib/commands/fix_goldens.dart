@@ -18,7 +18,8 @@ class FixGoldensCommand extends Command {
   FixGoldensCommand() {
     argParser.addOption(
       _runIdArg,
-      help: 'The ID of the workflow run where the goldens are failing. '
+      help:
+          'The ID of the workflow run where the goldens are failing. '
           'e.g.https://github.com/flutter/devtools/actions/runs/<run-id>/job/16691428186',
       valueHelp: '12345',
       mandatory: true,
@@ -43,29 +44,25 @@ class FixGoldensCommand extends Command {
     try {
       print('Downloading the artifacts to ${tmpDownloadDir.path}');
       await processManager.runProcess(
-        CliCommand(
-          'gh',
-          [
-            'run',
-            'download',
-            runId,
-            '-p',
-            '*golden_image_failures*',
-            '-R',
-            'github.com/flutter/devtools',
-            '-D',
-            tmpDownloadDir.path,
-          ],
-        ),
+        CliCommand('gh', [
+          'run',
+          'download',
+          runId,
+          '-p',
+          '*golden_image_failures*',
+          '-R',
+          'github.com/flutter/devtools',
+          '-D',
+          tmpDownloadDir.path,
+        ]),
       );
 
       final downloadedGoldens = tmpDownloadDir
           .listSync(recursive: true)
           .where((e) => e.path.endsWith('testImage.png'));
-      final allLocalGoldenPngs =
-          Directory(pathFromRepoRoot("packages/devtools_app/test/"))
-              .listSync(recursive: true)
-              .where((e) => e.path.endsWith('.png'));
+      final allLocalGoldenPngs = Directory(
+        pathFromRepoRoot("packages/devtools_app/test/"),
+      ).listSync(recursive: true).where((e) => e.path.endsWith('.png'));
 
       for (final downloadedGolden in downloadedGoldens) {
         final downloadedGoldenBaseName = path.basename(downloadedGolden.path);

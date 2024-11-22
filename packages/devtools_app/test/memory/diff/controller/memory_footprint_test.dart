@@ -20,8 +20,10 @@ void main() {
 
       final before = ProcessInfo.currentRss;
       for (final t in goldenHeapTests) {
-        snapshots[t.fileName] =
-            HeapData(await t.loadHeap(), created: DateTime.now());
+        snapshots[t.fileName] = HeapData(
+          await t.loadHeap(),
+          created: DateTime.now(),
+        );
         await snapshots[t.fileName]!.calculate;
       }
 

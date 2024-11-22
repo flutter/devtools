@@ -65,18 +65,12 @@ void main() {
         isSystemIsolate: false,
       );
       final recordVar = DartObjectNode.create(
-        BoundVariable(
-          name: 'myRecord',
-          value: instance,
-        ),
+        BoundVariable(name: 'myRecord', value: instance),
         isolateRef,
       );
 
       when(
-        manager.serviceManager.service!.getObject(
-          isolateId,
-          objectId,
-        ),
+        manager.serviceManager.service!.getObject(isolateId, objectId),
       ).thenAnswer((_) async {
         return instance;
       });
@@ -92,19 +86,8 @@ void main() {
   );
 }
 
-Matcher matchesVariable({
-  required String? name,
-  required Object value,
-}) {
+Matcher matchesVariable({required String? name, required Object value}) {
   return const TypeMatcher<DartObjectNode>()
-      .having(
-        (v) => v.displayValue,
-        'displayValue',
-        equals(value),
-      )
-      .having(
-        (v) => v.name,
-        'name',
-        equals(name),
-      );
+      .having((v) => v.displayValue, 'displayValue', equals(value))
+      .having((v) => v.name, 'name', equals(name));
 }

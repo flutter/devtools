@@ -16,10 +16,7 @@ import 'vm_developer_tools_controller.dart';
 import 'vm_statistics/vm_statistics_view.dart';
 
 abstract class VMDeveloperView {
-  const VMDeveloperView({
-    required this.title,
-    required this.icon,
-  });
+  const VMDeveloperView({required this.title, required this.icon});
 
   /// The user-facing name of the page.
   final String title;
@@ -68,8 +65,10 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<VMDeveloperToolsController,
-            VMDeveloperToolsScreenBody> {
+        ProvidedControllerMixin<
+          VMDeveloperToolsController,
+          VMDeveloperToolsScreenBody
+        > {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -98,9 +97,7 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
               ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(
-                  left: defaultSpacing,
-                ),
+                padding: const EdgeInsets.only(left: defaultSpacing),
                 child: IndexedStack(
                   index: selectedIndex,
                   children: [

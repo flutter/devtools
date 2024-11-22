@@ -33,10 +33,7 @@ class VmServiceTrafficLogger {
     final String? id = m['id'];
 
     messageBus.addEvent(
-      BusEvent(
-        eventName,
-        data: '⇨ #$id $method()\n$message',
-      ),
+      BusEvent(eventName, data: '⇨ #$id $method()\n$message'),
     );
   }
 

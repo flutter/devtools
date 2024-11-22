@@ -76,10 +76,7 @@ class MessageColumn extends ColumnData<LogData>
                         theme.regularTextStyle,
                       ),
                     if (hasSummary && hasDetails())
-                      TextSpan(
-                        text: '  •  ',
-                        style: theme.subtleTextStyle,
-                      ),
+                      TextSpan(text: '  •  ', style: theme.subtleTextStyle),
                     if (hasDetails())
                       ...processAnsiTerminalCodes(
                         detailsComputed ? data.details! : '<fetching>',

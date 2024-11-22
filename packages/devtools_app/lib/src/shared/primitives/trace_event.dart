@@ -9,14 +9,14 @@
 class ChromeTraceEvent {
   /// Creates a timeline event given JSON-encoded event data.
   ChromeTraceEvent(this.json)
-      : name = json[nameKey] as String?,
-        category = json[categoryKey] as String?,
-        phase = json[phaseKey] as String?,
-        processId = json[processIdKey] as int?,
-        threadId = json[threadIdKey] as int?,
-        duration = json[durationKey] as int?,
-        timestampMicros = json[timestampKey] as int?,
-        args = json[argsKey] as Map<String, Object?>?;
+    : name = json[nameKey] as String?,
+      category = json[categoryKey] as String?,
+      phase = json[phaseKey] as String?,
+      processId = json[processIdKey] as int?,
+      threadId = json[threadIdKey] as int?,
+      duration = json[durationKey] as int?,
+      timestampMicros = json[timestampKey] as int?,
+      args = json[argsKey] as Map<String, Object?>?;
 
   static const nameKey = 'name';
   static const categoryKey = 'cat';
@@ -120,6 +120,7 @@ class ChromeTraceEvent {
   }
 
   @override
-  String toString() => '[$idKey: $id] [$phaseKey: $phase] '
+  String toString() =>
+      '[$idKey: $id] [$phaseKey: $phase] '
       '$name - [$timestampKey: $timestampMicros] [$durationKey: $duration]';
 }

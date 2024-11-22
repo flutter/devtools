@@ -22,7 +22,8 @@ class ObjectStoreController extends DisposableController
       return;
     }
     _selectedIsolateObjectStore.value = null;
-    _selectedIsolateObjectStore.value =
-        await service.getObjectStore(isolate.id!);
+    _selectedIsolateObjectStore.value = await service.getObjectStore(
+      isolate.id!,
+    );
   }
 }

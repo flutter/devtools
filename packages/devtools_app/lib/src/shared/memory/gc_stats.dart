@@ -47,12 +47,12 @@ class GCStats with Serializable {
 
   @override
   Map<String, dynamic> toJson() => {
-        _Json.heap: heap,
-        _Json.usage: usage,
-        _Json.capacity: capacity,
-        _Json.collections: collections,
-        _Json.averageCollectionTime: averageCollectionTime,
-      };
+    _Json.heap: heap,
+    _Json.usage: usage,
+    _Json.capacity: capacity,
+    _Json.collections: collections,
+    _Json.averageCollectionTime: averageCollectionTime,
+  };
 
   static const usedKey = 'used';
   static const capacityKey = 'capacity';

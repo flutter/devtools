@@ -79,9 +79,10 @@ class _InitializerState extends State<Initializer>
           children: [
             const Spacer(),
             CenteredMessage(
-              message: _showConnectToNewAppButton
-                  ? 'Cannot connect to VM service.'
-                  : 'Waiting for VM service connection...',
+              message:
+                  _showConnectToNewAppButton
+                      ? 'Cannot connect to VM service.'
+                      : 'Waiting for VM service connection...',
             ),
             if (_showConnectToNewAppButton) ...[
               const SizedBox(height: defaultSpacing),

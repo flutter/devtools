@@ -18,6 +18,7 @@ import 'package:web/web.dart';
 
 import '../dtd_manager_extensions.dart';
 import '../globals.dart';
+import '../primitives/utils.dart';
 import '../query_parameters.dart';
 import '../server/server.dart' as server;
 import '../utils.dart';
@@ -55,6 +56,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   // than a fixed list of fields. See
   // https://github.com/flutter/devtools/pull/3281#discussion_r692376353.
   external factory GtagEventDevTools({
+    String? screen,
     String? event_category,
     String? event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
     String? send_to, // UA ID of target GA property to receive event data.
@@ -65,7 +67,6 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
-
     String? user_app, // dimension1 (flutter or web)
     String? user_build, // dimension2 (debug or profile)
     String? user_platform, // dimension3 (android/ios/fuchsia/linux/mac/windows)
@@ -74,11 +75,10 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     String? devtools_version, // dimension6 DevTools version #
     String? ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
     String?
-        flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
+    flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
     String? is_external_build, // dimension9 External build or google3
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
-
     // dimension12 IDE feature that launched Devtools
     // The following is a non-exhaustive list of possible values for this dimension:
     // "command" - VS Code command palette
@@ -91,7 +91,6 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     // "languageStatus" - launched from the language status popout
     String? ide_launched_feature,
     String? is_wasm, // dimension13 whether DevTools is running with WASM.
-
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
     int? raster_duration_micros, // metric2
@@ -109,11 +108,15 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     int? root_set_count, // metric10
     int? row_count, // metric11
     int? inspector_tree_controller_id, // metric12
+    // Deep Link screen metrics. See [DeepLinkScreenMetrics].
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
+    // Inspector screen metrics. See [InspectorScreenMetrics].
+    bool? is_v2_inspector, // metric15
   });
 
   factory GtagEventDevTools._create({
+    required String screen,
     required String event_category,
     required String event_label,
     String? send_to,
@@ -122,6 +125,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     ScreenAnalyticsMetrics? screenMetrics,
   }) {
     return GtagEventDevTools(
+      screen: screen,
       event_category: event_category,
       event_label: event_label,
       send_to: send_to,
@@ -141,55 +145,73 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
       ide_launched_feature: ideLaunchedFeature,
       is_wasm: kIsWasm.toString(),
       // [PerformanceScreenMetrics]
-      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.uiDuration?.inMicroseconds
-          : null,
-      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.rasterDuration?.inMicroseconds
-          : null,
+      ui_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.uiDuration?.inMicroseconds
+              : null,
+      raster_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.rasterDuration?.inMicroseconds
+              : null,
       shader_compilation_duration_micros:
           screenMetrics is PerformanceScreenMetrics
               ? screenMetrics.shaderCompilationDuration?.inMicroseconds
               : null,
-      trace_event_count: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.traceEventCount
-          : null,
+      trace_event_count:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.traceEventCount
+              : null,
       // [ProfilerScreenMetrics]
-      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
-          ? screenMetrics.cpuSampleCount
-          : null,
-      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
-          ? screenMetrics.cpuStackDepth
-          : null,
+      cpu_sample_count:
+          screenMetrics is ProfilerScreenMetrics
+              ? screenMetrics.cpuSampleCount
+              : null,
+      cpu_stack_depth:
+          screenMetrics is ProfilerScreenMetrics
+              ? screenMetrics.cpuStackDepth
+              : null,
       // [MemoryScreenMetrics]
-      heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapDiffObjectsBefore
-          : null,
-      heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapDiffObjectsAfter
-          : null,
-      heap_objects_total: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapObjectsTotal
-          : null,
+      heap_diff_objects_before:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapDiffObjectsBefore
+              : null,
+      heap_diff_objects_after:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapDiffObjectsAfter
+              : null,
+      heap_objects_total:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapObjectsTotal
+              : null,
       // [InspectorScreenMetrics]
-      root_set_count: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.rootSetCount
-          : null,
-      row_count: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.rowCount
-          : null,
-      inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.inspectorTreeControllerId
-          : null,
+      root_set_count:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.rootSetCount
+              : null,
+      row_count:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.rowCount
+              : null,
+      inspector_tree_controller_id:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.inspectorTreeControllerId
+              : null,
       // [DeepLinkScreenMetrics]
-      android_app_id: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.androidAppId
-          : null,
-      ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.iosBundleId
-          : null,
+      android_app_id:
+          screenMetrics is DeepLinkScreenMetrics
+              ? screenMetrics.androidAppId
+              : null,
+      ios_bundle_id:
+          screenMetrics is DeepLinkScreenMetrics
+              ? screenMetrics.iosBundleId
+              : null,
+      // [InspectorScreenMetrics]
+      is_v2_inspector:
+          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
     );
   }
+
+  external String? get screen;
 
   // Custom dimensions:
   external String? get user_app;
@@ -221,16 +243,17 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   external int? get inspector_tree_controller_id;
   external String? get android_app_id;
   external String? get ios_bundle_id;
+  external bool? get is_v2_inspector;
 }
 
 extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
   external factory GtagExceptionDevTools({
+    String? screen,
     String? description,
     bool fatal,
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
-
     String? user_app, // dimension1 (flutter or web)
     String? user_build, // dimension2 (debug or profile)
     String? user_platform, // dimension3 (android or ios)
@@ -242,7 +265,6 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     String? is_external_build, // dimension9 External build or google3
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
-
     // dimension12 IDE feature that launched Devtools
     // The following is a non-exhaustive list of possible values for this dimension:
     // "command" - VS Code command palette
@@ -255,7 +277,6 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     // "languageStatus" - launched from the language status popout
     String? ide_launched_feature,
     String? is_wasm, // dimension13 whether DevTools is running with WASM.
-
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
     int? raster_duration_micros, // metric2
@@ -273,8 +294,11 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     int? root_set_count, // metric10
     int? row_count, // metric11
     int? inspector_tree_controller_id, // metric12
+    // Deep Link screen metrics. See [DeepLinkScreenMetrics].
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
+    // Inspector screen metrics. See [InspectorScreenMetrics].
+    bool? is_v2_inspector, // metric15
   });
 
   factory GtagExceptionDevTools._create(
@@ -299,53 +323,69 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
       ide_launched_feature: ideLaunchedFeature,
       is_wasm: kIsWasm.toString(),
       // [PerformanceScreenMetrics]
-      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.uiDuration?.inMicroseconds
-          : null,
-      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.rasterDuration?.inMicroseconds
-          : null,
-      trace_event_count: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.traceEventCount
-          : null,
+      ui_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.uiDuration?.inMicroseconds
+              : null,
+      raster_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.rasterDuration?.inMicroseconds
+              : null,
+      trace_event_count:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.traceEventCount
+              : null,
       shader_compilation_duration_micros:
           screenMetrics is PerformanceScreenMetrics
               ? screenMetrics.shaderCompilationDuration?.inMicroseconds
               : null,
       // [ProfilerScreenMetrics]
-      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
-          ? screenMetrics.cpuSampleCount
-          : null,
-      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
-          ? screenMetrics.cpuStackDepth
-          : null,
+      cpu_sample_count:
+          screenMetrics is ProfilerScreenMetrics
+              ? screenMetrics.cpuSampleCount
+              : null,
+      cpu_stack_depth:
+          screenMetrics is ProfilerScreenMetrics
+              ? screenMetrics.cpuStackDepth
+              : null,
       // [MemoryScreenMetrics]
-      heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapDiffObjectsBefore
-          : null,
-      heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapDiffObjectsAfter
-          : null,
-      heap_objects_total: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapObjectsTotal
-          : null,
+      heap_diff_objects_before:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapDiffObjectsBefore
+              : null,
+      heap_diff_objects_after:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapDiffObjectsAfter
+              : null,
+      heap_objects_total:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapObjectsTotal
+              : null,
       // [InspectorScreenMetrics]
-      root_set_count: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.rootSetCount
-          : null,
-      row_count: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.rowCount
-          : null,
-      inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.inspectorTreeControllerId
-          : null,
+      root_set_count:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.rootSetCount
+              : null,
+      row_count:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.rowCount
+              : null,
+      inspector_tree_controller_id:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.inspectorTreeControllerId
+              : null,
       // [DeepLinkScreenMetrics]
-      android_app_id: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.androidAppId
-          : null,
-      ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.iosBundleId
-          : null,
+      android_app_id:
+          screenMetrics is DeepLinkScreenMetrics
+              ? screenMetrics.androidAppId
+              : null,
+      ios_bundle_id:
+          screenMetrics is DeepLinkScreenMetrics
+              ? screenMetrics.iosBundleId
+              : null,
+      // [InspectorScreenMetrics]
+      is_v2_inspector:
+          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
     );
   }
 
@@ -379,6 +419,7 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
   external int? get inspector_tree_controller_id;
   external String? get android_app_id;
   external String? get ios_bundle_id;
+  external bool? get is_v2_inspector;
 }
 
 /// Whether google analytics are enabled.
@@ -418,18 +459,16 @@ Future<bool> shouldShowAnalyticsConsentMessage() async {
   return shouldShow;
 }
 
-void screen(
-  String screenName, [
-  int value = 0,
-]) {
+void screen(String screenName, [int value = 0]) {
   _log.fine('Event: Screen(screenName:$screenName, value:$value)');
   final gtagEvent = GtagEventDevTools._create(
+    screen: screenName,
     event_category: gac.screenViewEvent,
     event_label: gac.init,
     value: value,
     send_to: gaDevToolsPropertyId(),
   );
-  _sendEventForScreen(screenName, gtagEvent);
+  _sendEvent(gtagEvent);
 }
 
 String _operationKey(String screenName, String timedOperation) {
@@ -443,10 +482,7 @@ final _timedOperationsInProgress = <String, DateTime>{};
 // end marks.
 void timeStart(String screenName, String timedOperation) {
   final startTime = DateTime.now();
-  final operationKey = _operationKey(
-    screenName,
-    timedOperation,
-  );
+  final operationKey = _operationKey(screenName, timedOperation);
   _timedOperationsInProgress[operationKey] = startTime;
 }
 
@@ -459,10 +495,7 @@ void timeEnd(
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
   final endTime = DateTime.now();
-  final operationKey = _operationKey(
-    screenName,
-    timedOperation,
-  );
+  final operationKey = _operationKey(screenName, timedOperation);
   final startTime = _timedOperationsInProgress.remove(operationKey);
   assert(startTime != null);
   if (startTime == null) {
@@ -485,10 +518,7 @@ void timeEnd(
 }
 
 void cancelTimingOperation(String screenName, String timedOperation) {
-  final operationKey = _operationKey(
-    screenName,
-    timedOperation,
-  );
+  final operationKey = _operationKey(screenName, timedOperation);
   final operation = _timedOperationsInProgress.remove(operationKey);
   assert(
     operation != null,
@@ -569,13 +599,14 @@ void _timing(
     'durationMicros:$durationMicros)',
   );
   final gtagEvent = GtagEventDevTools._create(
+    screen: screenName,
     event_category: gac.timingEvent,
     event_label: timedOperation,
     value: durationMicros,
     send_to: gaDevToolsPropertyId(),
     screenMetrics: screenMetrics,
   );
-  _sendEventForScreen(screenName, gtagEvent);
+  _sendEvent(gtagEvent);
 }
 
 /// Sends an analytics event to signal that something in DevTools was selected.
@@ -594,6 +625,7 @@ void select(
     'nonInteraction:$nonInteraction)',
   );
   final gtagEvent = GtagEventDevTools._create(
+    screen: screenName,
     event_category: gac.selectEvent,
     event_label: selectedItem,
     value: value,
@@ -602,7 +634,7 @@ void select(
     screenMetrics:
         screenMetricsProvider != null ? screenMetricsProvider() : null,
   );
-  _sendEventForScreen(screenName, gtagEvent);
+  _sendEvent(gtagEvent);
 }
 
 /// Sends an analytics event to signal that something in DevTools was viewed.
@@ -619,6 +651,7 @@ void impression(
     'item:$item)',
   );
   final gtagEvent = GtagEventDevTools._create(
+    screen: screenName,
     event_category: gac.impressionEvent,
     event_label: item,
     non_interaction: true,
@@ -626,26 +659,37 @@ void impression(
     screenMetrics:
         screenMetricsProvider != null ? screenMetricsProvider() : null,
   );
-  _sendEventForScreen(screenName, gtagEvent);
+  _sendEvent(gtagEvent);
 }
 
 String? _lastGaError;
 
+/// Reports an error to analytics.
+///
+/// [errorMessage] is the description of the error.
+/// [stackTraceSubstrings] is the stack trace broken up into substrings of
+/// size [ga4ParamValueCharacterLimit] so that we can send the stack trace in
+/// chunks to GA4 through unified_analytics.
 void reportError(
   String errorMessage, {
+  List<String> stackTraceSubstrings = const <String>[],
   bool fatal = false,
 }) {
   // Don't keep recording same last error.
   if (_lastGaError == errorMessage) return;
   _lastGaError = errorMessage;
 
-  final gTagException = GtagExceptionDevTools._create(
-    errorMessage,
+  final gTagExceptionWithStackTrace = GtagExceptionDevTools._create(
+    // Include the stack trace in the message for legacy analytics.
+    '$errorMessage\n${stackTraceSubstrings.join()}',
     fatal: fatal,
   );
-  GTag.exception(gaExceptionProvider: () => gTagException);
+  GTag.exception(gaExceptionProvider: () => gTagExceptionWithStackTrace);
 
-  final uaEvent = _uaEventFromGtagException(gTagException);
+  final uaEvent = _uaEventFromGtagException(
+    GtagExceptionDevTools._create(errorMessage, fatal: fatal),
+    stackTraceSubstrings: stackTraceSubstrings,
+  );
   unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
@@ -867,17 +911,17 @@ void legacyOnSetupAnalytics() {
   jsHookupListenerForGA();
 }
 
-void _sendEventForScreen(String screenName, GtagEventDevTools gtagEvent) {
-  GTag.event(
-    screenName,
-    gaEventProvider: () => gtagEvent,
-  );
+void _sendEvent(GtagEventDevTools gtagEvent) {
+  GTag.event(gtagEvent.screen!, gaEventProvider: () => gtagEvent);
   final uaEvent = _uaEventFromGtagEvent(gtagEvent);
   unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
 ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
+  // Any dimensions or metrics that have a null value will be removed from
+  // the event data in the [ua.Event.devtoolsEvent] constructor.
   return ua.Event.devtoolsEvent(
+    screen: gtagEvent.screen!,
     eventCategory: gtagEvent.event_category!,
     label: gtagEvent.event_label!,
     value: gtagEvent.value,
@@ -889,34 +933,57 @@ ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
     devtoolsChrome: gtagEvent.devtools_chrome,
     devtoolsVersion: gtagEvent.devtools_version,
     ideLaunched: gtagEvent.ide_launched,
+    ideLaunchedFeature: gtagEvent.ide_launched_feature,
     isExternalBuild: gtagEvent.is_external_build,
     isEmbedded: gtagEvent.is_embedded,
-    ideLaunchedFeature: gtagEvent.ide_launched_feature,
     isWasm: gtagEvent.is_wasm,
     g3Username: gtagEvent.g3_username,
-    uiDurationMicros: gtagEvent.ui_duration_micros,
-    rasterDurationMicros: gtagEvent.raster_duration_micros,
-    shaderCompilationDurationMicros:
-        gtagEvent.shader_compilation_duration_micros,
-    traceEventCount: gtagEvent.trace_event_count,
-    cpuSampleCount: gtagEvent.cpu_sample_count,
-    cpuStackDepth: gtagEvent.cpu_stack_depth,
-    heapDiffObjectsBefore: gtagEvent.heap_diff_objects_before,
-    heapDiffObjectsAfter: gtagEvent.heap_diff_objects_after,
-    heapObjectsTotal: gtagEvent.heap_objects_total,
-    rootSetCount: gtagEvent.root_set_count,
-    rowCount: gtagEvent.row_count,
-    inspectorTreeControllerId: gtagEvent.inspector_tree_controller_id,
-    androidAppId: gtagEvent.android_app_id,
-    iosBundleId: gtagEvent.ios_bundle_id,
+    // Only 25 entries are permitted for GA4 event parameters, but since not
+    // all of the below metrics will be non-null at the same time, it is okay to
+    // include all the metrics here. The [ua.Event.devtoolsEvent] constructor
+    // will remove any entries with a null value from the sent event parameters.
+    additionalMetrics: _DevToolsEventMetrics(
+      uiDurationMicros: gtagEvent.ui_duration_micros,
+      rasterDurationMicros: gtagEvent.raster_duration_micros,
+      shaderCompilationDurationMicros:
+          gtagEvent.shader_compilation_duration_micros,
+      traceEventCount: gtagEvent.trace_event_count,
+      cpuSampleCount: gtagEvent.cpu_sample_count,
+      cpuStackDepth: gtagEvent.cpu_stack_depth,
+      heapDiffObjectsBefore: gtagEvent.heap_diff_objects_before,
+      heapDiffObjectsAfter: gtagEvent.heap_diff_objects_after,
+      heapObjectsTotal: gtagEvent.heap_objects_total,
+      rootSetCount: gtagEvent.root_set_count,
+      rowCount: gtagEvent.row_count,
+      inspectorTreeControllerId: gtagEvent.inspector_tree_controller_id,
+      isV2Inspector: gtagEvent.is_v2_inspector,
+      androidAppId: gtagEvent.android_app_id,
+      iosBundleId: gtagEvent.ios_bundle_id,
+    ),
   );
 }
 
-ua.Event _uaEventFromGtagException(GtagExceptionDevTools gtagException) {
+ua.Event _uaEventFromGtagException(
+  GtagExceptionDevTools gtagException, {
+  List<String> stackTraceSubstrings = const <String>[],
+}) {
+  // Any data entries that have a null value will be removed from the event data
+  // in the [ua.Event.exception] constructor.
   return ua.Event.exception(
     exception: gtagException.description ?? 'unknown exception',
     data: {
       'fatal': gtagException.fatal,
+      // Each stack trace substring of length [ga4ParamValueCharacterLimit]
+      // contains information for ~1 stack frame, so including 8 chunks should
+      // give us enough information to understand the source of the exception.
+      'stackTraceChunk0': stackTraceSubstrings.safeGet(0),
+      'stackTraceChunk1': stackTraceSubstrings.safeGet(1),
+      'stackTraceChunk2': stackTraceSubstrings.safeGet(2),
+      'stackTraceChunk3': stackTraceSubstrings.safeGet(3),
+      'stackTraceChunk4': stackTraceSubstrings.safeGet(4),
+      'stackTraceChunk5': stackTraceSubstrings.safeGet(5),
+      'stackTraceChunk6': stackTraceSubstrings.safeGet(6),
+      'stackTraceChunk7': stackTraceSubstrings.safeGet(7),
       'userApp': gtagException.user_app,
       'userBuild': gtagException.user_build,
       'userPlatform': gtagException.user_platform,
@@ -924,24 +991,79 @@ ua.Event _uaEventFromGtagException(GtagExceptionDevTools gtagException) {
       'devtoolsChrome': gtagException.devtools_chrome,
       'devtoolsVersion': gtagException.devtools_version,
       'ideLaunched': gtagException.ide_launched,
+      'ideLaunchedFeature': gtagException.ide_launched_feature,
       'isExternalBuild': gtagException.is_external_build,
       'isEmbedded': gtagException.is_embedded,
-      'ideLaunchedFeature': gtagException.ide_launched_feature,
       'isWasm': gtagException.is_wasm,
       'g3Username': gtagException.g3_username,
-      'uiDurationMicros': gtagException.ui_duration_micros,
-      'rasterDurationMicros': gtagException.raster_duration_micros,
-      'shaderCompilationDurationMicros':
-          gtagException.shader_compilation_duration_micros,
-      'traceEventCount': gtagException.trace_event_count,
-      'cpuSampleCount': gtagException.cpu_sample_count,
-      'cpuStackDepth': gtagException.cpu_stack_depth,
-      'heapDiffObjectsBefore': gtagException.heap_diff_objects_before,
-      'heapDiffObjectsAfter': gtagException.heap_diff_objects_after,
-      'heapObjectsTotal': gtagException.heap_objects_total,
-      'rootSetCount': gtagException.root_set_count,
-      'rowCount': gtagException.row_count,
-      'inspectorTreeControllerId': gtagException.inspector_tree_controller_id,
+      // Do not include metrics in exceptions because GA4 event parameter are
+      // limited to 25 entries, and we need to reserve entries for the stack
+      // trace chunks.
     },
   );
+}
+
+final class _DevToolsEventMetrics extends ua.CustomMetrics {
+  _DevToolsEventMetrics({
+    required this.rasterDurationMicros,
+    required this.shaderCompilationDurationMicros,
+    required this.traceEventCount,
+    required this.cpuSampleCount,
+    required this.cpuStackDepth,
+    required this.heapDiffObjectsBefore,
+    required this.heapDiffObjectsAfter,
+    required this.heapObjectsTotal,
+    required this.rootSetCount,
+    required this.rowCount,
+    required this.inspectorTreeControllerId,
+    required this.isV2Inspector,
+    required this.androidAppId,
+    required this.iosBundleId,
+    required this.uiDurationMicros,
+  });
+
+  // [PerformanceScreenMetrics]
+  final int? uiDurationMicros;
+  final int? rasterDurationMicros;
+  final int? shaderCompilationDurationMicros;
+  final int? traceEventCount;
+
+  // [ProfilerScreenMetrics]
+  final int? cpuSampleCount;
+  final int? cpuStackDepth;
+
+  // [MemoryScreenMetrics]
+  final int? heapDiffObjectsBefore;
+  final int? heapDiffObjectsAfter;
+  final int? heapObjectsTotal;
+
+  // [InspectorScreenMetrics]
+  final int? rootSetCount;
+  final int? rowCount;
+  final int? inspectorTreeControllerId;
+  final bool? isV2Inspector;
+
+  // [DeepLinkScreenMetrics]
+  final String? androidAppId;
+  final String? iosBundleId;
+
+  @override
+  Map<String, Object> toMap() =>
+      (<String, Object?>{
+        'uiDurationMicros': uiDurationMicros,
+        'rasterDurationMicros': rasterDurationMicros,
+        'shaderCompilationDurationMicros': shaderCompilationDurationMicros,
+        'traceEventCount': traceEventCount,
+        'cpuSampleCount': cpuSampleCount,
+        'cpuStackDepth': cpuStackDepth,
+        'heapDiffObjectsBefore': heapDiffObjectsBefore,
+        'heapDiffObjectsAfter': heapDiffObjectsAfter,
+        'heapObjectsTotal': heapObjectsTotal,
+        'rootSetCount': rootSetCount,
+        'rowCount': rowCount,
+        'inspectorTreeControllerId': inspectorTreeControllerId,
+        'isV2Inspector': isV2Inspector,
+        'androidAppId': androidAppId,
+        'iosBundleId': iosBundleId,
+      }..removeWhere((key, value) => value == null)).cast<String, Object>();
 }

@@ -43,53 +43,44 @@ void main() {
     setUp(() {
       screen1 = SimpleScreen(const Placeholder());
       screen2 = SimpleScreen(const Placeholder());
-      extensionScreen1 = DevToolsScreen<void>(
-        ExtensionScreen(StubDevToolsExtensions.someToolExtension),
-      ).screen;
-      extensionScreen2 = DevToolsScreen<void>(
-        ExtensionScreen(StubDevToolsExtensions.barExtension),
-      ).screen;
-      screens = <Screen>[
-        screen1,
-        screen2,
-        extensionScreen1,
-        extensionScreen2,
-      ];
+      extensionScreen1 =
+          DevToolsScreen<void>(
+            ExtensionScreen(StubDevToolsExtensions.someToolExtension),
+          ).screen;
+      extensionScreen2 =
+          DevToolsScreen<void>(
+            ExtensionScreen(StubDevToolsExtensions.barExtension),
+          ).screen;
+      screens = <Screen>[screen1, screen2, extensionScreen1, extensionScreen2];
     });
 
-    test(
-      'hides extension screens based on query parameters',
-      () {
-        DevToolsAppState.removeHiddenScreens(
-          screens,
-          DevToolsQueryParams({
-            DevToolsQueryParams.hideScreensKey:
-                DevToolsQueryParams.hideExtensionsValue,
-          }),
-        );
-        expect(screens.contains(screen1), true);
-        expect(screens.contains(screen2), true);
-        expect(screens.contains(extensionScreen1), false);
-        expect(screens.contains(extensionScreen2), false);
-      },
-    );
+    test('hides extension screens based on query parameters', () {
+      DevToolsAppState.removeHiddenScreens(
+        screens,
+        DevToolsQueryParams({
+          DevToolsQueryParams.hideScreensKey:
+              DevToolsQueryParams.hideExtensionsValue,
+        }),
+      );
+      expect(screens.contains(screen1), true);
+      expect(screens.contains(screen2), true);
+      expect(screens.contains(extensionScreen1), false);
+      expect(screens.contains(extensionScreen2), false);
+    });
 
-    test(
-      'hides all except extension screens based on query parameters',
-      () {
-        DevToolsAppState.removeHiddenScreens(
-          screens,
-          DevToolsQueryParams({
-            DevToolsQueryParams.hideScreensKey:
-                DevToolsQueryParams.hideAllExceptExtensionsValue,
-          }),
-        );
-        expect(screens.contains(screen1), false);
-        expect(screens.contains(screen2), false);
-        expect(screens.contains(extensionScreen1), true);
-        expect(screens.contains(extensionScreen2), true);
-      },
-    );
+    test('hides all except extension screens based on query parameters', () {
+      DevToolsAppState.removeHiddenScreens(
+        screens,
+        DevToolsQueryParams({
+          DevToolsQueryParams.hideScreensKey:
+              DevToolsQueryParams.hideAllExceptExtensionsValue,
+        }),
+      );
+      expect(screens.contains(screen1), false);
+      expect(screens.contains(screen2), false);
+      expect(screens.contains(extensionScreen1), true);
+      expect(screens.contains(extensionScreen2), true);
+    });
 
     test('maybeIncludeOnlyEmbeddedScreen', () {
       expect(

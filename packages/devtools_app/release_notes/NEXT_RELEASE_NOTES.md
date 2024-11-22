@@ -13,10 +13,14 @@ To learn more about DevTools, check out the
 * Persist filter settings across sessions. - [#8447](https://github.com/flutter/devtools/pull/8447),
 [#8456](https://github.com/flutter/devtools/pull/8456)
 [#8470](https://github.com/flutter/devtools/pull/8470)
+* Tables match IDE theme when embedded in an IDE. - [#8498](https://github.com/flutter/devtools/pull/8498)
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+- Added an option to the [new Inspector's](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates)
+  settings to allow auto-refreshing the widget tree after a hot-reload. - [#8483](https://github.com/flutter/devtools/pull/8483)
+- Fixed an [issue](https://github.com/flutter/devtools/issues/8487) where the [new Inspector](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates) would not load after a hot-restart in the legacy Inspector. - [#8491](https://github.com/flutter/devtools/pull/8491)
+- Fixed an [issue](https://github.com/flutter/devtools/issues/8465) preventing scrolling to an implementation widget in the [new Inspector](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates) after selecting it on the device. - [#8494](https://github.com/flutter/devtools/pull/8494)
 
 ## Performance updates
 
@@ -45,6 +49,8 @@ TODO: Remove this section if there are not any general updates.
 * Fetch log details immediately upon receiving logs so that log data is not lost
 due to lazy loading. - [#8421](https://github.com/flutter/devtools/pull/8421)
 
+* Reduce initial page load time. - [#8500](https://github.com/flutter/devtools/pull/8500)
+
 * Added support for displaying metadata, such as log
 severity, category, zone, and isolate -
 [#8419](https://github.com/flutter/devtools/pull/8419),
@@ -60,6 +66,8 @@ search and filter by these metadata values. - [#8473](https://github.com/flutter
 * Added support for filtering by log severity / levels. -
 [#8433](https://github.com/flutter/devtools/pull/8433)
     ![Log level filter](images/log_level_filter.png "Log level filter")
+
+* Added a setting to set the log retention limit. - [#8493](https://github.com/flutter/devtools/pull/8493)
 
 * Added a button to toggle the log details display between raw text and JSON. -
 [#8445](https://github.com/flutter/devtools/pull/8445)

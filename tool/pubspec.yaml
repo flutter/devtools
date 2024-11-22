@@ -3,7 +3,7 @@ description: A repo management tool for DevTools.
 publish_to: none
 
 environment:
-  sdk: ^3.2.0
+  sdk: ">=3.7.0-160.0.dev <4.0.0"
 
 executables:
   dt: dt
@@ -19,3 +19,6 @@ dependency_overrides:
   devtools_shared:
     path: ../packages/devtools_shared
   lints: ^4.0.0
+  
+dev_dependencies:
+  test: ^1.25.8

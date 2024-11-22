@@ -8,10 +8,7 @@ import 'package:web/web.dart' as web;
 
 class Notification {
   Notification(String title, {String body = ''}) {
-    _impl = web.Notification(
-      title,
-      web.NotificationOptions(body: body),
-    );
+    _impl = web.Notification(title, web.NotificationOptions(body: body));
   }
 
   late final web.Notification _impl;

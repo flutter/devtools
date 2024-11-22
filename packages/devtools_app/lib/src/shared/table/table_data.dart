@@ -132,11 +132,7 @@ abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
   }
 }
 
-enum ColumnAlignment {
-  left,
-  right,
-  center,
-}
+enum ColumnAlignment { left, right, center }
 
 mixin PinnableListEntry {
   /// Determines if the row should be pinned to the top of the table.
@@ -157,9 +153,9 @@ class ColumnGroup {
     required Range range,
     String? tooltip,
   }) : this(
-          title: maybeWrapWithTooltip(child: Text(title), tooltip: tooltip),
-          range: range,
-        );
+         title: maybeWrapWithTooltip(child: Text(title), tooltip: tooltip),
+         range: range,
+       );
 
   final Widget title;
 
@@ -212,10 +208,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
     this.percentageOnly = false,
     double columnWidth = _defaultTimeColumnWidth,
     super.titleTooltip,
-  }) : super(
-          title,
-          fixedWidthPx: scaleByFontFactor(columnWidth),
-        );
+  }) : super(title, fixedWidthPx: scaleByFontFactor(columnWidth));
 
   static const _defaultTimeColumnWidth = 120.0;
 
@@ -244,9 +237,10 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
   }
 
   @override
-  double getValue(T dataObject) => percentageOnly
-      ? percentAsDoubleProvider(dataObject)
-      : timeProvider!(dataObject).inMicroseconds.toDouble();
+  double getValue(T dataObject) =>
+      percentageOnly
+          ? percentAsDoubleProvider(dataObject)
+          : timeProvider!(dataObject).inMicroseconds.toDouble();
 
   @override
   String getDisplayValue(T dataObject) {
@@ -295,10 +289,7 @@ abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
     this.percentageOnly = false,
     double columnWidth = _defaultMemoryColumnWidth,
     super.titleTooltip,
-  }) : super(
-          title,
-          fixedWidthPx: scaleByFontFactor(columnWidth),
-        );
+  }) : super(title, fixedWidthPx: scaleByFontFactor(columnWidth));
 
   static const _defaultMemoryColumnWidth =
       TimeAndPercentageColumn._defaultTimeColumnWidth;
@@ -328,9 +319,10 @@ abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
   }
 
   @override
-  double getValue(T dataObject) => percentageOnly
-      ? percentAsDoubleProvider(dataObject)
-      : sizeProvider!(dataObject).toDouble();
+  double getValue(T dataObject) =>
+      percentageOnly
+          ? percentAsDoubleProvider(dataObject)
+          : sizeProvider!(dataObject).toDouble();
 
   @override
   String getDisplayValue(T dataObject) {

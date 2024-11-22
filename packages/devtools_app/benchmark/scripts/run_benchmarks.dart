@@ -56,9 +56,10 @@ Future<BenchmarkResults> runBenchmarks({
       await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
         entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
-        compilationOptions: useWasm
-            ? const CompilationOptions.wasm()
-            : const CompilationOptions.js(),
+        compilationOptions:
+            useWasm
+                ? const CompilationOptions.wasm()
+                : const CompilationOptions.js(),
         treeShakeIcons: false,
         benchmarkPath: benchmarkPath(useWasm: useWasm),
         headless: !useBrowser,
@@ -86,8 +87,9 @@ void printAndMaybeSaveResults({
   required String? saveToFileLocation,
 }) {
   final resultsAsMap = benchmarkResults.toJson();
-  final resultsAsJsonString =
-      const JsonEncoder.withIndent('  ').convert(resultsAsMap);
+  final resultsAsJsonString = const JsonEncoder.withIndent(
+    '  ',
+  ).convert(resultsAsMap);
 
   if (saveToFileLocation != null) {
     final location = Uri.parse(saveToFileLocation);

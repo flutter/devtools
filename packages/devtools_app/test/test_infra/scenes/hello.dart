@@ -10,11 +10,7 @@ import 'package:stager/stager.dart';
 class HelloScene extends Scene {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Card(
-        child: Text('Hello, I am $title.'),
-      ),
-    );
+    return MaterialApp(home: Card(child: Text('Hello, I am $title.')));
   }
 
   @override

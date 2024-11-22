@@ -27,8 +27,9 @@ extension DevToolsDTDExtension on DTDManager {
   Future<String> analyticsConsentMessage() async {
     if (!hasConnection) return '';
     try {
-      final response =
-          await _dtd.analyticsGetConsentMessage(ua.DashTool.devtools);
+      final response = await _dtd.analyticsGetConsentMessage(
+        ua.DashTool.devtools,
+      );
       _log.finer('DTDManager.analyticsConsentMessage success');
       return response.value!;
     } catch (e) {
@@ -42,8 +43,9 @@ extension DevToolsDTDExtension on DTDManager {
   Future<bool> shouldShowAnalyticsConsentMessage() async {
     if (!hasConnection) return false;
     try {
-      final response =
-          await _dtd.analyticsShouldShowConsentMessage(ua.DashTool.devtools);
+      final response = await _dtd.analyticsShouldShowConsentMessage(
+        ua.DashTool.devtools,
+      );
       final shouldShow = response.value!;
       _log.finer(
         'DTDManager.shouldShowAnalyticsConsentMessage result: $shouldShow',
@@ -70,8 +72,9 @@ extension DevToolsDTDExtension on DTDManager {
   Future<bool> analyticsTelemetryEnabled() async {
     if (!hasConnection) return false;
     try {
-      final response =
-          await _dtd.analyticsTelemetryEnabled(ua.DashTool.devtools);
+      final response = await _dtd.analyticsTelemetryEnabled(
+        ua.DashTool.devtools,
+      );
       final enabled = response.value!;
       _log.finer('DTDManager.analyticsTelemetryEnabled result: $enabled');
       return enabled;

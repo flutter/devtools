@@ -131,9 +131,9 @@ enum ScreenMetaData {
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
   }) : assert(
-          icon == null || iconAsset == null,
-          'Only one of icon or iconAsset may be specified.',
-        );
+         icon == null || iconAsset == null,
+         'Only one of icon or iconAsset may be specified.',
+       );
 
   final String id;
   final String? title;
@@ -197,14 +197,14 @@ abstract class Screen {
     this.requiresVmDeveloperMode = false,
     this.worksWithOfflineData = false,
     this.showFloatingDebuggerControls = true,
-  })  : assert(
-          title == null || titleGenerator == null,
-          'Only one of title or titleGenerator may be specified.',
-        ),
-        assert(
-          icon == null || iconAsset == null,
-          'Only one of icon or iconAsset may be specified.',
-        );
+  }) : assert(
+         title == null || titleGenerator == null,
+         'Only one of title or titleGenerator may be specified.',
+       ),
+       assert(
+         icon == null || iconAsset == null,
+         'Only one of icon or iconAsset may be specified.',
+       );
 
   const Screen.conditional({
     required String id,
@@ -223,21 +223,21 @@ abstract class Screen {
     String? iconAsset,
     Key? tabKey,
   }) : this(
-          id,
-          requiresLibrary: requiresLibrary,
-          requiresConnection: requiresConnection,
-          requiresDartVm: requiresDartVm,
-          requiresFlutter: requiresFlutter,
-          requiresDebugBuild: requiresDebugBuild,
-          requiresVmDeveloperMode: requiresVmDeveloperMode,
-          worksWithOfflineData: worksWithOfflineData,
-          showFloatingDebuggerControls: showFloatingDebuggerControls,
-          title: title,
-          titleGenerator: titleGenerator,
-          icon: icon,
-          iconAsset: iconAsset,
-          tabKey: tabKey,
-        );
+         id,
+         requiresLibrary: requiresLibrary,
+         requiresConnection: requiresConnection,
+         requiresDartVm: requiresDartVm,
+         requiresFlutter: requiresFlutter,
+         requiresDebugBuild: requiresDebugBuild,
+         requiresVmDeveloperMode: requiresVmDeveloperMode,
+         worksWithOfflineData: worksWithOfflineData,
+         showFloatingDebuggerControls: showFloatingDebuggerControls,
+         title: title,
+         titleGenerator: titleGenerator,
+         icon: icon,
+         iconAsset: iconAsset,
+         tabKey: tabKey,
+       );
 
   Screen.fromMetaData(
     ScreenMetaData metadata, {
@@ -246,22 +246,22 @@ abstract class Screen {
     String Function()? titleGenerator,
     Key? tabKey,
   }) : this.conditional(
-          id: metadata.id,
-          requiresLibrary: metadata.requiresLibrary,
-          requiresConnection: metadata.requiresConnection,
-          requiresDartVm: metadata.requiresDartVm,
-          requiresFlutter: metadata.requiresFlutter,
-          requiresDebugBuild: metadata.requiresDebugBuild,
-          requiresVmDeveloperMode: metadata.requiresVmDeveloperMode,
-          worksWithOfflineData: metadata.worksWithOfflineData,
-          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
-          showFloatingDebuggerControls: showFloatingDebuggerControls,
-          title: titleGenerator == null ? metadata.title : null,
-          titleGenerator: titleGenerator,
-          icon: metadata.icon,
-          iconAsset: metadata.iconAsset,
-          tabKey: tabKey,
-        );
+         id: metadata.id,
+         requiresLibrary: metadata.requiresLibrary,
+         requiresConnection: metadata.requiresConnection,
+         requiresDartVm: metadata.requiresDartVm,
+         requiresFlutter: metadata.requiresFlutter,
+         requiresDebugBuild: metadata.requiresDebugBuild,
+         requiresVmDeveloperMode: metadata.requiresVmDeveloperMode,
+         worksWithOfflineData: metadata.worksWithOfflineData,
+         shouldShowForFlutterVersion: shouldShowForFlutterVersion,
+         showFloatingDebuggerControls: showFloatingDebuggerControls,
+         title: titleGenerator == null ? metadata.title : null,
+         titleGenerator: titleGenerator,
+         icon: metadata.icon,
+         iconAsset: metadata.iconAsset,
+         tabKey: tabKey,
+       );
 
   /// Whether to show floating debugger controls if the app is paused.
   ///
@@ -382,8 +382,9 @@ abstract class Screen {
   Widget buildTab(BuildContext context) {
     final title = _userFacingTitle;
     return ValueListenableBuilder<int>(
-      valueListenable:
-          serviceConnection.errorBadgeManager.errorCountNotifier(screenId),
+      valueListenable: serviceConnection.errorBadgeManager.errorCountNotifier(
+        screenId,
+      ),
       builder: (context, count, _) {
         final tab = Tab(
           key: tabKey,
@@ -393,18 +394,16 @@ abstract class Screen {
                 DevToolsIcon(
                   icon: icon,
                   iconAsset: iconAsset,
-                  size: iconAsset != null
-                      // Add 1.0 to adjust for margins on the screen icon assets.
-                      ? scaleByFontFactor(defaultIconSizeBeforeScaling + 1.0)
-                      : defaultIconSize,
+                  size:
+                      iconAsset != null
+                          // Add 1.0 to adjust for margins on the screen icon assets.
+                          ? scaleByFontFactor(defaultIconSizeBeforeScaling + 1.0)
+                          : defaultIconSize,
                 ),
               if (title.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(left: denseSpacing),
-                  child: Text(
-                    title,
-                    style: Theme.of(context).regularTextStyle,
-                  ),
+                  child: Text(title, style: Theme.of(context).regularTextStyle),
                 ),
             ],
           ),
@@ -454,7 +453,7 @@ abstract class Screen {
     if (!requiresConnection) {
       final connected =
           serviceConnection.serviceManager.connectedState.value.connected &&
-              serviceConnection.serviceManager.connectedAppInitialized;
+          serviceConnection.serviceManager.connectedAppInitialized;
       // Do not use the disconnected body in offline mode, because the default
       // [buildScreenBody] should be used for offline states.
       if (!connected && !offlineDataController.showingOfflineData.value) {
@@ -494,13 +493,15 @@ abstract class Screen {
     _log.finest('for offline mode: returning ${screen.worksWithOfflineData}');
     return (
       show: screen.worksWithOfflineData,
-      disabledReason: screen.worksWithOfflineData
-          ? null
-          : ScreenDisabledReason.offlineDataNotSupported,
+      disabledReason:
+          screen.worksWithOfflineData
+              ? null
+              : ScreenDisabledReason.offlineDataNotSupported,
     );
   }
 
-  final serviceReady = serviceConnection.serviceManager.isServiceAvailable &&
+  final serviceReady =
+      serviceConnection.serviceManager.isServiceAvailable &&
       serviceConnection.serviceManager.connectedApp!.connectedAppInitialized;
   if (!serviceReady) {
     if (!screen.requiresConnection) {
@@ -521,8 +522,9 @@ abstract class Screen {
   if (screen.requiresLibrary != null) {
     if (serviceConnection.serviceManager.isolateManager.mainIsolate.value ==
             null ||
-        !serviceConnection.serviceManager
-            .libraryUriAvailableNow(screen.requiresLibrary)) {
+        !serviceConnection.serviceManager.libraryUriAvailableNow(
+          screen.requiresLibrary,
+        )) {
       _log.finest(
         'screen requires library ${screen.requiresLibrary}: returning false',
       );
@@ -576,9 +578,10 @@ class BadgePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = colorScheme.errorContainer
-      ..style = PaintingStyle.fill;
+    final paint =
+        Paint()
+          ..color = colorScheme.errorContainer
+          ..style = PaintingStyle.fill;
 
     final countPainter = TextPainter(
       text: TextSpan(
@@ -616,10 +619,8 @@ class BadgePainter extends CustomPainter {
 }
 
 class ShortcutsConfiguration {
-  const ShortcutsConfiguration({
-    required this.shortcuts,
-    required this.actions,
-  }) : assert(shortcuts.length == actions.length);
+  const ShortcutsConfiguration({required this.shortcuts, required this.actions})
+    : assert(shortcuts.length == actions.length);
 
   factory ShortcutsConfiguration.empty() {
     return ShortcutsConfiguration(shortcuts: {}, actions: {});

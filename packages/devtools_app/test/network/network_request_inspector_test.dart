@@ -36,9 +36,7 @@ void main() {
       fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           httpProfile: HttpProfile(
-            requests: [
-              httpRequest!,
-            ],
+            requests: [httpRequest!],
             timestamp: DateTime.fromMicrosecondsSinceEpoch(0),
           ),
         ),
@@ -79,15 +77,13 @@ void main() {
       // Tap the requestBody copy button.
       expect(clipboardContents, isEmpty);
       await tester.tap(find.byType(CopyToClipboardControl));
-      final expectedResponseBody =
-          jsonDecode(utf8.decode(httpRequest!.requestBody!.toList()));
+      final expectedResponseBody = jsonDecode(
+        utf8.decode(httpRequest!.requestBody!.toList()),
+      );
 
       // Check that the contents were copied to clipboard.
       expect(clipboardContents, isNotEmpty);
-      expect(
-        jsonDecode(clipboardContents),
-        equals(expectedResponseBody),
-      );
+      expect(jsonDecode(clipboardContents), equals(expectedResponseBody));
 
       await controller.stopRecording();
 
@@ -121,15 +117,13 @@ void main() {
       // Tap the responseBody copy button.
       expect(clipboardContents, isEmpty);
       await tester.tap(find.byType(CopyToClipboardControl));
-      final expectedResponseBody =
-          jsonDecode(utf8.decode(httpRequest!.responseBody!.toList()));
+      final expectedResponseBody = jsonDecode(
+        utf8.decode(httpRequest!.responseBody!.toList()),
+      );
 
       // Check that the contents were copied to clipboard.
       expect(clipboardContents, isNotEmpty);
-      expect(
-        jsonDecode(clipboardContents),
-        equals(expectedResponseBody),
-      );
+      expect(jsonDecode(clipboardContents), equals(expectedResponseBody));
 
       await controller.stopRecording();
 
@@ -142,18 +136,20 @@ void main() {
         'drop down value should update when response view type changes',
         (tester) async {
           NetworkResponseViewType? getCurrentDropDownValue() {
-            final dropDownWidget = find
-                .byType(RoundedDropDownButton<NetworkResponseViewType>)
-                .evaluate()
-                .first
-                .widget as RoundedDropDownButton<NetworkResponseViewType>;
+            final dropDownWidget =
+                find
+                        .byType(RoundedDropDownButton<NetworkResponseViewType>)
+                        .evaluate()
+                        .first
+                        .widget
+                    as RoundedDropDownButton<NetworkResponseViewType>;
             return dropDownWidget.value;
           }
 
           final currentResponseViewType =
               ValueNotifier<NetworkResponseViewType>(
-            NetworkResponseViewType.auto,
-          );
+                NetworkResponseViewType.auto,
+              );
 
           // Matches Drop Down value with currentResponseViewType
           void checkDropDownValue() {
@@ -195,8 +191,8 @@ void main() {
         (tester) async {
           final currentResponseViewType =
               ValueNotifier<NetworkResponseViewType>(
-            NetworkResponseViewType.auto,
-          );
+                NetworkResponseViewType.auto,
+              );
           String initial = 'Not changed';
           const afterOnChanged = 'changed';
 
@@ -221,18 +217,11 @@ void main() {
           await tester.pumpAndSettle();
 
           // Select Json from drop down
-          await tester.tap(
-            find.text(
-              NetworkResponseViewType.json.toString(),
-            ),
-          );
+          await tester.tap(find.text(NetworkResponseViewType.json.toString()));
 
           await tester.pumpAndSettle();
 
-          expect(
-            initial,
-            afterOnChanged,
-          );
+          expect(initial, afterOnChanged);
 
           // pumpAndSettle so residual http timers can clear.
           await tester.pumpAndSettle(const Duration(seconds: 1));

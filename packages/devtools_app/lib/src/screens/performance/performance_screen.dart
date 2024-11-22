@@ -94,7 +94,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
         final showingOfflineData =
             offlineDataController.showingOfflineData.value;
-        final isOfflineFlutterApp = showingOfflineData &&
+        final isOfflineFlutterApp =
+            showingOfflineData &&
             controller.offlinePerformanceData != null &&
             controller.offlinePerformanceData!.frames.isNotEmpty;
         return Column(
@@ -107,7 +108,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             if (isOfflineFlutterApp ||
                 (!showingOfflineData &&
                     serviceConnection
-                        .serviceManager.connectedApp!.isFlutterAppNow!))
+                        .serviceManager
+                        .connectedApp!
+                        .isFlutterAppNow!))
               FlutterFramesChart(
                 controller.flutterFramesController,
                 showingOfflineData: showingOfflineData,
@@ -128,7 +131,7 @@ class WebPerformanceScreenBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final isFlutterWebApp =
         serviceConnection.serviceManager.connectedApp?.isFlutterWebAppNow ??
-            false;
+        false;
     return Markdown(
       data: isFlutterWebApp ? flutterWebInstructionsMd : dartWebInstructionsMd,
       onTapLink: (_, url, _) {
@@ -155,8 +158,10 @@ class DisconnectedPerformanceScreenBody extends StatelessWidget {
       gaSelectionImport: gac.PerformanceEvents.openDataFile.name,
       gaSelectionAction: gac.PerformanceEvents.loadDataFromFile.name,
       onAction: (jsonFile) {
-        Provider.of<ImportController>(context, listen: false)
-            .importData(jsonFile, expectedScreenId: PerformanceScreen.id);
+        Provider.of<ImportController>(
+          context,
+          listen: false,
+        ).importData(jsonFile, expectedScreenId: PerformanceScreen.id);
       },
     );
   }

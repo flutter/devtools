@@ -124,12 +124,13 @@ class ClassRefEncodeDecode extends EncodeDecode<ClassRef> {
 Object? toEncodable(Object? value) {
   return switch (value) {
     null => null,
-    final HeapSnapshotGraph value =>
-      HeapSnapshotGraphEncodeDecode.instance.toEncodable(value),
+    final HeapSnapshotGraph value => HeapSnapshotGraphEncodeDecode.instance
+        .toEncodable(value),
     final ByteData value => ByteDataEncodeDecode.instance.toEncodable(value),
     final DateTime value => DateTimeEncodeDecode.instance.toEncodable(value),
-    final IsolateRef value =>
-      IsolateRefEncodeDecode.instance.toEncodable(value),
+    final IsolateRef value => IsolateRefEncodeDecode.instance.toEncodable(
+      value,
+    ),
     final ClassRef value => ClassRefEncodeDecode.instance.toEncodable(value),
     final Serializable value => value.toJson(),
     _ =>

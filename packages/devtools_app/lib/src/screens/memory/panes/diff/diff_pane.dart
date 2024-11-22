@@ -36,9 +36,7 @@ class DiffPane extends StatelessWidget {
           child: SnapshotList(controller: diffController),
         ),
         OutlineDecoration.onlyLeft(
-          child: _SnapshotItemContent(
-            controller: diffController,
-          ),
+          child: _SnapshotItemContent(controller: diffController),
         ),
       ],
     );
@@ -74,8 +72,9 @@ class _SnapshotItemContent extends StatelessWidget {
                           styleSheet: MarkdownStyleSheet(
                             p: Theme.of(context).regularTextStyle,
                           ),
-                          onTapLink: (text, url, title) =>
-                              unawaited(launchUrlWithErrorHandling(url!)),
+                          onTapLink:
+                              (text, url, title) =>
+                                  unawaited(launchUrlWithErrorHandling(url!)),
                         ),
                       ),
                       const SizedBox(width: densePadding),
@@ -93,8 +92,8 @@ class _SnapshotItemContent extends StatelessWidget {
                           MoreInfoLink(
                             url: DocLinks.diff.value,
                             gaScreenName: gac.memory,
-                            gaSelectedItemDescription:
-                                gac.topicDocumentationLink(_documentationTopic),
+                            gaSelectedItemDescription: gac
+                                .topicDocumentationLink(_documentationTopic),
                           ),
                         ],
                       ),
@@ -128,11 +127,7 @@ class SnapshotInstanceItemPane extends StatelessWidget {
             child: SnapshotControlPane(controller: controller),
           ),
         ),
-        Expanded(
-          child: SnapshotView(
-            controller: controller,
-          ),
-        ),
+        Expanded(child: SnapshotView(controller: controller)),
       ],
     );
   }
