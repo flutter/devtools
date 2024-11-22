@@ -59,10 +59,17 @@ class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
         return;
       }
 
-      final isolateId = serviceConnection
-          .serviceManager.isolateManager.selectedIsolate.value!.id!;
+      final isolateId =
+          serviceConnection
+              .serviceManager
+              .isolateManager
+              .selectedIsolate
+              .value!
+              .id!;
       final service = serviceConnection.serviceManager.service!;
-      _initialized = service.getObject(isolateId, elementsInstance.id!).then(
+      _initialized = service
+          .getObject(isolateId, elementsInstance.id!)
+          .then(
             (e) => entries.addAll((e as Instance).elements!.cast<Response?>()),
           );
       return;
@@ -88,10 +95,7 @@ class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
           controller: widget.controller,
           object: widget.vmObject,
           generalDataRows: [
-            ...vmObjectGeneralDataRows(
-              widget.controller,
-              widget.vmObject,
-            ),
+            ...vmObjectGeneralDataRows(widget.controller, widget.vmObject),
           ],
           expandableWidgets: [
             ExpansionTileInstanceList(

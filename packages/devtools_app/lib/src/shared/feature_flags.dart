@@ -23,8 +23,9 @@ bool get enableExperiments =>
 ///   "args": [
 ///     "--dart-define=enable_experiments=true"
 ///   ]
-const _experimentsEnabledByEnvironment =
-    bool.fromEnvironment('enable_experiments');
+const _experimentsEnabledByEnvironment = bool.fromEnvironment(
+  'enable_experiments',
+);
 
 bool _experimentsEnabledFromMain = false;
 
@@ -35,8 +36,10 @@ void setEnableExperiments() {
 @visibleForTesting
 bool get enableBeta => enableExperiments || !isExternalBuild;
 
-const _kMemoryDisconnectExperience =
-    bool.fromEnvironment('memory_disconnect_experience', defaultValue: true);
+const _kMemoryDisconnectExperience = bool.fromEnvironment(
+  'memory_disconnect_experience',
+  defaultValue: true,
+);
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members

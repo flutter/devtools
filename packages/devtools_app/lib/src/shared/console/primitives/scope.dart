@@ -48,10 +48,7 @@ class EvalScope {
     return result;
   }
 
-  Future<InstanceRef?> _refreshRef(
-    InstanceRef ref,
-    String isolateId,
-  ) async {
+  Future<InstanceRef?> _refreshRef(InstanceRef ref, String isolateId) async {
     Obj? object;
     try {
       object = await serviceConnection.serviceManager.service!.getObject(

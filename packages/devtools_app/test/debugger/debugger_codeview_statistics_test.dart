@@ -38,10 +38,12 @@ void main() {
       isProfileBuild: false,
       isWebApp: false,
     );
-    when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
-        .thenReturn(false);
-    when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
-        .thenReturn(false);
+    when(
+      fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow,
+    ).thenReturn(false);
+    when(
+      fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow,
+    ).thenReturn(false);
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, MockScriptManager());
@@ -54,29 +56,32 @@ void main() {
     scriptsHistory.pushEntry(mockScript!);
     final mockCodeViewController = debuggerController.codeViewController;
 
-    when(mockCodeViewController.currentScriptRef)
-        .thenReturn(ValueNotifier(mockScriptRef));
-    when(mockCodeViewController.currentParsedScript)
-        .thenReturn(ValueNotifier(mockParsedScript));
+    when(
+      mockCodeViewController.currentScriptRef,
+    ).thenReturn(ValueNotifier(mockScriptRef));
+    when(
+      mockCodeViewController.currentParsedScript,
+    ).thenReturn(ValueNotifier(mockParsedScript));
     when(mockCodeViewController.scriptsHistory).thenReturn(scriptsHistory);
 
     showCodeCoverage = ValueNotifier<bool>(false);
     showProfileHits = ValueNotifier<bool>(false);
-    when(mockCodeViewController.toggleShowCodeCoverage()).thenAnswer(
-      (_) => showCodeCoverage.value = !showCodeCoverage.value,
-    );
-    when(mockCodeViewController.toggleShowProfileInformation()).thenAnswer(
-      (_) => showProfileHits.value = !showProfileHits.value,
-    );
+    when(
+      mockCodeViewController.toggleShowCodeCoverage(),
+    ).thenAnswer((_) => showCodeCoverage.value = !showCodeCoverage.value);
+    when(
+      mockCodeViewController.toggleShowProfileInformation(),
+    ).thenAnswer((_) => showProfileHits.value = !showProfileHits.value);
     when(mockCodeViewController.showCodeCoverage).thenReturn(showCodeCoverage);
-    when(mockCodeViewController.showProfileInformation)
-        .thenReturn(showProfileHits);
+    when(
+      mockCodeViewController.showProfileInformation,
+    ).thenReturn(showProfileHits);
     refreshCodeCoverageInvoked = false;
-    // TODO(jacobr): is there a better way to clean this up?
-    // ignore: discarded_futures
-    when(mockCodeViewController.refreshCodeStatistics()).thenAnswer(
-      (_) async => refreshCodeCoverageInvoked = true,
-    );
+    when(
+      // TODO(jacobr): is there a better way to clean this up?
+      // ignore: discarded_futures
+      mockCodeViewController.refreshCodeStatistics(),
+    ).thenAnswer((_) async => refreshCodeCoverageInvoked = true);
     when(codeViewController.navigationInProgress).thenReturn(false);
   });
 
@@ -140,10 +145,7 @@ void main() {
       // Coverage display starts disabled.
       gutterItemCoverageTester(tester, false);
       gutterItemProfileInfoTester(tester, false);
-      expect(
-        tester.widget<DevToolsButton>(findRefresh).onPressed,
-        isNull,
-      );
+      expect(tester.widget<DevToolsButton>(findRefresh).onPressed, isNull);
 
       // Toggle showing coverage and verify the gutter items contain coverage
       // information.
@@ -151,10 +153,7 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       gutterItemCoverageTester(tester, true);
       gutterItemProfileInfoTester(tester, false);
-      expect(
-        tester.widget<DevToolsButton>(findRefresh).onPressed,
-        isNotNull,
-      );
+      expect(tester.widget<DevToolsButton>(findRefresh).onPressed, isNotNull);
 
       // Toggle showing profiler information and verify the gutter items contain
       // profiling information.
@@ -162,10 +161,7 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       gutterItemCoverageTester(tester, true);
       gutterItemProfileInfoTester(tester, true);
-      expect(
-        tester.widget<DevToolsButton>(findRefresh).onPressed,
-        isNotNull,
-      );
+      expect(tester.widget<DevToolsButton>(findRefresh).onPressed, isNotNull);
 
       // Test the refresh coverage button.
       await tester.tap(findRefresh);
@@ -177,20 +173,14 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       gutterItemCoverageTester(tester, false);
       gutterItemProfileInfoTester(tester, true);
-      expect(
-        tester.widget<DevToolsButton>(findRefresh).onPressed,
-        isNotNull,
-      );
+      expect(tester.widget<DevToolsButton>(findRefresh).onPressed, isNotNull);
 
       // Toggle again and verify the profiling information is no longer present.
       await tester.tap(findProfileToggle);
       await pumpDebuggerScreen(tester, debuggerController);
       gutterItemCoverageTester(tester, false);
       gutterItemProfileInfoTester(tester, false);
-      expect(
-        tester.widget<DevToolsButton>(findRefresh).onPressed,
-        isNull,
-      );
+      expect(tester.widget<DevToolsButton>(findRefresh).onPressed, isNull);
     },
   );
 }

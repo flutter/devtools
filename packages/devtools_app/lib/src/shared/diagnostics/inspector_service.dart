@@ -38,15 +38,15 @@ abstract class InspectorServiceBase extends DisposableController
     required this.serviceExtensionPrefix,
     required String inspectorLibraryUri,
     ValueListenable<IsolateRef?>? evalIsolate,
-  })  : assert(serviceConnection.serviceManager.connectedAppInitialized),
-        assert(serviceConnection.serviceManager.service != null),
-        clients = {},
-        inspectorLibrary = EvalOnDartLibrary(
-          inspectorLibraryUri,
-          serviceConnection.serviceManager.service!,
-          serviceManager: serviceConnection.serviceManager,
-          isolate: evalIsolate,
-        ) {
+  }) : assert(serviceConnection.serviceManager.connectedAppInitialized),
+       assert(serviceConnection.serviceManager.service != null),
+       clients = {},
+       inspectorLibrary = EvalOnDartLibrary(
+         inspectorLibraryUri,
+         serviceConnection.serviceManager.service!,
+         serviceManager: serviceConnection.serviceManager,
+         isolate: evalIsolate,
+       ) {
     _lastMainIsolate =
         serviceConnection.serviceManager.isolateManager.mainIsolate.value;
     addAutoDisposeListener(
@@ -124,8 +124,9 @@ abstract class InspectorServiceBase extends DisposableController
   Future<bool> invokeBoolServiceMethodNoArgs(String methodName) async {
     return useDaemonApi
         ? await invokeServiceMethodDaemonNoGroupArgs(methodName) == true
-        : (await invokeServiceMethodObservatoryNoGroup(methodName))
-                ?.valueAsString ==
+        : (await invokeServiceMethodObservatoryNoGroup(
+              methodName,
+            ))?.valueAsString ==
             'true';
   }
 
@@ -159,17 +160,18 @@ abstract class InspectorServiceBase extends DisposableController
     if (!serviceConnection.serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable(callMethodName)) {
       final available = await serviceConnection
-          .serviceManager.serviceExtensionManager
+          .serviceManager
+          .serviceExtensionManager
           .waitForServiceExtensionAvailable(callMethodName);
       if (!available) return {'result': null};
     }
 
-    final r =
-        await serviceConnection.serviceManager.service!.callServiceExtension(
-      callMethodName,
-      isolateId: isolateRef!.id,
-      args: args,
-    );
+    final r = await serviceConnection.serviceManager.service!
+        .callServiceExtension(
+          callMethodName,
+          isolateId: isolateRef!.id,
+          args: args,
+        );
     final json = r.json!;
     if (json['errorMessage'] != null) {
       throw Exception('$methodName -- ${json['errorMessage']}');
@@ -182,22 +184,24 @@ abstract class InspectorServiceBase extends DisposableController
 /// the inspector.
 class InspectorService extends InspectorServiceBase {
   InspectorService()
-      : super(
-          clientInspectorName: 'WidgetInspectorService',
-          serviceExtensionPrefix: inspectorExtensionPrefix,
-          inspectorLibraryUri: _inspectorLibraryUri,
-          evalIsolate:
-              serviceConnection.serviceManager.isolateManager.mainIsolate,
-        ) {
+    : super(
+        clientInspectorName: 'WidgetInspectorService',
+        serviceExtensionPrefix: inspectorExtensionPrefix,
+        inspectorLibraryUri: _inspectorLibraryUri,
+        evalIsolate:
+            serviceConnection.serviceManager.isolateManager.mainIsolate,
+      ) {
     // Note: We do not need to listen to event history here because the
     // inspector uses a separate API to get the current inspector selection.
     autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onExtensionEvent
-          .listen(onExtensionVmServiceReceived),
+      serviceConnection.serviceManager.service!.onExtensionEvent.listen(
+        onExtensionVmServiceReceived,
+      ),
     );
     autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onDebugEvent
-          .listen(onDebugVmServiceReceived),
+      serviceConnection.serviceManager.service!.onDebugEvent.listen(
+        onDebugVmServiceReceived,
+      ),
     );
   }
 
@@ -418,8 +422,10 @@ class InspectorService extends InspectorServiceBase {
   RemoteDiagnosticsNode? _currentSelection;
 
   InspectorObjectGroupManager get _selectionGroups {
-    return _cachedSelectionGroups ??=
-        InspectorObjectGroupManager(this, 'selection');
+    return _cachedSelectionGroups ??= InspectorObjectGroupManager(
+      this,
+      'selection',
+    );
   }
 
   InspectorObjectGroupManager? _cachedSelectionGroups;
@@ -464,9 +470,8 @@ class InspectorService extends InspectorServiceBase {
 /// This class has additional descenders in Google3.
 abstract class InspectorObjectGroupBase
     extends InspectorObjectGroupApi<RemoteDiagnosticsNode> {
-  InspectorObjectGroupBase(
-    String debugName,
-  ) : groupName = '${debugName}_${InspectorServiceBase.nextGroupId}' {
+  InspectorObjectGroupBase(String debugName)
+    : groupName = '${debugName}_${InspectorServiceBase.nextGroupId}' {
     InspectorServiceBase.nextGroupId++;
   }
 
@@ -492,12 +497,13 @@ abstract class InspectorObjectGroupBase
   @override
   Future<void> dispose() {
     // No need to dispose the group if the isolate is already gone.
-    final disposeComplete = inspectorService.isolateRef != null
-        ? invokeVoidServiceMethod(
-            WidgetInspectorServiceExtensions.disposeGroup.name,
-            groupName,
-          )
-        : Future<void>.value();
+    final disposeComplete =
+        inspectorService.isolateRef != null
+            ? invokeVoidServiceMethod(
+              WidgetInspectorServiceExtensions.disposeGroup.name,
+              groupName,
+            )
+            : Future<void>.value();
     disposed = true;
     return disposeComplete;
   }
@@ -509,11 +515,11 @@ abstract class InspectorObjectGroupBase
     if (disposed) return null;
     return useDaemonApi
         ? parseDiagnosticsNodeDaemon(
-            invokeServiceMethodDaemonInspectorRef(methodName, ref),
-          )
+          invokeServiceMethodDaemonInspectorRef(methodName, ref),
+        )
         : parseDiagnosticsNodeObservatory(
-            invokeServiceMethodObservatoryInspectorRef(methodName, ref),
-          );
+          invokeServiceMethodObservatoryInspectorRef(methodName, ref),
+        );
   }
 
   Future<RemoteDiagnosticsNode?> invokeServiceMethodWithArgReturningNode(
@@ -523,11 +529,11 @@ abstract class InspectorObjectGroupBase
     if (disposed) return null;
     return useDaemonApi
         ? parseDiagnosticsNodeDaemon(
-            invokeServiceMethodDaemonArg(methodName, arg, groupName),
-          )
+          invokeServiceMethodDaemonArg(methodName, arg, groupName),
+        )
         : parseDiagnosticsNodeObservatory(
-            invokeServiceMethodObservatoryWithGroupName1(methodName, arg),
-          );
+          invokeServiceMethodObservatoryWithGroupName1(methodName, arg),
+        );
   }
 
   Future<Object?> invokeServiceMethodDaemonArg(
@@ -572,10 +578,9 @@ abstract class InspectorObjectGroupBase
     String methodName, [
     String? objectGroup,
   ]) {
-    return invokeServiceMethodDaemonParams(
-      methodName,
-      {'objectGroup': objectGroup ?? groupName},
-    );
+    return invokeServiceMethodDaemonParams(methodName, {
+      'objectGroup': objectGroup ?? groupName,
+    });
   }
 
   Future<InstanceRef?> invokeServiceMethodObservatory1(
@@ -608,7 +613,8 @@ abstract class InspectorObjectGroupBase
     if (!serviceConnection.serviceManager.serviceExtensionManager
         .isServiceExtensionAvailable(callMethodName)) {
       final available = await serviceConnection
-          .serviceManager.serviceExtensionManager
+          .serviceManager
+          .serviceExtensionManager
           .waitForServiceExtensionAvailable(callMethodName);
       if (!available) return null;
     }
@@ -625,12 +631,12 @@ abstract class InspectorObjectGroupBase
     }
 
     return inspectorLibrary.addRequest(this, () async {
-      final r =
-          await serviceConnection.serviceManager.service!.callServiceExtension(
-        extension,
-        isolateId: inspectorService.isolateRef!.id,
-        args: args,
-      );
+      final r = await serviceConnection.serviceManager.service!
+          .callServiceExtension(
+            extension,
+            isolateId: inspectorService.isolateRef!.id,
+            args: args,
+          );
       if (disposed) return null;
       final json = r.json!;
       if (json['errorMessage'] != null) {
@@ -844,15 +850,15 @@ abstract class InspectorObjectGroupBase
     if (disposed) return const [];
     return useDaemonApi
         ? parseDiagnosticsNodesDaemon(
-            invokeServiceMethodDaemonInspectorRef(methodName, instanceRef),
-            parent,
-            isProperty,
-          )
+          invokeServiceMethodDaemonInspectorRef(methodName, instanceRef),
+          parent,
+          isProperty,
+        )
         : parseDiagnosticsNodesObservatory(
-            invokeServiceMethodObservatoryInspectorRef(methodName, instanceRef),
-            parent,
-            isProperty,
-          );
+          invokeServiceMethodObservatoryInspectorRef(methodName, instanceRef),
+          parent,
+          isProperty,
+        );
   }
 
   /// Evaluate an expression where `object` references the [inspectorRef] or
@@ -937,10 +943,7 @@ abstract class InspectorObjectGroupBase
 /// will be skipped. This means that clients should not have to write any
 /// special logic to handle orphaned requests.
 class ObjectGroup extends InspectorObjectGroupBase {
-  ObjectGroup(
-    super.debugName,
-    this.inspectorService,
-  );
+  ObjectGroup(super.debugName, this.inspectorService);
 
   @override
   final InspectorService inspectorService;
@@ -981,7 +984,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
     );
   }
 
-// TODO these ones could be not needed.
+  // TODO these ones could be not needed.
   /* TODO(jacobr): this probably isn't needed.
   Future<List<DiagnosticsPathNode>> getParentChain(DiagnosticsNode target) async {
     if (disposed) return null;
@@ -1059,19 +1062,19 @@ class ObjectGroup extends InspectorObjectGroupBase {
     }
     return useDaemonApi
         ? handleSetSelectionDaemon(
-            invokeServiceMethodDaemonInspectorRef(
-              WidgetInspectorServiceExtensions.setSelectionById.name,
-              selection,
-            ),
-            uiAlreadyUpdated,
-          )
+          invokeServiceMethodDaemonInspectorRef(
+            WidgetInspectorServiceExtensions.setSelectionById.name,
+            selection,
+          ),
+          uiAlreadyUpdated,
+        )
         : handleSetSelectionObservatory(
-            invokeServiceMethodObservatoryInspectorRef(
-              WidgetInspectorServiceExtensions.setSelectionById.name,
-              selection,
-            ),
-            uiAlreadyUpdated,
-          );
+          invokeServiceMethodObservatoryInspectorRef(
+            WidgetInspectorServiceExtensions.setSelectionById.name,
+            selection,
+          ),
+          uiAlreadyUpdated,
+        );
   }
 
   Future<bool> setSelection(GenericInstanceRef selection) async {

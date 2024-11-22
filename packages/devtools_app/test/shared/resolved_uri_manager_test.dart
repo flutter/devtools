@@ -62,8 +62,10 @@ void main() {
     });
 
     test('lookupPackageUri when uri is unknown', () {
-      final packageUriResult =
-          resolvedUriManager.lookupPackageUri(isolateId, 'some/uri');
+      final packageUriResult = resolvedUriManager.lookupPackageUri(
+        isolateId,
+        'some/uri',
+      );
       expect(packageUriResult, isNull);
     });
 
@@ -158,21 +160,27 @@ void main() {
     });
 
     test('lookupFileUri when package is unknown', () {
-      final fileUriResult =
-          resolvedUriManager.lookupFileUri(isolateId, 'package:some/uri');
+      final fileUriResult = resolvedUriManager.lookupFileUri(
+        isolateId,
+        'package:some/uri',
+      );
       expect(fileUriResult, isNull);
     });
 
     test('lookupFileUri', () async {
       when(
-        service
-            .lookupResolvedPackageUris(isolateId, [packageUri1, packageUri2]),
+        service.lookupResolvedPackageUris(isolateId, [
+          packageUri1,
+          packageUri2,
+        ]),
       ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [uri1, uri2])),
       );
 
-      await resolvedUriManager
-          .fetchFileUris(isolateId, [packageUri1, packageUri2]);
+      await resolvedUriManager.fetchFileUris(isolateId, [
+        packageUri1,
+        packageUri2,
+      ]);
 
       expect(
         resolvedUriManager.lookupFileUri(isolateId, packageUri1),
@@ -185,14 +193,12 @@ void main() {
     });
 
     test('remembers already fetched file paths', () async {
-      when(service.lookupResolvedPackageUris(isolateId, [packageUri1]))
-          .thenAnswer(
-        (realInvocation) => Future.value(UriList(uris: [uri1])),
-      );
-      when(service.lookupResolvedPackageUris(isolateId, [packageUri2]))
-          .thenAnswer(
-        (realInvocation) => Future.value(UriList(uris: [uri2])),
-      );
+      when(
+        service.lookupResolvedPackageUris(isolateId, [packageUri1]),
+      ).thenAnswer((realInvocation) => Future.value(UriList(uris: [uri1])));
+      when(
+        service.lookupResolvedPackageUris(isolateId, [packageUri2]),
+      ).thenAnswer((realInvocation) => Future.value(UriList(uris: [uri2])));
 
       await resolvedUriManager.fetchFileUris(isolateId, [packageUri1]);
       expect(
@@ -214,12 +220,12 @@ void main() {
     test('caches different mappings between different isolates', () async {
       const isolateId2 = 'anIsolateId2';
       const fileUriFromDifferentIsolate = 'file:///this/is/a/third/fileUri3';
-      when(service.lookupResolvedPackageUris(isolateId, [packageUri1]))
-          .thenAnswer(
-        (realInvocation) => Future.value(UriList(uris: [uri1])),
-      );
-      when(service.lookupResolvedPackageUris(isolateId2, [packageUri1]))
-          .thenAnswer(
+      when(
+        service.lookupResolvedPackageUris(isolateId, [packageUri1]),
+      ).thenAnswer((realInvocation) => Future.value(UriList(uris: [uri1])));
+      when(
+        service.lookupResolvedPackageUris(isolateId2, [packageUri1]),
+      ).thenAnswer(
         (realInvocation) =>
             Future.value(UriList(uris: [fileUriFromDifferentIsolate])),
       );
@@ -238,10 +244,9 @@ void main() {
     });
 
     test('preserves the reverse file to package mapping', () async {
-      when(service.lookupResolvedPackageUris(isolateId, [packageUri1]))
-          .thenAnswer(
-        (realInvocation) => Future.value(UriList(uris: [uri1])),
-      );
+      when(
+        service.lookupResolvedPackageUris(isolateId, [packageUri1]),
+      ).thenAnswer((realInvocation) => Future.value(UriList(uris: [uri1])));
 
       await resolvedUriManager.fetchFileUris(isolateId, [packageUri1]);
 

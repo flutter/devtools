@@ -45,13 +45,8 @@ void main() {
       final offset = pow(2, 20) as int;
       const addressCount = 1000;
       testCode.json = {
-        '_objectPool': {
-          'id': 'pool-id',
-          'length': 0,
-        },
-        InliningData.kInlinedFunctions: [
-          testFunction.toJson(),
-        ],
+        '_objectPool': {'id': 'pool-id', 'length': 0},
+        InliningData.kInlinedFunctions: [testFunction.toJson()],
         InliningData.kStartAddressKey: offset.toRadixString(16),
         InliningData.kInlinedIntervals: [
           // Pretend that each group of 4 instructions are inlined.
@@ -88,18 +83,18 @@ void main() {
 
       when(mockCodeObject.obj).thenReturn(testCode);
       when(mockCodeObject.script).thenReturn(null);
-      when(mockCodeObject.retainingPath).thenReturn(
-        const FixedValueListenable<RetainingPath?>(null),
-      );
+      when(
+        mockCodeObject.retainingPath,
+      ).thenReturn(const FixedValueListenable<RetainingPath?>(null));
       when(mockCodeObject.inboundReferencesTree).thenReturn(
         const FixedValueListenable<List<InboundReferencesTreeNode>>([]),
       );
-      when(mockCodeObject.fetchingReachableSize).thenReturn(
-        const FixedValueListenable<bool>(false),
-      );
-      when(mockCodeObject.fetchingRetainedSize).thenReturn(
-        const FixedValueListenable<bool>(false),
-      );
+      when(
+        mockCodeObject.fetchingReachableSize,
+      ).thenReturn(const FixedValueListenable<bool>(false));
+      when(
+        mockCodeObject.fetchingRetainedSize,
+      ).thenReturn(const FixedValueListenable<bool>(false));
       when(mockCodeObject.retainedSize).thenReturn(null);
       when(mockCodeObject.reachableSize).thenReturn(null);
       when(mockCodeObject.ticksTable).thenReturn(ticksTable);
@@ -107,8 +102,9 @@ void main() {
 
     Future<void> verifyCodeTable(WidgetTester tester) async {
       expect(find.byType(CodeTable), findsOneWidget);
-      final FlatTableState<Instruction> state =
-          tester.state(find.byType(FlatTable<Instruction>));
+      final FlatTableState<Instruction> state = tester.state(
+        find.byType(FlatTable<Instruction>),
+      );
 
       // Check that the profiler columns render ticks correctly.
       final profilerColumns = state.tableController.columns.where(
@@ -164,8 +160,9 @@ void main() {
 
     Future<void> verifyInliningTable(WidgetTester tester) async {
       expect(find.byType(InliningTable), findsOneWidget);
-      final FlatTableState<InliningEntry> state =
-          tester.state(find.byType(FlatTable<InliningEntry>));
+      final FlatTableState<InliningEntry> state = tester.state(
+        find.byType(FlatTable<InliningEntry>),
+      );
 
       // Check that the profiler columns render ticks correctly.
       final profilerColumns = state.tableController.columns.where(

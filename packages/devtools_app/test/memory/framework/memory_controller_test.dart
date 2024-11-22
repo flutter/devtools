@@ -36,10 +36,7 @@ void _verifyFiltersAreEqual(MemoryDefaultScene scene, [ClassFilter? filter]) {
   );
 
   if (filter != null) {
-    expect(
-      scene.controller.diff.core.classFilter.value,
-      equals(filter),
-    );
+    expect(scene.controller.diff.core.classFilter.value, equals(filter));
   }
 }
 

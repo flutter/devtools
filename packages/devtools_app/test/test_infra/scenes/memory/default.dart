@@ -49,24 +49,27 @@ abstract class MemoryDefaultSceneHeaps {
     return result;
   }
 
-  static final forDiffTesting = [
-    {'A': 1, 'B': 2, 'C': 1},
-    {'A': 1, 'B': 2},
-    {'B': 1, 'C': 2, 'D': 3},
-    {'B': 1, 'C': 2, 'D': 3},
-  ]
-      .map((e) => () async => FakeHeapSnapshotGraph()..addClassInstances(e))
-      .toList();
+  static final forDiffTesting =
+      [
+            {'A': 1, 'B': 2, 'C': 1},
+            {'A': 1, 'B': 2},
+            {'B': 1, 'C': 2, 'D': 3},
+            {'B': 1, 'C': 2, 'D': 3},
+          ]
+          .map((e) => () async => FakeHeapSnapshotGraph()..addClassInstances(e))
+          .toList();
 
   static final golden =
-      // ignore: avoid-redundant-async, match signature
-      goldenHeapTests.map((e) => () async => e.loadHeap()).toList();
+          goldenHeapTests
+          // ignore: avoid-redundant-async, match signature
+          .map((e) => () async => e.loadHeap())
+          .toList();
 
   static List<HeapProvider> get all => [
-        ...forDiffTesting,
-        manyPaths,
-        ...golden,
-      ];
+    ...forDiffTesting,
+    manyPaths,
+    ...golden,
+  ];
 }
 
 class MemoryDefaultScene extends Scene {
@@ -75,10 +78,7 @@ class MemoryDefaultScene extends Scene {
 
   @override
   Widget build(BuildContext context) {
-    return wrapWithControllers(
-      const MemoryScreenBody(),
-      memory: controller,
-    );
+    return wrapWithControllers(const MemoryScreenBody(), memory: controller);
   }
 
   Future<void> pump(WidgetTester tester) async {
@@ -89,7 +89,6 @@ class MemoryDefaultScene extends Scene {
   }
 
   @override
-
   /// Sets up the scene.
   ///
   /// [classList] will be returned by VmService.getClassList.
@@ -114,10 +113,12 @@ class MemoryDefaultScene extends Scene {
     );
 
     // Load canned data testHeapSampleData.
-    final memoryJson =
-        SamplesMemoryJson.decode(argJsonString: testHeapSampleData);
-    final allocationJson =
-        AllocationMemoryJson.decode(argJsonString: testAllocationData);
+    final memoryJson = SamplesMemoryJson.decode(
+      argJsonString: testHeapSampleData,
+    );
+    final allocationJson = AllocationMemoryJson.decode(
+      argJsonString: testAllocationData,
+    );
 
     fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
@@ -133,8 +134,9 @@ class MemoryDefaultScene extends Scene {
       isProfileBuild: true,
       isWebApp: false,
     );
-    when(fakeServiceConnection.serviceManager.vm.operatingSystem)
-        .thenReturn('ios');
+    when(
+      fakeServiceConnection.serviceManager.vm.operatingSystem,
+    ).thenReturn('ios');
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(OfflineDataController, OfflineDataController());
 

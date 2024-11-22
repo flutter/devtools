@@ -39,10 +39,10 @@ import 'variables.dart';
 
 class DebuggerScreen extends Screen {
   DebuggerScreen()
-      : super.fromMetaData(
-          ScreenMetaData.debugger,
-          showFloatingDebuggerControls: false,
-        );
+    : super.fromMetaData(
+        ScreenMetaData.debugger,
+        showFloatingDebuggerControls: false,
+      );
 
   static final id = ScreenMetaData.debugger.id;
 
@@ -98,8 +98,10 @@ class _DebuggerScreenBodyWrapper extends StatefulWidget {
 class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<DebuggerController,
-            _DebuggerScreenBodyWrapper> {
+        ProvidedControllerMixin<
+          DebuggerController,
+          _DebuggerScreenBodyWrapper
+        > {
   late bool _shownFirstScript;
 
   @override
@@ -158,10 +160,7 @@ class DebuggerScreenBody extends StatelessWidget {
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
       children: [
-        const RoundedOutlinedBorder(
-          clip: true,
-          child: DebuggerWindows(),
-        ),
+        const RoundedOutlinedBorder(clip: true, child: DebuggerWindows()),
         DebuggerSourceAndControls(
           shownFirstScript: shownFirstScript,
           setShownFirstScript: setShownFirstScript,
@@ -195,10 +194,10 @@ class DebuggerWindows extends StatelessWidget {
               actions: [
                 CopyToClipboardControl(
                   dataProvider: () {
-                    final callStackList = controller
-                        .stackFramesWithLocation.value
-                        .map((frame) => frame.callStackDisplay)
-                        .toList();
+                    final callStackList =
+                        controller.stackFramesWithLocation.value
+                            .map((frame) => frame.callStackDisplay)
+                            .toList();
                     for (var i = 0; i < callStackList.length; i++) {
                       callStackList[i] = '#$i ${callStackList[i]}';
                     }
@@ -218,11 +217,7 @@ class DebuggerWindows extends StatelessWidget {
               roundedTopBorder: false,
             ),
           ],
-          children: const [
-            CallStack(),
-            Variables(),
-            Breakpoints(),
-          ],
+          children: const [CallStack(), Variables(), Breakpoints()],
         );
       },
     );
@@ -245,9 +240,10 @@ class _BreakpointsWindowActions extends StatelessWidget {
               child: ToolbarAction(
                 icon: Icons.delete,
                 size: defaultIconSize,
-                onPressed: breakpoints.isNotEmpty
-                    ? () => unawaited(breakpointManager.clearBreakpoints())
-                    : null,
+                onPressed:
+                    breakpoints.isNotEmpty
+                        ? () => unawaited(breakpointManager.clearBreakpoints())
+                        : null,
               ),
             ),
           ],
@@ -294,8 +290,8 @@ class DebuggerSourceAndControls extends StatelessWidget {
                       child: ProgramExplorer(
                         controller:
                             codeViewController.programExplorerController,
-                        onNodeSelected: (node) =>
-                            _onNodeSelected(context, node),
+                        onNodeSelected:
+                            (node) => _onNodeSelected(context, node),
                       ),
                     ),
                   ],
@@ -315,10 +311,7 @@ class DebuggerSourceAndControls extends StatelessWidget {
                 if (scriptRef != null &&
                     parsedScript != null &&
                     !shownFirstScript()) {
-                  ga.timeEnd(
-                    DebuggerScreen.id,
-                    gac.pageReady,
-                  );
+                  ga.timeEnd(DebuggerScreen.id, gac.pageReady);
                   unawaited(
                     serviceConnection.sendDwdsEvent(
                       screen: DebuggerScreen.id,
@@ -333,9 +326,10 @@ class DebuggerSourceAndControls extends StatelessWidget {
                   debuggerController: controller,
                   scriptRef: scriptRef,
                   parsedScript: parsedScript,
-                  onSelected: (script, line) => unawaited(
-                    breakpointManager.toggleBreakpoint(script, line),
-                  ),
+                  onSelected:
+                      (script, line) => unawaited(
+                        breakpointManager.toggleBreakpoint(script, line),
+                      ),
                 );
               },
             ),
@@ -372,10 +366,7 @@ class GoToLineNumberIntent extends Intent {
 class GoToLineNumberAction extends Action<GoToLineNumberIntent> {
   @override
   void invoke(GoToLineNumberIntent intent) {
-    showGoToLineDialog(
-      intent._context,
-      intent._controller.codeViewController,
-    );
+    showGoToLineDialog(intent._context, intent._controller.codeViewController);
     intent._controller.codeViewController
       ..toggleFileOpenerVisibility(false)
       ..toggleSearchInFileVisibility(false);
@@ -428,10 +419,7 @@ class OpenFileAction extends Action<OpenFileIntent> {
 }
 
 class DebuggerStatus extends StatefulWidget {
-  const DebuggerStatus({
-    super.key,
-    required this.controller,
-  });
+  const DebuggerStatus({super.key, required this.controller});
 
   final DebuggerController controller;
 
@@ -465,20 +453,17 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   void _updateStatusOnPause() {
     addAutoDisposeListener(
       serviceConnection
-          .serviceManager.isolateManager.mainIsolateState?.isPaused,
-      () => unawaited(
-        _updateStatus(),
-      ),
+          .serviceManager
+          .isolateManager
+          .mainIsolateState
+          ?.isPaused,
+      () => unawaited(_updateStatus()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      _status,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
+    return Text(_status, maxLines: 1, overflow: TextOverflow.ellipsis);
   }
 
   Future<void> _updateStatus() async {
@@ -554,7 +539,10 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     controlHeight = _isPaused ? defaultButtonHeight : 0.0;
     addAutoDisposeListener(
       serviceConnection
-          .serviceManager.isolateManager.mainIsolateState?.isPaused,
+          .serviceManager
+          .isolateManager
+          .mainIsolateState
+          ?.isPaused,
       () {
         setState(() {
           if (_isPaused) {
@@ -588,9 +576,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
             Container(
               height: defaultButtonHeight,
               alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(
-                horizontal: defaultSpacing,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
               child: Text(
                 'Main isolate is paused in the debugger',
                 style: TextStyle(color: colorScheme.onWarningContainer),

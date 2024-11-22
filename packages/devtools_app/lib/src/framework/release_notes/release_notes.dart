@@ -39,14 +39,12 @@ const _releaseNotesPath = '/f/devtools-releases.json';
 final _flutterDocsSite = Uri.https('docs.flutter.dev');
 
 class ReleaseNotesViewer extends SidePanelViewer {
-  const ReleaseNotesViewer({
-    required super.controller,
-    super.child,
-  }) : super(
-          key: releaseNotesKey,
-          title: 'What\'s new in DevTools?',
-          textIfMarkdownDataEmpty: 'Stay tuned for updates.',
-        );
+  const ReleaseNotesViewer({required super.controller, super.child})
+    : super(
+        key: releaseNotesKey,
+        title: 'What\'s new in DevTools?',
+        textIfMarkdownDataEmpty: 'Stay tuned for updates.',
+      );
 }
 
 class ReleaseNotesController extends SidePanelController {
@@ -121,8 +119,9 @@ class ReleaseNotesController extends SidePanelController {
     // Release notes will be hosted on the Flutter website with a version number
     // that does not contain any build metadata.
     final parsedDevToolsVersion = SemanticVersion.parse(devToolsVersion);
-    final checkVersion =
-        latestVersionToCheckForReleaseNotes(parsedDevToolsVersion);
+    final checkVersion = latestVersionToCheckForReleaseNotes(
+      parsedDevToolsVersion,
+    );
 
     _log.fine(
       'attempting to fetch and show release notes for DevTools $checkVersion '
@@ -174,8 +173,10 @@ class ReleaseNotesController extends SidePanelController {
         } catch (_) {
           // This can very infrequently fail due to CDN or caching issues,
           // or if the upstream file has an incorrect link.
-          _log.info('Failed to retrieve release notes for v$releaseToCheck, '
-              'despite indication it is live at $releaseNotePath.');
+          _log.info(
+            'Failed to retrieve release notes for v$releaseToCheck, '
+            'despite indication it is live at $releaseNotePath.',
+          );
           // If we couldn't retrieve this page, keep going to
           // try with earlier patch versions.
           continue;
@@ -190,9 +191,7 @@ class ReleaseNotesController extends SidePanelController {
         toggleVisibility(true);
         if (server.isDevToolsServerAvailable) {
           // Only set the last release notes version if we are not debugging.
-          unawaited(
-            server.setLastShownReleaseNotesVersion(releaseToCheck),
-          );
+          unawaited(server.setLastShownReleaseNotesVersion(releaseToCheck));
         }
         return;
       }

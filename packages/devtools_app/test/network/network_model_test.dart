@@ -143,26 +143,14 @@ void main() {
 
     test('startTimestamp returns correct value', () {
       // Test these values in UTC to avoid timezone differences with the bots.
-      expect(
-        formatDateTime(httpGet.startTimestamp.toUtc()),
-        '1:45:26.279',
-      );
+      expect(formatDateTime(httpGet.startTimestamp.toUtc()), '1:45:26.279');
       expect(
         formatDateTime(httpGetWithError.startTimestamp.toUtc()),
         '1:29:45.227',
       );
-      expect(
-        formatDateTime(httpPost.startTimestamp.toUtc()),
-        '0:39:59.492',
-      );
-      expect(
-        formatDateTime(httpPut.startTimestamp.toUtc()),
-        '0:20:05.283',
-      );
-      expect(
-        formatDateTime(httpPatch.startTimestamp.toUtc()),
-        '0:31:50.177',
-      );
+      expect(formatDateTime(httpPost.startTimestamp.toUtc()), '0:39:59.492');
+      expect(formatDateTime(httpPut.startTimestamp.toUtc()), '0:20:05.283');
+      expect(formatDateTime(httpPatch.startTimestamp.toUtc()), '0:31:50.177');
       expect(
         formatDateTime(httpWsHandshake.startTimestamp.toUtc()),
         '2:15:40.222',
@@ -171,26 +159,14 @@ void main() {
 
     test('endTimestamp returns correct value', () {
       // Test these values in UTC to avoid timezone differences with the bots.
-      expect(
-        formatDateTime(httpGet.endTimestamp!.toUtc()),
-        '1:45:27.091',
-      );
+      expect(formatDateTime(httpGet.endTimestamp!.toUtc()), '1:45:27.091');
       expect(
         formatDateTime(httpGetWithError.endTimestamp!.toUtc()),
         '1:29:47.256',
       );
-      expect(
-        formatDateTime(httpPost.endTimestamp!.toUtc()),
-        '0:40:01.000',
-      );
-      expect(
-        formatDateTime(httpPut.endTimestamp!.toUtc()),
-        '0:20:06.609',
-      );
-      expect(
-        formatDateTime(httpPatch.endTimestamp!.toUtc()),
-        '0:31:51.420',
-      );
+      expect(formatDateTime(httpPost.endTimestamp!.toUtc()), '0:40:01.000');
+      expect(formatDateTime(httpPut.endTimestamp!.toUtc()), '0:20:06.609');
+      expect(formatDateTime(httpPatch.endTimestamp!.toUtc()), '0:31:51.420');
       expect(
         formatDateTime(httpWsHandshake.endTimestamp!.toUtc()),
         '2:15:40.263',
@@ -462,22 +438,10 @@ void main() {
         isTrue,
       );
       expect(httpGetWithError.queryParameters, isEmpty);
-      expect(
-        httpPost.queryParameters,
-        isEmpty,
-      );
-      expect(
-        httpPost.queryParameters,
-        isEmpty,
-      );
-      expect(
-        httpPost.queryParameters,
-        isEmpty,
-      );
-      expect(
-        httpPost.queryParameters,
-        isEmpty,
-      );
+      expect(httpPost.queryParameters, isEmpty);
+      expect(httpPost.queryParameters, isEmpty);
+      expect(httpPost.queryParameters, isEmpty);
+      expect(httpPost.queryParameters, isEmpty);
     });
 
     test('requestCookies returns correct value', () {

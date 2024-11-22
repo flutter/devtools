@@ -92,34 +92,30 @@ void main() {
         wrapSimple(
           Column(
             key: testKey,
-            children: testLogs.map((log) {
-              return Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: MetadataChips(
-                    data: log,
-                    maxWidth: 1000.0,
-                  ),
-                ),
-              );
-            }).toList(),
+            children:
+                testLogs.map((log) {
+                  return Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: MetadataChips(data: log, maxWidth: 1000.0),
+                    ),
+                  );
+                }).toList(),
           ),
         ),
       );
     }
 
-    testWidgetsWithWindowSize(
-      'render for list of logs',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpMetadataChips(tester);
-        await expectLater(
-          find.byKey(testKey),
-          matchesDevToolsGolden(
-            '../../test_infra/goldens/logging/metadata_chips.png',
-          ),
-        );
-      },
-    );
+    testWidgetsWithWindowSize('render for list of logs', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpMetadataChips(tester);
+      await expectLater(
+        find.byKey(testKey),
+        matchesDevToolsGolden(
+          '../../test_infra/goldens/logging/metadata_chips.png',
+        ),
+      );
+    });
   });
 }

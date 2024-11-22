@@ -19,10 +19,11 @@ class ObjectSetStats {
     from ??= _empty;
     subtract ??= _empty;
 
-    final result = ObjectSetStats()
-      ..instanceCount = from.instanceCount - subtract.instanceCount
-      ..shallowSize = from.shallowSize - subtract.shallowSize
-      ..retainedSize = from.retainedSize - subtract.retainedSize;
+    final result =
+        ObjectSetStats()
+          ..instanceCount = from.instanceCount - subtract.instanceCount
+          ..shallowSize = from.shallowSize - subtract.shallowSize
+          ..retainedSize = from.retainedSize - subtract.retainedSize;
 
     if (result.isZero) return null;
     return result;
@@ -111,22 +112,21 @@ class ObjectSet extends ObjectSetStats {
 }
 
 @immutable
-
 /// List of classes with filtering support.
 ///
 /// Is used to provide a list of classes to widgets.
 class ClassDataList<T extends ClassData> {
   const ClassDataList(this._originalList)
-      : _appliedFilter = null,
-        _filtered = null;
+    : _appliedFilter = null,
+      _filtered = null;
 
   const ClassDataList._filtered({
     required List<T> original,
     required ClassFilter appliedFilter,
     required List<T> filtered,
-  })  : _originalList = original,
-        _appliedFilter = appliedFilter,
-        _filtered = filtered;
+  }) : _originalList = original,
+       _appliedFilter = appliedFilter,
+       _filtered = filtered;
 
   /// The list of classes after filtering.
   List<T> get list => _filtered ?? _originalList;
@@ -135,8 +135,9 @@ class ClassDataList<T extends ClassData> {
   final ClassFilter? _appliedFilter;
   final List<T>? _filtered;
 
-  Map<HeapClassName, T> asMap() =>
-      {for (final c in _originalList) c.className: c};
+  Map<HeapClassName, T> asMap() => {
+    for (final c in _originalList) c.className: c,
+  };
 
   ClassDataList<T> filtered(ClassFilter newFilter, String? rootPackage) {
     final filtered = ClassFilter.filter(
@@ -193,7 +194,8 @@ class SingleClassData extends ClassData {
 
   @override
   // ignore: avoid-explicit-type-declaration, required to override base class.
-  final ObjectSet objects = ObjectSet();
+  final ObjectSet
+  objects = ObjectSet();
 
   @override
   final byPath = <PathFromRoot, ObjectSetStats>{};
@@ -204,15 +206,17 @@ class SingleClassData extends ClassData {
     required List<int>? retainers,
     required List<int>? retainedSizes,
   }) {
-    final path = retainers == null
-        ? null
-        : PathFromRoot.forObject(
-            graph,
-            shortestRetainers: retainers,
-            index: index,
-          );
+    final path =
+        retainers == null
+            ? null
+            : PathFromRoot.forObject(
+              graph,
+              shortestRetainers: retainers,
+              index: index,
+            );
 
-    final excludeFromRetained = path != null &&
+    final excludeFromRetained =
+        path != null &&
         retainedSizes != null &&
         path.classes.contains(className);
 
@@ -224,10 +228,7 @@ class SingleClassData extends ClassData {
     );
 
     if (path != null) {
-      byPath.putIfAbsent(
-        path,
-        () => ObjectSetStats(),
-      );
+      byPath.putIfAbsent(path, () => ObjectSetStats());
       byPath[path]!.countInstance(
         graph,
         index,

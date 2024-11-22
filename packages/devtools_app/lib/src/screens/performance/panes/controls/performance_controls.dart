@@ -89,7 +89,9 @@ class _PrimaryControls extends StatelessWidget {
     return Row(
       children: [
         if (serviceConnection
-            .serviceManager.connectedApp!.isFlutterAppNow!) ...[
+            .serviceManager
+            .connectedApp!
+            .isFlutterAppNow!) ...[
           VisibilityButton(
             show: preferences.performance.showFlutterFramesChart,
             gaScreen: gac.performance,
@@ -123,9 +125,7 @@ class _PrimaryControls extends StatelessWidget {
 }
 
 class _SecondaryPerformanceControls extends StatelessWidget {
-  const _SecondaryPerformanceControls({
-    required this.controller,
-  });
+  const _SecondaryPerformanceControls({required this.controller});
 
   final PerformanceController controller;
 
@@ -140,9 +140,7 @@ class _SecondaryPerformanceControls extends StatelessWidget {
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
                 PerformanceControls.minScreenWidthForTextBeforeScaling,
-            extensions: [
-              extensions.performanceOverlay,
-            ],
+            extensions: [extensions.performanceOverlay],
           ),
           const SizedBox(width: denseSpacing),
           EnhanceTracingButton(controller.enhanceTracingController),

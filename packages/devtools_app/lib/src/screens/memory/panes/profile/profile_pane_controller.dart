@@ -15,17 +15,11 @@ import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
 @visibleForTesting
-enum Json {
-  profile,
-  rootPackage;
-}
+enum Json { profile, rootPackage }
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
-  ProfilePaneController({
-    required this.rootPackage,
-    AdaptedProfile? profile,
-  }) {
+  ProfilePaneController({required this.rootPackage, AdaptedProfile? profile}) {
     // [profile] should only be non-null when loading offline data.
     if (profile != null) {
       _currentAllocationProfile.value = AdaptedProfile.withNewFilter(

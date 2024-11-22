@@ -199,10 +199,7 @@ text that should be removed from the file. */
           '''// This is some $currentYear multiline license
 // text that should be added to the file.''';
 
-      expect(
-        replacementInfo.existingHeader,
-        equals(expectedExistingHeader),
-      );
+      expect(replacementInfo.existingHeader, equals(expectedExistingHeader));
 
       expect(
         replacementInfo.replacementHeader,
@@ -399,77 +396,71 @@ text that should be added to the file. */''',
     });
   });
 
-  test(
-    'repo wide check',
-    () async {
-      // This test is currently skipped because not all existing files
-      // have had their license headers updated to the correct license text.
-      // So this test will always fail. Set skip to false to run locally, but
-      // don't commit the change to the repository.
+  test('repo wide check', () async {
+    // This test is currently skipped because not all existing files
+    // have had their license headers updated to the correct license text.
+    // So this test will always fail. Set skip to false to run locally, but
+    // don't commit the change to the repository.
 
-      // TODO(mossmana): This test should stop being skipped only when it is safe to check just new files going forward.
-      final rootPathMatcher = RegExp(r'(.*[/|\\]devtools[/|\\]).*');
-      // TODO(mossmana): make this work on Google3
-      expect(rootPathMatcher.hasMatch(Directory.current.path), true);
-      final match = rootPathMatcher.firstMatch(Directory.current.path);
-      final rootPath = match?.group(1);
-      expect(rootPath, isNotNull);
+    // TODO(mossmana): This test should stop being skipped only when it is safe to check just new files going forward.
+    final rootPathMatcher = RegExp(r'(.*[/|\\]devtools[/|\\]).*');
+    // TODO(mossmana): make this work on Google3
+    expect(rootPathMatcher.hasMatch(Directory.current.path), true);
+    final match = rootPathMatcher.firstMatch(Directory.current.path);
+    final rootPath = match?.group(1);
+    expect(rootPath, isNotNull);
 
-      final failedPaths = <String>[];
-      final subDirectories = ['packages', 'tool'];
+    final failedPaths = <String>[];
+    final subDirectories = ['packages', 'tool'];
 
-      for (final subDirectory in subDirectories) {
-        final checkedDirectory = Directory('$rootPath$subDirectory');
-        expect(
-          checkedDirectory.existsSync(),
-          true,
-          reason: '$checkedDirectory does not exist.',
-        );
-        final files = checkedDirectory
-            .listSync(recursive: true)
-            .whereType<File>()
-            .toList();
-        final header = LicenseHeader();
-        const goodReplacementLicenseText =
-            '''// Copyright <copyright_date> The Flutter Authors
+    for (final subDirectory in subDirectories) {
+      final checkedDirectory = Directory('$rootPath$subDirectory');
+      expect(
+        checkedDirectory.existsSync(),
+        true,
+        reason: '$checkedDirectory does not exist.',
+      );
+      final files =
+          checkedDirectory.listSync(recursive: true).whereType<File>().toList();
+      final header = LicenseHeader();
+      const goodReplacementLicenseText =
+          '''// Copyright <copyright_date> The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.''';
-        for (final file in files) {
-          final extension = p.extension(file.path);
-          // Only check dart source files and exclude any files that are
-          // downloaded as part of the flutter-sdk package dependencies.
-          if (extension != '.dart' || file.path.contains('flutter-sdk')) {
-            continue;
-          }
-          try {
-            final replacementInfo = await header.getReplacementInfo(
-              file: file,
-              existingLicenseText: goodReplacementLicenseText,
-              replacementLicenseText: '',
-              byteCount: goodReplacementLicenseText.length,
-            );
-            if (replacementInfo.existingHeader.isEmpty ||
-                replacementInfo.replacementHeader.isEmpty) {
-              failedPaths.add(file.path);
-            }
-          } on StateError {
+      for (final file in files) {
+        final extension = p.extension(file.path);
+        // Only check dart source files and exclude any files that are
+        // downloaded as part of the flutter-sdk package dependencies.
+        if (extension != '.dart' || file.path.contains('flutter-sdk')) {
+          continue;
+        }
+        try {
+          final replacementInfo = await header.getReplacementInfo(
+            file: file,
+            existingLicenseText: goodReplacementLicenseText,
+            replacementLicenseText: '',
+            byteCount: goodReplacementLicenseText.length,
+          );
+          if (replacementInfo.existingHeader.isEmpty ||
+              replacementInfo.replacementHeader.isEmpty) {
             failedPaths.add(file.path);
           }
+        } on StateError {
+          failedPaths.add(file.path);
         }
       }
-      expect(
-        failedPaths.isEmpty,
-        true,
-        reason:
-            'License headers are incorrect for ${failedPaths.length} files: $failedPaths',
-      );
-    },
-    skip: true,
-  );
+    }
+    expect(
+      failedPaths.isEmpty,
+      true,
+      reason:
+          'License headers are incorrect for ${failedPaths.length} files: $failedPaths',
+    );
+  }, skip: true);
 }
 
 Future<({String existingHeader, String replacementHeader})>
-    _getTestReplacementInfo({
+_getTestReplacementInfo({
   required File testFile,
   required String existingLicenseText,
   required String replacementLicenseText,
@@ -591,12 +582,7 @@ Future<void> _setupTestDirectoryStructure() async {
 
   // Setup /repo_root/sub_dir1/sub_dir1a/sub_dir1b directory structure
   Directory(
-    p.join(
-      repoRoot.path,
-      'sub_dir1',
-      'sub_dir1a',
-      'sub_dir1b',
-    ),
+    p.join(repoRoot.path, 'sub_dir1', 'sub_dir1a', 'sub_dir1b'),
   ).createSync(recursive: true);
 
   testFile4 = File(p.join(repoRoot.path, 'sub_dir1', 'test4.ext1'))
@@ -622,28 +608,20 @@ Future<void> _setupTestDirectoryStructure() async {
 
   // Setup /repo_root/sub_dir2/sub_dir3 directory structure
   Directory(
-    p.join(
-      repoRoot.path,
-      'sub_dir2',
-      'sub_dir3',
-    ),
+    p.join(repoRoot.path, 'sub_dir2', 'sub_dir3'),
   ).createSync(recursive: true);
 
   testFile8 = File(p.join(repoRoot.path, 'sub_dir2', 'sub_dir3', 'test8.ext1'))
     ..createSync(recursive: true);
   testFile8.writeAsStringSync(licenseText2 + extraText, flush: true);
-  excludeFile2 =
-      File(p.join(repoRoot.path, 'sub_dir2', 'sub_dir3', 'exclude2.ext2'))
-        ..createSync(recursive: true);
+  excludeFile2 = File(
+    p.join(repoRoot.path, 'sub_dir2', 'sub_dir3', 'exclude2.ext2'),
+  )..createSync(recursive: true);
   excludeFile2.writeAsStringSync(licenseText3 + extraText, flush: true);
 
   // Setup /repo_root/sub_dir2/sub_dir4 directory structure
   Directory(
-    p.join(
-      repoRoot.path,
-      'sub_dir2',
-      'sub_dir4',
-    ),
+    p.join(repoRoot.path, 'sub_dir2', 'sub_dir4'),
   ).createSync(recursive: true);
 
   testFile9 = File(p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'test9.ext1'))
@@ -652,12 +630,7 @@ Future<void> _setupTestDirectoryStructure() async {
 
   // Setup /repo_root/sub_dir2/sub_dir4/sub_dir5 directory structure
   Directory(
-    p.join(
-      repoRoot.path,
-      'sub_dir2',
-      'sub_dir4',
-      'sub_dir5',
-    ),
+    p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'sub_dir5'),
   ).createSync(recursive: true);
 
   testFile10 = File(

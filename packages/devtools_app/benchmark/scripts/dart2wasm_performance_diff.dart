@@ -88,7 +88,7 @@ void main(List<String> args) async {
 
 class CsvBuilder {
   CsvBuilder({this.saveToLocation})
-      : assert(saveToLocation == null || saveToLocation.endsWith('.csv'));
+    : assert(saveToLocation == null || saveToLocation.endsWith('.csv'));
 
   final _sb = StringBuffer();
 
@@ -108,26 +108,22 @@ class CsvBuilder {
     // TODO(kenz): automatically detect these and write them to the CSV.
     const flutter = '<enter manually by running \'flutter --version\'>';
     const devtools = '<enter manually by running \'git log\'>';
-    writeLines(
-      [
-        'Version info:',
-        'Flutter: $flutter',
-        'DevTools: $devtools',
-        '',
-        'Results:',
-      ],
-    );
+    writeLines([
+      'Version info:',
+      'Flutter: $flutter',
+      'DevTools: $devtools',
+      '',
+      'Results:',
+    ]);
 
     // Write the headers.
-    writeLine(
-      [
-        'Benchmark Name',
-        'Metric',
-        'Value (micros)',
-        'Delta (micros)',
-        'Delta (%)',
-      ],
-    );
+    writeLine([
+      'Benchmark Name',
+      'Metric',
+      'Value (micros)',
+      'Delta (micros)',
+      'Delta (%)',
+    ]);
   }
 
   void writeLine(List<String> content) {
@@ -157,11 +153,7 @@ class CsvBuilder {
       final downloadsDir = Directory.fromUri(
         Uri.parse(
           // We need the leading slash so that this is an absolute path.
-          '/${p.join(
-            currentDirectoryParts[0],
-            currentDirectoryParts[1],
-            'Downloads',
-          )}',
+          '/${p.join(currentDirectoryParts[0], currentDirectoryParts[1], 'Downloads')}',
         ),
       );
       if (downloadsDir.existsSync()) {
@@ -233,7 +225,8 @@ class _Args extends BenchmarkArgsBase {
       )
       ..addOption(
         BenchmarkArgument.test.flagName,
-        help: 'The test benchmark data (dart2wasm) to use for this performance'
+        help:
+            'The test benchmark data (dart2wasm) to use for this performance'
             ' diff. When specified, this script will use the benchmark data at '
             'the specified path instead of generating a new benchmark run for '
             'the dart2wasm data. This file path should point to a JSON file that '

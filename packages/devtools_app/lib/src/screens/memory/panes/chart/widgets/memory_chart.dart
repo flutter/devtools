@@ -42,9 +42,6 @@ class MemoryChartState extends State<MemoryChart> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: defaultChartHeight,
-      child: Chart(widget.chart),
-    );
+    return SizedBox(height: defaultChartHeight, child: Chart(widget.chart));
   }
 }

@@ -357,8 +357,9 @@ class DebuggingManager {
   }
 
   Future<String?> getConsoleContents() async {
-    final response =
-        await tools.tabInstance.send('debugger.getConsoleContents');
+    final response = await tools.tabInstance.send(
+      'debugger.getConsoleContents',
+    );
     return response.result as String?;
   }
 
@@ -392,8 +393,9 @@ class DebuggingManager {
   }
 
   Future<List<String>> getCallStackFrames() async {
-    final response =
-        await tools.tabInstance.send('debugger.getCallStackFrames');
+    final response = await tools.tabInstance.send(
+      'debugger.getCallStackFrames',
+    );
     final result = response.result as List<Object?>;
     return result.cast<String>();
   }

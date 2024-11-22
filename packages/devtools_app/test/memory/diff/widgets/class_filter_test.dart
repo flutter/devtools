@@ -29,10 +29,7 @@ class _FilterTest {
       '../../../test_infra/goldens/memory_diff_filter_dialog_${type?.name ?? 'custom'}.png';
 }
 
-final _tests = [
-  _FilterTest(isDiff: false),
-  _FilterTest(isDiff: true),
-];
+final _tests = [_FilterTest(isDiff: false), _FilterTest(isDiff: true)];
 
 final _customFilter = ClassFilter(
   filterType: ClassFilterType.only,
@@ -56,14 +53,16 @@ void main() {
       scene.setClassFilterToShowAll();
 
       expect(
-        scene.diffController.core.snapshots.value
-            .where((s) => s is SnapshotDataItem && s.isProcessed),
+        scene.diffController.core.snapshots.value.where(
+          (s) => s is SnapshotDataItem && s.isProcessed,
+        ),
         hasLength(2),
       );
 
-      final diffWith = test.isDiff
-          ? scene.diffController.core.snapshots.value[1] as SnapshotDataItem
-          : null;
+      final diffWith =
+          test.isDiff
+              ? scene.diffController.core.snapshots.value[1] as SnapshotDataItem
+              : null;
 
       scene.diffController.setDiffing(
         scene.diffController.derived.selectedItem.value as SnapshotDataItem,

@@ -55,22 +55,22 @@ void main(List<String> args) async {
     testRunnerArgs: testRunnerArgs,
     runTest: _runTest,
     newArgsGenerator: (args) => DevToolsAppTestRunnerArgs(args),
-    testIsSupported: (testFile) =>
-        testRunnerArgs.testAppDevice.supportsTest(testFile.path),
+    testIsSupported:
+        (testFile) => testRunnerArgs.testAppDevice.supportsTest(testFile.path),
     debugLogging: debugTestScript,
   );
 }
 
-Future<void> _runTest(
-  DevToolsAppTestRunnerArgs testRunnerArgs,
-) async {
+Future<void> _runTest(DevToolsAppTestRunnerArgs testRunnerArgs) async {
   final testTarget = testRunnerArgs.testTarget!;
   final testDevice = testRunnerArgs.testAppDevice.name;
 
   final disabledForAllDevices = _disabledTestsForDevice[_testDeviceAll]!;
   final disabledForDevice = _disabledTestsForDevice[testDevice] ?? {};
-  final disabled = {...disabledForAllDevices, ...disabledForDevice}
-      .any((t) => testTarget.endsWith(t));
+  final disabled = {
+    ...disabledForAllDevices,
+    ...disabledForDevice,
+  }.any((t) => testTarget.endsWith(t));
   if (disabled) {
     debugLog('Disabled test - skipping $testTarget for $testDevice.');
     return;

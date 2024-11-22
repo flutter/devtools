@@ -148,14 +148,7 @@ void main() {
       const longer = TextSpan(text: 'this is a longer line of text');
       const longest = TextSpan(text: 'this is an even longer line of text');
 
-      expect(
-        findLongestTextSpan([
-          shortest,
-          longer,
-          longest,
-        ]),
-        equals(longest),
-      );
+      expect(findLongestTextSpan([shortest, longer, longest]), equals(longest));
     });
 
     test('returns first longest if multiple spans have the same length', () {
@@ -164,11 +157,7 @@ void main() {
       const alsoLongest = TextSpan(text: 'this is a ------ line of text');
 
       expect(
-        findLongestTextSpan([
-          shortest,
-          longest,
-          alsoLongest,
-        ]),
+        findLongestTextSpan([shortest, longest, alsoLongest]),
         equals(longest),
       );
     });
@@ -248,61 +237,62 @@ void main() {
     );
   });
 
-  testWidgetsWithWindowSize(
-    'OffsetScrollbar goldens',
-    const Size(300, 300),
-    (WidgetTester tester) async {
-      const root = Key('root');
-      final scrollControllerX = ScrollController();
-      final scrollControllerY = ScrollController();
-      await tester.pumpWidget(
-        wrap(
-          Scrollbar(
-            thumbVisibility: true,
-            key: root,
+  testWidgetsWithWindowSize('OffsetScrollbar goldens', const Size(300, 300), (
+    WidgetTester tester,
+  ) async {
+    const root = Key('root');
+    final scrollControllerX = ScrollController();
+    final scrollControllerY = ScrollController();
+    await tester.pumpWidget(
+      wrap(
+        Scrollbar(
+          thumbVisibility: true,
+          key: root,
+          controller: scrollControllerX,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             controller: scrollControllerX,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              controller: scrollControllerX,
-              child: OffsetScrollbar(
-                axis: Axis.vertical,
-                isAlwaysShown: true,
-                offsetControllerViewportDimension:
-                    300, // Matches the extent of the outer ScrollView.
+            child: OffsetScrollbar(
+              axis: Axis.vertical,
+              isAlwaysShown: true,
+              offsetControllerViewportDimension:
+                  300, // Matches the extent of the outer ScrollView.
+              controller: scrollControllerY,
+              offsetController: scrollControllerX,
+              child: SingleChildScrollView(
                 controller: scrollControllerY,
-                offsetController: scrollControllerX,
-                child: SingleChildScrollView(
-                  controller: scrollControllerY,
-                  child:
-                      Container(width: 2000, height: 1000, color: Colors.green),
+                child: Container(
+                  width: 2000,
+                  height: 1000,
+                  color: Colors.green,
                 ),
               ),
             ),
           ),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      // Screenshot should show both vertical and horizontal scrollbars.
-      await expectLater(
-        find.byKey(root),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/offset_scrollbar_startup.png',
-        ),
-      );
+    // Screenshot should show both vertical and horizontal scrollbars.
+    await expectLater(
+      find.byKey(root),
+      matchesDevToolsGolden(
+        '../test_infra/goldens/offset_scrollbar_startup.png',
+      ),
+    );
 
-      scrollControllerX.jumpTo(500);
-      await tester.pumpAndSettle();
-      // Screenshot should show horizontal scrollbar scrolled while vertical
-      // scrollbar is at its initial offset.
-      await expectLater(
-        find.byKey(root),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/offset_scrollbar_scrolled.png',
-        ),
-      );
-    },
-  );
+    scrollControllerX.jumpTo(500);
+    await tester.pumpAndSettle();
+    // Screenshot should show horizontal scrollbar scrolled while vertical
+    // scrollbar is at its initial offset.
+    await expectLater(
+      find.byKey(root),
+      matchesDevToolsGolden(
+        '../test_infra/goldens/offset_scrollbar_scrolled.png',
+      ),
+    );
+  });
 }
 
 void expectScreenSize(

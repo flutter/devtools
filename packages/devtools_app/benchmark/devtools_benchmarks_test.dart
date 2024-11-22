@@ -18,10 +18,7 @@ import 'test_infra/project_root_directory.dart';
 
 const _isWasmScore = 'isWasm';
 
-const _extraScores = [
-  totalUiFrameAverage,
-  _isWasmScore,
-];
+const _extraScores = [totalUiFrameAverage, _isWasmScore];
 
 /// Tests that the DevTools web benchmarks are run and reported correctly.
 void main() {
@@ -43,23 +40,22 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   final taskResult = await serveWebBenchmark(
     benchmarkAppDirectory: projectRootDirectory(),
     entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
-    compilationOptions: useWasm
-        ? const CompilationOptions.wasm()
-        : const CompilationOptions.js(),
+    compilationOptions:
+        useWasm
+            ? const CompilationOptions.wasm()
+            : const CompilationOptions.js(),
     treeShakeIcons: false,
     benchmarkPath: benchmarkPath(useWasm: useWasm),
   );
   stdout.writeln('Web benchmark tests finished.');
 
-  expect(
-    taskResult.scores.keys,
-    hasLength(DevToolsBenchmark.values.length),
-  );
+  expect(taskResult.scores.keys, hasLength(DevToolsBenchmark.values.length));
 
   for (final benchmarkName in DevToolsBenchmark.values.map((e) => e.id)) {
-    final expectedMetrics = expectedBenchmarkMetrics(useWasm: useWasm)
-        .map((BenchmarkMetric metric) => metric.label)
-        .toList();
+    final expectedMetrics =
+        expectedBenchmarkMetrics(
+          useWasm: useWasm,
+        ).map((BenchmarkMetric metric) => metric.label).toList();
     const expectedComputations = BenchmarkMetricComputation.values;
     final scores = taskResult.scores[benchmarkName] ?? [];
     expect(

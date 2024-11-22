@@ -43,8 +43,9 @@ Future<void> navigateThroughDevToolsScreens(
     shouldExpect: runWithExpectations,
   );
 
-  final screens = (ScreenMetaData.values.toList()
-    ..removeWhere((data) => !visibleScreenIds.contains(data.id)));
+  final screens =
+      (ScreenMetaData.values.toList()
+        ..removeWhere((data) => !visibleScreenIds.contains(data.id)));
   for (final screen in screens) {
     await switchToScreen(
       controller,
@@ -85,11 +86,7 @@ Future<void> switchToScreen(
     icon: tabIcon,
     iconAsset: tabIconAsset,
   );
-  _maybeExpect(
-    tabFinder,
-    findsOneWidget,
-    shouldExpect: runWithExpectations,
-  );
+  _maybeExpect(tabFinder, findsOneWidget, shouldExpect: runWithExpectations);
 
   await controller.tap(tabFinder, warnIfMissed: warnIfTapMissed);
   // We use pump here instead of pumpAndSettle because pumpAndSettle will

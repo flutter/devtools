@@ -10,4 +10,4 @@
 /// Note: a regexp in the `dt update-version' command logic matches the constant
 /// declaration `const version =`. If you change the declaration you must also
 /// modify the regex in the `dt update-version' command logic.
-const version = '2.41.0-dev.2';
+const version = '2.41.0-dev.3';

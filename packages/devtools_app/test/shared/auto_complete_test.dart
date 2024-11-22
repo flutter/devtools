@@ -161,8 +161,9 @@ void main() {
       expect(parts.rightSide.isEmpty, isTrue);
       expect(parts.isField, isFalse);
 
-      parts =
-          testEdit('baseObject.close + 1000/2000 + chart.traces[addOne,addT');
+      parts = testEdit(
+        'baseObject.close + 1000/2000 + chart.traces[addOne,addT',
+      );
       outputResult(17, parts);
       expect(parts.activeWord, 'addT');
       expect(

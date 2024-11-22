@@ -151,14 +151,12 @@ void main() {
     testWidgets('offset throws for empty group', (tester) async {
       await tester.pumpWidget(const TestEmptyGroup());
 
-      final state =
-          tester.state<TestEmptyGroupState>(find.byType(TestEmptyGroup));
-      expect(
-        () {
-          state._controllers.offset;
-        },
-        throwsAssertionError,
+      final state = tester.state<TestEmptyGroupState>(
+        find.byType(TestEmptyGroup),
       );
+      expect(() {
+        state._controllers.offset;
+      }, throwsAssertionError);
     });
 
     testWidgets('offset returns current position', (tester) async {
@@ -287,26 +285,21 @@ void main() {
       expect(state._numbers.position.pixels, 100.0);
     });
 
-    testWidgets(
-      'tap on another scrollable during fling stops scrolling',
-      (tester) async {
-        await tester.pumpWidget(const Test());
-        final state = tester.state<TestState>(find.byType(Test));
+    testWidgets('tap on another scrollable during fling stops scrolling', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const Test());
+      final state = tester.state<TestState>(find.byType(Test));
 
-        await tester.fling(
-          find.text('Hello A'),
-          const Offset(0.0, -50.0),
-          500.0,
-        );
-        await tester.tap(find.text('Hello 1'));
+      await tester.fling(find.text('Hello A'), const Offset(0.0, -50.0), 500.0);
+      await tester.tap(find.text('Hello 1'));
 
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-        // Position would be about 100 if the scroll were not stopped by the tap.
-        expect(state._letters.position.pixels, 50.0);
-        expect(state._numbers.position.pixels, 50.0);
-      },
-    );
+      // Position would be about 100 if the scroll were not stopped by the tap.
+      expect(state._letters.position.pixels, 50.0);
+      expect(state._numbers.position.pixels, 50.0);
+    });
   });
 }
 
@@ -395,9 +388,9 @@ class Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext _) => Container(
-        margin: const EdgeInsets.all(8.0),
-        padding: const EdgeInsets.all(8.0),
-        height: 250.0,
-        child: Center(child: Text(caption)),
-      );
+    margin: const EdgeInsets.all(8.0),
+    padding: const EdgeInsets.all(8.0),
+    height: 250.0,
+    child: Center(child: Text(caption)),
+  );
 }

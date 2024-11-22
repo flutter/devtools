@@ -11,8 +11,10 @@ import 'dart:io';
 /// Ex: dart cpu_sample_intervals.dart ~/Downloads/example_json.dart
 void main(List<String> arguments) async {
   if (arguments.isEmpty) {
-    print('You must specify a json input file path.\n'
-        'Ex: dart cpu_sample_intervals.dart ~/Downloads/example.json');
+    print(
+      'You must specify a json input file path.\n'
+      'Ex: dart cpu_sample_intervals.dart ~/Downloads/example.json',
+    );
     return;
   }
 

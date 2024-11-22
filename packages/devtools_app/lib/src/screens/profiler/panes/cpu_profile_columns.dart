@@ -14,12 +14,12 @@ class SelfTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
     super.titleTooltip,
     RichTooltipBuilder<CpuStackFrame>? dataTooltipProvider,
   }) : super(
-          title: 'Self Time',
-          timeProvider: (stackFrame) => stackFrame.selfTime,
-          percentAsDoubleProvider: (stackFrame) => stackFrame.selfTimeRatio,
-          richTooltipProvider: dataTooltipProvider,
-          secondaryCompare: (stackFrame) => stackFrame.name,
-        );
+         title: 'Self Time',
+         timeProvider: (stackFrame) => stackFrame.selfTime,
+         percentAsDoubleProvider: (stackFrame) => stackFrame.selfTimeRatio,
+         richTooltipProvider: dataTooltipProvider,
+         secondaryCompare: (stackFrame) => stackFrame.name,
+       );
 }
 
 class TotalTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
@@ -27,12 +27,12 @@ class TotalTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
     super.titleTooltip,
     RichTooltipBuilder<CpuStackFrame>? dataTooltipProvider,
   }) : super(
-          title: 'Total Time',
-          timeProvider: (stackFrame) => stackFrame.totalTime,
-          percentAsDoubleProvider: (stackFrame) => stackFrame.totalTimeRatio,
-          richTooltipProvider: dataTooltipProvider,
-          secondaryCompare: (stackFrame) => stackFrame.name,
-        );
+         title: 'Total Time',
+         timeProvider: (stackFrame) => stackFrame.totalTime,
+         percentAsDoubleProvider: (stackFrame) => stackFrame.totalTimeRatio,
+         richTooltipProvider: dataTooltipProvider,
+         secondaryCompare: (stackFrame) => stackFrame.name,
+       );
 }
 
 class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>

@@ -12,14 +12,15 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/ui/icons.dart';
 
-typedef DevToolsButtonData = ({
-  String label,
-  IconData? icon,
-  String? iconAsset,
-  String screenId,
-  bool requiresDebugSession,
-  bool prefersDebugSession,
-});
+typedef DevToolsButtonData =
+    ({
+      String label,
+      IconData? icon,
+      String? iconAsset,
+      String screenId,
+      bool requiresDebugSession,
+      bool prefersDebugSession,
+    });
 
 TableRow createDevToolsScreenRow({
   required DevToolsButtonData dataLeft,
@@ -33,14 +34,15 @@ TableRow createDevToolsScreenRow({
     !singleColumn || dataRight == null,
     'dataRight must be null is singleColumn is true',
   );
-  final cellRight = dataRight != null
-      ? _DevToolsScreenButton(
-          data: dataRight,
-          editor: editor,
-          hasDebugSessions: hasDebugSessions,
-          onPressed: onPressed,
-        )
-      : const SizedBox();
+  final cellRight =
+      dataRight != null
+          ? _DevToolsScreenButton(
+            data: dataRight,
+            editor: editor,
+            hasDebugSessions: hasDebugSessions,
+            onPressed: onPressed,
+          )
+          : const SizedBox();
   return TableRow(
     children: [
       _DevToolsScreenButton(
@@ -108,10 +110,7 @@ void openDevToolsScreen({
   required bool prefersDebugSession,
   required EditorClient editor,
 }) {
-  ga.select(
-    editor.gaId,
-    gac.EditorSidebar.openDevToolsScreen(screenId),
-  );
+  ga.select(editor.gaId, gac.EditorSidebar.openDevToolsScreen(screenId));
   unawaited(
     editor.openDevToolsPage(
       null,

@@ -79,10 +79,7 @@ void main() {
     required AppSizeTestController controller,
   }) async {
     await tester.pumpWidget(
-      wrapWithControllers(
-        const AppSizeBody(),
-        appSize: controller,
-      ),
+      wrapWithControllers(const AppSizeBody(), appSize: controller),
     );
     deferredLoadingSupportEnabled = true;
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -122,94 +119,84 @@ void main() {
       expect(find.text('App Size'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize(
-      'builds initial content',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpAppSizeScreen(
-          tester,
-          controller: appSizeController,
-        );
+    testWidgetsWithWindowSize('builds initial content', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpAppSizeScreen(tester, controller: appSizeController);
 
-        expect(find.byType(AppSizeBody), findsOneWidget);
-        expect(find.byType(TabBar), findsOneWidget);
+      expect(find.byType(AppSizeBody), findsOneWidget);
+      expect(find.byType(TabBar), findsOneWidget);
 
-        expect(find.byKey(AppSizeScreen.analysisTabKey), findsOneWidget);
-        expect(find.byKey(AppSizeScreen.diffTabKey), findsOneWidget);
+      expect(find.byKey(AppSizeScreen.analysisTabKey), findsOneWidget);
+      expect(find.byKey(AppSizeScreen.diffTabKey), findsOneWidget);
 
-        await loadDataAndPump(tester);
+      await loadDataAndPump(tester);
 
-        // Verify the state of the splitter.
-        final splitFinder = find.byType(SplitPane);
-        expect(splitFinder, findsOneWidget);
-        final SplitPane splitter = tester.widget(splitFinder);
-        expect(splitter.initialFractions[0], equals(0.67));
-        expect(splitter.initialFractions[1], equals(0.33));
-      },
-    );
+      // Verify the state of the splitter.
+      final splitFinder = find.byType(SplitPane);
+      expect(splitFinder, findsOneWidget);
+      final SplitPane splitter = tester.widget(splitFinder);
+      expect(splitter.initialFractions[0], equals(0.67));
+      expect(splitter.initialFractions[1], equals(0.33));
+    });
 
-    testWidgetsWithWindowSize(
-      'builds deferred content',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpAppSizeScreen(
-          tester,
-          controller: appSizeController,
-        );
-        await loadDataAndPump(tester, data: deferredAppFile);
+    testWidgetsWithWindowSize('builds deferred content', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpAppSizeScreen(tester, controller: appSizeController);
+      await loadDataAndPump(tester, data: deferredAppFile);
 
-        // Verify the dropdown for selecting app units exists.
-        final appUnitDropdownFinder = _findDropdownButton<AppUnit>();
-        expect(appUnitDropdownFinder, findsOneWidget);
+      // Verify the dropdown for selecting app units exists.
+      final appUnitDropdownFinder = _findDropdownButton<AppUnit>();
+      expect(appUnitDropdownFinder, findsOneWidget);
 
-        // Verify the entire app is shown.
-        final breadcrumbs = _fetchBreadcrumbs(tester);
-        expect(breadcrumbs.length, 1);
-        expect(breadcrumbs.first.text, equals('Entire App [39.8 MB]'));
-        expect(find.richText('Main [39.5 MB]'), findsOneWidget);
+      // Verify the entire app is shown.
+      final breadcrumbs = _fetchBreadcrumbs(tester);
+      expect(breadcrumbs.length, 1);
+      expect(breadcrumbs.first.text, equals('Entire App [39.8 MB]'));
+      expect(find.richText('Main [39.5 MB]'), findsOneWidget);
 
-        // Open the dropdown.
-        await tester.tap(appUnitDropdownFinder);
-        await tester.pumpAndSettle();
+      // Open the dropdown.
+      await tester.tap(appUnitDropdownFinder);
+      await tester.pumpAndSettle();
 
-        // Verify the menu items in the dropdown are expected.
-        final entireAppMenuItemFinder =
-            _findMenuItemWithText<AppUnit>('Entire App');
-        expect(entireAppMenuItemFinder, findsOneWidget);
-        final mainMenuItemFinder = _findMenuItemWithText<AppUnit>('Main');
-        expect(mainMenuItemFinder, findsOneWidget);
-        final deferredMenuItemFinder =
-            _findMenuItemWithText<AppUnit>('Deferred');
-        expect(deferredMenuItemFinder, findsOneWidget);
+      // Verify the menu items in the dropdown are expected.
+      final entireAppMenuItemFinder = _findMenuItemWithText<AppUnit>(
+        'Entire App',
+      );
+      expect(entireAppMenuItemFinder, findsOneWidget);
+      final mainMenuItemFinder = _findMenuItemWithText<AppUnit>('Main');
+      expect(mainMenuItemFinder, findsOneWidget);
+      final deferredMenuItemFinder = _findMenuItemWithText<AppUnit>('Deferred');
+      expect(deferredMenuItemFinder, findsOneWidget);
 
-        // Select the main unit.
-        await tester.tap(find.text('Main').hitTestable());
-        await tester.pumpAndSettle();
+      // Select the main unit.
+      await tester.tap(find.text('Main').hitTestable());
+      await tester.pumpAndSettle();
 
-        // Verify the main unit is shown.
-        final mainBreadcrumbs = _fetchBreadcrumbs(tester);
-        expect(mainBreadcrumbs.length, 1);
-        expect(mainBreadcrumbs.first.text, equals('Main [39.5 MB]'));
-        expect(find.richText('appsize_app.app [39.5 MB]'), findsOneWidget);
+      // Verify the main unit is shown.
+      final mainBreadcrumbs = _fetchBreadcrumbs(tester);
+      expect(mainBreadcrumbs.length, 1);
+      expect(mainBreadcrumbs.first.text, equals('Main [39.5 MB]'));
+      expect(find.richText('appsize_app.app [39.5 MB]'), findsOneWidget);
 
-        // Open the dropdown.
-        await tester.tap(appUnitDropdownFinder);
-        await tester.pumpAndSettle();
+      // Open the dropdown.
+      await tester.tap(appUnitDropdownFinder);
+      await tester.pumpAndSettle();
 
-        // Select the deferred units.
-        await tester.tap(find.text('Deferred').hitTestable());
-        await tester.pumpAndSettle();
+      // Select the deferred units.
+      await tester.tap(find.text('Deferred').hitTestable());
+      await tester.pumpAndSettle();
 
-        // Verify the deferred units are shown.
-        final deferredBreadcrumbs = _fetchBreadcrumbs(tester);
-        expect(deferredBreadcrumbs.length, 1);
-        expect(deferredBreadcrumbs.first.text, equals('Deferred [344.3 KB]'));
-        expect(
-          find.richText('flutter_assets [344.3 KB] (Deferred)'),
-          findsOneWidget,
-        );
-      },
-    );
+      // Verify the deferred units are shown.
+      final deferredBreadcrumbs = _fetchBreadcrumbs(tester);
+      expect(deferredBreadcrumbs.length, 1);
+      expect(deferredBreadcrumbs.first.text, equals('Deferred [344.3 KB]'));
+      expect(
+        find.richText('flutter_assets [344.3 KB] (Deferred)'),
+        findsOneWidget,
+      );
+    });
   });
 
   group('SnapshotView', () {
@@ -218,78 +205,65 @@ void main() {
       appSizeController = AppSizeTestController();
     });
 
-    testWidgetsWithWindowSize(
-      'imports file and loads data',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpAppSizeScreen(
-          tester,
-          controller: appSizeController,
-        );
+    testWidgetsWithWindowSize('imports file and loads data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpAppSizeScreen(tester, controller: appSizeController);
 
-        expect(find.byKey(AppSizeScreen.diffTypeDropdownKey), findsNothing);
-        expect(find.byType(ClearButton), findsOneWidget);
+      expect(find.byKey(AppSizeScreen.diffTypeDropdownKey), findsNothing);
+      expect(find.byType(ClearButton), findsOneWidget);
 
-        expect(find.byType(FileImportContainer), findsOneWidget);
-        expect(find.text(AnalysisView.importInstructions), findsOneWidget);
-        expect(find.text('No File Selected'), findsOneWidget);
+      expect(find.byType(FileImportContainer), findsOneWidget);
+      expect(find.text(AnalysisView.importInstructions), findsOneWidget);
+      expect(find.text('No File Selected'), findsOneWidget);
 
-        appSizeController.loadTreeFromJsonFile(
-          jsonFile: newV8JsonFile,
-          onError: (error) => {},
-          delayed: true,
-        );
-        await tester.pump(const Duration(milliseconds: 500));
-        expect(find.text(AppSizeScreen.loadingMessage), findsOneWidget);
-        await tester.pumpAndSettle();
+      appSizeController.loadTreeFromJsonFile(
+        jsonFile: newV8JsonFile,
+        onError: (error) => {},
+        delayed: true,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text(AppSizeScreen.loadingMessage), findsOneWidget);
+      await tester.pumpAndSettle();
 
-        expect(find.byType(FileImportContainer), findsNothing);
-        expect(find.text(AnalysisView.importInstructions), findsNothing);
-        expect(find.text('No File Selected'), findsNothing);
-        expect(find.byType(AnalysisView), findsOneWidget);
-        expect(
-          find.text(
-            'Dart AOT snapshot: lib/src/app_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(AppSizeScreen.analysisViewTreemapKey),
-          findsOneWidget,
-        );
+      expect(find.byType(FileImportContainer), findsNothing);
+      expect(find.text(AnalysisView.importInstructions), findsNothing);
+      expect(find.text('No File Selected'), findsNothing);
+      expect(find.byType(AnalysisView), findsOneWidget);
+      expect(
+        find.text(
+          'Dart AOT snapshot: lib/src/app_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(AppSizeScreen.analysisViewTreemapKey), findsOneWidget);
 
-        final breadcrumbs = _fetchBreadcrumbs(tester);
-        expect(breadcrumbs.length, 1);
-        expect(breadcrumbs.first.text, equals('Root [6.0 MB]'));
-        expect(find.byType(BreadcrumbNavigator), findsOneWidget);
+      final breadcrumbs = _fetchBreadcrumbs(tester);
+      expect(breadcrumbs.length, 1);
+      expect(breadcrumbs.first.text, equals('Root [6.0 MB]'));
+      expect(find.byType(BreadcrumbNavigator), findsOneWidget);
 
-        expect(find.richText('package:flutter'), findsOneWidget);
-        expect(find.richText('dart:core'), findsOneWidget);
+      expect(find.richText('package:flutter'), findsOneWidget);
+      expect(find.richText('dart:core'), findsOneWidget);
 
-        expect(find.byType(AppSizeAnalysisTable), findsOneWidget);
-        expect(find.byType(AppSizeDiffTable), findsNothing);
-      },
-    );
+      expect(find.byType(AppSizeAnalysisTable), findsOneWidget);
+      expect(find.byType(AppSizeDiffTable), findsNothing);
+    });
 
-    testWidgetsWithWindowSize(
-      'clears data',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpAppSizeScreen(
-          tester,
-          controller: appSizeController,
-        );
+    testWidgetsWithWindowSize('clears data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpAppSizeScreen(tester, controller: appSizeController);
 
-        await loadDataAndPump(tester);
+      await loadDataAndPump(tester);
 
-        await tester.tap(find.byType(ClearButton));
-        await tester.pumpAndSettle();
+      await tester.tap(find.byType(ClearButton));
+      await tester.pumpAndSettle();
 
-        expect(find.byType(FileImportContainer), findsOneWidget);
-        expect(find.text(AnalysisView.importInstructions), findsOneWidget);
-        expect(find.text('No File Selected'), findsOneWidget);
-      },
-    );
+      expect(find.byType(FileImportContainer), findsOneWidget);
+      expect(find.text(AnalysisView.importInstructions), findsOneWidget);
+      expect(find.text('No File Selected'), findsOneWidget);
+    });
   });
 
   group('DiffView', () {
@@ -299,10 +273,7 @@ void main() {
     });
 
     Future<void> loadDiffTabAndSettle(WidgetTester tester) async {
-      await pumpAppSizeScreen(
-        tester,
-        controller: appSizeController,
-      );
+      await pumpAppSizeScreen(tester, controller: appSizeController);
       await tester.tap(find.byKey(AppSizeScreen.diffTabKey));
       await tester.pumpAndSettle();
     }
@@ -320,72 +291,62 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgetsWithWindowSize(
-      'builds initial content',
-      windowSize,
-      (WidgetTester tester) async {
-        await loadDiffTabAndSettle(tester);
+    testWidgetsWithWindowSize('builds initial content', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await loadDiffTabAndSettle(tester);
 
-        expect(find.byKey(AppSizeScreen.diffTypeDropdownKey), findsOneWidget);
-        expect(find.byKey(AppSizeScreen.appUnitDropdownKey), findsNothing);
-        expect(find.byType(ClearButton), findsOneWidget);
+      expect(find.byKey(AppSizeScreen.diffTypeDropdownKey), findsOneWidget);
+      expect(find.byKey(AppSizeScreen.appUnitDropdownKey), findsNothing);
+      expect(find.byType(ClearButton), findsOneWidget);
 
-        expect(find.byType(DualFileImportContainer), findsOneWidget);
-        expect(find.byType(FileImportContainer), findsNWidgets(2));
-        expect(find.text(DiffView.importOldInstructions), findsOneWidget);
-        expect(find.text(DiffView.importNewInstructions), findsOneWidget);
-        expect(find.text('No File Selected'), findsNWidgets(2));
-      },
-    );
+      expect(find.byType(DualFileImportContainer), findsOneWidget);
+      expect(find.byType(FileImportContainer), findsNWidgets(2));
+      expect(find.text(DiffView.importOldInstructions), findsOneWidget);
+      expect(find.text(DiffView.importNewInstructions), findsOneWidget);
+      expect(find.text('No File Selected'), findsNWidgets(2));
+    });
 
-    testWidgetsWithWindowSize(
-      'imports files and loads data',
-      windowSize,
-      (WidgetTester tester) async {
-        await loadDiffTabAndSettle(tester);
+    testWidgetsWithWindowSize('imports files and loads data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await loadDiffTabAndSettle(tester);
 
-        appSizeController.loadDiffTreeFromJsonFiles(
-          oldFile: oldV8JsonFile,
-          newFile: newV8JsonFile,
-          onError: (error) => {},
-          delayed: true,
-        );
-        await tester.pump(const Duration(milliseconds: 500));
-        expect(find.text(AppSizeScreen.loadingMessage), findsOneWidget);
-        await tester.pumpAndSettle();
+      appSizeController.loadDiffTreeFromJsonFiles(
+        oldFile: oldV8JsonFile,
+        newFile: newV8JsonFile,
+        onError: (error) => {},
+        delayed: true,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text(AppSizeScreen.loadingMessage), findsOneWidget);
+      await tester.pumpAndSettle();
 
-        expect(find.byType(FileImportContainer), findsNothing);
-        expect(find.text(DiffView.importOldInstructions), findsNothing);
-        expect(find.text(DiffView.importNewInstructions), findsNothing);
-        expect(find.text('No File Selected'), findsNothing);
+      expect(find.byType(FileImportContainer), findsNothing);
+      expect(find.text(DiffView.importOldInstructions), findsNothing);
+      expect(find.text(DiffView.importNewInstructions), findsNothing);
+      expect(find.text('No File Selected'), findsNothing);
 
-        expect(find.byType(DiffView), findsOneWidget);
+      expect(find.byType(DiffView), findsOneWidget);
 
-        expect(
-          find.text(
-            'Diffing Dart AOT snapshots: lib/src/app_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD)    vs    (NEW) lib/src/app_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(AppSizeScreen.diffViewTreemapKey),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(AppSizeScreen.analysisViewTreemapKey),
-          findsNothing,
-        );
+      expect(
+        find.text(
+          'Diffing Dart AOT snapshots: lib/src/app_size/stub_data/old_v8.dart - 7/28/2020 1:29 PM (OLD)    vs    (NEW) lib/src/app_size/stub_data/new_v8.dart - 7/28/2020 1:29 PM',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(AppSizeScreen.diffViewTreemapKey), findsOneWidget);
+      expect(find.byKey(AppSizeScreen.analysisViewTreemapKey), findsNothing);
 
-        final breadcrumbs = _fetchBreadcrumbs(tester);
-        expect(breadcrumbs.length, 1);
-        expect(breadcrumbs.first.text, equals('Root [+1.5 MB]'));
-        expect(find.richText('package:pointycastle'), findsOneWidget);
-        expect(find.richText('package:flutter'), findsOneWidget);
+      final breadcrumbs = _fetchBreadcrumbs(tester);
+      expect(breadcrumbs.length, 1);
+      expect(breadcrumbs.first.text, equals('Root [+1.5 MB]'));
+      expect(find.richText('package:pointycastle'), findsOneWidget);
+      expect(find.richText('package:flutter'), findsOneWidget);
 
-        expect(find.byType(AppSizeAnalysisTable), findsNothing);
-        expect(find.byType(AppSizeDiffTable), findsOneWidget);
-      },
-    );
+      expect(find.byType(AppSizeAnalysisTable), findsNothing);
+      expect(find.byType(AppSizeDiffTable), findsOneWidget);
+    });
 
     testWidgetsWithWindowSize(
       'loads data and shows different tree types',
@@ -420,24 +381,22 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize(
-      'clears data',
-      windowSize,
-      (WidgetTester tester) async {
-        await loadDiffTabAndSettle(tester);
+    testWidgetsWithWindowSize('clears data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await loadDiffTabAndSettle(tester);
 
-        await loadDiffDataAndPump(tester, oldV8JsonFile, newV8JsonFile);
+      await loadDiffDataAndPump(tester, oldV8JsonFile, newV8JsonFile);
 
-        await tester.tap(find.byType(ClearButton));
-        await tester.pumpAndSettle();
+      await tester.tap(find.byType(ClearButton));
+      await tester.pumpAndSettle();
 
-        expect(find.byType(DualFileImportContainer), findsOneWidget);
-        expect(find.byType(FileImportContainer), findsNWidgets(2));
-        expect(find.text(DiffView.importOldInstructions), findsOneWidget);
-        expect(find.text(DiffView.importNewInstructions), findsOneWidget);
-        expect(find.text('No File Selected'), findsNWidgets(2));
-      },
-    );
+      expect(find.byType(DualFileImportContainer), findsOneWidget);
+      expect(find.byType(FileImportContainer), findsNWidgets(2));
+      expect(find.text(DiffView.importOldInstructions), findsOneWidget);
+      expect(find.text(DiffView.importNewInstructions), findsOneWidget);
+      expect(find.text('No File Selected'), findsNWidgets(2));
+    });
   });
 
   group('AppSizeController', () {
@@ -545,164 +504,155 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize(
-      'builds deferred content for diff table',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpAppSizeScreen(
-          tester,
-          controller: appSizeController,
-        );
-        await tester.tap(find.byKey(AppSizeScreen.diffTabKey));
-        await tester.pumpAndSettle();
+    testWidgetsWithWindowSize('builds deferred content for diff table', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpAppSizeScreen(tester, controller: appSizeController);
+      await tester.tap(find.byKey(AppSizeScreen.diffTabKey));
+      await tester.pumpAndSettle();
 
-        await loadDiffTreeAndPump(tester, diffNonDeferredApp, diffDeferredApp);
+      await loadDiffTreeAndPump(tester, diffNonDeferredApp, diffDeferredApp);
 
-        // Verify the dropdown for selecting app units exists.
-        final appUnitDropdownFinder = _findDropdownButton<AppUnit>();
-        expect(appUnitDropdownFinder, findsOneWidget);
+      // Verify the dropdown for selecting app units exists.
+      final appUnitDropdownFinder = _findDropdownButton<AppUnit>();
+      expect(appUnitDropdownFinder, findsOneWidget);
 
-        // Open the app unit dropdown.
-        await tester.tap(appUnitDropdownFinder);
-        await tester.pumpAndSettle();
+      // Open the app unit dropdown.
+      await tester.tap(appUnitDropdownFinder);
+      await tester.pumpAndSettle();
 
-        // Verify the menu items in the dropdown are expected.
-        final entireAppMenuItemFinder =
-            _findMenuItemWithText<AppUnit>('Entire App');
-        expect(entireAppMenuItemFinder, findsOneWidget);
-        final mainMenuItemFinder = _findMenuItemWithText<AppUnit>('Main');
-        expect(mainMenuItemFinder, findsOneWidget);
-        final deferredMenuItemFinder =
-            _findMenuItemWithText<AppUnit>('Deferred');
-        expect(deferredMenuItemFinder, findsOneWidget);
+      // Verify the menu items in the dropdown are expected.
+      final entireAppMenuItemFinder = _findMenuItemWithText<AppUnit>(
+        'Entire App',
+      );
+      expect(entireAppMenuItemFinder, findsOneWidget);
+      final mainMenuItemFinder = _findMenuItemWithText<AppUnit>('Main');
+      expect(mainMenuItemFinder, findsOneWidget);
+      final deferredMenuItemFinder = _findMenuItemWithText<AppUnit>('Deferred');
+      expect(deferredMenuItemFinder, findsOneWidget);
 
-        // Select the main unit.
-        await tester.tap(find.richText('Main').hitTestable());
-        await tester.pumpAndSettle();
+      // Select the main unit.
+      await tester.tap(find.richText('Main').hitTestable());
+      await tester.pumpAndSettle();
 
-        // Verify the main unit is shown for entire app.
-        final mainBreadcrumbs = _fetchBreadcrumbs(tester);
-        expect(mainBreadcrumbs.length, 1);
-        expect(
-          mainBreadcrumbs.first.text,
-          equals(
-            '/Main/appsize_app.app/Contents/Frameworks/App.framework/Resources/flutter_assets [-344.3 KB]',
-          ),
-        );
-        expect(
-          find.richText('packages/cupertino_icons/assets [-276.8 KB]'),
-          findsOneWidget,
-        );
+      // Verify the main unit is shown for entire app.
+      final mainBreadcrumbs = _fetchBreadcrumbs(tester);
+      expect(mainBreadcrumbs.length, 1);
+      expect(
+        mainBreadcrumbs.first.text,
+        equals(
+          '/Main/appsize_app.app/Contents/Frameworks/App.framework/Resources/flutter_assets [-344.3 KB]',
+        ),
+      );
+      expect(
+        find.richText('packages/cupertino_icons/assets [-276.8 KB]'),
+        findsOneWidget,
+      );
 
-        // Open the diffType dropdown.
-        await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
-        await tester.pumpAndSettle();
+      // Open the diffType dropdown.
+      await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
+      await tester.pumpAndSettle();
 
-        // Select increase only.
-        await tester.tap(find.text('Increase Only').hitTestable());
-        await tester.pumpAndSettle();
+      // Select increase only.
+      await tester.tap(find.text('Increase Only').hitTestable());
+      await tester.pumpAndSettle();
 
-        // Verify the main unit is shown for increase only.
-        final mainIncreaseBreadcrumbs = _fetchBreadcrumbs(tester);
-        expect(mainIncreaseBreadcrumbs.length, 1);
-        expect(
-          mainIncreaseBreadcrumbs.first.text,
-          equals(
-            '/Main/appsize_app.app/Contents/Frameworks/App.framework/Resources/flutter_assets [0 B]',
-          ),
-        );
+      // Verify the main unit is shown for increase only.
+      final mainIncreaseBreadcrumbs = _fetchBreadcrumbs(tester);
+      expect(mainIncreaseBreadcrumbs.length, 1);
+      expect(
+        mainIncreaseBreadcrumbs.first.text,
+        equals(
+          '/Main/appsize_app.app/Contents/Frameworks/App.framework/Resources/flutter_assets [0 B]',
+        ),
+      );
 
-        // Open the diffType dropdown.
-        await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
-        await tester.pumpAndSettle();
+      // Open the diffType dropdown.
+      await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
+      await tester.pumpAndSettle();
 
-        // Select decrease only.
-        await tester.tap(find.text('Decrease Only').hitTestable());
-        await tester.pumpAndSettle();
+      // Select decrease only.
+      await tester.tap(find.text('Decrease Only').hitTestable());
+      await tester.pumpAndSettle();
 
-        // Verify the main unit is shown for decrease only.
-        final mainDecreaseBreadcrumbs = _fetchBreadcrumbs(tester);
-        expect(mainDecreaseBreadcrumbs.length, 1);
-        expect(
-          mainDecreaseBreadcrumbs.first.text,
-          equals(
-            '/Main/appsize_app.app/Contents/Frameworks/App.framework/Resources/flutter_assets [-344.3 KB]',
-          ),
-        );
-        expect(
-          find.richText('packages/cupertino_icons/assets [-276.8 KB]'),
-          findsOneWidget,
-        );
+      // Verify the main unit is shown for decrease only.
+      final mainDecreaseBreadcrumbs = _fetchBreadcrumbs(tester);
+      expect(mainDecreaseBreadcrumbs.length, 1);
+      expect(
+        mainDecreaseBreadcrumbs.first.text,
+        equals(
+          '/Main/appsize_app.app/Contents/Frameworks/App.framework/Resources/flutter_assets [-344.3 KB]',
+        ),
+      );
+      expect(
+        find.richText('packages/cupertino_icons/assets [-276.8 KB]'),
+        findsOneWidget,
+      );
 
-        // Open the diffType dropdown.
-        await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
-        await tester.pumpAndSettle();
+      // Open the diffType dropdown.
+      await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
+      await tester.pumpAndSettle();
 
-        // Select entire app.
-        await tester.tap(find.text('Combined').hitTestable());
-        await tester.pumpAndSettle();
+      // Select entire app.
+      await tester.tap(find.text('Combined').hitTestable());
+      await tester.pumpAndSettle();
 
-        // Open the app unit dropdown.
-        await tester.tap(appUnitDropdownFinder);
-        await tester.pumpAndSettle();
+      // Open the app unit dropdown.
+      await tester.tap(appUnitDropdownFinder);
+      await tester.pumpAndSettle();
 
-        // Select the deferred units.
-        await tester.tap(find.text('Deferred').hitTestable());
-        await tester.pumpAndSettle();
+      // Select the deferred units.
+      await tester.tap(find.text('Deferred').hitTestable());
+      await tester.pumpAndSettle();
 
-        // Verify the deferred units are shown for entire app.
-        final deferredBreadcrumbs = _fetchBreadcrumbs(tester);
-        expect(deferredBreadcrumbs.length, 1);
-        expect(
-          deferredBreadcrumbs.first.text,
-          equals('/Deferred/flutter_assets [+344.3 KB]'),
-        );
-        expect(
-          find.richText('packages/cupertino_icons/assets [+276.8 KB]'),
-          findsOneWidget,
-        );
+      // Verify the deferred units are shown for entire app.
+      final deferredBreadcrumbs = _fetchBreadcrumbs(tester);
+      expect(deferredBreadcrumbs.length, 1);
+      expect(
+        deferredBreadcrumbs.first.text,
+        equals('/Deferred/flutter_assets [+344.3 KB]'),
+      );
+      expect(
+        find.richText('packages/cupertino_icons/assets [+276.8 KB]'),
+        findsOneWidget,
+      );
 
-        // Open the diffType dropdown.
-        await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
-        await tester.pumpAndSettle();
+      // Open the diffType dropdown.
+      await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
+      await tester.pumpAndSettle();
 
-        // Select increase only.
-        await tester.tap(find.text('Increase Only').hitTestable());
-        await tester.pumpAndSettle();
+      // Select increase only.
+      await tester.tap(find.text('Increase Only').hitTestable());
+      await tester.pumpAndSettle();
 
-        // Verify the deferred unit is shown for increase only.
-        final deferredIncreaseBreadcrumbs = _fetchBreadcrumbs(tester);
-        expect(deferredIncreaseBreadcrumbs.length, 1);
-        expect(
-          deferredIncreaseBreadcrumbs.first.text,
-          equals(
-            '/Deferred/flutter_assets [+344.3 KB]',
-          ),
-        );
-        expect(
-          find.richText('packages/cupertino_icons/assets [+276.8 KB]'),
-          findsOneWidget,
-        );
+      // Verify the deferred unit is shown for increase only.
+      final deferredIncreaseBreadcrumbs = _fetchBreadcrumbs(tester);
+      expect(deferredIncreaseBreadcrumbs.length, 1);
+      expect(
+        deferredIncreaseBreadcrumbs.first.text,
+        equals('/Deferred/flutter_assets [+344.3 KB]'),
+      );
+      expect(
+        find.richText('packages/cupertino_icons/assets [+276.8 KB]'),
+        findsOneWidget,
+      );
 
-        // Open the diffType dropdown.
-        await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
-        await tester.pumpAndSettle();
+      // Open the diffType dropdown.
+      await tester.tap(find.byKey(AppSizeScreen.diffTypeDropdownKey));
+      await tester.pumpAndSettle();
 
-        // Select decrease only.
-        await tester.tap(find.text('Decrease Only').hitTestable());
-        await tester.pumpAndSettle();
+      // Select decrease only.
+      await tester.tap(find.text('Decrease Only').hitTestable());
+      await tester.pumpAndSettle();
 
-        // Verify the main unit is shown for decrease only.
-        final deferredDecreaseBreadcrumbs = _fetchBreadcrumbs(tester);
-        expect(deferredDecreaseBreadcrumbs.length, 1);
-        expect(
-          deferredDecreaseBreadcrumbs.first.text,
-          equals(
-            '/Deferred/flutter_assets [0 B]',
-          ),
-        );
-      },
-    );
+      // Verify the main unit is shown for decrease only.
+      final deferredDecreaseBreadcrumbs = _fetchBreadcrumbs(tester);
+      expect(deferredDecreaseBreadcrumbs.length, 1);
+      expect(
+        deferredDecreaseBreadcrumbs.first.text,
+        equals('/Deferred/flutter_assets [0 B]'),
+      );
+    });
   });
 }
 

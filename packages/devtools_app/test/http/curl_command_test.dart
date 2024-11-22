@@ -209,9 +209,7 @@ void main() {
 }
 
 class _TestDartIOHttpRequestData extends DartIOHttpRequestData {
-  _TestDartIOHttpRequestData(
-    this._request,
-  ) : super(_request);
+  _TestDartIOHttpRequestData(this._request) : super(_request);
 
   final HttpProfileRequest _request;
 

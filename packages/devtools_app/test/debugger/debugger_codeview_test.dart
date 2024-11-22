@@ -54,15 +54,18 @@ void main() {
     );
     setGlobal(PreferencesController, PreferencesController());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
-    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'),
+    ).thenReturn(ValueNotifier<int>(0));
 
     scriptsHistory.pushEntry(mockScript!);
     final mockCodeViewController = debuggerController.codeViewController;
-    when(mockCodeViewController.currentScriptRef)
-        .thenReturn(ValueNotifier(mockScriptRef));
-    when(mockCodeViewController.currentParsedScript)
-        .thenReturn(ValueNotifier(mockParsedScript));
+    when(
+      mockCodeViewController.currentScriptRef,
+    ).thenReturn(ValueNotifier(mockScriptRef));
+    when(
+      mockCodeViewController.currentParsedScript,
+    ).thenReturn(ValueNotifier(mockParsedScript));
     when(mockCodeViewController.scriptsHistory).thenReturn(scriptsHistory);
   });
 
@@ -106,9 +109,7 @@ void main() {
       );
       await expectLater(
         find.byType(CodeView),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/codeview_scrollbars.png',
-        ),
+        matchesDevToolsGolden('../test_infra/goldens/codeview_scrollbars.png'),
       );
     },
   );
@@ -117,30 +118,27 @@ void main() {
     'search in file field is visible',
     smallWindowSize,
     (WidgetTester tester) async {
-      when(codeViewController.showSearchInFileField)
-          .thenReturn(ValueNotifier(true));
+      when(
+        codeViewController.showSearchInFileField,
+      ).thenReturn(ValueNotifier(true));
       when(codeViewController.searchFieldFocusNode).thenReturn(FocusNode());
-      when(codeViewController.searchTextFieldController)
-          .thenReturn(SearchTextEditingController());
+      when(
+        codeViewController.searchTextFieldController,
+      ).thenReturn(SearchTextEditingController());
 
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.byType(SearchField<CodeViewController>), findsOneWidget);
     },
   );
 
-  testWidgetsWithWindowSize(
-    'file opener is visible',
-    smallWindowSize,
-    (WidgetTester tester) async {
-      when(codeViewController.showFileOpener).thenReturn(ValueNotifier(true));
-      when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
-      await pumpDebuggerScreen(tester, debuggerController);
-      expect(
-        find.byKey(debuggerCodeViewFileOpenerKey),
-        findsOneWidget,
-      );
-    },
-  );
+  testWidgetsWithWindowSize('file opener is visible', smallWindowSize, (
+    WidgetTester tester,
+  ) async {
+    when(codeViewController.showFileOpener).thenReturn(ValueNotifier(true));
+    when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
+    await pumpDebuggerScreen(tester, debuggerController);
+    expect(find.byKey(debuggerCodeViewFileOpenerKey), findsOneWidget);
+  });
 
   group('fetchScriptLocationFullFilePath', () {
     testWidgets('gets the full path', (WidgetTester tester) async {
@@ -153,57 +151,62 @@ void main() {
         ),
       );
 
-      final filePath =
-          await fetchScriptLocationFullFilePath(codeViewController);
+      final filePath = await fetchScriptLocationFullFilePath(
+        codeViewController,
+      );
 
       expect(filePath, equals(mockScriptRefFileUri));
     });
 
-    testWidgets(
-      'gets the path if immediately available',
-      (WidgetTester tester) async {
-        when(codeViewController.scriptLocation).thenReturn(
-          ValueNotifier(
-            ScriptLocation(
-              mockScriptRef,
-              location: const SourcePosition(line: 50, column: 50),
-            ),
+    testWidgets('gets the path if immediately available', (
+      WidgetTester tester,
+    ) async {
+      when(codeViewController.scriptLocation).thenReturn(
+        ValueNotifier(
+          ScriptLocation(
+            mockScriptRef,
+            location: const SourcePosition(line: 50, column: 50),
           ),
-        );
-        // Prefetch File Uris
-        await serviceConnection.serviceManager.resolvedUriManager.fetchFileUris(
-          serviceConnection
-              .serviceManager.isolateManager.selectedIsolate.value!.id!,
-          [mockScriptRef.uri!],
-        );
+        ),
+      );
+      // Prefetch File Uris
+      await serviceConnection.serviceManager.resolvedUriManager.fetchFileUris(
+        serviceConnection
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value!
+            .id!,
+        [mockScriptRef.uri!],
+      );
 
-        final filePath =
-            await fetchScriptLocationFullFilePath(codeViewController);
+      final filePath = await fetchScriptLocationFullFilePath(
+        codeViewController,
+      );
 
-        expect(filePath, equals(mockScriptRefFileUri));
-      },
-    );
+      expect(filePath, equals(mockScriptRefFileUri));
+    });
 
-    testWidgets(
-      'returns null if package not found',
-      (WidgetTester tester) async {
-        when(codeViewController.scriptLocation).thenReturn(
-          ValueNotifier(
-            ScriptLocation(
-              ScriptRef(
-                uri: 'some/unknown/file',
-                id: 'unknown-script-ref-for-test',
-              ),
-              location: const SourcePosition(line: 123, column: 456),
+    testWidgets('returns null if package not found', (
+      WidgetTester tester,
+    ) async {
+      when(codeViewController.scriptLocation).thenReturn(
+        ValueNotifier(
+          ScriptLocation(
+            ScriptRef(
+              uri: 'some/unknown/file',
+              id: 'unknown-script-ref-for-test',
             ),
+            location: const SourcePosition(line: 123, column: 456),
           ),
-        );
+        ),
+      );
 
-        final filePath =
-            await fetchScriptLocationFullFilePath(codeViewController);
+      final filePath = await fetchScriptLocationFullFilePath(
+        codeViewController,
+      );
 
-        expect(filePath, isNull);
-      },
-    );
+      expect(filePath, isNull);
+    });
   });
 }

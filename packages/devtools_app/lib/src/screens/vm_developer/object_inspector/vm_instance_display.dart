@@ -64,9 +64,7 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
 
     unawaited(
       _initialized = buildVariablesTree(_root)
-          .then(
-            (_) => _root.expand(),
-          )
+          .then((_) => _root.expand())
           .then(
             (_) => unawaited(
               Future.wait([
@@ -125,10 +123,7 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
 }
 
 class _InstanceViewer extends StatelessWidget {
-  const _InstanceViewer({
-    required this.controller,
-    required this.instance,
-  });
+  const _InstanceViewer({required this.controller, required this.instance});
 
   final ObjectInspectorViewController controller;
   final InstanceObject instance;
@@ -185,17 +180,14 @@ class DisplayProvider extends StatelessWidget {
         SelectableText.rich(
           TextSpan(
             text: hasName ? variable.name : null,
-            style: variable.artificialName
-                ? theme.subtleFixedFontStyle
-                : theme.fixedFontStyle.apply(
-                    color: theme.colorScheme.controlFlowSyntaxColor,
-                  ),
+            style:
+                variable.artificialName
+                    ? theme.subtleFixedFontStyle
+                    : theme.fixedFontStyle.apply(
+                      color: theme.colorScheme.controlFlowSyntaxColor,
+                    ),
             children: [
-              if (hasName)
-                TextSpan(
-                  text: ': ',
-                  style: theme.fixedFontStyle,
-                ),
+              if (hasName) TextSpan(text: ': ', style: theme.fixedFontStyle),
               if (variable.ref!.value is Sentinel)
                 TextSpan(
                   text: 'Sentinel ${variable.displayValue.toString()}',

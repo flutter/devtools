@@ -38,8 +38,9 @@ class ProfilerScreenController extends DisposableController
   Future<void> _initHelper() async {
     if (!offlineDataController.showingOfflineData.value) {
       await allowedError(
-        serviceConnection.serviceManager.service!
-            .setProfilePeriod(mediumProfilePeriod),
+        serviceConnection.serviceManager.service!.setProfilePeriod(
+          mediumProfilePeriod,
+        ),
         logError: false,
       );
 
@@ -48,8 +49,12 @@ class ProfilerScreenController extends DisposableController
       addAutoDisposeListener(
         serviceConnection.serviceManager.isolateManager.selectedIsolate,
         () {
-          final selectedIsolate = serviceConnection
-              .serviceManager.isolateManager.selectedIsolate.value;
+          final selectedIsolate =
+              serviceConnection
+                  .serviceManager
+                  .isolateManager
+                  .selectedIsolate
+                  .value;
           if (selectedIsolate != null) {
             switchToIsolate(selectedIsolate);
           }
@@ -68,8 +73,9 @@ class ProfilerScreenController extends DisposableController
           // need to default to the basic view of the profile.
           final userTagFilter = cpuProfilerController.userTagFilter.value;
           if (userTagFilter == CpuProfilerController.groupByVmTag) {
-            await cpuProfilerController
-                .loadDataWithTag(CpuProfilerController.userTagNone);
+            await cpuProfilerController.loadDataWithTag(
+              CpuProfilerController.userTagNone,
+            );
           }
         }
         // Always reset to the function view when the VM developer mode state
@@ -93,10 +99,7 @@ class ProfilerScreenController extends DisposableController
       processId: 'offline data processing',
     );
     cpuProfilerController.loadProcessedData(
-      CpuProfilePair(
-        functionProfile: data,
-        codeProfile: null,
-      ),
+      CpuProfilePair(functionProfile: data, codeProfile: null),
       storeAsUserTagNone: true,
     );
   }
@@ -151,9 +154,9 @@ class ProfilerScreenController extends DisposableController
 
   @override
   OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
-        screenId: ProfilerScreen.id,
-        data: cpuProfileData!.toJson(),
-      );
+    screenId: ProfilerScreen.id,
+    data: cpuProfileData!.toJson(),
+  );
 
   Future<void> clear() async {
     await cpuProfilerController.clear();

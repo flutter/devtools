@@ -36,8 +36,9 @@ void main() {
         isWebApp: false,
       );
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
-      when(mockServiceManager.connectedState)
-          .thenReturn(ValueNotifier(const ConnectedState(true)));
+      when(
+        mockServiceManager.connectedState,
+      ).thenReturn(ValueNotifier(const ConnectedState(true)));
       setGlobal(ServiceConnectionManager, mockServiceConnection);
       offlineDataController.startShowingOfflineData(
         offlineApp: serviceConnection.serviceManager.connectedApp!,

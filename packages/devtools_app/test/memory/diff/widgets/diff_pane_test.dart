@@ -15,9 +15,7 @@ import '../../../test_infra/scenes/memory/default.dart';
 
 Future<void> pumpScene(WidgetTester tester, MemoryDefaultScene scene) async {
   await scene.pump(tester);
-  await tester.tap(
-    find.byKey(MemoryScreenKeys.diffTab),
-  );
+  await tester.tap(find.byKey(MemoryScreenKeys.diffTab));
   await tester.pumpAndSettle();
 }
 
@@ -47,82 +45,80 @@ void main() {
       await scene.setUp(heapProviders: MemoryDefaultSceneHeaps.forDiffTesting);
     });
 
-    testWidgetsWithWindowSize(
-      'records and deletes snapshots',
-      windowSize,
-      (WidgetTester tester) async {
-        final snapshots = scene.controller.diff.core.snapshots;
-        // Check the list contains only documentation item.
-        expect(snapshots.value.length, equals(1));
-        await pumpScene(tester, scene);
+    testWidgetsWithWindowSize('records and deletes snapshots', windowSize, (
+      WidgetTester tester,
+    ) async {
+      final snapshots = scene.controller.diff.core.snapshots;
+      // Check the list contains only documentation item.
+      expect(snapshots.value.length, equals(1));
+      await pumpScene(tester, scene);
 
-        // Check initial golden.
-        await expectLater(
-          find.byType(DiffPane),
-          matchesDevToolsGolden(
-            '../../../test_infra/goldens/memory_diff_empty1.png',
-          ),
-        );
+      // Check initial golden.
+      await expectLater(
+        find.byType(DiffPane),
+        matchesDevToolsGolden(
+          '../../../test_infra/goldens/memory_diff_empty1.png',
+        ),
+      );
 
-        // Record three snapshots.
-        for (final i in Iterable<int>.generate(3)) {
-          await takeSnapshot(tester, scene);
-          expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
-        }
-
-        await expectLater(
-          find.byType(DiffPane),
-          matchesDevToolsGolden(
-            '../../../test_infra/goldens/memory_diff_three_snapshots1.png',
-          ),
-        );
-        expect(snapshots.value.length, equals(1 + 3));
-
-        await expectLater(
-          find.byType(DiffPane),
-          matchesDevToolsGolden(
-            '../../../test_infra/goldens/memory_diff_selected_class.png',
-          ),
-        );
-
-        // Delete a snapshot.
-        await tester.tap(
-          find.descendant(
-            of: find.byType(SnapshotListTitle),
-            matching: find.byType(ContextMenuButton),
-          ),
-        );
-        await tester.pumpAndSettle();
-        await tester.tap(
-          find.descendant(
-            of: find.byType(MenuItemButton),
-            matching: find.text('Delete'),
-          ),
-        );
-        await tester.pumpAndSettle();
-        expect(snapshots.value.length, equals(1 + 3 - 1));
-
-        // Record snapshot
+      // Record three snapshots.
+      for (final i in Iterable<int>.generate(3)) {
         await takeSnapshot(tester, scene);
-        await expectLater(
-          find.byType(DiffPane),
-          matchesDevToolsGolden(
-            '../../../test_infra/goldens/memory_diff_three_snapshots2.png',
-          ),
-        );
-        expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
+        expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
+      }
 
-        // Clear all
-        await tester.tap(find.byTooltip('Delete all snapshots'));
-        await tester.pumpAndSettle();
-        await expectLater(
-          find.byType(DiffPane),
-          matchesDevToolsGolden(
-            '../../../test_infra/goldens/memory_diff_empty2.png',
-          ),
-        );
-        expect(snapshots.value.length, equals(1));
-      },
-    );
+      await expectLater(
+        find.byType(DiffPane),
+        matchesDevToolsGolden(
+          '../../../test_infra/goldens/memory_diff_three_snapshots1.png',
+        ),
+      );
+      expect(snapshots.value.length, equals(1 + 3));
+
+      await expectLater(
+        find.byType(DiffPane),
+        matchesDevToolsGolden(
+          '../../../test_infra/goldens/memory_diff_selected_class.png',
+        ),
+      );
+
+      // Delete a snapshot.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(SnapshotListTitle),
+          matching: find.byType(ContextMenuButton),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(MenuItemButton),
+          matching: find.text('Delete'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(snapshots.value.length, equals(1 + 3 - 1));
+
+      // Record snapshot
+      await takeSnapshot(tester, scene);
+      await expectLater(
+        find.byType(DiffPane),
+        matchesDevToolsGolden(
+          '../../../test_infra/goldens/memory_diff_three_snapshots2.png',
+        ),
+      );
+      expect(snapshots.value.length, equals(1 + 3 - 1 + 1));
+
+      // Clear all
+      await tester.tap(find.byTooltip('Delete all snapshots'));
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byType(DiffPane),
+        matchesDevToolsGolden(
+          '../../../test_infra/goldens/memory_diff_empty2.png',
+        ),
+      );
+      expect(snapshots.value.length, equals(1));
+    });
   });
 }

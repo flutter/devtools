@@ -16,12 +16,13 @@ Future<RemoteDiagnosticsNode> widgetToLayoutExplorerRemoteDiagnosticsNode({
 }) async {
   await tester.pumpWidget(MaterialApp(home: Scaffold(body: widget)));
   final element = find.byWidget(widget).evaluate().first;
-  final nodeJson =
-      element.toDiagnosticsNode(style: DiagnosticsTreeStyle.dense).toJsonMap(
-            LayoutExplorerSerializationDelegate(
-              subtreeDepth: subtreeDepth,
-              service: WidgetInspectorService.instance,
-            ),
-          );
+  final nodeJson = element
+      .toDiagnosticsNode(style: DiagnosticsTreeStyle.dense)
+      .toJsonMap(
+        LayoutExplorerSerializationDelegate(
+          subtreeDepth: subtreeDepth,
+          service: WidgetInspectorService.instance,
+        ),
+      );
   return RemoteDiagnosticsNode(nodeJson, null, false, null);
 }

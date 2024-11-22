@@ -36,7 +36,10 @@ class _DebuggingControlsState extends State<DebuggingControls>
     if (!initController()) return;
     addAutoDisposeListener(
       serviceConnection
-          .serviceManager.isolateManager.mainIsolateState?.isPaused,
+          .serviceManager
+          .isolateManager
+          .mainIsolateState
+          ?.isPaused,
     );
     addAutoDisposeListener(controller.resuming);
     addAutoDisposeListener(controller.stackFramesWithLocation);
@@ -47,13 +50,14 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
-    final canStep = serviceConnection.serviceManager.isMainIsolatePaused &&
+    final canStep =
+        serviceConnection.serviceManager.isMainIsolatePaused &&
         !resuming &&
         hasStackFrames &&
         !isSystemIsolate;
     final isVmApp =
         serviceConnection.serviceManager.connectedApp?.isRunningOnDartVM ??
-            false;
+        false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
@@ -89,18 +93,20 @@ class _DebuggingControlsState extends State<DebuggingControls>
           icon: Codicons.debugPause,
           autofocus: true,
           // Disable when paused or selected isolate is a system isolate.
-          onPressed: (isPaused || isSystemIsolate)
-              ? null
-              : () => unawaited(controller.pause()),
+          onPressed:
+              (isPaused || isSystemIsolate)
+                  ? null
+                  : () => unawaited(controller.pause()),
         ),
         ButtonGroupItemData(
           tooltip: 'Resume',
           icon: Codicons.debugContinue,
           // Enable while paused + not resuming and selected isolate is not
           // a system isolate.
-          onPressed: ((isPaused && !resuming) && !isSystemIsolate)
-              ? () => unawaited(controller.resume())
-              : null,
+          onPressed:
+              ((isPaused && !resuming) && !isSystemIsolate)
+                  ? () => unawaited(controller.resume())
+                  : null,
         ),
       ],
     );
@@ -139,9 +145,10 @@ class _DebuggingControlsState extends State<DebuggingControls>
           label: 'File Explorer',
           onPressed: controller.codeViewController.toggleLibrariesVisible,
           gaScreen: gac.debugger,
-          gaSelection: visible
-              ? gac.DebuggerEvents.hideFileExplorer.name
-              : gac.DebuggerEvents.showFileExplorer.name,
+          gaSelection:
+              visible
+                  ? gac.DebuggerEvents.hideFileExplorer.name
+                  : gac.DebuggerEvents.showFileExplorer.name,
           minScreenWidthForTextBeforeScaling:
               DebuggingControls.minWidthBeforeScaling,
         );
@@ -151,10 +158,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
 }
 
 class CodeStatisticsControls extends StatelessWidget {
-  const CodeStatisticsControls({
-    super.key,
-    required this.controller,
-  });
+  const CodeStatisticsControls({super.key, required this.controller});
 
   final DebuggerController controller;
 
@@ -198,11 +202,12 @@ class CodeStatisticsControls extends StatelessWidget {
               tooltip: 'Refresh statistics',
               gaScreen: gac.debugger,
               gaSelection: gac.DebuggerEvents.refreshStatistics.name,
-              onPressed: showCodeCoverage || showProfileInformation
-                  ? () => unawaited(
+              onPressed:
+                  showCodeCoverage || showProfileInformation
+                      ? () => unawaited(
                         controller.codeViewController.refreshCodeStatistics(),
                       )
-                  : null,
+                      : null,
             ),
           ],
         );
@@ -212,10 +217,7 @@ class CodeStatisticsControls extends StatelessWidget {
 }
 
 class _CodeStatsControl extends StatelessWidget {
-  const _CodeStatsControl({
-    required this.icon,
-    required this.tooltip,
-  });
+  const _CodeStatsControl({required this.icon, required this.tooltip});
 
   final IconData icon;
   final String tooltip;
@@ -226,26 +228,21 @@ class _CodeStatsControl extends StatelessWidget {
       message: tooltip,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: Icon(
-          icon,
-          size: defaultIconSize,
-        ),
+        child: Icon(icon, size: defaultIconSize),
       ),
     );
   }
 }
 
 class BreakOnExceptionsControl extends StatelessWidget {
-  const BreakOnExceptionsControl({
-    super.key,
-    required this.controller,
-  });
+  const BreakOnExceptionsControl({super.key, required this.controller});
 
   final DebuggerController controller;
 
   @override
   Widget build(BuildContext context) {
-    final isInSmallMode = MediaQuery.of(context).size.width <
+    final isInSmallMode =
+        MediaQuery.of(context).size.width <
         DebuggingControls.minWidthBeforeScaling;
     return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
@@ -253,19 +250,18 @@ class BreakOnExceptionsControl extends StatelessWidget {
         return RoundedDropDownButton<ExceptionMode>(
           value: ExceptionMode.from(modeId),
           // Cannot set exception pause mode for system isolates.
-          onChanged: controller.isSystemIsolate
-              ? null
-              : (ExceptionMode? mode) {
-                  unawaited(controller.setIsolatePauseMode(mode!.id));
-                },
+          onChanged:
+              controller.isSystemIsolate
+                  ? null
+                  : (ExceptionMode? mode) {
+                    unawaited(controller.setIsolatePauseMode(mode!.id));
+                  },
           isDense: true,
           items: [
             for (final mode in ExceptionMode.modes)
               DropdownMenuItem<ExceptionMode>(
                 value: mode,
-                child: Text(
-                  isInSmallMode ? mode.name : mode.description,
-                ),
+                child: Text(isInSmallMode ? mode.name : mode.description),
               ),
           ],
         );

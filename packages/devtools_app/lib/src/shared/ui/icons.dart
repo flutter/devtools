@@ -77,18 +77,12 @@ class CircleIcon extends StatelessWidget {
     return Container(
       width: defaultIconSize,
       height: defaultIconSize,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       alignment: Alignment.center,
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: scaleByFontFactor(9.0),
-          color: textColor,
-        ),
+        style: TextStyle(fontSize: scaleByFontFactor(9.0), color: textColor),
       ),
     );
   }
@@ -154,7 +148,7 @@ class CustomIconMaker {
 
 class IconKind {
   const IconKind(this.name, this.icon, [AssetImageIcon? abstractIcon])
-      : abstractIcon = abstractIcon ?? icon;
+    : abstractIcon = abstractIcon ?? icon;
 
   static IconKind classIcon = const IconKind(
     'class',
@@ -258,10 +252,7 @@ class _ColorIconPainter extends CustomPainter {
         ),
         greyPaint,
       )
-      ..drawRect(
-        iconRect,
-        Paint()..color = color,
-      )
+      ..drawRect(iconRect, Paint()..color = color)
       ..drawRect(
         iconRect,
         Paint()
@@ -297,8 +288,8 @@ class AssetImageIcon extends StatelessWidget {
     this.color,
     double? height,
     double? width,
-  })  : _width = width,
-        _height = height;
+  }) : _width = width,
+       _height = height;
 
   final String asset;
   final Color? color;
@@ -334,17 +325,12 @@ class Octicons {
 /// A widget that renders either an [icon] from a font glyph or an [iconAsset]
 /// from the app bundle.
 class DevToolsIcon extends StatelessWidget {
-  DevToolsIcon({
-    super.key,
-    this.icon,
-    this.iconAsset,
-    this.color,
-    double? size,
-  })  : assert(
-          (icon == null) != (iconAsset == null),
-          'Exactly one of icon and iconAsset must be specified.',
-        ),
-        size = size ?? defaultIconSize;
+  DevToolsIcon({super.key, this.icon, this.iconAsset, this.color, double? size})
+    : assert(
+        (icon == null) != (iconAsset == null),
+        'Exactly one of icon and iconAsset must be specified.',
+      ),
+      size = size ?? defaultIconSize;
 
   /// The icon to use for this screen's tab.
   ///
@@ -364,16 +350,12 @@ class DevToolsIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = this.color ?? Theme.of(context).colorScheme.onSurface;
     return icon != null
-        ? Icon(
-            icon,
-            size: size,
-            color: color,
-          )
+        ? Icon(icon, size: size, color: color)
         : AssetImageIcon(
-            asset: iconAsset!,
-            height: size,
-            width: size,
-            color: color,
-          );
+          asset: iconAsset!,
+          height: size,
+          width: size,
+          color: color,
+        );
   }
 }

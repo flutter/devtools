@@ -21,8 +21,9 @@ class LogDetails extends StatefulWidget {
   @override
   State<LogDetails> createState() => _LogDetailsState();
 
-  static const copyToClipboardButtonKey =
-      Key('log_details_copy_to_clipboard_button');
+  static const copyToClipboardButtonKey = Key(
+    'log_details_copy_to_clipboard_button',
+  );
 }
 
 class _LogDetailsState extends State<LogDetails>
@@ -85,17 +86,18 @@ class _LogDetailsState extends State<LogDetails>
         controller: scrollController,
         child: SingleChildScrollView(
           controller: scrollController,
-          child: preferences.logging.detailsFormat.value ==
-                      LoggingDetailsFormat.text ||
-                  (log?.encodedDetails ?? '').isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(denseSpacing),
-                  child: SelectableText(
-                    log?.prettyPrinted() ?? '',
-                    textAlign: TextAlign.left,
-                  ),
-                )
-              : JsonViewer(encodedJson: log!.encodedDetails),
+          child:
+              preferences.logging.detailsFormat.value ==
+                          LoggingDetailsFormat.text ||
+                      (log?.encodedDetails ?? '').isEmpty
+                  ? Padding(
+                    padding: const EdgeInsets.all(denseSpacing),
+                    child: SelectableText(
+                      log?.prettyPrinted() ?? '',
+                      textAlign: TextAlign.left,
+                    ),
+                  )
+                  : JsonViewer(encodedJson: log!.encodedDetails),
         ),
       ),
     );
@@ -149,22 +151,19 @@ class LogDetailsFormatButton extends StatelessWidget {
 
     return currentlyUsingTextFormat
         ? Padding(
-            // This padding aligns this button with the copy button.
-            padding: const EdgeInsets.only(bottom: borderPadding),
-            child: SmallAction(
-              tooltip: tooltip,
-              onPressed: togglePreference,
-              child: Text(
-                ' { } ',
-                style: Theme.of(context).regularTextStyle,
-              ),
-            ),
-          )
-        : ToolbarAction(
-            icon: Icons.text_fields,
+          // This padding aligns this button with the copy button.
+          padding: const EdgeInsets.only(bottom: borderPadding),
+          child: SmallAction(
             tooltip: tooltip,
             onPressed: togglePreference,
-            size: defaultIconSize,
-          );
+            child: Text(' { } ', style: Theme.of(context).regularTextStyle),
+          ),
+        )
+        : ToolbarAction(
+          icon: Icons.text_fields,
+          tooltip: tooltip,
+          onPressed: togglePreference,
+          size: defaultIconSize,
+        );
   }
 }

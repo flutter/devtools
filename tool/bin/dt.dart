@@ -11,8 +11,9 @@ import 'package:io/io.dart';
 void main(List<String> args) async {
   final runner = DevToolsCommandRunner();
   try {
-    final dynamic result =
-        await runner.run(args).whenComplete(sharedStdIn.terminate);
+    final dynamic result = await runner
+        .run(args)
+        .whenComplete(sharedStdIn.terminate);
 
     exit(result is int ? result : 0);
   } catch (e) {

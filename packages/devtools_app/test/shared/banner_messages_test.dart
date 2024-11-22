@@ -44,10 +44,7 @@ void main() {
                 children: <Widget>[
                   // This is button is present so that we can tap it and
                   // simulate a frame being drawn.
-                  ElevatedButton(
-                    onPressed: () => {},
-                    child: const SizedBox(),
-                  ),
+                  ElevatedButton(onPressed: () => {}, child: const SizedBox()),
                 ],
               ),
             ),

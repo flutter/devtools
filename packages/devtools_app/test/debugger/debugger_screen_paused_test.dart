@@ -47,23 +47,23 @@ void main() {
     );
     setGlobal(PreferencesController, PreferencesController());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
-    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'),
+    ).thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
     final codeViewController = debuggerController.codeViewController;
     final scriptsHistory = ScriptsHistory();
     scriptsHistory.pushEntry(mockScript!);
     when(codeViewController.scriptsHistory).thenReturn(scriptsHistory);
-    when(debuggerController.stackFramesWithLocation).thenReturn(
-      ValueNotifier([
-        _stackFrame1,
-        _stackFrame2,
-      ]),
-    );
-    when(codeViewController.currentScriptRef)
-        .thenReturn(ValueNotifier(mockScriptRef));
-    when(codeViewController.currentParsedScript)
-        .thenReturn(ValueNotifier(mockParsedScript));
+    when(
+      debuggerController.stackFramesWithLocation,
+    ).thenReturn(ValueNotifier([_stackFrame1, _stackFrame2]));
+    when(
+      codeViewController.currentScriptRef,
+    ).thenReturn(ValueNotifier(mockScriptRef));
+    when(
+      codeViewController.currentParsedScript,
+    ).thenReturn(ValueNotifier(mockParsedScript));
     when(codeViewController.navigationInProgress).thenReturn(false);
   });
 
@@ -79,55 +79,50 @@ void main() {
     );
   }
 
-  testWidgetsWithWindowSize(
-    'debugger controls paused',
-    windowSize,
-    (WidgetTester tester) async {
-      await pumpDebuggerScreen(tester);
+  testWidgetsWithWindowSize('debugger controls paused', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await pumpDebuggerScreen(tester);
 
-      (serviceConnection.serviceManager.isolateManager as FakeIsolateManager)
-          .setMainIsolatePausedState(true);
-      await tester.pump();
+    (serviceConnection.serviceManager.isolateManager as FakeIsolateManager)
+        .setMainIsolatePausedState(true);
+    await tester.pump();
 
-      expect(
-        findDebuggerButtonWithIcon(Codicons.debugPause),
-        findsOneWidget,
-      );
-      final pause = getWidgetFromFinder<OutlinedButton>(
-        findDebuggerButtonWithIcon(Codicons.debugPause),
-      );
-      expect(pause.onPressed, isNull);
+    expect(findDebuggerButtonWithIcon(Codicons.debugPause), findsOneWidget);
+    final pause = getWidgetFromFinder<OutlinedButton>(
+      findDebuggerButtonWithIcon(Codicons.debugPause),
+    );
+    expect(pause.onPressed, isNull);
 
-      expect(
-        findDebuggerButtonWithIcon(Codicons.debugContinue),
-        findsOneWidget,
-      );
-      final resume = getWidgetFromFinder<OutlinedButton>(
-        findDebuggerButtonWithIcon(Codicons.debugContinue),
-      );
-      expect(resume.onPressed, isNotNull);
-    },
-  );
+    expect(findDebuggerButtonWithIcon(Codicons.debugContinue), findsOneWidget);
+    final resume = getWidgetFromFinder<OutlinedButton>(
+      findDebuggerButtonWithIcon(Codicons.debugContinue),
+    );
+    expect(resume.onPressed, isNotNull);
+  });
 
   testWidgetsWithWindowSize(
     'selecting stackframe scrolls the frame location into view',
     windowSize,
     (WidgetTester tester) async {
       final stackFrameNotifier = ValueNotifier(_stackFrame1);
-      when(debuggerController.selectedStackFrame)
-          .thenReturn(stackFrameNotifier);
+      when(
+        debuggerController.selectedStackFrame,
+      ).thenReturn(stackFrameNotifier);
 
       await pumpDebuggerScreen(tester);
       await tester.pumpAndSettle();
 
       // The first stack frame is visible:
-      final firstStackFrame =
-          findStackFrameWithText('firstCodeRef main.dart:1');
+      final firstStackFrame = findStackFrameWithText(
+        'firstCodeRef main.dart:1',
+      );
       expect(firstStackFrame, findsOneWidget);
 
       // The second stack frame is visible:
-      final secondStackFrame =
-          findStackFrameWithText('secondCodeRef main.dart:85');
+      final secondStackFrame = findStackFrameWithText(
+        'secondCodeRef main.dart:85',
+      );
       expect(secondStackFrame, findsOneWidget);
 
       // The first stack frame's line is visible:
@@ -159,9 +154,7 @@ final _stackFrame1 = StackFrameAndSourcePosition(
       id: 'firstCodeRef',
       kind: CodeKind.kDart,
     ),
-    location: SourceLocation(
-      script: mockScriptRef,
-    ),
+    location: SourceLocation(script: mockScriptRef),
     kind: FrameKind.kRegular,
   ),
   position: const SourcePosition(line: _stackFrame1Line, column: 1),
@@ -177,25 +170,25 @@ final _stackFrame2 = StackFrameAndSourcePosition(
       id: 'secondCodeRef',
       kind: CodeKind.kDart,
     ),
-    location: SourceLocation(
-      script: mockScriptRef,
-    ),
+    location: SourceLocation(script: mockScriptRef),
     kind: FrameKind.kRegular,
   ),
   position: const SourcePosition(line: _stackFrame2Line, column: 1),
 );
 
 Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
-      (Widget widget) =>
-          widget is RichText && widget.text.toPlainText().contains(text),
-    );
+  (Widget widget) =>
+      widget is RichText && widget.text.toPlainText().contains(text),
+);
 
 bool gutterItemForLineIsVisible(int lineNumber) {
   final gutterItems = find.byType(GutterItem);
   final firstGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.first);
   final lastGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.last);
-  final lineRange =
-      Range(firstGutterItem.lineNumber, lastGutterItem.lineNumber);
+  final lineRange = Range(
+    firstGutterItem.lineNumber,
+    lastGutterItem.lineNumber,
+  );
 
   return lineRange.contains(lineNumber);
 }

@@ -15,8 +15,9 @@ final goToLineNumberKeySet = LogicalKeySet(
   LogicalKeyboardKey.keyG,
 );
 
-final goToLineNumberKeySetDescription =
-    goToLineNumberKeySet.describeKeys(isMacOS: HostPlatform.instance.isMacOS);
+final goToLineNumberKeySetDescription = goToLineNumberKeySet.describeKeys(
+  isMacOS: HostPlatform.instance.isMacOS,
+);
 
 final searchInFileKeySet = LogicalKeySet(
   HostPlatform.instance.isMacOS
@@ -25,9 +26,7 @@ final searchInFileKeySet = LogicalKeySet(
   LogicalKeyboardKey.keyF,
 );
 
-final escapeKeySet = LogicalKeySet(
-  LogicalKeyboardKey.escape,
-);
+final escapeKeySet = LogicalKeySet(LogicalKeyboardKey.escape);
 
 final openFileKeySet = LogicalKeySet(
   HostPlatform.instance.isMacOS
@@ -36,5 +35,6 @@ final openFileKeySet = LogicalKeySet(
   LogicalKeyboardKey.keyP,
 );
 
-final openFileKeySetDescription =
-    openFileKeySet.describeKeys(isMacOS: HostPlatform.instance.isMacOS);
+final openFileKeySetDescription = openFileKeySet.describeKeys(
+  isMacOS: HostPlatform.instance.isMacOS,
+);

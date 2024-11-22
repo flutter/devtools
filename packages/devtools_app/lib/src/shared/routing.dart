@@ -100,13 +100,13 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
         ChangeNotifier,
         PopNavigatorRouterDelegateMixin<DevToolsRouteConfiguration> {
   DevToolsRouterDelegate(this._getPage, [GlobalKey<NavigatorState>? key])
-      : navigatorKey = key ?? GlobalKey<NavigatorState>(),
-        _isTestMode = false;
+    : navigatorKey = key ?? GlobalKey<NavigatorState>(),
+      _isTestMode = false;
 
   @visibleForTesting
   DevToolsRouterDelegate.test(this._getPage, [GlobalKey<NavigatorState>? key])
-      : navigatorKey = key ?? GlobalKey<NavigatorState>(),
-        _isTestMode = true;
+    : navigatorKey = key ?? GlobalKey<NavigatorState>(),
+      _isTestMode = true;
 
   static DevToolsRouterDelegate of(BuildContext context) =>
       Router.of(context).routerDelegate as DevToolsRouterDelegate;
@@ -128,7 +128,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     String?,
     DevToolsQueryParams,
     DevToolsNavigationState?,
-  ) _getPage;
+  )
+  _getPage;
 
   /// A list of any routes/pages on the stack.
   ///
@@ -196,13 +197,12 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     Map<String, String?>? argUpdates,
     DevToolsNavigationState? state,
   ]) {
-    final newParams = currentConfiguration?.params.withUpdates(argUpdates) ??
+    final newParams =
+        currentConfiguration?.params.withUpdates(argUpdates) ??
         DevToolsQueryParams.empty();
 
     unawaited(
-      _replaceStack(
-        DevToolsRouteConfiguration(page, newParams, state),
-      ),
+      _replaceStack(DevToolsRouteConfiguration(page, newParams, state)),
     );
     notifyListeners();
   }
@@ -211,13 +211,10 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     bool clearUriParam = false,
     required bool clearScreenParam,
   }) {
-    navigate(
-      homeScreenId,
-      {
-        if (clearUriParam) 'uri': null,
-        if (clearScreenParam) 'screen': null,
-      },
-    );
+    navigate(homeScreenId, {
+      if (clearUriParam) 'uri': null,
+      if (clearScreenParam) 'screen': null,
+    });
   }
 
   /// Replaces the navigation stack with a new route.
@@ -264,11 +261,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final newArgs = currentConfig.params.withUpdates(argUpdates);
 
     await _replaceStack(
-      DevToolsRouteConfiguration(
-        currentPage,
-        newArgs,
-        currentConfig.state,
-      ),
+      DevToolsRouteConfiguration(currentPage, newArgs, currentConfig.state),
     );
     notifyListeners();
   }
@@ -356,10 +349,7 @@ class DevToolsNavigationState {
   DevToolsNavigationState({
     required this.kind,
     required Map<String, String?> state,
-  }) : _state = {
-          _kKind: kind,
-          ...state,
-        };
+  }) : _state = {_kKind: kind, ...state};
 
   DevToolsNavigationState._(this._state) : kind = _state[_kKind]!;
 
@@ -371,10 +361,7 @@ class DevToolsNavigationState {
   final Map<String, String?> _state;
 
   bool hasChanges(DevToolsNavigationState? other) {
-    return !mapEquals(
-      {...state, ...?other?.state},
-      state,
-    );
+    return !mapEquals({...state, ...?other?.state}, state);
   }
 
   /// Creates a new [DevToolsNavigationState] by merging this instance with
@@ -384,10 +371,7 @@ class DevToolsNavigationState {
   /// this instance (e.g., if both instances have state with the same key, the
   /// state in [other] will be used).
   DevToolsNavigationState merge(DevToolsNavigationState other) {
-    final newState = <String, String?>{
-      ..._state,
-      ...other._state,
-    };
+    final newState = <String, String?>{..._state, ...other._state};
     return DevToolsNavigationState(kind: kind, state: newState);
   }
 

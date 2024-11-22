@@ -81,8 +81,9 @@ Future<void> main() async {
         Directory(_goldensDirectoryPath).createSync();
         failuresDirectory.createSync();
 
-        File('$_failuresDirectoryPath/$screenshotName.png')
-            .writeAsBytesSync(screenshotBytes);
+        File(
+          '$_failuresDirectoryPath/$screenshotName.png',
+        ).writeAsBytesSync(screenshotBytes);
       }
 
       if (lastScreenshot &&

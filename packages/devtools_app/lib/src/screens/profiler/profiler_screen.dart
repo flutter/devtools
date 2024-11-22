@@ -129,11 +129,12 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
             child: const CenteredCircularProgressIndicator(),
           );
         }
-        final status = recording || profilerBusy
-            ? (recording
-                ? const RecordingStatus()
-                : ProfilerBusyStatus(status: profilerBusyStatus))
-            : null;
+        final status =
+            recording || profilerBusy
+                ? (recording
+                    ? const RecordingStatus()
+                    : ProfilerBusyStatus(status: profilerBusyStatus))
+                : null;
         return Column(
           children: [
             ProfilerScreenControls(
@@ -144,7 +145,8 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
             ),
             const SizedBox(height: intermediateSpacing),
             Expanded(
-              child: status ??
+              child:
+                  status ??
                   ValueListenableBuilder<CpuProfileData?>(
                     valueListenable:
                         controller.cpuProfilerController.dataNotifier,
@@ -191,8 +193,10 @@ class DisconnectedCpuProfilerScreenBody extends StatelessWidget {
       gaSelectionImport: gac.CpuProfilerEvents.openDataFile.name,
       gaSelectionAction: gac.CpuProfilerEvents.loadDataFromFile.name,
       onAction: (jsonFile) {
-        Provider.of<ImportController>(context, listen: false)
-            .importData(jsonFile, expectedScreenId: ProfilerScreen.id);
+        Provider.of<ImportController>(
+          context,
+          listen: false,
+        ).importData(jsonFile, expectedScreenId: ProfilerScreen.id);
       },
     );
   }

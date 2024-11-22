@@ -32,8 +32,10 @@ void main() {
   );
 
   test('$DiffClassData calculates mix of cases as expected', () async {
-    final className =
-        HeapClassName.fromPath(className: 'myClass', library: 'library');
+    final className = HeapClassName.fromPath(
+      className: 'myClass',
+      library: 'library',
+    );
 
     final graphBefore = FakeHeapSnapshotGraph();
     final deleted = graphBefore.add(1);
@@ -44,23 +46,23 @@ void main() {
     final created1 = graphAfter.add(3);
     final created2 = graphAfter.add(4);
 
-    final classBefore = testClassData(
-      className,
-      [deleted, persistedBefore],
-      graphBefore,
-    );
-    final classAfter = testClassData(
-      className,
-      [persistedAfter, created1, created2],
-      graphAfter,
-    );
+    final classBefore = testClassData(className, [
+      deleted,
+      persistedBefore,
+    ], graphBefore);
+    final classAfter = testClassData(className, [
+      persistedAfter,
+      created1,
+      created2,
+    ], graphAfter);
 
-    final diff = DiffClassData.compare(
-      before: classBefore,
-      dataBefore: await testHeapData(graphBefore),
-      after: classAfter,
-      dataAfter: await testHeapData(graphAfter),
-    )!;
+    final diff =
+        DiffClassData.compare(
+          before: classBefore,
+          dataBefore: await testHeapData(graphBefore),
+          after: classAfter,
+          dataAfter: await testHeapData(graphAfter),
+        )!;
 
     expect(diff.className, className);
     expect(diff.diff.created.instanceCount, 2);
@@ -70,24 +72,23 @@ void main() {
   });
 
   test('$DiffClassData calculates deletion as expected', () async {
-    final className =
-        HeapClassName.fromPath(className: 'myClass', library: 'library');
+    final className = HeapClassName.fromPath(
+      className: 'myClass',
+      library: 'library',
+    );
 
     final graphBefore = FakeHeapSnapshotGraph();
     final deleted = graphBefore.add(1);
 
-    final classBefore = testClassData(
-      className,
-      [deleted],
-      graphBefore,
-    );
+    final classBefore = testClassData(className, [deleted], graphBefore);
 
-    final diff = DiffClassData.compare(
-      before: classBefore,
-      dataBefore: await testHeapData(graphBefore),
-      after: null,
-      dataAfter: await testHeapData(),
-    )!;
+    final diff =
+        DiffClassData.compare(
+          before: classBefore,
+          dataBefore: await testHeapData(graphBefore),
+          after: null,
+          dataAfter: await testHeapData(),
+        )!;
 
     expect(diff.className, className);
     expect(diff.diff.created.instanceCount, 0);

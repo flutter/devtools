@@ -12,42 +12,36 @@ import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 
 void main() {
   for (final encode in [false, true]) {
-    test(
-      '$SnapshotDataItem serializes and deserializes correctly',
-      () async {
-        final item = SnapshotDataItem(
-          defaultName: 'defaultName',
-          displayNumber: 5,
-          nameOverride: 'nameOverride',
-        );
-        await item.loadHeap(HeapGraphLoaderGoldens());
+    test('$SnapshotDataItem serializes and deserializes correctly', () async {
+      final item = SnapshotDataItem(
+        defaultName: 'defaultName',
+        displayNumber: 5,
+        nameOverride: 'nameOverride',
+      );
+      await item.loadHeap(HeapGraphLoaderGoldens());
 
-        Map<String, dynamic> json = item.toJson();
+      Map<String, dynamic> json = item.toJson();
 
-        if (encode) {
-          final encoded = jsonEncode(json, toEncodable: toEncodable);
-          json = jsonDecode(encoded);
-        }
+      if (encode) {
+        final encoded = jsonEncode(json, toEncodable: toEncodable);
+        json = jsonDecode(encoded);
+      }
 
-        expect(
-          json.keys.toSet(),
-          equals(Json.values.map((e) => e.name).toSet()),
-        );
-        final fromJson = SnapshotDataItem.fromJson(json);
+      expect(json.keys.toSet(), equals(Json.values.map((e) => e.name).toSet()));
+      final fromJson = SnapshotDataItem.fromJson(json);
 
-        expect(fromJson.defaultName, item.defaultName);
-        expect(fromJson.displayNumber, item.displayNumber);
-        expect(fromJson.nameOverride, item.nameOverride);
+      expect(fromJson.defaultName, item.defaultName);
+      expect(fromJson.displayNumber, item.displayNumber);
+      expect(fromJson.nameOverride, item.nameOverride);
 
-        await fromJson.process;
+      await fromJson.process;
 
-        expect(
-          fromJson.heap!.graph.objects.length,
-          item.heap!.graph.objects.length,
-        );
+      expect(
+        fromJson.heap!.graph.objects.length,
+        item.heap!.graph.objects.length,
+      );
 
-        expect(fromJson.heap!.created, item.heap!.created);
-      },
-    );
+      expect(fromJson.heap!.created, item.heap!.created);
+    });
   }
 }

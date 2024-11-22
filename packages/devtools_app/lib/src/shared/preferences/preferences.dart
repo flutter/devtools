@@ -56,9 +56,7 @@ enum _UiPreferences {
 /// DevTools preferences for general settings.
 ///
 /// These values are not stored in the DevTools storage file with a prefix.
-enum _GeneralPreferences {
-  verboseLogging,
-}
+enum _GeneralPreferences { verboseLogging }
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -79,8 +77,9 @@ class PreferencesController extends DisposableController
   /// dart2js + canvaskit
   final wasmEnabled = ValueNotifier<bool>(false);
 
-  final verboseLoggingEnabled =
-      ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
+  final verboseLoggingEnabled = ValueNotifier<bool>(
+    Logger.root.level == verboseLoggingLevel,
+  );
 
   CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
   final _cpuProfiler = CpuProfilerPreferencesController();
@@ -126,9 +125,11 @@ class PreferencesController extends DisposableController
   }
 
   Future<void> _initDarkMode() async {
-    final darkModeValue =
-        await storage.getValue(_UiPreferences.darkMode.storageKey);
-    final useDarkMode = (darkModeValue == null && useDarkThemeAsDefault) ||
+    final darkModeValue = await storage.getValue(
+      _UiPreferences.darkMode.storageKey,
+    );
+    final useDarkMode =
+        (darkModeValue == null && useDarkThemeAsDefault) ||
         darkModeValue == 'true';
     ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
     toggleDarkModeTheme(useDarkMode);

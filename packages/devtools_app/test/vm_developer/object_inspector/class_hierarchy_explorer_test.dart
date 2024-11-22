@@ -19,17 +19,11 @@ void main() {
 
   late FakeObjectInspectorViewController objectInspectorViewController;
 
-  final lib = LibraryRef(
-    id: 'lib/2',
-    uri: 'foo.dart',
-  );
+  final lib = LibraryRef(id: 'lib/2', uri: 'foo.dart');
   final objectCls = Class(
     id: 'cls/1',
     name: 'Object',
-    library: LibraryRef(
-      id: 'lib/0',
-      uri: 'dart:core',
-    ),
+    library: LibraryRef(id: 'lib/0', uri: 'dart:core'),
   );
   final superCls = Class(
     id: 'cls/2',
@@ -50,20 +44,16 @@ void main() {
     library: lib,
   );
 
-  final classes = <Class>[
-    objectCls,
-    superCls,
-    subCls,
-    noSubCls,
-  ];
+  final classes = <Class>[objectCls, superCls, subCls, noSubCls];
 
   setUp(() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
 
     objectInspectorViewController = FakeObjectInspectorViewController();
-    objectInspectorViewController.classHierarchyController
-        .buildHierarchy(classes);
+    objectInspectorViewController.classHierarchyController.buildHierarchy(
+      classes,
+    );
   });
 
   test('Correctly builds class hierarchy', () {
@@ -98,35 +88,28 @@ void main() {
     expect(superNode.children.first.isExpandable, false);
   });
 
-  testWidgetsWithWindowSize(
-    'Correctly renders class hierarchy',
-    windowSize,
-    (tester) async {
-      final controller = objectInspectorViewController.classHierarchyController;
-      await tester.pumpWidget(
-        wrapSimple(
-          ClassHierarchyExplorer(
-            controller: objectInspectorViewController,
-          ),
-        ),
-      );
+  testWidgetsWithWindowSize('Correctly renders class hierarchy', windowSize, (
+    tester,
+  ) async {
+    final controller = objectInspectorViewController.classHierarchyController;
+    await tester.pumpWidget(
+      wrapSimple(
+        ClassHierarchyExplorer(controller: objectInspectorViewController),
+      ),
+    );
 
-      expect(find.text('Object', findRichText: true), findsOneWidget);
+    expect(find.text('Object', findRichText: true), findsOneWidget);
 
-      controller.selectedIsolateClassHierarchy.value.first.expandCascading();
-      (controller.selectedIsolateClassHierarchy as ValueNotifier)
-          .notifyListeners();
-      await tester.pumpAndSettle();
+    controller.selectedIsolateClassHierarchy.value.first.expandCascading();
+    (controller.selectedIsolateClassHierarchy as ValueNotifier)
+        .notifyListeners();
+    await tester.pumpAndSettle();
 
-      expect(find.text('Object', findRichText: true), findsOneWidget);
-      expect(find.text('Super', findRichText: true), findsOneWidget);
-      expect(find.text('Sub', findRichText: true), findsOneWidget);
-      expect(find.text('NoSub', findRichText: true), findsOneWidget);
+    expect(find.text('Object', findRichText: true), findsOneWidget);
+    expect(find.text('Super', findRichText: true), findsOneWidget);
+    expect(find.text('Sub', findRichText: true), findsOneWidget);
+    expect(find.text('NoSub', findRichText: true), findsOneWidget);
 
-      expect(
-        find.byType(VmServiceObjectLink),
-        findsNWidgets(classes.length),
-      );
-    },
-  );
+    expect(find.byType(VmServiceObjectLink), findsNWidgets(classes.length));
+  });
 }

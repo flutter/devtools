@@ -75,9 +75,10 @@ class FlutterFramesController extends PerformanceFeatureController {
         // Default to true for profile builds only.
         _badgeTabForJankyFrames.value = await connectedApp.isProfileBuild;
 
-        final refreshRate = connectedApp.isFlutterAppNow!
-            ? await serviceConnection.queryDisplayRefreshRate
-            : defaultRefreshRate;
+        final refreshRate =
+            connectedApp.isFlutterAppNow!
+                ? await serviceConnection.queryDisplayRefreshRate
+                : defaultRefreshRate;
 
         _displayRefreshRate.value = refreshRate ?? defaultRefreshRate;
       }
@@ -143,8 +144,9 @@ class FlutterFramesController extends PerformanceFeatureController {
   void _maybeBadgeTabForJankyFrame(FlutterFrame frame) {
     if (_badgeTabForJankyFrames.value) {
       if (frame.isJanky(_displayRefreshRate.value)) {
-        serviceConnection.errorBadgeManager
-            .incrementBadgeCount(PerformanceScreen.id);
+        serviceConnection.errorBadgeManager.incrementBadgeCount(
+          PerformanceScreen.id,
+        );
       }
     }
   }

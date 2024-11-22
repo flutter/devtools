@@ -72,7 +72,8 @@ class MemoryChartPaneController extends DisposableController
     if (!isChartVisible.value) return;
     assert(data.isDeviceAndroid != null || _chartConnection!.initialized);
     data.isDeviceAndroid ??= _chartConnection!.isDeviceAndroid;
-    isAndroidChartVisible.value = data.isDeviceAndroid! &&
+    isAndroidChartVisible.value =
+        data.isDeviceAndroid! &&
         preferences.memory.androidCollectionEnabled.value;
   }
 
@@ -82,10 +83,11 @@ class MemoryChartPaneController extends DisposableController
     if (!isChartVisible.value) return;
     if (!offlineDataController.showingOfflineData.value) {
       if (_chartConnection == null) {
-        _chartConnection ??= _chartConnection = ChartVmConnection(
-          data.timeline,
-          isAndroidChartVisible: isAndroidChartVisible,
-        );
+        _chartConnection ??=
+            _chartConnection = ChartVmConnection(
+              data.timeline,
+              isAndroidChartVisible: isAndroidChartVisible,
+            );
         if (serviceConnection.serviceManager.connectedState.value.connected) {
           _chartConnection!.init();
           resume();

@@ -18,10 +18,7 @@ import '../performance_controls.dart';
 import 'enhance_tracing_controller.dart';
 
 class EnhanceTracingButton extends StatelessWidget {
-  const EnhanceTracingButton(
-    this.enhanceTracingController, {
-    super.key,
-  });
+  const EnhanceTracingButton(this.enhanceTracingController, {super.key});
 
   static const title = 'Enhance Tracing';
 
@@ -49,7 +46,8 @@ class EnhanceTracingButton extends StatelessWidget {
       },
       overlayDescription: RichText(
         text: TextSpan(
-          text: 'These options can be used to add more detail to the '
+          text:
+              'These options can be used to add more detail to the '
               'timeline, but be aware that ',
           style: textStyle,
           children: [
@@ -57,12 +55,10 @@ class EnhanceTracingButton extends StatelessWidget {
               text: 'frame times may be negatively affected',
               style: textStyle.copyWith(color: theme.colorScheme.error),
             ),
+            TextSpan(text: '.\n\n', style: textStyle),
             TextSpan(
-              text: '.\n\n',
-              style: textStyle,
-            ),
-            TextSpan(
-              text: 'When toggling on/off a tracing option, you will need '
+              text:
+                  'When toggling on/off a tracing option, you will need '
                   'to reproduce activity in your app to see the enhanced '
                   'tracing in the timeline.',
               style: textStyle,
@@ -74,10 +70,7 @@ class EnhanceTracingButton extends StatelessWidget {
   }
 }
 
-enum TraceWidgetBuildsScope {
-  all,
-  userCreated,
-}
+enum TraceWidgetBuildsScope { all, userCreated }
 
 extension TraceWidgetBuildsScopeExtension on TraceWidgetBuildsScope {
   String get radioDisplay {
@@ -153,19 +146,20 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
         serviceConnection.serviceManager.serviceExtensionManager
             .waitForServiceExtensionAvailable(extension.extension)
             .then((isServiceAvailable) {
-          if (isServiceAvailable) {
-            _tracingAvailable.value = true;
+              if (isServiceAvailable) {
+                _tracingAvailable.value = true;
 
-            final state = serviceConnection
-                .serviceManager.serviceExtensionManager
-                .getServiceExtensionState(extension.extension);
+                final state = serviceConnection
+                    .serviceManager
+                    .serviceExtensionManager
+                    .getServiceExtensionState(extension.extension);
 
-            _updateForServiceExtensionState(state.value, type);
-            addAutoDisposeListener(state, () {
-              _updateForServiceExtensionState(state.value, type);
-            });
-          }
-        }),
+                _updateForServiceExtensionState(state.value, type);
+                addAutoDisposeListener(state, () {
+                  _updateForServiceExtensionState(state.value, type);
+                });
+              }
+            }),
       );
     }
   }
@@ -174,15 +168,17 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
     ServiceExtensionState newState,
     TraceWidgetBuildsScope type,
   ) async {
-    final otherState = serviceConnection.serviceManager.serviceExtensionManager
-        .getServiceExtensionState(type.opposite.extensionForScope.extension)
-        .value
-        .enabled;
+    final otherState =
+        serviceConnection.serviceManager.serviceExtensionManager
+            .getServiceExtensionState(type.opposite.extensionForScope.extension)
+            .value
+            .enabled;
     final traceAllWidgets =
         type == TraceWidgetBuildsScope.all ? newState.enabled : otherState;
-    final traceUserWidgets = type == TraceWidgetBuildsScope.userCreated
-        ? newState.enabled
-        : otherState;
+    final traceUserWidgets =
+        type == TraceWidgetBuildsScope.userCreated
+            ? newState.enabled
+            : otherState;
     await _updateTracing(
       traceAllWidgets: traceAllWidgets,
       traceUserWidgets: traceUserWidgets,
@@ -199,10 +195,10 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
       // widgets. Disable the service extension for tracing all widgets.
       await serviceConnection.serviceManager.serviceExtensionManager
           .setServiceExtensionState(
-        extensions.profileWidgetBuilds.extension,
-        enabled: false,
-        value: extensions.profileWidgetBuilds.disabledValue,
-      );
+            extensions.profileWidgetBuilds.extension,
+            enabled: false,
+            value: extensions.profileWidgetBuilds.disabledValue,
+          );
       traceAllWidgets = false;
     }
 
@@ -211,9 +207,10 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
     // Double nested conditinoal expressions are hard to read.
     // ignore: prefer-conditional-expression
     if (_tracingEnabled.value) {
-      _selectedScope.value = traceUserWidgets
-          ? TraceWidgetBuildsScope.userCreated
-          : TraceWidgetBuildsScope.all;
+      _selectedScope.value =
+          traceUserWidgets
+              ? TraceWidgetBuildsScope.userCreated
+              : TraceWidgetBuildsScope.all;
     } else {
       _selectedScope.value = null;
     }
@@ -234,10 +231,7 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
           },
         ),
         MultiValueListenableBuilder(
-          listenables: [
-            _tracingEnabled,
-            _selectedScope,
-          ],
+          listenables: [_tracingEnabled, _selectedScope],
           builder: (context, values, _) {
             final tracingEnabled = values.first as bool;
             final selectedScope = values.second as TraceWidgetBuildsScope?;
@@ -300,26 +294,27 @@ class TraceWidgetBuildsCheckbox extends StatelessWidget {
 
   void _checkboxChanged(bool? value) async {
     final enabled = value == true;
-    final tracingExtensions =
-        TraceWidgetBuildsScope.values.map((scope) => scope.extensionForScope);
+    final tracingExtensions = TraceWidgetBuildsScope.values.map(
+      (scope) => scope.extensionForScope,
+    );
     if (enabled) {
       // Default to tracing only user-created widgets.
       final extension = extensions.profileUserWidgetBuilds;
       await serviceConnection.serviceManager.serviceExtensionManager
           .setServiceExtensionState(
-        extension.extension,
-        enabled: true,
-        value: extension.enabledValue,
-      );
+            extension.extension,
+            enabled: true,
+            value: extension.enabledValue,
+          );
     } else {
       await Future.wait([
         for (final extension in tracingExtensions)
           serviceConnection.serviceManager.serviceExtensionManager
               .setServiceExtensionState(
-            extension.extension,
-            enabled: false,
-            value: extension.disabledValue,
-          ),
+                extension.extension,
+                enabled: false,
+                value: extension.disabledValue,
+              ),
       ]);
     }
   }
@@ -347,10 +342,7 @@ class TraceWidgetBuildsScopeSelector extends StatelessWidget {
           textStyle: textStyle,
         ),
         const SizedBox(width: defaultSpacing),
-        ..._scopeSetting(
-          TraceWidgetBuildsScope.all,
-          textStyle: textStyle,
-        ),
+        ..._scopeSetting(TraceWidgetBuildsScope.all, textStyle: textStyle),
       ],
     );
   }
@@ -366,10 +358,7 @@ class TraceWidgetBuildsScopeSelector extends StatelessWidget {
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         onChanged: enabled ? _changeScope : null,
       ),
-      Text(
-        type.radioDisplay,
-        style: textStyle,
-      ),
+      Text(type.radioDisplay, style: textStyle),
     ];
   }
 
@@ -377,21 +366,19 @@ class TraceWidgetBuildsScopeSelector extends StatelessWidget {
     assert(enabled);
     final extension = type!.extensionForScope;
     final opposite = type.opposite.extensionForScope;
-    await Future.wait(
-      [
-        serviceConnection.serviceManager.serviceExtensionManager
-            .setServiceExtensionState(
-          opposite.extension,
-          enabled: false,
-          value: opposite.disabledValue,
-        ),
-        serviceConnection.serviceManager.serviceExtensionManager
-            .setServiceExtensionState(
-          extension.extension,
-          enabled: true,
-          value: extension.enabledValue,
-        ),
-      ],
-    );
+    await Future.wait([
+      serviceConnection.serviceManager.serviceExtensionManager
+          .setServiceExtensionState(
+            opposite.extension,
+            enabled: false,
+            value: opposite.disabledValue,
+          ),
+      serviceConnection.serviceManager.serviceExtensionManager
+          .setServiceExtensionState(
+            extension.extension,
+            enabled: true,
+            value: extension.enabledValue,
+          ),
+    ]);
   }
 }

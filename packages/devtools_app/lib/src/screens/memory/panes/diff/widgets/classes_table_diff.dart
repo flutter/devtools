@@ -19,24 +19,19 @@ import '../controller/class_data.dart';
 import '../data/classes_diff.dart';
 import 'instances.dart';
 
-enum _DataPart {
-  created,
-  deleted,
-  delta,
-  persisted,
-}
+enum _DataPart { created, deleted, delta, persisted }
 
 class _ClassNameColumn extends ColumnData<DiffClassData>
     implements
         ColumnRenderer<DiffClassData>,
         ColumnHeaderRenderer<DiffClassData> {
   _ClassNameColumn(this.diffData)
-      : super(
-          'Class',
-          titleTooltip: 'Class name',
-          fixedWidthPx: scaleByFontFactor(200.0),
-          alignment: ColumnAlignment.left,
-        );
+    : super(
+        'Class',
+        titleTooltip: 'Class name',
+        fixedWidthPx: scaleByFontFactor(200.0),
+        alignment: ColumnAlignment.left,
+      );
 
   final ClassesTableDiffData diffData;
 
@@ -81,11 +76,11 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
 class _InstanceColumn extends ColumnData<DiffClassData>
     implements ColumnRenderer<DiffClassData> {
   _InstanceColumn(this.dataPart, this.diffData)
-      : super(
-          columnTitle(dataPart),
-          fixedWidthPx: scaleByFontFactor(110.0),
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        columnTitle(dataPart),
+        fixedWidthPx: scaleByFontFactor(110.0),
+        alignment: ColumnAlignment.right,
+      );
 
   final _DataPart dataPart;
 
@@ -146,9 +141,10 @@ class _InstanceColumn extends ColumnData<DiffClassData>
       return null;
     }
 
-    final heapCallback = dataPart == _DataPart.deleted
-        ? diffData.heapBefore
-        : diffData.heapAfter;
+    final heapCallback =
+        dataPart == _DataPart.deleted
+            ? diffData.heapBefore
+            : diffData.heapAfter;
 
     if (objects is! ObjectSet) {
       throw StateError(
@@ -168,11 +164,11 @@ class _InstanceColumn extends ColumnData<DiffClassData>
 
 class _SizeColumn extends ColumnData<DiffClassData> {
   _SizeColumn(this.dataPart, this.sizeType)
-      : super(
-          columnTitle(dataPart),
-          fixedWidthPx: scaleByFontFactor(80.0),
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        columnTitle(dataPart),
+        fixedWidthPx: scaleByFontFactor(80.0),
+        alignment: ColumnAlignment.right,
+      );
 
   final _DataPart dataPart;
   final SizeType sizeType;
@@ -270,16 +266,17 @@ class _SizeGroupTitle extends StatelessWidget {
             RoundedDropDownButton<SizeType>(
               isDense: true,
               value: sizeType,
-              onChanged: (SizeType? value) =>
-                  diffData.selectedSizeType.value = value!,
-              items: SizeType.values
-                  .map(
-                    (sizeType) => DropdownMenuItem<SizeType>(
-                      value: sizeType,
-                      child: Text(sizeType.displayName),
-                    ),
-                  )
-                  .toList(),
+              onChanged:
+                  (SizeType? value) => diffData.selectedSizeType.value = value!,
+              items:
+                  SizeType.values
+                      .map(
+                        (sizeType) => DropdownMenuItem<SizeType>(
+                          value: sizeType,
+                          child: Text(sizeType.displayName),
+                        ),
+                      )
+                      .toList(),
             ),
             const SizedBox(width: denseSpacing),
             const Text('Size'),
@@ -292,11 +289,7 @@ class _SizeGroupTitle extends StatelessWidget {
 }
 
 class ClassesTableDiff extends StatelessWidget {
-  ClassesTableDiff({
-    super.key,
-    required this.classes,
-    required this.diffData,
-  }) {
+  ClassesTableDiff({super.key, required this.classes, required this.diffData}) {
     _columns = {
       for (final sizeType in SizeType.values)
         sizeType: ClassesTableDiffColumns(sizeType, diffData),
@@ -308,19 +301,13 @@ class ClassesTableDiff extends StatelessWidget {
 
   List<ColumnGroup> _columnGroups() {
     return [
-      ColumnGroup.fromText(
-        title: '',
-        range: const Range(0, 1),
-      ),
+      ColumnGroup.fromText(title: '', range: const Range(0, 1)),
       ColumnGroup.fromText(
         title: 'Instances',
         range: const Range(1, 5),
         tooltip: nonGcableInstancesColumnTooltip,
       ),
-      ColumnGroup(
-        title: _SizeGroupTitle(diffData),
-        range: const Range(5, 9),
-      ),
+      ColumnGroup(title: _SizeGroupTitle(diffData), range: const Range(5, 9)),
     ];
   }
 
@@ -344,10 +331,11 @@ class ClassesTableDiff extends StatelessWidget {
           dataKey: dataKey,
           keyFactory: (e) => Key(e.className.fullName),
           selectionNotifier: diffData.selection,
-          onItemSelected: (_) => ga.select(
-            gac.memory,
-            gac.MemoryEvents.diffClassDiffSelect.name,
-          ),
+          onItemSelected:
+              (_) => ga.select(
+                gac.memory,
+                gac.MemoryEvents.diffClassDiffSelect.name,
+              ),
           defaultSortColumn: columns.sizeDeltaColumn,
           defaultSortDirection: SortDirection.descending,
         );

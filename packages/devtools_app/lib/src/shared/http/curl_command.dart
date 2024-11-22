@@ -29,9 +29,7 @@ class CurlCommand {
     );
   }
 
-  CurlCommand._({
-    required this.commandParts,
-  });
+  CurlCommand._({required this.commandParts});
 
   static const _lineBreak = '\\\n';
 

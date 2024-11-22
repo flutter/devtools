@@ -25,9 +25,10 @@ class UserTagDropdown extends StatelessWidget {
       valueListenable: controller.userTagFilter,
       builder: (context, userTag, _) {
         final userTags = controller.userTags;
-        final tooltip = userTags.isNotEmpty
-            ? 'Filter the CPU profile by the given UserTag'
-            : 'No UserTags found for this CPU profile';
+        final tooltip =
+            userTags.isNotEmpty
+                ? 'Filter the CPU profile by the given UserTag'
+                : 'No UserTags found for this CPU profile';
         return SizedBox(
           height: defaultButtonHeight,
           child: DevToolsTooltip(
@@ -65,11 +66,12 @@ class UserTagDropdown extends StatelessWidget {
                         value: CpuProfilerController.groupByVmTag,
                       ),
                   ],
-                  onChanged: userTags.isEmpty ||
-                          (userTags.length == 1 &&
-                              userTags.first == UserTag.defaultTag.label)
-                      ? null
-                      : (String? tag) => _onUserTagChanged(tag!),
+                  onChanged:
+                      userTags.isEmpty ||
+                              (userTags.length == 1 &&
+                                  userTags.first == UserTag.defaultTag.label)
+                          ? null
+                          : (String? tag) => _onUserTagChanged(tag!),
                 );
               },
             ),
@@ -83,10 +85,7 @@ class UserTagDropdown extends StatelessWidget {
     required String display,
     required String value,
   }) {
-    return DropdownMenuItem<String>(
-      value: value,
-      child: Text(display),
-    );
+    return DropdownMenuItem<String>(value: value, child: Text(display));
   }
 
   void _onUserTagChanged(String newTag) async {
@@ -111,12 +110,13 @@ class ModeDropdown extends StatelessWidget {
     return ValueListenableBuilder<CpuProfilerViewType>(
       valueListenable: controller.viewType,
       builder: (context, viewType, _) {
-        final tooltip = viewType == CpuProfilerViewType.function
-            ? 'Display the profile in terms of the Dart call stack '
-                '(i.e., inlined frames are expanded)'
-            : 'Display the profile in terms of native stack frames '
-                '(i.e., inlined frames are not expanded, display code objects '
-                'rather than individual functions)';
+        final tooltip =
+            viewType == CpuProfilerViewType.function
+                ? 'Display the profile in terms of the Dart call stack '
+                    '(i.e., inlined frames are expanded)'
+                : 'Display the profile in terms of native stack frames '
+                    '(i.e., inlined frames are not expanded, display code objects '
+                    'rather than individual functions)';
         return SizedBox(
           height: defaultButtonHeight,
           child: DevToolsTooltip(

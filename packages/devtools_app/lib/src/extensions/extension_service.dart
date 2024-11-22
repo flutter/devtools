@@ -18,20 +18,21 @@ final _log = Logger('ExtensionService');
 
 /// Data pattern containing a [List] of available extensions and a [List] of
 /// visible extensions.
-typedef DevToolsExtensionsGroup = ({
-  /// All the DevTools extensions, runtime and static, that are available for
-  /// the connected application, regardless of whether they have been enabled or
-  /// disabled by the user.
-  ///
-  /// This set of extensions will include one version of a DevTools extension
-  /// per package and will exclude any duplicates that have been marked as
-  /// ignored in [_maybeIgnoreExtensions].
-  List<DevToolsExtensionConfig> availableExtensions,
+typedef DevToolsExtensionsGroup =
+    ({
+      /// All the DevTools extensions, runtime and static, that are available for
+      /// the connected application, regardless of whether they have been enabled or
+      /// disabled by the user.
+      ///
+      /// This set of extensions will include one version of a DevTools extension
+      /// per package and will exclude any duplicates that have been marked as
+      /// ignored in [_maybeIgnoreExtensions].
+      List<DevToolsExtensionConfig> availableExtensions,
 
-  /// DevTools extensions that are visible in their own DevTools screen (i.e.
-  /// extensions that have not been manually disabled by the user).
-  List<DevToolsExtensionConfig> visibleExtensions,
-});
+      /// DevTools extensions that are visible in their own DevTools screen (i.e.
+      /// extensions that have not been manually disabled by the user).
+      List<DevToolsExtensionConfig> visibleExtensions,
+    });
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
@@ -60,12 +61,10 @@ class ExtensionService extends DisposableController
   /// from having to listen to two separate notifiers.
   ValueListenable<DevToolsExtensionsGroup> get currentExtensions =>
       _currentExtensions;
-  final _currentExtensions = ValueNotifier<DevToolsExtensionsGroup>(
-    (
-      availableExtensions: <DevToolsExtensionConfig>[],
-      visibleExtensions: <DevToolsExtensionConfig>[],
-    ),
-  );
+  final _currentExtensions = ValueNotifier<DevToolsExtensionsGroup>((
+    availableExtensions: <DevToolsExtensionConfig>[],
+    visibleExtensions: <DevToolsExtensionConfig>[],
+  ));
 
   /// All the DevTools extensions, runtime and static, that are available for
   /// the connected application, regardless of whether they have been enabled or
@@ -120,9 +119,7 @@ class ExtensionService extends DisposableController
   ) {
     return _extensionEnabledStates.putIfAbsent(
       extensionName.toLowerCase(),
-      () => ValueNotifier<ExtensionEnabledState>(
-        ExtensionEnabledState.none,
-      ),
+      () => ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none),
     );
   }
 
@@ -183,8 +180,9 @@ class ExtensionService extends DisposableController
         serviceConnection.serviceManager.connectedState.value.connected &&
         serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
             null) {
-      _appRoot = await serviceConnection.serviceManager
-          .connectedAppPackageRoot(dtdManager);
+      _appRoot = await serviceConnection.serviceManager.connectedAppPackageRoot(
+        dtdManager,
+      );
     }
 
     // TODO(kenz): gracefully handle app connections / disconnects when there
@@ -226,14 +224,16 @@ class ExtensionService extends DisposableController
   // ignoring the static extension when there is a duplicate.
   void _deduplicateStaticExtensionsWithRuntimeExtensions() {
     if (runtimeExtensions.isEmpty) return;
-    for (final staticExtension
-        in staticExtensions.where((ext) => !isExtensionIgnored(ext))) {
+    for (final staticExtension in staticExtensions.where(
+      (ext) => !isExtensionIgnored(ext),
+    )) {
       // TODO(kenz): do we need to match on something other than name? Names
       // _should_ be unique since they match a pub package name, but this may
       // not always be true for extensions that are not published on pub or
       // extensions that do not follow best practices for naming.
-      final isRuntimeDuplicate =
-          runtimeExtensions.any((ext) => ext.name == staticExtension.name);
+      final isRuntimeDuplicate = runtimeExtensions.any(
+        (ext) => ext.name == staticExtension.name,
+      );
       if (isRuntimeDuplicate) {
         _log.fine(
           'ignoring duplicate static extension ${staticExtension.identifier} '
@@ -263,9 +263,10 @@ class ExtensionService extends DisposableController
       );
       stateNotifier.value = stateFromOptionsFile;
 
-      final shouldIncludeInVisible = onlyIncludeEnabled
-          ? stateFromOptionsFile == ExtensionEnabledState.enabled
-          : stateFromOptionsFile != ExtensionEnabledState.disabled;
+      final shouldIncludeInVisible =
+          onlyIncludeEnabled
+              ? stateFromOptionsFile == ExtensionEnabledState.enabled
+              : stateFromOptionsFile != ExtensionEnabledState.disabled;
       if (shouldIncludeInVisible) {
         visible.add(extension);
       }

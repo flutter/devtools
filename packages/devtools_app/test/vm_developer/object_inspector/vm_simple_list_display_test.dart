@@ -49,36 +49,34 @@ void main() {
   });
 
   group('Subtype test cache display test', () {
-    testWidgetsWithWindowSize(
-      'basic layout',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            VmSimpleListDisplay(
-              vmObject: mockSubtypeTestCacheObject,
-              controller: ObjectInspectorViewController(),
-            ),
+    testWidgetsWithWindowSize('basic layout', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          VmSimpleListDisplay(
+            vmObject: mockSubtypeTestCacheObject,
+            controller: ObjectInspectorViewController(),
           ),
-        );
+        ),
+      );
 
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-        expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-        expect(find.byType(VMInfoCard), findsOneWidget);
-        expect(find.text('General Information'), findsOneWidget);
-        expect(find.text('Object Class:'), findsOneWidget);
-        expect(find.text('SubtypeTestCache'), findsOneWidget);
-        expect(find.text('Shallow Size:'), findsOneWidget);
-        expect(find.text('Retained Size:'), findsOneWidget);
+      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
+      expect(find.text('General Information'), findsOneWidget);
+      expect(find.text('Object Class:'), findsOneWidget);
+      expect(find.text('SubtypeTestCache'), findsOneWidget);
+      expect(find.text('Shallow Size:'), findsOneWidget);
+      expect(find.text('Retained Size:'), findsOneWidget);
 
-        expect(find.text('64 B'), findsOneWidget);
+      expect(find.text('64 B'), findsOneWidget);
 
-        expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
-        expect(find.byType(RetainingPathWidget), findsOneWidget);
-        expect(find.byType(InboundReferencesTree), findsOneWidget);
-        expect(find.byType(ExpansionTileInstanceList), findsOneWidget);
-      },
-    );
+      expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+      expect(find.byType(RetainingPathWidget), findsOneWidget);
+      expect(find.byType(InboundReferencesTree), findsOneWidget);
+      expect(find.byType(ExpansionTileInstanceList), findsOneWidget);
+    });
   });
 }

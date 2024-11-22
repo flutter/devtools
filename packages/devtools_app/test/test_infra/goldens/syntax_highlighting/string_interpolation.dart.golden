@@ -59,30 +59,36 @@
 >void functions() {
 #^^^^ storage.type.primitive.dart
 #     ^^^^^^^^^ entity.name.function.dart
->  print('${() {
+>  print(
 #  ^^^^^ entity.name.function.dart
-#        ^ string.interpolated.single.dart
-#         ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
->    return 'Hello';
-#^^^^ string.interpolated.single.dart string.interpolated.expression.dart
-#    ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
-#          ^^^^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
->  }}');
-#^^^ string.interpolated.single.dart string.interpolated.expression.dart
-#   ^^ string.interpolated.single.dart
-#      ^ punctuation.terminator.dart
->  print('print(${() {
+>    '${() {
+#    ^ string.interpolated.single.dart
+#     ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+>      return 'Hello';
+#^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+#      ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
+#            ^^^^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+>    }}',
+#^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+#     ^^ string.interpolated.single.dart
+#       ^ punctuation.comma.dart
+>  );
+#   ^ punctuation.terminator.dart
+>  print(
 #  ^^^^^ entity.name.function.dart
-#        ^^^^^^^ string.interpolated.single.dart
-#               ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
->    return 'Hello';
-#^^^^ string.interpolated.single.dart string.interpolated.expression.dart
-#    ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
-#          ^^^^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
->  }()})');
-#^^^ string.interpolated.single.dart string.interpolated.expression.dart
-#   ^^^^^ string.interpolated.single.dart
-#         ^ punctuation.terminator.dart
+>    'print(${() {
+#    ^^^^^^^ string.interpolated.single.dart
+#           ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+>      return 'Hello';
+#^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+#      ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
+#            ^^^^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+>    }()})',
+#^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+#     ^^^^^ string.interpolated.single.dart
+#          ^ punctuation.comma.dart
+>  );
+#   ^ punctuation.terminator.dart
 >  print('${() => 'Hello'}');
 #  ^^^^^ entity.name.function.dart
 #        ^ string.interpolated.single.dart

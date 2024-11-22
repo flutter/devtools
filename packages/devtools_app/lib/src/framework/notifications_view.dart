@@ -69,10 +69,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
         Overlay.of(context).insert(_overlayEntry!);
       });
 
-      addAutoDisposeListener(
-        notificationService.newTasks,
-        _processQueues,
-      );
+      addAutoDisposeListener(notificationService.newTasks, _processQueues);
     }
 
     _processQueues();
@@ -99,10 +96,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
   void _push(NotificationMessage message) {
     setState(() {
       _notifications.add(
-        _Notification(
-          message: message,
-          remove: _removeNotification,
-        ),
+        _Notification(message: message, remove: _removeNotification),
       );
       _overlayEntry?.markNeedsBuild();
     });
@@ -145,9 +139,8 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
 }
 
 class _NotificationOverlay extends StatelessWidget {
-  const _NotificationOverlay({
-    required List<_Notification> notifications,
-  }) : _notifications = notifications;
+  const _NotificationOverlay({required List<_Notification> notifications})
+    : _notifications = notifications;
 
   final List<_Notification> _notifications;
 
@@ -179,10 +172,7 @@ class _NotificationOverlay extends StatelessWidget {
 }
 
 class _Notification extends StatefulWidget {
-  const _Notification({
-    required this.message,
-    required this.remove,
-  });
+  const _Notification({required this.message, required this.remove});
 
   final NotificationMessage message;
   final void Function(_Notification) remove;
@@ -204,10 +194,7 @@ class _NotificationState extends State<_Notification>
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    curve = CurvedAnimation(
-      parent: controller,
-      curve: Curves.easeInOutCirc,
-    );
+    curve = CurvedAnimation(parent: controller, curve: Curves.easeInOutCirc);
 
     // Set up a timer that reverses the entrance animation, and tells the widget
     // to remove itself when the exit animation is completed.
@@ -239,16 +226,14 @@ class _NotificationState extends State<_Notification>
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
-        return Opacity(
-          opacity: curve.value,
-          child: child,
-        );
+        return Opacity(opacity: curve.value, child: child);
       },
       child: Card(
         color: theme.colorScheme.secondaryContainer,
         margin: const EdgeInsets.only(bottom: densePadding),
         child: DefaultTextStyle(
-          style: theme.snackBarTheme.contentTextStyle ??
+          style:
+              theme.snackBarTheme.contentTextStyle ??
               theme.textTheme.titleMedium!,
           child: Padding(
             padding: const EdgeInsets.all(denseSpacing),
@@ -257,24 +242,18 @@ class _NotificationState extends State<_Notification>
               children: [
                 widget.message.isDismissible
                     ? Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Flexible(
-                            child: _NotificationMessage(
-                              widget: widget,
-                            ),
-                          ),
-                          _DismissAction(
-                            onPressed: () {
-                              widget.remove(widget);
-                            },
-                          ),
-                        ],
-                      )
-                    : _NotificationMessage(
-                        widget: widget,
-                      ),
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Flexible(child: _NotificationMessage(widget: widget)),
+                        _DismissAction(
+                          onPressed: () {
+                            widget.remove(widget);
+                          },
+                        ),
+                      ],
+                    )
+                    : _NotificationMessage(widget: widget),
                 const SizedBox(height: defaultSpacing),
                 _NotificationActions(actions: widget.message.actions),
               ],
@@ -287,9 +266,7 @@ class _NotificationState extends State<_Notification>
 }
 
 class _DismissAction extends StatelessWidget {
-  const _DismissAction({
-    required this.onPressed,
-  });
+  const _DismissAction({required this.onPressed});
 
   final void Function() onPressed;
 
@@ -297,28 +274,22 @@ class _DismissAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topRight,
-      child: IconButton(
-        icon: const Icon(
-          Icons.close,
-        ),
-        onPressed: onPressed,
-      ),
+      child: IconButton(icon: const Icon(Icons.close), onPressed: onPressed),
     );
   }
 }
 
 class _NotificationMessage extends StatelessWidget {
-  const _NotificationMessage({
-    required this.widget,
-  });
+  const _NotificationMessage({required this.widget});
 
   final _Notification widget;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle =
-        theme.regularTextStyleWithColor(theme.colorScheme.onSecondaryContainer);
+    final textStyle = theme.regularTextStyleWithColor(
+      theme.colorScheme.onSecondaryContainer,
+    );
     return Padding(
       padding: const EdgeInsets.only(
         left: denseSpacing,
@@ -327,9 +298,10 @@ class _NotificationMessage extends StatelessWidget {
       ),
       child: Text(
         widget.message.text,
-        style: widget.message.isError
-            ? textStyle.copyWith(color: theme.colorScheme.error)
-            : textStyle,
+        style:
+            widget.message.isError
+                ? textStyle.copyWith(color: theme.colorScheme.error)
+                : textStyle,
         overflow: TextOverflow.visible,
         maxLines: 10,
       ),

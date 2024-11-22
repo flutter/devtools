@@ -96,10 +96,7 @@ final _profileTraceEvents = <Map<String, Object?>>[
     'tid': 42247,
     'ts': 0,
     'cat': 'Dart',
-    'args': <String, Object?>{
-      'userTag': 'Default',
-      'vmTag': 'VM',
-    },
+    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
     'sf': '140357727781376-1',
   },
   {
@@ -109,10 +106,7 @@ final _profileTraceEvents = <Map<String, Object?>>[
     'tid': 42247,
     'ts': 1000,
     'cat': 'Dart',
-    'args': <String, Object?>{
-      'userTag': 'Default',
-      'vmTag': 'VM',
-    },
+    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
     'sf': '140357727781376-2',
   },
   {
@@ -122,10 +116,7 @@ final _profileTraceEvents = <Map<String, Object?>>[
     'tid': 42247,
     'ts': 2000,
     'cat': 'Dart',
-    'args': <String, Object?>{
-      'userTag': 'Default',
-      'vmTag': 'VM',
-    },
+    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
     'sf': '140357727781376-7',
   },
   {
@@ -135,10 +126,7 @@ final _profileTraceEvents = <Map<String, Object?>>[
     'tid': 42247,
     'ts': 3000,
     'cat': 'Dart',
-    'args': <String, Object?>{
-      'userTag': 'Default',
-      'vmTag': 'VM',
-    },
+    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
     'sf': '140357727781376-7',
   },
   {
@@ -148,10 +136,7 @@ final _profileTraceEvents = <Map<String, Object?>>[
     'tid': 42247,
     'ts': 4000,
     'cat': 'Dart',
-    'args': <String, Object?>{
-      'userTag': 'Default',
-      'vmTag': 'VM',
-    },
+    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
     'sf': '140357727781376-3',
   },
   {
@@ -161,10 +146,7 @@ final _profileTraceEvents = <Map<String, Object?>>[
     'tid': 42247,
     'ts': 5000,
     'cat': 'Dart',
-    'args': <String, Object?>{
-      'userTag': 'Default',
-      'vmTag': 'VM',
-    },
+    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
     'sf': '140357727781376-3',
   },
   {
@@ -174,10 +156,7 @@ final _profileTraceEvents = <Map<String, Object?>>[
     'tid': 42247,
     'ts': 6000,
     'cat': 'Dart',
-    'args': <String, Object?>{
-      'userTag': 'Default',
-      'vmTag': 'VM',
-    },
+    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
     'sf': '140357727781376-3',
   },
   {
@@ -187,10 +166,7 @@ final _profileTraceEvents = <Map<String, Object?>>[
     'tid': 42247,
     'ts': 7000,
     'cat': 'Dart',
-    'args': <String, Object?>{
-      'userTag': 'Default',
-      'vmTag': 'VM',
-    },
+    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
     'sf': '140357727781376-8',
   },
   {
@@ -200,10 +176,7 @@ final _profileTraceEvents = <Map<String, Object?>>[
     'tid': 42247,
     'ts': 8000,
     'cat': 'Dart',
-    'args': <String, Object?>{
-      'userTag': 'Default',
-      'vmTag': 'VM',
-    },
+    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
     'sf': '140357727781376-5',
   },
   {
@@ -213,10 +186,7 @@ final _profileTraceEvents = <Map<String, Object?>>[
     'tid': 42247,
     'ts': 9000,
     'cat': 'Dart',
-    'args': <String, Object?>{
-      'userTag': 'Default',
-      'vmTag': 'VM',
-    },
+    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
     'sf': '140357727781376-9',
   },
 ];

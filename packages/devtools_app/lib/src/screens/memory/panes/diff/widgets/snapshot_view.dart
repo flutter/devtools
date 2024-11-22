@@ -58,12 +58,13 @@ class SnapshotView extends StatelessWidget {
 
         final pathTable = ValueListenableBuilder<ClassData?>(
           valueListenable: controller.derived.classData,
-          builder: (_, classData, _) => HeapClassDetails(
-            classData: classData,
-            pathSelection: controller.derived.selectedPath,
-            isDiff: classes is ClassDataList<DiffClassData>,
-            pathController: controller.retainingPathController,
-          ),
+          builder:
+              (_, classData, _) => HeapClassDetails(
+                classData: classData,
+                pathSelection: controller.derived.selectedPath,
+                isDiff: classes is ClassDataList<DiffClassData>,
+                pathController: controller.retainingPathController,
+              ),
         );
 
         return SplitPane(
@@ -71,12 +72,8 @@ class SnapshotView extends StatelessWidget {
           initialFractions: const [0.4, 0.6],
           minSizes: const [80, 80],
           children: [
-            OutlineDecoration.onlyBottom(
-              child: classTable,
-            ),
-            OutlineDecoration.onlyTop(
-              child: pathTable,
-            ),
+            OutlineDecoration.onlyBottom(child: classTable),
+            OutlineDecoration.onlyTop(child: pathTable),
           ],
         );
       },

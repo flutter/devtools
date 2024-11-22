@@ -88,15 +88,16 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (FeatureFlags.devToolsExtensions) {
       // TODO(https://github.com/flutter/devtools/issues/6273): stop special
       // casing the package:provider extension.
-      final containsProviderExtension = extensionService
-          .currentExtensions.value.visibleExtensions
-          .where((e) => e.name == 'provider')
-          .isNotEmpty;
-      final devToolsScreens = containsProviderExtension
-          ? _originalScreens
-              .where((s) => s.screenId != ScreenMetaData.provider.id)
-              .toList()
-          : _originalScreens;
+      final containsProviderExtension =
+          extensionService.currentExtensions.value.visibleExtensions
+              .where((e) => e.name == 'provider')
+              .isNotEmpty;
+      final devToolsScreens =
+          containsProviderExtension
+              ? _originalScreens
+                  .where((s) => s.screenId != ScreenMetaData.provider.id)
+                  .toList()
+              : _originalScreens;
       return [...devToolsScreens, ..._extensionScreens];
     }
     return _originalScreens;
@@ -105,10 +106,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _originalScreens =>
       widget.originalScreens.map((s) => s.screen).toList();
 
-  Iterable<Screen> get _extensionScreens =>
-      extensionService.visibleExtensions.map(
-        (e) => DevToolsScreen<void>(ExtensionScreen(e)).screen,
-      );
+  Iterable<Screen> get _extensionScreens => extensionService.visibleExtensions
+      .map((e) => DevToolsScreen<void>(ExtensionScreen(e)).screen);
 
   final hoverCardController = HoverCardController();
 
@@ -197,25 +196,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
-      Widget widget = pages[page]!(
-        context,
-        page,
-        params,
-        state,
-      );
-      assert(
-        () {
-          widget = _AlternateCheckedModeBanner(
-            builder: (context) => pages[page]!(
-              context,
-              page,
-              params,
-              state,
-            ),
-          );
-          return true;
-        }(),
-      );
+      Widget widget = pages[page]!(context, page, params, state);
+      assert(() {
+        widget = _AlternateCheckedModeBanner(
+          builder: (context) => pages[page]!(context, page, params, state),
+        );
+        return true;
+      }());
       return MaterialPage(child: widget);
     }
 
@@ -261,25 +248,28 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           extensionService.currentExtensions,
         ],
         builder: (_, _, child) {
-          final screensInScaffold = _visibleScreens()
-              .where(
-                (s) => maybeIncludeOnlyEmbeddedScreen(
-                  s,
-                  page: page,
-                  embedMode: embedMode,
-                ),
-              )
-              .toList();
+          final screensInScaffold =
+              _visibleScreens()
+                  .where(
+                    (s) => maybeIncludeOnlyEmbeddedScreen(
+                      s,
+                      page: page,
+                      embedMode: embedMode,
+                    ),
+                  )
+                  .toList();
 
           removeHiddenScreens(screensInScaffold, queryParams);
 
           DevToolsScaffold scaffold;
 
-          final originalScreen =
-              _screens.firstWhereOrNull((s) => s.screenId == page);
+          final originalScreen = _screens.firstWhereOrNull(
+            (s) => s.screenId == page,
+          );
           final screenInOriginalScreens = originalScreen != null;
-          final screenInScaffoldScreens =
-              screensInScaffold.any((s) => s.screenId == page);
+          final screenInScaffoldScreens = screensInScaffold.any(
+            (s) => s.screenId == page,
+          );
           if (page != null &&
               screenInOriginalScreens &&
               !screenInScaffoldScreens) {
@@ -302,41 +292,49 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             scaffold = DevToolsScaffold.withChild(
               embedMode: embedMode,
               child: CenteredMessage(
-                message: 'No DevTools '
+                message:
+                    'No DevTools '
                     '${queryParams.hideAllExceptExtensions ? 'extensions' : 'screens'} '
                     'available for your project.',
               ),
             );
           } else {
-            final connectedToFlutterApp = serviceConnection
-                    .serviceManager.connectedApp?.isFlutterAppNow ??
+            final connectedToFlutterApp =
+                serviceConnection
+                    .serviceManager
+                    .connectedApp
+                    ?.isFlutterAppNow ??
                 false;
-            final connectedToDartWebApp = serviceConnection
-                    .serviceManager.connectedApp?.isDartWebAppNow ??
+            final connectedToDartWebApp =
+                serviceConnection
+                    .serviceManager
+                    .connectedApp
+                    ?.isDartWebAppNow ??
                 false;
             scaffold = DevToolsScaffold(
               embedMode: embedMode,
               page: page,
               screens: screensInScaffold,
-              actions: isEmbedded()
-                  ? []
-                  : [
-                      if (paramsContainVmServiceUri) ...[
-                        // Hide the hot reload button for Dart web apps, where the
-                        // hot reload service extension is not avilable and where the
-                        // [service.reloadServices] RPC is not implemented.
-                        // TODO(https://github.com/flutter/devtools/issues/6441): find
-                        // a way to show this for Dart web apps when supported.
-                        if (!connectedToDartWebApp)
-                          HotReloadButton(
-                            callOnVmServiceDirectly: !connectedToFlutterApp,
-                          ),
-                        // This button will hide itself based on whether the
-                        // hot restart service is available for the connected app.
-                        const HotRestartButton(),
+              actions:
+                  isEmbedded()
+                      ? []
+                      : [
+                        if (paramsContainVmServiceUri) ...[
+                          // Hide the hot reload button for Dart web apps, where the
+                          // hot reload service extension is not avilable and where the
+                          // [service.reloadServices] RPC is not implemented.
+                          // TODO(https://github.com/flutter/devtools/issues/6441): find
+                          // a way to show this for Dart web apps when supported.
+                          if (!connectedToDartWebApp)
+                            HotReloadButton(
+                              callOnVmServiceDirectly: !connectedToFlutterApp,
+                            ),
+                          // This button will hide itself based on whether the
+                          // hot restart service is available for the connected app.
+                          const HotRestartButton(),
+                        ],
+                        ...DevToolsScaffold.defaultActions(),
                       ],
-                      ...DevToolsScaffold.defaultActions(),
-                    ],
             );
           }
           return MultiProvider(
@@ -432,9 +430,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             Provider<AnalyticsController>.value(
               value: widget.analyticsController,
             ),
-            Provider<HoverCardController>.value(
-              value: hoverCardController,
-            ),
+            Provider<HoverCardController>.value(value: hoverCardController),
             Provider<ReleaseNotesController>.value(
               value: releaseNotesController,
             ),
@@ -454,8 +450,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       routeInformationParser: DevToolsRouteInformationParser(),
       // Disable default scrollbar behavior on web to fix duplicate scrollbars
       // bug, see https://github.com/flutter/flutter/issues/90697:
-      scrollBehavior:
-          const MaterialScrollBehavior().copyWith(scrollbars: !kIsWeb),
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        scrollbars: !kIsWeb,
+      ),
     );
   }
 
@@ -505,7 +502,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (reason == ScreenDisabledReason.requiresDartLibrary) {
       // Special case for screens that require a library since the message
       // needs to be generated dynamically.
-      disabledMessage = 'The ${screen.title} screen requires library '
+      disabledMessage =
+          'The ${screen.title} screen requires library '
           '${screen.requiresLibrary}, but the library was not detected.';
     } else if (reason?.message case final String message) {
       disabledMessage = 'The ${screen.title} screen $message';
@@ -561,12 +559,13 @@ class DevToolsScreen<C extends Object?> {
 
 /// A [WidgetBuilder] that takes an additional map of URL query parameters and
 /// args, as well a state not included in the URL.
-typedef UrlParametersBuilder = Widget Function(
-  BuildContext,
-  String?,
-  DevToolsQueryParams,
-  DevToolsNavigationState?,
-);
+typedef UrlParametersBuilder =
+    Widget Function(
+      BuildContext,
+      String?,
+      DevToolsQueryParams,
+      DevToolsNavigationState?,
+    );
 
 /// Displays the checked mode banner in the bottom end corner instead of the
 /// top end corner.
@@ -583,9 +582,7 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
       message: 'DEBUG',
       textDirection: TextDirection.ltr,
       location: BannerLocation.bottomEnd,
-      child: Builder(
-        builder: builder,
-      ),
+      child: Builder(builder: builder),
     );
   }
 }
@@ -611,21 +608,15 @@ class ScreenUnavailable extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            title,
-            style: theme.textTheme.titleLarge,
-          ),
+          Text(title, style: theme.textTheme.titleLarge),
           const SizedBox(height: denseSpacing),
           if (description != null)
-            Text(
-              description!,
-              style: theme.regularTextStyle,
-            ),
+            Text(description!, style: theme.regularTextStyle),
           if (embedMode == EmbedMode.none) ...[
             const SizedBox(height: defaultSpacing),
             ElevatedButton(
-              onPressed: () =>
-                  routerDelegate.navigateHome(clearScreenParam: true),
+              onPressed:
+                  () => routerDelegate.navigateHome(clearScreenParam: true),
               child: const Text('Go to Home screen'),
             ),
           ],
@@ -667,9 +658,9 @@ List<DevToolsScreen> defaultScreens({
     ),
     DevToolsScreen<DebuggerController>(
       DebuggerScreen(),
-      createController: (routerDelegate) => DebuggerController(
-        routerDelegate: routerDelegate,
-      ),
+      createController:
+          (routerDelegate) =>
+              DebuggerController(routerDelegate: routerDelegate),
     ),
     DevToolsScreen<NetworkController>(
       NetworkScreen(),

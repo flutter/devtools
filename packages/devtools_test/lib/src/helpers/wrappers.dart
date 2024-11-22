@@ -30,10 +30,7 @@ Widget wrap(Widget widget, {DevToolsQueryParams? queryParams}) {
     theme: themeFor(
       isDarkTheme: false,
       ideTheme: IdeTheme(),
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: lightColorScheme,
-      ),
+      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
     ),
     routerDelegate: DevToolsRouterDelegate.test(
       (context, page, args, state) => MaterialPage(
@@ -50,8 +47,9 @@ Widget wrap(Widget widget, {DevToolsQueryParams? queryParams}) {
       _testNavigatorKey,
     ),
     routeInformationParser: DevToolsRouteInformationParser.test(
-      DevToolsQueryParams({'uri': 'http://test/uri'})
-          .withUpdates(queryParams?.params),
+      DevToolsQueryParams({
+        'uri': 'http://test/uri',
+      }).withUpdates(queryParams?.params),
     ),
   );
 }
@@ -66,10 +64,7 @@ Widget wrapSimple(Widget widget) {
     theme: themeFor(
       isDarkTheme: false,
       ideTheme: IdeTheme(),
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: lightColorScheme,
-      ),
+      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
     ),
     home: Material(
       child: Directionality(
@@ -121,10 +116,7 @@ Widget wrapWithControllers(
       Provider<VMDeveloperToolsController>.value(value: vmDeveloperTools),
   ];
   final child = wrapWithNotifications(
-    MultiProvider(
-      providers: providers,
-      child: widget,
-    ),
+    MultiProvider(providers: providers, child: widget),
   );
   return includeRouter
       ? wrap(child, queryParams: queryParams)
@@ -182,15 +174,11 @@ void testWidgetsWithWindowSize(
   WidgetTesterCallback test, {
   bool skip = false,
 }) {
-  testWidgets(
-    name,
-    (WidgetTester tester) async {
-      await _setWindowSize(tester, windowSize);
-      await test(tester);
-      await _resetWindowSize(tester);
-    },
-    skip: skip,
-  );
+  testWidgets(name, (WidgetTester tester) async {
+    await _setWindowSize(tester, windowSize);
+    await test(tester);
+    await _resetWindowSize(tester);
+  }, skip: skip);
 }
 
 Future<void> _setWindowSize(WidgetTester tester, Size windowSize) async {

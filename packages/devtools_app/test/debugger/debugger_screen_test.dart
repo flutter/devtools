@@ -34,9 +34,9 @@ void main() {
   setUp(() async {
     final fakeServiceConnection = FakeServiceConnectionManager();
     final scriptManager = MockScriptManager();
-    when(scriptManager.getScript(any)).thenAnswer(
-      (_) => Future<Script>.value(testScript),
-    );
+    when(
+      scriptManager.getScript(any),
+    ).thenAnswer((_) => Future<Script>.value(testScript));
     mockConnectedApp(
       fakeServiceConnection.serviceManager.connectedApp!,
       isFlutterApp: true,
@@ -56,8 +56,9 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(BannerMessagesController, BannerMessagesController());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
-    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'),
+    ).thenReturn(ValueNotifier<int>(0));
 
     programExplorerController = TestProgramExplorerController(
       initializer: (controller) {
@@ -74,8 +75,9 @@ void main() {
       programExplorerController: programExplorerController,
     );
     when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
-    when(codeViewController.fileExplorerVisible)
-        .thenReturn(ValueNotifier(true));
+    when(
+      codeViewController.fileExplorerVisible,
+    ).thenReturn(ValueNotifier(true));
     debuggerController = createMockDebuggerControllerWithDefaults(
       codeViewController: codeViewController,
     );
@@ -103,51 +105,41 @@ void main() {
     expect(find.text('Debugger'), findsOneWidget);
   });
 
-  testWidgetsWithWindowSize(
-    'has Console / stdio area',
-    windowSize,
-    (WidgetTester tester) async {
-      serviceConnection.consoleService.appendStdio('test stdio');
+  testWidgetsWithWindowSize('has Console / stdio area', windowSize, (
+    WidgetTester tester,
+  ) async {
+    serviceConnection.consoleService.appendStdio('test stdio');
 
-      await pumpConsole(tester, debuggerController);
+    await pumpConsole(tester, debuggerController);
 
-      expect(find.text('Console'), findsOneWidget);
+    expect(find.text('Console'), findsOneWidget);
 
-      // test for stdio output.
-      expect(find.text('test stdio'), findsOneWidget);
-    },
-  );
+    // test for stdio output.
+    expect(find.text('test stdio'), findsOneWidget);
+  });
 
-  testWidgetsWithWindowSize(
-    'debugger controls running',
-    windowSize,
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapWithControllers(
-          Builder(builder: screen.build),
-          debugger: debuggerController,
-        ),
-      );
+  testWidgetsWithWindowSize('debugger controls running', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapWithControllers(
+        Builder(builder: screen.build),
+        debugger: debuggerController,
+      ),
+    );
 
-      expect(
-        findDebuggerButtonWithIcon(Codicons.debugPause),
-        findsOneWidget,
-      );
-      final pause = getWidgetFromFinder<OutlinedButton>(
-        findDebuggerButtonWithIcon(Codicons.debugPause),
-      );
-      expect(pause.onPressed, isNotNull);
+    expect(findDebuggerButtonWithIcon(Codicons.debugPause), findsOneWidget);
+    final pause = getWidgetFromFinder<OutlinedButton>(
+      findDebuggerButtonWithIcon(Codicons.debugPause),
+    );
+    expect(pause.onPressed, isNotNull);
 
-      expect(
-        findDebuggerButtonWithIcon(Codicons.debugContinue),
-        findsOneWidget,
-      );
-      final resume = getWidgetFromFinder<OutlinedButton>(
-        findDebuggerButtonWithIcon(Codicons.debugContinue),
-      );
-      expect(resume.onPressed, isNull);
-    },
-  );
+    expect(findDebuggerButtonWithIcon(Codicons.debugContinue), findsOneWidget);
+    final resume = getWidgetFromFinder<OutlinedButton>(
+      findDebuggerButtonWithIcon(Codicons.debugContinue),
+    );
+    expect(resume.onPressed, isNull);
+  });
 
   testWidgetsWithWindowSize(
     'debugger controls break on exceptions',
@@ -183,67 +175,63 @@ void main() {
     },
   );
 
-  testWidgetsWithWindowSize(
-    'node selection state',
-    windowSize,
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapWithControllers(
-          Builder(builder: screen.build),
-          debugger: debuggerController,
-        ),
-      );
-      final delegate = tester
-          .firstWidget<MaterialApp>(find.byType(MaterialApp))
-          .routerDelegate as DevToolsRouterDelegate;
-      final libNode = programExplorerController.rootObjectNodes.value.first;
-      final libScript = libraryNode.script!;
-      final libScriptRef = ScriptRef(
-        id: libScript.id!,
-        uri: libScript.uri,
-      );
+  testWidgetsWithWindowSize('node selection state', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      wrapWithControllers(
+        Builder(builder: screen.build),
+        debugger: debuggerController,
+      ),
+    );
+    final delegate =
+        tester.firstWidget<MaterialApp>(find.byType(MaterialApp)).routerDelegate
+            as DevToolsRouterDelegate;
+    final libNode = programExplorerController.rootObjectNodes.value.first;
+    final libScript = libraryNode.script!;
+    final libScriptRef = ScriptRef(id: libScript.id!, uri: libScript.uri);
 
-      // Select the library node and ensure the outline is populated.
-      final libNodeFinder = find.text(libNode.name);
-      expect(libNodeFinder, findsOneWidget);
-      await tester.tap(libNodeFinder);
-      await tester.pump();
+    // Select the library node and ensure the outline is populated.
+    final libNodeFinder = find.text(libNode.name);
+    expect(libNodeFinder, findsOneWidget);
+    await tester.tap(libNodeFinder);
+    await tester.pump();
 
-      expect(programExplorerController.scriptSelection, libNode);
+    expect(programExplorerController.scriptSelection, libNode);
 
-      CodeViewSourceLocationNavigationState? state =
-          CodeViewSourceLocationNavigationState.fromState(
-        delegate.currentConfiguration!.state,
-      );
+    CodeViewSourceLocationNavigationState? state =
+        CodeViewSourceLocationNavigationState.fromState(
+          delegate.currentConfiguration!.state,
+        );
 
-      expect(state, isNotNull);
-      expect(state!.script, libScriptRef);
-      expect(state.line, 0);
+    expect(state, isNotNull);
+    expect(state!.script, libScriptRef);
+    expect(state.line, 0);
 
-      // There should be three children total, one root with two children.
-      expect(programExplorerController.outlineNodes.value.length, 1);
-      expect(programExplorerController.outlineNodes.value.numNodes, 3);
+    // There should be three children total, one root with two children.
+    expect(programExplorerController.outlineNodes.value.length, 1);
+    expect(programExplorerController.outlineNodes.value.numNodes, 3);
 
-      // Select one of them and check that the outline selection has been
-      // updated.
-      final outlineNode = programExplorerController.outlineNodes.value.first;
-      final outlineNodeFinder = find.text(outlineNode.name);
-      expect(outlineNodeFinder, findsOneWidget);
-      await tester.tap(outlineNodeFinder);
-      await tester.pump();
+    // Select one of them and check that the outline selection has been
+    // updated.
+    final outlineNode = programExplorerController.outlineNodes.value.first;
+    final outlineNodeFinder = find.text(outlineNode.name);
+    expect(outlineNodeFinder, findsOneWidget);
+    await tester.tap(outlineNodeFinder);
+    await tester.pump();
 
-      expect(programExplorerController.scriptSelection, libNode);
-      expect(
-        programExplorerController.outlineNodes.value
-            .singleWhereOrNull((e) => e.isSelected),
-        outlineNode,
-      );
-      state = CodeViewSourceLocationNavigationState.fromState(
-        delegate.currentConfiguration!.state,
-      );
-      expect(state, isNotNull);
-      expect(state!.script, libScriptRef);
-      expect(state.line, testClassRef.location!.line);
-    },
-  );
+    expect(programExplorerController.scriptSelection, libNode);
+    expect(
+      programExplorerController.outlineNodes.value.singleWhereOrNull(
+        (e) => e.isSelected,
+      ),
+      outlineNode,
+    );
+    state = CodeViewSourceLocationNavigationState.fromState(
+      delegate.currentConfiguration!.state,
+    );
+    expect(state, isNotNull);
+    expect(state!.script, libScriptRef);
+    expect(state.line, testClassRef.location!.line);
+  });
 }

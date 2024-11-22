@@ -40,17 +40,19 @@ class DevToolsServerConnection {
   ///
   /// - http://foo/devtools => http://foo/devtools/api
   @visibleForTesting
-  static Uri apiUriFor(Uri baseUri) => baseUri.path.endsWith('devtools')
-      ? baseUri.resolve('devtools/api/')
-      : baseUri.resolve('api/');
+  static Uri apiUriFor(Uri baseUri) =>
+      baseUri.path.endsWith('devtools')
+          ? baseUri.resolve('devtools/api/')
+          : baseUri.resolve('api/');
 
   static Future<DevToolsServerConnection?> connect() async {
     final apiUri = apiUriFor(Uri.base);
     final pingUri = apiUri.resolve('ping');
 
     try {
-      final response =
-          await http.get(pingUri).timeout(const Duration(seconds: 5));
+      final response = await http
+          .get(pingUri)
+          .timeout(const Duration(seconds: 5));
       // When running with the local dev server Flutter may serve its index page
       // for missing files to support the hashless url strategy. Check the response
       // content to confirm it came from our server.
@@ -187,16 +189,13 @@ class DevToolsServerConnection {
 
   void _notifyCurrentPage(PageChangeEvent page) {
     unawaited(
-      _callMethod(
-        'currentPage',
-        {
-          'id': page.id,
-          // TODO(kenz): see if we need to change the client code on the
-          // DevTools server to be aware of the type of embedded mode (many vs.
-          // one).
-          'embedded': page.embedMode.embedded,
-        },
-      ),
+      _callMethod('currentPage', {
+        'id': page.id,
+        // TODO(kenz): see if we need to change the client code on the
+        // DevTools server to be aware of the type of embedded mode (many vs.
+        // one).
+        'embedded': page.embedMode.embedded,
+      }),
     );
   }
 

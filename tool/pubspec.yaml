@@ -3,7 +3,7 @@ description: A repo management tool for DevTools.
 publish_to: none
 
 environment:
-  sdk: ^3.2.0
+  sdk: ">=3.7.0-160.0.dev <4.0.0"
 
 executables:
   dt: dt

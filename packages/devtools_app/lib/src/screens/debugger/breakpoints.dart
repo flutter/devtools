@@ -46,10 +46,7 @@ class _BreakpointsState extends State<Breakpoints>
           itemCount: breakpoints.length,
           itemExtent: defaultListItemHeight,
           itemBuilder: (_, index) {
-            return buildBreakpoint(
-              breakpoints[index],
-              selectedBreakpoint,
-            );
+            return buildBreakpoint(breakpoints[index], selectedBreakpoint);
           },
         );
       },
@@ -91,9 +88,10 @@ class _BreakpointsState extends State<Breakpoints>
                     children: [
                       TextSpan(
                         text: ' (${bp.scriptUri})',
-                        style: isSelected
-                            ? theme.selectedSubtleTextStyle
-                            : theme.subtleTextStyle,
+                        style:
+                            isSelected
+                                ? theme.selectedSubtleTextStyle
+                                : theme.subtleTextStyle,
                       ),
                     ],
                   ),
