@@ -6,17 +6,19 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../shared/primitives/utils.dart';
+
 class PropertyEditorSidebar extends StatelessWidget {
   const PropertyEditorSidebar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Property Editor', style: theme.textTheme.titleMedium),
-        const _PropertiesList(),
+        Text('Property Editor', style: Theme.of(context).textTheme.titleMedium),
+        const PaddedDivider.noPadding(),
+        const Expanded(child: _PropertiesList()),
       ],
     );
   }
@@ -26,17 +28,17 @@ class _PropertiesList extends StatelessWidget {
   const _PropertiesList();
 
   static const itemPadding = densePadding;
-  static const itemDivider = Divider(thickness: 1.0);
 
   @override
   Widget build(BuildContext context) {
+    // TODO(https://github.com/flutter/devtools/issues/8546) Switch to scrollable
+    // ListView when this has been moved into its own panel.
     return Column(
       children: [
-        itemDivider,
-        for (final property in _properties) ...[
-          _EditablePropertyItem(property: property),
-          itemDivider,
-        ],
+        for (final property in _properties)
+          ...<Widget>[
+            _EditablePropertyItem(property: property),
+          ].joinWith(const PaddedDivider.noPadding()),
       ],
     );
   }
@@ -128,6 +130,7 @@ class _PropertyInput extends StatelessWidget {
               (options ?? []).map((option) {
                 return DropdownMenuItem(
                   value: option,
+                  // TODO(https://github.com/flutter/devtools/issues/8531) Handle onTap.
                   onTap: () {},
                   child: Text(option),
                 );
@@ -145,6 +148,7 @@ class _PropertyInput extends StatelessWidget {
           inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
           decoration: decoration,
           style: Theme.of(context).fixedFontStyle,
+          // TODO(https://github.com/flutter/devtools/issues/8531) Handle onChanged.
           onChanged: (_) {},
         );
       default:

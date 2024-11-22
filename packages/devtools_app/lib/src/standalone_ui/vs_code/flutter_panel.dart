@@ -53,12 +53,15 @@ class _EditorSidebarPanelState extends State<EditorSidebarPanel> {
         Expanded(
           child: FutureBuilder(
             future: _editor,
-            builder: (context, snapshot) =>
-                switch ((snapshot.connectionState, snapshot.data)) {
-              (ConnectionState.done, final editor?) =>
-                _EditorConnectedPanel(editor),
-              _ => const CenteredCircularProgressIndicator(),
-            },
+            builder:
+                (context, snapshot) => switch ((
+                  snapshot.connectionState,
+                  snapshot.data,
+                )) {
+                  (ConnectionState.done, final editor?) =>
+                    _EditorConnectedPanel(editor),
+                  _ => const CenteredCircularProgressIndicator(),
+                },
           ),
         ),
       ],
@@ -192,8 +195,9 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
                   editor: widget.editor,
                   debugSessions: debugSessions,
                 ),
-              if (FeatureFlags.propertyEditor)
-                const PropertyEditorSidebar(),
+              // TODO(https://github.com/flutter/devtools/issues/8546) Move
+              // Property Editor to its own sidepanel.
+              if (FeatureFlags.propertyEditor) const PropertyEditorSidebar(),
             ],
           ),
         ),
