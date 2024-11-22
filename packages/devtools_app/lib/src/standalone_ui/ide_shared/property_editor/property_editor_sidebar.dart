@@ -18,7 +18,7 @@ class PropertyEditorSidebar extends StatelessWidget {
       children: [
         Text('Property Editor', style: Theme.of(context).textTheme.titleMedium),
         const PaddedDivider.noPadding(),
-        const Expanded(child: _PropertiesList()),
+        const _PropertiesList(),
       ],
     );
   }
