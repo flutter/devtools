@@ -16,15 +16,16 @@ class OfflineNetworkData with Serializable {
     required this.httpRequestData,
     required this.socketData,
     this.selectedRequestId,
+    required this.timelineMicrosOffset,
   });
 
   /// Creates an instance of [OfflineNetworkData] from a JSON map.
   factory OfflineNetworkData.fromJson(Map<String, Object?> json) {
     final httpRequestJsonList =
         json[_OfflineDataKeys.httpRequestData.name] as List<Object?>?;
-
     // Deserialize httpRequestData
-    final httpRequestData = httpRequestJsonList
+    final httpRequestData =
+        httpRequestJsonList
             ?.map((e) {
               if (e is Map<String, Object?>) {
                 final requestData =
@@ -42,7 +43,8 @@ class OfflineNetworkData with Serializable {
     // Deserialize socketData
     final socketJsonList =
         json[_OfflineDataKeys.socketData.name] as List<Object?>?;
-    final socketData = socketJsonList
+    final socketData =
+        socketJsonList
             ?.map((e) {
               if (e is Map<String, Object?>) {
                 return Socket.fromJson(e);
@@ -52,12 +54,14 @@ class OfflineNetworkData with Serializable {
             .whereType<Socket>()
             .toList() ??
         [];
+    final timelineMicrosOffset = json['timelineMicrosOffset'];
 
     return OfflineNetworkData(
       httpRequestData: httpRequestData,
       selectedRequestId:
           json[_OfflineDataKeys.selectedRequestId.name] as String?,
       socketData: socketData,
+      timelineMicrosOffset: timelineMicrosOffset as int,
     );
   }
 
@@ -68,6 +72,9 @@ class OfflineNetworkData with Serializable {
 
   /// The ID of the currently selected request, if any.
   final String? selectedRequestId;
+
+  /// used to calculate the correct wall-time for timeline events.
+  final int timelineMicrosOffset;
 
   /// The list of socket statistics for the offline network data.
   final List<Socket> socketData;
@@ -81,6 +88,7 @@ class OfflineNetworkData with Serializable {
       _OfflineDataKeys.selectedRequestId.name: selectedRequestId,
       _OfflineDataKeys.socketData.name:
           socketData.map((e) => e.toJson()).toList(),
+      _OfflineDataKeys.timelineMicrosOffset.name: timelineMicrosOffset,
     };
   }
 }
@@ -90,4 +98,5 @@ enum _OfflineDataKeys {
   selectedRequestId,
   socketData,
   request,
+  timelineMicrosOffset,
 }

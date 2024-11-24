@@ -175,6 +175,7 @@ class NetworkController extends DisposableController
       await maybeLoadOfflineData(
         NetworkScreen.id,
         createData: (json) => OfflineNetworkData.fromJson(json),
+        // ignore: avoid_dynamic_calls
         shouldLoad: (data) => !data.isEmpty,
         loadData: (data) => loadOfflineData(data),
       );
@@ -184,7 +185,8 @@ class NetworkController extends DisposableController
   }
 
   Future<void> loadOfflineData(OfflineNetworkData offlineData) async {
-    final httpProfileData = offlineData.httpRequestData.mapToHttpProfileRequests;
+    final httpProfileData =
+        offlineData.httpRequestData.mapToHttpProfileRequests;
     final socketStatsData = offlineData.socketData.mapToSocketStatistics;
 
     _currentNetworkRequests
@@ -192,14 +194,15 @@ class NetworkController extends DisposableController
       ..updateOrAddAll(
         requests: httpProfileData,
         sockets: socketStatsData,
-        timelineMicrosOffset: DateTime.now().microsecondsSinceEpoch,
+        timelineMicrosOffset: offlineData.timelineMicrosOffset,
       );
     _filterAndRefreshSearchMatches();
 
     // If a selectedRequestId is available, select it in offline mode.
     if (offlineData.selectedRequestId != null) {
-      final selected = _currentNetworkRequests
-          .getRequest(offlineData.selectedRequestId ?? '');
+      final selected = _currentNetworkRequests.getRequest(
+        offlineData.selectedRequestId ?? '',
+      );
       if (selected != null) {
         selectedRequest.value = selected;
         resetDropDown();
@@ -457,6 +460,7 @@ class NetworkController extends DisposableController
       httpRequestData: httpRequestData,
       socketData: socketData,
       selectedRequestId: selectedRequest.value?.id,
+      timelineMicrosOffset: _timelineMicrosOffset,
     );
 
     return OfflineScreenData(
