@@ -71,32 +71,35 @@ void main() {
 
     test('Socket duration should be calculated correctly', () {
       final expectedDuration = Duration(
-        microseconds: firstSocket.endTimestamp!.microsecondsSinceEpoch -
+        microseconds:
+            firstSocket.endTimestamp!.microsecondsSinceEpoch -
             firstSocket.startTimestamp.microsecondsSinceEpoch,
       );
 
       expect(firstSocket.duration, expectedDuration);
     });
 
-    test('Socket status should indicate "Open" or "Closed" based on endTime',
-        () {
-      expect(
-        firstSocket.status,
-        'Closed',
-      ); // The provided socket has an endTime
+    test(
+      'Socket status should indicate "Open" or "Closed" based on endTime',
+      () {
+        expect(
+          firstSocket.status,
+          'Closed',
+        ); // The provided socket has an endTime
 
-      // Modify socket to simulate "Open" status
-      final openSocketJson = {
-        ...firstSocket.toJson(),
-        'socket': {
-          ...(firstSocket.toJson()['socket'] as Map<String, Object?>),
-          'endTime': null,
-        },
-      };
-      final openSocket = Socket.fromJson(openSocketJson);
+        // Modify socket to simulate "Open" status
+        final openSocketJson = {
+          ...firstSocket.toJson(),
+          'socket': {
+            ...(firstSocket.toJson()['socket'] as Map<String, Object?>),
+            'endTime': null,
+          },
+        };
+        final openSocket = Socket.fromJson(openSocketJson);
 
-      expect(openSocket.status, 'Open'); // No endTime indicates "Open"
-    });
+        expect(openSocket.status, 'Open'); // No endTime indicates "Open"
+      },
+    );
 
     test('Socket equality and hash code should work correctly', () {
       expect(firstSocket == secondSocket, isFalse);
@@ -138,20 +141,23 @@ void main() {
     });
 
     test(
-        'isEmpty should return true when both httpRequestData and socketData are empty',
-        () {
-      final emptyOfflineData = OfflineNetworkData(
-        httpRequestData: [],
-        socketData: [],
-      );
+      'isEmpty should return true when both httpRequestData and socketData are empty',
+      () {
+        final emptyOfflineData = OfflineNetworkData(
+          httpRequestData: [],
+          socketData: [],
+          timelineMicrosOffset: 1731482170837171,
+        );
 
-      expect(emptyOfflineData.isEmpty, isTrue);
-    });
+        expect(emptyOfflineData.isEmpty, isTrue);
+      },
+    );
 
     test('isEmpty should return false when httpRequestData is populated', () {
       final populatedHttpData = OfflineNetworkData(
         httpRequestData: offlineData.httpRequestData,
         socketData: [],
+        timelineMicrosOffset: 1731482170837171,
       );
 
       expect(populatedHttpData.isEmpty, isFalse);

@@ -61,7 +61,7 @@ class OfflineNetworkData with Serializable {
       selectedRequestId:
           json[_OfflineDataKeys.selectedRequestId.name] as String?,
       socketData: socketData,
-      timelineMicrosOffset: timelineMicrosOffset as int,
+      timelineMicrosOffset: timelineMicrosOffset as int? ?? 0,
     );
   }
 
@@ -74,7 +74,7 @@ class OfflineNetworkData with Serializable {
   final String? selectedRequestId;
 
   /// used to calculate the correct wall-time for timeline events.
-  final int timelineMicrosOffset;
+  final int? timelineMicrosOffset;
 
   /// The list of socket statistics for the offline network data.
   final List<Socket> socketData;
