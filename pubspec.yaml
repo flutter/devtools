@@ -1,0 +1,13 @@
+name: _
+environment:
+  sdk: ^3.6.0
+workspace:
+  - packages/devtools_app
+  - packages/devtools_app_shared
+  - packages/devtools_extensions
+  - packages/devtools_shared
+  - packages/devtools_test
+  - tool
+
+dev_dependencies:
+  flutter_lints: ^4.0.0

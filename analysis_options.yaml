@@ -12,9 +12,9 @@ analyzer:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
   exclude:
-    - build/**
+    - '**/build/**'
     - '**.freezed.dart'
-    - flutter-sdk/
+    - tool/flutter-sdk/
 
 linter:
   rules:
