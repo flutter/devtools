@@ -34,12 +34,11 @@ class _PropertiesList extends StatelessWidget {
     // TODO(https://github.com/flutter/devtools/issues/8546) Switch to scrollable
     // ListView when this has been moved into its own panel.
     return Column(
-      children: [
-        for (final property in _properties)
-          ...<Widget>[
-            _EditablePropertyItem(property: property),
-          ].joinWith(const PaddedDivider.noPadding()),
-      ],
+      children: <Widget>[
+        ..._properties.map(
+          (property) => _EditablePropertyItem(property: property),
+        ),
+      ].joinWith(const PaddedDivider.noPadding()),
     );
   }
 }
@@ -192,9 +191,9 @@ class _WidgetProperty {
     this.isDefault = false,
     this.errorText,
     this.options,
-    // ignore: unused_element, TODO(https://github.com/flutter/devtools/issues/8532): Support colors.
+    // ignore: unused_element_parameter, TODO(https://github.com/flutter/devtools/issues/8532): Support colors.
     this.swatches,
-    // ignore: unused_element, TODO(https://github.com/flutter/devtools/issues/8532): Support objects.
+    // ignore: unused_element_parameter, TODO(https://github.com/flutter/devtools/issues/8532): Support objects.
     this.properties,
   });
 
