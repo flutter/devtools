@@ -86,6 +86,7 @@ void main() {
         );
       },
       timeout: const Timeout.factor(8),
+      tags: includeForCustomerTestsTag,
     );
 
     test(
@@ -110,6 +111,7 @@ void main() {
         );
       },
       timeout: const Timeout.factor(8),
+      tags: includeForCustomerTestsTag,
     );
 
     test(
@@ -144,6 +146,7 @@ void main() {
         );
       },
       timeout: const Timeout.factor(8),
+      tags: includeForCustomerTestsTag,
     );
     test(
       'returns privates only from library',
@@ -169,129 +172,145 @@ void main() {
         );
       },
       timeout: const Timeout.factor(8),
+      tags: includeForCustomerTestsTag,
     );
-    test('returns exported members from import', () async {
-      await runMethodAndWaitForPause(
-        'AnotherClass().pauseWithScopedVariablesMethod()',
-      );
-      expect(
-        await autoCompleteResultsFor(
-          EditingParts(
-            activeWord: 'exportedField',
-            leftSide: '',
-            rightSide: '',
+    test(
+      'returns exported members from import',
+      () async {
+        await runMethodAndWaitForPause(
+          'AnotherClass().pauseWithScopedVariablesMethod()',
+        );
+        expect(
+          await autoCompleteResultsFor(
+            EditingParts(
+              activeWord: 'exportedField',
+              leftSide: '',
+              rightSide: '',
+            ),
+            evalService,
           ),
-          evalService,
-        ),
-        equals(['exportedField']),
-      );
+          equals(['exportedField']),
+        );
 
-      expect(
-        await autoCompleteResultsFor(
-          EditingParts(
-            activeWord: 'ExportedClass',
-            leftSide: '',
-            rightSide: '',
+        expect(
+          await autoCompleteResultsFor(
+            EditingParts(
+              activeWord: 'ExportedClass',
+              leftSide: '',
+              rightSide: '',
+            ),
+            evalService,
           ),
-          evalService,
-        ),
-        equals(['ExportedClass']),
-      );
+          equals(['ExportedClass']),
+        );
 
-      // Privates are not exported
-      expect(
-        await autoCompleteResultsFor(
-          EditingParts(
-            activeWord: '_privateExportedField',
-            leftSide: '',
-            rightSide: '',
+        // Privates are not exported
+        expect(
+          await autoCompleteResultsFor(
+            EditingParts(
+              activeWord: '_privateExportedField',
+              leftSide: '',
+              rightSide: '',
+            ),
+            evalService,
           ),
-          evalService,
-        ),
-        equals([]),
-      );
+          equals([]),
+        );
 
-      expect(
-        await autoCompleteResultsFor(
-          EditingParts(
-            activeWord: '_PrivateExportedClass',
-            leftSide: '',
-            rightSide: '',
+        expect(
+          await autoCompleteResultsFor(
+            EditingParts(
+              activeWord: '_PrivateExportedClass',
+              leftSide: '',
+              rightSide: '',
+            ),
+            evalService,
           ),
-          evalService,
-        ),
-        equals([]),
-      );
-    }, timeout: const Timeout.factor(8));
+          equals([]),
+        );
+      },
+      timeout: const Timeout.factor(8),
+      tags: includeForCustomerTestsTag,
+    );
 
-    test('returns prefixes of libraries imported', () async {
-      await runMethodAndWaitForPause(
-        'AnotherClass().pauseWithScopedVariablesMethod()',
-      );
-      expect(
-        await autoCompleteResultsFor(
-          EditingParts(activeWord: 'developer', leftSide: '', rightSide: ''),
-          evalService,
-        ),
-        equals(['developer']),
-      );
+    test(
+      'returns prefixes of libraries imported',
+      () async {
+        await runMethodAndWaitForPause(
+          'AnotherClass().pauseWithScopedVariablesMethod()',
+        );
+        expect(
+          await autoCompleteResultsFor(
+            EditingParts(activeWord: 'developer', leftSide: '', rightSide: ''),
+            evalService,
+          ),
+          equals(['developer']),
+        );
 
-      expect(
-        await autoCompleteResultsFor(
-          EditingParts(activeWord: 'math', leftSide: '', rightSide: ''),
-          evalService,
-        ),
-        equals(['math']),
-      );
-    }, timeout: const Timeout.factor(8));
+        expect(
+          await autoCompleteResultsFor(
+            EditingParts(activeWord: 'math', leftSide: '', rightSide: ''),
+            evalService,
+          ),
+          equals(['math']),
+        );
+      },
+      timeout: const Timeout.factor(8),
+      tags: includeForCustomerTestsTag,
+    );
 
-    test('returns no operators for int', () async {
-      await runMethodAndWaitForPause(
-        'AnotherClass().pauseWithScopedVariablesMethod()',
-      );
-      expect(
-        await autoCompleteResultsFor(
-          EditingParts(leftSide: '7.', activeWord: '', rightSide: ''),
-          evalService,
-        ),
-        equals([
-          'hashCode',
-          'bitLength',
-          'toString',
-          'remainder',
-          'abs',
-          'sign',
-          'isEven',
-          'isOdd',
-          'isNaN',
-          'isNegative',
-          'isInfinite',
-          'isFinite',
-          'toUnsigned',
-          'toSigned',
-          'compareTo',
-          'round',
-          'floor',
-          'ceil',
-          'truncate',
-          'roundToDouble',
-          'floorToDouble',
-          'ceilToDouble',
-          'truncateToDouble',
-          'clamp',
-          'toInt',
-          'toDouble',
-          'toStringAsFixed',
-          'toStringAsExponential',
-          'toStringAsPrecision',
-          'toRadixString',
-          'modPow',
-          'modInverse',
-          'gcd',
-          'noSuchMethod',
-          'runtimeType',
-        ]),
-      );
-    }, timeout: const Timeout.factor(8));
+    test(
+      'returns no operators for int',
+      () async {
+        await runMethodAndWaitForPause(
+          'AnotherClass().pauseWithScopedVariablesMethod()',
+        );
+        expect(
+          await autoCompleteResultsFor(
+            EditingParts(leftSide: '7.', activeWord: '', rightSide: ''),
+            evalService,
+          ),
+          equals([
+            'hashCode',
+            'bitLength',
+            'toString',
+            'remainder',
+            'abs',
+            'sign',
+            'isEven',
+            'isOdd',
+            'isNaN',
+            'isNegative',
+            'isInfinite',
+            'isFinite',
+            'toUnsigned',
+            'toSigned',
+            'compareTo',
+            'round',
+            'floor',
+            'ceil',
+            'truncate',
+            'roundToDouble',
+            'floorToDouble',
+            'ceilToDouble',
+            'truncateToDouble',
+            'clamp',
+            'toInt',
+            'toDouble',
+            'toStringAsFixed',
+            'toStringAsExponential',
+            'toStringAsPrecision',
+            'toRadixString',
+            'modPow',
+            'modInverse',
+            'gcd',
+            'noSuchMethod',
+            'runtimeType',
+          ]),
+        );
+      },
+      timeout: const Timeout.factor(8),
+      tags: includeForCustomerTestsTag,
+    );
   });
 }
