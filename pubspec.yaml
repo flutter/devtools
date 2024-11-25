@@ -1,4 +1,4 @@
-name: _
+name: _devtools
 environment:
   sdk: ^3.6.0
 workspace:
