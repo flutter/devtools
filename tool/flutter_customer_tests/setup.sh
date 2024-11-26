@@ -3,12 +3,10 @@
 # https://github.com/flutter/tests
 # This is executed as a pre-submit check for every PR in flutter/flutter
 
+# Ensure the `dt` executable is on PATH.
 root_dir=$(pwd)
 tool_dir="$root_dir/tool/bin"
-
-# Ensure the `dt` executable is on PATH.
 export PATH=$PATH:$tool_dir
-
 # Force `dt` to use the current Flutter (which is available on PATH).
 export DEVTOOLS_TOOL_FLUTTER_FROM_PATH=true
 
