@@ -120,13 +120,21 @@ class DevToolsRepo {
                 : '${skip.toString()} directories are intentionally skipped';
         print('Skipping ${dir.path} in _collectPackages because $reason.');
       } else {
-        final parentDirectoryAdded = result.any(
-          (p) => dir.path.startsWith(p.packagePath),
+        final ancestor = result.firstWhereOrNull(
+          (p) =>
+              // Remove the last segment of [dir]'s pathSegments to ensure we
+              // are only checking ancestors and not sibling directories with
+              // similar names.
+              (List.from(dir.uri.pathSegments)..safeRemoveLast())
+              // TODO(kenz): this may cause issues for Windows paths.
+              .join('/')
+              .startsWith(p.packagePath),
         );
-        if (!includeSubdirectories && parentDirectoryAdded) {
+        final ancestorDirectoryAdded = ancestor != null;
+        if (!includeSubdirectories && ancestorDirectoryAdded) {
           print(
             'Skipping ${dir.path} in _collectPackages because it is a '
-            'subdirectory of another package.',
+            'subdirectory of another package (${ancestor.packagePath}).',
           );
         } else {
           result.add(Package._(this, dir.path));
@@ -306,4 +314,8 @@ bool _fileExists(Directory parent, String name) {
 
 bool _dirExists(Directory parent, String name) {
   return FileSystemEntity.isDirectorySync(path.join(parent.path, name));
+}
+
+extension _SafeAccessList<T> on List<T> {
+  T? safeRemoveLast() => isNotEmpty ? removeLast() : null;
 }
