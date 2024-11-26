@@ -7,3 +7,10 @@ skip the test case by adding the tag 'skip-for-flutter-customer-tests', which
 is defined in a const in
 [utils.dart](https://github.com/flutter/devtools/blob/master/packages/devtools_test/lib/src/helpers/utils.dart#L15)
 inside the `devtools_test` package.
+
+If a new DevTools test should be run on the Flutter customer test run that is **not**
+already part of one of the `test/` subdirectories tested in `test.sh`, you can add
+the tag 'include-for-flutter-customer-tests', which
+is defined in a const in
+[utils.dart](https://github.com/flutter/devtools/blob/master/packages/devtools_test/lib/src/helpers/utils.dart#L15)
+inside the `devtools_test` package.
