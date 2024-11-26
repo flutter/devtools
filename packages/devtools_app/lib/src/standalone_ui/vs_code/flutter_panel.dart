@@ -13,6 +13,8 @@ import '../../service/editor/api_classes.dart';
 import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
+import '../ide_shared/property_editor/property_editor_sidebar.dart';
 import 'debug_sessions.dart';
 import 'devices.dart';
 import 'devtools/devtools_view.dart';
@@ -193,6 +195,9 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
                   editor: widget.editor,
                   debugSessions: debugSessions,
                 ),
+              // TODO(https://github.com/flutter/devtools/issues/8546) Move
+              // Property Editor to its own sidepanel.
+              if (FeatureFlags.propertyEditor) const PropertyEditorSidebar(),
             ],
           ),
         ),

@@ -544,22 +544,7 @@ class DefaultValueLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-      decoration: BoxDecoration(
-        borderRadius: defaultBorderRadius,
-        color: colorScheme.secondary,
-      ),
-      child: Text(
-        'default',
-        style: theme.regularTextStyleWithColor(
-          colorScheme.onSecondary,
-          backgroundColor: colorScheme.secondary,
-        ),
-      ),
-    );
+    return const RoundedLabel(labelText: 'default');
   }
 }
 

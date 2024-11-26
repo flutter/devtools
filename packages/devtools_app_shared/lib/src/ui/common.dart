@@ -600,3 +600,39 @@ class RoundedCornerOptions {
   final bool showBottomLeft;
   final bool showBottomRight;
 }
+
+/// A rounded label containing [labelText].
+class RoundedLabel extends StatelessWidget {
+  const RoundedLabel({
+    super.key,
+    required this.labelText,
+    this.backgroundColor,
+    this.textColor,
+  });
+
+  final String labelText;
+  final Color? backgroundColor;
+  final Color? textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+      decoration: BoxDecoration(
+        borderRadius: defaultBorderRadius,
+        color: backgroundColor ?? colorScheme.secondary,
+      ),
+      child: Text(
+        labelText,
+        overflow: TextOverflow.clip,
+        softWrap: false,
+        style: theme.regularTextStyleWithColor(
+          textColor ?? colorScheme.onSecondary,
+          backgroundColor: backgroundColor ?? colorScheme.secondary,
+        ),
+      ),
+    );
+  }
+}
