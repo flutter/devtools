@@ -13,8 +13,7 @@ export DEVTOOLS_TOOL_FLUTTER_FROM_PATH=true
 cd tool
 flutter pub get
 
-# We do not need to run `dt pub-get` explicitly here because
-# `dt generate-code --upgrade` will run `dt pub-get --only-main --upgrade`.
-dt generate-code --upgrade
+dt pub-get --upgrade
+dt generate-code --no-pub-get
 
 cd ..
