@@ -9,6 +9,13 @@
 
 cd tool
 flutter pub get
-dart bin/dt.dart pub-get
-dart bin/dt.dart analyze --no-fatal-infos
+
+# We do not need to run `dart bin/dt.dart pub-get` here because
+# the Flutter customer test retgistry script already runs 
+# `flutter packages get` on the DevTools packages.
+
+# Skip unimportant directories to speed up analysis.
+# Unimportant directories are defined in tool/lib/commands/analyze.dart.
+dart bin/dt.dart analyze --no-fatal-infos --skip-unimportant
+
 cd ..

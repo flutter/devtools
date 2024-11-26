@@ -11,6 +11,7 @@ executables:
 dependencies:
   args: ^2.4.2
   cli_util: ^0.4.1
+  collection: ^1.19.1
   io: ^1.0.4
   path: ^1.9.0
   yaml: ^3.1.2

@@ -12,15 +12,27 @@ import '../model.dart';
 import '../utils.dart';
 
 const _fatalInfosArg = 'fatal-infos';
+const _skipUnimportantArg = 'skip-unimportant';
+
+const _unimportantDirectories = ['case_study', 'fixtures'];
 
 class AnalyzeCommand extends Command {
   AnalyzeCommand() {
-    argParser.addFlag(
-      'fatal-infos',
-      help: 'Sets the "fatal-infos" flag for the dart analyze command',
-      defaultsTo: true,
-      negatable: true,
-    );
+    argParser
+      ..addFlag(
+        _fatalInfosArg,
+        help: 'Sets the "fatal-infos" flag for the dart analyze command',
+        defaultsTo: true,
+        negatable: true,
+      )
+      ..addFlag(
+        _skipUnimportantArg,
+        help:
+            'Skips analysis for unimportant directories '
+            '${_unimportantDirectories.toString()}',
+        defaultsTo: false,
+        negatable: false,
+      );
   }
 
   @override
@@ -34,7 +46,10 @@ class AnalyzeCommand extends Command {
     final log = Logger.standard();
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
-    final packages = repo.getPackages();
+    final skipUnimportant = argResults![_skipUnimportantArg] as bool;
+    final packages = repo.getPackages(
+      skip: skipUnimportant ? _unimportantDirectories : [],
+    );
     final fatalInfos = argResults![_fatalInfosArg] as bool;
 
     log.stdout('Running flutter analyze...');
