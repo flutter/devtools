@@ -204,21 +204,11 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     final diagnosticLocal = diagnostic!;
     final inspectorService = serviceConnection.inspectorService!;
 
-    final isNullValue = description == 'null';
-    final isPrimitiveValue = [
-          'StringProperty',
-          'IntProperty',
-          'DoubleProperty',
-        ].contains(diagnosticLocal.type) ||
-        description == 'true' ||
-        description == 'false';
-
     return HoverCardTooltip.async(
       enabled: () =>
           preferences.inspector.hoverEvalModeEnabled.value &&
           diagnosticLocal.objectGroupApi != null &&
-          !isPrimitiveValue &&
-          !isNullValue,
+          !isPrimitiveValueOrNull(description),
       asyncGenerateHoverCardData: ({
         required event,
         required isHoverStale,

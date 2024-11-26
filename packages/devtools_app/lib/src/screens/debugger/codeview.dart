@@ -1190,7 +1190,7 @@ class _LineItemState extends State<LineItem>
       widget.lineContents,
     );
 
-    if (word != '') {
+    if (word != '' && !isPrimitiveValueOrNull(word)) {
       try {
         final response = await evalService.evalAtCurrentFrame(word);
         final isolateRef = serviceConnection
