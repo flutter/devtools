@@ -11,8 +11,12 @@ export PATH=$PATH:$tool_dir
 
 # Force `dt` to use the current Flutter (which is available on PATH).
 export DEVTOOLS_TOOL_FLUTTER_FROM_PATH=true
+
 cd tool
 flutter pub get
-dt pub-get
+
+# We do not need to run `dt pub-get` explicitly here because
+# `dt generate-code --upgrade` will run `dt pub-get --only-main --upgrade`.
 dt generate-code --upgrade
+
 cd ..
