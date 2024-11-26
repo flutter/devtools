@@ -207,7 +207,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       enabled:
           () =>
               preferences.inspector.hoverEvalModeEnabled.value &&
-              diagnosticLocal.objectGroupApi != null,
+              diagnosticLocal.objectGroupApi != null &&
+              !isPrimitiveValueOrNull(description),
       asyncGenerateHoverCardData: ({
         required event,
         required isHoverStale,

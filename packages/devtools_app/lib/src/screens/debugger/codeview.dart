@@ -1172,7 +1172,7 @@ class _LineItemState extends State<LineItem>
 
     final word = wordForHover(event.localPosition.dx, widget.lineContents);
 
-    if (word != '') {
+    if (word != '' && !isPrimitiveValueOrNull(word)) {
       try {
         final response = await evalService.evalAtCurrentFrame(word);
         final isolateRef =
