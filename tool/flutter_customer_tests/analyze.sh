@@ -8,7 +8,6 @@
 # https://github.com/flutter/tests/blob/main/registry/flutter_devtools.test.
 
 cd tool
-flutter pub get
 
 # We do not need to run `dt pub-get` here because the Flutter customer
 # test retgistry script already runs `flutter packages get` on the
