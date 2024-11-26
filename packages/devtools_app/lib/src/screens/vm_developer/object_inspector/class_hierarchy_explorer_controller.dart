@@ -37,10 +37,7 @@ class ClassHierarchyExplorerController {
   @visibleForTesting
   void buildHierarchy(List<Class> classes) {
     final nodes = <String?, ClassHierarchyNode>{
-      for (final cls in classes)
-        cls.id: ClassHierarchyNode(
-          cls: cls,
-        ),
+      for (final cls in classes) cls.id: ClassHierarchyNode(cls: cls),
     };
 
     late final ClassHierarchyNode objectNode;

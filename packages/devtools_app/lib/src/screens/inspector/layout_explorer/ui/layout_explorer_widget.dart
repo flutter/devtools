@@ -20,17 +20,17 @@ const maxRequestsPerSecond = 3.0;
 
 /// Base class for layout widgets for all widget types.
 abstract class LayoutExplorerWidget extends StatefulWidget {
-  const LayoutExplorerWidget(
-    this.inspectorController, {
-    super.key,
-  });
+  const LayoutExplorerWidget(this.inspectorController, {super.key});
 
   final InspectorController inspectorController;
 }
 
 /// Base class for state objects for layout widgets for all widget types.
-abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
-        L extends LayoutProperties> extends State<W>
+abstract class LayoutExplorerWidgetState<
+  W extends LayoutExplorerWidget,
+  L extends LayoutProperties
+>
+    extends State<W>
     with TickerProviderStateMixin
     implements InspectorServiceClient {
   LayoutExplorerWidgetState() {
@@ -128,8 +128,9 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   }
 
   void _unregisterInspectorControllerService() {
-    inspectorController.selectedNode
-        .removeListener(_onSelectionChangedCallback);
+    inspectorController.selectedNode.removeListener(
+      _onSelectionChangedCallback,
+    );
     inspectorService?.removeClient(this);
   }
 
@@ -231,9 +232,8 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   }
 
   void _initAnimationStates() {
-    entranceController = longAnimationController(
-      this,
-    )..addStatusListener((status) {
+    entranceController = longAnimationController(this)
+      ..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
           setState(() {
             _previousProperties = null;

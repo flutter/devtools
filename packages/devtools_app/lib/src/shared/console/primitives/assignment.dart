@@ -18,8 +18,12 @@ class ConsoleVariableAssignment {
     const variableNameGroup = '([_a-zA-Z][_a-zA-Z0-9]{0,30})';
     const indexGroup = '([_012345])';
 
-    final regex =
-        RegExp(r'var\s+' '$variableNameGroup' r'\s*=\s*\$' '$indexGroup');
+    final regex = RegExp(
+      r'var\s+'
+      '$variableNameGroup'
+      r'\s*=\s*\$'
+      '$indexGroup',
+    );
 
     final matches = regex.allMatches(expression);
     if (matches.length != 1) return null;

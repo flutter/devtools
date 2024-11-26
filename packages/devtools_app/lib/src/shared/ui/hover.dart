@@ -17,12 +17,12 @@ import 'utils.dart';
 double get _maxHoverCardHeight => scaleByFontFactor(250.0);
 
 TextStyle get _hoverTitleTextStyle => fixBlurryText(
-      TextStyle(
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(15.0),
-        decoration: TextDecoration.none,
-      ),
-    );
+  TextStyle(
+    fontWeight: FontWeight.normal,
+    fontSize: scaleByFontFactor(15.0),
+    decoration: TextDecoration.none,
+  ),
+);
 
 /// Regex for valid Dart identifiers.
 final _identifier = RegExp(r'^[a-zA-Z0-9]|_|\$');
@@ -210,16 +210,16 @@ class HoverCard {
     required HoverCardController hoverCardController,
     String? title,
   }) : this(
-          context: context,
-          contents: contents,
-          width: width,
-          position: Offset(
-            math.max(0, event.position.dx - (width / 2.0)),
-            event.position.dy + _hoverYOffset,
-          ),
-          title: title,
-          hoverCardController: hoverCardController,
-        );
+         context: context,
+         contents: contents,
+         width: width,
+         position: Offset(
+           math.max(0, event.position.dx - (width / 2.0)),
+           event.position.dy + _hoverYOffset,
+         ),
+         title: title,
+         hoverCardController: hoverCardController,
+       );
 
   late OverlayEntry _overlayEntry;
 
@@ -285,18 +285,18 @@ class HoverCardController {
   }
 }
 
-typedef AsyncGenerateHoverCardDataFunc = Future<HoverCardData?> Function({
-  required PointerHoverEvent event,
+typedef AsyncGenerateHoverCardDataFunc =
+    Future<HoverCardData?> Function({
+      required PointerHoverEvent event,
 
-  /// Returns true if the HoverCard is no longer visible.
-  ///
-  /// Use this callback to short circuit long running tasks.
-  required bool Function() isHoverStale,
-});
+      /// Returns true if the HoverCard is no longer visible.
+      ///
+      /// Use this callback to short circuit long running tasks.
+      required bool Function() isHoverStale,
+    });
 
-typedef SyncGenerateHoverCardDataFunc = HoverCardData Function(
-  PointerHoverEvent event,
-);
+typedef SyncGenerateHoverCardDataFunc =
+    HoverCardData Function(PointerHoverEvent event);
 
 /// A hover card based tooltip.
 class HoverCardTooltip extends StatefulWidget {
@@ -326,8 +326,8 @@ class HoverCardTooltip extends StatefulWidget {
     required this.generateHoverCardData,
     required this.child,
     this.disposable,
-  })  : asyncGenerateHoverCardData = null,
-        asyncTimeout = null;
+  }) : asyncGenerateHoverCardData = null,
+       asyncTimeout = null;
 
   static const _hoverDelay = Duration(milliseconds: 500);
   static double get defaultHoverWidth => scaleByFontFactor(450.0);
@@ -422,9 +422,10 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     HoverCard? spinnerHoverCard;
     final hoverCardDataFuture = asyncGenerateHoverCardData(
       event: event,
-      isHoverStale: () =>
-          spinnerHoverCard != null &&
-          !_hoverCardController.isHoverCardStillActive(spinnerHoverCard),
+      isHoverStale:
+          () =>
+              spinnerHoverCard != null &&
+              !_hoverCardController.isHoverCardStillActive(spinnerHoverCard),
     );
     final hoverCardDataCompleter = _hoverCardDataCompleter(hoverCardDataFuture);
     // If we have set the async hover card to show up only after a timeout,
@@ -463,9 +464,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
       hoverCardController: _hoverCardController,
     );
 
-    _setHoverCard(
-      spinnerHoverCard,
-    );
+    _setHoverCard(spinnerHoverCard);
 
     // The spinner is showing, we can now generate the HoverCardData
     final hoverCardData = await hoverCardDataCompleter.future;

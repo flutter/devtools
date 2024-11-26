@@ -125,10 +125,7 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Mock Editor',
-                    style: theme.textTheme.headlineMedium,
-                  ),
+                  Text('Mock Editor', style: theme.textTheme.headlineMedium),
                   const SizedBox(height: defaultSpacing),
                   const Text(
                     'Use these buttons to simulate actions that would usually occur in the IDE.',
@@ -138,16 +135,18 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                     children: [
                       const Text('Editor: '),
                       ElevatedButton(
-                        onPressed: editor.connected
-                            ? null
-                            : _withUpdate(editor.connectEditor),
+                        onPressed:
+                            editor.connected
+                                ? null
+                                : _withUpdate(editor.connectEditor),
                         child: const Text('Connect'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: editor.connected
-                            ? _withUpdate(editor.disconnectEditor)
-                            : null,
+                        onPressed:
+                            editor.connected
+                                ? _withUpdate(editor.disconnectEditor)
+                                : null,
                         child: const Text('Disconnect'),
                       ),
                     ],
@@ -173,38 +172,42 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'macos',
-                          flutterMode: 'debug',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'macos',
+                              flutterMode: 'debug',
+                            ),
                         child: const Text('Desktop debug'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'macos',
-                          flutterMode: 'profile',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'macos',
+                              flutterMode: 'profile',
+                            ),
                         child: const Text('Desktop profile'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'macos',
-                          flutterMode: 'release',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'macos',
+                              flutterMode: 'release',
+                            ),
                         child: const Text('Desktop release'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'macos',
-                          flutterMode: 'jit_release',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'macos',
+                              flutterMode: 'jit_release',
+                            ),
                         child: const Text('Desktop jit_release'),
                       ),
                     ],
@@ -213,29 +216,32 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'chrome',
-                          flutterMode: 'debug',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'chrome',
+                              flutterMode: 'debug',
+                            ),
                         child: const Text('Web debug'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'chrome',
-                          flutterMode: 'profile',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'chrome',
+                              flutterMode: 'profile',
+                            ),
                         child: const Text('Web profile'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'chrome',
-                          flutterMode: 'release',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'chrome',
+                              flutterMode: 'release',
+                            ),
                         child: const Text('Web release'),
                       ),
                     ],
@@ -244,10 +250,11 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Dart',
-                          deviceId: 'macos',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Dart',
+                              deviceId: 'macos',
+                            ),
                         child: const Text('Dart CLI'),
                       ),
                     ],
@@ -256,9 +263,7 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                   ElevatedButton(
                     onPressed: () => editor.stopAllSessions(),
                     style: theme.elevatedButtonTheme.style!.copyWith(
-                      backgroundColor: const WidgetStatePropertyAll(
-                        Colors.red,
-                      ),
+                      backgroundColor: const WidgetStatePropertyAll(Colors.red),
                     ),
                     child: const Text('Stop All'),
                   ),
@@ -288,19 +293,24 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                               builder: (context, logRing, _) {
                                 return ListView.builder(
                                   itemCount: logRing.length,
-                                  itemBuilder: (context, index) =>
-                                      OutlineDecoration.onlyBottom(
-                                    child: Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: denseSpacing,
-                                      ),
-                                      child: Text(
-                                        logRing.elementAt(index),
-                                        style: Theme.of(context).fixedFontStyle,
-                                      ),
-                                    ),
-                                  ),
+                                  itemBuilder:
+                                      (context, index) =>
+                                          OutlineDecoration.onlyBottom(
+                                            child: Container(
+                                              width: double.infinity,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: denseSpacing,
+                                                  ),
+                                              child: Text(
+                                                logRing.elementAt(index),
+                                                style:
+                                                    Theme.of(
+                                                      context,
+                                                    ).fixedFontStyle,
+                                              ),
+                                            ),
+                                          ),
                                 );
                               },
                             ),
@@ -337,20 +347,20 @@ class VsCodeTheme {
   });
 
   const VsCodeTheme.dark()
-      : this._(
-          activityBarBackgroundColor: const Color(0xFF333333),
-          editorBackgroundColor: const Color(0xFF1E1E1E),
-          foregroundColor: const Color(0xFFD4D4D4),
-          sidebarBackgroundColor: const Color(0xFF252526),
-        );
+    : this._(
+        activityBarBackgroundColor: const Color(0xFF333333),
+        editorBackgroundColor: const Color(0xFF1E1E1E),
+        foregroundColor: const Color(0xFFD4D4D4),
+        sidebarBackgroundColor: const Color(0xFF252526),
+      );
 
   const VsCodeTheme.light()
-      : this._(
-          activityBarBackgroundColor: const Color(0xFF2C2C2C),
-          editorBackgroundColor: const Color(0xFFFFFFFF),
-          foregroundColor: const Color(0xFF000000),
-          sidebarBackgroundColor: const Color(0xFFF3F3F3),
-        );
+    : this._(
+        activityBarBackgroundColor: const Color(0xFF2C2C2C),
+        editorBackgroundColor: const Color(0xFFFFFFFF),
+        foregroundColor: const Color(0xFF000000),
+        sidebarBackgroundColor: const Color(0xFFF3F3F3),
+      );
 
   static VsCodeTheme of(BuildContext context) {
     return Theme.of(context).isDarkTheme

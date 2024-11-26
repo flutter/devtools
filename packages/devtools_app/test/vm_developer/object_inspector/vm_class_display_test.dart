@@ -45,40 +45,38 @@ void main() {
     when(mockClassObject.obj).thenReturn(testClassCopy);
   });
 
-  testWidgetsWithWindowSize(
-    'builds class display',
-    windowSize,
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          VmClassDisplay(
-            clazz: mockClassObject,
-            controller: ObjectInspectorViewController(),
-          ),
+  testWidgetsWithWindowSize('builds class display', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      wrap(
+        VmClassDisplay(
+          clazz: mockClassObject,
+          controller: ObjectInspectorViewController(),
         ),
-      );
+      ),
+    );
 
-      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-      expect(find.byType(VMInfoCard), findsOneWidget);
-      expect(find.text('General Information'), findsOneWidget);
-      expect(find.text('1.0 KB'), findsOneWidget);
-      expect(find.text('fooLib', findRichText: true), findsOneWidget);
-      expect(
-        find.text('fooScript.dart:10:4', findRichText: true),
-        findsOneWidget,
-      );
-      expect(find.text('fooSuperClass', findRichText: true), findsOneWidget);
-      expect(find.text('fooSuperType', findRichText: true), findsOneWidget);
-      expect(find.text('Currently allocated instances:'), findsOneWidget);
-      expect(find.text('3'), findsOneWidget);
+    expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+    expect(find.byType(VMInfoCard), findsOneWidget);
+    expect(find.text('General Information'), findsOneWidget);
+    expect(find.text('1.0 KB'), findsOneWidget);
+    expect(find.text('fooLib', findRichText: true), findsOneWidget);
+    expect(
+      find.text('fooScript.dart:10:4', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.text('fooSuperClass', findRichText: true), findsOneWidget);
+    expect(find.text('fooSuperType', findRichText: true), findsOneWidget);
+    expect(find.text('Currently allocated instances:'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
 
-      expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+    expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
-      expect(find.byType(RetainingPathWidget), findsOneWidget);
+    expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-      expect(find.byType(InboundReferencesTree), findsOneWidget);
+    expect(find.byType(InboundReferencesTree), findsOneWidget);
 
-      // TODO(mtaylee): test ClassInstancesWidget when implemented
-    },
-  );
+    // TODO(mtaylee): test ClassInstancesWidget when implemented
+  });
 }

@@ -68,8 +68,9 @@ class BuildCommand extends Command {
     final useWasm = results[BuildCommandArgs.wasm.flagName] as bool;
     final noStripWasm = results[BuildCommandArgs.noStripWasm.flagName] as bool;
 
-    final webBuildDir =
-        Directory(path.join(repo.devtoolsAppDirectoryPath, 'build', 'web'));
+    final webBuildDir = Directory(
+      path.join(repo.devtoolsAppDirectoryPath, 'build', 'web'),
+    );
 
     if (updateFlutter) {
       logStatus('updating tool/flutter-sdk to the latest flutter candidate');
@@ -97,25 +98,23 @@ class BuildCommand extends Command {
     await processManager.runAll(
       commands: [
         if (runPubGet) CliCommand.tool(['pub-get', '--only-main']),
-        CliCommand.flutter(
-          [
-            'build',
-            'web',
-            '--source-maps',
-            if (useWasm) ...[
-              BuildCommandArgs.wasm.asArg(),
-              if (noStripWasm) BuildCommandArgs.noStripWasm.asArg(),
-            ] else ...[
-              '--web-renderer',
-              'canvaskit',
-              // Do not minify stack traces in debug mode.
-              if (buildMode == 'debug') '--dart2js-optimization=O1',
-              if (buildMode != 'debug') '--$buildMode',
-            ],
-            '--pwa-strategy=offline-first',
-            '--no-tree-shake-icons',
+        CliCommand.flutter([
+          'build',
+          'web',
+          '--source-maps',
+          if (useWasm) ...[
+            BuildCommandArgs.wasm.asArg(),
+            if (noStripWasm) BuildCommandArgs.noStripWasm.asArg(),
+          ] else ...[
+            '--web-renderer',
+            'canvaskit',
+            // Do not minify stack traces in debug mode.
+            if (buildMode == 'debug') '--dart2js-optimization=O1',
+            if (buildMode != 'debug') '--$buildMode',
           ],
-        ),
+          '--pwa-strategy=offline-first',
+          '--no-tree-shake-icons',
+        ]),
       ],
       workingDirectory: repo.devtoolsAppDirectoryPath,
     );
@@ -126,8 +125,9 @@ class BuildCommand extends Command {
       final canvaskitDir = Directory(path.join(webBuildDir.path, 'canvaskit'));
       for (final file in canvaskitDir.listSync()) {
         if (RegExp(r'canvaskit\..*').hasMatch(file.path)) {
-          await processManager
-              .runProcess(CliCommand('chmod', ['0755', file.path]));
+          await processManager.runProcess(
+            CliCommand('chmod', ['0755', file.path]),
+          );
         }
       }
     }

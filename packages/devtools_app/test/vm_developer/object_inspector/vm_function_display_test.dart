@@ -54,84 +54,76 @@ void main() {
     when(mockFuncObject.isRecognized).thenReturn(false);
     when(mockFuncObject.isNative).thenReturn(null);
     when(mockFuncObject.vmName).thenReturn('fooDartFunction');
-    when(mockFuncObject.icDataArray).thenReturn(
-      Instance(
-        id: 'ic-data-array-id',
-        length: 0,
-        elements: [],
-      ),
-    );
+    when(
+      mockFuncObject.icDataArray,
+    ).thenReturn(Instance(id: 'ic-data-array-id', length: 0, elements: []));
   });
 
   group('function display test', () {
-    testWidgetsWithWindowSize(
-      'basic layout',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            VmFuncDisplay(
-              function: mockFuncObject,
-              controller: ObjectInspectorViewController(),
-            ),
+    testWidgetsWithWindowSize('basic layout', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          VmFuncDisplay(
+            function: mockFuncObject,
+            controller: ObjectInspectorViewController(),
           ),
-        );
+        ),
+      );
 
-        expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-        expect(find.byType(VMInfoCard), findsNWidgets(2));
-        expect(find.text('General Information'), findsOneWidget);
-        expect(find.text('Function'), findsOneWidget);
-        expect(find.text('256 B'), findsOneWidget);
-        expect(find.text('Owner:'), findsOneWidget);
-        expect(find.text('fooLib', findRichText: true), findsOneWidget);
-        expect(
-          find.text('fooScript.dart:10:4', findRichText: true),
-          findsOneWidget,
-        );
+      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsNWidgets(2));
+      expect(find.text('General Information'), findsOneWidget);
+      expect(find.text('Function'), findsOneWidget);
+      expect(find.text('256 B'), findsOneWidget);
+      expect(find.text('Owner:'), findsOneWidget);
+      expect(find.text('fooLib', findRichText: true), findsOneWidget);
+      expect(
+        find.text('fooScript.dart:10:4', findRichText: true),
+        findsOneWidget,
+      );
 
-        expect(find.text('Function Details'), findsOneWidget);
-        expect(find.text('Kind:'), findsOneWidget);
-        expect(
-          find.text('static const implicit closure function'),
-          findsOneWidget,
-        );
-        expect(find.text('Deoptimizations:'), findsOneWidget);
-        expect(find.text('3'), findsOneWidget);
-        expect(find.text('Optimizable:'), findsOneWidget);
-        expect(find.text('Inlinable:'), findsOneWidget);
-        expect(find.text('Intrinsic:'), findsOneWidget);
-        expect(find.text('Recognized:'), findsOneWidget);
-        expect(find.text('Native:'), findsOneWidget);
-        expect(find.text('Yes'), findsNWidgets(2));
-        expect(find.text('No'), findsNWidgets(2));
-        expect(find.text('--'), findsOneWidget);
-        expect(find.text('VM Name:'), findsOneWidget);
-        expect(find.text('fooDartFunction'), findsOneWidget);
+      expect(find.text('Function Details'), findsOneWidget);
+      expect(find.text('Kind:'), findsOneWidget);
+      expect(
+        find.text('static const implicit closure function'),
+        findsOneWidget,
+      );
+      expect(find.text('Deoptimizations:'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('Optimizable:'), findsOneWidget);
+      expect(find.text('Inlinable:'), findsOneWidget);
+      expect(find.text('Intrinsic:'), findsOneWidget);
+      expect(find.text('Recognized:'), findsOneWidget);
+      expect(find.text('Native:'), findsOneWidget);
+      expect(find.text('Yes'), findsNWidgets(2));
+      expect(find.text('No'), findsNWidgets(2));
+      expect(find.text('--'), findsOneWidget);
+      expect(find.text('VM Name:'), findsOneWidget);
+      expect(find.text('fooDartFunction'), findsOneWidget);
 
-        expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
-        expect(find.byType(RetainingPathWidget), findsOneWidget);
-        expect(find.byType(InboundReferencesTree), findsOneWidget);
-        expect(find.byType(CallSiteDataArrayWidget), findsOneWidget);
-      },
-    );
+      expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+      expect(find.byType(RetainingPathWidget), findsOneWidget);
+      expect(find.byType(InboundReferencesTree), findsOneWidget);
+      expect(find.byType(CallSiteDataArrayWidget), findsOneWidget);
+    });
 
-    testWidgetsWithWindowSize(
-      'unrecognized function kind',
-      windowSize,
-      (WidgetTester tester) async {
-        when(mockFuncObject.kind).thenReturn(null);
+    testWidgetsWithWindowSize('unrecognized function kind', windowSize, (
+      WidgetTester tester,
+    ) async {
+      when(mockFuncObject.kind).thenReturn(null);
 
-        await tester.pumpWidget(
-          wrap(
-            VmFuncDisplay(
-              function: mockFuncObject,
-              controller: ObjectInspectorViewController(),
-            ),
+      await tester.pumpWidget(
+        wrap(
+          VmFuncDisplay(
+            function: mockFuncObject,
+            controller: ObjectInspectorViewController(),
           ),
-        );
+        ),
+      );
 
-        expect(find.text('Unrecognized function kind: null'), findsOneWidget);
-      },
-    );
+      expect(find.text('Unrecognized function kind: null'), findsOneWidget);
+    });
   });
 }

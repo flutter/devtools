@@ -65,13 +65,14 @@ class MethodTableController extends DisposableController
       depthFirstTraversal(
         root,
         action: (CpuStackFrame frame) {
-          final parentNode = frame.parent != null &&
-                  frame.parentId != CpuProfileData.rootId &&
-                  !frame.parent!.isTag
-              // Since we are performing a DFS, the parent should always be in
-              // the map.
-              ? methodMap[frame.parent!.methodTableId]!
-              : null;
+          final parentNode =
+              frame.parent != null &&
+                      frame.parentId != CpuProfileData.rootId &&
+                      !frame.parent!.isTag
+                  // Since we are performing a DFS, the parent should always be in
+                  // the map.
+                  ? methodMap[frame.parent!.methodTableId]!
+                  : null;
 
           var graphNode = MethodTableGraphNode.fromStackFrame(frame);
           final existingNode = methodMap[frame.methodTableId];

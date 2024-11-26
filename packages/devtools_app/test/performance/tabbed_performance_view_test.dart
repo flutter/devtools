@@ -45,8 +45,9 @@ void main() {
 
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(OfflineDataController, OfflineDataController());
-    when(serviceConnection.serviceManager.connectedApp!.isDartWebApp)
-        .thenAnswer((_) => Future.value(false));
+    when(
+      serviceConnection.serviceManager.connectedApp!.isDartWebApp,
+    ).thenAnswer((_) => Future.value(false));
   }
 
   group('TabbedPerformanceView', () {
@@ -72,8 +73,9 @@ void main() {
 
       final mockFlutterFramesController =
           controller.flutterFramesController as MockFlutterFramesController;
-      when(mockFlutterFramesController.selectedFrame)
-          .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
+      when(
+        mockFlutterFramesController.selectedFrame,
+      ).thenReturn(const FixedValueListenable<FlutterFrame?>(null));
       when(mockFlutterFramesController.isActiveFeature).thenReturn(false);
     });
 
@@ -103,23 +105,21 @@ void main() {
 
     const windowSize = Size(2225.0, 1000.0);
 
-    testWidgetsWithWindowSize(
-      'builds content successfully',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline();
-          await pumpView(tester);
+    testWidgetsWithWindowSize('builds content successfully', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await tester.runAsync(() async {
+        await setUpServiceManagerWithTimeline();
+        await pumpView(tester);
 
-          expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+        expect(find.byType(AnalyticsTabbedView), findsOneWidget);
+        expect(find.byType(DevToolsTab), findsNWidgets(3));
 
-          expect(find.text('Timeline Events'), findsOneWidget);
-          expect(find.text('Frame Analysis'), findsOneWidget);
-          expect(find.text('Rebuild Stats'), findsOneWidget);
-        });
-      },
-    );
+        expect(find.text('Timeline Events'), findsOneWidget);
+        expect(find.text('Frame Analysis'), findsOneWidget);
+        expect(find.text('Rebuild Stats'), findsOneWidget);
+      });
+    });
 
     testWidgetsWithWindowSize(
       'builds content for Frame Analysis tab with selected frame',
@@ -130,8 +130,9 @@ void main() {
           final frame = FlutterFrame6.frame;
           final framesController =
               controller.flutterFramesController as MockFlutterFramesController;
-          when(framesController.selectedFrame)
-              .thenReturn(FixedValueListenable<FlutterFrame?>(frame));
+          when(
+            framesController.selectedFrame,
+          ).thenReturn(FixedValueListenable<FlutterFrame?>(frame));
 
           await pumpView(tester, performanceController: controller);
 

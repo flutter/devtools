@@ -19,21 +19,25 @@ import 'extension_screen.dart';
 /// managing DevTools extension states.
 class ExtensionSettingsAction extends ScaffoldAction {
   ExtensionSettingsAction({super.key, super.color})
-      : super(
-          iconAsset: 'icons/app_bar/devtools_extensions.png',
-          tooltip: 'DevTools Extensions',
-          onPressed: (context) {
-            unawaited(
-              showDialog(
-                context: context,
-                builder: (context) => ExtensionSettingsDialog(
-                  extensions: extensionService
-                      .currentExtensions.value.availableExtensions,
-                ),
-              ),
-            );
-          },
-        );
+    : super(
+        iconAsset: 'icons/app_bar/devtools_extensions.png',
+        tooltip: 'DevTools Extensions',
+        onPressed: (context) {
+          unawaited(
+            showDialog(
+              context: context,
+              builder:
+                  (context) => ExtensionSettingsDialog(
+                    extensions:
+                        extensionService
+                            .currentExtensions
+                            .value
+                            .availableExtensions,
+                  ),
+            ),
+          );
+        },
+      );
 }
 
 @visibleForTesting
@@ -72,21 +76,20 @@ class ExtensionSettingsDialog extends StatelessWidget {
             ),
             const PaddedDivider(),
             Expanded(
-              child: extensions.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No extensions available.',
-                        style: theme.subtleTextStyle,
-                      ),
-                    )
-                  : _ExtensionsList(extensions: extensions),
+              child:
+                  extensions.isEmpty
+                      ? Center(
+                        child: Text(
+                          'No extensions available.',
+                          style: theme.subtleTextStyle,
+                        ),
+                      )
+                      : _ExtensionsList(extensions: extensions),
             ),
           ],
         ),
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }
@@ -123,9 +126,9 @@ class __ExtensionsListState extends State<_ExtensionsList> {
       child: ListView.builder(
         controller: scrollController,
         itemCount: widget.extensions.length,
-        itemBuilder: (context, index) => ExtensionSetting(
-          extension: widget.extensions[index],
-        ),
+        itemBuilder:
+            (context, index) =>
+                ExtensionSetting(extension: widget.extensions[index]),
       ),
     );
   }
@@ -142,35 +145,31 @@ class ExtensionSetting extends StatelessWidget {
     final buttonStates = [
       (
         title: 'Enabled',
-        isSelected: (ExtensionEnabledState state) =>
-            state == ExtensionEnabledState.enabled,
+        isSelected:
+            (ExtensionEnabledState state) =>
+                state == ExtensionEnabledState.enabled,
         onPressed: () {
           ga.select(
             gac.DevToolsExtensionEvents.extensionSettingsId.name,
             gac.DevToolsExtensionEvents.extensionEnableManual(extension),
           );
           unawaited(
-            extensionService.setExtensionEnabledState(
-              extension,
-              enable: true,
-            ),
+            extensionService.setExtensionEnabledState(extension, enable: true),
           );
         },
       ),
       (
         title: 'Disabled',
-        isSelected: (ExtensionEnabledState state) =>
-            state == ExtensionEnabledState.disabled,
+        isSelected:
+            (ExtensionEnabledState state) =>
+                state == ExtensionEnabledState.disabled,
         onPressed: () {
           ga.select(
             gac.DevToolsExtensionEvents.extensionSettingsId.name,
             gac.DevToolsExtensionEvents.extensionDisableManual(extension),
           );
           unawaited(
-            extensionService.setExtensionEnabledState(
-              extension,
-              enable: false,
-            ),
+            extensionService.setExtensionEnabledState(extension, enable: false),
           );
           final router = DevToolsRouterDelegate.of(context);
           if (router.currentConfiguration?.page == extension.screenId) {

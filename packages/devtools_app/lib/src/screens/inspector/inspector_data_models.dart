@@ -72,17 +72,18 @@ List<double> computeRenderSizes({
   }
 
   List<double> transformToRenderSize(double largestRenderSize) => [
-        for (final s in sizes)
-          (s - smallestSize) *
-                  (largestRenderSize - smallestRenderSize) /
-                  (largestSize - smallestSize) +
-              smallestRenderSize,
-      ];
+    for (final s in sizes)
+      (s - smallestSize) *
+              (largestRenderSize - smallestRenderSize) /
+              (largestSize - smallestSize) +
+          smallestRenderSize,
+  ];
 
   var renderSizes = transformToRenderSize(largestRenderSize);
 
   if (useMaxSizeAvailable && sum(renderSizes) < maxSizeAvailable) {
-    largestRenderSize = (maxSizeAvailable - n * smallestRenderSize) *
+    largestRenderSize =
+        (maxSizeAvailable - n * smallestRenderSize) *
             (largestSize - smallestSize) /
             sum([for (final s in sizes) s - smallestSize]) +
         smallestRenderSize;
@@ -95,19 +96,21 @@ List<double> computeRenderSizes({
 /// Represents parsed layout information for a specific [RemoteDiagnosticsNode].
 class LayoutProperties {
   LayoutProperties(this.node, {int copyLevel = 1})
-      : description = node.description,
-        size = node.size!,
-        constraints = node.constraints,
-        isFlex = node.isFlex,
-        flexFactor = node.flexFactor,
-        flexFit = node.flexFit,
-        children = copyLevel == 0
-            ? []
-            : node.childrenNow
-                .map(
-                  (child) => LayoutProperties(child, copyLevel: copyLevel - 1),
-                )
-                .toList(growable: false) {
+    : description = node.description,
+      size = node.size!,
+      constraints = node.constraints,
+      isFlex = node.isFlex,
+      flexFactor = node.flexFactor,
+      flexFit = node.flexFit,
+      children =
+          copyLevel == 0
+              ? []
+              : node.childrenNow
+                  .map(
+                    (child) =>
+                        LayoutProperties(child, copyLevel: copyLevel - 1),
+                  )
+                  .toList(growable: false) {
     for (final child in children) {
       child.parent = this;
     }
@@ -170,10 +173,10 @@ class LayoutProperties {
     if (constraintsLocal == null) return '';
     return constraintsLocal.hasBoundedWidth
         ? describeAxis(
-            constraintsLocal.minWidth,
-            constraintsLocal.maxWidth,
-            'w',
-          )
+          constraintsLocal.minWidth,
+          constraintsLocal.maxWidth,
+          'w',
+        )
         : 'width is unconstrained';
   }
 
@@ -182,10 +185,10 @@ class LayoutProperties {
     if (constraintsLocal == null) return '';
     return constraintsLocal.hasBoundedHeight
         ? describeAxis(
-            constraintsLocal.minHeight,
-            constraintsLocal.maxHeight,
-            'h',
-          )
+          constraintsLocal.minHeight,
+          constraintsLocal.maxHeight,
+          'h',
+        )
         : 'height is unconstrained';
   }
 
@@ -248,10 +251,7 @@ class LayoutProperties {
 ///
 /// See also:
 /// * [OverflowIndicatorPainter]
-enum OverflowSide {
-  right,
-  bottom,
-}
+enum OverflowSide { right, bottom }
 
 // TODO(jacobr): is it possible to overflow on multiple sides?
 // TODO(jacobr): do we need to worry about overflowing on the left side in RTL
@@ -356,8 +356,9 @@ class FlexLayoutProperties extends LayoutProperties {
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
     final renderObjectJson = node.renderObject!.json;
-    final properties = (renderObjectJson['properties'] as List<Object?>)
-        .cast<Map<String, Object?>>();
+    final properties =
+        (renderObjectJson['properties'] as List<Object?>)
+            .cast<Map<String, Object?>>();
 
     final data = {
       for (final property in properties)
@@ -367,16 +368,19 @@ class FlexLayoutProperties extends LayoutProperties {
     return FlexLayoutProperties._fromNode(
       node,
       direction: _directionUtils.enumEntry(data['direction']) ?? Axis.vertical,
-      mainAxisAlignment:
-          _mainAxisAlignmentUtils.enumEntry(data['mainAxisAlignment']),
+      mainAxisAlignment: _mainAxisAlignmentUtils.enumEntry(
+        data['mainAxisAlignment'],
+      ),
       mainAxisSize: _mainAxisSizeUtils.enumEntry(data['mainAxisSize']),
-      crossAxisAlignment:
-          _crossAxisAlignmentUtils.enumEntry(data['crossAxisAlignment']),
-      textDirection: _textDirectionUtils.enumEntry(data['textDirection']) ??
+      crossAxisAlignment: _crossAxisAlignmentUtils.enumEntry(
+        data['crossAxisAlignment'],
+      ),
+      textDirection:
+          _textDirectionUtils.enumEntry(data['textDirection']) ??
           TextDirection.ltr,
       verticalDirection:
           _verticalDirectionUtils.enumEntry(data['verticalDirection']) ??
-              VerticalDirection.down,
+          VerticalDirection.down,
       textBaseline: _textBaselineUtils.enumEntry(data['textBaseline']),
     );
   }
@@ -417,10 +421,11 @@ class FlexLayoutProperties extends LayoutProperties {
 
   num get totalFlex {
     if (children.isEmpty) return 0;
-    _totalFlex ??= children
-        .map((child) => child.flexFactor ?? 0)
-        .reduce((value, element) => value + element)
-        .toInt();
+    _totalFlex ??=
+        children
+            .map((child) => child.flexFactor ?? 0)
+            .reduce((value, element) => value + element)
+            .toInt();
     return _totalFlex!;
   }
 
@@ -554,11 +559,12 @@ class FlexLayoutProperties extends LayoutProperties {
         );
       } else {
         // uniform cross axis sizes.
-        double size = crossAxisAlignment == CrossAxisAlignment.stretch
-            ? maxSizeAvailable(axis)
-            : largestSize /
-                math.max(dimension(axis), 1.0) *
-                maxSizeAvailable(axis);
+        double size =
+            crossAxisAlignment == CrossAxisAlignment.stretch
+                ? maxSizeAvailable(axis)
+                : largestSize /
+                    math.max(dimension(axis), 1.0) *
+                    maxSizeAvailable(axis);
         size = math.max(size, smallestRenderSize(axis));
         return sizes.map((_) => size).toList();
       }
@@ -567,9 +573,10 @@ class FlexLayoutProperties extends LayoutProperties {
     final widths = renderSizes(Axis.horizontal);
     final heights = renderSizes(Axis.vertical);
 
-    final renderFreeSpace = freeSpace > 0.0
-        ? (isMainAxisHorizontal ? widths.last : heights.last)
-        : 0.0;
+    final renderFreeSpace =
+        freeSpace > 0.0
+            ? (isMainAxisHorizontal ? widths.last : heights.last)
+            : 0.0;
 
     final renderLeadingSpace = leadingSpace(renderFreeSpace);
     final renderBetweenSpace = betweenSpace(renderFreeSpace);
@@ -616,11 +623,11 @@ class FlexLayoutProperties extends LayoutProperties {
     for (var i = 0; i < children.length; ++i) {
       childrenRenderProps.add(
         RenderProperties(
-          axis: direction,
-          size: Size(widths[i], heights[i]),
-          offset: Offset.zero,
-          realSize: displayChildren[i].size,
-        )
+            axis: direction,
+            size: Size(widths[i], heights[i]),
+            offset: Offset.zero,
+            realSize: displayChildren[i].size,
+          )
           ..mainAxisOffset = calculateMainAxisOffset(i)
           ..crossAxisOffset = calculateCrossAxisOffset(i)
           ..layoutProperties = displayChildren[i],
@@ -661,7 +668,8 @@ class FlexLayoutProperties extends LayoutProperties {
         displayMainAxisAlignment != MainAxisAlignment.end) {
       spaces.add(
         renderPropsWithFullCrossAxisDimension.clone()
-          ..mainAxisOffset = childrenRenderProps.last.mainAxisDimension +
+          ..mainAxisOffset =
+              childrenRenderProps.last.mainAxisDimension +
               childrenRenderProps.last.mainAxisOffset
           ..mainAxisDimension = renderLeadingSpace
           ..mainAxisRealDimension = actualLeadingSpace,
@@ -699,13 +707,15 @@ class FlexLayoutProperties extends LayoutProperties {
         spaces.add(space.clone()..crossAxisOffset = 0.0);
         spaces.add(
           space.clone()
-            ..crossAxisOffset = renderProperties.crossAxisDimension +
+            ..crossAxisOffset =
+                renderProperties.crossAxisDimension +
                 renderProperties.crossAxisOffset,
         );
       } else {
-        space.crossAxisOffset = crossAxisAlignment == CrossAxisAlignment.end
-            ? 0
-            : renderProperties.crossAxisDimension;
+        space.crossAxisOffset =
+            crossAxisAlignment == CrossAxisAlignment.end
+                ? 0
+                : renderProperties.crossAxisDimension;
         spaces.add(space);
       }
     }
@@ -713,18 +723,24 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   static final _directionUtils = EnumUtils<Axis>(Axis.values);
-  static final _mainAxisAlignmentUtils =
-      EnumUtils<MainAxisAlignment>(MainAxisAlignment.values);
-  static final _mainAxisSizeUtils =
-      EnumUtils<MainAxisSize>(MainAxisSize.values);
-  static final _crossAxisAlignmentUtils =
-      EnumUtils<CrossAxisAlignment>(CrossAxisAlignment.values);
-  static final _textDirectionUtils =
-      EnumUtils<TextDirection>(TextDirection.values);
-  static final _verticalDirectionUtils =
-      EnumUtils<VerticalDirection>(VerticalDirection.values);
-  static final _textBaselineUtils =
-      EnumUtils<TextBaseline>(TextBaseline.values);
+  static final _mainAxisAlignmentUtils = EnumUtils<MainAxisAlignment>(
+    MainAxisAlignment.values,
+  );
+  static final _mainAxisSizeUtils = EnumUtils<MainAxisSize>(
+    MainAxisSize.values,
+  );
+  static final _crossAxisAlignmentUtils = EnumUtils<CrossAxisAlignment>(
+    CrossAxisAlignment.values,
+  );
+  static final _textDirectionUtils = EnumUtils<TextDirection>(
+    TextDirection.values,
+  );
+  static final _verticalDirectionUtils = EnumUtils<VerticalDirection>(
+    VerticalDirection.values,
+  );
+  static final _textBaselineUtils = EnumUtils<TextBaseline>(
+    TextBaseline.values,
+  );
 }
 
 /// RenderProperties contains information for rendering a [LayoutProperties] node
@@ -736,12 +752,12 @@ class RenderProperties {
     Size? realSize,
     this.layoutProperties,
     this.isFreeSpace = false,
-  })  : width = size?.width ?? 0.0,
-        height = size?.height ?? 0.0,
-        realWidth = realSize?.width ?? 0.0,
-        realHeight = realSize?.height ?? 0.0,
-        dx = offset?.dx ?? 0.0,
-        dy = offset?.dy ?? 0.0;
+  }) : width = size?.width ?? 0.0,
+       height = size?.height ?? 0.0,
+       realWidth = realSize?.width ?? 0.0,
+       realHeight = realSize?.height ?? 0.0,
+       dx = offset?.dx ?? 0.0,
+       dy = offset?.dy ?? 0.0;
 
   final Axis axis;
 

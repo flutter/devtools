@@ -63,12 +63,12 @@ class FrameAnalysis {
         final buildChildren = layoutEvent.shallowNodesWithCondition(
           (event) => FramePhaseType.build.isMatchForEventName(event.name),
         );
-        final buildDuration = buildChildren.fold<Duration>(
-          Duration.zero,
-          (previous, FlutterTimelineEvent event) {
-            return previous + event.time.duration;
-          },
-        );
+        final buildDuration = buildChildren.fold<Duration>(Duration.zero, (
+          previous,
+          FlutterTimelineEvent event,
+        ) {
+          return previous + event.time.duration;
+        });
 
         return FramePhase.layout(
           events: <FlutterTimelineEvent>[layoutEvent],
@@ -109,11 +109,13 @@ class FrameAnalysis {
 
   late FramePhase longestUiPhase = _calculateLongestFramePhase();
 
-  bool get hasUiData => _hasUiData ??= [
-        ...buildPhase.events,
-        ...layoutPhase.events,
-        ...paintPhase.events,
-      ].isNotEmpty;
+  bool get hasUiData =>
+      _hasUiData ??=
+          [
+            ...buildPhase.events,
+            ...layoutPhase.events,
+            ...paintPhase.events,
+          ].isNotEmpty;
 
   bool? _hasUiData;
 
@@ -272,15 +274,13 @@ enum FramePhaseType {
 }
 
 class FramePhase {
-  FramePhase._({
-    required this.type,
-    required this.events,
-    Duration? duration,
-  })  : title = type.display,
-        duration = duration ??
-            events.fold<Duration>(Duration.zero, (previous, event) {
-              return previous + event.time.duration;
-            });
+  FramePhase._({required this.type, required this.events, Duration? duration})
+    : title = type.display,
+      duration =
+          duration ??
+          events.fold<Duration>(Duration.zero, (previous, event) {
+            return previous + event.time.duration;
+          });
 
   factory FramePhase.build({
     required List<FlutterTimelineEvent> events,

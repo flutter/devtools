@@ -42,8 +42,9 @@ void main() {
       when(
         fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
       ).thenReturn(false);
-      when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
-          .thenReturn(false);
+      when(
+        fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow,
+      ).thenReturn(false);
       when(
         fakeServiceConnection.errorBadgeManager.errorCountNotifier('logging'),
       ).thenReturn(ValueNotifier<int>(0));
@@ -65,57 +66,50 @@ void main() {
       expect(find.text('Logging'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize(
-      'copy log contents',
-      windowSize,
-      (WidgetTester tester) async {
-        final logA = LogData('TEST A', 'Log A', 123);
-        final logB = LogData('TEST B', 'Log B', 124);
-        mockLoggingController = createMockLoggingControllerWithDefaults(
-          data: [
-            logA,
-            logB,
-          ],
-        );
+    testWidgetsWithWindowSize('copy log contents', windowSize, (
+      WidgetTester tester,
+    ) async {
+      final logA = LogData('TEST A', 'Log A', 123);
+      final logB = LogData('TEST B', 'Log B', 124);
+      mockLoggingController = createMockLoggingControllerWithDefaults(
+        data: [logA, logB],
+      );
 
-        String clipboardContents = '';
-        setupClipboardCopyListener(
-          clipboardContentsCallback: (contents) {
-            clipboardContents = contents ?? '';
-          },
-        );
+      String clipboardContents = '';
+      setupClipboardCopyListener(
+        clipboardContentsCallback: (contents) {
+          clipboardContents = contents ?? '';
+        },
+      );
 
-        await pumpLoggingScreen(tester);
-        await tester.tap(find.byTooltip('Copy filtered logs'));
+      await pumpLoggingScreen(tester);
+      await tester.tap(find.byTooltip('Copy filtered logs'));
 
-        expect(
-          clipboardContents,
-          equals(
-            [
-              '${logA.timestamp} [${logA.kind}] ${logA.details}',
-              '${logB.timestamp} [${logB.kind}] ${logB.details}',
-            ].joinWithTrailing('\n'),
-          ),
-        );
-      },
-    );
+      expect(
+        clipboardContents,
+        equals(
+          [
+            '${logA.timestamp} [${logA.kind}] ${logA.details}',
+            '${logB.timestamp} [${logB.kind}] ${logB.details}',
+          ].joinWithTrailing('\n'),
+        ),
+      );
+    });
 
-    testWidgetsWithWindowSize(
-      'builds with no data',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpLoggingScreen(tester);
-        expect(find.byType(LoggingScreenBody), findsOneWidget);
-        expect(find.byType(LogsTable), findsOneWidget);
-        expect(find.byType(LogDetails), findsOneWidget);
-        expect(find.byType(LoggingControls), findsOneWidget);
-        expect(find.byType(ClearButton), findsOneWidget);
-        expect(find.byType(SearchField<LoggingController>), findsOneWidget);
-        expect(find.byType(StandaloneFilterField<LogData>), findsOneWidget);
-        expect(find.byType(DevToolsFilterButton), findsOneWidget);
-        expect(find.byType(SettingsOutlinedButton), findsOneWidget);
-      },
-    );
+    testWidgetsWithWindowSize('builds with no data', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpLoggingScreen(tester);
+      expect(find.byType(LoggingScreenBody), findsOneWidget);
+      expect(find.byType(LogsTable), findsOneWidget);
+      expect(find.byType(LogDetails), findsOneWidget);
+      expect(find.byType(LoggingControls), findsOneWidget);
+      expect(find.byType(ClearButton), findsOneWidget);
+      expect(find.byType(SearchField<LoggingController>), findsOneWidget);
+      expect(find.byType(StandaloneFilterField<LogData>), findsOneWidget);
+      expect(find.byType(DevToolsFilterButton), findsOneWidget);
+      expect(find.byType(SettingsOutlinedButton), findsOneWidget);
+    });
 
     testWidgetsWithWindowSize(
       'builds with horizontal axis for small screens',
@@ -150,16 +144,14 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize(
-      'can clear logs',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpLoggingScreen(tester);
-        verifyNever(mockLoggingController.clear());
-        await tester.tap(find.byType(ClearButton));
-        verify(mockLoggingController.clear()).called(1);
-      },
-    );
+    testWidgetsWithWindowSize('can clear logs', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await pumpLoggingScreen(tester);
+      verifyNever(mockLoggingController.clear());
+      await tester.tap(find.byType(ClearButton));
+      verify(mockLoggingController.clear()).called(1);
+    });
 
     testWidgetsWithWindowSize(
       'search field is disabled with no data',
@@ -178,43 +170,37 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize(
-      'can toggle structured errors',
-      windowSize,
-      (WidgetTester tester) async {
-        final serviceConnection = FakeServiceConnectionManager();
-        when(serviceConnection.serviceManager.connectedApp!.isFlutterWebAppNow)
-            .thenReturn(false);
-        when(serviceConnection.serviceManager.connectedApp!.isProfileBuildNow)
-            .thenReturn(false);
-        setGlobal(
-          ServiceConnectionManager,
-          serviceConnection,
-        );
-        await pumpLoggingScreen(tester);
+    testWidgetsWithWindowSize('can toggle structured errors', windowSize, (
+      WidgetTester tester,
+    ) async {
+      final serviceConnection = FakeServiceConnectionManager();
+      when(
+        serviceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
+      ).thenReturn(false);
+      when(
+        serviceConnection.serviceManager.connectedApp!.isProfileBuildNow,
+      ).thenReturn(false);
+      setGlobal(ServiceConnectionManager, serviceConnection);
+      await pumpLoggingScreen(tester);
 
-        await tester.tap(find.byType(SettingsOutlinedButton));
-        await tester.pump();
-        Switch toggle = tester.widget(
-          find.descendant(
-            of: find.byType(StructuredErrorsToggle),
-            matching: find.byType(Switch),
-          ),
-        );
-        expect(toggle.value, false);
+      await tester.tap(find.byType(SettingsOutlinedButton));
+      await tester.pump();
+      Switch toggle = tester.widget(
+        find.descendant(
+          of: find.byType(StructuredErrorsToggle),
+          matching: find.byType(Switch),
+        ),
+      );
+      expect(toggle.value, false);
 
-        serviceConnection.serviceManager.serviceExtensionManager
-            .fakeServiceExtensionStateChanged(
-          structuredErrors.extension,
-          'true',
-        );
-        await tester.pumpAndSettle();
-        toggle = tester.widget(find.byType(Switch));
-        expect(toggle.value, true);
+      serviceConnection.serviceManager.serviceExtensionManager
+          .fakeServiceExtensionStateChanged(structuredErrors.extension, 'true');
+      await tester.pumpAndSettle();
+      toggle = tester.widget(find.byType(Switch));
+      expect(toggle.value, true);
 
-        // TODO(djshuckerow): Hook up fake extension state querying.
-      },
-    );
+      // TODO(djshuckerow): Hook up fake extension state querying.
+    });
 
     group('MessageColumn', () {
       late MessageColumn column;

@@ -11,15 +11,8 @@ void main() {
     test('basic', () {
       const data = <String, Object?>{
         'id': 1,
-        'map': {
-          'foo': 'bar',
-        },
-        'list': [
-          1,
-          '2',
-          true,
-          null,
-        ],
+        'map': {'foo': 'bar'},
+        'list': [1, '2', true, null],
         'aNullValue': null,
       };
 
@@ -100,12 +93,8 @@ void main() {
 
     test('sub-collection support', () {
       final data = <String, Object?>{
-        'list': [
-          for (int i = 0; i < 10; ++i) i,
-        ],
-        'map': {
-          for (int i = 0; i < 10; ++i) '$i': i,
-        },
+        'list': [for (int i = 0; i < 10; ++i) i],
+        'map': {for (int i = 0; i < 10; ++i) '$i': i},
       };
       final cache = JsonToServiceCache();
       final root = cache.insertJsonObject(data);
@@ -125,10 +114,7 @@ void main() {
       expect(submap.count, 5);
       for (int i = 0; i < submap.count!; ++i) {
         final association = submap.associations![i];
-        expect(
-          (association.key as Instance).valueAsString,
-          (i + 2).toString(),
-        );
+        expect((association.key as Instance).valueAsString, (i + 2).toString());
         expect(
           (association.value as Instance).valueAsString,
           (i + 2).toString(),
@@ -144,26 +130,16 @@ void main() {
         'id': 1,
         'map': {
           'foo': 'bar',
-          'baz': [
-            'a',
-            null,
-          ],
+          'baz': ['a', null],
         },
         'list': [
-          [
-            7,
-            '8',
-            9.0,
-          ],
+          [7, '8', 9.0],
           1,
           '2',
           4.9,
           true,
           null,
-          {
-            'a': 'b',
-            'c': 'd',
-          },
+          {'a': 'b', 'c': 'd'},
         ],
         'aNullValue': null,
       };

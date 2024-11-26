@@ -12,12 +12,16 @@ void values() {
 }
 
 void functions() {
-  print('${() {
-    return 'Hello';
-  }}');
-  print('print(${() {
-    return 'Hello';
-  }()})');
+  print(
+    '${() {
+      return 'Hello';
+    }}',
+  );
+  print(
+    'print(${() {
+      return 'Hello';
+    }()})',
+  );
   print('${() => 'Hello'}');
   print('print(${(() => 'Hello')()})');
 }

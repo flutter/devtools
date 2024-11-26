@@ -62,26 +62,17 @@ void main() {
   });
 
   for (final t in _Tests.all.keys) {
-    test(
-      '$TracePaneController serializes and deserializes correctly, $t',
-      () {
-        final trace = _Tests.all[t]!;
+    test('$TracePaneController serializes and deserializes correctly, $t', () {
+      final trace = _Tests.all[t]!;
 
-        final json = trace.toJson();
-        expect(
-          json.keys.toSet(),
-          equals(Json.values.map((e) => e.name).toSet()),
-        );
-        final fromJson = TracePaneController.fromJson(json);
-        expect(
-          fromJson.selection.value.isolate.id,
-          trace.selection.value.isolate.id,
-        );
-        expect(
-          fromJson.stateForIsolate.length,
-          trace.stateForIsolate.length,
-        );
-      },
-    );
+      final json = trace.toJson();
+      expect(json.keys.toSet(), equals(Json.values.map((e) => e.name).toSet()));
+      final fromJson = TracePaneController.fromJson(json);
+      expect(
+        fromJson.selection.value.isolate.id,
+        trace.selection.value.isolate.id,
+      );
+      expect(fromJson.stateForIsolate.length, trace.stateForIsolate.length);
+    });
   }
 }

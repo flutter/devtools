@@ -106,9 +106,7 @@ class PerformanceController extends DisposableController
       if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
           false) {
         final impellerEnabledResponse = await serviceConnection.serviceManager
-            .callServiceExtensionOnMainIsolate(
-          registrations.isImpellerEnabled,
-        );
+            .callServiceExtensionOnMainIsolate(registrations.isImpellerEnabled);
         _impellerEnabled = impellerEnabledResponse.json?['enabled'] == true;
       } else {
         _impellerEnabled = false;
@@ -120,27 +118,31 @@ class PerformanceController extends DisposableController
       // Listen for Flutter.RebuiltWidgets events.
       autoDisposeStreamSubscription(
         serviceConnection
-            .serviceManager.service!.onExtensionEventWithHistorySafe
+            .serviceManager
+            .service!
+            .onExtensionEventWithHistorySafe
             .listen((event) {
-          if (event.extensionKind == FlutterEvent.frame) {
-            final frame = FlutterFrame.fromJson(event.extensionData!.data);
-            enhanceTracingController.assignStateForFrame(frame);
-            flutterFramesController.addFrame(frame);
-          } else if (event.extensionKind == FlutterEvent.rebuiltWidgets &&
-              FeatureFlags.widgetRebuildStats) {
-            if (_currentRebuildWidgetsIsolate != event.isolate) {
-              rebuildCountModel.clearFromRestart();
-            }
-            _currentRebuildWidgetsIsolate = event.isolate;
-            // TODO(jacobr): need to make sure we don't get events from before
-            // the last hot restart. Their data would be bogus.
-            rebuildCountModel.processRebuildEvent(event.extensionData!.data);
-            if (!rebuildCountModel.locationMap.locationsResolved.value &&
-                !_fetchMissingLocationsStarted) {
-              _fetchMissingRebuildLocations();
-            }
-          }
-        }),
+              if (event.extensionKind == FlutterEvent.frame) {
+                final frame = FlutterFrame.fromJson(event.extensionData!.data);
+                enhanceTracingController.assignStateForFrame(frame);
+                flutterFramesController.addFrame(frame);
+              } else if (event.extensionKind == FlutterEvent.rebuiltWidgets &&
+                  FeatureFlags.widgetRebuildStats) {
+                if (_currentRebuildWidgetsIsolate != event.isolate) {
+                  rebuildCountModel.clearFromRestart();
+                }
+                _currentRebuildWidgetsIsolate = event.isolate;
+                // TODO(jacobr): need to make sure we don't get events from before
+                // the last hot restart. Their data would be bogus.
+                rebuildCountModel.processRebuildEvent(
+                  event.extensionData!.data,
+                );
+                if (!rebuildCountModel.locationMap.locationsResolved.value &&
+                    !_fetchMissingLocationsStarted) {
+                  _fetchMissingRebuildLocations();
+                }
+              }
+            }),
       );
     } else {
       await maybeLoadOfflineData(
@@ -245,15 +247,16 @@ class PerformanceController extends DisposableController
 
   @override
   OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
-        screenId: PerformanceScreen.id,
-        data: OfflinePerformanceData(
+    screenId: PerformanceScreen.id,
+    data:
+        OfflinePerformanceData(
           perfettoTraceBinary: timelineEventsController.fullPerfettoTrace,
           frames: flutterFramesController.flutterFrames.value,
           selectedFrame: flutterFramesController.selectedFrame.value,
           rebuildCountModel: rebuildCountModel,
           displayRefreshRate: flutterFramesController.displayRefreshRate.value,
         ).toJson(),
-      );
+  );
 }
 
 abstract class PerformanceFeatureController extends DisposableController {

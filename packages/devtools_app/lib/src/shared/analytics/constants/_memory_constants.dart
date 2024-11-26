@@ -5,10 +5,7 @@
 part of '../constants.dart';
 
 /// Analytics time constants specific for memory screen.
-enum MemoryTime {
-  calculateDiff,
-  updateValues,
-}
+enum MemoryTime { calculateDiff, updateValues }
 
 enum MemoryEvents {
   browseRefLimit,

@@ -67,7 +67,6 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
-
     String? user_app, // dimension1 (flutter or web)
     String? user_build, // dimension2 (debug or profile)
     String? user_platform, // dimension3 (android/ios/fuchsia/linux/mac/windows)
@@ -76,11 +75,10 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     String? devtools_version, // dimension6 DevTools version #
     String? ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
     String?
-        flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
+    flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
     String? is_external_build, // dimension9 External build or google3
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
-
     // dimension12 IDE feature that launched Devtools
     // The following is a non-exhaustive list of possible values for this dimension:
     // "command" - VS Code command palette
@@ -93,7 +91,6 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     // "languageStatus" - launched from the language status popout
     String? ide_launched_feature,
     String? is_wasm, // dimension13 whether DevTools is running with WASM.
-
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
     int? raster_duration_micros, // metric2
@@ -148,53 +145,66 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
       ide_launched_feature: ideLaunchedFeature,
       is_wasm: kIsWasm.toString(),
       // [PerformanceScreenMetrics]
-      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.uiDuration?.inMicroseconds
-          : null,
-      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.rasterDuration?.inMicroseconds
-          : null,
+      ui_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.uiDuration?.inMicroseconds
+              : null,
+      raster_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.rasterDuration?.inMicroseconds
+              : null,
       shader_compilation_duration_micros:
           screenMetrics is PerformanceScreenMetrics
               ? screenMetrics.shaderCompilationDuration?.inMicroseconds
               : null,
-      trace_event_count: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.traceEventCount
-          : null,
+      trace_event_count:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.traceEventCount
+              : null,
       // [ProfilerScreenMetrics]
-      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
-          ? screenMetrics.cpuSampleCount
-          : null,
-      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
-          ? screenMetrics.cpuStackDepth
-          : null,
+      cpu_sample_count:
+          screenMetrics is ProfilerScreenMetrics
+              ? screenMetrics.cpuSampleCount
+              : null,
+      cpu_stack_depth:
+          screenMetrics is ProfilerScreenMetrics
+              ? screenMetrics.cpuStackDepth
+              : null,
       // [MemoryScreenMetrics]
-      heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapDiffObjectsBefore
-          : null,
-      heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapDiffObjectsAfter
-          : null,
-      heap_objects_total: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapObjectsTotal
-          : null,
+      heap_diff_objects_before:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapDiffObjectsBefore
+              : null,
+      heap_diff_objects_after:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapDiffObjectsAfter
+              : null,
+      heap_objects_total:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapObjectsTotal
+              : null,
       // [InspectorScreenMetrics]
-      root_set_count: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.rootSetCount
-          : null,
-      row_count: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.rowCount
-          : null,
-      inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.inspectorTreeControllerId
-          : null,
+      root_set_count:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.rootSetCount
+              : null,
+      row_count:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.rowCount
+              : null,
+      inspector_tree_controller_id:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.inspectorTreeControllerId
+              : null,
       // [DeepLinkScreenMetrics]
-      android_app_id: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.androidAppId
-          : null,
-      ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.iosBundleId
-          : null,
+      android_app_id:
+          screenMetrics is DeepLinkScreenMetrics
+              ? screenMetrics.androidAppId
+              : null,
+      ios_bundle_id:
+          screenMetrics is DeepLinkScreenMetrics
+              ? screenMetrics.iosBundleId
+              : null,
       // [InspectorScreenMetrics]
       is_v2_inspector:
           screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
@@ -244,7 +254,6 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
-
     String? user_app, // dimension1 (flutter or web)
     String? user_build, // dimension2 (debug or profile)
     String? user_platform, // dimension3 (android or ios)
@@ -256,7 +265,6 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     String? is_external_build, // dimension9 External build or google3
     String? is_embedded, // dimension10 Whether devtools is embedded
     String? g3_username, // dimension11 g3 username (null for external users)
-
     // dimension12 IDE feature that launched Devtools
     // The following is a non-exhaustive list of possible values for this dimension:
     // "command" - VS Code command palette
@@ -269,7 +277,6 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     // "languageStatus" - launched from the language status popout
     String? ide_launched_feature,
     String? is_wasm, // dimension13 whether DevTools is running with WASM.
-
     // Performance screen metrics. See [PerformanceScreenMetrics].
     int? ui_duration_micros, // metric1
     int? raster_duration_micros, // metric2
@@ -316,53 +323,66 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
       ide_launched_feature: ideLaunchedFeature,
       is_wasm: kIsWasm.toString(),
       // [PerformanceScreenMetrics]
-      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.uiDuration?.inMicroseconds
-          : null,
-      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.rasterDuration?.inMicroseconds
-          : null,
-      trace_event_count: screenMetrics is PerformanceScreenMetrics
-          ? screenMetrics.traceEventCount
-          : null,
+      ui_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.uiDuration?.inMicroseconds
+              : null,
+      raster_duration_micros:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.rasterDuration?.inMicroseconds
+              : null,
+      trace_event_count:
+          screenMetrics is PerformanceScreenMetrics
+              ? screenMetrics.traceEventCount
+              : null,
       shader_compilation_duration_micros:
           screenMetrics is PerformanceScreenMetrics
               ? screenMetrics.shaderCompilationDuration?.inMicroseconds
               : null,
       // [ProfilerScreenMetrics]
-      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
-          ? screenMetrics.cpuSampleCount
-          : null,
-      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
-          ? screenMetrics.cpuStackDepth
-          : null,
+      cpu_sample_count:
+          screenMetrics is ProfilerScreenMetrics
+              ? screenMetrics.cpuSampleCount
+              : null,
+      cpu_stack_depth:
+          screenMetrics is ProfilerScreenMetrics
+              ? screenMetrics.cpuStackDepth
+              : null,
       // [MemoryScreenMetrics]
-      heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapDiffObjectsBefore
-          : null,
-      heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapDiffObjectsAfter
-          : null,
-      heap_objects_total: screenMetrics is MemoryScreenMetrics
-          ? screenMetrics.heapObjectsTotal
-          : null,
+      heap_diff_objects_before:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapDiffObjectsBefore
+              : null,
+      heap_diff_objects_after:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapDiffObjectsAfter
+              : null,
+      heap_objects_total:
+          screenMetrics is MemoryScreenMetrics
+              ? screenMetrics.heapObjectsTotal
+              : null,
       // [InspectorScreenMetrics]
-      root_set_count: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.rootSetCount
-          : null,
-      row_count: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.rowCount
-          : null,
-      inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.inspectorTreeControllerId
-          : null,
+      root_set_count:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.rootSetCount
+              : null,
+      row_count:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.rowCount
+              : null,
+      inspector_tree_controller_id:
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.inspectorTreeControllerId
+              : null,
       // [DeepLinkScreenMetrics]
-      android_app_id: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.androidAppId
-          : null,
-      ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.iosBundleId
-          : null,
+      android_app_id:
+          screenMetrics is DeepLinkScreenMetrics
+              ? screenMetrics.androidAppId
+              : null,
+      ios_bundle_id:
+          screenMetrics is DeepLinkScreenMetrics
+              ? screenMetrics.iosBundleId
+              : null,
       // [InspectorScreenMetrics]
       is_v2_inspector:
           screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
@@ -462,10 +482,7 @@ final _timedOperationsInProgress = <String, DateTime>{};
 // end marks.
 void timeStart(String screenName, String timedOperation) {
   final startTime = DateTime.now();
-  final operationKey = _operationKey(
-    screenName,
-    timedOperation,
-  );
+  final operationKey = _operationKey(screenName, timedOperation);
   _timedOperationsInProgress[operationKey] = startTime;
 }
 
@@ -478,10 +495,7 @@ void timeEnd(
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
   final endTime = DateTime.now();
-  final operationKey = _operationKey(
-    screenName,
-    timedOperation,
-  );
+  final operationKey = _operationKey(screenName, timedOperation);
   final startTime = _timedOperationsInProgress.remove(operationKey);
   assert(startTime != null);
   if (startTime == null) {
@@ -504,10 +518,7 @@ void timeEnd(
 }
 
 void cancelTimingOperation(String screenName, String timedOperation) {
-  final operationKey = _operationKey(
-    screenName,
-    timedOperation,
-  );
+  final operationKey = _operationKey(screenName, timedOperation);
   final operation = _timedOperationsInProgress.remove(operationKey);
   assert(
     operation != null,
@@ -901,10 +912,7 @@ void legacyOnSetupAnalytics() {
 }
 
 void _sendEvent(GtagEventDevTools gtagEvent) {
-  GTag.event(
-    gtagEvent.screen!,
-    gaEventProvider: () => gtagEvent,
-  );
+  GTag.event(gtagEvent.screen!, gaEventProvider: () => gtagEvent);
   final uaEvent = _uaEventFromGtagEvent(gtagEvent);
   unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
@@ -1040,7 +1048,8 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
   final String? iosBundleId;
 
   @override
-  Map<String, Object> toMap() => (<String, Object?>{
+  Map<String, Object> toMap() =>
+      (<String, Object?>{
         'uiDurationMicros': uiDurationMicros,
         'rasterDurationMicros': rasterDurationMicros,
         'shaderCompilationDurationMicros': shaderCompilationDurationMicros,
@@ -1056,6 +1065,5 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
         'isV2Inspector': isV2Inspector,
         'androidAppId': androidAppId,
         'iosBundleId': iosBundleId,
-      }..removeWhere((key, value) => value == null))
-          .cast<String, Object>();
+      }..removeWhere((key, value) => value == null)).cast<String, Object>();
 }

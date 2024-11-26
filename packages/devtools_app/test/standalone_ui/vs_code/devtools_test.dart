@@ -74,16 +74,17 @@ void main() {
 
   group('$DevToolsSidebarOptions', () {
     for (final hasDebugSessions in [true, false]) {
-      final debugSessions = hasDebugSessions
-          ? {
-              'test session': generateDebugSession(
-                debuggerType: 'Flutter',
-                deviceId: 'macos',
-                flutterMode: 'debug',
-                projectRootPath: testDtdProjectRoot,
-              ),
-            }
-          : <String, EditorDebugSession>{};
+      final debugSessions =
+          hasDebugSessions
+              ? {
+                'test session': generateDebugSession(
+                  debuggerType: 'Flutter',
+                  deviceId: 'macos',
+                  flutterMode: 'debug',
+                  projectRootPath: testDtdProjectRoot,
+                ),
+              }
+              : <String, EditorDebugSession>{};
 
       testWidgetsWithWindowSize(
         'pumps DevTools screens ${hasDebugSessions ? 'with' : 'without'} debug '
@@ -128,38 +129,33 @@ void main() {
         },
       );
 
-      testWidgetsWithWindowSize(
-        'includes DevTools extensions',
-        windowSize,
-        (tester) async {
-          await pumpDevToolsSidebarOptions(
-            tester,
-            debugSessions: debugSessions,
-          );
-          expect(find.text('DevTools Extensions'), findsOneWidget);
+      testWidgetsWithWindowSize('includes DevTools extensions', windowSize, (
+        tester,
+      ) async {
+        await pumpDevToolsSidebarOptions(tester, debugSessions: debugSessions);
+        expect(find.text('DevTools Extensions'), findsOneWidget);
 
-          final expectedExtensions = [
-            StubDevToolsExtensions.barExtension,
-            StubDevToolsExtensions.bazExtension,
-            StubDevToolsExtensions.duplicateFooExtension,
-          ];
-          for (final ext in expectedExtensions) {
-            expect(find.text(ext.displayName), findsOneWidget);
-            final buttonFinder = find.ancestor(
-              of: find.text(ext.displayName),
-              matching: find.byType(InkWell),
-            );
-            expect(buttonFinder, findsOneWidget);
-            final buttonWidget = tester.widget<InkWell>(buttonFinder);
-            expect(
-              buttonWidget.onTap,
-              hasDebugSessions
-                  ? isNotNull
-                  : (ext.requiresConnection ? isNull : isNotNull),
-            );
-          }
-        },
-      );
+        final expectedExtensions = [
+          StubDevToolsExtensions.barExtension,
+          StubDevToolsExtensions.bazExtension,
+          StubDevToolsExtensions.duplicateFooExtension,
+        ];
+        for (final ext in expectedExtensions) {
+          expect(find.text(ext.displayName), findsOneWidget);
+          final buttonFinder = find.ancestor(
+            of: find.text(ext.displayName),
+            matching: find.byType(InkWell),
+          );
+          expect(buttonFinder, findsOneWidget);
+          final buttonWidget = tester.widget<InkWell>(buttonFinder);
+          expect(
+            buttonWidget.onTap,
+            hasDebugSessions
+                ? isNotNull
+                : (ext.requiresConnection ? isNull : isNotNull),
+          );
+        }
+      });
     }
   });
 }

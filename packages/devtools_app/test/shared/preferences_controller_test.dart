@@ -55,8 +55,9 @@ void main() {
         valueChanged = true;
       });
 
-      controller
-          .toggleVmDeveloperMode(!controller.vmDeveloperModeEnabled.value);
+      controller.toggleVmDeveloperMode(
+        !controller.vmDeveloperModeEnabled.value,
+      );
       expect(valueChanged, isTrue);
       expect(controller.vmDeveloperModeEnabled.value, isNot(originalValue));
     });
@@ -115,9 +116,7 @@ void main() {
     void updateMainIsolateRootLibrary(String? rootLibrary) {
       setGlobal(
         ServiceConnectionManager,
-        FakeServiceConnectionManager(
-          rootLibrary: rootLibrary,
-        ),
+        FakeServiceConnectionManager(rootLibrary: rootLibrary),
       );
     }
 
@@ -146,14 +145,12 @@ void main() {
 
         controller.setHoverEvalMode(newHoverModeValue);
 
-        final storedHoverModeValue =
-            await storage.getValue('inspector.hoverEvalMode');
+        final storedHoverModeValue = await storage.getValue(
+          'inspector.hoverEvalMode',
+        );
         expect(valueChanged, isTrue);
         expect(controller.hoverEvalModeEnabled.value, newHoverModeValue);
-        expect(
-          storedHoverModeValue,
-          newHoverModeValue.toString(),
-        );
+        expect(storedHoverModeValue, newHoverModeValue.toString());
       });
     });
 
@@ -167,20 +164,15 @@ void main() {
               '/third_party/dart/',
         };
 
-        for (final MapEntry(
-              key: rootLib,
-              value: expectedPubRoot,
-            ) in rootLibToExpectedPubRoot.entries) {
-          test(
-            '$rootLib -> $expectedPubRoot',
-            () async {
-              updateMainIsolateRootLibrary(rootLib);
-              await controller.handleConnectionToNewService();
-              final directories = controller.pubRootDirectories.value;
+        for (final MapEntry(key: rootLib, value: expectedPubRoot)
+            in rootLibToExpectedPubRoot.entries) {
+          test('$rootLib -> $expectedPubRoot', () async {
+            updateMainIsolateRootLibrary(rootLib);
+            await controller.handleConnectionToNewService();
+            final directories = controller.pubRootDirectories.value;
 
-              expect(directories, equals([expectedPubRoot]));
-            },
-          );
+            expect(directories, equals([expectedPubRoot]));
+          });
         }
       },
     );
@@ -200,17 +192,11 @@ void main() {
         );
       });
 
-      test(
-        'fetches custom pub root directories from the local cache',
-        () {
-          final directories = controller.pubRootDirectories.value;
+      test('fetches custom pub root directories from the local cache', () {
+        final directories = controller.pubRootDirectories.value;
 
-          expect(
-            directories,
-            containsAll(customPubRootDirectories),
-          );
-        },
-      );
+        expect(directories, containsAll(customPubRootDirectories));
+      });
 
       test(
         'custom pub root directories are cached across multiple connections',
@@ -219,23 +205,14 @@ void main() {
           var cachedDirectories =
               await controller.readCachedPubRootDirectories();
 
-          expect(
-            directories,
-            containsAll(customPubRootDirectories),
-          );
-          expect(
-            cachedDirectories,
-            containsAll(customPubRootDirectories),
-          );
+          expect(directories, containsAll(customPubRootDirectories));
+          expect(cachedDirectories, containsAll(customPubRootDirectories));
 
           await controller.handleConnectionToNewService();
           directories = controller.pubRootDirectories.value;
           cachedDirectories = await controller.readCachedPubRootDirectories();
 
-          expect(
-            directories,
-            containsAll(customPubRootDirectories),
-          );
+          expect(directories, containsAll(customPubRootDirectories));
           expect(cachedDirectories, containsAll(customPubRootDirectories));
         },
       );
@@ -243,10 +220,9 @@ void main() {
       test(
         'adding more directories to cache doesn\'t overwrite pre-existing values',
         () async {
-          await controller.addPubRootDirectories(
-            ['test_dir/fake_app/custom_dir3'],
-            shouldCache: true,
-          );
+          await controller.addPubRootDirectories([
+            'test_dir/fake_app/custom_dir3',
+          ], shouldCache: true);
 
           final cachedDirectories =
               await controller.readCachedPubRootDirectories();
@@ -274,45 +250,30 @@ void main() {
           await controller.removePubRootDirectories([removed]);
           cachedDirectories = await controller.readCachedPubRootDirectories();
 
-          expect(
-            cachedDirectories,
-            isNot(contains(removed)),
-          );
-          expect(
-            cachedDirectories,
-            contains(notRemoved),
-          );
+          expect(cachedDirectories, isNot(contains(removed)));
+          expect(cachedDirectories, contains(notRemoved));
         },
       );
 
-      test(
-        'directories includes inferred directory as well',
-        () {
-          final directories = controller.pubRootDirectories.value;
+      test('directories includes inferred directory as well', () {
+        final directories = controller.pubRootDirectories.value;
 
-          expect(
-            directories,
-            contains('test_dir/fake_app/'),
-          );
-        },
-      );
+        expect(directories, contains('test_dir/fake_app/'));
+      });
 
-      test(
-        'does not save inferred directory to local cache',
-        () async {
-          final cachedDirectories =
-              await controller.readCachedPubRootDirectories();
+      test('does not save inferred directory to local cache', () async {
+        final cachedDirectories =
+            await controller.readCachedPubRootDirectories();
 
-          expect(cachedDirectories, isNot(contains('test_dir/fake_app/')));
-        },
-      );
+        expect(cachedDirectories, isNot(contains('test_dir/fake_app/')));
+      });
 
       test(
         'directories added with "no caching" specified are not cached',
         () async {
-          await controller.addPubRootDirectories(
-            ['test_dir/fake_app/do_not_cache_dir'],
-          );
+          await controller.addPubRootDirectories([
+            'test_dir/fake_app/do_not_cache_dir',
+          ]);
           final cachedDirectories =
               await controller.readCachedPubRootDirectories();
 
@@ -328,12 +289,10 @@ void main() {
       updateMainIsolateRootLibrary('test_dir/fake_app/lib/main.dart');
       await storage.setValue(
         'inspector.customPubRootDirectories_myPackage',
-        jsonEncode(
-          [
-            'flutter_dir/flutter/packages/flutter',
-            'test_dir/fake_app/custom_dir1',
-          ],
-        ),
+        jsonEncode([
+          'flutter_dir/flutter/packages/flutter',
+          'test_dir/fake_app/custom_dir1',
+        ]),
       );
       await controller.handleConnectionToNewService();
       final cachedDirectories = await controller.readCachedPubRootDirectories();
@@ -342,10 +301,7 @@ void main() {
         cachedDirectories,
         isNot(contains('flutter_dir/flutter/packages/flutter')),
       );
-      expect(
-        cachedDirectories,
-        contains('test_dir/fake_app/custom_dir1'),
-      );
+      expect(cachedDirectories, contains('test_dir/fake_app/custom_dir1'));
     });
 
     test(
@@ -354,12 +310,10 @@ void main() {
         updateMainIsolateRootLibrary('test_dir/fake_app/lib/main.dart');
         await storage.setValue(
           'inspector.customPubRootDirectories_myPackage',
-          jsonEncode(
-            [
-              'flutter_dir/flutter/packages/flutter',
-              'test_dir/fake_app/custom_dir1',
-            ],
-          ),
+          jsonEncode([
+            'flutter_dir/flutter/packages/flutter',
+            'test_dir/fake_app/custom_dir1',
+          ]),
         );
         await controller.handleConnectionToNewService();
         var cachedDirectories = await controller.readCachedPubRootDirectories();
@@ -368,19 +322,14 @@ void main() {
           cachedDirectories,
           isNot(contains('flutter_dir/flutter/packages/flutter')),
         );
-        expect(
-          cachedDirectories,
-          contains('test_dir/fake_app/custom_dir1'),
-        );
+        expect(cachedDirectories, contains('test_dir/fake_app/custom_dir1'));
 
         await storage.setValue(
           'inspector.customPubRootDirectories_myPackage',
-          jsonEncode(
-            [
-              'flutter_dir/flutter/packages/flutter',
-              'test_dir/fake_app/custom_dir2',
-            ],
-          ),
+          jsonEncode([
+            'flutter_dir/flutter/packages/flutter',
+            'test_dir/fake_app/custom_dir2',
+          ]),
         );
         await controller.handleConnectionToNewService();
         cachedDirectories = await controller.readCachedPubRootDirectories();
@@ -389,10 +338,7 @@ void main() {
           cachedDirectories,
           isNot(contains('flutter_dir/flutter/packages/flutter')),
         );
-        expect(
-          cachedDirectories,
-          contains('test_dir/fake_app/custom_dir2'),
-        );
+        expect(cachedDirectories, contains('test_dir/fake_app/custom_dir2'));
       },
     );
   });
@@ -577,10 +523,7 @@ void main() {
       await controller.init();
 
       // Check they did not change back to default.
-      expect(
-        controller.showFlutterFramesChart.value,
-        !showFramesChart,
-      );
+      expect(controller.showFlutterFramesChart.value, !showFramesChart);
       expect(
         controller.includeCpuSamplesInTimeline.value,
         !includeCpuSamplesInTimeline,
@@ -595,10 +538,7 @@ void main() {
       await controller.init();
 
       // Check they flipped values are loaded.
-      expect(
-        controller.showFlutterFramesChart.value,
-        showFramesChart,
-      );
+      expect(controller.showFlutterFramesChart.value, showFramesChart);
       expect(
         controller.includeCpuSamplesInTimeline.value,
         includeCpuSamplesInTimeline,
@@ -636,10 +576,7 @@ void main() {
       await controller.init();
 
       // Check they did not change back to default.
-      expect(
-        controller.showOnlyEnabledExtensions.value,
-        !showOnlyEnabled,
-      );
+      expect(controller.showOnlyEnabledExtensions.value, !showOnlyEnabled);
 
       // Flip the values in storage.
       for (final key in storage.values.keys) {
@@ -650,10 +587,7 @@ void main() {
       await controller.init();
 
       // Check they flipped values are loaded.
-      expect(
-        controller.showOnlyEnabledExtensions.value,
-        showOnlyEnabled,
-      );
+      expect(controller.showOnlyEnabledExtensions.value, showOnlyEnabled);
     });
   });
 }

@@ -32,20 +32,22 @@ part '_tree_table.dart';
 // TODO(devoncarew): We need to render the selected row with a different
 // background color.
 
-typedef IndexedScrollableWidgetBuilder = Widget Function({
-  required BuildContext context,
-  required LinkedScrollControllerGroup linkedScrollControllerGroup,
-  required int index,
-  required List<double> columnWidths,
-  required bool isPinned,
-  required bool enableHoverHandling,
-});
+typedef IndexedScrollableWidgetBuilder =
+    Widget Function({
+      required BuildContext context,
+      required LinkedScrollControllerGroup linkedScrollControllerGroup,
+      required int index,
+      required List<double> columnWidths,
+      required bool isPinned,
+      required bool enableHoverHandling,
+    });
 
-typedef TableKeyEventHandler = KeyEventResult Function(
-  KeyEvent event,
-  ScrollController scrollController,
-  BoxConstraints constraints,
-);
+typedef TableKeyEventHandler =
+    KeyEventResult Function(
+      KeyEvent event,
+      ScrollController scrollController,
+      BoxConstraints constraints,
+    );
 
 class Selection<T> {
   Selection({
@@ -56,10 +58,10 @@ class Selection<T> {
   }) : assert(nodeIndex == null || nodeIndexCalculator == null);
 
   Selection.empty()
-      : node = null,
-        nodeIndex = null,
-        nodeIndexCalculator = null,
-        scrollIntoView = true;
+    : node = null,
+      nodeIndex = null,
+      nodeIndexCalculator = null,
+      scrollIntoView = true;
 
   final T? node;
   // TODO (carolynqu): get rid of nodeIndex and only use nodeIndexCalculator, https://github.com/flutter/devtools/issues/4266
@@ -137,9 +139,10 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
 
-    final initialScrollOffset = widget.preserveVerticalScrollPosition
-        ? widget.tableController.tableUiState.scrollOffset
-        : 0.0;
+    final initialScrollOffset =
+        widget.preserveVerticalScrollPosition
+            ? widget.tableController.tableUiState.scrollOffset
+            : 0.0;
     widget.tableController.initScrollController(initialScrollOffset);
     scrollController = widget.tableController.verticalScrollController!;
 
@@ -158,7 +161,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   void didUpdateWidget(covariant DevToolsTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final notifiersChanged = widget.tableController.tableData !=
+    final notifiersChanged =
+        widget.tableController.tableData !=
             oldWidget.tableController.tableData ||
         widget.selectionNotifier != oldWidget.selectionNotifier ||
         widget.activeSearchMatchNotifier != oldWidget.activeSearchMatchNotifier;
@@ -196,9 +200,10 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
           final nodeIndex = selection.nodeIndex;
 
           if (selection.scrollIntoView && node != null) {
-            final selectedDisplayRow = nodeIndexCalculator != null
-                ? nodeIndexCalculator(node)!
-                : nodeIndex!;
+            final selectedDisplayRow =
+                nodeIndexCalculator != null
+                    ? nodeIndexCalculator(node)!
+                    : nodeIndex!;
 
             final newPos = selectedDisplayRow * defaultRowHeight;
 
@@ -228,7 +233,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     if (index == -1) return;
 
     final y = index * defaultRowHeight;
-    final indexInView = y > scrollController.offset &&
+    final indexInView =
+        y > scrollController.offset &&
         y < scrollController.offset + scrollController.position.extentInside;
     if (!indexInView) {
       await scrollController.animateTo(
@@ -344,9 +350,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   }
 
   double _pinnedDataHeight(BoxConstraints tableConstraints) => min(
-        widget.rowItemExtent! * pinnedData.length,
-        tableConstraints.maxHeight / 2,
-      );
+    widget.rowItemExtent! * pinnedData.length,
+    tableConstraints.maxHeight / 2,
+  );
 
   int _dataRowCount(
     BoxConstraints tableConstraints,
@@ -358,7 +364,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     var maxHeight = tableConstraints.maxHeight;
     final columnHeadersCount = showColumnGroupHeader ? 2 : 1;
-    maxHeight -= columnHeadersCount *
+    maxHeight -=
+        columnHeadersCount *
         (defaultHeaderHeight +
             (widget.tallHeaders ? scaleByFontFactor(densePadding) : 0.0));
 
@@ -395,7 +402,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     final columnGroups = widget.tableController.columnGroups;
     final includeColumnGroupHeaders =
         widget.tableController.includeColumnGroupHeaders;
-    final showColumnGroupHeader = columnGroups != null &&
+    final showColumnGroupHeader =
+        columnGroups != null &&
         columnGroups.isNotEmpty &&
         includeColumnGroupHeaders;
     final tableUiState = widget.tableController.tableUiState;
@@ -456,11 +464,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                         controller: pinnedScrollController,
                         itemCount: pinnedData.length,
                         itemExtent: widget.rowItemExtent,
-                        itemBuilder: (context, index) => _buildItem(
-                          context,
-                          index,
-                          isPinned: true,
-                        ),
+                        itemBuilder:
+                            (context, index) =>
+                                _buildItem(context, index, isPinned: true),
                       ),
                     ),
                   ),
@@ -475,18 +481,22 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                       onTapDown: (a) => widget.focusNode?.requestFocus(),
                       child: Focus(
                         autofocus: true,
-                        onKeyEvent: (_, event) => widget.handleKeyEvent != null
-                            ? widget.handleKeyEvent!(
-                                event,
-                                scrollController,
-                                constraints,
-                              )
-                            : KeyEventResult.ignored,
+                        onKeyEvent:
+                            (_, event) =>
+                                widget.handleKeyEvent != null
+                                    ? widget.handleKeyEvent!(
+                                      event,
+                                      scrollController,
+                                      constraints,
+                                    )
+                                    : KeyEventResult.ignored,
                         focusNode: widget.focusNode,
                         child: ListView.builder(
                           controller: scrollController,
-                          itemCount:
-                              _dataRowCount(constraints, showColumnGroupHeader),
+                          itemCount: _dataRowCount(
+                            constraints,
+                            showColumnGroupHeader,
+                          ),
                           itemExtent: widget.rowItemExtent,
                           itemBuilder: _buildItem,
                         ),

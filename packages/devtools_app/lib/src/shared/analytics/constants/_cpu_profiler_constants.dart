@@ -11,9 +11,7 @@ enum CpuProfilerEvents {
   cpuProfileFlameChartHelp,
   cpuProfileProcessingTime,
   openDataFile,
-  loadDataFromFile;
+  loadDataFromFile,
 }
 
-enum CpuProfilerDocs {
-  profileGranularityDocs,
-}
+enum CpuProfilerDocs { profileGranularityDocs }

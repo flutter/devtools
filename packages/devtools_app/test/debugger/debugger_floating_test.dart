@@ -17,10 +17,12 @@ void main() {
   final debuggerController = createMockDebuggerControllerWithDefaults();
   final scriptManager = MockScriptManager();
 
-  when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
-      .thenReturn(false);
-  when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
-      .thenReturn(false);
+  when(
+    fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow,
+  ).thenReturn(false);
+  when(
+    fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow,
+  ).thenReturn(false);
   setGlobal(ServiceConnectionManager, fakeServiceConnection);
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, scriptManager);
@@ -51,10 +53,7 @@ void main() {
     final animatedOpacity =
         animatedOpacityFinder.evaluate().first.widget as AnimatedOpacity;
     expect(animatedOpacity.opacity, equals(1.0));
-    expect(
-      find.text('Main isolate is paused in the debugger'),
-      findsOneWidget,
-    );
+    expect(find.text('Main isolate is paused in the debugger'), findsOneWidget);
     expect(find.byTooltip('Resume'), findsOneWidget);
     expect(find.byTooltip('Step over'), findsOneWidget);
   });

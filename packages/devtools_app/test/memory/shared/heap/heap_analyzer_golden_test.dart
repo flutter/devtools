@@ -41,14 +41,16 @@ void main() {
       });
 
       test('has exactly one object of type ${t.appClassName}.', () {
-        final appObjects =
-            heap.graph.objects.where((o) => o.classId == appClassId);
+        final appObjects = heap.graph.objects.where(
+          (o) => o.classId == appClassId,
+        );
         expect(appObjects, hasLength(1), reason: t.fileName);
       });
 
       test('has path to the object of type ${t.appClassName}.', () {
-        final className =
-            HeapClassName.fromHeapSnapshotClass(heap.graph.classes[appClassId]);
+        final className = HeapClassName.fromHeapSnapshotClass(
+          heap.graph.classes[appClassId],
+        );
 
         final classData = heap.classes!.asMap()[className]!;
         expect(classData.byPath, isNotEmpty, reason: t.fileName);
@@ -61,9 +63,7 @@ int findClassId(HeapData heap, String className) {
   return heap.graph.classes
       .firstWhere(
         (c) => c.name == className,
-        orElse: () => throw StateError(
-          'No class found with name $className.',
-        ),
+        orElse: () => throw StateError('No class found with name $className.'),
       )
       .classId;
 }

@@ -24,8 +24,9 @@ void main() {
       final mockServiceConnection = createMockServiceConnectionWithDefaults();
       mockServiceManager =
           mockServiceConnection.serviceManager as MockServiceManager;
-      when(mockServiceManager.connectedState)
-          .thenReturn(ValueNotifier(const ConnectedState(true)));
+      when(
+        mockServiceManager.connectedState,
+      ).thenReturn(ValueNotifier(const ConnectedState(true)));
       setGlobal(ServiceConnectionManager, mockServiceConnection);
     });
 
@@ -46,10 +47,12 @@ void main() {
       expect(service.runtimeExtensions.length, 3);
       expect(service.availableExtensions.length, 5);
 
-      final ignoredStaticExtensions =
-          service.staticExtensions.where(service.isExtensionIgnored);
-      final ignoredRuntimeExtensions =
-          service.runtimeExtensions.where(service.isExtensionIgnored);
+      final ignoredStaticExtensions = service.staticExtensions.where(
+        service.isExtensionIgnored,
+      );
+      final ignoredRuntimeExtensions = service.runtimeExtensions.where(
+        service.isExtensionIgnored,
+      );
       expect(ignoredStaticExtensions.length, 2);
       expect(ignoredStaticExtensions.map((e) => e.identifier).toList(), [
         'bar_2.0.0',
@@ -59,8 +62,9 @@ void main() {
     });
 
     test('initialize with ignoreServiceConnection', () async {
-      when(mockServiceManager.connectedState)
-          .thenReturn(ValueNotifier(const ConnectedState(false)));
+      when(
+        mockServiceManager.connectedState,
+      ).thenReturn(ValueNotifier(const ConnectedState(false)));
 
       final service = ExtensionService(ignoreServiceConnection: true);
       expect(service.staticExtensions, isEmpty);
@@ -72,8 +76,9 @@ void main() {
       expect(service.runtimeExtensions, isEmpty);
       expect(service.availableExtensions.length, 3);
 
-      final ignoredStaticExtensions =
-          service.staticExtensions.where(service.isExtensionIgnored);
+      final ignoredStaticExtensions = service.staticExtensions.where(
+        service.isExtensionIgnored,
+      );
       expect(ignoredStaticExtensions.length, 1);
       expect(ignoredStaticExtensions.map((e) => e.identifier).toList(), [
         'bar_2.0.0', // Duplicate: older version of an existing extension.
@@ -98,10 +103,12 @@ void main() {
         );
       }
 
-      var barEnabledState =
-          await enabledOnDisk(StubDevToolsExtensions.barExtension);
-      var newerBarEnabledState =
-          await enabledOnDisk(StubDevToolsExtensions.newerBarExtension);
+      var barEnabledState = await enabledOnDisk(
+        StubDevToolsExtensions.barExtension,
+      );
+      var newerBarEnabledState = await enabledOnDisk(
+        StubDevToolsExtensions.newerBarExtension,
+      );
       expect(barEnabledState, ExtensionEnabledState.none);
       expect(newerBarEnabledState, ExtensionEnabledState.none);
       expect(
@@ -117,10 +124,12 @@ void main() {
       );
 
       // Verify enabled states for all matching extensions have been updated.
-      barEnabledState =
-          await enabledOnDisk(StubDevToolsExtensions.barExtension);
-      newerBarEnabledState =
-          await enabledOnDisk(StubDevToolsExtensions.newerBarExtension);
+      barEnabledState = await enabledOnDisk(
+        StubDevToolsExtensions.barExtension,
+      );
+      newerBarEnabledState = await enabledOnDisk(
+        StubDevToolsExtensions.newerBarExtension,
+      );
       expect(barEnabledState, ExtensionEnabledState.enabled);
       expect(newerBarEnabledState, ExtensionEnabledState.enabled);
       expect(
@@ -130,10 +139,12 @@ void main() {
         ExtensionEnabledState.enabled,
       );
 
-      var fooEnabledState =
-          await enabledOnDisk(StubDevToolsExtensions.fooExtension);
-      var duplicateFooEnabledState =
-          await enabledOnDisk(StubDevToolsExtensions.duplicateFooExtension);
+      var fooEnabledState = await enabledOnDisk(
+        StubDevToolsExtensions.fooExtension,
+      );
+      var duplicateFooEnabledState = await enabledOnDisk(
+        StubDevToolsExtensions.duplicateFooExtension,
+      );
       expect(fooEnabledState, ExtensionEnabledState.none);
       expect(duplicateFooEnabledState, ExtensionEnabledState.none);
       expect(
@@ -149,10 +160,12 @@ void main() {
       );
 
       // Verify enabled states for all matching extensions have been updated.
-      fooEnabledState =
-          await enabledOnDisk(StubDevToolsExtensions.fooExtension);
-      duplicateFooEnabledState =
-          await enabledOnDisk(StubDevToolsExtensions.duplicateFooExtension);
+      fooEnabledState = await enabledOnDisk(
+        StubDevToolsExtensions.fooExtension,
+      );
+      duplicateFooEnabledState = await enabledOnDisk(
+        StubDevToolsExtensions.duplicateFooExtension,
+      );
       expect(fooEnabledState, ExtensionEnabledState.disabled);
       expect(duplicateFooEnabledState, ExtensionEnabledState.disabled);
       expect(

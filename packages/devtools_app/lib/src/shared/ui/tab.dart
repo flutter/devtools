@@ -24,11 +24,9 @@ class DevToolsTab extends Tab {
     required this.gaId,
     this.trailing,
     super.child,
-  })  : assert(text != null || child != null || icon != null),
-        assert(text == null || child == null),
-        super(
-          height: calculateHeight(icon, text, child),
-        );
+  }) : assert(text != null || child != null || icon != null),
+       assert(text == null || child == null),
+       super(height: calculateHeight(icon, text, child));
 
   factory DevToolsTab.create({
     Key? key,
@@ -40,10 +38,7 @@ class DevToolsTab extends Tab {
       key: key ?? ValueKey<String>(tabName),
       gaId: '${gaPrefix}_$tabName',
       trailing: trailing,
-      child: Text(
-        tabName,
-        overflow: TextOverflow.ellipsis,
-      ),
+      child: Text(tabName, overflow: TextOverflow.ellipsis),
     );
   }
 
@@ -87,9 +82,9 @@ class AnalyticsTabbedView extends StatefulWidget {
     this.initialSelectedIndex,
     this.analyticsSessionIdentifier,
   }) : trailingWidgets = List.generate(
-          tabs.length,
-          (index) => tabs[index].tab.trailing ?? const SizedBox(),
-        );
+         tabs.length,
+         (index) => tabs[index].tab.trailing ?? const SizedBox(),
+       );
 
   final List<TabAndView> tabs;
 
@@ -133,10 +128,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     _tabController?.removeListener(_onTabChanged);
     _tabController?.dispose();
 
-    _tabController = TabController(
-      length: widget.tabs.length,
-      vsync: this,
-    );
+    _tabController = TabController(length: widget.tabs.length, vsync: this);
 
     final initialIndex = widget.initialSelectedIndex;
     if (initialIndex != null) {
@@ -187,7 +179,8 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.tabs != widget.tabs ||
         oldWidget.gaScreen != widget.gaScreen) {
-      final isNewSession = oldWidget.analyticsSessionIdentifier !=
+      final isNewSession =
+          oldWidget.analyticsSessionIdentifier !=
               widget.analyticsSessionIdentifier &&
           widget.analyticsSessionIdentifier != null;
       _initTabController(isNewSession: isNewSession);

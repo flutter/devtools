@@ -24,21 +24,21 @@ void main() {
     mockServiceManager =
         mockServiceConnection.serviceManager as MockServiceManager;
     when(mockServiceManager.service).thenReturn(null);
-    when(mockServiceManager.connectedState).thenReturn(
-      ValueNotifier<ConnectedState>(const ConnectedState(false)),
-    );
+    when(
+      mockServiceManager.connectedState,
+    ).thenReturn(ValueNotifier<ConnectedState>(const ConnectedState(false)));
     when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-    when(mockServiceConnection.appState).thenReturn(
-      AppState(
-        mockServiceManager.isolateManager.selectedIsolate,
-      ),
-    );
+    when(
+      mockServiceConnection.appState,
+    ).thenReturn(AppState(mockServiceManager.isolateManager.selectedIsolate));
 
     final mockErrorBadgeManager = MockErrorBadgeManager();
-    when(mockServiceConnection.errorBadgeManager)
-        .thenReturn(mockErrorBadgeManager);
-    when(mockErrorBadgeManager.errorCountNotifier(any))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      mockServiceConnection.errorBadgeManager,
+    ).thenReturn(mockErrorBadgeManager);
+    when(
+      mockErrorBadgeManager.errorCountNotifier(any),
+    ).thenReturn(ValueNotifier<int>(0));
     when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
 
     setGlobal(ServiceConnectionManager, mockServiceConnection);
@@ -119,12 +119,12 @@ class _TestScreen extends Screen {
     bool showFloatingDebuggerControls = true,
     Key? tabKey,
   }) : super(
-          name,
-          title: name,
-          icon: Icons.computer,
-          tabKey: tabKey,
-          showFloatingDebuggerControls: showFloatingDebuggerControls,
-        );
+         name,
+         title: name,
+         icon: Icons.computer,
+         tabKey: tabKey,
+         showFloatingDebuggerControls: showFloatingDebuggerControls,
+       );
 
   final String name;
   final Key key;

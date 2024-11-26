@@ -50,33 +50,33 @@ class DevToolsScaffold extends StatefulWidget {
     EmbedMode embedMode = EmbedMode.none,
     List<Widget>? actions,
   }) : this(
-          key: key,
-          screens: [SimpleScreen(child)],
-          actions: actions,
-          embedMode: embedMode,
-        );
+         key: key,
+         screens: [SimpleScreen(child)],
+         actions: actions,
+         embedMode: embedMode,
+       );
 
   static List<Widget> defaultActions({Color? color}) => [
-        OpenSettingsAction(color: color),
-        if (FeatureFlags.devToolsExtensions &&
-            !DevToolsQueryParams.load().hideExtensions)
-          ExtensionSettingsAction(color: color),
-        ReportFeedbackButton(color: color),
-        OpenAboutAction(color: color),
-      ];
+    OpenSettingsAction(color: color),
+    if (FeatureFlags.devToolsExtensions &&
+        !DevToolsQueryParams.load().hideExtensions)
+      ExtensionSettingsAction(color: color),
+    ReportFeedbackButton(color: color),
+    OpenAboutAction(color: color),
+  ];
 
   /// The padding around the content in the DevTools UI.
   EdgeInsets get appPadding => EdgeInsets.fromLTRB(
-        horizontalPadding.left,
-        isEmbedded() ? 2.0 : intermediateSpacing,
-        horizontalPadding.right,
-        isEmbedded() ? 2.0 : intermediateSpacing,
-      );
+    horizontalPadding.left,
+    isEmbedded() ? 2.0 : intermediateSpacing,
+    horizontalPadding.right,
+    isEmbedded() ? 2.0 : intermediateSpacing,
+  );
 
   /// Horizontal padding around the content in the DevTools UI.
   static EdgeInsets get horizontalPadding => EdgeInsets.symmetric(
-        horizontal: isEmbedded() ? densePadding : largeSpacing,
-      );
+    horizontal: isEmbedded() ? densePadding : largeSpacing,
+  );
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
   final List<Screen> screens;
@@ -138,17 +138,19 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // Stay on the current tab if possible when the collection of tabs changes.
       if (_tabController != null &&
           widget.screens.contains(oldWidget.screens[_tabController!.index])) {
-        newIndex =
-            widget.screens.indexOf(oldWidget.screens[_tabController!.index]);
+        newIndex = widget.screens.indexOf(
+          oldWidget.screens[_tabController!.index],
+        );
       }
       // Create a new tab controller to reflect the changed tabs.
       _setupTabController(startingIndex: newIndex);
     } else if (widget.screens[_tabController!.index].screenId != widget.page) {
       // If the page changed (eg. the route was modified by pressing back in the
       // browser), animate to the new one.
-      var newIndex = widget.page == null
-          ? 0 // When there's no supplied page, we show the first one.
-          : widget.screens.indexWhere((t) => t.screenId == widget.page);
+      var newIndex =
+          widget.page == null
+              ? 0 // When there's no supplied page, we show the first one.
+              : widget.screens.indexWhere((t) => t.screenId == widget.page);
       // Ensure the returned index is in range, otherwise set to 0.
       if (newIndex == -1) {
         newIndex = 0;
@@ -182,8 +184,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     );
 
     if (widget.page != null) {
-      final initialIndex =
-          widget.screens.indexWhere((screen) => screen.screenId == widget.page);
+      final initialIndex = widget.screens.indexWhere(
+        (screen) => screen.screenId == widget.page,
+      );
       if (initialIndex != -1) {
         _tabController!.index = initialIndex;
       }
@@ -243,8 +246,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void _showPageById(String pageId) {
     final existingTabIndex = _tabController!.index;
 
-    final newIndex =
-        widget.screens.indexWhere((screen) => screen.screenId == pageId);
+    final newIndex = widget.screens.indexWhere(
+      (screen) => screen.screenId == pageId,
+    );
 
     if (newIndex != -1 && newIndex != existingTabIndex) {
       DevToolsRouterDelegate.of(context).navigateIfNotCurrent(pageId);
@@ -278,11 +282,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         Align(
           alignment: Alignment.topLeft,
           child: FocusScope(
-            child: AnalyticsPrompt(
-              child: BannerMessages(
-                screen: screen,
-              ),
-            ),
+            child: AnalyticsPrompt(child: BannerMessages(screen: screen)),
           ),
         ),
     ];
@@ -296,7 +296,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ),
         if (serviceConnection.serviceManager.connectedAppInitialized &&
             !serviceConnection
-                .serviceManager.connectedApp!.isProfileBuildNow! &&
+                .serviceManager
+                .connectedApp!
+                .isProfileBuildNow! &&
             !offlineDataController.showingOfflineData.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
@@ -311,65 +313,68 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       builder: (context, _) {
         final showConsole =
             serviceConnection.serviceManager.connectedAppInitialized &&
-                !offlineDataController.showingOfflineData.value &&
-                _currentScreen.showConsole(widget.embedMode);
+            !offlineDataController.showingOfflineData.value &&
+            _currentScreen.showConsole(widget.embedMode);
         final containsSingleSimpleScreen =
             widget.screens.length == 1 && widget.screens.first is SimpleScreen;
-        final showAppBar = widget.embedMode == EmbedMode.none ||
+        final showAppBar =
+            widget.embedMode == EmbedMode.none ||
             (widget.embedMode == EmbedMode.embedMany &&
                 !containsSingleSimpleScreen);
         return DragAndDrop(
           handleDrop: _importController.importData,
           child: KeyboardShortcuts(
-            keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
-              context,
-            ),
+            keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(context),
             child: Scaffold(
-              appBar: showAppBar
-                  ? PreferredSize(
-                      preferredSize: Size.fromHeight(defaultToolbarHeight),
-                      // Place the AppBar inside of a Hero widget to keep it the same across
-                      // route transitions.
-                      child: Hero(
-                        tag: _appBarTag,
-                        child: DevToolsAppBar(
-                          tabController: _tabController,
-                          screens: widget.screens,
-                          actions: widget.actions,
+              appBar:
+                  showAppBar
+                      ? PreferredSize(
+                        preferredSize: Size.fromHeight(defaultToolbarHeight),
+                        // Place the AppBar inside of a Hero widget to keep it the same across
+                        // route transitions.
+                        child: Hero(
+                          tag: _appBarTag,
+                          child: DevToolsAppBar(
+                            tabController: _tabController,
+                            screens: widget.screens,
+                            actions: widget.actions,
+                          ),
                         ),
-                      ),
-                    )
-                  : null,
+                      )
+                      : null,
               body: OutlineDecoration.onlyTop(
                 child: Padding(
                   padding: widget.appPadding,
-                  child: showConsole
-                      ? SplitPane(
-                          axis: Axis.vertical,
-                          splitters: [
-                            ConsolePaneHeader(),
-                          ],
-                          initialFractions: const [0.8, 0.2],
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: intermediateSpacing,
+                  child:
+                      showConsole
+                          ? SplitPane(
+                            axis: Axis.vertical,
+                            splitters: [ConsolePaneHeader()],
+                            initialFractions: const [0.8, 0.2],
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: intermediateSpacing,
+                                ),
+                                child: content,
                               ),
-                              child: content,
-                            ),
-                            RoundedOutlinedBorder.onlyBottom(
-                              child: const ConsolePane(),
-                            ),
-                          ],
-                        )
-                      : content,
+                              RoundedOutlinedBorder.onlyBottom(
+                                child: const ConsolePane(),
+                              ),
+                            ],
+                          )
+                          : content,
                 ),
               ),
               bottomNavigationBar: StatusLine(
                 currentScreen: _currentScreen,
                 isEmbedded: widget.embedMode.embedded,
-                isConnected: serviceConnection
-                        .serviceManager.connectedState.value.connected &&
+                isConnected:
+                    serviceConnection
+                        .serviceManager
+                        .connectedState
+                        .value
+                        .connected &&
                     serviceConnection.serviceManager.connectedAppInitialized,
               ),
             ),
@@ -426,11 +431,7 @@ class KeyboardShortcutsState extends State<KeyboardShortcuts>
 }
 
 class SimpleScreen extends Screen {
-  SimpleScreen(this.child)
-      : super(
-          id,
-          showFloatingDebuggerControls: false,
-        );
+  SimpleScreen(this.child) : super(id, showFloatingDebuggerControls: false);
 
   static final id = ScreenMetaData.simple.id;
 

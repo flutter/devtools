@@ -163,12 +163,11 @@ class _DetailsTableState extends State<DetailsTable> {
   List<DevToolsTab> _getTabsInOrder({
     required bool renderTabExists,
     required bool flexExplorerTabExists,
-  }) =>
-      [
-        _widgetPropertiesTab,
-        if (renderTabExists) _renderObjectTab,
-        if (flexExplorerTabExists) _flexExplorerTab,
-      ];
+  }) => [
+    _widgetPropertiesTab,
+    if (renderTabExists) _renderObjectTab,
+    if (flexExplorerTabExists) _flexExplorerTab,
+  ];
 }
 
 /// Displays a widget's properties, including the layout properties and a
@@ -243,7 +242,8 @@ class _PropertiesViewState extends State<PropertiesView> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalLayout = constraints.maxWidth >
+        final horizontalLayout =
+            constraints.maxWidth >
             (PropertiesView.layoutExplorerWidth *
                 PropertiesView.scaleFactorForVerticalLayout);
 
@@ -275,9 +275,10 @@ class _PropertiesViewState extends State<PropertiesView> {
                       ),
                       if (layoutPropertiesList != null)
                         Padding(
-                          padding: horizontalLayout
-                              ? const EdgeInsets.only(left: largeSpacing)
-                              : const EdgeInsets.only(bottom: largeSpacing),
+                          padding:
+                              horizontalLayout
+                                  ? const EdgeInsets.only(left: largeSpacing)
+                                  : const EdgeInsets.only(bottom: largeSpacing),
                           child: layoutPropertiesList,
                         ),
                     ],
@@ -345,9 +346,9 @@ class LayoutPropertiesList extends StatelessWidget {
   LayoutWidthsAndHeights? get widthsAndHeights =>
       widgetHeights != null && widgetWidths != null
           ? LayoutWidthsAndHeights(
-              widths: widgetWidths!,
-              heights: widgetHeights!,
-            )
+            widths: widgetWidths!,
+            heights: widgetHeights!,
+          )
           : null;
 
   @override
@@ -370,34 +371,16 @@ class LayoutPropertiesList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LayoutPropertyItem(
-          name: 'height',
-          value: widgetHeight,
-        ),
-        LayoutPropertyItem(
-          name: 'width',
-          value: widgetWidth,
-        ),
+        LayoutPropertyItem(name: 'height', value: widgetHeight),
+        LayoutPropertyItem(name: 'width', value: widgetWidth),
         if (hasTopPadding)
-          LayoutPropertyItem(
-            name: 'top padding',
-            value: topPadding,
-          ),
+          LayoutPropertyItem(name: 'top padding', value: topPadding),
         if (hasBottomPadding)
-          LayoutPropertyItem(
-            name: 'bottom padding',
-            value: bottomPadding,
-          ),
+          LayoutPropertyItem(name: 'bottom padding', value: bottomPadding),
         if (hasLeftPadding)
-          LayoutPropertyItem(
-            name: 'left padding',
-            value: leftPadding,
-          ),
+          LayoutPropertyItem(name: 'left padding', value: leftPadding),
         if (hasRightPadding)
-          LayoutPropertyItem(
-            name: 'right padding',
-            value: rightPadding,
-          ),
+          LayoutPropertyItem(name: 'right padding', value: rightPadding),
       ],
     );
   }
@@ -424,10 +407,7 @@ class LayoutPropertyItem extends StatelessWidget {
           text: '$name: ',
           style: theme.subtleTextStyle,
           children: [
-            TextSpan(
-              text: toStringAsFixed(value),
-              style: theme.fixedFontStyle,
-            ),
+            TextSpan(text: toStringAsFixed(value), style: theme.fixedFontStyle),
           ],
         ),
       ),
@@ -455,10 +435,7 @@ class PropertiesTable extends StatelessWidget {
         controller: scrollController,
         itemCount: properties.length,
         itemBuilder: (context, index) {
-          return PropertyItem(
-            index: index,
-            properties: properties,
-          );
+          return PropertyItem(index: index, properties: properties);
         },
       ),
     );
@@ -519,10 +496,7 @@ class PropertyItem extends StatelessWidget {
 
 /// A widget property's name.
 class PropertyName extends StatelessWidget {
-  const PropertyName({
-    super.key,
-    required this.property,
-  });
+  const PropertyName({super.key, required this.property});
 
   final RemoteDiagnosticsNode property;
 
@@ -539,10 +513,7 @@ class PropertyName extends StatelessWidget {
 
 /// A widget property's value.
 class PropertyValue extends StatelessWidget {
-  const PropertyValue({
-    super.key,
-    required this.property,
-  });
+  const PropertyValue({super.key, required this.property});
 
   final RemoteDiagnosticsNode property;
 
@@ -561,10 +532,7 @@ class PropertyValue extends StatelessWidget {
 
 /// Wraps a text widget with the correct amount of padding for the table.
 class PaddedText extends StatelessWidget {
-  const PaddedText({
-    super.key,
-    required this.child,
-  });
+  const PaddedText({super.key, required this.child});
 
   final Widget child;
 

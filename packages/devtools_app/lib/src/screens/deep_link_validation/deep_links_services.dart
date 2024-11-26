@@ -161,15 +161,17 @@ class DeepLinksService {
 
       final result = json.decode(response.body) as Map<String, Object?>;
 
-      final validationResult = (result[_androidValidationResultKey] as List)
-          .cast<Map<String, Object?>>();
+      final validationResult =
+          (result[_androidValidationResultKey] as List)
+              .cast<Map<String, Object?>>();
       googlePlayFingerprintsAvailable =
           result[_googlePlayFingerprintsAvailabilityKey] ==
-              _googlePlayFingerprintsAvailableValue;
+          _googlePlayFingerprintsAvailableValue;
       for (final domainResult in validationResult) {
         final domainName = domainResult[_domainNameKey] as String;
-        final failedChecks = (domainResult[_failedChecksKey] as List?)
-            ?.cast<Map<String, Object?>>();
+        final failedChecks =
+            (domainResult[_failedChecksKey] as List?)
+                ?.cast<Map<String, Object?>>();
         if (failedChecks != null) {
           for (final failedCheck in failedChecks) {
             final checkName = failedCheck[_checkNameKey] as String;
@@ -205,23 +207,22 @@ class DeepLinksService {
         Uri.parse(iosDomainValidationURL),
         headers: postHeader,
         body: jsonEncode({
-          _appIdKey: {
-            _bundleIdKey: bundleId,
-            _teamIdKey: teamId,
-          },
+          _appIdKey: {_bundleIdKey: bundleId, _teamIdKey: teamId},
           _universalLinkDomainsKey: [
             for (final domain in domainList) {_iosDomainNameKey: domain},
           ],
         }),
       );
       final result = json.decode(response.body) as Map<String, Object?>;
-      final validationResult = (result[_iosValidationResultsKey] as List)
-          .cast<Map<String, Object?>>();
+      final validationResult =
+          (result[_iosValidationResultsKey] as List)
+              .cast<Map<String, Object?>>();
 
       for (final domainResult in validationResult) {
         if (domainResult[_domainNameKey] case final String domainName) {
-          final failedChecks = (domainResult[_failedChecksKey] as List?)
-              ?.cast<Map<String, Object?>>();
+          final failedChecks =
+              (domainResult[_failedChecksKey] as List?)
+                  ?.cast<Map<String, Object?>>();
           if (failedChecks != null) {
             for (final failedCheck in failedChecks) {
               final checkName = failedCheck[_checkNameKey] as String;
@@ -233,15 +234,17 @@ class DeepLinksService {
                       <AASAfileFormatSubCheck>[];
 
                   // Adds sub checks for file format error.
-                  final subChecks = (failedCheck[_subCheckResultsKey] as List?)
-                      ?.cast<Map<String, Object?>>();
+                  final subChecks =
+                      (failedCheck[_subCheckResultsKey] as List?)
+                          ?.cast<Map<String, Object?>>();
                   for (final subCheck in (subChecks ?? <Map>[])) {
                     final subCheckName = subCheck[_checkNameKey] as String;
                     final subCheckResultType =
                         subCheck[_resultTypeKey] as String;
                     if (subCheckResultType != _passedKey) {
-                      failedAasaFileFormatSubCheck
-                          .add(aasaFileFormatSubCheck[subCheckName]!);
+                      failedAasaFileFormatSubCheck.add(
+                        aasaFileFormatSubCheck[subCheckName]!,
+                      );
                     }
                   }
 
@@ -261,25 +264,30 @@ class DeepLinksService {
             }
           }
 
-          final aasaAppPaths = (domainResult[_aasaAppPathsKey] as List?)
-              ?.cast<Map<String, Object?>>();
+          final aasaAppPaths =
+              (domainResult[_aasaAppPathsKey] as List?)
+                  ?.cast<Map<String, Object?>>();
           if (aasaAppPaths != null) {
             for (final aasaAppPath in aasaAppPaths) {
-              final aasaPaths = (aasaAppPath[_aasaPathsKey] as List?)
-                  ?.cast<Map<String, Object?>>();
+              final aasaPaths =
+                  (aasaAppPath[_aasaPathsKey] as List?)
+                      ?.cast<Map<String, Object?>>();
               if (aasaPaths != null) {
                 for (final aasaPath in aasaPaths) {
                   final path = aasaPath[_pathKey] as String?;
                   if (path.isNullOrEmpty) {
                     continue;
                   }
-                  final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
-                      ?.cast<Map<String, Object?>>();
+                  final rawQueryParams =
+                      (aasaPath[_queryParamsKey] as List?)
+                          ?.cast<Map<String, Object?>>();
                   final queryParams = <String, String>{
                     for (final item in rawQueryParams ?? <Map>[])
                       item[_keyKey] as String: item[_valueKey] as String,
                   };
-                  paths.putIfAbsent(domainName, () => <Path>[]).add(
+                  paths
+                      .putIfAbsent(domainName, () => <Path>[])
+                      .add(
                         Path(
                           path: path!,
                           queryParams: queryParams,
@@ -295,11 +303,7 @@ class DeepLinksService {
         }
       }
     }
-    return ValidateIosDomainResult(
-      errorCode,
-      domainErrors,
-      paths,
-    );
+    return ValidateIosDomainResult(errorCode, domainErrors, paths);
   }
 
   // The request can take 1000 domains at most, split domains to make a few calls in serial with a batch of _domainBatchSize.
@@ -323,13 +327,11 @@ class DeepLinksService {
     final response = await client.post(
       Uri.parse(assetLinksGenerationURL),
       headers: postHeader,
-      body: jsonEncode(
-        {
-          _packageNameKey: applicationId,
-          _domainsKey: [domain],
-          if (localFingerprint != null) _fingerprintsKey: [localFingerprint],
-        },
-      ),
+      body: jsonEncode({
+        _packageNameKey: applicationId,
+        _domainsKey: [domain],
+        if (localFingerprint != null) _fingerprintsKey: [localFingerprint],
+      }),
     );
     final result = json.decode(response.body) as Map<String, Object?>;
     final errorCode = (result[_errorCodeKey] as String?) ?? '';

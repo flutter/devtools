@@ -121,17 +121,15 @@ void main() {
 
     void disableAllFilters() {
       controller.settingFilters.first.setting.value = Level.ALL.value;
-      for (final filter
-          in controller.activeFilter.value.settingFilters.sublist(1)) {
+      for (final filter in controller.activeFilter.value.settingFilters.sublist(
+        1,
+      )) {
         filter.setting.value = false;
       }
     }
 
     setUp(() {
-      setGlobal(
-        ServiceConnectionManager,
-        FakeServiceConnectionManager(),
-      );
+      setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
       setGlobal(MessageBus, MessageBus());
       setGlobal(PreferencesController, PreferencesController());
 
@@ -324,7 +322,8 @@ void main() {
           1,
         );
         final nullDetails = LogData('some kind', null, 1);
-        const prettyJson = '{\n'
+        const prettyJson =
+            '{\n'
             '  "firstValue": "value",\n'
             '  "otherValue": "value2"\n'
             '}';

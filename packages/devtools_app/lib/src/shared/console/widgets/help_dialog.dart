@@ -40,10 +40,7 @@ Use debug console to:
 Assign previously evaluated objects to variable using $0, $1 … $5.
 Example: ''',
                 ),
-                TextSpan(
-                  text: r'var x = $0',
-                  style: theme.fixedFontStyle,
-                ),
+                TextSpan(text: r'var x = $0', style: theme.fixedFontStyle),
               ],
             ),
           ),
@@ -51,14 +48,13 @@ Example: ''',
             // TODO(polina-c): create content and change url.
             url: 'https://docs.flutter.dev/tools/devtools/console',
             gaScreenName: gac.console,
-            gaSelectedItemDescription:
-                gac.topicDocumentationLink(_documentationTopic),
+            gaSelectedItemDescription: gac.topicDocumentationLink(
+              _documentationTopic,
+            ),
           ),
         ],
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }

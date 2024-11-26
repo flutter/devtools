@@ -22,11 +22,12 @@ class ExternalDevToolsEnvironmentParameters
   GaLink issueTrackerLink({String? additionalInfo, String? issueTitle}) {
     return GaLink(
       display: _newDevToolsIssueUriDisplay,
-      url: newDevToolsGitHubIssueUriLengthSafe(
-        additionalInfo: additionalInfo,
-        issueTitle: issueTitle,
-        environment: issueLinkDetails(),
-      ).toString(),
+      url:
+          newDevToolsGitHubIssueUriLengthSafe(
+            additionalInfo: additionalInfo,
+            issueTitle: issueTitle,
+            environment: issueLinkDetails(),
+          ).toString(),
       gaScreenName: gac.devToolsMain,
       gaSelectedItemDescription: gac.feedbackLink,
     );
@@ -115,8 +116,10 @@ Uri newDevToolsGitHubIssueUriLengthSafe({
   }
 
   // Truncate the additional info if the URL is too long:
-  final truncatedInfo =
-      additionalInfo.substring(0, additionalInfo.length - lengthToCut);
+  final truncatedInfo = additionalInfo.substring(
+    0,
+    additionalInfo.length - lengthToCut,
+  );
 
   final truncatedUri = _newDevToolsGitHubIssueUri(
     additionalInfo: truncatedInfo,
@@ -137,10 +140,7 @@ Uri _newDevToolsGitHubIssueUri({
     ...environment,
   ].join('\n');
 
-  return Uri.parse('https://$_newDevToolsIssueUriDisplay').replace(
-    queryParameters: {
-      'title': issueTitle,
-      'body': issueBody,
-    },
-  );
+  return Uri.parse(
+    'https://$_newDevToolsIssueUriDisplay',
+  ).replace(queryParameters: {'title': issueTitle, 'body': issueBody});
 }

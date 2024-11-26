@@ -29,57 +29,51 @@ void main() {
     });
 
     group('suggestions', () {
-      testWidgets(
-        'shows no suggestion for empty text',
-        (tester) async {
-          final objects = await _setupEvalFieldObjects(tester);
+      testWidgets('shows no suggestion for empty text', (tester) async {
+        final objects = await _setupEvalFieldObjects(tester);
 
-          await tester.enterText(objects.textField, '');
-          await tester.pumpAndSettle();
+        await tester.enterText(objects.textField, '');
+        await tester.pumpAndSettle();
 
-          expect(objects.searchTextEditingController.text, '');
-          expect(objects.searchTextEditingController.suggestionText, null);
-        },
-      );
+        expect(objects.searchTextEditingController.text, '');
+        expect(objects.searchTextEditingController.suggestionText, null);
+      });
 
-      testWidgets(
-        'shows "bar" item as suggestion for string "b"',
-        (tester) async {
-          final objects = await _setupEvalFieldObjects(tester);
+      testWidgets('shows "bar" item as suggestion for string "b"', (
+        tester,
+      ) async {
+        final objects = await _setupEvalFieldObjects(tester);
 
-          await tester.enterText(objects.textField, 'b');
-          await tester.pumpAndSettle();
+        await tester.enterText(objects.textField, 'b');
+        await tester.pumpAndSettle();
 
-          expect(objects.searchTextEditingController.text, 'b');
-          expect(objects.searchTextEditingController.suggestionText, 'ar');
-        },
-      );
+        expect(objects.searchTextEditingController.text, 'b');
+        expect(objects.searchTextEditingController.suggestionText, 'ar');
+      });
 
-      testWidgets(
-        'shows "bazz" item as suggestion for string "baz"',
-        (tester) async {
-          final objects = await _setupEvalFieldObjects(tester);
+      testWidgets('shows "bazz" item as suggestion for string "baz"', (
+        tester,
+      ) async {
+        final objects = await _setupEvalFieldObjects(tester);
 
-          await tester.enterText(objects.textField, 'baz');
-          await tester.pumpAndSettle();
+        await tester.enterText(objects.textField, 'baz');
+        await tester.pumpAndSettle();
 
-          expect(objects.searchTextEditingController.text, 'baz');
-          expect(objects.searchTextEditingController.suggestionText, 'z');
-        },
-      );
+        expect(objects.searchTextEditingController.text, 'baz');
+        expect(objects.searchTextEditingController.suggestionText, 'z');
+      });
 
-      testWidgets(
-        'shows "foo" (first item) item as suggestion for field',
-        (tester) async {
-          final objects = await _setupEvalFieldObjects(tester);
+      testWidgets('shows "foo" (first item) item as suggestion for field', (
+        tester,
+      ) async {
+        final objects = await _setupEvalFieldObjects(tester);
 
-          await tester.enterText(objects.textField, 'someValue.');
-          await tester.pumpAndSettle();
+        await tester.enterText(objects.textField, 'someValue.');
+        await tester.pumpAndSettle();
 
-          expect(objects.searchTextEditingController.text, 'someValue.');
-          expect(objects.searchTextEditingController.suggestionText, 'foo');
-        },
-      );
+        expect(objects.searchTextEditingController.text, 'someValue.');
+        expect(objects.searchTextEditingController.suggestionText, 'foo');
+      });
 
       testWidgets(
         'pressing "arrowDown" shows the "bar" item as suggestion for field',
@@ -142,19 +136,18 @@ void main() {
         },
       );
 
-      testWidgets(
-        'removing the dot after a word removes the suggestion',
-        (tester) async {
-          final objects = await _setupEvalFieldObjects(tester);
+      testWidgets('removing the dot after a word removes the suggestion', (
+        tester,
+      ) async {
+        final objects = await _setupEvalFieldObjects(tester);
 
-          await tester.enterText(objects.textField, 'someValue.');
-          await tester.enterText(objects.textField, 'someValue');
-          await tester.pumpAndSettle();
+        await tester.enterText(objects.textField, 'someValue.');
+        await tester.enterText(objects.textField, 'someValue');
+        await tester.pumpAndSettle();
 
-          expect(objects.searchTextEditingController.text, 'someValue');
-          expect(objects.searchTextEditingController.suggestionText, null);
-        },
-      );
+        expect(objects.searchTextEditingController.text, 'someValue');
+        expect(objects.searchTextEditingController.suggestionText, null);
+      });
 
       testWidgets(
         'when the cursor is not at the end of the text, don\'t show suggestion',
@@ -162,8 +155,9 @@ void main() {
           final objects = await _setupEvalFieldObjects(tester);
 
           await tester.enterText(objects.textField, 'someValue.');
-          objects.searchTextEditingController.selection =
-              const TextSelection.collapsed(offset: 0);
+          objects
+              .searchTextEditingController
+              .selection = const TextSelection.collapsed(offset: 0);
           await tester.pumpAndSettle();
 
           expect(objects.searchTextEditingController.text, 'someValue.');
@@ -184,18 +178,17 @@ void main() {
         },
       );
 
-      testWidgets(
-        'when there is no match, don\'t show suggestion text',
-        (tester) async {
-          final objects = await _setupEvalFieldObjects(tester);
+      testWidgets('when there is no match, don\'t show suggestion text', (
+        tester,
+      ) async {
+        final objects = await _setupEvalFieldObjects(tester);
 
-          await tester.enterText(objects.textField, 'someValue.bazzz');
-          await tester.pumpAndSettle();
+        await tester.enterText(objects.textField, 'someValue.bazzz');
+        await tester.pumpAndSettle();
 
-          expect(objects.searchTextEditingController.text, 'someValue.bazzz');
-          expect(objects.searchTextEditingController.suggestionText, null);
-        },
-      );
+        expect(objects.searchTextEditingController.text, 'someValue.bazzz');
+        expect(objects.searchTextEditingController.suggestionText, null);
+      });
 
       testWidgets(
         'when there is a exact match ("bar") and another match ("barz"), the exact won\'t show suggestion text',
@@ -231,43 +224,41 @@ void main() {
       LogicalKeyboardKey.arrowRight,
     ]) {
       group('selection with ${selectionKey.keyLabel} key', () {
-        testWidgets(
-          'selecting "ar" autocompletes "b" to "bar"',
-          (tester) async {
-            final objects = await _setupEvalFieldObjects(tester);
+        testWidgets('selecting "ar" autocompletes "b" to "bar"', (
+          tester,
+        ) async {
+          final objects = await _setupEvalFieldObjects(tester);
 
-            await tester.enterText(objects.textField, 'b');
-            await tester.pumpAndSettle();
+          await tester.enterText(objects.textField, 'b');
+          await tester.pumpAndSettle();
 
-            expect(objects.searchTextEditingController.text, 'b');
-            expect(objects.searchTextEditingController.suggestionText, 'ar');
+          expect(objects.searchTextEditingController.text, 'b');
+          expect(objects.searchTextEditingController.suggestionText, 'ar');
 
-            // Select the suggestion.
-            await tester.sendKeyEvent(selectionKey);
-            await tester.pumpAndSettle();
+          // Select the suggestion.
+          await tester.sendKeyEvent(selectionKey);
+          await tester.pumpAndSettle();
 
-            expect(objects.textFieldValue, equals('bar'));
-          },
-        );
+          expect(objects.textFieldValue, equals('bar'));
+        });
 
-        testWidgets(
-          'selecting "r" autocompletes "ba" to "bar"',
-          (tester) async {
-            final objects = await _setupEvalFieldObjects(tester);
+        testWidgets('selecting "r" autocompletes "ba" to "bar"', (
+          tester,
+        ) async {
+          final objects = await _setupEvalFieldObjects(tester);
 
-            await tester.enterText(objects.textField, 'ba');
-            await tester.pumpAndSettle();
+          await tester.enterText(objects.textField, 'ba');
+          await tester.pumpAndSettle();
 
-            expect(objects.searchTextEditingController.text, 'ba');
-            expect(objects.searchTextEditingController.suggestionText, 'r');
+          expect(objects.searchTextEditingController.text, 'ba');
+          expect(objects.searchTextEditingController.suggestionText, 'r');
 
-            // Select the suggestion.
-            await tester.sendKeyEvent(selectionKey);
-            await tester.pumpAndSettle();
+          // Select the suggestion.
+          await tester.sendKeyEvent(selectionKey);
+          await tester.pumpAndSettle();
 
-            expect(objects.textFieldValue, equals('bar'));
-          },
-        );
+          expect(objects.textFieldValue, equals('bar'));
+        });
 
         testWidgets(
           'selecting "foo" autocompletes "someValue." to "someValue.foo"',
@@ -339,18 +330,13 @@ Future<_EvalFieldTestObjects> _setupEvalFieldObjects(
     },
   );
 
-  await tester.pumpWidget(
-    MaterialApp(
-      home: Scaffold(
-        body: evalField,
-      ),
-    ),
-  );
+  await tester.pumpWidget(MaterialApp(home: Scaffold(body: evalField)));
 
   final textField = find.byType(TextField).first;
 
-  final state =
-      tester.state<ExpressionEvalFieldState>(find.byWidget(evalField));
+  final state = tester.state<ExpressionEvalFieldState>(
+    find.byWidget(evalField),
+  );
 
   return _EvalFieldTestObjects(
     state.searchTextFieldController,

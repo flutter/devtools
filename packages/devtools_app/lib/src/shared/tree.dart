@@ -87,8 +87,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
             final T item = dataFlatList[index];
             return _TreeViewItem<T>(
               item,
-              buildDisplay: (onPressed) =>
-                  widget.dataDisplayProvider(item, onPressed),
+              buildDisplay:
+                  (onPressed) => widget.dataDisplayProvider(item, onPressed),
               onItemSelected: _onItemSelected,
               onItemExpanded: _onItemExpanded,
             );
@@ -147,10 +147,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
 
   void _updateItems() {
     setState(() {
-      dataFlatList = buildFlatList(
-        dataRoots,
-        onTraverse: widget.onTraverse,
-      );
+      dataFlatList = buildFlatList(dataRoots, onTraverse: widget.onTraverse);
     });
   }
 }
@@ -180,23 +177,21 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(left: nodeIndent(widget.data)),
-      color: widget.data.isSelected
-          ? Theme.of(context).colorScheme.selectedRowBackgroundColor
-          : null,
+      color:
+          widget.data.isSelected
+              ? Theme.of(context).colorScheme.selectedRowBackgroundColor
+              : null,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           widget.data.isExpandable
               ? InkWell(
-                  onTap: _onExpanded,
-                  child: RotationTransition(
-                    turns: expandArrowAnimation,
-                    child: Icon(
-                      Icons.keyboard_arrow_down,
-                      size: defaultIconSize,
-                    ),
-                  ),
-                )
+                onTap: _onExpanded,
+                child: RotationTransition(
+                  turns: expandArrowAnimation,
+                  child: Icon(Icons.keyboard_arrow_down, size: defaultIconSize),
+                ),
+              )
               : SizedBox(width: defaultIconSize),
           Expanded(child: widget.buildDisplay(_onSelected)),
         ],

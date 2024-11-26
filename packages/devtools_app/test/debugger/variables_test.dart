@@ -31,39 +31,31 @@ void main() {
       WidgetTester tester,
       DartObjectNode? variable,
     ) async {
-      await tester.pumpWidget(
-        wrap(
-          ExpandableVariable(
-            variable: variable,
-          ),
-        ),
-      );
+      await tester.pumpWidget(wrap(ExpandableVariable(variable: variable)));
       await tester.pumpAndSettle();
       expect(find.byType(ExpandableVariable), findsOneWidget);
     }
 
-    testWidgets(
-      'ExpandableVariable builds without error',
-      (WidgetTester tester) async {
-        await pumpExpandableVariable(tester, objectNode);
-        expect(find.byType(TreeView<DartObjectNode>), findsOneWidget);
-        expect(
-          find.byKey(ExpandableVariable.emptyExpandableVariableKey),
-          findsNothing,
-        );
-      },
-    );
+    testWidgets('ExpandableVariable builds without error', (
+      WidgetTester tester,
+    ) async {
+      await pumpExpandableVariable(tester, objectNode);
+      expect(find.byType(TreeView<DartObjectNode>), findsOneWidget);
+      expect(
+        find.byKey(ExpandableVariable.emptyExpandableVariableKey),
+        findsNothing,
+      );
+    });
 
-    testWidgets(
-      'ExpandableVariable builds for null variable',
-      (WidgetTester tester) async {
-        await pumpExpandableVariable(tester, null);
-        expect(find.byType(TreeView<DartObjectNode>), findsNothing);
-        expect(
-          find.byKey(ExpandableVariable.emptyExpandableVariableKey),
-          findsOneWidget,
-        );
-      },
-    );
+    testWidgets('ExpandableVariable builds for null variable', (
+      WidgetTester tester,
+    ) async {
+      await pumpExpandableVariable(tester, null);
+      expect(find.byType(TreeView<DartObjectNode>), findsNothing);
+      expect(
+        find.byKey(ExpandableVariable.emptyExpandableVariableKey),
+        findsOneWidget,
+      );
+    });
   });
 }

@@ -13,11 +13,13 @@ import '../utils.dart';
 
 // All other devtools_* pubspecs have their own versioning strategies, or do not
 // have a version at all (in the case of devtools_test).
-final _devtoolsAppPubspec =
-    File(pathFromRepoRoot('packages/devtools_app/pubspec.yaml'));
+final _devtoolsAppPubspec = File(
+  pathFromRepoRoot('packages/devtools_app/pubspec.yaml'),
+);
 
-final _releaseNoteDirPath =
-    pathFromRepoRoot('packages/devtools_app/release_notes');
+final _releaseNoteDirPath = pathFromRepoRoot(
+  'packages/devtools_app/release_notes',
+);
 
 class UpdateDevToolsVersionCommand extends Command {
   UpdateDevToolsVersionCommand() {
@@ -52,9 +54,7 @@ Future<void> performTheVersionUpdate({
   );
 }
 
-Future<void> resetReleaseNotes({
-  required String version,
-}) async {
+Future<void> resetReleaseNotes({required String version}) async {
   print('Resetting the release notes');
   // Clear out the current notes
   final imagesDir = Directory('$_releaseNoteDirPath/images');
@@ -64,15 +64,17 @@ Future<void> resetReleaseNotes({
   await imagesDir.create();
   await File('$_releaseNoteDirPath/images/.gitkeep').create();
 
-  final currentReleaseNotesFile =
-      File('$_releaseNoteDirPath/NEXT_RELEASE_NOTES.md');
+  final currentReleaseNotesFile = File(
+    '$_releaseNoteDirPath/NEXT_RELEASE_NOTES.md',
+  );
   if (currentReleaseNotesFile.existsSync()) {
     await currentReleaseNotesFile.delete();
   }
 
   // Normalize the version number so that it onl
-  final semVerMatch = RegExp(r'^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)')
-      .firstMatch(version);
+  final semVerMatch = RegExp(
+    r'^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)',
+  ).firstMatch(version);
   if (semVerMatch == null) {
     throw 'Version format is unexpected';
   }
@@ -80,8 +82,9 @@ Future<void> resetReleaseNotes({
   final minor = int.parse(semVerMatch.namedGroup('minor')!, radix: 10);
   final normalizedVersionNumber = '$major.$minor.0';
 
-  final templateFile =
-      File('$_releaseNoteDirPath/helpers/release_notes_template.md');
+  final templateFile = File(
+    '$_releaseNoteDirPath/helpers/release_notes_template.md',
+  );
   final templateFileContents = await templateFile.readAsString();
   await currentReleaseNotesFile.writeAsString(
     templateFileContents.replaceAll(
@@ -92,8 +95,9 @@ Future<void> resetReleaseNotes({
 }
 
 String? incrementVersionByType(String version, String type) {
-  final semVerMatch = RegExp(r'^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)')
-      .firstMatch(version);
+  final semVerMatch = RegExp(
+    r'^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)',
+  ).firstMatch(version);
   if (semVerMatch == null) {
     throw 'Version format is unexpected';
   }
@@ -142,13 +146,14 @@ void writeVersionToPubspec(File pubspec, String version) {
     }
     if (currentSection == pubspecVersionPrefix &&
         line.startsWith(pubspecVersionPrefix)) {
-      line = [
-        line.substring(
-          0,
-          line.indexOf(pubspecVersionPrefix) + pubspecVersionPrefix.length,
-        ),
-        ' $version',
-      ].join();
+      line =
+          [
+            line.substring(
+              0,
+              line.indexOf(pubspecVersionPrefix) + pubspecVersionPrefix.length,
+            ),
+            ' $version',
+          ].join();
     }
     revisedLines.add(line);
   }
@@ -193,8 +198,9 @@ String incrementDevVersion(String currentVersion) {
 }
 
 String stripPreReleases(String currentVersion) {
-  final devVerMatch =
-      RegExp(r'^(?<semver>\d+\.\d+\.\d+).*$').firstMatch(currentVersion);
+  final devVerMatch = RegExp(
+    r'^(?<semver>\d+\.\d+\.\d+).*$',
+  ).firstMatch(currentVersion);
   if (devVerMatch == null) {
     throw 'Could not strip pre-releases from version: $currentVersion';
   } else {
@@ -353,9 +359,7 @@ class AutoUpdateCommand extends Command {
     );
     if (['minor', 'major'].contains(type)) {
       // Only cycle the release notes when doing a minor or major version bump
-      await resetReleaseNotes(
-        version: newVersion,
-      );
+      await resetReleaseNotes(version: newVersion);
     }
   }
 }

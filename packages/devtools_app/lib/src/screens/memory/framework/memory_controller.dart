@@ -34,10 +34,7 @@ class MemoryController extends DisposableController
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
     unawaited(
-      _init(
-        connectedDiff: connectedDiff,
-        connectedProfile: connectedProfile,
-      ),
+      _init(connectedDiff: connectedDiff, connectedProfile: connectedProfile),
     );
   }
 
@@ -115,11 +112,13 @@ class MemoryController extends DisposableController
 
     chart = MemoryChartPaneController(data: offlineData?.chart ?? ChartData());
 
-    final rootPackage = isConnected
-        ? serviceConnection.serviceManager.rootInfoNow().package!
-        : null;
+    final rootPackage =
+        isConnected
+            ? serviceConnection.serviceManager.rootInfoNow().package!
+            : null;
 
-    diff = diffPaneController ??
+    diff =
+        diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
           loader:
@@ -127,7 +126,8 @@ class MemoryController extends DisposableController
           rootPackage: rootPackage,
         );
 
-    profile = profilePaneController ??
+    profile =
+        profilePaneController ??
         offlineData?.profile ??
         ProfilePaneController(rootPackage: rootPackage!);
 
@@ -172,9 +172,7 @@ class MemoryController extends DisposableController
     });
 
     diff.core.classFilter.addListener(() {
-      theProfile.setFilter(
-        diff.core.classFilter.value,
-      );
+      theProfile.setFilter(diff.core.classFilter.value);
     });
   }
 
@@ -186,7 +184,11 @@ class MemoryController extends DisposableController
     try {
       await serviceConnection.serviceManager.service!.getAllocationProfile(
         (serviceConnection
-            .serviceManager.isolateManager.selectedIsolate.value?.id)!,
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value
+            ?.id)!,
         gc: true,
       );
       chart.data.timeline.addGCEvent();

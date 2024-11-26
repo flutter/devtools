@@ -36,8 +36,9 @@ void main() {
   );
   setGlobal(PreferencesController, PreferencesController());
   fakeServiceConnection.consoleService.ensureServiceInitialized();
-  when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
-      .thenReturn(ValueNotifier<int>(0));
+  when(
+    fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'),
+  ).thenReturn(ValueNotifier<int>(0));
   final debuggerController = createMockDebuggerControllerWithDefaults();
 
   final breakpoints = [
@@ -60,10 +61,12 @@ void main() {
     ),
   ];
   final codeViewController = debuggerController.codeViewController;
-  when(mockBreakpointManager.breakpoints)
-      .thenReturn(ValueNotifier(breakpoints));
-  when(mockBreakpointManager.breakpointsWithLocation)
-      .thenReturn(ValueNotifier(breakpointsWithLocation));
+  when(
+    mockBreakpointManager.breakpoints,
+  ).thenReturn(ValueNotifier(breakpoints));
+  when(
+    mockBreakpointManager.breakpointsWithLocation,
+  ).thenReturn(ValueNotifier(breakpointsWithLocation));
 
   when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
   when(codeViewController.scriptLocation).thenReturn(ValueNotifier(null));
@@ -74,30 +77,25 @@ void main() {
     DebuggerController controller,
   ) async {
     await tester.pumpWidget(
-      wrapWithControllers(
-        const DebuggerWindows(),
-        debugger: controller,
-      ),
+      wrapWithControllers(const DebuggerWindows(), debugger: controller),
     );
   }
 
-  testWidgetsWithWindowSize(
-    'Breakpoints show items',
-    windowSize,
-    (WidgetTester tester) async {
-      await pumpDebuggerScreen(tester, debuggerController);
+  testWidgetsWithWindowSize('Breakpoints show items', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await pumpDebuggerScreen(tester, debuggerController);
 
-      expect(find.text('Breakpoints'), findsOneWidget);
+    expect(find.text('Breakpoints'), findsOneWidget);
 
-      // test for items in the breakpoint list
-      expect(
-        find.byWidgetPredicate(
-          (Widget widget) =>
-              widget is RichText &&
-              widget.text.toPlainText().contains('script.dart:10'),
-        ),
-        findsOneWidget,
-      );
-    },
-  );
+    // test for items in the breakpoint list
+    expect(
+      find.byWidgetPredicate(
+        (Widget widget) =>
+            widget is RichText &&
+            widget.text.toPlainText().contains('script.dart:10'),
+      ),
+      findsOneWidget,
+    );
+  });
 }

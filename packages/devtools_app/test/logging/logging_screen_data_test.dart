@@ -36,12 +36,15 @@ void main() {
     // details behaves the same for each test.
     _fakeLogData = null;
 
-    when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow)
-        .thenReturn(false);
-    when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
-        .thenReturn(false);
-    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('logging'))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
+    ).thenReturn(false);
+    when(
+      fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow,
+    ).thenReturn(false);
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('logging'),
+    ).thenReturn(ValueNotifier<int>(0));
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(NotificationService, NotificationService());
     setGlobal(
@@ -51,82 +54,69 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
 
-    mockLoggingController =
-        createMockLoggingControllerWithDefaults(data: fakeLogData);
+    mockLoggingController = createMockLoggingControllerWithDefaults(
+      data: fakeLogData,
+    );
   });
 
-  testWidgetsWithWindowSize(
-    'shows log items',
-    windowSize,
-    (WidgetTester tester) async {
-      await pumpLoggingScreen(tester);
-      await tester.pumpAndSettle();
-      expect(find.byType(LogsTable), findsOneWidget);
-      expect(
-        find.byKey(ValueKey(fakeLogData.first)),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(ValueKey(fakeLogData.last)),
-        findsOneWidget,
-      );
-    },
-  );
+  testWidgetsWithWindowSize('shows log items', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await pumpLoggingScreen(tester);
+    await tester.pumpAndSettle();
+    expect(find.byType(LogsTable), findsOneWidget);
+    expect(find.byKey(ValueKey(fakeLogData.first)), findsOneWidget);
+    expect(find.byKey(ValueKey(fakeLogData.last)), findsOneWidget);
+  });
 
-  testWidgetsWithWindowSize(
-    'can show non-computing log data',
-    windowSize,
-    (WidgetTester tester) async {
-      await pumpLoggingScreen(tester);
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(ValueKey(fakeLogData[6])));
-      await tester.pumpAndSettle();
+  testWidgetsWithWindowSize('can show non-computing log data', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await pumpLoggingScreen(tester);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(ValueKey(fakeLogData[6])));
+    await tester.pumpAndSettle();
 
-      expect(
-        find.descendant(
-          of: find.byType(LogsTable),
-          matching: find.richTextContaining('log event 6'),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byType(LogDetails),
-          matching: find.selectableText('log event 6'),
-        ),
-        findsOneWidget,
-        reason: 'The log details should now be visible in the details section.',
-      );
-    },
-  );
+    expect(
+      find.descendant(
+        of: find.byType(LogsTable),
+        matching: find.richTextContaining('log event 6'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(LogDetails),
+        matching: find.selectableText('log event 6'),
+      ),
+      findsOneWidget,
+      reason: 'The log details should now be visible in the details section.',
+    );
+  });
 
-  testWidgetsWithWindowSize(
-    'can show null log data',
-    windowSize,
-    (WidgetTester tester) async {
-      await pumpLoggingScreen(tester);
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(ValueKey(fakeLogData[7])));
-      await tester.pumpAndSettle();
-    },
-  );
-  testWidgetsWithWindowSize(
-    'search field can enter text',
-    windowSize,
-    (WidgetTester tester) async {
-      await pumpLoggingScreen(tester);
-      verifyNever(mockLoggingController.clear());
+  testWidgetsWithWindowSize('can show null log data', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await pumpLoggingScreen(tester);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(ValueKey(fakeLogData[7])));
+    await tester.pumpAndSettle();
+  });
+  testWidgetsWithWindowSize('search field can enter text', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await pumpLoggingScreen(tester);
+    verifyNever(mockLoggingController.clear());
 
-      final textFieldFinder = find.descendant(
-        of: find.byType(SearchField<LoggingController>),
-        matching: find.byType(TextField),
-      );
-      expect(textFieldFinder, findsOneWidget);
-      final textField = tester.widget(textFieldFinder) as TextField;
-      expect(textField.enabled, isTrue);
-      await tester.enterText(textFieldFinder, 'abc');
-    },
-  );
+    final textFieldFinder = find.descendant(
+      of: find.byType(SearchField<LoggingController>),
+      matching: find.byType(TextField),
+    );
+    expect(textFieldFinder, findsOneWidget);
+    final textField = tester.widget(textFieldFinder) as TextField;
+    expect(textField.enabled, isTrue);
+    await tester.enterText(textFieldFinder, 'abc');
+  });
 
   testWidgetsWithWindowSize(
     'Copy to clipboard button enables/disables correctly',
@@ -135,11 +125,13 @@ void main() {
       await pumpLoggingScreen(tester);
 
       // Locates the copy to clipboard button's IconButton.
-      ToolbarAction copyButton() => find
-          .byKey(LogDetails.copyToClipboardButtonKey)
-          .evaluate()
-          .first
-          .widget as ToolbarAction;
+      ToolbarAction copyButton() =>
+          find
+                  .byKey(LogDetails.copyToClipboardButtonKey)
+                  .evaluate()
+                  .first
+                  .widget
+              as ToolbarAction;
 
       expect(
         copyButton().onPressed,
@@ -218,62 +210,60 @@ void main() {
     },
   );
 
-  testWidgetsWithWindowSize(
-    'can show details of json log data',
-    windowSize,
-    (WidgetTester tester) async {
-      const index = 9;
-      bool containsJson(Widget widget) {
-        if (widget is! SelectableText) return false;
-        final content = widget.data!.trim();
-        return content.startsWith('{') && content.endsWith('}');
-      }
+  testWidgetsWithWindowSize('can show details of json log data', windowSize, (
+    WidgetTester tester,
+  ) async {
+    const index = 9;
+    bool containsJson(Widget widget) {
+      if (widget is! SelectableText) return false;
+      final content = widget.data!.trim();
+      return content.startsWith('{') && content.endsWith('}');
+    }
 
-      final findJson = find.descendant(
-        of: find.byType(LogDetails),
-        matching: find.byWidgetPredicate(containsJson),
-      );
+    final findJson = find.descendant(
+      of: find.byType(LogDetails),
+      matching: find.byWidgetPredicate(containsJson),
+    );
 
-      await pumpLoggingScreen(tester);
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(ValueKey(fakeLogData[index])));
-      await tester.pump();
+    await pumpLoggingScreen(tester);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(ValueKey(fakeLogData[index])));
+    await tester.pump();
 
-      expect(
-        findJson,
-        findsNothing,
-        reason:
-            "The details of the log haven't computed yet, so they shouldn't be available.",
-      );
+    expect(
+      findJson,
+      findsNothing,
+      reason:
+          "The details of the log haven't computed yet, so they shouldn't be available.",
+    );
 
-      await tester.pumpAndSettle();
-      expect(findJson, findsOneWidget);
-      expect(find.byType(JsonViewer), findsNothing);
+    await tester.pumpAndSettle();
+    expect(findJson, findsOneWidget);
+    expect(find.byType(JsonViewer), findsNothing);
 
-      // Toggle the log details view format to view as JSON.
-      expect(
-        find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
-        findsOneWidget,
-      );
-      expect(
-        find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
-        findsNothing,
-      );
-      await tester.tap(find.byType(LogDetailsFormatButton));
-      await tester.pumpAndSettle();
+    // Toggle the log details view format to view as JSON.
+    expect(
+      find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
+      findsOneWidget,
+    );
+    expect(
+      find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
+      findsNothing,
+    );
+    await tester.tap(find.byType(LogDetailsFormatButton));
+    await tester.pumpAndSettle();
 
-      expect(findJson, findsNothing);
-      expect(find.byType(JsonViewer), findsOneWidget);
-      expect(
-        find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
-        findsNothing,
-      );
-      expect(
-        find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
-        findsOneWidget,
-      );
-    },
-  );
+    expect(findJson, findsNothing);
+    expect(find.byType(JsonViewer), findsOneWidget);
+    expect(
+      find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
+      findsNothing,
+    );
+    expect(
+      find.byTooltip(LogDetailsFormatButton.viewAsRawTextTooltip),
+      findsOneWidget,
+    );
+  });
 }
 
 const totalLogs = 10;
@@ -304,10 +294,13 @@ LogData _generate(int i) {
       break;
   }
 
-  final detailsComputer = computedDetails == null
-      ? null
-      : () =>
-          Future.delayed(const Duration(seconds: 1), () => computedDetails!);
+  final detailsComputer =
+      computedDetails == null
+          ? null
+          : () => Future.delayed(
+            const Duration(seconds: 1),
+            () => computedDetails!,
+          );
   return LogData(kind, details, i, detailsComputer: detailsComputer);
 }
 

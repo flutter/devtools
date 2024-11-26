@@ -21,8 +21,9 @@ void main() {
     mockServiceConnection = createMockServiceConnectionWithDefaults();
     mockServiceManager =
         mockServiceConnection.serviceManager as MockServiceManager;
-    when(mockServiceManager.serviceExtensionManager)
-        .thenAnswer((realInvocation) => fakeExtensionManager);
+    when(
+      mockServiceManager.serviceExtensionManager,
+    ).thenAnswer((realInvocation) => fakeExtensionManager);
     setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(IdeTheme, getIdeTheme());
   });
@@ -31,10 +32,12 @@ void main() {
     setUp(() async {
       fakeExtensionManager = FakeServiceExtensionManager();
       await fakeExtensionManager.fakeFrame();
-      await fakeExtensionManager
-          .fakeAddServiceExtension(profileWidgetBuilds.extension);
-      await fakeExtensionManager
-          .fakeAddServiceExtension(profileUserWidgetBuilds.extension);
+      await fakeExtensionManager.fakeAddServiceExtension(
+        profileWidgetBuilds.extension,
+      );
+      await fakeExtensionManager.fakeAddServiceExtension(
+        profileUserWidgetBuilds.extension,
+      );
     });
 
     testWidgets('builds successfully', (WidgetTester tester) async {
@@ -84,85 +87,78 @@ void main() {
       expect(allWidgetsRadio.groupValue, isNull);
     });
 
-    testWidgets(
-      'builds with profileWidgetBuilds enabled',
-      (WidgetTester tester) async {
-        await mockServiceManager.serviceExtensionManager
-            .setServiceExtensionState(
-          profileWidgetBuilds.extension,
-          enabled: true,
-          value: true,
-        );
-        await tester.pumpWidget(wrap(const TraceWidgetBuildsSetting()));
-        await tester.pumpAndSettle();
+    testWidgets('builds with profileWidgetBuilds enabled', (
+      WidgetTester tester,
+    ) async {
+      await mockServiceManager.serviceExtensionManager.setServiceExtensionState(
+        profileWidgetBuilds.extension,
+        enabled: true,
+        value: true,
+      );
+      await tester.pumpWidget(wrap(const TraceWidgetBuildsSetting()));
+      await tester.pumpAndSettle();
 
-        verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
-          traceAllWidgets: true,
-          traceUserCreatedWidgets: false,
-        );
+      verifyExtensionStates(
+        mockServiceManager: mockServiceManager,
+        traceAllWidgets: true,
+        traceUserCreatedWidgets: false,
+      );
 
-        final traceWidgetBuildsCheckbox =
-            tester.widget(find.byType(Checkbox)) as Checkbox;
-        expect(traceWidgetBuildsCheckbox.value, isTrue);
+      final traceWidgetBuildsCheckbox =
+          tester.widget(find.byType(Checkbox)) as Checkbox;
+      expect(traceWidgetBuildsCheckbox.value, isTrue);
 
-        final userCreatedWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-                as Radio<TraceWidgetBuildsScope>;
-        expect(
-          userCreatedWidgetsRadio.groupValue,
-          equals(TraceWidgetBuildsScope.all),
-        );
+      final userCreatedWidgetsRadio =
+          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
+              as Radio<TraceWidgetBuildsScope>;
+      expect(
+        userCreatedWidgetsRadio.groupValue,
+        equals(TraceWidgetBuildsScope.all),
+      );
 
-        final allWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
-                as Radio<TraceWidgetBuildsScope>;
-        expect(
-          allWidgetsRadio.groupValue,
-          equals(TraceWidgetBuildsScope.all),
-        );
-      },
-    );
+      final allWidgetsRadio =
+          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
+              as Radio<TraceWidgetBuildsScope>;
+      expect(allWidgetsRadio.groupValue, equals(TraceWidgetBuildsScope.all));
+    });
 
-    testWidgets(
-      'builds with profileUserWidgetBuilds enabled',
-      (WidgetTester tester) async {
-        await mockServiceManager.serviceExtensionManager
-            .setServiceExtensionState(
-          profileUserWidgetBuilds.extension,
-          enabled: true,
-          value: true,
-        );
-        await tester.pumpWidget(wrap(const TraceWidgetBuildsSetting()));
-        await tester.pumpAndSettle();
+    testWidgets('builds with profileUserWidgetBuilds enabled', (
+      WidgetTester tester,
+    ) async {
+      await mockServiceManager.serviceExtensionManager.setServiceExtensionState(
+        profileUserWidgetBuilds.extension,
+        enabled: true,
+        value: true,
+      );
+      await tester.pumpWidget(wrap(const TraceWidgetBuildsSetting()));
+      await tester.pumpAndSettle();
 
-        verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
-          traceAllWidgets: false,
-          traceUserCreatedWidgets: true,
-        );
+      verifyExtensionStates(
+        mockServiceManager: mockServiceManager,
+        traceAllWidgets: false,
+        traceUserCreatedWidgets: true,
+      );
 
-        final traceWidgetBuildsCheckbox =
-            tester.widget(find.byType(Checkbox)) as Checkbox;
-        expect(traceWidgetBuildsCheckbox.value, isTrue);
+      final traceWidgetBuildsCheckbox =
+          tester.widget(find.byType(Checkbox)) as Checkbox;
+      expect(traceWidgetBuildsCheckbox.value, isTrue);
 
-        final userCreatedWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-                as Radio<TraceWidgetBuildsScope>;
-        expect(
-          userCreatedWidgetsRadio.groupValue,
-          equals(TraceWidgetBuildsScope.userCreated),
-        );
+      final userCreatedWidgetsRadio =
+          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
+              as Radio<TraceWidgetBuildsScope>;
+      expect(
+        userCreatedWidgetsRadio.groupValue,
+        equals(TraceWidgetBuildsScope.userCreated),
+      );
 
-        final allWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
-                as Radio<TraceWidgetBuildsScope>;
-        expect(
-          allWidgetsRadio.groupValue,
-          equals(TraceWidgetBuildsScope.userCreated),
-        );
-      },
-    );
+      final allWidgetsRadio =
+          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
+              as Radio<TraceWidgetBuildsScope>;
+      expect(
+        allWidgetsRadio.groupValue,
+        equals(TraceWidgetBuildsScope.userCreated),
+      );
+    });
 
     testWidgets(
       'defaults to user created widgets when both service extensions are '
@@ -170,16 +166,16 @@ void main() {
       (WidgetTester tester) async {
         await mockServiceManager.serviceExtensionManager
             .setServiceExtensionState(
-          profileWidgetBuilds.extension,
-          enabled: true,
-          value: true,
-        );
+              profileWidgetBuilds.extension,
+              enabled: true,
+              value: true,
+            );
         await mockServiceManager.serviceExtensionManager
             .setServiceExtensionState(
-          profileUserWidgetBuilds.extension,
-          enabled: true,
-          value: true,
-        );
+              profileUserWidgetBuilds.extension,
+              enabled: true,
+              value: true,
+            );
         verifyExtensionStates(
           mockServiceManager: mockServiceManager,
           traceAllWidgets: true,
@@ -253,10 +249,10 @@ void main() {
       (WidgetTester tester) async {
         await mockServiceManager.serviceExtensionManager
             .setServiceExtensionState(
-          profileUserWidgetBuilds.extension,
-          enabled: true,
-          value: true,
-        );
+              profileUserWidgetBuilds.extension,
+              enabled: true,
+              value: true,
+            );
         await tester.pumpWidget(wrap(const TraceWidgetBuildsSetting()));
         await tester.pumpAndSettle();
 
@@ -285,50 +281,48 @@ void main() {
       },
     );
 
-    testWidgets(
-      'can toggle trace widget builds scope',
-      (WidgetTester tester) async {
-        await mockServiceManager.serviceExtensionManager
-            .setServiceExtensionState(
-          profileUserWidgetBuilds.extension,
-          enabled: true,
-          value: true,
-        );
-        await tester.pumpWidget(wrap(const TraceWidgetBuildsSetting()));
-        await tester.pumpAndSettle();
+    testWidgets('can toggle trace widget builds scope', (
+      WidgetTester tester,
+    ) async {
+      await mockServiceManager.serviceExtensionManager.setServiceExtensionState(
+        profileUserWidgetBuilds.extension,
+        enabled: true,
+        value: true,
+      );
+      await tester.pumpWidget(wrap(const TraceWidgetBuildsSetting()));
+      await tester.pumpAndSettle();
 
-        verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
-          traceAllWidgets: false,
-          traceUserCreatedWidgets: true,
-        );
+      verifyExtensionStates(
+        mockServiceManager: mockServiceManager,
+        traceAllWidgets: false,
+        traceUserCreatedWidgets: true,
+      );
 
-        var userCreatedWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-                as Radio<TraceWidgetBuildsScope>;
-        expect(
-          userCreatedWidgetsRadio.groupValue,
-          equals(TraceWidgetBuildsScope.userCreated),
-        );
+      var userCreatedWidgetsRadio =
+          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
+              as Radio<TraceWidgetBuildsScope>;
+      expect(
+        userCreatedWidgetsRadio.groupValue,
+        equals(TraceWidgetBuildsScope.userCreated),
+      );
 
-        await tester.tap(find.byType(Radio<TraceWidgetBuildsScope>).at(1));
-        await tester.pumpAndSettle();
+      await tester.tap(find.byType(Radio<TraceWidgetBuildsScope>).at(1));
+      await tester.pumpAndSettle();
 
-        userCreatedWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-                as Radio<TraceWidgetBuildsScope>;
-        expect(
-          userCreatedWidgetsRadio.groupValue,
-          equals(TraceWidgetBuildsScope.all),
-        );
+      userCreatedWidgetsRadio =
+          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
+              as Radio<TraceWidgetBuildsScope>;
+      expect(
+        userCreatedWidgetsRadio.groupValue,
+        equals(TraceWidgetBuildsScope.all),
+      );
 
-        verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
-          traceAllWidgets: true,
-          traceUserCreatedWidgets: false,
-        );
-      },
-    );
+      verifyExtensionStates(
+        mockServiceManager: mockServiceManager,
+        traceAllWidgets: true,
+        traceUserCreatedWidgets: false,
+      );
+    });
 
     testWidgets(
       'cannot toggle scope when both service extensions are disabled',

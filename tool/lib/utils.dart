@@ -11,7 +11,8 @@ import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
 abstract class DartSdkHelper {
-  static const commandDebugMessage = 'Consider running this command from your'
+  static const commandDebugMessage =
+      'Consider running this command from your'
       'Dart SDK directory locally to debug.';
 
   static Future<void> fetchAndCheckoutMaster(
@@ -33,9 +34,11 @@ abstract class DartSdkHelper {
 String localDartSdkLocation() {
   final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
   if (localDartSdkLocation == null) {
-    throw Exception('LOCAL_DART_SDK environment variable not set. Please add '
-        'the following to your \'.bash_profile\' or \'.bash_rc\' file:\n'
-        'export LOCAL_DART_SDK=<absolute/path/to/my/dart/sdk>');
+    throw Exception(
+      'LOCAL_DART_SDK environment variable not set. Please add '
+      'the following to your \'.bash_profile\' or \'.bash_rc\' file:\n'
+      'export LOCAL_DART_SDK=<absolute/path/to/my/dart/sdk>',
+    );
   }
   return localDartSdkLocation;
 }
@@ -74,21 +77,11 @@ class CliCommand {
   }
 
   /// CliCommand helper for running git commands.
-  factory CliCommand.git(
-    List<String> args, {
-    bool throwOnException = true,
-  }) {
-    return CliCommand(
-      'git',
-      args,
-      throwOnException: throwOnException,
-    );
+  factory CliCommand.git(List<String> args, {bool throwOnException = true}) {
+    return CliCommand('git', args, throwOnException: throwOnException);
   }
 
-  factory CliCommand.tool(
-    List<String> args, {
-    bool throwOnException = true,
-  }) {
+  factory CliCommand.tool(List<String> args, {bool throwOnException = true}) {
     var toolPath = Platform.script.toFilePath();
     if (!File(toolPath).existsSync()) {
       // Handling https://github.com/dart-lang/sdk/issues/54493
@@ -112,10 +105,7 @@ class CliCommand {
       // tool will automatically select the one that's running the VM and we'll
       // have selected that here.
       FlutterSdk.current.dartExePath,
-      [
-        toolPath,
-        ...args,
-      ],
+      [toolPath, ...args],
       throwOnException: throwOnException,
     );
   }
@@ -161,7 +151,7 @@ extension DevToolsProcessManagerExtension on ProcessManager {
     return (
       exitCode: code,
       stdout: processStdout.toString(),
-      stderr: processStderr.toString()
+      stderr: processStderr.toString(),
     );
   }
 
@@ -213,8 +203,8 @@ Future<String> findRemote(
   try {
     upstreamRemoteResult = remoteRegexpResults.firstWhere(
       (element) =>
-          // ignore: prefer_interpolation_to_compose_strings
-          RegExp(r'' + remoteId + '\$').hasMatch(element.namedGroup('path')!),
+      // ignore: prefer_interpolation_to_compose_strings
+      RegExp(r'' + remoteId + '\$').hasMatch(element.namedGroup('path')!),
     );
   } on StateError {
     throw StateError(

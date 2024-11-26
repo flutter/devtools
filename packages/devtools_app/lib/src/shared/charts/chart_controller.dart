@@ -223,19 +223,22 @@ class ChartController extends DisposableController
         final startOfLastNMinutes =
             // We need this cast to be able to return null if nothing is found.
             // ignore: unnecessary_cast
-            timestamps.reversed.firstWhereOrNull((timestamp) {
-          final currentDT = DateTime.fromMillisecondsSinceEpoch(timestamp);
-          final diff = lastDT.difference(currentDT);
-          if (diff.inMinutes >= duration.inMinutes) {
-            return true;
-          }
+            timestamps
+            .reversed
+            .firstWhereOrNull((timestamp) {
+              final currentDT = DateTime.fromMillisecondsSinceEpoch(timestamp);
+              final diff = lastDT.difference(currentDT);
+              if (diff.inMinutes >= duration.inMinutes) {
+                return true;
+              }
 
-          return false;
-        });
+              return false;
+            });
 
-        final ticksVisible = startOfLastNMinutes != null
-            ? timestampsLength - timestamps.indexOf(startOfLastNMinutes)
-            : timestampsLength + 1;
+        final ticksVisible =
+            startOfLastNMinutes != null
+                ? timestampsLength - timestamps.indexOf(startOfLastNMinutes)
+                : timestampsLength + 1;
         _tickWidth = canvasChartWidth / ticksVisible;
       } else {
         // No but lets scale x-axis based on the last two timestamps diffs we have.
@@ -245,8 +248,9 @@ class ChartController extends DisposableController
         // Enough data (at least 2 points) to know how many ticks for the duration.
         if (length > 1) {
           final lastTS = DateTime.fromMillisecondsSinceEpoch(timestamps.last);
-          final previousTS =
-              DateTime.fromMillisecondsSinceEpoch(timestamps[length - 2]);
+          final previousTS = DateTime.fromMillisecondsSinceEpoch(
+            timestamps[length - 2],
+          );
           final diffTS = lastTS.difference(previousTS);
           final ticksPerMinute = oneMinuteInMs / diffTS.inMilliseconds;
           final ticksVisible = ticksPerMinute * duration.inMinutes;
@@ -358,10 +362,12 @@ class ChartController extends DisposableController
     if (labelTimestamps.isEmpty) return;
 
     final rightLabelTimestamp = labelTimestamps.last;
-    final rightMostLabelDT =
-        DateTime.fromMillisecondsSinceEpoch(rightLabelTimestamp);
-    final rightMostTimestampDT =
-        DateTime.fromMillisecondsSinceEpoch(timestamps.last);
+    final rightMostLabelDT = DateTime.fromMillisecondsSinceEpoch(
+      rightLabelTimestamp,
+    );
+    final rightMostTimestampDT = DateTime.fromMillisecondsSinceEpoch(
+      timestamps.last,
+    );
 
     final nSeconds =
         rightMostTimestampDT.difference(rightMostLabelDT).inSeconds;
@@ -565,9 +571,9 @@ class TapLocation {
   /// but the multiple charts tied to the same timeline should be highlighted
   /// (selection point).
   TapLocation.copy(TapLocation original)
-      : tapDownDetails = null,
-        timestamp = original.timestamp,
-        index = original.index;
+    : tapDownDetails = null,
+      timestamp = original.timestamp,
+      index = original.index;
 
   final TapDownDetails? tapDownDetails;
 

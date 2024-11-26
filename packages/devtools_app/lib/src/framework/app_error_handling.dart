@@ -103,12 +103,13 @@ Future<void> _reportError(
   // Split the stack trace up into substrings of size
   // [ga4ParamValueCharacterLimit] so that we can send the stack trace in chunks
   // to GA4 through unified_analytics.
-  final stackTraceSubstrings = stackTrace
-      .toString()
-      .characters
-      .slices(ga4ParamValueCharacterLimit)
-      .map((slice) => slice.join())
-      .toList();
+  final stackTraceSubstrings =
+      stackTrace
+          .toString()
+          .characters
+          .slices(ga4ParamValueCharacterLimit)
+          .map((slice) => slice.join())
+          .toList();
   ga.reportError('$error', stackTraceSubstrings: stackTraceSubstrings);
 
   // Show error message in a notification pop-up:
@@ -133,9 +134,7 @@ Future<SingleMapping?> _fetchSourceMapping() async {
 Future<SingleMapping?> _initializeSourceMapping() async {
   if (!kIsWeb) return null;
   try {
-    final sourceMapUri = Uri.parse(
-      'main.dart.${kIsWasm ? 'wasm' : 'js'}.map',
-    );
+    final sourceMapUri = Uri.parse('main.dart.${kIsWasm ? 'wasm' : 'js'}.map');
     final sourceMapFile = await get(sourceMapUri);
 
     return SingleMapping.fromJson(
@@ -154,19 +153,16 @@ Future<stack_trace.Trace?> _mapAndTersify(StackTrace? stack) async {
 
   final mappedStackTrace = await _maybeMapStackTrace(originalStackTrace);
   // If mapping fails, revert back to the original stack trace:
-  final stackTrace = mappedStackTrace.toString().isEmpty
-      ? originalStackTrace
-      : mappedStackTrace;
+  final stackTrace =
+      mappedStackTrace.toString().isEmpty
+          ? originalStackTrace
+          : mappedStackTrace;
   return stack_trace.Trace.from(stackTrace);
 }
 
 Future<StackTrace> _maybeMapStackTrace(StackTrace stack) async {
   final sourceMapping = await _fetchSourceMapping();
   return sourceMapping != null
-      ? mapStackTrace(
-          sourceMapping,
-          stack,
-          minified: true,
-        )
+      ? mapStackTrace(sourceMapping, stack, minified: true)
       : stack;
 }

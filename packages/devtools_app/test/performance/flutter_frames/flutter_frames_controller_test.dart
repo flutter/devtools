@@ -26,8 +26,9 @@ void main() {
 
       mockPerformanceController = createMockPerformanceControllerWithDefaults();
       mockTimelineEventsController = MockTimelineEventsController();
-      when(mockPerformanceController.timelineEventsController)
-          .thenReturn(mockTimelineEventsController);
+      when(
+        mockPerformanceController.timelineEventsController,
+      ).thenReturn(mockTimelineEventsController);
       framesController = FlutterFramesController(mockPerformanceController);
     });
 
@@ -42,28 +43,19 @@ void main() {
     test('can add frames', () {
       expect(framesController.flutterFrames.value, isEmpty);
       framesController.addFrame(testFrame1);
-      expect(
-        framesController.flutterFrames.value.length,
-        equals(1),
-      );
+      expect(framesController.flutterFrames.value.length, equals(1));
 
       // Toggle recording value so that any added frames will not be added
       // directly, but will be marked as pending.
       framesController.toggleRecordingFrames(false);
 
       framesController.addFrame(testFrame2);
-      expect(
-        framesController.flutterFrames.value.length,
-        equals(1),
-      );
+      expect(framesController.flutterFrames.value.length, equals(1));
 
       // Start recording again and verify that the pending frame has been added.
       framesController.toggleRecordingFrames(true);
 
-      expect(
-        framesController.flutterFrames.value.length,
-        equals(2),
-      );
+      expect(framesController.flutterFrames.value.length, equals(2));
     });
 
     test('can toggle frame selection', () {
@@ -81,27 +73,18 @@ void main() {
       // Select a frame.
       expect(framesController.selectedFrame.value, isNull);
       framesController.handleSelectedFrame(FlutterFrame2.frame);
-      expect(
-        framesController.selectedFrame.value,
-        equals(FlutterFrame2.frame),
-      );
+      expect(framesController.selectedFrame.value, equals(FlutterFrame2.frame));
       // Verify the other feature controller handlers are called when a
       // frame is selected.
       expect(timelineControllerHandlerCalled, isTrue);
 
       // Unselect this frame.
       framesController.handleSelectedFrame(FlutterFrame2.frame);
-      expect(
-        framesController.selectedFrame.value,
-        isNull,
-      );
+      expect(framesController.selectedFrame.value, isNull);
 
       // Select a different frame.
       framesController.handleSelectedFrame(FlutterFrame4.frame);
-      expect(
-        framesController.selectedFrame.value,
-        equals(FlutterFrame4.frame),
-      );
+      expect(framesController.selectedFrame.value, equals(FlutterFrame4.frame));
     });
 
     test('can setOfflineData', () async {
@@ -124,10 +107,7 @@ void main() {
 
       expect(framesController.flutterFrames.value.length, equals(2));
       expect(framesController.selectedFrame.value, equals(testFrame0));
-      expect(
-        framesController.displayRefreshRate.value,
-        equals(120.0),
-      );
+      expect(framesController.displayRefreshRate.value, equals(120.0));
     });
   });
 }

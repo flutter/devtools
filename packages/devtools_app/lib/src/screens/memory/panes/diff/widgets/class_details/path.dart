@@ -30,10 +30,7 @@ class RetainingPathView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: densePadding),
-          _PathControlPane(
-            controller: controller,
-            data: data,
-          ),
+          _PathControlPane(controller: controller, data: data),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(
@@ -50,10 +47,7 @@ class RetainingPathView extends StatelessWidget {
 }
 
 class _PathControlPane extends StatelessWidget {
-  const _PathControlPane({
-    required this.controller,
-    required this.data,
-  });
+  const _PathControlPane({required this.controller, required this.data});
 
   final PathData data;
   final RetainingPathController controller;
@@ -87,33 +81,36 @@ class _PathControlPane extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.hideStandard,
-          builder: (_, hideStandard, _) => DevToolsFilterButton(
-            onPressed: () {
-              ga.select(
-                gac.memory,
-                '${gac.MemoryEvents.diffPathFilter.name}-$hideStandard',
-              );
-              controller.hideStandard.value = !controller.hideStandard.value;
-            },
-            isFilterActive: hideStandard,
-            message: 'Hide standard libraries',
-          ),
+          builder:
+              (_, hideStandard, _) => DevToolsFilterButton(
+                onPressed: () {
+                  ga.select(
+                    gac.memory,
+                    '${gac.MemoryEvents.diffPathFilter.name}-$hideStandard',
+                  );
+                  controller.hideStandard.value =
+                      !controller.hideStandard.value;
+                },
+                isFilterActive: hideStandard,
+                message: 'Hide standard libraries',
+              ),
         ),
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.invert,
-          builder: (_, invert, _) => DevToolsToggleButton(
-            onPressed: () {
-              ga.select(
-                gac.memory,
-                '${gac.MemoryEvents.diffPathInvert.name}-$invert',
-              );
-              controller.invert.value = !controller.invert.value;
-            },
-            isSelected: invert,
-            message: 'Invert the path',
-            icon: Icons.swap_horiz,
-          ),
+          builder:
+              (_, invert, _) => DevToolsToggleButton(
+                onPressed: () {
+                  ga.select(
+                    gac.memory,
+                    '${gac.MemoryEvents.diffPathInvert.name}-$invert',
+                  );
+                  controller.invert.value = !controller.invert.value;
+                },
+                isSelected: invert,
+                message: 'Invert the path',
+                icon: Icons.swap_horiz,
+              ),
         ),
       ],
     );
@@ -129,10 +126,7 @@ class _PathView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiValueListenableBuilder(
-      listenables: [
-        controller.hideStandard,
-        controller.invert,
-      ],
+      listenables: [controller.hideStandard, controller.invert],
       builder: (_, values, _) {
         final hideStandard = values.first as bool;
         final invert = values.second as bool;

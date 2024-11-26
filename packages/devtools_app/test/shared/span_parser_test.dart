@@ -32,12 +32,14 @@ void main() {
   final grammarFile = File(path.join('assets', 'dart_syntax.json')).absolute;
   late Grammar grammar;
 
-  final testDataDirectory = Directory(
-    path.join('test', 'test_infra', 'test_data', 'syntax_highlighting'),
-  ).absolute;
-  final goldenDirectory = Directory(
-    path.join('test', 'test_infra', 'goldens', 'syntax_highlighting'),
-  ).absolute;
+  final testDataDirectory =
+      Directory(
+        path.join('test', 'test_infra', 'test_data', 'syntax_highlighting'),
+      ).absolute;
+  final goldenDirectory =
+      Directory(
+        path.join('test', 'test_infra', 'goldens', 'syntax_highlighting'),
+      ).absolute;
 
   setUpAll(() async {
     expect(grammarFile.existsSync(), true);
@@ -49,10 +51,7 @@ void main() {
     final updateGoldens = autoUpdateGoldenFiles;
 
     /// Expects parsing [content] using produces the output in [goldenFile].
-    void expectSpansMatchGolden(
-      String content,
-      File goldenFile,
-    ) {
+    void expectSpansMatchGolden(String content, File goldenFile) {
       if (updateGoldens) {
         final spans = SpanParser.parse(grammar, content);
         final actual = _buildGoldenText(content, spans);
@@ -112,10 +111,9 @@ void main() {
       // flag:
       //
       //     flutter test test/shared/span_parser_test.dart --update-goldens
-      final testFiles = testDataDirectory
-          .listSync()
-          .whereType<File>()
-          .where((file) => path.extension(file.path) == '.dart');
+      final testFiles = testDataDirectory.listSync().whereType<File>().where(
+        (file) => path.extension(file.path) == '.dart',
+      );
 
       for (final testFile in testFiles) {
         final goldenFile = goldenFileFor(path.basename(testFile.path));

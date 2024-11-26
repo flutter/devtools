@@ -188,19 +188,22 @@ class LicenseHeader {
   ///
   /// For now, only up to one stored value is supported.
   Future<({String existingHeader, String replacementHeader})>
-      getReplacementInfo({
+  getReplacementInfo({
     required File file,
     required String existingLicenseText,
     required String replacementLicenseText,
     required int byteCount,
     String? defaultStoredValue,
   }) async {
-    final stream =
-        file.openRead(0, byteCount).transform(utf8.decoder).handleError(
-              (e) => throw StateError(
+    final stream = file
+        .openRead(0, byteCount)
+        .transform(utf8.decoder)
+        .handleError(
+          (e) =>
+              throw StateError(
                 'License header expected, but error reading file - $e',
               ),
-            );
+        );
     await for (final content in stream) {
       // Return just the license headers for the simple case with no stored
       // value requested (i.e. content matches licenseText verbatim)
@@ -279,8 +282,10 @@ class LicenseHeader {
           const bufferSize = 20;
           // Assume that the license text will be near the start of the file,
           // but add in some buffer.
-          final byteCount =
-              min(bufferSize + existingLicenseText.length, fileLength);
+          final byteCount = min(
+            bufferSize + existingLicenseText.length,
+            fileLength,
+          );
           final replacementInfo = await getReplacementInfo(
             file: file,
             existingLicenseText: existingLicenseText,
@@ -311,10 +316,7 @@ class LicenseHeader {
         }
       }
     }
-    return (
-      includedPaths: includedPathsList,
-      updatedPaths: updatedPathsList,
-    );
+    return (includedPaths: includedPathsList, updatedPaths: updatedPathsList);
   }
 
   ({String existingHeader, String replacementHeader}) _processHeaders({
@@ -327,9 +329,10 @@ class LicenseHeader {
     final storedNameIndex = matchStr.indexOf('<$storedName>');
     if (storedNameIndex != -1) {
       final beforeStoredName = matchStr.substring(0, storedNameIndex);
-      final afterStoredName = matchStr
-          .substring(storedNameIndex + storedName.length + 2)
-          .trimRight();
+      final afterStoredName =
+          matchStr
+              .substring(storedNameIndex + storedName.length + 2)
+              .trimRight();
       final storedMatcher = RegExp(
         r'' +
             beforeStoredName +

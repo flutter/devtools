@@ -47,33 +47,29 @@ void main() {
       timeout: const Timeout.factor(4),
     );
 
-    test(
-      'notifies on stream change',
-      () async {
-        await env.setupEnvironment();
+    test('notifies on stream change', () async {
+      await env.setupEnvironment();
 
-        final initialStreams =
-            serviceConnection.timelineStreamManager.recordedStreams;
-        expect(
-          initialStreams.map((stream) => stream.name).toList(),
-          equals(['Dart', 'Embedder', 'GC']),
-        );
+      final initialStreams =
+          serviceConnection.timelineStreamManager.recordedStreams;
+      expect(
+        initialStreams.map((stream) => stream.name).toList(),
+        equals(['Dart', 'Embedder', 'GC']),
+      );
 
-        await serviceConnection.serviceManager.service!.setVMTimelineFlags([
-          TimelineStreamManager.apiTimelineStream,
-          TimelineStreamManager.compilerTimelineStream,
-          TimelineStreamManager.isolateTimelineStream,
-        ]);
-        final newStreams =
-            serviceConnection.timelineStreamManager.recordedStreams;
-        expect(
-          newStreams.map((stream) => stream.name).toList(),
-          equals(['API', 'Compiler', 'Isolate']),
-        );
+      await serviceConnection.serviceManager.service!.setVMTimelineFlags([
+        TimelineStreamManager.apiTimelineStream,
+        TimelineStreamManager.compilerTimelineStream,
+        TimelineStreamManager.isolateTimelineStream,
+      ]);
+      final newStreams =
+          serviceConnection.timelineStreamManager.recordedStreams;
+      expect(
+        newStreams.map((stream) => stream.name).toList(),
+        equals(['API', 'Compiler', 'Isolate']),
+      );
 
-        await env.tearDownEnvironment();
-      },
-      timeout: const Timeout.factor(4),
-    );
+      await env.tearDownEnvironment();
+    }, timeout: const Timeout.factor(4));
   });
 }

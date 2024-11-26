@@ -28,80 +28,59 @@ final _classB = HeapClassName.fromPath(className: 'B', library: 'l');
 final _classSizeTests = <_ClassSizeTest>[
   _ClassSizeTest(
     name: 'separate',
-    heap: FakeHeapSnapshotGraph()
-      ..setObjects(
-        {
-          1: [2, 3, 4],
-          2: [],
-          3: [],
-          4: [],
-        },
-        classes: {
-          1: _root,
-          2: _classA,
-          3: _classA,
-          4: _classA,
-        },
-      ),
+    heap:
+        FakeHeapSnapshotGraph()..setObjects(
+          {
+            1: [2, 3, 4],
+            2: [],
+            3: [],
+            4: [],
+          },
+          classes: {1: _root, 2: _classA, 3: _classA, 4: _classA},
+        ),
     expectedClassARetainedSize: 3,
   ),
   _ClassSizeTest(
     name: 'linked',
-    heap: FakeHeapSnapshotGraph()
-      ..setObjects(
-        {
-          1: [2],
-          2: [3],
-          3: [4],
-          4: [],
-        },
-        classes: {
-          1: _root,
-          2: _classA,
-          3: _classA,
-          4: _classA,
-        },
-      ),
+    heap:
+        FakeHeapSnapshotGraph()..setObjects(
+          {
+            1: [2],
+            2: [3],
+            3: [4],
+            4: [],
+          },
+          classes: {1: _root, 2: _classA, 3: _classA, 4: _classA},
+        ),
     expectedClassARetainedSize: 3,
   ),
   _ClassSizeTest(
     name: 'full graph',
-    heap: FakeHeapSnapshotGraph()
-      ..setObjects(
-        {
-          1: [2],
-          2: [3, 4],
-          3: [2, 4],
-          4: [2, 3],
-        },
-        classes: {
-          1: _root,
-          2: _classA,
-          3: _classA,
-          4: _classA,
-        },
-      ),
+    heap:
+        FakeHeapSnapshotGraph()..setObjects(
+          {
+            1: [2],
+            2: [3, 4],
+            3: [2, 4],
+            4: [2, 3],
+          },
+          classes: {1: _root, 2: _classA, 3: _classA, 4: _classA},
+        ),
     expectedClassARetainedSize: 3,
   ),
   _ClassSizeTest(
     name: 'with global B',
-    heap: FakeHeapSnapshotGraph()
-      ..setObjects(
-        {
-          1: [2],
-          2: [3, 5],
-          3: [4, 5],
-          4: [2, 3],
-          5: [],
-        },
-        classes: {
-          1: _root,
-          2: _classA,
-          3: _classA,
-          4: _classA,
-          5: _classB,
-        },
-      ),
+    heap:
+        FakeHeapSnapshotGraph()..setObjects(
+          {
+            1: [2],
+            2: [3, 5],
+            3: [4, 5],
+            4: [2, 3],
+            5: [],
+          },
+          classes: {1: _root, 2: _classA, 3: _classA, 4: _classA, 5: _classB},
+        ),
     expectedClassARetainedSize: 4,
   ),
 ];
@@ -111,10 +90,7 @@ void main() {
     test(
       '$SingleClassData does not double-count self-referenced classes, ${t.name}.',
       () async {
-        final heapData = HeapData(
-          t.heap,
-          created: DateTime.now(),
-        );
+        final heapData = HeapData(t.heap, created: DateTime.now());
         await heapData.calculate;
 
         final classes = heapData.classes!;

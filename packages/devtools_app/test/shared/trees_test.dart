@@ -75,23 +75,30 @@ void main() {
         expect(
           childTreeNodes.length,
           expected.length,
-          reason: 'expected list of bool must have '
+          reason:
+              'expected list of bool must have '
               '${childTreeNodes.length} elements',
         );
         for (var i = 0; i < childTreeNodes.length; i++) {
           expect(
             childTreeNodes[i].shouldShow(),
             expected[i],
-            reason: 'treeNode${i + 1}.shouldShow() did not match '
+            reason:
+                'treeNode${i + 1}.shouldShow() did not match '
                 'the expected value.',
           );
         }
       }
 
       expect(treeNode0.shouldShow(), true);
-      expectChildTreeNodesShouldShow(
-        [false, false, false, false, false, false],
-      );
+      expectChildTreeNodesShouldShow([
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+      ]);
       treeNode0.expandCascading();
       treeNode5.collapse();
       expectChildTreeNodesShouldShow([true, true, true, true, true, false]);
@@ -200,14 +207,14 @@ void main() {
     });
 
     test('filterTree', () {
-      final filteredTreeRoots =
-          testTreeNode.filterWhere((node) => node.id.isEven);
+      final filteredTreeRoots = testTreeNode.filterWhere(
+        (node) => node.id.isEven,
+      );
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
       expect(
         filteredTree.toString(),
-        equals(
-          '''
+        equals('''
 0
   2
     10
@@ -215,14 +222,14 @@ void main() {
   4
   6
   8
-''',
-        ),
+'''),
       );
     });
 
     test('filterTree when root should be filtered out', () {
-      final filteredTreeRoots =
-          testTreeNode.filterWhere((node) => node.id.isOdd);
+      final filteredTreeRoots = testTreeNode.filterWhere(
+        (node) => node.id.isOdd,
+      );
       expect(filteredTreeRoots.length, equals(3));
       final firstRoot = filteredTreeRoots[0];
       final middleRoot = filteredTreeRoots[1];
@@ -230,48 +237,43 @@ void main() {
 
       expect(
         firstRoot.toString(),
-        equals(
-          '''
+        equals('''
 1
-''',
-        ),
+'''),
       );
       expect(
         middleRoot.toString(),
-        equals(
-          '''
+        equals('''
 11
-''',
-        ),
+'''),
       );
       expect(
         lastRoot.toString(),
-        equals(
-          '''
+        equals('''
 3
   5
     7
     9
-''',
-        ),
+'''),
       );
     });
 
     test('filterTree when zero nodes match', () {
-      final filteredTreeRoots =
-          testTreeNode.filterWhere((node) => node.id > 15);
+      final filteredTreeRoots = testTreeNode.filterWhere(
+        (node) => node.id > 15,
+      );
       expect(filteredTreeRoots, isEmpty);
     });
 
     test('filterTree when all nodes match', () {
-      final filteredTreeRoots =
-          testTreeNode.filterWhere((node) => node.id < 10);
+      final filteredTreeRoots = testTreeNode.filterWhere(
+        (node) => node.id < 10,
+      );
       expect(filteredTreeRoots.length, equals(1));
       final filteredTree = filteredTreeRoots.first;
       expect(
         filteredTree.toString(),
-        equals(
-          '''
+        equals('''
 0
   1
   2
@@ -282,8 +284,7 @@ void main() {
       7
       8
       9
-''',
-        ),
+'''),
       );
     });
 
@@ -326,30 +327,17 @@ void main() {
         treeNodeI = TraversalTestTreeNode('I');
         treeNodeJ = TraversalTestTreeNode('J');
 
-        tree = treeNodeA
-          ..addAllChildren(
-            [
-              treeNodeB
-                ..addAllChildren(
-                  [
-                    treeNodeE
-                      ..addAllChildren([
-                        treeNodeH,
-                      ]),
-                    treeNodeF,
-                  ],
-                ),
+        tree =
+            treeNodeA..addAllChildren([
+              treeNodeB..addAllChildren([
+                treeNodeE..addAllChildren([treeNodeH]),
+                treeNodeF,
+              ]),
               treeNodeC,
-              treeNodeD
-                ..addAllChildren([
-                  treeNodeG
-                    ..addAllChildren([
-                      treeNodeI,
-                      treeNodeJ,
-                    ]),
-                ]),
-            ],
-          );
+              treeNodeD..addAllChildren([
+                treeNodeG..addAllChildren([treeNodeI, treeNodeJ]),
+              ]),
+            ]);
       });
 
       group('BFS', () {
@@ -373,10 +361,11 @@ void main() {
         });
 
         test('finds the correct node', () {
-          final node = breadthFirstTraversal<TraversalTestTreeNode>(
-            tree,
-            returnCondition: (node) => node.id == 'H',
-          )!;
+          final node =
+              breadthFirstTraversal<TraversalTestTreeNode>(
+                tree,
+                returnCondition: (node) => node.id == 'H',
+              )!;
           expect(node.id, equals('H'));
         });
       });
@@ -402,10 +391,11 @@ void main() {
         });
 
         test('finds the correct node', () {
-          final node = depthFirstTraversal<TraversalTestTreeNode>(
-            tree,
-            returnCondition: (node) => node.id == 'H',
-          )!;
+          final node =
+              depthFirstTraversal<TraversalTestTreeNode>(
+                tree,
+                returnCondition: (node) => node.id == 'H',
+              )!;
           expect(node.id, equals('H'));
         });
 
@@ -446,27 +436,15 @@ final treeNode9 = TestTreeNode(9, tag: 'test-tag');
 final treeNode10 = TestTreeNode(10);
 final treeNode11 = TestTreeNode(11);
 final treeNode12 = TestTreeNode(12);
-final testTreeNode = treeNode0
-  ..addAllChildren([
-    treeNode1,
-    treeNode2
-      ..addAllChildren([
-        treeNode10,
-        treeNode11,
-        treeNode12,
-      ]),
-    treeNode3
-      ..addAllChildren([
+final testTreeNode =
+    treeNode0..addAllChildren([
+      treeNode1,
+      treeNode2..addAllChildren([treeNode10, treeNode11, treeNode12]),
+      treeNode3..addAllChildren([
         treeNode4,
-        treeNode5
-          ..addAllChildren([
-            treeNode6,
-            treeNode7,
-            treeNode8,
-            treeNode9,
-          ]),
+        treeNode5..addAllChildren([treeNode6, treeNode7, treeNode8, treeNode9]),
       ]),
-  ]);
+    ]);
 
 class TestTreeNode extends TreeNode<TestTreeNode> {
   TestTreeNode(this.id, {this.tag});

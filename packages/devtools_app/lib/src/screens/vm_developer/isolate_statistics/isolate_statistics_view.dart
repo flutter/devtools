@@ -24,10 +24,7 @@ import 'isolate_statistics_view_controller.dart';
 /// isolate.
 class IsolateStatisticsView extends VMDeveloperView {
   const IsolateStatisticsView()
-      : super(
-          title: 'Isolates',
-          icon: Icons.bar_chart,
-        );
+    : super(title: 'Isolates', icon: Icons.bar_chart);
 
   @override
   bool get showIsolateSelector => true;
@@ -58,14 +55,8 @@ class IsolateStatisticsViewBody extends StatelessWidget {
             Flexible(
               child: Column(
                 children: [
-                  Flexible(
-                    child: _buildTopRow(),
-                  ),
-                  Flexible(
-                    child: IsolatePortsWidget(
-                      controller: controller,
-                    ),
-                  ),
+                  Flexible(child: _buildTopRow()),
+                  Flexible(child: IsolatePortsWidget(controller: controller)),
                 ],
               ),
             ),
@@ -82,28 +73,16 @@ class IsolateStatisticsViewBody extends StatelessWidget {
           child: Column(
             children: [
               Expanded(
-                child: GeneralIsolateStatisticsWidget(
-                  controller: controller,
-                ),
+                child: GeneralIsolateStatisticsWidget(controller: controller),
               ),
               Expanded(
-                child: IsolateMemoryStatisticsWidget(
-                  controller: controller,
-                ),
+                child: IsolateMemoryStatisticsWidget(controller: controller),
               ),
             ],
           ),
         ),
-        Flexible(
-          child: TagStatisticsWidget(
-            controller: controller,
-          ),
-        ),
-        Flexible(
-          child: ServiceExtensionsWidget(
-            controller: controller,
-          ),
-        ),
+        Flexible(child: TagStatisticsWidget(controller: controller)),
+        Flexible(child: ServiceExtensionsWidget(controller: controller)),
       ],
     );
   }
@@ -125,9 +104,7 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
     }
     final startedAtFormatter = DateFormat.yMMMMd().add_jms();
     return startedAtFormatter.format(
-      DateTime.fromMillisecondsSinceEpoch(
-        isolate.startTime!,
-      ).toLocal(),
+      DateTime.fromMillisecondsSinceEpoch(isolate.startTime!).toLocal(),
     );
   }
 
@@ -138,9 +115,7 @@ class GeneralIsolateStatisticsWidget extends StatelessWidget {
     final uptimeFormatter = DateFormat.Hms();
     return uptimeFormatter.format(
       DateTime.now()
-          .subtract(
-            Duration(milliseconds: isolate.startTime!),
-          )
+          .subtract(Duration(milliseconds: isolate.startTime!))
           .toUtc(),
     );
   }
@@ -201,10 +176,7 @@ class IsolateMemoryStatisticsWidget extends StatelessWidget {
           ),
           selectableTextBuilderMapEntry(
             'New Space',
-            _buildMemoryString(
-              isolate?.newSpaceUsage,
-              isolate?.newSpaceUsage,
-            ),
+            _buildMemoryString(isolate?.newSpaceUsage, isolate?.newSpaceUsage),
           ),
           selectableTextBuilderMapEntry(
             'Old Space',
@@ -238,18 +210,17 @@ class TagStatisticsWidget extends StatelessWidget {
         title: 'Execution Time',
         roundedTopBorder: false,
         table: Flexible(
-          child: controller.cpuProfilerController.profilerEnabled
-              ? FlatTable<VMTag>(
-                  keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
-                  data: controller.tags,
-                  dataKey: 'tag-statistics',
-                  columns: _columns,
-                  defaultSortColumn: _percentage,
-                  defaultSortDirection: SortDirection.descending,
-                )
-              : CpuProfilerDisabled(
-                  controller.cpuProfilerController,
-                ),
+          child:
+              controller.cpuProfilerController.profilerEnabled
+                  ? FlatTable<VMTag>(
+                    keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
+                    data: controller.tags,
+                    dataKey: 'tag-statistics',
+                    columns: _columns,
+                    defaultSortColumn: _percentage,
+                    defaultSortDirection: SortDirection.descending,
+                  )
+                  : CpuProfilerDisabled(controller.cpuProfilerController),
         ),
       ),
     );
@@ -265,7 +236,7 @@ class _TagColumn extends ColumnData<VMTag> {
 
 class _PercentageColumn extends ColumnData<VMTag> {
   _PercentageColumn()
-      : super.wide('Percentage', alignment: ColumnAlignment.right);
+    : super.wide('Percentage', alignment: ColumnAlignment.right);
 
   @override
   double getValue(VMTag dataObject) => dataObject.percentage;
@@ -313,10 +284,7 @@ class _StackTraceViewerFrameColumn extends ColumnData<String> {
 // TODO(bkonyi): merge with debugger stack trace viewer.
 /// A simple table to display a stack trace, sorted by frame number.
 class StackTraceViewerWidget extends StatelessWidget {
-  const StackTraceViewerWidget({
-    super.key,
-    required this.stackTrace,
-  });
+  const StackTraceViewerWidget({super.key, required this.stackTrace});
 
   static final frame = _StackTraceViewerFrameColumn();
 
@@ -327,29 +295,29 @@ class StackTraceViewerWidget extends StatelessWidget {
     return ValueListenableBuilder<InstanceRef?>(
       valueListenable: stackTrace,
       builder: (context, stackTrace, _) {
-        final lines = stackTrace?.allocationLocation?.valueAsString
-            ?.split('\n')
-            .where((e) => e.isNotEmpty)
-            .toList();
+        final lines =
+            stackTrace?.allocationLocation?.valueAsString
+                ?.split('\n')
+                .where((e) => e.isNotEmpty)
+                .toList();
         return VMInfoList(
           title: 'Allocation Location',
           roundedTopBorder: false,
-          table: lines == null
-              ? const Expanded(
-                  child: Center(
-                    child: Text('No port selected'),
+          table:
+              lines == null
+                  ? const Expanded(
+                    child: Center(child: Text('No port selected')),
+                  )
+                  : Flexible(
+                    child: FlatTable<String>(
+                      keyFactory: (String s) => ValueKey<String>(s),
+                      data: lines,
+                      dataKey: 'stack-trace-viewer',
+                      columns: [frame],
+                      defaultSortColumn: frame,
+                      defaultSortDirection: SortDirection.ascending,
+                    ),
                   ),
-                )
-              : Flexible(
-                  child: FlatTable<String>(
-                    keyFactory: (String s) => ValueKey<String>(s),
-                    data: lines,
-                    dataKey: 'stack-trace-viewer',
-                    columns: [frame],
-                    defaultSortColumn: frame,
-                    defaultSortDirection: SortDirection.ascending,
-                  ),
-                ),
         );
       },
     );
@@ -383,10 +351,7 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
     return OutlineDecoration(
       child: SplitPane(
         axis: Axis.horizontal,
-        initialFractions: const [
-          0.3,
-          0.7,
-        ],
+        initialFractions: const [0.3, 0.7],
         children: [
           OutlineDecoration.onlyRight(
             child: Column(
@@ -394,14 +359,13 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
                 AreaPaneHeader(
                   includeTopBorder: false,
                   roundedTopBorder: false,
-                  title: Text(
-                    'Open Ports (${ports.length})',
-                  ),
+                  title: Text('Open Ports (${ports.length})'),
                 ),
                 Flexible(
                   child: FlatTable<InstanceRef?>(
-                    keyFactory: (InstanceRef? port) =>
-                        ValueKey<String>(port!.debugName!),
+                    keyFactory:
+                        (InstanceRef? port) =>
+                            ValueKey<String>(port!.debugName!),
                     data: ports,
                     dataKey: 'isolate-ports',
                     columns: _columns,
@@ -414,9 +378,7 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
             ),
           ),
           OutlineDecoration.onlyLeft(
-            child: StackTraceViewerWidget(
-              stackTrace: selectedPort,
-            ),
+            child: StackTraceViewerWidget(stackTrace: selectedPort),
           ),
         ],
       ),

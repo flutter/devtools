@@ -13,10 +13,7 @@ import '../../../../shared/ui/utils.dart';
 import 'frame_analysis_model.dart';
 
 class FrameTimeVisualizer extends StatefulWidget {
-  const FrameTimeVisualizer({
-    super.key,
-    required this.frameAnalysis,
-  });
+  const FrameTimeVisualizer({super.key, required this.frameAnalysis});
 
   final FrameAnalysis frameAnalysis;
 
@@ -154,12 +151,16 @@ class _FrameBlockGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget content;
     if (hasData) {
-      final totalFlex =
-          data.fold<int>(0, (current, block) => current + block.flex);
+      final totalFlex = data.fold<int>(
+        0,
+        (current, block) => current + block.flex,
+      );
       content = LayoutBuilder(
         builder: (context, constraints) {
-          final adjustedBlockWidths =
-              adjustedWidthsForBlocks(constraints, totalFlex);
+          final adjustedBlockWidths = adjustedWidthsForBlocks(
+            constraints,
+            totalFlex,
+          );
           return Row(
             children: [
               for (var i = 0; i < data.length; i++)
@@ -177,11 +178,7 @@ class _FrameBlockGroup extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title),
-        const SizedBox(height: denseSpacing),
-        content,
-      ],
+      children: [Text(title), const SizedBox(height: denseSpacing), content],
     );
   }
 
@@ -194,11 +191,12 @@ class _FrameBlockGroup extends StatelessWidget {
     BoxConstraints constraints,
     int totalFlex,
   ) {
-    final unadjustedBlockWidths = data
-        .map(
-          (blockData) => constraints.maxWidth * blockData.flex / totalFlex,
-        )
-        .toList();
+    final unadjustedBlockWidths =
+        data
+            .map(
+              (blockData) => constraints.maxWidth * blockData.flex / totalFlex,
+            )
+            .toList();
 
     var adjustment = 0.0;
     var widestBlockIndex = 0;
@@ -213,11 +211,13 @@ class _FrameBlockGroup extends StatelessWidget {
       }
     }
 
-    final adjustedBlockWidths = unadjustedBlockWidths
-        .map(
-          (blockWidth) => math.max(blockWidth, _FramePhaseBlock.minBlockWidth),
-        )
-        .toList();
+    final adjustedBlockWidths =
+        unadjustedBlockWidths
+            .map(
+              (blockWidth) =>
+                  math.max(blockWidth, _FramePhaseBlock.minBlockWidth),
+            )
+            .toList();
     final widest = adjustedBlockWidths[widestBlockIndex];
     adjustedBlockWidths[widestBlockIndex] = math.max(
       widest - adjustment,
@@ -229,10 +229,7 @@ class _FrameBlockGroup extends StatelessWidget {
 }
 
 class _FramePhaseBlock extends StatelessWidget {
-  const _FramePhaseBlock({
-    required this.blockData,
-    required this.width,
-  });
+  const _FramePhaseBlock({required this.blockData, required this.width});
 
   static const _height = 24.0;
 
@@ -263,7 +260,8 @@ class _FramePhaseBlock extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: densePadding),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final minWidthForText = defaultIconSize +
+            final minWidthForText =
+                defaultIconSize +
                 densePadding * 2 +
                 denseSpacing +
                 calculateTextSpanWidth(TextSpan(text: blockData.display));
@@ -274,16 +272,10 @@ class _FramePhaseBlock extends StatelessWidget {
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  blockData.icon,
-                  size: defaultIconSize,
-                ),
+                Icon(blockData.icon, size: defaultIconSize),
                 if (includeText) ...[
                   const SizedBox(width: denseSpacing),
-                  Text(
-                    blockData.display,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  Text(blockData.display, overflow: TextOverflow.ellipsis),
                 ],
               ],
             );
@@ -311,13 +303,14 @@ class _FramePhaseBlockData {
   final IconData icon;
 
   String get display {
-    final text = duration != Duration.zero
-        ? durationText(
-            duration,
-            unit: DurationDisplayUnit.milliseconds,
-            allowRoundingToZero: false,
-          )
-        : '--';
+    final text =
+        duration != Duration.zero
+            ? durationText(
+              duration,
+              unit: DurationDisplayUnit.milliseconds,
+              allowRoundingToZero: false,
+            )
+            : '--';
     return '$title - $text';
   }
 }

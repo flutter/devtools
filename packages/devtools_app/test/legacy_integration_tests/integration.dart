@@ -41,8 +41,9 @@ class DevtoolsManager {
     // wait for app initialization
     await Future.wait([
       waitForConnection
-          ? tabInstance.onEvent
-              .firstWhere((msg) => msg.event == 'app.devToolsReady')
+          ? tabInstance.onEvent.firstWhere(
+            (msg) => msg.event == 'app.devToolsReady',
+          )
           : Future<void>.value(),
       tabInstance.getBrowserChannel(),
     ]);
@@ -105,21 +106,21 @@ class BrowserTabInstance {
     tab.onConsoleAPICalled
         .where((ConsoleAPIEvent event) => event.type == 'log')
         .listen((ConsoleAPIEvent event) {
-      if (event.args.isNotEmpty) {
-        final message = event.args.first;
-        final value = '${message.value}';
-        if (value.startsWith('[') && value.endsWith(']')) {
-          try {
-            final msg = jsonDecode(value.substring(1, value.length - 1));
-            if (msg is Map) {
-              _handleBrowserMessage(msg);
+          if (event.args.isNotEmpty) {
+            final message = event.args.first;
+            final value = '${message.value}';
+            if (value.startsWith('[') && value.endsWith(']')) {
+              try {
+                final msg = jsonDecode(value.substring(1, value.length - 1));
+                if (msg is Map) {
+                  _handleBrowserMessage(msg);
+                }
+              } catch (_) {
+                // ignore
+              }
             }
-          } catch (_) {
-            // ignore
           }
-        }
-      }
-    });
+        });
   }
 
   final ChromeTab tab;
@@ -184,8 +185,9 @@ class BrowserTabInstance {
     // In Headless Chrome, we get Inspector.detached when we close the last
     // target rather than a response.
     await Future.any(<Future<Object>>[
-      tab.wipConnection!.onNotification
-          .firstWhere((n) => n.method == 'Inspector.detached'),
+      tab.wipConnection!.onNotification.firstWhere(
+        (n) => n.method == 'Inspector.detached',
+      ),
       tab.wipConnection!.target.closeTarget(tab.wipTab.id),
     ]);
   }
@@ -318,9 +320,7 @@ class WebBuildFixture {
     return WebBuildFixture._(process, url, verbose);
   }
 
-  static Future<void> build({
-    bool verbose = false,
-  }) async {
+  static Future<void> build({bool verbose = false}) async {
     final clean = await _runFlutter(['clean']);
     expect(await clean.exitCode, 0);
     final pubGet = await _runFlutter(['pub', 'get']);

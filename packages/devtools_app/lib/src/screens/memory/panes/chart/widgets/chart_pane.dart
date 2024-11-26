@@ -102,11 +102,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         timestamp: value.timestamp ?? _timestamp,
       );
 
-      _showHover(
-        context,
-        allValues,
-        details.globalPosition,
-      );
+      _showHover(context, allValues, details.globalPosition);
     });
   }
 
@@ -135,9 +131,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     }
 
     // There is no listener passed, so SetState will be invoked.
-    addAutoDisposeListener(
-      widget.chart.isAndroidChartVisible,
-    );
+    addAutoDisposeListener(widget.chart.isAndroidChartVisible);
   }
 
   @override
@@ -201,9 +195,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                 },
               ),
               // Chart control pane.
-              ChartControlPane(
-                chart: widget.chart,
-              ),
+              ChartControlPane(chart: widget.chart),
             ],
           ),
         );
@@ -231,13 +223,15 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       return [];
     }
 
-    final androidDataDisplayed =
-        chartsValues.androidDataToDisplay(widget.chart.android.traces);
+    final androidDataDisplayed = chartsValues.androidDataToDisplay(
+      widget.chart.android.traces,
+    );
 
     // Separator between Android data.
     // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
     //              Is it centering on a too wide Overlay?
-    final width = _hoverWidth -
+    final width =
+        _hoverWidth -
         totalDividerLineHorizontalSpace -
         DashedLine.defaultDashWidth;
     final dashedColor = Colors.grey.shade600;
@@ -266,8 +260,9 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     final focusColor = theme.focusColor;
     final colorScheme = theme.colorScheme;
 
-    final box = MemoryChartPane.hoverKey.currentContext!.findRenderObject()
-        as RenderBox;
+    final box =
+        MemoryChartPane.hoverKey.currentContext!.findRenderObject()
+            as RenderBox;
     final renderBoxWidth = box.size.width;
 
     // Display hover to left of right side of position.
@@ -278,11 +273,12 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     double totalHoverHeight;
     int totalTraces;
-    totalTraces = widget.chart.isAndroidChartVisible.value
-        ? chartsValues.vmData.entries.length -
-            1 +
-            chartsValues.androidData.entries.length
-        : chartsValues.vmData.entries.length - 1;
+    totalTraces =
+        widget.chart.isAndroidChartVisible.value
+            ? chartsValues.vmData.entries.length -
+                1 +
+                chartsValues.androidData.entries.length
+            : chartsValues.vmData.entries.length - 1;
 
     totalHoverHeight = _computeHoverHeight(
       chartsValues.eventCount,
@@ -294,40 +290,41 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final overlayState = Overlay.of(context);
     _hoverOverlayEntry ??= OverlayEntry(
-      builder: (context) => Positioned(
-        top: position.dy + _hoverYOffset,
-        left: xPosition,
-        height: totalHoverHeight,
-        child: Container(
-          padding: const EdgeInsets.only(top: 5, bottom: 8),
-          decoration: BoxDecoration(
-            color: colorScheme.defaultBackgroundColor,
-            border: Border.all(
-              color: focusColor,
-              width: _hoverCardBorderWidth,
-            ),
-            borderRadius: defaultBorderRadius,
-          ),
-          width: _hoverWidth,
-          child: ListView(
-            children: [
-              Container(
-                width: _hoverWidth,
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  'Time $displayTimestamp',
-                  style: theme.legendTextStyle,
-                  textAlign: TextAlign.center,
+      builder:
+          (context) => Positioned(
+            top: position.dy + _hoverYOffset,
+            left: xPosition,
+            height: totalHoverHeight,
+            child: Container(
+              padding: const EdgeInsets.only(top: 5, bottom: 8),
+              decoration: BoxDecoration(
+                color: colorScheme.defaultBackgroundColor,
+                border: Border.all(
+                  color: focusColor,
+                  width: _hoverCardBorderWidth,
                 ),
+                borderRadius: defaultBorderRadius,
               ),
-              ..._displayEventsInHover(chartsValues),
-              ..._displayVmDataInHover(chartsValues),
-              ..._displayAndroidDataInHover(chartsValues),
-              ..._displayExtensionEventsInHover(chartsValues),
-            ],
+              width: _hoverWidth,
+              child: ListView(
+                children: [
+                  Container(
+                    width: _hoverWidth,
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      'Time $displayTimestamp',
+                      style: theme.legendTextStyle,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  ..._displayEventsInHover(chartsValues),
+                  ..._displayVmDataInHover(chartsValues),
+                  ..._displayAndroidDataInHover(chartsValues),
+                  ..._displayExtensionEventsInHover(chartsValues),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
     );
 
     overlayState.insert(_hoverOverlayEntry!);
@@ -343,9 +340,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     for (final entry in dataToDisplay.entries) {
       final keys = entry.value.keys;
-      final image = keys.contains(renderImage)
-          ? entry.value[renderImage] as String?
-          : null;
+      final image =
+          keys.contains(renderImage)
+              ? entry.value[renderImage] as String?
+              : null;
       final color =
           keys.contains(renderLine) ? entry.value[renderLine] as Color? : null;
       final dashedLine =
@@ -404,24 +402,17 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         traceColor =
             dashed ? createDashWidget(colorPatch) : createSolidLine(colorPatch);
       } else {
-        traceColor = image == null
-            ? const SizedBox()
-            : scaleImage
-                ? Image(
-                    image: AssetImage(image),
-                    width: 20,
-                    height: 10,
-                  )
-                : Image(
-                    image: AssetImage(image),
-                  );
+        traceColor =
+            image == null
+                ? const SizedBox()
+                : scaleImage
+                ? Image(image: AssetImage(image), width: 20, height: 10)
+                : Image(image: AssetImage(image));
       }
 
       return [
         traceColor,
-        const PaddedDivider(
-          padding: EdgeInsets.only(left: denseRowSpacing),
-        ),
+        const PaddedDivider(padding: EdgeInsets.only(left: denseRowSpacing)),
         Text(displayName, style: theme.legendTextStyle),
         Text(displayValue, style: theme.legendTextStyle),
       ];
@@ -439,9 +430,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     );
     return Container(
       margin: const EdgeInsets.only(left: 5, bottom: 2),
-      child: Row(
-        children: rowChildren,
-      ),
+      child: Row(children: rowChildren),
     );
   }
 
@@ -459,9 +448,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   List<Widget> _displayExtensionEventsInHover(ChartsValues chartsValues) {
     return [
       if (chartsValues.hasExtensionEvents)
-        ..._extensionEvents(
-          allEvents: chartsValues.extensionEvents,
-        ),
+        ..._extensionEvents(allEvents: chartsValues.extensionEvents),
     ];
   }
 
@@ -528,9 +515,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       children: [
         Container(
           padding: const EdgeInsets.only(left: 6.0),
-          child: Image(
-            image: AssetImage(eventLegendAsset(eventsLength)),
-          ),
+          child: Image(image: AssetImage(eventLegendAsset(eventsLength))),
         ),
         const SizedBox(width: denseSpacing),
         Text(
@@ -539,10 +524,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         ),
       ],
     );
-    return [
-      title,
-      ...widgets,
-    ];
+    return [title, ...widgets];
   }
 
   String _decodeEventValues(Map<String, Object> event) {

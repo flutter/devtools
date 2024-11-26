@@ -12,9 +12,7 @@ Future<Object?> getPreferenceValue(String key) async {
 
   final uri = Uri(
     path: PreferencesApi.getPreferenceValue,
-    queryParameters: {
-      PreferencesApi.preferenceKeyProperty: key,
-    },
+    queryParameters: {PreferencesApi.preferenceKeyProperty: key},
   );
   final resp = await request(uri.toString());
   if (resp?.statusOk ?? false) {

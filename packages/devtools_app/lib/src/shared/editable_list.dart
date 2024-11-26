@@ -27,8 +27,8 @@ class EditableList extends StatefulWidget {
     this.onRefreshTriggered,
     void Function(String)? onEntryAdded,
     void Function(String)? onEntryRemoved,
-  })  : onEntryAdded = onEntryAdded ?? ((entry) => entries.add(entry)),
-        onEntryRemoved = onEntryRemoved ?? ((entry) => entries.remove(entry));
+  }) : onEntryAdded = onEntryAdded ?? ((entry) => entries.add(entry)),
+       onEntryRemoved = onEntryRemoved ?? ((entry) => entries.remove(entry));
 
   /// The values that will be displayed in the editable list.
   ///
@@ -179,19 +179,19 @@ class EditableListActionBar extends StatelessWidget {
           const SizedBox(width: densePadding),
           isRefreshing?.value ?? false
               ? SizedBox(
-                  width: defaultTextFieldHeight,
-                  height: defaultTextFieldHeight,
-                  child: const Padding(
-                    padding: EdgeInsets.all(densePadding),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              : RefreshButton(
-                  gaScreen: gaScreen,
-                  gaSelection: gaRefreshSelection,
-                  onPressed: onRefresh,
-                  minScreenWidthForTextBeforeScaling: double.maxFinite,
+                width: defaultTextFieldHeight,
+                height: defaultTextFieldHeight,
+                child: const Padding(
+                  padding: EdgeInsets.all(densePadding),
+                  child: CircularProgressIndicator(),
                 ),
+              )
+              : RefreshButton(
+                gaScreen: gaScreen,
+                gaSelection: gaRefreshSelection,
+                onPressed: onRefresh,
+                minScreenWidthForTextBeforeScaling: double.maxFinite,
+              ),
         ],
       ),
     );
@@ -242,18 +242,12 @@ class EditableListRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: Text(entry),
-        ),
-        EditableListCopyDirectoryButton(
-          value: entry,
-        ),
+        Expanded(child: Text(entry)),
+        EditableListCopyDirectoryButton(value: entry),
         const SizedBox(width: denseSpacing),
         EditableListRemoveDirectoryButton(
           onPressed: () {
-            onEntryRemoved(
-              entry,
-            );
+            onEntryRemoved(entry);
           },
         ),
       ],
@@ -263,10 +257,7 @@ class EditableListRow extends StatelessWidget {
 
 @visibleForTesting
 class EditableListCopyDirectoryButton extends StatelessWidget {
-  const EditableListCopyDirectoryButton({
-    super.key,
-    required this.value,
-  });
+  const EditableListCopyDirectoryButton({super.key, required this.value});
 
   final String value;
 

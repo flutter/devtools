@@ -57,77 +57,73 @@ void main() {
       ];
 
       final testPool = ObjectPool(
-        json: {
-          'size': 0,
-        },
+        json: {'size': 0},
         id: 'object-pool-id',
         entries: objectPoolEntries,
         length: objectPoolEntries.length,
       );
       when(mockObjectPool.obj).thenReturn(testPool);
       when(mockObjectPool.script).thenReturn(null);
-      when(mockObjectPool.retainingPath).thenReturn(
-        const FixedValueListenable<RetainingPath?>(null),
-      );
+      when(
+        mockObjectPool.retainingPath,
+      ).thenReturn(const FixedValueListenable<RetainingPath?>(null));
       when(mockObjectPool.inboundReferencesTree).thenReturn(
         const FixedValueListenable<List<InboundReferencesTreeNode>>([]),
       );
-      when(mockObjectPool.fetchingReachableSize).thenReturn(
-        const FixedValueListenable<bool>(false),
-      );
-      when(mockObjectPool.fetchingRetainedSize).thenReturn(
-        const FixedValueListenable<bool>(false),
-      );
+      when(
+        mockObjectPool.fetchingReachableSize,
+      ).thenReturn(const FixedValueListenable<bool>(false));
+      when(
+        mockObjectPool.fetchingRetainedSize,
+      ).thenReturn(const FixedValueListenable<bool>(false));
       when(mockObjectPool.retainedSize).thenReturn(null);
       when(mockObjectPool.reachableSize).thenReturn(null);
     });
 
-    testWidgetsWithWindowSize(
-      'displays object pool entries',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrapSimple(
-            VmObjectPoolDisplay(
-              objectPool: mockObjectPool,
-              controller: ObjectInspectorViewController(),
-            ),
+    testWidgetsWithWindowSize('displays object pool entries', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrapSimple(
+          VmObjectPoolDisplay(
+            objectPool: mockObjectPool,
+            controller: ObjectInspectorViewController(),
           ),
+        ),
+      );
+
+      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
+      expect(find.text('General Information'), findsOneWidget);
+      expect(find.text('ObjectPool'), findsOneWidget);
+      expect(find.text('Shallow Size:'), findsOneWidget);
+      expect(find.text('0 B'), findsOneWidget);
+      expect(find.text('Reachable Size:'), findsOneWidget);
+      expect(find.text('Retained Size:'), findsOneWidget);
+
+      expect(find.byType(RetainingPathWidget), findsOneWidget);
+      expect(find.byType(InboundReferencesTree), findsOneWidget);
+
+      expect(find.byType(ObjectPoolTable), findsOneWidget);
+
+      for (final entry in mockObjectPool.obj.entries) {
+        // Includes the offset within the pool.
+        expect(
+          find.text(
+            '[PP + 0x${entry.offset.toRadixString(16).toUpperCase()}]',
+            findRichText: true,
+          ),
+          findsOneWidget,
         );
-
-        expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-        expect(find.byType(VMInfoCard), findsOneWidget);
-        expect(find.text('General Information'), findsOneWidget);
-        expect(find.text('ObjectPool'), findsOneWidget);
-        expect(find.text('Shallow Size:'), findsOneWidget);
-        expect(find.text('0 B'), findsOneWidget);
-        expect(find.text('Reachable Size:'), findsOneWidget);
-        expect(find.text('Retained Size:'), findsOneWidget);
-
-        expect(find.byType(RetainingPathWidget), findsOneWidget);
-        expect(find.byType(InboundReferencesTree), findsOneWidget);
-
-        expect(find.byType(ObjectPoolTable), findsOneWidget);
-
-        for (final entry in mockObjectPool.obj.entries) {
-          // Includes the offset within the pool.
-          expect(
-            find.text(
-              '[PP + 0x${entry.offset.toRadixString(16).toUpperCase()}]',
-              findRichText: true,
-            ),
-            findsOneWidget,
-          );
-          expect(
-            find.text(
-              VmServiceObjectLink.defaultTextBuilder(entry.value) ??
-                  entry.value.toString(),
-              findRichText: true,
-            ),
-            findsOneWidget,
-          );
-        }
-      },
-    );
+        expect(
+          find.text(
+            VmServiceObjectLink.defaultTextBuilder(entry.value) ??
+                entry.value.toString(),
+            findRichText: true,
+          ),
+          findsOneWidget,
+        );
+      }
+    });
   });
 }
