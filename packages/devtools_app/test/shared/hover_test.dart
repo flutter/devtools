@@ -41,4 +41,38 @@ void main() {
     expect(wordForHover(250, _textSpan), 'foo.bar');
     expect(wordForHover(300, _textSpan), 'foo.bar.baz');
   });
+
+  group('isPrimitiveValueOrNull', () {
+    test('returns false for non-primitives values', () {
+      expect(isPrimitiveValueOrNull('myVariable'), isFalse);
+      expect(isPrimitiveValueOrNull('MyWidget'), isFalse);
+      expect(isPrimitiveValueOrNull('MyClass'), isFalse);
+    });
+
+    test('returns true for null', () {
+      expect(isPrimitiveValueOrNull('null'), isTrue);
+    });
+
+    test('returns true for ints', () {
+      expect(isPrimitiveValueOrNull('10'), isTrue);
+      expect(isPrimitiveValueOrNull('3'), isTrue);
+      expect(isPrimitiveValueOrNull('255'), isTrue);
+    });
+
+    test('returns true for doubles', () {
+      expect(isPrimitiveValueOrNull('.3'), isTrue);
+      expect(isPrimitiveValueOrNull('1.7'), isTrue);
+      expect(isPrimitiveValueOrNull('123.389'), isTrue);
+    });
+
+    test('returns true for bools', () {
+      expect(isPrimitiveValueOrNull('true'), isTrue);
+      expect(isPrimitiveValueOrNull('false'), isTrue);
+    });
+
+    test('returns true for strings', () {
+      expect(isPrimitiveValueOrNull('"Hello World!"'), isTrue);
+      expect(isPrimitiveValueOrNull("'Hello World!'"), isTrue);
+    });
+  });
 }
