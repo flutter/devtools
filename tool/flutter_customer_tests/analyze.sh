@@ -16,6 +16,6 @@ flutter pub get
 
 # Skip unimportant directories to speed up analysis.
 # Unimportant directories are defined in tool/lib/commands/analyze.dart.
-dart bin/dt.dart analyze --no-fatal-infos --skip-unimportant
+dt analyze --no-fatal-infos --skip-unimportant
 
 cd ..
