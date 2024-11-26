@@ -49,6 +49,9 @@ class AnalyzeCommand extends Command {
     final skipUnimportant = argResults![_skipUnimportantArg] as bool;
     final packages = repo.getPackages(
       skip: skipUnimportant ? _unimportantDirectories : [],
+      // Analyzing packages that are subdirectories of another package is
+      // redundant.
+      includeSubdirectories: false,
     );
     final fatalInfos = argResults![_fatalInfosArg] as bool;
 

@@ -45,14 +45,33 @@ class DevToolsRepo {
     return DevToolsRepo._create(repoPath);
   }
 
-  List<Package> getPackages({List<String> skip = const []}) {
+  /// Returns the list of Dart or Flutter packages contained within the DevTools
+  /// repository.
+  ///
+  /// A Dart or Flutter package is defined as any directory with a pubspec.yaml
+  /// file.
+  ///
+  /// If a package path contains any part on its path that is in [skip], the
+  /// package will not be included in the returned results.
+  ///
+  /// If [includeSubdirectories] is false, packages that are a subdirectory of
+  /// another package will not be included in the returned results.
+  List<Package> getPackages({
+    List<String> skip = const [],
+    bool includeSubdirectories = true,
+  }) {
     final result = <Package>[];
     final repoDir = Directory(repoPath);
 
     for (final entity in repoDir.listSync()) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.')) {
-        _collectPackages(entity, result, skip: skip);
+        _collectPackages(
+          entity,
+          result,
+          skip: skip,
+          includeSubdirectories: includeSubdirectories,
+        );
       }
     }
 
@@ -79,6 +98,7 @@ class DevToolsRepo {
   void _collectPackages(
     Directory dir,
     List<Package> result, {
+    bool includeSubdirectories = true,
     List<String> skip = const [],
   }) {
     // Do not collect packages from the Flutter SDK that is stored in the tool/
@@ -100,14 +120,29 @@ class DevToolsRepo {
                 : '${skip.toString()} directories are intentionally skipped';
         print('Skipping ${dir.path} in _collectPackages because $reason.');
       } else {
-        result.add(Package._(this, dir.path));
+        final parentDirectoryAdded = result.any(
+          (p) => dir.path.startsWith(p.packagePath),
+        );
+        if (!includeSubdirectories && parentDirectoryAdded) {
+          print(
+            'Skipping ${dir.path} in _collectPackages because it is a '
+            'subdirectory of another package.',
+          );
+        } else {
+          result.add(Package._(this, dir.path));
+        }
       }
     }
 
     for (final entity in dir.listSync(followLinks: false)) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
-        _collectPackages(entity, result, skip: skip);
+        _collectPackages(
+          entity,
+          result,
+          skip: skip,
+          includeSubdirectories: includeSubdirectories,
+        );
       }
     }
   }
