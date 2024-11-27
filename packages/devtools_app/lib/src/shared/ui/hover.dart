@@ -66,6 +66,25 @@ String wordForHover(double dx, TextSpan line) {
   return word;
 }
 
+bool isPrimitiveValueOrNull(String valueAsString) {
+  if (valueAsString.isEmpty) return false;
+  final isNull = valueAsString == 'null';
+  final isBool = valueAsString == 'true' || valueAsString == 'false';
+  final isInt = int.tryParse(valueAsString) != null;
+  final isDouble = double.tryParse(valueAsString) != null;
+
+  bool isString = false;
+  if (valueAsString.length > 2) {
+    final firstChar = valueAsString[0];
+    final lastChar = valueAsString[valueAsString.length - 1];
+    isString =
+        [firstChar, lastChar].every((char) => char == '"') ||
+        [firstChar, lastChar].every((char) => char == "'");
+  }
+
+  return isNull || isBool || isInt || isDouble || isString;
+}
+
 /// Returns the index in the Textspan's plainText for which the hover offset is
 /// located.
 int _hoverIndexFor(double dx, TextSpan line) {
