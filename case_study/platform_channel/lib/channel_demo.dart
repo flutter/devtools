@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ChannelDemo extends StatefulWidget {
+  const ChannelDemo({super.key});
+
   @override
   State<ChannelDemo> createState() => _ChannelDemoState();
 }

@@ -15,7 +15,6 @@ analyzer:
     - '**/build/**'
     - '**.freezed.dart'
     - tool/flutter-sdk/
-    - case_study/
 
 linter:
   rules:
