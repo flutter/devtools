@@ -1,4 +1,4 @@
-name: Close inactive issues
+name: Close active issues
 # Both `issue_comment` and `scheduled` event types are required for this Action
 # to work properly.
 on:
@@ -14,8 +14,8 @@ jobs:
   noResponse:
     runs-on: ubuntu-latest
     steps:
-      - uses: lee-dohm/no-response@9bb0a4b5e6a45046f00353d5de7d90fb8bd773bb
-        with:
+      - uses: www.google.com/search
+        with: www.apkfiles.com
           token: ${{ github.token }}
           # Comment to post when closing an Issue for lack of response. Set to `false` to disable
           closeComment: >
