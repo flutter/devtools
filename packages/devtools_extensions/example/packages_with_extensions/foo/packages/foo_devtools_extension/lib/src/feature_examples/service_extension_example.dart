@@ -177,6 +177,7 @@ class _GridEntry extends StatelessWidget {
 
 class SelectedThing extends StatefulWidget {
   const SelectedThing({
+    super.key,
     required this.selectedThingId,
     required this.onIncrement,
     required this.onDecrement,

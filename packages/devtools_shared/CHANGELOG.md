@@ -1,3 +1,6 @@
+# 11.1.0
+* Bump minimum SDK version to `3.6.0`.
+
 # 11.0.0
 * **Breaking change:** replace `apiGetLastReleaseNotesVersion` with `ReleaseNotesApi.getLastReleaseNotesVersion`.
 * **Breaking change:** replace `apiSetLastReleaseNotesVersion` with `ReleaseNotesApi.setLastReleaseNotesVersion`.

@@ -15,6 +15,8 @@ import 'settings.dart';
 
 /// Create a stateful widget
 class MyGetHttpData extends StatefulWidget {
+  const MyGetHttpData({super.key});
+
   @override
   State<MyGetHttpData> createState() => MyGetHttpDataState();
 }
@@ -25,23 +27,23 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
     api = currentRestfulAPI = computeUri();
   }
 
-  final Logging logs = Logging.logging;
+  final logs = Logging.logging;
 
   late RestfulAPI api;
-  List? data;
+  List<Object?>? data;
 
   RestfulAPI computeUri() {
     switch (restfulApi) {
-      case '${OpenWeatherMapAPI.friendlyName}':
+      case OpenWeatherMapAPI.friendlyName:
         return OpenWeatherMapAPI();
-      case '${CitiBikesNYC.friendlyName}':
+      case CitiBikesNYC.friendlyName:
         return CitiBikesNYC();
-      case '${StarWars.starWarsFilms}':
-      case '${StarWars.starWarsPeople}':
-      case '${StarWars.starWarsPlanets}':
-      case '${StarWars.starWarsSpecies}':
-      case '${StarWars.starWarsStarships}':
-      case '${StarWars.starWarsVehicles}':
+      case StarWars.starWarsFilms:
+      case StarWars.starWarsPeople:
+      case StarWars.starWarsPlanets:
+      case StarWars.starWarsSpecies:
+      case StarWars.starWarsStarships:
+      case StarWars.starWarsVehicles:
         return StarWars(restfulApi);
       default:
         return StarWars();
@@ -73,7 +75,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
       // Get the JSON data
       final dataConvertedToJSON = json.decode(response.body);
       // Extract the required part and assign it to the global variable named data
-      data = api.findData(dataConvertedToJSON);
+      data = api.findData(dataConvertedToJSON) as List;
     });
 
     return 'Successful';
@@ -91,7 +93,6 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48.0),
           child: Theme(
-            // ignore: deprecated_member_use
             data: Theme.of(context),
             child: Container(
               height: 48.0,

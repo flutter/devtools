@@ -4,13 +4,15 @@ publish_to: none
 
 # Note: this version should only be updated by running the 'dt update-version'
 # command that updates the version here and in 'devtools.dart'.
-version: 2.41.0
+version: 2.42.0-dev.0
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
 environment:
   sdk: ">=3.7.0-160.0.dev <4.0.0"
   flutter: ">=3.27.0-1.0.pre.563"
+
+resolution: workspace
 
 dependencies:
   ansi_up: ^1.0.0
@@ -21,9 +23,9 @@ dependencies:
   collection: ^1.15.0
   dap: ^1.1.0
   dds_service_extensions: ^2.0.0
-  devtools_app_shared: ^0.2.2
-  devtools_extensions: ^0.3.0-wip
-  devtools_shared: ^10.0.1
+  devtools_app_shared:
+  devtools_extensions:
+  devtools_shared:
   dtd: ^2.4.0
   file: ^7.0.0
   file_selector: ^1.0.0
@@ -166,11 +168,3 @@ flutter:
 dependency_overrides:
   ansi_up:
     path: ../../third_party/packages/ansi_up
-  devtools_shared:
-    path: ../devtools_shared
-  devtools_app_shared:
-    path: ../devtools_app_shared
-  devtools_test:
-    path: ../devtools_test
-  devtools_extensions:
-    path: ../devtools_extensions
