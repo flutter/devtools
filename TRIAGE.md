@@ -20,8 +20,9 @@ by applying [proper labels](#label-the-issue) and [assigning priority](#prioriti
 2. Triage any new [flutter/flutter issues related to DevTools](https://github.com/flutter/flutter/labels/d%3A%20devtools).
 Transfer any issues to the `flutter/devtools` repo that should be tracked on our own issue tracker, and close issues you
 find that are obsolete.
-3. Spend at least 20 minutes [cleaning up the issue backlog](#clean-up-the-issue-backlog).
-4. Look through the DevTools discord [channel](https://discord.com/channels/608014603317936148/958862085297672282) for any recent user
+3. Try to reproduce any issues with the [reproduce to verify](https://github.com/flutter/devtools/labels/reproduce%20to%20verify) label.
+4. Spend at least 20 minutes [cleaning up the issue backlog](#clean-up-the-issue-backlog).
+5. Look through the DevTools discord [channel](https://discord.com/channels/608014603317936148/958862085297672282) for any recent user
 questions or concerns that require a response.
 
 ### Label the issue
