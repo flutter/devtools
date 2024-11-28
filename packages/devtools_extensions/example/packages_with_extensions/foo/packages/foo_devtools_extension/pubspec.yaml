@@ -14,6 +14,7 @@ dependencies:
   devtools_extensions:
     path: ../../../../../../devtools_extensions 
   dtd: ^2.2.0
+  path: ^1.8.0
   flutter:
     sdk: flutter
 

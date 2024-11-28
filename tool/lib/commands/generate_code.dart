@@ -72,8 +72,7 @@ class GenerateCodeCommand extends Command {
     }
 
     await runOverPackages(
-      CliCommand.flutter([
-        'pub',
+      CliCommand.dart([
         'run',
         'build_runner',
         'build',
