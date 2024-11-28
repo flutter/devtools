@@ -97,7 +97,7 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
     _verifyScoresAgainstThresholds(devToolsBenchmark, scores);
   }
 
-    expect(
+  expect(
     _exceededThresholds.isEmpty,
     isTrue,
     reason:
