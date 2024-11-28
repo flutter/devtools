@@ -159,6 +159,7 @@ void _verifyScoresAgainstThresholds(
   }
 }
 
+// TODO(kenz): dial these expected values in before landing this PR.
 final _benchmarkThresholds = {
   DevToolsBenchmark.navigateThroughOfflineScreens: {
     ..._valuesForMetric(
