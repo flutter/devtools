@@ -20,8 +20,14 @@ const _isWasmScore = 'isWasm';
 
 const _extraScores = [totalUiFrameAverage, _isWasmScore];
 
+late StringBuffer _exceededThresholds;
+
 /// Tests that the DevTools web benchmarks are run and reported correctly.
 void main() {
+  setUp(() {
+    _exceededThresholds = StringBuffer();
+  });
+
   for (final useWasm in [true, false]) {
     test(
       'Can run web benchmarks with ${useWasm ? 'WASM' : 'JS'}',
@@ -31,8 +37,6 @@ void main() {
       timeout: const Timeout(Duration(minutes: 10)),
     );
   }
-
-  // TODO(kenz): add tests that verify performance meets some expected threshold
 }
 
 Future<void> _runBenchmarks({bool useWasm = false}) async {
@@ -49,13 +53,15 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   );
   stdout.writeln('Web benchmark tests finished.');
 
+  expect(
+    const JsonEncoder.withIndent('  ').convert(taskResult.toJson()),
+    isA<String>(),
+  );
   expect(taskResult.scores.keys, hasLength(DevToolsBenchmark.values.length));
 
-  for (final benchmarkName in DevToolsBenchmark.values.map((e) => e.id)) {
-    final expectedMetrics =
-        expectedBenchmarkMetrics(
-          useWasm: useWasm,
-        ).map((BenchmarkMetric metric) => metric.label).toList();
+  for (final devToolsBenchmark in DevToolsBenchmark.values) {
+    final benchmarkName = devToolsBenchmark.id;
+    final expectedMetrics = expectedBenchmarkMetrics(useWasm: useWasm);
     const expectedComputations = BenchmarkMetricComputation.values;
     final scores = taskResult.scores[benchmarkName] ?? [];
     expect(
@@ -66,11 +72,11 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
       ),
     );
 
-    for (final metricName in expectedMetrics) {
+    for (final metric in expectedMetrics) {
       for (final computation in expectedComputations) {
         expect(
           scores.where(
-            (score) => score.metric == '$metricName.${computation.name}',
+            (score) => score.metric == _generateScoreName(metric, computation),
           ),
           hasLength(1),
         );
@@ -87,10 +93,148 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
     );
     expect(isWasmScore, isNotNull);
     expect(isWasmScore!.value, useWasm ? 1 : 0);
+
+    _verifyScoresAgainstThresholds(devToolsBenchmark, scores);
   }
 
-  expect(
-    const JsonEncoder.withIndent('  ').convert(taskResult.toJson()),
-    isA<String>(),
+    expect(
+    _exceededThresholds.isEmpty,
+    isTrue,
+    reason:
+        'The following benchmark scores exceeded their expected thresholds:'
+        '\n\n${_exceededThresholds.toString()}',
   );
 }
+
+void _verifyScoresAgainstThresholds(
+  DevToolsBenchmark devToolsBenchmark,
+  List<BenchmarkScore> scores,
+) {
+  stdout.writeln(
+    'Verifying ${devToolsBenchmark.id} scores against expected thresholds.',
+  );
+  expect(
+    _benchmarkThresholds.containsKey(devToolsBenchmark),
+    isTrue,
+    reason: 'Missing expected thresholds for ${devToolsBenchmark.id}.',
+  );
+  final expectedThresholds = _benchmarkThresholds[devToolsBenchmark]!;
+
+  final scoresAsMap = Map.fromEntries([
+    for (final score in scores) MapEntry(score.metric, score),
+  ]);
+
+  String exceededThresholdLine({
+    required String scoreName,
+    required num actualScore,
+    required num threshold,
+  }) {
+    return '[${devToolsBenchmark.id}] $scoreName was $actualScore μs, which '
+        'exceeded the expected threshold, $threshold μs.';
+  }
+
+  for (final metric in [
+    BenchmarkMetric.flutterFrameTotalTime,
+    BenchmarkMetric.flutterFrameBuildTime,
+    BenchmarkMetric.flutterFrameRasterTime,
+  ]) {
+    for (final computation in [
+      BenchmarkMetricComputation.average,
+      BenchmarkMetricComputation.p50,
+      BenchmarkMetricComputation.p90,
+    ]) {
+      final scoreName = _generateScoreName(metric, computation);
+      final score = scoresAsMap[scoreName]!.value;
+      final threshold = expectedThresholds[scoreName]!;
+      if (score > threshold) {
+        _exceededThresholds.writeln(
+          exceededThresholdLine(
+            scoreName: scoreName,
+            actualScore: score,
+            threshold: threshold,
+          ),
+        );
+      }
+    }
+  }
+}
+
+final _benchmarkThresholds = {
+  DevToolsBenchmark.navigateThroughOfflineScreens: {
+    ..._valuesForMetric(
+      BenchmarkMetric.flutterFrameTotalTime,
+      avg: 16666.0,
+      p50: 16666.0,
+      p90: 16666.0,
+    ),
+    ..._valuesForMetric(
+      BenchmarkMetric.flutterFrameBuildTime,
+      avg: 16666.0,
+      p50: 16666.0,
+      p90: 16666.0,
+    ),
+    ..._valuesForMetric(
+      BenchmarkMetric.flutterFrameRasterTime,
+      avg: 16666.0,
+      p50: 16666.0,
+      p90: 16666.0,
+    ),
+  },
+  DevToolsBenchmark.offlineCpuProfilerScreen: {
+    ..._valuesForMetric(
+      BenchmarkMetric.flutterFrameTotalTime,
+      avg: 16666.0,
+      p50: 16666.0,
+      p90: 16666.0,
+    ),
+    ..._valuesForMetric(
+      BenchmarkMetric.flutterFrameBuildTime,
+      avg: 16666.0,
+      p50: 16666.0,
+      p90: 16666.0,
+    ),
+    ..._valuesForMetric(
+      BenchmarkMetric.flutterFrameRasterTime,
+      avg: 16666.0,
+      p50: 16666.0,
+      p90: 16666.0,
+    ),
+  },
+  DevToolsBenchmark.offlinePerformanceScreen: {
+    ..._valuesForMetric(
+      BenchmarkMetric.flutterFrameTotalTime,
+      avg: 16666.0,
+      p50: 16666.0,
+      p90: 16666.0,
+    ),
+    ..._valuesForMetric(
+      BenchmarkMetric.flutterFrameBuildTime,
+      avg: 16666.0,
+      p50: 16666.0,
+      p90: 16666.0,
+    ),
+    ..._valuesForMetric(
+      BenchmarkMetric.flutterFrameRasterTime,
+      avg: 16666.0,
+      p50: 16666.0,
+      p90: 16666.0,
+    ),
+  },
+};
+
+/// Returns a Map of benchmark score names to their expected value in micros.
+Map<String, num> _valuesForMetric(
+  BenchmarkMetric metric, {
+  required num avg,
+  required num p50,
+  required num p90,
+}) => {
+  _generateScoreName(metric, BenchmarkMetricComputation.average): avg,
+  _generateScoreName(metric, BenchmarkMetricComputation.p50): p50,
+  _generateScoreName(metric, BenchmarkMetricComputation.p90): p90,
+};
+
+String _generateScoreName(
+  BenchmarkMetric metric,
+  BenchmarkMetricComputation computation,
+) => '${metric.label}.${computation.name}';
