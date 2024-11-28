@@ -195,9 +195,6 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
                   editor: widget.editor,
                   debugSessions: debugSessions,
                 ),
-              // TODO(https://github.com/flutter/devtools/issues/8546) Move
-              // Property Editor to its own sidepanel.
-              if (FeatureFlags.propertyEditor) const PropertyEditorSidebar(),
             ],
           ),
         ),
