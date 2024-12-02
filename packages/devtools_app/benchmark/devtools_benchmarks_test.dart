@@ -94,7 +94,7 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
     expect(isWasmScore, isNotNull);
     expect(isWasmScore!.value, useWasm ? 1 : 0);
 
-    _verifyScoresAgainstThresholds(devToolsBenchmark, scores);
+    _verifyScoresAgainstThresholds(devToolsBenchmark, scores, useWasm: useWasm);
   }
 
   expect(
@@ -108,11 +108,11 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
 
 void _verifyScoresAgainstThresholds(
   DevToolsBenchmark devToolsBenchmark,
-  List<BenchmarkScore> scores,
-) {
-  stdout.writeln(
-    'Verifying ${devToolsBenchmark.id} scores against expected thresholds.',
-  );
+  List<BenchmarkScore> scores, {
+  required bool useWasm,
+}) {
+  final identifier = '${devToolsBenchmark.id}.${useWasm ? 'wasm' : 'js'}';
+  stdout.writeln('Verifying $identifier scores against expected thresholds.');
   expect(
     _benchmarkThresholds.containsKey(devToolsBenchmark),
     isTrue,
@@ -129,7 +129,7 @@ void _verifyScoresAgainstThresholds(
     required num actualScore,
     required num threshold,
   }) {
-    return '[${devToolsBenchmark.id}] $scoreName was $actualScore μs, which '
+    return '[$identifier] $scoreName was $actualScore μs, which '
         'exceeded the expected threshold, $threshold μs.';
   }
 
