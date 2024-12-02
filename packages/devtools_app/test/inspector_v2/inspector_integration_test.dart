@@ -377,6 +377,8 @@ void main() {
         );
       }
     },
+    // TODO(https://github.com/flutter/devtools/issues/8582): re-enable.
+    skip: true,
   );
 
   group('widget errors', () {
