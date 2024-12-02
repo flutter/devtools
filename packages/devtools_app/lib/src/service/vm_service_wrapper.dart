@@ -143,7 +143,9 @@ class VmServiceWrapper extends VmService {
         // running with VM developer mode enabled. This data isn't accessible
         // in non-VM developer mode, so not requesting the code profile will
         // save on space and network usage.
-        '_code': preferences.vmDeveloperModeEnabled.value,
+        // TODO(bkonyi): re-enable when package:vm_service 15.0.0 is rolled
+        // into Flutter. See https://github.com/flutter/devtools/issues/8567.
+        // '_code': preferences.vmDeveloperModeEnabled.value,
       },
     ).then((e) => e as CpuSamples);
   }
