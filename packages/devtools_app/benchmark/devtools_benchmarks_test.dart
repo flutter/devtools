@@ -170,67 +170,69 @@ void _verifyScoresAgainstThresholds(
   }
 }
 
+const _frameTimeFor60FPSInMicros = 16666.6;
+
 // TODO(https://github.com/flutter/devtools/issues/8583): adjust these
 // thresholds to match expectations.
 final _benchmarkThresholds = {
   DevToolsBenchmark.navigateThroughOfflineScreens: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
-      avg: 16666.0,
-      p50: 16666.0,
-      p90: 16666.0,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameBuildTime,
-      avg: 16666.0,
-      p50: 16666.0,
-      p90: 16666.0,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameRasterTime,
-      avg: 16666.0,
-      p50: 16666.0,
-      p90: 16666.0,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
   },
   DevToolsBenchmark.offlineCpuProfilerScreen: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
-      avg: 16666.0,
-      p50: 16666.0,
-      p90: 16666.0,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameBuildTime,
-      avg: 16666.0,
-      p50: 16666.0,
-      p90: 16666.0,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameRasterTime,
-      avg: 16666.0,
-      p50: 16666.0,
-      p90: 16666.0,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
   },
   DevToolsBenchmark.offlinePerformanceScreen: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
-      avg: 16666.0,
-      p50: 16666.0,
-      p90: 16666.0,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameBuildTime,
-      avg: 16666.0,
-      p50: 16666.0,
-      p90: 16666.0,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameRasterTime,
-      avg: 16666.0,
-      p50: 16666.0,
-      p90: 16666.0,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
   },
 };
