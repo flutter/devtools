@@ -28,6 +28,10 @@ void main() {
     _exceededThresholds = StringBuffer();
   });
 
+  tearDown(() {
+    _exceededThresholds.clear();
+  });
+
   for (final useWasm in [true, false]) {
     test(
       'Can run web benchmarks with ${useWasm ? 'WASM' : 'JS'}',
@@ -97,12 +101,14 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
     _verifyScoresAgainstThresholds(devToolsBenchmark, scores, useWasm: useWasm);
   }
 
+  final exceededThresholdsAsString = _exceededThresholds.toString();
   expect(
-    _exceededThresholds.isEmpty,
-    isTrue,
+    exceededThresholdsAsString,
+    isEmpty,
     reason:
-        'The following benchmark scores exceeded their expected thresholds:'
-        '\n\n${_exceededThresholds.toString()}',
+        '[${useWasm ? 'WASM' : 'JS'} Benchmarks] The following benchmark '
+        'scores exceeded their expected thresholds:'
+        '\n\n$exceededThresholdsAsString',
   );
 }
 
@@ -159,7 +165,8 @@ void _verifyScoresAgainstThresholds(
   }
 }
 
-// TODO(kenz): dial these expected values in before landing this PR.
+// TODO(https://github.com/flutter/devtools/issues/8583): adjust these
+// thresholds to match expectations.
 final _benchmarkThresholds = {
   DevToolsBenchmark.navigateThroughOfflineScreens: {
     ..._valuesForMetric(
