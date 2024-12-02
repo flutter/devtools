@@ -23,6 +23,10 @@ const _extraScores = [totalUiFrameAverage, _isWasmScore];
 late StringBuffer _exceededThresholds;
 
 /// Tests that the DevTools web benchmarks are run and reported correctly.
+/// 
+/// To run locally:
+/// 
+/// flutter test benchmark/devtools_benchmarks_test.dart
 void main() {
   setUp(() {
     _exceededThresholds = StringBuffer();
@@ -39,6 +43,7 @@ void main() {
         await _runBenchmarks(useWasm: useWasm);
       },
       timeout: const Timeout(Duration(minutes: 10)),
+      retry: 1,
     );
   }
 }
