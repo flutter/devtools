@@ -20,6 +20,9 @@ class PropertyEditorSidebarPanel extends StatefulWidget {
 
   final DartToolingDaemon dtd;
 
+  /// Analytics id to track events that come from the property editor sidebar.
+  static String get id => 'propertyEditorSidebar';
+
   @override
   State<PropertyEditorSidebarPanel> createState() =>
       _PropertyEditorSidebarPanelState();
@@ -36,7 +39,7 @@ class _PropertyEditorSidebarPanelState
     super.initState();
 
     final editor = EditorClient(widget.dtd);
-    ga.screen(editor.gaId);
+    ga.screen(PropertyEditorSidebarPanel.id);
     unawaited(_editor = editor.initialized.then((_) => editor));
   }
 
