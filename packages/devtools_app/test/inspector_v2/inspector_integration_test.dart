@@ -338,6 +338,9 @@ void main() {
         'textPreview',
         'children',
         'createdByLocalProject',
+        // TODO(elliette): Once we update to the Flutter version with
+        // https://github.com/flutter/flutter/pull/159701, this should be
+        // deleted.
         'truncated',
       ];
       const extraneousDetailsForTreeNode = [
