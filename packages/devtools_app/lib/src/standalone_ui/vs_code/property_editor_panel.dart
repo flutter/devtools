@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart';
 import '../../shared/common_widgets.dart';
 import '../ide_shared/property_editor/property_editor_sidebar.dart';
 
@@ -19,9 +20,6 @@ class PropertyEditorSidebarPanel extends StatefulWidget {
   const PropertyEditorSidebarPanel(this.dtd, {super.key});
 
   final DartToolingDaemon dtd;
-
-  /// Analytics id to track events that come from the property editor sidebar.
-  static String get id => 'propertyEditorSidebar';
 
   @override
   State<PropertyEditorSidebarPanel> createState() =>
@@ -39,7 +37,7 @@ class _PropertyEditorSidebarPanelState
     super.initState();
 
     final editor = EditorClient(widget.dtd);
-    ga.screen(PropertyEditorSidebarPanel.id);
+    ga.screen(PropertyEditorEvents.id);
     unawaited(_editor = editor.initialized.then((_) => editor));
   }
 
