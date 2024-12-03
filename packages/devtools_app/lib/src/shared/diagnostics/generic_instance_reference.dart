@@ -6,7 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../memory/heap_object.dart';
 import '../memory/simple_items.dart';
-import '../vm_utils.dart';
+import '../utils/vm_utils.dart';
 import 'diagnostics_node.dart';
 
 /// True, if [ref] contains static or live information about references and thus

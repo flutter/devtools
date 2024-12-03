@@ -16,12 +16,12 @@ import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/common_widgets.dart';
 import '../shared/constants.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/ui/colors.dart';
+import '../shared/ui/common_widgets.dart';
 import '../shared/ui/hover.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';

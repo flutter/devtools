@@ -4,7 +4,7 @@
 
 import 'package:clock/clock.dart';
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/shared/survey.dart';
+import 'package:devtools_app/src/shared/managers/survey.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

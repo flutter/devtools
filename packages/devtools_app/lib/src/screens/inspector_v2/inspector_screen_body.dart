@@ -11,11 +11,11 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/console/eval/inspector_tree_v2.dart';
-import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/error_badge_manager.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/search.dart';
 import '../inspector_shared/inspector_controls.dart';
 import '../inspector_shared/inspector_screen.dart';

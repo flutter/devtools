@@ -12,7 +12,7 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../memory/heap_object.dart';
-import '../vm_utils.dart';
+import '../utils/vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
 import 'object_group_api.dart';

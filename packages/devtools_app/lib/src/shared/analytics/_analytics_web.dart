@@ -16,12 +16,12 @@ import 'package:logging/logging.dart';
 import 'package:unified_analytics/unified_analytics.dart' as ua;
 import 'package:web/web.dart';
 
-import '../dtd_manager_extensions.dart';
 import '../globals.dart';
+import '../managers/dtd_manager_extensions.dart';
+import '../primitives/query_parameters.dart';
 import '../primitives/utils.dart';
-import '../query_parameters.dart';
 import '../server/server.dart' as server;
-import '../utils.dart';
+import '../utils/utils.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as gac;
 import 'gtags.dart';

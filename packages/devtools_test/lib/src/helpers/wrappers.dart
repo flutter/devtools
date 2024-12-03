@@ -5,7 +5,7 @@
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, fine for test only package.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/shared/query_parameters.dart';
+import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';

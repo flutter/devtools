@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 import '../../screens/debugger/codeview.dart';
 import '../analytics/constants.dart' as gac;
-import '../common_widgets.dart';
 import '../diagnostics/inspector_service.dart';
 import '../globals.dart';
-import '../utils.dart';
+import '../ui/common_widgets.dart';
+import '../utils/utils.dart';
 import 'environment_parameters_base.dart';
 
 class ExternalDevToolsEnvironmentParameters

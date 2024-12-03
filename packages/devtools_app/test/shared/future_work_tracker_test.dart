@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/shared/future_work_tracker.dart';
+import 'package:devtools_app/src/shared/utils/future_work_tracker.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 

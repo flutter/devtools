@@ -19,8 +19,8 @@ import '../constants.dart';
 import '../diagnostics/inspector_service.dart';
 import '../feature_flags.dart';
 import '../globals.dart';
-import '../query_parameters.dart';
-import '../utils.dart';
+import '../primitives/query_parameters.dart';
+import '../utils/utils.dart';
 
 part '_cpu_profiler_preferences.dart';
 part '_extension_preferences.dart';

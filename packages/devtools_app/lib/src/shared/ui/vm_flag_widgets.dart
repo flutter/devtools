@@ -12,12 +12,12 @@ import 'package:vm_service/vm_service.dart';
 import '../../screens/profiler/cpu_profile_service.dart';
 import '../../screens/profiler/sampling_rate.dart';
 import '../analytics/constants.dart' as gac;
-import '../banner_messages.dart';
-import '../common_widgets.dart';
 import '../globals.dart';
+import '../managers/banner_messages.dart';
 import '../primitives/utils.dart';
 import '../table/table.dart';
 import '../table/table_data.dart';
+import 'common_widgets.dart';
 import 'drop_down_button.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.

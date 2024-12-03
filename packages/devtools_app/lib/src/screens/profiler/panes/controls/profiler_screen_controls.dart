@@ -6,10 +6,10 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/file_import.dart';
+import '../../../../shared/framework/screen.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/screen.dart';
+import '../../../../shared/ui/common_widgets.dart';
+import '../../../../shared/ui/file_import.dart';
 import '../../../../shared/ui/vm_flag_widgets.dart';
 import '../../profiler_screen_controller.dart';
 

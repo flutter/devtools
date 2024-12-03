@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_model.dart';
-import 'package:devtools_app/src/shared/profiler_utils.dart';
+import 'package:devtools_app/src/shared/utils/profiler_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

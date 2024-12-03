@@ -8,7 +8,7 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app_shared/utils.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../connected_app.dart';
+import '../../connected_app/connected_app.dart';
 import '../../globals.dart';
 import '../../ui/search.dart';
 import 'eval_service.dart';

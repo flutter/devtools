@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tab.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_body.dart';

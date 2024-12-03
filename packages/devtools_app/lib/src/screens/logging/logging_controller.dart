@@ -15,10 +15,10 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
-import '../../framework/app_error_handling.dart' as error_handling;
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
+import '../../shared/framework/app_error_handling.dart' as error_handling;
 import '../../shared/globals.dart';
 import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/message_bus.dart';

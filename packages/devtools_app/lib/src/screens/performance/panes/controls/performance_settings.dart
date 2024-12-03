@@ -5,8 +5,8 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../performance_controller.dart';
 import '../flutter_frames/flutter_frames_controller.dart';
 

@@ -6,7 +6,7 @@ import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_table.dart';
-import 'package:devtools_app/src/shared/file_import.dart';
+import 'package:devtools_app/src/shared/ui/file_import.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';

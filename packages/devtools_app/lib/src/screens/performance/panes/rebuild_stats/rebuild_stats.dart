@@ -12,11 +12,11 @@ import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../service/vm_service_wrapper.dart';
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../flutter_frames/flutter_frame_model.dart';
 import 'rebuild_stats_model.dart';
 

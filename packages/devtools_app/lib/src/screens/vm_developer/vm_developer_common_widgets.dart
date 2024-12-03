@@ -13,11 +13,11 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/tree.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../debugger/codeview.dart';
 import '../debugger/codeview_controller.dart';
 import '../debugger/debugger_model.dart';

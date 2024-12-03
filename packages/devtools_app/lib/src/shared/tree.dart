@@ -9,7 +9,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 
-import 'collapsible_mixin.dart';
+import 'primitives/collapsible_mixin.dart';
 import 'primitives/trees.dart';
 
 double get defaultTreeViewRowHeight => scaleByFontFactor(20.0);

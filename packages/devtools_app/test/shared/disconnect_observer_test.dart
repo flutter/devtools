@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/disconnect_observer.dart';
-import 'package:devtools_app/src/shared/framework_controller.dart';
+import 'package:devtools_app/src/shared/framework/framework_controller.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';

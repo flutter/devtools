@@ -5,10 +5,10 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart' hide Badge;
 
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/utils.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/utils/utils.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
