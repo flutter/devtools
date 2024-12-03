@@ -39,7 +39,7 @@ void main() {
     await expectLater(
       find.byType(MemorySettingsDialog),
       matchesDevToolsGolden(
-        '../../test_infra/goldens/settings_dialog_default.png',
+        '../../../test_infra/goldens/settings_dialog_default.png',
       ),
     );
 
@@ -52,7 +52,7 @@ void main() {
     await expectLater(
       find.byType(MemorySettingsDialog),
       matchesDevToolsGolden(
-        '../../test_infra/goldens/settings_dialog_modified.png',
+        '../../../test_infra/goldens/settings_dialog_modified.png',
       ),
     );
     expect(preferences.memory.androidCollectionEnabled.value, isTrue);
@@ -65,7 +65,7 @@ void main() {
     await expectLater(
       find.byType(MemorySettingsDialog),
       matchesDevToolsGolden(
-        '../../test_infra/goldens/settings_dialog_modified.png',
+        '../../../test_infra/goldens/settings_dialog_modified.png',
       ),
     );
   });

@@ -142,7 +142,7 @@ void main() {
         await expectLater(
           find.byType(MemoryScreenBody),
           matchesDevToolsGolden(
-            '../../test_infra/goldens/memory/load_offline_data_profile_tab.png',
+            '../../../test_infra/goldens/memory/load_offline_data_profile_tab.png',
           ),
         );
 
@@ -158,7 +158,7 @@ void main() {
         // await expectLater(
         //   find.byType(MemoryScreenBody),
         //   matchesDevToolsGolden(
-        //     '../../test_infra/goldens/memory/load_offline_data_diff_tab.png',
+        //     '../../../test_infra/goldens/memory/load_offline_data_diff_tab.png',
         //   ),
         // );
         // Select a snapshot.
@@ -170,7 +170,7 @@ void main() {
         // await expectLater(
         //   find.byType(MemoryScreenBody),
         //   matchesDevToolsGolden(
-        //     '../../test_infra/goldens/memory/load_offline_data_diff_tab_snapshot_selected.png',
+        //     '../../../test_infra/goldens/memory/load_offline_data_diff_tab_snapshot_selected.png',
         //   ),
         // );
 
@@ -195,7 +195,7 @@ void main() {
         await expectLater(
           find.byType(MemoryScreenBody),
           matchesDevToolsGolden(
-            '../../test_infra/goldens/memory/load_offline_data_trace_tab.png',
+            '../../../test_infra/goldens/memory/load_offline_data_trace_tab.png',
           ),
         );
       });

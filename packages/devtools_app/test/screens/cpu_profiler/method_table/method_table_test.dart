@@ -78,7 +78,7 @@ void main() {
       await expectLater(
         find.byType(CpuMethodTable),
         matchesDevToolsGolden(
-          '../../test_infra/goldens/cpu_profiler/method_table_no_selection.png',
+          '../../../test_infra/goldens/cpu_profiler/method_table_no_selection.png',
         ),
       );
     });
@@ -110,7 +110,7 @@ void main() {
       await expectLater(
         find.byType(CpuMethodTable),
         matchesDevToolsGolden(
-          '../../test_infra/goldens/cpu_profiler/method_table_with_selection.png',
+          '../../../test_infra/goldens/cpu_profiler/method_table_with_selection.png',
         ),
       );
 
@@ -120,7 +120,7 @@ void main() {
       await expectLater(
         find.byType(CpuMethodTable),
         matchesDevToolsGolden(
-          '../../test_infra/goldens/cpu_profiler/method_table_with_selection_2.png',
+          '../../../test_infra/goldens/cpu_profiler/method_table_with_selection_2.png',
         ),
       );
     });

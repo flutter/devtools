@@ -132,7 +132,7 @@ void main() {
         await expectLater(
           find.byType(FrameTimeVisualizer),
           matchesDevToolsGolden(
-            '../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer.png',
+            '../../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer.png',
           ),
         );
       });
@@ -163,7 +163,7 @@ void main() {
           await expectLater(
             find.byType(FrameTimeVisualizer),
             matchesDevToolsGolden(
-              '../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer_icons_only.png',
+              '../../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer_icons_only.png',
             ),
           );
         },
@@ -204,7 +204,7 @@ void main() {
           await expectLater(
             find.byType(FrameTimeVisualizer),
             matchesDevToolsGolden(
-              '../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer_with_shader_compilation.png',
+              '../../../test_infra/goldens/performance/frame_analysis/frame_time_visualizer_with_shader_compilation.png',
             ),
           );
         },

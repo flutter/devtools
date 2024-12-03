@@ -22,11 +22,11 @@ class _FilterTest {
   String get name => isDiff ? 'diff' : 'single';
 
   String get sceneGolden =>
-      '../../../test_infra/goldens/memory_diff_snapshot_scene_$name.png';
+      '../../../../test_infra/goldens/memory_diff_snapshot_scene_$name.png';
   String snapshotGolden(ClassFilterType? type) =>
-      '../../../test_infra/goldens/memory_diff_snapshot_${type?.name ?? 'custom'}_$name.png';
+      '../../../../test_infra/goldens/memory_diff_snapshot_${type?.name ?? 'custom'}_$name.png';
   static String dialogGolden(ClassFilterType? type) =>
-      '../../../test_infra/goldens/memory_diff_filter_dialog_${type?.name ?? 'custom'}.png';
+      '../../../../test_infra/goldens/memory_diff_filter_dialog_${type?.name ?? 'custom'}.png';
 }
 
 final _tests = [_FilterTest(isDiff: false), _FilterTest(isDiff: true)];
