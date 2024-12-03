@@ -9,9 +9,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../console/primitives/eval_history.dart';
-import '../diagnostics/dap_object_node.dart';
-import '../diagnostics/dart_object_node.dart';
+import '../../shared/console/primitives/eval_history.dart';
+import '../../shared/diagnostics/dap_object_node.dart';
+import '../../shared/diagnostics/dart_object_node.dart';
 
 /// Extension methods for the [ConnectedApp] class.
 ///

@@ -10,8 +10,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../screens/performance/performance_utils.dart';
+import '../../service/connected_app/connected_app.dart';
 import '../analytics/constants.dart' as gac;
-import '../connected_app/connected_app.dart';
 import '../framework/screen.dart';
 import '../globals.dart';
 import '../http/http_service.dart' as http_service;

@@ -5,13 +5,13 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../analytics/constants.dart' as gac;
-import '../framework/routing.dart';
-import '../globals.dart';
-import '../primitives/utils.dart';
-import '../ui/common_widgets.dart';
-import '../ui/utils.dart';
-import '../utils/utils.dart';
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/framework/routing.dart';
+import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/utils.dart';
+import '../../shared/utils/utils.dart';
 
 class ConnectedAppSummary extends StatelessWidget {
   const ConnectedAppSummary({super.key, this.narrowView = true});

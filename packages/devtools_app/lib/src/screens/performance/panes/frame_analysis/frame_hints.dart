@@ -6,9 +6,9 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../service/connected_app/connected_app.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/connected_app/connected_app.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/ui/common_widgets.dart';

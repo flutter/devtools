@@ -20,7 +20,7 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../devtools.dart' as devtools;
-import '../connected_app/connected_app.dart';
+import '../../service/connected_app/connected_app.dart';
 import '../globals.dart';
 import '../primitives/query_parameters.dart';
 import '../primitives/utils.dart';

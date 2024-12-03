@@ -8,8 +8,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../service/connected_app/connection_info.dart';
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/connected_app/connection_info.dart';
 import '../shared/framework/routing.dart';
 import '../shared/globals.dart';
 import '../shared/ui/common_widgets.dart';
