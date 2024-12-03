@@ -14,7 +14,7 @@ import 'package:path/path.dart' as path;
 
 /// The tag to add to a test case to ensure it is run on each commit to the
 /// Flutter SDK.
-/// 
+///
 /// Before adding this tag, first check if the test is included in one of the
 /// tested subdirectories defined by tool/ci/flutter_customer_tests/test.sh. If
 /// it is, there is no need to add the tag to the individual test case since the
@@ -23,7 +23,7 @@ const includeForCustomerTestsTag = 'include-for-flutter-customer-tests';
 
 /// The tag to add to a test case to ensure it is not run on each commit to the
 /// Flutter SDK.
-/// 
+///
 /// Before adding this tag, first check if the test is included in one of the
 /// tested subdirectories defined by tool/ci/flutter_customer_tests/test.sh. If
 /// it is not, there is no need to add this tag to the individual test case

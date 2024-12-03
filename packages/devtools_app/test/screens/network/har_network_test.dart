@@ -12,7 +12,7 @@ import 'package:devtools_app/src/screens/network/har_network_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final file = File('test/network/sample_requests.json');
+  final file = File('test/test_infra/test_data/network/sample_requests.json');
   final fileContent = file.readAsStringSync();
   final jsonData = jsonDecode(fileContent) as Map<String, Object?>;
 

@@ -109,7 +109,9 @@ void main() {
       );
       await expectLater(
         find.byType(CodeView),
-        matchesDevToolsGolden('../../test_infra/goldens/codeview_scrollbars.png'),
+        matchesDevToolsGolden(
+          '../../test_infra/goldens/codeview_scrollbars.png',
+        ),
       );
     },
   );
