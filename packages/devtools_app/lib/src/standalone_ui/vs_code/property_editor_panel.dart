@@ -45,9 +45,9 @@ class _PropertyEditorSidebarPanelState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Expanded(
           child: FutureBuilder(
             future: _editor,
             builder:
@@ -60,8 +60,7 @@ class _PropertyEditorSidebarPanelState
                   _ => const CenteredCircularProgressIndicator(),
                 },
           ),
-        ),
-      ],
+      ),
     );
   }
 }
