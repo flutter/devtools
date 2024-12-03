@@ -14,7 +14,7 @@ import '../../../shared/feature_flags.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/server/server.dart' as server;
-import '../../../shared/utils.dart';
+import '../../../shared/utils/utils.dart';
 import '../deep_links_controller.dart';
 import '../deep_links_model.dart';
 import 'root_selector.dart';

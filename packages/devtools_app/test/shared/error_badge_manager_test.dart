@@ -10,7 +10,7 @@ import 'package:devtools_app/src/screens/memory/framework/memory_screen.dart';
 import 'package:devtools_app/src/screens/network/network_screen.dart';
 import 'package:devtools_app/src/screens/performance/performance_screen.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
-import 'package:devtools_app/src/shared/error_badge_manager.dart';
+import 'package:devtools_app/src/shared/managers/error_badge_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final supportedScreenIds = [

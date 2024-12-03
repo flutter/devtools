@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../../service/service_extension_widgets.dart';
 import '../../../../../service/service_extensions.dart' as extensions;
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 import '../performance_controls.dart';
 import 'enhance_tracing_controller.dart';
 

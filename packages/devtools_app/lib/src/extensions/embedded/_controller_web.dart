@@ -13,10 +13,10 @@ import 'package:web/web.dart';
 
 import '../../shared/development_helpers.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/query_parameters.dart';
 import '../../shared/server/server.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'controller.dart';
 
 /// Incrementer for the extension iFrame view that will live for the entire

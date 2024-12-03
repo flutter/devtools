@@ -7,9 +7,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/profiler_utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
+import '../../../../shared/utils/profiler_utils.dart';
 import 'method_table_controller.dart';
 import 'method_table_model.dart';
 

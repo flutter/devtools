@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/framework/scaffold.dart';
-import 'package:devtools_app/src/shared/framework_controller.dart';
-import 'package:devtools_app/src/shared/query_parameters.dart';
-import 'package:devtools_app/src/shared/survey.dart';
+import 'package:devtools_app/src/framework/scaffold/scaffold.dart';
+import 'package:devtools_app/src/shared/framework/framework_controller.dart';
+import 'package:devtools_app/src/shared/managers/survey.dart';
+import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';

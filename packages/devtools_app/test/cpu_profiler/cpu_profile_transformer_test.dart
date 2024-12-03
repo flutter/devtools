@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
-import 'package:devtools_app/src/shared/profiler_utils.dart';
+import 'package:devtools_app/src/shared/utils/profiler_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';

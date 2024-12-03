@@ -8,10 +8,10 @@ import 'dart:math' as math;
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/diagnostics/inspector_service.dart';
 import '../../../../shared/primitives/math_utils.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../inspector_data_models.dart';
 import '../ui/arrow.dart';
 import '../ui/free_space.dart';

@@ -13,11 +13,11 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart';
 
-import '../../shared/banner_messages.dart';
-import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/globals.dart';
-import '../../shared/utils.dart';
+import '../../shared/managers/banner_messages.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/utils/utils.dart';
 import '_controller_web.dart';
 import 'controller.dart';
 

@@ -11,7 +11,6 @@ import '../../../../../shared/charts/chart_trace.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
-//import '../../../framework/connected/memory_controller.dart';
 
 /// Name of each trace being charted, index order is the trace index
 /// too (order of trace creation top-down order).

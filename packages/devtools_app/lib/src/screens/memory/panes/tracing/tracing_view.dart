@@ -8,9 +8,9 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/simple_items.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'class_table.dart';
 import 'tracing_pane_controller.dart';

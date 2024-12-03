@@ -5,8 +5,8 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/memory/classes.dart';
+import '../../../../../../shared/ui/common_widgets.dart';
 import '../../controller/class_data.dart';
 import 'path.dart';
 import 'paths.dart';

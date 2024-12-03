@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/common_widgets.dart';
-import '../../../shared/history_viewport.dart';
 import '../../../shared/primitives/history_manager.dart';
+import '../../../shared/ui/common_widgets.dart';
+import '../../../shared/ui/history_viewport.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_class_display.dart';
 import 'vm_code_display.dart';

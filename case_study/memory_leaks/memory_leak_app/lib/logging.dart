@@ -19,10 +19,10 @@ class Logging {
     return _theLogging!;
   }
 
-  final List<String> _logs = [];
+  final _logs = <String>[];
 
   void add(String entry) {
-    final TimeStamp newTimeStamp = TimeStamp.record(DateTime.now());
+    final newTimeStamp = TimeStamp.record(DateTime.now());
 
     _logs.add('[${model.log.length}] : ${newTimeStamp.time}] $entry');
   }
@@ -61,9 +61,9 @@ class TimeModel {
 
   List<TimeStamp> log = <TimeStamp>[];
 
-  final String _time = '';
-  final String _date = '';
-  final String _meridiem = '';
+  final _time = '';
+  final _date = '';
+  final _meridiem = '';
   Timer? _clockUpdateTimer;
   DateTime now = DateTime.now();
 
@@ -118,7 +118,7 @@ class TimeModel {
       return;
     }
 
-    final TimeStamp newTimeStamp = TimeStamp.record(now);
+    final newTimeStamp = TimeStamp.record(now);
 
     log.add(newTimeStamp);
 

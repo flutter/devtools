@@ -21,7 +21,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../console/primitives/simple_items.dart';
 import '../globals.dart';
-import '../utils.dart';
+import '../utils/utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'object_group_api.dart';

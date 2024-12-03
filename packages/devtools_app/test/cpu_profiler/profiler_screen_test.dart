@@ -7,7 +7,7 @@ import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/panes/controls/cpu_profiler_controls.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_status.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
-import 'package:devtools_app/src/shared/file_import.dart';
+import 'package:devtools_app/src/shared/ui/file_import.dart';
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';

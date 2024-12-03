@@ -16,7 +16,7 @@ import '../../analytics/constants.dart' as gac;
 import '../../globals.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
-import '../../utils.dart';
+import '../../utils/utils.dart';
 import '../eval/auto_complete.dart';
 import '../eval/eval_service.dart';
 import '../primitives/assignment.dart';

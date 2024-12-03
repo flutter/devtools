@@ -5,7 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../globals.dart';
-import '../../vm_utils.dart';
+import '../../utils/vm_utils.dart';
 
 class EvalScope {
   /// Parameter `scope` for `serviceManager.manager.service!.evaluate(...)`.

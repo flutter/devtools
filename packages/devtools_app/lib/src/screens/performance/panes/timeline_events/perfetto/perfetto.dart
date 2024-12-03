@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 import '_perfetto_desktop.dart'
     if (dart.library.js_interop) '_perfetto_web.dart';
 import 'perfetto_controller.dart';

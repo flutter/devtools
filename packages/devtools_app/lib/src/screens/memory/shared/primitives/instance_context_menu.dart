@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/ui/common_widgets.dart';
 
 typedef MenuBuilder = List<Widget> Function();
 

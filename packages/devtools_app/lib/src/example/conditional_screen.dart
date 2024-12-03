@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../shared/framework/screen.dart';
 import '../shared/globals.dart';
-import '../shared/offline_data.dart';
-import '../shared/screen.dart';
-import '../shared/utils.dart';
+import '../shared/offline/offline_data.dart';
+import '../shared/utils/utils.dart';
 
 /// This is an example implementation of a conditional screen that supports
 /// offline mode and uses a provided controller [ExampleController].

@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/service/connected_app/connected_app.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/service_registrations.dart';
-import 'package:devtools_app/src/shared/connected_app.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/managers/notifications.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';

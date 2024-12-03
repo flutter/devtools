@@ -7,14 +7,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../shared/common_widgets.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/ui/colors.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tab.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
 import 'validation_details_view.dart';

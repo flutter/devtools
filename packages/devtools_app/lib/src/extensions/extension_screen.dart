@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/common_widgets.dart';
+import '../shared/framework/screen.dart';
 import '../shared/globals.dart';
-import '../shared/screen.dart';
+import '../shared/ui/common_widgets.dart';
 import 'embedded/controller.dart';
 import 'embedded/view.dart';
 import 'extension_screen_controls.dart';

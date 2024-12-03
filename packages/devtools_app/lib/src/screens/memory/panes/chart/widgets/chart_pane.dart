@@ -8,11 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../../shared/charts/chart_controller.dart';
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/ui/colors.dart';
-import '../../../../../shared/utils.dart';
+import '../../../../../shared/ui/common_widgets.dart';
+import '../../../../../shared/utils/utils.dart';
 import '../../../shared/primitives/painting.dart';
 import '../controller/chart_pane_controller.dart';
 import '../data/charts.dart';

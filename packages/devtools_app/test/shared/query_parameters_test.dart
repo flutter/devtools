@@ -5,7 +5,7 @@
 import 'dart:ui';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/shared/query_parameters.dart';
+import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_shared/devtools_shared.dart';
