@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:devtools_app/src/utils/list_queue_value_notifier.dart';
+import 'package:devtools_app/src/shared/primitives/list_queue_value_notifier.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';

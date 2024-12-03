@@ -7,7 +7,7 @@ import 'package:devtools_app/src/shared/diagnostics/generic_instance_reference.d
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../debugger/typed_data_variable_test.dart';
+import '../../screens/debugger/typed_data_variable_test.dart';
 
 void resetRef() {
   _refNumber = 0;
