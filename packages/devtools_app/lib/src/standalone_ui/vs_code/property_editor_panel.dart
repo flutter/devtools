@@ -46,18 +46,18 @@ class _PropertyEditorSidebarPanelState
     return Align(
       alignment: Alignment.topCenter,
       child: Expanded(
-          child: FutureBuilder(
-            future: _editor,
-            builder:
-                (context, snapshot) => switch ((
-                  snapshot.connectionState,
-                  snapshot.data,
-                )) {
-                  (ConnectionState.done, final editor?) =>
-                    _PropertyEditorConnectedPanel(editor),
-                  _ => const CenteredCircularProgressIndicator(),
-                },
-          ),
+        child: FutureBuilder(
+          future: _editor,
+          builder:
+              (context, snapshot) => switch ((
+                snapshot.connectionState,
+                snapshot.data,
+              )) {
+                (ConnectionState.done, final editor?) =>
+                  _PropertyEditorConnectedPanel(editor),
+                _ => const CenteredCircularProgressIndicator(),
+              },
+        ),
       ),
     );
   }
