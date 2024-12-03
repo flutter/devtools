@@ -63,6 +63,9 @@ void main() {
           expect(instance2.classRef!.name, '_Future');
         },
         timeout: const Timeout.factor(2),
+        // TODO(https://github.com/flutter/devtools/issues/6998): if this flake
+        // is addressed, we can unskip this for the Flutter customer tests.
+        tags: skipForCustomerTestsTag,
       );
 
       test(

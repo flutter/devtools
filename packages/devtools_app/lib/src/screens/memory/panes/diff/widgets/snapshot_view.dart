@@ -5,9 +5,9 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 import '../controller/diff_pane_controller.dart';
 import '../data/classes_diff.dart';
 import 'class_details/class_details.dart';

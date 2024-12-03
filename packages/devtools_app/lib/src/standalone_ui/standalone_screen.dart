@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/ui/common_widgets.dart';
 import 'vs_code/flutter_panel.dart';
 
 /// "Screens" that are intended for standalone use only, likely for embedding

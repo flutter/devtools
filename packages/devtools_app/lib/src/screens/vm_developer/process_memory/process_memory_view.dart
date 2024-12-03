@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/charts/treemap.dart';
-import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
+import '../../../shared/ui/common_widgets.dart';
 import '../../../shared/ui/tab.dart';
 import '../vm_developer_tools_screen.dart';
 import 'process_memory_tree_columns.dart';

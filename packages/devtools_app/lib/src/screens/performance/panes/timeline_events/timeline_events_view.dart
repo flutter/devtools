@@ -10,9 +10,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
+import '../../../../shared/ui/common_widgets.dart';
 import 'perfetto/perfetto.dart';
 import 'timeline_events_controller.dart';
 

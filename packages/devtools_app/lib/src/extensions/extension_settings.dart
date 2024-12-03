@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/common_widgets.dart';
+import '../shared/framework/routing.dart';
 import '../shared/globals.dart';
-import '../shared/routing.dart';
+import '../shared/ui/common_widgets.dart';
 import 'extension_screen.dart';
 
 /// A [ScaffoldAction] that, when clicked, will open a dialog menu for

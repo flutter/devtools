@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 
 import '../../screens/debugger/codeview.dart';
-import '../common_widgets.dart';
 import '../diagnostics/inspector_service.dart';
+import '../ui/common_widgets.dart';
 
 abstract class DevToolsEnvironmentParameters {
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions();

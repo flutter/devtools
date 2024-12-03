@@ -5,10 +5,10 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/common_widgets.dart';
 import '../../shared/console/eval/inspector_tree.dart';
-import '../../shared/diagnostics_text_styles.dart';
+import '../../shared/primitives/diagnostics_text_styles.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/ui/common_widgets.dart';
 
 class InspectorBreadcrumbNavigator extends StatelessWidget {
   const InspectorBreadcrumbNavigator({

@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/common_widgets.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/ui/colors.dart';
-import '../../shared/utils.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/utils/utils.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';

@@ -4,8 +4,8 @@
 
 import 'package:devtools_shared/devtools_extensions.dart';
 
+import '../framework/screen.dart';
 import '../preferences/preferences.dart';
-import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
 part 'constants/_debugger_constants.dart';

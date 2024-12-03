@@ -10,11 +10,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/tree.dart';
 import '../../shared/ui/colors.dart';
+import '../../shared/ui/common_widgets.dart';
 import 'program_explorer_controller.dart';
 import 'program_explorer_model.dart';
 

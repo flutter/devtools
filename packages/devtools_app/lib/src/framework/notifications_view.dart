@@ -9,10 +9,10 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/notifications.dart';
+import '../shared/managers/notifications.dart';
 import '../shared/primitives/utils.dart';
+import '../shared/ui/common_widgets.dart';
 
 double get _notificationHeight => scaleByFontFactor(175.0);
 final _notificationWidth = _notificationHeight * goldenRatio;

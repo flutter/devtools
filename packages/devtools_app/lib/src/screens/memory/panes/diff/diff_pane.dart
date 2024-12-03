@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/simple_items.dart';
-import '../../../../shared/utils.dart';
+import '../../../../shared/ui/common_widgets.dart';
+import '../../../../shared/utils/utils.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/snapshot_item.dart';

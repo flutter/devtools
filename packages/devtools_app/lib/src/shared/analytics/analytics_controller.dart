@@ -7,9 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../development_helpers.dart';
-import '../dtd_manager_extensions.dart';
 import '../globals.dart';
-
+import '../managers/dtd_manager_extensions.dart';
 import 'analytics.dart' as ga;
 
 Future<AnalyticsController> get analyticsController async {

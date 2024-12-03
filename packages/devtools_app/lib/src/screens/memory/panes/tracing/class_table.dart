@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'tracing_data.dart';
 import 'tracing_pane_controller.dart';

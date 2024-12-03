@@ -12,15 +12,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../service/connected_app/connection_info.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/config_specific/import_export/import_export.dart';
-import '../shared/connection_info.dart';
+import '../shared/framework/routing.dart';
+import '../shared/framework/screen.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
-import '../shared/routing.dart';
-import '../shared/screen.dart';
 import '../shared/title.dart';
 import '../shared/ui/vm_flag_widgets.dart';
 import 'framework_core.dart';

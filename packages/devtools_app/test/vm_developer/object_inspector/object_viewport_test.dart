@@ -10,7 +10,7 @@ import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_functi
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_instance_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_library_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_script_display.dart';
-import 'package:devtools_app/src/shared/history_viewport.dart';
+import 'package:devtools_app/src/shared/ui/history_viewport.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';

@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/memory/simple_items.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/snapshot_item.dart';

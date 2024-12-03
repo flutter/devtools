@@ -9,11 +9,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/feature_flags.dart';
-import '../../../../../shared/file_import.dart';
+import '../../../../../shared/framework/screen.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/screen.dart';
+import '../../../../../shared/ui/common_widgets.dart';
+import '../../../../../shared/ui/file_import.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import 'settings_dialog.dart';
 

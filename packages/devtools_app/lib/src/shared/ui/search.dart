@@ -13,12 +13,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
-import '../common_widgets.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../ui/utils.dart';
-import '../utils.dart';
+import '../utils/utils.dart';
 import 'colors.dart';
+import 'common_widgets.dart';
 
 // TODO(https://github.com/flutter/devtools/issues/5416): break this file up
 // into managable pieces.

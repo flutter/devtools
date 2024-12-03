@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/common_widgets.dart';
+import '../../../shared/ui/common_widgets.dart';
 import '../../../shared/ui/tab.dart';
 import '../panes/diff/diff_pane.dart';
 import '../panes/profile/profile_view.dart';

@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart';
-import '../../shared/common_widgets.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../ide_shared/property_editor/property_editor_sidebar.dart';
 
 /// The side panel for the Property Editor.

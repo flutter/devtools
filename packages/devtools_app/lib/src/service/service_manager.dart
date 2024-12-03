@@ -10,14 +10,14 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../shared/analytics/analytics.dart' as ga;
-import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
 import '../shared/diagnostics/inspector_service.dart';
-import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
+import '../shared/managers/error_badge_manager.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/title.dart';
-import '../shared/utils.dart';
+import '../shared/utils/utils.dart';
+import 'connected_app/connected_app.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline_streams.dart';
 import 'vm_flags.dart';

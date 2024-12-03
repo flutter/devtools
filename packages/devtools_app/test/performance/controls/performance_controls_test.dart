@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/performance_controls.dart';
-import 'package:devtools_app/src/shared/file_import.dart';
+import 'package:devtools_app/src/shared/ui/file_import.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';

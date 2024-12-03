@@ -20,10 +20,10 @@ import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/diagnostics/tree_builder.dart';
 import '../../shared/feature_flags.dart';
+import '../../shared/framework/routing.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/routing.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
 

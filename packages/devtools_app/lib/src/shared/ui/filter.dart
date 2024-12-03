@@ -8,12 +8,11 @@ import 'dart:convert';
 import 'package:codicon/codicon.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../common_widgets.dart';
 import '../primitives/utils.dart';
+import 'common_widgets.dart';
 
 typedef QueryFilterArgs<T> = Map<String, QueryFilterArgument<T>>;
 typedef SettingFilters<T> = List<SettingFilter<T, Object>>;

@@ -10,11 +10,11 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
-import '../../shared/editable_list.dart';
 import '../../shared/globals.dart';
 import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/simple_items.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/editable_list.dart';
 
 class FlutterInspectorSettingsDialog extends StatelessWidget {
   const FlutterInspectorSettingsDialog({super.key});

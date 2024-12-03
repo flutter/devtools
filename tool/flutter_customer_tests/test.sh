@@ -6,6 +6,9 @@
 # setup.sh, which is called from the setup steps in
 # https://github.com/flutter/tests/blob/main/registry/flutter_devtools.test.
 
+# Ensure test failures are reported.
+set -e
+
 # Test all tests in devtools_app_shared
 cd packages/devtools_app_shared
 flutter pub get

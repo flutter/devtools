@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/simple_items.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/chart_pane_controller.dart';
 import 'interval_dropdown.dart';

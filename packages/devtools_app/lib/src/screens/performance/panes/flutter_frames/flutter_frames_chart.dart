@@ -9,18 +9,17 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../framework/scaffold.dart';
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
-import '../../../../shared/banner_messages.dart';
-import '../../../../shared/common_widgets.dart';
+import '../../../../shared/framework/screen.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/managers/banner_messages.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/ui/colors.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../../../shared/ui/hover.dart';
 import '../../../../shared/ui/utils.dart';
-import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import 'flutter_frame_model.dart';
 import 'flutter_frames_controller.dart';
@@ -125,8 +124,8 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
       bannerMessages.addMessage(
         ShaderJankMessage(
           offlineDataController.showingOfflineData.value
-              ? SimpleScreen.id
-              : PerformanceScreen.id,
+              ? ScreenMetaData.simple.id
+              : ScreenMetaData.performance.id,
           jankyFramesCount: shaderJankFrames.length,
           jankDuration: shaderJankDuration,
         ).build(context),

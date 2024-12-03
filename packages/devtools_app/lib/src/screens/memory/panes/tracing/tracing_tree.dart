@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../../../shared/ui/tab.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/panes/cpu_profile_columns.dart';

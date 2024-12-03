@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/devtools.dart' as devtools;
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/framework/about_dialog.dart';
+import 'package:devtools_app/src/framework/scaffold/about_dialog.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';

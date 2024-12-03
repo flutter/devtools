@@ -7,8 +7,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/screen.dart';
-import '../../shared/utils.dart';
+import '../../shared/framework/screen.dart';
+import '../../shared/utils/utils.dart';
 import 'isolate_statistics/isolate_statistics_view.dart';
 import 'object_inspector/object_inspector_view.dart';
 import 'process_memory/process_memory_view.dart';

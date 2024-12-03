@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../inspector_shared/inspector_settings_dialog.dart';
 import '../inspector_v2/inspector_controller.dart' as v2;
 

@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'src/app.dart';
-import 'src/framework/app_error_handling.dart';
 import 'src/framework/framework_core.dart';
 import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/shared/config_specific/logger/logger_helpers.dart';
 import 'src/shared/feature_flags.dart';
+import 'src/shared/framework/app_error_handling.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/primitives/url_utils.dart';
 import 'src/shared/primitives/utils.dart';

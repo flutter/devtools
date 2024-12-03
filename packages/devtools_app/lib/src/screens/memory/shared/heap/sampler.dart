@@ -12,7 +12,7 @@ import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/classes.dart';
 import '../../../../shared/memory/heap_data.dart';
 import '../../../../shared/memory/heap_object.dart';
-import '../../../../shared/vm_utils.dart';
+import '../../../../shared/utils/vm_utils.dart';
 
 class _HeapObjects {
   _HeapObjects(this.objects, this.heap);

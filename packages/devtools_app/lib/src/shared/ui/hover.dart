@@ -11,7 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../common_widgets.dart';
+import 'common_widgets.dart';
 import 'utils.dart';
 
 double get _maxHoverCardHeight => scaleByFontFactor(250.0);
