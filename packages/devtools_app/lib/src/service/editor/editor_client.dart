@@ -97,7 +97,16 @@ class EditorClient extends DisposableController
           EditorEventKind.debugSessionStopped =>
             DebugSessionStoppedEvent.fromJson(data.data),
           EditorEventKind.themeChanged => ThemeChangedEvent.fromJson(data.data),
+          EditorEventKind.activeLocationChanged =>
+            ActiveLocationChangedEvent.fromJson(data.data),
         };
+        // Add ActiveLocationChangedEvents to a new stream to be ingested by the
+        // property editor.
+        if (event?.kind == EditorEventKind.activeLocationChanged) {
+          _activeLocationChangedController.add(
+            event as ActiveLocationChangedEvent,
+          );
+        }
         if (event != null) {
           _eventController.add(event);
         }
@@ -138,6 +147,12 @@ class EditorClient extends DisposableController
   bool get supportsOpenDevToolsForceExternal =>
       _supportsOpenDevToolsForceExternal;
   var _supportsOpenDevToolsForceExternal = false;
+
+  /// A stream of [ActiveLocationChangedEvent]s from the edtior.
+  Stream<ActiveLocationChangedEvent> get activeLocationChangedStream =>
+      _activeLocationChangedController.stream;
+  final _activeLocationChangedController =
+      StreamController<ActiveLocationChangedEvent>();
 
   /// A stream of [EditorEvent]s from the editor.
   Stream<EditorEvent> get event => _eventController.stream;
@@ -212,11 +227,39 @@ class EditorClient extends DisposableController
     );
   }
 
+  /// Gets the editable arguments from the Analysis Server.
+  Future<EditableArgumentsResult?> getEditableArguments({
+    required TextDocument textDocument,
+    required CursorPosition position,
+  }) async {
+    final response = await _callLspApi(
+      'experimental/dart/textDocument/editableArguments',
+      params: {
+        'type': 'Object', // not used, but required by DTD?
+        'textDocument': textDocument.toJson(),
+        'position': position.toJson(),
+      },
+    );
+    final result = response.result['result'];
+    if (result != null) {
+      return EditableArgumentsResult.fromJson(result as Map<String, Object?>);
+    }
+    return null;
+  }
+
   Future<DTDResponse> _call(
     EditorMethod method, {
     Map<String, Object?>? params,
   }) {
     return _dtd.call(editorServiceName, method.name, params: params);
+  }
+
+  Future<DTDResponse> _callLspApi(
+    // TODO: switch to enum.
+    String lspApi, {
+    Map<String, Object?>? params,
+  }) {
+    return _dtd.call(lspServiceName, lspApi, params: params);
   }
 }
 

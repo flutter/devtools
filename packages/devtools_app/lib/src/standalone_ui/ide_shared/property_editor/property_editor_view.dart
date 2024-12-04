@@ -6,10 +6,14 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../service/editor/api_classes.dart';
 import '../../../shared/primitives/utils.dart';
+import 'property_editor_controller.dart';
 
 class PropertyEditorSidebar extends StatelessWidget {
-  const PropertyEditorSidebar({super.key});
+  const PropertyEditorSidebar({required this.controller, super.key});
+
+  final PropertyEditorController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -18,27 +22,34 @@ class PropertyEditorSidebar extends StatelessWidget {
       children: [
         Text('Property Editor', style: Theme.of(context).textTheme.titleMedium),
         const PaddedDivider.noPadding(),
-        const _PropertiesList(),
+        _PropertiesList(controller: controller),
       ],
     );
   }
 }
 
 class _PropertiesList extends StatelessWidget {
-  const _PropertiesList();
+  const _PropertiesList({required this.controller});
+
+  final PropertyEditorController controller;
 
   static const itemPadding = densePadding;
-
   @override
   Widget build(BuildContext context) {
     // TODO(https://github.com/flutter/devtools/issues/8546) Switch to scrollable
     // ListView when this has been moved into its own panel.
-    return Column(
-      children: <Widget>[
-        ..._properties.map(
-          (property) => _EditablePropertyItem(property: property),
-        ),
-      ].joinWith(const PaddedDivider.noPadding()),
+    return ValueListenableBuilder<List<EditableArgument>>(
+      valueListenable: controller.editableArgs,
+      builder: (context, args, _) {
+        return Column(
+          children: [
+            for (final property in args)
+              ...<Widget>[
+                _EditablePropertyItem(property: property),
+              ].joinWith(const PaddedDivider.noPadding()),
+          ],
+        );
+      },
     );
   }
 }
@@ -46,7 +57,7 @@ class _PropertiesList extends StatelessWidget {
 class _EditablePropertyItem extends StatelessWidget {
   const _EditablePropertyItem({required this.property});
 
-  final _WidgetProperty property;
+  final EditableArgument property;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +83,7 @@ class _EditablePropertyItem extends StatelessWidget {
 class _PropertyLabels extends StatelessWidget {
   const _PropertyLabels({required this.property});
 
-  final _WidgetProperty property;
+  final EditableArgument property;
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +116,7 @@ class _PropertyLabels extends StatelessWidget {
 class _PropertyInput extends StatelessWidget {
   const _PropertyInput({required this.property});
 
-  final _WidgetProperty property;
+  final EditableArgument property;
 
   @override
   Widget build(BuildContext context) {
@@ -122,11 +133,16 @@ class _PropertyInput extends StatelessWidget {
       case 'bool':
         final options =
             property.type == 'bool' ? ['true', 'false'] : property.options;
+        options.add(property.valueDisplay);
+        if (property.isNullable) {
+          options.add('null');
+        }
+
         return DropdownButtonFormField(
           value: property.valueDisplay,
           decoration: decoration,
           items:
-              (options ?? []).map((option) {
+              options.toSet().toList().map((option) {
                 return DropdownMenuItem(
                   value: option,
                   // TODO(https://github.com/flutter/devtools/issues/8531) Handle onTap.
@@ -177,104 +193,3 @@ class _PropertyInput extends StatelessWidget {
     return null;
   }
 }
-
-class _WidgetProperty {
-  const _WidgetProperty({
-    required this.name,
-    required this.type,
-    required this.isNullable,
-    this.value,
-    this.displayValue,
-    this.isEditable = true,
-    this.isRequired = false,
-    this.hasArgument = true,
-    this.isDefault = false,
-    this.errorText,
-    this.options,
-    // ignore: unused_element_parameter, TODO(https://github.com/flutter/devtools/issues/8532): Support colors.
-    this.swatches,
-    // ignore: unused_element_parameter, TODO(https://github.com/flutter/devtools/issues/8532): Support objects.
-    this.properties,
-  });
-
-  final String name;
-  final String type;
-  final bool isNullable;
-  final Object? value;
-  final String? displayValue;
-  final bool isEditable;
-  final bool isRequired;
-  final bool hasArgument;
-  final bool isDefault;
-  final String? errorText;
-  final List<String>? options;
-  final List<String>? swatches;
-  final List<_WidgetProperty>? properties;
-
-  String get valueDisplay => displayValue ?? value.toString();
-}
-
-// TODO(https://github.com/flutter/devtools/issues/8531): Connect to DTD and delete hard-coded properties.
-const _titleProperty = _WidgetProperty(
-  name: 'title',
-  value: 'Hello world!',
-  type: 'string',
-  isNullable: false,
-  isRequired: true,
-  hasArgument: false,
-);
-
-const _widthProperty = _WidgetProperty(
-  name: 'width',
-  displayValue: '100.0',
-  type: 'double',
-  isEditable: false,
-  errorText: 'Some reason for why this can\'t be edited.',
-  isNullable: false,
-  value: 20.0,
-  isRequired: true,
-  hasArgument: false,
-);
-
-const _heightProperty = _WidgetProperty(
-  name: 'height',
-  type: 'double',
-  isNullable: false,
-  value: 20.0,
-  isDefault: true,
-  isRequired: true,
-);
-
-const _softWrapProperty = _WidgetProperty(
-  name: 'softWrap',
-  type: 'bool',
-  isNullable: false,
-  value: true,
-  isDefault: true,
-);
-
-const _alignProperty = _WidgetProperty(
-  name: 'align',
-  type: 'enum',
-  isNullable: false,
-  value: 'Alignment.center',
-  options: [
-    'Alignment.bottomCenter',
-    'Alignment.bottomLeft',
-    'Alignment.bottomRight',
-    'Alignment.center',
-    'Alignment.centerLeft',
-    'Alignment.centerRight',
-    'Alignment.topCenter',
-    'Alignment.topLeft',
-    'Alignment.topRight',
-  ],
-);
-
-const _properties = [
-  _titleProperty,
-  _widthProperty,
-  _heightProperty,
-  _alignProperty,
-  _softWrapProperty,
-];

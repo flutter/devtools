@@ -6,6 +6,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 
 const editorServiceName = 'Editor';
 const editorStreamName = 'Editor';
+const lspServiceName = 'Lsp';
 
 enum EditorMethod {
   // Device.
@@ -53,13 +54,20 @@ enum EditorEventKind {
 
   /// The kind for a [ThemeChangedEvent].
   themeChanged,
+
+  /// The kind for an [ActiveLocationChangedEvent] event.
+  activeLocationChanged,
 }
 
 /// Constants for all fields used in JSON maps to avoid literal strings that
 /// may have typos sprinkled throughout the API classes.
 abstract class Field {
+  static const active = 'active';
+  static const anchor = 'anchor';
+  static const arguments = 'arguments';
   static const backgroundColor = 'backgroundColor';
   static const category = 'category';
+  static const character = 'character';
   static const debuggerType = 'debuggerType';
   static const debugSession = 'debugSession';
   static const debugSessionId = 'debugSessionId';
@@ -67,6 +75,7 @@ abstract class Field {
   static const device = 'device';
   static const deviceId = 'deviceId';
   static const devices = 'devices';
+  static const displayValue = 'displayValue';
   static const emulator = 'emulator';
   static const emulatorId = 'emulatorId';
   static const ephemeral = 'ephemeral';
@@ -75,9 +84,15 @@ abstract class Field {
   static const fontSize = 'fontSize';
   static const forceExternal = 'forceExternal';
   static const foregroundColor = 'foregroundColor';
+  static const hasArgument = 'hasArgument';
   static const id = 'id';
   static const isDarkMode = 'isDarkMode';
+  static const isDefault = 'isDefault';
+  static const isNullable = 'isNullable';
+  static const isRequired = 'isRequired';
+  static const line = 'line';
   static const name = 'name';
+  static const options = 'options';
   static const page = 'page';
   static const platform = 'platform';
   static const platformType = 'platformType';
@@ -85,9 +100,15 @@ abstract class Field {
   static const projectRootPath = 'projectRootPath';
   static const requiresDebugSession = 'requiresDebugSession';
   static const selectedDeviceId = 'selectedDeviceId';
+  static const selections = 'selections';
   static const supported = 'supported';
   static const supportsForceExternal = 'supportsForceExternal';
+  static const textDocument = 'textDocument';
   static const theme = 'theme';
+  static const type = 'type';
+  static const uri = 'uri';
+  static const value = 'value';
+  static const version = 'version';
   static const vmServiceUri = 'vmServiceUri';
 }
 
@@ -254,6 +275,188 @@ class ThemeChangedEvent extends EditorEvent {
 
   @override
   Map<String, Object?> toJson() => {Field.theme: theme};
+}
+
+/// An event sent by an editor when the current cursor position/s change.
+class ActiveLocationChangedEvent extends EditorEvent {
+  ActiveLocationChangedEvent({
+    required this.selections,
+    required this.textDocument,
+  });
+
+  ActiveLocationChangedEvent.fromJson(Map<String, Object?> map)
+    : this(
+        textDocument: TextDocument.fromJson(
+          map[Field.textDocument] as Map<String, Object?>,
+        ),
+        selections:
+            (map[Field.selections] as List<Object?>)
+                .cast<Map<String, Object?>>()
+                .map(EditorSelection.fromJson)
+                .toList(),
+      );
+
+  final List<EditorSelection> selections;
+  final TextDocument textDocument;
+
+  @override
+  EditorEventKind get kind => EditorEventKind.activeLocationChanged;
+
+  @override
+  Map<String, Object?> toJson() => {
+    Field.selections: selections,
+    Field.textDocument: textDocument,
+  };
+}
+
+/// A reference to a text document in the editor.
+class TextDocument with Serializable {
+  TextDocument({required this.uri, required this.version});
+
+  TextDocument.fromJson(Map<String, Object?> map)
+    : this(uri: map[Field.uri] as String, version: map[Field.version] as int);
+
+  final String uri;
+  final int version;
+
+  @override
+  Map<String, Object?> toJson() => {Field.uri: uri, Field.version: version};
+
+  @override
+  bool operator ==(Object other) {
+    return other is TextDocument &&
+        other.uri == uri &&
+        other.version == version;
+  }
+
+  @override
+  int get hashCode => Object.hash(uri, version);
+}
+
+// The starting and ending cursor positions in the editor.
+class EditorSelection with Serializable {
+  EditorSelection({required this.active, required this.anchor});
+
+  EditorSelection.fromJson(Map<String, Object?> map)
+    : this(
+        active: CursorPosition.fromJson(
+          map[Field.active] as Map<String, Object?>,
+        ),
+        anchor: CursorPosition.fromJson(
+          map[Field.anchor] as Map<String, Object?>,
+        ),
+      );
+
+  final CursorPosition active;
+  final CursorPosition anchor;
+
+  @override
+  Map<String, Object?> toJson() => {
+    Field.active: active.toJson(),
+    Field.anchor: anchor.toJson(),
+  };
+}
+
+/// Representation of a single cursor position in the editor.
+class CursorPosition with Serializable {
+  CursorPosition({required this.character, required this.line});
+
+  CursorPosition.fromJson(Map<String, Object?> map)
+    : this(
+        character: map[Field.character] as int,
+        line: map[Field.line] as int,
+      );
+
+  final int character;
+  final int line;
+
+  @override
+  Map<String, Object?> toJson() => {
+    Field.character: character,
+    Field.line: line,
+  };
+
+  @override
+  bool operator ==(Object other) {
+    return other is CursorPosition &&
+        other.character == character &&
+        other.line == line;
+  }
+
+  @override
+  int get hashCode => Object.hash(character, line);
+}
+
+/// The result of an `editableArguments` request.
+class EditableArgumentsResult with Serializable {
+  EditableArgumentsResult({required this.args});
+
+  EditableArgumentsResult.fromJson(Map<String, Object?> map)
+    : this(
+        args:
+            (map[Field.arguments] as List<Object?>? ?? <Object?>[])
+                .cast<Map<String, Object?>>()
+                .map(EditableArgument.fromJson)
+                .toList(),
+      );
+
+  final List<EditableArgument> args;
+
+  @override
+  Map<String, Object?> toJson() => {Field.arguments: args};
+}
+
+/// Information about a single editable argument of a widget.
+class EditableArgument with Serializable {
+  EditableArgument({
+    required this.name,
+    required this.type,
+    required this.value,
+    required this.hasArgument,
+    required this.isDefault,
+    required this.isNullable,
+    required this.isRequired,
+    required this.isEditable,
+    required this.options,
+    this.displayValue,
+    this.errorText,
+  });
+
+  EditableArgument.fromJson(Map<String, Object?> map)
+    : this(
+        name: map[Field.name] as String,
+        type: map[Field.type] as String,
+        value: map[Field.value],
+        hasArgument: (map[Field.hasArgument] as bool?) ?? false,
+        isDefault: (map[Field.isDefault] as bool?) ?? false,
+        isNullable: (map[Field.isNullable] as bool?) ?? false,
+        isRequired: (map[Field.isRequired] as bool?) ?? false,
+        isEditable: (map['isEditable'] as bool?) ?? true,
+        options:
+            (map[Field.options] as List<Object?>? ?? <Object?>[])
+                .cast<String>(),
+        displayValue: map[Field.displayValue] as String?,
+        errorText: map['errorText'] as String?,
+      );
+
+  final String name;
+  final String type;
+  final Object? value;
+  final bool hasArgument;
+  final bool isDefault;
+  final bool isNullable;
+  final bool isRequired;
+  final bool isEditable;
+  final List<String> options;
+  final String? displayValue;
+  final String? errorText;
+
+  String get valueDisplay => displayValue ?? value.toString();
+
+  @override
+  Map<String, Object?> toJson() => {
+    // TODO.
+  };
 }
 
 /// The result of a `GetDevices` request.

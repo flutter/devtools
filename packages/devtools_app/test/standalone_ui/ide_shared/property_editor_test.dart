@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_sidebar.dart';
+import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';

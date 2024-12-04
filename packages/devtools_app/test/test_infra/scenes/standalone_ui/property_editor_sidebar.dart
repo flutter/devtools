@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/standalone_ui/vs_code/property_editor_panel.dart';
+import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_panel.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
