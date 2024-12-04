@@ -39,9 +39,7 @@ class PropertyEditorController extends DisposableController
         position: cursorPosition,
       );
       final args = result?.args ?? <EditableArgument>[];
-      if (args.isNotEmpty) {
-        _editableArgs.replaceAll(args);
-      }
+      _editableArgs.replaceAll(args);
     });
   }
 }

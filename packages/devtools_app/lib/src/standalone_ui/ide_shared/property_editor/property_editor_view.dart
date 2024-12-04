@@ -41,14 +41,18 @@ class _PropertiesList extends StatelessWidget {
     return ValueListenableBuilder<List<EditableArgument>>(
       valueListenable: controller.editableArgs,
       builder: (context, args, _) {
-        return Column(
-          children: [
-            for (final property in args)
-              ...<Widget>[
-                _EditablePropertyItem(property: property),
-              ].joinWith(const PaddedDivider.noPadding()),
-          ],
-        );
+        return args.isEmpty
+            ? const Center(
+              child: Text('No widget properties at current cursor location.'),
+            )
+            : Column(
+              children: [
+                for (final property in args)
+                  ...<Widget>[
+                    _EditablePropertyItem(property: property),
+                  ].joinWith(const PaddedDivider.noPadding()),
+              ],
+            );
       },
     );
   }
