@@ -278,7 +278,7 @@ void main() {
     await expectLater(
       find.byKey(root),
       matchesDevToolsGolden(
-        '../test_infra/goldens/offset_scrollbar_startup.png',
+        '../../test_infra/goldens/offset_scrollbar_startup.png',
       ),
     );
 
@@ -289,7 +289,7 @@ void main() {
     await expectLater(
       find.byKey(root),
       matchesDevToolsGolden(
-        '../test_infra/goldens/offset_scrollbar_scrolled.png',
+        '../../test_infra/goldens/offset_scrollbar_scrolled.png',
       ),
     );
   });
