@@ -12,6 +12,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import 'editor_service/simulated_editor.dart';
+import 'shared/common_ui.dart';
 
 /// A simple UI that acts as a stand-in host editor to simplify the development
 /// workflow when working on embedded tooling.
@@ -334,42 +335,4 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
       setState(() {});
     };
   }
-}
-
-/// A basic theme that matches the default colours of VS Code dart/light themes
-/// so the mock environment can be displayed in either.
-class VsCodeTheme {
-  const VsCodeTheme._({
-    required this.activityBarBackgroundColor,
-    required this.editorBackgroundColor,
-    required this.foregroundColor,
-    required this.sidebarBackgroundColor,
-  });
-
-  const VsCodeTheme.dark()
-    : this._(
-        activityBarBackgroundColor: const Color(0xFF333333),
-        editorBackgroundColor: const Color(0xFF1E1E1E),
-        foregroundColor: const Color(0xFFD4D4D4),
-        sidebarBackgroundColor: const Color(0xFF252526),
-      );
-
-  const VsCodeTheme.light()
-    : this._(
-        activityBarBackgroundColor: const Color(0xFF2C2C2C),
-        editorBackgroundColor: const Color(0xFFFFFFFF),
-        foregroundColor: const Color(0xFF000000),
-        sidebarBackgroundColor: const Color(0xFFF3F3F3),
-      );
-
-  static VsCodeTheme of(BuildContext context) {
-    return Theme.of(context).isDarkTheme
-        ? const VsCodeTheme.dark()
-        : const VsCodeTheme.light();
-  }
-
-  final Color activityBarBackgroundColor;
-  final Color editorBackgroundColor;
-  final Color foregroundColor;
-  final Color sidebarBackgroundColor;
 }

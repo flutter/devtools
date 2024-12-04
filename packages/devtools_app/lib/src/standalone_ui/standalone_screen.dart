@@ -15,6 +15,8 @@ import 'vs_code/flutter_panel.dart';
 /// meaning that this screen will not be part of DevTools' normal navigation.
 /// The only way to access a standalone screen is directly from the url.
 enum StandaloneScreenType {
+  // TODO(elliette): Add property editor as a standalone screen, see:
+  // https://github.com/flutter/devtools/issues/8546
   editorSidebar,
   vsCodeFlutterPanel; // Legacy postMessage version, shows an upgrade message.
 

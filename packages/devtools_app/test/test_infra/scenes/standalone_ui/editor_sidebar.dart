@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/flutter_panel.dart';
 import 'package:devtools_app_shared/service.dart';
-import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -17,7 +16,8 @@ import 'package:stager/stager.dart';
 
 import 'editor_service/simulated_editor.dart';
 import 'mock_editor_widget.dart';
-import 'utils.dart';
+import 'shared/common_ui.dart';
+import 'shared/utils.dart';
 
 /// To run, use the "standalone_ui/editor_sidebar" launch configuration with the
 /// `devtools/packages/` folder open in VS Code, or run:
@@ -30,17 +30,7 @@ class EditorSidebarScene extends Scene {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: themeFor(
-        isDarkTheme: false,
-        ideTheme: _ideTheme(const VsCodeTheme.light()),
-        theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
-      ),
-      darkTheme: themeFor(
-        isDarkTheme: true,
-        ideTheme: _ideTheme(const VsCodeTheme.dark()),
-        theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
-      ),
+    return IdeThemedMaterialApp(
       home: Scaffold(
         body: MockEditorWidget(
           editor: editor,
@@ -48,15 +38,6 @@ class EditorSidebarScene extends Scene {
           child: EditorSidebarPanel(clientDtd),
         ),
       ),
-    );
-  }
-
-  /// Creates an [IdeTheme] using the colours from the mock editor.
-  IdeTheme _ideTheme(VsCodeTheme vsCodeTheme) {
-    return IdeTheme(
-      backgroundColor: vsCodeTheme.editorBackgroundColor,
-      foregroundColor: vsCodeTheme.foregroundColor,
-      embedMode: EmbedMode.embedOne,
     );
   }
 
