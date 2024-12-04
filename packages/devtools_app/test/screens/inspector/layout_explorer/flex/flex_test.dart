@@ -18,7 +18,8 @@ import '../../../../test_infra/matchers/matchers.dart';
 // https://github.com/flutter/devtools/issues/1403
 void main() {
   const windowSize = Size(1750, 1750);
-  const relativeGoldenPath = '../../../../test_infra/goldens/inspector/layout_explorer/flex';
+  const relativeGoldenPath =
+      '../../../../test_infra/goldens/inspector/layout_explorer/flex';
 
   Map<String, Object> buildDiagnosticsNodeJson(Axis axis) => jsonDecode('''
       {

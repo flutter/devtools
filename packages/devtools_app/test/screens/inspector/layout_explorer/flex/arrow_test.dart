@@ -10,7 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../../test_infra/matchers/matchers.dart';
 
 void main() {
-  const relativeGoldenPath = '../../../../test_infra/goldens/inspector/layout_explorer/flex';
+  const relativeGoldenPath =
+      '../../../../test_infra/goldens/inspector/layout_explorer/flex';
 
   group('Arrow Golden Tests', () {
     group('Unidirectional', () {
