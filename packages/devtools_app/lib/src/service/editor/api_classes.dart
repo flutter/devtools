@@ -21,6 +21,16 @@ enum EditorMethod {
   openDevToolsPage,
 }
 
+enum LspMethod {
+  editableArguments(
+    methodName: 'experimental/dart/textDocument/editableArguments',
+  );
+
+  const LspMethod({required this.methodName});
+
+  final String methodName;
+}
+
 /// Known kinds of events that may come from the editor.
 ///
 /// This list is not guaranteed to match actual events from any given editor as
@@ -79,6 +89,7 @@ abstract class Field {
   static const emulator = 'emulator';
   static const emulatorId = 'emulatorId';
   static const ephemeral = 'ephemeral';
+  static const errorText = 'errorText';
   static const flutterDeviceId = 'flutterDeviceId';
   static const flutterMode = 'flutterMode';
   static const fontSize = 'fontSize';
@@ -88,6 +99,7 @@ abstract class Field {
   static const id = 'id';
   static const isDarkMode = 'isDarkMode';
   static const isDefault = 'isDefault';
+  static const isEditable = 'isEditable';
   static const isNullable = 'isNullable';
   static const isRequired = 'isRequired';
   static const line = 'line';
@@ -431,12 +443,12 @@ class EditableArgument with Serializable {
         isDefault: (map[Field.isDefault] as bool?) ?? false,
         isNullable: (map[Field.isNullable] as bool?) ?? false,
         isRequired: (map[Field.isRequired] as bool?) ?? false,
-        isEditable: (map['isEditable'] as bool?) ?? true,
+        isEditable: (map[Field.isEditable] as bool?) ?? true,
         options:
             (map[Field.options] as List<Object?>? ?? <Object?>[])
                 .cast<String>(),
         displayValue: map[Field.displayValue] as String?,
-        errorText: map['errorText'] as String?,
+        errorText: map[Field.errorText] as String?,
       );
 
   final String name;
@@ -455,7 +467,17 @@ class EditableArgument with Serializable {
 
   @override
   Map<String, Object?> toJson() => {
-    // TODO.
+    Field.name: name,
+    Field.type: type,
+    Field.value: value,
+    Field.hasArgument: hasArgument,
+    Field.isDefault: isDefault,
+    Field.isNullable: isNullable,
+    Field.isRequired: isRequired,
+    Field.isEditable: isEditable,
+    Field.options: options,
+    Field.displayValue: displayValue,
+    Field.errorText: errorText,
   };
 }
 

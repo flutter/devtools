@@ -233,9 +233,9 @@ class EditorClient extends DisposableController
     required CursorPosition position,
   }) async {
     final response = await _callLspApi(
-      'experimental/dart/textDocument/editableArguments',
+      LspMethod.editableArguments,
       params: {
-        'type': 'Object', // not used, but required by DTD?
+        'type': 'Object', // This is required by DTD.
         'textDocument': textDocument.toJson(),
         'position': position.toJson(),
       },
@@ -255,11 +255,10 @@ class EditorClient extends DisposableController
   }
 
   Future<DTDResponse> _callLspApi(
-    // TODO: switch to enum.
-    String lspApi, {
+    LspMethod method, {
     Map<String, Object?>? params,
   }) {
-    return _dtd.call(lspServiceName, lspApi, params: params);
+    return _dtd.call(lspServiceName, method.methodName, params: params);
   }
 }
 
