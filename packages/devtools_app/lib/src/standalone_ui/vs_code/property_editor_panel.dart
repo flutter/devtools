@@ -45,8 +45,7 @@ class _PropertyEditorSidebarPanelState
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topCenter,
-      child: Expanded(
-        child: FutureBuilder(
+      child: FutureBuilder(
           future: _editor,
           builder:
               (context, snapshot) => switch ((
@@ -57,7 +56,6 @@ class _PropertyEditorSidebarPanelState
                   _PropertyEditorConnectedPanel(editor),
                 _ => const CenteredCircularProgressIndicator(),
               },
-        ),
       ),
     );
   }
