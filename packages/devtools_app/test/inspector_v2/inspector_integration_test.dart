@@ -384,7 +384,7 @@ void main() {
     skip: true,
   );
 
-  group('updating after code edits', () {
+  group('auto-refresh after code edits', () {
     const flutterAppMainPath =
         'test/test_infra/fixtures/flutter_app/lib/main.dart';
     String flutterMainContents = '';
@@ -398,7 +398,7 @@ void main() {
     });
 
     tearDown(() {
-      // Re-set conents of main.dart.
+      // Re-set contents of main.dart.
       File(flutterAppMainPath).writeAsStringSync(flutterMainContents);
 
       // Re-set changes to auto refresh.
