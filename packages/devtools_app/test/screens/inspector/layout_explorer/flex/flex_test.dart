@@ -18,6 +18,7 @@ import '../../../../test_infra/matchers/matchers.dart';
 // https://github.com/flutter/devtools/issues/1403
 void main() {
   const windowSize = Size(1750, 1750);
+  const relativeGoldenPath = '../../../../test_infra/goldens/inspector/layout_explorer/flex';
 
   Map<String, Object> buildDiagnosticsNodeJson(Axis axis) => jsonDecode('''
       {
@@ -264,7 +265,7 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byWidget(widget),
-      matchesDevToolsGolden('goldens/story_of_row_layout.png'),
+      matchesDevToolsGolden('$relativeGoldenPath/story_of_row_layout.png'),
     );
   }, skip: true);
 
@@ -284,7 +285,7 @@ void main() {
     await pump(tester, widget);
     await expectLater(
       find.byWidget(widget),
-      matchesDevToolsGolden('goldens/story_of_column_layout.png'),
+      matchesDevToolsGolden('$relativeGoldenPath/story_of_column_layout.png'),
     );
   }, skip: true);
 }

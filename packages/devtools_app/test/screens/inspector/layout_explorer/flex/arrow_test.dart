@@ -10,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../../test_infra/matchers/matchers.dart';
 
 void main() {
+  const relativeGoldenPath = '../../../../test_infra/goldens/inspector/layout_explorer/flex';
+
   group('Arrow Golden Tests', () {
     group('Unidirectional', () {
       Widget buildUnidirectionalArrowWrapper(ArrowType type) => Directionality(
@@ -30,7 +32,9 @@ void main() {
         await tester.pumpWidget(widget);
         await expectLater(
           find.byWidget(widget),
-          matchesDevToolsGolden('goldens/arrow_unidirectional_left.png'),
+          matchesDevToolsGolden(
+            '$relativeGoldenPath/arrow_unidirectional_left.png',
+          ),
         );
       }, skip: kIsWeb);
       testWidgets('up', (WidgetTester tester) async {
@@ -38,7 +42,9 @@ void main() {
         await tester.pumpWidget(widget);
         await expectLater(
           find.byWidget(widget),
-          matchesDevToolsGolden('goldens/arrow_unidirectional_up.png'),
+          matchesDevToolsGolden(
+            '$relativeGoldenPath/arrow_unidirectional_up.png',
+          ),
         );
       }, skip: kIsWeb);
       testWidgets('right', (WidgetTester tester) async {
@@ -46,7 +52,9 @@ void main() {
         await tester.pumpWidget(widget);
         await expectLater(
           find.byWidget(widget),
-          matchesDevToolsGolden('goldens/arrow_unidirectional_right.png'),
+          matchesDevToolsGolden(
+            '$relativeGoldenPath/arrow_unidirectional_right.png',
+          ),
         );
       }, skip: kIsWeb);
       testWidgets('down', (WidgetTester tester) async {
@@ -54,7 +62,9 @@ void main() {
         await tester.pumpWidget(widget);
         await expectLater(
           find.byWidget(widget),
-          matchesDevToolsGolden('goldens/arrow_unidirectional_down.png'),
+          matchesDevToolsGolden(
+            '$relativeGoldenPath/arrow_unidirectional_down.png',
+          ),
         );
       }, skip: kIsWeb);
     });
@@ -78,7 +88,9 @@ void main() {
         await tester.pumpWidget(widget);
         await expectLater(
           find.byWidget(widget),
-          matchesDevToolsGolden('goldens/arrow_bidirectional_horizontal.png'),
+          matchesDevToolsGolden(
+            '$relativeGoldenPath/arrow_bidirectional_horizontal.png',
+          ),
         );
       }, skip: kIsWeb);
       testWidgets('vertical', (WidgetTester tester) async {
@@ -86,7 +98,9 @@ void main() {
         await tester.pumpWidget(widget);
         await expectLater(
           find.byWidget(widget),
-          matchesDevToolsGolden('goldens/arrow_bidirectional_vertical.png'),
+          matchesDevToolsGolden(
+            '$relativeGoldenPath/arrow_bidirectional_vertical.png',
+          ),
         );
       }, skip: kIsWeb);
     });
