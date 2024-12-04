@@ -390,11 +390,19 @@ void main() {
     String flutterMainContents = '';
 
     setUp(() {
+      // Save contents of main.dart file.
       flutterMainContents = File(flutterAppMainPath).readAsStringSync();
+
+      // Enable auto-refresh.
+      preferences.inspector.setAutoRefreshEnabled(true);
     });
 
     tearDown(() {
+      // Re-set conents of main.dart.
       File(flutterAppMainPath).writeAsStringSync(flutterMainContents);
+
+      // Re-set changes to auto refresh.
+      preferences.inspector.setAutoRefreshEnabled(true);
     });
 
     void makeEditToFlutterMain({
