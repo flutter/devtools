@@ -5,6 +5,7 @@
 * Add `DevToolsIcon` and `AssetImageIcon` widgets.
 * Add `iconAsset` and `iconSize` fields to the `ButtonGroupItemData` class.
 * Add `iconAsset` and `iconSize` fields to the `MaterialIconLabel` class.
+* Add "Supported Flutter versions" policy to the README.
 
 ## 0.2.4
 * Add `updateQueryParameter` utility method.
