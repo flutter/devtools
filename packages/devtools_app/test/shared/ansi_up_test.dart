@@ -6,7 +6,6 @@
 library;
 
 import 'package:ansi_up/ansi_up.dart';
-import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -16,22 +15,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import '../test_infra/utils/ansi.dart';
+
 void main() {
   group('ansi_up', () {
     test('test standard colors', () {
-      final pen = AnsiPen();
+      final ansi = AnsiWriter();
       final sb = StringBuffer();
       // Test the 16 color defaults.
       for (int c = 0; c < 16; c++) {
-        pen
+        ansi
           ..reset()
           ..white(bold: true)
           ..xterm(c, bg: true);
-        sb.write(pen('$c '));
-        pen
+        sb.write(ansi.write('$c '));
+        ansi
           ..reset()
           ..xterm(c);
-        sb.write(pen(' $c '));
+        sb.write(ansi.write(' $c '));
         if (c == 7 || c == 15) {
           sb.writeln();
         }
@@ -43,15 +44,15 @@ void main() {
         for (int g = 0; g < 6; g += 3) {
           for (int b = 0; b < 6; b += 3) {
             final c = r * 36 + g * 6 + b + 16;
-            pen
+            ansi
               ..reset()
               ..rgb(r: r / 5, g: g / 5, b: b / 5, bg: true)
               ..white(bold: true);
-            sb.write(pen(' $c '));
-            pen
+            sb.write(ansi.write(' $c '));
+            ansi
               ..reset()
               ..rgb(r: r / 5, g: g / 5, b: b / 5);
-            sb.write(pen(' $c '));
+            sb.write(ansi.write(' $c '));
           }
           sb.writeln();
         }
@@ -61,15 +62,15 @@ void main() {
         if (0 == c % 8) {
           sb.writeln();
         }
-        pen
+        ansi
           ..reset()
           ..gray(level: c / 23, bg: true)
           ..white(bold: true);
-        sb.write(pen(' ${c + 232} '));
-        pen
+        sb.write(ansi.write(' ${c + 232} '));
+        ansi
           ..reset()
           ..gray(level: c / 23);
-        sb.write(pen(' ${c + 232} '));
+        sb.write(ansi.write(' ${c + 232} '));
       }
 
       final output = StringBuffer();
@@ -114,8 +115,8 @@ void main() {
     String ansiCodesOutput() {
       final sb = StringBuffer();
       sb.write('Ansi color codes processed for ');
-      final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
-      sb.write(pen('log 5'));
+      final ansi = AnsiWriter()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
+      sb.write(ansi.write('log 5'));
       return sb.toString();
     }
 
@@ -266,8 +267,8 @@ void main() {
     String ansiCodesOutput() {
       final sb = StringBuffer();
       sb.write('Ansi color codes processed for ');
-      final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
-      sb.write(pen('console'));
+      final ansi = AnsiWriter()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
+      sb.write(ansi.write('console'));
       return sb.toString();
     }
 

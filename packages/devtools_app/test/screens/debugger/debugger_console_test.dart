@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -14,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../test_infra/utils/ansi.dart';
 import '../../test_infra/utils/test_utils.dart';
 
 void main() {
@@ -129,7 +129,7 @@ void main() {
 String _ansiCodesOutput() {
   final sb = StringBuffer();
   sb.write('Ansi color codes processed for ');
-  final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
-  sb.write(pen('console'));
+  final ansi = AnsiWriter()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
+  sb.write(ansi.write('console'));
   return sb.toString();
 }
