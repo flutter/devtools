@@ -24,7 +24,6 @@ import '../globals.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/utils.dart';
 import '../utils/utils.dart';
-import 'icons.dart';
 
 double get assumedMonospaceCharacterWidth =>
     scaleByFontFactor(_assumedMonospaceCharacterWidth);

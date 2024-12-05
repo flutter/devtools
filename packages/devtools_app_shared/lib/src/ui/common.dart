@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../utils/url/url.dart';
 import '../utils/utils.dart';
+import 'icons.dart';
 import 'theme/theme.dart';
 
 /// A DevTools-styled area pane to hold a section of UI on a screen.
@@ -427,15 +428,23 @@ final class MaterialIconLabel extends StatelessWidget {
   const MaterialIconLabel({
     super.key,
     required this.label,
-    required this.iconData,
+    this.iconData,
+    this.iconAsset,
+    this.iconSize,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
-  }) : assert(
-          label != null || iconData != null,
-          'Either iconData or label must be specified.',
+  })  : assert(
+          label != null || iconData != null || iconAsset != null,
+          'At least one of iconData, iconAsset, or label must be specified.',
+        ),
+        assert(
+          iconData == null || iconAsset == null,
+          'Only one of iconData and iconAsset may be specified.',
         );
 
   final IconData? iconData;
+  final String? iconAsset;
+  final double? iconSize;
   final Color? color;
   final String? label;
   final double? minScreenWidthForTextBeforeScaling;
@@ -447,10 +456,11 @@ final class MaterialIconLabel extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (iconData != null)
-          Icon(
-            iconData,
-            size: defaultIconSize,
+        if (iconData != null || iconAsset != null)
+          DevToolsIcon(
+            icon: iconData,
+            iconAsset: iconAsset,
+            size: iconSize ?? defaultIconSize,
             color: color,
           ),
         // TODO(jacobr): animate showing and hiding the text.
