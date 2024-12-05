@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../shared/globals.dart';
 import '../shared/ui/common_widgets.dart';
+import 'ide_shared/property_editor/property_editor_panel.dart';
 import 'vs_code/flutter_panel.dart';
 
 /// "Screens" that are intended for standalone use only, likely for embedding
@@ -18,6 +19,7 @@ enum StandaloneScreenType {
   // TODO(elliette): Add property editor as a standalone screen, see:
   // https://github.com/flutter/devtools/issues/8546
   editorSidebar,
+  propertyEditor,
   vsCodeFlutterPanel; // Legacy postMessage version, shows an upgrade message.
 
   Widget get screen {
@@ -39,6 +41,14 @@ enum StandaloneScreenType {
           return data == null
               ? const CenteredCircularProgressIndicator()
               : EditorSidebarPanel(data);
+        },
+      ),
+      StandaloneScreenType.propertyEditor => ValueListenableBuilder(
+        valueListenable: dtdManager.connection,
+        builder: (context, data, _) {
+          return data == null
+              ? const CenteredCircularProgressIndicator()
+              : PropertyEditorPanel(data);
         },
       ),
     };
