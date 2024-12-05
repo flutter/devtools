@@ -15,10 +15,6 @@ ios/**/*
 linux/**/*
 windows/**/*
 
-# This should only be present as a byproduct of running the publish
-# script. It should not be committed.
-fonts/codicon.ttf
-
 # IntelliJ related
 *.iml
 *.ipr
