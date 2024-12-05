@@ -132,9 +132,7 @@ void main() {
     final pause = getWidgetFromFinder<OutlinedButton>(pauseButtonFinder);
     expect(pause.onPressed, isNotNull);
 
-    final resumeButtonFinder = findDebuggerButtonWithIconAsset(
-      'material_resume.png',
-    );
+    final resumeButtonFinder = findDebuggerButtonWithIconAsset('resume.png');
     expect(resumeButtonFinder, findsOneWidget);
     final resume = getWidgetFromFinder<OutlinedButton>(resumeButtonFinder);
     expect(resume.onPressed, isNull);
