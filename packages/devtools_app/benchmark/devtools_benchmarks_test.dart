@@ -172,8 +172,6 @@ void _verifyScoresAgainstThresholds(
 
 const _frameTimeFor60FPSInMicros = 16666.6;
 
-// TODO(https://github.com/flutter/devtools/issues/8583): adjust these
-// thresholds to match expectations.
 final _benchmarkThresholds = {
   DevToolsBenchmark.navigateThroughOfflineScreens: {
     ..._valuesForMetric(
