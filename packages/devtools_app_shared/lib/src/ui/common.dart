@@ -454,7 +454,7 @@ final class MaterialIconLabel extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (iconData != null)
+        if (iconData != null || iconAsset != null)
           DevToolsIcon(
             icon: iconData,
             iconAsset: iconAsset,
