@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../shared/globals.dart';
 import '../shared/ui/common_widgets.dart';
-import 'ide_shared/property_editor/property_editor_panel.dart';
 import 'vs_code/flutter_panel.dart';
+import 'vs_code/property_editor_panel.dart';
 
 /// "Screens" that are intended for standalone use only, likely for embedding
 /// directly in an IDE.
@@ -48,7 +48,7 @@ enum StandaloneScreenType {
         builder: (context, data, _) {
           return data == null
               ? const CenteredCircularProgressIndicator()
-              : PropertyEditorPanel(data);
+              : PropertyEditorSidebarPanel(data);
         },
       ),
     };
