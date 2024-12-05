@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:codicon/codicon.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -586,8 +585,8 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               message: 'Resume',
               child: TextButton(
                 onPressed: controller.resume,
-                child: Icon(
-                  Codicons.debugContinue,
+                child: DevToolsIcon(
+                  iconAsset: 'icons/debugger/material_resume.png',
                   color: Colors.green,
                   size: defaultIconSize,
                 ),
@@ -597,8 +596,8 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               message: 'Step over',
               child: TextButton(
                 onPressed: controller.stepOver,
-                child: Icon(
-                  Codicons.debugStepOver,
+                child: DevToolsIcon(
+                  iconAsset: 'icons/debugger/material_step_over.png',
                   color: Colors.black,
                   size: defaultIconSize,
                 ),

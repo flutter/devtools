@@ -12,3 +12,13 @@ Finder findDebuggerButtonWithIcon(IconData icon) => find.ancestor(
   ),
   matching: find.byType(OutlinedButton),
 );
+
+Finder findDebuggerButtonWithIconAsset(String iconName) => find.ancestor(
+  of: find.byWidgetPredicate(
+    (Widget widget) =>
+        widget is MaterialIconLabel &&
+        widget.iconAsset != null &&
+        widget.iconAsset!.contains(iconName),
+  ),
+  matching: find.byType(OutlinedButton),
+);

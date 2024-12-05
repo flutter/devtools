@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:codicon/codicon.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -709,7 +708,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                       },
                     ),
                   DevToolsToggleButton(
-                    icon: Codicons.regex,
+                    icon: Icons.emergency,
                     message: 'Use regular expressions',
                     outlined: false,
                     isSelected: useRegExp,

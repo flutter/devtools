@@ -17,9 +17,8 @@ resolution: workspace
 dependencies:
   ansi_up: ^1.0.0
   ansicolor: ^2.0.0
-  async: ^2.0.0
-  clock: ^1.1.1
-  codicon: ^1.0.0
+  async: ^2.0.0 # okay
+  clock: ^1.1.1 # Okay
   collection: ^1.15.0
   dap: ^1.1.0
   dds_service_extensions: ^2.0.0
@@ -95,6 +94,7 @@ flutter:
     - icons/actions/
     - icons/app_bar/
     - icons/custom/
+    - icons/debugger/
     - icons/general/
     - icons/gutter/
     - icons/inspector/
@@ -161,9 +161,6 @@ flutter:
     - family: Octicons
       fonts:
         - asset: fonts/Octicons.ttf
-    - family: Codicon
-      fonts:
-        - asset: packages/codicon/font/codicon.ttf
 
 dependency_overrides:
   ansi_up:

@@ -351,6 +351,7 @@ final class _ButtonGroupButton extends StatelessWidget {
         child: MaterialIconLabel(
           label: buttonData.label,
           iconData: buttonData.icon,
+          iconAsset: buttonData.iconAsset,
           minScreenWidthForTextBeforeScaling:
               minScreenWidthForTextBeforeScaling,
         ),
@@ -363,14 +364,23 @@ final class ButtonGroupItemData {
   const ButtonGroupItemData({
     this.label,
     this.icon,
+    this.iconAsset,
     String? tooltip,
     this.onPressed,
     this.autofocus = false,
   })  : tooltip = tooltip ?? label,
-        assert(label != null || icon != null);
+        assert(
+          label != null || icon != null || iconAsset != null,
+          'At least one of icon, iconAsset, or label must be specified.',
+        ),
+        assert(
+          icon == null || iconAsset == null,
+          'Only one of icon and iconAsset may be specified.',
+        );
 
   final String? label;
   final IconData? icon;
+  final String? iconAsset;
   final String? tooltip;
   final VoidCallback? onPressed;
   final bool autofocus;

@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import '../../../service/editor/editor_client.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/ui/icons.dart';
 
 typedef DevToolsButtonData =
     ({
