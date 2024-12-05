@@ -1,3 +1,6 @@
+# 1.1.0
+* Discontinue the `codicon` package.
+
 # 1.0.0
 * Migrate to null safety.
 

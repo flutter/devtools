@@ -1,7 +1,7 @@
 name: codicon
 description: VS Code icons for Flutter.
 homepage: https://github.com/flutter/devtools/tree/master/third_party/packages/codicon
-version: 1.0.0
+version: 1.1.0
 
 environment:
   sdk: ^3.2.0

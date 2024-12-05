@@ -1,5 +1,7 @@
 # codicon
 
+**IMPORTANT: this package is discontinued.**
+
 __codicon__ is an easy to use package that exposes
 [vscode-icons](https://marketplace.visualstudio.com/items?itemName=vscode-icons-team.vscode-icons)
 for Flutter.
