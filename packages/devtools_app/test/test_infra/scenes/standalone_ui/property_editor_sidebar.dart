@@ -71,7 +71,7 @@ class _PropertyEditorState extends State<_PropertyEditorSidebar> {
                 ? MockEditorWidget(
                   editor: editor!,
                   clientLog: clientLog!,
-                  child: PropertyEditorSidebarPanel(clientDtd!),
+                  child: PropertyEditorPanel(clientDtd!),
                 )
                 : _DtdUriForm(
                   onSaved: _connectToDtd,
