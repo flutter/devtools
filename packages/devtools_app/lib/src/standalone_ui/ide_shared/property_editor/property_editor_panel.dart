@@ -17,19 +17,17 @@ import 'property_editor_controller.dart';
 import 'property_editor_view.dart';
 
 /// The side panel for the Property Editor.
-class PropertyEditorSidebarPanel extends StatefulWidget {
-  const PropertyEditorSidebarPanel(this.dtd, {super.key});
+class PropertyEditorPanel extends StatefulWidget {
+  const PropertyEditorPanel(this.dtd, {super.key});
 
   final DartToolingDaemon dtd;
 
   @override
-  State<PropertyEditorSidebarPanel> createState() =>
-      _PropertyEditorSidebarPanelState();
+  State<PropertyEditorPanel> createState() => _PropertyEditorPanelState();
 }
 
-class _PropertyEditorSidebarPanelState
-    extends State<PropertyEditorSidebarPanel> {
-  _PropertyEditorSidebarPanelState();
+class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
+  _PropertyEditorPanelState();
 
   Future<EditorClient>? _editor;
   PropertyEditorController? _propertyEditorController;
@@ -116,7 +114,7 @@ class _PropertyEditorConnectedPanelState
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [PropertyEditorSidebar(controller: widget.controller)],
+            children: [PropertyEditorView(controller: widget.controller)],
           ),
         ),
       ),

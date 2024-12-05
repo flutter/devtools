@@ -429,7 +429,7 @@ class EditableArgument with Serializable {
     required this.isNullable,
     required this.isRequired,
     required this.isEditable,
-    required this.options,
+    this.options,
     this.displayValue,
     this.errorText,
   });
@@ -444,9 +444,7 @@ class EditableArgument with Serializable {
         isNullable: (map[Field.isNullable] as bool?) ?? false,
         isRequired: (map[Field.isRequired] as bool?) ?? false,
         isEditable: (map[Field.isEditable] as bool?) ?? true,
-        options:
-            (map[Field.options] as List<Object?>? ?? <Object?>[])
-                .cast<String>(),
+        options: (map[Field.options] as List<Object?>?)?.cast<String>(),
         displayValue: map[Field.displayValue] as String?,
         errorText: map[Field.errorText] as String?,
       );
@@ -459,7 +457,7 @@ class EditableArgument with Serializable {
   final bool isNullable;
   final bool isRequired;
   final bool isEditable;
-  final List<String> options;
+  final List<String>? options;
   final String? displayValue;
   final String? errorText;
 

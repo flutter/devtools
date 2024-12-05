@@ -10,8 +10,8 @@ import '../../../service/editor/api_classes.dart';
 import '../../../shared/primitives/utils.dart';
 import 'property_editor_controller.dart';
 
-class PropertyEditorSidebar extends StatelessWidget {
-  const PropertyEditorSidebar({required this.controller, super.key});
+class PropertyEditorView extends StatelessWidget {
+  const PropertyEditorView({required this.controller, super.key});
 
   final PropertyEditorController controller;
 
@@ -136,7 +136,9 @@ class _PropertyInput extends StatelessWidget {
       case 'enum':
       case 'bool':
         final options =
-            property.type == 'bool' ? ['true', 'false'] : property.options;
+            property.type == 'bool'
+                ? ['true', 'false']
+                : (property.options ?? <String>[]);
         options.add(property.valueDisplay);
         if (property.isNullable) {
           options.add('null');
