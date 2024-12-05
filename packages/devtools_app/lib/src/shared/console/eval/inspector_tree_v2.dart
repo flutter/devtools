@@ -40,9 +40,9 @@ class InspectorTreeNode {
     InspectorTreeNode? parent,
     bool expandChildren = true,
     this.whenDirty,
-  })  : _children = <InspectorTreeNode>[],
-        _parent = parent,
-        _isExpanded = expandChildren;
+  }) : _children = <InspectorTreeNode>[],
+       _parent = parent,
+       _isExpanded = expandChildren;
 
   /// Callback that is called when the node is marked as dirty.
   void Function(InspectorTreeNode node)? whenDirty;
@@ -184,10 +184,11 @@ class InspectorTreeRow with SearchableDataMixin {
 }
 
 /// Callback issued every time a node is added to the tree.
-typedef NodeAddedCallback = void Function(
-  InspectorTreeNode node,
-  RemoteDiagnosticsNode diagnosticsNode,
-);
+typedef NodeAddedCallback =
+    void Function(
+      InspectorTreeNode node,
+      RemoteDiagnosticsNode diagnosticsNode,
+    );
 
 class InspectorTreeConfig {
   InspectorTreeConfig({

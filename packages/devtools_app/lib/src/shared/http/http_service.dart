@@ -13,16 +13,14 @@ import '../primitives/utils.dart';
 
 /// Enables or disables HTTP logging for all isolates.
 Future<void> toggleHttpRequestLogging(bool state) async {
-  await serviceConnection.serviceManager.service!
-      .forEachIsolate((isolate) async {
+  await serviceConnection.serviceManager.service!.forEachIsolate((
+    isolate,
+  ) async {
     final httpLoggingAvailable = await serviceConnection.serviceManager.service!
         .isHttpTimelineLoggingAvailableWrapper(isolate.id!);
     if (httpLoggingAvailable) {
       final future = serviceConnection.serviceManager.service!
-          .httpEnableTimelineLoggingWrapper(
-        isolate.id!,
-        state,
-      );
+          .httpEnableTimelineLoggingWrapper(isolate.id!, state);
       // The above call won't complete immediately if the isolate is paused, so
       // give up waiting after 500ms. However, the call will complete eventually
       // if the isolate is eventually resumed.
@@ -35,8 +33,7 @@ Future<void> toggleHttpRequestLogging(bool state) async {
 
 bool get httpLoggingEnabled => httpLoggingState.value.enabled;
 
-ValueListenable<ServiceExtensionState> get httpLoggingState =>
-    serviceConnection.serviceManager.serviceExtensionManager
-        .getServiceExtensionState(
-      extensions.httpEnableTimelineLogging.extension,
-    );
+ValueListenable<ServiceExtensionState> get httpLoggingState => serviceConnection
+    .serviceManager
+    .serviceExtensionManager
+    .getServiceExtensionState(extensions.httpEnableTimelineLogging.extension);

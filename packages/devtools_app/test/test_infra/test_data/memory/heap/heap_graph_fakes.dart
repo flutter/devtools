@@ -24,14 +24,16 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
 
   @override
   // ignore: avoid-explicit-type-declaration, required to override base class.
-  final List<HeapSnapshotClass> classes = <HeapSnapshotClass>[
+  final List<HeapSnapshotClass>
+  classes = <HeapSnapshotClass>[
     _FakeHeapSnapshotClass(),
     _FakeHeapSnapshotClass.weak(),
   ];
 
   @override
   // ignore: avoid-explicit-type-declaration, required to override base class.
-  final List<FakeSnapshotObject> objects = <FakeSnapshotObject>[
+  final List<FakeSnapshotObject>
+  objects = <FakeSnapshotObject>[
     _sentinelObject,
     FakeSnapshotObject(shallowSize: 1), // root
   ];
@@ -50,10 +52,7 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
   /// Creates sentinel at index 0 and sets one byte objects itemized in [refsByIndex] with given references.
   ///
   /// Throws if indexes are missed.
-  void setObjects(
-    RefsByIndex refsByIndex, {
-    ClassByIndex? classes,
-  }) {
+  void setObjects(RefsByIndex refsByIndex, {ClassByIndex? classes}) {
     assert(!refsByIndex.containsKey(0), '0 is reserved for sentinel.');
     objects.clear();
     objects.add(_sentinelObject);
@@ -66,8 +65,9 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
   int addChain(List<String> path) {
     var referrer = heapRootIndex;
     for (final name in path) {
-      final classId =
-          maybeAddClass(HeapClassName(library: _library, className: name));
+      final classId = maybeAddClass(
+        HeapClassName(library: _library, className: name),
+      );
       final index = add();
       objects[index].classId = classId!;
       objects[referrer]._references.add(index);
@@ -82,8 +82,9 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
   /// The classes has empty library name.
   void addClassInstances(Map<String, int> classToInstanceCount) {
     for (final entry in classToInstanceCount.entries) {
-      final classId =
-          maybeAddClass(HeapClassName(className: entry.key, library: null));
+      final classId = maybeAddClass(
+        HeapClassName(className: entry.key, library: null),
+      );
       for (var i = 0; i < entry.value; i++) {
         objects.add(
           FakeSnapshotObject(
@@ -158,9 +159,9 @@ class _FakeHeapSnapshotClass extends Fake implements HeapSnapshotClass {
   });
 
   _FakeHeapSnapshotClass.weak()
-      : name = '_WeakProperty',
-        libraryName = 'dart:core',
-        classId = _weakClassId {
+    : name = '_WeakProperty',
+      libraryName = 'dart:core',
+      classId = _weakClassId {
     assert(HeapClassName.fromHeapSnapshotClass(this).isWeak);
   }
 
@@ -183,8 +184,8 @@ class FakeSnapshotObject extends Fake implements HeapSnapshotObject {
     List<int>? references,
     this.shallowSize = 0,
     int? classId,
-  })  : classId = classId ?? _defaultClassId,
-        _references = references ?? [];
+  }) : classId = classId ?? _defaultClassId,
+       _references = references ?? [];
 
   @override
   int classId;

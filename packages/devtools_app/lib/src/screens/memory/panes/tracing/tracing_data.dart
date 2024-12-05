@@ -16,19 +16,14 @@ import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/cpu_profile_transformer.dart';
 
 @visibleForTesting
-enum TracedClassJson {
-  clazz,
-  instances,
-  allocations,
-}
+enum TracedClassJson { clazz, instances, allocations }
 
 /// A representation of a class and it's allocation tracing state.
 class TracedClass with PinnableListEntry, Serializable {
-  TracedClass({
-    required this.clazz,
-  })  : traceAllocations = false,
-        instances = 0,
-        name = HeapClassName.fromClassRef(clazz);
+  TracedClass({required this.clazz})
+    : traceAllocations = false,
+      instances = 0,
+      name = HeapClassName.fromClassRef(clazz);
 
   TracedClass._({
     required this.clazz,
@@ -39,8 +34,9 @@ class TracedClass with PinnableListEntry, Serializable {
   factory TracedClass.fromJson(Map<String, dynamic> json) {
     return TracedClass._(
       instances: json[TracedClassJson.instances.name] as int,
-      clazz: ClassRefEncodeDecode.instance
-          .decode(json[TracedClassJson.clazz.name]),
+      clazz: ClassRefEncodeDecode.instance.decode(
+        json[TracedClassJson.clazz.name],
+      ),
       traceAllocations: json[TracedClassJson.allocations.name] as bool,
     );
   }
@@ -92,11 +88,7 @@ class TracedClass with PinnableListEntry, Serializable {
 
 // TODO(kenz): include the selected class in the toJson and fromJson methods.
 @visibleForTesting
-enum TracingIsolateStateJson {
-  isolate,
-  classes,
-  profiles;
-}
+enum TracingIsolateStateJson { isolate, classes, profiles }
 
 /// Contains allocation tracing state for a single isolate.
 ///
@@ -118,17 +110,19 @@ class TracingIsolateState with Serializable {
 
   factory TracingIsolateState.fromJson(Map<String, dynamic> json) {
     return TracingIsolateState(
-      isolate: IsolateRefEncodeDecode.instance
-          .decode(json[TracingIsolateStateJson.isolate.name]),
+      isolate: IsolateRefEncodeDecode.instance.decode(
+        json[TracingIsolateStateJson.isolate.name],
+      ),
       profiles: (json[TracingIsolateStateJson.profiles.name] as Map).map(
         (key, value) => MapEntry(
           key,
           deserialize<CpuProfileData>(value, CpuProfileData.fromJson),
         ),
       ),
-      classes: (json[TracingIsolateStateJson.classes.name] as List)
-          .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
-          .toList(),
+      classes:
+          (json[TracingIsolateStateJson.classes.name] as List)
+              .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
+              .toList(),
     );
   }
 
@@ -207,9 +201,7 @@ class TracingIsolateState with Serializable {
         (newFilter.caseInsensitiveContains(currentFilter) && !force
                 ? _filteredClassList.value
                 : classes)
-            .where(
-              (e) => e.clazz.name!.caseInsensitiveContains(newFilter),
-            )
+            .where((e) => e.clazz.name!.caseInsensitiveContains(newFilter))
             .map((e) => classesById[e.clazz.id!]!)
             .toList();
 
@@ -254,9 +246,7 @@ class TracingIsolateState with Serializable {
     // Only update if the tracing state has changed for `clazz`.
     if (tracedClass.traceAllocations != enabled) {
       await service.setTraceClassAllocation(isolate.id!, clazz.id!, enabled);
-      final update = tracedClass.copyWith(
-        traceAllocations: enabled,
-      );
+      final update = tracedClass.copyWith(traceAllocations: enabled);
       _updateClassState(tracedClass, update);
     }
   }
@@ -280,8 +270,13 @@ class TracingIsolateState with Serializable {
       );
     }
     final service = serviceConnection.serviceManager.service!;
-    final isolateId = serviceConnection
-        .serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final isolateId =
+        serviceConnection
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value!
+            .id!;
     final clazz = tracedClass.clazz;
 
     // Note: we need to provide `timeExtentMicros` to `getAllocationTraces`,

@@ -168,7 +168,7 @@ Future<void> delayToReleaseUiThread({int micros = 0}) async {
 /// Use in long calculations, to release UI thread after each N steps.
 class UiReleaser {
   UiReleaser({this.stepsBetweenDelays = 100000, this.delayLength = 0})
-      : assert(stepsBetweenDelays > 0);
+    : assert(stepsBetweenDelays > 0);
 
   final int stepsBetweenDelays;
   final int delayLength;
@@ -365,7 +365,7 @@ typedef RateLimiterCallback = Future<void> Function();
 /// specified rate and that at most one async [callback] is running at a time.
 class RateLimiter {
   RateLimiter(double requestsPerSecond, this.callback)
-      : delayBetweenRequests = 1000 ~/ requestsPerSecond;
+    : delayBetweenRequests = 1000 ~/ requestsPerSecond;
 
   final RateLimiterCallback callback;
   Completer<void>? _pendingRequest;
@@ -446,10 +446,7 @@ class RateLimiter {
 /// remaining time units supported by [Duration] - (seconds, minutes, etc.). If
 /// you add a unit of time to this enum, modify the toString() method in
 /// [TimeRange] to handle the new case.
-enum TimeUnit {
-  microseconds,
-  milliseconds,
-}
+enum TimeUnit { microseconds, milliseconds }
 
 class TimeRange {
   TimeRange({this.singleAssignment = true});
@@ -675,10 +672,7 @@ class Range {
   int get hashCode => Object.hash(begin, end);
 }
 
-enum SortDirection {
-  ascending,
-  descending,
-}
+enum SortDirection { ascending, descending }
 
 /// A Range-like class that works for inclusive ranges of lines in source code.
 class LineRange {
@@ -827,17 +821,21 @@ List<TextSpan> processAnsiTerminalCodes(String? input, TextStyle defaultStyle) {
       .map(
         (entry) => TextSpan(
           text: entry.text,
-          style: entry.style.isEmpty
-              ? defaultStyle
-              : TextStyle(
-                  color: entry.fgColor != null
-                      ? colorFromAnsi(entry.fgColor!)
-                      : null,
-                  backgroundColor: entry.bgColor != null
-                      ? colorFromAnsi(entry.bgColor!)
-                      : null,
-                  fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
-                ),
+          style:
+              entry.style.isEmpty
+                  ? defaultStyle
+                  : TextStyle(
+                    color:
+                        entry.fgColor != null
+                            ? colorFromAnsi(entry.fgColor!)
+                            : null,
+                    backgroundColor:
+                        entry.bgColor != null
+                            ? colorFromAnsi(entry.bgColor!)
+                            : null,
+                    fontWeight:
+                        entry.bold ? FontWeight.bold : FontWeight.normal,
+                  ),
         ),
       )
       .toList();
@@ -869,17 +867,17 @@ extension LogicalKeySetExtension on LogicalKeySet {
   String describeKeys({bool isMacOS = false}) {
     // Put the modifiers first. If it has a synonym, then it's something like
     // shiftLeft, altRight, etc.
-    final sortedKeys = keys.toList()
-      ..sort((a, b) {
-        final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
-        final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
-        if (aIsModifier && !bIsModifier) {
-          return -1;
-        } else if (bIsModifier && !aIsModifier) {
-          return 1;
-        }
-        return a.keyLabel.compareTo(b.keyLabel);
-      });
+    final sortedKeys =
+        keys.toList()..sort((a, b) {
+          final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
+          final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
+          if (aIsModifier && !bIsModifier) {
+            return -1;
+          } else if (bIsModifier && !aIsModifier) {
+            return 1;
+          }
+          return a.keyLabel.compareTo(b.keyLabel);
+        });
 
     return sortedKeys.map((key) {
       if (_modifiers.contains(key)) {
@@ -939,8 +937,10 @@ extension StringExtension on String {
       return contains(pattern);
     } else if (pattern is String) {
       final lowerCase = _lowercaseLookup.putIfAbsent(this, () => toLowerCase());
-      final strLowerCase =
-          _lowercaseLookup.putIfAbsent(pattern, () => pattern.toLowerCase());
+      final strLowerCase = _lowercaseLookup.putIfAbsent(
+        pattern,
+        () => pattern.toLowerCase(),
+      );
       return lowerCase.contains(strLowerCase);
     }
     throw Exception(
@@ -1052,10 +1052,7 @@ double safePositiveDouble(double value) {
 /// @param isUTC - if true for testing, the UTC locale is used (instead of
 /// the user's locale). Tests will then pass when run in any timezone. All
 /// formatted timestamps are displayed using the UTC locale.
-String prettyTimestamp(
-  int? timestamp, {
-  bool isUtc = false,
-}) {
+String prettyTimestamp(int? timestamp, {bool isUtc = false}) {
   if (timestamp == null) return '';
   final timestampDT = DateTime.fromMillisecondsSinceEpoch(
     timestamp,

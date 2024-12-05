@@ -9,11 +9,11 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tab.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
@@ -68,7 +68,8 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       final hasOfflineData = offlineData != null;
       showFrameAnalysis =
           showFrameAnalysis && hasOfflineData && offlineData.frames.isNotEmpty;
-      showRebuildStats = showRebuildStats &&
+      showRebuildStats =
+          showRebuildStats &&
           hasOfflineData &&
           offlineData.rebuildCountModel != null;
     }
@@ -77,9 +78,10 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       showFrameAnalysis: showFrameAnalysis,
       showRebuildStats: showRebuildStats,
     );
-    final tabs = tabsAndControllers
-        .map((t) => (tab: t.tab, tabView: t.tabView))
-        .toList();
+    final tabs =
+        tabsAndControllers
+            .map((t) => (tab: t.tab, tabView: t.tabView))
+            .toList();
     final featureControllers =
         tabsAndControllers.map((t) => t.featureController).toList();
 
@@ -110,11 +112,13 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   }
 
   List<
-      ({
-        DevToolsTab tab,
-        Widget tabView,
-        PerformanceFeatureController? featureController,
-      })> _generateTabs({
+    ({
+      DevToolsTab tab,
+      Widget tabView,
+      PerformanceFeatureController? featureController,
+    })
+  >
+  _generateTabs({
     required bool showFrameAnalysis,
     required bool showRebuildStats,
   }) {
@@ -126,18 +130,19 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         (
           tab: _buildTab(tabName: 'Frame Analysis'),
           tabView: KeepAliveWrapper(
-            child: _selectedFlutterFrame != null
-                ? FlutterFrameAnalysisView(
-                    frame: _selectedFlutterFrame!,
-                    enhanceTracingController:
-                        controller.enhanceTracingController,
-                    rebuildCountModel: controller.rebuildCountModel,
-                    displayRefreshRateNotifier:
-                        controller.flutterFramesController.displayRefreshRate,
-                  )
-                : const CenteredMessage(
-                    message: 'Select a frame above to view analysis data.',
-                  ),
+            child:
+                _selectedFlutterFrame != null
+                    ? FlutterFrameAnalysisView(
+                      frame: _selectedFlutterFrame!,
+                      enhanceTracingController:
+                          controller.enhanceTracingController,
+                      rebuildCountModel: controller.rebuildCountModel,
+                      displayRefreshRateNotifier:
+                          controller.flutterFramesController.displayRefreshRate,
+                    )
+                    : const CenteredMessage(
+                      message: 'Select a frame above to view analysis data.',
+                    ),
           ),
           featureController: null,
         ),

@@ -43,8 +43,9 @@ class FakeServiceConnectionManager extends Fake
       when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
       );
-      when(errorBadgeManager.errorCountNotifier(screenId))
-          .thenReturn(ValueNotifier<int>(0));
+      when(
+        errorBadgeManager.errorCountNotifier(screenId),
+      ).thenReturn(ValueNotifier<int>(0));
     }
   }
 
@@ -75,18 +76,11 @@ class FakeServiceConnectionManager extends Fake
   Future<double> get queryDisplayRefreshRate => Future.value(60.0);
 
   @override
-  Future<Response> get rasterCacheMetrics => Future.value(
-        Response.parse({
-          'layerBytes': 0,
-          'pictureBytes': 0,
-        })!,
-      );
+  Future<Response> get rasterCacheMetrics =>
+      Future.value(Response.parse({'layerBytes': 0, 'pictureBytes': 0})!);
 
   @override
-  Future<void> sendDwdsEvent({
-    required String screen,
-    required String action,
-  }) {
+  Future<void> sendDwdsEvent({required String screen, required String action}) {
     return Future.value();
   }
 }
@@ -103,9 +97,9 @@ class FakeServiceManager extends Fake
     Map<String, Response>? serviceExtensionResponses,
     String? rootLibrary,
     bool hasConnection = true,
-  })  : serviceExtensionResponses =
-            serviceExtensionResponses ?? _defaultServiceExtensionResponses,
-        _isolateManager = FakeIsolateManager(rootLibrary: rootLibrary) {
+  }) : serviceExtensionResponses =
+           serviceExtensionResponses ?? _defaultServiceExtensionResponses,
+       _isolateManager = FakeIsolateManager(rootLibrary: rootLibrary) {
     this.service = service ?? createFakeService();
     serviceUri = this.service!.wsUri;
     mockConnectedApp(
@@ -131,20 +125,19 @@ class FakeServiceManager extends Fake
     Map<String, String>? resolvedUriMap,
     ClassList? classList,
     List<({String flagName, String value})>? vmFlags,
-  }) =>
-      FakeVmServiceWrapper(
-        _flagManager,
-        timelineData,
-        socketProfile,
-        httpProfile,
-        memoryData,
-        allocationData,
-        cpuSamples,
-        allocationSamples,
-        resolvedUriMap,
-        classList,
-        vmFlags,
-      );
+  }) => FakeVmServiceWrapper(
+    _flagManager,
+    timelineData,
+    socketProfile,
+    httpProfile,
+    memoryData,
+    allocationData,
+    cpuSamples,
+    allocationSamples,
+    resolvedUriMap,
+    classList,
+    vmFlags,
+  );
 
   final List<String> availableServices;
 
@@ -187,8 +180,8 @@ class FakeServiceManager extends Fake
 
   @override
   // ignore: avoid-explicit-type-declaration, required to override base class.
-  final FakeServiceExtensionManager serviceExtensionManager =
-      FakeServiceExtensionManager();
+  final FakeServiceExtensionManager
+  serviceExtensionManager = FakeServiceExtensionManager();
 
   @override
   ConnectedApp? connectedApp = MockConnectedApp();
@@ -245,12 +238,15 @@ class FakeServiceManager extends Fake
   @override
   ValueListenable<ConnectedState> get connectedState => _connectedState;
 
-  final _connectedState =
-      ValueNotifier<ConnectedState>(const ConnectedState(false));
+  final _connectedState = ValueNotifier<ConnectedState>(
+    const ConnectedState(false),
+  );
 
   void setConnectedState(bool value, {bool manual = false}) {
-    _connectedState.value =
-        ConnectedState(value, userInitiatedConnectionState: manual);
+    _connectedState.value = ConnectedState(
+      value,
+      userInitiatedConnectionState: manual,
+    );
   }
 
   @override

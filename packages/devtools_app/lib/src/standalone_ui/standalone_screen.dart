@@ -4,9 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import 'api/impl/dart_tooling_api.dart';
+import '../shared/ui/common_widgets.dart';
 import 'vs_code/flutter_panel.dart';
 
 /// "Screens" that are intended for standalone use only, likely for embedding
@@ -16,24 +15,32 @@ import 'vs_code/flutter_panel.dart';
 /// meaning that this screen will not be part of DevTools' normal navigation.
 /// The only way to access a standalone screen is directly from the url.
 enum StandaloneScreenType {
+  // TODO(elliette): Add property editor as a standalone screen, see:
+  // https://github.com/flutter/devtools/issues/8546
   editorSidebar,
-  vsCodeFlutterPanel; // Legacy postMessage version.
+  vsCodeFlutterPanel; // Legacy postMessage version, shows an upgrade message.
 
   Widget get screen {
     return switch (this) {
-      StandaloneScreenType.vsCodeFlutterPanel =>
-        VsCodePostMessageSidebarPanel(PostMessageToolApiImpl.postMessage()),
-      StandaloneScreenType.editorSidebar => ValueListenableBuilder(
-          // TODO(dantup): Add a timeout here so if dtdManager.connection
-          //  doesn't complete after some period we can give some kind of
-          //  useful message.
-          valueListenable: dtdManager.connection,
-          builder: (context, data, _) {
-            return data == null
-                ? const CenteredCircularProgressIndicator()
-                : DtdEditorSidebarPanel(data);
-          },
+      StandaloneScreenType.vsCodeFlutterPanel => const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: CenteredMessage(
+          message:
+              'The Flutter sidebar for this SDK requires v3.96 or '
+              'newer of the Dart VS Code extension',
         ),
+      ),
+      StandaloneScreenType.editorSidebar => ValueListenableBuilder(
+        // TODO(dantup): Add a timeout here so if dtdManager.connection
+        //  doesn't complete after some period we can give some kind of
+        //  useful message.
+        valueListenable: dtdManager.connection,
+        builder: (context, data, _) {
+          return data == null
+              ? const CenteredCircularProgressIndicator()
+              : EditorSidebarPanel(data);
+        },
+      ),
     };
   }
 }

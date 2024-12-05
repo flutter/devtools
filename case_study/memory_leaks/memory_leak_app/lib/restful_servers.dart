@@ -13,9 +13,9 @@ abstract class RestfulAPI {
 
   String get activeFriendlyName;
 
-  dynamic findData(dynamic data);
+  Object? findData(Object? data);
 
-  String display(dynamic data, int index);
+  String display(Object? data, int index);
 }
 
 /// StarWars information server.
@@ -25,20 +25,20 @@ class StarWars extends RestfulAPI {
     _activeFriendlyName = name;
   }
 
-  static const String starWarsFilms = 'StarWars Films';
-  static const String starWarsPeople = 'StarWars People';
-  static const String starWarsPlanets = 'StarWars Planets';
-  static const String starWarsSpecies = 'StarWars Species';
-  static const String starWarsStarships = 'StarWars Starships';
-  static const String starWarsVehicles = 'StarWars Vehicles';
+  static const starWarsFilms = 'StarWars Films';
+  static const starWarsPeople = 'StarWars People';
+  static const starWarsPlanets = 'StarWars Planets';
+  static const starWarsSpecies = 'StarWars Species';
+  static const starWarsStarships = 'StarWars Starships';
+  static const starWarsVehicles = 'StarWars Vehicles';
 
-  static const Map<String, String> _friendlyNames = {
-    '$starWarsFilms': 'https://swapi.co/api/films',
-    '$starWarsPeople': 'https://swapi.co/api/people',
-    '$starWarsPlanets': 'https://swapi.co/api/planets',
-    '$starWarsSpecies': 'https://swapi.co/api/species',
-    '$starWarsStarships': 'https://swapi.co/api/starships',
-    '$starWarsVehicles': 'https://swapi.co/api/vehicles',
+  static const _friendlyNames = {
+    starWarsFilms: 'https://swapi.co/api/films',
+    starWarsPeople: 'https://swapi.co/api/people',
+    starWarsPlanets: 'https://swapi.co/api/planets',
+    starWarsSpecies: 'https://swapi.co/api/species',
+    starWarsStarships: 'https://swapi.co/api/starships',
+    starWarsVehicles: 'https://swapi.co/api/vehicles',
   };
 
   late final String _activeFriendlyName;
@@ -53,14 +53,16 @@ class StarWars extends RestfulAPI {
   String uri() => _defaultUri;
 
   @override
-  dynamic findData(dynamic data) => data['results'];
+  Object? findData(Object? data) => (data as Map)['results'];
 
   @override
-  String display(dynamic data, int index) {
+  String display(Object? data, int index) {
     // data from film Restful URI has slightly different format
     // title instead of name.
     final isFilm = _defaultUri == _friendlyNames[starWarsFilms];
-    return data == null ? '' : data[index][isFilm ? 'title' : 'name'];
+    return data == null
+        ? ''
+        : ((data as Map)[index] as Map)[isFilm ? 'title' : 'name'];
   }
 }
 
@@ -70,7 +72,7 @@ class CitiBikesNYC extends RestfulAPI {
   static const citiBikesUri =
       'https://feeds.citibikenyc.com/stations/stations.json';
 
-  static const String friendlyName = 'NYC Bike Sharing';
+  static const friendlyName = 'NYC Bike Sharing';
 
   @override
   String uri() => citiBikesUri;
@@ -79,11 +81,11 @@ class CitiBikesNYC extends RestfulAPI {
   String get activeFriendlyName => friendlyName;
 
   @override
-  dynamic findData(dynamic data) => data['stationBeanList'];
+  Object? findData(Object? data) => (data as Map)['stationBeanList'];
 
   @override
-  String display(dynamic data, int index) =>
-      data == null ? '' : data[index]['stationName'];
+  String display(Object? data, int index) =>
+      data == null ? '' : ((data as List)[index] as Map)['stationName'];
 }
 
 class CityInformation {
@@ -108,7 +110,7 @@ class CityInformation {
 ///   Subscribe for free OpenWeatherMap then create an appid using:
 ///       https://home.openweathermap.org/api_keys
 class OpenWeatherMapAPI extends RestfulAPI {
-  static const String friendlyName = 'Weather';
+  static const friendlyName = 'Weather';
 
   static const _baseUrl = 'http://api.openweathermap.org/data/2.5/group?id=';
   static const _unitsOption = '&units=imperial';
@@ -145,9 +147,9 @@ class OpenWeatherMapAPI extends RestfulAPI {
   CityInformation? secondCity;
 
   String _cityIdsList({int initialStart = -1, int count = 20}) {
-    final StringBuffer buff = StringBuffer();
+    final buff = StringBuffer();
 
-    final int start = initialStart == -1 ? randomSeed() : initialStart;
+    final start = initialStart == -1 ? randomSeed() : initialStart;
     firstCity = CityInformation(_cityIds.keys.toList()[start]);
 
     secondCity = firstCity;
@@ -174,18 +176,19 @@ class OpenWeatherMapAPI extends RestfulAPI {
   String get activeFriendlyName => friendlyName;
 
   @override
-  dynamic findData(dynamic data) => data['list']; // weather group
+  Object? findData(Object? data) => (data as Map)['list']; // weather group
 
-  static String cityName(dynamic data, int index) => '${data[index]['name']}';
+  static String cityName(Object? data, int index) =>
+      '${((data as List)[index] as Map)['name']}';
 
-  static String temperature(dynamic data, int index) =>
-      '${data[index]['main']['temp']}';
+  static String temperature(Object? data, int index) =>
+      '${(((data as List)[index] as Map)['main'] as Map)['temp']}';
 
-  static String weather(dynamic data, int index) =>
-      '${data[index]['weather'][0]['main']}';
+  static String weather(Object? data, int index) =>
+      '${((((data as Map)[index] as Map)['weather'] as List)[0] as Map)['main']}';
 
   @override
-  String display(dynamic data, int index) =>
+  String display(Object? data, int index) =>
       '${OpenWeatherMapAPI.cityName(data, index)} '
       '${OpenWeatherMapAPI.temperature(data, index)} '
       '${OpenWeatherMapAPI.weather(data, index)}';

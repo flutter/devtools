@@ -11,10 +11,10 @@ import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/file_import.dart';
+import '../../../../shared/framework/screen.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/screen.dart';
+import '../../../../shared/ui/common_widgets.dart';
+import '../../../../shared/ui/file_import.dart';
 import '../../../../shared/ui/utils.dart';
 import '../../panes/timeline_events/timeline_events_controller.dart';
 import '../../performance_controller.dart';
@@ -89,7 +89,9 @@ class _PrimaryControls extends StatelessWidget {
     return Row(
       children: [
         if (serviceConnection
-            .serviceManager.connectedApp!.isFlutterAppNow!) ...[
+            .serviceManager
+            .connectedApp!
+            .isFlutterAppNow!) ...[
           VisibilityButton(
             show: preferences.performance.showFlutterFramesChart,
             gaScreen: gac.performance,
@@ -123,9 +125,7 @@ class _PrimaryControls extends StatelessWidget {
 }
 
 class _SecondaryPerformanceControls extends StatelessWidget {
-  const _SecondaryPerformanceControls({
-    required this.controller,
-  });
+  const _SecondaryPerformanceControls({required this.controller});
 
   final PerformanceController controller;
 
@@ -140,9 +140,7 @@ class _SecondaryPerformanceControls extends StatelessWidget {
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
                 PerformanceControls.minScreenWidthForTextBeforeScaling,
-            extensions: [
-              extensions.performanceOverlay,
-            ],
+            extensions: [extensions.performanceOverlay],
           ),
           const SizedBox(width: denseSpacing),
           EnhanceTracingButton(controller.enhanceTracingController),

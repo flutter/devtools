@@ -37,25 +37,25 @@ class NetworkRequestInspector extends StatelessWidget {
     return ValueListenableBuilder<NetworkRequest?>(
       valueListenable: controller.selectedRequest,
       builder: (context, data, _) {
-        return RoundedOutlinedBorder(
-          child: (data == null)
-              ? Center(
-                  child: Text(
-                    'No request selected',
-                    style: Theme.of(context).regularTextStyle,
-                  ),
-                )
-              : ListenableBuilder(
-                  listenable: data,
-                  builder: (context, _) {
-                    return AnalyticsTabbedView(
-                      analyticsSessionIdentifier: data.id,
-                      tabs: _generateTabs(data),
-                      gaScreen: gac.network,
-                    );
-                  },
+        return data == null
+            ? RoundedOutlinedBorder(
+              child: Center(
+                child: Text(
+                  'No request selected',
+                  style: Theme.of(context).regularTextStyle,
                 ),
-        );
+              ),
+            )
+            : ListenableBuilder(
+              listenable: data,
+              builder: (context, _) {
+                return AnalyticsTabbedView(
+                  analyticsSessionIdentifier: data.id,
+                  tabs: _generateTabs(data),
+                  gaScreen: gac.network,
+                );
+              },
+            );
       },
     );
   }
@@ -64,58 +64,64 @@ class NetworkRequestInspector extends StatelessWidget {
     NetworkRequest data,
   ) =>
       [
-        (
-          tab: _buildTab(tabName: NetworkRequestInspector._overviewTabTitle),
-          tabView: NetworkRequestOverviewView(data),
-        ),
-        if (data is DartIOHttpRequestData) ...[
-          (
-            tab: _buildTab(tabName: NetworkRequestInspector._headersTabTitle),
-            tabView: HttpRequestHeadersView(data),
-          ),
-          if (data.requestBody != null)
             (
               tab: _buildTab(
-                tabName: NetworkRequestInspector._requestTabTitle,
-                trailing: HttpViewTrailingCopyButton(
-                  data,
-                  (data) => data.requestBody,
+                tabName: NetworkRequestInspector._overviewTabTitle,
+              ),
+              tabView: NetworkRequestOverviewView(data),
+            ),
+            if (data is DartIOHttpRequestData) ...[
+              (
+                tab: _buildTab(
+                  tabName: NetworkRequestInspector._headersTabTitle,
                 ),
+                tabView: HttpRequestHeadersView(data),
               ),
-              tabView: HttpRequestView(data),
-            ),
-          if (data.responseBody != null)
-            (
-              tab: _buildTab(
-                tabName: NetworkRequestInspector._responseTabTitle,
-                trailing: Row(
-                  children: [
-                    HttpResponseTrailingDropDown(
+              if (data.requestBody != null)
+                (
+                  tab: _buildTab(
+                    tabName: NetworkRequestInspector._requestTabTitle,
+                    trailing: HttpViewTrailingCopyButton(
                       data,
-                      currentResponseViewType:
-                          controller.currentResponseViewType,
-                      onChanged: (value) =>
-                          controller.setResponseViewType = value,
+                      (data) => data.requestBody,
                     ),
-                    HttpViewTrailingCopyButton(
-                      data,
-                      (data) => data.responseBody,
-                    ),
-                  ],
+                  ),
+                  tabView: HttpRequestView(data),
                 ),
-              ),
-              tabView: HttpResponseView(
-                data,
-                currentResponseViewType: controller.currentResponseViewType,
-              ),
-            ),
-          if (data.hasCookies)
-            (
-              tab: _buildTab(tabName: NetworkRequestInspector._cookiesTabTitle),
-              tabView: HttpRequestCookiesView(data),
-            ),
-        ],
-      ]
+              if (data.responseBody != null)
+                (
+                  tab: _buildTab(
+                    tabName: NetworkRequestInspector._responseTabTitle,
+                    trailing: Row(
+                      children: [
+                        HttpResponseTrailingDropDown(
+                          data,
+                          currentResponseViewType:
+                              controller.currentResponseViewType,
+                          onChanged:
+                              (value) => controller.setResponseViewType = value,
+                        ),
+                        HttpViewTrailingCopyButton(
+                          data,
+                          (data) => data.responseBody,
+                        ),
+                      ],
+                    ),
+                  ),
+                  tabView: HttpResponseView(
+                    data,
+                    currentResponseViewType: controller.currentResponseViewType,
+                  ),
+                ),
+              if (data.hasCookies)
+                (
+                  tab: _buildTab(
+                    tabName: NetworkRequestInspector._cookiesTabTitle,
+                  ),
+                  tabView: HttpRequestCookiesView(data),
+                ),
+            ],
+          ]
           .map(
             (t) => (
               tab: t.tab,

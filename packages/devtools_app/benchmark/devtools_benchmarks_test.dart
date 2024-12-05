@@ -8,28 +8,17 @@
 import 'dart:convert' show JsonEncoder;
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:test/test.dart';
+import 'package:web_benchmarks/metrics.dart';
 import 'package:web_benchmarks/server.dart';
 
 import 'test_infra/common.dart';
 import 'test_infra/project_root_directory.dart';
 
-List<String> metricList({required bool useWasm}) => [
-      // The skwasm renderer doesn't have preroll or apply frame steps in its
-      // rendering.
-      if (!useWasm) ...[
-        'preroll_frame',
-        'apply_frame',
-      ],
-      'drawFrameDuration',
-    ];
+const _isWasmScore = 'isWasm';
 
-final valueList = <String>[
-  'average',
-  'outlierAverage',
-  'outlierRatio',
-  'noise',
-];
+const _extraScores = [totalUiFrameAverage, _isWasmScore];
 
 /// Tests that the DevTools web benchmarks are run and reported correctly.
 void main() {
@@ -40,10 +29,6 @@ void main() {
         await _runBenchmarks(useWasm: useWasm);
       },
       timeout: const Timeout(Duration(minutes: 10)),
-      // TODO(https://github.com/dart-lang/sdk/issues/56664): unskip the wasm
-      // benchmarks once this issue is resolved and we can bump DevTools to a
-      // version of Flutter that includes the fix.
-      skip: useWasm,
     );
   }
 
@@ -54,32 +39,38 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   stdout.writeln('Starting web benchmark tests ...');
   final taskResult = await serveWebBenchmark(
     benchmarkAppDirectory: projectRootDirectory(),
-    entryPoint: 'benchmark/test_infra/client.dart',
-    compilationOptions: useWasm
-        ? const CompilationOptions.wasm()
-        : const CompilationOptions.js(),
+    entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
+    compilationOptions:
+        useWasm
+            ? const CompilationOptions.wasm()
+            : const CompilationOptions.js(),
     treeShakeIcons: false,
-    initialPage: benchmarkInitialPage,
+    benchmarkPath: benchmarkPath(useWasm: useWasm),
   );
   stdout.writeln('Web benchmark tests finished.');
 
-  expect(
-    taskResult.scores.keys,
-    hasLength(DevToolsBenchmark.values.length),
-  );
+  expect(taskResult.scores.keys, hasLength(DevToolsBenchmark.values.length));
 
   for (final benchmarkName in DevToolsBenchmark.values.map((e) => e.id)) {
-    final expectedMetrics = metricList(useWasm: useWasm);
+    final expectedMetrics =
+        expectedBenchmarkMetrics(
+          useWasm: useWasm,
+        ).map((BenchmarkMetric metric) => metric.label).toList();
+    const expectedComputations = BenchmarkMetricComputation.values;
+    final scores = taskResult.scores[benchmarkName] ?? [];
     expect(
-      taskResult.scores[benchmarkName],
-      hasLength(expectedMetrics.length * valueList.length + 1),
+      scores,
+      hasLength(
+        expectedMetrics.length * expectedComputations.length +
+            _extraScores.length,
+      ),
     );
 
     for (final metricName in expectedMetrics) {
-      for (final valueName in valueList) {
+      for (final computation in expectedComputations) {
         expect(
-          taskResult.scores[benchmarkName]?.where(
-            (score) => score.metric == '$metricName.$valueName',
+          scores.where(
+            (score) => score.metric == '$metricName.${computation.name}',
           ),
           hasLength(1),
         );
@@ -87,11 +78,15 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
     }
 
     expect(
-      taskResult.scores[benchmarkName]?.where(
-        (score) => score.metric == 'totalUiFrame.average',
-      ),
+      scores.where((score) => score.metric == totalUiFrameAverage),
       hasLength(1),
     );
+
+    final isWasmScore = scores.firstWhereOrNull(
+      (BenchmarkScore score) => score.metric == _isWasmScore,
+    );
+    expect(isWasmScore, isNotNull);
+    expect(isWasmScore!.value, useWasm ? 1 : 0);
   }
 
   expect(

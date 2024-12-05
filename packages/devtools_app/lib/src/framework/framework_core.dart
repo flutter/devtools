@@ -17,20 +17,20 @@ import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
-import '../shared/banner_messages.dart';
 import '../shared/config_specific/framework_initialize/framework_initialize.dart';
 import '../shared/console/eval/eval_service.dart';
-import '../shared/framework_controller.dart';
+import '../shared/framework/app_error_handling.dart' as error_handling;
+import '../shared/framework/framework_controller.dart';
 import '../shared/globals.dart';
-import '../shared/notifications.dart';
-import '../shared/offline_data.dart';
+import '../shared/managers/banner_messages.dart';
+import '../shared/managers/notifications.dart';
+import '../shared/managers/script_manager.dart';
+import '../shared/managers/survey.dart';
+import '../shared/offline/offline_data.dart';
 import '../shared/preferences/preferences.dart';
 import '../shared/primitives/message_bus.dart';
-import '../shared/scripts/script_manager.dart';
 import '../shared/server/server.dart' as server;
-import '../shared/survey.dart';
-import '../shared/utils.dart';
-import 'app_error_handling.dart' as error_handling;
+import '../shared/utils/utils.dart';
 import 'theme_manager.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
@@ -119,25 +119,25 @@ abstract class FrameworkCore {
         final service = await connect<VmServiceWrapper>(
           uri: uri,
           finishedCompleter: finishedCompleter,
-          serviceFactory: ({
-            // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
-            required Stream<dynamic> /*String|List<int>*/ inStream,
-            required void Function(String message) writeMessage,
-            Log? log,
-            DisposeHandler? disposeHandler,
-            Future? streamClosed,
-            String? wsUri,
-            bool trackFutures = false,
-          }) =>
-              VmServiceWrapper.defaultFactory(
-            inStream: inStream,
-            writeMessage: writeMessage,
-            log: log,
-            disposeHandler: disposeHandler,
-            streamClosed: streamClosed,
-            wsUri: wsUri,
-            trackFutures: integrationTestMode,
-          ),
+          serviceFactory:
+              ({
+                // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
+                required Stream<dynamic> /*String|List<int>*/ inStream,
+                required void Function(String message) writeMessage,
+                Log? log,
+                DisposeHandler? disposeHandler,
+                Future? streamClosed,
+                String? wsUri,
+                bool trackFutures = false,
+              }) => VmServiceWrapper.defaultFactory(
+                inStream: inStream,
+                writeMessage: writeMessage,
+                log: log,
+                disposeHandler: disposeHandler,
+                streamClosed: streamClosed,
+                wsUri: wsUri,
+                trackFutures: integrationTestMode,
+              ),
         );
 
         await serviceConnection.serviceManager.vmServiceOpened(
@@ -162,10 +162,7 @@ abstract class FrameworkCore {
   }
 
   static void _defaultErrorReporter(String title, Object error) {
-    notificationService.pushError(
-      '$title, $error',
-      isReportable: false,
-    );
+    notificationService.pushError('$title, $error', isReportable: false);
   }
 }
 
@@ -191,9 +188,9 @@ Future<void> _initDTDConnection() async {
       );
 
       if (dtdManager.connection.value != null) {
-        FrameworkCore._themeManager =
-            EditorThemeManager(dtdManager.connection.value!)
-              ..listenForThemeChanges();
+        FrameworkCore._themeManager = EditorThemeManager(
+          dtdManager.connection.value!,
+        )..listenForThemeChanges();
       }
     } else {
       _log.info('No DTD uri provided from the server during initialization.');

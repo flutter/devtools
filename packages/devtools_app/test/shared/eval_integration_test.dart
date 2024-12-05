@@ -27,25 +27,21 @@ void main() {
   });
 
   group('EvalOnDartLibrary', () {
-    test(
-      'getHashCode',
-      () async {
-        await env.setupEnvironment();
-        final eval = EvalOnDartLibrary(
-          'dart:core',
-          serviceConnection.serviceManager.service!,
-          serviceManager: serviceConnection.serviceManager,
-        );
+    test('getHashCode', () async {
+      await env.setupEnvironment();
+      final eval = EvalOnDartLibrary(
+        'dart:core',
+        serviceConnection.serviceManager.service!,
+        serviceManager: serviceConnection.serviceManager,
+      );
 
-        final instance = await eval.safeEval('42', isAlive: isAlive);
+      final instance = await eval.safeEval('42', isAlive: isAlive);
 
-        await expectLater(
-          eval.getHashCode(instance, isAlive: isAlive),
-          completion(anyOf(isPositive, 0)),
-        );
-      },
-      timeout: const Timeout.factor(2),
-    );
+      await expectLater(
+        eval.getHashCode(instance, isAlive: isAlive),
+        completion(anyOf(isPositive, 0)),
+      );
+    }, timeout: const Timeout.factor(2));
 
     group('asyncEval', () {
       test(
@@ -67,6 +63,9 @@ void main() {
           expect(instance2.classRef!.name, '_Future');
         },
         timeout: const Timeout.factor(2),
+        // TODO(https://github.com/flutter/devtools/issues/6998): if this flake
+        // is addressed, we can unskip this for the Flutter customer tests.
+        tags: skipForCustomerTestsTag,
       );
 
       test(
@@ -84,11 +83,12 @@ void main() {
             isolate: mainIsolate,
           );
 
-          final instance = (await eval.asyncEval(
-            // The delay asserts that there is no issue with garbage collection
-            'await Future<int>.delayed(const Duration(milliseconds: 500), () => 42)',
-            isAlive: isAlive,
-          ))!;
+          final instance =
+              (await eval.asyncEval(
+                // The delay asserts that there is no issue with garbage collection
+                'await Future<int>.delayed(const Duration(milliseconds: 500), () => 42)',
+                isAlive: isAlive,
+              ))!;
 
           expect(instance.valueAsString, '42');
         },
@@ -115,9 +115,10 @@ void main() {
                 isAlive: isAlive,
               )
               .then<FutureFailedException>(
-                (_) => throw Exception(
-                  'The FutureFailedException was not thrown as expected.',
-                ),
+                (_) =>
+                    throw Exception(
+                      'The FutureFailedException was not thrown as expected.',
+                    ),
                 onError: (Object? err) => err,
               );
 
@@ -129,9 +130,7 @@ void main() {
           final stack = await eval.safeEval(
             'stack.toString()',
             isAlive: isAlive,
-            scope: {
-              'stack': instance.stacktraceRef.id!,
-            },
+            scope: {'stack': instance.stacktraceRef.id!},
           );
           expect(
             stack.valueAsString,

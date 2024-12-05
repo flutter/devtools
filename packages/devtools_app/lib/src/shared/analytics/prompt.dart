@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../common_widgets.dart';
-import '../utils.dart';
+import '../ui/common_widgets.dart';
+import '../utils/utils.dart';
 import 'analytics_controller.dart';
 
 /// Conditionally displays a prompt to request permission for collection of
@@ -43,18 +43,13 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (showPrompt) child!,
-            Expanded(child: widget.child),
-          ],
+          children: [if (showPrompt) child!, Expanded(child: widget.child)],
         );
       },
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: defaultBorderRadius,
-          side: BorderSide(
-            color: theme.focusColor,
-          ),
+          side: BorderSide(color: theme.focusColor),
         ),
         color: theme.canvasColor,
         margin: const EdgeInsets.only(bottom: denseSpacing),
@@ -91,9 +86,9 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
 
   Widget _analyticsDescription(ThemeData theme) {
     final consentMessageRegExpResults =
-        parseAnalyticsConsentMessage(controller.consentMessage)
-            ?.map((e) => adjustLineBreaks(e))
-            .toList();
+        parseAnalyticsConsentMessage(
+          controller.consentMessage,
+        )?.map((e) => adjustLineBreaks(e)).toList();
 
     // When failing to parse the consent message, fallback to displaying the
     // consent message in its regular form.
@@ -166,8 +161,10 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
 @visibleForTesting
 List<String>? parseAnalyticsConsentMessage(String consentMessage) {
   final results = <String>[];
-  final pattern =
-      RegExp(r'^([\S\s]*)(https?:\/\/[^\s]+)(\)\.)$', multiLine: true);
+  final pattern = RegExp(
+    r'^([\S\s]*)(https?:\/\/[^\s]+)(\)\.)$',
+    multiLine: true,
+  );
 
   final matches = pattern.allMatches(consentMessage);
   if (matches.isEmpty) {
@@ -193,7 +190,9 @@ List<String>? parseAnalyticsConsentMessage(String consentMessage) {
 /// match the width of the view.
 @visibleForTesting
 String adjustLineBreaks(String value) {
-  final pattern =
-      RegExp(r'(?<!\r\n|\r|\n)(\r\n|\r|\n)(?!\r\n|\r|\n)', multiLine: true);
+  final pattern = RegExp(
+    r'(?<!\r\n|\r|\n)(\r\n|\r|\n)(?!\r\n|\r|\n)',
+    multiLine: true,
+  );
   return value.replaceAll(pattern, ' ');
 }

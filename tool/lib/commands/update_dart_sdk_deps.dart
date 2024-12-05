@@ -19,7 +19,7 @@ const _argCommit = 'commit';
 /// automatically built and uploaded to CIPD on each DevTools commit.
 ///
 /// To run this script:
-/// `devtools_tool update-sdk-deps -c <commit-hash>`
+/// `dt update-sdk-deps -c <commit-hash>`
 class UpdateDartSdkDepsCommand extends Command {
   UpdateDartSdkDepsCommand() {
     argParser.addOption(
@@ -49,10 +49,11 @@ class UpdateDartSdkDepsCommand extends Command {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
-        CliCommand.git(
-          ['branch', '-D', 'devtools-$commit'],
-          throwOnException: false,
-        ),
+        CliCommand.git([
+          'branch',
+          '-D',
+          'devtools-$commit',
+        ], throwOnException: false),
         CliCommand.git(['new-branch', 'devtools-$commit']),
       ],
     );
@@ -66,13 +67,7 @@ class UpdateDartSdkDepsCommand extends Command {
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
         CliCommand.git(['add', 'DEPS']),
-        CliCommand.git(
-          [
-            'commit',
-            '-m',
-            'Update DevTools rev to $commit',
-          ],
-        ),
+        CliCommand.git(['commit', '-m', 'Update DevTools rev to $commit']),
         CliCommand.git(['cl', 'upload', '-s', '-f']),
       ],
     );

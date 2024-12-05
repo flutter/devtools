@@ -13,15 +13,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../common_widgets.dart';
 import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../ui/colors.dart';
+import '../ui/common_widgets.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
-import '../utils.dart';
+import '../utils/utils.dart';
 
 const rowPadding = 2.0;
 // Flame chart rows contain text so are not readable if they do not scale with
@@ -98,8 +98,11 @@ abstract class FlameChart<T, V> extends StatefulWidget {
 // performance improvements. Optionally we could also do something clever with
 // grouping nodes that are close together until they are zoomed in (quad tree
 // like implementation).
-abstract class FlameChartState<T extends FlameChart,
-        V extends FlameChartDataMixin<V>> extends State<T>
+abstract class FlameChartState<
+  T extends FlameChart,
+  V extends FlameChartDataMixin<V>
+>
+    extends State<T>
     with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
   int get rowOffsetForTopPadding => 2;
 
@@ -156,14 +159,16 @@ abstract class FlameChartState<T extends FlameChart,
 
   TimeRange get visibleTimeRange {
     final horizontalScrollOffset = horizontalControllerGroup.offset;
-    final startMicros = horizontalScrollOffset < widget.startInset
-        ? startTimeOffset
-        : startTimeOffset +
-            (horizontalScrollOffset - widget.startInset) /
-                currentZoom /
-                startingPxPerMicro;
+    final startMicros =
+        horizontalScrollOffset < widget.startInset
+            ? startTimeOffset
+            : startTimeOffset +
+                (horizontalScrollOffset - widget.startInset) /
+                    currentZoom /
+                    startingPxPerMicro;
 
-    final endMicros = startTimeOffset +
+    final endMicros =
+        startTimeOffset +
         (horizontalScrollOffset - widget.startInset + widget.containerWidth) /
             currentZoom /
             startingPxPerMicro;
@@ -231,8 +236,9 @@ abstract class FlameChartState<T extends FlameChart,
     )..addListener(_handleZoomControllerValueUpdate);
 
     verticalExtentDelegate = FixedExtentDelegate(
-      computeExtent: (index) =>
-          rows[index].nodes.isEmpty ? sectionSpacing : rowHeightWithPadding,
+      computeExtent:
+          (index) =>
+              rows[index].nodes.isEmpty ? sectionSpacing : rowHeightWithPadding,
       computeLength: () => rows.length,
     );
 
@@ -299,12 +305,7 @@ abstract class FlameChartState<T extends FlameChart,
                 final chartOverlays = buildChartOverlays(constraints, context);
                 final flameChart = _buildFlameChart(constraints);
                 return chartOverlays.isNotEmpty
-                    ? Stack(
-                        children: [
-                          flameChart,
-                          ...chartOverlays,
-                        ],
-                      )
+                    ? Stack(children: [flameChart, ...chartOverlays])
                     : flameChart;
               },
             ),
@@ -395,10 +396,11 @@ abstract class FlameChartState<T extends FlameChart,
       return;
     }
 
-    final hoverNodeData = _binarySearchForNode(
-      x: event.localPosition.dx + horizontalControllerGroup.offset,
-      nodesInRow: nodes,
-    )?.data;
+    final hoverNodeData =
+        _binarySearchForNode(
+          x: event.localPosition.dx + horizontalControllerGroup.offset,
+          nodesInRow: nodes,
+        )?.data;
     _hoveredNodeNotifier.value = hoverNodeData;
   }
 
@@ -419,7 +421,8 @@ abstract class FlameChartState<T extends FlameChart,
   int _rowIndexForY(double dy) {
     final topPaddingHeight = rowOffsetForTopPadding * sectionSpacing;
     final adjustedDy = verticalControllerGroup.offset + dy;
-    final rowIndex = ((adjustedDy - topPaddingHeight) ~/ rowHeightWithPadding) +
+    final rowIndex =
+        ((adjustedDy - topPaddingHeight) ~/ rowHeightWithPadding) +
         rowOffsetForTopPadding;
     if (rowIndex < 0 || rowIndex >= rows.length) {
       return -1;
@@ -466,21 +469,13 @@ abstract class FlameChartState<T extends FlameChart,
     final eventKey = event.physicalKey;
     if (eventKey == PhysicalKeyboardKey.keyW) {
       unawaited(
-        zoomTo(
-          math.min(
-            maxZoomLevel,
-            currentZoom + keyboardZoomInUnit,
-          ),
-        ),
+        zoomTo(math.min(maxZoomLevel, currentZoom + keyboardZoomInUnit)),
       );
       return KeyEventResult.handled;
     } else if (eventKey == PhysicalKeyboardKey.keyS) {
       unawaited(
         zoomTo(
-          math.max(
-            FlameChart.minZoomLevel,
-            currentZoom - keyboardZoomOutUnit,
-          ),
+          math.max(FlameChart.minZoomLevel, currentZoom - keyboardZoomOutUnit),
         ),
       );
       return KeyEventResult.handled;
@@ -511,10 +506,13 @@ abstract class FlameChartState<T extends FlameChart,
     final fixedX = safeMouseHoverX + lastScrollOffset - widget.startInset;
 
     // Calculate the new horizontal scroll position.
-    final newScrollOffset = fixedX >= 0
-        ? fixedX * newZoom / previousZoom + widget.startInset - safeMouseHoverX
-        // We are in the fixed portion of the window - no need to transform.
-        : lastScrollOffset;
+    final newScrollOffset =
+        fixedX >= 0
+            ? fixedX * newZoom / previousZoom +
+                widget.startInset -
+                safeMouseHoverX
+            // We are in the fixed portion of the window - no need to transform.
+            : lastScrollOffset;
 
     setState(() {
       currentZoom = zoomController.value;
@@ -549,10 +547,7 @@ abstract class FlameChartState<T extends FlameChart,
   /// this method, the call to this method should be placed inside of a
   /// postFrameCallback:
   /// `WidgetsBinding.instance.addPostFrameCallback((_) { ... });`.
-  FutureOr<void> scrollToX(
-    double offset, {
-    bool jump = false,
-  }) async {
+  FutureOr<void> scrollToX(double offset, {bool jump = false}) async {
     final target = offset.clamp(
       FlameChart.minScrollOffset,
       horizontalControllerGroup.position.maxScrollExtent,
@@ -624,7 +619,8 @@ abstract class FlameChartState<T extends FlameChart,
     targetWidth ??= widget.containerWidth * 0.8;
     final startingWidth = durationMicros * startingPxPerMicro;
     final zoom = targetWidth / startingWidth;
-    final mouseXForZoom = (startMicros - startTimeOffset + durationMicros / 2) *
+    final mouseXForZoom =
+        (startMicros - startTimeOffset + durationMicros / 2) *
             startingPxPerMicro +
         widget.startInset;
     await zoomTo(zoom, forceMouseX: mouseXForZoom, jump: jump);
@@ -681,7 +677,8 @@ class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
 }
 
 class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
-    extends State<ScrollingFlameChartRow<V>> with AutoDisposeMixin {
+    extends State<ScrollingFlameChartRow<V>>
+    with AutoDisposeMixin {
   late final ScrollController scrollController;
 
   late final _ScrollingFlameChartRowExtentDelegate _extentDelegate;
@@ -916,7 +913,7 @@ class FlameChartUtils {
     } else {
       padding =
           (node.rect.left - chartStartInset) * zoomForNode(node, chartZoom) +
-              chartStartInset;
+          chartStartInset;
     }
     // Floating point rounding error can result in slightly negative padding.
     return math.max(0.0, padding);
@@ -943,11 +940,12 @@ class FlameChartUtils {
     // Node right with zoom and insets taken into consideration.
     final nodeRight =
         (node.rect.right - chartStartInset) * nodeZoom + chartStartInset;
-    final padding = nextNode == null
-        ? chartWidth - nodeRight
-        : ((nextNode.rect.left - chartStartInset) * nextNodeZoom +
-                chartStartInset) -
-            nodeRight;
+    final padding =
+        nextNode == null
+            ? chartWidth - nodeRight
+            : ((nextNode.rect.left - chartStartInset) * nextNodeZoom +
+                    chartStartInset) -
+                nodeRight;
     // Floating point rounding error can result in slightly negative padding.
     return math.max(0.0, padding);
   }
@@ -987,11 +985,7 @@ class FlameChartUtils {
 }
 
 class FlameChartSection {
-  FlameChartSection(
-    this.index, {
-    required this.startRow,
-    required this.endRow,
-  });
+  FlameChartSection(this.index, {required this.startRow, required this.endRow});
 
   final int index;
 
@@ -1096,28 +1090,25 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
         activeSearchMatch: activeSearchMatch,
         colorScheme: theme.colorScheme,
       ),
-      child: zoomedWidth >= _minWidthForText
-          ? Text(
-              text,
-              textAlign: TextAlign.left,
-              overflow: TextOverflow.ellipsis,
-              style: theme.regularTextStyleWithColor(
-                _textColor(
-                  selected: selected,
-                  searchMatch: searchMatch,
-                  activeSearchMatch: activeSearchMatch,
-                  colorScheme: theme.colorScheme,
+      child:
+          zoomedWidth >= _minWidthForText
+              ? Text(
+                text,
+                textAlign: TextAlign.left,
+                overflow: TextOverflow.ellipsis,
+                style: theme.regularTextStyleWithColor(
+                  _textColor(
+                    selected: selected,
+                    searchMatch: searchMatch,
+                    activeSearchMatch: activeSearchMatch,
+                    colorScheme: theme.colorScheme,
+                  ),
                 ),
-              ),
-            )
-          : const SizedBox(),
+              )
+              : const SizedBox(),
     );
     return (hovered || !selectable)
-        ? DevToolsTooltip(
-            key: key,
-            message: data.tooltip,
-            child: node,
-          )
+        ? DevToolsTooltip(key: key, message: data.tooltip, child: node)
         : node;
   }
 
@@ -1156,8 +1147,10 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     // small events that have padding.
     //
     // See https://github.com/flutter/devtools/issues/1503 for details.
-    final zoomedLeft =
-        math.max(0.0, (rect.left - chartStartInset) * zoom + chartStartInset);
+    final zoomedLeft = math.max(
+      0.0,
+      (rect.left - chartStartInset) * zoom + chartStartInset,
+    );
     final zoomedWidth = math.max(0.0, rect.width * zoom);
     return Rect.fromLTWH(zoomedLeft, rect.top, zoomedWidth, rect.height);
   }
@@ -1353,9 +1346,11 @@ class TimelineGridPainter extends FlameChartPainter {
     final microsPerInterval = _microsPerInterval(intervalWidth);
     int timestampMicros = _startingTimestamp(intervalWidth, microsPerInterval);
     double lineX;
-    lineX = visible.left <= chartStartInset
-        ? chartStartInset - visible.left
-        : intervalWidth - ((visible.left - chartStartInset) % intervalWidth);
+    lineX =
+        visible.left <= chartStartInset
+            ? chartStartInset - visible.left
+            : intervalWidth -
+                ((visible.left - chartStartInset) % intervalWidth);
 
     while (lineX < constraints.maxWidth) {
       _paintTimestamp(canvas, timestampMicros, intervalWidth, lineX);
@@ -1426,9 +1421,10 @@ class TimelineGridPainter extends FlameChartPainter {
   }
 
   int _startingTimestamp(double intervalWidth, int microsPerInterval) {
-    final startingIntervalIndex = horizontalScrollOffset < chartStartInset
-        ? 0
-        : (horizontalScrollOffset - chartStartInset) ~/ intervalWidth + 1;
+    final startingIntervalIndex =
+        horizontalScrollOffset < chartStartInset
+            ? 0
+            : (horizontalScrollOffset - chartStartInset) ~/ intervalWidth + 1;
     return startingIntervalIndex * microsPerInterval;
   }
 
@@ -1448,13 +1444,13 @@ class TimelineGridPainter extends FlameChartPainter {
 
   @override
   int get hashCode => Object.hash(
-        zoom,
-        constraints,
-        flameChartWidth,
-        horizontalScrollOffset,
-        duration,
-        colorScheme,
-      );
+    zoom,
+    constraints,
+    flameChartWidth,
+    horizontalScrollOffset,
+    duration,
+    colorScheme,
+  );
 }
 
 class FlameChartHelpButton extends StatelessWidget {
@@ -1502,18 +1498,9 @@ class FlameChartHelpButton extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                'WASD • ',
-                style: theme.fixedFontStyle,
-              ),
-              Text(
-                'click + drag • ',
-                style: theme.fixedFontStyle,
-              ),
-              Text(
-                'click + fling • ',
-                style: theme.fixedFontStyle,
-              ),
+              Text('WASD • ', style: theme.fixedFontStyle),
+              Text('click + drag • ', style: theme.fixedFontStyle),
+              Text('click + fling • ', style: theme.fixedFontStyle),
             ],
           ),
         ),
@@ -1555,11 +1542,7 @@ class EmptyFlameChartRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      width: width,
-      color: backgroundColor,
-    );
+    return Container(height: height, width: width, color: backgroundColor);
   }
 }
 

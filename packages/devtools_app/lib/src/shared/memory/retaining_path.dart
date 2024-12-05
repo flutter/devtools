@@ -42,18 +42,18 @@ class PathFromRoot {
   PathFromRoot._(
     this.path, {
     @visibleForTesting bool debugOmitClassesInRetainingPath = false,
-  })  : assert(() {
-          debugUsage.constructed++;
-          return true;
-        }()),
-        hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
-        classes = debugOmitClassesInRetainingPath ? const {} : path.toSet();
+  }) : assert(() {
+         debugUsage.constructed++;
+         return true;
+       }()),
+       hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
+       classes = debugOmitClassesInRetainingPath ? const {} : path.toSet();
 
   /// For objects directly referenced from root.
   const PathFromRoot._empty()
-      : path = const [],
-        classes = const {},
-        hashCode = _hashOfEmptyPath;
+    : path = const [],
+      classes = const {},
+      hashCode = _hashOfEmptyPath;
 
   factory PathFromRoot.forObject(
     HeapSnapshotGraph graph, {

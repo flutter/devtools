@@ -5,8 +5,8 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/memory/classes.dart';
+import '../../../../../../shared/ui/common_widgets.dart';
 import '../../controller/class_data.dart';
 import 'path.dart';
 import 'paths.dart';
@@ -42,17 +42,14 @@ class HeapClassDetails extends StatelessWidget {
 
     final selectedPathView = ValueListenableBuilder<PathData?>(
       valueListenable: pathSelection,
-      builder: (_, pathData, __) {
+      builder: (_, pathData, _) {
         if (pathData == null) {
           return const CenteredMessage(
             message: 'Click a table row to see the detailed path.',
           );
         }
 
-        return RetainingPathView(
-          data: pathData,
-          controller: pathController,
-        );
+        return RetainingPathView(data: pathData, controller: pathController);
       },
     );
 
@@ -60,12 +57,8 @@ class HeapClassDetails extends StatelessWidget {
       axis: Axis.horizontal,
       initialFractions: const [0.7, 0.3],
       children: [
-        OutlineDecoration.onlyRight(
-          child: retainingPathsTable,
-        ),
-        OutlineDecoration.onlyLeft(
-          child: selectedPathView,
-        ),
+        OutlineDecoration.onlyRight(child: retainingPathsTable),
+        OutlineDecoration.onlyLeft(child: selectedPathView),
       ],
     );
   }

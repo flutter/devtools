@@ -23,7 +23,8 @@ class ReleaseNotesCommand extends Command {
       ..addFlag(
         _useCurrentBranch,
         abbr: 'c',
-        help: 'Whether to use the current branch on the local flutter/website '
+        help:
+            'Whether to use the current branch on the local flutter/website '
             'checkout instead of creating a new one.',
       );
   }
@@ -68,9 +69,11 @@ class ReleaseNotesCommand extends Command {
             CliCommand.git(['checkout', 'main']),
             CliCommand.git(['pull']),
             CliCommand.git(['submodule', 'update', '--init', '--recursive']),
-            CliCommand.git(
-              ['checkout', '-b', 'devtools-release-notes-$releaseNotesVersion'],
-            ),
+            CliCommand.git([
+              'checkout',
+              '-b',
+              'devtools-release-notes-$releaseNotesVersion',
+            ]),
           ],
           workingDirectory: websiteRepoPath,
         );
@@ -105,23 +108,20 @@ class ReleaseNotesCommand extends Command {
 
     // Write the 'release-notes-<x.y.z>.md' file.
     File(
-      p.join(
-        websiteReleaseNotesDir.path,
-        'release-notes-$releaseNotesVersion.md',
-      ),
-    )
+        p.join(
+          websiteReleaseNotesDir.path,
+          'release-notes-$releaseNotesVersion.md',
+        ),
+      )
       ..createSync()
-      ..writeAsStringSync(
-        '''---
+      ..writeAsStringSync('''---
 short-title: $releaseNotesVersion release notes
 description: Release notes for Dart and Flutter DevTools version $releaseNotesVersion.
 toc: false
 ---
 
 {% include ./release-notes-$releaseNotesVersion-src.md %}
-''',
-        flush: true,
-      );
+''', flush: true);
 
     // Create the 'release-notes-<x.y.z>-src.md' file.
     final releaseNotesSrcMd = File(
@@ -138,8 +138,9 @@ toc: false
       // This set of release notes contains images. Perform the line
       // transformations and copy the image files.
       final websiteImagesDirName = 'images-$releaseNotesVersion';
-      final devtoolsImagesDir =
-          Directory(p.join(devToolsReleaseNotesDirectory.path, 'images'));
+      final devtoolsImagesDir = Directory(
+        p.join(devToolsReleaseNotesDirectory.path, 'images'),
+      );
       final websiteImagesDir = Directory(
         p.join(websiteReleaseNotesDir.path, websiteImagesDirName),
       )..createSync();
@@ -166,17 +167,20 @@ toc: false
     );
 
     // Write the 'devtools_releases.yml' file.
-    final releasesYml =
-        File(p.join(websiteRepoPath, 'src', '_data', 'devtools_releases.yml'));
+    final releasesYml = File(
+      p.join(websiteRepoPath, 'src', '_data', 'devtools_releases.yml'),
+    );
     if (!releasesYml.existsSync()) {
       throw FileSystemException(
         'The devtools_releases.yml file does not exist.',
         releasesYml.path,
       );
     }
-    final releasesYmlContent =
-        releasesYml.readAsStringSync().replaceFirst('releases:', '''releases:
-  - '$releaseNotesVersion\'''');
+    final releasesYmlContent = releasesYml.readAsStringSync().replaceFirst(
+      'releases:',
+      '''releases:
+  - '$releaseNotesVersion\'''',
+    );
     releasesYml.writeAsStringSync(releasesYmlContent, flush: true);
 
     const firstPartInstructions =
@@ -184,16 +188,14 @@ toc: false
         'Please clean them up by deleting empty sections and fixing any '
         'grammar mistakes or typos. Run the following to open the release '
         'notes source file:';
-    log.stdout(
-      '''
+    log.stdout('''
 $firstPartInstructions
 
 cd $websiteRepoPath;
 code ${releaseNotesSrcMd.absolute.path}
 
 Create a PR on the flutter/website repo when you are finished.
-''',
-    );
+''');
   }
 }
 

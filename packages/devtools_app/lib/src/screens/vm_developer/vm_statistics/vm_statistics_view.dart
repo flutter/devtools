@@ -7,22 +7,18 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/byte_utils.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
+import '../../../shared/ui/common_widgets.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_developer_tools_screen.dart';
 import '../vm_service_private_extensions.dart';
 import 'vm_statistics_view_controller.dart';
 
 class VMStatisticsView extends VMDeveloperView {
-  const VMStatisticsView()
-      : super(
-          title: 'VM',
-          icon: Icons.devices,
-        );
+  const VMStatisticsView() : super(title: 'VM', icon: Icons.devices);
 
   @override
   Widget build(BuildContext context) => VMStatisticsViewBody();
@@ -47,10 +43,8 @@ class VMStatisticsViewBody extends StatelessWidget {
         Expanded(
           child: ValueListenableBuilder(
             valueListenable: controller.refreshing,
-            builder: (context, _, __) {
-              return VMStatisticsWidget(
-                controller: controller,
-              );
+            builder: (context, _, _) {
+              return VMStatisticsWidget(controller: controller);
             },
           ),
         ),
@@ -73,15 +67,9 @@ class VMStatisticsWidget extends StatelessWidget {
           child: Column(
             children: [
               Expanded(
-                child: GeneralVMStatisticsWidget(
-                  controller: controller,
-                ),
+                child: GeneralVMStatisticsWidget(controller: controller),
               ),
-              Expanded(
-                child: ProcessStatisticsWidget(
-                  controller: controller,
-                ),
-              ),
+              Expanded(child: ProcessStatisticsWidget(controller: controller)),
             ],
           ),
         ),
@@ -89,11 +77,7 @@ class VMStatisticsWidget extends StatelessWidget {
           flex: 4,
           child: Column(
             children: [
-              Flexible(
-                child: IsolatesPreviewWidget(
-                  controller: controller,
-                ),
-              ),
+              Flexible(child: IsolatesPreviewWidget(controller: controller)),
               Flexible(
                 child: IsolatesPreviewWidget(
                   controller: controller,
@@ -136,16 +120,13 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
             vm == null
                 ? null
                 : formatDateTime(
-                    DateTime.fromMillisecondsSinceEpoch(vm.startTime!),
-                  ),
+                  DateTime.fromMillisecondsSinceEpoch(vm.startTime!),
+                ),
           ),
           selectableTextBuilderMapEntry('Profiler Mode', vm?.profilerMode),
           selectableTextBuilderMapEntry(
             'Current Memory',
-            prettyPrintBytes(
-              vm?.currentMemory,
-              includeUnit: true,
-            ),
+            prettyPrintBytes(vm?.currentMemory, includeUnit: true),
           ),
         ],
       ),
@@ -186,24 +167,15 @@ class ProcessStatisticsWidget extends StatelessWidget {
           ),
           selectableTextBuilderMapEntry(
             'Max Memory (RSS)',
-            prettyPrintBytes(
-              vm?.maxRSS,
-              includeUnit: true,
-            ),
+            prettyPrintBytes(vm?.maxRSS, includeUnit: true),
           ),
           selectableTextBuilderMapEntry(
             'Current Memory (RSS)',
-            prettyPrintBytes(
-              vm?.currentRSS,
-              includeUnit: true,
-            ),
+            prettyPrintBytes(vm?.currentRSS, includeUnit: true),
           ),
           selectableTextBuilderMapEntry(
             'Zone Memory',
-            prettyPrintBytes(
-              vm?.nativeZoneMemoryUsage,
-              includeUnit: true,
-            ),
+            prettyPrintBytes(vm?.nativeZoneMemoryUsage, includeUnit: true),
           ),
         ],
       ),

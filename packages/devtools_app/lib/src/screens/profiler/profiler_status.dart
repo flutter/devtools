@@ -5,7 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/common_widgets.dart';
+import '../../shared/ui/common_widgets.dart';
 import 'cpu_profiler_controller.dart';
 
 class CpuProfilerDisabled extends StatelessWidget {
@@ -109,8 +109,8 @@ class ProfileRecordingInstructions extends StatelessWidget {
 
 class ProfilerBusyStatus extends _Status {
   ProfilerBusyStatus({required CpuProfilerBusyStatus status})
-      : assert(status != CpuProfilerBusyStatus.none),
-        super(statusVerb: status.display);
+    : assert(status != CpuProfilerBusyStatus.none),
+      super(statusVerb: status.display);
 }
 
 class RecordingStatus extends _Status {

@@ -61,10 +61,7 @@ void main() {
       await _verifyStringExtension(tester);
 
       logStatus('verify Flutter engine service extensions');
-      expect(
-        await serviceConnection.queryDisplayRefreshRate,
-        equals(60),
-      );
+      expect(await serviceConnection.queryDisplayRefreshRate, equals(60));
 
       logStatus('verify services that are registered to exactly one client');
       await _verifyHotReloadAndHotRestart();
@@ -96,11 +93,7 @@ void main() {
     // Enable a service extension of each type (boolean, numeric, string).
     for (final ext in serviceExtensionsToEnable) {
       await serviceConnection.serviceManager.serviceExtensionManager
-          .setServiceExtensionState(
-        ext.$1,
-        enabled: true,
-        value: ext.$2,
-      );
+          .setServiceExtensionState(ext.$1, enabled: true, value: ext.$2);
     }
 
     logStatus('disconnecting from the test device');
@@ -264,11 +257,7 @@ Future<void> _verifyExtension(
 
   // Enable the service extension state from the service manager.
   await serviceConnection.serviceManager.serviceExtensionManager
-      .setServiceExtensionState(
-    extensionName,
-    enabled: true,
-    value: newValue,
-  );
+      .setServiceExtensionState(extensionName, enabled: true, value: newValue);
 
   await _verifyExtensionStateOnTestDevice(
     evalExpression: evalExpression,
@@ -302,8 +291,9 @@ Future<void> _changeServiceExtensionFromButton(
   required (bool, Object?) expectedResultInServiceManager,
   required WidgetTester tester,
 }) async {
-  final serviceExtensionButtons = tester
-      .widgetList<ServiceExtensionButton>(find.byType(ServiceExtensionButton));
+  final serviceExtensionButtons = tester.widgetList<ServiceExtensionButton>(
+    find.byType(ServiceExtensionButton),
+  );
   final button = serviceExtensionButtons.firstWhereOrNull(
     (b) => b.extensionState.description.extension == extensionName,
   );
@@ -358,7 +348,8 @@ Future<void> _verifyExtensionStateInServiceManager(
   required Object? value,
 }) async {
   final stateListenable = serviceConnection
-      .serviceManager.serviceExtensionManager
+      .serviceManager
+      .serviceExtensionManager
       .getServiceExtensionState(extensionName);
 
   // Wait for the service extension state to match the expected value.

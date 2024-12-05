@@ -16,19 +16,19 @@ import 'package:logging/logging.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
-import '../../shared/collapsible_mixin.dart';
-import '../../shared/common_widgets.dart';
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/console/widgets/description.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
-import '../../shared/diagnostics_text_styles.dart';
-import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/error_badge_manager.dart';
+import '../../shared/primitives/collapsible_mixin.dart';
+import '../../shared/primitives/diagnostics_text_styles.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/colors.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'inspector_controller.dart';
 
 final _log = Logger('inspector_tree_controller');
@@ -114,11 +114,12 @@ class InspectorTreeController extends DisposableController
       gac.inspector,
       gac.inspectorTreeControllerInitialized,
       nonInteraction: true,
-      screenMetricsProvider: () => InspectorScreenMetrics.v2(
-        inspectorTreeControllerId: gaId,
-        rootSetCount: _rootSetCount,
-        rowCount: _rowsInTree.value.length,
-      ),
+      screenMetricsProvider:
+          () => InspectorScreenMetrics.v2(
+            inspectorTreeControllerId: gaId,
+            rootSetCount: _rootSetCount,
+            rowCount: _rowsInTree.value.length,
+          ),
     );
   }
 
@@ -161,10 +162,7 @@ class InspectorTreeController extends DisposableController
 
   set root(InspectorTreeNode? node) {
     if (node != null) {
-      _updateRows(
-        node: node,
-        updateSearchableRows: true,
-      );
+      _updateRows(node: node, updateSearchableRows: true);
     }
     _root = node;
 
@@ -172,11 +170,12 @@ class InspectorTreeController extends DisposableController
       gac.inspector,
       gac.inspectorTreeControllerRootChange,
       nonInteraction: true,
-      screenMetricsProvider: () => InspectorScreenMetrics.v2(
-        inspectorTreeControllerId: gaId,
-        rootSetCount: ++_rootSetCount,
-        rowCount: _rowsInTree.value.length,
-      ),
+      screenMetricsProvider:
+          () => InspectorScreenMetrics.v2(
+            inspectorTreeControllerId: gaId,
+            rootSetCount: ++_rootSetCount,
+            rowCount: _rowsInTree.value.length,
+          ),
     );
   }
 
@@ -321,8 +320,10 @@ class InspectorTreeController extends DisposableController
     final selectionLocal = selection;
     final diagnostic = selectionLocal?.diagnostic;
 
-    final toggledHideableGroup =
-        _maybeToggleHideableGroup(diagnostic, showGroup: false);
+    final toggledHideableGroup = _maybeToggleHideableGroup(
+      diagnostic,
+      showGroup: false,
+    );
     if (toggledHideableGroup) return;
 
     // This logic is consistent with how IntelliJ handles tree navigation on
@@ -350,8 +351,10 @@ class InspectorTreeController extends DisposableController
     final selectionLocal = selection;
     final diagnostic = selectionLocal?.diagnostic;
 
-    final toggledHideableGroup =
-        _maybeToggleHideableGroup(diagnostic, showGroup: true);
+    final toggledHideableGroup = _maybeToggleHideableGroup(
+      diagnostic,
+      showGroup: true,
+    );
     if (toggledHideableGroup) return;
 
     // This logic is consistent with how IntelliJ handles tree navigation on
@@ -371,12 +374,15 @@ class InspectorTreeController extends DisposableController
 
     refreshTree(
       updateTreeAction: () {
-        final nodeToSelect = selection == null
-            ? root
-            : rowAtIndex(
-                (_rowIndexFromNode(selection!) + indexOffset)
-                    .clamp(0, _numRows - 1),
-              )?.node;
+        final nodeToSelect =
+            selection == null
+                ? root
+                : rowAtIndex(
+                  (_rowIndexFromNode(selection!) + indexOffset).clamp(
+                    0,
+                    _numRows - 1,
+                  ),
+                )?.node;
         setSelectedNode(nodeToSelect);
         return true;
       },
@@ -392,7 +398,8 @@ class InspectorTreeController extends DisposableController
   }) {
     final isHideableGroupLeader =
         diagnostic != null && diagnostic.isHideableGroupLeader;
-    final shouldToggle = isHideableGroupLeader &&
+    final shouldToggle =
+        isHideableGroupLeader &&
         (showGroup ? diagnostic.groupIsHidden : !diagnostic.groupIsHidden);
 
     if (shouldToggle) {
@@ -478,7 +485,8 @@ class InspectorTreeController extends DisposableController
             index: currentIdx,
             ticks: ticks,
             depth: depth,
-            lineToParent: !node.isProperty &&
+            lineToParent:
+                !node.isProperty &&
                 currentIdx != 0 &&
                 node.parent!.showLinesToChildren,
             hasSingleChild: node.children.length == 1,
@@ -486,27 +494,21 @@ class InspectorTreeController extends DisposableController
         );
       }
 
-      final style = node.diagnostic?.style;
-      final indented = style != DiagnosticsTreeStyle.flat &&
-          style != DiagnosticsTreeStyle.error;
-
       if (!node.isExpanded && !includeCollapsedRows) return;
       final children = node.children;
       final parentDepth = depth;
       final childrenDepth = children.length > 1 ? parentDepth + 1 : parentDepth;
       for (final child in children) {
-        final shouldAddTick = children.length > 1 &&
+        final shouldAddTick =
+            children.length > 1 &&
             children.last != child &&
             !children.last.isProperty &&
-            indented;
+            node.diagnostic?.shouldIndent == true;
 
         buildRowsHelper(
           child,
           depth: childrenDepth,
-          ticks: [
-            ...ticks,
-            if (shouldAddTick) parentDepth,
-          ],
+          ticks: [...ticks, if (shouldAddTick) parentDepth],
         );
       }
     }
@@ -546,10 +548,7 @@ class InspectorTreeController extends DisposableController
 
   void onSelectNode(InspectorTreeNode? node) {
     setSelectedNode(node);
-    ga.select(
-      gac.inspector,
-      gac.treeNodeSelection,
-    );
+    ga.select(gac.inspector, gac.treeNodeSelection);
     final diagnostic = node?.diagnostic;
     if (diagnostic != null && diagnostic.groupIsHidden) {
       diagnostic.hideableGroupLeader?.toggleHiddenGroup();
@@ -662,8 +661,9 @@ class InspectorTreeController extends DisposableController
     if (diagnosticsNode.hasChildren ||
         diagnosticsNode.inlineProperties.isNotEmpty) {
       if (diagnosticsNode.childrenReady || !diagnosticsNode.hasChildren) {
-        final styleIsMultiline =
-            expandPropertiesByDefault(diagnosticsNode.style);
+        final styleIsMultiline = expandPropertiesByDefault(
+          diagnosticsNode.style,
+        );
         setupChildren(
           diagnosticsNode,
           node,
@@ -734,12 +734,7 @@ class InspectorTreeController extends DisposableController
       try {
         final children = await diagnostic.children;
         if (treeNode.hasPlaceholderChildren || treeNode.children.isEmpty) {
-          setupChildren(
-            diagnostic,
-            treeNode,
-            children,
-            expandChildren: true,
-          );
+          setupChildren(diagnostic, treeNode, children, expandChildren: true);
           refreshTree(
             updateTreeAction: () {
               nodeChanged(treeNode);
@@ -780,8 +775,9 @@ class InspectorTreeController extends DisposableController
     if (searchPreviousMatches) {
       final previousMatches = searchMatches.value;
       for (final previousMatch in previousMatches) {
-        if (previousMatch.node.diagnostic!.searchValue
-            .caseInsensitiveContains(search)) {
+        if (previousMatch.node.diagnostic!.searchValue.caseInsensitiveContains(
+          search,
+        )) {
           matches.add(previousMatch);
         }
       }
@@ -796,21 +792,17 @@ class InspectorTreeController extends DisposableController
     if (search.isEmpty ||
         inspectorService == null ||
         inspectorService.isDisposed) {
-      assert(
-        () {
-          debugPrint('Search completed, no search');
-          return true;
-        }(),
-      );
+      assert(() {
+        debugPrint('Search completed, no search');
+        return true;
+      }());
       return matches;
     }
 
-    assert(
-      () {
-        debugPrint('Search started: $_searchTarget');
-        return true;
-      }(),
-    );
+    assert(() {
+      debugPrint('Search started: $_searchTarget');
+      return true;
+    }());
 
     for (final row in _searchableCachedRows) {
       final diagnostic = row!.node.diagnostic;
@@ -827,14 +819,12 @@ class InspectorTreeController extends DisposableController
       // Widget search end
     }
 
-    assert(
-      () {
-        debugPrint(
-          'Search completed with $debugStatsWidgets widgets, $debugStatsSearchOps ops',
-        );
-        return true;
-      }(),
-    );
+    assert(() {
+      debugPrint(
+        'Search completed with $debugStatsWidgets widgets, $debugStatsSearchOps ops',
+      );
+      return true;
+    }());
 
     return matches;
   }
@@ -954,21 +944,21 @@ class _InspectorTreeState extends State<InspectorTree>
   }
 
   // TODO(devoncarew): Commented out as per flutter/devtools/pull/2001.
-//  void _onScrollYChange() {
-//    if (controller == null) return;
-//
-//    // If the vertical position  is already being animated we should not trigger
-//    // a new animation of the horizontal position as a more direct animation of
-//    // the horizontal position has already been triggered.
-//    if (currentAnimateY != null) return;
-//
-//    final x = _computeTargetX(_scrollControllerY.offset);
-//    _scrollControllerX.animateTo(
-//      x,
-//      duration: defaultDuration,
-//      curve: defaultCurve,
-//    );
-//  }
+  //  void _onScrollYChange() {
+  //    if (controller == null) return;
+  //
+  //    // If the vertical position  is already being animated we should not trigger
+  //    // a new animation of the horizontal position as a more direct animation of
+  //    // the horizontal position has already been triggered.
+  //    if (currentAnimateY != null) return;
+  //
+  //    final x = _computeTargetX(_scrollControllerY.offset);
+  //    _scrollControllerX.animateTo(
+  //      x,
+  //      duration: defaultDuration,
+  //      curve: defaultCurve,
+  //    );
+  //  }
 
   @override
   Future<void> waitForClientsThenScrollToRect(
@@ -992,12 +982,14 @@ class _InspectorTreeState extends State<InspectorTree>
 
     final initialX = rect.left;
     final initialY = rect.top;
-    final yOffsetAtViewportTop = _scrollControllerY.hasClients
-        ? _scrollControllerY.offset
-        : _scrollControllerY.initialScrollOffset;
-    final xOffsetAtViewportLeft = _scrollControllerX.hasClients
-        ? _scrollControllerX.offset
-        : _scrollControllerX.initialScrollOffset;
+    final yOffsetAtViewportTop =
+        _scrollControllerY.hasClients
+            ? _scrollControllerY.offset
+            : _scrollControllerY.initialScrollOffset;
+    final xOffsetAtViewportLeft =
+        _scrollControllerX.hasClients
+            ? _scrollControllerX.offset
+            : _scrollControllerX.initialScrollOffset;
 
     final viewPortInScrollControllerSpace = Rect.fromLTWH(
       xOffsetAtViewportLeft,
@@ -1012,8 +1004,9 @@ class _InspectorTreeState extends State<InspectorTree>
       (rect.centerLeft.dx + rect.center.dx) / 2,
       rect.center.dy,
     );
-    final isRectInViewPort =
-        viewPortInScrollControllerSpace.contains(centerLeftHalf);
+    final isRectInViewPort = viewPortInScrollControllerSpace.contains(
+      centerLeftHalf,
+    );
     if (isRectInViewPort) {
       // The rect is already in view, don't scroll
       return;
@@ -1083,9 +1076,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
   /// Pad [initialY] so that a row would be placed in the vertical center of
   /// the screen.
-  double _padTargetY({
-    required double initialY,
-  }) {
+  double _padTargetY({required double initialY}) {
     return initialY - (safeViewportHeight / 2) + inspectorRowHeight / 2;
   }
 
@@ -1162,7 +1153,8 @@ class _InspectorTreeState extends State<InspectorTree>
                 controller: _scrollControllerX,
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: treeControllerLocal.rowWidth +
+                    maxWidth:
+                        treeControllerLocal.rowWidth +
                         treeControllerLocal.maxRowIndent,
                   ),
                   // TODO(kenz): this scrollbar needs to be sticky to the right side of
@@ -1183,29 +1175,29 @@ class _InspectorTreeState extends State<InspectorTree>
                         offsetControllerViewportDimension: viewportWidth,
                         child: ListView.custom(
                           itemExtent: inspectorRowHeight,
-                          childrenDelegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              if (index == rows.length) {
-                                return SizedBox(height: inspectorRowHeight);
-                              }
-                              final row =
-                                  treeControllerLocal.rowAtIndex(index)!;
-                              final inspectorRef =
-                                  row.node.diagnostic?.valueRef.id;
-                              return _InspectorTreeRowWidget(
-                                key: PageStorageKey(row.node),
-                                inspectorTreeState: this,
-                                row: row,
-                                scrollControllerX: _scrollControllerX,
-                                viewportWidth: viewportWidth,
-                                error: widget.widgetErrors != null &&
-                                        inspectorRef != null
-                                    ? widget.widgetErrors![inspectorRef]
-                                    : null,
-                              );
-                            },
-                            childCount: rows.length + 1,
-                          ),
+                          childrenDelegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            if (index == rows.length) {
+                              return SizedBox(height: inspectorRowHeight);
+                            }
+                            final row = treeControllerLocal.rowAtIndex(index)!;
+                            final inspectorRef =
+                                row.node.diagnostic?.valueRef.id;
+                            return _InspectorTreeRowWidget(
+                              key: PageStorageKey(row.node),
+                              inspectorTreeState: this,
+                              row: row,
+                              scrollControllerX: _scrollControllerX,
+                              viewportWidth: viewportWidth,
+                              error:
+                                  widget.widgetErrors != null &&
+                                          inspectorRef != null
+                                      ? widget.widgetErrors![inspectorRef]
+                                      : null,
+                            );
+                          }, childCount: rows.length + 1),
                           controller: _scrollControllerY,
                         ),
                       ),
@@ -1226,9 +1218,10 @@ class _InspectorTreeState extends State<InspectorTree>
   bool get wantKeepAlive => true;
 }
 
-Paint _defaultPaint(ColorScheme colorScheme) => Paint()
-  ..color = colorScheme.treeGuidelineColor
-  ..strokeWidth = chartLineStrokeWidth;
+Paint _defaultPaint(ColorScheme colorScheme) =>
+    Paint()
+      ..color = colorScheme.treeGuidelineColor
+      ..strokeWidth = chartLineStrokeWidth;
 
 /// The distance (on the x-axis) between the expand/collapse and the start of
 /// the row, as determined by a percentage of the [inspectorColumnIndent].
@@ -1273,7 +1266,8 @@ class _RowPainter extends CustomPainter {
     final distanceFromExpandCollapseToRowStart =
         inspectorColumnIndent * _expandCollapseToRowStartXDistancePercentage;
     for (final tick in row.ticks) {
-      final expandCollapseX = _controller.getDepthIndent(tick) -
+      final expandCollapseX =
+          _controller.getDepthIndent(tick) -
           distanceFromExpandCollapseToRowStart;
       // Draw a vertical line for each tick identifying a connection between
       // an ancestor of this node and some other node in the tree.
@@ -1286,11 +1280,13 @@ class _RowPainter extends CustomPainter {
     // If this row is itself connected to a parent then draw the L shaped line
     // to make that connection.
     if (row.lineToParent) {
-      final parentExpandCollapseX = _controller.getDepthIndent(row.depth - 1) -
+      final parentExpandCollapseX =
+          _controller.getDepthIndent(row.depth - 1) -
           distanceFromExpandCollapseToRowStart;
-      final width = showExpandCollapse
-          ? inspectorColumnIndent * 0.6
-          : inspectorColumnIndent;
+      final width =
+          showExpandCollapse
+              ? inspectorColumnIndent * 0.6
+              : inspectorColumnIndent;
       canvas.drawLine(
         Offset(parentExpandCollapseX, 0.0),
         Offset(parentExpandCollapseX, inspectorRowHeight * 0.5),
@@ -1314,13 +1310,15 @@ class _RowPainter extends CustomPainter {
     final subordinates =
         node.diagnostic?.hideableGroupSubordinates ?? <RemoteDiagnosticsNode>[];
     final groupIsHidden = node.diagnostic?.groupIsHidden ?? false;
-    final lastHiddenSubordinateHasNoChildren = groupIsHidden &&
+    final lastHiddenSubordinateHasNoChildren =
+        groupIsHidden &&
         subordinates.isNotEmpty &&
         subordinates.last.childrenNow.isEmpty;
     if (expandedWithSingleChild && !lastHiddenSubordinateHasNoChildren) {
       final distanceFromIconCenterToRowStart =
           inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
-      final iconCenterX = _controller.getDepthIndent(row.depth) -
+      final iconCenterX =
+          _controller.getDepthIndent(row.depth) -
           distanceFromIconCenterToRowStart;
       // Draw a line from the bottom of the current row's icon to the top of the
       // child row's icon:
@@ -1393,9 +1391,10 @@ class InspectorRowContent extends StatelessWidget {
 
     Color? backgroundColor;
     if (row.isSelected) {
-      backgroundColor = hasError
-          ? colorScheme.errorContainer
-          : colorScheme.selectedRowBackgroundColor;
+      backgroundColor =
+          hasError
+              ? colorScheme.errorContainer
+              : colorScheme.selectedRowBackgroundColor;
     }
 
     final node = row.node;
@@ -1414,19 +1413,16 @@ class InspectorRowContent extends StatelessWidget {
               children: [
                 node.showExpandCollapse
                     ? InkWell(
-                        onTap: onToggle,
-                        child: RotationTransition(
-                          turns: expandArrowAnimation,
-                          child: Icon(
-                            Icons.expand_more,
-                            size: defaultIconSize,
-                          ),
-                        ),
-                      )
-                    : const SizedBox(
-                        width: expandCollapseWidth,
-                        height: defaultSpacing,
+                      onTap: onToggle,
+                      child: RotationTransition(
+                        turns: expandArrowAnimation,
+                        child: Icon(Icons.expand_more, size: defaultIconSize),
                       ),
+                    )
+                    : const SizedBox(
+                      width: expandCollapseWidth,
+                      height: defaultSpacing,
+                    ),
                 Expanded(
                   child: Container(
                     color: backgroundColor,
@@ -1454,30 +1450,32 @@ class InspectorRowContent extends StatelessWidget {
                           nodeDescriptionHighlightStyle:
                               searchValue.isEmpty || !row.isSearchMatch
                                   ? DiagnosticsTextStyles.regular(
-                                      Theme.of(context).colorScheme,
-                                    )
+                                    Theme.of(context).colorScheme,
+                                  )
                                   : row.isSelected
-                                      ? theme.searchMatchHighlightStyleFocused
-                                      : theme.searchMatchHighlightStyle,
-                          actionLabel: isHideableGroupLeader
-                              ? diagnostic!.groupIsHidden
-                                  ? '(expand)'
-                                  : '(collapse)'
-                              : null,
-                          actionCallback: isHideableGroupLeader
-                              ? () {
-                                  controller.refreshTree(
-                                    updateTreeAction: () {
-                                      controller.toggleHiddenGroup(node);
-                                      return true;
-                                    },
-                                  );
-                                }
-                              : null,
-                          customDescription: isHideableGroupLeader &&
-                                  diagnostic!.groupIsHidden
-                              ? '${diagnostic.hideableGroupSubordinates!.length + 1} more widgets...'
-                              : null,
+                                  ? theme.searchMatchHighlightStyleFocused
+                                  : theme.searchMatchHighlightStyle,
+                          actionLabel:
+                              isHideableGroupLeader
+                                  ? diagnostic!.groupIsHidden
+                                      ? '(expand)'
+                                      : '(collapse)'
+                                  : null,
+                          actionCallback:
+                              isHideableGroupLeader
+                                  ? () {
+                                    controller.refreshTree(
+                                      updateTreeAction: () {
+                                        controller.toggleHiddenGroup(node);
+                                        return true;
+                                      },
+                                    );
+                                  }
+                                  : null,
+                          customDescription:
+                              isHideableGroupLeader && diagnostic!.groupIsHidden
+                                  ? '${diagnostic.hideableGroupSubordinates!.length + 1} more widgets...'
+                                  : null,
                           customIconName:
                               isHideableGroupLeader && diagnostic!.groupIsHidden
                                   ? 'HiddenGroup'
@@ -1496,8 +1494,10 @@ class InspectorRowContent extends StatelessWidget {
 
     // Wrap with tooltip if there is an error for this node's widget.
     if (hasError) {
-      rowWidget =
-          DevToolsTooltip(message: error!.errorMessage, child: rowWidget);
+      rowWidget = DevToolsTooltip(
+        message: error!.errorMessage,
+        child: rowWidget,
+      );
     }
 
     return CustomPaint(

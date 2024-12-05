@@ -12,25 +12,25 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../service/connected_app/connection_info.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/config_specific/import_export/import_export.dart';
-import '../shared/connection_info.dart';
+import '../shared/framework/routing.dart';
+import '../shared/framework/screen.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
-import '../shared/routing.dart';
-import '../shared/screen.dart';
 import '../shared/title.dart';
 import '../shared/ui/vm_flag_widgets.dart';
 import 'framework_core.dart';
 
 class HomeScreen extends Screen {
   HomeScreen({this.sampleData = const []})
-      : super.fromMetaData(
-          ScreenMetaData.home,
-          titleGenerator: () => devToolsTitle.value,
-        );
+    : super.fromMetaData(
+        ScreenMetaData.home,
+        titleGenerator: () => devToolsTitle.value,
+      );
 
   static final id = ScreenMetaData.home.id;
 
@@ -64,7 +64,7 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     final connected =
         serviceConnection.serviceManager.connectedState.value.connected &&
-            serviceConnection.serviceManager.connectedAppInitialized;
+        serviceConnection.serviceManager.connectedAppInitialized;
     return Scrollbar(
       child: ListView(
         children: [
@@ -104,8 +104,8 @@ class ConnectionSection extends StatelessWidget {
             minScreenWidthForTextBeforeScaling:
                 _primaryMinScreenWidthForTextBeforeScaling,
             routerDelegate: DevToolsRouterDelegate.of(context),
-            onPressed: () =>
-                Navigator.of(context, rootNavigator: true).pop('dialog'),
+            onPressed:
+                () => Navigator.of(context, rootNavigator: true).pop('dialog'),
           ),
         ],
         child: const ConnectedAppSummary(narrowView: false),
@@ -137,12 +137,7 @@ class LandingScreenSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(
-              child: Text(
-                title,
-                style: textTheme.headlineMedium,
-              ),
-            ),
+            Expanded(child: Text(title, style: textTheme.headlineMedium)),
             ...actions,
           ],
         ),
@@ -239,10 +234,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Connect to a Running App',
-            style: textTheme.titleMedium,
-          ),
+          Text('Connect to a Running App', style: textTheme.titleMedium),
           const SizedBox(height: denseRowSpacing),
           Text(
             'Enter a URL to a running Dart or Flutter application',
@@ -261,10 +253,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
   }
 
   Future<void> _connectHelper() async {
-    ga.select(
-      gac.home,
-      gac.HomeScreenEvents.connectToApp.name,
-    );
+    ga.select(gac.home, gac.HomeScreenEvents.connectToApp.name);
 
     final uri = connectDialogController.text;
     if (uri.isEmpty) {
@@ -286,11 +275,13 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
     // intuitive that we don't want to just cancel the route change or
     // notification if we are already on a different screen.
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    final connected =
-        await FrameworkCore.initVmService(serviceUriAsString: uri);
+    final connected = await FrameworkCore.initVmService(
+      serviceUriAsString: uri,
+    );
     if (connected) {
-      final connectedUri =
-          Uri.parse(serviceConnection.serviceManager.serviceUri!);
+      final connectedUri = Uri.parse(
+        serviceConnection.serviceManager.serviceUri!,
+      );
       await routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');
@@ -304,10 +295,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
 }
 
 class SampleDataDropDownButton extends StatefulWidget {
-  const SampleDataDropDownButton({
-    super.key,
-    this.sampleData = const [],
-  });
+  const SampleDataDropDownButton({super.key, this.sampleData = const []});
 
   final List<DevToolsJsonFile> sampleData;
 
@@ -325,19 +313,21 @@ class _SampleDataDropDownButtonState extends State<SampleDataDropDownButton> {
       children: [
         RoundedDropDownButton<DevToolsJsonFile>(
           value: value,
-          items: [
-            for (final data in widget.sampleData) _buildMenuItem(data),
-          ],
-          onChanged: (file) => setState(() {
-            value = file;
-          }),
+          items: [for (final data in widget.sampleData) _buildMenuItem(data)],
+          onChanged:
+              (file) => setState(() {
+                value = file;
+              }),
         ),
         const SizedBox(width: defaultSpacing),
         ElevatedButton(
-          onPressed: value == null
-              ? null
-              : () => Provider.of<ImportController>(context, listen: false)
-                  .importData(value!),
+          onPressed:
+              value == null
+                  ? null
+                  : () => Provider.of<ImportController>(
+                    context,
+                    listen: false,
+                  ).importData(value!),
           child: const MaterialIconLabel(
             label: 'Load sample data',
             iconData: Icons.file_upload,

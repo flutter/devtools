@@ -16,7 +16,7 @@ void main() {
   Logging.logging.add('Starting...');
 
   runApp(
-    MaterialApp(
+    const MaterialApp(
       // Title
       title: appName,
       // Home
@@ -26,6 +26,8 @@ void main() {
 }
 
 class MyHome extends StatefulWidget {
+  const MyHome({super.key});
+
   @override
   State<MyHome> createState() => MyHomeState();
 }
@@ -101,6 +103,7 @@ class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
         );
         break;
       default:
+        // ignore: avoid_print, fine for example app.
         print('ERROR: Unhandled Menu.');
     }
   }

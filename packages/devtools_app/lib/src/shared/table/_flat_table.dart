@@ -26,20 +26,23 @@ class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable<T> {
     super.pinBehavior = FlatTablePinBehavior.none,
     super.columnGroups,
     super.autoScrollContent = false,
+    super.startScrolledAtBottom = false,
     super.onItemSelected,
     super.preserveVerticalScrollPosition = false,
     super.includeColumnGroupHeaders = true,
     super.sizeColumnsToFit = true,
+    super.rowHeight,
     super.selectionNotifier,
   }) : super(
-          searchMatchesNotifier: searchController.searchMatches,
-          activeSearchMatchNotifier: searchController.activeSearchMatch,
-          onDataSorted: () => WidgetsBinding.instance.addPostFrameCallback((_) {
-            // This needs to be in a post frame callback so that the search
-            // matches are not updated in the middle of a table build.
-            searchController.refreshSearchMatches();
-          }),
-        );
+         searchMatchesNotifier: searchController.searchMatches,
+         activeSearchMatchNotifier: searchController.activeSearchMatch,
+         onDataSorted:
+             () => WidgetsBinding.instance.addPostFrameCallback((_) {
+               // This needs to be in a post frame callback so that the search
+               // matches are not updated in the middle of a table build.
+               searchController.refreshSearchMatches();
+             }),
+       );
 }
 
 /// A table that displays in a collection of [data], based on a collection of
@@ -56,6 +59,7 @@ class FlatTable<T> extends StatefulWidget {
     required this.columns,
     this.columnGroups,
     this.autoScrollContent = false,
+    this.startScrolledAtBottom = false,
     this.onItemSelected,
     required this.defaultSortColumn,
     required this.defaultSortDirection,
@@ -69,6 +73,7 @@ class FlatTable<T> extends StatefulWidget {
     this.includeColumnGroupHeaders = true,
     this.tallHeaders = false,
     this.sizeColumnsToFit = true,
+    this.rowHeight,
     this.headerColor,
     this.fillWithEmptyRows = false,
     this.enableHoverHandling = false,
@@ -92,6 +97,8 @@ class FlatTable<T> extends StatefulWidget {
   /// Whether the columns for this table should be sized so that the entire
   /// table fits in view (e.g. so that there is no horizontal scrolling).
   final bool sizeColumnsToFit;
+
+  final double? rowHeight;
 
   // TODO(kenz): should we enable this behavior by default? Does it ever matter
   // to preserve the order of the original data passed to a flat table?
@@ -136,6 +143,10 @@ class FlatTable<T> extends StatefulWidget {
 
   /// Auto-scrolling the table to keep new content visible.
   final bool autoScrollContent;
+
+  /// Determines whether the table should be scrolled to the bottom of the
+  /// scrollable area on the initial build of the table.
+  final bool startScrolledAtBottom;
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T data) keyFactory;
@@ -266,7 +277,8 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     FlatTable<T> oldWidget,
     FlatTable<T> newWidget,
   ) {
-    final columnsChanged = !collectionEquals(
+    final columnsChanged =
+        !collectionEquals(
           oldWidget.columns.map((c) => c.config),
           newWidget.columns.map((c) => c.config),
         ) ||
@@ -280,25 +292,27 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     Widget buildTable(List<double> columnWidths) => DevToolsTable<T>(
-          tableController: tableController,
-          columnWidths: columnWidths,
-          autoScrollContent: widget.autoScrollContent,
-          rowBuilder: _buildRow,
-          activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
-          rowItemExtent: defaultRowHeight,
-          preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
-          tallHeaders: widget.tallHeaders,
-          headerColor: widget.headerColor,
-          fillWithEmptyRows: widget.fillWithEmptyRows,
-          enableHoverHandling: widget.enableHoverHandling,
-        );
+      tableController: tableController,
+      columnWidths: columnWidths,
+      autoScrollContent: widget.autoScrollContent,
+      startScrolledAtBottom: widget.startScrolledAtBottom,
+      rowBuilder: _buildRow,
+      activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
+      rowItemExtent: widget.rowHeight ?? defaultRowHeight,
+      preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+      tallHeaders: widget.tallHeaders,
+      headerColor: widget.headerColor,
+      fillWithEmptyRows: widget.fillWithEmptyRows,
+      enableHoverHandling: widget.enableHoverHandling,
+    );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
-        builder: (context, constraints) => buildTable(
-          tableController.computeColumnWidthsSizeToFit(
-            constraints.maxWidth,
-          ),
-        ),
+        builder:
+            (context, constraints) => buildTable(
+              tableController.computeColumnWidthsSizeToFit(
+                constraints.maxWidth,
+              ),
+            ),
       );
     }
     return buildTable(tableController.columnWidths!);

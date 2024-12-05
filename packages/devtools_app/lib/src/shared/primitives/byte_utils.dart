@@ -72,8 +72,10 @@ String printBytes(
     // TODO(peterdjlee): Round up to the respective digit when fractionDigits > 0.
     bytes = fractionDigits == 0 ? bytes + 511 : bytes;
   }
-  final bytesDisplay =
-      convertBytes(bytes, to: unit).toStringAsFixed(fractionDigits);
+  final bytesDisplay = convertBytes(
+    bytes,
+    to: unit,
+  ).toStringAsFixed(fractionDigits);
   final unitSuffix = includeUnit ? ' ${unit.display}' : '';
   return '$bytesDisplay$unitSuffix';
 }
@@ -106,7 +108,7 @@ enum ByteUnit {
   gb(multiplierCount: 3);
 
   const ByteUnit({required this.multiplierCount, String? display})
-      : _display = display;
+    : _display = display;
 
   static const unitMultiplier = 1024.0;
 

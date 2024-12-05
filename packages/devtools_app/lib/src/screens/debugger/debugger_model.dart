@@ -24,10 +24,7 @@ bool includeDiagnosticChildren = false;
 
 /// A tuple of a script and an optional location.
 class ScriptLocation {
-  ScriptLocation(
-    this.scriptRef, {
-    this.location,
-  });
+  ScriptLocation(this.scriptRef, {this.location});
 
   final ScriptRef scriptRef;
 
@@ -186,10 +183,7 @@ class _BreakpointAndSourcePositionUnresolved
 
 /// A tuple of a stack frame and a source position.
 class StackFrameAndSourcePosition {
-  StackFrameAndSourcePosition(
-    this.frame, {
-    this.position,
-  });
+  StackFrameAndSourcePosition(this.frame, {this.position});
 
   final Frame frame;
 

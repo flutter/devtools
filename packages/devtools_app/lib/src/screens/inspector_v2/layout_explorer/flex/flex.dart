@@ -8,10 +8,10 @@ import 'dart:math' as math;
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/diagnostics/inspector_service.dart';
 import '../../../../shared/primitives/math_utils.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../inspector_data_models.dart';
 import '../ui/arrow.dart';
 import '../ui/free_space.dart';
@@ -29,10 +29,7 @@ import 'utils.dart';
 double get alignmentDropdownMaxSize => scaleByFontFactor(140.0);
 
 class FlexLayoutExplorerWidget extends LayoutExplorerWidget {
-  const FlexLayoutExplorerWidget(
-    super.inspectorController, {
-    super.key,
-  });
+  const FlexLayoutExplorerWidget(super.inspectorController, {super.key});
 
   static bool shouldDisplay(RemoteDiagnosticsNode node) {
     return (node.isFlex) || (node.parent?.isFlex ?? false);
@@ -43,8 +40,12 @@ class FlexLayoutExplorerWidget extends LayoutExplorerWidget {
       FlexLayoutExplorerWidgetState();
 }
 
-class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
-    FlexLayoutExplorerWidget, FlexLayoutProperties> {
+class FlexLayoutExplorerWidgetState
+    extends
+        LayoutExplorerWidgetState<
+          FlexLayoutExplorerWidget,
+          FlexLayoutProperties
+        > {
   final scrollController = ScrollController();
 
   Axis get direction => properties!.direction;
@@ -57,9 +58,10 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           ? colorScheme.mainAxisColor
           : colorScheme.crossAxisColor;
 
-  Color verticalColor(ColorScheme colorScheme) => properties!.isMainAxisVertical
-      ? colorScheme.mainAxisColor
-      : colorScheme.crossAxisColor;
+  Color verticalColor(ColorScheme colorScheme) =>
+      properties!.isMainAxisVertical
+          ? colorScheme.mainAxisColor
+          : colorScheme.crossAxisColor;
 
   Color horizontalTextColor(ColorScheme colorScheme) =>
       properties!.isMainAxisHorizontal
@@ -120,9 +122,10 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
 
   Widget _buildAxisAlignmentDropdown(Axis axis, ThemeData theme) {
     final colorScheme = theme.colorScheme;
-    final color = axis == direction
-        ? colorScheme.mainAxisTextColor
-        : colorScheme.crossAxisTextColor;
+    final color =
+        axis == direction
+            ? colorScheme.mainAxisTextColor
+            : colorScheme.crossAxisTextColor;
     List<Enum> alignmentEnumEntries;
     Object? selected;
     final propertiesLocal = properties!;
@@ -150,9 +153,10 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           isExpanded: true,
           // Avoid showing an underline for the main axis and cross-axis drop downs.
           underline: const SizedBox(),
-          iconEnabledColor: axis == propertiesLocal.direction
-              ? colorScheme.mainAxisColor
-              : colorScheme.crossAxisColor,
+          iconEnabledColor:
+              axis == propertiesLocal.direction
+                  ? colorScheme.mainAxisColor
+                  : colorScheme.crossAxisColor,
           selectedItemBuilder: (context) {
             return [
               for (final alignment in alignmentEnumEntries)
@@ -173,13 +177,13 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                       child: Image.asset(
                         (axis == direction)
                             ? mainAxisAssetImageUrl(
-                                direction,
-                                alignment as MainAxisAlignment,
-                              )
+                              direction,
+                              alignment as MainAxisAlignment,
+                            )
                             : crossAxisAssetImageUrl(
-                                direction,
-                                alignment as CrossAxisAlignment,
-                              ),
+                              direction,
+                              alignment as CrossAxisAlignment,
+                            ),
                         height: axisAlignmentAssetImageHeight,
                         fit: BoxFit.fitHeight,
                         color: color,
@@ -212,13 +216,13 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                         child: Image.asset(
                           (axis == direction)
                               ? mainAxisAssetImageUrl(
-                                  direction,
-                                  alignment as MainAxisAlignment,
-                                )
+                                direction,
+                                alignment as MainAxisAlignment,
+                              )
                               : crossAxisAssetImageUrl(
-                                  direction,
-                                  alignment as CrossAxisAlignment,
-                                ),
+                                direction,
+                                alignment as CrossAxisAlignment,
+                              ),
                           fit: BoxFit.fitHeight,
                           color: color,
                         ),
@@ -234,13 +238,14 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
             FlexLayoutProperties changedProperties;
-            changedProperties = axis == direction
-                ? propertiesLocal.copyWith(
-                    mainAxisAlignment: newSelection as MainAxisAlignment?,
-                  )
-                : propertiesLocal.copyWith(
-                    crossAxisAlignment: newSelection as CrossAxisAlignment?,
-                  );
+            changedProperties =
+                axis == direction
+                    ? propertiesLocal.copyWith(
+                      mainAxisAlignment: newSelection as MainAxisAlignment?,
+                    )
+                    : propertiesLocal.copyWith(
+                      crossAxisAlignment: newSelection as CrossAxisAlignment?,
+                    );
             final valueRef = propertiesLocal.node.valueRef;
             markAsDirty();
             await objectGroup!.invokeSetFlexProperties(
@@ -450,9 +455,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
 
     final contents = Container(
       decoration: BoxDecoration(
-        border: Border.all(
-          color: theme.primaryColorLight,
-        ),
+        border: Border.all(color: theme.primaryColorLight),
       ),
       margin: const EdgeInsets.only(top: margin, left: margin),
       child: LayoutBuilder(
@@ -464,21 +467,23 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
             return axis == Axis.horizontal ? maxWidth : maxHeight;
           }
 
-          final childrenAndMainAxisSpacesRenderProps =
-              widget.properties.childrenRenderProperties(
-            smallestRenderWidth: minRenderWidth,
-            largestRenderWidth: defaultMaxRenderWidth,
-            smallestRenderHeight: minRenderHeight,
-            largestRenderHeight: defaultMaxRenderHeight,
-            maxSizeAvailable: maxSizeAvailable,
-          );
+          final childrenAndMainAxisSpacesRenderProps = widget.properties
+              .childrenRenderProperties(
+                smallestRenderWidth: minRenderWidth,
+                largestRenderWidth: defaultMaxRenderWidth,
+                smallestRenderHeight: minRenderHeight,
+                largestRenderHeight: defaultMaxRenderHeight,
+                maxSizeAvailable: maxSizeAvailable,
+              );
 
-          final renderProperties = childrenAndMainAxisSpacesRenderProps
-              .where((renderProps) => !renderProps.isFreeSpace)
-              .toList();
-          final mainAxisSpaces = childrenAndMainAxisSpacesRenderProps
-              .where((renderProps) => renderProps.isFreeSpace)
-              .toList();
+          final renderProperties =
+              childrenAndMainAxisSpacesRenderProps
+                  .where((renderProps) => !renderProps.isFreeSpace)
+                  .toList();
+          final mainAxisSpaces =
+              childrenAndMainAxisSpacesRenderProps
+                  .where((renderProps) => renderProps.isFreeSpace)
+                  .toList();
           final crossAxisSpaces = widget.properties.crossAxisSpaces(
             childrenRenderProperties: renderProperties,
             maxSizeAvailable: maxSizeAvailable,
@@ -524,22 +529,27 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
               scrollDirection: widget.properties.direction,
               controller: widget.scrollController,
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: maxWidth,
-                  minHeight: maxHeight,
-                  maxWidth: widget.direction == Axis.horizontal
-                      ? sum(
-                          childrenAndMainAxisSpacesRenderProps
-                              .map((renderSize) => renderSize.width),
-                        )
-                      : maxWidth,
-                  maxHeight: widget.direction == Axis.vertical
-                      ? sum(
-                          childrenAndMainAxisSpacesRenderProps
-                              .map((renderSize) => renderSize.height),
-                        )
-                      : maxHeight,
-                ).normalize(),
+                constraints:
+                    BoxConstraints(
+                      minWidth: maxWidth,
+                      minHeight: maxHeight,
+                      maxWidth:
+                          widget.direction == Axis.horizontal
+                              ? sum(
+                                childrenAndMainAxisSpacesRenderProps.map(
+                                  (renderSize) => renderSize.width,
+                                ),
+                              )
+                              : maxWidth,
+                      maxHeight:
+                          widget.direction == Axis.vertical
+                              ? sum(
+                                childrenAndMainAxisSpacesRenderProps.map(
+                                  (renderSize) => renderSize.height,
+                                ),
+                              )
+                              : maxHeight,
+                    ).normalize(),
                 child: Stack(
                   children: [
                     LayoutExplorerBackground(colorScheme: colorScheme),
@@ -597,10 +607,7 @@ class FlexChildVisualizer extends StatelessWidget {
 
   void onChangeFlexFit(FlexFit? newFlexFit) async {
     state.markAsDirty();
-    await objectGroup!.invokeSetFlexFit(
-      properties.node.valueRef,
-      newFlexFit!,
-    );
+    await objectGroup!.invokeSetFlexFit(properties.node.valueRef, newFlexFit!);
   }
 
   Widget _buildFlexFactorChangerDropdown(
@@ -612,9 +619,10 @@ class FlexChildVisualizer extends StatelessWidget {
     Widget buildMenuitemChild(int? flexFactor) {
       return Text(
         'flex: $flexFactor',
-        style: flexFactor == propertiesLocal.flexFactor
-            ? theme.boldTextStyle.copyWith(color: emphasizedTextColor)
-            : theme.regularTextStyleWithColor(emphasizedTextColor),
+        style:
+            flexFactor == propertiesLocal.flexFactor
+                ? theme.boldTextStyle.copyWith(color: emphasizedTextColor)
+                : theme.regularTextStyleWithColor(emphasizedTextColor),
       );
     }
 
@@ -639,9 +647,9 @@ class FlexChildVisualizer extends StatelessWidget {
 
   Widget _buildFlexFitChangerDropdown(ThemeData theme) {
     Widget flexFitDescription(FlexFit flexFit) => Text(
-          'fit: ${flexFit.name}',
-          style: theme.regularTextStyleWithColor(emphasizedTextColor),
-        );
+      'fit: ${flexFit.name}',
+      style: theme.regularTextStyleWithColor(emphasizedTextColor),
+    );
 
     final propertiesLocal = properties;
 
@@ -674,14 +682,13 @@ class FlexChildVisualizer extends StatelessWidget {
     // TODO(https://github.com/flutter/devtools/issues/4058) allow more dynamic
     // flex factor input
     final currentFlexFactor = properties.flexFactor?.toInt() ?? 0;
-    final currentMaxFlexFactor =
-        math.max(currentFlexFactor, maximumFlexFactorOptions);
+    final currentMaxFlexFactor = math.max(
+      currentFlexFactor,
+      maximumFlexFactorOptions,
+    );
 
     return Container(
-      margin: const EdgeInsets.only(
-        top: margin,
-        left: margin,
-      ),
+      margin: const EdgeInsets.only(top: margin, left: margin),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -719,15 +726,20 @@ class FlexChildVisualizer extends StatelessWidget {
       final horizontal = rootLocal.isMainAxisHorizontal;
 
       late Size size;
-      size = propertiesLocal.hasFlexFactor
-          ? SizeTween(
-              begin: Size(
-                horizontal ? minRenderWidth - entranceMargin : renderSize.width,
-                vertical ? minRenderHeight - entranceMargin : renderSize.height,
-              ),
-              end: renderSize,
-            ).evaluate(state.entranceCurve)!
-          : renderSize;
+      size =
+          propertiesLocal.hasFlexFactor
+              ? SizeTween(
+                begin: Size(
+                  horizontal
+                      ? minRenderWidth - entranceMargin
+                      : renderSize.width,
+                  vertical
+                      ? minRenderHeight - entranceMargin
+                      : renderSize.height,
+                ),
+                end: renderSize,
+              ).evaluate(state.entranceCurve)!
+              : renderSize;
       // Not-expanded widgets enter much faster.
       return Opacity(
         opacity: min([state.entranceCurve.value * 5, 1.0]),

@@ -10,11 +10,11 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
-import '../../shared/editable_list.dart';
 import '../../shared/globals.dart';
 import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/simple_items.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/editable_list.dart';
 
 class FlutterInspectorSettingsDialog extends StatelessWidget {
   const FlutterInspectorSettingsDialog({super.key});
@@ -36,20 +36,28 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...dialogSubHeader(
-                  theme,
-                  'General',
-                ),
+                ...dialogSubHeader(theme, 'General'),
                 CheckboxSetting(
-                  notifier: preferences.inspector.hoverEvalModeEnabled
-                      as ValueNotifier<bool?>,
+                  notifier:
+                      preferences.inspector.hoverEvalModeEnabled
+                          as ValueNotifier<bool?>,
                   title: 'Enable hover inspection',
                   description:
                       'Hovering over any widget displays its properties and values.',
                   gaItem: gac.inspectorHoverEvalMode,
                 ),
-                if (!inspectorV2Enabled) ...[
-                  const SizedBox(height: largeSpacing),
+                const SizedBox(height: largeSpacing),
+                if (inspectorV2Enabled) ...[
+                  CheckboxSetting(
+                    notifier:
+                        preferences.inspector.autoRefreshEnabled
+                            as ValueNotifier<bool?>,
+                    title: 'Enable auto-refreshing of the widget tree',
+                    description:
+                        'The widget tree will automatically be refreshed after a hot-reload.',
+                    gaItem: gac.inspectorAutoRefreshEnabled,
+                  ),
+                ] else ...[
                   const InspectorDefaultDetailsViewOption(),
                 ],
                 const SizedBox(height: largeSpacing),
@@ -76,15 +84,11 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                   style: theme.subtleTextStyle,
                 ),
                 const SizedBox(height: denseSpacing),
-                const Expanded(
-                  child: PubRootDirectorySection(),
-                ),
+                const Expanded(child: PubRootDirectorySection()),
               ],
             ),
           ),
-          actions: const [
-            DialogCloseButton(),
-          ],
+          actions: const [DialogCloseButton()],
         );
       },
     );
@@ -137,13 +141,11 @@ class InspectorDefaultDetailsViewOption extends StatelessWidget {
   void _onChanged(InspectorDetailsViewType? value) {
     if (value != null) {
       preferences.inspector.setDefaultInspectorDetailsView(value);
-      final item = value.name == InspectorDetailsViewType.layoutExplorer.name
-          ? gac.defaultDetailsViewToLayoutExplorer
-          : gac.defaultDetailsViewToWidgetDetails;
-      ga.select(
-        gac.inspector,
-        item,
-      );
+      final item =
+          value.name == InspectorDetailsViewType.layoutExplorer.name
+              ? gac.defaultDetailsViewToLayoutExplorer
+              : gac.defaultDetailsViewToWidgetDetails;
+      ga.select(gac.inspector, item);
     }
   }
 }
@@ -156,7 +158,7 @@ class PubRootDirectorySection extends StatelessWidget {
     return ValueListenableBuilder<IsolateRef?>(
       valueListenable:
           serviceConnection.serviceManager.isolateManager.mainIsolate,
-      builder: (_, __, ___) {
+      builder: (_, _, _) {
         return SizedBox(
           height: 200.0,
           child: EditableList(
@@ -165,16 +167,18 @@ class PubRootDirectorySection extends StatelessWidget {
             entries: preferences.inspector.pubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
             isRefreshing: preferences.inspector.isRefreshingPubRootDirectories,
-            onEntryAdded: (p0) => unawaited(
-              preferences.inspector.addPubRootDirectories(
-                [p0],
-                shouldCache: true,
-              ),
-            ),
-            onEntryRemoved: (p0) =>
-                unawaited(preferences.inspector.removePubRootDirectories([p0])),
-            onRefreshTriggered: () =>
-                unawaited(preferences.inspector.loadPubRootDirectories()),
+            onEntryAdded:
+                (p0) => unawaited(
+                  preferences.inspector.addPubRootDirectories([
+                    p0,
+                  ], shouldCache: true),
+                ),
+            onEntryRemoved:
+                (p0) => unawaited(
+                  preferences.inspector.removePubRootDirectories([p0]),
+                ),
+            onRefreshTriggered:
+                () => unawaited(preferences.inspector.loadPubRootDirectories()),
           ),
         );
       },

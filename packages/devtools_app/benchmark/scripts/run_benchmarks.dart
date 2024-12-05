@@ -55,12 +55,13 @@ Future<BenchmarkResults> runBenchmarks({
     benchmarkResults.add(
       await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
-        entryPoint: 'benchmark/test_infra/client.dart',
-        compilationOptions: useWasm
-            ? const CompilationOptions.wasm()
-            : const CompilationOptions.js(),
+        entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
+        compilationOptions:
+            useWasm
+                ? const CompilationOptions.wasm()
+                : const CompilationOptions.js(),
         treeShakeIcons: false,
-        initialPage: benchmarkInitialPage,
+        benchmarkPath: benchmarkPath(useWasm: useWasm),
         headless: !useBrowser,
       ),
     );
@@ -86,8 +87,9 @@ void printAndMaybeSaveResults({
   required String? saveToFileLocation,
 }) {
   final resultsAsMap = benchmarkResults.toJson();
-  final resultsAsJsonString =
-      const JsonEncoder.withIndent('  ').convert(resultsAsMap);
+  final resultsAsJsonString = const JsonEncoder.withIndent(
+    '  ',
+  ).convert(resultsAsMap);
 
   if (saveToFileLocation != null) {
     final location = Uri.parse(saveToFileLocation);

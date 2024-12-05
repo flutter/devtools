@@ -55,8 +55,9 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                 ),
                 TextSpan(
                   text: '${frame.id}',
-                  style: theme.fixedFontStyle
-                      .copyWith(color: theme.colorScheme.primary),
+                  style: theme.fixedFontStyle.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
               ],
             ),
@@ -94,10 +95,11 @@ class FlutterFrameAnalysisView extends StatelessWidget {
               const PaddedDivider.noPadding(),
               ValueListenableBuilder<ServiceExtensionState>(
                 valueListenable: serviceConnection
-                    .serviceManager.serviceExtensionManager
+                    .serviceManager
+                    .serviceExtensionManager
                     .getServiceExtensionState(
-                  extensions.countWidgetBuilds.extension,
-                ),
+                      extensions.countWidgetBuilds.extension,
+                    ),
                 builder: (context, extensionState, _) {
                   if (!extensionState.enabled) {
                     return Row(
@@ -119,9 +121,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
               ),
             ],
             if (rebuilds == null)
-              const Text(
-                'Rebuild information not available for this frame.',
-              )
+              const Text('Rebuild information not available for this frame.')
             else if (rebuilds.isEmpty)
               const Text(
                 'No widget rebuilds occurred for widgets that were directly '

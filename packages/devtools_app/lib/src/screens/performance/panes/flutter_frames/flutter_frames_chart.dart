@@ -9,18 +9,17 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../framework/scaffold.dart';
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
-import '../../../../shared/banner_messages.dart';
-import '../../../../shared/common_widgets.dart';
+import '../../../../shared/framework/screen.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/managers/banner_messages.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/ui/colors.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../../../shared/ui/hover.dart';
 import '../../../../shared/ui/utils.dart';
-import '../../performance_screen.dart';
 import '../../performance_utils.dart';
 import 'flutter_frame_model.dart';
 import 'flutter_frames_controller.dart';
@@ -113,9 +112,10 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
   }
 
   void _maybeShowShaderJankMessage() {
-    final shaderJankFrames = widget.frames
-        .where((frame) => frame.hasShaderJank(widget.displayRefreshRate))
-        .toList();
+    final shaderJankFrames =
+        widget.frames
+            .where((frame) => frame.hasShaderJank(widget.displayRefreshRate))
+            .toList();
     if (shaderJankFrames.isNotEmpty) {
       final Duration shaderJankDuration = shaderJankFrames.fold(
         Duration.zero,
@@ -124,8 +124,8 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
       bannerMessages.addMessage(
         ShaderJankMessage(
           offlineDataController.showingOfflineData.value
-              ? SimpleScreen.id
-              : PerformanceScreen.id,
+              ? ScreenMetaData.simple.id
+              : ScreenMetaData.performance.id,
           jankyFramesCount: shaderJankFrames.length,
           jankDuration: shaderJankDuration,
         ).build(context),
@@ -145,7 +145,8 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
         right: denseSpacing,
         bottom: denseSpacing,
       ),
-      height: defaultChartHeight +
+      height:
+          defaultChartHeight +
           _FlutterFramesChart.frameNumberSectionHeight +
           _FlutterFramesChart.frameChartScrollbarOffset,
       child: Row(
@@ -299,17 +300,18 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
             scrollDirection: Axis.horizontal,
             itemCount: widget.frames.length,
             itemExtent: _defaultFrameWidthWithPadding,
-            itemBuilder: (context, index) => FlutterFramesChartItem(
-              framesController: widget.framesController,
-              index: index,
-              frame: widget.frames[index],
-              selected: widget.frames[index] == _selectedFrame,
-              msPerPx: _msPerPx,
-              availableChartHeight:
-                  defaultChartHeight - 2 * _outlineBorderWidth,
-              displayRefreshRate: widget.displayRefreshRate,
-              onSelected: (index) => _selectedFrameIndex = index,
-            ),
+            itemBuilder:
+                (context, index) => FlutterFramesChartItem(
+                  framesController: widget.framesController,
+                  index: index,
+                  frame: widget.frames[index],
+                  selected: widget.frames[index] == _selectedFrame,
+                  msPerPx: _msPerPx,
+                  availableChartHeight:
+                      defaultChartHeight - 2 * _outlineBorderWidth,
+                  displayRefreshRate: widget.displayRefreshRate,
+                  onSelected: (index) => _selectedFrameIndex = index,
+                ),
           ),
         ),
       ),
@@ -321,7 +323,8 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
         displayRefreshRate: widget.displayRefreshRate,
         msPerPx: _msPerPx,
         themeData: themeData,
-        bottomMargin: _FlutterFramesChart.frameChartScrollbarOffset +
+        bottomMargin:
+            _FlutterFramesChart.frameChartScrollbarOffset +
             _FlutterFramesChart.frameNumberSectionHeight,
       ),
     );
@@ -332,17 +335,15 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
         displayRefreshRate: widget.displayRefreshRate,
         msPerPx: _msPerPx,
         themeData: themeData,
-        bottomMargin: _FlutterFramesChart.frameChartScrollbarOffset +
+        bottomMargin:
+            _FlutterFramesChart.frameChartScrollbarOffset +
             _FlutterFramesChart.frameNumberSectionHeight,
       ),
     );
     return Stack(
       children: [
         chartAxisPainter,
-        Padding(
-          padding: EdgeInsets.only(left: _yAxisUnitsSpace),
-          child: chart,
-        ),
+        Padding(padding: EdgeInsets.only(left: _yAxisUnitsSpace), child: chart),
         fpsLinePainter,
         Positioned(
           right: denseSpacing,
@@ -409,18 +410,12 @@ class FramesChartControls extends StatelessWidget {
         Legend(
           dense: true,
           entries: [
-            LegendEntry(
-              terse ? 'UI' : 'Frame Time (UI)',
-              mainUiColor,
-            ),
+            LegendEntry(terse ? 'UI' : 'Frame Time (UI)', mainUiColor),
             LegendEntry(
               terse ? 'Raster' : 'Frame Time (Raster)',
               mainRasterColor,
             ),
-            LegendEntry(
-              terse ? 'Jank' : 'Jank (slow frame)',
-              uiJankColor,
-            ),
+            LegendEntry(terse ? 'Jank' : 'Jank (slow frame)', uiJankColor),
             if (!impellerEnabled)
               LegendEntry(
                 'Shader Compilation',
@@ -465,8 +460,9 @@ class FlutterFramesChartItem extends StatelessWidget {
 
   static const selectedIndicatorHeight = 8.0;
 
-  static const selectedFrameIndicatorKey =
-      Key('flutter frames chart - selected frame indicator');
+  static const selectedFrameIndicatorKey = Key(
+    'flutter frames chart - selected frame indicator',
+  );
 
   final FlutterFramesController framesController;
 
@@ -512,8 +508,10 @@ class FlutterFramesChartItem extends StatelessWidget {
     final ui = Container(
       key: Key('frame ${frame.id} - ui'),
       width: defaultFrameWidth / 2,
-      height: (frame.buildTime.inMilliseconds / msPerPx)
-          .clamp(0.0, availableChartHeight),
+      height: (frame.buildTime.inMilliseconds / msPerPx).clamp(
+        0.0,
+        availableChartHeight,
+      ),
       color: uiColor,
     );
 
@@ -534,8 +532,10 @@ class FlutterFramesChartItem extends StatelessWidget {
           Container(
             key: Key('frame ${frame.id} - shaders'),
             width: defaultFrameWidth / 2,
-            height: (shaderDuration / msPerPx)
-                .clamp(0.0, availableChartHeight * shaderToRasterRatio),
+            height: (shaderDuration / msPerPx).clamp(
+              0.0,
+              availableChartHeight * shaderToRasterRatio,
+            ),
             color: shaderColor,
           ),
       ],
@@ -563,10 +563,7 @@ class FlutterFramesChartItem extends StatelessWidget {
                     const Expanded(child: SizedBox()),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        ui,
-                        raster,
-                      ],
+                      children: [ui, raster],
                     ),
                   ],
                 ),
@@ -591,19 +588,16 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
     return index % 2 == 0
         ? Stack(
-            children: [
-              content,
-              Container(
-                margin: EdgeInsets.only(top: defaultChartHeight),
-                height: _FlutterFramesChart.frameNumberSectionHeight,
-                alignment: AlignmentDirectional.center,
-                child: Text(
-                  '${frame.id}',
-                  style: themeData.subtleChartTextStyle,
-                ),
-              ),
-            ],
-          )
+          children: [
+            content,
+            Container(
+              margin: EdgeInsets.only(top: defaultChartHeight),
+              height: _FlutterFramesChart.frameNumberSectionHeight,
+              alignment: AlignmentDirectional.center,
+              child: Text('${frame.id}', style: themeData.subtleChartTextStyle),
+            ),
+          ],
+        )
         : content;
   }
 
@@ -616,11 +610,12 @@ class FlutterFramesChartItem extends StatelessWidget {
       ga.select(
         gac.performance,
         gac.PerformanceEvents.selectFlutterFrame.name,
-        screenMetricsProvider: () => PerformanceScreenMetrics(
-          uiDuration: frame.buildTime,
-          rasterDuration: frame.rasterTime,
-          shaderCompilationDuration: frame.shaderDuration,
-        ),
+        screenMetricsProvider:
+            () => PerformanceScreenMetrics(
+              uiDuration: frame.buildTime,
+              rasterDuration: frame.rasterTime,
+              shaderCompilationDuration: frame.shaderDuration,
+            ),
       );
     }
     framesController.handleSelectedFrame(frame);
@@ -657,29 +652,21 @@ class FlutterFrameTooltip extends StatelessWidget {
   }
 
   HoverCardData _buildCardData(TextStyle textStyle) {
-    final uiText = 'UI: ${durationText(
-      frame.buildTime,
-      unit: DurationDisplayUnit.milliseconds,
-      allowRoundingToZero: false,
-    )}';
-    final rasterText = 'Raster: ${durationText(
-      frame.rasterTime,
-      unit: DurationDisplayUnit.milliseconds,
-      allowRoundingToZero: false,
-    )}';
-    final shaderText = hasShaderJank
-        ? 'Shader Compilation: ${durationText(
-            frame.shaderDuration,
-            unit: DurationDisplayUnit.milliseconds,
-            allowRoundingToZero: false,
-          )}  -'
-        : '';
+    final uiText =
+        'UI: ${durationText(frame.buildTime, unit: DurationDisplayUnit.milliseconds, allowRoundingToZero: false)}';
+    final rasterText =
+        'Raster: ${durationText(frame.rasterTime, unit: DurationDisplayUnit.milliseconds, allowRoundingToZero: false)}';
+    final shaderText =
+        hasShaderJank
+            ? 'Shader Compilation: ${durationText(frame.shaderDuration, unit: DurationDisplayUnit.milliseconds, allowRoundingToZero: false)}  -'
+            : '';
     return HoverCardData(
       position: HoverCardPosition.element,
-      width: _calculateTooltipWidth(
-        [uiText, rasterText, shaderText],
-        textStyle,
-      ),
+      width: _calculateTooltipWidth([
+        uiText,
+        rasterText,
+        shaderText,
+      ], textStyle),
       contents: Material(
         child: DefaultTextStyle(
           style: textStyle,
@@ -701,8 +688,11 @@ class FlutterFrameTooltip extends StatelessWidget {
                     MoreInfoLink(
                       url: preCompileShadersDocsUrl,
                       gaScreenName: gac.performance,
-                      gaSelectedItemDescription: gac.PerformanceDocs
-                          .shaderCompilationDocsTooltipLink.name,
+                      gaSelectedItemDescription:
+                          gac
+                              .PerformanceDocs
+                              .shaderCompilationDocsTooltipLink
+                              .name,
                     ),
                   ],
                 ),
@@ -716,8 +706,9 @@ class FlutterFrameTooltip extends StatelessWidget {
   double _calculateTooltipWidth(List<String> lines, TextStyle style) {
     var maxWidth = 0.0;
     for (final line in lines) {
-      final lineWidth =
-          calculateTextSpanWidth(TextSpan(text: line, style: style));
+      final lineWidth = calculateTextSpanWidth(
+        TextSpan(text: line, style: style),
+      );
       maxWidth = math.max(maxWidth, lineWidth);
     }
     // Add (2 * denseSpacing) for the card padding, and add
@@ -830,10 +821,7 @@ class ChartAxisPainter extends CustomPainter {
     _paintYAxisLabels(canvas, chartArea);
   }
 
-  void _paintYAxisLabels(
-    Canvas canvas,
-    Rect chartArea,
-  ) {
+  void _paintYAxisLabels(Canvas canvas, Rect chartArea) {
     const yAxisLabelCount = 5;
     final totalMs = msPerPx * constraints.maxHeight;
 
@@ -849,14 +837,18 @@ class ChartAxisPainter extends CustomPainter {
     // Y axis time units centered around [targetMsPerFrameRounded].
     final yAxisTimes = [
       0,
-      for (int timeMs = targetMsPerFrameRounded - timeUnitMs;
-          timeMs > 0;
-          timeMs -= timeUnitMs)
+      for (
+        int timeMs = targetMsPerFrameRounded - timeUnitMs;
+        timeMs > 0;
+        timeMs -= timeUnitMs
+      )
         timeMs,
       targetMsPerFrameRounded,
-      for (int timeMs = targetMsPerFrameRounded + timeUnitMs;
-          timeMs < totalMs;
-          timeMs += timeUnitMs)
+      for (
+        int timeMs = targetMsPerFrameRounded + timeUnitMs;
+        timeMs < totalMs;
+        timeMs += timeUnitMs
+      )
         timeMs,
     ];
 
@@ -865,11 +857,7 @@ class ChartAxisPainter extends CustomPainter {
     }
   }
 
-  void _paintYAxisLabel(
-    Canvas canvas,
-    Rect chartArea, {
-    required int timeMs,
-  }) {
+  void _paintYAxisLabel(Canvas canvas, Rect chartArea, {required int timeMs}) {
     final labelText = durationText(
       Duration(milliseconds: timeMs),
       unit: DurationDisplayUnit.milliseconds,
@@ -893,10 +881,7 @@ class ChartAxisPainter extends CustomPainter {
 
     // Paint the axis label.
     final textPainter = TextPainter(
-      text: TextSpan(
-        text: labelText,
-        style: themeData.subtleChartTextStyle,
-      ),
+      text: TextSpan(text: labelText, style: themeData.subtleChartTextStyle),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
     )..layout();
@@ -979,10 +964,7 @@ class FPSLinePainter extends CustomPainter {
 
     textPainter.paint(
       canvas,
-      Offset(
-        chartArea.right - fpsTextSpace,
-        targetLineY + borderPadding,
-      ),
+      Offset(chartArea.right - fpsTextSpace, targetLineY + borderPadding),
     );
   }
 

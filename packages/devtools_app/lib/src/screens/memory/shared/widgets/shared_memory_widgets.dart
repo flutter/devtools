@@ -6,8 +6,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/ui/common_widgets.dart';
 
 class HeapClassView extends StatelessWidget {
   const HeapClassView({
@@ -73,12 +73,7 @@ class ClassTypeLegend extends StatelessWidget {
       children: [
         const Text('Class type legend:'),
         ...ClassType.values.map(
-          (t) => Row(
-            children: [
-              t.icon,
-              Text(' ${t.aliasDescription}'),
-            ],
-          ),
+          (t) => Row(children: [t.icon, Text(' ${t.aliasDescription}')]),
         ),
       ],
     );

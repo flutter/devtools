@@ -14,7 +14,7 @@ import 'common.dart';
 /// A recorder that measures frame building durations for the DevTools.
 class DevToolsRecorder extends WidgetRecorder {
   DevToolsRecorder({required this.benchmark})
-      : super(name: benchmark.id, useCustomWarmUp: true);
+    : super(name: benchmark.id, useCustomWarmUp: true);
 
   /// The name of the DevTools benchmark to be run.
   ///
@@ -34,6 +34,7 @@ class DevToolsRecorder extends WidgetRecorder {
     _devToolsAutomator = DevToolsAutomater(
       benchmark: benchmark,
       stopWarmingUpCallback: profile.stopWarmingUp,
+      profile: profile,
     );
     return _devToolsAutomator!.createWidget();
   }

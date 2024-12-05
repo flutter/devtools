@@ -53,20 +53,21 @@ class EnhanceTracingController extends DisposableController
   /// This method assigns [_firstLiveFrameId] when the first 'Flutter.Frame'
   /// event is received, and then cancels the stream subscription.
   void _listenForFirstLiveFrame() {
-    _firstFrameEventSubscription =
-        serviceConnection.serviceManager.service!.onExtensionEvent.listen(
-      (event) {
-        if (event.extensionKind == 'Flutter.Frame' &&
-            _firstLiveFrameId == null) {
-          _firstLiveFrameId =
-              FlutterFrame.fromJson(event.extensionData!.data).id;
-          // See https://github.com/dart-lang/linter/issues/3801
-          // ignore: discarded_futures
-          unawaited(_firstFrameEventSubscription!.cancel());
-          _firstFrameEventSubscription = null;
-        }
-      },
-    );
+    _firstFrameEventSubscription = serviceConnection
+        .serviceManager
+        .service!
+        .onExtensionEvent
+        .listen((event) {
+          if (event.extensionKind == 'Flutter.Frame' &&
+              _firstLiveFrameId == null) {
+            _firstLiveFrameId =
+                FlutterFrame.fromJson(event.extensionData!.data).id;
+            // See https://github.com/dart-lang/linter/issues/3801
+            // ignore: discarded_futures
+            unawaited(_firstFrameEventSubscription!.cancel());
+            _firstFrameEventSubscription = null;
+          }
+        });
   }
 
   void init() {
@@ -92,7 +93,8 @@ class EnhanceTracingController extends DisposableController
   }
 
   void _updateTracingState() {
-    final builds = _extensionStates[extensions.profileWidgetBuilds]! ||
+    final builds =
+        _extensionStates[extensions.profileWidgetBuilds]! ||
         _extensionStates[extensions.profileUserWidgetBuilds]!;
     final layouts = _extensionStates[extensions.profileRenderObjectLayouts]!;
     final paints = _extensionStates[extensions.profileRenderObjectPaints]!;

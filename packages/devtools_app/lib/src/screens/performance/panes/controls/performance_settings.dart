@@ -5,8 +5,8 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../performance_controller.dart';
 import '../flutter_frames/flutter_frames_controller.dart';
 
@@ -32,9 +32,7 @@ class PerformanceSettingsDialog extends StatelessWidget {
           ),
         ],
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }
@@ -50,8 +48,9 @@ class FlutterSettings extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CheckboxSetting(
-          notifier: flutterFramesController.badgeTabForJankyFrames
-              as ValueNotifier<bool?>,
+          notifier:
+              flutterFramesController.badgeTabForJankyFrames
+                  as ValueNotifier<bool?>,
           title: 'Badge Performance tab when Flutter UI jank is detected',
         ),
       ],

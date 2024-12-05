@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/common_widgets.dart';
-import '../../../shared/history_viewport.dart';
 import '../../../shared/primitives/history_manager.dart';
+import '../../../shared/ui/common_widgets.dart';
+import '../../../shared/ui/history_viewport.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_class_display.dart';
 import 'vm_code_display.dart';
@@ -25,10 +25,7 @@ import 'vm_unknown_object_display.dart';
 /// Displays the VM information for the currently selected object in the
 /// program explorer.
 class ObjectViewport extends StatelessWidget {
-  const ObjectViewport({
-    super.key,
-    required this.controller,
-  });
+  const ObjectViewport({super.key, required this.controller});
 
   final ObjectInspectorViewController controller;
 
@@ -36,9 +33,7 @@ class ObjectViewport extends StatelessWidget {
   Widget build(BuildContext context) {
     return HistoryViewport<VmObject>(
       history: controller.objectHistory,
-      controls: [
-        ToolbarRefresh(onPressed: controller.refreshObject),
-      ],
+      controls: [ToolbarRefresh(onPressed: controller.refreshObject)],
       generateTitle: viewportTitle,
       contentBuilder: (context, _) {
         return ValueListenableBuilder<bool>(
@@ -50,9 +45,10 @@ class ObjectViewport extends StatelessWidget {
               child = const CenteredCircularProgressIndicator();
             } else {
               final currentObject = controller.objectHistory.current.value;
-              child = currentObject == null
-                  ? const SizedBox.shrink()
-                  : buildObjectDisplay(currentObject);
+              child =
+                  currentObject == null
+                      ? const SizedBox.shrink()
+                      : buildObjectDisplay(currentObject);
             }
 
             return Expanded(child: child);
@@ -84,70 +80,37 @@ class ObjectViewport extends StatelessWidget {
   @visibleForTesting
   Widget buildObjectDisplay(VmObject obj) {
     if (obj is ClassObject) {
-      return VmClassDisplay(
-        controller: controller,
-        clazz: obj,
-      );
+      return VmClassDisplay(controller: controller, clazz: obj);
     }
     if (obj is FuncObject) {
-      return VmFuncDisplay(
-        controller: controller,
-        function: obj,
-      );
+      return VmFuncDisplay(controller: controller, function: obj);
     }
     if (obj is FieldObject) {
-      return VmFieldDisplay(
-        controller: controller,
-        field: obj,
-      );
+      return VmFieldDisplay(controller: controller, field: obj);
     }
     if (obj is LibraryObject) {
-      return VmLibraryDisplay(
-        controller: controller,
-        library: obj,
-      );
+      return VmLibraryDisplay(controller: controller, library: obj);
     }
     if (obj is ScriptObject) {
-      return VmScriptDisplay(
-        controller: controller,
-        script: obj,
-      );
+      return VmScriptDisplay(controller: controller, script: obj);
     }
     if (obj is InstanceObject) {
-      return VmInstanceDisplay(
-        controller: controller,
-        instance: obj,
-      );
+      return VmInstanceDisplay(controller: controller, instance: obj);
     }
     if (obj is CodeObject) {
-      return VmCodeDisplay(
-        controller: controller,
-        code: obj,
-      );
+      return VmCodeDisplay(controller: controller, code: obj);
     }
     if (obj is ObjectPoolObject) {
-      return VmObjectPoolDisplay(
-        controller: controller,
-        objectPool: obj,
-      );
+      return VmObjectPoolDisplay(controller: controller, objectPool: obj);
     }
     if (obj is ICDataObject) {
-      return VmICDataDisplay(
-        controller: controller,
-        icData: obj,
-      );
+      return VmICDataDisplay(controller: controller, icData: obj);
     }
     if (obj is VmListObject) {
-      return VmSimpleListDisplay(
-        controller: controller,
-        vmObject: obj,
-      );
+      return VmSimpleListDisplay(controller: controller, vmObject: obj);
     }
     if (obj is UnknownObject) {
-      return VmUnknownObjectDisplay(
-        controller: controller,
-        object: obj,
-      );
+      return VmUnknownObjectDisplay(controller: controller, object: obj);
     }
     return const SizedBox.shrink();
   }

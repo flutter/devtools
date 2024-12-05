@@ -8,37 +8,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/globals.dart';
-import '../../../../shared/ui/filter.dart';
-import '../../cpu_profile_model.dart';
 import '../../cpu_profiler_controller.dart';
 import '../../profiler_screen_controller.dart';
-
-class CpuProfileFilterDialog extends StatelessWidget {
-  const CpuProfileFilterDialog({required this.controller, super.key});
-
-  static const filterQueryInstructions = '''
-Type a filter query to show or hide specific stack frames.
-
-Any text that is not paired with an available filter key below will be queried against all categories (method, uri).
-
-Available filters:
-    'uri', 'u'       (e.g. 'uri:my_dart_package/some_lib.dart', '-u:some_lib_to_hide')
-
-Example queries:
-    'someMethodName uri:my_dart_package,b_dart_package'
-    '.toString -uri:flutter'
-''';
-
-  final CpuProfilerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilterDialog<CpuStackFrame>(
-      controller: controller,
-      queryInstructions: filterQueryInstructions,
-    );
-  }
-}
 
 /// DropdownButton that controls the value of
 /// [ProfilerScreenController.userTagFilter].
@@ -54,9 +25,10 @@ class UserTagDropdown extends StatelessWidget {
       valueListenable: controller.userTagFilter,
       builder: (context, userTag, _) {
         final userTags = controller.userTags;
-        final tooltip = userTags.isNotEmpty
-            ? 'Filter the CPU profile by the given UserTag'
-            : 'No UserTags found for this CPU profile';
+        final tooltip =
+            userTags.isNotEmpty
+                ? 'Filter the CPU profile by the given UserTag'
+                : 'No UserTags found for this CPU profile';
         return SizedBox(
           height: defaultButtonHeight,
           child: DevToolsTooltip(
@@ -94,11 +66,12 @@ class UserTagDropdown extends StatelessWidget {
                         value: CpuProfilerController.groupByVmTag,
                       ),
                   ],
-                  onChanged: userTags.isEmpty ||
-                          (userTags.length == 1 &&
-                              userTags.first == UserTag.defaultTag.label)
-                      ? null
-                      : (String? tag) => _onUserTagChanged(tag!),
+                  onChanged:
+                      userTags.isEmpty ||
+                              (userTags.length == 1 &&
+                                  userTags.first == UserTag.defaultTag.label)
+                          ? null
+                          : (String? tag) => _onUserTagChanged(tag!),
                 );
               },
             ),
@@ -112,10 +85,7 @@ class UserTagDropdown extends StatelessWidget {
     required String display,
     required String value,
   }) {
-    return DropdownMenuItem<String>(
-      value: value,
-      child: Text(display),
-    );
+    return DropdownMenuItem<String>(value: value, child: Text(display));
   }
 
   void _onUserTagChanged(String newTag) async {
@@ -140,12 +110,13 @@ class ModeDropdown extends StatelessWidget {
     return ValueListenableBuilder<CpuProfilerViewType>(
       valueListenable: controller.viewType,
       builder: (context, viewType, _) {
-        final tooltip = viewType == CpuProfilerViewType.function
-            ? 'Display the profile in terms of the Dart call stack '
-                '(i.e., inlined frames are expanded)'
-            : 'Display the profile in terms of native stack frames '
-                '(i.e., inlined frames are not expanded, display code objects '
-                'rather than individual functions)';
+        final tooltip =
+            viewType == CpuProfilerViewType.function
+                ? 'Display the profile in terms of the Dart call stack '
+                    '(i.e., inlined frames are expanded)'
+                : 'Display the profile in terms of native stack frames '
+                    '(i.e., inlined frames are not expanded, display code objects '
+                    'rather than individual functions)';
         return SizedBox(
           height: defaultButtonHeight,
           child: DevToolsTooltip(

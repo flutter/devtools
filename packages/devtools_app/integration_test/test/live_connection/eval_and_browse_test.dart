@@ -86,17 +86,11 @@ Future<void> _inboundReferencesAreListed(EvalTester tester) async {
     find.textContaining('MyApp, retained size '),
     next: find.text('references'),
   );
-  next = await tester.tapAndPump(
-    next!,
-    next: find.textContaining('static ('),
-  );
+  next = await tester.tapAndPump(next!, next: find.textContaining('static ('));
   next = await tester.tapAndPump(
     next!,
     description: 'text containing "static ("',
     next: find.text('inbound'),
   );
-  next = await tester.tapAndPump(
-    next!,
-    next: find.text('View'),
-  );
+  next = await tester.tapAndPump(next!, next: find.text('View'));
 }

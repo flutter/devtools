@@ -21,7 +21,8 @@ class UpdatePerfettoCommand extends Command {
       ..addOption(
         _buildFlag,
         abbr: 'b',
-        help: 'The build location of the Perfetto assets. When this is not '
+        help:
+            'The build location of the Perfetto assets. When this is not '
             'specified, the Perfetto assets will be fetched from the latest '
             'source code at "android.googlesource.com".',
         valueHelp: '/Users/me/path/to/perfetto/out/ui/ui/dist',
@@ -30,7 +31,8 @@ class UpdatePerfettoCommand extends Command {
         _authFlag,
         negatable: true,
         defaultsTo: true,
-        help: 'Whether to authenticate via "gcert" before cloning the Perfetto '
+        help:
+            'Whether to authenticate via "gcert" before cloning the Perfetto '
             'repository.',
       );
   }
@@ -60,16 +62,21 @@ class UpdatePerfettoCommand extends Command {
     final perfettoUiCompiledLibPath = pathFromRepoRoot(
       path.join('third_party', 'packages', 'perfetto_ui_compiled', 'lib'),
     );
-    final perfettoUiCompiledBuildPath =
-        path.join(perfettoUiCompiledLibPath, 'dist');
-    final perfettoDevToolsPath =
-        path.join(perfettoUiCompiledBuildPath, 'devtools');
+    final perfettoUiCompiledBuildPath = path.join(
+      perfettoUiCompiledLibPath,
+      'dist',
+    );
+    final perfettoDevToolsPath = path.join(
+      perfettoUiCompiledBuildPath,
+      'devtools',
+    );
 
     logStatus(
       'moving DevTools-Perfetto integration files to a temp directory.',
     );
-    final tempPerfettoDevTools =
-        Directory.systemTemp.createTempSync('perfetto_devtools');
+    final tempPerfettoDevTools = Directory.systemTemp.createTempSync(
+      'perfetto_devtools',
+    );
     await copyPath(perfettoDevToolsPath, tempPerfettoDevTools.path);
 
     logStatus('deleting existing Perfetto build');
@@ -86,15 +93,14 @@ class UpdatePerfettoCommand extends Command {
       await copyPath(buildLocation, perfettoUiCompiledBuildPath);
     } else {
       logStatus('cloning Perfetto from HEAD and building from source');
-      final tempPerfettoClone =
-          Directory.systemTemp.createTempSync('perfetto_clone');
+      final tempPerfettoClone = Directory.systemTemp.createTempSync(
+        'perfetto_clone',
+      );
       await processManager.runProcess(
-        CliCommand.git(
-          [
-            'clone',
-            'https://android.googlesource.com/platform/external/perfetto',
-          ],
-        ),
+        CliCommand.git([
+          'clone',
+          'https://android.googlesource.com/platform/external/perfetto',
+        ]),
         workingDirectory: tempPerfettoClone.path,
       );
 

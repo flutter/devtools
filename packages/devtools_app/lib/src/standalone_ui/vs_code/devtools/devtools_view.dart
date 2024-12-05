@@ -11,9 +11,9 @@ import '../../../service/editor/api_classes.dart';
 import '../../../service/editor/editor_client.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/common_widgets.dart';
+import '../../../shared/framework/screen.dart';
 import '../../../shared/primitives/utils.dart';
-import '../../../shared/screen.dart';
+import '../../../shared/ui/common_widgets.dart';
 import 'extensions_view.dart';
 import 'shared.dart';
 
@@ -79,10 +79,7 @@ class SidebarDevToolsScreens extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'DevTools',
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('DevTools', style: theme.textTheme.titleMedium),
             if (editor.supportsOpenDevToolsForceExternal)
               ToolbarAction(
                 icon: Icons.open_in_browser_outlined,
@@ -92,21 +89,20 @@ class SidebarDevToolsScreens extends StatelessWidget {
                     editor.gaId,
                     gac.EditorSidebar.openDevToolsExternally.name,
                   );
-                  unawaited(
-                    editor.openDevToolsPage(null, forceExternal: true),
-                  );
+                  unawaited(editor.openDevToolsPage(null, forceExternal: true));
                 },
               ),
           ],
         ),
         Table(
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          columnWidths: singleColumn
-              ? null
-              : const <int, TableColumnWidth>{
-                  0: FlexColumnWidth(),
-                  1: FlexColumnWidth(),
-                },
+          columnWidths:
+              singleColumn
+                  ? null
+                  : const <int, TableColumnWidth>{
+                    0: FlexColumnWidth(),
+                    1: FlexColumnWidth(),
+                  },
           children: generateRows(singleColumn),
         ),
       ],
@@ -125,12 +121,13 @@ class SidebarDevToolsScreens extends StatelessWidget {
               editor: editor,
               singleColumn: singleColumn,
               hasDebugSessions: debugSessions.isNotEmpty,
-              onPressed: (data) => openDevToolsScreen(
-                screenId: data.screenId,
-                requiresDebugSession: data.requiresDebugSession,
-                prefersDebugSession: data.prefersDebugSession,
-                editor: editor,
-              ),
+              onPressed:
+                  (data) => openDevToolsScreen(
+                    screenId: data.screenId,
+                    requiresDebugSession: data.requiresDebugSession,
+                    prefersDebugSession: data.prefersDebugSession,
+                    editor: editor,
+                  ),
             ),
           )
           .toList();
@@ -147,12 +144,13 @@ class SidebarDevToolsScreens extends StatelessWidget {
           editor: editor,
           singleColumn: singleColumn,
           hasDebugSessions: debugSessions.isNotEmpty,
-          onPressed: (data) => openDevToolsScreen(
-            screenId: data.screenId,
-            requiresDebugSession: data.requiresDebugSession,
-            prefersDebugSession: data.prefersDebugSession,
-            editor: editor,
-          ),
+          onPressed:
+              (data) => openDevToolsScreen(
+                screenId: data.screenId,
+                requiresDebugSession: data.requiresDebugSession,
+                prefersDebugSession: data.prefersDebugSession,
+                editor: editor,
+              ),
         ),
       );
     }
@@ -179,9 +177,10 @@ class SidebarDevToolsScreens extends StatelessWidget {
       ScreenMetaData.debugger ||
       ScreenMetaData.vmTools ||
       // This screen will be removed from the first party DevTools screens soon.
-      // If the user depends on package:provider, the provider extension should
-      // show up in the DevTools extensions list instead.
-      ScreenMetaData.provider ||
+          // If the user depends on package:provider, the provider extension should
+          // show up in the DevTools extensions list instead.
+          ScreenMetaData
+          .provider ||
       ScreenMetaData.simple =>
         false,
       _ => true,

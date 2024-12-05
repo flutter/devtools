@@ -9,7 +9,7 @@ enum InspectorDetailsViewType {
   widgetDetailsTree(nameOverride: 'Widget Details Tree');
 
   const InspectorDetailsViewType({String? nameOverride})
-      : _nameOverride = nameOverride;
+    : _nameOverride = nameOverride;
 
   final String? _nameOverride;
 
@@ -20,6 +20,7 @@ class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
   ValueListenable<bool> get inspectorV2Enabled => _inspectorV2Enabled;
+  ValueListenable<bool> get autoRefreshEnabled => _autoRefreshEnabled;
   ValueListenable<InspectorDetailsViewType> get defaultDetailsView =>
       _defaultDetailsView;
   ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
@@ -30,6 +31,9 @@ class InspectorPreferencesController extends DisposableController
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
   final _inspectorV2Enabled = ValueNotifier<bool>(false);
+  // TODO(https://github.com/flutter/devtools/issues/1423): Default to true
+  // after verifying auto-refreshes are performant.
+  final _autoRefreshEnabled = ValueNotifier<bool>(false);
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
@@ -39,6 +43,7 @@ class InspectorPreferencesController extends DisposableController
 
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
   static const _inspectorV2EnabledStorageId = 'inspector.inspectorV2Enabled';
+  static const _autoRefreshEnabledStorageId = 'inspector.autoRefreshEnabled';
   static const _defaultDetailsViewStorageId =
       'inspector.defaultDetailsViewType';
   static const _customPubRootDirectoriesStoragePrefix =
@@ -51,8 +56,10 @@ class InspectorPreferencesController extends DisposableController
         (await serviceConnection.serviceManager.tryToDetectMainRootInfo())
             ?.library;
     final rootLibUri = Uri.parse(rootLibUriString ?? '');
-    final directorySegments =
-        rootLibUri.pathSegments.sublist(0, rootLibUri.pathSegments.length - 1);
+    final directorySegments = rootLibUri.pathSegments.sublist(
+      0,
+      rootLibUri.pathSegments.length - 1,
+    );
     final rootLibDirectory = rootLibUri.replace(
       pathSegments: directorySegments,
     );
@@ -62,6 +69,7 @@ class InspectorPreferencesController extends DisposableController
   Future<void> init() async {
     await _initHoverEvalMode();
     await _initInspectorV2Enabled();
+    await _initAutoRefreshEnabled();
     // TODO(jacobr): consider initializing this first as it is not blocking.
     _initPubRootDirectories();
     await _initDefaultInspectorDetailsView();
@@ -83,6 +91,14 @@ class InspectorPreferencesController extends DisposableController
     );
   }
 
+  Future<void> _initAutoRefreshEnabled() async {
+    await _updateAutoRefreshEnabled();
+    _saveBooleanPreferenceChanges(
+      preferenceStorageId: _autoRefreshEnabledStorageId,
+      preferenceNotifier: _autoRefreshEnabled,
+    );
+  }
+
   Future<void> _updateHoverEvalMode() async {
     await _updateBooleanPreference(
       preferenceStorageId: _hoverEvalModeStorageId,
@@ -95,6 +111,16 @@ class InspectorPreferencesController extends DisposableController
     await _updateBooleanPreference(
       preferenceStorageId: _inspectorV2EnabledStorageId,
       preferenceNotifier: _inspectorV2Enabled,
+      defaultValue: false,
+    );
+  }
+
+  Future<void> _updateAutoRefreshEnabled() async {
+    await _updateBooleanPreference(
+      preferenceStorageId: _autoRefreshEnabledStorageId,
+      preferenceNotifier: _autoRefreshEnabled,
+      // TODO(https://github.com/flutter/devtools/issues/1423): Default to true
+      // after verifying auto-refreshes are performant.
       defaultValue: false,
     );
   }
@@ -133,12 +159,14 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> _updateInspectorDetailsViewSelection() async {
-    final inspectorDetailsView =
-        await storage.getValue(_defaultDetailsViewStorageId);
+    final inspectorDetailsView = await storage.getValue(
+      _defaultDetailsViewStorageId,
+    );
 
     if (inspectorDetailsView != null) {
-      _defaultDetailsView.value = InspectorDetailsViewType.values
-          .firstWhere((e) => e.name.toString() == inspectorDetailsView);
+      _defaultDetailsView.value = InspectorDetailsViewType.values.firstWhere(
+        (e) => e.name.toString() == inspectorDetailsView,
+      );
     }
   }
 
@@ -220,8 +248,9 @@ class InspectorPreferencesController extends DisposableController
 
   @visibleForTesting
   Future<List<String>> readCachedPubRootDirectories() async {
-    final cachedDirectoriesJson =
-        await storage.getValue(_customPubRootStorageId());
+    final cachedDirectoriesJson = await storage.getValue(
+      _customPubRootStorageId(),
+    );
     if (cachedDirectoriesJson == null) return <String>[];
     final cachedDirectories = List<String>.from(
       jsonDecode(cachedDirectoriesJson),
@@ -251,8 +280,9 @@ class InspectorPreferencesController extends DisposableController
   /// directories are for the current project so we make a best guess based on
   /// the root library for the main isolate.
   Future<String?> _inferPubRootDirectory() async {
-    final fileUriString = await serviceConnection.serviceManager
-        .mainIsolateRootLibraryUriAsString();
+    final fileUriString =
+        await serviceConnection.serviceManager
+            .mainIsolateRootLibraryUriAsString();
     if (fileUriString == null) {
       return null;
     }
@@ -288,9 +318,10 @@ class InspectorPreferencesController extends DisposableController
     pubRootDirectory ??= (parts..removeLast()).join('/');
     // Make sure the root directory ends with /, otherwise we will patch with
     // other directories that start the same.
-    pubRootDirectory = pubRootDirectory.endsWith('/')
-        ? pubRootDirectory
-        : '$pubRootDirectory/';
+    pubRootDirectory =
+        pubRootDirectory.endsWith('/')
+            ? pubRootDirectory
+            : '$pubRootDirectory/';
     return pubRootDirectory;
   }
 
@@ -307,25 +338,21 @@ class InspectorPreferencesController extends DisposableController
     }
   }
 
-  Future<void> _cachePubRootDirectories(
-    List<String> pubRootDirectories,
-  ) async {
+  Future<void> _cachePubRootDirectories(List<String> pubRootDirectories) async {
     final cachedDirectories = await readCachedPubRootDirectories();
     await storage.setValue(
       _customPubRootStorageId(),
-      jsonEncode([
-        ...cachedDirectories,
-        ...pubRootDirectories,
-      ]),
+      jsonEncode([...cachedDirectories, ...pubRootDirectories]),
     );
   }
 
   Future<void> _uncachePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    final directoriesToCache = (await readCachedPubRootDirectories())
-        .where((dir) => !pubRootDirectories.contains(dir))
-        .toList();
+    final directoriesToCache =
+        (await readCachedPubRootDirectories())
+            .where((dir) => !pubRootDirectories.contains(dir))
+            .toList();
     await storage.setValue(
       _customPubRootStorageId(),
       jsonEncode(directoriesToCache),
@@ -358,9 +385,7 @@ class InspectorPreferencesController extends DisposableController
     });
   }
 
-  Future<void> removePubRootDirectories(
-    List<String> pubRootDirectories,
-  ) async {
+  Future<void> removePubRootDirectories(List<String> pubRootDirectories) async {
     if (!serviceConnection.serviceManager.connectedState.value.connected) {
       return;
     }
@@ -419,6 +444,11 @@ class InspectorPreferencesController extends DisposableController
   @visibleForTesting
   void setInspectorV2Enabled(bool inspectorV2Enabled) {
     _inspectorV2Enabled.value = inspectorV2Enabled;
+  }
+
+  @visibleForTesting
+  void setAutoRefreshEnabled(bool autoRefreshEnabled) {
+    _autoRefreshEnabled.value = autoRefreshEnabled;
   }
 
   void setDefaultInspectorDetailsView(InspectorDetailsViewType value) {

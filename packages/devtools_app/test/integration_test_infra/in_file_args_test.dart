@@ -24,25 +24,19 @@ final tests = [
     name: 'empty',
     input: '',
     testAppDevice: TestAppDevice.flutterTester,
-    output: TestFileArgs.parse(
-      {
-        TestFileArgItems.experimentsOn: _defaultArgs.experimentsOn,
-        TestFileArgItems.appPath: _defaultArgs.appPath,
-      },
-      testAppDevice: TestAppDevice.flutterTester,
-    ),
+    output: TestFileArgs.parse({
+      TestFileArgItems.experimentsOn: _defaultArgs.experimentsOn,
+      TestFileArgItems.appPath: _defaultArgs.appPath,
+    }, testAppDevice: TestAppDevice.flutterTester),
   ),
   _InFileTestArgsTest(
     name: 'empty',
     input: '',
     testAppDevice: TestAppDevice.cli,
-    output: TestFileArgs.parse(
-      {
-        TestFileArgItems.experimentsOn: _defaultArgsForCliDevice.experimentsOn,
-        TestFileArgItems.appPath: _defaultArgsForCliDevice.appPath,
-      },
-      testAppDevice: TestAppDevice.cli,
-    ),
+    output: TestFileArgs.parse({
+      TestFileArgItems.experimentsOn: _defaultArgsForCliDevice.experimentsOn,
+      TestFileArgItems.appPath: _defaultArgsForCliDevice.appPath,
+    }, testAppDevice: TestAppDevice.cli),
   ),
   _InFileTestArgsTest(
     name: 'non-empty',
@@ -59,13 +53,10 @@ final tests = [
 import 'dart:ui' as ui;
 ''',
     testAppDevice: TestAppDevice.flutterTester,
-    output: TestFileArgs.parse(
-      {
-        TestFileArgItems.experimentsOn: true,
-        TestFileArgItems.appPath: _testAppPath,
-      },
-      testAppDevice: TestAppDevice.flutterTester,
-    ),
+    output: TestFileArgs.parse({
+      TestFileArgItems.experimentsOn: true,
+      TestFileArgItems.appPath: _testAppPath,
+    }, testAppDevice: TestAppDevice.flutterTester),
   ),
 ];
 

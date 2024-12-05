@@ -9,9 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 class TestProgramExplorerController extends ProgramExplorerController {
-  TestProgramExplorerController({
-    required this.initializer,
-  });
+  TestProgramExplorerController({required this.initializer});
 
   @override
   ValueListenable<bool> get initialized => _initialized;

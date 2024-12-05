@@ -8,19 +8,16 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/simple_items.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'class_table.dart';
 import 'tracing_pane_controller.dart';
 import 'tracing_tree.dart';
 
 class TracingPane extends StatefulWidget {
-  const TracingPane({
-    super.key,
-    required this.controller,
-  });
+  const TracingPane({super.key, required this.controller});
 
   final TracePaneController controller;
 
@@ -49,7 +46,7 @@ class TracingPaneState extends State<TracingPane> {
   Widget build(BuildContext context) {
     final isProfileMode =
         serviceConnection.serviceManager.connectedApp?.isProfileBuildNow ??
-            false;
+        false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -64,14 +61,10 @@ class TracingPaneState extends State<TracingPane> {
               initialFractions: const [0.25, 0.75],
               children: [
                 OutlineDecoration.onlyRight(
-                  child: AllocationTracingTable(
-                    controller: widget.controller,
-                  ),
+                  child: AllocationTracingTable(controller: widget.controller),
                 ),
                 OutlineDecoration.onlyLeft(
-                  child: AllocationTracingTree(
-                    controller: widget.controller,
-                  ),
+                  child: AllocationTracingTree(controller: widget.controller),
                 ),
               ],
             ),
@@ -136,8 +129,9 @@ class _ProfileHelpLink extends StatelessWidget {
         MoreInfoLink(
           url: DocLinks.trace.value,
           gaScreenName: gac.memory,
-          gaSelectedItemDescription:
-              gac.topicDocumentationLink(_documentationTopic),
+          gaSelectedItemDescription: gac.topicDocumentationLink(
+            _documentationTopic,
+          ),
         ),
       ],
       child: const Column(

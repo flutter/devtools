@@ -5,7 +5,7 @@
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, fine for test only package.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/shared/query_parameters.dart';
+import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -30,10 +30,7 @@ Widget wrap(Widget widget, {DevToolsQueryParams? queryParams}) {
     theme: themeFor(
       isDarkTheme: false,
       ideTheme: IdeTheme(),
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: lightColorScheme,
-      ),
+      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
     ),
     routerDelegate: DevToolsRouterDelegate.test(
       (context, page, args, state) => MaterialPage(
@@ -50,8 +47,9 @@ Widget wrap(Widget widget, {DevToolsQueryParams? queryParams}) {
       _testNavigatorKey,
     ),
     routeInformationParser: DevToolsRouteInformationParser.test(
-      DevToolsQueryParams({'uri': 'http://test/uri'})
-          .withUpdates(queryParams?.params),
+      DevToolsQueryParams({
+        'uri': 'http://test/uri',
+      }).withUpdates(queryParams?.params),
     ),
   );
 }
@@ -66,10 +64,7 @@ Widget wrapSimple(Widget widget) {
     theme: themeFor(
       isDarkTheme: false,
       ideTheme: IdeTheme(),
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: lightColorScheme,
-      ),
+      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
     ),
     home: Material(
       child: Directionality(
@@ -87,7 +82,6 @@ Widget wrapWithControllers(
   Widget widget, {
   InspectorScreenController? inspector,
   LoggingController? logging,
-  LoggingControllerV2? loggingV2,
   MemoryController? memory,
   PerformanceController? performance,
   ProfilerScreenController? profiler,
@@ -105,8 +99,6 @@ Widget wrapWithControllers(
     if (inspector != null)
       Provider<InspectorScreenController>.value(value: inspector),
     if (logging != null) Provider<LoggingController>.value(value: logging),
-    if (loggingV2 != null)
-      Provider<LoggingControllerV2>.value(value: loggingV2),
     if (memory != null) Provider<MemoryController>.value(value: memory),
     if (performance != null)
       Provider<PerformanceController>.value(value: performance),
@@ -124,10 +116,7 @@ Widget wrapWithControllers(
       Provider<VMDeveloperToolsController>.value(value: vmDeveloperTools),
   ];
   final child = wrapWithNotifications(
-    MultiProvider(
-      providers: providers,
-      child: widget,
-    ),
+    MultiProvider(providers: providers, child: widget),
   );
   return includeRouter
       ? wrap(child, queryParams: queryParams)
@@ -185,15 +174,11 @@ void testWidgetsWithWindowSize(
   WidgetTesterCallback test, {
   bool skip = false,
 }) {
-  testWidgets(
-    name,
-    (WidgetTester tester) async {
-      await _setWindowSize(tester, windowSize);
-      await test(tester);
-      await _resetWindowSize(tester);
-    },
-    skip: skip,
-  );
+  testWidgets(name, (WidgetTester tester) async {
+    await _setWindowSize(tester, windowSize);
+    await test(tester);
+    await _resetWindowSize(tester);
+  }, skip: skip);
 }
 
 Future<void> _setWindowSize(WidgetTester tester, Size windowSize) async {

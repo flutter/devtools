@@ -12,10 +12,7 @@ import 'dimension.dart';
 import 'theme.dart';
 
 class FreeSpaceVisualizerWidget extends StatelessWidget {
-  const FreeSpaceVisualizerWidget(
-    this.renderProperties, {
-    super.key,
-  });
+  const FreeSpaceVisualizerWidget(this.renderProperties, {super.key});
 
   final RenderProperties renderProperties;
 
@@ -32,9 +29,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
       children: [
         Flexible(
           child: dimensionDescription(
-            TextSpan(
-              text: widthDescription,
-            ),
+            TextSpan(text: widthDescription),
             false,
             colorScheme,
           ),
@@ -108,9 +103,7 @@ class PaddingVisualizerWidget extends StatelessWidget {
       children: [
         Flexible(
           child: dimensionDescription(
-            TextSpan(
-              text: widthDescription,
-            ),
+            TextSpan(text: widthDescription),
             false,
             colorScheme,
           ),

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
@@ -11,16 +9,25 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
+const _pubGetFlag = 'pub-get';
 const _upgradeFlag = 'upgrade';
 
 class GenerateCodeCommand extends Command {
   GenerateCodeCommand() {
-    argParser.addFlag(
-      _upgradeFlag,
-      negatable: false,
-      help:
-          'Run pub upgrade on the DevTools packages before performing the code generation.',
-    );
+    argParser
+      ..addFlag(
+        _pubGetFlag,
+        defaultsTo: true,
+        negatable: true,
+        help:
+            'Run pub get on the DevTools packages before performing the code generation.',
+      )
+      ..addFlag(
+        _upgradeFlag,
+        negatable: false,
+        help:
+            'Run pub upgrade on the DevTools packages before performing the code generation.',
+      );
   }
 
   @override
@@ -35,49 +42,57 @@ class GenerateCodeCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
-    final upgrade = argResults![_upgradeFlag] as bool;
-    if (upgrade) {
-      await processManager.runProcess(
-        CliCommand.tool(['pub-get', '--only-main', '--upgrade']),
-      );
+    Future<void> runOverPackages(
+      CliCommand command, {
+      String? commandDescription,
+    }) async {
+      for (final packageName in ['devtools_app', 'devtools_test']) {
+        if (commandDescription != null) {
+          print('Running $commandDescription for $packageName...');
+        }
+        final directoryPath = path.join(repo.repoPath, 'packages', packageName);
+        await processManager.runProcess(
+          command,
+          workingDirectory: directoryPath,
+        );
+      }
     }
 
-    for (final packageName in ['devtools_app', 'devtools_test']) {
-      print('Running build_runner build for $packageName');
-      final directoryPath = path.join(repo.repoPath, 'packages', packageName);
-      await processManager.runProcess(
-        CliCommand.flutter(
-          [
-            'pub',
-            'run',
-            'build_runner',
-            'build',
-            '--delete-conflicting-outputs',
-          ],
-        ),
-        workingDirectory: directoryPath,
-      );
-    }
-
-    print('Adding lint ignores for mocks');
-    final mockFile = File(
-      path.join(
-        repo.repoPath,
-        'packages',
-        'devtools_test',
-        'lib',
-        'src',
-        'mocks',
-        'generated.mocks.dart',
-      ),
+    await runOverPackages(
+      CliCommand.git(['clean', '-xfd', '.']),
+      commandDescription: 'git clean',
     );
-    var mockFileContents = mockFile.readAsStringSync();
-    if (!mockFileContents.contains('require_trailing_commas')) {
-      mockFileContents = mockFileContents.replaceFirst(
-        '// ignore_for_file:',
-        '// ignore_for_file: require_trailing_commas\n// ignore_for_file:',
+
+    final pubGet = argResults![_pubGetFlag] as bool;
+    final upgrade = argResults![_upgradeFlag] as bool;
+    if (pubGet) {
+      await processManager.runProcess(
+        CliCommand.tool(['pub-get', '--only-main', if (upgrade) '--upgrade']),
       );
-      mockFile.writeAsStringSync(mockFileContents);
     }
+
+    await runOverPackages(
+      CliCommand.dart([
+        'run',
+        'build_runner',
+        'build',
+        '--delete-conflicting-outputs',
+      ]),
+      commandDescription: 'build_runner build',
+    );
+
+    // Format the generated code so that the dart format check does not fail on
+    // the CI.
+    await processManager.runProcess(
+      CliCommand.dart(['format', path.join('test', 'test_infra', 'scenes')]),
+      workingDirectory: repo.devtoolsAppDirectoryPath,
+    );
+    await processManager.runProcess(
+      CliCommand.dart([
+        'format',
+        path.join('lib', 'src', 'mocks', 'generated.mocks.dart'),
+      ]),
+      workingDirectory: path.join(repo.repoPath, 'packages', 'devtools_test'),
+    );
   }
 }

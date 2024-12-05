@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const String appName = 'Memory Leak';
+const appName = 'Memory Leak';
 
-const String logMenu = 'Log';
-const String aboutMenu = 'About';
+const logMenu = 'Log';
+const aboutMenu = 'About';

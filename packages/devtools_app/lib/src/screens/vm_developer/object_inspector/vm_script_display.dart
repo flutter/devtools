@@ -37,23 +37,15 @@ class VmScriptDisplay extends StatelessWidget {
 
   /// Generates a list of key-value pairs (map entries) containing the general
   /// VM information of the Script object [widget.script].
-  List<MapEntry<String, WidgetBuilder>> _scriptDataRows(
-    ScriptObject field,
-  ) {
+  List<MapEntry<String, WidgetBuilder>> _scriptDataRows(ScriptObject field) {
     return [
-      ...vmObjectGeneralDataRows(
-        controller,
-        field,
-      ),
+      ...vmObjectGeneralDataRows(controller, field),
       serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'URI',
         object: script.obj,
       ),
-      selectableTextBuilderMapEntry(
-        'Load time',
-        script.loadTime.toString(),
-      ),
+      selectableTextBuilderMapEntry('Load time', script.loadTime.toString()),
     ];
   }
 }

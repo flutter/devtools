@@ -10,10 +10,8 @@ import 'post_message.dart';
 
 Stream<PostMessageEvent> get onPostMessage {
   return window.onMessage.map(
-    (message) => PostMessageEvent(
-      origin: message.origin,
-      data: message.data.dartify(),
-    ),
+    (message) =>
+        PostMessageEvent(origin: message.origin, data: message.data.dartify()),
   );
 }
 

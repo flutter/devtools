@@ -1,41 +1,19 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.40.0 release notes
+# DevTools 2.41.0 release notes
 
-The 2.40.0 release of the Dart and Flutter DevTools
+The 2.41.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](/tools/devtools/overview).
 
 ## General updates
 
-* Add a setting that allows users to opt-in to loading DevTools
-with WebAssembly. - [#8270](https://github.com/flutter/devtools/pull/8270)
-
-    ![Wasm opt-in setting](images/wasm_setting.png "DevTools setting to opt into wasm.")
-
-* Removed the legacy Provider screen from DevTools. The `package:provider` tool is now
-distributed as a DevTools extension from `package:provider`. Upgrade your `package:provider`
-dependency to use the extension. - [#8364](https://github.com/flutter/devtools/pull/8364)
-
-* Fixed a bug that was causing the DevTools release notes to always
-show. - [#8277](https://github.com/flutter/devtools/pull/8277)
-
-* Added support for loading extensions in pub workspaces
-  [8347](https://github.com/flutter/devtools/pull/8347).
-
-* Mapped error stacktraces to use the Dart source code locations so that they are human-
-  readable. - [#8385](https://github.com/flutter/devtools/pull/8385)
-
-* Added handling for IDE theme change events to update embedded DevTools UI. -
-[#8336](https://github.com/flutter/devtools/pull/8336)
-
-* Fixed a bug that was causing data filters to be cleared when clearing data
-on the Network and Logging screens. - [#8407](https://github.com/flutter/devtools/pull/8407)
-
-* Fixed a bug that was causing the navigator to lose state when opening the VM
-Flags dialog. - [#8413](https://github.com/flutter/devtools/pull/8413)
+* Persist filter settings across sessions. - [#8447](https://github.com/flutter/devtools/pull/8447),
+[#8456](https://github.com/flutter/devtools/pull/8456)
+[#8470](https://github.com/flutter/devtools/pull/8470)
+* Tables match IDE theme when embedded in an IDE. - [#8498](https://github.com/flutter/devtools/pull/8498)
 
 * Persist filter settings across sessions. - [#8447](https://github.com/flutter/devtools/pull/8447),
 [#8456](https://github.com/flutter/devtools/pull/8456)
@@ -45,16 +23,14 @@ Flags dialog. - [#8413](https://github.com/flutter/devtools/pull/8413)
 
 ## Inspector updates
 
-- Added a setting to the Flutter Inspector controls that allows users to opt-in to the newly redesigned Flutter Inspector. - [#8342](https://github.com/flutter/devtools/pull/8342)
-
-  ![New inspector opt-in setting](images/new_inspector.png "DevTools setting to opt into the new Flutter Inspector.")
+- Added an option to the [new Inspector's](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates)
+  settings to allow auto-refreshing the widget tree after a hot-reload. - [#8483](https://github.com/flutter/devtools/pull/8483)
 - Fixed an [issue](https://github.com/flutter/devtools/issues/8487) where the [new Inspector](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates) would not load after a hot-restart in the legacy Inspector. - [#8491](https://github.com/flutter/devtools/pull/8491)
 - Fixed an [issue](https://github.com/flutter/devtools/issues/8465) preventing scrolling to an implementation widget in the [new Inspector](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates) after selecting it on the device. - [#8494](https://github.com/flutter/devtools/pull/8494)
 
 ## Performance updates
 
-* Fixed an issue with the "Refreshing timeline" overlay that was getting shown
-when it should not have been. - [#8318](https://github.com/flutter/devtools/pull/8318)
+TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
@@ -70,11 +46,43 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-* Resolved an issue in .har export where response content was sometimes missing in the data. - [#8333](https://github.com/flutter/devtools/pull/8333)
+* Added a filter text field to the top-level Network profiler controls. -
+[#8469](https://github.com/flutter/devtools/pull/8469)
+    ![Network filter field](images/network_filter.png "Network filter field")
 
 ## Logging updates
 
-TODO: Remove this section if there are not any general updates.
+* Fetch log details immediately upon receiving logs so that log data is not lost
+due to lazy loading. - [#8421](https://github.com/flutter/devtools/pull/8421)
+
+* Reduce initial page load time. - [#8500](https://github.com/flutter/devtools/pull/8500)
+
+* Added support for displaying metadata, such as log
+severity, category, zone, and isolate -
+[#8419](https://github.com/flutter/devtools/pull/8419),
+[#8439](https://github.com/flutter/devtools/pull/8439),
+[#8441](https://github.com/flutter/devtools/pull/8441). It is now also possible to
+search and filter by these metadata values. - [#8473](https://github.com/flutter/devtools/pull/8473)
+    ![Logging metadata display](images/log_metadata.png "Logging metadata display")
+
+* Add a filter text field to the top-level Logging controls. -
+[#8427](https://github.com/flutter/devtools/pull/8427)
+    ![Logging filter](images/log_filter.png "Logging filter")
+
+* Added support for filtering by log severity / levels. -
+[#8433](https://github.com/flutter/devtools/pull/8433)
+    ![Log level filter](images/log_level_filter.png "Log level filter")
+
+* Added a setting to set the log retention limit. - [#8493](https://github.com/flutter/devtools/pull/8493)
+
+* Added a button to toggle the log details display between raw text and JSON. -
+[#8445](https://github.com/flutter/devtools/pull/8445)
+
+* Fixed a bug where logs would get out of order after midnight. - 
+[#8420](https://github.com/flutter/devtools/pull/8420)
+
+* Automatically scroll logs table to the bottom on the initial load -
+[#8437](https://github.com/flutter/devtools/pull/8437)
 
 ## App size tool updates
 
@@ -82,13 +90,15 @@ TODO: Remove this section if there are not any general updates.
 
 ## Deep links tool updates
 
-- Added support for validating iOS deep link settings. - [#8394](https://github.com/flutter/devtools/pull/8394)
-
-  ![Deep link validator for iOS](images/deep_link_ios.png "DevTools Deep link validator Page")
+TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-TODO: Remove this section if there are not any general updates.
+- The legacy `postMessage` version of the VS Code sidebar has been removed in
+  favor of the DTD-powered version. Trying to access the legacy sidebar will
+  show a message advising to update your Dart VS Code extension. The Dart VS
+  Code extension was the only user of the legacy sidebar and migrated off in
+  v3.96.
 
 ## DevTools Extension updates
 
@@ -97,4 +107,4 @@ TODO: Remove this section if there are not any general updates.
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.40.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.41.0).

@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../shared/framework/screen.dart';
 import '../shared/globals.dart';
-import '../shared/offline_data.dart';
-import '../shared/screen.dart';
-import '../shared/utils.dart';
+import '../shared/offline/offline_data.dart';
+import '../shared/utils/utils.dart';
 
 /// This is an example implementation of a conditional screen that supports
 /// offline mode and uses a provided controller [ExampleController].
@@ -19,13 +19,13 @@ import '../shared/utils.dart';
 /// DevTools app.
 class ExampleConditionalScreen extends Screen {
   const ExampleConditionalScreen()
-      : super.conditional(
-          id: id,
-          requiresLibrary: 'package:flutter/',
-          title: 'Example',
-          icon: Icons.palette,
-          worksWithOfflineData: true,
-        );
+    : super.conditional(
+        id: id,
+        requiresLibrary: 'package:flutter/',
+        title: 'Example',
+        icon: Icons.palette,
+        worksWithOfflineData: true,
+      );
 
   static const id = 'example';
 
@@ -46,8 +46,10 @@ class _ExampleConditionalScreenBody extends StatefulWidget {
 class _ExampleConditionalScreenBodyState
     extends State<_ExampleConditionalScreenBody>
     with
-        ProvidedControllerMixin<ExampleController,
-            _ExampleConditionalScreenBody> {
+        ProvidedControllerMixin<
+          ExampleController,
+          _ExampleConditionalScreenBody
+        > {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -73,8 +75,9 @@ class ExampleController extends DisposableController
     unawaited(_init());
   }
 
-  final data =
-      ValueNotifier<ExampleScreenData>(ExampleScreenData('Example screen'));
+  final data = ValueNotifier<ExampleScreenData>(
+    ExampleScreenData('Example screen'),
+  );
 
   final _initialized = Completer<void>();
 

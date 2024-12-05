@@ -8,11 +8,11 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../service/connected_app/connection_info.dart';
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/common_widgets.dart';
-import '../shared/connection_info.dart';
+import '../shared/framework/routing.dart';
 import '../shared/globals.dart';
-import '../shared/routing.dart';
+import '../shared/ui/common_widgets.dart';
 
 // TODO(kenz): see if we can simplify this widget. Several things have changed
 // with DevTools routing and service management code since this widget was
@@ -79,9 +79,10 @@ class _InitializerState extends State<Initializer>
           children: [
             const Spacer(),
             CenteredMessage(
-              message: _showConnectToNewAppButton
-                  ? 'Cannot connect to VM service.'
-                  : 'Waiting for VM service connection...',
+              message:
+                  _showConnectToNewAppButton
+                      ? 'Cannot connect to VM service.'
+                      : 'Waiting for VM service connection...',
             ),
             if (_showConnectToNewAppButton) ...[
               const SizedBox(height: defaultSpacing),

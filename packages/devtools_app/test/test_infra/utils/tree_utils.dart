@@ -8,10 +8,7 @@ extension TreeNodeList<T extends TreeNode<T>> on List<T> {
   int get numNodes {
     return fold<int>(0, (prev, next) {
       int count = 0;
-      breadthFirstTraversal<T>(
-        next,
-        action: (node) => count++,
-      );
+      breadthFirstTraversal<T>(next, action: (node) => count++);
       return prev + count;
     });
   }

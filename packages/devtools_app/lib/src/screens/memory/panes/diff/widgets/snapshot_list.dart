@@ -12,11 +12,11 @@ import 'package:logging/logging.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/ui/common_widgets.dart';
+import '../../../../../shared/ui/dialogs.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/snapshot_item.dart';
 
@@ -39,9 +39,7 @@ class SnapshotList extends StatelessWidget {
             child: _ListControlPane(controller: controller),
           ),
         ),
-        Expanded(
-          child: _SnapshotListItems(controller: controller),
-        ),
+        Expanded(child: _SnapshotListItems(controller: controller)),
       ],
     );
   }
@@ -63,17 +61,19 @@ class _ListControlPane extends StatelessWidget {
       if (!context.mounted) return;
       await showDialog(
         context: context,
-        builder: (context) => UnexpectedErrorDialog(
-          additionalInfo:
-              'Encountered an error while taking a heap snapshot:\n${e.runtimeType}\n$e\n$trace',
-        ),
+        builder:
+            (context) => UnexpectedErrorDialog(
+              additionalInfo:
+                  'Encountered an error while taking a heap snapshot:\n${e.runtimeType}\n$e\n$trace',
+            ),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final showTakeSnapshotButton = controller.loader != null &&
+    final showTakeSnapshotButton =
+        controller.loader != null &&
         !offlineDataController.showingOfflineData.value;
     return Row(
       children: [
@@ -93,15 +93,16 @@ class _ListControlPane extends StatelessWidget {
               icon: Icons.delete,
               size: defaultIconSize,
               tooltip: 'Delete all snapshots',
-              onPressed: controller.hasSnapshots
-                  ? () {
-                      ga.select(
-                        gac.memory,
-                        gac.MemoryEvents.diffClearSnapshots.name,
-                      );
-                      controller.clearSnapshots();
-                    }
-                  : null,
+              onPressed:
+                  controller.hasSnapshots
+                      ? () {
+                        ga.select(
+                          gac.memory,
+                          gac.MemoryEvents.diffClearSnapshots.name,
+                        );
+                        controller.clearSnapshots();
+                      }
+                      : null,
             );
           },
         ),
@@ -182,29 +183,28 @@ class SnapshotListTitle extends StatelessWidget {
           ContextMenuButton.defaultWidth + ContextMenuButton.densePadding;
       trailing.addAll([
         if (theItem.totalSize != null)
-          Text(
-            prettyPrintBytes(theItem.totalSize, includeUnit: true)!,
-          ),
+          Text(prettyPrintBytes(theItem.totalSize, includeUnit: true)!),
         Padding(
           padding: const EdgeInsets.only(left: ContextMenuButton.densePadding),
-          child: selected
-              ? ContextMenuButton(
-                  menuChildren: <Widget>[
-                    MenuItemButton(
-                      onPressed: onEdit,
-                      child: const Text('Rename'),
-                    ),
-                    MenuItemButton(
-                      onPressed: onDelete,
-                      child: const Text('Delete'),
-                    ),
-                    MenuItemButton(
-                      onPressed: onExport,
-                      child: const Text('Export'),
-                    ),
-                  ],
-                )
-              : const SizedBox(width: menuButtonWidth),
+          child:
+              selected
+                  ? ContextMenuButton(
+                    menuChildren: <Widget>[
+                      MenuItemButton(
+                        onPressed: onEdit,
+                        child: const Text('Rename'),
+                      ),
+                      MenuItemButton(
+                        onPressed: onDelete,
+                        child: const Text('Delete'),
+                      ),
+                      MenuItemButton(
+                        onPressed: onExport,
+                        child: const Text('Export'),
+                      ),
+                    ],
+                  )
+                  : const SizedBox(width: menuButtonWidth),
         ),
       ]);
     } else {
@@ -213,7 +213,7 @@ class SnapshotListTitle extends StatelessWidget {
 
     return FutureBuilder(
       future: theItem is SnapshotDataItem ? theItem.process : null,
-      builder: (_, __) {
+      builder: (_, _) {
         final isProcessing =
             theItem is SnapshotDataItem ? !theItem.isProcessed : false;
 
@@ -384,11 +384,8 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
     final core = widget.controller.core;
 
     return MultiValueListenableBuilder(
-      listenables: [
-        core.snapshots,
-        core.selectedSnapshotIndex,
-      ],
-      builder: (_, values, __) {
+      listenables: [core.snapshots, core.selectedSnapshotIndex],
+      builder: (_, values, _) {
         final snapshots = values.first as List<SnapshotItem>;
         final selectedIndex = values.second as int;
         return ListView.builder(
@@ -399,9 +396,10 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
             final selected = selectedIndex == index;
             return Container(
               height: _headerHeight,
-              color: selected
-                  ? Theme.of(context).colorScheme.selectedRowBackgroundColor
-                  : null,
+              color:
+                  selected
+                      ? Theme.of(context).colorScheme.selectedRowBackgroundColor
+                      : null,
               child: InkWell(
                 canRequestFocus: false,
                 onTap: () {

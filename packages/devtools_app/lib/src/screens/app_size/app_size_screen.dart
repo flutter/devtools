@@ -12,16 +12,16 @@ import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/treemap.dart';
-import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
-import '../../shared/file_import.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/query_parameters.dart';
-import '../../shared/screen.dart';
 import '../../shared/server/server.dart' as server;
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/file_import.dart';
 import '../../shared/ui/tab.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'app_size_controller.dart';
 import 'app_size_table.dart';
 import 'code_size_attribution.dart';
@@ -203,14 +203,12 @@ class _AppSizeBodyState extends State<AppSizeBody>
                     AppUnitDropdown(
                       value: controller.selectedAppUnit.value,
                       onChanged: (newAppUnit) {
-                        setState(
-                          () {
-                            controller.changeSelectedAppUnit(
-                              newAppUnit!,
-                              currentTab.key!,
-                            );
-                          },
-                        );
+                        setState(() {
+                          controller.changeSelectedAppUnit(
+                            newAppUnit!,
+                            currentTab.key!,
+                          );
+                        });
                       },
                     ),
                   if (currentTab.key == AppSizeScreen.diffTabKey) ...[
@@ -226,9 +224,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
                   ClearButton(
                     gaScreen: gac.appSize,
                     gaSelection: gac.clear,
-                    onPressed: () => controller.clear(
-                      currentTab.key!,
-                    ),
+                    onPressed: () => controller.clear(currentTab.key!),
                   ),
                 ],
               ),
@@ -236,10 +232,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
                 child: TabBarView(
                   physics: defaultTabBarViewPhysics,
                   controller: _tabController,
-                  children: const [
-                    AnalysisView(),
-                    DiffView(),
-                  ],
+                  children: const [AnalysisView(), DiffView()],
                 ),
               ),
             ],
@@ -327,7 +320,8 @@ class AnalysisView extends StatefulWidget {
 
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
-  static const importInstructions = 'Drag and drop an AOT snapshot or'
+  static const importInstructions =
+      'Drag and drop an AOT snapshot or'
       ' size analysis file for debugging';
 
   @override
@@ -362,19 +356,20 @@ class _AnalysisViewState extends State<AnalysisView>
     return Column(
       children: [
         Expanded(
-          child: analysisRootLocal == null
-              ? _buildImportFileView()
-              : _AppSizeView(
-                  title: _generateSingleFileHeaderText(),
-                  treemapKey: AppSizeScreen.analysisViewTreemapKey,
-                  treemapRoot: analysisRootLocal,
-                  onRootChangedCallback: controller.changeAnalysisRoot,
-                  analysisTable: AppSizeAnalysisTable(
-                    rootNode: analysisRootLocal.root,
-                    controller: controller,
+          child:
+              analysisRootLocal == null
+                  ? _buildImportFileView()
+                  : _AppSizeView(
+                    title: _generateSingleFileHeaderText(),
+                    treemapKey: AppSizeScreen.analysisViewTreemapKey,
+                    treemapRoot: analysisRootLocal,
+                    onRootChangedCallback: controller.changeAnalysisRoot,
+                    analysisTable: AppSizeAnalysisTable(
+                      rootNode: analysisRootLocal.root,
+                      controller: controller,
+                    ),
+                    callGraphRoot: controller.analysisCallGraphRoot.value,
                   ),
-                  callGraphRoot: controller.analysisCallGraphRoot.value,
-                ),
         ),
       ],
     );
@@ -382,9 +377,10 @@ class _AnalysisViewState extends State<AnalysisView>
 
   String _generateSingleFileHeaderText() {
     final analysisFile = controller.analysisJsonFile.value!;
-    String output = analysisFile.isAnalyzeSizeFile
-        ? 'Total size analysis: '
-        : 'Dart AOT snapshot: ';
+    String output =
+        analysisFile.isAnalyzeSizeFile
+            ? 'Total size analysis: '
+            : 'Dart AOT snapshot: ';
     output += analysisFile.displayText;
     return output;
   }
@@ -396,26 +392,26 @@ class _AnalysisViewState extends State<AnalysisView>
         return processing
             ? const CenteredMessage(message: AppSizeScreen.loadingMessage)
             : Column(
-                children: [
-                  Flexible(
-                    child: FileImportContainer(
-                      instructions: AnalysisView.importInstructions,
-                      actionText: 'Analyze Size',
-                      gaScreen: gac.appSize,
-                      gaSelectionImport: gac.importFileSingle,
-                      gaSelectionAction: gac.analyzeSingle,
-                      onAction: (jsonFile) {
-                        controller.loadTreeFromJsonFile(
-                          jsonFile: jsonFile,
-                          onError: (error) {
-                            if (mounted) notificationService.push(error);
-                          },
-                        );
-                      },
-                    ),
+              children: [
+                Flexible(
+                  child: FileImportContainer(
+                    instructions: AnalysisView.importInstructions,
+                    actionText: 'Analyze Size',
+                    gaScreen: gac.appSize,
+                    gaSelectionImport: gac.importFileSingle,
+                    gaSelectionAction: gac.analyzeSingle,
+                    onAction: (jsonFile) {
+                      controller.loadTreeFromJsonFile(
+                        jsonFile: jsonFile,
+                        onError: (error) {
+                          if (mounted) notificationService.push(error);
+                        },
+                      );
+                    },
                   ),
-                ],
-              );
+                ),
+              ],
+            );
       },
     );
   }
@@ -426,9 +422,11 @@ class DiffView extends StatefulWidget {
 
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
-  static const importOldInstructions = 'Drag and drop an original (old) AOT '
+  static const importOldInstructions =
+      'Drag and drop an original (old) AOT '
       'snapshot or size analysis file for debugging';
-  static const importNewInstructions = 'Drag and drop a modified (new) AOT '
+  static const importNewInstructions =
+      'Drag and drop a modified (new) AOT '
       'snapshot or size analysis file for debugging';
 
   @override
@@ -465,16 +463,17 @@ class _DiffViewState extends State<DiffView>
     return Column(
       children: [
         Expanded(
-          child: diffRootLocal == null
-              ? _buildImportDiffView()
-              : _AppSizeView(
-                  title: _generateDualFileHeaderText(),
-                  treemapKey: AppSizeScreen.diffViewTreemapKey,
-                  treemapRoot: diffRootLocal,
-                  onRootChangedCallback: controller.changeDiffRoot,
-                  analysisTable: AppSizeDiffTable(rootNode: diffRootLocal),
-                  callGraphRoot: controller.diffCallGraphRoot.value,
-                ),
+          child:
+              diffRootLocal == null
+                  ? _buildImportDiffView()
+                  : _AppSizeView(
+                    title: _generateDualFileHeaderText(),
+                    treemapKey: AppSizeScreen.diffViewTreemapKey,
+                    treemapRoot: diffRootLocal,
+                    onRootChangedCallback: controller.changeDiffRoot,
+                    analysisTable: AppSizeDiffTable(rootNode: diffRootLocal),
+                    callGraphRoot: controller.diffCallGraphRoot.value,
+                  ),
         ),
       ],
     );
@@ -484,9 +483,10 @@ class _DiffViewState extends State<DiffView>
     final oldFile = controller.oldDiffJsonFile.value!;
     final newFile = controller.newDiffJsonFile.value!;
     String output = 'Diffing ';
-    output += oldFile.isAnalyzeSizeFile
-        ? 'total size analyses: '
-        : 'Dart AOT snapshots: ';
+    output +=
+        oldFile.isAnalyzeSizeFile
+            ? 'total size analyses: '
+            : 'Dart AOT snapshots: ';
     output += oldFile.displayText;
     output += ' (OLD)    vs    (NEW) ';
     output += newFile.displayText;
@@ -500,30 +500,31 @@ class _DiffViewState extends State<DiffView>
         return processing
             ? const CenteredMessage(message: AppSizeScreen.loadingMessage)
             : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: DualFileImportContainer(
-                      firstFileTitle: 'Old',
-                      secondFileTitle: 'New',
-                      // TODO(kenz): perhaps bold "original" and "modified".
-                      firstInstructions: DiffView.importOldInstructions,
-                      secondInstructions: DiffView.importNewInstructions,
-                      actionText: 'Analyze Diff',
-                      gaScreen: gac.appSize,
-                      gaSelectionImportFirst: gac.importFileDiffFirst,
-                      gaSelectionImportSecond: gac.importFileDiffSecond,
-                      gaSelectionAction: gac.analyzeDiff,
-                      onAction: (oldFile, newFile, onError) =>
-                          controller.loadDiffTreeFromJsonFiles(
-                        oldFile: oldFile,
-                        newFile: newFile,
-                        onError: onError,
-                      ),
-                    ),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: DualFileImportContainer(
+                    firstFileTitle: 'Old',
+                    secondFileTitle: 'New',
+                    // TODO(kenz): perhaps bold "original" and "modified".
+                    firstInstructions: DiffView.importOldInstructions,
+                    secondInstructions: DiffView.importNewInstructions,
+                    actionText: 'Analyze Diff',
+                    gaScreen: gac.appSize,
+                    gaSelectionImportFirst: gac.importFileDiffFirst,
+                    gaSelectionImportSecond: gac.importFileDiffSecond,
+                    gaSelectionAction: gac.analyzeDiff,
+                    onAction:
+                        (oldFile, newFile, onError) =>
+                            controller.loadDiffTreeFromJsonFiles(
+                              oldFile: oldFile,
+                              newFile: newFile,
+                              onError: onError,
+                            ),
                   ),
-                ],
-              );
+                ),
+              ],
+            );
       },
     );
   }
@@ -589,9 +590,7 @@ class _AppSizeView extends StatelessWidget {
                   OutlineDecoration.onlyTop(
                     child: Row(
                       children: [
-                        Flexible(
-                          child: analysisTable,
-                        ),
+                        Flexible(child: analysisTable),
                         if (callGraphRoot != null)
                           Flexible(
                             child: OutlineDecoration.onlyLeft(

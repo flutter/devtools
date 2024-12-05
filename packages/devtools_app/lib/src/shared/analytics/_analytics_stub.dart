@@ -28,10 +28,7 @@ void initializeGA() {}
 
 void jsHookupListenerForGA() {}
 
-void screen(
-  String screenName, [
-  int value = 0,
-]) {
+void screen(String screenName, [int value = 0]) {
   _log.fine('Event: screen(screenName:$screenName, value:$value)');
 }
 

@@ -13,11 +13,11 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart';
 
-import '../../shared/banner_messages.dart';
-import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/globals.dart';
-import '../../shared/utils.dart';
+import '../../shared/managers/banner_messages.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/utils/utils.dart';
 import '_controller_web.dart';
 import 'controller.dart';
 
@@ -60,9 +60,7 @@ class _EmbeddedExtensionState extends State<EmbeddedExtension>
           if (refreshing) {
             return const CenteredCircularProgressIndicator();
           }
-          return HtmlElementView(
-            viewType: _embeddedExtensionController.viewId,
-          );
+          return HtmlElementView(viewType: _embeddedExtensionController.viewId);
         },
       ),
     );
@@ -118,8 +116,9 @@ class _ExtensionIFrameController extends DisposableController
     );
 
     autoDisposeStreamSubscription(
-      embeddedExtensionController.extensionPostEventStream.stream
-          .listen((event) async {
+      embeddedExtensionController.extensionPostEventStream.stream.listen((
+        event,
+      ) async {
         final ready = await _pingExtensionUntilReady();
         if (ready) {
           switch (event.type) {
@@ -137,7 +136,8 @@ class _ExtensionIFrameController extends DisposableController
             'Something went wrong. The '
             '${embeddedExtensionController.extensionConfig.name} extension is '
             'not ready.',
-            reportExplanation: 'The extension did not respond to multiple '
+            reportExplanation:
+                'The extension did not respond to multiple '
                 'DevToolsExtensionEventType.ping events with the expected '
                 'DevToolsExtensionEventType.pong event.',
           );
@@ -147,9 +147,10 @@ class _ExtensionIFrameController extends DisposableController
 
     addAutoDisposeListener(preferences.darkModeEnabled, () {
       updateTheme(
-        theme: isDarkThemeEnabled()
-            ? ExtensionEventParameters.themeValueDark
-            : ExtensionEventParameters.themeValueLight,
+        theme:
+            isDarkThemeEnabled()
+                ? ExtensionEventParameters.themeValueDark
+                : ExtensionEventParameters.themeValueLight,
       );
     });
   }
@@ -182,9 +183,10 @@ class _ExtensionIFrameController extends DisposableController
     if (extensionEvent != null) {
       onEventReceived(
         extensionEvent,
-        onUnknownEvent: () => notificationService.push(
-          'Unknown event received from extension: $extensionEvent}',
-        ),
+        onUnknownEvent:
+            () => notificationService.push(
+              'Unknown event received from extension: $extensionEvent}',
+            ),
       );
     }
   }
@@ -197,13 +199,15 @@ class _ExtensionIFrameController extends DisposableController
   Future<bool> _pingExtensionUntilReady() async {
     var ready = true;
     if (!_extensionHandlerReady.isCompleted) {
-      _pollForExtensionHandlerReady =
-          Timer.periodic(const Duration(milliseconds: 200), (_) {
-        // Once the extension UI is ready, the extension will receive this
-        // [DevToolsExtensionEventType.ping] message and return a
-        // [DevToolsExtensionEventType.pong] message, handled in [_handleMessage].
-        ping();
-      });
+      _pollForExtensionHandlerReady = Timer.periodic(
+        const Duration(milliseconds: 200),
+        (_) {
+          // Once the extension UI is ready, the extension will receive this
+          // [DevToolsExtensionEventType.ping] message and return a
+          // [DevToolsExtensionEventType.pong] message, handled in [_handleMessage].
+          ping();
+        },
+      );
 
       await _extensionHandlerReady.future.timeout(
         _pollUntilReadyTimeout,
@@ -301,7 +305,7 @@ class _ExtensionIFrameController extends DisposableController
     final showBannerMessageEvent = ShowBannerMessageExtensionEvent.from(event);
     final bannerMessageType =
         BannerMessageType.parse(showBannerMessageEvent.bannerMessageType) ??
-            BannerMessageType.warning;
+        BannerMessageType.warning;
     final bannerMessage = BannerMessage(
       messageType: bannerMessageType,
       key: Key(

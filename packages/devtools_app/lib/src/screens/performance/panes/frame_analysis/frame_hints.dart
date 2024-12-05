@@ -6,12 +6,12 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../service/connected_app/connected_app.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
-import '../../../../shared/connected_app.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../performance_utils.dart';
 import '../controls/enhance_tracing/enhance_tracing.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
@@ -44,32 +44,34 @@ class FrameHints extends StatelessWidget {
     final theme = Theme.of(context);
     final saveLayerCount = frameAnalysis.saveLayerCount;
     final intrinsicOperationsCount = frameAnalysis.intrinsicOperationsCount;
-    final uiHints = showUiJankHints
-        ? [
-            Text('UI Jank Detected', style: theme.errorTextStyle),
-            const SizedBox(height: denseSpacing),
-            EnhanceTracingHint(
-              longestPhase: frameAnalysis.longestUiPhase,
-              enhanceTracingState: frameAnalysis.frame.enhanceTracingState,
-              enhanceTracingController: enhanceTracingController,
-            ),
-            const SizedBox(height: densePadding),
-            if (intrinsicOperationsCount > 0)
-              IntrinsicOperationsHint(intrinsicOperationsCount),
-          ]
-        : <Widget>[];
-    final rasterHints = showRasterJankHints
-        ? [
-            Text('Raster Jank Detected', style: theme.errorTextStyle),
-            const SizedBox(height: denseSpacing),
-            if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
-            const SizedBox(height: denseSpacing),
-            if (frame.hasShaderTime)
-              ShaderCompilationHint(shaderTime: frame.shaderDuration),
-            const SizedBox(height: denseSpacing),
-            const GeneralRasterJankHint(),
-          ]
-        : <Widget>[];
+    final uiHints =
+        showUiJankHints
+            ? [
+              Text('UI Jank Detected', style: theme.errorTextStyle),
+              const SizedBox(height: denseSpacing),
+              EnhanceTracingHint(
+                longestPhase: frameAnalysis.longestUiPhase,
+                enhanceTracingState: frameAnalysis.frame.enhanceTracingState,
+                enhanceTracingController: enhanceTracingController,
+              ),
+              const SizedBox(height: densePadding),
+              if (intrinsicOperationsCount > 0)
+                IntrinsicOperationsHint(intrinsicOperationsCount),
+            ]
+            : <Widget>[];
+    final rasterHints =
+        showRasterJankHints
+            ? [
+              Text('Raster Jank Detected', style: theme.errorTextStyle),
+              const SizedBox(height: denseSpacing),
+              if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
+              const SizedBox(height: denseSpacing),
+              if (frame.hasShaderTime)
+                ShaderCompilationHint(shaderTime: frame.shaderDuration),
+              const SizedBox(height: denseSpacing),
+              const GeneralRasterJankHint(),
+            ]
+            : <Widget>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,10 +94,7 @@ class _Hint extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          Icons.lightbulb_outline,
-          size: defaultIconSize,
-        ),
+        Icon(Icons.lightbulb_outline, size: defaultIconSize),
         const SizedBox(width: denseSpacing),
         Expanded(child: message),
       ],
@@ -130,10 +129,7 @@ class EnhanceTracingHint extends StatelessWidget {
         text: TextSpan(
           text: '',
           children: [
-            TextSpan(
-              text: longestPhase.title,
-              style: theme.fixedFontStyle,
-            ),
+            TextSpan(text: longestPhase.title, style: theme.fixedFontStyle),
             TextSpan(
               text: ' was the longest UI phase in this frame. ',
               style: theme.regularTextStyle,
@@ -145,10 +141,7 @@ class EnhanceTracingHint extends StatelessWidget {
     );
   }
 
-  List<InlineSpan> _hintForPhase(
-    FramePhase phase,
-    ThemeData theme,
-  ) {
+  List<InlineSpan> _hintForPhase(FramePhase phase, ThemeData theme) {
     final phaseType = phase.type;
     // TODO(kenz): when [enhanceTracingState] is not available, use heuristics
     // to detect whether tracing was enhanced for a frame (e.g. the depth or
@@ -191,7 +184,8 @@ class EnhanceTracingHint extends StatelessWidget {
     if (tracingEnhanced) {
       return [
         TextSpan(
-          text: 'Since "$settingTitle" was enabled while this frame was drawn, '
+          text:
+              'Since "$settingTitle" was enabled while this frame was drawn, '
               'you should be able to see timeline events for each '
               '$eventDescription.',
           style: theme.regularTextStyle,
@@ -244,10 +238,7 @@ class SmallEnhanceTracingButton extends StatelessWidget {
 
 @visibleForTesting
 class IntrinsicOperationsHint extends StatelessWidget {
-  const IntrinsicOperationsHint(
-    this.intrinsicOperationsCount, {
-    super.key,
-  });
+  const IntrinsicOperationsHint(this.intrinsicOperationsCount, {super.key});
 
   static const _intrinsicOperationsDocs =
       'https://flutter.dev/to/minimize-layout-passes';
@@ -265,12 +256,10 @@ class IntrinsicOperationsHint extends StatelessWidget {
             gac.PerformanceDocs.intrinsicOperationsDocs.name,
         message: TextSpan(
           children: [
+            TextSpan(text: 'Intrinsic', style: theme.fixedFontStyle),
             TextSpan(
-              text: 'Intrinsic',
-              style: theme.fixedFontStyle,
-            ),
-            TextSpan(
-              text: ' passes were performed $intrinsicOperationsCount '
+              text:
+                  ' passes were performed $intrinsicOperationsCount '
                   '${pluralize('time', intrinsicOperationsCount)} during this '
                   'frame.',
               style: theme.regularTextStyle,
@@ -288,10 +277,7 @@ class IntrinsicOperationsHint extends StatelessWidget {
 // args, display it in the hint.
 @visibleForTesting
 class CanvasSaveLayerHint extends StatelessWidget {
-  const CanvasSaveLayerHint(
-    this.saveLayerCount, {
-    super.key,
-  });
+  const CanvasSaveLayerHint(this.saveLayerCount, {super.key});
 
   static const _saveLayerDocs = 'https://flutter.dev/to/save-layer-perf';
 
@@ -307,12 +293,10 @@ class CanvasSaveLayerHint extends StatelessWidget {
         gaSelectedItemDescription: gac.PerformanceDocs.canvasSaveLayerDocs.name,
         message: TextSpan(
           children: [
+            TextSpan(text: 'Canvas.saveLayer()', style: theme.fixedFontStyle),
             TextSpan(
-              text: 'Canvas.saveLayer()',
-              style: theme.fixedFontStyle,
-            ),
-            TextSpan(
-              text: ' was called $saveLayerCount '
+              text:
+                  ' was called $saveLayerCount '
                   '${pluralize('time', saveLayerCount)} during this frame.',
               style: theme.regularTextStyle,
             ),
@@ -325,10 +309,7 @@ class CanvasSaveLayerHint extends StatelessWidget {
 
 @visibleForTesting
 class ShaderCompilationHint extends StatelessWidget {
-  const ShaderCompilationHint({
-    super.key,
-    required this.shaderTime,
-  });
+  const ShaderCompilationHint({super.key, required this.shaderTime});
 
   final Duration shaderTime;
 
@@ -356,30 +337,28 @@ class ShaderCompilationHint extends StatelessWidget {
             ),
           ],
         ),
-        childrenSpans: serviceConnection.serviceManager.connectedApp!.isIosApp
-            ? [
-                TextSpan(
-                  text:
-                      ' Note: pre-compiling shaders is a legacy solution with many '
-                      'pitfalls. Try ',
-                  style: theme.regularTextStyle,
-                ),
-                GaLinkTextSpan(
-                  link: GaLink(
-                    display: 'Impeller',
-                    url: impellerDocsUrl,
-                    gaScreenName: gac.performance,
-                    gaSelectedItemDescription:
-                        gac.PerformanceDocs.impellerDocsLink.name,
+        childrenSpans:
+            serviceConnection.serviceManager.connectedApp!.isIosApp
+                ? [
+                  TextSpan(
+                    text:
+                        ' Note: pre-compiling shaders is a legacy solution with many '
+                        'pitfalls. Try ',
+                    style: theme.regularTextStyle,
                   ),
-                  context: context,
-                ),
-                TextSpan(
-                  text: ' instead!',
-                  style: theme.regularTextStyle,
-                ),
-              ]
-            : [],
+                  GaLinkTextSpan(
+                    link: GaLink(
+                      display: 'Impeller',
+                      url: impellerDocsUrl,
+                      gaScreenName: gac.performance,
+                      gaSelectedItemDescription:
+                          gac.PerformanceDocs.impellerDocsLink.name,
+                    ),
+                    context: context,
+                  ),
+                  TextSpan(text: ' instead!', style: theme.regularTextStyle),
+                ]
+                : [],
       ),
     );
   }
@@ -397,7 +376,8 @@ class GeneralRasterJankHint extends StatelessWidget {
         text: TextSpan(
           children: [
             TextSpan(
-              text: 'To learn about rendering performance in Flutter, check '
+              text:
+                  'To learn about rendering performance in Flutter, check '
                   'out the Flutter documentation on ',
               style: theme.regularTextStyle,
             ),
@@ -411,10 +391,7 @@ class GeneralRasterJankHint extends StatelessWidget {
               ),
               context: context,
             ),
-            TextSpan(
-              text: '.',
-              style: theme.regularTextStyle,
-            ),
+            TextSpan(text: '.', style: theme.regularTextStyle),
           ],
         ),
       ),
@@ -444,10 +421,7 @@ class _ExpensiveOperationHint extends StatelessWidget {
       text: TextSpan(
         children: [
           message,
-          TextSpan(
-            text: ' This may ',
-            style: theme.regularTextStyle,
-          ),
+          TextSpan(text: ' This may ', style: theme.regularTextStyle),
           GaLinkTextSpan(
             context: context,
             link: GaLink(
@@ -458,10 +432,7 @@ class _ExpensiveOperationHint extends StatelessWidget {
                   'frameAnalysis_$gaSelectedItemDescription',
             ),
           ),
-          TextSpan(
-            text: '.',
-            style: theme.regularTextStyle,
-          ),
+          TextSpan(text: '.', style: theme.regularTextStyle),
           ...childrenSpans,
         ],
       ),

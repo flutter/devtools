@@ -13,12 +13,12 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/config_specific/import_export/import_export.dart';
-import '../../../../../shared/file_import.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/heap_graph_loader.dart';
 import '../../../../../shared/memory/retaining_path.dart';
 import '../../../../../shared/memory/simple_items.dart';
+import '../../../../../shared/ui/file_import.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import '../data/classes_diff.dart';
@@ -29,11 +29,7 @@ import 'class_data.dart';
 import 'snapshot_item.dart';
 
 @visibleForTesting
-enum Json {
-  snapshots,
-  diffWith,
-  rootPackage;
-}
+enum Json { snapshots, diffWith, rootPackage }
 
 class DiffPaneController extends DisposableController with Serializable {
   DiffPaneController({
@@ -48,9 +44,13 @@ class DiffPaneController extends DisposableController with Serializable {
   }
 
   factory DiffPaneController.fromJson(Map<String, dynamic> json) {
-    final snapshots = (json[Json.snapshots.name] as List)
-        .map((e) => deserialize<SnapshotDataItem>(e, SnapshotDataItem.fromJson))
-        .toList();
+    final snapshots =
+        (json[Json.snapshots.name] as List)
+            .map(
+              (e) =>
+                  deserialize<SnapshotDataItem>(e, SnapshotDataItem.fromJson),
+            )
+            .toList();
 
     final diffWith =
         (json[Json.diffWith.name] as List).map((e) => e as int?).toList();
@@ -73,18 +73,21 @@ class DiffPaneController extends DisposableController with Serializable {
 
   @override
   Map<String, dynamic> toJson() {
-    final snapshots = core.snapshots.value
-        .whereType<SnapshotDataItem>()
-        .where((s) => s.heap != null)
-        .toList();
+    final snapshots =
+        core.snapshots.value
+            .whereType<SnapshotDataItem>()
+            .where((s) => s.heap != null)
+            .toList();
 
-    final snapshotToIndex =
-        snapshots.asMap().map((index, item) => MapEntry(item, index));
+    final snapshotToIndex = snapshots.asMap().map(
+      (index, item) => MapEntry(item, index),
+    );
 
-    final diffWithIndices = snapshots.map((item) {
-      final diffWith = item.diffWith.value;
-      return diffWith == null ? null : snapshotToIndex[diffWith];
-    }).toList();
+    final diffWithIndices =
+        snapshots.map((item) {
+          final diffWith = item.diffWith.value;
+          return diffWith == null ? null : snapshotToIndex[diffWith];
+        }).toList();
 
     return {
       Json.snapshots.name: snapshots,
@@ -105,10 +108,7 @@ class DiffPaneController extends DisposableController with Serializable {
   bool get hasSnapshots => core.snapshots.value.length > 1;
 
   Future<void> takeSnapshot() async {
-    ga.select(
-      gac.memory,
-      gac.MemoryEvents.diffTakeSnapshotControlPane.name,
-    );
+    ga.select(gac.memory, gac.MemoryEvents.diffTakeSnapshotControlPane.name);
     final item = SnapshotDataItem(
       displayNumber: _nextDisplayNumber(),
       defaultName: selectedIsolateName ?? '<isolate-not-detected>',
@@ -121,10 +121,7 @@ class DiffPaneController extends DisposableController with Serializable {
   ///
   /// Opens file selector and loads snapshots from the selected files.
   Future<void> importSnapshots() async {
-    ga.select(
-      gac.memory,
-      gac.importFile,
-    );
+    ga.select(gac.memory, gac.importFile);
     final files = await importRawFilesFromPicker();
     if (files.isEmpty) return;
 
@@ -189,10 +186,7 @@ class DiffPaneController extends DisposableController with Serializable {
     derived._updateValues();
   }
 
-  void setDiffing(
-    SnapshotDataItem diffItem,
-    SnapshotDataItem? withItem,
-  ) {
+  void setDiffing(SnapshotDataItem diffItem, SnapshotDataItem? withItem) {
     diffItem.diffWith.value = withItem;
     derived._updateValues();
   }
@@ -249,9 +243,10 @@ class CoreData {
   SnapshotItem get selectedItem =>
       _snapshots.value[_selectedSnapshotIndex.value];
 
-  SnapshotDataItem? get selectedDataItem => selectedItem is SnapshotDataItem
-      ? selectedItem as SnapshotDataItem
-      : null;
+  SnapshotDataItem? get selectedDataItem =>
+      selectedItem is SnapshotDataItem
+          ? selectedItem as SnapshotDataItem
+          : null;
 
   /// Full name for the selected class.
   ///
@@ -324,8 +319,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Classes to show for currently selected item, if the item is not diffed.
   ValueListenable<ClassDataList<SingleClassData>?> get singleClassesToShow =>
       _singleClassesToShow;
-  final _singleClassesToShow =
-      ValueNotifier<ClassDataList<SingleClassData>?>(null);
+  final _singleClassesToShow = ValueNotifier<ClassDataList<SingleClassData>?>(
+    null,
+  );
 
   /// Classes to show for currently selected item, if the item is diffed.
   ValueListenable<ClassDataList<DiffClassData>?> get diffClassesToShow =>
@@ -425,16 +421,18 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     if (classes is ClassDataList<SingleClassData>) {
       _singleClassesToShow.value = classes;
       _diffClassesToShow.value = null;
-      classesTableSingle.selection.value = classes.list
-          .singleWhereOrNull((d) => d.className == selectedClassName);
+      classesTableSingle.selection.value = classes.list.singleWhereOrNull(
+        (d) => d.className == selectedClassName,
+      );
       classesTableDiff.selection.value = null;
       classData.value = classesTableSingle.selection.value;
     } else if (classes is ClassDataList<DiffClassData>) {
       _singleClassesToShow.value = null;
       _diffClassesToShow.value = classes;
       classesTableSingle.selection.value = null;
-      classesTableDiff.selection.value = classes.list
-          .singleWhereOrNull((d) => d.className == selectedClassName);
+      classesTableDiff.selection.value = classes.list.singleWhereOrNull(
+        (d) => d.className == selectedClassName,
+      );
       classData.value = classesTableDiff.selection.value;
     } else if (classes == null) {
       _singleClassesToShow.value = null;
@@ -483,10 +481,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Make sure the method does not trigger itself recursively.
     assert(!_updatingValues);
 
-    ga.timeStart(
-      gac.memory,
-      gac.MemoryTime.updateValues.name,
-    );
+    ga.timeStart(gac.memory, gac.MemoryTime.updateValues.name);
 
     _updatingValues = true;
   }
@@ -494,10 +489,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   void _endUpdatingValues() {
     _updatingValues = false;
 
-    ga.timeEnd(
-      gac.memory,
-      gac.MemoryTime.updateValues.name,
-    );
+    ga.timeEnd(gac.memory, gac.MemoryTime.updateValues.name);
 
     _assertIntegrity();
   }

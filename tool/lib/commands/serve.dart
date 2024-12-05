@@ -23,14 +23,14 @@ const _allowEmbeddingFlag = 'allow-embedding';
 const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 
 /// This command builds DevTools in release mode by running the
-/// `devtools_tool build` command and then serves DevTools with a locally
+/// `dt build` command and then serves DevTools with a locally
 /// running DevTools server.
 ///
 /// If the [_buildAppFlag] argument is negated (e.g. --no-build-app), then the
 /// DevTools web app will not be rebuilt before serving. The following arguments
 /// are ignored if '--no-build-app' is present in the list of arguments passed
 /// to this command. All of the following commands are passed along to the
-/// `devtools_tool build` command.
+/// `dt build` command.
 ///
 /// If the [_debugServerFlag] argument is present, the DevTools server will be
 /// started with the `--observe` flag. This will allow you to debug and profile
@@ -46,11 +46,11 @@ const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 ///
 /// If the [BuildCommandArgs.updatePerfetto] argument is present, the
 /// precompiled bits for Perfetto will be updated from the
-/// `devtools_tool update-perfetto` command as part of the DevTools build
+/// `dt update-perfetto` command as part of the DevTools build
 /// process.
 ///
 /// If [BuildCommandArgs.pubGet] argument is negated (e.g. --no-pub-get), then
-/// `devtools_tool pub-get --only-main` command will not be run before building
+/// `dt pub-get --only-main` command will not be run before building
 /// the DevTools web app. Use this flag to save the cost of updating pub
 /// packages if your pub cahce does not need to be updated. This is helpful when
 /// developing with the DevTools server.
@@ -137,29 +137,32 @@ class ServeCommand extends Command {
     final serveWithDartSdk = results[_serveWithDartSdkFlag] as String?;
 
     // Any flag that we aren't removing here is intended to be passed through.
-    final remainingArguments = List.of(results.arguments)
-      ..remove(BuildCommandArgs.updateFlutter.asArg())
-      ..remove(BuildCommandArgs.updateFlutter.asArg(negated: true))
-      ..remove(BuildCommandArgs.updatePerfetto.asArg())
-      ..remove(BuildCommandArgs.wasm.asArg())
-      ..remove(BuildCommandArgs.noStripWasm.asArg())
-      ..remove(valueAsArg(_buildAppFlag))
-      ..remove(valueAsArg(_buildAppFlag, negated: true))
-      ..remove(valueAsArg(_debugServerFlag))
-      ..remove(BuildCommandArgs.pubGet.asArg())
-      ..remove(BuildCommandArgs.pubGet.asArg(negated: true))
-      ..removeWhere(
-        (element) => element.startsWith(BuildCommandArgs.buildMode.asArg()),
-      )
-      ..removeWhere(
-        (element) => element.startsWith(valueAsArg(_serveWithDartSdkFlag)),
-      );
+    final remainingArguments =
+        List.of(results.arguments)
+          ..remove(BuildCommandArgs.updateFlutter.asArg())
+          ..remove(BuildCommandArgs.updateFlutter.asArg(negated: true))
+          ..remove(BuildCommandArgs.updatePerfetto.asArg())
+          ..remove(BuildCommandArgs.wasm.asArg())
+          ..remove(BuildCommandArgs.noStripWasm.asArg())
+          ..remove(valueAsArg(_buildAppFlag))
+          ..remove(valueAsArg(_buildAppFlag, negated: true))
+          ..remove(valueAsArg(_debugServerFlag))
+          ..remove(BuildCommandArgs.pubGet.asArg())
+          ..remove(BuildCommandArgs.pubGet.asArg(negated: true))
+          ..removeWhere(
+            (element) => element.startsWith(BuildCommandArgs.buildMode.asArg()),
+          )
+          ..removeWhere(
+            (element) => element.startsWith(valueAsArg(_serveWithDartSdkFlag)),
+          );
 
     final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
     if (localDartSdkLocation == null) {
-      throw Exception('LOCAL_DART_SDK environment variable not set. Please add '
-          'the following to your \'.bash_profile\' or \'.bashrc\' file:\n'
-          'export LOCAL_DART_SDK=<absolute/path/to/my/sdk>');
+      throw Exception(
+        'LOCAL_DART_SDK environment variable not set. Please add '
+        'the following to your \'.bash_profile\' or \'.bashrc\' file:\n'
+        'export LOCAL_DART_SDK=<absolute/path/to/my/sdk>',
+      );
     }
 
     // Validate the path looks correct in case it was set without the /sdk or
@@ -172,8 +175,11 @@ class ServeCommand extends Command {
       );
     }
 
-    final devToolsBuildLocation =
-        path.join(repo.devtoolsAppDirectoryPath, 'build', 'web');
+    final devToolsBuildLocation = path.join(
+      repo.devtoolsAppDirectoryPath,
+      'build',
+      'web',
+    );
 
     if (buildApp) {
       final process = await processManager.runProcess(
@@ -188,9 +194,7 @@ class ServeCommand extends Command {
         ]),
       );
       if (process.exitCode == 1) {
-        throw Exception(
-          'Something went wrong while running `devtools_tool build`',
-        );
+        throw Exception('Something went wrong while running `dt build`');
       }
       logStatus('completed building DevTools: $devToolsBuildLocation');
     }
@@ -212,21 +216,15 @@ class ServeCommand extends Command {
 
     // This call will not exit until explicitly terminated by the user.
     await processManager.runProcess(
-      CliCommand.dart(
-        [
-          if (debugServer) ...[
-            'run',
-            '--observe=0',
-          ],
-          serveLocalScriptPath,
-          '--devtools-build=$devToolsBuildLocation',
-          // Pass any args that were provided to our script along. This allows IDEs
-          // to pass `--machine` (etc.) so that this script can behave the same as
-          // the "dart devtools" command for testing local DevTools/server changes.
-          ...remainingArguments,
-        ],
-        sdkOverride: serveWithDartSdk,
-      ),
+      CliCommand.dart([
+        if (debugServer) ...['run', '--observe=0'],
+        serveLocalScriptPath,
+        '--devtools-build=$devToolsBuildLocation',
+        // Pass any args that were provided to our script along. This allows IDEs
+        // to pass `--machine` (etc.) so that this script can behave the same as
+        // the "dart devtools" command for testing local DevTools/server changes.
+        ...remainingArguments,
+      ], sdkOverride: serveWithDartSdk),
       workingDirectory: localDartSdkLocation,
     );
   }

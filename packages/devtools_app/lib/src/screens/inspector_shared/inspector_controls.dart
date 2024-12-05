@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../inspector_shared/inspector_settings_dialog.dart';
 import '../inspector_v2/inspector_controller.dart' as v2;
 
@@ -35,11 +35,10 @@ class InspectorControls extends StatelessWidget {
       children: [
         ValueListenableBuilder<bool>(
           valueListenable: serviceConnection
-              .serviceManager.serviceExtensionManager
-              .hasServiceExtension(
-            extensions.toggleSelectWidgetMode.extension,
-          ),
-          builder: (_, selectModeSupported, __) {
+              .serviceManager
+              .serviceExtensionManager
+              .hasServiceExtension(extensions.toggleSelectWidgetMode.extension),
+          builder: (_, selectModeSupported, _) {
             return ServiceExtensionButtonGroup(
               fillColor: activeButtonColor,
               extensions: [
@@ -128,10 +127,7 @@ class InspectorServiceExtensionButtonGroup extends StatelessWidget {
 /// Toggle button that allows showing/hiding the implementation widgets in the
 /// widget tree.
 class ShowImplementationWidgetsButton extends StatelessWidget {
-  const ShowImplementationWidgetsButton({
-    super.key,
-    required this.controller,
-  });
+  const ShowImplementationWidgetsButton({super.key, required this.controller});
 
   final v2.InspectorController controller;
 
@@ -145,12 +141,13 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
           isSelected: !isHidden,
           message:
               'Show widgets created by the Flutter framework or other packages.',
-          label: isScreenWiderThan(
-            context,
-            InspectorControls.minScreenWidthForTextBeforeTruncating,
-          )
-              ? 'Show Implementation Widgets'
-              : 'Show',
+          label:
+              isScreenWiderThan(
+                    context,
+                    InspectorControls.minScreenWidthForTextBeforeTruncating,
+                  )
+                  ? 'Show Implementation Widgets'
+                  : 'Show',
           onPressed: controller.toggleImplementationWidgetsVisibility,
           icon: Icons.code,
           minScreenWidthForTextBeforeScaling:

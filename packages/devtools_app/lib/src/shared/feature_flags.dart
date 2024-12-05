@@ -23,8 +23,9 @@ bool get enableExperiments =>
 ///   "args": [
 ///     "--dart-define=enable_experiments=true"
 ///   ]
-const _experimentsEnabledByEnvironment =
-    bool.fromEnvironment('enable_experiments');
+const _experimentsEnabledByEnvironment = bool.fromEnvironment(
+  'enable_experiments',
+);
 
 bool _experimentsEnabledFromMain = false;
 
@@ -35,8 +36,10 @@ void setEnableExperiments() {
 @visibleForTesting
 bool get enableBeta => enableExperiments || !isExternalBuild;
 
-const _kMemoryDisconnectExperience =
-    bool.fromEnvironment('memory_disconnect_experience', defaultValue: true);
+const _kMemoryDisconnectExperience = bool.fromEnvironment(
+  'memory_disconnect_experience',
+  defaultValue: true,
+);
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
@@ -84,11 +87,6 @@ abstract class FeatureFlags {
   /// once extension support is added in g3.
   static bool devToolsExtensions = isExternalBuild;
 
-  /// Flag to enable the new Logging experience.
-  ///
-  /// https://github.com/flutter/devtools/issues/7703
-  static bool loggingV2 = enableExperiments;
-
   /// Flag to enable debugging via DAP.
   ///
   /// https://github.com/flutter/devtools/issues/6056
@@ -104,6 +102,11 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/7856
   static bool wasmOptInSetting = true;
 
+  /// Flag to enable the Flutter Property Editor sidebar.
+  ///
+  /// https://github.com/flutter/devtools/issues/7854
+  static bool propertyEditor = enableExperiments;
+
   /// Stores a map of all the feature flags for debugging purposes.
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
@@ -112,10 +115,10 @@ abstract class FeatureFlags {
     'widgetRebuildStats': widgetRebuildStats,
     'memorySaveLoad': memorySaveLoad,
     'deepLinkIosCheck': deepLinkIosCheck,
-    'loggingV2': loggingV2,
     'dapDebugging': dapDebugging,
     'inspectorV2': inspectorV2,
     'wasmOptInSetting': wasmOptInSetting,
+    'propertyEditor': propertyEditor,
   };
 
   /// A helper to print the status of all the feature flags.

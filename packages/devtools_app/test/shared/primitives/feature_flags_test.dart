@@ -13,8 +13,9 @@ void main() {
     expect(isExternalBuild, true);
     expect(FeatureFlags.memorySaveLoad, false);
     expect(FeatureFlags.deepLinkIosCheck, true);
-    expect(FeatureFlags.loggingV2, false);
     expect(FeatureFlags.dapDebugging, false);
     expect(FeatureFlags.wasmOptInSetting, true);
+    expect(FeatureFlags.inspectorV2, true);
+    expect(FeatureFlags.propertyEditor, false);
   });
 }

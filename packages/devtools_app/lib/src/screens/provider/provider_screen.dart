@@ -5,8 +5,8 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/common_widgets.dart';
-import '../../shared/screen.dart';
+import '../../shared/framework/screen.dart';
+import '../../shared/ui/common_widgets.dart';
 
 class ProviderScreen extends Screen {
   ProviderScreen() : super.fromMetaData(ScreenMetaData.provider);
@@ -18,7 +18,8 @@ class ProviderScreen extends Screen {
     return CenteredMessage(
       richMessage: [
         const TextSpan(
-          text: 'The Provider screen is now shipped as a DevTools extension.\n'
+          text:
+              'The Provider screen is now shipped as a DevTools extension.\n'
               'If you want to use this tool, please upgrade your ',
         ),
         TextSpan(

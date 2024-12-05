@@ -6,12 +6,12 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/banner_messages.dart';
-import '../../../shared/common_widgets.dart';
+import '../../../shared/framework/screen.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/http/http_service.dart' as http_service;
-import '../../../shared/screen.dart';
-import '../../../shared/utils.dart';
+import '../../../shared/managers/banner_messages.dart';
+import '../../../shared/ui/common_widgets.dart';
+import '../../../shared/utils/utils.dart';
 import '../panes/chart/widgets/chart_pane.dart';
 import '../panes/control/widgets/control_pane.dart';
 import 'memory_controller.dart';
@@ -74,13 +74,8 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
               onSave: controller.exportData,
             ),
             const SizedBox(height: intermediateSpacing),
-            MemoryChartPane(
-              chart: controller.chart,
-              keyFocusNode: _focusNode,
-            ),
-            Expanded(
-              child: MemoryTabView(controller),
-            ),
+            MemoryChartPane(chart: controller.chart, keyFocusNode: _focusNode),
+            Expanded(child: MemoryTabView(controller)),
           ],
         );
       },

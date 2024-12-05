@@ -1,16 +1,18 @@
 name: devtools_app_shared
 description: Package of Dart & Flutter structures shared between devtools_app and devtools extensions.
-version: 0.2.4
+version: 0.3.0
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app_shared
 
 environment:
-  sdk: ">=3.4.3 <4.0.0"
-  flutter: ">=3.22.2"
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+resolution: workspace
 
 dependencies:
   collection: ^1.15.0
   dds_service_extensions: ^2.0.0
-  devtools_shared: ^10.0.2
+  devtools_shared: ^11.1.0
   dtd: ^2.1.0
   flutter:
     sdk: flutter
@@ -58,7 +60,3 @@ flutter:
           weight: 500
         - asset: fonts/Roboto_Mono/RobotoMono-Bold.ttf
           weight: 700
-
-dependency_overrides:
-  devtools_shared:
-    path: ../devtools_shared

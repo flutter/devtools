@@ -13,11 +13,11 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/tree.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/tree_view.dart';
 import '../debugger/codeview.dart';
 import '../debugger/codeview_controller.dart';
 import '../debugger/debugger_model.dart';
@@ -81,10 +81,7 @@ MapEntry<String, WidgetBuilder> selectableTextBuilderMapEntry(
 ) {
   return MapEntry(
     key,
-    (context) => Text(
-      value ?? '--',
-      style: Theme.of(context).fixedFontStyle,
-    ),
+    (context) => Text(value ?? '--', style: Theme.of(context).fixedFontStyle),
   );
 }
 
@@ -141,25 +138,20 @@ class VMInfoList extends StatelessWidget {
               controller: listScrollController,
               child: ListView(
                 controller: listScrollController,
-                children: prettyRows(
-                  context,
-                  [
-                    for (final row in rowKeyValues)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '${row.key.toString()}:',
-                            style: theme.fixedFontStyle,
-                          ),
-                          const SizedBox(width: denseSpacing),
-                          Flexible(
-                            child: Builder(builder: row.value),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
+                children: prettyRows(context, [
+                  for (final row in rowKeyValues)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${row.key.toString()}:',
+                          style: theme.fixedFontStyle,
+                        ),
+                        const SizedBox(width: denseSpacing),
+                        Flexible(child: Builder(builder: row.value)),
+                      ],
+                    ),
+                ]),
               ),
             ),
           ),
@@ -180,9 +172,7 @@ Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
   return Container(
     color: alternatingColorForIndex(index, Theme.of(context).colorScheme),
     height: defaultRowHeight,
-    padding: const EdgeInsets.symmetric(
-      horizontal: defaultSpacing,
-    ),
+    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
     child: row,
   );
 }
@@ -222,28 +212,28 @@ class RequestableSizeWidget extends StatelessWidget {
           final size = sizeProvider();
           return size == null
               ? GaDevToolsButton(
-                  icon: Icons.call_made,
-                  label: 'Request',
-                  outlined: false,
-                  gaScreen: gac.vmTools,
-                  gaSelection: gac.requestSize,
-                  onPressed: requestFunction,
-                )
+                icon: Icons.call_made,
+                label: 'Request',
+                outlined: false,
+                gaScreen: gac.vmTools,
+                gaSelection: gac.requestSize,
+                onPressed: requestFunction,
+              )
               : Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      size.valueAsString == null
-                          ? '--'
-                          : prettyPrintBytes(
-                              int.parse(size.valueAsString!),
-                              includeUnit: true,
-                              maxBytes: 512,
-                            )!,
-                    ),
-                    ToolbarRefresh(onPressed: requestFunction),
-                  ],
-                );
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    size.valueAsString == null
+                        ? '--'
+                        : prettyPrintBytes(
+                          int.parse(size.valueAsString!),
+                          includeUnit: true,
+                          maxBytes: 512,
+                        )!,
+                  ),
+                  ToolbarRefresh(onPressed: requestFunction),
+                ],
+              );
         }
       },
     );
@@ -292,9 +282,7 @@ class VmExpansionTile extends StatelessWidget {
     final theme = Theme.of(context);
     return Card(
       child: ListTileTheme(
-        data: ListTileTheme.of(context).copyWith(
-          dense: true,
-        ),
+        data: ListTileTheme.of(context).copyWith(dense: true),
         child: Theme(
           // Prevents divider lines appearing at the top and bottom of the
           // expanded ExpansionTile.
@@ -347,10 +335,7 @@ class ExpansionTileInstanceList extends StatelessWidget {
       for (int i = 0; i < elements.length; ++i)
         Row(
           children: [
-            Text(
-              '[$i]: ',
-              style: theme.subtleFixedFontStyle,
-            ),
+            Text('[$i]: ', style: theme.subtleFixedFontStyle),
             VmServiceObjectLink(
               object: elements[i],
               onTap: controller.findAndSelectNodeForObject,
@@ -383,12 +368,10 @@ class RetainingPathWidget extends StatelessWidget {
     return ValueListenableBuilder<RetainingPath?>(
       valueListenable: retainingPath,
       builder: (context, retainingPath, _) {
-        final retainingObjects = retainingPath == null
-            ? const <Widget>[]
-            : _retainingPathList(
-                context,
-                retainingPath,
-              );
+        final retainingObjects =
+            retainingPath == null
+                ? const <Widget>[]
+                : _retainingPathList(context, retainingPath);
         return VmExpansionTile(
           title: 'Retaining Path',
           onExpanded: onExpanded,
@@ -396,11 +379,11 @@ class RetainingPathWidget extends StatelessWidget {
             retainingPath == null
                 ? const SizedCircularProgressIndicator()
                 : SizedBox.fromSize(
-                    size: Size.fromHeight(
-                      retainingObjects.length * defaultRowHeight + densePadding,
-                    ),
-                    child: Column(children: retainingObjects),
+                  size: Size.fromHeight(
+                    retainingObjects.length * defaultRowHeight + densePadding,
                   ),
+                  child: Column(children: retainingObjects),
+                ),
           ],
         );
       },
@@ -419,25 +402,19 @@ class RetainingPathWidget extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
-    final emptyList = Text(
-      'No retaining objects',
-      style: theme.fixedFontStyle,
-    );
+    final emptyList = Text('No retaining objects', style: theme.fixedFontStyle);
     if (retainingPath.elements == null) return [emptyList];
 
-    final firstRetainingObject = retainingPath.elements!.isNotEmpty
-        ? VmServiceObjectLink(
-            object: retainingPath.elements!.first.value,
-            onTap: onTap,
-          )
-        : emptyList;
+    final firstRetainingObject =
+        retainingPath.elements!.isNotEmpty
+            ? VmServiceObjectLink(
+              object: retainingPath.elements!.first.value,
+              onTap: onTap,
+            )
+            : emptyList;
 
     final retainingObjects = [
-      Row(
-        children: [
-          firstRetainingObject,
-        ],
-      ),
+      Row(children: [firstRetainingObject]),
       if (retainingPath.elements!.length > 1)
         for (final object in retainingPath.elements!.sublist(1))
           Row(
@@ -498,19 +475,21 @@ class _RetainingObjectDescription extends StatelessWidget {
         text: TextSpan(
           children: [
             const TextSpan(text: 'Retained by element at ['),
-            VmServiceObjectLink(object: object.parentMapKey, onTap: onTap)
-                .buildTextSpan(context),
+            VmServiceObjectLink(
+              object: object.parentMapKey,
+              onTap: onTap,
+            ).buildTextSpan(context),
             const TextSpan(text: '] of '),
-            VmServiceObjectLink(object: object.value, onTap: onTap)
-                .buildTextSpan(context),
+            VmServiceObjectLink(
+              object: object.value,
+              onTap: onTap,
+            ).buildTextSpan(context),
           ],
         ),
       );
     }
 
-    final entries = <TextSpan>[
-      const TextSpan(text: 'Retained by '),
-    ];
+    final entries = <TextSpan>[const TextSpan(text: 'Retained by ')];
 
     if (object.parentField is int) {
       assert((object.value as InstanceRef).kind == InstanceKind.kRecord);
@@ -521,31 +500,23 @@ class _RetainingObjectDescription extends StatelessWidget {
 
     if (object.value is FieldRef) {
       final field = object.value as FieldRef;
-      entries.addAll(
-        [
-          VmServiceObjectLink(
-            object: field.declaredType,
-            onTap: onTap,
-          ).buildTextSpan(context),
-          const TextSpan(text: ' '),
-          VmServiceObjectLink(
-            object: field,
-            onTap: onTap,
-          ).buildTextSpan(context),
-          const TextSpan(text: ' of '),
-          VmServiceObjectLink(
-            object: field.owner,
-            onTap: onTap,
-          ).buildTextSpan(context),
-        ],
-      );
+      entries.addAll([
+        VmServiceObjectLink(
+          object: field.declaredType,
+          onTap: onTap,
+        ).buildTextSpan(context),
+        const TextSpan(text: ' '),
+        VmServiceObjectLink(object: field, onTap: onTap).buildTextSpan(context),
+        const TextSpan(text: ' of '),
+        VmServiceObjectLink(
+          object: field.owner,
+          onTap: onTap,
+        ).buildTextSpan(context),
+      ]);
     } else if (object.value is FuncRef) {
       final func = object.value as FuncRef;
       entries.add(
-        VmServiceObjectLink(
-          object: func,
-          onTap: onTap,
-        ).buildTextSpan(context),
+        VmServiceObjectLink(object: func, onTap: onTap).buildTextSpan(context),
       );
     } else {
       entries.add(
@@ -555,9 +526,7 @@ class _RetainingObjectDescription extends StatelessWidget {
         ).buildTextSpan(context),
       );
     }
-    return RichText(
-      text: TextSpan(children: entries),
-    );
+    return RichText(text: TextSpan(children: entries));
   }
 }
 
@@ -588,10 +557,11 @@ class InboundReferencesTree extends StatelessWidget {
             builder: (context, references, _) {
               return TreeView<InboundReferencesTreeNode>(
                 dataRootsListenable: object.inboundReferencesTree,
-                dataDisplayProvider: (node, _) => InboundReferenceWidget(
-                  controller: controller,
-                  node: node,
-                ),
+                dataDisplayProvider:
+                    (node, _) => InboundReferenceWidget(
+                      controller: controller,
+                      node: node,
+                    ),
                 emptyTreeViewBuilder: () {
                   return Padding(
                     padding: EdgeInsets.all(defaultRowHeight / 2),
@@ -625,9 +595,7 @@ class InboundReferenceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final rowContent = <Widget>[
-      const Text('Referenced by '),
-    ];
+    final rowContent = <Widget>[const Text('Referenced by ')];
 
     final parentField = node.ref.parentField;
     if (parentField != null) {
@@ -647,9 +615,7 @@ class InboundReferenceWidget extends StatelessWidget {
     );
     return DefaultTextStyle(
       style: theme.regularTextStyle,
-      child: Row(
-        children: rowContent,
-      ),
+      child: Row(children: rowContent),
     );
   }
 }
@@ -669,10 +635,7 @@ class VmServiceObjectLink extends StatelessWidget {
   final FutureOr<void> Function(ObjRef) onTap;
 
   @visibleForTesting
-  static String? defaultTextBuilder(
-    Object? object, {
-    bool preferUri = false,
-  }) {
+  static String? defaultTextBuilder(Object? object, {bool preferUri = false}) {
     if (object == null) return null;
     return switch (object) {
       FieldRef(:final name) ||
@@ -725,7 +688,8 @@ class VmServiceObjectLink extends StatelessWidget {
   TextSpan buildTextSpan(BuildContext context) {
     final theme = Theme.of(context);
 
-    String? text = textBuilder?.call(object) ??
+    String? text =
+        textBuilder?.call(object) ??
         defaultTextBuilder(object, preferUri: preferUri);
 
     // Sentinels aren't objects that can be inspected.
@@ -741,15 +705,16 @@ class VmServiceObjectLink extends StatelessWidget {
     return TextSpan(
       text: text,
       style: style.apply(overflow: TextOverflow.ellipsis),
-      recognizer: isServiceObject
-          ? (TapGestureRecognizer()
-            ..onTap = () async {
-              final obj = object;
-              if (obj is ObjRef) {
-                await onTap(obj);
-              }
-            })
-          : null,
+      recognizer:
+          isServiceObject
+              ? (TapGestureRecognizer()
+                ..onTap = () async {
+                  final obj = object;
+                  if (obj is ObjRef) {
+                    await onTap(obj);
+                  }
+                })
+              : null,
     );
   }
 
@@ -757,9 +722,7 @@ class VmServiceObjectLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       maxLines: 1,
-      text: TextSpan(
-        children: [buildTextSpan(context)],
-      ),
+      text: TextSpan(children: [buildTextSpan(context)]),
     );
   }
 }
@@ -849,11 +812,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 MapEntry<String, WidgetBuilder> shallowSizeRowBuilder(VmObject object) {
   return selectableTextBuilderMapEntry(
     'Shallow Size',
-    prettyPrintBytes(
-      object.obj.size ?? 0,
-      includeUnit: true,
-      maxBytes: 512,
-    ),
+    prettyPrintBytes(object.obj.size ?? 0, includeUnit: true, maxBytes: 512),
   );
 }
 
@@ -1011,9 +970,8 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
               location.endTokenPos != null) {
             final script = currentParsedScript.script;
             final startLine = location.line!;
-            final endLine = script.getLineNumberFromTokenPos(
-              location.endTokenPos!,
-            )!;
+            final endLine =
+                script.getLineNumberFromTokenPos(location.endTokenPos!)!;
             lineRange = LineRange(startLine, endLine);
           }
         }
@@ -1022,9 +980,7 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
           axis: Axis.vertical,
           initialFractions: const [0.5, 0.5],
           children: [
-            OutlineDecoration.onlyBottom(
-              child: widget.child,
-            ),
+            OutlineDecoration.onlyBottom(child: widget.child),
             Column(
               children: [
                 const AreaPaneHeader(

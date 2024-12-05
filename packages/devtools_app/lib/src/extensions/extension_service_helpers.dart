@@ -13,7 +13,7 @@ import 'package:logging/logging.dart';
 void deduplicateExtensionsAndTakeLatest(
   List<DevToolsExtensionConfig> extensions, {
   required void Function(DevToolsExtensionConfig ext, {required bool ignore})
-      onSetIgnored,
+  onSetIgnored,
   Logger? logger,
   String extensionType = '',
 }) {

@@ -8,10 +8,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-import '../common_widgets.dart';
 import '../primitives/byte_utils.dart';
 import '../primitives/trees.dart';
 import '../ui/colors.dart';
+import '../ui/common_widgets.dart';
 
 enum PivotType { pivotByMiddle, pivotBySize }
 
@@ -234,13 +234,15 @@ class _TreemapState extends State<Treemap> {
         final pivotAndList2Ratio = (pivotByteSize + list2Size) / totalByteSize;
         final pivotRatio = pivotByteSize / (pivotByteSize + list2Size);
 
-        final pivotWidth = isHorizontalRectangle
-            ? pivotAndList2Ratio * width
-            : pivotRatio * width;
+        final pivotWidth =
+            isHorizontalRectangle
+                ? pivotAndList2Ratio * width
+                : pivotRatio * width;
 
-        final pivotHeight = isHorizontalRectangle
-            ? pivotRatio * height
-            : pivotAndList2Ratio * height;
+        final pivotHeight =
+            isHorizontalRectangle
+                ? pivotRatio * height
+                : pivotAndList2Ratio * height;
 
         final pivotAspectRatio = pivotWidth / pivotHeight;
 
@@ -267,12 +269,14 @@ class _TreemapState extends State<Treemap> {
       final pivotAndList2Ratio =
           (pivotByteSize + list2ByteSize) / totalByteSize;
       final pivotRatio = pivotByteSize / (pivotByteSize + list2ByteSize);
-      pivotBestWidth = isHorizontalRectangle
-          ? pivotAndList2Ratio * width
-          : pivotRatio * width;
-      pivotBestHeight = isHorizontalRectangle
-          ? pivotRatio * height
-          : pivotAndList2Ratio * height;
+      pivotBestWidth =
+          isHorizontalRectangle
+              ? pivotAndList2Ratio * width
+              : pivotRatio * width;
+      pivotBestHeight =
+          isHorizontalRectangle
+              ? pivotRatio * height
+              : pivotAndList2Ratio * height;
     }
 
     final positionedTreemaps = <PositionedCell>[];
@@ -396,7 +400,8 @@ class _TreemapState extends State<Treemap> {
             // A key is required to force a rebuild of the tooltips for each cell.
             // Use tooltipMessage as the key to prevent rebuilds within a cell.
             key: Key(hoveredNode?.displayText() ?? ''),
-            richMessage: hoveredNode?.displayTextSpan(
+            richMessage:
+                hoveredNode?.displayTextSpan(
                   defaultTextStyle: defaultTextStyle,
                 ) ??
                 const TextSpan(text: ''),
@@ -474,10 +479,7 @@ class _TreemapState extends State<Treemap> {
 
   Column buildTreemapFromRoot() {
     final rootNode = widget.rootNode!;
-    final child = _TreeMapCell(
-      treeMapHeight: widget.height,
-      node: rootNode,
-    );
+    final child = _TreeMapCell(treeMapHeight: widget.height, node: rootNode);
     return Column(
       children: [
         if (widget.isOutermostLevel)
@@ -487,13 +489,14 @@ class _TreemapState extends State<Treemap> {
             onRootChangedCallback: widget.onRootChangedCallback,
           ),
         Expanded(
-          child: widget.isOutermostLevel
-              ? child
-              : _SelectableTreemapNode(
-                  node: rootNode,
-                  onRootChangedCallback: widget.onRootChangedCallback,
-                  child: child,
-                ),
+          child:
+              widget.isOutermostLevel
+                  ? child
+                  : _SelectableTreemapNode(
+                    node: rootNode,
+                    onRootChangedCallback: widget.onRootChangedCallback,
+                    child: child,
+                  ),
         ),
       ],
     );
@@ -503,10 +506,7 @@ class _TreemapState extends State<Treemap> {
   /// a cell in [positionedCells].
   ///
   /// If so, saves the matching hoveredNode.
-  void _onHover(
-    PointerHoverEvent event,
-    List<PositionedCell> positionedCells,
-  ) {
+  void _onHover(PointerHoverEvent event, List<PositionedCell> positionedCells) {
     final x = event.localPosition.dx;
     final y = event.localPosition.dy;
     final touchPoint = Offset(x, y);
@@ -524,10 +524,7 @@ class _TreemapState extends State<Treemap> {
 }
 
 class _TreeMapCell extends StatelessWidget {
-  const _TreeMapCell({
-    required this.treeMapHeight,
-    required this.node,
-  });
+  const _TreeMapCell({required this.treeMapHeight, required this.node});
 
   final double treeMapHeight;
   final TreemapNode node;
@@ -540,13 +537,14 @@ class _TreeMapCell extends StatelessWidget {
         border: Border.all(color: Colors.black87),
       ),
       child: Center(
-        child: treeMapHeight > Treemap.minHeightToDisplayCellText
-            ? _NameAndSizeText(
-                node: node,
-                color: node.showDiff ? Colors.white : Colors.black,
-                singleLine: false,
-              )
-            : const SizedBox(),
+        child:
+            treeMapHeight > Treemap.minHeightToDisplayCellText
+                ? _NameAndSizeText(
+                  node: node,
+                  color: node.showDiff ? Colors.white : Colors.black,
+                  singleLine: false,
+                )
+                : const SizedBox(),
       ),
     );
   }
@@ -577,9 +575,7 @@ class _TitleBar extends StatelessWidget {
         child: Container(
           height: Treemap.treeMapHeaderHeight,
           width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.black87),
-          ),
+          decoration: BoxDecoration(border: Border.all(color: Colors.black87)),
           child: _NameAndSizeText(
             node: rootNode,
             color: Theme.of(context).colorScheme.onSurface,
@@ -635,9 +631,10 @@ class _BreadcrumbNavigator extends StatelessWidget {
         builder: (context, index) {
           final node = pathFromRoot[index];
           return Breadcrumb(
-            text: index < pathFromRoot.length - 1
-                ? node.name
-                : node.displayText(),
+            text:
+                index < pathFromRoot.length - 1
+                    ? node.name
+                    : node.displayText(),
             isRoot: index == 0,
             onPressed: () => onRootChangedCallback(node),
           );
@@ -831,11 +828,11 @@ class PositionedCell extends Positioned {
     required this.node,
     required super.child,
   }) : super(
-          left: rect.left,
-          top: rect.top,
-          width: rect.width,
-          height: rect.height,
-        );
+         left: rect.left,
+         top: rect.top,
+         width: rect.width,
+         height: rect.height,
+       );
 
   final Rect rect;
 
@@ -873,9 +870,10 @@ class MultiCellPainter extends CustomPainter {
     rectPaint.color = node.displayColor;
     canvas.drawRect(bounds, rectPaint);
 
-    final borderPaint = Paint()
-      ..color = Colors.black45
-      ..style = PaintingStyle.stroke;
+    final borderPaint =
+        Paint()
+          ..color = Colors.black45
+          ..style = PaintingStyle.stroke;
     canvas.drawRect(bounds, borderPaint);
 
     if (positionedCell.width! > Treemap.minWidthToDisplayCellText &&
@@ -894,10 +892,7 @@ class MultiCellPainter extends CustomPainter {
           positionedCell.left! + bounds.width / 2 - textPainter.width / 2;
       final centerY =
           positionedCell.top! + bounds.height / 2 - textPainter.height / 2;
-      textPainter.paint(
-        canvas,
-        Offset(centerX, centerY),
-      );
+      textPainter.paint(canvas, Offset(centerX, centerY));
     }
   }
 

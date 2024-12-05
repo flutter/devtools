@@ -12,11 +12,11 @@ import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../service/vm_service_wrapper.dart';
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../flutter_frames/flutter_frame_model.dart';
 import 'rebuild_stats_model.dart';
 
@@ -107,8 +107,9 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
                 ),
                 Expanded(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: denseSpacing),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: denseSpacing,
+                    ),
                     child: ServiceExtensionCheckbox(
                       serviceExtension: extensions.countWidgetBuilds,
                     ),
@@ -121,10 +122,11 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
         Expanded(
           child: ValueListenableBuilder<ServiceExtensionState>(
             valueListenable: serviceConnection
-                .serviceManager.serviceExtensionManager
+                .serviceManager
+                .serviceExtensionManager
                 .getServiceExtensionState(
-              extensions.countWidgetBuilds.extension,
-            ),
+                  extensions.countWidgetBuilds.extension,
+                ),
             builder: (context, state, _) {
               if (metrics.isEmpty && !state.enabled) {
                 return const Center(
@@ -135,9 +137,7 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
               }
               if (metrics.isEmpty) {
                 return const Center(
-                  child: Text(
-                    'Interact with the app to trigger rebuilds.',
-                  ),
+                  child: Text('Interact with the app to trigger rebuilds.'),
                 ); // No data to display but there should be data soon.
               }
               return RebuildTable(
@@ -196,8 +196,11 @@ class _RebuildTableState extends State<RebuildTable> {
   static final _widgetColumn = _WidgetColumn();
   static final _locationColumn = _LocationColumn();
 
-  List<ColumnData<RebuildLocationStats>> get _columns =>
-      [_widgetColumn, ..._metricsColumns, _locationColumn];
+  List<ColumnData<RebuildLocationStats>> get _columns => [
+    _widgetColumn,
+    ..._metricsColumns,
+    _locationColumn,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -205,8 +208,9 @@ class _RebuildTableState extends State<RebuildTable> {
       dataKey: 'RebuildMetricsTable',
       columns: _columns,
       data: widget.metrics,
-      keyFactory: (RebuildLocationStats location) =>
-          ValueKey<String?>('${location.location.id}'),
+      keyFactory:
+          (RebuildLocationStats location) =>
+              ValueKey<String?>('${location.location.id}'),
       defaultSortColumn: _metricsColumns.first,
       defaultSortDirection: sortDirection,
       onItemSelected: (item) async {
@@ -226,11 +230,7 @@ class _RebuildTableState extends State<RebuildTable> {
 }
 
 class _WidgetColumn extends ColumnData<RebuildLocationStats> {
-  _WidgetColumn()
-      : super(
-          'Widget',
-          fixedWidthPx: scaleByFontFactor(200),
-        );
+  _WidgetColumn() : super('Widget', fixedWidthPx: scaleByFontFactor(200));
 
   @override
   String getValue(RebuildLocationStats dataObject) {
@@ -263,9 +263,7 @@ class _LocationColumn extends ColumnData<RebuildLocationStats> {
 
 class _RebuildCountColumn extends ColumnData<RebuildLocationStats> {
   _RebuildCountColumn(super.name, this.metricIndex)
-      : super(
-          fixedWidthPx: scaleByFontFactor(130),
-        );
+    : super(fixedWidthPx: scaleByFontFactor(130));
 
   final int metricIndex;
 

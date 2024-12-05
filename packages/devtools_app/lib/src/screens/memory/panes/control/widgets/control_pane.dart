@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/screen.dart';
+import '../../../../../shared/framework/screen.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 import 'primary_controls.dart';
 import 'secondary_controls.dart';
 
@@ -26,18 +26,15 @@ class MemoryControlPane extends StatelessWidget {
   Widget build(BuildContext context) {
     // OfflineAwareControls are here to enable button to exit offline mode.
     return OfflineAwareControls(
-      controlsBuilder: (_) => Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const PrimaryControls(),
-          const Spacer(),
-          SecondaryControls(
-            isGcing: isGcing,
-            onGc: onGc,
-            onSave: onSave,
+      controlsBuilder:
+          (_) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const PrimaryControls(),
+              const Spacer(),
+              SecondaryControls(isGcing: isGcing, onGc: onGc, onSave: onSave),
+            ],
           ),
-        ],
-      ),
       gaScreen: ScreenMetaData.memory.id,
     );
   }

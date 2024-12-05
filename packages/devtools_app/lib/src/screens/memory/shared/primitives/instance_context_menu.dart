@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/ui/common_widgets.dart';
 
 typedef MenuBuilder = List<Widget> Function();
 
@@ -30,12 +30,7 @@ class InstanceViewWithContextMenu extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Expanded(
-          child: Text(
-            nf.format(count),
-            textAlign: TextAlign.end,
-          ),
-        ),
+        Expanded(child: Text(nf.format(count), textAlign: TextAlign.end)),
         if (shouldShowMenu)
           ContextMenuButton(
             // ignore: avoid_redundant_argument_values, ensures consistency with [SizedBox] below.

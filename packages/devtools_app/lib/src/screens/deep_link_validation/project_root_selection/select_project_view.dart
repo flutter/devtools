@@ -14,7 +14,7 @@ import '../../../shared/feature_flags.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/server/server.dart' as server;
-import '../../../shared/utils.dart';
+import '../../../shared/utils/utils.dart';
 import '../deep_links_controller.dart';
 import '../deep_links_model.dart';
 import 'root_selector.dart';
@@ -99,9 +99,7 @@ class _SelectProjectViewState extends State<SelectProjectView>
           content: Text(
             'It looks like you have selected a non-Flutter project. Please select a Flutter project instead.',
           ),
-          actions: [
-            DialogCloseButton(),
-          ],
+          actions: [DialogCloseButton()],
         );
       },
     );
@@ -202,10 +200,7 @@ class _LoadingProjectView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Project loading...',
-            style: theme.regularTextStyle,
-          ),
+          Text('Project loading...', style: theme.regularTextStyle),
           Container(
             width: _kLinearProgressIndicatorWidth,
             padding: const EdgeInsets.symmetric(vertical: densePadding),

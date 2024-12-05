@@ -4,19 +4,20 @@
 
 import 'package:devtools_shared/devtools_extensions.dart';
 
+import '../framework/screen.dart';
 import '../preferences/preferences.dart';
-import '../screen.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
 part 'constants/_debugger_constants.dart';
 part 'constants/_deep_links_constants.dart';
+part 'constants/_editor_sidebar_constants.dart';
 part 'constants/_extension_constants.dart';
+part 'constants/_inspector_constants.dart';
+part 'constants/_logging_constants.dart';
 part 'constants/_memory_constants.dart';
 part 'constants/_network_constants.dart';
-part 'constants/_logging_constants.dart';
 part 'constants/_performance_constants.dart';
-part 'constants/_editor_sidebar_constants.dart';
-part 'constants/_inspector_constants.dart';
+part 'constants/_property_editor_sidebar_constants.dart';
 
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
@@ -91,11 +92,7 @@ final defaultDetailsViewToLayoutExplorer =
 final defaultDetailsViewToWidgetDetails =
     InspectorDetailsViewType.widgetDetailsTree.name;
 
-enum HomeScreenEvents {
-  connectToApp,
-  connectToNewApp,
-  viewVmFlags,
-}
+enum HomeScreenEvents { connectToApp, connectToNewApp, viewVmFlags }
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
@@ -122,6 +119,7 @@ const wasm = 'wasm';
 const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const inspectorV2Enabled = 'inspectorV2Enabled';
+const inspectorAutoRefreshEnabled = 'inspectorAutoRefreshEnabled';
 const clearLogs = 'clearLogs';
 const copyLogs = 'copyLogs';
 

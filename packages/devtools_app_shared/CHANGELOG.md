@@ -1,5 +1,13 @@
+## 0.3.0
+* Bump minimum Dart SDK version to `3.6.0`.
+* Bump minimum Flutter SDK version to `3.24.0`.
+* Bump `devtools_shared` dependency to `^11.1.0`.
+
 ## 0.2.4
 * Add `updateQueryParameter` utility method.
+* Add `jump` parameter to `ScrollController.autoScrollToBottom` extension method.
+* Add `DevToolsAreaPane` widget.
+* Add `InputDecorationSuffixButton.help` factory constructor.
 
 ## 0.2.3
 * Bump `web` dependency to `^1.0.0`

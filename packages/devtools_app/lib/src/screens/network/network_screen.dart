@@ -12,19 +12,19 @@ import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/screen.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
@@ -45,10 +45,7 @@ class NetworkScreen extends Screen {
     final networkController = Provider.of<NetworkController>(context);
     final color = Theme.of(context).colorScheme.onPrimary;
     return MultiValueListenableBuilder(
-      listenables: [
-        networkController.requests,
-        networkController.filteredData,
-      ],
+      listenables: [networkController.requests, networkController.filteredData],
       builder: (context, values, child) {
         final networkRequests = values.first as List<NetworkRequest>;
         final filteredRequests = values.second as List<NetworkRequest>;
@@ -73,11 +70,12 @@ class NetworkScreen extends Screen {
           return SizedBox(
             width: smallProgressSize,
             height: smallProgressSize,
-            child: recording
-                ? SmallCircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
-                  )
-                : const SizedBox(),
+            child:
+                recording
+                    ? SmallCircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                    )
+                    : const SizedBox(),
           );
         },
       ),
@@ -87,23 +85,6 @@ class NetworkScreen extends Screen {
 
 class NetworkScreenBody extends StatefulWidget {
   const NetworkScreenBody({super.key});
-
-  static const filterQueryInstructions = '''
-Type a filter query to show or hide specific requests.
-
-Any text that is not paired with an available filter key below will be queried against all categories (method, uri, status, type).
-
-Available filters:
-    'method', 'm'       (e.g. 'm:get', '-m:put,patch')
-    'status', 's'           (e.g. 's:200', '-s:404')
-    'type', 't'               (e.g. 't:json', '-t:ws')
-
-Example queries:
-    'my-endpoint method:put,post -status:404 type:json'
-    'example.com -m:get s:200,201 t:htm,html,json'
-    'http s:404'
-    'POST'
-''';
 
   @override
   State<StatefulWidget> createState() => _NetworkScreenBodyState();
@@ -152,9 +133,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
       children: [
         _NetworkProfilerControls(controller: controller),
         const SizedBox(height: intermediateSpacing),
-        Expanded(
-          child: _NetworkProfilerBody(controller: controller),
-        ),
+        Expanded(child: _NetworkProfilerBody(controller: controller)),
       ],
     );
   }
@@ -163,9 +142,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 /// The row of controls that control the Network profiler (e.g., record, pause,
 /// clear, search, filter, etc.).
 class _NetworkProfilerControls extends StatefulWidget {
-  const _NetworkProfilerControls({
-    required this.controller,
-  });
+  const _NetworkProfilerControls({required this.controller});
 
   static const _includeTextWidth = 810.0;
 
@@ -178,10 +155,6 @@ class _NetworkProfilerControls extends StatefulWidget {
 
 class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     with AutoDisposeMixin {
-  late List<NetworkRequest> _requests;
-
-  late List<NetworkRequest> _filteredRequests;
-
   bool _recording = false;
 
   @override
@@ -194,33 +167,24 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         _recording = widget.controller.recordingNotifier.value;
       });
     });
-    _requests = widget.controller.requests.value;
-    addAutoDisposeListener(widget.controller.requests, () {
-      setState(() {
-        _requests = widget.controller.requests.value;
-      });
-    });
-    _filteredRequests = widget.controller.filteredData.value;
-    addAutoDisposeListener(widget.controller.filteredData, () {
-      setState(() {
-        _filteredRequests = widget.controller.filteredData.value;
-      });
-    });
+
+    addAutoDisposeListener(widget.controller.filteredData);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = ScreenSize(context).width;
-    final hasRequests = _filteredRequests.isNotEmpty;
+    final hasRequests = widget.controller.filteredData.value.isNotEmpty;
     return Row(
       children: [
         StartStopRecordingButton(
           recording: _recording,
-          onPressed: () async =>
-              await widget.controller.togglePolling(!_recording),
-          tooltipOverride: _recording
-              ? 'Stop recording network traffic'
-              : 'Resume recording network traffic',
+          onPressed:
+              () async => await widget.controller.togglePolling(!_recording),
+          tooltipOverride:
+              _recording
+                  ? 'Stop recording network traffic'
+                  : 'Resume recording network traffic',
           minScreenWidthForTextBeforeScaling: double.infinity,
           gaScreen: gac.network,
           gaSelection: _recording ? gac.pause : gac.resume,
@@ -235,6 +199,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         ),
         const SizedBox(width: defaultSpacing),
         DownloadButton(
+          tooltip: 'Download as .har file',
           minScreenWidthForTextBeforeScaling:
               _NetworkProfilerControls._includeTextWidth,
           onPressed: widget.controller.exportAsHarFile,
@@ -242,33 +207,25 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           gaSelection: gac.NetworkEvent.downloadAsHar.name,
         ),
         const SizedBox(width: defaultSpacing),
-        const Expanded(child: SizedBox()),
         // TODO(kenz): fix focus issue when state is refreshed
-        SearchField<NetworkController>(
-          searchController: widget.controller,
-          searchFieldEnabled: hasRequests,
-          searchFieldWidth: screenWidth <= MediaSize.xs
-              ? defaultSearchFieldWidth
-              : wideSearchFieldWidth,
+        Expanded(
+          child: SearchField<NetworkController>(
+            searchController: widget.controller,
+            searchFieldEnabled: hasRequests,
+            searchFieldWidth:
+                screenWidth <= MediaSize.xs
+                    ? defaultSearchFieldWidth
+                    : wideSearchFieldWidth,
+          ),
         ),
         const SizedBox(width: denseSpacing),
-        DevToolsFilterButton(
-          onPressed: _showFilterDialog,
-          isFilterActive: _filteredRequests.length != _requests.length,
+        Expanded(
+          child: StandaloneFilterField<NetworkRequest>(
+            controller: widget.controller,
+            filteredItem: 'request',
+          ),
         ),
       ],
-    );
-  }
-
-  void _showFilterDialog() {
-    unawaited(
-      showDialog(
-        context: context,
-        builder: (context) => FilterDialog<NetworkRequest>(
-          controller: widget.controller,
-          queryInstructions: NetworkScreenBody.filterQueryInstructions,
-        ),
-      ),
     );
   }
 }
@@ -364,11 +321,11 @@ class NetworkRequestsTable extends StatelessWidget {
 class AddressColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
   AddressColumn()
-      : super.wide(
-          'Address',
-          minWidthPx: scaleByFontFactor(isEmbedded() ? 100 : 150.0),
-          showTooltip: true,
-        );
+    : super.wide(
+        'Address',
+        minWidthPx: scaleByFontFactor(isEmbedded() ? 100 : 150.0),
+        showTooltip: true,
+      );
 
   @override
   String getValue(NetworkRequest dataObject) {
@@ -409,11 +366,11 @@ class MethodColumn extends ColumnData<NetworkRequest> {
 class ActionsColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
   ActionsColumn()
-      : super(
-          '',
-          fixedWidthPx: scaleByFontFactor(32),
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        '',
+        fixedWidthPx: scaleByFontFactor(32),
+        alignment: ColumnAlignment.right,
+      );
 
   static const _actionSplashRadius = 16.0;
 
@@ -484,12 +441,12 @@ class ActionsColumn extends ColumnData<NetworkRequest>
 class StatusColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
   StatusColumn()
-      : super(
-          'Status',
-          alignment: ColumnAlignment.right,
-          headerAlignment: TextAlign.right,
-          fixedWidthPx: scaleByFontFactor(50),
-        );
+    : super(
+        'Status',
+        alignment: ColumnAlignment.right,
+        headerAlignment: TextAlign.right,
+        fixedWidthPx: scaleByFontFactor(50),
+      );
 
   @override
   String? getValue(NetworkRequest dataObject) {
@@ -512,21 +469,22 @@ class StatusColumn extends ColumnData<NetworkRequest>
     final theme = Theme.of(context);
     return Text(
       getDisplayValue(data),
-      style: data.didFail
-          ? TextStyle(color: theme.colorScheme.error)
-          : theme.regularTextStyle,
+      style:
+          data.didFail
+              ? TextStyle(color: theme.colorScheme.error)
+              : theme.regularTextStyle,
     );
   }
 }
 
 class TypeColumn extends ColumnData<NetworkRequest> {
   TypeColumn()
-      : super(
-          'Type',
-          alignment: ColumnAlignment.right,
-          headerAlignment: TextAlign.right,
-          fixedWidthPx: scaleByFontFactor(50),
-        );
+    : super(
+        'Type',
+        alignment: ColumnAlignment.right,
+        headerAlignment: TextAlign.right,
+        fixedWidthPx: scaleByFontFactor(50),
+      );
 
   @override
   String getValue(NetworkRequest dataObject) {
@@ -541,12 +499,12 @@ class TypeColumn extends ColumnData<NetworkRequest> {
 
 class DurationColumn extends ColumnData<NetworkRequest> {
   DurationColumn()
-      : super(
-          'Duration',
-          alignment: ColumnAlignment.right,
-          headerAlignment: TextAlign.right,
-          fixedWidthPx: scaleByFontFactor(75),
-        );
+    : super(
+        'Duration',
+        alignment: ColumnAlignment.right,
+        headerAlignment: TextAlign.right,
+        fixedWidthPx: scaleByFontFactor(75),
+      );
 
   @override
   int? getValue(NetworkRequest dataObject) {
@@ -558,21 +516,18 @@ class DurationColumn extends ColumnData<NetworkRequest> {
     final ms = getValue(dataObject);
     return ms == null
         ? 'Pending'
-        : durationText(
-            Duration(milliseconds: ms),
-            fractionDigits: 0,
-          );
+        : durationText(Duration(milliseconds: ms), fractionDigits: 0);
   }
 }
 
 class TimestampColumn extends ColumnData<NetworkRequest> {
   TimestampColumn()
-      : super(
-          'Timestamp',
-          alignment: ColumnAlignment.right,
-          headerAlignment: TextAlign.right,
-          fixedWidthPx: scaleByFontFactor(115),
-        );
+    : super(
+        'Timestamp',
+        alignment: ColumnAlignment.right,
+        headerAlignment: TextAlign.right,
+        fixedWidthPx: scaleByFontFactor(115),
+      );
 
   @override
   DateTime? getValue(NetworkRequest dataObject) {

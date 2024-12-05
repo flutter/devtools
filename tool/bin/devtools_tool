@@ -1,19 +1,8 @@
 #!/bin/bash -e
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+# This file serves as an alias for the 'dt' executable so that
+# the legacy `dt` can be used.
+# TODO(kenz): remove this file in ~6 months (April 2025).
 
-if [ ! -z "$DEVTOOLS_TOOL_FLUTTER_FROM_PATH" ]
-then
-  echo Running devtools_tool using Dart/Flutter from PATH because DEVTOOLS_TOOL_FLUTTER_FROM_PATH is set
-  dart run "$SCRIPT_DIR/devtools_tool.dart" "$@"
-else
-  if [ ! -d $SCRIPT_DIR/../flutter-sdk ]
-  then
-	# If the `devtools/tool/flutter-sdk` directory does not exist yet, use whatever Dart
-	# is on the user's path to update it before proceeding.
-	echo "Running devtools_tool using the Dart SDK from `which dart` to create the Flutter SDK in tool/flutter-sdk."
-   	dart run "$SCRIPT_DIR/devtools_tool.dart" update-flutter-sdk
-  fi
-
-  "$SCRIPT_DIR/../flutter-sdk/bin/dart" run "$SCRIPT_DIR/devtools_tool.dart" "$@"
-fi
+echo Warning: devtools_tool has been replaced by dt. Please use dt instead.
+dt $@

@@ -31,7 +31,7 @@ const quitTimeout = Duration(seconds: 10);
 
 abstract class FlutterTestDriver {
   FlutterTestDriver(this.projectFolder, {String? logPrefix})
-      : _logPrefix = logPrefix != null ? '$logPrefix: ' : '';
+    : _logPrefix = logPrefix != null ? '$logPrefix: ' : '';
 
   final Directory projectFolder;
   final String _logPrefix;
@@ -96,10 +96,12 @@ abstract class FlutterTestDriver {
         hasExited = true;
       }),
     );
-    transformToLines(proc.stdout)
-        .listen((String line) => stdoutController.add(line));
-    transformToLines(proc.stderr)
-        .listen((String line) => stderrController.add(line));
+    transformToLines(
+      proc.stdout,
+    ).listen((String line) => stdoutController.add(line));
+    transformToLines(
+      proc.stderr,
+    ).listen((String line) => stderrController.add(line));
 
     // Capture stderr to a buffer so we can show it all if any requests fail.
     stderrController.stream.listen(errorBuffer.writeln);
@@ -221,9 +223,10 @@ abstract class FlutterTestDriver {
     return _timeoutWithMessages<Map<String, dynamic>>(
       () => response.future,
       timeout: timeout,
-      message: event != null
-          ? 'Did not receive expected $event event.'
-          : 'Did not receive response to request "$id".',
+      message:
+          event != null
+              ? 'Did not receive expected $event event.'
+              : 'Did not receive response to request "$id".',
     ).whenComplete(() => sub.cancel());
   }
 
@@ -243,15 +246,18 @@ abstract class FlutterTestDriver {
 
     final sub = _allMessages.stream.listen(logMessage);
 
-    return f().timeout(
-      timeout ?? defaultTimeout,
-      onTimeout: () {
-        logMessage('<timed out>');
-        throw '$message';
-      },
-    ).catchError((Object? error) {
-      throw '$error\nReceived:\n${messages.toString()}';
-    }).whenComplete(() => sub.cancel());
+    return f()
+        .timeout(
+          timeout ?? defaultTimeout,
+          onTimeout: () {
+            logMessage('<timed out>');
+            throw '$message';
+          },
+        )
+        .catchError((Object? error) {
+          throw '$error\nReceived:\n${messages.toString()}';
+        })
+        .whenComplete(() => sub.cancel());
   }
 
   Map<String, Object?>? _parseFlutterResponse(String line) {
@@ -279,10 +285,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
   }) async {
-    final args = <String>[
-      'run',
-      '--machine',
-    ];
+    final args = <String>['run', '--machine'];
     if (runConfig.trackWidgetCreation) {
       args.add('--track-widget-creation');
     }
@@ -324,37 +327,40 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     final started = waitFor(event: 'app.started', timeout: appStartTimeout);
 
     if (runConfig.withDebugger) {
-      final debugPort =
-          await waitFor(event: 'app.debugPort', timeout: appStartTimeout);
+      final debugPort = await waitFor(
+        event: 'app.debugPort',
+        timeout: appStartTimeout,
+      );
       final Map<String, dynamic> params = debugPort['params'];
       final String wsUriString = params['wsUri'];
       _vmServiceWsUri = Uri.parse(wsUriString);
 
       // Map to WS URI.
-      _vmServiceWsUri =
-          convertToWebSocketUrl(serviceProtocolUrl: _vmServiceWsUri);
+      _vmServiceWsUri = convertToWebSocketUrl(
+        serviceProtocolUrl: _vmServiceWsUri,
+      );
 
       vmService = await vmServiceConnectUriWithFactory<VmServiceWrapper>(
         _vmServiceWsUri.toString(),
-        vmServiceFactory: ({
-          // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
-          required Stream<dynamic> /*String|List<int>*/ inStream,
-          required void Function(String message) writeMessage,
-          Log? log,
-          DisposeHandler? disposeHandler,
-          Future? streamClosed,
-          String? wsUri,
-          bool trackFutures = false,
-        }) =>
-            VmServiceWrapper.defaultFactory(
-          inStream: inStream,
-          writeMessage: writeMessage,
-          log: log,
-          disposeHandler: disposeHandler,
-          streamClosed: streamClosed,
-          wsUri: wsUri,
-          trackFutures: true,
-        ),
+        vmServiceFactory:
+            ({
+              // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
+              required Stream<dynamic> /*String|List<int>*/ inStream,
+              required void Function(String message) writeMessage,
+              Log? log,
+              DisposeHandler? disposeHandler,
+              Future? streamClosed,
+              String? wsUri,
+              bool trackFutures = false,
+            }) => VmServiceWrapper.defaultFactory(
+              inStream: inStream,
+              writeMessage: writeMessage,
+              log: log,
+              disposeHandler: disposeHandler,
+              streamClosed: streamClosed,
+              wsUri: wsUri,
+              trackFutures: true,
+            ),
       );
 
       final vmServiceLocal = vmService!;
@@ -403,14 +409,11 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       throw Exception('App has not started yet');
     }
 
-    final hotReloadResp = await _sendRequest(
-      'app.restart',
-      <String, Object?>{
-        'appId': _currentRunningAppId,
-        'fullRestart': fullRestart,
-        'pause': pause,
-      },
-    );
+    final hotReloadResp = await _sendRequest('app.restart', <String, Object?>{
+      'appId': _currentRunningAppId,
+      'fullRestart': fullRestart,
+      'pause': pause,
+    });
 
     if (hotReloadResp == null ||
         (hotReloadResp as Map<String, Object?>)['code'] != 0) {
@@ -431,10 +434,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       _debugPrint('Stopping app');
       await Future.any<void>(<Future<void>>[
         proc.exitCode,
-        _sendRequest(
-          'app.stop',
-          <String, Object?>{'appId': _currentRunningAppId},
-        ),
+        _sendRequest('app.stop', <String, Object?>{
+          'appId': _currentRunningAppId,
+        }),
       ]).timeout(
         quitTimeout,
         onTimeout: () {

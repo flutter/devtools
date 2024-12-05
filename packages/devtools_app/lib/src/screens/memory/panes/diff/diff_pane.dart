@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/simple_items.dart';
-import '../../../../shared/utils.dart';
+import '../../../../shared/ui/common_widgets.dart';
+import '../../../../shared/utils/utils.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/snapshot_item.dart';
@@ -36,9 +36,7 @@ class DiffPane extends StatelessWidget {
           child: SnapshotList(controller: diffController),
         ),
         OutlineDecoration.onlyLeft(
-          child: _SnapshotItemContent(
-            controller: diffController,
-          ),
+          child: _SnapshotItemContent(controller: diffController),
         ),
       ],
     );
@@ -56,7 +54,7 @@ class _SnapshotItemContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SnapshotItem>(
       valueListenable: controller.derived.selectedItem,
-      builder: (_, item, __) {
+      builder: (_, item, _) {
         if (item is SnapshotDocItem) {
           return Padding(
             padding: const EdgeInsets.all(denseSpacing),
@@ -74,8 +72,9 @@ class _SnapshotItemContent extends StatelessWidget {
                           styleSheet: MarkdownStyleSheet(
                             p: Theme.of(context).regularTextStyle,
                           ),
-                          onTapLink: (text, url, title) =>
-                              unawaited(launchUrlWithErrorHandling(url!)),
+                          onTapLink:
+                              (text, url, title) =>
+                                  unawaited(launchUrlWithErrorHandling(url!)),
                         ),
                       ),
                       const SizedBox(width: densePadding),
@@ -93,8 +92,8 @@ class _SnapshotItemContent extends StatelessWidget {
                           MoreInfoLink(
                             url: DocLinks.diff.value,
                             gaScreenName: gac.memory,
-                            gaSelectedItemDescription:
-                                gac.topicDocumentationLink(_documentationTopic),
+                            gaSelectedItemDescription: gac
+                                .topicDocumentationLink(_documentationTopic),
                           ),
                         ],
                       ),
@@ -128,11 +127,7 @@ class SnapshotInstanceItemPane extends StatelessWidget {
             child: SnapshotControlPane(controller: controller),
           ),
         ),
-        Expanded(
-          child: SnapshotView(
-            controller: controller,
-          ),
-        ),
+        Expanded(child: SnapshotView(controller: controller)),
       ],
     );
   }

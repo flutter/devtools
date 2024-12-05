@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: unused_local_variable
+// ignore_for_file: unused_local_variable, avoid_print
 
 import 'dart:async';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/service_extensions.dart' as extensions;
 import 'package:devtools_shared/service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() async {
@@ -41,7 +40,7 @@ void main() async {
   );
 
   /// Example: Get a service extension state.
-  final ValueListenable<ServiceExtensionState> performanceOverlayEnabled =
+  final performanceOverlayEnabled =
       serviceManager.serviceExtensionManager.getServiceExtensionState(
     extensions.performanceOverlay.extension,
   );

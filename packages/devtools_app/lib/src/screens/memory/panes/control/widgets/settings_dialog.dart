@@ -5,8 +5,8 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 
 /// The dialog keys for testing purposes.
 @visibleForTesting
@@ -43,9 +43,7 @@ class MemorySettingsDialog extends StatelessWidget {
           ],
         ),
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }

@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
+import '../../../shared/ui/common_widgets.dart';
 import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
@@ -68,8 +68,13 @@ class _VmICDataDisplayState extends State<VmICDataDisplay> {
       return;
     }
 
-    final isolateId = serviceConnection
-        .serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final isolateId =
+        serviceConnection
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value!
+            .id!;
     final service = serviceConnection.serviceManager.service!;
     final argumentsDescriptorFuture = service
         .getObject(isolateId, icData.argumentsDescriptor.id!)
@@ -80,9 +85,7 @@ class _VmICDataDisplayState extends State<VmICDataDisplay> {
     _initialized = Future.wait([
       argumentsDescriptorFuture,
       entriesFuture,
-    ]).then(
-      (result) => populateLists(result[0], result[1]),
-    );
+    ]).then((result) => populateLists(result[0], result[1]));
   }
 
   @override

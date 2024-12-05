@@ -31,8 +31,8 @@ import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/query_parameters.dart';
 import '../inspector_shared/inspector_screen.dart';
 import 'inspector_data_models.dart';
 import 'inspector_tree_controller.dart';
@@ -41,26 +41,24 @@ final _log = Logger('inspector_controller');
 
 /// Data pattern containing the properties and render properties for a widget
 /// tree node.
-typedef WidgetTreeNodeProperties = ({
-  /// Properties defined directly on the widget.
-  List<RemoteDiagnosticsNode> widgetProperties,
+typedef WidgetTreeNodeProperties =
+    ({
+      /// Properties defined directly on the widget.
+      List<RemoteDiagnosticsNode> widgetProperties,
 
-  /// Properties defined on the widget's render object.
-  List<RemoteDiagnosticsNode> renderProperties,
+      /// Properties defined on the widget's render object.
+      List<RemoteDiagnosticsNode> renderProperties,
 
-  /// Layout properties for the widget.
-  LayoutProperties? layoutProperties,
-});
+      /// Layout properties for the widget.
+      LayoutProperties? layoutProperties,
+    });
 
 /// This class is based on the InspectorPanel class from the Flutter IntelliJ
 /// plugin with some refactors to make it more of a true controller than a view.
 class InspectorController extends DisposableController
     with AutoDisposeControllerMixin
     implements InspectorServiceClient {
-  InspectorController({
-    required this.inspectorTree,
-    required this.treeType,
-  }) {
+  InspectorController({required this.inspectorTree, required this.treeType}) {
     unawaited(_init());
   }
 
@@ -112,10 +110,10 @@ class InspectorController extends DisposableController
       if (_supportsToggleSelectWidgetMode.value) {
         serviceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
-          extensions.enableOnDeviceInspector.extension,
-          enabled: true,
-          value: true,
-        );
+              extensions.enableOnDeviceInspector.extension,
+              enabled: true,
+              value: true,
+            );
       }
     });
 
@@ -132,6 +130,17 @@ class InspectorController extends DisposableController
     }
 
     serviceConnection.consoleService.ensureServiceInitialized();
+
+    final vmService = serviceConnection.serviceManager.service;
+    if (vmService != null) {
+      autoDisposeStreamSubscription(
+        vmService.onIsolateEvent.listen(_maybeAutoRefreshInspector),
+      );
+
+      autoDisposeStreamSubscription(
+        vmService.onExtensionEvent.listen(_maybeAutoRefreshInspector),
+      );
+    }
   }
 
   void _handleConnectionStart() {
@@ -154,9 +163,10 @@ class InspectorController extends DisposableController
 
   IsolateRef? _mainIsolate;
 
-  ValueListenable<bool> get _supportsToggleSelectWidgetMode =>
-      serviceConnection.serviceManager.serviceExtensionManager
-          .hasServiceExtension(extensions.toggleSelectWidgetMode.extension);
+  ValueListenable<bool> get _supportsToggleSelectWidgetMode => serviceConnection
+      .serviceManager
+      .serviceExtensionManager
+      .hasServiceExtension(extensions.toggleSelectWidgetMode.extension);
 
   Future<void> _onClientChange(bool added) async {
     if (!added && _clientCount == 0) {
@@ -227,9 +237,11 @@ class InspectorController extends DisposableController
 
   ValueListenable<WidgetTreeNodeProperties> get selectedNodeProperties =>
       _selectedNodeProperties;
-  final _selectedNodeProperties = ValueNotifier<WidgetTreeNodeProperties>(
-    (widgetProperties: [], renderProperties: [], layoutProperties: null),
-  );
+  final _selectedNodeProperties = ValueNotifier<WidgetTreeNodeProperties>((
+    widgetProperties: [],
+    renderProperties: [],
+    layoutProperties: null,
+  ));
 
   /// Whether the implementation widgets are hidden in the widget tree.
   ValueListenable<bool> get implementationWidgetsHidden =>
@@ -418,9 +430,7 @@ class InspectorController extends DisposableController
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
       final inspectorRef = DevToolsQueryParams.load().inspectorRef;
-      await updateSelectionFromService(
-        inspectorRef: inspectorRef,
-      );
+      await updateSelectionFromService(inspectorRef: inspectorRef);
     } else {
       if (_disposed) return;
       if (inspectorService is InspectorService) {
@@ -434,11 +444,33 @@ class InspectorController extends DisposableController
     }
   }
 
+  bool _receivedIsolateReloadEvent = false;
+
+  Future<void> _maybeAutoRefreshInspector(Event event) async {
+    if (!preferences.inspector.autoRefreshEnabled.value) return;
+
+    // It is not sufficent to wait for the isolate reload event, because Flutter
+    // might not have re-painted the app. Instead, we need to wait for the first
+    // frame AFTER the isolate reload event in order to request the new tree.
+    if (event.kind == EventKind.kExtension) {
+      if (!_receivedIsolateReloadEvent) return;
+      if (event.extensionKind == 'Flutter.Frame') {
+        _receivedIsolateReloadEvent = false;
+        await refreshInspector();
+      }
+    }
+
+    if (event.kind == EventKind.kIsolateReload) {
+      _receivedIsolateReloadEvent = true;
+    }
+  }
+
   Future<void> _recomputeTreeRoot(
     RemoteDiagnosticsNode? newSelection, {
-    bool hideImplementationWidgets = false,
+    bool? hideImplementationWidgets,
   }) async {
     assert(!_disposed);
+    hideImplementationWidgets ??= _implementationWidgetsHidden.value;
     final treeGroups = _treeGroups;
     if (_disposed || treeGroups == null) {
       return;
@@ -450,6 +482,7 @@ class InspectorController extends DisposableController
       final node = await group.getRoot(
         treeType,
         isSummaryTree: hideImplementationWidgets,
+        includeFullDetails: false,
       );
       if (node == null || group.disposed || _disposed) {
         return;
@@ -466,14 +499,89 @@ class InspectorController extends DisposableController
         expandChildren: true,
       );
       inspectorTree.root = rootNode;
-
-      refreshSelection(newSelection);
+      final selectedNode = _determineNewSelection(
+        newSelection ?? selectedDiagnostic,
+      );
+      refreshSelection(selectedNode);
       _implementationWidgetsHidden.value = hideImplementationWidgets;
     } catch (error, st) {
       _log.shout(error, error, st);
       treeGroups.cancelNext();
       return;
     }
+  }
+
+  RemoteDiagnosticsNode? _determineNewSelection(
+    RemoteDiagnosticsNode? previousSelection,
+  ) {
+    if (previousSelection == null) return null;
+    if (valueToInspectorTreeNode.containsKey(previousSelection.valueRef)) {
+      return previousSelection;
+    }
+
+    // TODO(https://github.com/flutter/devtools/issues/8481): Consider using a
+    // variation of a path-finding algorithm to determine the new selection,
+    // instead of looking for the first matching descendant.
+    final (
+      closestUnchangedAncestor,
+      distanceToAncestor,
+    ) = _findClosestUnchangedAncestor(previousSelection);
+    if (closestUnchangedAncestor == null) return inspectorTree.root?.diagnostic;
+
+    const distanceOffset = 3;
+    final matchingDescendant = _findMatchingDescendant(
+      of: closestUnchangedAncestor,
+      matching: previousSelection,
+      inRange: Range(
+        distanceToAncestor - distanceOffset,
+        distanceToAncestor + distanceOffset,
+      ),
+    );
+
+    return matchingDescendant ?? closestUnchangedAncestor;
+  }
+
+  (RemoteDiagnosticsNode?, int) _findClosestUnchangedAncestor(
+    RemoteDiagnosticsNode node, [
+    int distanceToAncestor = 1,
+  ]) {
+    final inspectorTreeNode = valueToInspectorTreeNode[node.valueRef];
+    if (inspectorTreeNode != null) {
+      return (inspectorTreeNode.diagnostic, distanceToAncestor);
+    }
+
+    final ancestor = node.parent;
+    if (ancestor == null) return (null, distanceToAncestor);
+    return _findClosestUnchangedAncestor(ancestor, distanceToAncestor++);
+  }
+
+  RemoteDiagnosticsNode? _findMatchingDescendant({
+    required RemoteDiagnosticsNode of,
+    required RemoteDiagnosticsNode matching,
+    required Range inRange,
+    int currentDistance = 1,
+  }) {
+    if (currentDistance > inRange.end) return null;
+
+    if (inRange.contains(currentDistance)) {
+      if (of.description == matching.description) {
+        return of;
+      }
+    }
+
+    final children = of.childrenNow;
+    final distance = currentDistance++;
+    for (final child in children) {
+      final matchingDescendant = _findMatchingDescendant(
+        of: child,
+        matching: matching,
+        inRange: inRange,
+        currentDistance: distance,
+      );
+      if (matchingDescendant != null) return matchingDescendant;
+    }
+
+    return null;
   }
 
   Future<void> toggleImplementationWidgetsVisibility() async {
@@ -486,6 +594,9 @@ class InspectorController extends DisposableController
       );
       // Persist the selected node after refreshing the widget tree:
       refreshSelection(currentSelectedNode?.diagnostic);
+
+      // If the user is searching the tree, refresh the search matches.
+      inspectorTree.refreshSearchMatches();
     }
   }
 
@@ -527,7 +638,7 @@ class InspectorController extends DisposableController
     final matchingNode = findMatchingInspectorTreeNode(newSelection);
     if (matchingNode != null) {
       setSelectedNode(matchingNode);
-      syncSelectionHelper(selection: newSelection);
+      syncSelectionHelper(selection: matchingNode.diagnostic);
 
       syncTreeSelection();
     }
@@ -591,9 +702,7 @@ class InspectorController extends DisposableController
     unawaited(updateSelectionFromService());
   }
 
-  Future<void> updateSelectionFromService({
-    String? inspectorRef,
-  }) async {
+  Future<void> updateSelectionFromService({String? inspectorRef}) async {
     final selectionGroups = _selectionGroups;
     if (selectionGroups == null) {
       // Already disposed. Ignore this requested to update selection.
@@ -624,8 +733,9 @@ class InspectorController extends DisposableController
       // user selected an implementation widget in the app while implementation
       // widgets are hidden in the tree.
       if (implementationWidgetsHidden.value && newSelection != null) {
-        final isInTree =
-            valueToInspectorTreeNode.containsKey(newSelection.valueRef);
+        final isInTree = valueToInspectorTreeNode.containsKey(
+          newSelection.valueRef,
+        );
         final hasParent = newSelection.parent != null;
         final isImplementationWidget = !isInTree && !hasParent;
         if (isImplementationWidget) {
@@ -775,15 +885,17 @@ class InspectorController extends DisposableController
   void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
     final inspectorRef = node?.diagnostic?.valueRef.id;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors =
+        serviceConnection.errorBadgeManager
+            .erroredItemsForPage(InspectorScreen.id)
+            .value;
 
     // Check whether the node that was just selected has any errors associated
     // with it.
-    var errorIndex = inspectorRef != null
-        ? errors.keys.toList().indexOf(inspectorRef)
-        : null;
+    var errorIndex =
+        inspectorRef != null
+            ? errors.keys.toList().indexOf(inspectorRef)
+            : null;
     if (errorIndex == -1) {
       errorIndex = null;
     }
@@ -793,8 +905,10 @@ class InspectorController extends DisposableController
     if (errorIndex != null) {
       // Mark the error as "seen" as this will render slightly differently
       // so the user can track which errored nodes they've viewed.
-      serviceConnection.errorBadgeManager
-          .markErrorAsRead(InspectorScreen.id, errors[inspectorRef!]!);
+      serviceConnection.errorBadgeManager.markErrorAsRead(
+        InspectorScreen.id,
+        errors[inspectorRef!]!,
+      );
       // Also clear the error badge since new errors may have arrived while
       // the inspector was visible (normally they're cleared when visiting
       // the screen) and visiting an errored node seems an appropriate
@@ -807,14 +921,13 @@ class InspectorController extends DisposableController
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors =
+        serviceConnection.errorBadgeManager
+            .erroredItemsForPage(InspectorScreen.id)
+            .value;
 
     unawaited(
-      updateSelectionFromService(
-        inspectorRef: errors.keys.elementAt(index),
-      ),
+      updateSelectionFromService(inspectorRef: errors.keys.elementAt(index)),
     );
   }
 

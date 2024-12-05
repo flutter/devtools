@@ -28,12 +28,17 @@ HeapDiffData _calculateDiffGaWrapper(_HeapCouple couple) {
   ga.timeSync(
     gac.memory,
     gac.MemoryTime.calculateDiff.name,
-    syncOperation: () => result =
-        calculateHeapDiffData(before: couple.before, after: couple.after),
-    screenMetricsProvider: () => MemoryScreenMetrics(
-      heapDiffObjectsBefore: couple.before.graph.objects.length,
-      heapDiffObjectsAfter: couple.after.graph.objects.length,
-    ),
+    syncOperation:
+        () =>
+            result = calculateHeapDiffData(
+              before: couple.before,
+              after: couple.after,
+            ),
+    screenMetricsProvider:
+        () => MemoryScreenMetrics(
+          heapDiffObjectsBefore: couple.before.graph.objects.length,
+          heapDiffObjectsAfter: couple.after.graph.objects.length,
+        ),
   );
   return result;
 }

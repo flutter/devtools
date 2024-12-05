@@ -21,38 +21,44 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   final controller = MockPerformanceController();
   final timelineEventsController = MockTimelineEventsController();
   final flutterFramesController = MockFlutterFramesController();
-  when(controller.enhanceTracingController)
-      .thenReturn(EnhanceTracingController());
+  when(
+    controller.enhanceTracingController,
+  ).thenReturn(EnhanceTracingController());
   when(controller.offlinePerformanceData).thenReturn(null);
   when(controller.selectedFeatureTabIndex).thenReturn(0);
   when(controller.initialized).thenAnswer((_) => Future.value());
 
   // Stubs for Flutter Frames feature.
   when(controller.flutterFramesController).thenReturn(flutterFramesController);
-  when(flutterFramesController.selectedFrame)
-      .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
-  when(flutterFramesController.recordingFrames)
-      .thenReturn(const FixedValueListenable<bool>(true));
-  when(flutterFramesController.displayRefreshRate)
-      .thenReturn(ValueNotifier<double>(defaultRefreshRate));
+  when(
+    flutterFramesController.selectedFrame,
+  ).thenReturn(const FixedValueListenable<FlutterFrame?>(null));
+  when(
+    flutterFramesController.recordingFrames,
+  ).thenReturn(const FixedValueListenable<bool>(true));
+  when(
+    flutterFramesController.displayRefreshRate,
+  ).thenReturn(ValueNotifier<double>(defaultRefreshRate));
 
   // Stubs for Timeline Events feature.
-  when(controller.timelineEventsController)
-      .thenReturn(timelineEventsController);
+  when(
+    controller.timelineEventsController,
+  ).thenReturn(timelineEventsController);
   when(timelineEventsController.status).thenReturn(
     ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty),
   );
 
   // Stubs for Rebuild Count feature
   when(controller.rebuildCountModel).thenReturn(RebuildCountModel());
-  when(controller.rebuildStatsController)
-      .thenReturn(RebuildStatsController(controller));
+  when(
+    controller.rebuildStatsController,
+  ).thenReturn(RebuildStatsController(controller));
 
   return controller;
 }
 
 MockProgramExplorerController
-    createMockProgramExplorerControllerWithDefaults() {
+createMockProgramExplorerControllerWithDefaults() {
   final controller = MockProgramExplorerController();
   when(controller.initialized).thenReturn(ValueNotifier(true));
   when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
@@ -69,24 +75,27 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   when(codeViewController.fileExplorerVisible).thenReturn(ValueNotifier(false));
   when(codeViewController.currentScriptRef).thenReturn(ValueNotifier(null));
   when(codeViewController.scriptLocation).thenReturn(ValueNotifier(null));
-  when(codeViewController.currentParsedScript)
-      .thenReturn(ValueNotifier<ParsedScript?>(null));
+  when(
+    codeViewController.currentParsedScript,
+  ).thenReturn(ValueNotifier<ParsedScript?>(null));
   when(codeViewController.searchMatches).thenReturn(ValueNotifier([]));
   when(codeViewController.activeSearchMatch).thenReturn(ValueNotifier(null));
   when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
-  when(codeViewController.showSearchInFileField)
-      .thenReturn(ValueNotifier(false));
-  when(codeViewController.searchInProgressNotifier)
-      .thenReturn(const FixedValueListenable<bool>(false));
+  when(
+    codeViewController.showSearchInFileField,
+  ).thenReturn(ValueNotifier(false));
+  when(
+    codeViewController.searchInProgressNotifier,
+  ).thenReturn(const FixedValueListenable<bool>(false));
   when(codeViewController.matchIndex).thenReturn(ValueNotifier<int>(0));
   programExplorerController ??=
       createMockProgramExplorerControllerWithDefaults();
-  when(codeViewController.programExplorerController).thenReturn(
-    programExplorerController,
-  );
-  when(codeViewController.showProfileInformation).thenReturn(
-    const FixedValueListenable(false),
-  );
+  when(
+    codeViewController.programExplorerController,
+  ).thenReturn(programExplorerController);
+  when(
+    codeViewController.showProfileInformation,
+  ).thenReturn(const FixedValueListenable(false));
   when(codeViewController.showCodeCoverage).thenReturn(ValueNotifier(false));
   when(codeViewController.focusLine).thenReturn(ValueNotifier(-1));
   when(codeViewController.navigationInProgress).thenReturn(false);
@@ -107,17 +116,17 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.isSystemIsolate).thenReturn(false);
 
   when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
-  when(debuggerController.stackFramesWithLocation)
-      .thenReturn(ValueNotifier([]));
+  when(
+    debuggerController.stackFramesWithLocation,
+  ).thenReturn(ValueNotifier([]));
   when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
 
-  when(debuggerController.exceptionPauseMode)
-      .thenReturn(ValueNotifier('Unhandled'));
+  when(
+    debuggerController.exceptionPauseMode,
+  ).thenReturn(ValueNotifier('Unhandled'));
 
   codeViewController ??= createMockCodeViewControllerWithDefaults();
-  when(debuggerController.codeViewController).thenReturn(
-    codeViewController,
-  );
+  when(debuggerController.codeViewController).thenReturn(codeViewController);
 
   return debuggerController;
 }
@@ -172,10 +181,12 @@ MockServiceManager<VmServiceWrapper> _createMockServiceManagerWithDefaults() {
   provideDummy<ServiceExtensionManager>(fakeServiceExtensionManager);
 
   when(mockServiceManager.isolateManager).thenReturn(fakeIsolateManager);
-  when(mockServiceManager.serviceExtensionManager)
-      .thenReturn(fakeServiceExtensionManager);
-  when(mockServiceManager.connectedState)
-      .thenReturn(ValueNotifier(const ConnectedState(true)));
+  when(
+    mockServiceManager.serviceExtensionManager,
+  ).thenReturn(fakeServiceExtensionManager);
+  when(
+    mockServiceManager.connectedState,
+  ).thenReturn(ValueNotifier(const ConnectedState(true)));
   return mockServiceManager;
 }
 
@@ -185,31 +196,54 @@ MockLoggingController createMockLoggingControllerWithDefaults({
   provideDummy<ListValueNotifier<LogData>>(ListValueNotifier<LogData>(data));
   final mockLoggingController = MockLoggingController();
   when(mockLoggingController.data).thenReturn(data);
-  when(mockLoggingController.filteredData)
-      .thenReturn(ListValueNotifier<LogData>(data));
-  when(mockLoggingController.isFilterActive).thenReturn(false);
-  when(mockLoggingController.selectedLog)
-      .thenReturn(ValueNotifier<LogData?>(null));
-  when(mockLoggingController.searchFieldFocusNode).thenReturn(FocusNode());
-  when(mockLoggingController.searchTextFieldController)
-      .thenReturn(SearchTextEditingController());
-  when(mockLoggingController.searchMatches)
-      .thenReturn(const FixedValueListenable(<LogData>[]));
-  when(mockLoggingController.activeSearchMatch)
-      .thenReturn(const FixedValueListenable<LogData?>(null));
-  when(mockLoggingController.searchInProgressNotifier)
-      .thenReturn(const FixedValueListenable(false));
-  when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
-  return mockLoggingController;
-}
+  when(
+    mockLoggingController.selectedLog,
+  ).thenReturn(ValueNotifier<LogData?>(null));
 
-MockLoggingControllerV2 createMockLoggingControllerV2WithDefaults() {
-  provideDummy<ListValueNotifier<LogDataV2>>(
-    ListValueNotifier<LogDataV2>([]),
+  // Set up mock filter state.
+  when(
+    mockLoggingController.createQueryFilterArgs(),
+  ).thenReturn(LoggingController.loggingQueryFilterArgs);
+  when(
+    mockLoggingController.queryFilterArgs,
+  ).thenReturn(LoggingController.loggingQueryFilterArgs);
+  when(
+    mockLoggingController.createSettingFilters(),
+  ).thenReturn(LoggingController.loggingSettingFilters);
+  when(
+    mockLoggingController.settingFilters,
+  ).thenReturn(LoggingController.loggingSettingFilters);
+  final activeFilter = FixedValueListenable(
+    Filter<LogData>(
+      queryFilter: QueryFilter.empty(
+        args: LoggingController.loggingQueryFilterArgs,
+      ),
+      settingFilters: LoggingController.loggingSettingFilters,
+    ),
   );
-  final mockLoggingController = MockLoggingControllerV2();
-  when(mockLoggingController.loggingModel).thenReturn(LoggingTableModel());
-  when(mockLoggingController.selectedLog)
-      .thenReturn(ValueNotifier<LogDataV2?>(null));
+  provideDummy<FixedValueListenable<Filter<LogData>>>(activeFilter);
+  when(mockLoggingController.activeFilter).thenReturn(activeFilter);
+  when(mockLoggingController.useRegExp).thenReturn(ValueNotifier<bool>(false));
+  when(
+    mockLoggingController.filteredData,
+  ).thenReturn(ListValueNotifier<LogData>(data));
+  when(mockLoggingController.isFilterActive).thenReturn(false);
+
+  // Set up mock search state.
+  when(mockLoggingController.searchFieldFocusNode).thenReturn(FocusNode());
+  when(
+    mockLoggingController.searchTextFieldController,
+  ).thenReturn(SearchTextEditingController());
+  when(
+    mockLoggingController.searchMatches,
+  ).thenReturn(const FixedValueListenable(<LogData>[]));
+  when(
+    mockLoggingController.activeSearchMatch,
+  ).thenReturn(const FixedValueListenable<LogData?>(null));
+  when(
+    mockLoggingController.searchInProgressNotifier,
+  ).thenReturn(const FixedValueListenable(false));
+  when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
+
   return mockLoggingController;
 }

@@ -12,14 +12,7 @@ import '../../panes/tracing/tracing_pane_controller.dart';
 import '../../shared/heap/class_filter.dart';
 
 @visibleForTesting
-enum Json {
-  selectedTab,
-  classFilter,
-  diffData,
-  profileData,
-  chartData,
-  trace;
-}
+enum Json { selectedTab, classFilter, diffData, profileData, chartData, trace }
 
 class OfflineMemoryData with Serializable {
   OfflineMemoryData(

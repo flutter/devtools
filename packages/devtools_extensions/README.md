@@ -245,8 +245,8 @@ file in VS code:
     "configurations": [
         ...
         {
-            "name": "some_pkg_devtools_extension + simulated environment",
-            "cwd": "packages/some_pkg_devtools_extension",
+            "name": "devtools_extension + simulated environment",
+            "cwd": "relative/path/to/your/extension",
             "request": "launch",
             "type": "dart",
             "args": [

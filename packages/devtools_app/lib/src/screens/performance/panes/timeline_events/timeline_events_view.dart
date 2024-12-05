@@ -10,9 +10,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
+import '../../../../shared/ui/common_widgets.dart';
 import 'perfetto/perfetto.dart';
 import 'timeline_events_controller.dart';
 
@@ -191,9 +191,10 @@ class RefreshTimelineEventsButton extends StatelessWidget {
         return RefreshButton(
           iconOnly: true,
           outlined: false,
-          onPressed: status == EventsControllerStatus.refreshing
-              ? null
-              : controller.forceRefresh,
+          onPressed:
+              status == EventsControllerStatus.refreshing
+                  ? null
+                  : controller.forceRefresh,
           tooltip: 'Refresh timeline events',
           gaScreen: gac.performance,
           gaSelection: gac.PerformanceEvents.refreshTimelineEvents.name,
@@ -251,9 +252,7 @@ class _TimelineSettingsDialogState extends State<TimelineSettingsDialog>
           ],
         ),
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 
@@ -267,12 +266,7 @@ class _TimelineSettingsDialogState extends State<TimelineSettingsDialog>
       ),
       const SizedBox(height: defaultSpacing),
       ...dialogSubHeader(theme, 'Trace categories'),
-      RichText(
-        text: TextSpan(
-          text: 'Default',
-          style: theme.subtleTextStyle,
-        ),
-      ),
+      RichText(text: TextSpan(text: 'Default', style: theme.subtleTextStyle)),
       ..._timelineStreams(advanced: false),
       // Special case "Network Traffic" because it is not implemented as a
       // Timeline recorded stream in the VM. The user does not need to be aware of
@@ -281,46 +275,41 @@ class _TimelineSettingsDialogState extends State<TimelineSettingsDialog>
         title: 'Network',
         description: 'Http traffic',
         notifier: _httpLogging,
-        onChanged: (value) => unawaited(
-          http_service.toggleHttpRequestLogging(value ?? false),
-        ),
+        onChanged:
+            (value) => unawaited(
+              http_service.toggleHttpRequestLogging(value ?? false),
+            ),
       ),
     ];
   }
 
   List<Widget> _advancedStreams(ThemeData theme) {
     return [
-      RichText(
-        text: TextSpan(
-          text: 'Advanced',
-          style: theme.subtleTextStyle,
-        ),
-      ),
+      RichText(text: TextSpan(text: 'Advanced', style: theme.subtleTextStyle)),
       ..._timelineStreams(advanced: true),
     ];
   }
 
-  List<Widget> _timelineStreams({
-    required bool advanced,
-  }) {
-    final streams = advanced
-        ? serviceConnection.timelineStreamManager.advancedStreams
-        : serviceConnection.timelineStreamManager.basicStreams;
-    final settings = streams
-        .map(
-          (stream) => CheckboxSetting(
-            title: stream.name,
-            description: stream.description,
-            notifier: stream.recorded as ValueNotifier<bool?>,
-            onChanged: (newValue) => unawaited(
-              serviceConnection.timelineStreamManager.updateTimelineStream(
-                stream,
-                newValue ?? false,
+  List<Widget> _timelineStreams({required bool advanced}) {
+    final streams =
+        advanced
+            ? serviceConnection.timelineStreamManager.advancedStreams
+            : serviceConnection.timelineStreamManager.basicStreams;
+    final settings =
+        streams
+            .map(
+              (stream) => CheckboxSetting(
+                title: stream.name,
+                description: stream.description,
+                notifier: stream.recorded as ValueNotifier<bool?>,
+                onChanged:
+                    (newValue) => unawaited(
+                      serviceConnection.timelineStreamManager
+                          .updateTimelineStream(stream, newValue ?? false),
+                    ),
               ),
-            ),
-          ),
-        )
-        .toList();
+            )
+            .toList();
     return settings;
   }
 }
