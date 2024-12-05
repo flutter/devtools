@@ -3,8 +3,8 @@
 * Bump minimum Flutter SDK version to `3.24.0`.
 * Bump `devtools_shared` dependency to `^11.1.0`.
 * Add `DevToolsIcon` and `AssetImageIcon` widgets.
-* Add `iconAsset` field to `ButtonGroupItemData` class.
-* Add `iconAsset` field to `MaterialIconLabel` class.
+* Add `iconAsset` and `iconSize` fields to the `ButtonGroupItemData` class.
+* Add `iconAsset` and `iconSize` fields to the `MaterialIconLabel` class.
 
 ## 0.2.4
 * Add `updateQueryParameter` utility method.

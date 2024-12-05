@@ -21,6 +21,12 @@ class DebuggingControls extends StatefulWidget {
 
   static const minWidthBeforeScaling = 1750.0;
 
+  // The icon size for the material_symbol icons needs to be increased to
+  // account for padding included in the icon assets.
+  static final materialIconSize = scaleByFontFactor(
+    defaultIconSizeBeforeScaling + 3.0,
+  );
+
   @override
   State<DebuggingControls> createState() => _DebuggingControlsState();
 }
@@ -100,6 +106,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
         ButtonGroupItemData(
           tooltip: 'Resume',
           iconAsset: 'icons/material_symbols/resume.png',
+          iconSize: DebuggingControls.materialIconSize,
           // Enable while paused + not resuming and selected isolate is not
           // a system isolate.
           onPressed:
@@ -117,16 +124,19 @@ class _DebuggingControlsState extends State<DebuggingControls>
         ButtonGroupItemData(
           label: 'Step Over',
           iconAsset: 'icons/material_symbols/step_over.png',
+          iconSize: DebuggingControls.materialIconSize,
           onPressed: canStep ? () => unawaited(controller.stepOver()) : null,
         ),
         ButtonGroupItemData(
           label: 'Step In',
           iconAsset: 'icons/material_symbols/step_into.png',
+          iconSize: DebuggingControls.materialIconSize,
           onPressed: canStep ? () => unawaited(controller.stepIn()) : null,
         ),
         ButtonGroupItemData(
           label: 'Step Out',
           iconAsset: 'icons/material_symbols/step_out.png',
+          iconSize: DebuggingControls.materialIconSize,
           onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
         ),
       ],

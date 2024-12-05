@@ -352,6 +352,7 @@ final class _ButtonGroupButton extends StatelessWidget {
           label: buttonData.label,
           iconData: buttonData.icon,
           iconAsset: buttonData.iconAsset,
+          iconSize: buttonData.iconSize,
           minScreenWidthForTextBeforeScaling:
               minScreenWidthForTextBeforeScaling,
         ),
@@ -365,6 +366,7 @@ final class ButtonGroupItemData {
     this.label,
     this.icon,
     this.iconAsset,
+    this.iconSize,
     String? tooltip,
     this.onPressed,
     this.autofocus = false,
@@ -381,6 +383,7 @@ final class ButtonGroupItemData {
   final String? label;
   final IconData? icon;
   final String? iconAsset;
+  final double? iconSize;
   final String? tooltip;
   final VoidCallback? onPressed;
   final bool autofocus;

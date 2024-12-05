@@ -430,6 +430,7 @@ final class MaterialIconLabel extends StatelessWidget {
     required this.label,
     this.iconData,
     this.iconAsset,
+    this.iconSize,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
   })  : assert(
@@ -443,6 +444,7 @@ final class MaterialIconLabel extends StatelessWidget {
 
   final IconData? iconData;
   final String? iconAsset;
+  final double? iconSize;
   final Color? color;
   final String? label;
   final double? minScreenWidthForTextBeforeScaling;
@@ -458,7 +460,7 @@ final class MaterialIconLabel extends StatelessWidget {
           DevToolsIcon(
             icon: iconData,
             iconAsset: iconAsset,
-            size: defaultIconSize,
+            size: iconSize ?? defaultIconSize,
             color: color,
           ),
         // TODO(jacobr): animate showing and hiding the text.

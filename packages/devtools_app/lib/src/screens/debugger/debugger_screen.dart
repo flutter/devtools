@@ -588,7 +588,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
                 child: DevToolsIcon(
                   iconAsset: 'icons/material_symbols/resume.png',
                   color: Colors.green,
-                  size: defaultIconSize,
+                  size: DebuggingControls.materialIconSize,
                 ),
               ),
             ),
@@ -599,7 +599,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
                 child: DevToolsIcon(
                   iconAsset: 'icons/material_symbols/step_over.png',
                   color: Colors.black,
-                  size: defaultIconSize,
+                  size: DebuggingControls.materialIconSize,
                 ),
               ),
             ),
