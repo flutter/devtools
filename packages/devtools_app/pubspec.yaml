@@ -94,7 +94,7 @@ flutter:
     - icons/actions/
     - icons/app_bar/
     - icons/custom/
-    - icons/debugger/
+    - icons/material_symbols/
     - icons/general/
     - icons/gutter/
     - icons/inspector/

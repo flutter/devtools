@@ -99,7 +99,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
         ),
         ButtonGroupItemData(
           tooltip: 'Resume',
-          iconAsset: 'icons/debugger/material_resume.png',
+          iconAsset: 'icons/material_symbols/resume.png',
           // Enable while paused + not resuming and selected isolate is not
           // a system isolate.
           onPressed:
@@ -116,17 +116,17 @@ class _DebuggingControlsState extends State<DebuggingControls>
       items: [
         ButtonGroupItemData(
           label: 'Step Over',
-          iconAsset: 'icons/debugger/material_step_over.png',
+          iconAsset: 'icons/material_symbols/step_over.png',
           onPressed: canStep ? () => unawaited(controller.stepOver()) : null,
         ),
         ButtonGroupItemData(
           label: 'Step In',
-          iconAsset: 'icons/debugger/material_step_into.png',
+          iconAsset: 'icons/material_symbols/step_into.png',
           onPressed: canStep ? () => unawaited(controller.stepIn()) : null,
         ),
         ButtonGroupItemData(
           label: 'Step Out',
-          iconAsset: 'icons/debugger/material_step_out.png',
+          iconAsset: 'icons/material_symbols/step_out.png',
           onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
         ),
       ],
