@@ -15,12 +15,6 @@ To learn more about DevTools, check out the
 [#8470](https://github.com/flutter/devtools/pull/8470)
 * Tables match IDE theme when embedded in an IDE. - [#8498](https://github.com/flutter/devtools/pull/8498)
 
-* Persist filter settings across sessions. - [#8447](https://github.com/flutter/devtools/pull/8447),
-[#8456](https://github.com/flutter/devtools/pull/8456)
-[#8470](https://github.com/flutter/devtools/pull/8470)
-
-* Tables match IDE theme when embedded in an IDE. - [#8498](https://github.com/flutter/devtools/pull/8498)
-
 ## Inspector updates
 
 - Added an option to the [new Inspector's](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates)
