@@ -62,7 +62,7 @@ class AnsiParser {
         return pkt;
       }
 
-      final String nextChar = _text[1];
+      final nextChar = _text[1];
       if ((nextChar != '[') && (nextChar != ']')) {
         pkt.kind = _PacketKind.esc;
         pkt.text = _text.substring(0, 1);
@@ -219,12 +219,12 @@ const _ansiColors = <List<_AnsiColor>>[
   ],
 ];
 
-final List<_AnsiColor> _palette256 = _createAnsiPalette();
+final _palette256 = _createAnsiPalette();
 
 List<_AnsiColor> _createAnsiPalette() {
-  final List<_AnsiColor> palette = [];
+  final palette = <_AnsiColor>[];
 
-  // ignore: prefer_foreach
+  // ignore: prefer_foreach (clarity)
   for (final colors in _ansiColors) {
     palette.addAll(colors);
   }
@@ -246,7 +246,7 @@ List<_AnsiColor> _createAnsiPalette() {
   return palette;
 }
 
-final RegExp _csiRegex = RegExp(
+final _csiRegex = RegExp(
   '^' // beginning of line
   // First attempt
   '(?:' // legal sequence
@@ -311,15 +311,15 @@ class StyledText {
     bgColor: fragment.bg?.rgb.toList(),
   );
 
-  static const int kNone = 0;
-  static const int kBold = 1;
-  static const int kDim = 2;
-  static const int kItalic = 4;
-  static const int kUnderline = 8;
-  static const int kStrikethrough = 16;
-  static const int kBlink = 32;
-  static const int kReverse = 64;
-  static const int kInvisible = 128;
+  static const kNone = 0;
+  static const kBold = 1;
+  static const kDim = 2;
+  static const kItalic = 4;
+  static const kUnderline = 8;
+  static const kStrikethrough = 16;
+  static const kBlink = 32;
+  static const kReverse = 64;
+  static const kInvisible = 128;
 
   final String text;
   final int textStyle;
