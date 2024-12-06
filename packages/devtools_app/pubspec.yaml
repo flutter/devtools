@@ -15,9 +15,8 @@ environment:
 resolution: workspace
 
 dependencies:
-  ansi_up: ^1.0.0
-  async: ^2.0.0 # okay
-  clock: ^1.1.1 # Okay
+  async: ^2.0.0
+  clock: ^1.1.1
   collection: ^1.15.0
   dap: ^1.1.0
   dds_service_extensions: ^2.0.0
@@ -160,7 +159,3 @@ flutter:
     - family: Octicons
       fonts:
         - asset: fonts/Octicons.ttf
-
-dependency_overrides:
-  ansi_up:
-    path: ../../third_party/packages/ansi_up

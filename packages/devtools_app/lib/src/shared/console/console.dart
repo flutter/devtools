@@ -183,7 +183,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
                   TextSpan(
                     // TODO(jacobr): consider caching the processed ansi terminal
                     // codes.
-                    children: processAnsiTerminalCodes(
+                    children: textSpansFromAnsi(
                       line.text,
                       theme.regularTextStyle,
                     ),

@@ -165,8 +165,8 @@ class DisplayProvider extends StatelessWidget {
     if (variable.text != null) {
       return SelectableText.rich(
         TextSpan(
-          children: processAnsiTerminalCodes(
-            variable.text,
+          children: textSpansFromAnsi(
+            variable.text ?? '',
             theme.subtleFixedFontStyle,
           ),
         ),
