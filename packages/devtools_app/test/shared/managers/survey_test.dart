@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:clock/clock.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/managers/survey.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  setUp(() {
+    fakeClockTimeForSurvey = null;
+  });
+
   group('SurveyService', () {
     test('can fetch survey metadata', () async {
       final survey = await SurveyService().fetchSurveyContent();
@@ -59,12 +62,12 @@ void main() {
       test('empty survey', () {
         final emptySurvey = DevToolsSurvey.fromJson({});
 
-        withClock(Clock.fixed(DateTime(2023, 11, 7)), () {
-          expect(emptySurvey.meetsDateRequirement, isFalse);
-        });
-        withClock(Clock.fixed(DateTime(2023, 11, 15)), () {
-          expect(emptySurvey.meetsDateRequirement, isFalse);
-        });
+        fakeClockTimeForSurvey = DateTime(2023, 11, 7);
+        expect(emptySurvey.meetsDateRequirement, isFalse);
+
+        fakeClockTimeForSurvey = DateTime(2023, 11, 15);
+        expect(emptySurvey.meetsDateRequirement, isFalse);
+
         expect(emptySurvey.meetsMinVersionRequirement, isTrue);
         expect(emptySurvey.meetsEnvironmentRequirement, isTrue);
         expect(emptySurvey.shouldShow, isFalse);
@@ -87,9 +90,8 @@ void main() {
         });
 
         ideLaunched = 'VSCode';
-        withClock(Clock.fixed(DateTime(2023, 11, 7)), () {
-          expect(survey.shouldShow, isTrue);
-        });
+        fakeClockTimeForSurvey = DateTime(2023, 11, 7);
+        expect(survey.shouldShow, isTrue);
       });
 
       test('meetsDateRequirement', () {
@@ -98,12 +100,11 @@ void main() {
           'endDate': '2023-11-14T09:00:00-07:00',
         });
 
-        withClock(Clock.fixed(DateTime(2023, 11, 7)), () {
-          expect(survey.meetsDateRequirement, isTrue);
-        });
-        withClock(Clock.fixed(DateTime(2023, 11, 15)), () {
-          expect(survey.meetsDateRequirement, isFalse);
-        });
+        fakeClockTimeForSurvey = DateTime(2023, 11, 7);
+        expect(survey.meetsDateRequirement, isTrue);
+
+        fakeClockTimeForSurvey = DateTime(2023, 11, 15);
+        expect(survey.meetsDateRequirement, isFalse);
       });
 
       test('meetsMinVersionRequirement', () {
