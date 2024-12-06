@@ -1,3 +1,6 @@
+# 2.1.0
+* Discontinue the `ansi_up` package.
+
 ## 2.0.0
 * Fixed a regexp getting recompiled every time an `AnsiUp` is instantiated and
   `decodeAnsiColorEscapeCodes` is called for the first time.

@@ -1,5 +1,7 @@
 # ansi_up.js
 
+**IMPORTANT: this package is discontinued.**
+
 __ansi_up__ is an easy to use library that transforms text containing
 [ANSI color escape codes](http://en.wikipedia.org/wiki/ANSI_escape_code#Colors) into HTML.
 
