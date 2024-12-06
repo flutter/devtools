@@ -5,7 +5,6 @@
 @TestOn('vm')
 library;
 
-import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';
@@ -16,6 +15,8 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+import '../../test_infra/utils/ansi.dart';
 
 void main() {
   late MockLoggingController mockLoggingController;
@@ -310,7 +311,7 @@ const jsonOutput = '{\n"Details": "of log event 9",\n"logEvent": "9"\n}\n';
 String _ansiCodesOutput() {
   final sb = StringBuffer();
   sb.write('Ansi color codes processed for ');
-  final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
-  sb.write(pen('log 5'));
+  final ansi = AnsiWriter()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
+  sb.write(ansi.write('log 5'));
   return sb.toString();
 }
