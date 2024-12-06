@@ -167,12 +167,12 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
     super.initState();
     connectDialogController = TextEditingController();
     assert(() {
-      _debugInitSharedPreferences();
+      _debugInitVmServiceCache();
       return true;
     }());
   }
 
-  void _debugInitSharedPreferences() async {
+  void _debugInitVmServiceCache() async {
     // We only do this in debug mode as it speeds iteration for DevTools
     // developers who tend to repeatedly restart DevTools to debug the same
     // test application.

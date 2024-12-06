@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import '../test_infra/flutter_test_storage.dart';
+
 void main() {
   late FakeServiceConnectionManager fakeServiceConnection;
 
@@ -22,6 +24,7 @@ void main() {
         fakeServiceConnection = FakeServiceConnectionManager(),
       );
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(Storage, FlutterTestStorage());
       fakeServiceConnection.serviceManager.setConnectedState(false);
     });
 
