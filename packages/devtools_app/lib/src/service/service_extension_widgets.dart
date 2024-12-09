@@ -258,7 +258,7 @@ class _HotReloadScaffoldAction extends ScaffoldAction {
 }
 
 Future<void> _callHotReload() {
-  return serviceConnection.serviceManager.runDeviceBusyTask(
+  return serviceConnection.serviceManager.runDeviceBusyTask<void>(
     _wrapReloadCall(
       'reload',
       serviceConnection.serviceManager.performHotReload,
