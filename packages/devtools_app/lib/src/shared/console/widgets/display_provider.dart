@@ -48,8 +48,8 @@ class _DisplayProviderState extends State<DisplayProvider> {
         menuButtons: _getMenuButtons(context),
         child: Text.rich(
           TextSpan(
-            children: processAnsiTerminalCodes(
-              widget.variable.text,
+            children: textSpansFromAnsi(
+              widget.variable.text!,
               theme.subtleFixedFontStyle,
             ),
           ),

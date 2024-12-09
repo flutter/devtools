@@ -17,6 +17,7 @@ part 'constants/_logging_constants.dart';
 part 'constants/_memory_constants.dart';
 part 'constants/_network_constants.dart';
 part 'constants/_performance_constants.dart';
+part 'constants/_property_editor_sidebar_constants.dart';
 
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).

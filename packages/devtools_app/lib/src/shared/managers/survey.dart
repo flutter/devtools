@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:clock/clock.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
@@ -243,7 +242,7 @@ extension ShowSurveyExtension on DevToolsSurvey {
           : Range(
             startDate!.millisecondsSinceEpoch,
             endDate!.millisecondsSinceEpoch,
-          ).contains(clock.now().millisecondsSinceEpoch);
+          ).contains(_currentClockTime().millisecondsSinceEpoch);
 
   bool get meetsMinVersionRequirement =>
       minDevToolsVersion == null ||
@@ -252,10 +251,18 @@ extension ShowSurveyExtension on DevToolsSurvey {
       ).isSupported(minSupportedVersion: minDevToolsVersion!);
 
   bool get meetsEnvironmentRequirement =>
-      devEnvironments == null || devEnvironments!.contains(ga.ideLaunched);
+      devEnvironments == null ||
+      ga.ideLaunched.isEmpty ||
+      devEnvironments!.contains(ga.ideLaunched);
 
   bool get shouldShow =>
       meetsDateRequirement &&
       meetsMinVersionRequirement &&
       meetsEnvironmentRequirement;
 }
+
+DateTime _currentClockTime() => fakeClockTimeForSurvey ?? DateTime.now();
+
+/// A hook to set a fake clock time for tests.
+@visibleForTesting
+DateTime? fakeClockTimeForSurvey;

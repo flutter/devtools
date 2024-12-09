@@ -69,7 +69,7 @@ class MessageColumn extends ColumnData<LogData>
                 text: TextSpan(
                   children: [
                     if (hasSummary)
-                      ...processAnsiTerminalCodes(
+                      ...textSpansFromAnsi(
                         // TODO(helin24): Recompute summary length considering ansi codes.
                         //  The current summary is generally the first 200 chars of details.
                         data.summary!,
@@ -78,7 +78,7 @@ class MessageColumn extends ColumnData<LogData>
                     if (hasSummary && hasDetails())
                       TextSpan(text: '  •  ', style: theme.subtleTextStyle),
                     if (hasDetails())
-                      ...processAnsiTerminalCodes(
+                      ...textSpansFromAnsi(
                         detailsComputed ? data.details! : '<fetching>',
                         theme.subtleTextStyle,
                       ),

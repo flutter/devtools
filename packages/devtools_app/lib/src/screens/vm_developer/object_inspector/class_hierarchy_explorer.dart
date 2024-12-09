@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../shared/tree.dart';
 import '../../../shared/ui/common_widgets.dart';
+import '../../../shared/ui/tree_view.dart';
 import '../vm_developer_common_widgets.dart';
 import 'class_hierarchy_explorer_controller.dart';
 import 'object_inspector_view_controller.dart';

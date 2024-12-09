@@ -10,7 +10,6 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:ansi_up/ansi_up.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +18,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
+import 'ansi_utils.dart';
 import 'byte_utils.dart';
 import 'simple_items.dart';
 
@@ -813,35 +813,29 @@ class MovingAverage {
   }
 }
 
-List<TextSpan> processAnsiTerminalCodes(String? input, TextStyle defaultStyle) {
-  if (input == null) {
-    return [];
-  }
-  return decodeAnsiColorEscapeCodes(input, AnsiUp())
-      .map(
-        (entry) => TextSpan(
-          text: entry.text,
-          style:
-              entry.style.isEmpty
-                  ? defaultStyle
-                  : TextStyle(
-                    color:
-                        entry.fgColor != null
-                            ? colorFromAnsi(entry.fgColor!)
-                            : null,
-                    backgroundColor:
-                        entry.bgColor != null
-                            ? colorFromAnsi(entry.bgColor!)
-                            : null,
-                    fontWeight:
-                        entry.bold ? FontWeight.bold : FontWeight.normal,
-                  ),
-        ),
-      )
-      .toList();
+List<TextSpan> textSpansFromAnsi(String input, TextStyle defaultStyle) {
+  final parser = AnsiParser(input);
+  return parser.parse().map((entry) {
+    final styled = entry.bold || entry.fgColor != null || entry.bgColor != null;
+    return TextSpan(
+      text: entry.text,
+      style:
+          styled
+              ? TextStyle(
+                color: ansiToColor(entry.fgColor),
+                backgroundColor: ansiToColor(entry.bgColor),
+                fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
+              )
+              : defaultStyle,
+    );
+  }).toList();
 }
 
-Color colorFromAnsi(List<int> ansiInput) {
+Color? ansiToColor(List<int>? ansiInput) {
+  if (ansiInput == null) {
+    return null;
+  }
+
   assert(ansiInput.length == 3, 'Ansi color list should contain 3 elements');
   return Color.fromRGBO(ansiInput[0], ansiInput[1], ansiInput[2], 1);
 }
