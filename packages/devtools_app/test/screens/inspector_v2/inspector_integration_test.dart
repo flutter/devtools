@@ -16,6 +16,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 
 import '../../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../../test_infra/flutter_test_environment.dart';
@@ -36,6 +37,7 @@ void main() {
 
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
+    useTempDirectory: true,
   );
 
   env.afterEverySetup = () async {
@@ -387,8 +389,7 @@ void main() {
   );
 
   group('auto-refresh after code edits', () {
-    const flutterAppMainPath =
-        'test/test_infra/fixtures/flutter_app/lib/main.dart';
+    final flutterAppMainPath = p.join(env.testAppDirectory, 'lib', 'main.dart');
     String flutterMainContents = '';
 
     setUp(() {
@@ -401,7 +402,9 @@ void main() {
 
     tearDown(() {
       // Re-set contents of main.dart.
-      File(flutterAppMainPath).writeAsStringSync(flutterMainContents);
+      File(
+        flutterAppMainPath,
+      ).writeAsStringSync(flutterMainContents, flush: true);
 
       // Re-set changes to auto refresh.
       preferences.inspector.setAutoRefreshEnabled(true);
@@ -413,7 +416,10 @@ void main() {
     }) {
       final file = File(flutterAppMainPath);
       final fileContents = file.readAsStringSync();
-      file.writeAsStringSync(fileContents.replaceAll(toReplace, replaceWith));
+      file.writeAsStringSync(
+        fileContents.replaceAll(toReplace, replaceWith),
+        flush: true,
+      );
     }
 
     testWidgetsWithWindowSize('changing parent widget of selected', windowSize, (
@@ -465,7 +471,7 @@ void main() {
         tester: tester,
       );
     });
-  });
+  }, retry: 0);
 
   group('widget errors', () {
     testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
