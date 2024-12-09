@@ -471,7 +471,7 @@ void main() {
         tester: tester,
       );
     });
-  }, retry: 0);
+  });
 
   group('widget errors', () {
     testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
