@@ -20,26 +20,28 @@ class PropertyEditorController extends DisposableController
   CursorPosition? _currentCursorPosition;
 
   ValueListenable<List<EditableArgument>> get editableArgs => _editableArgs;
-  final _editableArgs = ListValueNotifier<EditableArgument>([]);
+  final _editableArgs = ValueNotifier<List<EditableArgument>>([]);
 
   void _init() {
-    editorClient.activeLocationChangedStream.listen((event) async {
-      final textDocument = event.textDocument;
-      final cursorPosition = event.selections.first.active;
-      // Don't do anything if the event corresponds to the current position.
-      if (textDocument == _currentDocument &&
-          cursorPosition == _currentCursorPosition) {
-        return;
-      }
-      _currentDocument = textDocument;
-      _currentCursorPosition = cursorPosition;
-      // Get the editable arguments for the current position.
-      final result = await editorClient.getEditableArguments(
-        textDocument: textDocument,
-        position: cursorPosition,
-      );
-      final args = result?.args ?? <EditableArgument>[];
-      _editableArgs.replaceAll(args);
-    });
+    autoDisposeStreamSubscription(
+      editorClient.activeLocationChangedStream.listen((event) async {
+        final textDocument = event.textDocument;
+        final cursorPosition = event.selections.first.active;
+        // Don't do anything if the event corresponds to the current position.
+        if (textDocument == _currentDocument &&
+            cursorPosition == _currentCursorPosition) {
+          return;
+        }
+        _currentDocument = textDocument;
+        _currentCursorPosition = cursorPosition;
+        // Get the editable arguments for the current position.
+        final result = await editorClient.getEditableArguments(
+          textDocument: textDocument,
+          position: cursorPosition,
+        );
+        final args = result?.args ?? <EditableArgument>[];
+        _editableArgs.value = args;
+      }),
+    );
   }
 }

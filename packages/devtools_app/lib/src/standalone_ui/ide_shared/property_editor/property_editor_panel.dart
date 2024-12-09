@@ -47,6 +47,12 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
   }
 
   @override
+  void dispose() {
+    _propertyEditorController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topCenter,

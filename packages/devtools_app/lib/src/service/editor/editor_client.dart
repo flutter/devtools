@@ -100,8 +100,8 @@ class EditorClient extends DisposableController
           EditorEventKind.activeLocationChanged =>
             ActiveLocationChangedEvent.fromJson(data.data),
         };
-        // Add ActiveLocationChangedEvents to a new stream to be ingested by the
-        // property editor.
+        // Add [ActiveLocationChangedEvent]s to a new stream to be ingested by
+        // the property editor.
         if (event?.kind == EditorEventKind.activeLocationChanged) {
           _activeLocationChangedController.add(
             event as ActiveLocationChangedEvent,
@@ -240,11 +240,10 @@ class EditorClient extends DisposableController
         'position': position.toJson(),
       },
     );
-    final result = response.result['result'];
-    if (result != null) {
-      return EditableArgumentsResult.fromJson(result as Map<String, Object?>);
-    }
-    return null;
+    final result = response.result[Field.result];
+    return (result != null)
+        ? EditableArgumentsResult.fromJson(result as Map<String, Object?>)
+        : null;
   }
 
   Future<DTDResponse> _call(

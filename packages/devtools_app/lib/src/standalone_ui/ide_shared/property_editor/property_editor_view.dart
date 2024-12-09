@@ -34,6 +34,7 @@ class _PropertiesList extends StatelessWidget {
   final PropertyEditorController controller;
 
   static const itemPadding = densePadding;
+
   @override
   Widget build(BuildContext context) {
     // TODO(https://github.com/flutter/devtools/issues/8546) Switch to scrollable
@@ -43,15 +44,14 @@ class _PropertiesList extends StatelessWidget {
       builder: (context, args, _) {
         return args.isEmpty
             ? const Center(
-              child: Text('No widget properties at current cursor location.'),
+              child: Text(
+                'No widget properties at the current cursor location.',
+              ),
             )
             : Column(
-              children: [
-                for (final property in args)
-                  ...<Widget>[
-                    _EditablePropertyItem(property: property),
-                  ].joinWith(const PaddedDivider.noPadding()),
-              ],
+              children: <Widget>[
+                ...args.map((arg) => _EditablePropertyItem(argument: arg)),
+              ].joinWith(const PaddedDivider.noPadding()),
             );
       },
     );
@@ -59,9 +59,9 @@ class _PropertiesList extends StatelessWidget {
 }
 
 class _EditablePropertyItem extends StatelessWidget {
-  const _EditablePropertyItem({required this.property});
+  const _EditablePropertyItem({required this.argument});
 
-  final EditableArgument property;
+  final EditableArgument argument;
 
   @override
   Widget build(BuildContext context) {
@@ -72,11 +72,11 @@ class _EditablePropertyItem extends StatelessWidget {
           flex: 3,
           child: Padding(
             padding: const EdgeInsets.all(_PropertiesList.itemPadding),
-            child: _PropertyInput(property: property),
+            child: _PropertyInput(argument: argument),
           ),
         ),
-        if (property.isRequired || property.isDefault) ...[
-          Flexible(child: _PropertyLabels(property: property)),
+        if (argument.isRequired || argument.isDefault) ...[
+          Flexible(child: _PropertyLabels(argument: argument)),
         ] else
           const Spacer(),
       ],
@@ -85,15 +85,15 @@ class _EditablePropertyItem extends StatelessWidget {
 }
 
 class _PropertyLabels extends StatelessWidget {
-  const _PropertyLabels({required this.property});
+  const _PropertyLabels({required this.argument});
 
-  final EditableArgument property;
+  final EditableArgument argument;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isRequired = property.isRequired;
-    final isDefault = property.isDefault;
+    final isRequired = argument.isRequired;
+    final isDefault = argument.isDefault;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,34 +118,34 @@ class _PropertyLabels extends StatelessWidget {
 }
 
 class _PropertyInput extends StatelessWidget {
-  const _PropertyInput({required this.property});
+  const _PropertyInput({required this.argument});
 
-  final EditableArgument property;
+  final EditableArgument argument;
 
   @override
   Widget build(BuildContext context) {
     final decoration = InputDecoration(
       helperText: '',
-      errorText: property.errorText,
+      errorText: argument.errorText,
       isDense: true,
-      label: Text(property.name),
+      label: Text(argument.name),
       border: const OutlineInputBorder(),
     );
 
-    switch (property.type) {
+    switch (argument.type) {
       case 'enum':
       case 'bool':
         final options =
-            property.type == 'bool'
+            argument.type == 'bool'
                 ? ['true', 'false']
-                : (property.options ?? <String>[]);
-        options.add(property.valueDisplay);
-        if (property.isNullable) {
+                : (argument.options ?? <String>[]);
+        options.add(argument.valueDisplay);
+        if (argument.isNullable) {
           options.add('null');
         }
 
         return DropdownButtonFormField(
-          value: property.valueDisplay,
+          value: argument.valueDisplay,
           decoration: decoration,
           items:
               options.toSet().toList().map((option) {
@@ -162,8 +162,8 @@ class _PropertyInput extends StatelessWidget {
       case 'int':
       case 'string':
         return TextFormField(
-          initialValue: property.valueDisplay,
-          enabled: property.isEditable,
+          initialValue: argument.valueDisplay,
+          enabled: argument.isEditable,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: _inputValidator,
           inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
@@ -173,13 +173,13 @@ class _PropertyInput extends StatelessWidget {
           onChanged: (_) {},
         );
       default:
-        return Text(property.valueDisplay);
+        return Text(argument.valueDisplay);
     }
   }
 
   String? _inputValidator(String? inputValue) {
-    final isDouble = property.type == 'double';
-    final isInt = property.type == 'int';
+    final isDouble = argument.type == 'double';
+    final isInt = argument.type == 'int';
 
     // Only validate numeric types.
     if (!isDouble && !isInt) {

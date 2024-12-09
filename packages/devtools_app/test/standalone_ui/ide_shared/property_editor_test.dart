@@ -20,11 +20,13 @@ void main() {
   final eventController = StreamController<ActiveLocationChangedEvent>();
   final eventStream = eventController.stream;
 
-  final locationToArgsResult =
-      <(TextDocument, CursorPosition), EditableArgumentsResult>{
-        (textDocument1, activeCursorPosition1): result1,
-        (textDocument2, activeCursorPosition2): result2,
-      };
+  final locationToArgsResult = <
+    ({TextDocument document, CursorPosition position}),
+    EditableArgumentsResult
+  >{
+    (document: textDocument1, position: activeCursorPosition1): result1,
+    (document: textDocument2, position: activeCursorPosition2): result2,
+  };
 
   late MockEditorClient mockEditorClient;
   late PropertyEditorController controller;
@@ -46,19 +48,22 @@ void main() {
   });
 
   group('on cursor location change', () {
+    Future<void> Function()? listener;
+
     void waitForEditableArgs(
       List<EditableArgument> args, {
       required Future then,
     }) {
-      controller.editableArgs.addListener(() async {
+      listener = () async {
         final current =
             controller.editableArgs.value.map((arg) => arg.name).toList();
         final expected = args.map((arg) => arg.name).toList();
 
-        if (expected.every((arg) => current.contains(arg))) {
+        if (collectionEquals(current, expected, ordered: false)) {
           await then;
         }
-      });
+      };
+      controller.editableArgs.addListener(listener!);
     }
 
     setUp(() {
@@ -67,10 +72,16 @@ void main() {
         when(
           // ignore: discarded_futures, for mocking purposes.
           mockEditorClient.getEditableArguments(
-            textDocument: location.$1,
-            position: location.$2,
+            textDocument: location.document,
+            position: location.position,
           ),
         ).thenAnswer((realInvocation) => Future.value(result));
+      }
+    });
+
+    tearDown(() {
+      if (listener != null) {
+        controller.editableArgs.removeListener(listener!);
       }
     });
 
@@ -183,7 +194,10 @@ final editorSelection1 = EditorSelection(
   active: activeCursorPosition1,
   anchor: anchorCursorPosition1,
 );
-final textDocument1 = TextDocument(uri: '/my/fake/file.dart', version: 1);
+final textDocument1 = TextDocument(
+  uriAsString: '/my/fake/file.dart',
+  version: 1,
+);
 final activeLocationChangedEvent1 = ActiveLocationChangedEvent(
   selections: [editorSelection1],
   textDocument: textDocument1,
@@ -196,7 +210,10 @@ final editorSelection2 = EditorSelection(
   active: activeCursorPosition2,
   anchor: anchorCursorPosition2,
 );
-final textDocument2 = TextDocument(uri: '/my/fake/other.dart', version: 1);
+final textDocument2 = TextDocument(
+  uriAsString: '/my/fake/other.dart',
+  version: 1,
+);
 final activeLocationChangedEvent2 = ActiveLocationChangedEvent(
   selections: [editorSelection2],
   textDocument: textDocument2,

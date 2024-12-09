@@ -21,6 +21,7 @@ enum EditorMethod {
   openDevToolsPage,
 }
 
+/// Method names of LSP requests registered on the Analysis Server.
 enum LspMethod {
   editableArguments(
     methodName: 'experimental/dart/textDocument/editableArguments',
@@ -111,6 +112,7 @@ abstract class Field {
   static const prefersDebugSession = 'prefersDebugSession';
   static const projectRootPath = 'projectRootPath';
   static const requiresDebugSession = 'requiresDebugSession';
+  static const result = 'result';
   static const selectedDeviceId = 'selectedDeviceId';
   static const selections = 'selections';
   static const supported = 'supported';
@@ -322,30 +324,41 @@ class ActiveLocationChangedEvent extends EditorEvent {
 }
 
 /// A reference to a text document in the editor.
+///
+/// The [uriAsString] is a file URI to the text document.
+///
+/// The [version] is an integer corresponding to LSP's
+/// [VersionedTextDocumentIdentifier](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#versionedTextDocumentIdentifier)
 class TextDocument with Serializable {
-  TextDocument({required this.uri, required this.version});
+  TextDocument({required this.uriAsString, required this.version});
 
   TextDocument.fromJson(Map<String, Object?> map)
-    : this(uri: map[Field.uri] as String, version: map[Field.version] as int);
+    : this(
+        uriAsString: map[Field.uri] as String,
+        version: map[Field.version] as int,
+      );
 
-  final String uri;
+  final String uriAsString;
   final int version;
 
   @override
-  Map<String, Object?> toJson() => {Field.uri: uri, Field.version: version};
+  Map<String, Object?> toJson() => {
+    Field.uri: uriAsString,
+    Field.version: version,
+  };
 
   @override
   bool operator ==(Object other) {
     return other is TextDocument &&
-        other.uri == uri &&
+        other.uriAsString == uriAsString &&
         other.version == version;
   }
 
   @override
-  int get hashCode => Object.hash(uri, version);
+  int get hashCode => Object.hash(uriAsString, version);
 }
 
-// The starting and ending cursor positions in the editor.
+/// The starting and ending cursor positions in the editor.
 class EditorSelection with Serializable {
   EditorSelection({required this.active, required this.anchor});
 
@@ -370,6 +383,8 @@ class EditorSelection with Serializable {
 }
 
 /// Representation of a single cursor position in the editor.
+///
+/// The cursor position is after the given [character] of the [line].
 class CursorPosition with Serializable {
   CursorPosition({required this.character, required this.line});
 
@@ -379,7 +394,10 @@ class CursorPosition with Serializable {
         line: map[Field.line] as int,
       );
 
+  /// The zero-based character number of this position.
   final int character;
+
+  /// The zero-based line number of this position.
   final int line;
 
   @override
@@ -449,16 +467,47 @@ class EditableArgument with Serializable {
         errorText: map[Field.errorText] as String?,
       );
 
+  /// The name of the corresponding parameter.
   final String name;
+
+  /// The type of the corresponding parameter.
+  ///
+  /// This is not necessarily the Dart type, it is from a defined set of values
+  /// that clients may understand how to edit.
   final String type;
+
+  /// The current value for this argument.
   final Object? value;
+
+  /// Whether an explicit argument exists for this parameter in the code.
   final bool hasArgument;
+
+  /// Whether the value is the default for this parameter.
   final bool isDefault;
+
+  /// Whether this argument can be `null`.
   final bool isNullable;
+
+  /// Whether this argument is required.
   final bool isRequired;
+
+  /// Whether this argument can be edited by the Analysis Server.
+  ///
+  /// An argument might not be editable, e.g. if it is a positional parameter
+  /// where previous positional parameters have no argument.
   final bool isEditable;
+
+  /// A list of values that could be provided for this argument.
+  ///
+  /// This will only be included if the parameter's [type] is "enum".
   final List<String>? options;
+
+  /// A string that can be displayed to indicate the value for this argument.
+  ///
+  /// This is populated in cases where the source code is not literally the same
+  /// as the value field, for example an expression or named constant.
   final String? displayValue;
+
   final String? errorText;
 
   String get valueDisplay => displayValue ?? value.toString();
