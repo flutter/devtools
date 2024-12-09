@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/globals.dart';
@@ -38,19 +39,37 @@ enum StandaloneScreenType {
         //  useful message.
         valueListenable: dtdManager.connection,
         builder: (context, data, _) {
-          return data == null
-              ? const CenteredCircularProgressIndicator()
-              : EditorSidebarPanel(data);
+          return _DtdConnectedScreen(
+            dtd: data,
+            screenProvider: (dtd) => EditorSidebarPanel(dtd),
+          );
         },
       ),
       StandaloneScreenType.propertyEditor => ValueListenableBuilder(
         valueListenable: dtdManager.connection,
         builder: (context, data, _) {
-          return data == null
-              ? const CenteredCircularProgressIndicator()
-              : PropertyEditorSidebarPanel(data);
+          return _DtdConnectedScreen(
+            dtd: data,
+            screenProvider: (dtd) => PropertyEditorSidebarPanel(dtd),
+          );
         },
       ),
     };
+  }
+}
+
+/// Widget that returns a [CenteredCircularProgressIndicator] while it waits for
+/// a [DartToolingDaemon] connection.
+class _DtdConnectedScreen extends StatelessWidget {
+  const _DtdConnectedScreen({required this.dtd, required this.screenProvider});
+
+  final DartToolingDaemon? dtd;
+  final Widget Function(DartToolingDaemon) screenProvider;
+
+  @override
+  Widget build(BuildContext context) {
+    return dtd == null
+        ? const CenteredCircularProgressIndicator()
+        : screenProvider(dtd!);
   }
 }
