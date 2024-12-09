@@ -286,7 +286,7 @@ class HotRestartButton extends StatelessWidget {
     );
   }
 
-  Future<void> _callHotRestart() async {
+  Future<void> _callHotRestart() {
     return serviceConnection.serviceManager.runDeviceBusyTask<void>(
       _wrapReloadCall(
         'restart',
