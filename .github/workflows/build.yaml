@@ -277,7 +277,7 @@ jobs:
   benchmark-performance:
     name: benchmark-performance
     needs: flutter-prep
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       fail-fast: false
     steps:

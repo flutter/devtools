@@ -33,7 +33,7 @@ Provide arguments to the `run_benchmarks.dart` script in order to:
 
 Run `dart run benchmark/scripts/run_benchmarks.dart -h` to see details.
 
-To run the test that verifies we can run benchmark tests, run:
+To run the performance benchmark test locally, run:
 ```sh
 flutter test benchmark/devtools_benchmarks_test.dart
 ```

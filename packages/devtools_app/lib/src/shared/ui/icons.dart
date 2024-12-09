@@ -281,36 +281,6 @@ class FlutterMaterialIcons {
   }
 }
 
-class AssetImageIcon extends StatelessWidget {
-  const AssetImageIcon({
-    super.key,
-    required this.asset,
-    this.color,
-    double? height,
-    double? width,
-  }) : _width = width,
-       _height = height;
-
-  final String asset;
-  final Color? color;
-  final double? _height;
-  final double? _width;
-
-  double get width => _width ?? defaultIconSize;
-  double get height => _height ?? defaultIconSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return Image(
-      image: AssetImage(asset),
-      height: height,
-      width: width,
-      fit: BoxFit.fill,
-      color: color ?? Theme.of(context).colorScheme.onSurface,
-    );
-  }
-}
-
 class Octicons {
   static const bug = IconData(61714, fontFamily: 'Octicons');
   static const info = IconData(61778, fontFamily: 'Octicons');
@@ -320,42 +290,4 @@ class Octicons {
   static const package = IconData(61812, fontFamily: 'Octicons');
   static const dashboard = IconData(61733, fontFamily: 'Octicons');
   static const pulse = IconData(61823, fontFamily: 'Octicons');
-}
-
-/// A widget that renders either an [icon] from a font glyph or an [iconAsset]
-/// from the app bundle.
-class DevToolsIcon extends StatelessWidget {
-  DevToolsIcon({super.key, this.icon, this.iconAsset, this.color, double? size})
-    : assert(
-        (icon == null) != (iconAsset == null),
-        'Exactly one of icon and iconAsset must be specified.',
-      ),
-      size = size ?? defaultIconSize;
-
-  /// The icon to use for this screen's tab.
-  ///
-  /// Exactly one of [icon] and [iconAsset] must be non-null.
-  final IconData? icon;
-
-  /// The icon asset path to render as the icon for this screen's tab.
-  ///
-  /// Exactly one of [icon] and [iconAsset] must be non-null.
-  final String? iconAsset;
-
-  final double size;
-
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = this.color ?? Theme.of(context).colorScheme.onSurface;
-    return icon != null
-        ? Icon(icon, size: size, color: color)
-        : AssetImageIcon(
-          asset: iconAsset!,
-          height: size,
-          width: size,
-          color: color,
-        );
-  }
 }
