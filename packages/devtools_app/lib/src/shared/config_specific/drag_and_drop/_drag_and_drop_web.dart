@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:js_interop';
 import 'package:web/web.dart';
 
 import '../../globals.dart';
@@ -78,7 +79,8 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     final reader = FileReader();
     (reader as Element).onLoad.listen((event) {
       try {
-        final Object json = jsonDecode(reader.result as String);
+        // The reader's result is a string as `readAsText` was used.
+        final Object json = jsonDecode((reader.result as JSString).toDart);
         final devToolsJsonFile = DevToolsJsonFile(
           name: droppedFile!.name,
           lastModifiedTime: DateTime.fromMillisecondsSinceEpoch(

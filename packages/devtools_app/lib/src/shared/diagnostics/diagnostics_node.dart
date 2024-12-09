@@ -256,9 +256,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   );
 
   /// Dart class defining the diagnostic node.
-  /// For example, DiagnosticProperty<Color>, IntProperty, StringProperty, etc.
-  /// This should rarely be required except for cases where custom rendering is desired
-  /// of a specific Dart diagnostic class.
+  ///
+  /// For example: `DiagnosticProperty<Color>`, `IntProperty`, `StringProperty`.
+  /// This should rarely be required except for cases where custom rendering is
+  /// desired of a specific Dart diagnostic class.
   String? get type => getStringMember('type');
 
   /// Whether the description is enclosed in double quotes.
