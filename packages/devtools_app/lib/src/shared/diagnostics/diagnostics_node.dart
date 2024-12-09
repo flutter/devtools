@@ -11,18 +11,11 @@ import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/inspector_v2/inspector_data_models.dart';
-import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
 import '../ui/icons.dart';
 import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
-
-final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
-
-final treeStyleUtils = EnumUtils<DiagnosticsTreeStyle>(
-  DiagnosticsTreeStyle.values,
-);
 
 /// Defines diagnostics data for a [value].
 ///
@@ -503,7 +496,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    return diagnosticLevelUtils.enumEntry(value)!;
+    return DiagnosticLevel.values.byName(value);
   }
 
   DiagnosticsTreeStyle getStyleMember(
@@ -517,7 +510,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    return treeStyleUtils.enumEntry(value)!;
+    return DiagnosticsTreeStyle.values.byName(value);
   }
 
   /// Returns a reference to the value the DiagnosticsNode object is describing.
