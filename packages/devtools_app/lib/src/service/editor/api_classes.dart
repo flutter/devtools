@@ -25,7 +25,8 @@ enum EditorMethod {
 enum LspMethod {
   editableArguments(
     methodName: 'experimental/dart/textDocument/editableArguments',
-  );
+  ),
+  editArgument(methodName: 'experimental/dart/textDocument/editArgument');
 
   const LspMethod({required this.methodName});
 

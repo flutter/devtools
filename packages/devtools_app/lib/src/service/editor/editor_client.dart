@@ -6,9 +6,12 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
+import 'package:logging/logging.dart';
 
 import '../../shared/analytics/constants.dart';
 import 'api_classes.dart';
+
+final _log = Logger('editor_client');
 
 /// A client wrapper that connects to an editor over DTD.
 ///
@@ -244,6 +247,27 @@ class EditorClient extends DisposableController
     return (result != null)
         ? EditableArgumentsResult.fromJson(result as Map<String, Object?>)
         : null;
+  }
+
+  /// Requests that the Analysis Server makes a code edit for an argument.
+  Future<void> editArgument<T>({
+    required TextDocument textDocument,
+    required CursorPosition position,
+    required String name,
+    required T value,
+  }) async {
+    final response = await _callLspApi(
+      LspMethod.editArgument,
+      params: {
+        'type': 'Object', // This is required by DTD.
+        'textDocument': textDocument.toJson(),
+        'position': position.toJson(),
+        'edit': {'name': name, 'newValue': value},
+      },
+    );
+    // TODO(elliette): Handle response, currently the response from the Analysis
+    // Server is null.
+    _log.info('editArgument response: ${response.result}');
   }
 
   Future<DTDResponse> _call(
