@@ -288,7 +288,7 @@ class CustomPointerScrollable extends StatefulWidget {
       return Future<void>.value();
     }
     if (futures.length == 1) return futures.single;
-    return Future.wait<void>(futures).then<void>((List<void> _) => null);
+    return futures.wait.then<void>((List<void> _) => null);
   }
 }
 

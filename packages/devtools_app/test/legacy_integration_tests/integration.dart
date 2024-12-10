@@ -38,15 +38,15 @@ class DevtoolsManager {
     );
     await tabInstance.tab.navigate('${overrideUri ?? baseAppUri}');
 
-    // wait for app initialization
-    await Future.wait([
+    // Wait for app initialization.
+    await [
       waitForConnection
           ? tabInstance.onEvent.firstWhere(
             (msg) => msg.event == 'app.devToolsReady',
           )
           : Future<void>.value(),
       tabInstance.getBrowserChannel(),
-    ]);
+    ].wait;
   }
 
   Future<void> switchPage(String page) async {

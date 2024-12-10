@@ -327,7 +327,7 @@ Future<List<DartObjectNode>> createVariablesForDiagnostics(
     if (diagnostic.level == DiagnosticLevel.hidden) continue;
     variables.add(_buildVariable(diagnostic, objectGroupApi, isolateRef));
   }
-  return variables.isNotEmpty ? await Future.wait(variables) : const [];
+  return variables.isNotEmpty ? await variables.wait : const [];
 }
 
 List<DartObjectNode> createVariablesForMap(

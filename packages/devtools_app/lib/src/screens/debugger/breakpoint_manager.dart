@@ -180,7 +180,7 @@ class BreakpointManager with DisposerMixin {
       }
     }
 
-    await Future.wait([
+    await [
       // Remove the breakpoints.
       for (final bp in breakpointsToRemove) removeBreakpoint(bp.breakpoint),
       // Add them back to the newer versions of those scripts.
@@ -189,7 +189,7 @@ class BreakpointManager with DisposerMixin {
           if (scriptRef.uri == bp.scriptUri)
             addBreakpoint(scriptRef.id!, bp.line!),
       ],
-    ]);
+    ].wait;
   }
 
   Future<List<Breakpoint>> _getBreakpointsForIsolate(String isolateId) async {
@@ -214,15 +214,17 @@ class BreakpointManager with DisposerMixin {
   }) async {
     _breakpoints.value = breakpoints;
     // Build _breakpointsWithLocation from _breakpoints.
-    await Future.wait(
-      _breakpoints.value.map(breakpointManager.createBreakpointWithLocation),
-    ).then((list) {
-      if (isolateId != _isolateRefId) {
-        // Current request is obsolete.
-        return;
-      }
-      _breakpointsWithLocation.value = list.toList()..sort();
-    });
+    final breakpointsWithLocation =
+        await _breakpoints.value
+            .map(breakpointManager.createBreakpointWithLocation)
+            .wait;
+
+    if (isolateId != _isolateRefId) {
+      // Current request is obsolete.
+      return;
+    }
+
+    _breakpointsWithLocation.value = breakpointsWithLocation.sorted();
   }
 
   Future<void> _setUpBreakpoints({

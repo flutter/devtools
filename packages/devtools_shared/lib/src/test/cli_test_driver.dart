@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
@@ -164,24 +165,21 @@ class CliAppFixture extends AppFixture {
     await waitFor(() async {
       const skipId = 'skip';
       final vm = await serviceConnection.getVM();
-      final List<Isolate?> isolates = await Future.wait(
-        vm.isolates!.map(
-          (ref) => serviceConnection
-              .getIsolate(ref.id!)
-              // Calling getIsolate() can sometimes return a collected sentinel
-              // for an isolate that hasn't started yet. We can just ignore these
-              // as on the next trip around the Isolate will be returned.
-              // https://github.com/dart-lang/sdk/issues/33747
-              .catchError((Object error) {
-            print('getIsolate(${ref.id}) failed, skipping\n$error');
-            return Future<Isolate>.value(Isolate(id: skipId));
-          }),
-        ),
-      );
-      foundIsolate = isolates.firstWhere(
+      final isolates = await vm.isolates!
+          .map((ref) => serviceConnection
+                  .getIsolate(ref.id!)
+                  // Calling getIsolate() can sometimes return a collected sentinel
+                  // for an isolate that hasn't started yet. We can just ignore these
+                  // as on the next trip around the Isolate will be returned.
+                  // https://github.com/dart-lang/sdk/issues/33747
+                  .catchError((Object error) {
+                print('getIsolate(${ref.id}) failed, skipping\n$error');
+                return Future<Isolate>.value(Isolate(id: skipId));
+              }))
+          .wait;
+      foundIsolate = isolates.firstWhereOrNull(
         (isolate) =>
-            isolate!.id != skipId && isolate.pauseEvent?.kind == pauseEventKind,
-        orElse: () => null,
+            isolate.id != skipId && isolate.pauseEvent?.kind == pauseEventKind,
       );
       return foundIsolate != null;
     });

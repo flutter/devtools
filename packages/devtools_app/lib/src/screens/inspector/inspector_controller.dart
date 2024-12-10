@@ -328,10 +328,10 @@ class InspectorController extends DisposableController
     final detailsLocal = details;
     if (detailsLocal == null) return _waitForPendingUpdateDone();
 
-    return Future.wait([
+    return [
       _waitForPendingUpdateDone(),
       detailsLocal._waitForPendingUpdateDone(),
-    ]);
+    ].wait;
   }
 
   // Note that this may be called after the controller is disposed.  We need to handle nulls in the fields.
