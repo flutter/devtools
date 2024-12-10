@@ -9,11 +9,12 @@ import 'package:vm_service_protos/vm_service_protos.dart';
 
 import '../../../../performance_model.dart';
 
-/// A change notifer that contains a Perfetto trace binary object [Uint8List].
+/// A change notifier that contains a Perfetto trace binary object [Uint8List].
 ///
-/// We use this custom change notifier instead of a raw
-/// ValueNotifier<Uint8List?> so that listeners are notified when the content of
-/// the [Uint8List] changes, even if the [Uint8List] object does not change.
+/// We use this custom change notifier instead of
+/// a raw `ValueNotifier<Uint8List?>` so that listeners are
+/// notified when the content of the [Uint8List] changes, even if
+/// the [Uint8List] object does not change.
 class PerfettoTrace extends ChangeNotifier {
   PerfettoTrace(Uint8List? traceBinary) : _traceBinary = traceBinary;
 

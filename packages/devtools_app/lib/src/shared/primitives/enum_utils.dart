@@ -8,13 +8,17 @@
 /// Class that converts enum value names to enum entries and vice versa.
 ///
 /// Example usage:
+///
+/// ```dart
 /// enum Color {
 ///   red, green, blue
 /// }
-/// ```
+///
+/// void f() {
 ///   EnumUtils<Color> colorUtils = EnumUtils(Color.values);
 ///   colorUtils.getEnum('red'); // returns Color.red
 ///   colorUtils.getName(Color.red); // returns 'red'
+/// }
 /// ```
 class EnumUtils<T extends Enum> {
   EnumUtils(List<T> enumValues) {
