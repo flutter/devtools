@@ -305,7 +305,7 @@ class ProgramExplorerController extends DisposableController
               getFuncs(lib.functions!, lib.variables),
             ).wait;
         lib.variables = variableObjects.cast<Field>();
-        lib.functions = functionObjects.cast<Func>();
+        lib.functions = functionObjects;
         node.updateObject(lib);
       } else if (object is ClassRef) {
         final clazz = await service!.getObject(isolateId!, object.id!) as Class;
@@ -315,7 +315,7 @@ class ProgramExplorerController extends DisposableController
               getFuncs(clazz.functions!, clazz.fields),
             ).wait;
         clazz.fields = fieldObjects.cast<Field>();
-        clazz.functions = functionObjects.cast<Func>();
+        clazz.functions = functionObjects;
         node.updateObject(clazz);
       } else {
         final obj = await service!.getObject(isolateId!, object.id!);
