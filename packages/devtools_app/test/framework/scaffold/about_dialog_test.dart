@@ -47,6 +47,7 @@ void main() {
     testWidgets('builds dialog', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(aboutDialog));
       expect(find.text('About DevTools'), findsOneWidget);
+      expect(find.text('VIEW LICENSES'), findsOneWidget);
     });
 
     testWidgets('content renders correctly', (WidgetTester tester) async {
