@@ -63,17 +63,18 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
 
   int get payloadVersion => _payloadVersion;
 
-  /// Imported JSON data loaded and converted, if necessary, to the latest version.
+  /// Imported JSON data loaded and
+  /// converted, if necessary, to the latest version.
   bool get isMatchedVersion => _payloadVersion == version;
 
   late final bool _memoryPayload;
 
-  /// JSON payload field "dart<T>DevToolsScreen" has a value of "memory" e.g.,
-  ///   "dartDevToolsScreen": "memory"
+  /// JSON payload field `"dart<T>DevToolsScreen"` has a value of "memory" e.g.,
+  ///   `"dartDevToolsScreen": "memory"`
   bool get isMemoryPayload => _memoryPayload;
 
-  /// If data is empty check isMatchedVersion and isMemoryPayload to ensure the
-  /// JSON file loaded is a memory file.
+  /// If data is empty, check [isMatchedVersion] and [isMemoryPayload] to
+  /// ensure the JSON file loaded is a memory file.
   final data = <T>[];
 
   static const jsonDevToolsScreenField = 'dartDevToolsScreen';
@@ -184,7 +185,7 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
         '${HeapSample.version} is the only valid HeapSample version',
       );
 
-  /// Given a list of HeapSample, encode as a Json string.
+  /// Given a list of [HeapSample], encode as a Json string.
   static String encodeList(List<HeapSample> data) {
     final samplesJson = SamplesMemoryJson();
     final result = StringBuffer();
