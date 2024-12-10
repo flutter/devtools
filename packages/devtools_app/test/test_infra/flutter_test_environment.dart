@@ -193,14 +193,6 @@ class FlutterTestEnvironment {
       return;
     }
 
-    // Delete any temporary directories that were created during the test suite.
-    if (_tempTestAppDirectory != null) {
-      final tempDirectory = Directory(_tempTestAppDirectory!);
-      if (tempDirectory.existsSync()) {
-        Directory(_tempTestAppDirectory!).deleteSync(recursive: true);
-      }
-    }
-
     if (_beforeFinalTearDown != null) await _beforeFinalTearDown!();
 
     await serviceConnection.serviceManager.manuallyDisconnect();
@@ -220,6 +212,16 @@ class FlutterTestEnvironment {
     _flutter = null;
 
     _needsSetup = true;
+  }
+
+  void finalTeardown() {
+    // Delete the temporary directory created for the test suite.
+    if (_tempTestAppDirectory != null) {
+      final tempDirectory = Directory(_tempTestAppDirectory!);
+      if (tempDirectory.existsSync()) {
+        Directory(_tempTestAppDirectory!).deleteSync(recursive: true);
+      }
+    }
   }
 
   bool _isNewRunConfig(FlutterRunConfiguration? config) {

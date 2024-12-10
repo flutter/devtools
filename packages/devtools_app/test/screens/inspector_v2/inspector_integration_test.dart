@@ -66,6 +66,10 @@ void main() {
     preferences.inspector.setInspectorV2Enabled(false);
   });
 
+  tearDownAll(() {
+    env.finalTeardown();
+  });
+
   group('screenshot tests', () {
     testWidgetsWithWindowSize('initial load', windowSize, (
       WidgetTester tester,
