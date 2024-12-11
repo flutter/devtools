@@ -724,6 +724,7 @@ class InspectorController extends DisposableController
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
       treeType,
+      implementationWidgetsHidden: implementationWidgetsHidden.value,
     );
 
     try {
@@ -732,6 +733,8 @@ class InspectorController extends DisposableController
       // Show an error and don't update the selected node in the tree if the
       // user selected an implementation widget in the app while implementation
       // widgets are hidden in the tree.
+
+      // TODO: Update the following.
       if (implementationWidgetsHidden.value && newSelection != null) {
         final isInTree = valueToInspectorTreeNode.containsKey(
           newSelection.valueRef,
@@ -952,7 +955,7 @@ class InspectorController extends DisposableController
     }
   }
 
-  void selectionChanged() {
+  void selectionChanged({bool notifyFlutterInspector = false}) {
     if (!visibleToUser) {
       return;
     }
@@ -968,18 +971,24 @@ class InspectorController extends DisposableController
       setSelectedNode(node);
       unawaited(_addNodeToConsole(node));
 
-      syncSelectionHelper(selection: selectedDiagnostic);
+      syncSelectionHelper(
+        selection: selectedDiagnostic,
+        notifyFlutterInspector: notifyFlutterInspector,
+      );
     }
   }
 
-  void syncSelectionHelper({required RemoteDiagnosticsNode? selection}) {
+  void syncSelectionHelper({
+    required RemoteDiagnosticsNode? selection,
+    bool notifyFlutterInspector = false,
+  }) {
     if (selection != null) {
       if (selection.isCreatedByLocalProject) {
         _navigateTo(selection);
       }
     }
 
-    if (selection != null) {
+    if (notifyFlutterInspector && selection != null) {
       unawaited(selection.setSelectionInspector(true));
     }
   }

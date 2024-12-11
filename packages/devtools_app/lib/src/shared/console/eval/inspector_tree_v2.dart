@@ -199,7 +199,7 @@ class InspectorTreeConfig {
   });
 
   final NodeAddedCallback? onNodeAdded;
-  final VoidCallback? onSelectionChange;
+  final void Function({bool notifyFlutterInspector})? onSelectionChange;
   final void Function(bool added)? onClientActiveChange;
   final TreeEventCallback? onExpand;
 }
