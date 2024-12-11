@@ -37,7 +37,7 @@ const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 /// `dt build` command.
 ///
 /// If the [_runAppFlag] argument is passed (e.g. --run-app), then DevTools will
-/// be ran with `flutter run `instead of being built with `flutter build web`.
+/// be run with `flutter run `instead of being built with `flutter build web`.
 /// The debug instance of DevTools app running from Flutter Tool will be
 /// connected to a locally running instance of the DevTools server.
 ///
@@ -242,10 +242,14 @@ class ServeCommand extends Command {
       CliCommand.dart([
         if (debugServer) ...['run', '--observe=0'],
         ddsServeLocalScriptPath,
-        if (!runApp) '--devtools-build=$devToolsBuildLocation',
-        // When running DevTools via `flutter run`, the [flutterRunProcess]
-        // below will launch DevTools in the browser.
-        if (runApp) '--no-launch-browser',
+        if (runApp)
+          // When running DevTools via `flutter run`, the [flutterRunProcess]
+          // below will launch DevTools in the browser.
+          '--no-launch-browser'
+        else
+          // Only pass a build location if the server is serving the web assets
+          // (i.e. not when DevTools app is ran via `flutter run`).
+          '--devtools-build=$devToolsBuildLocation',
         // Pass any args that were provided to our script along. This allows IDEs
         // to pass `--machine` (etc.) so that this script can behave the same as
         // the "dart devtools" command for testing local DevTools/server changes.
@@ -282,6 +286,9 @@ class ServeCommand extends Command {
           'run',
           '-d',
           'chrome',
+          // TODO(ft-issue):
+          //  [flutterRunProcess] exits without the --verbose flag.
+          '--verbose',
           // Add the trailing slash because this is what DevTools app expects.
           '--dart-define=debug_devtools_server=$devToolsServerAddress/',
         ]),
@@ -319,28 +326,28 @@ class ServeCommand extends Command {
     await Future.any([
       serveLocalProcessExited.future,
       flutterRunProcessExited.future,
-    ]).then((_) async {
-      if (serveLocalProcessExited.isCompleted &&
-          !flutterRunProcessExited.isCompleted &&
-          flutterRunProcess != null) {
-        final exitCode = await serveLocalProcessExited.future;
-        logStatus(
-          'Killing the flutterRunProcess because the serveLocalProcess has '
-          'exited with code $exitCode',
-        );
-        await _killProcess(flutterRunProcess);
-      }
+    ]);
 
-      if (flutterRunProcessExited.isCompleted &&
-          !serveLocalProcessExited.isCompleted) {
-        final exitCode = await flutterRunProcessExited.future;
-        logStatus(
-          'Killing the serveLocalProcess because the flutterRunProcess has '
-          'exited with code $exitCode',
-        );
-        await _killProcess(serveLocalProcess);
-      }
-    });
+    if (serveLocalProcessExited.isCompleted &&
+        !flutterRunProcessExited.isCompleted &&
+        flutterRunProcess != null) {
+      final exitCode = await serveLocalProcessExited.future;
+      logStatus(
+        'Killing the flutterRunProcess because the serveLocalProcess has '
+        'exited with code $exitCode.',
+      );
+      await _killProcess(flutterRunProcess);
+    }
+
+    if (flutterRunProcessExited.isCompleted &&
+        !serveLocalProcessExited.isCompleted) {
+      final exitCode = await flutterRunProcessExited.future;
+      logStatus(
+        'Killing the serveLocalProcess because the flutterRunProcess has '
+        'exited with code $exitCode.',
+      );
+      await _killProcess(serveLocalProcess);
+    }
   }
 
   Future<void> _killProcess(Process? process) async {
