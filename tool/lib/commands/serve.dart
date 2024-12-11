@@ -14,6 +14,8 @@ import 'package:path/path.dart' as path;
 import 'shared.dart';
 
 const _buildAppFlag = 'build-app';
+// TODO(kenz): consider adding a `dt run` command to simplify the dev workflow
+// and reduce the cognitive load of remembering the args to pass to `dt serve`.
 const _runAppFlag = 'run-app';
 const _debugServerFlag = 'debug-server';
 
@@ -33,6 +35,11 @@ const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 /// are ignored if '--no-build-app' is present in the list of arguments passed
 /// to this command. All of the following commands are passed along to the
 /// `dt build` command.
+///
+/// If the [_runAppFlag] argument is passed (e.g. --run-app), then DevTools will
+/// be ran with `flutter run `instead of being built with `flutter build web`.
+/// The debug instance of DevTools app running from Flutter Tool will be
+/// connected to a locally running instance of the DevTools server.
 ///
 /// If the [_debugServerFlag] argument is present, the DevTools server will be
 /// started with the `--observe` flag. This will allow you to debug and profile
@@ -275,7 +282,6 @@ class ServeCommand extends Command {
           'run',
           '-d',
           'chrome',
-          '--verbose',
           // Add the trailing slash because this is what DevTools app expects.
           '--dart-define=debug_devtools_server=$devToolsServerAddress/',
         ]),
