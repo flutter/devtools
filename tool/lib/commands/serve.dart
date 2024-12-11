@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
@@ -13,6 +14,7 @@ import 'package:path/path.dart' as path;
 import 'shared.dart';
 
 const _buildAppFlag = 'build-app';
+const _runAppFlag = 'run-app';
 const _debugServerFlag = 'debug-server';
 
 // TODO(https://github.com/flutter/devtools/issues/7232): Consider using
@@ -67,7 +69,17 @@ class ServeCommand extends Command {
         defaultsTo: true,
         help:
             'Whether to build the DevTools web app before starting the DevTools'
-            ' server.',
+            ' server. If --no-build-app is passed, the existing assets from'
+            ' devtools_app/build/web will be used.',
+      )
+      ..addFlag(
+        _runAppFlag,
+        negatable: false,
+        defaultsTo: false,
+        help:
+            'Whether to run the DevTools web app using `flutter run` instead'
+            ' of building it using `flutter build web` and serving the assets'
+            ' directly from the DevTools server.',
       )
       ..addFlag(
         _debugServerFlag,
@@ -124,6 +136,7 @@ class ServeCommand extends Command {
 
     final results = argResults!;
     final buildApp = results[_buildAppFlag] as bool;
+    final runApp = results[_runAppFlag] as bool;
     final debugServer = results[_debugServerFlag] as bool;
     final updateFlutter =
         results[BuildCommandArgs.updateFlutter.flagName] as bool;
@@ -146,6 +159,7 @@ class ServeCommand extends Command {
           ..remove(BuildCommandArgs.noStripWasm.asArg())
           ..remove(valueAsArg(_buildAppFlag))
           ..remove(valueAsArg(_buildAppFlag, negated: true))
+          ..remove(valueAsArg(_runAppFlag))
           ..remove(valueAsArg(_debugServerFlag))
           ..remove(BuildCommandArgs.pubGet.asArg())
           ..remove(BuildCommandArgs.pubGet.asArg(negated: true))
@@ -181,7 +195,7 @@ class ServeCommand extends Command {
       'web',
     );
 
-    if (buildApp) {
+    if (buildApp && !runApp) {
       final process = await processManager.runProcess(
         CliCommand.tool([
           'build',
@@ -206,7 +220,7 @@ class ServeCommand extends Command {
     );
 
     logStatus('serving DevTools with a local devtools server...');
-    final serveLocalScriptPath = path.join(
+    final ddsServeLocalScriptPath = path.join(
       'pkg',
       'dds',
       'tool',
@@ -214,18 +228,119 @@ class ServeCommand extends Command {
       'serve_local.dart',
     );
 
+    String? devToolsServerAddress;
+
     // This call will not exit until explicitly terminated by the user.
-    await processManager.runProcess(
+    final serveLocalProcess = await startIndependentProcess(
       CliCommand.dart([
         if (debugServer) ...['run', '--observe=0'],
-        serveLocalScriptPath,
-        '--devtools-build=$devToolsBuildLocation',
+        ddsServeLocalScriptPath,
+        if (!runApp) '--devtools-build=$devToolsBuildLocation',
+        // When running DevTools via `flutter run`, the [flutterRunProcess]
+        // below will launch DevTools in the browser.
+        if (runApp) '--no-launch-browser',
         // Pass any args that were provided to our script along. This allows IDEs
         // to pass `--machine` (etc.) so that this script can behave the same as
         // the "dart devtools" command for testing local DevTools/server changes.
         ...remainingArguments,
       ], sdkOverride: serveWithDartSdk),
       workingDirectory: localDartSdkLocation,
+      waitForOutput: 'Serving DevTools at ',
+      onWaitForOutputReceived: (line) {
+        // This will pull the server address from a String like:
+        // "Serving DevTools at http://127.0.0.1:9104.".
+        final regexp = RegExp(
+          r'http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+',
+        );
+        final match = regexp.firstMatch(line);
+        if (match != null) {
+          devToolsServerAddress = match.group(0);
+        }
+      },
     );
+
+    Process? flutterRunProcess;
+    if (runApp) {
+      if (devToolsServerAddress == null) {
+        await _killProcess(serveLocalProcess);
+        throw Exception(
+          'Cannot run DevTools and connect to the DevTools server because '
+          'devToolsServerAddress is null.',
+        );
+      }
+
+      logStatus('running DevTools');
+      flutterRunProcess = await startIndependentProcess(
+        CliCommand.flutter([
+          'run',
+          '-d',
+          'chrome',
+          '--verbose',
+          // Add the trailing slash because this is what DevTools app expects.
+          '--dart-define=debug_devtools_server=$devToolsServerAddress/',
+        ]),
+        workingDirectory: repo.devtoolsAppDirectoryPath,
+        waitForOutput:
+            'The Flutter DevTools debugger and profiler on Chrome is available at:',
+      );
+    }
+
+    await _waitForAndHandleExit(
+      serveLocalProcess: serveLocalProcess,
+      flutterRunProcess: flutterRunProcess,
+    );
+  }
+
+  Future<void> _waitForAndHandleExit({
+    required Process serveLocalProcess,
+    required Process? flutterRunProcess,
+  }) async {
+    final serveLocalProcessExited = Completer<int>();
+    final flutterRunProcessExited = Completer<int>();
+    unawaited(
+      serveLocalProcess.exitCode.then((code) {
+        serveLocalProcessExited.complete(code);
+      }),
+    );
+    if (flutterRunProcess != null) {
+      unawaited(
+        flutterRunProcess.exitCode.then((code) {
+          flutterRunProcessExited.complete(code);
+        }),
+      );
+    }
+
+    await Future.any([
+      serveLocalProcessExited.future,
+      flutterRunProcessExited.future,
+    ]).then((_) async {
+      if (serveLocalProcessExited.isCompleted &&
+          !flutterRunProcessExited.isCompleted &&
+          flutterRunProcess != null) {
+        final exitCode = await serveLocalProcessExited.future;
+        logStatus(
+          'Killing the flutterRunProcess because the serveLocalProcess has '
+          'exited with code $exitCode',
+        );
+        await _killProcess(flutterRunProcess);
+      }
+
+      if (flutterRunProcessExited.isCompleted &&
+          !serveLocalProcessExited.isCompleted) {
+        final exitCode = await flutterRunProcessExited.future;
+        logStatus(
+          'Killing the serveLocalProcess because the flutterRunProcess has '
+          'exited with code $exitCode',
+        );
+        await _killProcess(serveLocalProcess);
+      }
+    });
+  }
+
+  Future<void> _killProcess(Process? process) async {
+    if (process != null) {
+      Process.killPid(process.pid, ProcessSignal.sigint);
+      await process.exitCode;
+    }
   }
 }

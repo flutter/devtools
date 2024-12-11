@@ -46,7 +46,11 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     }
 
     final basePath = devtoolsAssetsBasePath(
-      origin: window.location.origin,
+      // This needs to use the DevTools server URI as the origin because the
+      // extension assets are served through a DevTools server handler. The
+      // DevTools server handler loads them directly from their location in the
+      // user's pub-cache.
+      origin: devToolsServerUriAsString,
       path: window.location.pathname,
     );
     final baseUri = path.join(
