@@ -1025,7 +1025,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
     RemoteDiagnosticsNode? previousSelection,
     FlutterTreeType treeType, {
     bool isSummaryTree = false,
-    bool implementationWidgetsHidden = false,
+    bool createdByLocalProjectOnly = false,
   }) async {
     // There is no reason to allow calling this method on a disposed group.
     assert(!disposed);
@@ -1038,7 +1038,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
         newSelection = await invokeServiceMethodReturningNodeInspectorRef(
           isSummaryTree
               ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
-              : implementationWidgetsHidden
+              : createdByLocalProjectOnly
               ? WidgetInspectorServiceExtensions.getSelectedLocalWidget.name
               : WidgetInspectorServiceExtensions.getSelectedWidget.name,
           null,

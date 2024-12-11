@@ -31,6 +31,7 @@ import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
 import '../inspector_shared/inspector_screen.dart';
@@ -724,32 +725,13 @@ class InspectorController extends DisposableController
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
       treeType,
-      implementationWidgetsHidden: implementationWidgetsHidden.value,
+      // If implementation widgets are hidden, the only widgets in the tree are
+      // those that were created by the local project.
+      createdByLocalProjectOnly: implementationWidgetsHidden.value,
     );
 
     try {
       final newSelection = await pendingSelectionFuture;
-
-      // Show an error and don't update the selected node in the tree if the
-      // user selected an implementation widget in the app while implementation
-      // widgets are hidden in the tree.
-
-      // TODO: Update the following.
-      if (implementationWidgetsHidden.value && newSelection != null) {
-        final isInTree = valueToInspectorTreeNode.containsKey(
-          newSelection.valueRef,
-        );
-        final hasParent = newSelection.parent != null;
-        final isImplementationWidget = !isInTree && !hasParent;
-        if (isImplementationWidget) {
-          notificationService.pushError(
-            'Selected an implementation widget. Please toggle "Show Implementation Widgets" and select a widget from the device again.',
-            allowDuplicates: true,
-            isReportable: false,
-          );
-          return;
-        }
-      }
 
       if (_disposed || group.disposed) return;
 
@@ -758,6 +740,11 @@ class InspectorController extends DisposableController
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection);
+
+      await _maybeShowNotificationForSelectedNode(
+        selectedNode: newSelection,
+        group: group,
+      );
     } catch (error, st) {
       if (selectionGroups.next == group) {
         _log.shout(error, error, st);
@@ -812,6 +799,51 @@ class InspectorController extends DisposableController
     }
 
     animateTo(selectedNode.value);
+  }
+
+  static const _implementationWidgetMessage =
+      'Selected an implementation widget';
+
+  static const _notificationDuration = Duration(seconds: 4);
+
+  Future<void> _maybeShowNotificationForSelectedNode({
+    required RemoteDiagnosticsNode? selectedNode,
+    required ObjectGroup group,
+  }) async {
+    if (selectedNode == null) return;
+    if (!implementationWidgetsHidden.value) return;
+
+    // Return early if we have a new selected node.
+    if (_selectionIsOutOfDate(selectedNode)) return;
+
+    final possibleImplementationWidget = await group.getSelection(
+      selectedDiagnostic,
+      treeType,
+    );
+
+    // Return early if we have a new selected node.
+    if (_selectionIsOutOfDate(selectedNode)) return;
+
+    final isImplementationWidget =
+        !(possibleImplementationWidget?.isCreatedByLocalProject ?? true);
+    if (isImplementationWidget) {
+      final selectedWidgetName = selectedNode.description ?? '';
+
+      // Return early if we have a new selected node.
+      if (_selectionIsOutOfDate(selectedNode)) return;
+
+      notificationService.pushNotification(
+        NotificationMessage(
+          '$_implementationWidgetMessage${selectedWidgetName.isEmpty ? '' : ' of $selectedWidgetName'}.',
+          duration: _notificationDuration,
+        ),
+        allowDuplicates: false,
+      );
+    }
+  }
+
+  bool _selectionIsOutOfDate(RemoteDiagnosticsNode selected) {
+    return selected.valueRef != selectedNode.value?.diagnostic?.valueRef;
   }
 
   Future<void> _loadPropertiesForNode(InspectorTreeNode? node) async {
