@@ -22,6 +22,11 @@ enum EditorMethod {
 }
 
 /// Method names of LSP requests registered on the Analysis Server.
+///
+/// These should be kept in sync with the methods defined at
+/// [pkg/analysis_server/lib/src/lsp/constants.dart][code link]
+///
+/// [code link]: https://github.com/dart-lang/sdk/blob/ebfcd436da65802a2b20d415afe600b51e432305/pkg/analysis_server/lib/src/lsp/constants.dart#L136
 enum LspMethod {
   editableArguments(
     methodName: 'experimental/dart/textDocument/editableArguments',

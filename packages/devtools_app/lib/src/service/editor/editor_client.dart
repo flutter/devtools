@@ -241,7 +241,7 @@ class EditorClient extends DisposableController
       },
     );
     final result = response.result[Field.result];
-    return (result != null)
+    return result != null
         ? EditableArgumentsResult.fromJson(result as Map<String, Object?>)
         : null;
   }
