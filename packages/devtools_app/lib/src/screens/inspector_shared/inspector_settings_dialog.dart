@@ -52,9 +52,9 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                     notifier:
                         preferences.inspector.autoRefreshEnabled
                             as ValueNotifier<bool?>,
-                    title: 'Enable auto-refreshing of the widget tree',
+                    title: 'Enable widget tree auto-refreshing',
                     description:
-                        'The widget tree will automatically be refreshed after a hot-reload.',
+                        'The widget tree will automatically refresh after a hot-reload or navigation event.',
                     gaItem: gac.inspectorAutoRefreshEnabled,
                   ),
                 ] else ...[
