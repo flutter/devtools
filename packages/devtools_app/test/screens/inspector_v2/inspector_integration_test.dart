@@ -2,17 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('vm')
+library;
+
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart'
-    hide InspectorScreenBodyState, InspectorScreenBody;
+    hide InspectorScreenBodyState, InspectorScreenBody, InspectorRowContent;
 import 'package:devtools_app/src/screens/inspector/inspector_screen_body.dart'
     as legacy;
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
+import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 
 import '../../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../../test_infra/flutter_test_environment.dart';
@@ -33,6 +40,7 @@ void main() {
 
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
+    useTempDirectory: true,
   );
 
   env.afterEverySetup = () async {
@@ -59,6 +67,10 @@ void main() {
     await env.tearDownEnvironment(force: true);
     // Re-set changes to preferences:
     preferences.inspector.setInspectorV2Enabled(false);
+  });
+
+  tearDownAll(() {
+    env.finalTeardown();
   });
 
   group('screenshot tests', () {
@@ -383,6 +395,91 @@ void main() {
     },
   );
 
+  group('auto-refresh after code edits', () {
+    final flutterAppMainPath = p.join(env.testAppDirectory, 'lib', 'main.dart');
+    String flutterMainContents = '';
+
+    setUp(() {
+      // Save contents of main.dart file.
+      flutterMainContents = File(flutterAppMainPath).readAsStringSync();
+
+      // Enable auto-refresh.
+      preferences.inspector.setAutoRefreshEnabled(true);
+    });
+
+    tearDown(() {
+      // Re-set contents of main.dart.
+      File(
+        flutterAppMainPath,
+      ).writeAsStringSync(flutterMainContents, flush: true);
+
+      // Re-set changes to auto refresh.
+      preferences.inspector.setAutoRefreshEnabled(true);
+    });
+
+    void makeEditToFlutterMain({
+      required String toReplace,
+      required String replaceWith,
+    }) {
+      final file = File(flutterAppMainPath);
+      final fileContents = file.readAsStringSync();
+      file.writeAsStringSync(
+        fileContents.replaceAll(toReplace, replaceWith),
+        flush: true,
+      );
+    }
+
+    testWidgetsWithWindowSize('changing parent widget of selected', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await _loadInspectorUI(tester);
+
+      // Give time for the initial animation to complete.
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Verify the Text widget is after the Center widget.
+      expect(
+        _treeRowsAreInOrder(
+          treeRowDescriptions: ['Center', 'Text: "Hello, World!"'],
+          startingAtIndex: 15,
+        ),
+        isTrue,
+      );
+
+      // Select the Text widget (row index #16).
+      await tester.tap(_findTreeRowMatching('Text: "Hello, World!"'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Verify the Text widget is selected (its properties are displayed):
+      verifyPropertyIsVisible(
+        name: 'data',
+        value: '"Hello, World!"',
+        tester: tester,
+      );
+
+      // Make edit to main.dart to replace Center with an Align.
+      makeEditToFlutterMain(toReplace: 'Center', replaceWith: 'Align');
+      await env.flutter!.hotReload();
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Verify the Align is now in the widget tree instead of Center.
+      expect(
+        _treeRowsAreInOrder(
+          treeRowDescriptions: ['Align', 'Text: "Hello, World!"'],
+          startingAtIndex: 15,
+        ),
+        isTrue,
+      );
+
+      // Verify the Text widget is still selected (its properties are displayed):
+      verifyPropertyIsVisible(
+        name: 'data',
+        value: '"Hello, World!"',
+        tester: tester,
+      );
+    });
+  });
+
   group('widget errors', () {
     testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
       WidgetTester tester,
@@ -526,3 +623,35 @@ bool areHorizontallyAligned(
 
   return widgetACenter.dy == widgetBCenter.dy;
 }
+
+bool _treeRowsAreInOrder({
+  required List<String> treeRowDescriptions,
+  required int startingAtIndex,
+}) {
+  final treeRowIndices = <int>[];
+
+  for (final description in treeRowDescriptions) {
+    final treeRow = _getWidgetFromFinder<InspectorRowContent>(
+      _findTreeRowMatching(description),
+    );
+    treeRowIndices.add(treeRow.row.index);
+  }
+
+  int indexToCheck = startingAtIndex;
+  for (final index in treeRowIndices) {
+    if (index == indexToCheck) {
+      indexToCheck++;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+Finder _findTreeRowMatching(String description) => find.ancestor(
+  of: find.richText(description),
+  matching: find.byType(InspectorRowContent),
+);
+
+T _getWidgetFromFinder<T>(Finder finder) =>
+    finder.first.evaluate().first.widget as T;
