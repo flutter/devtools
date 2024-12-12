@@ -250,7 +250,7 @@ class ReleaseNotesController extends SidePanelController {
     markdown.value = null;
     toggleVisibility(false);
     if (message != null) {
-      _log.warning('Warning: $message');
+      _log.warning(message);
     }
   }
 

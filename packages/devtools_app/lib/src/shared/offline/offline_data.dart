@@ -82,6 +82,7 @@ class OfflineDataController {
 ///
 /// Example:
 ///
+/// ```dart
 /// class MyScreenController with OfflineScreenControllerMixin<MyScreenData> {
 ///   MyScreenController() {
 ///     init();
@@ -110,11 +111,14 @@ class OfflineDataController {
 ///     data: {} // The data for this screen as a serializable JSON object.
 ///   );
 /// }
+/// ```
 ///
 /// ...
 ///
-/// Then in the DevTools [ScreenMetaData] enum, set 'worksWithOfflineData' to true.
+/// Then in the DevTools [ScreenMetaData] enum,
+/// set `worksWithOfflineData` to `true`.
 ///
+/// ```dart
 /// enum ScreenMetaData {
 ///   ...
 ///   myScreen(
@@ -122,6 +126,7 @@ class OfflineDataController {
 ///     worksWithOfflineData: true,
 ///   ),
 /// }
+/// ```
 mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   final _exportController = ExportController();
 

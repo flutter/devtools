@@ -1069,30 +1069,6 @@ const connectToNewAppText = 'Connect to a new app';
 /// favor of a new request.
 class ProcessCancelledException implements Exception {}
 
-extension UriExtension on Uri {
-  Uri copyWith({
-    String? scheme,
-    String? userInfo,
-    String? host,
-    int? port,
-    Iterable<String>? pathSegments,
-    String? query,
-    Map<String, dynamic>? queryParameters,
-    String? fragment,
-  }) {
-    return Uri(
-      scheme: scheme ?? this.scheme,
-      userInfo: userInfo ?? this.userInfo,
-      host: host ?? this.host,
-      port: port ?? this.port,
-      pathSegments: pathSegments ?? this.pathSegments,
-      query: query ?? this.query,
-      queryParameters: queryParameters ?? this.queryParameters,
-      fragment: fragment ?? this.fragment,
-    );
-  }
-}
-
 // TODO(mtaylee): Prefer to use this helper method whenever a call to
 // .split('/').last is made on a String (usually on URIs).
 // See https://github.com/flutter/devtools/issues/4360.

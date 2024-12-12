@@ -67,7 +67,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
               : ExtensionEventParameters.themeValueLight,
       if (dtdManager.uri != null) 'dtdUri': dtdManager.uri.toString(),
     };
-    return Uri.parse(baseUri).copyWith(queryParameters: queryParams).toString();
+    return Uri.parse(baseUri).replace(queryParameters: queryParams).toString();
   }
 
   HTMLIFrameElement get extensionIFrame => _extensionIFrame;

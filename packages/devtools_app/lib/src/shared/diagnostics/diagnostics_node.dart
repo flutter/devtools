@@ -11,18 +11,11 @@ import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/inspector_v2/inspector_data_models.dart';
-import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
 import '../ui/icons.dart';
 import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
-
-final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
-
-final treeStyleUtils = EnumUtils<DiagnosticsTreeStyle>(
-  DiagnosticsTreeStyle.values,
-);
 
 /// Defines diagnostics data for a [value].
 ///
@@ -256,9 +249,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   );
 
   /// Dart class defining the diagnostic node.
-  /// For example, DiagnosticProperty<Color>, IntProperty, StringProperty, etc.
-  /// This should rarely be required except for cases where custom rendering is desired
-  /// of a specific Dart diagnostic class.
+  ///
+  /// For example: `DiagnosticProperty<Color>`, `IntProperty`, `StringProperty`.
+  /// This should rarely be required except for cases where custom rendering is
+  /// desired of a specific Dart diagnostic class.
   String? get type => getStringMember('type');
 
   /// Whether the description is enclosed in double quotes.
@@ -503,7 +497,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    return diagnosticLevelUtils.enumEntry(value)!;
+    return DiagnosticLevel.values.byName(value);
   }
 
   DiagnosticsTreeStyle getStyleMember(
@@ -517,7 +511,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (value == null) {
       return defaultValue;
     }
-    return treeStyleUtils.enumEntry(value)!;
+    return DiagnosticsTreeStyle.values.byName(value);
   }
 
   /// Returns a reference to the value the DiagnosticsNode object is describing.

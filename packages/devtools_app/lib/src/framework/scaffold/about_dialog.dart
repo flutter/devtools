@@ -63,7 +63,7 @@ class DevToolsAboutDialog extends StatelessWidget {
           ),
         ],
       ),
-      actions: const [DialogCloseButton()],
+      actions: const [DialogLicenseButton(), DialogCloseButton()],
     );
   }
 }
@@ -143,4 +143,31 @@ class OpenAboutAction extends ScaffoldAction {
           );
         },
       );
+}
+
+// Since [DevToolsAboutDialog] is not actually an [AboutDialog], there is no
+// built-in way to add a 'View Licenses' button.
+// So, adding a custom [DialogTextButton] to view licenses.
+// Since this action is very specific to just the [DevToolsAboutDialog],
+// providing implementation in about_dialog.dart and not in
+// dialogs.dart which contains the definition of [DevToolsDialog].
+// TODO(mossmana): We may want to consider refactoring [DevToolsAboutDialog] to
+// be an [AboutDialog].
+// https://api.flutter.dev/flutter/material/AboutDialog-class.html
+final class DialogLicenseButton extends StatelessWidget {
+  const DialogLicenseButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DialogTextButton(
+      onPressed: () {
+        showLicensePage(
+          context: context,
+          applicationName: 'DevTools',
+          useRootNavigator: true,
+        );
+      },
+      child: const Text('VIEW LICENSES'),
+    );
+  }
 }
