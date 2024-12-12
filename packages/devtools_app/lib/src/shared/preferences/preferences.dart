@@ -25,8 +25,8 @@ import '../utils/utils.dart';
 part '_cpu_profiler_preferences.dart';
 part '_extension_preferences.dart';
 part '_inspector_preferences.dart';
-part '_memory_preferences.dart';
 part '_logging_preferences.dart';
+part '_memory_preferences.dart';
 part '_network_preferences.dart';
 part '_performance_preferences.dart';
 
@@ -211,8 +211,17 @@ class PreferencesController extends DisposableController
       return;
     }
 
+    // Whether DevTools was run using the `dt serve --run-app` command, which
+    // runs DevTools in debug mode using `flutter run` and connects it to an
+    // instance of the DevTools server.
+    final usingDebugDevToolsServer =
+        (const String.fromEnvironment('debug_devtools_server')).isNotEmpty &&
+        !kReleaseMode;
     final shouldEnableWasm =
-        (enabledFromStorage || enabledFromQueryParams) && kIsWeb;
+        (enabledFromStorage || enabledFromQueryParams) &&
+        kIsWeb &&
+        // Wasm cannot be enabled if DevTools was built using `flutter run`.
+        !usingDebugDevToolsServer;
     assert(kIsWasm == shouldEnableWasm);
     // This should be a no-op if the flutter_bootstrap.js logic set the
     // renderer properly, but we call this to be safe in case something went

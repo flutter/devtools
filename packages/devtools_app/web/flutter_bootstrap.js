@@ -28,6 +28,10 @@ const wasmQueryParameterKey = 'wasm';
 
 // Calls the DevTools server API to read the user's wasm preference.
 async function getDevToolsWasmPreference() {
+  // Note: when the DevTools server is running on a different port than the
+  // DevTools web app, this request path will be incorrect and the request
+  // will fail. This is okay because DevTools cannot be built with WASM when
+  // running from `flutter run` anyway.
   const request = 'api/getPreferenceValue?key=experiment.wasm';
   try {
     const response = await fetch(request);

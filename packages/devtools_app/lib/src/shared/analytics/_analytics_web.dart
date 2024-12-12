@@ -522,7 +522,8 @@ void cancelTimingOperation(String screenName, String timedOperation) {
   final operation = _timedOperationsInProgress.remove(operationKey);
   assert(
     operation != null,
-    'The operation cannot be cancelled because it does not exist.',
+    'The operation $screenName.$timedOperation cannot be cancelled because it '
+    'does not exist.',
   );
 }
 
