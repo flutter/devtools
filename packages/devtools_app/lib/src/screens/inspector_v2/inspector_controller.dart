@@ -734,7 +734,7 @@ class InspectorController extends DisposableController
       treeType,
       // If implementation widgets are hidden, the only widgets in the tree are
       // those that were created by the local project.
-      inLocalProjectOnly: implementationWidgetsHidden.value,
+      restrictToLocalProject: implementationWidgetsHidden.value,
     );
 
     try {
@@ -817,11 +817,11 @@ class InspectorController extends DisposableController
     required RemoteDiagnosticsNode? selectedNode,
     required ObjectGroup group,
   }) async {
-    if (selectedNode == null) return;
-    if (!implementationWidgetsHidden.value) return;
-
-    // Return early if we have a new selected node.
-    if (_selectionIsOutOfDate(selectedNode)) return;
+    if (selectedNode == null ||
+        !implementationWidgetsHidden.value ||
+        _selectionIsOutOfDate(selectedNode)) {
+      return;
+    }
 
     final possibleImplementationWidget = await group.getSelection(
       selectedDiagnostic,
@@ -842,6 +842,8 @@ class InspectorController extends DisposableController
       // Return early if we have a new selected node.
       if (_selectionIsOutOfDate(selectedNode)) return;
 
+      // Show a notification that the user selected an implementation widget,
+      // e.g. "Selected an implementation widget of Text: RichText."
       final messageDetails =
           selectedWidgetName.isEmpty
               ? ''
@@ -1001,6 +1003,12 @@ class InspectorController extends DisposableController
     }
   }
 
+  /// Handles updating the widget tree when the selecected widget changes.
+  ///
+  /// [notifyFlutterInspector] determines whether a request should be sent to
+  /// the Widget Inspector in the Flutter framework to update the on-device
+  /// selection. This should only be true if the the selection was changed due
+  /// to a user action in DevTools (e.g. clicking on a widget in the tree).
   void selectionChanged({bool notifyFlutterInspector = false}) {
     if (!visibleToUser) {
       return;
@@ -1024,6 +1032,12 @@ class InspectorController extends DisposableController
     }
   }
 
+  /// Syncs the selection state after a new widgets was selected.
+  ///
+  /// [notifyFlutterInspector] determines whether a request should be sent to
+  /// the Widget Inspector in the Flutter framework to update the on-device
+  /// selection. This should only be true if the the selection was changed due
+  /// to a user action in DevTools (e.g. clicking on a widget in the tree).
   void syncSelectionHelper({
     required RemoteDiagnosticsNode? selection,
     bool notifyFlutterInspector = false,

@@ -1024,7 +1024,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
   Future<RemoteDiagnosticsNode?> getSelection(
     RemoteDiagnosticsNode? previousSelection,
     FlutterTreeType treeType, {
-    bool inLocalProjectOnly = false,
+    bool restrictToLocalProject = false,
   }) async {
     // There is no reason to allow calling this method on a disposed group.
     assert(!disposed);
@@ -1035,7 +1035,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
     switch (treeType) {
       case FlutterTreeType.widget:
         newSelection = await invokeServiceMethodReturningNodeInspectorRef(
-          inLocalProjectOnly
+          restrictToLocalProject
               ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
               : WidgetInspectorServiceExtensions.getSelectedWidget.name,
           null,
