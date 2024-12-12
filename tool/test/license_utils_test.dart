@@ -73,24 +73,20 @@ void main() {
 
       expect(config.removeLicenses.length, equals(4));
 
-      var expectedVal = '''// This is some <value1> multiline license
-// text that should be removed from the file.
-''';
+      var expectedVal = '''// This is some <value> multiline license
+// text that should be removed from the file.''';
       expect(config.removeLicenses[0], equals(expectedVal));
 
-      expectedVal = '''/* This is other <value2> multiline license
-text that should be removed from the file. */
-''';
+      expectedVal = '''/* This is other <value> multiline license
+text that should be removed from the file. */''';
       expect(config.removeLicenses[1], equals(expectedVal));
 
-      expectedVal = '''# This is more <value3> multiline license
-# text that should be removed from the file.
-''';
+      expectedVal = '''# This is more <value> multiline license
+# text that should be removed from the file.''';
       expect(config.removeLicenses[2], equals(expectedVal));
 
       expectedVal = '''// This is some multiline license text to
-// remove that does not contain a stored value.
-''';
+// remove that does not contain a stored value.''';
       expect(config.removeLicenses[3], equals(expectedVal));
     });
 
@@ -99,19 +95,16 @@ text that should be removed from the file. */
 
       expect(config.addLicenses.length, equals(3));
 
-      var expectedVal = '''// This is some <value1> multiline license
-// text that should be added to the file.
-''';
+      var expectedVal = '''// This is some <value> multiline license
+// text that should be added to the file.''';
       expect(config.addLicenses[0], equals(expectedVal));
 
-      expectedVal = '''# This is other <value3> multiline license
-# text that should be added to the file.
-''';
+      expectedVal = '''# This is other <value> multiline license
+# text that should be added to the file.''';
       expect(config.addLicenses[1], equals(expectedVal));
 
       expectedVal = '''// This is some multiline license text to
-// add that does not contain a stored value.
-''';
+// add that does not contain a stored value.''';
       expect(config.addLicenses[2], equals(expectedVal));
     });
 
@@ -483,27 +476,27 @@ Future<void> _setupTestConfigFile() async {
   final contents = '''---
 # sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
 remove_licenses:
-  - |
-    // This is some <value1> multiline license
+  - |-
+    // This is some <value> multiline license
     // text that should be removed from the file.
-  - |
-    /* This is other <value2> multiline license
+  - |-
+    /* This is other <value> multiline license
     text that should be removed from the file. */
-  - |
-    # This is more <value3> multiline license
+  - |-
+    # This is more <value> multiline license
     # text that should be removed from the file.
-  - |
+  - |-
     // This is some multiline license text to
     // remove that does not contain a stored value.
 # sequence of license text strings that should be added to the top of a file. {value} will be replaced.
 add_licenses: 
-  - |
-    // This is some <value1> multiline license
+  - |-
+    // This is some <value> multiline license
     // text that should be added to the file.
-  - |
-    # This is other <value3> multiline license
+  - |-
+    # This is other <value> multiline license
     # text that should be added to the file.
-  - |
+  - |-
     // This is some multiline license text to
     // add that does not contain a stored value.
 # defines which files should have license text added or updated.
