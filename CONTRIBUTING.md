@@ -169,10 +169,20 @@ dependency_overrides:
     path: relative/path/to/devtools/packages/devtools_shared
 ```
 
-Then you can run DevTools with the server by running the following from the top-level `devtools` directory:
-```
-dt serve
-```
+Then you can run DevTools with the server by running the following from anywhere under the `devtools/` directory:
+1. To run DevTools in release mode, served with the DevTools server (this emulates the production environment):
+	```
+	dt serve
+	```
+2. To run DevTools in debug mode with full debugging support and a connection to a live DevTools server:
+	```sh
+	dt run
+	```
+
+Option 2 is useful for a quicker development cycle. The DevTools build time will be faster, and you will be
+able to connect the DevTools web app to an IDE or DevTools for debugging purposes.
+
+To see the full list of arguments available for either command, please pass the `-h` flag.
 
 ### DevTools + VS Code integration (IDE-embedded DevTools experience)
 
@@ -191,7 +201,10 @@ command palette (`F1`)) and add the following to your settings:
 		"LOCAL_DART_SDK": "/path/to/sdk"
 		// Path to the version that Flutter DevTools is pinned to.
 		"FLUTTER_ROOT": "/path/to/devtools/tool/flutter-sdk"
-	}
+	},
+	"args": [
+		// Arguments that will be passed along to the `dt serve` command.
+	],
 },
 ```
 
