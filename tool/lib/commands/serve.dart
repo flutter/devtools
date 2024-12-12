@@ -114,6 +114,16 @@ class ServeCommand extends Command {
       );
   }
 
+  static const _devToolsServerAddressLine = 'Serving DevTools at ';
+  static const _debugServerVmServiceLine =
+      'The Dart VM service is listening on ';
+  static const _debugServerDartDevToolsLine =
+      'The Dart DevTools debugger and profiler is available at: ';
+  static const _runAppVmServiceLine =
+      'A Dart VM Service on Chrome is available at: ';
+  static const _runAppFlutterDevToolsLine =
+      'The Flutter DevTools debugger and profiler on Chrome is available at: ';
+
   @override
   String get name => 'serve';
 
@@ -231,6 +241,35 @@ class ServeCommand extends Command {
     // The address of the locally running DevTools server.
     String? devToolsServerAddress;
 
+    // This is the DevTools URI associated with the DevTools server process
+    // when the '--debug-server' flag is present. This DevTools connection
+    // allows you to debug the DevTools server logic.
+    String? debugServerDevToolsConnection;
+
+    // This is the VM Service URI associated with the DevTools server process
+    // when the '--debug-server' flag is present.
+    String? debugServerVmServiceUri;
+
+    void processServeLocalOutput(String line) {
+      if (line.startsWith(_debugServerVmServiceLine)) {
+        debugServerVmServiceUri =
+            line.substring(_debugServerVmServiceLine.length).trim();
+      } else if (line.startsWith(_debugServerDartDevToolsLine)) {
+        debugServerDevToolsConnection =
+            line.substring(_debugServerDartDevToolsLine.length).trim();
+      } else if (line.startsWith(_devToolsServerAddressLine)) {
+        // This will pull the server address from a String like:
+        // "Serving DevTools at http://127.0.0.1:9104.".
+        final regexp = RegExp(
+          r'http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+',
+        );
+        final match = regexp.firstMatch(line);
+        if (match != null) {
+          devToolsServerAddress = match.group(0);
+        }
+      }
+    }
+
     // This call will not exit until explicitly terminated by the user.
     final serveLocalProcess = await startIndependentProcess(
       CliCommand.dart([
@@ -250,18 +289,8 @@ class ServeCommand extends Command {
         ...remainingArguments,
       ], sdkOverride: serveWithDartSdk),
       workingDirectory: localDartSdkLocation,
-      waitForOutput: 'Serving DevTools at ',
-      onWaitForOutputReceived: (line) {
-        // This will pull the server address from a String like:
-        // "Serving DevTools at http://127.0.0.1:9104.".
-        final regexp = RegExp(
-          r'http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+',
-        );
-        final match = regexp.firstMatch(line);
-        if (match != null) {
-          devToolsServerAddress = match.group(0);
-        }
-      },
+      waitForOutput: _devToolsServerAddressLine,
+      onOutput: processServeLocalOutput,
     );
 
     Process? flutterRunProcess;
@@ -272,6 +301,26 @@ class ServeCommand extends Command {
           'Cannot run DevTools and connect to the DevTools server because '
           'devToolsServerAddress is null.',
         );
+      }
+
+      // This is the DevTools URI associated with the DevTools web app when it is
+      // run using `flutter run` (e.g. when [runApp] is true).
+      String? devToolsWebAppDevToolsConnection;
+
+      // This is the VM service URI associated with the DevTools web app when it
+      // is run using `flutter run` (e.g. when [runApp] is true).
+      String? devToolsWebAppVmServiceUri;
+
+      void processFlutterRunOutput(String line) {
+        if (line.contains(_runAppVmServiceLine)) {
+          final index = line.indexOf(_runAppVmServiceLine);
+          devToolsWebAppVmServiceUri =
+              line.substring(index + _runAppVmServiceLine.length).trim();
+        } else if (line.contains(_runAppFlutterDevToolsLine)) {
+          final index = line.indexOf(_runAppFlutterDevToolsLine);
+          devToolsWebAppDevToolsConnection =
+              line.substring(index + _runAppFlutterDevToolsLine.length).trim();
+        }
       }
 
       logStatus('running DevTools');
@@ -288,9 +337,30 @@ class ServeCommand extends Command {
           '--dart-define=debug_devtools_server=$devToolsServerAddress/',
         ]),
         workingDirectory: repo.devtoolsAppDirectoryPath,
-        waitForOutput:
-            'The Flutter DevTools debugger and profiler on Chrome is available at:',
+        waitForOutput: _runAppFlutterDevToolsLine,
+        onOutput: processFlutterRunOutput,
       );
+
+      // Consolidate important stdout content for easy access.
+      final debugServerContent =
+          debugServer
+              ? '''
+- VM Service URI: $debugServerVmServiceUri
+- DevTools URI for debugging the DevTools server: $debugServerDevToolsConnection
+'''
+              : '';
+
+      print('''
+-------------------------------------------------------------------
+
+The DevTools web app should have just launched on Chrome.
+- VM Service URI: $devToolsWebAppVmServiceUri
+- DevTools URI for debugging the DevTools web app: $devToolsWebAppDevToolsConnection
+
+The DevTools server is running at: $devToolsServerAddress.
+$debugServerContent
+-------------------------------------------------------------------
+''');
     }
 
     await _waitForAndHandleExit(
