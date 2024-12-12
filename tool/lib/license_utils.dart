@@ -25,27 +25,27 @@ import 'package:yaml/yaml.dart';
 /// ```yaml
 /// # sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
 /// remove_licenses:
-///   - |
-///     // This is some <value1> multiline license
+///   - |-
+///     // This is some <value> multiline license
 ///     // text that should be removed from the file.
-///   - |
-///     /* This is other <value2> multiline license
+///   - |-
+///     /* This is other <value> multiline license
 ///     text that should be removed from the file. */
-///   - |
-///     # This is more <value3> multiline license
+///   - |-
+///     # This is more <value> multiline license
 ///     # text that should be removed from the file.
-///   - |
+///   - |-
 ///     // This is some multiline license text to
 ///     // remove that does not contain a stored value.
 /// # sequence of license text strings that should be added to the top of a file. {value} will be replaced.
 /// add_licenses:
-///   - |
-///     // This is some <value1> multiline license
+///   - |-
+///     // This is some <value> multiline license
 ///     // text that should be added to the file.
-///   - |
-///     # This is other <value3> multiline license
+///   - |-
+///     # This is other <value> multiline license
 ///     # text that should be added to the file.
-///   - |
+///   - |-
 ///     // This is some multiline license text to
 ///     // add that does not contain a stored value.
 /// # defines which files should have license text added or updated.
