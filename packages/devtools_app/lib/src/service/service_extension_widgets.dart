@@ -253,22 +253,16 @@ class _HotReloadScaffoldAction extends ScaffoldAction {
     : super(
         icon: hotReloadIcon,
         tooltip: HotReloadButton._hotReloadTooltip,
-        onPressed: (context) {
-          ga.select(gac.devToolsMain, gac.hotReload);
-          _callHotReload();
-        },
+        onPressed: (_) => _callHotReload(),
       );
 }
 
 Future<void> _callHotReload() {
-  // The future is returned.
-  // ignore: discarded_futures
-  return serviceConnection.serviceManager.runDeviceBusyTask(
-    // The future is returned.
-    // ignore: discarded_futures
+  return serviceConnection.serviceManager.runDeviceBusyTask<void>(
     _wrapReloadCall(
       'reload',
       serviceConnection.serviceManager.performHotReload,
+      gaName: gac.hotReload,
     ),
   );
 }
@@ -285,20 +279,19 @@ class HotRestartButton extends StatelessWidget {
       message: 'Hot restart',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotRestart,
-        action: () {
-          // The future is returned.
-          // ignore: discarded_futures
-          return serviceConnection.serviceManager.runDeviceBusyTask(
-            // The future is returned.
-            // ignore: discarded_futures
-            _wrapReloadCall(
-              'restart',
-              serviceConnection.serviceManager.performHotRestart,
-            ),
-          );
-        },
+        action: _callHotRestart,
         completedText: 'Hot restart completed.',
         describeError: (error) => 'Unable to hot restart the app: $error',
+      ),
+    );
+  }
+
+  Future<void> _callHotRestart() {
+    return serviceConnection.serviceManager.runDeviceBusyTask<void>(
+      _wrapReloadCall(
+        'restart',
+        serviceConnection.serviceManager.performHotRestart,
+        gaName: gac.hotRestart,
       ),
     );
   }
@@ -306,8 +299,9 @@ class HotRestartButton extends StatelessWidget {
 
 Future<void> _wrapReloadCall(
   String name,
-  Future<void> Function() reloadCall,
-) async {
+  Future<void> Function() reloadCall, {
+  required String gaName,
+}) async {
   try {
     final timer = Stopwatch()..start();
     messageBus.addEvent(BusEvent('$name.start'));
@@ -316,8 +310,7 @@ Future<void> _wrapReloadCall(
     // 'restarted in 1.6s'
     final message = '${name}ed in ${durationText(timer.elapsed)}';
     messageBus.addEvent(BusEvent('$name.end', data: message));
-    // TODO(devoncarew): Add analytics.
-    //ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);
+    ga.select(gac.devToolsMain, gaName, value: timer.elapsed.inMilliseconds);
   } catch (_) {
     final message = 'error performing $name';
     messageBus.addEvent(BusEvent('$name.end', data: message));

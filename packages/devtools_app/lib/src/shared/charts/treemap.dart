@@ -55,7 +55,7 @@ class Treemap extends StatefulWidget {
   /// which means the level should not change.
   ///
   /// For example, levelsVisible = 2:
-  /// ```
+  /// ```none
   /// _______________
   /// |     Root    |
   /// ---------------
@@ -140,7 +140,7 @@ class _TreemapState extends State<Treemap> {
   /// the aspect ratio of the pivot cell (P) is as close to 1 as it can be.
   ///
   /// **Layout**
-  /// ```
+  /// ```none
   /// ----------------------
   /// |      |  P   |      |
   /// |      |      |      |
@@ -432,7 +432,7 @@ class _TreemapState extends State<Treemap> {
   }
 
   /// **Treemap widget layout**
-  /// ```
+  /// ```none
   /// ----------------------------
   /// |        Title Text        |
   /// |--------------------------|

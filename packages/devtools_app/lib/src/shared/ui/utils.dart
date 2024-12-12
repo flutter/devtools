@@ -271,29 +271,30 @@ enum MediaSize with EnumIndexOrdering {
   final double heightThreshold;
 }
 
-class ScreenSize {
-  ScreenSize(BuildContext context) {
-    _height = _calculateHeight(context);
-    _width = _calculateWidth(context);
+final class ScreenSize {
+  factory ScreenSize(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    return ScreenSize._(
+      height: _calculateHeight(size.height),
+      width: _calculateWidth(size.width),
+    );
   }
 
-  MediaSize get height => _height;
-  MediaSize get width => _width;
-  late MediaSize _height;
-  late MediaSize _width;
+  ScreenSize._({required this.height, required this.width});
 
-  MediaSize _calculateWidth(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+  final MediaSize height;
+  final MediaSize width;
+
+  static MediaSize _calculateHeight(double height) {
     return MediaSize.values.firstWhere(
-      (size) => width < size.widthThreshold,
+      (size) => height < size.heightThreshold,
       orElse: () => MediaSize.xl,
     );
   }
 
-  MediaSize _calculateHeight(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
+  static MediaSize _calculateWidth(double width) {
     return MediaSize.values.firstWhere(
-      (size) => height < size.heightThreshold,
+      (size) => width < size.widthThreshold,
       orElse: () => MediaSize.xl,
     );
   }

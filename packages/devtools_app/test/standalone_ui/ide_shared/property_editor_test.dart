@@ -16,14 +16,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+typedef Location = ({TextDocument document, CursorPosition position});
+typedef LocationToArgsResult = Map<Location, EditableArgumentsResult>;
+
 void main() {
   final eventController = StreamController<ActiveLocationChangedEvent>();
   final eventStream = eventController.stream;
 
-  final locationToArgsResult = <
-    ({TextDocument document, CursorPosition position}),
-    EditableArgumentsResult
-  >{
+  final LocationToArgsResult locationToArgsResult = {
     (document: textDocument1, position: activeCursorPosition1): result1,
     (document: textDocument2, position: activeCursorPosition2): result2,
   };
