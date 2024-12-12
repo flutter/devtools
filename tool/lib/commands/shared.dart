@@ -12,14 +12,11 @@ extension CommandExtension on Command {
 }
 
 extension BuildCommandArgsExtension on ArgParser {
-  void addBulidModeOption({
-    List<String> allowed = const ['debug', 'profile', 'release'],
-    String defaultsTo = 'release',
-  }) {
+  void addBulidModeOption() {
     addOption(
       SharedCommandArgs.buildMode.flagName,
-      allowed: allowed,
-      defaultsTo: defaultsTo,
+      allowed: ['debug', 'profile', 'release'],
+      defaultsTo: 'release',
       help: 'The build mode to use for the DevTools web app.',
     );
   }

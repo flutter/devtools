@@ -329,7 +329,6 @@ class ServeCommand extends Command {
           'run',
           '-d',
           'chrome',
-          if (devToolsAppBuildMode == 'profile') '--profile',
           // TODO(https://github.com/flutter/flutter/issues/160130):
           //  [flutterRunProcess] exits without the --verbose flag.
           '--verbose',

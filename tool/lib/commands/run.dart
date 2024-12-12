@@ -10,9 +10,7 @@ import '../utils.dart';
 
 class RunCommand extends Command {
   RunCommand() {
-    argParser
-      ..addBulidModeOption(allowed: ['debug', 'profile'], defaultsTo: 'debug')
-      ..addDebugServerFlag();
+    argParser.addDebugServerFlag();
   }
 
   @override
@@ -20,8 +18,8 @@ class RunCommand extends Command {
 
   @override
   String get description =>
-      'Runs the DevTools web app using "flutter run" and connects it to a '
-      'locally running instance of the DevTools server.';
+      'Runs the DevTools web app in debug mode using "flutter run" and connects'
+      ' it to a locally running instance of the DevTools server.';
 
   @override
   Future run() async {
