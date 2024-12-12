@@ -343,7 +343,7 @@ void main() {
 
     // Verify the notification about selecting an implementation widget is displayed.
     expect(
-      find.text('Selected an implementation widget of Text.'),
+      find.text('Selected an implementation widget of Text: RichText.'),
       findsOneWidget,
     );
   });

@@ -832,16 +832,23 @@ class InspectorController extends DisposableController
     if (_selectionIsOutOfDate(selectedNode)) return;
 
     final isImplementationWidget =
-        !(possibleImplementationWidget?.isCreatedByLocalProject ?? true);
+        possibleImplementationWidget != null &&
+        !possibleImplementationWidget.isCreatedByLocalProject;
     if (isImplementationWidget) {
       final selectedWidgetName = selectedNode.description ?? '';
+      final implementationWidgetName =
+          possibleImplementationWidget.description ?? '';
 
       // Return early if we have a new selected node.
       if (_selectionIsOutOfDate(selectedNode)) return;
 
+      final messageDetails =
+          selectedWidgetName.isEmpty
+              ? ''
+              : ' of $selectedWidgetName${implementationWidgetName.isEmpty ? '' : ': $implementationWidgetName'}';
       notificationService.pushNotification(
         NotificationMessage(
-          '$_implementationWidgetMessage${selectedWidgetName.isEmpty ? '' : ' of $selectedWidgetName'}.',
+          '$_implementationWidgetMessage$messageDetails.',
           duration: _notificationDuration,
         ),
         allowDuplicates: false,
