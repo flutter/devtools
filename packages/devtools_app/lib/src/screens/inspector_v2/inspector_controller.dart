@@ -31,6 +31,7 @@ import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
 import '../inspector_shared/inspector_screen.dart';
@@ -731,29 +732,13 @@ class InspectorController extends DisposableController
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
       treeType,
+      // If implementation widgets are hidden, the only widgets in the tree are
+      // those that were created by the local project.
+      restrictToLocalProject: implementationWidgetsHidden.value,
     );
 
     try {
       final newSelection = await pendingSelectionFuture;
-
-      // Show an error and don't update the selected node in the tree if the
-      // user selected an implementation widget in the app while implementation
-      // widgets are hidden in the tree.
-      if (implementationWidgetsHidden.value && newSelection != null) {
-        final isInTree = valueToInspectorTreeNode.containsKey(
-          newSelection.valueRef,
-        );
-        final hasParent = newSelection.parent != null;
-        final isImplementationWidget = !isInTree && !hasParent;
-        if (isImplementationWidget) {
-          notificationService.pushError(
-            'Selected an implementation widget. Please toggle "Show Implementation Widgets" and select a widget from the device again.',
-            allowDuplicates: true,
-            isReportable: false,
-          );
-          return;
-        }
-      }
 
       if (_disposed || group.disposed) return;
 
@@ -762,6 +747,11 @@ class InspectorController extends DisposableController
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection);
+
+      await _maybeShowNotificationForSelectedNode(
+        selectedNode: newSelection,
+        group: group,
+      );
     } catch (error, st) {
       if (selectionGroups.next == group) {
         _log.shout(error, error, st);
@@ -816,6 +806,60 @@ class InspectorController extends DisposableController
     }
 
     animateTo(selectedNode.value);
+  }
+
+  static const _implementationWidgetMessage =
+      'Selected an implementation widget';
+
+  static const _notificationDuration = Duration(seconds: 4);
+
+  Future<void> _maybeShowNotificationForSelectedNode({
+    required RemoteDiagnosticsNode? selectedNode,
+    required ObjectGroup group,
+  }) async {
+    if (selectedNode == null ||
+        !implementationWidgetsHidden.value ||
+        _selectionIsOutOfDate(selectedNode)) {
+      return;
+    }
+
+    final possibleImplementationWidget = await group.getSelection(
+      selectedDiagnostic,
+      treeType,
+    );
+
+    // Return early if we have a new selected node.
+    if (_selectionIsOutOfDate(selectedNode)) return;
+
+    final isImplementationWidget =
+        possibleImplementationWidget != null &&
+        !possibleImplementationWidget.isCreatedByLocalProject;
+    if (isImplementationWidget) {
+      final selectedWidgetName = selectedNode.description ?? '';
+      final implementationWidgetName =
+          possibleImplementationWidget.description ?? '';
+
+      // Return early if we have a new selected node.
+      if (_selectionIsOutOfDate(selectedNode)) return;
+
+      // Show a notification that the user selected an implementation widget,
+      // e.g. "Selected an implementation widget of Text: RichText."
+      final messageDetails =
+          selectedWidgetName.isEmpty
+              ? ''
+              : ' of $selectedWidgetName${implementationWidgetName.isEmpty ? '' : ': $implementationWidgetName'}';
+      notificationService.pushNotification(
+        NotificationMessage(
+          '$_implementationWidgetMessage$messageDetails.',
+          duration: _notificationDuration,
+        ),
+        allowDuplicates: false,
+      );
+    }
+  }
+
+  bool _selectionIsOutOfDate(RemoteDiagnosticsNode selected) {
+    return selected.valueRef != selectedNode.value?.diagnostic?.valueRef;
   }
 
   Future<void> _loadPropertiesForNode(InspectorTreeNode? node) async {
@@ -959,7 +1003,13 @@ class InspectorController extends DisposableController
     }
   }
 
-  void selectionChanged() {
+  /// Handles updating the widget tree when the selecected widget changes.
+  ///
+  /// [notifyFlutterInspector] determines whether a request should be sent to
+  /// the Widget Inspector in the Flutter framework to update the on-device
+  /// selection. This should only be true if the the selection was changed due
+  /// to a user action in DevTools (e.g. clicking on a widget in the tree).
+  void selectionChanged({bool notifyFlutterInspector = false}) {
     if (!visibleToUser) {
       return;
     }
@@ -975,18 +1025,30 @@ class InspectorController extends DisposableController
       setSelectedNode(node);
       unawaited(_addNodeToConsole(node));
 
-      syncSelectionHelper(selection: selectedDiagnostic);
+      syncSelectionHelper(
+        selection: selectedDiagnostic,
+        notifyFlutterInspector: notifyFlutterInspector,
+      );
     }
   }
 
-  void syncSelectionHelper({required RemoteDiagnosticsNode? selection}) {
+  /// Syncs the selection state after a new widgets was selected.
+  ///
+  /// [notifyFlutterInspector] determines whether a request should be sent to
+  /// the Widget Inspector in the Flutter framework to update the on-device
+  /// selection. This should only be true if the the selection was changed due
+  /// to a user action in DevTools (e.g. clicking on a widget in the tree).
+  void syncSelectionHelper({
+    required RemoteDiagnosticsNode? selection,
+    bool notifyFlutterInspector = false,
+  }) {
     if (selection != null) {
       if (selection.isCreatedByLocalProject) {
         _navigateTo(selection);
       }
     }
 
-    if (selection != null) {
+    if (notifyFlutterInspector && selection != null) {
       unawaited(selection.setSelectionInspector(true));
     }
   }
