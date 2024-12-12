@@ -277,6 +277,77 @@ void main() {
     expect(find.richTextContaining('more widgets...'), findsNothing);
   });
 
+  // TODO(elliette): Expand into test group for cases when:
+  // - selected widget is implementation widget and implementation widgets are hidden (this test case)
+  // - selected widget is implementation widget and implementation widgets are visible
+  // - selected widget is not implementation widget and implementation widgets are hidden
+  // - selected widget is not implementation widget and implementation widgets are visible
+  testWidgetsWithWindowSize('selecting implementation widget', windowSize, (
+    WidgetTester tester,
+  ) async {
+    // Load the Inspector.
+    await _loadInspectorUI(tester);
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+    final state =
+        tester.state(find.byType(InspectorScreenBody))
+            as InspectorScreenBodyState;
+
+    // Find the first Text diagnostic node.
+    final diagnostics = state.controller.inspectorTree.rowsInTree.value.map(
+      (row) => row!.node.diagnostic,
+    );
+    final textDiagnostic =
+        diagnostics.firstWhere((d) => d?.description == 'Text')!;
+    expect(textDiagnostic.isCreatedByLocalProject, isTrue);
+
+    // Tap the "Show Implementation Widgets" button (selected by default).
+    final showImplementationWidgetsButton = find.descendant(
+      of: find.byType(DevToolsToggleButton),
+      matching: find.text('Show Implementation Widgets'),
+    );
+    expect(showImplementationWidgetsButton, findsOneWidget);
+    await tester.tap(showImplementationWidgetsButton);
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+    // Verify the Text diagnostic node is still in the tree.
+    final diagnosticsNow = state.controller.inspectorTree.rowsInTree.value.map(
+      (row) => row!.node.diagnostic,
+    );
+    expect(
+      diagnosticsNow.any((d) => d?.valueRef == textDiagnostic.valueRef),
+      isTrue,
+    );
+
+    // Get the RichText child of the Text diagnostic node.
+    final service = serviceConnection.inspectorService as InspectorService;
+    final group = service.createObjectGroup('test-group');
+    final textSubtree = await group.getDetailsSubtree(textDiagnostic);
+    final richTextDiagnostic = (await textSubtree!.children)!.firstWhere(
+      (child) => child.description == 'RichText',
+    );
+
+    // Verify the RichText child is an implementation node that is not in the tree.
+    expect(richTextDiagnostic.isCreatedByLocalProject, isFalse);
+    expect(
+      diagnosticsNow.any((d) => d?.valueRef == richTextDiagnostic.valueRef),
+      isFalse,
+    );
+
+    // Mimic selecting the RichText diagnostic node with the on-device inspector.
+    await group.setSelectionInspector(richTextDiagnostic.valueRef, false);
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+    // Verify the Text node is now selected.
+    final selectedNode = state.controller.selectedNode.value;
+    expect(selectedNode!.diagnostic!.valueRef, equals(textDiagnostic.valueRef));
+
+    // Verify the notification about selecting an implementation widget is displayed.
+    expect(
+      find.text('Selected an implementation widget of Text.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgetsWithWindowSize('can revert to legacy inspector', windowSize, (
     WidgetTester tester,
   ) async {
