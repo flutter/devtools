@@ -204,7 +204,7 @@ command palette (`F1`)) and add the following to your settings:
 	},
 	"args": [
 		// Arguments that will be passed along to the `dt serve` command.
-	],
+    ],
 },
 ```
 
