@@ -488,7 +488,7 @@ remove_licenses:
   - |-
     // This is some multiline license text to
     // remove that does not contain a stored value.
-# sequence of license text strings that should be added to the top of a file. {value} will be replaced.
+# sequence of license text strings that should be added to the top of a file. <value> will be replaced.
 add_licenses: 
   - |-
     // This is some <value> multiline license
