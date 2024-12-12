@@ -1036,10 +1036,8 @@ class ObjectGroup extends InspectorObjectGroupBase {
     switch (treeType) {
       case FlutterTreeType.widget:
         newSelection = await invokeServiceMethodReturningNodeInspectorRef(
-          isSummaryTree
+          isSummaryTree || createdByLocalProjectOnly
               ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
-              : createdByLocalProjectOnly
-              ? WidgetInspectorServiceExtensions.getSelectedLocalWidget.name
               : WidgetInspectorServiceExtensions.getSelectedWidget.name,
           null,
         );
