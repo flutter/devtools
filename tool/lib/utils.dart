@@ -177,11 +177,11 @@ String pathFromRepoRoot(String pathFromRoot) {
 /// Returns the name of the git remote with id [remoteId] in
 /// [workingDirectory].
 ///
-/// When [workingDirectory] is null, this method will look for the remote in
+/// When [workingDirectory] is `null`, this method will look for the remote in
 /// the current directory.
 ///
-/// [remoteId] should have the form <organization>/<repository>.git. For
-/// example: 'flutter/flutter.git' or 'flutter/devtools.git'.
+/// [remoteId] should have the form `<organization>/<repository>.git`.
+/// For example: `'flutter/flutter.git'` or `'flutter/devtools.git'`.
 Future<String> findRemote(
   ProcessManager processManager, {
   required String remoteId,

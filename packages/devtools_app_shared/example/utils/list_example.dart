@@ -15,7 +15,7 @@ void main() {
 /// A [ListValueNotifier] will holds a list object, and will notify listeners
 /// on modifications to the list.
 ///
-/// This should be used in place of ValueNotifier<List<Object>> when list
+/// This should be used in place of `ValueNotifier<List<Object>>` when list
 /// updates should notify listeners, and not just changing the notifier's value
 /// with a new list.
 void useListValueNotifier() {

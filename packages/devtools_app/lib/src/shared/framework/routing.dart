@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import '../../framework/framework_core.dart';
 import '../globals.dart';
 import '../primitives/query_parameters.dart';
-import '../primitives/utils.dart';
 
 const homeScreenId = '';
 const snapshotScreenId = 'snapshot';
@@ -32,7 +31,7 @@ class DevToolsRouteConfiguration {
 /// in the address bar/state objects).
 class DevToolsRouteInformationParser
     extends RouteInformationParser<DevToolsRouteConfiguration> {
-  DevToolsRouteInformationParser();
+  DevToolsRouteInformationParser() : _testQueryParams = null;
 
   @visibleForTesting
   DevToolsRouteInformationParser.test(this._testQueryParams);
@@ -41,7 +40,7 @@ class DevToolsRouteInformationParser
   ///
   /// This is to be used in a testing environment only and can be set via the
   /// [DevToolsRouteInformationParser.test] constructor.
-  DevToolsQueryParams? _testQueryParams;
+  final DevToolsQueryParams? _testQueryParams;
 
   @override
   Future<DevToolsRouteConfiguration> parseRouteInformation(
@@ -49,7 +48,7 @@ class DevToolsRouteInformationParser
   ) async {
     var uri = routeInformation.uri;
     if (_testQueryParams != null) {
-      uri = uri.copyWith(queryParameters: _testQueryParams!.params);
+      uri = uri.replace(queryParameters: _testQueryParams.params);
     }
 
     // routeInformation.path comes from the address bar and (when not empty) is

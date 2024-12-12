@@ -446,16 +446,23 @@ class InspectorController extends DisposableController
   }
 
   bool _receivedIsolateReloadEvent = false;
+  bool _receivedFlutterNavigationEvent = false;
 
   Future<void> _maybeAutoRefreshInspector(Event event) async {
     if (!preferences.inspector.autoRefreshEnabled.value) return;
 
-    // It is not sufficent to wait for the isolate reload event, because Flutter
-    // might not have re-painted the app. Instead, we need to wait for the first
-    // frame AFTER the isolate reload event in order to request the new tree.
+    // It is not sufficent to wait for the navigation and isolate reload events
+    // only, because Flutter might not have re-painted the app. Instead, we need
+    // to wait for the first frame AFTER the isolate reload or navigation event
+    // in order to request the new tree.
     if (event.kind == EventKind.kExtension) {
-      if (!_receivedIsolateReloadEvent) return;
-      if (event.extensionKind == 'Flutter.Frame') {
+      final extensionEventKind = event.extensionKind;
+      if (extensionEventKind == 'Flutter.Navigation') {
+        _receivedFlutterNavigationEvent = true;
+      }
+      if ((_receivedFlutterNavigationEvent || _receivedIsolateReloadEvent) &&
+          extensionEventKind == 'Flutter.Frame') {
+        _receivedFlutterNavigationEvent = false;
         _receivedIsolateReloadEvent = false;
         await refreshInspector();
       }

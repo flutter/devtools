@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 
 import '../../shared/diagnostics/diagnostics_node.dart';
-import '../../shared/primitives/enum_utils.dart';
 import '../../shared/primitives/math_utils.dart';
 import '../../shared/primitives/utils.dart';
 import 'layout_explorer/flex/utils.dart';
@@ -367,21 +366,19 @@ class FlexLayoutProperties extends LayoutProperties {
 
     return FlexLayoutProperties._fromNode(
       node,
-      direction: _directionUtils.enumEntry(data['direction']) ?? Axis.vertical,
-      mainAxisAlignment: _mainAxisAlignmentUtils.enumEntry(
-        data['mainAxisAlignment'],
-      ),
-      mainAxisSize: _mainAxisSizeUtils.enumEntry(data['mainAxisSize']),
-      crossAxisAlignment: _crossAxisAlignmentUtils.enumEntry(
-        data['crossAxisAlignment'],
-      ),
+      direction: _directionNamesToValues[data['direction']] ?? Axis.vertical,
+      mainAxisAlignment:
+          _mainAxisAlignmentNamesToValues[data['mainAxisAlignment']],
+      mainAxisSize: _mainAxisSizeNamesToValues[data['mainAxisSize']],
+      crossAxisAlignment:
+          _crossAxisAlignmentNamesToValues[data['crossAxisAlignment']],
       textDirection:
-          _textDirectionUtils.enumEntry(data['textDirection']) ??
+          _textDirectionNamesToValues[data['textDirection']] ??
           TextDirection.ltr,
       verticalDirection:
-          _verticalDirectionUtils.enumEntry(data['verticalDirection']) ??
+          _verticalDirectionNamesToValues[data['verticalDirection']] ??
           VerticalDirection.down,
-      textBaseline: _textBaselineUtils.enumEntry(data['textBaseline']),
+      textBaseline: _textBaselineNamesToValues[data['textBaseline']],
     );
   }
 
@@ -722,25 +719,16 @@ class FlexLayoutProperties extends LayoutProperties {
     return spaces;
   }
 
-  static final _directionUtils = EnumUtils<Axis>(Axis.values);
-  static final _mainAxisAlignmentUtils = EnumUtils<MainAxisAlignment>(
-    MainAxisAlignment.values,
-  );
-  static final _mainAxisSizeUtils = EnumUtils<MainAxisSize>(
-    MainAxisSize.values,
-  );
-  static final _crossAxisAlignmentUtils = EnumUtils<CrossAxisAlignment>(
-    CrossAxisAlignment.values,
-  );
-  static final _textDirectionUtils = EnumUtils<TextDirection>(
-    TextDirection.values,
-  );
-  static final _verticalDirectionUtils = EnumUtils<VerticalDirection>(
-    VerticalDirection.values,
-  );
-  static final _textBaselineUtils = EnumUtils<TextBaseline>(
-    TextBaseline.values,
-  );
+  static final _directionNamesToValues = Axis.values.asNameMap();
+  static final _mainAxisAlignmentNamesToValues =
+      MainAxisAlignment.values.asNameMap();
+  static final _mainAxisSizeNamesToValues = MainAxisSize.values.asNameMap();
+  static final _crossAxisAlignmentNamesToValues =
+      CrossAxisAlignment.values.asNameMap();
+  static final _textDirectionNamesToValues = TextDirection.values.asNameMap();
+  static final _verticalDirectionNamesToValues =
+      VerticalDirection.values.asNameMap();
+  static final _textBaselineNamesToValues = TextBaseline.values.asNameMap();
 }
 
 /// RenderProperties contains information for rendering a [LayoutProperties] node

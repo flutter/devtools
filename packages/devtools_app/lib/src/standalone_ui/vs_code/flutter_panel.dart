@@ -142,6 +142,9 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
             case ThemeChangedEvent():
             // Do nothing; this is handled in
             // lib/src/framework/theme_manager.dart.
+            case ActiveLocationChangedEvent():
+            // Do nothing; this is handled in
+            // lib/src/standalone_ui/ide_shared/property_editor.
           }
         });
       }),

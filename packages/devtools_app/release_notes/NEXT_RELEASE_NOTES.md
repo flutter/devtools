@@ -14,6 +14,7 @@ To learn more about DevTools, check out the
 [#8456](https://github.com/flutter/devtools/pull/8456)
 [#8470](https://github.com/flutter/devtools/pull/8470)
 * Tables match IDE theme when embedded in an IDE. - [#8498](https://github.com/flutter/devtools/pull/8498)
+* View licenses added to about dialog. - [8610](https://github.com/flutter/devtools/pull/8610)
 
 ## Inspector updates
 
