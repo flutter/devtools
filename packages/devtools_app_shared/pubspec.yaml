@@ -21,7 +21,7 @@ dependencies:
   path: ^1.8.0
   pointer_interceptor: ^0.10.1+1
   url_launcher: ^6.1.0
-  vm_service: ^14.2.1
+  vm_service: ^15.0.0
   web: ^1.0.0
 
 dev_dependencies:

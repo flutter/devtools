@@ -1,6 +1,7 @@
 ## 0.3.0-dev.1
 * Bump `devtools_app_shared` dependency to `0.3.0`.
 * Bump `devtools_shared` dependency to `11.1.0`.
+* Bump `vm_service` dependency to `^15.0.0`.
 * Clarify VS Code configuration in `README.md`.
 * Add "Supported Flutter versions" policy to the README.
 
