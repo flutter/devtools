@@ -211,9 +211,9 @@ class PreferencesController extends DisposableController
       return;
     }
 
-    // Whether DevTools was run using the `dt serve --run-app` command, which
-    // runs DevTools in debug mode using `flutter run` and connects it to an
-    // instance of the DevTools server.
+    // Whether DevTools was run using the `dt run` command, which runs DevTools
+    // using `flutter run` and connects it to a locally running instance of the
+    // DevTools server.
     final usingDebugDevToolsServer =
         (const String.fromEnvironment('debug_devtools_server')).isNotEmpty &&
         !kReleaseMode;

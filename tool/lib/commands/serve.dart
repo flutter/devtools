@@ -32,16 +32,17 @@ const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 /// to this command. All of the following commands are passed along to the
 /// `dt build` command.
 ///
-/// If the [runAppFlag] argument is passed (e.g. --run-app), then DevTools will
-/// be run with `flutter run `instead of being built with `flutter build web`.
-/// The debug instance of DevTools app running from Flutter Tool will be
+/// If the [SharedCommandArgs.runApp] argument is passed (e.g. --run-app), then
+/// DevTools will be run with `flutter run `instead of being built with
+/// `flutter build web`. The DevTools web app running from Flutter Tool will be
 /// connected to a locally running instance of the DevTools server.
 ///
-/// If the [_debugServerFlag] argument is present, the DevTools server will be
-/// started with the `--observe` flag. This will allow you to debug and profile
-/// the server with a local VM service connection. By default, this will set
-/// `--pause-isolates-on-start` and `--pause-isolates-on-unhandled-exceptions`
-/// for the DevTools server VM service connection.
+/// If the [SharedCommandArgs.debugServer] argument is present, the DevTools
+/// server will be started with the `--observe` flag. This will allow you to
+/// debug and profile the server with a local VM service connection. By default,
+/// this will set `--pause-isolates-on-start` and
+/// `--pause-isolates-on-unhandled-exceptions` for the DevTools server VM
+/// service connection.
 ///
 /// If the [SharedCommandArgs.useFlutterFromPath] argument is present, the
 /// Flutter SDK will not be updated to the latest Flutter candidate before
@@ -227,6 +228,7 @@ class ServeCommand extends Command {
       'serve_local.dart',
     );
 
+    // The address of the locally running DevTools server.
     String? devToolsServerAddress;
 
     // This call will not exit until explicitly terminated by the user.

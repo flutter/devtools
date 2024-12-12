@@ -47,9 +47,8 @@ String get devToolsServerUriAsString {
     _debugDevToolsServerFlag,
   );
   // Ensure we only use the debug DevTools server URI in non-release
-  // builds. By running `dt serve --run-app`, an instance of DevTools ran
-  // with `flutter run` can be connected to the DevTools server on a
-  // different port.
+  // builds. By running `dt run`, an instance of DevTools run with `flutter run`
+  // can be connected to the DevTools server on a different port.
   return debugDevToolsServerUriAsString.isNotEmpty && !kReleaseMode
       ? debugDevToolsServerUriAsString
       : Uri.base.toString();
