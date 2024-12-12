@@ -14,10 +14,6 @@ import 'package:path/path.dart' as path;
 import 'shared.dart';
 
 const _buildAppFlag = 'build-app';
-// TODO(kenz): consider adding a `dt run` command to simplify the dev workflow
-// and reduce the cognitive load of remembering the args to pass to `dt serve`.
-const _runAppFlag = 'run-app';
-const _debugServerFlag = 'debug-server';
 
 // TODO(https://github.com/flutter/devtools/issues/7232): Consider using
 // AllowAnythingParser instead of manually passing these args through.
@@ -36,7 +32,7 @@ const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 /// to this command. All of the following commands are passed along to the
 /// `dt build` command.
 ///
-/// If the [_runAppFlag] argument is passed (e.g. --run-app), then DevTools will
+/// If the [runAppFlag] argument is passed (e.g. --run-app), then DevTools will
 /// be run with `flutter run `instead of being built with `flutter build web`.
 /// The debug instance of DevTools app running from Flutter Tool will be
 /// connected to a locally running instance of the DevTools server.
@@ -47,24 +43,24 @@ const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 /// `--pause-isolates-on-start` and `--pause-isolates-on-unhandled-exceptions`
 /// for the DevTools server VM service connection.
 ///
-/// If the [BuildCommandArgs.useFlutterFromPath] argument is present, the
+/// If the [SharedCommandArgs.useFlutterFromPath] argument is present, the
 /// Flutter SDK will not be updated to the latest Flutter candidate before
 /// building DevTools. Use this flag to save the cost of updating the Flutter
 /// SDK when you already have the proper SDK checked out. This is helpful when
 /// developing with the DevTools server.
 ///
-/// If the [BuildCommandArgs.updatePerfetto] argument is present, the
+/// If the [SharedCommandArgs.updatePerfetto] argument is present, the
 /// precompiled bits for Perfetto will be updated from the
 /// `dt update-perfetto` command as part of the DevTools build
 /// process.
 ///
-/// If [BuildCommandArgs.pubGet] argument is negated (e.g. --no-pub-get), then
+/// If [SharedCommandArgs.pubGet] argument is negated (e.g. --no-pub-get), then
 /// `dt pub-get --only-main` command will not be run before building
 /// the DevTools web app. Use this flag to save the cost of updating pub
 /// packages if your pub cahce does not need to be updated. This is helpful when
 /// developing with the DevTools server.
 ///
-/// The [BuildCommandArgs.buildMode] argument specifies the Flutter build mode
+/// The [SharedCommandArgs.buildMode] argument specifies the Flutter build mode
 /// that the DevTools web app will be built in ('release', 'profile', 'debug').
 /// This defaults to 'release' if unspecified.
 class ServeCommand extends Command {
@@ -80,7 +76,7 @@ class ServeCommand extends Command {
             ' devtools_app/build/web will be used.',
       )
       ..addFlag(
-        _runAppFlag,
+        SharedCommandArgs.runApp.flagName,
         negatable: false,
         defaultsTo: false,
         help:
@@ -88,12 +84,7 @@ class ServeCommand extends Command {
             ' of building it using `flutter build web` and serving the assets'
             ' directly from the DevTools server.',
       )
-      ..addFlag(
-        _debugServerFlag,
-        negatable: false,
-        defaultsTo: false,
-        help: 'Enable debugging for the DevTools server.',
-      )
+      ..addDebugServerFlag()
       ..addUpdateFlutterFlag()
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
@@ -143,35 +134,36 @@ class ServeCommand extends Command {
 
     final results = argResults!;
     final buildApp = results[_buildAppFlag] as bool;
-    final runApp = results[_runAppFlag] as bool;
-    final debugServer = results[_debugServerFlag] as bool;
+    final runApp = results[SharedCommandArgs.runApp.flagName] as bool;
+    final debugServer = results[SharedCommandArgs.debugServer.flagName] as bool;
     final updateFlutter =
-        results[BuildCommandArgs.updateFlutter.flagName] as bool;
+        results[SharedCommandArgs.updateFlutter.flagName] as bool;
     final updatePerfetto =
-        results[BuildCommandArgs.updatePerfetto.flagName] as bool;
-    final useWasm = results[BuildCommandArgs.wasm.flagName] as bool;
-    final noStripWasm = results[BuildCommandArgs.noStripWasm.flagName] as bool;
-    final runPubGet = results[BuildCommandArgs.pubGet.flagName] as bool;
+        results[SharedCommandArgs.updatePerfetto.flagName] as bool;
+    final useWasm = results[SharedCommandArgs.wasm.flagName] as bool;
+    final noStripWasm = results[SharedCommandArgs.noStripWasm.flagName] as bool;
+    final runPubGet = results[SharedCommandArgs.pubGet.flagName] as bool;
     final devToolsAppBuildMode =
-        results[BuildCommandArgs.buildMode.flagName] as String;
+        results[SharedCommandArgs.buildMode.flagName] as String;
     final serveWithDartSdk = results[_serveWithDartSdkFlag] as String?;
 
     // Any flag that we aren't removing here is intended to be passed through.
     final remainingArguments =
         List.of(results.arguments)
-          ..remove(BuildCommandArgs.updateFlutter.asArg())
-          ..remove(BuildCommandArgs.updateFlutter.asArg(negated: true))
-          ..remove(BuildCommandArgs.updatePerfetto.asArg())
-          ..remove(BuildCommandArgs.wasm.asArg())
-          ..remove(BuildCommandArgs.noStripWasm.asArg())
+          ..remove(SharedCommandArgs.updateFlutter.asArg())
+          ..remove(SharedCommandArgs.updateFlutter.asArg(negated: true))
+          ..remove(SharedCommandArgs.updatePerfetto.asArg())
+          ..remove(SharedCommandArgs.wasm.asArg())
+          ..remove(SharedCommandArgs.noStripWasm.asArg())
           ..remove(valueAsArg(_buildAppFlag))
           ..remove(valueAsArg(_buildAppFlag, negated: true))
-          ..remove(valueAsArg(_runAppFlag))
-          ..remove(valueAsArg(_debugServerFlag))
-          ..remove(BuildCommandArgs.pubGet.asArg())
-          ..remove(BuildCommandArgs.pubGet.asArg(negated: true))
+          ..remove(SharedCommandArgs.runApp.asArg())
+          ..remove(SharedCommandArgs.debugServer.asArg())
+          ..remove(SharedCommandArgs.pubGet.asArg())
+          ..remove(SharedCommandArgs.pubGet.asArg(negated: true))
           ..removeWhere(
-            (element) => element.startsWith(BuildCommandArgs.buildMode.asArg()),
+            (element) =>
+                element.startsWith(SharedCommandArgs.buildMode.asArg()),
           )
           ..removeWhere(
             (element) => element.startsWith(valueAsArg(_serveWithDartSdkFlag)),
@@ -206,12 +198,12 @@ class ServeCommand extends Command {
       final process = await processManager.runProcess(
         CliCommand.tool([
           'build',
-          BuildCommandArgs.updateFlutter.asArg(negated: !updateFlutter),
-          if (updatePerfetto) BuildCommandArgs.updatePerfetto.asArg(),
-          if (useWasm) BuildCommandArgs.wasm.asArg(),
-          if (noStripWasm) BuildCommandArgs.noStripWasm.asArg(),
-          '${BuildCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode',
-          BuildCommandArgs.pubGet.asArg(negated: !runPubGet),
+          SharedCommandArgs.updateFlutter.asArg(negated: !updateFlutter),
+          if (updatePerfetto) SharedCommandArgs.updatePerfetto.asArg(),
+          if (useWasm) SharedCommandArgs.wasm.asArg(),
+          if (noStripWasm) SharedCommandArgs.noStripWasm.asArg(),
+          '${SharedCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode',
+          SharedCommandArgs.pubGet.asArg(negated: !runPubGet),
         ]),
       );
       if (process.exitCode == 1) {
@@ -286,6 +278,7 @@ class ServeCommand extends Command {
           'run',
           '-d',
           'chrome',
+          if (devToolsAppBuildMode == 'profile') '--profile',
           // TODO(https://github.com/flutter/flutter/issues/160130):
           //  [flutterRunProcess] exits without the --verbose flag.
           '--verbose',

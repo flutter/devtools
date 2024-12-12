@@ -12,20 +12,21 @@ extension CommandExtension on Command {
 }
 
 extension BuildCommandArgsExtension on ArgParser {
-  void addBulidModeOption() {
+  void addBulidModeOption({
+    List<String> allowed = const ['debug', 'profile', 'release'],
+    String defaultsTo = 'release',
+  }) {
     addOption(
-      BuildCommandArgs.buildMode.flagName,
-      allowed: ['debug', 'profile', 'release'],
-      defaultsTo: 'release',
-      help:
-          'The build mode to use for the DevTools web app. This should only'
-          ' be "debug" or "profile" for the purpose of local development.',
+      SharedCommandArgs.buildMode.flagName,
+      allowed: allowed,
+      defaultsTo: defaultsTo,
+      help: 'The build mode to use for the DevTools web app.',
     );
   }
 
   void addPubGetFlag() {
     addFlag(
-      BuildCommandArgs.pubGet.flagName,
+      SharedCommandArgs.pubGet.flagName,
       negatable: true,
       defaultsTo: true,
       help:
@@ -36,7 +37,7 @@ extension BuildCommandArgsExtension on ArgParser {
 
   void addUpdatePerfettoFlag() {
     addFlag(
-      BuildCommandArgs.updatePerfetto.flagName,
+      SharedCommandArgs.updatePerfetto.flagName,
       negatable: false,
       defaultsTo: false,
       help: 'Whether to update the Perfetto assets before building DevTools.',
@@ -45,7 +46,7 @@ extension BuildCommandArgsExtension on ArgParser {
 
   void addUpdateFlutterFlag() {
     addFlag(
-      BuildCommandArgs.updateFlutter.flagName,
+      SharedCommandArgs.updateFlutter.flagName,
       negatable: true,
       defaultsTo: true,
       help:
@@ -56,7 +57,7 @@ extension BuildCommandArgsExtension on ArgParser {
 
   void addWasmFlag() {
     addFlag(
-      BuildCommandArgs.wasm.flagName,
+      SharedCommandArgs.wasm.flagName,
       defaultsTo: true,
       negatable: true,
       help: 'Whether to build DevTools with dart2wasm instead of dart2js.',
@@ -65,7 +66,7 @@ extension BuildCommandArgsExtension on ArgParser {
 
   void addNoStripWasmFlag() {
     addFlag(
-      BuildCommandArgs.noStripWasm.flagName,
+      SharedCommandArgs.noStripWasm.flagName,
       defaultsTo: false,
       help:
           'When this flag is present, static symbol names will be included in '
@@ -73,17 +74,28 @@ extension BuildCommandArgsExtension on ArgParser {
           'not present.',
     );
   }
+
+  void addDebugServerFlag() {
+    addFlag(
+      SharedCommandArgs.debugServer.flagName,
+      negatable: false,
+      defaultsTo: false,
+      help: 'Enable debugging for the DevTools server.',
+    );
+  }
 }
 
-enum BuildCommandArgs {
+enum SharedCommandArgs {
   buildMode('build-mode'),
+  debugServer('debug-server'),
   pubGet('pub-get'),
   wasm('wasm'),
   noStripWasm('no-strip-wasm'),
+  runApp('run-app'),
   updateFlutter('update-flutter'),
   updatePerfetto('update-perfetto');
 
-  const BuildCommandArgs(this.flagName);
+  const SharedCommandArgs(this.flagName);
 
   final String flagName;
 
