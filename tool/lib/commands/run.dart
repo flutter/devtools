@@ -8,6 +8,11 @@ import 'package:io/io.dart';
 
 import '../utils.dart';
 
+/// Runs the DevTools web app in debug mode with `flutter run` and connects it
+/// to a locally running instance of the DevTools server.
+/// 
+/// To open a debug connection to the DevTools server, pass the `--debug-server`
+/// flag to this command.
 class RunCommand extends Command {
   RunCommand() {
     argParser.addDebugServerFlag();
