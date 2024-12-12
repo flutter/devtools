@@ -33,7 +33,7 @@ const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 /// `dt build` command.
 ///
 /// If the [SharedCommandArgs.runApp] argument is passed (e.g. --run-app), then
-/// DevTools will be run with `flutter run `instead of being built with
+/// DevTools will be run with `flutter run` instead of being built with
 /// `flutter build web`. The DevTools web app running from Flutter Tool will be
 /// connected to a locally running instance of the DevTools server.
 ///
