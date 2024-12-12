@@ -286,7 +286,7 @@ class ServeCommand extends Command {
           'run',
           '-d',
           'chrome',
-          // TODO(ft-issue):
+          // TODO(https://github.com/flutter/flutter/issues/160130):
           //  [flutterRunProcess] exits without the --verbose flag.
           '--verbose',
           // Add the trailing slash because this is what DevTools app expects.
