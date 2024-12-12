@@ -727,7 +727,7 @@ class InspectorController extends DisposableController
       treeType,
       // If implementation widgets are hidden, the only widgets in the tree are
       // those that were created by the local project.
-      createdByLocalProjectOnly: implementationWidgetsHidden.value,
+      inLocalProject: implementationWidgetsHidden.value,
     );
 
     try {
