@@ -126,7 +126,7 @@ class LicenseConfig {
     print(ext);
     final fileType = fileTypes[_removeDotFromExtension(ext)];
     if (fileType != Null) {
-      return fileType!['remove'] as YamlList;
+      return fileType['remove'] as YamlList;
     }
     return YamlList();
   }
