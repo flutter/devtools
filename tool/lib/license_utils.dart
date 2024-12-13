@@ -123,7 +123,6 @@ class LicenseConfig {
   /// Returns the list of indices for the given [ext] of [removeLicenses]
   /// containing the license text to remove if they exist or an empty YamlList.
   YamlList getRemoveIndicesForExtension(String ext) {
-    print(ext);
     final fileType = fileTypes[_removeDotFromExtension(ext)];
     if (fileType != null) {
       return fileType['remove'] as YamlList;
