@@ -35,9 +35,7 @@ void main() {
   setUpAll(() {
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
-  });
 
-  setUpAll(() {
     mockEditorClient = MockEditorClient();
     when(
       mockEditorClient.activeLocationChangedStream,
@@ -48,22 +46,30 @@ void main() {
   });
 
   group('on cursor location change', () {
-    Future<void> Function()? listener;
+    void Function()? listener;
 
-    void waitForEditableArgs(
-      List<EditableArgument> args, {
-      required Future then,
-    }) {
-      listener = () async {
-        final current =
-            controller.editableArgs.value.map((arg) => arg.name).toList();
-        final expected = args.map((arg) => arg.name).toList();
-
-        if (collectionEquals(current, expected, ordered: false)) {
-          await then;
-        }
+    Future<List<EditableArgument>> waitForEditableArgs() {
+      final argsCompleter = Completer<List<EditableArgument>>();
+      listener = () {
+        argsCompleter.complete(controller.editableArgs.value);
       };
       controller.editableArgs.addListener(listener!);
+      return argsCompleter.future;
+    }
+
+    void verifyEditableArgs({
+      required List<EditableArgument> actual,
+      required List<EditableArgument> expected,
+    }) {
+      final actualArgNames = actual.map((arg) => arg.name).toList();
+      final expectedArgNames = expected.map((arg) => arg.name).toList();
+
+      expect(
+        collectionEquals(actualArgNames, expectedArgNames),
+        isTrue,
+        reason:
+            'Expected ${expectedArgNames.join(', ')} not ${actualArgNames.join(', ')}',
+      );
     }
 
     setUp(() {
@@ -85,65 +91,121 @@ void main() {
       }
     });
 
-    testWidgets('properties match args for first cursor location', (
+    testWidgets('verify editable arguments for first cursor location', (
       tester,
     ) async {
-      // Wait for expected editable arguments and inputs:
-      waitForEditableArgs(
-        result1.args,
-        then: tester.runAsync(() async {
-          expect(_findNoPropertiesMessage, findsNothing);
-          expect(_findTextFormField('title'), findsOneWidget);
-          expect(_findTextFormField('width'), findsOneWidget);
-          expect(_findTextFormField('height'), findsOneWidget);
-        }),
-      );
+      await tester.runAsync(() async {
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+        final editableArgsFuture = waitForEditableArgs();
 
-      // Load property editor then send an active location changed event:
-      await tester.pumpWidget(wrap(propertyEditor));
-      eventController.add(activeLocationChangedEvent1);
+        // Send an active location changed event.
+        eventController.add(activeLocationChangedEvent1);
+
+        // Wait for the expected editable args.
+        final editableArgs = await editableArgsFuture;
+        verifyEditableArgs(actual: editableArgs, expected: result1.args);
+      });
     });
 
-    testWidgets('properties match args for second cursor location', (
+    testWidgets('verify editable arguments for second cursor location', (
       tester,
     ) async {
-      // Wait for expected editable arguments and inputs:
-      waitForEditableArgs(
-        result2.args,
-        then: tester.runAsync(() async {
-          expect(_findNoPropertiesMessage, findsNothing);
-          final softWrapInput = _findDropdownButtonFormField('softWrap');
-          expect(softWrapInput, findsOneWidget);
-          await _verifyDropdownMenuItems(
-            softWrapInput,
-            menuOptions: ['true', 'false'],
-            selectedOption: 'true',
-            tester: tester,
-          );
-          final alignInput = _findDropdownButtonFormField('align');
-          expect(alignInput, findsOneWidget);
-          await _verifyDropdownMenuItems(
-            alignInput,
-            menuOptions: [
-              'Alignment.bottomCenter',
-              'Alignment.bottomLeft',
-              'Alignment.bottomRight',
-              'Alignment.center',
-              'Alignment.centerLeft',
-              'Alignment.centerRight',
-              'Alignment.topCenter',
-              'Alignment.topLeft',
-              'Alignment.topRight',
-            ],
-            selectedOption: 'Alignment.center',
-            tester: tester,
-          );
-        }),
-      );
+      await tester.runAsync(() async {
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+        final editableArgsFuture = waitForEditableArgs();
 
-      // Load property editor then send an active location changed event:
+        // Send an active location changed event.
+        eventController.add(activeLocationChangedEvent2);
+
+        // Wait for the expected editable args.
+        final editableArgs = await editableArgsFuture;
+        verifyEditableArgs(actual: editableArgs, expected: result2.args);
+      });
+    });
+  });
+
+  group('inputs for editable arguments', () {
+    testWidgets('inputs are expected for first group of editable arguments', (
+      tester,
+    ) async {
+      // Load the property editor.
       await tester.pumpWidget(wrap(propertyEditor));
-      eventController.add(activeLocationChangedEvent2);
+
+      // Change the editable args.
+      controller.updateEditableArgs(result1.args);
+      await tester.pumpAndSettle();
+
+      // Verify the inputs are expected.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(_findTextFormField('title'), findsOneWidget);
+      expect(_findTextFormField('width'), findsOneWidget);
+      expect(_findTextFormField('height'), findsOneWidget);
+    });
+
+    testWidgets('inputs are expected for second group of editable arguments', (
+      tester,
+    ) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.updateEditableArgs(result2.args);
+      await tester.pumpAndSettle();
+
+      // Verify the inputs are expected.
+      expect(_findNoPropertiesMessage, findsNothing);
+      final softWrapInput = _findDropdownButtonFormField('softWrap');
+      expect(softWrapInput, findsOneWidget);
+      final alignInput = _findDropdownButtonFormField('align');
+      expect(alignInput, findsOneWidget);
+    });
+
+    testWidgets('softWrap input has expected options', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.updateEditableArgs(result2.args);
+      await tester.pumpAndSettle();
+
+      // Verify the input options are expected.
+      final softWrapInput = _findDropdownButtonFormField('softWrap');
+      await _verifyDropdownMenuItems(
+        softWrapInput,
+        menuOptions: ['true', 'false'],
+        selectedOption: 'true',
+        tester: tester,
+      );
+    });
+
+    testWidgets('align input has expected options', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.updateEditableArgs(result2.args);
+      await tester.pumpAndSettle();
+
+      // Verify the input options are expected.
+      final alignInput = _findDropdownButtonFormField('align');
+      await _verifyDropdownMenuItems(
+        alignInput,
+        menuOptions: [
+          'Alignment.bottomCenter',
+          'Alignment.bottomLeft',
+          'Alignment.bottomRight',
+          'Alignment.center',
+          'Alignment.centerLeft',
+          'Alignment.centerRight',
+          'Alignment.topCenter',
+          'Alignment.topLeft',
+          'Alignment.topRight',
+        ],
+        selectedOption: 'Alignment.center',
+        tester: tester,
+      );
     });
   });
 }
