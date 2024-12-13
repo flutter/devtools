@@ -638,7 +638,7 @@ class InspectorController extends DisposableController
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
       treeType,
-      isSummaryTree: isSummaryTree,
+      restrictToLocalProject: isSummaryTree,
     );
 
     final pendingDetailsFuture =

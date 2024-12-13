@@ -193,7 +193,10 @@ class InspectorTreeController extends DisposableController
     }
   }
 
-  bool setSelectedNode(InspectorTreeNode? node) {
+  bool setSelectedNode(
+    InspectorTreeNode? node, {
+    bool notifyFlutterInspector = false,
+  }) {
     if (node == _selection) return false;
 
     _selection?.selected = false;
@@ -201,7 +204,9 @@ class InspectorTreeController extends DisposableController
     _selection?.selected = true;
     final configLocal = config;
     if (configLocal.onSelectionChange != null) {
-      configLocal.onSelectionChange!();
+      configLocal.onSelectionChange!(
+        notifyFlutterInspector: notifyFlutterInspector,
+      );
     }
     return true;
   }
@@ -547,7 +552,7 @@ class InspectorTreeController extends DisposableController
   }
 
   void onSelectNode(InspectorTreeNode? node) {
-    setSelectedNode(node);
+    setSelectedNode(node, notifyFlutterInspector: true);
     ga.select(gac.inspector, gac.treeNodeSelection);
     final diagnostic = node?.diagnostic;
     if (diagnostic != null && diagnostic.groupIsHidden) {
