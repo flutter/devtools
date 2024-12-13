@@ -22,21 +22,6 @@ class PropertyEditorController extends DisposableController
   ValueListenable<List<EditableArgument>> get editableArgs => _editableArgs;
   final _editableArgs = ValueNotifier<List<EditableArgument>>([]);
 
-  @visibleForTesting
-  void updateEditableArgs(List<EditableArgument> args) {
-    _editableArgs.value = args;
-  }
-
-  @visibleForTesting
-  set currentDocument(TextDocument document) {
-    _currentDocument = document;
-  }
-
-  @visibleForTesting
-  set currentPosition(CursorPosition position) {
-    _currentCursorPosition = position;
-  }
-
   void _init() {
     autoDisposeStreamSubscription(
       editorClient.activeLocationChangedStream.listen((event) async {
@@ -55,7 +40,7 @@ class PropertyEditorController extends DisposableController
           position: cursorPosition,
         );
         final args = result?.args ?? <EditableArgument>[];
-        updateEditableArgs(args);
+        _editableArgs.value = args;
       }),
     );
   }
@@ -70,5 +55,22 @@ class PropertyEditorController extends DisposableController
       name: name,
       value: value,
     );
+  }
+
+  @visibleForTesting
+  void initForTestsOnly({
+    List<EditableArgument>? editableArgs,
+    TextDocument? document,
+    CursorPosition? cursorPosition,
+  }) {
+    if (editableArgs != null) {
+      _editableArgs.value = editableArgs;
+    }
+    if (document != null) {
+      _currentDocument = document;
+    }
+    if (cursorPosition != null) {
+      _currentCursorPosition = cursorPosition;
+    }
   }
 }

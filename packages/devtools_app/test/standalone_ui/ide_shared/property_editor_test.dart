@@ -134,7 +134,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.updateEditableArgs(result1.args);
+      controller.initForTestsOnly(editableArgs: result1.args);
       await tester.pumpAndSettle();
 
       // Verify the inputs are expected.
@@ -151,7 +151,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.updateEditableArgs(result2.args);
+      controller.initForTestsOnly(editableArgs: result2.args);
       await tester.pumpAndSettle();
 
       // Verify the inputs are expected.
@@ -167,7 +167,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.updateEditableArgs(result2.args);
+      controller.initForTestsOnly(editableArgs: result2.args);
       await tester.pumpAndSettle();
 
       // Verify the input options are expected.
@@ -185,7 +185,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.updateEditableArgs(result2.args);
+      controller.initForTestsOnly(editableArgs: result2.args);
       await tester.pumpAndSettle();
 
       // Verify the input options are expected.
@@ -213,6 +213,11 @@ void main() {
     Completer<String>? nextEditCompleter;
 
     setUp(() {
+      controller.initForTestsOnly(
+        document: textDocument1,
+        cursorPosition: activeCursorPosition1,
+      );
+
       nextEditCompleter = Completer<String>();
       when(
         // ignore: discarded_futures, for mocking purposes.
@@ -233,19 +238,45 @@ void main() {
       });
     });
 
-    testWidgets('editing an enum input (align)', (tester) async {
+    testWidgets('editing a string input (title)', (tester) async {
       return await tester.runAsync(() async {
-        controller.currentDocument = textDocument1;
-        controller.currentPosition = activeCursorPosition1;
-
         // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
         await tester.pumpWidget(wrap(propertyEditor));
 
-        // Change the editable args.
-        controller.updateEditableArgs(result2.args);
-        await tester.pumpAndSettle();
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: 'Brand New Title!', tester: tester);
 
-        // Verify the inputs are expected.
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter!.future;
+        expect(nextEdit, equals('title: Brand New Title!'));
+      });
+    });
+
+    testWidgets('editing a numeric input (height)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(heightInput, text: '55.81', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter!.future;
+        expect(nextEdit, equals('height: 55.81'));
+      });
+    });
+
+    testWidgets('editing an enum input (align)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result2.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Select the align: Alignment.topLeft option.
         final alignInput = _findDropdownButtonFormField('align');
         await _selectDropdownMenuItem(
           alignInput,
@@ -262,17 +293,11 @@ void main() {
 
     testWidgets('editing a boolean input (softWrap)', (tester) async {
       return await tester.runAsync(() async {
-        controller.currentDocument = textDocument1;
-        controller.currentPosition = activeCursorPosition1;
-
         // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result2.args);
         await tester.pumpWidget(wrap(propertyEditor));
 
-        // Change the editable args.
-        controller.updateEditableArgs(result2.args);
-        await tester.pumpAndSettle();
-
-        // Verify the inputs are expected.
+        // Select the softWrap: false option.
         final softWrapInput = _findDropdownButtonFormField('softWrap');
         await _selectDropdownMenuItem(
           softWrapInput,
@@ -359,6 +384,16 @@ Future<void> _selectDropdownMenuItem(
   // Verify the option is now selected.
   expect(currentlySelectedFinder, findsNothing);
   expect(optionToSelectFinder, findsOneWidget);
+}
+
+Future<void> _inputText(
+  Finder textFormField, {
+  required String text,
+  required WidgetTester tester,
+}) async {
+  await tester.enterText(textFormField, text);
+  await tester.testTextInput.receiveAction(TextInputAction.done);
+  await tester.pump();
 }
 
 // Location position 1
