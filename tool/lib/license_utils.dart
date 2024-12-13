@@ -125,7 +125,7 @@ class LicenseConfig {
   YamlList getRemoveIndicesForExtension(String ext) {
     print(ext);
     final fileType = fileTypes[_removeDotFromExtension(ext)];
-    if (fileType != Null) {
+    if (fileType != null) {
       return fileType['remove'] as YamlList;
     }
     return YamlList();
@@ -135,7 +135,7 @@ class LicenseConfig {
   /// license text to add if it exists or -1.
   int getAddIndexForExtension(String ext) {
     final fileType = fileTypes[_removeDotFromExtension(ext)];
-    if (fileType != Null) {
+    if (fileType != null) {
       return fileType['add'];
     }
     return -1;
