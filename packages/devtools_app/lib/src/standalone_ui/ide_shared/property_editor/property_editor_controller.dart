@@ -27,6 +27,16 @@ class PropertyEditorController extends DisposableController
     _editableArgs.value = args;
   }
 
+  @visibleForTesting
+  set currentDocument(TextDocument document) {
+    _currentDocument = document;
+  }
+
+  @visibleForTesting
+  set currentPosition(CursorPosition position) {
+    _currentCursorPosition = position;
+  }
+
   void _init() {
     autoDisposeStreamSubscription(
       editorClient.activeLocationChangedStream.listen((event) async {

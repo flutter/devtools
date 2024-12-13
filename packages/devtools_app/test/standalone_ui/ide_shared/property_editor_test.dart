@@ -208,6 +208,85 @@ void main() {
       );
     });
   });
+
+  group('editing arguments', () {
+    Completer<String>? nextEditCompleter;
+
+    setUp(() {
+      nextEditCompleter = Completer<String>();
+      when(
+        // ignore: discarded_futures, for mocking purposes.
+        mockEditorClient.editArgument(
+          textDocument: argThat(isNotNull, named: 'textDocument'),
+          position: argThat(isNotNull, named: 'position'),
+          name: argThat(isNotNull, named: 'name'),
+          value: argThat(isNotNull, named: 'value'),
+        ),
+      ).thenAnswer((realInvocation) {
+        final calledWithArgs = realInvocation.namedArguments;
+        final name = calledWithArgs[const Symbol('name')];
+        final value = calledWithArgs[const Symbol('value')];
+        if (nextEditCompleter != null) {
+          nextEditCompleter!.complete('$name: $value');
+        }
+        return Future.value();
+      });
+    });
+
+    testWidgets('editing an enum input (align)', (tester) async {
+      return await tester.runAsync(() async {
+        controller.currentDocument = textDocument1;
+        controller.currentPosition = activeCursorPosition1;
+
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Change the editable args.
+        controller.updateEditableArgs(result2.args);
+        await tester.pumpAndSettle();
+
+        // Verify the inputs are expected.
+        final alignInput = _findDropdownButtonFormField('align');
+        await _selectDropdownMenuItem(
+          alignInput,
+          optionToSelect: 'Alignment.topLeft',
+          currentlySelected: 'Alignment.center',
+          tester: tester,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter!.future;
+        expect(nextEdit, equals('align: Alignment.topLeft'));
+      });
+    });
+
+    testWidgets('editing a boolean input (softWrap)', (tester) async {
+      return await tester.runAsync(() async {
+        controller.currentDocument = textDocument1;
+        controller.currentPosition = activeCursorPosition1;
+
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Change the editable args.
+        controller.updateEditableArgs(result2.args);
+        await tester.pumpAndSettle();
+
+        // Verify the inputs are expected.
+        final softWrapInput = _findDropdownButtonFormField('softWrap');
+        await _selectDropdownMenuItem(
+          softWrapInput,
+          optionToSelect: 'false',
+          currentlySelected: 'true',
+          tester: tester,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter!.future;
+        expect(nextEdit, equals('softWrap: false'));
+      });
+    });
+  });
 }
 
 final _findNoPropertiesMessage = find.text(
@@ -247,6 +326,39 @@ Future<void> _verifyDropdownMenuItems(
       expect(menuOptionFinder, findsOneWidget);
     }
   }
+}
+
+Future<void> _selectDropdownMenuItem(
+  Finder dropdownButton, {
+  required String optionToSelect,
+  required String currentlySelected,
+  required WidgetTester tester,
+}) async {
+  final optionToSelectFinder = find.descendant(
+    of: find.byType(DropdownMenuItem<String>),
+    matching: find.text(optionToSelect),
+  );
+  final currentlySelectedFinder = find.descendant(
+    of: find.byType(DropdownMenuItem<String>),
+    matching: find.text(currentlySelected),
+  );
+
+  // Verify the option is not yet selected.
+  expect(currentlySelectedFinder, findsOneWidget);
+  expect(optionToSelectFinder, findsNothing);
+
+  // Click button to open the options.
+  await tester.tap(dropdownButton);
+  await tester.pumpAndSettle();
+
+  // Click on the option.
+  expect(optionToSelectFinder, findsOneWidget);
+  await tester.tap(optionToSelectFinder);
+  await tester.pumpAndSettle();
+
+  // Verify the option is now selected.
+  expect(currentlySelectedFinder, findsNothing);
+  expect(optionToSelectFinder, findsOneWidget);
 }
 
 // Location position 1
