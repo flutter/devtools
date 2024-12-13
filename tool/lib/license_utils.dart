@@ -209,7 +209,7 @@ class LicenseHeader {
         .handleError(
           (e) =>
               throw StateError(
-                'License header expected, but error reading file - $e',
+                'License header expected, but error reading file $file - $e',
               ),
         );
     await for (final content in stream) {
