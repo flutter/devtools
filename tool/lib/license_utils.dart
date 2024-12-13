@@ -121,17 +121,24 @@ class LicenseConfig {
   final YamlMap fileTypes;
 
   /// Returns the list of indices for the given [ext] of [removeLicenses]
-  /// containing the license text to remove.
+  /// containing the license text to remove if they exist or an empty YamlList.
   YamlList getRemoveIndicesForExtension(String ext) {
+    print(ext);
     final fileType = fileTypes[_removeDotFromExtension(ext)];
-    return fileType['remove'] as YamlList;
+    if (fileType) {
+      return fileType['remove'] as YamlList;
+    }
+    return YamlList();
   }
 
   /// Returns the index for the given [ext] of [addLicenses] containing the
-  /// license text to add.
+  /// license text to add if it exists or -1.
   int getAddIndexForExtension(String ext) {
     final fileType = fileTypes[_removeDotFromExtension(ext)];
-    return fileType['add'];
+    if (fileType) {
+      return fileType['add'];
+    }
+    return -1;
   }
 
   /// Returns whether the file should be excluded according to the config.
