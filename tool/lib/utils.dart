@@ -175,7 +175,7 @@ Future<Process> startIndependentProcess(
   String? workingDirectory,
   String? waitForOutput,
   Duration waitForOutputTimeout = const Duration(minutes: 2),
-  void Function(String line)? onWaitForOutputReceived,
+  void Function(String line)? onOutput,
 }) async {
   final commandDisplay = '${workingDirectory ?? ''} > $command';
   print(commandDisplay);
@@ -189,15 +189,15 @@ Future<Process> startIndependentProcess(
     final completer = Completer<void>();
     final stdoutSub = process.stdout.transform(utf8.decoder).listen((line) {
       print('> [stdout] $line');
+      onOutput?.call(line);
       if (line.contains(waitForOutput)) {
-        onWaitForOutputReceived?.call(line);
         completer.complete();
       }
     });
     final stderrSub = process.stderr.transform(utf8.decoder).listen((line) {
       print('> [stderr] $line');
+      onOutput?.call(line);
       if (line.contains(waitForOutput)) {
-        onWaitForOutputReceived?.call(line);
         completer.complete();
       }
     });
