@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../service/editor/api_classes.dart';
-import '../../../shared/primitives/utils.dart';
 import 'property_editor_controller.dart';
 
 class PropertyEditorView extends StatelessWidget {
@@ -19,11 +18,7 @@ class PropertyEditorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Property Editor', style: Theme.of(context).textTheme.titleMedium),
-        const PaddedDivider.noPadding(),
-        _PropertiesList(controller: controller),
-      ],
+      children: [_PropertiesList(controller: controller)],
     );
   }
 }
@@ -43,15 +38,18 @@ class _PropertiesList extends StatelessWidget {
       valueListenable: controller.editableArgs,
       builder: (context, args, _) {
         return args.isEmpty
-            ? const Center(
-              child: Text(
-                'No widget properties at the current cursor location.',
+            ? const _ListItemPadding(
+              child: Center(
+                child: Text(
+                  'No widget properties at the current cursor location.',
+                ),
               ),
             )
             : Column(
-              children: <Widget>[
-                ...args.map((arg) => _EditablePropertyItem(argument: arg)),
-              ].joinWith(const PaddedDivider.noPadding()),
+              children:
+                  args
+                      .map((arg) => _EditablePropertyItem(argument: arg))
+                      .toList(),
             );
       },
     );
@@ -65,21 +63,33 @@ class _EditablePropertyItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Flexible(
-          flex: 3,
-          child: Padding(
-            padding: const EdgeInsets.all(_PropertiesList.itemPadding),
-            child: _PropertyInput(argument: argument),
-          ),
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color:
+            argument.hasArgument
+                ? theme.colorScheme.emphasizedRowBackgroundColor
+                : theme.colorScheme.deemphasizedRowBackgroundColor,
+        border: Border(bottom: defaultBorderSide(Theme.of(context))),
+      ),
+      child: _ListItemPadding(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Flexible(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(_PropertiesList.itemPadding),
+                child: _PropertyInput(argument: argument),
+              ),
+            ),
+            if (argument.isRequired || argument.isDefault) ...[
+              Flexible(child: _PropertyLabels(argument: argument)),
+            ] else
+              const Spacer(),
+          ],
         ),
-        if (argument.isRequired || argument.isDefault) ...[
-          Flexible(child: _PropertyLabels(argument: argument)),
-        ] else
-          const Spacer(),
-      ],
+      ),
     );
   }
 }
@@ -147,6 +157,7 @@ class _PropertyInput extends StatelessWidget {
         return DropdownButtonFormField(
           value: argument.valueDisplay,
           decoration: decoration,
+          isExpanded: true,
           items:
               options.toSet().toList().map((option) {
                 return DropdownMenuItem(
@@ -197,5 +208,24 @@ class _PropertyInput extends StatelessWidget {
       return validationMessage;
     }
     return null;
+  }
+}
+
+class _ListItemPadding extends StatelessWidget {
+  const _ListItemPadding({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        denseSpacing,
+        denseSpacing,
+        defaultSpacing, // Additional right padding for scroll bar.
+        noPadding,
+      ),
+      child: child,
+    );
   }
 }
