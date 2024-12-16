@@ -157,6 +157,7 @@ class ServeCommand extends Command {
     final devToolsAppBuildMode =
         results[SharedCommandArgs.buildMode.flagName] as String;
     final serveWithDartSdk = results[_serveWithDartSdkFlag] as String?;
+    final forMachine = results[_machineFlag] as bool;
 
     // Any flag that we aren't removing here is intended to be passed through.
     final remainingArguments =
@@ -271,23 +272,34 @@ class ServeCommand extends Command {
     }
 
     // This call will not exit until explicitly terminated by the user.
+    final cliCommand = CliCommand.dart([
+      if (debugServer) ...['run', '--observe=0'],
+      ddsServeLocalScriptPath,
+      if (runApp)
+        // When running DevTools via `flutter run`, the [flutterRunProcess]
+        // below will launch DevTools in the browser.
+        '--no-launch-browser'
+      else
+        // Only pass a build location if the server is serving the web assets
+        // (i.e. not when DevTools app is ran via `flutter run`).
+        '--devtools-build=$devToolsBuildLocation',
+      // Pass any args that were provided to our script along. This allows IDEs
+      // to pass `--machine` (etc.) so that this script can behave the same as
+      // the "dart devtools" command for testing local DevTools/server changes.
+      ...remainingArguments,
+    ], sdkOverride: serveWithDartSdk);
+    if (forMachine) {
+      // If --machine flag is true, then the output is a tool-readable JSON.
+      // Therefore, skip reading the process output and instead just run the
+      // process.
+      return processManager.runProcess(
+        cliCommand,
+        workingDirectory: localDartSdkLocation,
+      );
+    }
+
     final serveLocalProcess = await startIndependentProcess(
-      CliCommand.dart([
-        if (debugServer) ...['run', '--observe=0'],
-        ddsServeLocalScriptPath,
-        if (runApp)
-          // When running DevTools via `flutter run`, the [flutterRunProcess]
-          // below will launch DevTools in the browser.
-          '--no-launch-browser'
-        else
-          // Only pass a build location if the server is serving the web assets
-          // (i.e. not when DevTools app is ran via `flutter run`).
-          '--devtools-build=$devToolsBuildLocation',
-        // Pass any args that were provided to our script along. This allows IDEs
-        // to pass `--machine` (etc.) so that this script can behave the same as
-        // the "dart devtools" command for testing local DevTools/server changes.
-        ...remainingArguments,
-      ], sdkOverride: serveWithDartSdk),
+      cliCommand,
       workingDirectory: localDartSdkLocation,
       waitForOutput: _devToolsServerAddressLine,
       onOutput: processServeLocalOutput,
