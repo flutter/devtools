@@ -134,7 +134,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.updateEditableArgs(result1.args);
+      controller.initForTestsOnly(editableArgs: result1.args);
       await tester.pumpAndSettle();
 
       // Verify the inputs are expected.
@@ -151,7 +151,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.updateEditableArgs(result2.args);
+      controller.initForTestsOnly(editableArgs: result2.args);
       await tester.pumpAndSettle();
 
       // Verify the inputs are expected.
@@ -167,7 +167,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.updateEditableArgs(result2.args);
+      controller.initForTestsOnly(editableArgs: result2.args);
       await tester.pumpAndSettle();
 
       // Verify the input options are expected.
@@ -185,7 +185,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.updateEditableArgs(result2.args);
+      controller.initForTestsOnly(editableArgs: result2.args);
       await tester.pumpAndSettle();
 
       // Verify the input options are expected.
@@ -206,6 +206,108 @@ void main() {
         selectedOption: 'Alignment.center',
         tester: tester,
       );
+    });
+  });
+
+  group('editing arguments', () {
+    late Completer<String> nextEditCompleter;
+
+    setUp(() {
+      controller.initForTestsOnly(
+        document: textDocument1,
+        cursorPosition: activeCursorPosition1,
+      );
+
+      nextEditCompleter = Completer<String>();
+      when(
+        // ignore: discarded_futures, for mocking purposes.
+        mockEditorClient.editArgument(
+          textDocument: argThat(isNotNull, named: 'textDocument'),
+          position: argThat(isNotNull, named: 'position'),
+          name: argThat(isNotNull, named: 'name'),
+          value: argThat(isNotNull, named: 'value'),
+        ),
+      ).thenAnswer((realInvocation) {
+        final calledWithArgs = realInvocation.namedArguments;
+        final name = calledWithArgs[const Symbol('name')];
+        final value = calledWithArgs[const Symbol('value')];
+        nextEditCompleter.complete('$name: $value');
+        return Future.value();
+      });
+    });
+
+    testWidgets('editing a string input (title)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: 'Brand New Title!', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('title: Brand New Title!'));
+      });
+    });
+
+    testWidgets('editing a numeric input (height)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(heightInput, text: '55.81', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('height: 55.81'));
+      });
+    });
+
+    testWidgets('editing an enum input (align)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result2.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Select the align: Alignment.topLeft option.
+        final alignInput = _findDropdownButtonFormField('align');
+        await _selectDropdownMenuItem(
+          alignInput,
+          optionToSelect: 'Alignment.topLeft',
+          currentlySelected: 'Alignment.center',
+          tester: tester,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('align: Alignment.topLeft'));
+      });
+    });
+
+    testWidgets('editing a boolean input (softWrap)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result2.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Select the softWrap: false option.
+        final softWrapInput = _findDropdownButtonFormField('softWrap');
+        await _selectDropdownMenuItem(
+          softWrapInput,
+          optionToSelect: 'false',
+          currentlySelected: 'true',
+          tester: tester,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('softWrap: false'));
+      });
     });
   });
 }
@@ -247,6 +349,49 @@ Future<void> _verifyDropdownMenuItems(
       expect(menuOptionFinder, findsOneWidget);
     }
   }
+}
+
+Future<void> _selectDropdownMenuItem(
+  Finder dropdownButton, {
+  required String optionToSelect,
+  required String currentlySelected,
+  required WidgetTester tester,
+}) async {
+  final optionToSelectFinder = find.descendant(
+    of: find.byType(DropdownMenuItem<String>),
+    matching: find.text(optionToSelect),
+  );
+  final currentlySelectedFinder = find.descendant(
+    of: find.byType(DropdownMenuItem<String>),
+    matching: find.text(currentlySelected),
+  );
+
+  // Verify the option is not yet selected.
+  expect(currentlySelectedFinder, findsOneWidget);
+  expect(optionToSelectFinder, findsNothing);
+
+  // Click button to open the options.
+  await tester.tap(dropdownButton);
+  await tester.pumpAndSettle();
+
+  // Click on the option.
+  expect(optionToSelectFinder, findsOneWidget);
+  await tester.tap(optionToSelectFinder);
+  await tester.pumpAndSettle();
+
+  // Verify the option is now selected.
+  expect(currentlySelectedFinder, findsNothing);
+  expect(optionToSelectFinder, findsOneWidget);
+}
+
+Future<void> _inputText(
+  Finder textFormField, {
+  required String text,
+  required WidgetTester tester,
+}) async {
+  await tester.enterText(textFormField, text);
+  await tester.testTextInput.receiveAction(TextInputAction.done);
+  await tester.pump();
 }
 
 // Location position 1

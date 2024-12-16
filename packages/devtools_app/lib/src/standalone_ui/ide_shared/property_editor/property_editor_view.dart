@@ -50,7 +50,12 @@ class _PropertiesList extends StatelessWidget {
             )
             : Column(
               children: <Widget>[
-                ...args.map((arg) => _EditablePropertyItem(argument: arg)),
+                ...args.map(
+                  (arg) => _EditablePropertyItem(
+                    argument: arg,
+                    controller: controller,
+                  ),
+                ),
               ].joinWith(const PaddedDivider.noPadding()),
             );
       },
@@ -59,9 +64,13 @@ class _PropertiesList extends StatelessWidget {
 }
 
 class _EditablePropertyItem extends StatelessWidget {
-  const _EditablePropertyItem({required this.argument});
+  const _EditablePropertyItem({
+    required this.argument,
+    required this.controller,
+  });
 
   final EditableArgument argument;
+  final PropertyEditorController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +81,7 @@ class _EditablePropertyItem extends StatelessWidget {
           flex: 3,
           child: Padding(
             padding: const EdgeInsets.all(_PropertiesList.itemPadding),
-            child: _PropertyInput(argument: argument),
+            child: _PropertyInput(argument: argument, controller: controller),
           ),
         ),
         if (argument.isRequired || argument.isDefault) ...[
@@ -117,35 +126,45 @@ class _PropertyLabels extends StatelessWidget {
   }
 }
 
-class _PropertyInput extends StatelessWidget {
-  const _PropertyInput({required this.argument});
+class _PropertyInput extends StatefulWidget {
+  const _PropertyInput({required this.argument, required this.controller});
 
   final EditableArgument argument;
+  final PropertyEditorController controller;
+
+  @override
+  State<_PropertyInput> createState() => _PropertyInputState();
+}
+
+class _PropertyInputState extends State<_PropertyInput> {
+  String get typeError => 'Please enter a ${widget.argument.type}.';
+
+  String currentValue = '';
 
   @override
   Widget build(BuildContext context) {
     final decoration = InputDecoration(
       helperText: '',
-      errorText: argument.errorText,
+      errorText: widget.argument.errorText,
       isDense: true,
-      label: Text(argument.name),
+      label: Text(widget.argument.name),
       border: const OutlineInputBorder(),
     );
 
-    switch (argument.type) {
+    switch (widget.argument.type) {
       case 'enum':
       case 'bool':
         final options =
-            argument.type == 'bool'
+            widget.argument.type == 'bool'
                 ? ['true', 'false']
-                : (argument.options ?? <String>[]);
-        options.add(argument.valueDisplay);
-        if (argument.isNullable) {
+                : (widget.argument.options ?? <String>[]);
+        options.add(widget.argument.valueDisplay);
+        if (widget.argument.isNullable) {
           options.add('null');
         }
 
         return DropdownButtonFormField(
-          value: argument.valueDisplay,
+          value: widget.argument.valueDisplay,
           decoration: decoration,
           items:
               options.toSet().toList().map((option) {
@@ -156,46 +175,103 @@ class _PropertyInput extends StatelessWidget {
                   child: Text(option),
                 );
               }).toList(),
-          onChanged: (_) {},
+          onChanged: (newValue) async {
+            await _editArgument(newValue);
+          },
         );
       case 'double':
       case 'int':
       case 'string':
         return TextFormField(
-          initialValue: argument.valueDisplay,
-          enabled: argument.isEditable,
+          initialValue: widget.argument.valueDisplay,
+          enabled: widget.argument.isEditable,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: _inputValidator,
           inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
           decoration: decoration,
           style: Theme.of(context).fixedFontStyle,
           // TODO(https://github.com/flutter/devtools/issues/8531) Handle onChanged.
-          onChanged: (_) {},
+          onChanged: (newValue) {
+            currentValue = newValue;
+          },
+          onEditingComplete: () async {
+            await _editArgument(currentValue);
+          },
+          onTapOutside: (_) async {
+            await _editArgument(currentValue);
+          },
         );
       default:
-        return Text(argument.valueDisplay);
+        return Text(widget.argument.valueDisplay);
+    }
+  }
+
+  Future<void> _editArgument(String? valueAsString) async {
+    final argName = widget.argument.name;
+
+    // Can edit values to null.
+    if (widget.argument.isNullable && valueAsString == null ||
+        (valueAsString == '' && widget.argument.type != 'string')) {
+      await widget.controller.editArgument(name: argName, value: null);
+      return;
+    }
+
+    switch (widget.argument.type) {
+      case 'string':
+      case 'enum':
+        await widget.controller.editArgument(
+          name: argName,
+          value: valueAsString,
+        );
+        break;
+      case 'bool':
+        await widget.controller.editArgument(
+          name: argName,
+          value:
+              valueAsString == 'true' || valueAsString == 'false'
+                  ? valueAsString == 'true'
+                  : valueAsString, // The boolean value might be an expression.
+        );
+        break;
+      case 'double':
+        final numValue = _toNumber(valueAsString);
+        if (numValue != null) {
+          await widget.controller.editArgument(
+            name: argName,
+            value: numValue as double,
+          );
+        }
+        break;
+      case 'int':
+        final numValue = _toNumber(valueAsString);
+        if (numValue != null) {
+          await widget.controller.editArgument(
+            name: argName,
+            value: numValue as int,
+          );
+        }
+        break;
     }
   }
 
   String? _inputValidator(String? inputValue) {
-    final isDouble = argument.type == 'double';
-    final isInt = argument.type == 'int';
+    final numValue = _toNumber(inputValue);
+    if (numValue == null) {
+      return typeError;
+    }
+    return null;
+  }
 
-    // Only validate numeric types.
+  Object? _toNumber(String? valueAsString) {
+    if (valueAsString == null || valueAsString == '') return null;
+
+    final isDouble = widget.argument.type == 'double';
+    final isInt = widget.argument.type == 'int';
+    // Only try to convert numeric types.
     if (!isDouble && !isInt) {
       return null;
     }
 
-    final validationMessage =
-        'Please enter ${isInt ? 'an integer' : 'a double'}.';
-    if (inputValue == null || inputValue == '') {
-      return validationMessage;
-    }
-    final numValue =
-        isInt ? int.tryParse(inputValue) : double.tryParse(inputValue);
-    if (numValue == null) {
-      return validationMessage;
-    }
-    return null;
+    return isInt ? int.tryParse(valueAsString) : double.tryParse(valueAsString);
   }
 }
