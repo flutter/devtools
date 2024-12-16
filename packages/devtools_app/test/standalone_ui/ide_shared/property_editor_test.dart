@@ -210,7 +210,7 @@ void main() {
   });
 
   group('editing arguments', () {
-    Completer<String>? nextEditCompleter;
+    late Completer<String> nextEditCompleter;
 
     setUp(() {
       controller.initForTestsOnly(
@@ -231,9 +231,7 @@ void main() {
         final calledWithArgs = realInvocation.namedArguments;
         final name = calledWithArgs[const Symbol('name')];
         final value = calledWithArgs[const Symbol('value')];
-        if (nextEditCompleter != null) {
-          nextEditCompleter!.complete('$name: $value');
-        }
+        nextEditCompleter.complete('$name: $value');
         return Future.value();
       });
     });
@@ -249,7 +247,7 @@ void main() {
         await _inputText(titleInput, text: 'Brand New Title!', tester: tester);
 
         // Verify the edit is expected.
-        final nextEdit = await nextEditCompleter!.future;
+        final nextEdit = await nextEditCompleter.future;
         expect(nextEdit, equals('title: Brand New Title!'));
       });
     });
@@ -265,7 +263,7 @@ void main() {
         await _inputText(heightInput, text: '55.81', tester: tester);
 
         // Verify the edit is expected.
-        final nextEdit = await nextEditCompleter!.future;
+        final nextEdit = await nextEditCompleter.future;
         expect(nextEdit, equals('height: 55.81'));
       });
     });
@@ -286,7 +284,7 @@ void main() {
         );
 
         // Verify the edit is expected.
-        final nextEdit = await nextEditCompleter!.future;
+        final nextEdit = await nextEditCompleter.future;
         expect(nextEdit, equals('align: Alignment.topLeft'));
       });
     });
@@ -307,7 +305,7 @@ void main() {
         );
 
         // Verify the edit is expected.
-        final nextEdit = await nextEditCompleter!.future;
+        final nextEdit = await nextEditCompleter.future;
         expect(nextEdit, equals('softWrap: false'));
       });
     });
