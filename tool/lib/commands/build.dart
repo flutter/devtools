@@ -106,8 +106,6 @@ class BuildCommand extends Command {
             SharedCommandArgs.wasm.asArg(),
             if (noStripWasm) SharedCommandArgs.noStripWasm.asArg(),
           ] else ...[
-            '--web-renderer',
-            'canvaskit',
             // Do not minify stack traces in debug mode.
             if (buildMode == 'debug') '--dart2js-optimization=O1',
             if (buildMode != 'debug') '--$buildMode',
