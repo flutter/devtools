@@ -159,6 +159,16 @@ class ServeCommand extends Command {
     final serveWithDartSdk = results[_serveWithDartSdkFlag] as String?;
     final forMachine = results[_machineFlag] as bool;
 
+    // TODO(https://github.com/flutter/devtools/issues/8643): Support running in
+    // machine mode with a debuggable DevTools app.
+    if (runApp && forMachine) {
+      throw Exception(
+        'Machine mode is not supported with `flutter run` DevTools.\n'
+        'Please use either --machine or --run-app, not both.\n'
+        'See https://github.com/flutter/devtools/issues/8643 for details.',
+      );
+    }
+
     // Any flag that we aren't removing here is intended to be passed through.
     final remainingArguments =
         List.of(results.arguments)
