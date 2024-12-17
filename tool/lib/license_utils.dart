@@ -298,9 +298,13 @@ class LicenseHeader {
       if (!config.shouldExclude(file)) {
         includedPathsList.add(file.path);
         final extension = p.extension(file.path);
-        final removeIndices = config.getRemoveIndicesForExtension(extension);
         final addIndex = config.getAddIndexForExtension(extension);
+        if (addIndex == -1) {
+          // skip if add index doesn't exist for extension
+          continue;
+        }
         final replacementLicenseText = config.addLicenses[addIndex];
+        final removeIndices = config.getRemoveIndicesForExtension(extension);
         for (final removeIndex in removeIndices) {
           final existingLicenseText = config.removeLicenses[removeIndex];
           final fileLength = file.lengthSync();

@@ -52,6 +52,7 @@ late File testFile9;
 late File testFile10;
 late File excludeFile1;
 late File excludeFile2;
+late File skippedFile;
 
 void main() {
   group('config file tests', () {
@@ -362,7 +363,7 @@ text that should be added to the file. */''',
 
       final includedPaths = results.includedPaths;
       expect(includedPaths, isNotNull);
-      expect(includedPaths.length, equals(7));
+      expect(includedPaths.length, equals(8));
       // Order is not guaranteed
       expect(includedPaths.contains(testFile1.path), true);
       expect(contentsBeforeUpdate, isNot(equals(contentsAfterUpdate)));
@@ -372,6 +373,7 @@ text that should be added to the file. */''',
       expect(includedPaths.contains(testFile8.path), true);
       expect(includedPaths.contains(testFile9.path), true);
       expect(includedPaths.contains(testFile10.path), true);
+      expect(includedPaths.contains(skippedFile.path), true);
 
       final updatedPaths = results.updatedPaths;
       expect(updatedPaths, isNotNull);
@@ -384,6 +386,7 @@ text that should be added to the file. */''',
       expect(updatedPaths.contains(testFile8.path), true);
       expect(updatedPaths.contains(testFile9.path), true);
       expect(updatedPaths.contains(testFile10.path), true);
+      expect(updatedPaths.contains(skippedFile.path), false);
     });
 
     test('license headers bulk update can be dry run', () async {
@@ -550,6 +553,7 @@ update_paths:
 /// repo_root/
 ///    test1.ext1
 ///    test2.ext2
+///    test.skip
 ///    .hidden/
 ///       test3.ext1
 ///    sub_dir1/
@@ -583,6 +587,10 @@ Future<void> _setupTestDirectoryStructure() async {
   testFile2 = File(p.join(repoRoot.path, 'test2.ext2'))
     ..createSync(recursive: true);
   testFile2.writeAsStringSync(licenseText3 + extraText, flush: true);
+
+  skippedFile = File(p.join(repoRoot.path, 'test.skip'))
+    ..createSync(recursive: true);
+  skippedFile.writeAsStringSync(extraText, flush: true);
 
   // Setup /repo_root/.hidden directory structure
   Directory(p.join(repoRoot.path, '.hidden')).createSync(recursive: true);
