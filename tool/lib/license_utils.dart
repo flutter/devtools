@@ -208,7 +208,7 @@ class LicenseHeader {
         .handleError(
           (e) =>
               throw StateError(
-                'License header expected, but error reading file $file - $e',
+                'License header expected, but error reading $file - $e',
               ),
         );
     await for (final content in stream) {
@@ -260,6 +260,24 @@ class LicenseHeader {
     return rewrittenFile;
   }
 
+  /// Returns a copy of the given [file] that is missing a license header
+  /// with the [replacementHeader] added to the top.
+  ///
+  /// Reads and writes the entire file contents all at once, so performance may
+  /// degrade for large files.
+  File addLicenseHeader({
+    required File file,
+    required String replacementHeader,
+  }) {
+    final rewrittenFile = File('${file.path}.tmp');
+    final contents = file.readAsStringSync();
+    rewrittenFile.writeAsStringSync(
+      '$replacementHeader${Platform.lineTerminator}$contents',
+      flush: true,
+    );
+    return rewrittenFile;
+  }
+
   /// Bulk update license headers for files in the [directory] as configured
   /// in the [config] and return a processed paths Record containing:
   /// - list of included paths
@@ -281,10 +299,10 @@ class LicenseHeader {
         includedPathsList.add(file.path);
         final extension = p.extension(file.path);
         final removeIndices = config.getRemoveIndicesForExtension(extension);
+        final addIndex = config.getAddIndexForExtension(extension);
+        final replacementLicenseText = config.addLicenses[addIndex];
         for (final removeIndex in removeIndices) {
           final existingLicenseText = config.removeLicenses[removeIndex];
-          final addIndex = config.getAddIndexForExtension(extension);
-          final replacementLicenseText = config.addLicenses[addIndex];
           final fileLength = file.lengthSync();
           const bufferSize = 20;
           // Assume that the license text will be near the start of the file,
@@ -301,6 +319,7 @@ class LicenseHeader {
           );
           if (replacementInfo.existingHeader.isNotEmpty &&
               replacementInfo.replacementHeader.isNotEmpty) {
+            // Case 1: Existing header needs to be replaced
             if (dryRun) {
               updatedPathsList.add(file.path);
             } else {
@@ -309,15 +328,27 @@ class LicenseHeader {
                 existingHeader: replacementInfo.existingHeader,
                 replacementHeader: replacementInfo.replacementHeader,
               );
-              if (rewrittenFile.lengthSync() > 0) {
-                file.writeAsStringSync(
-                  rewrittenFile.readAsStringSync(),
-                  mode: FileMode.writeOnly,
-                  flush: true,
-                );
-                updatedPathsList.add(file.path);
-              }
-              rewrittenFile.deleteSync();
+              _updateLicense(rewrittenFile, file, updatedPathsList);
+            }
+          }
+        }
+        if (!updatedPathsList.contains(file.path)) {
+          final licenseHeaders = _processHeaders(
+            storedName: '',
+            existingLicenseText: '',
+            replacementLicenseText: replacementLicenseText,
+            content: '',
+          );
+          if (licenseHeaders.replacementHeader.isNotEmpty) {
+            // Case 2: Missing header needs to be added
+            if (dryRun) {
+              updatedPathsList.add(file.path);
+            } else {
+              final rewrittenFile = addLicenseHeader(
+                file: file,
+                replacementHeader: licenseHeaders.replacementHeader,
+              );
+              _updateLicense(rewrittenFile, file, updatedPathsList);
             }
           }
         }
@@ -326,12 +357,35 @@ class LicenseHeader {
     return (includedPaths: includedPathsList, updatedPaths: updatedPathsList);
   }
 
+  void _updateLicense(
+    File rewrittenFile,
+    File file,
+    List<String> updatedPathsList,
+  ) {
+    if (rewrittenFile.lengthSync() > 0) {
+      file.writeAsStringSync(
+        rewrittenFile.readAsStringSync(),
+        mode: FileMode.writeOnly,
+        flush: true,
+      );
+      updatedPathsList.add(file.path);
+    }
+    rewrittenFile.deleteSync();
+  }
+
   ({String existingHeader, String replacementHeader}) _processHeaders({
     required String storedName,
     required String existingLicenseText,
     required String replacementLicenseText,
     required String content,
   }) {
+    if (existingLicenseText.isEmpty) {
+      final defaultReplacementHeader = replacementLicenseText.replaceAll(
+        '<$storedName>',
+        DateTime.now().year.toString(),
+      );
+      return (existingHeader: '', replacementHeader: defaultReplacementHeader);
+    }
     final matchStr = RegExp.escape(existingLicenseText);
     final storedNameIndex = matchStr.indexOf('<$storedName>');
     if (storedNameIndex != -1) {
