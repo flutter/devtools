@@ -367,11 +367,13 @@ extension DevToolsSharedColorScheme on ColorScheme {
   Color get alternatingBackgroundColor2 =>
       isLight ? surface.darken(0.06) : surface.brighten(0.06);
 
-  Color? get emphasizedRowBackgroundColor =>
-      isLight ? null : background.brighten(0.15);
+  Color? get emphasizedRowBackgroundColor {
+    if (surface.isGreyscale()) {
+      return primaryContainer;
+    }
 
-  Color? get deemphasizedRowBackgroundColor =>
-      isLight ? background.darken(0.15) : null;
+    return surface.accent();
+  }
 
   Color get selectedRowBackgroundColor =>
       isLight ? const Color(0xFFC7C6CA) : const Color(0xFF5E5E62);

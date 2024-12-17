@@ -40,7 +40,9 @@ class PropertyEditorController extends DisposableController
           position: cursorPosition,
         );
         final args = result?.args ?? <EditableArgument>[];
-        _editableArgs.value = args;
+        // TODO(elliette): Once the server sends back the arguments in a
+        // consistent order, we can remove sorting by name.
+        _editableArgs.value = args..sort((a, b) => a.name.compareTo(b.name));
       }),
     );
   }

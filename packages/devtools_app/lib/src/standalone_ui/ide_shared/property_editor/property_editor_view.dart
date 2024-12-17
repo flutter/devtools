@@ -78,7 +78,7 @@ class _EditablePropertyItem extends StatelessWidget {
         color:
             argument.hasArgument
                 ? theme.colorScheme.emphasizedRowBackgroundColor
-                : theme.colorScheme.deemphasizedRowBackgroundColor,
+                : null,
         border: Border(bottom: defaultBorderSide(Theme.of(context))),
       ),
       child: _ListItemPadding(
