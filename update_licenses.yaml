@@ -1,0 +1,136 @@
+---
+remove_licenses:
+  - |-
+    // Copyright <value> The Chromium Authors. All rights reserved.
+    // Use of this source code is governed by a BSD-style license that can be
+    // found in the LICENSE file.
+  - |-
+    /**
+    Copyright <value> The Chromium Authors. All rights reserved.
+    Use of this source code is governed by a BSD-style license that can be
+    found in the LICENSE file.
+    **/
+  - |-
+    # Copyright <value> The Chromium Authors. All rights reserved.
+    # Use of this source code is governed by a BSD-style license that can be
+    # found in the LICENSE file.
+  - |-
+    <!--
+    Copyright <value> The Chromium Authors. All rights reserved.
+    Use of this source code is governed by a BSD-style license that can be
+    found in the LICENSE file.
+    -->
+  - |-
+    REM Copyright <value> The Chromium Authors. All rights reserved.
+    REM Use of this source code is governed by a BSD-style license that can be
+    REM found in the LICENSE file.
+add_licenses: 
+  - |-
+    // Copyright <value> The Flutter Authors
+    // Use of this source code is governed by a BSD-style license that can be
+    // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+  - |-
+    /**
+    Copyright <value> The Flutter Authors
+    Use of this source code is governed by a BSD-style license that can be
+    found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+    **/
+  - |-
+    # Copyright <value> The Flutter Authors
+    # Use of this source code is governed by a BSD-style license that can be
+    # found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+  - |-
+    <!--
+    Copyright <value> The Flutter Authors
+    Use of this source code is governed by a BSD-style license that can be
+    found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+    -->
+  - |-
+    REM Copyright <value> The Flutter Authors
+    REM Use of this source code is governed by a BSD-style license that can be
+    REM found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+update_paths:
+  include:
+    - /Users/mossman/Development/devtools
+  exclude:
+    - /Users/mossman/Development/devtools/third_party
+    - /Users/mossman/Development/devtools/packages/devtools_app/build
+    - /Users/mossman/Development/devtools/tool/flutter-sdk
+  file_types:
+    bat:
+      remove:
+          - 4
+      add: 4
+    cc:
+      remove:
+          - 0
+          - 1
+      add: 0
+    cpp:
+      remove:
+          - 0
+          - 1
+      add: 0
+    css:
+      remove:
+          - 1
+      add: 1
+    dart:
+      remove:
+          - 0
+          - 1
+      add: 0
+    gradle:
+      remove:
+          - 0
+          - 1
+      add: 0
+    h:
+      remove:
+          - 0
+          - 1
+      add: 0
+    html:
+      remove:
+          - 3
+      add: 3
+    java:
+      remove:
+          - 0
+          - 1
+      add: 0
+    json:
+      remove:
+          - 0
+          - 1
+      add: 0
+    last_build_id:
+      remove:
+          - 0
+          - 1
+      add: 0
+    md:
+      remove:
+          - 3
+      add: 3
+    sh:
+      remove:
+          - 2
+      add: 2
+    swift:
+      remove:
+          - 0
+          - 1
+      add: 0
+    xml:
+      remove:
+          - 3
+      add: 3
+    yaml:
+      remove:
+          - 2
+      add: 2
+    yml:
+      remove:
+          - 2
+      add: 2
