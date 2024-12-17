@@ -852,22 +852,6 @@ Future<void> computeFlutterClientId() async {
   flutterClientId = await server.flutterGAClientID();
 }
 
-int _stillWaiting = 0;
-
-void waitForDimensionsComputed(String screenName) {
-  Timer(const Duration(milliseconds: 100), () {
-    if (_analyticsComputed) {
-      screen(screenName);
-    } else {
-      if (_stillWaiting++ < 50) {
-        waitForDimensionsComputed(screenName);
-      } else {
-        _log.warning('Cancel waiting for dimensions.');
-      }
-    }
-  });
-}
-
 Future<void> setupDimensions() async {
   if (!_analyticsComputed && !_computingDimensions) {
     _computingDimensions = true;
