@@ -293,7 +293,7 @@ text that should be added to the file. */''',
       expect(
         errorMessage,
         contains(
-          'Bad state: License header expected, but error reading file - PathNotFoundException',
+          'Bad state: License header expected, but error reading File: \'bad.txt\' - PathNotFoundException',
         ),
       );
     });
@@ -330,6 +330,24 @@ text that should be added to the file. */''',
       );
     });
 
+    test('license header can be added on disk', () async {
+      final header = LicenseHeader();
+      const replacementHeader = '''// This is some 2015 multiline license
+// text that should be added to the file.''';
+      final rewrittenFile = header.addLicenseHeader(
+        file: testFile9,
+        replacementHeader: replacementHeader,
+      );
+
+      expect(rewrittenFile.lengthSync(), greaterThan(0));
+
+      final rewrittenContents = rewrittenFile.readAsStringSync();
+      expect(
+        rewrittenContents.substring(0, replacementHeader.length),
+        equals(replacementHeader),
+      );
+    });
+
     test('license headers can be updated in bulk', () async {
       await _setupTestConfigFile();
       final config = LicenseConfig.fromYamlFile(configFile);
@@ -357,15 +375,15 @@ text that should be added to the file. */''',
 
       final updatedPaths = results.updatedPaths;
       expect(updatedPaths, isNotNull);
-      // testFile9 and testFile10 are intentionally misconfigured and so they
-      // won't be updated even though they are on the include list.
-      expect(updatedPaths.length, equals(5));
+      expect(updatedPaths.length, equals(7));
       // Order is not guaranteed
       expect(updatedPaths.contains(testFile1.path), true);
       expect(updatedPaths.contains(testFile2.path), true);
       expect(updatedPaths.contains(testFile3.path), true);
       expect(updatedPaths.contains(testFile7.path), true);
       expect(updatedPaths.contains(testFile8.path), true);
+      expect(updatedPaths.contains(testFile9.path), true);
+      expect(updatedPaths.contains(testFile10.path), true);
     });
 
     test('license headers bulk update can be dry run', () async {
@@ -383,7 +401,7 @@ text that should be added to the file. */''',
 
       final updatedPaths = results.updatedPaths;
       expect(updatedPaths, isNotNull);
-      expect(updatedPaths.length, equals(5));
+      expect(updatedPaths.length, equals(7));
       expect(updatedPaths.contains(testFile1.path), true);
       expect(contentsBeforeUpdate, equals(contentsAfterUpdate));
     });
@@ -617,6 +635,7 @@ Future<void> _setupTestDirectoryStructure() async {
     p.join(repoRoot.path, 'sub_dir2', 'sub_dir4'),
   ).createSync(recursive: true);
 
+  // Missing license header
   testFile9 = File(p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'test9.ext1'))
     ..createSync(recursive: true);
   testFile9.writeAsStringSync(extraText, flush: true);
@@ -626,6 +645,7 @@ Future<void> _setupTestDirectoryStructure() async {
     p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'sub_dir5'),
   ).createSync(recursive: true);
 
+  // Will be treated like a missing license header since not configured
   testFile10 = File(
     p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'sub_dir5', 'test10.ext2'),
   )..createSync(recursive: true);
