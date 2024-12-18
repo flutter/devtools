@@ -70,18 +70,28 @@ class _EditablePropertyItem extends StatelessWidget {
   final EditableArgument argument;
   final PropertyEditorController controller;
 
+  static const _hasArgIndicatorWidth = denseSpacing;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color:
-            argument.hasArgument
-                ? theme.colorScheme.emphasizedRowBackgroundColor
-                : null,
-        border: Border(bottom: defaultBorderSide(Theme.of(context))),
+        border: Border(
+          left:
+              argument.hasArgument
+                  ? BorderSide(
+                    color: theme.colorScheme.primary,
+                    width: _hasArgIndicatorWidth,
+                  )
+                  : BorderSide.none,
+          bottom: defaultBorderSide(Theme.of(context)),
+        ),
       ),
       child: _ListItemPadding(
+        additionalPadding: EdgeInsets.only(
+          left: argument.hasArgument ? noPadding : _hasArgIndicatorWidth,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -291,18 +301,23 @@ class _PropertyInputState extends State<_PropertyInput> {
 }
 
 class _ListItemPadding extends StatelessWidget {
-  const _ListItemPadding({required this.child});
+  const _ListItemPadding({
+    required this.child,
+    this.additionalPadding = const EdgeInsets.all(noPadding),
+  });
 
   final Widget child;
+  final EdgeInsets additionalPadding;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        denseSpacing,
-        denseSpacing,
-        defaultSpacing, // Additional right padding for scroll bar.
-        noPadding,
+      padding: EdgeInsets.fromLTRB(
+        additionalPadding.left + denseSpacing,
+        additionalPadding.top + denseSpacing,
+        additionalPadding.right +
+            defaultSpacing, // Additional right padding for scroll bar.
+        additionalPadding.bottom + noPadding,
       ),
       child: child,
     );

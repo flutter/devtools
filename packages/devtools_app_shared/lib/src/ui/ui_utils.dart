@@ -75,32 +75,4 @@ extension ColorExtension on Color {
       blue: c.b + ((1.0 - c.b) * percent),
     );
   }
-
-  bool isGreyscale() {
-    final averageChannel = (r + g + b) / 3;
-    final lowestChannel = math.max(0, averageChannel - 0.05);
-    final highestChannel = math.min(1, averageChannel + 0.05);
-    return [
-      r,
-      g,
-      b
-    ].every((channel) => channel >= lowestChannel && channel <= highestChannel);
-  }
-
-  Color accent() {
-    if (isGreyscale()) return this;
-
-    final sorted = [r, g, b]..sort();
-    return Color.from(
-        alpha: a,
-        red: _calculateAccentChannel(r, sorted),
-        blue: _calculateAccentChannel(b, sorted),
-        green: _calculateAccentChannel(g, sorted));
-  }
-
-  double _calculateAccentChannel(double channel, List<double> sorted) {
-    if (sorted.first == channel) return (sorted.first + sorted.last) / 1.5;
-    if (sorted.last == channel) return (sorted.first + sorted.last) / 2.5;
-    return channel;
-  }
 }
