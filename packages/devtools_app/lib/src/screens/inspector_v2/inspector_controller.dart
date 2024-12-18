@@ -462,6 +462,7 @@ class InspectorController extends DisposableController
       }
       if ((_receivedFlutterNavigationEvent || _receivedIsolateReloadEvent) &&
           extensionEventKind == 'Flutter.Frame') {
+        _refreshingAfterNavigationEvent = _receivedFlutterNavigationEvent;
         _receivedFlutterNavigationEvent = false;
         _receivedIsolateReloadEvent = false;
         await refreshInspector();
@@ -519,6 +520,8 @@ class InspectorController extends DisposableController
     }
   }
 
+  var _refreshingAfterNavigationEvent = false;
+
   RemoteDiagnosticsNode? _determineNewSelection(
     RemoteDiagnosticsNode? previousSelection,
   ) {
@@ -535,6 +538,11 @@ class InspectorController extends DisposableController
       distanceToAncestor,
     ) = _findClosestUnchangedAncestor(previousSelection);
     if (closestUnchangedAncestor == null) return inspectorTree.root?.diagnostic;
+
+    if (_refreshingAfterNavigationEvent) {
+      _refreshingAfterNavigationEvent = false;
+      return closestUnchangedAncestor;
+    }
 
     const distanceOffset = 3;
     final matchingDescendant = _findMatchingDescendant(
