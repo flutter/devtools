@@ -303,19 +303,37 @@ class LicenseHeader {
           // skip if add index doesn't exist for extension
           continue;
         }
+        final fileLength = file.lengthSync();
+        const bufferSize = 20;
         final replacementLicenseText = config.addLicenses[addIndex];
+        final byteCount = min(
+          bufferSize + replacementLicenseText.length,
+          fileLength,
+        );
+        var replacementInfo = await getReplacementInfo(
+          file: file,
+          existingLicenseText: replacementLicenseText,
+          replacementLicenseText: replacementLicenseText,
+          byteCount: byteCount as int,
+        );
+        if (replacementInfo.existingHeader.isNotEmpty &&
+            replacementInfo.replacementHeader.isNotEmpty &&
+            replacementInfo.existingHeader ==
+                replacementInfo.replacementHeader) {
+          // Do nothing if the replacement header is the same as the
+          // existing header
+          continue;
+        }
         final removeIndices = config.getRemoveIndicesForExtension(extension);
         for (final removeIndex in removeIndices) {
           final existingLicenseText = config.removeLicenses[removeIndex];
-          final fileLength = file.lengthSync();
-          const bufferSize = 20;
           // Assume that the license text will be near the start of the file,
           // but add in some buffer.
           final byteCount = min(
             bufferSize + existingLicenseText.length,
             fileLength,
           );
-          final replacementInfo = await getReplacementInfo(
+          replacementInfo = await getReplacementInfo(
             file: file,
             existingLicenseText: existingLicenseText,
             replacementLicenseText: replacementLicenseText,

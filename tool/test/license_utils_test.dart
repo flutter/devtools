@@ -52,7 +52,8 @@ late File testFile9;
 late File testFile10;
 late File excludeFile1;
 late File excludeFile2;
-late File skippedFile;
+late File skipFile;
+late File doNothingFile;
 
 void main() {
   group('config file tests', () {
@@ -257,27 +258,6 @@ text that should be added to the file. */''',
       }
     });
 
-    test('update skipped if license text not found', () async {
-      var errorMessage = '';
-      final header = LicenseHeader();
-      try {
-        await header.getReplacementInfo(
-          file: testFile9,
-          existingLicenseText: 'test',
-          replacementLicenseText: 'test',
-          byteCount: 50,
-        );
-      } on StateError catch (e) {
-        errorMessage = e.toString();
-      }
-      expect(
-        errorMessage,
-        equals(
-          'Bad state: License header expected in ${testFile9.path}, but not found!',
-        ),
-      );
-    });
-
     test("update skipped if file can't be read", () async {
       var errorMessage = '';
       final header = LicenseHeader();
@@ -363,7 +343,7 @@ text that should be added to the file. */''',
 
       final includedPaths = results.includedPaths;
       expect(includedPaths, isNotNull);
-      expect(includedPaths.length, equals(8));
+      expect(includedPaths.length, equals(9));
       // Order is not guaranteed
       expect(includedPaths.contains(testFile1.path), true);
       expect(contentsBeforeUpdate, isNot(equals(contentsAfterUpdate)));
@@ -373,7 +353,8 @@ text that should be added to the file. */''',
       expect(includedPaths.contains(testFile8.path), true);
       expect(includedPaths.contains(testFile9.path), true);
       expect(includedPaths.contains(testFile10.path), true);
-      expect(includedPaths.contains(skippedFile.path), true);
+      expect(includedPaths.contains(skipFile.path), true);
+      expect(includedPaths.contains(doNothingFile.path), true);
 
       final updatedPaths = results.updatedPaths;
       expect(updatedPaths, isNotNull);
@@ -386,7 +367,8 @@ text that should be added to the file. */''',
       expect(updatedPaths.contains(testFile8.path), true);
       expect(updatedPaths.contains(testFile9.path), true);
       expect(updatedPaths.contains(testFile10.path), true);
-      expect(updatedPaths.contains(skippedFile.path), false);
+      expect(updatedPaths.contains(skipFile.path), false);
+      expect(updatedPaths.contains(doNothingFile.path), false);
     });
 
     test('license headers bulk update can be dry run', () async {
@@ -544,6 +526,10 @@ update_paths:
     ext2:
       remove:
         - 2
+      add: 1
+    ext3:
+      remove:
+        - 3
       add: 1''';
 
   configFile.writeAsStringSync(contents, flush: true);
@@ -588,9 +574,17 @@ Future<void> _setupTestDirectoryStructure() async {
     ..createSync(recursive: true);
   testFile2.writeAsStringSync(licenseText3 + extraText, flush: true);
 
-  skippedFile = File(p.join(repoRoot.path, 'test.skip'))
+  final licenseText = '''
+# This is other 2001 multiline license
+# text that should be added to the file.
+''';
+  doNothingFile = File(p.join(repoRoot.path, 'doNothingFile.ext3'))
     ..createSync(recursive: true);
-  skippedFile.writeAsStringSync(extraText, flush: true);
+  doNothingFile.writeAsStringSync(licenseText + extraText, flush: true);
+
+  skipFile = File(p.join(repoRoot.path, 'test.skip'))
+    ..createSync(recursive: true);
+  skipFile.writeAsStringSync(extraText, flush: true);
 
   // Setup /repo_root/.hidden directory structure
   Directory(p.join(repoRoot.path, '.hidden')).createSync(recursive: true);
