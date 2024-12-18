@@ -56,6 +56,8 @@ update_paths:
     - /Users/mossman/Development/devtools/third_party
     - /Users/mossman/Development/devtools/packages/devtools_app/build
     - /Users/mossman/Development/devtools/tool/flutter-sdk
+    - /Users/mossman/Development/devtools/.github
+    - /Users/mossman/Development/devtools/.vscode
   file_types:
     bat:
       remove:
