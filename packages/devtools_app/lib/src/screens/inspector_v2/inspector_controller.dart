@@ -539,6 +539,12 @@ class InspectorController extends DisposableController
     ) = _findClosestUnchangedAncestor(previousSelection);
     if (closestUnchangedAncestor == null) return inspectorTree.root?.diagnostic;
 
+    // TODO(elliette): This might cause a race event that will set this to false
+    // for a subsequent navigate event. Consider passing the value of
+    // _refreshingAfterNavigationEvent through the method chain from where the
+    // navigation event is detected. This would require updating the interface
+    // of InspectorServiceClient.onForceRefresh, or refactoring to avoid doing
+    // so.
     if (_refreshingAfterNavigationEvent) {
       _refreshingAfterNavigationEvent = false;
       return closestUnchangedAncestor;
