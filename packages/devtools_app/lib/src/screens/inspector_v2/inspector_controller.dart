@@ -247,7 +247,7 @@ class InspectorController extends DisposableController
   /// Whether the implementation widgets are hidden in the widget tree.
   ValueListenable<bool> get implementationWidgetsHidden =>
       _implementationWidgetsHidden;
-  final _implementationWidgetsHidden = ValueNotifier<bool>(false);
+  final _implementationWidgetsHidden = ValueNotifier<bool>(true);
 
   InspectorTreeNode? lastExpanded;
 
