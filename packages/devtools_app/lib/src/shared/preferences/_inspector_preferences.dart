@@ -33,7 +33,7 @@ class InspectorPreferencesController extends DisposableController
   final _legacyInspectorEnabled = ValueNotifier<bool>(false);
   // TODO(https://github.com/flutter/devtools/issues/1423): Default to true
   // after verifying auto-refreshes are performant.
-  final _autoRefreshEnabled = ValueNotifier<bool>(false);
+  final _autoRefreshEnabled = ValueNotifier<bool>(true);
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
