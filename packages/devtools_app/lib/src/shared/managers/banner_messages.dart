@@ -539,7 +539,7 @@ class WelcomeToNewInspectorMessage {
       textSpans: [
         const TextSpan(
           text: '''
-👋 Welcome to the new Flutter Inspector! To get started, check out the  ''',
+👋 Welcome to the new Flutter Inspector! To get started, check out the ''',
         ),
         GaLinkTextSpan(
           link: GaLink(
@@ -551,7 +551,7 @@ class WelcomeToNewInspectorMessage {
           context: context,
           style: Theme.of(context).linkTextStyle,
         ),
-        const TextSpan(text: ' .'),
+        const TextSpan(text: '.'),
       ],
       screenId: screenId,
     );
