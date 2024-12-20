@@ -120,6 +120,7 @@ const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const inspectorV2Enabled = 'inspectorV2Enabled';
 const inspectorAutoRefreshEnabled = 'inspectorAutoRefreshEnabled';
+const inspectorV2Docs = 'inspectorV2Docs';
 const clearLogs = 'clearLogs';
 const copyLogs = 'copyLogs';
 
