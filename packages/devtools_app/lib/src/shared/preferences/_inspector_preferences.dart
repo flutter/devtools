@@ -19,7 +19,7 @@ enum InspectorDetailsViewType {
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
-  ValueListenable<bool> get inspectorV2Enabled => _inspectorV2Enabled;
+  ValueListenable<bool> get legacyInspectorEnabled => _legacyInspectorEnabled;
   ValueListenable<bool> get autoRefreshEnabled => _autoRefreshEnabled;
   ValueListenable<InspectorDetailsViewType> get defaultDetailsView =>
       _defaultDetailsView;
@@ -30,7 +30,7 @@ class InspectorPreferencesController extends DisposableController
       serviceConnection.inspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
-  final _inspectorV2Enabled = ValueNotifier<bool>(false);
+  final _legacyInspectorEnabled = ValueNotifier<bool>(false);
   // TODO(https://github.com/flutter/devtools/issues/1423): Default to true
   // after verifying auto-refreshes are performant.
   final _autoRefreshEnabled = ValueNotifier<bool>(false);
@@ -42,7 +42,8 @@ class InspectorPreferencesController extends DisposableController
   );
 
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
-  static const _inspectorV2EnabledStorageId = 'inspector.inspectorV2Enabled';
+  static const _legacyInspectorEnabledStorageId =
+      'inspector.legacyInspectorEnabled';
   static const _autoRefreshEnabledStorageId = 'inspector.autoRefreshEnabled';
   static const _defaultDetailsViewStorageId =
       'inspector.defaultDetailsViewType';
@@ -68,7 +69,7 @@ class InspectorPreferencesController extends DisposableController
 
   Future<void> init() async {
     await _initHoverEvalMode();
-    await _initInspectorV2Enabled();
+    await _initLegacyInspectorEnabled();
     await _initAutoRefreshEnabled();
     // TODO(jacobr): consider initializing this first as it is not blocking.
     _initPubRootDirectories();
@@ -83,11 +84,11 @@ class InspectorPreferencesController extends DisposableController
     );
   }
 
-  Future<void> _initInspectorV2Enabled() async {
-    await _updateInspectorV2Enabled();
+  Future<void> _initLegacyInspectorEnabled() async {
+    await _updateLegacyInspectorEnabled();
     _saveBooleanPreferenceChanges(
-      preferenceStorageId: _inspectorV2EnabledStorageId,
-      preferenceNotifier: _inspectorV2Enabled,
+      preferenceStorageId: _legacyInspectorEnabledStorageId,
+      preferenceNotifier: _legacyInspectorEnabled,
     );
   }
 
@@ -107,10 +108,10 @@ class InspectorPreferencesController extends DisposableController
     );
   }
 
-  Future<void> _updateInspectorV2Enabled() async {
+  Future<void> _updateLegacyInspectorEnabled() async {
     await _updateBooleanPreference(
-      preferenceStorageId: _inspectorV2EnabledStorageId,
-      preferenceNotifier: _inspectorV2Enabled,
+      preferenceStorageId: _legacyInspectorEnabledStorageId,
+      preferenceNotifier: _legacyInspectorEnabled,
       defaultValue: false,
     );
   }
@@ -226,7 +227,7 @@ class InspectorPreferencesController extends DisposableController
     _checkedFlutterPubRoot = false;
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
-    await _updateInspectorV2Enabled();
+    await _updateLegacyInspectorEnabled();
     await loadPubRootDirectories();
     await _updateInspectorDetailsViewSelection();
   }
@@ -442,8 +443,8 @@ class InspectorPreferencesController extends DisposableController
   }
 
   @visibleForTesting
-  void setInspectorV2Enabled(bool inspectorV2Enabled) {
-    _inspectorV2Enabled.value = inspectorV2Enabled;
+  void setLegacyInspectorEnabled(bool legacyInspectorEnabled) {
+    _legacyInspectorEnabled.value = legacyInspectorEnabled;
   }
 
   @visibleForTesting

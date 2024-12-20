@@ -75,7 +75,7 @@ void main() {
     setGlobal(NotificationService, NotificationService());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
     // Enable the V2 inspector:
-    preferences.inspector.setInspectorV2Enabled(true);
+    preferences.inspector.setLegacyInspectorEnabled(false);
   });
 
   Future<void> mockExtensions() async {

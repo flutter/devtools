@@ -14,9 +14,11 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/globals.dart';
 import '../../shared/managers/error_badge_manager.dart';
+import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/search.dart';
+import '../../shared/utils/utils.dart';
 import '../inspector_shared/inspector_controls.dart';
 import '../inspector_shared/inspector_screen.dart';
 import 'inspector_controller.dart';
@@ -57,6 +59,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   static const inspectorTreeKey = Key('Inspector Tree');
   static const minScreenWidthForTextBeforeScaling = 900.0;
 
+  static const _welcomeShownStorageId = 'inspectorV2WelcomeShown';
+
   @override
   void dispose() {
     _inspectorTreeController.dispose();
@@ -67,6 +71,14 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   void initState() {
     super.initState();
     ga.screen(InspectorScreen.id);
+
+    // If this is the first time a user is loading the new Inspector since it
+    // became opt-out instead of opt-in, then show a welcome banner.
+    unawaited(
+      _maybeShowWelcomeMessage().catchError((_) {
+        // Ignore errors.
+      }),
+    );
   }
 
   @override
@@ -216,6 +228,33 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         await controller.refreshInspector();
       }),
     );
+  }
+
+  Future<void> _maybeShowWelcomeMessage() async {
+    final welcomeAlreadyShown = await storage.getValue(_welcomeShownStorageId);
+    if (welcomeAlreadyShown == 'true') return;
+
+    const message =
+        '👋 Welcome to the new Flutter Inspector! To get started, '
+        'check out the docs.';
+    const docsUrl = 'https://docs.flutter.dev/tools/devtools/inspector#new';
+    final openDocsAction = NotificationAction(
+      label: 'Inspector docs',
+      onPressed: () {
+        unawaited(launchUrlWithErrorHandling(docsUrl));
+      },
+    );
+    notificationService.pushNotification(
+      NotificationMessage(
+        message,
+        isDismissible: true,
+        actions: [openDocsAction],
+      ),
+      allowDuplicates: false,
+    );
+
+    // Mark that the welcome message has already been shown.
+    await storage.setValue(_welcomeShownStorageId, 'true');
   }
 }
 

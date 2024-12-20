@@ -25,8 +25,9 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
     final dialogHeight = scaleByFontFactor(500.0);
 
     return ValueListenableBuilder(
-      valueListenable: preferences.inspector.inspectorV2Enabled,
-      builder: (context, inspectorV2Enabled, _) {
+      valueListenable: preferences.inspector.legacyInspectorEnabled,
+      builder: (context, legacyInspectorEnabled, _) {
+        final inspectorV2Enabled = !legacyInspectorEnabled;
         return DevToolsDialog(
           title: const DialogTitleText('Flutter Inspector Settings'),
           content: SizedBox(

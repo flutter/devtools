@@ -60,13 +60,13 @@ void main() {
   setUp(() async {
     await env.setupEnvironment();
     // Enable the V2 inspector:
-    preferences.inspector.setInspectorV2Enabled(true);
+    preferences.inspector.setLegacyInspectorEnabled(false);
   });
 
   tearDown(() async {
     await env.tearDownEnvironment(force: true);
     // Re-set changes to preferences:
-    preferences.inspector.setInspectorV2Enabled(false);
+    preferences.inspector.setLegacyInspectorEnabled(true);
   });
 
   tearDownAll(() {

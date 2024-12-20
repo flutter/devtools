@@ -100,10 +100,12 @@ class SettingsDialog extends StatelessWidget {
               Flexible(
                 child: CheckboxSetting(
                   notifier:
-                      preferences.inspector.inspectorV2Enabled
+                      preferences.inspector.legacyInspectorEnabled
                           as ValueNotifier<bool?>,
-                  title: 'Enable the new Inspector',
-                  description: 'Try out the redesigned Flutter Inspector.',
+                  title: 'Use legacy Inspector',
+                  description:
+                      'Disable the redesigned Flutter Inspector. Please know that '
+                      'the legacy Inspector may be removed in a future release.',
                   gaItem: gac.inspectorV2Enabled,
                 ),
               ),
