@@ -252,7 +252,7 @@ void main() {
     // widgets".
     expect(find.richTextContaining('more widgets...'), findsWidgets);
 
-    // Toggle implementation widgets ff.
+    // Toggle implementation widgets off.
     await _toggleImplementationWidgets(tester);
 
     // Confirm that the hidden widgets are no longer visible.
