@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../../shared/http/http_request_data.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'constants.dart';
 import 'har_data_entry.dart';
 

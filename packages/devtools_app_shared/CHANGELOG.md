@@ -1,3 +1,12 @@
+## 0.3.0
+* Bump minimum Dart SDK version to `3.6.0`.
+* Bump minimum Flutter SDK version to `3.27.1`.
+* Bump `devtools_shared` dependency to `^11.1.0`.
+* Add `DevToolsIcon` and `AssetImageIcon` widgets.
+* Add `iconAsset` and `iconSize` fields to the `ButtonGroupItemData` class.
+* Add `iconAsset` and `iconSize` fields to the `MaterialIconLabel` class.
+* Add "Supported Flutter versions" policy to the README.
+
 ## 0.2.4
 * Add `updateQueryParameter` utility method.
 * Add `jump` parameter to `ScrollController.autoScrollToBottom` extension method.

@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
-import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/ui/common_widgets.dart';
+import 'ide_shared/property_editor/property_editor_panel.dart';
 import 'vs_code/flutter_panel.dart';
 
 /// "Screens" that are intended for standalone use only, likely for embedding
@@ -15,7 +17,10 @@ import 'vs_code/flutter_panel.dart';
 /// meaning that this screen will not be part of DevTools' normal navigation.
 /// The only way to access a standalone screen is directly from the url.
 enum StandaloneScreenType {
+  // TODO(elliette): Add property editor as a standalone screen, see:
+  // https://github.com/flutter/devtools/issues/8546
   editorSidebar,
+  propertyEditor,
   vsCodeFlutterPanel; // Legacy postMessage version, shows an upgrade message.
 
   Widget get screen {
@@ -34,11 +39,37 @@ enum StandaloneScreenType {
         //  useful message.
         valueListenable: dtdManager.connection,
         builder: (context, data, _) {
-          return data == null
-              ? const CenteredCircularProgressIndicator()
-              : EditorSidebarPanel(data);
+          return _DtdConnectedScreen(
+            dtd: data,
+            screenProvider: (dtd) => EditorSidebarPanel(dtd),
+          );
+        },
+      ),
+      StandaloneScreenType.propertyEditor => ValueListenableBuilder(
+        valueListenable: dtdManager.connection,
+        builder: (context, data, _) {
+          return _DtdConnectedScreen(
+            dtd: data,
+            screenProvider: (dtd) => PropertyEditorPanel(dtd),
+          );
         },
       ),
     };
+  }
+}
+
+/// Widget that returns a [CenteredCircularProgressIndicator] while it waits for
+/// a [DartToolingDaemon] connection.
+class _DtdConnectedScreen extends StatelessWidget {
+  const _DtdConnectedScreen({required this.dtd, required this.screenProvider});
+
+  final DartToolingDaemon? dtd;
+  final Widget Function(DartToolingDaemon) screenProvider;
+
+  @override
+  Widget build(BuildContext context) {
+    return dtd == null
+        ? const CenteredCircularProgressIndicator()
+        : screenProvider(dtd!);
   }
 }

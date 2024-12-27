@@ -29,8 +29,8 @@ import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/query_parameters.dart';
 import '../inspector_shared/inspector_screen.dart';
 import 'inspector_tree_controller.dart';
 
@@ -638,7 +638,7 @@ class InspectorController extends DisposableController
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
       treeType,
-      isSummaryTree: isSummaryTree,
+      restrictToLocalProject: isSummaryTree,
     );
 
     final pendingDetailsFuture =

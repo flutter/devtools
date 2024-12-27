@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../common_widgets.dart';
-import '../utils.dart';
+import '../ui/common_widgets.dart';
+import '../utils/utils.dart';
 import 'analytics_controller.dart';
 
 /// Conditionally displays a prompt to request permission for collection of

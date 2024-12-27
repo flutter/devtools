@@ -6,8 +6,8 @@ import 'package:collection/collection.dart';
 
 import '../../../../shared/primitives/graph.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/profiler_utils.dart';
 import '../../../../shared/ui/search.dart';
+import '../../../../shared/utils/profiler_utils.dart';
 import '../../cpu_profile_model.dart';
 
 /// Represents a graph node for a method in a CPU profile method table.

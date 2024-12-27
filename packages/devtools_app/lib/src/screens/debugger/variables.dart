@@ -16,7 +16,7 @@ import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/tree_builder.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
-import '../../shared/tree.dart';
+import '../../shared/ui/tree_view.dart';
 
 class Variables extends StatelessWidget {
   const Variables({super.key});

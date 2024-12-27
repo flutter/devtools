@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import '../../service/editor/api_classes.dart';
 import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
-import '../../shared/common_widgets.dart';
+import '../../shared/ui/common_widgets.dart';
 import 'debug_sessions.dart';
 import 'devices.dart';
 import 'devtools/devtools_view.dart';
@@ -142,6 +142,9 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
             case ThemeChangedEvent():
             // Do nothing; this is handled in
             // lib/src/framework/theme_manager.dart.
+            case ActiveLocationChangedEvent():
+            // Do nothing; this is handled in
+            // lib/src/standalone_ui/ide_shared/property_editor.
           }
         });
       }),

@@ -8,13 +8,13 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/common_widgets.dart';
 import '../../../shared/console/widgets/expandable_variable.dart';
 import '../../../shared/diagnostics/dart_object_node.dart';
 import '../../../shared/diagnostics/tree_builder.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/colors.dart';
+import '../../../shared/ui/common_widgets.dart';
 import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
@@ -165,8 +165,8 @@ class DisplayProvider extends StatelessWidget {
     if (variable.text != null) {
       return SelectableText.rich(
         TextSpan(
-          children: processAnsiTerminalCodes(
-            variable.text,
+          children: textSpansFromAnsi(
+            variable.text ?? '',
             theme.subtleFixedFontStyle,
           ),
         ),

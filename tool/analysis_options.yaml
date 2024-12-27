@@ -7,8 +7,6 @@ analyzer:
 linter:
   rules:
     # - avoid_dynamic_calls
-    # Obsolete with the new Dart formatter.
-    # - require_trailing_commas
     - unawaited_futures
     - depend_on_referenced_packages
     - directives_ordering

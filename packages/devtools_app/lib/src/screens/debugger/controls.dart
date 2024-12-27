@@ -4,23 +4,28 @@
 
 import 'dart:async';
 
-import 'package:codicon/codicon.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/utils.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/utils/utils.dart';
 import 'debugger_controller.dart';
 
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({super.key});
 
   static const minWidthBeforeScaling = 1750.0;
+
+  // The icon size for the material_symbol icons needs to be increased to
+  // account for padding included in the icon assets.
+  static final materialIconSize = scaleByFontFactor(
+    defaultIconSizeBeforeScaling + 3.0,
+  );
 
   @override
   State<DebuggingControls> createState() => _DebuggingControlsState();
@@ -90,7 +95,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
       items: [
         ButtonGroupItemData(
           tooltip: 'Pause',
-          icon: Codicons.debugPause,
+          icon: Icons.pause,
           autofocus: true,
           // Disable when paused or selected isolate is a system isolate.
           onPressed:
@@ -100,7 +105,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
         ),
         ButtonGroupItemData(
           tooltip: 'Resume',
-          icon: Codicons.debugContinue,
+          iconAsset: 'icons/material_symbols/resume.png',
+          iconSize: DebuggingControls.materialIconSize,
           // Enable while paused + not resuming and selected isolate is not
           // a system isolate.
           onPressed:
@@ -117,17 +123,20 @@ class _DebuggingControlsState extends State<DebuggingControls>
       items: [
         ButtonGroupItemData(
           label: 'Step Over',
-          icon: Codicons.debugStepOver,
+          iconAsset: 'icons/material_symbols/step_over.png',
+          iconSize: DebuggingControls.materialIconSize,
           onPressed: canStep ? () => unawaited(controller.stepOver()) : null,
         ),
         ButtonGroupItemData(
           label: 'Step In',
-          icon: Codicons.debugStepInto,
+          iconAsset: 'icons/material_symbols/step_into.png',
+          iconSize: DebuggingControls.materialIconSize,
           onPressed: canStep ? () => unawaited(controller.stepIn()) : null,
         ),
         ButtonGroupItemData(
           label: 'Step Out',
-          icon: Codicons.debugStepOut,
+          iconAsset: 'icons/material_symbols/step_out.png',
+          iconSize: DebuggingControls.materialIconSize,
           onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
         ),
       ],
@@ -181,11 +190,11 @@ class CodeStatisticsControls extends StatelessWidget {
               children: const [
                 _CodeStatsControl(
                   tooltip: 'Show code coverage',
-                  icon: Codicons.checklist,
+                  icon: Icons.checklist,
                 ),
                 _CodeStatsControl(
                   tooltip: 'Show profiler hits',
-                  icon: Codicons.flame,
+                  icon: Icons.local_fire_department,
                 ),
               ],
               onPressed: (index) {

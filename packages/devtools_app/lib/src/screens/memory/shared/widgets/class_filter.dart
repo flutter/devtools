@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../heap/class_filter.dart';
 
 String _adaptRootPackageForFilter(String? rootPackage) {

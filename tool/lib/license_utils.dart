@@ -22,7 +22,7 @@ import 'package:yaml/yaml.dart';
 /// from a standalone script/application in the future.
 ///
 /// Sample config file:
-/// ---
+/// ```yaml
 /// # sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
 /// remove_licenses:
 ///   - |
@@ -73,6 +73,7 @@ import 'package:yaml/yaml.dart';
 ///       remove:
 ///         - 2
 ///       add: 1
+/// ```
 class LicenseConfig {
   /// Builds a [LicenseConfig] from the provided values.
   LicenseConfig({

@@ -14,20 +14,20 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../shared/common_widgets.dart';
 import '../../shared/console/widgets/expandable_variable.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/diagnostics/tree_builder.dart';
 import '../../shared/globals.dart';
-import '../../shared/history_viewport.dart';
 import '../../shared/primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/history_viewport.dart';
 import '../../shared/ui/hover.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'breakpoints.dart';
 import 'codeview_controller.dart';
@@ -1172,7 +1172,7 @@ class _LineItemState extends State<LineItem>
 
     final word = wordForHover(event.localPosition.dx, widget.lineContents);
 
-    if (word != '') {
+    if (word.isNotEmpty && !isPrimitiveValueOrNull(word)) {
       try {
         final response = await evalService.evalAtCurrentFrame(word);
         final isolateRef =

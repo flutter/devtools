@@ -9,13 +9,13 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../service/connected_app/connection_info.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/config_specific/import_export/import_export.dart';
-import '../shared/connection_info.dart';
+import '../shared/framework/routing.dart';
 import '../shared/globals.dart';
-import '../shared/query_parameters.dart';
-import '../shared/routing.dart';
+import '../shared/primitives/query_parameters.dart';
 
 class DisconnectObserver extends StatefulWidget {
   const DisconnectObserver({

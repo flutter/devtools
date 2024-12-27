@@ -7,11 +7,11 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../shared/framework/screen.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
-import '../../../shared/offline_data.dart';
-import '../../../shared/screen.dart';
+import '../../../shared/offline/offline_data.dart';
 import '../panes/chart/controller/chart_data.dart';
 import '../panes/chart/controller/chart_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';

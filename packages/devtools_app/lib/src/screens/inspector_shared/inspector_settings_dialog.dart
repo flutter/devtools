@@ -10,11 +10,11 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
-import '../../shared/editable_list.dart';
 import '../../shared/globals.dart';
 import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/simple_items.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/editable_list.dart';
 
 class FlutterInspectorSettingsDialog extends StatelessWidget {
   const FlutterInspectorSettingsDialog({super.key});
@@ -52,9 +52,9 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                     notifier:
                         preferences.inspector.autoRefreshEnabled
                             as ValueNotifier<bool?>,
-                    title: 'Enable auto-refreshing of the widget tree',
+                    title: 'Enable widget tree auto-refreshing',
                     description:
-                        'The widget tree will automatically be refreshed after a hot-reload.',
+                        'The widget tree will automatically refresh after a hot-reload or navigation event.',
                     gaItem: gac.inspectorAutoRefreshEnabled,
                   ),
                 ] else ...[

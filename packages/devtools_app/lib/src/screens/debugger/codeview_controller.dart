@@ -10,14 +10,14 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../framework/app_error_handling.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
+import '../../shared/framework/app_error_handling.dart';
+import '../../shared/framework/routing.dart';
 import '../../shared/globals.dart';
-import '../../shared/notifications.dart';
+import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/history_manager.dart';
-import '../../shared/routing.dart';
 import '../../shared/ui/search.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';

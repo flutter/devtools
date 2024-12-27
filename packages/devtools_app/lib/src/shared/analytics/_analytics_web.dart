@@ -16,12 +16,12 @@ import 'package:logging/logging.dart';
 import 'package:unified_analytics/unified_analytics.dart' as ua;
 import 'package:web/web.dart';
 
-import '../dtd_manager_extensions.dart';
 import '../globals.dart';
+import '../managers/dtd_manager_extensions.dart';
+import '../primitives/query_parameters.dart';
 import '../primitives/utils.dart';
-import '../query_parameters.dart';
 import '../server/server.dart' as server;
-import '../utils.dart';
+import '../utils/utils.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as gac;
 import 'gtags.dart';
@@ -522,7 +522,8 @@ void cancelTimingOperation(String screenName, String timedOperation) {
   final operation = _timedOperationsInProgress.remove(operationKey);
   assert(
     operation != null,
-    'The operation cannot be cancelled because it does not exist.',
+    'The operation $screenName.$timedOperation cannot be cancelled because it '
+    'does not exist.',
   );
 }
 
@@ -849,22 +850,6 @@ void computeDevToolsQueryParams() {
 
 Future<void> computeFlutterClientId() async {
   flutterClientId = await server.flutterGAClientID();
-}
-
-int _stillWaiting = 0;
-
-void waitForDimensionsComputed(String screenName) {
-  Timer(const Duration(milliseconds: 100), () {
-    if (_analyticsComputed) {
-      screen(screenName);
-    } else {
-      if (_stillWaiting++ < 50) {
-        waitForDimensionsComputed(screenName);
-      } else {
-        _log.warning('Cancel waiting for dimensions.');
-      }
-    }
-  });
 }
 
 Future<void> setupDimensions() async {

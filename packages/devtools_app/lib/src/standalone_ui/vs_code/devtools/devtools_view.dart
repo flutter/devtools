@@ -11,9 +11,9 @@ import '../../../service/editor/api_classes.dart';
 import '../../../service/editor/editor_client.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/common_widgets.dart';
+import '../../../shared/framework/screen.dart';
 import '../../../shared/primitives/utils.dart';
-import '../../../shared/screen.dart';
+import '../../../shared/ui/common_widgets.dart';
 import 'extensions_view.dart';
 import 'shared.dart';
 

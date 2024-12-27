@@ -6,7 +6,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/utils.dart';
+import '../../../../../shared/utils/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';

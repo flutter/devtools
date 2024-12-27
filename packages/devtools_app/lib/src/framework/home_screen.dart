@@ -10,17 +10,16 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../service/connected_app/connection_info.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/config_specific/import_export/import_export.dart';
-import '../shared/connection_info.dart';
+import '../shared/framework/routing.dart';
+import '../shared/framework/screen.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
-import '../shared/routing.dart';
-import '../shared/screen.dart';
 import '../shared/title.dart';
 import '../shared/ui/vm_flag_widgets.dart';
 import 'framework_core.dart';
@@ -159,28 +158,29 @@ class ConnectInput extends StatefulWidget {
 class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
   late final TextEditingController connectDialogController;
 
-  SharedPreferences? _debugSharedPreferences;
-  static const _vmServiceUriKey = 'vmServiceUri';
+  /// The key for the VM Service URI we cache in storage for the purpose of
+  /// speeding up the DevTools development cycle.
+  static const _debugVmServiceUriKey = 'debug_vmServiceUri';
+
   @override
   void initState() {
     super.initState();
     connectDialogController = TextEditingController();
     assert(() {
-      _debugInitSharedPreferences();
+      _debugInitVmServiceCache();
       return true;
     }());
   }
 
-  void _debugInitSharedPreferences() async {
+  void _debugInitVmServiceCache() async {
     // We only do this in debug mode as it speeds iteration for DevTools
     // developers who tend to repeatedly restart DevTools to debug the same
     // test application.
-    _debugSharedPreferences = await SharedPreferences.getInstance();
-    if (_debugSharedPreferences != null && mounted) {
-      final uri = _debugSharedPreferences!.getString(_vmServiceUriKey);
-      if (uri != null) {
+    final uri = await storage.getValue(_debugVmServiceUriKey);
+    if (uri != null) {
+      setState(() {
         connectDialogController.text = uri;
-      }
+      });
     }
   }
 
@@ -262,9 +262,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
     }
 
     assert(() {
-      if (_debugSharedPreferences != null) {
-        _debugSharedPreferences!.setString(_vmServiceUriKey, uri);
-      }
+      storage.setValue(_debugVmServiceUriKey, uri);
       return true;
     }());
 

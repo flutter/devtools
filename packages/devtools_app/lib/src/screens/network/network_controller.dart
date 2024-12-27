@@ -18,7 +18,7 @@ import '../../shared/offline_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'har_network_data.dart';
 import 'network_model.dart';
 import 'network_screen.dart';

@@ -9,8 +9,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../common_widgets.dart';
 import '../primitives/utils.dart';
+import '../ui/common_widgets.dart';
 import 'console_service.dart';
 import 'widgets/expandable_variable.dart';
 
@@ -183,7 +183,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
                   TextSpan(
                     // TODO(jacobr): consider caching the processed ansi terminal
                     // codes.
-                    children: processAnsiTerminalCodes(
+                    children: textSpansFromAnsi(
                       line.text,
                       theme.regularTextStyle,
                     ),

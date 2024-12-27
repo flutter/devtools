@@ -41,7 +41,6 @@ jobs:
         with:
           ref: master
 
-      - uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
       - name: Load Cached Flutter SDK
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
@@ -59,6 +58,10 @@ jobs:
         id: version-bump
         run: |
           set -ex
+
+          # Ensure we are using the Dart executable from the Flutter SDK
+          export PATH=`pwd`/tool/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/tool/flutter-sdk/bin:`pwd`/bin:$PATH
+
           pushd tool/
           dart pub get
           popd

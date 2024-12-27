@@ -12,10 +12,10 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../diagnostics/dap_object_node.dart';
 import '../../diagnostics/dart_object_node.dart';
+import '../../framework/routing.dart';
+import '../../framework/screen.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
-import '../../routing.dart';
-import '../../screen.dart';
 import '../../ui/colors.dart';
 import 'description.dart';
 
@@ -48,8 +48,8 @@ class _DisplayProviderState extends State<DisplayProvider> {
         menuButtons: _getMenuButtons(context),
         child: Text.rich(
           TextSpan(
-            children: processAnsiTerminalCodes(
-              widget.variable.text,
+            children: textSpansFromAnsi(
+              widget.variable.text!,
               theme.subtleFixedFontStyle,
             ),
           ),

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:codicon/codicon.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -16,15 +15,15 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/banner_messages.dart';
-import '../../shared/common_widgets.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
+import '../../shared/framework/routing.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/banner_messages.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/routing.dart';
-import '../../shared/screen.dart';
-import '../../shared/utils.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/utils/utils.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
@@ -586,10 +585,10 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               message: 'Resume',
               child: TextButton(
                 onPressed: controller.resume,
-                child: Icon(
-                  Codicons.debugContinue,
+                child: DevToolsIcon(
+                  iconAsset: 'icons/material_symbols/resume.png',
                   color: Colors.green,
-                  size: defaultIconSize,
+                  size: DebuggingControls.materialIconSize,
                 ),
               ),
             ),
@@ -597,10 +596,10 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               message: 'Step over',
               child: TextButton(
                 onPressed: controller.stepOver,
-                child: Icon(
-                  Codicons.debugStepOver,
+                child: DevToolsIcon(
+                  iconAsset: 'icons/material_symbols/step_over.png',
                   color: Colors.black,
-                  size: defaultIconSize,
+                  size: DebuggingControls.materialIconSize,
                 ),
               ),
             ),

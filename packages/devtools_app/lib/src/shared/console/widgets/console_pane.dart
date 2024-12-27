@@ -6,8 +6,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../common_widgets.dart';
 import '../../globals.dart';
+import '../../ui/common_widgets.dart';
 import '../console.dart';
 import '../console_service.dart';
 import 'evaluate.dart';

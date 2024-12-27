@@ -10,9 +10,9 @@ import 'package:provider/provider.dart';
 
 import '../../service/service_extension_widgets.dart';
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import 'logging_controller.dart';

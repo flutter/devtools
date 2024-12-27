@@ -1,5 +1,11 @@
-## 0.3.0-dev.1
-* Bump `devtools_app_shared` dependency to `0.2.4`.
+## 0.3.0
+* Fix `build_and_copy` command by removing deprecated `--web-renderer` option.
+* Bump minimum Dart SDK version to `3.6.0` and minimum Flutter SDK version
+to `3.27.1`.
+* Bump `devtools_app_shared` dependency to `0.3.0`.
+* Bump `devtools_shared` dependency to `11.1.0`.
+* Clarify VS Code configuration in `README.md`.
+* Add "Supported Flutter versions" policy to the README.
 
 ## 0.3.0-dev.0
 * Add `ExtensionManager.copyToClipboard` method.

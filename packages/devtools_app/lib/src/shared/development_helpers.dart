@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 import 'globals.dart';
-import 'survey.dart';
+import 'managers/survey.dart';
 
 // This file contains helpers that can be used during local development. Any
 // changes to variables in this file (like flipping a bool to true or setting

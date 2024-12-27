@@ -5,20 +5,18 @@ publish_to: none
 environment:
   sdk: ">=3.7.0-160.0.dev <4.0.0"
 
+resolution: workspace
+
 executables:
   dt: dt
 
 dependencies:
   args: ^2.4.2
   cli_util: ^0.4.1
+  collection: ^1.19.0
   io: ^1.0.4
   path: ^1.9.0
   yaml: ^3.1.2
-
-dependency_overrides:
-  devtools_shared:
-    path: ../packages/devtools_shared
-  lints: ^4.0.0
   
 dev_dependencies:
   test: ^1.25.8

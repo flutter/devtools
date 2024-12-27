@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 import '../../../shared/primitives/simple_elements.dart';
 
 class PrimaryControls extends StatelessWidget {

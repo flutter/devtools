@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import '../../shared/primitives/utils.dart';
-import '../../shared/ui/icons.dart';
 import 'logging_controller.dart';
 
 class MetadataChips extends StatelessWidget {

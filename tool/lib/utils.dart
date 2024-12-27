@@ -170,6 +170,52 @@ extension DevToolsProcessManagerExtension on ProcessManager {
   }
 }
 
+Future<Process> startIndependentProcess(
+  CliCommand command, {
+  String? workingDirectory,
+  String? waitForOutput,
+  Duration waitForOutputTimeout = const Duration(minutes: 2),
+  void Function(String line)? onOutput,
+}) async {
+  final commandDisplay = '${workingDirectory ?? ''} > $command';
+  print(commandDisplay);
+  final process = await Process.start(
+    command.exe,
+    command.args,
+    workingDirectory: workingDirectory,
+  );
+
+  if (waitForOutput != null) {
+    final completer = Completer<void>();
+    final stdoutSub = process.stdout.transform(utf8.decoder).listen((line) {
+      print('> [stdout] $line');
+      onOutput?.call(line);
+      if (line.contains(waitForOutput)) {
+        completer.complete();
+      }
+    });
+    final stderrSub = process.stderr.transform(utf8.decoder).listen((line) {
+      print('> [stderr] $line');
+      onOutput?.call(line);
+      if (line.contains(waitForOutput)) {
+        completer.complete();
+      }
+    });
+    await completer.future.timeout(
+      waitForOutputTimeout,
+      onTimeout: () {
+        throw Exception(
+          'Expected output "$waitForOutput" not received before timeout.',
+        );
+      },
+    );
+    await stdoutSub.cancel();
+    await stderrSub.cancel();
+  }
+
+  return process;
+}
+
 String pathFromRepoRoot(String pathFromRoot) {
   return path.join(DevToolsRepo.getInstance().repoPath, pathFromRoot);
 }
@@ -177,11 +223,11 @@ String pathFromRepoRoot(String pathFromRoot) {
 /// Returns the name of the git remote with id [remoteId] in
 /// [workingDirectory].
 ///
-/// When [workingDirectory] is null, this method will look for the remote in
+/// When [workingDirectory] is `null`, this method will look for the remote in
 /// the current directory.
 ///
-/// [remoteId] should have the form <organization>/<repository>.git. For
-/// example: 'flutter/flutter.git' or 'flutter/devtools.git'.
+/// [remoteId] should have the form `<organization>/<repository>.git`.
+/// For example: `'flutter/flutter.git'` or `'flutter/devtools.git'`.
 Future<String> findRemote(
   ProcessManager processManager, {
   required String remoteId,

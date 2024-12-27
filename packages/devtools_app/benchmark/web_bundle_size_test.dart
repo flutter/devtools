@@ -31,8 +31,6 @@ void main() {
       await _runProcess('flutter', [
         'build',
         'web',
-        '--web-renderer',
-        'canvaskit',
         '--pwa-strategy=offline-first',
         '--release',
         '--no-tree-shake-icons',

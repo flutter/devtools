@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/feature_flags.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
-import '../../shared/screen.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import '../inspector/inspector_screen_body.dart' as legacy;
 import '../inspector_v2/inspector_screen_body.dart' as v2;
 import 'inspector_screen_controller.dart';

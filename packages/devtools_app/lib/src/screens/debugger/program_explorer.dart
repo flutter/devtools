@@ -10,11 +10,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/tree.dart';
 import '../../shared/ui/colors.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/tree_view.dart';
 import 'program_explorer_controller.dart';
 import 'program_explorer_model.dart';
 
@@ -94,9 +94,9 @@ class _ProgramExplorerRow extends StatelessWidget {
   /// Builds a string representation of a field declaration.
   ///
   /// Examples:
-  ///   - final String
-  ///   - static const int
-  ///   - List<X0>
+  ///   - `final String`
+  ///   - `static const int`
+  ///   - `List<X0>`
   String _buildFieldTypeText(Field field) {
     final buffer = StringBuffer();
     if (field.isStatic!) {
@@ -117,10 +117,10 @@ class _ProgramExplorerRow extends StatelessWidget {
   /// Builds a string representation of a function signature
   ///
   /// Examples:
-  ///   - Foo<T>(T) -> dynamic
-  ///   - Bar(String, int) -> void
-  ///   - Baz(String, [int]) -> void
-  ///   - Faz(String, {String? bar, required int baz}) -> int
+  ///   - `Foo<T>(T) -> dynamic`
+  ///   - `Bar(String, int) -> void`
+  ///   - `Baz(String, [int]) -> void`
+  ///   - `Faz(String, {String? bar, required int baz}) -> int`
   String _buildFunctionTypeText(
     InstanceRef signature, {
     bool isInstanceMethod = false,

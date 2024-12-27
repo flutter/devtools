@@ -11,7 +11,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
 import '../../memory/heap_object.dart';
-import '../../vm_utils.dart';
+import '../../utils/vm_utils.dart';
 import '../primitives/scope.dart';
 
 class EvalService extends DisposableController with AutoDisposeControllerMixin {

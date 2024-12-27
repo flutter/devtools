@@ -16,19 +16,19 @@ import 'package:logging/logging.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
-import '../../shared/collapsible_mixin.dart';
-import '../../shared/common_widgets.dart';
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/console/widgets/description.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
-import '../../shared/diagnostics_text_styles.dart';
-import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/error_badge_manager.dart';
+import '../../shared/primitives/collapsible_mixin.dart';
+import '../../shared/primitives/diagnostics_text_styles.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/colors.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'inspector_controller.dart';
 
 final _log = Logger('inspector_tree_controller');
@@ -193,7 +193,10 @@ class InspectorTreeController extends DisposableController
     }
   }
 
-  bool setSelectedNode(InspectorTreeNode? node) {
+  bool setSelectedNode(
+    InspectorTreeNode? node, {
+    bool notifyFlutterInspector = false,
+  }) {
     if (node == _selection) return false;
 
     _selection?.selected = false;
@@ -201,7 +204,9 @@ class InspectorTreeController extends DisposableController
     _selection?.selected = true;
     final configLocal = config;
     if (configLocal.onSelectionChange != null) {
-      configLocal.onSelectionChange!();
+      configLocal.onSelectionChange!(
+        notifyFlutterInspector: notifyFlutterInspector,
+      );
     }
     return true;
   }
@@ -547,7 +552,7 @@ class InspectorTreeController extends DisposableController
   }
 
   void onSelectNode(InspectorTreeNode? node) {
-    setSelectedNode(node);
+    setSelectedNode(node, notifyFlutterInspector: true);
     ga.select(gac.inspector, gac.treeNodeSelection);
     final diagnostic = node?.diagnostic;
     if (diagnostic != null && diagnostic.groupIsHidden) {

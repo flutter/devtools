@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/screen.dart';
+import '../../../../../shared/framework/screen.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 import 'primary_controls.dart';
 import 'secondary_controls.dart';
 

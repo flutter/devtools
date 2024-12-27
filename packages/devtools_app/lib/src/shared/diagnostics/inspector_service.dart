@@ -21,7 +21,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../console/primitives/simple_items.dart';
 import '../globals.dart';
-import '../utils.dart';
+import '../utils/utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'object_group_api.dart';
@@ -1024,7 +1024,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
   Future<RemoteDiagnosticsNode?> getSelection(
     RemoteDiagnosticsNode? previousSelection,
     FlutterTreeType treeType, {
-    bool isSummaryTree = false,
+    bool restrictToLocalProject = false,
   }) async {
     // There is no reason to allow calling this method on a disposed group.
     assert(!disposed);
@@ -1035,7 +1035,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
     switch (treeType) {
       case FlutterTreeType.widget:
         newSelection = await invokeServiceMethodReturningNodeInspectorRef(
-          isSummaryTree
+          restrictToLocalProject
               ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
               : WidgetInspectorServiceExtensions.getSelectedWidget.name,
           null,

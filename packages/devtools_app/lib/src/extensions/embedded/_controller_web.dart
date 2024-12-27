@@ -13,10 +13,10 @@ import 'package:web/web.dart';
 
 import '../../shared/development_helpers.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/query_parameters.dart';
 import '../../shared/server/server.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'controller.dart';
 
 /// Incrementer for the extension iFrame view that will live for the entire
@@ -46,7 +46,11 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     }
 
     final basePath = devtoolsAssetsBasePath(
-      origin: window.location.origin,
+      // This needs to use the DevTools server URI as the origin because the
+      // extension assets are served through a DevTools server handler. The
+      // DevTools server handler loads them directly from their location in the
+      // user's pub-cache.
+      origin: devToolsServerUriAsString,
       path: window.location.pathname,
     );
     final baseUri = path.join(
@@ -63,7 +67,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
               : ExtensionEventParameters.themeValueLight,
       if (dtdManager.uri != null) 'dtdUri': dtdManager.uri.toString(),
     };
-    return Uri.parse(baseUri).copyWith(queryParameters: queryParams).toString();
+    return Uri.parse(baseUri).replace(queryParameters: queryParams).toString();
   }
 
   HTMLIFrameElement get extensionIFrame => _extensionIFrame;

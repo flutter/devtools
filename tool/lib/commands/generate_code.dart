@@ -9,16 +9,25 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
+const _pubGetFlag = 'pub-get';
 const _upgradeFlag = 'upgrade';
 
 class GenerateCodeCommand extends Command {
   GenerateCodeCommand() {
-    argParser.addFlag(
-      _upgradeFlag,
-      negatable: false,
-      help:
-          'Run pub upgrade on the DevTools packages before performing the code generation.',
-    );
+    argParser
+      ..addFlag(
+        _pubGetFlag,
+        defaultsTo: true,
+        negatable: true,
+        help:
+            'Run pub get on the DevTools packages before performing the code generation.',
+      )
+      ..addFlag(
+        _upgradeFlag,
+        negatable: false,
+        help:
+            'Run pub upgrade on the DevTools packages before performing the code generation.',
+      );
   }
 
   @override
@@ -54,14 +63,16 @@ class GenerateCodeCommand extends Command {
       commandDescription: 'git clean',
     );
 
+    final pubGet = argResults![_pubGetFlag] as bool;
     final upgrade = argResults![_upgradeFlag] as bool;
-    await processManager.runProcess(
-      CliCommand.tool(['pub-get', '--only-main', if (upgrade) '--upgrade']),
-    );
+    if (pubGet) {
+      await processManager.runProcess(
+        CliCommand.tool(['pub-get', '--only-main', if (upgrade) '--upgrade']),
+      );
+    }
 
     await runOverPackages(
-      CliCommand.flutter([
-        'pub',
+      CliCommand.dart([
         'run',
         'build_runner',
         'build',
