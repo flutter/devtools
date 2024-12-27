@@ -65,12 +65,10 @@ enum HttpRequestDataKeys {
   arguments,
   host,
   username,
-  isDirect
+  isDirect,
 }
 
-enum HttpRequestDataValues {
-  json,
-}
+enum HttpRequestDataValues { json }
 
 class HttpRequestDataDefaults {
   static const none = 'None';

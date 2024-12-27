@@ -41,8 +41,10 @@ const _kMemoryDisconnectExperience = bool.fromEnvironment(
   defaultValue: true,
 );
 
-const _kNetworkOfflineExperiment =
-    bool.fromEnvironment('network_disconnect_experience', defaultValue: true);
+const _kNetworkOfflineExperiment = bool.fromEnvironment(
+  'network_disconnect_experience',
+  defaultValue: true,
+);
 
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members

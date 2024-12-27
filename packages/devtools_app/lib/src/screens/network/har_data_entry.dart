@@ -29,16 +29,18 @@ class HarDataEntry {
     final modifiedRequestData = _remapCustomFieldKeys(json);
 
     // Retrieving url, method from requestData
-    final requestData = modifiedRequestData[NetworkEventKeys.request.name]
-        as Map<String, Object?>;
+    final requestData =
+        modifiedRequestData[NetworkEventKeys.request.name]
+            as Map<String, Object?>;
     modifiedRequestData[NetworkEventKeys.uri.name] =
         requestData[NetworkEventKeys.url.name];
     modifiedRequestData[NetworkEventKeys.method.name] =
         requestData[NetworkEventKeys.method.name];
 
     // Adding missing keys which are mandatory for parsing
-    final responseData = modifiedRequestData[NetworkEventKeys.response.name]
-        as Map<String, Object?>;
+    final responseData =
+        modifiedRequestData[NetworkEventKeys.response.name]
+            as Map<String, Object?>;
     responseData[NetworkEventKeys.redirects.name] = <Map<String, Object?>>[];
     final requestPostData = responseData[NetworkEventKeys.postData.name];
     final responseContent = responseData[NetworkEventKeys.content.name];
@@ -60,60 +62,65 @@ class HarDataEntry {
   /// serialization.
   static Map<String, Object?> toJson(DartIOHttpRequestData e) {
     // Implement the logic to convert DartIOHttpRequestData to HAR entry format
-    final requestCookies = e.requestCookies.map((cookie) {
-      return <String, Object?>{
-        NetworkEventKeys.name.name: cookie.name,
-        NetworkEventKeys.value.name: cookie.value,
-        NetworkEventKeys.path.name: cookie.path,
-        NetworkEventKeys.domain.name: cookie.domain,
-        NetworkEventKeys.expires.name:
-            cookie.expires?.toUtc().toIso8601String(),
-        NetworkEventKeys.httpOnly.name: cookie.httpOnly,
-        NetworkEventKeys.secure.name: cookie.secure,
-      };
-    }).toList();
+    final requestCookies =
+        e.requestCookies.map((cookie) {
+          return <String, Object?>{
+            NetworkEventKeys.name.name: cookie.name,
+            NetworkEventKeys.value.name: cookie.value,
+            NetworkEventKeys.path.name: cookie.path,
+            NetworkEventKeys.domain.name: cookie.domain,
+            NetworkEventKeys.expires.name:
+                cookie.expires?.toUtc().toIso8601String(),
+            NetworkEventKeys.httpOnly.name: cookie.httpOnly,
+            NetworkEventKeys.secure.name: cookie.secure,
+          };
+        }).toList();
 
-    final requestHeaders = e.requestHeaders?.entries.map((header) {
-      var value = header.value;
-      if (value is List) {
-        value = value.first;
-      }
-      return <String, Object?>{
-        NetworkEventKeys.name.name: header.key,
-        NetworkEventKeys.value.name: value,
-      };
-    }).toList();
+    final requestHeaders =
+        e.requestHeaders?.entries.map((header) {
+          var value = header.value;
+          if (value is List) {
+            value = value.first;
+          }
+          return <String, Object?>{
+            NetworkEventKeys.name.name: header.key,
+            NetworkEventKeys.value.name: value,
+          };
+        }).toList();
 
-    final queryString = Uri.parse(e.uri).queryParameters.entries.map((param) {
-      return <String, Object?>{
-        NetworkEventKeys.name.name: param.key,
-        NetworkEventKeys.value.name: param.value,
-      };
-    }).toList();
+    final queryString =
+        Uri.parse(e.uri).queryParameters.entries.map((param) {
+          return <String, Object?>{
+            NetworkEventKeys.name.name: param.key,
+            NetworkEventKeys.value.name: param.value,
+          };
+        }).toList();
 
-    final responseCookies = e.responseCookies.map((cookie) {
-      return <String, Object?>{
-        NetworkEventKeys.name.name: cookie.name,
-        NetworkEventKeys.value.name: cookie.value,
-        NetworkEventKeys.path.name: cookie.path,
-        NetworkEventKeys.domain.name: cookie.domain,
-        NetworkEventKeys.expires.name:
-            cookie.expires?.toUtc().toIso8601String(),
-        NetworkEventKeys.httpOnly.name: cookie.httpOnly,
-        NetworkEventKeys.secure.name: cookie.secure,
-      };
-    }).toList();
+    final responseCookies =
+        e.responseCookies.map((cookie) {
+          return <String, Object?>{
+            NetworkEventKeys.name.name: cookie.name,
+            NetworkEventKeys.value.name: cookie.value,
+            NetworkEventKeys.path.name: cookie.path,
+            NetworkEventKeys.domain.name: cookie.domain,
+            NetworkEventKeys.expires.name:
+                cookie.expires?.toUtc().toIso8601String(),
+            NetworkEventKeys.httpOnly.name: cookie.httpOnly,
+            NetworkEventKeys.secure.name: cookie.secure,
+          };
+        }).toList();
 
-    final responseHeaders = e.responseHeaders?.entries.map((header) {
-      var value = header.value;
-      if (value is List) {
-        value = value.first;
-      }
-      return <String, Object?>{
-        NetworkEventKeys.name.name: header.key,
-        NetworkEventKeys.value.name: value,
-      };
-    }).toList();
+    final responseHeaders =
+        e.responseHeaders?.entries.map((header) {
+          var value = header.value;
+          if (value is List) {
+            value = value.first;
+          }
+          return <String, Object?>{
+            NetworkEventKeys.name.name: header.key,
+            NetworkEventKeys.value.name: value,
+          };
+        }).toList();
 
     return <String, Object?>{
       NetworkEventKeys.startedDateTime.name:
@@ -131,8 +138,9 @@ class HarDataEntry {
           NetworkEventKeys.mimeType.name: e.contentType,
           NetworkEventKeys.text.name: e.requestBody,
         },
-        NetworkEventKeys.headersSize.name:
-            calculateHeadersSize(e.requestHeaders),
+        NetworkEventKeys.headersSize.name: calculateHeadersSize(
+          e.requestHeaders,
+        ),
         NetworkEventKeys.bodySize.name: _calculateBodySize(e.requestBody),
       },
       // Response
@@ -150,8 +158,9 @@ class HarDataEntry {
           NetworkEventKeys.text.name: e.responseBody,
         },
         NetworkEventKeys.redirectURL.name: '',
-        NetworkEventKeys.headersSize.name:
-            calculateHeadersSize(e.responseHeaders),
+        NetworkEventKeys.headersSize.name: calculateHeadersSize(
+          e.responseHeaders,
+        ),
         NetworkEventKeys.bodySize.name: _calculateBodySize(e.responseBody),
       },
       // Cache

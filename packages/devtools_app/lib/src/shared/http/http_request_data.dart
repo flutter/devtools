@@ -52,13 +52,14 @@ class DartIOHttpRequestData extends NetworkRequest {
     Map<String, Object?>? requestPostData,
     Map<String, Object?>? responseContent,
   ) {
-    final isFullRequest = modifiedRequestData
-            .containsKey(HttpRequestDataKeys.requestBody.name) &&
+    final isFullRequest =
+        modifiedRequestData.containsKey(HttpRequestDataKeys.requestBody.name) &&
         modifiedRequestData.containsKey(HttpRequestDataKeys.responseBody.name);
 
-    final parsedRequest = isFullRequest
-        ? HttpProfileRequest.parse(modifiedRequestData)
-        : HttpProfileRequestRef.parse(modifiedRequestData);
+    final parsedRequest =
+        isFullRequest
+            ? HttpProfileRequest.parse(modifiedRequestData)
+            : HttpProfileRequestRef.parse(modifiedRequestData);
 
     final responseBody =
         responseContent?[HttpRequestDataKeys.text.name]?.toString();
@@ -66,9 +67,9 @@ class DartIOHttpRequestData extends NetworkRequest {
         requestPostData?[HttpRequestDataKeys.text.name]?.toString();
 
     return DartIOHttpRequestData(
-      parsedRequest!,
-      requestFullDataFromVmService: parsedRequest is! HttpProfileRequest,
-    )
+        parsedRequest!,
+        requestFullDataFromVmService: parsedRequest is! HttpProfileRequest,
+      )
       .._responseBody = responseBody
       .._requestBody = requestBody;
   }
@@ -95,9 +96,9 @@ class DartIOHttpRequestData extends NetworkRequest {
       isFetchingFullData = true;
       final updated = await serviceConnection.serviceManager.service!
           .getHttpProfileRequestWrapper(
-        _request.isolateId,
-        _request.id.toString(),
-      );
+            _request.isolateId,
+            _request.id.toString(),
+          );
       _request = updated;
       final fullRequest = _request as HttpProfileRequest;
       _responseBody = utf8.decode(fullRequest.responseBody!);
@@ -233,9 +234,10 @@ class DartIOHttpRequestData extends NetworkRequest {
       requestCookies.isNotEmpty || responseCookies.isNotEmpty;
 
   /// A list of all cookies contained within the request headers.
-  List<Cookie> get requestCookies => _hasError
-      ? []
-      : DartIOHttpRequestData._parseCookies(_request.request?.cookies);
+  List<Cookie> get requestCookies =>
+      _hasError
+          ? []
+          : DartIOHttpRequestData._parseCookies(_request.request?.cookies);
 
   /// A list of all cookies contained within the response headers.
   List<Cookie> get responseCookies =>
@@ -335,9 +337,10 @@ class DartIOHttpRequestData extends NetworkRequest {
     DateTime lastTime = _request.startTime;
     for (final instant in instantEvents) {
       final instantTime = instant.timestamp;
-      instant._timeRange = TimeRange()
-        ..start = Duration(microseconds: lastTime.microsecondsSinceEpoch)
-        ..end = Duration(microseconds: instantTime.microsecondsSinceEpoch);
+      instant._timeRange =
+          TimeRange()
+            ..start = Duration(microseconds: lastTime.microsecondsSinceEpoch)
+            ..end = Duration(microseconds: instantTime.microsecondsSinceEpoch);
       lastTime = instantTime;
     }
   }
@@ -348,15 +351,8 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   @override
-  int get hashCode => Object.hash(
-        id,
-        method,
-        uri,
-        contentType,
-        type,
-        port,
-        startTimestamp,
-      );
+  int get hashCode =>
+      Object.hash(id, method, uri, contentType, type, port, startTimestamp);
 }
 
 extension HttpRequestExtension on List<DartIOHttpRequestData> {
