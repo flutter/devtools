@@ -36,8 +36,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
-
+* Offline support added for the network screen. - [#8332](https://github.com/flutter/devtools/pull/8332)
+  
 ## Logging updates
 
 TODO: Remove this section if there are not any general updates.
