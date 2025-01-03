@@ -14,6 +14,8 @@ To learn more about DevTools, check out the
 
 ## Inspector updates
 
+* The new Inspector is enabled by default. This can be disabled in the Inspector settings. - [#8650](https://github.com/flutter/devtools/pull/8650)
+    ![Legacy Inspector setting](images/legacy_inspector_setting.png "Legacy Inspector setting")
 * Selecting an implementation widget on the device while implementation widget's are hidden in the [new Inspector's](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates) does not show an error. - [#8625](https://github.com/flutter/devtools/pull/8625)
 * Enabled auto-refreshes of the widget tree on hot-reloads and navigation events by default. This can be disabled in the Inspector settings. - [#8646](https://github.com/flutter/devtools/pull/8646)
     ![Auto-refresh setting](images/inspector_auto_refresh_setting.png "Inspector auto-refresh setting")
