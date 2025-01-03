@@ -677,7 +677,7 @@ Future<void> toggleLegacyInspector(WidgetTester tester) async {
 
   // Toggle the "legacy Inspector" checkbox.
   final settingsRow = find.ancestor(
-    of: find.richTextContaining('Use legacy Inspector'),
+    of: find.richTextContaining('Use legacy inspector'),
     matching: find.byType(Row),
   );
   final inspectorCheckbox = find.descendant(

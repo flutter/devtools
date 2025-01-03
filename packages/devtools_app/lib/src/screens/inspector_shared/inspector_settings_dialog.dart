@@ -71,10 +71,10 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                       notifier:
                           preferences.inspector.legacyInspectorEnabled
                               as ValueNotifier<bool?>,
-                      title: 'Use legacy Inspector',
+                      title: 'Use legacy inspector',
                       description:
-                          'Disable the redesigned Flutter Inspector. Please know that '
-                          'the legacy Inspector may be removed in a future release.',
+                          'Disable the redesigned Flutter inspector. Please know that '
+                          'the legacy inspector may be removed in a future release.',
                       gaItem: gac.inspectorV2Enabled,
                     ),
                   ),

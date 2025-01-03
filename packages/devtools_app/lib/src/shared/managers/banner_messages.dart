@@ -539,7 +539,7 @@ class WelcomeToNewInspectorMessage {
       textSpans: [
         const TextSpan(
           text: '''
-👋 Welcome to the new Flutter Inspector! To get started, check out the ''',
+👋 Welcome to the new Flutter inspector! To get started, check out the ''',
         ),
         GaLinkTextSpan(
           link: GaLink(
