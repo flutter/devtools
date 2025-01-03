@@ -157,6 +157,9 @@ void main() {
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
 
+        // Toggle implementation widgets on.
+        await _toggleImplementationWidgets(tester);
+
         // Before hidden widgets are expanded, confirm the HeroControllerScope
         // is hidden:
         final hideableNodeFinder = findNodeMatching('HeroControllerScope');
@@ -208,6 +211,9 @@ void main() {
     ) async {
       await _loadInspectorUI(tester);
 
+      // Toggle implementation widgets on.
+      await _toggleImplementationWidgets(tester);
+
       // Before searching, confirm the HeroControllerScope is hidden:
       final hideableNodeFinder = findNodeMatching('HeroControllerScope');
       expect(hideableNodeFinder, findsNothing);
@@ -240,21 +246,15 @@ void main() {
   ) async {
     await _loadInspectorUI(tester);
 
-    // Give time for the initial animation to complete.
-    await tester.pumpAndSettle(inspectorChangeSettleTime);
+    // Toggle implementation widgets on.
+    await _toggleImplementationWidgets(tester);
 
     // Confirm the hidden widgets are visible behind affordances like "X more
     // widgets".
     expect(find.richTextContaining('more widgets...'), findsWidgets);
 
-    // Tap the "Show Implementation Widgets" button (selected by default).
-    final showImplementationWidgetsButton = find.descendant(
-      of: find.byType(DevToolsToggleButton),
-      matching: find.text('Show Implementation Widgets'),
-    );
-    expect(showImplementationWidgetsButton, findsOneWidget);
-    await tester.tap(showImplementationWidgetsButton);
-    await tester.pumpAndSettle(inspectorChangeSettleTime);
+    // Toggle implementation widgets off.
+    await _toggleImplementationWidgets(tester);
 
     // Confirm that the hidden widgets are no longer visible.
     expect(find.richTextContaining('more widgets...'), findsNothing);
@@ -288,6 +288,10 @@ void main() {
   ) async {
     // Load the Inspector.
     await _loadInspectorUI(tester);
+
+    // Toggle implementation widgets on.
+    await _toggleImplementationWidgets(tester);
+
     await tester.pumpAndSettle(inspectorChangeSettleTime);
     final state =
         tester.state(find.byType(InspectorScreenBody))
@@ -301,14 +305,8 @@ void main() {
         diagnostics.firstWhere((d) => d?.description == 'Text')!;
     expect(textDiagnostic.isCreatedByLocalProject, isTrue);
 
-    // Tap the "Show Implementation Widgets" button (selected by default).
-    final showImplementationWidgetsButton = find.descendant(
-      of: find.byType(DevToolsToggleButton),
-      matching: find.text('Show Implementation Widgets'),
-    );
-    expect(showImplementationWidgetsButton, findsOneWidget);
-    await tester.tap(showImplementationWidgetsButton);
-    await tester.pumpAndSettle(inspectorChangeSettleTime);
+    // Toggle implementation widgets off.
+    await _toggleImplementationWidgets(tester);
 
     // Verify the Text diagnostic node is still in the tree.
     final diagnosticsNow = state.controller.inspectorTree.rowsInTree.value.map(
@@ -506,6 +504,9 @@ void main() {
     ) async {
       await _loadInspectorUI(tester);
 
+      // Toggle implementation widgets on.
+      await _toggleImplementationWidgets(tester);
+
       // Give time for the initial animation to complete.
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
@@ -595,6 +596,17 @@ void main() {
       );
     });
   });
+}
+
+Future<void> _toggleImplementationWidgets(WidgetTester tester) async {
+  // Tap the "Show Implementation Widgets" button (selected by default).
+  final showImplementationWidgetsButton = find.descendant(
+    of: find.byType(DevToolsToggleButton),
+    matching: find.text('Show Implementation Widgets'),
+  );
+  expect(showImplementationWidgetsButton, findsOneWidget);
+  await tester.tap(showImplementationWidgetsButton);
+  await tester.pumpAndSettle(inspectorChangeSettleTime);
 }
 
 Future<void> _loadInspectorUI(WidgetTester tester) async {
