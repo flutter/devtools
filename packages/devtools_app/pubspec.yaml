@@ -4,7 +4,7 @@ publish_to: none
 
 # Note: this version should only be updated by running the 'dt update-version'
 # command that updates the version here and in 'devtools.dart'.
-version: 2.42.0-dev.1
+version: 2.42.0-dev.2
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
