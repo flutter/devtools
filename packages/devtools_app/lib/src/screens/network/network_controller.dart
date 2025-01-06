@@ -175,6 +175,8 @@ class NetworkController extends DisposableController
       await maybeLoadOfflineData(
         NetworkScreen.id,
         createData: (json) => OfflineNetworkData.fromJson(json),
+        // This ignore is used because the 'data' parameter can have a dynamic type,
+        // which cannot be explicitly typed here due to its dependency on JSON parsing.
         // ignore: avoid_dynamic_calls
         shouldLoad: (data) => !data.isEmpty,
         loadData: (data) => loadOfflineData(data),
