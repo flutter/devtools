@@ -63,6 +63,8 @@ void main() {
     setGlobal(Storage, FlutterTestStorage());
     setGlobal(NotificationService, NotificationService());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
+    // Enable the legacy inspector:
+    preferences.inspector.setLegacyInspectorEnabled(true);
   });
 
   Future<void> mockExtensions() async {

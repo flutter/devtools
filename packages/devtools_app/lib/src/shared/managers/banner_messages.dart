@@ -137,7 +137,8 @@ class BannerMessages extends StatelessWidget {
 // TODO(kenz): add an 'info' type.
 enum BannerMessageType {
   warning,
-  error;
+  error,
+  info;
 
   static BannerMessageType? parse(String? value) {
     for (final type in BannerMessageType.values) {
@@ -164,11 +165,11 @@ class BannerMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final backgroundColor = _backgroundColor(colorScheme);
+    final foregroundColor = _foregroundColor(colorScheme);
+
     return Card(
-      color:
-          messageType == BannerMessageType.error
-              ? colorScheme.errorContainer
-              : colorScheme.warningContainer,
+      color: backgroundColor,
       margin: const EdgeInsets.only(bottom: intermediateSpacing),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -182,27 +183,22 @@ class BannerMessage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Icon(
-                    messageType == BannerMessageType.error
-                        ? Icons.error_outline
-                        : Icons.warning_amber_outlined,
-                    size: actionsIconSize,
-                    color:
-                        messageType == BannerMessageType.error
-                            ? colorScheme.onErrorContainer
-                            : colorScheme.onWarningContainer,
+                if (messageType != BannerMessageType.info)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Icon(
+                      messageType == BannerMessageType.error
+                          ? Icons.error_outline
+                          : Icons.warning_amber_outlined,
+                      size: actionsIconSize,
+                      color: foregroundColor,
+                    ),
                   ),
-                ),
                 Expanded(
                   child: RichText(
                     text: TextSpan(
                       style: theme.regularTextStyle.copyWith(
-                        color:
-                            messageType == BannerMessageType.error
-                                ? colorScheme.onErrorContainer
-                                : colorScheme.onWarningContainer,
+                        color: foregroundColor,
                       ),
                       children: textSpans,
                     ),
@@ -213,10 +209,7 @@ class BannerMessage extends StatelessWidget {
                   icon: Icon(
                     Icons.close,
                     size: actionsIconSize,
-                    color:
-                        messageType == BannerMessageType.error
-                            ? colorScheme.onErrorContainer
-                            : colorScheme.onWarningContainer,
+                    color: foregroundColor,
                   ),
                   onPressed:
                       () => bannerMessages.removeMessage(this, dismiss: true),
@@ -227,6 +220,26 @@ class BannerMessage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _backgroundColor(ColorScheme colorScheme) {
+    if (messageType == BannerMessageType.info) {
+      return colorScheme.secondaryContainer;
+    }
+
+    return (messageType == BannerMessageType.error
+        ? colorScheme.errorContainer
+        : colorScheme.warningContainer);
+  }
+
+  Color _foregroundColor(ColorScheme colorScheme) {
+    if (messageType == BannerMessageType.info) {
+      return colorScheme.onSecondaryContainer;
+    }
+
+    return (messageType == BannerMessageType.error
+        ? colorScheme.onErrorContainer
+        : colorScheme.onWarningContainer);
   }
 }
 
@@ -245,6 +258,14 @@ class BannerWarning extends BannerMessage {
     required super.textSpans,
     required super.screenId,
   }) : super(messageType: BannerMessageType.warning);
+}
+
+class BannerInfo extends BannerMessage {
+  const BannerInfo({
+    required super.key,
+    required super.textSpans,
+    required super.screenId,
+  }) : super(messageType: BannerMessageType.info);
 }
 
 class DebugModePerformanceMessage {
@@ -503,6 +524,40 @@ The $codeType DevTools debugger is in maintenance mode. For the best debugging e
   }
 }
 
+class WelcomeToNewInspectorMessage {
+  WelcomeToNewInspectorMessage(this.screenId)
+    : key = Key('WelcomeToNewInspectorMessage - $screenId');
+
+  final Key key;
+
+  final String screenId;
+
+  BannerMessage build(BuildContext context) {
+    const docsUrl = 'https://docs.flutter.dev/tools/devtools/inspector#new';
+    return BannerInfo(
+      key: key,
+      textSpans: [
+        const TextSpan(
+          text: '''
+👋 Welcome to the new Flutter inspector! To get started, check out the ''',
+        ),
+        GaLinkTextSpan(
+          link: GaLink(
+            display: 'documentation',
+            url: docsUrl,
+            gaScreenName: screenId,
+            gaSelectedItemDescription: gac.inspectorV2Docs,
+          ),
+          context: context,
+          style: Theme.of(context).linkTextStyle,
+        ),
+        const TextSpan(text: '.'),
+      ],
+      screenId: screenId,
+    );
+  }
+}
+
 void maybePushDebugModePerformanceMessage(
   BuildContext context,
   String screenId,
@@ -538,6 +593,12 @@ void pushDebuggerIdeRecommendationMessage(
 ) {
   bannerMessages.addMessage(
     DebuggerIdeRecommendationMessage(screenId).build(context),
+  );
+}
+
+void pushWelcomeToNewInspectorMessage(BuildContext context, String screenId) {
+  bannerMessages.addMessage(
+    WelcomeToNewInspectorMessage(screenId).build(context),
   );
 }
 

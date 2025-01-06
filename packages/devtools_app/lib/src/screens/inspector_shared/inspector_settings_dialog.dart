@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/simple_items.dart';
@@ -25,8 +26,9 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
     final dialogHeight = scaleByFontFactor(500.0);
 
     return ValueListenableBuilder(
-      valueListenable: preferences.inspector.inspectorV2Enabled,
-      builder: (context, inspectorV2Enabled, _) {
+      valueListenable: preferences.inspector.legacyInspectorEnabled,
+      builder: (context, legacyInspectorEnabled, _) {
+        final inspectorV2Enabled = !legacyInspectorEnabled;
         return DevToolsDialog(
           title: const DialogTitleText('Flutter Inspector Settings'),
           content: SizedBox(
@@ -60,6 +62,22 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                 ] else ...[
                   const InspectorDefaultDetailsViewOption(),
                 ],
+                const SizedBox(height: largeSpacing),
+                // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up
+                // after Inspector V2 has been released.
+                if (FeatureFlags.inspectorV2)
+                  Flexible(
+                    child: CheckboxSetting(
+                      notifier:
+                          preferences.inspector.legacyInspectorEnabled
+                              as ValueNotifier<bool?>,
+                      title: 'Use legacy inspector',
+                      description:
+                          'Disable the redesigned Flutter inspector. Please know that '
+                          'the legacy inspector may be removed in a future release.',
+                      gaItem: gac.inspectorV2Enabled,
+                    ),
+                  ),
                 const SizedBox(height: largeSpacing),
                 ...dialogSubHeader(theme, 'Package Directories'),
                 Row(

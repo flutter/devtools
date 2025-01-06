@@ -52,21 +52,24 @@ class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
         > {
   bool get shouldShowInspectorV2 =>
       FeatureFlags.inspectorV2 &&
-      preferences.inspector.inspectorV2Enabled.value;
+      !preferences.inspector.legacyInspectorEnabled.value;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
 
-    addAutoDisposeListener(preferences.inspector.inspectorV2Enabled, () async {
-      controller.legacyInspectorController.setVisibleToUser(
-        !shouldShowInspectorV2,
-      );
-      await controller.v2InspectorController.setVisibleToUser(
-        shouldShowInspectorV2,
-      );
-    });
+    addAutoDisposeListener(
+      preferences.inspector.legacyInspectorEnabled,
+      () async {
+        controller.legacyInspectorController.setVisibleToUser(
+          !shouldShowInspectorV2,
+        );
+        await controller.v2InspectorController.setVisibleToUser(
+          shouldShowInspectorV2,
+        );
+      },
+    );
   }
 
   @override
@@ -74,8 +77,8 @@ class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
     final controller = Provider.of<InspectorScreenController>(context);
 
     return ValueListenableBuilder(
-      valueListenable: preferences.inspector.inspectorV2Enabled,
-      builder: (context, v2Enabled, _) {
+      valueListenable: preferences.inspector.legacyInspectorEnabled,
+      builder: (context, _, _) {
         if (shouldShowInspectorV2) {
           return v2.InspectorScreenBody(
             controller: controller.v2InspectorController,

@@ -58,23 +58,6 @@ class InspectorControls extends StatelessWidget {
           ShowImplementationWidgetsButton(controller: controller!),
         ],
         const Spacer(),
-        // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
-        // Inspector V2 has been released.
-        if (FeatureFlags.inspectorV2) ...[
-          const SizedBox(width: defaultSpacing),
-          SwitchSetting(
-            notifier:
-                preferences.inspector.inspectorV2Enabled as ValueNotifier<bool>,
-            title: 'New Inspector',
-            tooltip: 'Try out the redesigned Flutter Inspector.',
-            gaScreen: gac.inspector,
-            gaItem: gac.inspectorV2Enabled,
-            activeColor: activeButtonColor,
-            inactiveColor: Colors.transparent,
-            minScreenWidthForTextBeforeScaling:
-                minScreenWidthForTextBeforeScaling,
-          ),
-        ],
         const SizedBox(width: defaultSpacing),
         const InspectorServiceExtensionButtonGroup(),
       ],
