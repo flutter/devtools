@@ -14,7 +14,7 @@ import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/http/http_service.dart' as http_service;
-import '../../shared/offline_data.dart';
+import '../../shared/offline/offline_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
@@ -194,7 +194,7 @@ class NetworkController extends DisposableController
       ..updateOrAddAll(
         requests: httpProfileData,
         sockets: socketStatsData,
-        timelineMicrosOffset: offlineData.timelineMicrosOffset,
+        timelineMicrosOffset: offlineData.timelineMicrosOffset ?? 0,
       );
     _filterAndRefreshSearchMatches();
 
