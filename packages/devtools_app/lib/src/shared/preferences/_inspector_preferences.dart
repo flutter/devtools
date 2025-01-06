@@ -31,8 +31,6 @@ class InspectorPreferencesController extends DisposableController
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
   final _legacyInspectorEnabled = ValueNotifier<bool>(false);
-  // TODO(https://github.com/flutter/devtools/issues/1423): Default to true
-  // after verifying auto-refreshes are performant.
   final _autoRefreshEnabled = ValueNotifier<bool>(true);
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
@@ -85,6 +83,8 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> _initLegacyInspectorEnabled() async {
+    // TODO(https://github.com/flutter/devtools/issues/8667): Consider removing
+    // the old 'inspector.inspectorV2Enabled' key if it is set.
     await _updateLegacyInspectorEnabled();
     _saveBooleanPreferenceChanges(
       preferenceStorageId: _legacyInspectorEnabledStorageId,

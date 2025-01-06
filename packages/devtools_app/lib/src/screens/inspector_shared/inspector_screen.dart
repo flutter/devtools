@@ -78,7 +78,7 @@ class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
 
     return ValueListenableBuilder(
       valueListenable: preferences.inspector.legacyInspectorEnabled,
-      builder: (context, legacyInspectorEnabled, _) {
+      builder: (context, _, _) {
         if (shouldShowInspectorV2) {
           return v2.InspectorScreenBody(
             controller: controller.v2InspectorController,
