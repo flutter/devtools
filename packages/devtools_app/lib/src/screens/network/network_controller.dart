@@ -186,7 +186,7 @@ class NetworkController extends DisposableController
     }
   }
 
-  Future<void> loadOfflineData(OfflineNetworkData offlineData) async {
+  void loadOfflineData(OfflineNetworkData offlineData) {
     final httpProfileData =
         offlineData.httpRequestData.mapToHttpProfileRequests;
     final socketStatsData = offlineData.socketData.mapToSocketStatistics;
