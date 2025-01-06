@@ -174,10 +174,11 @@ text that should be removed from the file. */''';
       const existingLicenseText = '''// This is some multiline license text to
 // remove that does not contain a stored value.''';
       const replacementLicenseText =
-          '''// This is some <value4> multiline license
+          '''// This is some <value> multiline license
 // text that should be added to the file.''';
 
-      final replacementInfo = await _getTestReplacementInfo(
+      // Contains existing license
+      var replacementInfo = await _getTestReplacementInfo(
         testFile: testFile10,
         existingLicenseText: existingLicenseText,
         replacementLicenseText: replacementLicenseText,
@@ -193,6 +194,20 @@ text that should be removed from the file. */''';
       final expectedReplacementHeader =
           '''// This is some $currentYear multiline license
 // text that should be added to the file.''';
+
+      expect(replacementInfo.existingHeader, equals(expectedExistingHeader));
+
+      expect(
+        replacementInfo.replacementHeader,
+        equals(expectedReplacementHeader),
+      );
+
+      // Missing existing license
+      replacementInfo = await _getTestReplacementInfo(
+        testFile: testFile10,
+        existingLicenseText: existingLicenseText,
+        replacementLicenseText: replacementLicenseText,
+      );
 
       expect(replacementInfo.existingHeader, equals(expectedExistingHeader));
 
@@ -334,19 +349,19 @@ text that should be added to the file. */''',
       final config = LicenseConfig.fromYamlFile(configFile);
       final header = LicenseHeader();
 
-      final contentsBeforeUpdate = testFile1.readAsStringSync();
+      // missing license
+      final contentsBeforeUpdate = testFile9.readAsStringSync();
       final results = await header.bulkUpdate(
         directory: testDirectory,
         config: config,
       );
-      final contentsAfterUpdate = testFile1.readAsStringSync();
+      final contentsAfterUpdate = testFile9.readAsStringSync();
 
       final includedPaths = results.includedPaths;
       expect(includedPaths, isNotNull);
       expect(includedPaths.length, equals(9));
       // Order is not guaranteed
       expect(includedPaths.contains(testFile1.path), true);
-      expect(contentsBeforeUpdate, isNot(equals(contentsAfterUpdate)));
       expect(includedPaths.contains(testFile2.path), true);
       expect(includedPaths.contains(testFile3.path), true);
       expect(includedPaths.contains(testFile7.path), true);
@@ -369,6 +384,11 @@ text that should be added to the file. */''',
       expect(updatedPaths.contains(testFile10.path), true);
       expect(updatedPaths.contains(skipFile.path), false);
       expect(updatedPaths.contains(doNothingFile.path), false);
+
+      expect(contentsBeforeUpdate, isNot(equals(contentsAfterUpdate)));
+      // There is an extremely rare failure case on the year boundary.
+      // TODO(mossmana): Handle running test on Dec 31 - Jan 1.
+      expect(contentsAfterUpdate, contains(DateTime.now().year.toString()));
     });
 
     test('license headers bulk update can be dry run', () async {

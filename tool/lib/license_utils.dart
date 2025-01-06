@@ -212,10 +212,10 @@ class LicenseHeader {
               ),
         );
     await for (final content in stream) {
-      // Return just the license headers for the simple case with no stored
-      // value requested (i.e. content matches licenseText verbatim)
+      final storedName = _parseStoredName(replacementLicenseText);
       if (content.contains(existingLicenseText)) {
-        final storedName = _parseStoredName(replacementLicenseText);
+        // Return just the license headers for the simple case with no stored
+        // value requested (i.e. content matches licenseText verbatim)
         replacementLicenseText = replacementLicenseText.replaceAll(
           '<$storedName>',
           defaultStoredValue ?? DateTime.now().year.toString(),
@@ -227,17 +227,14 @@ class LicenseHeader {
       }
       // Return a non-empty map for the case where there is a stored value
       // requested (i.e. when there is a '<value>' defined in the license text)
-      final storedName = _parseStoredName(existingLicenseText);
-      if (storedName.isNotEmpty) {
-        return _processHeaders(
-          storedName: storedName,
-          existingLicenseText: existingLicenseText,
-          replacementLicenseText: replacementLicenseText,
-          content: content,
-        );
-      }
+      return _processHeaders(
+        storedName: storedName,
+        existingLicenseText: existingLicenseText,
+        replacementLicenseText: replacementLicenseText,
+        content: content,
+      );
     }
-    throw StateError('License header expected in ${file.path}, but not found!');
+    throw StateError('License header could not be added to ${file.path}');
   }
 
   /// Returns a copy of the given [file] with the [existingHeader] replaced by
@@ -356,7 +353,7 @@ class LicenseHeader {
         }
         if (!updatedPathsList.contains(file.path)) {
           final licenseHeaders = _processHeaders(
-            storedName: '',
+            storedName: _parseStoredName(replacementLicenseText),
             existingLicenseText: '',
             replacementLicenseText: replacementLicenseText,
             content: '',
@@ -401,13 +398,6 @@ class LicenseHeader {
     required String replacementLicenseText,
     required String content,
   }) {
-    if (existingLicenseText.isEmpty) {
-      final defaultReplacementHeader = replacementLicenseText.replaceAll(
-        '<$storedName>',
-        DateTime.now().year.toString(),
-      );
-      return (existingHeader: '', replacementHeader: defaultReplacementHeader);
-    }
     final matchStr = RegExp.escape(existingLicenseText);
     final storedNameIndex = matchStr.indexOf('<$storedName>');
     if (storedNameIndex != -1) {
@@ -438,7 +428,11 @@ class LicenseHeader {
         );
       }
     }
-    return const (existingHeader: '', replacementHeader: '');
+    final defaultReplacementHeader = replacementLicenseText.replaceAll(
+      '<$storedName>',
+      DateTime.now().year.toString(),
+    );
+    return (existingHeader: '', replacementHeader: defaultReplacementHeader);
   }
 
   // TODO(mossmana) Add support for multiple stored names
