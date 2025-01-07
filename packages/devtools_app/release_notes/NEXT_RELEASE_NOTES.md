@@ -20,46 +20,6 @@ To learn more about DevTools, check out the
 * Enabled auto-refreshes of the widget tree on hot-reloads and navigation events by default. This can be disabled in the inspector settings. - [#8646](https://github.com/flutter/devtools/pull/8646)
     ![Auto-refresh setting](images/inspector_auto_refresh_setting.png "Inspector auto-refresh setting")
 
-## Performance updates
-
-TODO: Remove this section if there are not any general updates.
-
-## CPU profiler updates
-
-TODO: Remove this section if there are not any general updates.
-
-## Memory updates
-
-TODO: Remove this section if there are not any general updates.
-
-## Debugger updates
-
-TODO: Remove this section if there are not any general updates.
-
-## Network profiler updates
-
-TODO: Remove this section if there are not any general updates.
-
-## Logging updates
-
-TODO: Remove this section if there are not any general updates.
-
-## App size tool updates
-
-TODO: Remove this section if there are not any general updates.
-
-## Deep links tool updates
-
-TODO: Remove this section if there are not any general updates.
-
-## VS Code Sidebar updates
-
-TODO: Remove this section if there are not any general updates.
-
-## DevTools Extension updates
-
-TODO: Remove this section if there are not any general updates.
-
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
