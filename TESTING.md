@@ -1,8 +1,3 @@
-<!--
-Copyright 2025 The Flutter Authors
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
--->
 # Testing for DevTools
 
 DevTools is test covered by multiple types of tests, all of which are run on the CI for each DevTools PR / commit:

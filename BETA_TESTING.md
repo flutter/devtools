@@ -1,8 +1,3 @@
-<!--
-Copyright 2025 The Flutter Authors
-Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
--->
 # Build DevTools
 
 This page describes the fastest way to build DevTools with the goal to use it. Do not mix this setup with development environment. If you want to make code changes, follow [contributing guidance](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md).
