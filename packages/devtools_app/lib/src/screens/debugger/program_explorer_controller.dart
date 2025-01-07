@@ -352,8 +352,7 @@ class ProgramExplorerController extends DisposableController
     final targetScript = switch (object) {
       ClassRef(:final location?) ||
       FieldRef(:final location?) ||
-      FuncRef(:final location?) =>
-        location.script,
+      FuncRef(:final location?) => location.script,
       Code(:final function?) => function.location?.script,
       ScriptRef() => object,
       _ => null,

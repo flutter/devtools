@@ -1254,13 +1254,10 @@ class _CpuProfileTimelineTree {
   String? get resolvedUrl =>
       isCodeTree && _function is vm_service.FuncRef?
           ?
-              // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
-              // critical since this is only displayed when VM developer mode is
-              // enabled.
-              (_function as vm_service.FuncRef?)
-              ?.location
-              ?.script
-              ?.uri
+          // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
+          // critical since this is only displayed when VM developer mode is
+          // enabled.
+          (_function as vm_service.FuncRef?)?.location?.script?.uri
           : samples.functions![index].resolvedUrl;
 
   int? get sourceLine {
