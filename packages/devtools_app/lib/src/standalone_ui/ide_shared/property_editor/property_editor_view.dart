@@ -175,6 +175,7 @@ class _PropertyInputState extends State<_PropertyInput> {
                   child: Text(option),
                 );
               }).toList(),
+          isExpanded: true,
           onChanged: (newValue) async {
             await _editArgument(newValue);
           },
