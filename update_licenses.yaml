@@ -101,16 +101,6 @@ update_paths:
           - 0
           - 1
       add: 0
-    json:
-      remove:
-          - 0
-          - 1
-      add: 0
-    last_build_id:
-      remove:
-          - 0
-          - 1
-      add: 0
     md:
       remove:
           - 3
