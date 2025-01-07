@@ -194,8 +194,7 @@ class SingleClassData extends ClassData {
 
   @override
   // ignore: avoid-explicit-type-declaration, required to override base class.
-  final ObjectSet
-  objects = ObjectSet();
+  final ObjectSet objects = ObjectSet();
 
   @override
   final byPath = <PathFromRoot, ObjectSetStats>{};
