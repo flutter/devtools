@@ -393,7 +393,11 @@ class InspectorController extends DisposableController
       // We do not want to complete this timing operation because the force
       // refresh will skew the results.
       ga.cancelTimingOperation(InspectorScreen.id, gac.pageReady);
-      ga.select(gac.inspector, gac.refreshEmptyTree);
+      ga.select(
+        gac.inspector,
+        gac.refreshEmptyTree,
+        screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+      );
       firstInspectorTreeLoadCompleted = true;
     }
     await onForceRefresh();
