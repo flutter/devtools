@@ -391,7 +391,9 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
               : null,
       // [InspectorScreenMetrics]
       is_v2_inspector:
-          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2.toString() : null,
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.isV2.toString()
+              : null,
     );
   }
 
