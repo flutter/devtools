@@ -768,7 +768,7 @@ class InspectorController extends DisposableController
         group: group,
       );
 
-      // Send event that the selected node has changed.
+      // Send an event that a widget was selected on the device.
       ga.select(
         gac.inspector,
         gac.onDeviceSelection,
