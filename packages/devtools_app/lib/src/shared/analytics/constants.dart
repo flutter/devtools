@@ -84,6 +84,7 @@ const selectWidgetMode = 'selectWidgetMode';
 const enableOnDeviceInspector = 'enableOnDeviceInspector';
 const showOnDeviceInspector = 'showInspector';
 const treeNodeSelection = 'treeNodeSelection';
+const onDeviceSelection = 'onDeviceSelection';
 const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';

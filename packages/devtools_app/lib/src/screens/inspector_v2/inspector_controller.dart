@@ -25,6 +25,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
@@ -765,6 +766,13 @@ class InspectorController extends DisposableController
       await _maybeShowNotificationForSelectedNode(
         selectedNode: newSelection,
         group: group,
+      );
+
+      // Send event that the selected node has changed.
+      ga.select(
+        gac.inspector,
+        gac.onDeviceSelection,
+        screenMetricsProvider: () => InspectorScreenMetrics.v2(),
       );
     } catch (error, st) {
       if (selectionGroups.next == group) {
