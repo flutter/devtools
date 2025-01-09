@@ -553,7 +553,11 @@ class InspectorTreeController extends DisposableController
 
   void onSelectNode(InspectorTreeNode? node) {
     setSelectedNode(node, notifyFlutterInspector: true);
-    ga.select(gac.inspector, gac.treeNodeSelection);
+    ga.select(
+      gac.inspector,
+      gac.treeNodeSelection,
+      screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+    );
     final diagnostic = node?.diagnostic;
     if (diagnostic != null && diagnostic.groupIsHidden) {
       diagnostic.hideableGroupLeader?.toggleHiddenGroup();
@@ -1136,7 +1140,12 @@ class _InspectorTreeState extends State<InspectorTree>
         if (!controller.firstInspectorTreeLoadCompleted) {
           final screenId = widget.screenId;
           if (screenId != null) {
-            ga.timeEnd(screenId, gac.pageReady);
+            ga.timeEnd(
+              screenId,
+              gac.pageReady,
+              screenMetricsProvider:
+                  () => InspectorScreenMetrics.v2(rowCount: rows.length),
+            );
             unawaited(
               serviceConnection.sendDwdsEvent(
                 screen: screenId,

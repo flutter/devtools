@@ -112,7 +112,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    bool? is_v2_inspector, // metric15
+    String? is_v2_inspector, // metric15
   });
 
   factory GtagEventDevTools._create({
@@ -207,7 +207,9 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
               : null,
       // [InspectorScreenMetrics]
       is_v2_inspector:
-          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.isV2.toString()
+              : null,
     );
   }
 
@@ -243,7 +245,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   external int? get inspector_tree_controller_id;
   external String? get android_app_id;
   external String? get ios_bundle_id;
-  external bool? get is_v2_inspector;
+  external String? get is_v2_inspector;
 }
 
 extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
@@ -903,11 +905,9 @@ void _sendEvent(GtagEventDevTools gtagEvent) {
 }
 
 ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
-  final screen = gtagEvent.screen!;
-
   // Any dimensions or metrics that have a null value will be removed from
   // the event data in the [ua.Event.devtoolsEvent] constructor.
-  final e = ua.Event.devtoolsEvent(
+  return ua.Event.devtoolsEvent(
     screen: gtagEvent.screen!,
     eventCategory: gtagEvent.event_category!,
     label: gtagEvent.event_label!,
@@ -948,15 +948,6 @@ ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
       iosBundleId: gtagEvent.ios_bundle_id,
     ),
   );
-
-  if (screen == 'inspector') {
-    final isV2Inspector = e.eventData['isV2Inspector'];
-    if (isV2Inspector is bool) {
-      print('${e.eventData['label']}, v2: $isV2Inspector');
-    }
-  }
-
-  return e;
 }
 
 ua.Event _uaEventFromGtagException(
@@ -1037,7 +1028,7 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
   final int? rootSetCount;
   final int? rowCount;
   final int? inspectorTreeControllerId;
-  final bool? isV2Inspector;
+  final String? isV2Inspector;
 
   // [DeepLinkScreenMetrics]
   final String? androidAppId;

@@ -154,7 +154,12 @@ class _ServiceExtensionButtonGroupState
         final gaScreenName = extensionState.description.gaScreenName;
         final gaItem = extensionState.description.gaItem;
         if (gaScreenName != null && gaItem != null) {
-          ga.select(gaScreenName, gaItem);
+          ga.select(
+            gaScreenName,
+            gaItem,
+            screenMetricsProvider:
+                extensionState.description.screenMetricsProvider,
+          );
         }
 
         final wasSelected = extensionState.isSelected;

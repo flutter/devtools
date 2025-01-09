@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/globals.dart';
 import '../../shared/managers/banner_messages.dart';
@@ -219,7 +220,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   void _refreshInspector() {
-    ga.select(gac.inspector, gac.refresh);
+    ga.select(
+      gac.inspector,
+      gac.refresh,
+      screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+    );
     unawaited(
       blockWhileInProgress(() async {
         await controller.refreshInspector();
