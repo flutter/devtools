@@ -903,9 +903,11 @@ void _sendEvent(GtagEventDevTools gtagEvent) {
 }
 
 ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
+  final screen = gtagEvent.screen!;
+
   // Any dimensions or metrics that have a null value will be removed from
   // the event data in the [ua.Event.devtoolsEvent] constructor.
-  return ua.Event.devtoolsEvent(
+  final e = ua.Event.devtoolsEvent(
     screen: gtagEvent.screen!,
     eventCategory: gtagEvent.event_category!,
     label: gtagEvent.event_label!,
@@ -946,6 +948,15 @@ ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
       iosBundleId: gtagEvent.ios_bundle_id,
     ),
   );
+
+  if (screen == 'inspector') {
+    final isV2Inspector = e.eventData['isV2Inspector'];
+    if (isV2Inspector is bool) {
+      print('${e.eventData['label']}, v2: $isV2Inspector');
+    }
+  }
+
+  return e;
 }
 
 ua.Event _uaEventFromGtagException(
