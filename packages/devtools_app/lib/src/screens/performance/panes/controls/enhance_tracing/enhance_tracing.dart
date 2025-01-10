@@ -307,7 +307,7 @@ class TraceWidgetBuildsCheckbox extends StatelessWidget {
             value: extension.enabledValue,
           );
     } else {
-      await Future.wait([
+      await [
         for (final extension in tracingExtensions)
           serviceConnection.serviceManager.serviceExtensionManager
               .setServiceExtensionState(
@@ -315,7 +315,7 @@ class TraceWidgetBuildsCheckbox extends StatelessWidget {
                 enabled: false,
                 value: extension.disabledValue,
               ),
-      ]);
+      ].wait;
     }
   }
 }
@@ -366,7 +366,7 @@ class TraceWidgetBuildsScopeSelector extends StatelessWidget {
     assert(enabled);
     final extension = type!.extensionForScope;
     final opposite = type.opposite.extensionForScope;
-    await Future.wait([
+    await [
       serviceConnection.serviceManager.serviceExtensionManager
           .setServiceExtensionState(
             opposite.extension,
@@ -379,6 +379,6 @@ class TraceWidgetBuildsScopeSelector extends StatelessWidget {
             enabled: true,
             value: extension.enabledValue,
           ),
-    ]);
+    ].wait;
   }
 }

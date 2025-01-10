@@ -21,12 +21,9 @@ class VMStatisticsViewController extends DisposableController {
     _refreshing.value = true;
     final vm = await _service.getVM();
     _vm = vm;
-    _isolates = await Future.wait<Isolate>(
-      vm.isolates!.map((i) => _service.getIsolate(i.id!)),
-    );
-    _systemIsolates = await Future.wait<Isolate>(
-      vm.systemIsolates!.map((i) => _service.getIsolate(i.id!)),
-    );
+    _isolates = await vm.isolates!.map((i) => _service.getIsolate(i.id!)).wait;
+    _systemIsolates =
+        await vm.systemIsolates!.map((i) => _service.getIsolate(i.id!)).wait;
     _refreshing.value = false;
   }
 

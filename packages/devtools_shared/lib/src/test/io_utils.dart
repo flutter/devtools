@@ -64,11 +64,11 @@ mixin IOMixin {
   }
 
   Future<void> cancelAllStreamSubscriptions() async {
-    await Future.wait(streamSubscriptions.map((s) => s.cancel()));
-    await Future.wait([
+    await streamSubscriptions.map((s) => s.cancel()).wait;
+    await [
       stdoutController.close(),
       stderrController.close(),
-    ]);
+    ].wait;
     streamSubscriptions.clear();
   }
 

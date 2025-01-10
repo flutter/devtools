@@ -254,47 +254,44 @@ class ProgramExplorerController extends DisposableController
             .id;
 
     Future<List<Obj>> getObjects(Iterable<ObjRef> objs) {
-      return Future.wait(
-        objs.map((o) => service!.getObject(isolateId!, o.id!)),
-      );
+      return objs.map((o) => service!.getObject(isolateId!, o.id!)).wait;
     }
 
     Future<List<Func>> getFuncs(
       Iterable<FuncRef> funcs,
       Iterable<FieldRef>? fields,
     ) async {
-      return await Future.wait<Func>(
-        funcs
-            .where((f) => !_isSyntheticAccessor(f, fields as List<FieldRef>))
-            .map<Future<Func>>(
-              (f) => service!.getObject(isolateId!, f.id!).then((f) async {
-                final func = f as Func;
-                final codeRef = func.code;
+      return await funcs
+          .where((f) => !_isSyntheticAccessor(f, fields as List<FieldRef>))
+          .map<Future<Func>>(
+            (f) => service!.getObject(isolateId!, f.id!).then((f) async {
+              final func = f as Func;
+              final codeRef = func.code;
 
-                // Populate the [Code] objects in each function if we want to
-                // show code nodes in the outline.
-                if (showCodeNodes && codeRef != null) {
-                  final code =
-                      await service.getObject(isolateId, codeRef.id!) as Code;
-                  func.code = code;
-                  Code unoptimizedCode = code;
-                  // `func.code` could be unoptimized code, so don't bother
-                  // fetching it again.
-                  if (func.unoptimizedCode != null &&
-                      func.unoptimizedCode?.id! != code.id!) {
-                    unoptimizedCode =
-                        await service.getObject(
-                              isolateId,
-                              func.unoptimizedCode!.id!,
-                            )
-                            as Code;
-                  }
-                  func.unoptimizedCode = unoptimizedCode;
+              // Populate the [Code] objects in each function if we want to
+              // show code nodes in the outline.
+              if (showCodeNodes && codeRef != null) {
+                final code =
+                    await service.getObject(isolateId, codeRef.id!) as Code;
+                func.code = code;
+                Code unoptimizedCode = code;
+                // `func.code` could be unoptimized code, so don't bother
+                // fetching it again.
+                if (func.unoptimizedCode != null &&
+                    func.unoptimizedCode?.id! != code.id!) {
+                  unoptimizedCode =
+                      await service.getObject(
+                            isolateId,
+                            func.unoptimizedCode!.id!,
+                          )
+                          as Code;
                 }
-                return func;
-              }),
-            ),
-      );
+                func.unoptimizedCode = unoptimizedCode;
+              }
+              return func;
+            }),
+          )
+          .wait;
     }
 
     try {
@@ -302,21 +299,23 @@ class ProgramExplorerController extends DisposableController
         return;
       } else if (object is LibraryRef) {
         final lib = await service!.getObject(isolateId!, object.id!) as Library;
-        final results = await Future.wait([
-          getObjects(lib.variables!),
-          getFuncs(lib.functions!, lib.variables),
-        ]);
-        lib.variables = results[0].cast<Field>();
-        lib.functions = results[1].cast<Func>();
+        final (variableObjects, functionObjects) =
+            await (
+              getObjects(lib.variables!),
+              getFuncs(lib.functions!, lib.variables),
+            ).wait;
+        lib.variables = variableObjects.cast<Field>();
+        lib.functions = functionObjects;
         node.updateObject(lib);
       } else if (object is ClassRef) {
         final clazz = await service!.getObject(isolateId!, object.id!) as Class;
-        final results = await Future.wait([
-          getObjects(clazz.fields!),
-          getFuncs(clazz.functions!, clazz.fields),
-        ]);
-        clazz.fields = results[0].cast<Field>();
-        clazz.functions = results[1].cast<Func>();
+        final (fieldObjects, functionObjects) =
+            await (
+              getObjects(clazz.fields!),
+              getFuncs(clazz.functions!, clazz.fields),
+            ).wait;
+        clazz.fields = fieldObjects.cast<Field>();
+        clazz.functions = functionObjects;
         node.updateObject(clazz);
       } else {
         final obj = await service!.getObject(isolateId!, object.id!);

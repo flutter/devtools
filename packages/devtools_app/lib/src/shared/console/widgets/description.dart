@@ -234,7 +234,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
             if (!isHoverStale()) await buildVariablesTree(child);
           }());
         }
-        await Future.wait(tasks);
+        await tasks.wait;
         variable.expand();
 
         return HoverCardData(

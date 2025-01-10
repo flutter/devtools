@@ -223,7 +223,7 @@ class ServiceManager<T extends VmService> {
   ) async {
     final callbacks =
         _lifecycleCallbacks[lifecycle] ?? <ServiceManagerCallback<T>>[];
-    await Future.wait(callbacks.map((c) async => await c.call(service)));
+    await callbacks.map((c) async => await c.call(service)).wait;
   }
 
   final _overrides = <ServiceManagerOverride, ServiceManagerCallback<T>>{};

@@ -67,9 +67,9 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
           .then((_) => _root.expand())
           .then(
             (_) => unawaited(
-              Future.wait([
+              [
                 for (final child in _root.children) buildVariablesTree(child),
-              ]),
+              ].wait,
             ),
           ),
     );

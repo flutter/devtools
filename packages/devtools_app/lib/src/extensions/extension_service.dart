@@ -297,14 +297,14 @@ class ExtensionService extends DisposableController
       ...runtimeExtensions,
       ...staticExtensions,
     ].where((e) => e.name == extension.name);
-    await Future.wait([
+    await [
       for (final ext in allMatchingExtensions)
         server.extensionEnabledState(
           devtoolsOptionsFileUri: ext.devtoolsOptionsUri,
           extensionName: ext.name,
           enable: enable,
         ),
-    ]);
+    ].wait;
     await _refreshExtensionEnabledStates(
       availableExtensions: _currentExtensions.value.availableExtensions,
     );

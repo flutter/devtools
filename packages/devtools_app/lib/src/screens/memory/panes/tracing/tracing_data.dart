@@ -192,7 +192,7 @@ class TracingIsolateState with Serializable {
 
     // All profile requests need to complete before we can consider the refresh
     // completed.
-    await Future.wait(profileRequests);
+    await profileRequests.wait;
   }
 
   void updateClassFilter(String newFilter, {bool force = false}) {

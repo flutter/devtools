@@ -82,10 +82,10 @@ class _VmICDataDisplayState extends State<VmICDataDisplay> {
     final entriesFuture = service
         .getObject(isolateId, icData.entries.id!)
         .then((e) => e as Instance);
-    _initialized = Future.wait([
+    _initialized = [
       argumentsDescriptorFuture,
       entriesFuture,
-    ]).then((result) => populateLists(result[0], result[1]));
+    ].wait.then((result) => populateLists(result[0], result[1]));
   }
 
   @override

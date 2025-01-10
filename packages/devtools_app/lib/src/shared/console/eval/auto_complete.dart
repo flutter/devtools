@@ -158,7 +158,7 @@ Future<Set<String>> _libraryMemberAndImportsAutocompletes(
         }
       }
     }
-    (await Future.wait(futures)).forEach(result.addAll);
+    (await futures.wait).forEach(result.addAll);
   } catch (_) {
     // Silently skip library completions if there is a failure.
   }
@@ -227,7 +227,7 @@ Future<Set<String>> _libraryMemberAutocompletes(
       }
     }
     if (futures.isNotEmpty) {
-      (await Future.wait(futures)).forEach(result.addAll);
+      (await futures.wait).forEach(result.addAll);
     }
   }
   return result;

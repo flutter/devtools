@@ -189,7 +189,7 @@ Future<void> loadFonts() async {
     await loader.load();
   });
 
-  await Future.wait(loadFontsFuture);
+  await loadFontsFuture.wait;
 }
 
 void verifyIsSearchMatch(
