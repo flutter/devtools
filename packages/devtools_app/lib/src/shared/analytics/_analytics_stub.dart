@@ -9,6 +9,7 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 import 'analytics_common.dart';
 
@@ -94,7 +95,7 @@ void impression(
 
 void reportError(
   String errorMessage, {
-  List<String> stackTraceSubstrings = const <String>[],
+  stack_trace.Trace? stackTrace,
   bool fatal = false,
 }) {}
 
