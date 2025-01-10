@@ -445,6 +445,7 @@ class InspectorTreeController extends DisposableController
     ga.select(
       gac.inspector,
       gac.treeNodeSelection,
+      screenMetricsProvider: () => InspectorScreenMetrics.legacy(),
     );
     expandPath(node);
   }
@@ -1004,7 +1005,14 @@ class _InspectorTreeState extends State<InspectorTree>
     if (!controller.firstInspectorTreeLoadCompleted && widget.isSummaryTree) {
       final screenId = widget.screenId;
       if (screenId != null) {
-        ga.timeEnd(screenId, gac.pageReady);
+        ga.timeEnd(
+          screenId,
+          gac.pageReady,
+          screenMetricsProvider:
+              () => InspectorScreenMetrics.legacy(
+                rowCount: treeControllerLocal.numRows,
+              ),
+        );
         unawaited(
           serviceConnection.sendDwdsEvent(
             screen: screenId,

@@ -23,6 +23,9 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
@@ -665,6 +668,13 @@ class InspectorController extends DisposableController
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection, detailsSelection, true);
+
+      // Send an event that a widget was selected on the device.
+      ga.select(
+        gac.inspector,
+        gac.onDeviceSelection,
+        screenMetricsProvider: () => InspectorScreenMetrics.legacy(),
+      );
     } catch (error, st) {
       if (selectionGroups.next == group) {
         _log.shout(error, error, st);

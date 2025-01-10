@@ -83,6 +83,7 @@ const selectWidgetMode = 'selectWidgetMode';
 const enableOnDeviceInspector = 'enableOnDeviceInspector';
 const showOnDeviceInspector = 'showInspector';
 const treeNodeSelection = 'treeNodeSelection';
+const onDeviceSelection = 'onDeviceSelection';
 const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
@@ -122,6 +123,8 @@ const wasm = 'wasm';
 const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const inspectorV2Enabled = 'inspectorV2Enabled';
+const inspectorAutoRefreshEnabled = 'inspectorAutoRefreshEnabled';
+const inspectorV2Docs = 'inspectorV2Docs';
 const clearLogs = 'clearLogs';
 const copyLogs = 'copyLogs';
 
