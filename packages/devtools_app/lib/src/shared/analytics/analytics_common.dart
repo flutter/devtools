@@ -5,8 +5,6 @@
 // Code in this file should be able to be imported by both web and dart:io
 // dependent libraries.
 
-import 'dart:math';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
