@@ -13,13 +13,13 @@ import 'dart:js_interop';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:unified_analytics/unified_analytics.dart' as ua;
 import 'package:web/web.dart';
 
 import '../globals.dart';
 import '../managers/dtd_manager_extensions.dart';
 import '../primitives/query_parameters.dart';
-import '../primitives/utils.dart';
 import '../server/server.dart' as server;
 import '../utils/utils.dart';
 import 'analytics_common.dart';
@@ -681,7 +681,7 @@ String? _lastGaError;
 /// chunks to GA4 through unified_analytics.
 void reportError(
   String errorMessage, {
-  List<String> stackTraceSubstrings = const <String>[],
+  stack_trace.Trace? stackTrace,
   bool fatal = false,
 }) {
   // Don't keep recording same last error.
@@ -690,14 +690,14 @@ void reportError(
 
   final gTagExceptionWithStackTrace = GtagExceptionDevTools._create(
     // Include the stack trace in the message for legacy analytics.
-    '$errorMessage\n${stackTraceSubstrings.join()}',
+    '$errorMessage\n${stackTrace?.toString() ?? ''}',
     fatal: fatal,
   );
   GTag.exception(gaExceptionProvider: () => gTagExceptionWithStackTrace);
 
   final uaEvent = _uaEventFromGtagException(
     GtagExceptionDevTools._create(errorMessage, fatal: fatal),
-    stackTraceSubstrings: stackTraceSubstrings,
+    stackTrace: stackTrace,
   );
   unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
@@ -958,25 +958,17 @@ ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
 
 ua.Event _uaEventFromGtagException(
   GtagExceptionDevTools gtagException, {
-  List<String> stackTraceSubstrings = const <String>[],
+  stack_trace.Trace? stackTrace,
 }) {
+  final stackTraceAsMap = createStackTraceForAnalytics(stackTrace);
+
   // Any data entries that have a null value will be removed from the event data
   // in the [ua.Event.exception] constructor.
   return ua.Event.exception(
     exception: gtagException.description ?? 'unknown exception',
     data: {
       'fatal': gtagException.fatal,
-      // Each stack trace substring of length [ga4ParamValueCharacterLimit]
-      // contains information for ~1 stack frame, so including 8 chunks should
-      // give us enough information to understand the source of the exception.
-      'stackTraceChunk0': stackTraceSubstrings.safeGet(0),
-      'stackTraceChunk1': stackTraceSubstrings.safeGet(1),
-      'stackTraceChunk2': stackTraceSubstrings.safeGet(2),
-      'stackTraceChunk3': stackTraceSubstrings.safeGet(3),
-      'stackTraceChunk4': stackTraceSubstrings.safeGet(4),
-      'stackTraceChunk5': stackTraceSubstrings.safeGet(5),
-      'stackTraceChunk6': stackTraceSubstrings.safeGet(6),
-      'stackTraceChunk7': stackTraceSubstrings.safeGet(7),
+      ...stackTraceAsMap,
       'userApp': gtagException.user_app,
       'userBuild': gtagException.user_build,
       'userPlatform': gtagException.user_platform,

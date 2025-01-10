@@ -687,7 +687,7 @@ void main() {
       });
     });
 
-    group('SafeAccess', () {
+    group('SafeListOperations', () {
       test('safeFirst', () {
         final list = <int?>[];
         final iterable = list;
@@ -726,6 +726,12 @@ void main() {
         expect(list.safeRemoveLast(), 2);
         expect(list.safeRemoveLast(), 1);
         expect(list.safeRemoveLast(), isNull);
+      });
+
+      test('safeSublist', () {
+        expect([1, 2, 3].safeSublist(-1, 2), [1, 2]);
+        expect([1, 2, 3].safeSublist(0, 6), [1, 2, 3]);
+        expect([1, 2, 3].safeSublist(2, 1), []);
       });
     });
   });
