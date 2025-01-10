@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
@@ -15,7 +14,6 @@ import 'package:source_maps/source_maps.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 import '../analytics/analytics.dart' as ga;
-import '../analytics/analytics_common.dart';
 import '../globals.dart';
 
 final _log = Logger('app_error_handling');
@@ -95,22 +93,12 @@ Future<void> _reportError(
   bool notifyUser = false,
   StackTrace? stack,
 }) async {
-  final stackTrace = await _mapAndTersify(stack);
+  final stackTrace = await _sourceMapStackTrace(stack);
   final terseStackTrace = stackTrace?.terse;
   final errorMessageWithTerseStackTrace = '$error\n${terseStackTrace ?? ''}';
   _log.severe('[$errorType]: $errorMessageWithTerseStackTrace', error, stack);
 
-  // Split the stack trace up into substrings of size
-  // [ga4ParamValueCharacterLimit] so that we can send the stack trace in chunks
-  // to GA4 through unified_analytics.
-  final stackTraceSubstrings =
-      stackTrace
-          .toString()
-          .characters
-          .slices(ga4ParamValueCharacterLimit)
-          .map((slice) => slice.join())
-          .toList();
-  ga.reportError('$error', stackTraceSubstrings: stackTraceSubstrings);
+  ga.reportError('$error', stackTrace: stackTrace);
 
   // Show error message in a notification pop-up:
   if (notifyUser) {
@@ -147,7 +135,7 @@ Future<SingleMapping?> _initializeSourceMapping() async {
   }
 }
 
-Future<stack_trace.Trace?> _mapAndTersify(StackTrace? stack) async {
+Future<stack_trace.Trace?> _sourceMapStackTrace(StackTrace? stack) async {
   final originalStackTrace = stack;
   if (originalStackTrace == null) return null;
 

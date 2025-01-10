@@ -633,10 +633,15 @@ String toStringAsFixed(double num, [int fractionDigit = 1]) {
   return num.toStringAsFixed(fractionDigit);
 }
 
-extension SafeAccessList<T> on List<T> {
+extension SafeListOperations<T> on List<T> {
   T? safeGet(int index) => index < 0 || index >= length ? null : this[index];
 
   T? safeRemoveLast() => isNotEmpty ? removeLast() : null;
+
+  List<T> safeSublist(int start, [int? end]) {
+    if (start >= length || start >= (end ?? length)) return <T>[];
+    return sublist(max(start, 0), min(length, end ?? length));
+  }
 }
 
 extension SafeAccess<T> on Iterable<T> {
