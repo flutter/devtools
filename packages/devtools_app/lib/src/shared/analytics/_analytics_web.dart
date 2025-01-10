@@ -67,6 +67,8 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
+    // IMPORTANT! Only string and int values are supported. All other value
+    // types will be ignored in GA4.
     String? user_app, // dimension1 (flutter or web)
     String? user_build, // dimension2 (debug or profile)
     String? user_platform, // dimension3 (android/ios/fuchsia/linux/mac/windows)
@@ -112,7 +114,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    bool? is_v2_inspector, // metric15
+    String? is_v2_inspector, // metric15
   });
 
   factory GtagEventDevTools._create({
@@ -207,7 +209,9 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
               : null,
       // [InspectorScreenMetrics]
       is_v2_inspector:
-          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.isV2.toString()
+              : null,
     );
   }
 
@@ -243,7 +247,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   external int? get inspector_tree_controller_id;
   external String? get android_app_id;
   external String? get ios_bundle_id;
-  external bool? get is_v2_inspector;
+  external String? get is_v2_inspector;
 }
 
 extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
@@ -254,6 +258,8 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
+    // IMPORTANT! Only string and int values are supported. All other value
+    // types will be ignored in GA4.
     String? user_app, // dimension1 (flutter or web)
     String? user_build, // dimension2 (debug or profile)
     String? user_platform, // dimension3 (android or ios)
@@ -298,7 +304,7 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    bool? is_v2_inspector, // metric15
+    String? is_v2_inspector, // metric15
   });
 
   factory GtagExceptionDevTools._create(
@@ -385,7 +391,9 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
               : null,
       // [InspectorScreenMetrics]
       is_v2_inspector:
-          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.isV2.toString()
+              : null,
     );
   }
 
@@ -1026,7 +1034,7 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
   final int? rootSetCount;
   final int? rowCount;
   final int? inspectorTreeControllerId;
-  final bool? isV2Inspector;
+  final String? isV2Inspector;
 
   // [DeepLinkScreenMetrics]
   final String? androidAppId;

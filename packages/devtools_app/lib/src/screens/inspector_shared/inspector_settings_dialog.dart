@@ -75,7 +75,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                       description:
                           'Disable the redesigned Flutter inspector. Please know that '
                           'the legacy inspector may be removed in a future release.',
-                      gaItem: gac.inspectorV2Enabled,
+                      gaItem: gac.inspectorV2Disabled,
                     ),
                   ),
                 const SizedBox(height: largeSpacing),
