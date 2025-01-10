@@ -66,7 +66,7 @@ file:///b/s/w/ir/x/w/devtools/packages/devtools_app/lib/src/screens/performance/
       );
     });
 
-    test('from stack trace without DevTools stack frames', () {
+    test('without DevTools stack frames', () {
       final stackTrace = stack_trace.Trace.parse(
         '''
 file:///b/s/w/ir/x/w/rc/flutter/packages/flutter/lib/src/rendering/box.dart 2212:22          size
