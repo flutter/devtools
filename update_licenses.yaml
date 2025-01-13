@@ -1,50 +1,70 @@
 ---
 remove_licenses:
+  #0
   - |-
     // Copyright <value> The Chromium Authors. All rights reserved.
     // Use of this source code is governed by a BSD-style license that can be
     // found in the LICENSE file.
+  #1
   - |-
     /**
     Copyright <value> The Chromium Authors. All rights reserved.
     Use of this source code is governed by a BSD-style license that can be
     found in the LICENSE file.
     **/
+  #2
   - |-
     # Copyright <value> The Chromium Authors. All rights reserved.
     # Use of this source code is governed by a BSD-style license that can be
     # found in the LICENSE file.
+  #3
   - |-
     <!--
     Copyright <value> The Chromium Authors. All rights reserved.
     Use of this source code is governed by a BSD-style license that can be
     found in the LICENSE file.
     -->
+  #4
   - |-
     REM Copyright <value> The Chromium Authors. All rights reserved.
     REM Use of this source code is governed by a BSD-style license that can be
     REM found in the LICENSE file.
-add_licenses: 
+  #5
+  - |-
+    // Copyright <value> The Chromium Authors. All rights reserved.
+    // Use of this source code is governed by a BSD-style license that can be
+    // found in the LICENSE file
+  #6
+  - |-
+  // Copyright 2022 The Chromium Authors. All rights reserved.
+  // Use of this source code is governed by a BSD-style license that can be found
+  // in the LICENSE file.
+add_licenses:
+  #0 
   - |-
     // Copyright <value> The Flutter Authors
     // Use of this source code is governed by a BSD-style license that can be
     // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+  #1
   - |-
     /**
     Copyright <value> The Flutter Authors
     Use of this source code is governed by a BSD-style license that can be
     found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
     **/
+  #2
   - |-
     # Copyright <value> The Flutter Authors
     # Use of this source code is governed by a BSD-style license that can be
     # found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+  #3
   - |-
     <!--
     Copyright <value> The Flutter Authors
     Use of this source code is governed by a BSD-style license that can be
     found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
     -->
+  #4
   - |-
     REM Copyright <value> The Flutter Authors
     REM Use of this source code is governed by a BSD-style license that can be
@@ -81,6 +101,8 @@ update_paths:
       remove:
           - 0
           - 1
+          - 5
+          - 6
       add: 0
     gradle:
       remove:

@@ -499,26 +499,33 @@ Future<void> _setupTestConfigFile() async {
   final contents = '''---
 # sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
 remove_licenses:
+  #0
   - |-
     // This is some <value> multiline license
     // text that should be removed from the file.
+  #1
   - |-
     /* This is other <value> multiline license
     text that should be removed from the file. */
+  #2
   - |-
     # This is more <value> multiline license
     # text that should be removed from the file.
+  #3
   - |-
     // This is some multiline license text to
     // remove that does not contain a stored value.
 # sequence of license text strings that should be added to the top of a file. <value> will be replaced.
-add_licenses: 
+add_licenses:
+  #0
   - |-
     // This is some <value> multiline license
     // text that should be added to the file.
+  #1
   - |-
     # This is other <value> multiline license
     # text that should be added to the file.
+  #2
   - |-
     // This is some multiline license text to
     // add that does not contain a stored value.
