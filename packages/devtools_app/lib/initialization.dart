@@ -22,13 +22,17 @@ import 'src/shared/primitives/utils.dart';
 /// Any initialization that needs to happen before running DevTools, regardless
 /// of context, should happen here.
 ///
-/// If the initialization is specific to running Devtools in google3 or
+/// If any initialization is specific to running Devtools in google3 or
 /// externally, then it should be added to that respective main.dart file.
+/// Alternatively, the [onDevToolsInitialized] callback can be used to perform
+/// additional logic that runs after DevTools initialization but before running
+/// the app.
 void runDevTools({
   bool integrationTestMode = false,
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
   List<DevToolsScreen>? screens,
+  Future<void> Function()? onDevToolsInitialized,
 }) {
   setupErrorHandling(() async {
     await initializeDevTools(
@@ -38,6 +42,8 @@ void runDevTools({
 
     // Load the Dart syntax highlighting grammar.
     await SyntaxHighlighter.initialize();
+
+    await onDevToolsInitialized?.call();
 
     // Run the app.
     runApp(
