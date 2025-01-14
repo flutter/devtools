@@ -86,6 +86,7 @@ void main() {
       );
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(PreferencesController, PreferencesController());
+      setGlobal(OfflineDataController, OfflineDataController());
       controller = NetworkController();
       await controller.startRecording();
     });

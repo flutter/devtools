@@ -16,7 +16,7 @@ void main() {
   late Socket secondSocket;
 
   setUpAll(() {
-    final file = File('test/network/sample_network_offline_data.json');
+    final file = File('test/screens/network/sample_network_offline_data.json');
     final fileContent = file.readAsStringSync();
     jsonData = jsonDecode(fileContent) as Map<String, Object?>;
 
