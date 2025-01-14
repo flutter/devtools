@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../test_infra/utils/test_utils.dart';
+
 typedef Location = ({TextDocument document, CursorPosition position});
 typedef LocationToArgsResult = Map<Location, EditableArgumentsResult>;
 
@@ -137,11 +139,26 @@ void main() {
       controller.initForTestsOnly(editableArgs: result1.args);
       await tester.pumpAndSettle();
 
+      final titleInput = _findTextFormField('title');
+      final widthInput = _findTextFormField('width');
+      final heightInput = _findTextFormField('height');
+
       // Verify the inputs are expected.
       expect(_findNoPropertiesMessage, findsNothing);
-      expect(_findTextFormField('title'), findsOneWidget);
-      expect(_findTextFormField('width'), findsOneWidget);
-      expect(_findTextFormField('height'), findsOneWidget);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Verify the labels are expected.
+      expect(_labelForInput(titleInput, matching: 'set'), findsNothing);
+      expect(_labelForInput(titleInput, matching: 'default'), findsNothing);
+      expect(_labelForInput(widthInput, matching: 'set'), findsNothing);
+      expect(_labelForInput(widthInput, matching: 'default'), findsNothing);
+      expect(_labelForInput(heightInput, matching: 'set'), findsNothing);
+      expect(_labelForInput(heightInput, matching: 'default'), findsOneWidget);
+
+      // Verify required comments exist.
+      expect(_requiredTextForInput(titleInput), findsOneWidget);
     });
 
     testWidgets('inputs are expected for second group of editable arguments', (
@@ -154,12 +171,22 @@ void main() {
       controller.initForTestsOnly(editableArgs: result2.args);
       await tester.pumpAndSettle();
 
+      final softWrapInput = _findDropdownButtonFormField('softWrap');
+      final alignInput = _findDropdownButtonFormField('align');
+
       // Verify the inputs are expected.
       expect(_findNoPropertiesMessage, findsNothing);
-      final softWrapInput = _findDropdownButtonFormField('softWrap');
       expect(softWrapInput, findsOneWidget);
-      final alignInput = _findDropdownButtonFormField('align');
       expect(alignInput, findsOneWidget);
+
+      // Verify the labels are expected.
+      expect(_labelForInput(softWrapInput, matching: 'set'), findsNothing);
+      expect(
+        _labelForInput(softWrapInput, matching: 'default'),
+        findsOneWidget,
+      );
+      expect(_labelForInput(alignInput, matching: 'set'), findsOneWidget);
+      expect(_labelForInput(alignInput, matching: 'default'), findsNothing);
     });
 
     testWidgets('softWrap input has expected options', (tester) async {
@@ -243,7 +270,8 @@ void main() {
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
-        final titleInput = _findTextFormField('title');
+        final titleInput = _findTextFormField('title*');
+        expect(titleInput, findsOneWidget);
         await _inputText(titleInput, text: 'Brand New Title!', tester: tester);
 
         // Verify the edit is expected.
@@ -317,9 +345,26 @@ final _findNoPropertiesMessage = find.text(
 );
 
 Finder _findTextFormField(String inputName) => find.ancestor(
-  of: find.text(inputName),
+  of: find.textContaining(inputName),
   matching: find.byType(TextFormField),
 );
+
+Finder _labelForInput(Finder inputFinder, {required String matching}) {
+  final rowFinder = find.ancestor(of: inputFinder, matching: find.byType(Row));
+  final labelFinder = find.descendant(
+    of: rowFinder,
+    matching: find.byType(RoundedLabel),
+  );
+  return find.descendant(of: labelFinder, matching: find.text(matching));
+}
+
+Finder _requiredTextForInput(Finder inputFinder) =>
+    _helperTextForInput(inputFinder, matching: '*required');
+
+Finder _helperTextForInput(Finder inputFinder, {required String matching}) {
+  final rowFinder = find.ancestor(of: inputFinder, matching: find.byType(Row));
+  return find.descendant(of: rowFinder, matching: find.richText(matching));
+}
 
 Finder _findDropdownButtonFormField(String inputName) => find.ancestor(
   of: find.text(inputName),
@@ -446,7 +491,7 @@ final widthProperty = EditableArgument(
   errorText: 'Some reason for why this can\'t be edited.',
   isNullable: false,
   value: 20.0,
-  isRequired: true,
+  isRequired: false,
   hasArgument: false,
 );
 final heightProperty = EditableArgument(
@@ -457,7 +502,7 @@ final heightProperty = EditableArgument(
   isNullable: false,
   value: 20.0,
   isDefault: true,
-  isRequired: true,
+  isRequired: false,
 );
 final result1 = EditableArgumentsResult(
   args: [titleProperty, widthProperty, heightProperty],
