@@ -137,12 +137,16 @@ class _PropertyLabels extends StatelessWidget {
               labelText: 'set',
               backgroundColor: colorScheme.primary,
               textColor: colorScheme.onPrimary,
+              tooltipText: 'Property argument is set.',
             ),
           ),
         if (isDefault)
           const Padding(
             padding: EdgeInsets.all(_PropertiesList.itemPadding),
-            child: RoundedLabel(labelText: 'default'),
+            child: RoundedLabel(
+              labelText: 'default',
+              tooltipText: 'Property argument matches the default value.',
+            ),
           ),
       ],
     );
@@ -168,7 +172,7 @@ class _PropertyInputState extends State<_PropertyInput> {
   Widget build(BuildContext context) {
     final argument = widget.argument;
     final decoration = InputDecoration(
-      helperText: '',
+      helperText: argument.isRequired ? '* required' : '',
       errorText: argument.errorText,
       isDense: true,
       label: Text('${argument.name}${argument.isRequired ? '* ' : ''}'),
