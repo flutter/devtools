@@ -74,8 +74,6 @@ void main() {
     setGlobal(Storage, FlutterTestStorage());
     setGlobal(NotificationService, NotificationService());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
-    // Enable the V2 inspector:
-    preferences.inspector.setInspectorV2Enabled(true);
   });
 
   Future<void> mockExtensions() async {

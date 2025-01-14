@@ -1,20 +1,20 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.42.0 release notes
+# DevTools 2.43.0 release notes
 
-The 2.42.0 release of the Dart and Flutter DevTools
+The 2.43.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](/tools/devtools/overview).
 
 ## General updates
 
-* View licenses added to about dialog. - [#8610](https://github.com/flutter/devtools/pull/8610)
+TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 
-* Selecting an implementation widget on the device while implementation widget's are hidden in the [new Inspector's](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates) does not show an error. - [#8625](https://github.com/flutter/devtools/pull/8625)
+TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
@@ -59,4 +59,4 @@ TODO: Remove this section if there are not any general updates.
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.42.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.43.0).

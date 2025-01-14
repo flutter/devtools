@@ -64,15 +64,15 @@ class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
 
 class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
   InspectorScreenMetrics.legacy({
-    required this.rootSetCount,
-    required this.rowCount,
-    required this.inspectorTreeControllerId,
+    this.rootSetCount,
+    this.rowCount,
+    this.inspectorTreeControllerId,
   }) : isV2 = false;
 
   InspectorScreenMetrics.v2({
-    required this.rootSetCount,
-    required this.rowCount,
-    required this.inspectorTreeControllerId,
+    this.rootSetCount,
+    this.rowCount,
+    this.inspectorTreeControllerId,
   }) : isV2 = true;
 
   static const summaryTreeGaId = 0;

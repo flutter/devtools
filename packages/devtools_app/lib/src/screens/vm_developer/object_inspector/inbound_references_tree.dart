@@ -35,8 +35,9 @@ class InboundReferencesTreeNode extends TreeNode<InboundReferencesTreeNode> {
     }
 
     return switch (objectRef) {
-      ClassRef(:final name) || FuncRef(:final name) || FieldRef(:final name) =>
-        name,
+      ClassRef(:final name) ||
+      FuncRef(:final name) ||
+      FieldRef(:final name) => name,
       LibraryRef(:final name, :final uri) => name.isNullOrEmpty ? uri : name,
       ScriptRef(:final uri) => fileNameFromUri(uri),
       InstanceRef(:final name, :final classRef) =>

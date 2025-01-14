@@ -3,3 +3,7 @@
     image-rendering: pixelated;
   }
 }
+
+body {
+  overscroll-behavior-x: none;
+}

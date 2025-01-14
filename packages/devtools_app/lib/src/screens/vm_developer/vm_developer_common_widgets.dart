@@ -641,8 +641,7 @@ class VmServiceObjectLink extends StatelessWidget {
       FieldRef(:final name) ||
       FuncRef(:final name) ||
       CodeRef(:final name) ||
-      TypeArgumentsRef(:final name) =>
-        name,
+      TypeArgumentsRef(:final name) => name,
       // If a class has an empty name, it's a special "top level" class.
       ClassRef(:final name) => name!.isEmpty ? 'top-level-class' : name,
       LibraryRef(:final uri, :final name) =>

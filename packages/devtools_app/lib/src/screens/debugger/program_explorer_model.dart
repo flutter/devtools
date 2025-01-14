@@ -333,8 +333,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     final sourceLocation = switch (object) {
       FieldRef(:final location) ||
       FuncRef(:final location) ||
-      ClassRef(:final location) =>
-        location,
+      ClassRef(:final location) => location,
       _ => null,
     };
 

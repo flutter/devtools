@@ -11,8 +11,10 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/banner_messages.dart';
 import '../../shared/managers/error_badge_manager.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/common_widgets.dart';
@@ -57,6 +59,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   static const inspectorTreeKey = Key('Inspector Tree');
   static const minScreenWidthForTextBeforeScaling = 900.0;
 
+  static const _welcomeShownStorageId = 'inspectorV2WelcomeShown';
+
   @override
   void dispose() {
     _inspectorTreeController.dispose();
@@ -70,7 +74,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
 
     if (serviceConnection.inspectorService == null) {
@@ -112,6 +116,12 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     }
 
     _inspectorTreeController.setSearchTarget(searchTarget);
+
+    unawaited(
+      _maybeShowWelcomeMessage(context).catchError((_) {
+        // Ignore errors.
+      }),
+    );
   }
 
   @override
@@ -210,12 +220,26 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   void _refreshInspector() {
-    ga.select(gac.inspector, gac.refresh);
+    ga.select(
+      gac.inspector,
+      gac.refresh,
+      screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+    );
     unawaited(
       blockWhileInProgress(() async {
         await controller.refreshInspector();
       }),
     );
+  }
+
+  Future<void> _maybeShowWelcomeMessage(BuildContext context) async {
+    final welcomeAlreadyShown = await storage.getValue(_welcomeShownStorageId);
+    if (welcomeAlreadyShown == 'true') return;
+    // Mark the welcome message as shown.
+    await storage.setValue(_welcomeShownStorageId, 'true');
+    if (context.mounted) {
+      pushWelcomeToNewInspectorMessage(context, InspectorScreen.id);
+    }
   }
 }
 

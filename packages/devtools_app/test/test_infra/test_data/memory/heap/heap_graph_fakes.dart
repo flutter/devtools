@@ -24,16 +24,14 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
 
   @override
   // ignore: avoid-explicit-type-declaration, required to override base class.
-  final List<HeapSnapshotClass>
-  classes = <HeapSnapshotClass>[
+  final List<HeapSnapshotClass> classes = <HeapSnapshotClass>[
     _FakeHeapSnapshotClass(),
     _FakeHeapSnapshotClass.weak(),
   ];
 
   @override
   // ignore: avoid-explicit-type-declaration, required to override base class.
-  final List<FakeSnapshotObject>
-  objects = <FakeSnapshotObject>[
+  final List<FakeSnapshotObject> objects = <FakeSnapshotObject>[
     _sentinelObject,
     FakeSnapshotObject(shallowSize: 1), // root
   ];
