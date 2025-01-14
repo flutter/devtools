@@ -36,7 +36,7 @@ remove_licenses:
     // found in the LICENSE file
   #6
   - |-
-    // Copyright 2022 The Chromium Authors. All rights reserved.
+    // Copyright <value> The Chromium Authors. All rights reserved.
     // Use of this source code is governed by a BSD-style license that can be found
     // in the LICENSE file.
 add_licenses:
