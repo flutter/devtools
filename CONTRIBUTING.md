@@ -98,7 +98,7 @@ of launch configurations for running and debugging DevTools:
 
 1. Change your local Flutter SDK to the latest flutter candidate branch:
 	```sh
-	dt update-flutter-sdk --update-from-path
+	dt update-flutter-sdk --update-on-path
 	```
 	> Warning: this will delete any local changes in your Flutter SDK you checked out from git.
 
