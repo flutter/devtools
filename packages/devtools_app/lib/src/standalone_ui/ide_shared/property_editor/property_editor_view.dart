@@ -172,7 +172,7 @@ class _PropertyInputState extends State<_PropertyInput> {
   Widget build(BuildContext context) {
     final argument = widget.argument;
     final decoration = InputDecoration(
-      helperText: argument.isRequired ? '* required' : '',
+      helperText: argument.isRequired ? '*required' : '',
       errorText: argument.errorText,
       isDense: true,
       label: Text('${argument.name}${argument.isRequired ? '* ' : ''}'),
