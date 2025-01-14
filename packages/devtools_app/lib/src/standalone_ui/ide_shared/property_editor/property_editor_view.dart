@@ -105,7 +105,7 @@ class _EditablePropertyItem extends StatelessWidget {
                 ),
               ),
             ),
-            if (argument.isRequired || argument.isDefault) ...[
+            if (argument.hasArgument || argument.isDefault) ...[
               Flexible(child: _PropertyLabels(argument: argument)),
             ] else
               const Spacer(),
@@ -124,17 +124,17 @@ class _PropertyLabels extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isRequired = argument.isRequired;
+    final isSet = argument.hasArgument;
     final isDefault = argument.isDefault;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (isRequired)
+        if (isSet)
           Padding(
             padding: const EdgeInsets.all(_PropertiesList.itemPadding),
             child: RoundedLabel(
-              labelText: 'required',
+              labelText: 'set',
               backgroundColor: colorScheme.primary,
               textColor: colorScheme.onPrimary,
             ),
@@ -166,11 +166,12 @@ class _PropertyInputState extends State<_PropertyInput> {
 
   @override
   Widget build(BuildContext context) {
+    final argument = widget.argument;
     final decoration = InputDecoration(
       helperText: '',
-      errorText: widget.argument.errorText,
+      errorText: argument.errorText,
       isDense: true,
-      label: Text(widget.argument.name),
+      label: Text('${argument.name}${argument.isRequired ? '* ' : ''}'),
       border: const OutlineInputBorder(),
     );
 
@@ -199,7 +200,6 @@ class _PropertyInputState extends State<_PropertyInput> {
                   child: Text(option),
                 );
               }).toList(),
-          isExpanded: true,
           onChanged: (newValue) async {
             await _editArgument(newValue);
           },
