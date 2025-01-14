@@ -1,6 +1,6 @@
-// Copyright 2025 The Chromium Authors. All rights reserved.
+// Copyright 2025 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/src/shared/analytics/analytics_common.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
