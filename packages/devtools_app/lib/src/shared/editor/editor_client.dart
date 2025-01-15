@@ -8,7 +8,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:logging/logging.dart';
 
-import '../../shared/analytics/constants.dart';
+import '../analytics/constants.dart';
 import 'api_classes.dart';
 
 final _log = Logger('editor_client');

@@ -7,7 +7,7 @@ library;
 
 import 'dart:async';
 
-import 'package:devtools_app/src/service/editor/api_classes.dart';
+import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:stream_channel/stream_channel.dart';

@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-import 'package:devtools_app/src/service/editor/api_classes.dart';
+import 'package:devtools_app/src/shared/editor/api_classes.dart';
 
 EditorDebugSession generateDebugSession({
   required String debuggerType,
