@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../service/editor/api_classes.dart';
+import '../../../shared/primitives/utils.dart';
 import 'property_editor_controller.dart';
 
 class PropertyEditorView extends StatelessWidget {
@@ -38,23 +39,20 @@ class _PropertiesList extends StatelessWidget {
       valueListenable: controller.editableArgs,
       builder: (context, args, _) {
         return args.isEmpty
-            ? const _ListItemPadding(
-              child: Center(
-                child: Text(
-                  'No widget properties at the current cursor location.',
-                ),
+            ? const Center(
+              child: Text(
+                'No widget properties at the current cursor location.',
               ),
             )
             : Column(
-              children:
-                  args
-                      .map(
-                        (arg) => _EditablePropertyItem(
-                          argument: arg,
-                          controller: controller,
-                        ),
-                      )
-                      .toList(),
+              children: <Widget>[
+                ...args.map(
+                  (arg) => _EditablePropertyItem(
+                    argument: arg,
+                    controller: controller,
+                  ),
+                ),
+              ].joinWith(const PaddedDivider.noPadding()),
             );
       },
     );
@@ -70,48 +68,23 @@ class _EditablePropertyItem extends StatelessWidget {
   final EditableArgument argument;
   final PropertyEditorController controller;
 
-  static const _hasArgIndicatorWidth = denseSpacing;
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          left:
-              argument.hasArgument
-                  ? BorderSide(
-                    color: theme.colorScheme.primary,
-                    width: _hasArgIndicatorWidth,
-                  )
-                  : BorderSide.none,
-          bottom: defaultBorderSide(Theme.of(context)),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Flexible(
+          flex: 3,
+          child: Padding(
+            padding: const EdgeInsets.all(_PropertiesList.itemPadding),
+            child: _PropertyInput(argument: argument, controller: controller),
+          ),
         ),
-      ),
-      child: _ListItemPadding(
-        additionalPadding: EdgeInsets.only(
-          left: argument.hasArgument ? noPadding : _hasArgIndicatorWidth,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Flexible(
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(_PropertiesList.itemPadding),
-                child: _PropertyInput(
-                  argument: argument,
-                  controller: controller,
-                ),
-              ),
-            ),
-            if (argument.hasArgument || argument.isDefault) ...[
-              Flexible(child: _PropertyLabels(argument: argument)),
-            ] else
-              const Spacer(),
-          ],
-        ),
-      ),
+        if (argument.hasArgument || argument.isDefault) ...[
+          Flexible(child: _PropertyLabels(argument: argument)),
+        ] else
+          const Spacer(),
+      ],
     );
   }
 }
