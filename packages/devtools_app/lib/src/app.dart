@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'example/conditional_screen.dart';
 import 'extensions/extension_screen.dart';
 import 'framework/disconnect_observer.dart';
 import 'framework/framework_core.dart';
@@ -58,10 +57,6 @@ import 'shared/ui/common_widgets.dart';
 import 'shared/ui/hover.dart';
 import 'shared/utils/utils.dart';
 import 'standalone_ui/standalone_screen.dart';
-
-// Assign to true to use a sample implementation of a conditional screen.
-// WARNING: Do not check in this file if debugEnableSampleScreen is true.
-const debugEnableSampleScreen = false;
 
 /// Top-level configuration for the app.
 @immutable
@@ -684,12 +679,6 @@ List<DevToolsScreen> defaultScreens({
       VMDeveloperToolsScreen(),
       createController: (_) => VMDeveloperToolsController(),
     ),
-    // Show the sample DevTools screen.
-    if (debugEnableSampleScreen && (kDebugMode || kProfileMode))
-      DevToolsScreen<ExampleController>(
-        const ExampleConditionalScreen(),
-        createController: (_) => ExampleController(),
-      ),
   ];
 }
 

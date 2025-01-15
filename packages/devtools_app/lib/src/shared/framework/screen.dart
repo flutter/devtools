@@ -156,14 +156,12 @@ enum ScreenMetaData {
   }
 }
 
-/// Defines a page shown in the DevTools [TabBar].
+/// Defines a screen shown in the top-level DevTools [TabBar].
 ///
-/// A devtools screen can be in three modes:
-/// * offline-data
-/// * connected
-/// * not-connected
-///
-/// See [devToolsMode].
+/// A DevTools screen can be in three modes:
+/// * showing offline-data
+/// * connected to an application
+/// * not connected to an application
 ///
 /// A screen may support any combination of modes.
 ///
