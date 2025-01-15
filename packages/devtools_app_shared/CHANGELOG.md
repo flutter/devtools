@@ -6,7 +6,7 @@
 * Add `iconAsset` and `iconSize` fields to the `ButtonGroupItemData` class.
 * Add `iconAsset` and `iconSize` fields to the `MaterialIconLabel` class.
 * Add "Supported Flutter versions" policy to the README.
-* Bump `vm_service` dependency to `^15.0.0`.
+* Bump `vm_service` dependency to `>=13.0.0 <16.0.0`.
 
 ## 0.2.4
 * Add `updateQueryParameter` utility method.
