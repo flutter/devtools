@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
@@ -110,7 +111,18 @@ class _PropertyEditorConnectedPanelState
       thumbVisibility: true,
       child: SingleChildScrollView(
         controller: scrollController,
-        child: PropertyEditorView(controller: widget.controller),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            denseSpacing,
+            defaultSpacing,
+            defaultSpacing, // Additional right padding for scroll bar.
+            defaultSpacing,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [PropertyEditorView(controller: widget.controller)],
+          ),
+        ),
       ),
     );
   }

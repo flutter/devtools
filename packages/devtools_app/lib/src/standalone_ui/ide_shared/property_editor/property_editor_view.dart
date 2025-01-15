@@ -277,27 +277,3 @@ class _PropertyInputState extends State<_PropertyInput> {
     return isInt ? int.tryParse(valueAsString) : double.tryParse(valueAsString);
   }
 }
-
-class _ListItemPadding extends StatelessWidget {
-  const _ListItemPadding({
-    required this.child,
-    this.additionalPadding = const EdgeInsets.all(noPadding),
-  });
-
-  final Widget child;
-  final EdgeInsets additionalPadding;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        additionalPadding.left + denseSpacing,
-        additionalPadding.top + denseSpacing,
-        additionalPadding.right +
-            defaultSpacing, // Additional right padding for scroll bar.
-        additionalPadding.bottom + noPadding,
-      ),
-      child: child,
-    );
-  }
-}
