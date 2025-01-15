@@ -9,8 +9,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:logging/logging.dart';
 
-import '../shared/editor/api_classes.dart';
 import '../shared/config_specific/post_message/post_message.dart';
+import '../shared/editor/api_classes.dart';
 import '../shared/globals.dart';
 
 final _log = Logger('theme_manager');
