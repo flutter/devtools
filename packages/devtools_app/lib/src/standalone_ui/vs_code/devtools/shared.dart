@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../service/editor/editor_client.dart';
+import '../../../shared/editor/editor_client.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 

@@ -60,7 +60,7 @@ export 'src/screens/vm_developer/vm_developer_tools_screen.dart';
 export 'src/screens/vm_developer/vm_service_private_extensions.dart';
 export 'src/service/connected_app/connected_app.dart';
 export 'src/service/connected_app/connection_info.dart';
-export 'src/service/editor/editor_client.dart';
+export 'src/shared/editor/editor_client.dart';
 export 'src/service/json_to_service_cache.dart';
 export 'src/service/service_extensions.dart';
 export 'src/service/service_manager.dart';

@@ -5,8 +5,8 @@
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../service/editor/api_classes.dart';
-import '../../../service/editor/editor_client.dart';
+import '../../../shared/editor/api_classes.dart';
+import '../../../shared/editor/editor_client.dart';
 
 class PropertyEditorController extends DisposableController
     with AutoDisposeControllerMixin {

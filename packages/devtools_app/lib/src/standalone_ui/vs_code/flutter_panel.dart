@@ -9,8 +9,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
-import '../../service/editor/api_classes.dart';
-import '../../service/editor/editor_client.dart';
+import '../../shared/editor/api_classes.dart';
+import '../../shared/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/ui/common_widgets.dart';
 import 'debug_sessions.dart';

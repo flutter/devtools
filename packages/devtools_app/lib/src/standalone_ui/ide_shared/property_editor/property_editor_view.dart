@@ -6,7 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../service/editor/api_classes.dart';
+import '../../../shared/editor/api_classes.dart';
 import '../../../shared/primitives/utils.dart';
 import 'property_editor_controller.dart';
 
