@@ -19,7 +19,10 @@ class PropertyEditorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [_PropertiesList(controller: controller)],
+      children: [
+        // TODO(elliette): Include widget name and documentation.
+        _PropertiesList(controller: controller),
+      ],
     );
   }
 }
