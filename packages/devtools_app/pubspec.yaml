@@ -1,3 +1,6 @@
+# Copyright 2025 The Flutter Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 name: devtools_app
 description: Web-based performance tooling for Dart and Flutter.
 publish_to: none
@@ -48,7 +51,7 @@ dependencies:
   stack_trace: ^1.12.0
   string_scanner: ^1.1.0
   unified_analytics: ^7.0.0
-  vm_service: ^14.2.5
+  vm_service: '>=13.0.0 <16.0.0'
   vm_service_protos: ^1.0.0
   vm_snapshot_analysis: ^0.7.6
   web: ^1.0.0
