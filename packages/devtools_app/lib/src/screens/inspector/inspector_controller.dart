@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// This library must not have direct dependencies on dart:html.
 ///
@@ -23,6 +23,9 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
@@ -638,7 +641,7 @@ class InspectorController extends DisposableController
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
       treeType,
-      isSummaryTree: isSummaryTree,
+      restrictToLocalProject: isSummaryTree,
     );
 
     final pendingDetailsFuture =
@@ -666,6 +669,13 @@ class InspectorController extends DisposableController
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection, detailsSelection, true);
+
+      // Send an event that a widget was selected on the device.
+      ga.select(
+        gac.inspector,
+        gac.onDeviceSelection,
+        screenMetricsProvider: () => InspectorScreenMetrics.legacy(),
+      );
     } catch (error, st) {
       if (selectionGroups.next == group) {
         _log.shout(error, error, st);

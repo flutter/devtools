@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:ui_web' as ui_web;
@@ -46,7 +46,11 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     }
 
     final basePath = devtoolsAssetsBasePath(
-      origin: window.location.origin,
+      // This needs to use the DevTools server URI as the origin because the
+      // extension assets are served through a DevTools server handler. The
+      // DevTools server handler loads them directly from their location in the
+      // user's pub-cache.
+      origin: devToolsServerUriAsString,
       path: window.location.pathname,
     );
     final baseUri = path.join(

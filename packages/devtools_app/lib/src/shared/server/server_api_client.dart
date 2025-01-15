@@ -13,6 +13,7 @@ import 'package:logging/logging.dart';
 import '../config_specific/notifications/notifications.dart';
 import '../framework/framework_controller.dart';
 import '../globals.dart';
+import 'server.dart';
 
 final _log = Logger('lib/src/shared/server_api_client');
 
@@ -46,7 +47,8 @@ class DevToolsServerConnection {
           : baseUri.resolve('api/');
 
   static Future<DevToolsServerConnection?> connect() async {
-    final apiUri = apiUriFor(Uri.base);
+    final serverUri = Uri.parse(devToolsServerUriAsString);
+    final apiUri = apiUriFor(serverUri);
     final pingUri = apiUri.resolve('ping');
 
     try {

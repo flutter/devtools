@@ -1,3 +1,8 @@
+<!--
+Copyright 2025 The Flutter Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+-->
 ## Updating NEXT_RELEASE_NOTES.md
 
 When you add a user-facing change to DevTools,
@@ -81,3 +86,13 @@ https://flutter-docs-prod--pr8928-dt-notes-links-b0b33er1.web.app/tools/devtools
 - Verify the release notes viewer displays the new release notes as expected.
   Some issues to watch out for are broken images or 'include_relative' lines in
   the markdown that don't load properly.
+
+## Preparing release notes for the next release
+
+After completing the release, the `NEXT_RELEASE_NOTES.md` file needs to be
+cleared in preparation for the next release. This should happen automatically
+when you update the version for the next release:
+
+```sh
+dt update-version auto -t minor; dt update-version auto -t dev
+```

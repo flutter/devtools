@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:collection';
@@ -193,7 +193,10 @@ class InspectorTreeController extends DisposableController
     }
   }
 
-  bool setSelectedNode(InspectorTreeNode? node) {
+  bool setSelectedNode(
+    InspectorTreeNode? node, {
+    bool notifyFlutterInspector = false,
+  }) {
     if (node == _selection) return false;
 
     _selection?.selected = false;
@@ -201,7 +204,9 @@ class InspectorTreeController extends DisposableController
     _selection?.selected = true;
     final configLocal = config;
     if (configLocal.onSelectionChange != null) {
-      configLocal.onSelectionChange!();
+      configLocal.onSelectionChange!(
+        notifyFlutterInspector: notifyFlutterInspector,
+      );
     }
     return true;
   }
@@ -547,8 +552,12 @@ class InspectorTreeController extends DisposableController
   }
 
   void onSelectNode(InspectorTreeNode? node) {
-    setSelectedNode(node);
-    ga.select(gac.inspector, gac.treeNodeSelection);
+    setSelectedNode(node, notifyFlutterInspector: true);
+    ga.select(
+      gac.inspector,
+      gac.treeNodeSelection,
+      screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+    );
     final diagnostic = node?.diagnostic;
     if (diagnostic != null && diagnostic.groupIsHidden) {
       diagnostic.hideableGroupLeader?.toggleHiddenGroup();
@@ -1131,7 +1140,12 @@ class _InspectorTreeState extends State<InspectorTree>
         if (!controller.firstInspectorTreeLoadCompleted) {
           final screenId = widget.screenId;
           if (screenId != null) {
-            ga.timeEnd(screenId, gac.pageReady);
+            ga.timeEnd(
+              screenId,
+              gac.pageReady,
+              screenMetricsProvider:
+                  () => InspectorScreenMetrics.v2(rowCount: rows.length),
+            );
             unawaited(
               serviceConnection.sendDwdsEvent(
                 screen: screenId,

@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:collection';
@@ -13,6 +13,7 @@ import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/globals.dart';
 import '../../shared/managers/error_badge_manager.dart';
@@ -265,7 +266,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   void _refreshInspector() {
-    ga.select(gac.inspector, gac.refresh);
+    ga.select(
+      gac.inspector,
+      gac.refresh,
+      screenMetricsProvider: () => InspectorScreenMetrics.legacy(),
+    );
     unawaited(
       blockWhileInProgress(() async {
         // If the user is force refreshing the inspector before the first load has
@@ -275,7 +280,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           // We do not want to complete this timing operation because the force
           // refresh will skew the results.
           ga.cancelTimingOperation(InspectorScreen.id, gac.pageReady);
-          ga.select(gac.inspector, gac.refreshEmptyTree);
+          ga.select(
+            gac.inspector,
+            gac.refreshEmptyTree,
+            screenMetricsProvider: () => InspectorScreenMetrics.legacy(),
+          );
           controller.firstInspectorTreeLoadCompleted = true;
         }
         await controller.onForceRefresh();

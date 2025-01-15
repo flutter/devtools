@@ -32,9 +32,11 @@ Future<String> initializePlatform() async {
   // Here, we try and initialize the connection between the DevTools web app and
   // its local server. DevTools can be launched without the server however, so
   // establishing this connection is a best-effort.
+  // TODO(kenz): investigate it we can remove the DevToolsServerConnection
+  // code in general. We do not appear to be using the SSE connection.
   final connection = await DevToolsServerConnection.connect();
   if (connection != null) {
-    setGlobal(Storage, ServerConnectionStorage());
+    setGlobal(Storage, server.ServerConnectionStorage());
   } else {
     setGlobal(Storage, BrowserStorage());
   }
@@ -91,19 +93,6 @@ void _sendKeyPressToParent(KeyboardEvent event) {
     {'command': 'keydown', 'data': data}.jsify(),
     '*'.toJS,
   );
-}
-
-class ServerConnectionStorage implements Storage {
-  @override
-  Future<String?> getValue(String key) async {
-    final value = await server.getPreferenceValue(key);
-    return value == null ? null : '$value';
-  }
-
-  @override
-  Future<void> setValue(String key, String value) async {
-    await server.setPreferenceValue(key, value);
-  }
 }
 
 class BrowserStorage implements Storage {

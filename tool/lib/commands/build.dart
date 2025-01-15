@@ -16,23 +16,23 @@ import '../utils.dart';
 ///
 /// By default, this command builds DevTools in release mode, but this can be
 /// overridden by passing 'debug' or 'profile' as the
-/// [BuildCommandArgs.buildMode] argument. For testing embedded content in
+/// [SharedCommandArgs.buildMode] argument. For testing embedded content in
 /// VS Code, 'profile' or the default 'release' mode must be used because
 /// the '--dart2js-optimization=O1' flag that is passed for 'debug' builds
 /// will cause issues with the VS Code embedding.
 ///
-/// If the [BuildCommandArgs.useFlutterFromPath] argument is present, the
+/// If the [SharedCommandArgs.useFlutterFromPath] argument is present, the
 /// Flutter SDK will not be updated to the latest Flutter candidate before
 /// building DevTools. Use this flag to save the cost of updating the Flutter
 /// SDK when you already have the proper SDK checked out. This is helpful when
 /// developing with the DevTools server.
 ///
-/// If the [BuildCommandArgs.updatePerfetto] argument is present, the
+/// If the [SharedCommandArgs.updatePerfetto] argument is present, the
 /// precompiled bits for Perfetto will be updated from the
 /// `dt update-perfetto` command as part of the DevTools build
 /// process.
 ///
-/// If [BuildCommandArgs.pubGet] argument is negated (e.g. --no-pub-get), then
+/// If [SharedCommandArgs.pubGet] argument is negated (e.g. --no-pub-get), then
 /// `dt pub-get --only-main` command will not be run before building
 /// the DevTools web app. Use this flag to save the cost of updating pub
 /// packages if your pub cahce does not need to be updated. This is helpful when
@@ -60,13 +60,13 @@ class BuildCommand extends Command {
     final processManager = ProcessManager();
     final results = argResults!;
     final updateFlutter =
-        results[BuildCommandArgs.updateFlutter.flagName] as bool;
+        results[SharedCommandArgs.updateFlutter.flagName] as bool;
     final updatePerfetto =
-        results[BuildCommandArgs.updatePerfetto.flagName] as bool;
-    final runPubGet = results[BuildCommandArgs.pubGet.flagName] as bool;
-    final buildMode = results[BuildCommandArgs.buildMode.flagName] as String;
-    final useWasm = results[BuildCommandArgs.wasm.flagName] as bool;
-    final noStripWasm = results[BuildCommandArgs.noStripWasm.flagName] as bool;
+        results[SharedCommandArgs.updatePerfetto.flagName] as bool;
+    final runPubGet = results[SharedCommandArgs.pubGet.flagName] as bool;
+    final buildMode = results[SharedCommandArgs.buildMode.flagName] as String;
+    final useWasm = results[SharedCommandArgs.wasm.flagName] as bool;
+    final noStripWasm = results[SharedCommandArgs.noStripWasm.flagName] as bool;
 
     final webBuildDir = Directory(
       path.join(repo.devtoolsAppDirectoryPath, 'build', 'web'),
@@ -103,11 +103,9 @@ class BuildCommand extends Command {
           'web',
           '--source-maps',
           if (useWasm) ...[
-            BuildCommandArgs.wasm.asArg(),
-            if (noStripWasm) BuildCommandArgs.noStripWasm.asArg(),
+            SharedCommandArgs.wasm.asArg(),
+            if (noStripWasm) SharedCommandArgs.noStripWasm.asArg(),
           ] else ...[
-            '--web-renderer',
-            'canvaskit',
             // Do not minify stack traces in debug mode.
             if (buildMode == 'debug') '--dart2js-optimization=O1',
             if (buildMode != 'debug') '--$buildMode',

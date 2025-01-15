@@ -177,12 +177,10 @@ class SidebarDevToolsScreens extends StatelessWidget {
       ScreenMetaData.debugger ||
       ScreenMetaData.vmTools ||
       // This screen will be removed from the first party DevTools screens soon.
-          // If the user depends on package:provider, the provider extension should
-          // show up in the DevTools extensions list instead.
-          ScreenMetaData
-          .provider ||
-      ScreenMetaData.simple =>
-        false,
+      // If the user depends on package:provider, the provider extension should
+      // show up in the DevTools extensions list instead.
+      ScreenMetaData.provider ||
+      ScreenMetaData.simple => false,
       _ => true,
     };
   }

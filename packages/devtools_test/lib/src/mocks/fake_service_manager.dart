@@ -180,8 +180,8 @@ class FakeServiceManager extends Fake
 
   @override
   // ignore: avoid-explicit-type-declaration, required to override base class.
-  final FakeServiceExtensionManager
-  serviceExtensionManager = FakeServiceExtensionManager();
+  final FakeServiceExtensionManager serviceExtensionManager =
+      FakeServiceExtensionManager();
 
   @override
   ConnectedApp? connectedApp = MockConnectedApp();

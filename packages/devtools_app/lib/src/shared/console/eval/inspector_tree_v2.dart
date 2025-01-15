@@ -10,7 +10,6 @@
 library;
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../diagnostics/diagnostics_node.dart';
 import '../../ui/search.dart';
@@ -199,7 +198,7 @@ class InspectorTreeConfig {
   });
 
   final NodeAddedCallback? onNodeAdded;
-  final VoidCallback? onSelectionChange;
+  final void Function({bool notifyFlutterInspector})? onSelectionChange;
   final void Function(bool added)? onClientActiveChange;
   final TreeEventCallback? onExpand;
 }

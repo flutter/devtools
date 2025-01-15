@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -1254,13 +1254,10 @@ class _CpuProfileTimelineTree {
   String? get resolvedUrl =>
       isCodeTree && _function is vm_service.FuncRef?
           ?
-              // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
-              // critical since this is only displayed when VM developer mode is
-              // enabled.
-              (_function as vm_service.FuncRef?)
-              ?.location
-              ?.script
-              ?.uri
+          // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
+          // critical since this is only displayed when VM developer mode is
+          // enabled.
+          (_function as vm_service.FuncRef?)?.location?.script?.uri
           : samples.functions![index].resolvedUrl;
 
   int? get sourceLine {

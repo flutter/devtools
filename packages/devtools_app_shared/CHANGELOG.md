@@ -1,6 +1,6 @@
 ## 0.3.0
 * Bump minimum Dart SDK version to `3.6.0`.
-* Bump minimum Flutter SDK version to `3.24.0`.
+* Bump minimum Flutter SDK version to `3.27.1`.
 * Bump `devtools_shared` dependency to `^11.1.0`.
 * Add `DevToolsIcon` and `AssetImageIcon` widgets.
 * Add `iconAsset` and `iconSize` fields to the `ButtonGroupItemData` class.

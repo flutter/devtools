@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -641,8 +641,7 @@ class VmServiceObjectLink extends StatelessWidget {
       FieldRef(:final name) ||
       FuncRef(:final name) ||
       CodeRef(:final name) ||
-      TypeArgumentsRef(:final name) =>
-        name,
+      TypeArgumentsRef(:final name) => name,
       // If a class has an empty name, it's a special "top level" class.
       ClassRef(:final name) => name!.isEmpty ? 'top-level-class' : name,
       LibraryRef(:final uri, :final name) =>

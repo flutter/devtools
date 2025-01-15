@@ -1,3 +1,6 @@
+# 11.2.0
+* Bump `vm_service` dependency upper bound to `<16.0.0`.
+
 # 11.1.0
 * Bump minimum SDK version to `3.6.0`.
 * Update `package:vm_service` to `>=13.0.0 <16.0.0`.

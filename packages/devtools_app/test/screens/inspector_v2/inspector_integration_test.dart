@@ -1,18 +1,26 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+
+@TestOn('vm')
+library;
+
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart'
-    hide InspectorScreenBodyState, InspectorScreenBody;
+    hide InspectorScreenBodyState, InspectorScreenBody, InspectorRowContent;
 import 'package:devtools_app/src/screens/inspector/inspector_screen_body.dart'
     as legacy;
+import 'package:devtools_app/src/screens/inspector_shared/inspector_controls.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
+import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 
 import '../../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../../test_infra/flutter_test_environment.dart';
@@ -33,6 +41,7 @@ void main() {
 
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
+    useTempDirectory: true,
   );
 
   env.afterEverySetup = () async {
@@ -52,13 +61,17 @@ void main() {
   setUp(() async {
     await env.setupEnvironment();
     // Enable the V2 inspector:
-    preferences.inspector.setInspectorV2Enabled(true);
+    preferences.inspector.setLegacyInspectorEnabled(false);
   });
 
   tearDown(() async {
     await env.tearDownEnvironment(force: true);
     // Re-set changes to preferences:
-    preferences.inspector.setInspectorV2Enabled(false);
+    preferences.inspector.setLegacyInspectorEnabled(true);
+  });
+
+  tearDownAll(() {
+    env.finalTeardown();
   });
 
   group('screenshot tests', () {
@@ -144,6 +157,9 @@ void main() {
       (WidgetTester tester) async {
         await _loadInspectorUI(tester);
 
+        // Toggle implementation widgets on.
+        await _toggleImplementationWidgets(tester);
+
         // Before hidden widgets are expanded, confirm the HeroControllerScope
         // is hidden:
         final hideableNodeFinder = findNodeMatching('HeroControllerScope');
@@ -195,6 +211,9 @@ void main() {
     ) async {
       await _loadInspectorUI(tester);
 
+      // Toggle implementation widgets on.
+      await _toggleImplementationWidgets(tester);
+
       // Before searching, confirm the HeroControllerScope is hidden:
       final hideableNodeFinder = findNodeMatching('HeroControllerScope');
       expect(hideableNodeFinder, findsNothing);
@@ -227,21 +246,15 @@ void main() {
   ) async {
     await _loadInspectorUI(tester);
 
-    // Give time for the initial animation to complete.
-    await tester.pumpAndSettle(inspectorChangeSettleTime);
+    // Toggle implementation widgets on.
+    await _toggleImplementationWidgets(tester);
 
     // Confirm the hidden widgets are visible behind affordances like "X more
     // widgets".
     expect(find.richTextContaining('more widgets...'), findsWidgets);
 
-    // Tap the "Show Implementation Widgets" button (selected by default).
-    final showImplementationWidgetsButton = find.descendant(
-      of: find.byType(DevToolsToggleButton),
-      matching: find.text('Show Implementation Widgets'),
-    );
-    expect(showImplementationWidgetsButton, findsOneWidget);
-    await tester.tap(showImplementationWidgetsButton);
-    await tester.pumpAndSettle(inspectorChangeSettleTime);
+    // Toggle implementation widgets off.
+    await _toggleImplementationWidgets(tester);
 
     // Confirm that the hidden widgets are no longer visible.
     expect(find.richTextContaining('more widgets...'), findsNothing);
@@ -265,6 +278,75 @@ void main() {
     expect(find.richTextContaining('more widgets...'), findsNothing);
   });
 
+  // TODO(elliette): Expand into test group for cases when:
+  // - selected widget is implementation widget and implementation widgets are hidden (this test case)
+  // - selected widget is implementation widget and implementation widgets are visible
+  // - selected widget is not implementation widget and implementation widgets are hidden
+  // - selected widget is not implementation widget and implementation widgets are visible
+  testWidgetsWithWindowSize('selecting implementation widget', windowSize, (
+    WidgetTester tester,
+  ) async {
+    // Load the Inspector.
+    await _loadInspectorUI(tester);
+
+    // Toggle implementation widgets on.
+    await _toggleImplementationWidgets(tester);
+
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+    final state =
+        tester.state(find.byType(InspectorScreenBody))
+            as InspectorScreenBodyState;
+
+    // Find the first Text diagnostic node.
+    final diagnostics = state.controller.inspectorTree.rowsInTree.value.map(
+      (row) => row!.node.diagnostic,
+    );
+    final textDiagnostic =
+        diagnostics.firstWhere((d) => d?.description == 'Text')!;
+    expect(textDiagnostic.isCreatedByLocalProject, isTrue);
+
+    // Toggle implementation widgets off.
+    await _toggleImplementationWidgets(tester);
+
+    // Verify the Text diagnostic node is still in the tree.
+    final diagnosticsNow = state.controller.inspectorTree.rowsInTree.value.map(
+      (row) => row!.node.diagnostic,
+    );
+    expect(
+      diagnosticsNow.any((d) => d?.valueRef == textDiagnostic.valueRef),
+      isTrue,
+    );
+
+    // Get the RichText child of the Text diagnostic node.
+    final service = serviceConnection.inspectorService as InspectorService;
+    final group = service.createObjectGroup('test-group');
+    final textSubtree = await group.getDetailsSubtree(textDiagnostic);
+    final richTextDiagnostic = (await textSubtree!.children)!.firstWhere(
+      (child) => child.description == 'RichText',
+    );
+
+    // Verify the RichText child is an implementation node that is not in the tree.
+    expect(richTextDiagnostic.isCreatedByLocalProject, isFalse);
+    expect(
+      diagnosticsNow.any((d) => d?.valueRef == richTextDiagnostic.valueRef),
+      isFalse,
+    );
+
+    // Mimic selecting the RichText diagnostic node with the on-device inspector.
+    await group.setSelectionInspector(richTextDiagnostic.valueRef, false);
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+    // Verify the Text node is now selected.
+    final selectedNode = state.controller.selectedNode.value;
+    expect(selectedNode!.diagnostic!.valueRef, equals(textDiagnostic.valueRef));
+
+    // Verify the notification about selecting an implementation widget is displayed.
+    expect(
+      find.text('Selected an implementation widget of Text: RichText.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgetsWithWindowSize('can revert to legacy inspector', windowSize, (
     WidgetTester tester,
   ) async {
@@ -275,7 +357,7 @@ void main() {
     await tester.pumpAndSettle(inspectorChangeSettleTime);
 
     // Disable Inspector V2:
-    await toggleV2Inspector(tester);
+    await toggleLegacyInspector(tester);
     await tester.pumpAndSettle(inspectorChangeSettleTime);
 
     // Verify the legacy inspector is visible:
@@ -295,7 +377,7 @@ void main() {
       await _loadInspectorUI(tester);
 
       // Disable Inspector V2.
-      await toggleV2Inspector(tester);
+      await toggleLegacyInspector(tester);
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
       // Verify the legacy inspector is visible.
@@ -306,7 +388,7 @@ void main() {
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
       // Enable Inspector V2.
-      await toggleV2Inspector(tester);
+      await toggleLegacyInspector(tester);
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
       // Verify the legacy inspector is not visible.
@@ -383,6 +465,94 @@ void main() {
     },
   );
 
+  group('auto-refresh after code edits', () {
+    final flutterAppMainPath = p.join(env.testAppDirectory, 'lib', 'main.dart');
+    String flutterMainContents = '';
+
+    setUp(() {
+      // Save contents of main.dart file.
+      flutterMainContents = File(flutterAppMainPath).readAsStringSync();
+
+      // Enable auto-refresh.
+      preferences.inspector.setAutoRefreshEnabled(true);
+    });
+
+    tearDown(() {
+      // Re-set contents of main.dart.
+      File(
+        flutterAppMainPath,
+      ).writeAsStringSync(flutterMainContents, flush: true);
+
+      // Re-set changes to auto refresh.
+      preferences.inspector.setAutoRefreshEnabled(true);
+    });
+
+    void makeEditToFlutterMain({
+      required String toReplace,
+      required String replaceWith,
+    }) {
+      final file = File(flutterAppMainPath);
+      final fileContents = file.readAsStringSync();
+      file.writeAsStringSync(
+        fileContents.replaceAll(toReplace, replaceWith),
+        flush: true,
+      );
+    }
+
+    testWidgetsWithWindowSize('changing parent widget of selected', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await _loadInspectorUI(tester);
+
+      // Toggle implementation widgets on.
+      await _toggleImplementationWidgets(tester);
+
+      // Give time for the initial animation to complete.
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Verify the Text widget is after the Center widget.
+      expect(
+        _treeRowsAreInOrder(
+          treeRowDescriptions: ['Center', 'Text: "Hello, World!"'],
+          startingAtIndex: 15,
+        ),
+        isTrue,
+      );
+
+      // Select the Text widget (row index #16).
+      await tester.tap(_findTreeRowMatching('Text: "Hello, World!"'));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Verify the Text widget is selected (its properties are displayed):
+      verifyPropertyIsVisible(
+        name: 'data',
+        value: '"Hello, World!"',
+        tester: tester,
+      );
+
+      // Make edit to main.dart to replace Center with an Align.
+      makeEditToFlutterMain(toReplace: 'Center', replaceWith: 'Align');
+      await env.flutter!.hotReload();
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Verify the Align is now in the widget tree instead of Center.
+      expect(
+        _treeRowsAreInOrder(
+          treeRowDescriptions: ['Align', 'Text: "Hello, World!"'],
+          startingAtIndex: 15,
+        ),
+        isTrue,
+      );
+
+      // Verify the Text widget is still selected (its properties are displayed):
+      verifyPropertyIsVisible(
+        name: 'data',
+        value: '"Hello, World!"',
+        tester: tester,
+      );
+    });
+  });
+
   group('widget errors', () {
     testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
       WidgetTester tester,
@@ -426,6 +596,17 @@ void main() {
       );
     });
   });
+}
+
+Future<void> _toggleImplementationWidgets(WidgetTester tester) async {
+  // Tap the "Show Implementation Widgets" button (selected by default).
+  final showImplementationWidgetsButton = find.descendant(
+    of: find.byType(DevToolsToggleButton),
+    matching: find.text('Show Implementation Widgets'),
+  );
+  expect(showImplementationWidgetsButton, findsOneWidget);
+  await tester.tap(showImplementationWidgetsButton);
+  await tester.pumpAndSettle(inspectorChangeSettleTime);
 }
 
 Future<void> _loadInspectorUI(WidgetTester tester) async {
@@ -485,10 +666,31 @@ Finder findExpandCollapseButtonForNode({
   return expandCollapseButtonFinder;
 }
 
-Future<void> toggleV2Inspector(WidgetTester tester) async {
-  final inspectorSwitch = find.byType(DevToolsSwitch);
-  expect(inspectorSwitch, findsOneWidget);
-  await tester.tap(inspectorSwitch);
+Future<void> toggleLegacyInspector(WidgetTester tester) async {
+  // Open settings dialog.
+  final inspectorSettingsDialogButton = find.descendant(
+    of: find.byType(InspectorServiceExtensionButtonGroup),
+    matching: find.byType(SettingsOutlinedButton),
+  );
+  await tester.tap(inspectorSettingsDialogButton);
+  await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+  // Toggle the "legacy Inspector" checkbox.
+  final settingsRow = find.ancestor(
+    of: find.richTextContaining('Use legacy inspector'),
+    matching: find.byType(Row),
+  );
+  final inspectorCheckbox = find.descendant(
+    of: settingsRow,
+    matching: find.byType(NotifierCheckbox),
+  );
+  await tester.tap(inspectorCheckbox);
+  await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+  // Close the settings dialog.
+  final closeButton = find.byType(DialogCloseButton);
+  await tester.tap(closeButton);
+  await tester.pumpAndSettle(inspectorChangeSettleTime);
 }
 
 void verifyPropertyIsVisible({
@@ -526,3 +728,35 @@ bool areHorizontallyAligned(
 
   return widgetACenter.dy == widgetBCenter.dy;
 }
+
+bool _treeRowsAreInOrder({
+  required List<String> treeRowDescriptions,
+  required int startingAtIndex,
+}) {
+  final treeRowIndices = <int>[];
+
+  for (final description in treeRowDescriptions) {
+    final treeRow = _getWidgetFromFinder<InspectorRowContent>(
+      _findTreeRowMatching(description),
+    );
+    treeRowIndices.add(treeRow.row.index);
+  }
+
+  int indexToCheck = startingAtIndex;
+  for (final index in treeRowIndices) {
+    if (index == indexToCheck) {
+      indexToCheck++;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+Finder _findTreeRowMatching(String description) => find.ancestor(
+  of: find.richText(description),
+  matching: find.byType(InspectorRowContent),
+);
+
+T _getWidgetFromFinder<T>(Finder finder) =>
+    finder.first.evaluate().first.widget as T;

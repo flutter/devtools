@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // Fake construction requires number of unawaited calls.
 // ignore_for_file: discarded_futures
@@ -74,8 +74,6 @@ void main() {
     setGlobal(Storage, FlutterTestStorage());
     setGlobal(NotificationService, NotificationService());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
-    // Enable the V2 inspector:
-    preferences.inspector.setInspectorV2Enabled(true);
   });
 
   Future<void> mockExtensions() async {

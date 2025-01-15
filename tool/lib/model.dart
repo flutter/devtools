@@ -122,10 +122,10 @@ class DevToolsRepo {
       } else {
         final ancestor = result.firstWhereOrNull(
           (p) =>
-              // Remove the last segment of [dir]'s pathSegments to ensure we
-              // are only checking ancestors and not sibling directories with
-              // similar names.
-              (List.from(dir.uri.pathSegments)..safeRemoveLast())
+          // Remove the last segment of [dir]'s pathSegments to ensure we
+          // are only checking ancestors and not sibling directories with
+          // similar names.
+          (List.from(dir.uri.pathSegments)..safeRemoveLast())
               // TODO(kenz): this may cause issues for Windows paths.
               .join('/')
               .startsWith(p.packagePath),
