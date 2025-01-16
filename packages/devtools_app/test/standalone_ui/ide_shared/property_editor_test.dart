@@ -250,13 +250,15 @@ void main() {
           textDocument: argThat(isNotNull, named: 'textDocument'),
           position: argThat(isNotNull, named: 'position'),
           name: argThat(isNotNull, named: 'name'),
-          value: argThat(isNotNull, named: 'value'),
+          value: argThat(anything, named: 'value'),
         ),
       ).thenAnswer((realInvocation) {
         final calledWithArgs = realInvocation.namedArguments;
         final name = calledWithArgs[const Symbol('name')];
         final value = calledWithArgs[const Symbol('value')];
-        nextEditCompleter.complete('$name: $value');
+        nextEditCompleter.complete(
+          '$name: $value (TYPE: ${value?.runtimeType ?? 'null'})',
+        );
         return Future.value();
       });
     });
@@ -274,7 +276,47 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('title: Brand New Title!'));
+        expect(nextEdit, equals('title: Brand New Title! (TYPE: String)'));
+      });
+    });
+
+    testWidgets('editing a string input to null (title)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: 'null', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('title: null (TYPE: null)'));
+      });
+    });
+
+    testWidgets('editing a string input to empty string (title)', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: '', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals(
+            'title: '
+            ' (TYPE: String)',
+          ),
+        );
       });
     });
 
@@ -290,7 +332,23 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('height: 55.81'));
+        expect(nextEdit, equals('height: 55.81 (TYPE: double)'));
+      });
+    });
+
+    testWidgets('editing a numeric input to null (height)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(heightInput, text: '', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('height: null (TYPE: null)'));
       });
     });
 
@@ -311,7 +369,28 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('align: Alignment.topLeft'));
+        expect(nextEdit, equals('align: Alignment.topLeft (TYPE: String)'));
+      });
+    });
+
+    testWidgets('editing a nullable enum input (align)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result2.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Select the align: null option.
+        final alignInput = _findDropdownButtonFormField('align');
+        await _selectDropdownMenuItem(
+          alignInput,
+          optionToSelect: 'null',
+          currentlySelected: 'Alignment.center',
+          tester: tester,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('align: null (TYPE: null)'));
       });
     });
 
@@ -332,7 +411,7 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('softWrap: false'));
+        expect(nextEdit, equals('softWrap: false (TYPE: bool)'));
       });
     });
   });
@@ -476,7 +555,7 @@ final titleProperty = EditableArgument(
   type: 'string',
   isDefault: false,
   isEditable: true,
-  isNullable: false,
+  isNullable: true,
   isRequired: true,
   hasArgument: false,
 );
@@ -497,7 +576,7 @@ final heightProperty = EditableArgument(
   type: 'double',
   hasArgument: false,
   isEditable: true,
-  isNullable: false,
+  isNullable: true,
   value: 20.0,
   isDefault: true,
   isRequired: false,
@@ -520,7 +599,7 @@ final softWrapProperty = EditableArgument(
 final alignProperty = EditableArgument(
   name: 'align',
   type: 'enum',
-  isNullable: false,
+  isNullable: true,
   hasArgument: true,
   isDefault: false,
   isRequired: false,
