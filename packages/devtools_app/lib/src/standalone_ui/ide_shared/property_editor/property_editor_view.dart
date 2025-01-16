@@ -151,7 +151,7 @@ class _PropertyInputState extends State<_PropertyInput> {
       helperText: argument.isRequired ? '*required' : '',
       errorText: argument.errorText,
       isDense: true,
-      label: Text('${argument.name}${argument.isRequired ? '* ' : ''}'),
+      label: Text('${argument.name}${argument.isRequired ? '*' : ''}'),
       border: const OutlineInputBorder(),
     );
 
