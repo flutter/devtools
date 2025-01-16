@@ -20,8 +20,7 @@ class PropertyEditorView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Property Editor', style: Theme.of(context).textTheme.titleMedium),
-        const PaddedDivider.noPadding(),
+        // TODO(elliette): Include widget name and documentation.
         _PropertiesList(controller: controller),
       ],
     );
@@ -84,7 +83,7 @@ class _EditablePropertyItem extends StatelessWidget {
             child: _PropertyInput(argument: argument, controller: controller),
           ),
         ),
-        if (argument.isRequired || argument.isDefault) ...[
+        if (argument.hasArgument || argument.isDefault) ...[
           Flexible(child: _PropertyLabels(argument: argument)),
         ] else
           const Spacer(),
@@ -101,25 +100,29 @@ class _PropertyLabels extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isRequired = argument.isRequired;
+    final isSet = argument.hasArgument;
     final isDefault = argument.isDefault;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (isRequired)
+        if (isSet)
           Padding(
             padding: const EdgeInsets.all(_PropertiesList.itemPadding),
             child: RoundedLabel(
-              labelText: 'required',
+              labelText: 'set',
               backgroundColor: colorScheme.primary,
               textColor: colorScheme.onPrimary,
+              tooltipText: 'Property argument is set.',
             ),
           ),
         if (isDefault)
           const Padding(
             padding: EdgeInsets.all(_PropertiesList.itemPadding),
-            child: RoundedLabel(labelText: 'default'),
+            child: RoundedLabel(
+              labelText: 'default',
+              tooltipText: 'Property argument matches the default value.',
+            ),
           ),
       ],
     );
@@ -143,11 +146,12 @@ class _PropertyInputState extends State<_PropertyInput> {
 
   @override
   Widget build(BuildContext context) {
+    final argument = widget.argument;
     final decoration = InputDecoration(
-      helperText: '',
-      errorText: widget.argument.errorText,
+      helperText: argument.isRequired ? '*required' : '',
+      errorText: argument.errorText,
       isDense: true,
-      label: Text(widget.argument.name),
+      label: Text('${argument.name}${argument.isRequired ? '*' : ''}'),
       border: const OutlineInputBorder(),
     );
 
@@ -166,6 +170,7 @@ class _PropertyInputState extends State<_PropertyInput> {
         return DropdownButtonFormField(
           value: widget.argument.valueDisplay,
           decoration: decoration,
+          isExpanded: true,
           items:
               options.toSet().toList().map((option) {
                 return DropdownMenuItem(
@@ -175,7 +180,6 @@ class _PropertyInputState extends State<_PropertyInput> {
                   child: Text(option),
                 );
               }).toList(),
-          isExpanded: true,
           onChanged: (newValue) async {
             await _editArgument(newValue);
           },
