@@ -26,13 +26,17 @@ const tooltipWait = Duration(milliseconds: 500);
 const tooltipWaitLong = Duration(milliseconds: 1000);
 const tooltipWaitExtraLong = Duration(milliseconds: 1500);
 
-/// Pluralizes a word, following english rules (1, many).
+/// Pluralizes a word, following English rules (1, many).
 ///
 /// Pass a custom named `plural` for irregular plurals:
 /// `pluralize('index', count, plural: 'indices')`
 /// So it returns `indices` and not `indexs`.
 String pluralize(String word, int count, {String? plural}) =>
     count == 1 ? word : (plural ?? '${word}s');
+
+/// Adds "a" or "an" to a word, following English rules.
+String addIndefiniteArticle(String word) =>
+    word.startsWith(RegExp(r'^[aeiouAEIOU]')) ? 'an $word' : 'a $word';
 
 bool isPrivateMember(String member) => member.startsWith('_');
 
