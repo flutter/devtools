@@ -87,8 +87,7 @@ class _EditablePropertyItem extends StatelessWidget {
           Flexible(child: _PropertyLabels(argument: argument)),
         ] else
           const Spacer(),
-      ],
-    );
+      ], textDirection: TextDirection.ltr,);
   }
 }
 
@@ -151,7 +150,7 @@ class _PropertyInputState extends State<_PropertyInput> {
       helperText: argument.isRequired ? '*required' : '',
       errorText: argument.errorText,
       isDense: true,
-      label: Text('${argument.name}${argument.isRequired ? '* ' : ''}'),
+      label: Text('${argument.name}${argument.isRequired ? '*' : ''}'),
       border: const OutlineInputBorder(),
     );
 
