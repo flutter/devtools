@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -137,7 +138,8 @@ class _PropertyInput extends StatefulWidget {
 }
 
 class _PropertyInputState extends State<_PropertyInput> {
-  String get typeError => 'Please enter a ${widget.argument.type}.';
+  String get typeError =>
+      'Please enter ${addIndefiniteArticle(widget.argument.type)}.';
 
   String currentValue = '';
 
@@ -150,12 +152,12 @@ class _PropertyInputState extends State<_PropertyInput> {
       label: Text(widget.argument.name),
       border: const OutlineInputBorder(),
     );
-
-    switch (widget.argument.type) {
+    final argType = widget.argument.type;
+    switch (argType) {
       case 'enum':
       case 'bool':
         final options =
-            widget.argument.type == 'bool'
+            argType == 'bool'
                 ? ['true', 'false']
                 : (widget.argument.options ?? <String>[]);
         options.add(widget.argument.valueDisplay);
@@ -183,11 +185,12 @@ class _PropertyInputState extends State<_PropertyInput> {
       case 'double':
       case 'int':
       case 'string':
+        final isNumeric = argType == 'double' || argType == 'int';
         return TextFormField(
           initialValue: widget.argument.valueDisplay,
           enabled: widget.argument.isEditable,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          validator: _inputValidator,
+          validator: isNumeric ? _numericInputValidator : null,
           inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
           decoration: decoration,
           style: Theme.of(context).fixedFontStyle,
@@ -211,8 +214,10 @@ class _PropertyInputState extends State<_PropertyInput> {
     final argName = widget.argument.name;
 
     // Can edit values to null.
-    if (widget.argument.isNullable && valueAsString == null ||
-        (valueAsString == '' && widget.argument.type != 'string')) {
+    final valueIsNull = valueAsString == null || valueAsString == 'null';
+    final valueIsEmpty =
+        widget.argument.type != 'string' && valueAsString == '';
+    if (widget.argument.isNullable && (valueIsNull || valueIsEmpty)) {
       await widget.controller.editArgument(name: argName, value: null);
       return;
     }
@@ -255,7 +260,12 @@ class _PropertyInputState extends State<_PropertyInput> {
     }
   }
 
-  String? _inputValidator(String? inputValue) {
+  String? _numericInputValidator(String? inputValue) {
+    // Permit sending null values with an empty input or with explicit "null".
+    final isNull = (inputValue ?? '').isEmpty || inputValue == 'null';
+    if (widget.argument.isNullable && isNull) {
+      return null;
+    }
     final numValue = _toNumber(inputValue);
     if (numValue == null) {
       return typeError;
