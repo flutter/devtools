@@ -1,3 +1,6 @@
+# Copyright 2025 The Flutter Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 ---
 remove_licenses:
   #0
@@ -78,6 +81,8 @@ update_paths:
     - /Users/mossman/Development/devtools/tool/flutter-sdk
     - /Users/mossman/Development/devtools/.github
     - /Users/mossman/Development/devtools/.vscode
+    - /Users/mossman/Development/devtools/packages/devtools_app/lib/src/shared/http/_http_date.dart
+    - /Users/mossman/Development/devtools/packages/devtools_app/lib/src/shared/http/_http_exception.dart
   file_types:
     bat:
       remove:
