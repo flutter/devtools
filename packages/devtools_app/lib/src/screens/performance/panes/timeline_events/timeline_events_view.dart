@@ -131,18 +131,28 @@ class TimelineEventsTabControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showingOfflineData = offlineDataController.showingOfflineData.value;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(right: densePadding),
-          child: PerfettoHelpButton(
-            perfettoController: controller.perfettoController,
+        if (!showingOfflineData)
+          Row(
+            children: [
+              const Text('Include CPU samples'),
+              const SizedBox(width: densePadding),
+              DevToolsTooltip(
+                message:
+                    'Include CPU samples in the timeline\n'
+                    '(this may negatively impact performance)',
+                child: NotifierSwitch(
+                  notifier: preferences.performance.includeCpuSamplesInTimeline,
+                ),
+              ),
+            ],
           ),
-        ),
-        if (!offlineDataController.showingOfflineData.value) ...[
-          // TODO(kenz): add a switch to enable the CPU profiler once the
-          // tracing format supports it (when we switch to protozero).
+        const SizedBox(width: densePadding),
+        PerfettoHelpButton(perfettoController: controller.perfettoController),
+        if (!showingOfflineData) ...[
           const SizedBox(width: densePadding),
           const TimelineSettingsButton(),
           const SizedBox(width: densePadding),
@@ -258,13 +268,6 @@ class _TimelineSettingsDialogState extends State<TimelineSettingsDialog>
 
   List<Widget> _defaultRecordedStreams(ThemeData theme) {
     return [
-      ...dialogSubHeader(theme, 'General'),
-      CheckboxSetting(
-        notifier: preferences.performance.includeCpuSamplesInTimeline,
-        title: 'Include CPU samples in the timeline',
-        description: 'This may negatively affect performance.',
-      ),
-      const SizedBox(height: defaultSpacing),
       ...dialogSubHeader(theme, 'Trace categories'),
       RichText(text: TextSpan(text: 'Default', style: theme.subtleTextStyle)),
       ..._timelineStreams(advanced: false),
