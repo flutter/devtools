@@ -7,10 +7,6 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import '../utils.dart';
 
-// This script must be executed from the top level devtools/ directory.
-// TODO(kenz): If changes are made to this script, first consider refactoring to
-// use https://github.com/dart-lang/pubspec_parse.
-
 // All other devtools_* pubspecs have their own versioning strategies, or do not
 // have a version at all (in the case of devtools_test).
 final _devtoolsAppPubspec = File(
