@@ -1,3 +1,8 @@
+<!--
+Copyright 2025 The Flutter Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+-->
 > [!NOTE]
 > There are parts of this release process that can only be completed by Googlers
 on the Dash team. If you are not a Googler on the Dash team, please reach out on the
