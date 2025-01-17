@@ -116,8 +116,9 @@ String toCssHexColor(Color color) {
   // In CSS Hex, Alpha comes last, but in Flutter's `value` field, alpha is
   // in the high bytes, so just using `value.toRadixString(16)` will put alpha
   // in the wrong position.
-  String hex(int val) => val.toRadixString(16).padLeft(2, '0');
-  return '#${hex(color.red)}${hex(color.green)}${hex(color.blue)}${hex(color.alpha)}';
+  String hex(double channelValue) =>
+      (channelValue * 255).round().toRadixString(16).padLeft(2, '0');
+  return '#${hex(color.r)}${hex(color.g)}${hex(color.b)}${hex(color.a)}';
 }
 
 extension StringUtilities on String {

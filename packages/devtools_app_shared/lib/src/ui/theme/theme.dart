@@ -228,9 +228,10 @@ const darkColorScheme = ColorScheme(
 );
 
 const searchMatchColor = Colors.yellow;
-final searchMatchColorOpaque = Colors.yellow.withOpacity(0.5);
+final searchMatchColorOpaque = Colors.yellow.withValues(alpha: 255 / 2);
 const activeSearchMatchColor = Colors.orangeAccent;
-final activeSearchMatchColorOpaque = Colors.orangeAccent.withOpacity(0.5);
+final activeSearchMatchColorOpaque =
+    Colors.orangeAccent.withValues(alpha: 255 / 2);
 
 /// Gets an alternating color to use for indexed UI elements.
 Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
