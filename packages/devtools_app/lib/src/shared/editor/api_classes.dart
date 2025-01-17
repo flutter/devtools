@@ -317,7 +317,7 @@ class ActiveLocationChangedEvent extends EditorEvent {
       );
 
   final List<EditorSelection> selections;
-  final TextDocument textDocument;
+  final TextDocument? textDocument;
 
   @override
   EditorEventKind get kind => EditorEventKind.activeLocationChanged;
@@ -341,11 +341,11 @@ class TextDocument with Serializable {
   TextDocument.fromJson(Map<String, Object?> map)
     : this(
         uriAsString: map[Field.uri] as String,
-        version: map[Field.version] as int,
+        version: map[Field.version] as int?,
       );
 
   final String uriAsString;
-  final int version;
+  final int? version;
 
   @override
   Map<String, Object?> toJson() => {

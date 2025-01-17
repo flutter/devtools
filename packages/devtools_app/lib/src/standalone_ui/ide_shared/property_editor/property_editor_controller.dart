@@ -27,6 +27,10 @@ class PropertyEditorController extends DisposableController
       editorClient.activeLocationChangedStream.listen((event) async {
         final textDocument = event.textDocument;
         final cursorPosition = event.selections.first.active;
+        // Don't do anything if the text document is null.
+        if (textDocument == null) {
+          return;
+        }
         // Don't do anything if the event corresponds to the current position.
         if (textDocument == _currentDocument &&
             cursorPosition == _currentCursorPosition) {
