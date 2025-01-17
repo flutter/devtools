@@ -63,8 +63,6 @@ class _PropertiesList extends StatelessWidget {
             ? const Center(
               child: Text(
                 'No widget properties at the current cursor location.',
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.left,
               ),
             )
             : Column(
