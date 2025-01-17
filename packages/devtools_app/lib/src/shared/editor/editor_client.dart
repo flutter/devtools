@@ -232,14 +232,14 @@ class EditorClient extends DisposableController
 
   /// Gets the editable arguments from the Analysis Server.
   Future<EditableArgumentsResult?> getEditableArguments({
-    required TextDocument textDocument,
+    required TextDocument? textDocument,
     required CursorPosition position,
   }) async {
     final response = await _callLspApi(
       LspMethod.editableArguments,
       params: {
         'type': 'Object', // This is required by DTD.
-        'textDocument': textDocument.toJson(),
+        'textDocument': textDocument?.toJson(),
         'position': position.toJson(),
       },
     );

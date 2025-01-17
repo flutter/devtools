@@ -317,7 +317,7 @@ class ActiveLocationChangedEvent extends EditorEvent {
       );
 
   final List<EditorSelection> selections;
-  final TextDocument textDocument;
+  final TextDocument? textDocument;
 
   @override
   EditorEventKind get kind => EditorEventKind.activeLocationChanged;
