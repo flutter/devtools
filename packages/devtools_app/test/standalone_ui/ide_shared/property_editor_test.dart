@@ -38,6 +38,12 @@ void main() {
 
     mockEditorClient = MockEditorClient();
     when(
+      mockEditorClient.editArgumentMethodName,
+    ).thenReturn(ValueNotifier(LspMethod.editArgument.methodName));
+    when(
+      mockEditorClient.editableArgumentsMethodName,
+    ).thenReturn(ValueNotifier(LspMethod.editableArguments.methodName));
+    when(
       mockEditorClient.activeLocationChangedStream,
     ).thenAnswer((_) => eventStream);
 

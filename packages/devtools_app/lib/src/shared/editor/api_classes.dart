@@ -28,14 +28,14 @@ enum EditorMethod {
 ///
 /// [code link]: https://github.com/dart-lang/sdk/blob/ebfcd436da65802a2b20d415afe600b51e432305/pkg/analysis_server/lib/src/lsp/constants.dart#L136
 enum LspMethod {
-  editableArguments(
-    methodName: 'experimental/dart/textDocument/editableArguments',
-  ),
-  editArgument(methodName: 'experimental/dart/textDocument/editArgument');
+  editableArguments(methodName: 'dart/textDocument/editableArguments'),
+  editArgument(methodName: 'dart/textDocument/editArgument');
 
   const LspMethod({required this.methodName});
 
   final String methodName;
+
+  String get experimentalMethodName => 'experimental/$methodName';
 }
 
 /// Known kinds of events that may come from the editor.
