@@ -97,7 +97,7 @@ void main() {
                   return Flexible(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: MetadataChips(data: log, maxWidth: 1000.0),
+                      child: MetadataChips(data: log),
                     ),
                   );
                 }).toList(),

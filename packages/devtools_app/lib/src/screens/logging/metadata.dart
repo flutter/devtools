@@ -13,16 +13,9 @@ import '../../shared/primitives/utils.dart';
 import 'logging_controller.dart';
 
 class MetadataChips extends StatelessWidget {
-  const MetadataChips({
-    super.key,
-    required this.data,
-    // TODO(kenz): remove maxWidth from these metadata chips once the Logging
-    // V2 code is removed.
-    required this.maxWidth,
-  });
+  const MetadataChips({super.key, required this.data});
 
   final LogData data;
-  final double maxWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +34,6 @@ class MetadataChips extends StatelessWidget {
     final logLevelChip = LogLevelMetadataChip(
       level: logLevel,
       rawLevel: data.level,
-      maxWidth: maxWidth,
       backgroundColor: logLevelColors.background,
       foregroundColor: logLevelColors.foreground,
     );
@@ -53,7 +45,6 @@ class MetadataChips extends StatelessWidget {
       isolateChip = IsolateChip(
         name: isolateName,
         id: data.isolateRef?.id,
-        maxWidth: maxWidth,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         outlined: true,
@@ -68,7 +59,6 @@ class MetadataChips extends StatelessWidget {
       zoneChip = ZoneChip(
         name: zoneName,
         identityHashCode: zone!.identityHashCode,
-        maxWidth: maxWidth,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         outlined: true,
@@ -96,7 +86,6 @@ class MetadataChips extends StatelessWidget {
       children: [
         KindMetaDataChip(
           kind: data.kind,
-          maxWidth: maxWidth,
           icon: kindIcon.icon,
           iconAsset: kindIcon.iconAsset,
           backgroundColor: kindColors.background,
@@ -105,7 +94,6 @@ class MetadataChips extends StatelessWidget {
         logLevelChip,
         if (elapsedFrameTimeAsString != null)
           FrameElapsedMetaDataChip(
-            maxWidth: maxWidth,
             elapsedTimeDisplay: elapsedFrameTimeAsString,
           ),
         if (isolateChip != null) isolateChip,
@@ -118,7 +106,6 @@ class MetadataChips extends StatelessWidget {
 abstract class MetadataChip extends StatelessWidget {
   const MetadataChip({
     super.key,
-    required this.maxWidth,
     required this.text,
     this.tooltip,
     this.icon,
@@ -129,7 +116,6 @@ abstract class MetadataChip extends StatelessWidget {
     this.includeLeadingMargin = true,
   });
 
-  final double maxWidth;
   final IconData? icon;
   final String? iconAsset;
   final String text;
@@ -156,7 +142,6 @@ abstract class MetadataChip extends StatelessWidget {
     return maybeWrapWithTooltip(
       tooltip: tooltip,
       child: Container(
-        constraints: BoxConstraints(maxWidth: maxWidth),
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(_borderRadius),
@@ -207,7 +192,6 @@ class KindMetaDataChip extends MetadataChip {
   const KindMetaDataChip({
     super.key,
     required String kind,
-    required super.maxWidth,
     super.icon,
     super.iconAsset,
     super.backgroundColor,
@@ -251,7 +235,6 @@ class KindMetaDataChip extends MetadataChip {
 class FrameElapsedMetaDataChip extends MetadataChip {
   const FrameElapsedMetaDataChip({
     super.key,
-    required super.maxWidth,
     required String elapsedTimeDisplay,
   }) : super(icon: Icons.timer, text: elapsedTimeDisplay);
 }
@@ -261,7 +244,6 @@ class LogLevelMetadataChip extends MetadataChip {
     super.key,
     required Level level,
     required int rawLevel,
-    required super.maxWidth,
     super.backgroundColor,
     super.foregroundColor,
   }) : super(text: 'Level.${level.name} ($rawLevel)');
@@ -307,7 +289,6 @@ class IsolateChip extends MetadataChip {
     super.key,
     required String name,
     required String? id,
-    required super.maxWidth,
     super.backgroundColor,
     super.foregroundColor,
     super.outlined = false,
@@ -319,7 +300,6 @@ class ZoneChip extends MetadataChip {
     super.key,
     required String name,
     required int? identityHashCode,
-    required super.maxWidth,
     super.backgroundColor,
     super.foregroundColor,
     super.outlined = false,

@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-// TODO(kenz): remove once min flutter version of devtools_app_shared >= 3.25
-// ignore_for_file: deprecated_member_use, analysis performed with newer flutter version than min sdk
-
 import 'dart:async';
 import 'dart:math';
 
@@ -119,8 +116,9 @@ String toCssHexColor(Color color) {
   // In CSS Hex, Alpha comes last, but in Flutter's `value` field, alpha is
   // in the high bytes, so just using `value.toRadixString(16)` will put alpha
   // in the wrong position.
-  String hex(int val) => val.toRadixString(16).padLeft(2, '0');
-  return '#${hex(color.red)}${hex(color.green)}${hex(color.blue)}${hex(color.alpha)}';
+  String hex(double channelValue) =>
+      (channelValue * 255).round().toRadixString(16).padLeft(2, '0');
+  return '#${hex(color.r)}${hex(color.g)}${hex(color.b)}${hex(color.a)}';
 }
 
 extension StringUtilities on String {

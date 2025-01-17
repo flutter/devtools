@@ -19,7 +19,6 @@ import '../ui/icons.dart';
 
 final _log = Logger('screen.dart');
 
-// TODO(kenz): use correct assets.
 enum ScreenMetaData {
   home(
     'home',
