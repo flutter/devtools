@@ -13,6 +13,7 @@ import 'package:devtools_tool/commands/serve.dart';
 import 'package:devtools_tool/commands/sync.dart';
 import 'package:devtools_tool/commands/tag_version.dart';
 import 'package:devtools_tool/commands/update_flutter_sdk.dart';
+import 'package:devtools_tool/commands/update_licenses.dart';
 import 'package:devtools_tool/commands/update_perfetto.dart';
 import 'package:devtools_tool/model.dart';
 
@@ -47,6 +48,7 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(UpdateDartSdkDepsCommand());
     addCommand(UpdateDevToolsVersionCommand());
     addCommand(UpdateFlutterSdkCommand());
+    addCommand(UpdateLicensesCommand());
     addCommand(UpdatePerfettoCommand());
 
     argParser.addFlag(

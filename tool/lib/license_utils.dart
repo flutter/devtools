@@ -25,27 +25,27 @@ import 'package:yaml/yaml.dart';
 /// ```yaml
 /// # sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
 /// remove_licenses:
-///   - |
-///     // This is some <value1> multiline license
+///   - |-
+///     // This is some <value> multiline license
 ///     // text that should be removed from the file.
-///   - |
-///     /* This is other <value2> multiline license
+///   - |-
+///     /* This is other <value> multiline license
 ///     text that should be removed from the file. */
-///   - |
-///     # This is more <value3> multiline license
+///   - |-
+///     # This is more <value> multiline license
 ///     # text that should be removed from the file.
-///   - |
+///   - |-
 ///     // This is some multiline license text to
 ///     // remove that does not contain a stored value.
-/// # sequence of license text strings that should be added to the top of a file. {value} will be replaced.
+/// # sequence of license text strings that should be added to the top of a file. <value> will be replaced.
 /// add_licenses:
-///   - |
-///     // This is some <value1> multiline license
+///   - |-
+///     // This is some <value> multiline license
 ///     // text that should be added to the file.
-///   - |
-///     # This is other <value3> multiline license
+///   - |-
+///     # This is other <value> multiline license
 ///     # text that should be added to the file.
-///   - |
+///   - |-
 ///     // This is some multiline license text to
 ///     // add that does not contain a stored value.
 /// # defines which files should have license text added or updated.
@@ -121,17 +121,23 @@ class LicenseConfig {
   final YamlMap fileTypes;
 
   /// Returns the list of indices for the given [ext] of [removeLicenses]
-  /// containing the license text to remove.
+  /// containing the license text to remove if they exist or an empty YamlList.
   YamlList getRemoveIndicesForExtension(String ext) {
     final fileType = fileTypes[_removeDotFromExtension(ext)];
-    return fileType['remove'] as YamlList;
+    if (fileType != null) {
+      return fileType['remove'] as YamlList;
+    }
+    return YamlList();
   }
 
   /// Returns the index for the given [ext] of [addLicenses] containing the
-  /// license text to add.
+  /// license text to add if it exists or -1.
   int getAddIndexForExtension(String ext) {
     final fileType = fileTypes[_removeDotFromExtension(ext)];
-    return fileType['add'];
+    if (fileType != null) {
+      return fileType['add'];
+    }
+    return -1;
   }
 
   /// Returns whether the file should be excluded according to the config.
@@ -202,14 +208,14 @@ class LicenseHeader {
         .handleError(
           (e) =>
               throw StateError(
-                'License header expected, but error reading file - $e',
+                'License header expected, but error reading $file - $e',
               ),
         );
     await for (final content in stream) {
-      // Return just the license headers for the simple case with no stored
-      // value requested (i.e. content matches licenseText verbatim)
+      final storedName = _parseStoredName(replacementLicenseText);
       if (content.contains(existingLicenseText)) {
-        final storedName = _parseStoredName(replacementLicenseText);
+        // Return just the license headers for the simple case with no stored
+        // value requested (i.e. content matches licenseText verbatim)
         replacementLicenseText = replacementLicenseText.replaceAll(
           '<$storedName>',
           defaultStoredValue ?? DateTime.now().year.toString(),
@@ -221,17 +227,14 @@ class LicenseHeader {
       }
       // Return a non-empty map for the case where there is a stored value
       // requested (i.e. when there is a '<value>' defined in the license text)
-      final storedName = _parseStoredName(existingLicenseText);
-      if (storedName.isNotEmpty) {
-        return _processHeaders(
-          storedName: storedName,
-          existingLicenseText: existingLicenseText,
-          replacementLicenseText: replacementLicenseText,
-          content: content,
-        );
-      }
+      return _processHeaders(
+        storedName: storedName,
+        existingLicenseText: existingLicenseText,
+        replacementLicenseText: replacementLicenseText,
+        content: content,
+      );
     }
-    throw StateError('License header expected in ${file.path}, but not found!');
+    throw StateError('License header could not be added to ${file.path}');
   }
 
   /// Returns a copy of the given [file] with the [existingHeader] replaced by
@@ -251,6 +254,24 @@ class LicenseHeader {
       replacementHeader,
     );
     rewrittenFile.writeAsStringSync(replacementContents, flush: true);
+    return rewrittenFile;
+  }
+
+  /// Returns a copy of the given [file] that is missing a license header
+  /// with the [replacementHeader] added to the top.
+  ///
+  /// Reads and writes the entire file contents all at once, so performance may
+  /// degrade for large files.
+  File addLicenseHeader({
+    required File file,
+    required String replacementHeader,
+  }) {
+    final rewrittenFile = File('${file.path}.tmp');
+    final contents = file.readAsStringSync();
+    rewrittenFile.writeAsStringSync(
+      '$replacementHeader${Platform.lineTerminator}$contents',
+      flush: true,
+    );
     return rewrittenFile;
   }
 
@@ -274,20 +295,42 @@ class LicenseHeader {
       if (!config.shouldExclude(file)) {
         includedPathsList.add(file.path);
         final extension = p.extension(file.path);
+        final addIndex = config.getAddIndexForExtension(extension);
+        if (addIndex == -1) {
+          // skip if add index doesn't exist for extension
+          continue;
+        }
+        final fileLength = file.lengthSync();
+        const bufferSize = 20;
+        final replacementLicenseText = config.addLicenses[addIndex];
+        final byteCount = min(
+          bufferSize + replacementLicenseText.length,
+          fileLength,
+        );
+        var replacementInfo = await getReplacementInfo(
+          file: file,
+          existingLicenseText: replacementLicenseText,
+          replacementLicenseText: replacementLicenseText,
+          byteCount: byteCount as int,
+        );
+        if (replacementInfo.existingHeader.isNotEmpty &&
+            replacementInfo.replacementHeader.isNotEmpty &&
+            replacementInfo.existingHeader ==
+                replacementInfo.replacementHeader) {
+          // Do nothing if the replacement header is the same as the
+          // existing header
+          continue;
+        }
         final removeIndices = config.getRemoveIndicesForExtension(extension);
         for (final removeIndex in removeIndices) {
           final existingLicenseText = config.removeLicenses[removeIndex];
-          final addIndex = config.getAddIndexForExtension(extension);
-          final replacementLicenseText = config.addLicenses[addIndex];
-          final fileLength = file.lengthSync();
-          const bufferSize = 20;
           // Assume that the license text will be near the start of the file,
           // but add in some buffer.
           final byteCount = min(
             bufferSize + existingLicenseText.length,
             fileLength,
           );
-          final replacementInfo = await getReplacementInfo(
+          replacementInfo = await getReplacementInfo(
             file: file,
             existingLicenseText: existingLicenseText,
             replacementLicenseText: replacementLicenseText,
@@ -295,6 +338,7 @@ class LicenseHeader {
           );
           if (replacementInfo.existingHeader.isNotEmpty &&
               replacementInfo.replacementHeader.isNotEmpty) {
+            // Case 1: Existing header needs to be replaced
             if (dryRun) {
               updatedPathsList.add(file.path);
             } else {
@@ -303,21 +347,49 @@ class LicenseHeader {
                 existingHeader: replacementInfo.existingHeader,
                 replacementHeader: replacementInfo.replacementHeader,
               );
-              if (rewrittenFile.lengthSync() > 0) {
-                file.writeAsStringSync(
-                  rewrittenFile.readAsStringSync(),
-                  mode: FileMode.writeOnly,
-                  flush: true,
-                );
-                updatedPathsList.add(file.path);
-              }
-              rewrittenFile.deleteSync();
+              _updateLicense(rewrittenFile, file, updatedPathsList);
+            }
+          }
+        }
+        if (!updatedPathsList.contains(file.path)) {
+          final licenseHeaders = _processHeaders(
+            storedName: _parseStoredName(replacementLicenseText),
+            existingLicenseText: '',
+            replacementLicenseText: replacementLicenseText,
+            content: '',
+          );
+          if (licenseHeaders.replacementHeader.isNotEmpty) {
+            // Case 2: Missing header needs to be added
+            if (dryRun) {
+              updatedPathsList.add(file.path);
+            } else {
+              final rewrittenFile = addLicenseHeader(
+                file: file,
+                replacementHeader: licenseHeaders.replacementHeader,
+              );
+              _updateLicense(rewrittenFile, file, updatedPathsList);
             }
           }
         }
       }
     }
     return (includedPaths: includedPathsList, updatedPaths: updatedPathsList);
+  }
+
+  void _updateLicense(
+    File rewrittenFile,
+    File file,
+    List<String> updatedPathsList,
+  ) {
+    if (rewrittenFile.lengthSync() > 0) {
+      file.writeAsStringSync(
+        rewrittenFile.readAsStringSync(),
+        mode: FileMode.writeOnly,
+        flush: true,
+      );
+      updatedPathsList.add(file.path);
+    }
+    rewrittenFile.deleteSync();
   }
 
   ({String existingHeader, String replacementHeader}) _processHeaders({
@@ -356,7 +428,11 @@ class LicenseHeader {
         );
       }
     }
-    return const (existingHeader: '', replacementHeader: '');
+    final defaultReplacementHeader = replacementLicenseText.replaceAll(
+      '<$storedName>',
+      DateTime.now().year.toString(),
+    );
+    return (existingHeader: '', replacementHeader: defaultReplacementHeader);
   }
 
   // TODO(mossmana) Add support for multiple stored names
