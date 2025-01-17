@@ -148,12 +148,15 @@ class _PropertyInputState extends State<_PropertyInput> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(elliette): Refactor to split each argument type into its own input
+    // widget class for readability.
+    final theme = Theme.of(context);
     final argument = widget.argument;
     final decoration = InputDecoration(
       helperText: argument.isRequired ? '*required' : '',
       errorText: argument.errorText,
       isDense: true,
-      label: Text('${argument.name}${argument.isRequired ? '*' : ''}'),
+      label: _inputLabel(argument, theme: theme),
       border: const OutlineInputBorder(),
     );
     final argType = widget.argument.type;
@@ -179,7 +182,7 @@ class _PropertyInputState extends State<_PropertyInput> {
                   value: option,
                   // TODO(https://github.com/flutter/devtools/issues/8531) Handle onTap.
                   onTap: () {},
-                  child: Text(option),
+                  child: Text(option, style: theme.fixedFontStyle),
                 );
               }).toList(),
           onChanged: (newValue) async {
@@ -212,6 +215,54 @@ class _PropertyInputState extends State<_PropertyInput> {
       default:
         return Text(widget.argument.valueDisplay);
     }
+  }
+
+  Widget _inputLabel(EditableArgument argument, {required ThemeData theme}) {
+    final type = _typeForLabel(argument);
+    return RichText(
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        text: type != null ? '$type ' : ':',
+        style: theme.fixedFontStyle,
+        children: [
+          TextSpan(
+            text: argument.name,
+            style: theme.fixedFontStyle.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+            children: [
+              TextSpan(
+                text: argument.isRequired ? '*' : '',
+                style: theme.fixedFontStyle,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String? _typeForLabel(EditableArgument argument) {
+    String? typeName;
+    switch (argument.type) {
+      case 'string':
+        typeName = 'String';
+        break;
+      case 'int':
+      case 'double':
+      case 'bool':
+        typeName = argument.type;
+        break;
+      case 'enum':
+        typeName = argument.options?.first.split('.').first;
+        break;
+      default:
+        break;
+    }
+
+    if (typeName == null) return null;
+    return argument.isNullable ? '$typeName?' : typeName;
   }
 
   Future<void> _editArgument(String? valueAsString) async {

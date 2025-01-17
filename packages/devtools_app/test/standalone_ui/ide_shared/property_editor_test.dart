@@ -137,9 +137,9 @@ void main() {
       controller.initForTestsOnly(editableArgs: result1.args);
       await tester.pumpAndSettle();
 
-      final titleInput = _findTextFormField('title');
-      final widthInput = _findTextFormField('width');
-      final heightInput = _findTextFormField('height');
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
 
       // Verify the inputs are expected.
       expect(_findNoPropertiesMessage, findsNothing);
@@ -169,8 +169,8 @@ void main() {
       controller.initForTestsOnly(editableArgs: result2.args);
       await tester.pumpAndSettle();
 
-      final softWrapInput = _findDropdownButtonFormField('softWrap');
-      final alignInput = _findDropdownButtonFormField('align');
+      final softWrapInput = _findDropdownButtonFormField('bool softWrap');
+      final alignInput = _findDropdownButtonFormField('Alignment? align');
 
       // Verify the inputs are expected.
       expect(_findNoPropertiesMessage, findsNothing);
@@ -422,7 +422,7 @@ final _findNoPropertiesMessage = find.text(
 );
 
 Finder _findTextFormField(String inputName) => find.ancestor(
-  of: find.textContaining(inputName),
+  of: find.richTextContaining(inputName),
   matching: find.byType(TextFormField),
 );
 
@@ -444,7 +444,7 @@ Finder _helperTextForInput(Finder inputFinder, {required String matching}) {
 }
 
 Finder _findDropdownButtonFormField(String inputName) => find.ancestor(
-  of: find.text(inputName),
+  of: find.richTextContaining(inputName),
   matching: find.byType(DropdownButtonFormField<String>),
 );
 
