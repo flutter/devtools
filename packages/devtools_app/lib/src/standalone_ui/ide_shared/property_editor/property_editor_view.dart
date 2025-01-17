@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/common_widgets.dart';
 import 'property_editor_controller.dart';
 
 class PropertyEditorView extends StatelessWidget {
@@ -18,12 +19,28 @@ class PropertyEditorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // TODO(elliette): Include widget name and documentation.
-        _PropertiesList(controller: controller),
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.editorClient.editArgumentMethodName,
+        controller.editorClient.editableArgumentsMethodName,
       ],
+      builder: (_, values, _) {
+        final editArgumentMethodName = values.first as String?;
+        final editableArgumentsMethodName = values.second as String?;
+
+        if (editArgumentMethodName == null ||
+            editableArgumentsMethodName == null) {
+          return const CenteredCircularProgressIndicator();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // TODO(elliette): Include widget name and documentation.
+            _PropertiesList(controller: controller),
+          ],
+        );
+      },
     );
   }
 }
