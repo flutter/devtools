@@ -62,8 +62,6 @@ class ServerApi {
   }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
-    // TODO(kenz): break this switch statement up so that it uses helper methods
-    // for each case. Also use [_checkRequiredParameters] helper.
     switch (request.url.path) {
       case apiNotifyForVmServiceConnection:
         return Handler.handleNotifyForVmServiceConnection(
@@ -71,6 +69,9 @@ class ServerApi {
           queryParams,
           dtd,
         );
+
+      // TODO(kenz): remove legacy analytics once the unified analytics rollout
+      // is complete and verified for robustness (est. Fall 2025).
 
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:

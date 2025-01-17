@@ -29,9 +29,6 @@ part '_table_column.dart';
 part '_table_row.dart';
 part '_tree_table.dart';
 
-// TODO(devoncarew): We need to render the selected row with a different
-// background color.
-
 typedef IndexedScrollableWidgetBuilder =
     Widget Function({
       required BuildContext context,
