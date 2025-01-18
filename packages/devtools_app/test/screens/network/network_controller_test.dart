@@ -22,6 +22,7 @@ void main() {
     late HttpProfile httpProfile;
 
     setUp(() {
+      setGlobal(OfflineDataController, OfflineDataController());
       socketProfile = loadSocketProfile();
       httpProfile = loadHttpProfile();
       fakeServiceConnection = FakeServiceConnectionManager(

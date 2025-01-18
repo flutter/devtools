@@ -17,6 +17,7 @@ void main() {
 
   group('NetworkScreen', () {
     setUp(() {
+      setGlobal(OfflineDataController, OfflineDataController());
       fakeServiceConnection = FakeServiceConnectionManager();
       when(
         fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow,

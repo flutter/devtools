@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../screens/network/network_model.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
+import 'constants.dart';
 import 'http.dart';
 
 final _log = Logger('http_request_data');
@@ -51,12 +52,34 @@ class DartIOHttpRequestData extends NetworkRequest {
     Map<String, Object?>? requestPostData,
     Map<String, Object?>? responseContent,
   ) {
+    final isFullRequest =
+        modifiedRequestData.containsKey(HttpRequestDataKeys.requestBody.name) &&
+        modifiedRequestData.containsKey(HttpRequestDataKeys.responseBody.name);
+
+    final parsedRequest =
+        isFullRequest
+            ? HttpProfileRequest.parse(modifiedRequestData)
+            : HttpProfileRequestRef.parse(modifiedRequestData);
+
+    final responseBody =
+        responseContent?[HttpRequestDataKeys.text.name]?.toString();
+    final requestBody =
+        requestPostData?[HttpRequestDataKeys.text.name]?.toString();
+
     return DartIOHttpRequestData(
-        HttpProfileRequestRef.parse(modifiedRequestData)!,
-        requestFullDataFromVmService: false,
+        parsedRequest!,
+        requestFullDataFromVmService: parsedRequest is! HttpProfileRequest,
       )
-      .._responseBody = responseContent?['text'].toString()
-      .._requestBody = requestPostData?['text'].toString();
+      .._responseBody = responseBody
+      .._requestBody = requestBody;
+  }
+
+  @override
+  Map<String, Object?> toJson() {
+    return {
+      HttpRequestDataKeys.request.name:
+          (_request as HttpProfileRequest).toJson(),
+    };
   }
 
   static const _connectionInfoKey = 'connectionInfo';
@@ -330,4 +353,86 @@ class DartIOHttpRequestData extends NetworkRequest {
   @override
   int get hashCode =>
       Object.hash(id, method, uri, contentType, type, port, startTimestamp);
+}
+
+extension HttpRequestExtension on List<DartIOHttpRequestData> {
+  List<HttpProfileRequest> get mapToHttpProfileRequests {
+    return map(
+      (httpRequestData) => httpRequestData._request as HttpProfileRequest,
+    ).toList();
+  }
+}
+
+extension HttpProfileRequestExtension on HttpProfileRequest {
+  Map<String, Object?> toJson() {
+    return {
+      HttpRequestDataKeys.id.name: id,
+      HttpRequestDataKeys.method.name: method,
+      HttpRequestDataKeys.uri.name: uri.toString(),
+      HttpRequestDataKeys.startTime.name: startTime.microsecondsSinceEpoch,
+      HttpRequestDataKeys.endTime.name: endTime?.microsecondsSinceEpoch,
+      HttpRequestDataKeys.response.name: response?.toJson(),
+      HttpRequestDataKeys.request.name: request?.toJson(),
+      HttpRequestDataKeys.isolateId.name: isolateId,
+      HttpRequestDataKeys.events.name: events.map((e) => e.toJson()).toList(),
+      HttpRequestDataKeys.requestBody.name: requestBody?.toList(),
+      HttpRequestDataKeys.responseBody.name: responseBody?.toList(),
+    };
+  }
+}
+
+extension HttpProfileRequestDataExtension on HttpProfileRequestData {
+  Map<String, Object?> toJson() {
+    return {
+      HttpRequestDataKeys.headers.name: headers,
+      HttpRequestDataKeys.followRedirects.name: followRedirects,
+      HttpRequestDataKeys.maxRedirects.name: maxRedirects,
+      HttpRequestDataKeys.connectionInfo.name: connectionInfo,
+      HttpRequestDataKeys.contentLength.name: contentLength,
+      HttpRequestDataKeys.cookies.name: cookies,
+      HttpRequestDataKeys.persistentConnection.name: persistentConnection,
+      HttpRequestDataKeys.proxyDetails.name: proxyDetails,
+    };
+  }
+}
+
+extension HttpProfileResponseDataExtension on HttpProfileResponseData {
+  Map<String, Object?> toJson() {
+    return {
+      HttpRequestDataKeys.startTime.name: startTime?.microsecondsSinceEpoch,
+      HttpRequestDataKeys.endTime.name: endTime?.microsecondsSinceEpoch,
+      HttpRequestDataKeys.headers.name: headers,
+      HttpRequestDataKeys.compressionState.name: compressionState,
+      HttpRequestDataKeys.connectionInfo.name: connectionInfo,
+      HttpRequestDataKeys.contentLength.name: contentLength,
+      HttpRequestDataKeys.cookies.name: cookies,
+      HttpRequestDataKeys.isRedirect.name: isRedirect,
+      HttpRequestDataKeys.persistentConnection.name: persistentConnection,
+      HttpRequestDataKeys.reasonPhrase.name: reasonPhrase,
+      HttpRequestDataKeys.redirects.name: redirects,
+      HttpRequestDataKeys.statusCode.name: statusCode,
+      HttpRequestDataKeys.error.name: error,
+    };
+  }
+}
+
+extension HttpProfileRequestEventExtension on HttpProfileRequestEvent {
+  Map<String, Object?> toJson() {
+    return {
+      HttpRequestDataKeys.event.name: event,
+      HttpRequestDataKeys.timestamp.name: timestamp.microsecondsSinceEpoch,
+      HttpRequestDataKeys.arguments.name: arguments,
+    };
+  }
+}
+
+extension HttpProfileProxyDataExtension on HttpProfileProxyData {
+  Map<String, Object?> toJson() {
+    return {
+      HttpRequestDataKeys.host.name: host,
+      HttpRequestDataKeys.username.name: username,
+      HttpRequestDataKeys.isDirect.name: isDirect,
+      HttpRequestDataKeys.host.name: port,
+    };
+  }
 }

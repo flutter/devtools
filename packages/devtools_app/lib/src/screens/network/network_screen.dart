@@ -14,7 +14,6 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/framework/screen.dart';
-import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
@@ -104,19 +103,6 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    unawaited(controller.startRecording());
-
-    cancelListeners();
-
-    addAutoDisposeListener(
-      serviceConnection.serviceManager.isolateManager.mainIsolate,
-      () {
-        if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
-            null) {
-          unawaited(controller.startRecording());
-        }
-      },
-    );
   }
 
   @override
@@ -131,7 +117,14 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _NetworkProfilerControls(controller: controller),
+        OfflineAwareControls(
+          controlsBuilder:
+              (offline) => _NetworkProfilerControls(
+                controller: controller,
+                offline: offline,
+              ),
+          gaScreen: gac.network,
+        ),
         const SizedBox(height: intermediateSpacing),
         Expanded(child: _NetworkProfilerBody(controller: controller)),
       ],
@@ -142,11 +135,16 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 /// The row of controls that control the Network profiler (e.g., record, pause,
 /// clear, search, filter, etc.).
 class _NetworkProfilerControls extends StatefulWidget {
-  const _NetworkProfilerControls({required this.controller});
+  const _NetworkProfilerControls({
+    required this.controller,
+    required this.offline,
+  });
 
   static const _includeTextWidth = 810.0;
 
   final NetworkController controller;
+
+  final bool offline;
 
   @override
   State<_NetworkProfilerControls> createState() =>
@@ -160,7 +158,6 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
   @override
   void initState() {
     super.initState();
-
     _recording = widget.controller.recordingNotifier.value;
     addAutoDisposeListener(widget.controller.recordingNotifier, () {
       setState(() {
@@ -177,54 +174,56 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     final hasRequests = widget.controller.filteredData.value.isNotEmpty;
     return Row(
       children: [
-        StartStopRecordingButton(
-          recording: _recording,
-          onPressed:
-              () async => await widget.controller.togglePolling(!_recording),
-          tooltipOverride:
-              _recording
-                  ? 'Stop recording network traffic'
-                  : 'Resume recording network traffic',
-          minScreenWidthForTextBeforeScaling: double.infinity,
-          gaScreen: gac.network,
-          gaSelection: _recording ? gac.pause : gac.resume,
-        ),
-        const SizedBox(width: denseSpacing),
-        ClearButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          gaScreen: gac.network,
-          gaSelection: gac.clear,
-          onPressed: widget.controller.clear,
-        ),
-        const SizedBox(width: defaultSpacing),
-        DownloadButton(
-          tooltip: 'Download as .har file',
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
-          onPressed: widget.controller.exportAsHarFile,
-          gaScreen: gac.network,
-          gaSelection: gac.NetworkEvent.downloadAsHar.name,
-        ),
-        const SizedBox(width: defaultSpacing),
-        // TODO(kenz): fix focus issue when state is refreshed
-        Expanded(
-          child: SearchField<NetworkController>(
-            searchController: widget.controller,
-            searchFieldEnabled: hasRequests,
-            searchFieldWidth:
-                screenWidth <= MediaSize.xs
-                    ? defaultSearchFieldWidth
-                    : wideSearchFieldWidth,
+        if (!widget.offline) ...[
+          StartStopRecordingButton(
+            recording: _recording,
+            onPressed:
+                () async => await widget.controller.togglePolling(!_recording),
+            tooltipOverride:
+                _recording
+                    ? 'Stop recording network traffic'
+                    : 'Resume recording network traffic',
+            minScreenWidthForTextBeforeScaling: double.infinity,
+            gaScreen: gac.network,
+            gaSelection: _recording ? gac.pause : gac.resume,
           ),
-        ),
-        const SizedBox(width: denseSpacing),
-        Expanded(
-          child: StandaloneFilterField<NetworkRequest>(
-            controller: widget.controller,
-            filteredItem: 'request',
+          const SizedBox(width: denseSpacing),
+          ClearButton(
+            minScreenWidthForTextBeforeScaling:
+                _NetworkProfilerControls._includeTextWidth,
+            gaScreen: gac.network,
+            gaSelection: gac.clear,
+            onPressed: widget.controller.clear,
           ),
-        ),
+          const SizedBox(width: defaultSpacing),
+          DownloadButton(
+            tooltip: 'Download as .har file',
+            minScreenWidthForTextBeforeScaling:
+                _NetworkProfilerControls._includeTextWidth,
+            onPressed: widget.controller.exportAsHarFile,
+            gaScreen: gac.network,
+            gaSelection: gac.NetworkEvent.downloadAsHar.name,
+          ),
+          const Spacer(),
+          // TODO(kenz): fix focus issue when state is refreshed
+          Expanded(
+            child: SearchField<NetworkController>(
+              searchController: widget.controller,
+              searchFieldEnabled: hasRequests,
+              searchFieldWidth:
+                  screenWidth <= MediaSize.xs
+                      ? defaultSearchFieldWidth
+                      : wideSearchFieldWidth,
+            ),
+          ),
+          const SizedBox(width: denseSpacing),
+          Expanded(
+            child: StandaloneFilterField<NetworkRequest>(
+              controller: widget.controller,
+              filteredItem: 'request',
+            ),
+          ),
+        ],
       ],
     );
   }
