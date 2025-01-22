@@ -98,10 +98,9 @@ class _DropdownInput<T> extends StatelessWidget with _PropertyInputMixin<T> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return DropdownButtonFormField(
       value: property.valueDisplay,
-      decoration: decoration(property, theme: Theme.of(context)),
+      decoration: decoration(property, theme: theme),
       isExpanded: true,
       items:
           property.propertyOptions.toList().map((option) {
@@ -138,14 +137,15 @@ class _TextInputState extends State<_TextInput> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return TextFormField(
       initialValue: widget.property.valueDisplay,
       enabled: widget.property.isEditable,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: widget.property.inputValidator,
       inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
-      decoration: widget.decoration(widget.property, theme: Theme.of(context)),
-      style: Theme.of(context).fixedFontStyle,
+      decoration: widget.decoration(widget.property, theme: theme),
+      style: theme.fixedFontStyle,
       onChanged: (newValue) {
         currentValue = newValue;
       },
