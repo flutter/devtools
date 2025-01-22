@@ -391,111 +391,60 @@ class _TextInputState extends State<TextInput> {
   }
 }
 
-class EditableBool extends EditableArgument with EditableProperty {
-  EditableBool(EditableArgument argument)
-    : super(
-        name: argument.name,
-        type: argument.type,
-        value: argument.value,
-        hasArgument: argument.hasArgument,
-        isDefault: argument.isDefault,
-        isNullable: argument.isNullable,
-        isRequired: argument.isRequired,
-        isEditable: argument.isEditable,
-        options: argument.options,
-        displayValue: argument.displayValue,
-        errorText: argument.errorText,
-      );
+class EditableBool extends EditableProperty {
+  EditableBool(super.argument);
 
   @override
   String get dartType => type;
 }
 
-class EditableDouble extends EditableArgument
-    with EditableProperty, NumericProperty {
-  EditableDouble(EditableArgument argument)
-    : super(
-        name: argument.name,
-        type: argument.type,
-        value: argument.value,
-        hasArgument: argument.hasArgument,
-        isDefault: argument.isDefault,
-        isNullable: argument.isNullable,
-        isRequired: argument.isRequired,
-        isEditable: argument.isEditable,
-        options: argument.options,
-        displayValue: argument.displayValue,
-        errorText: argument.errorText,
-      );
+class EditableDouble extends EditableProperty with NumericProperty {
+  EditableDouble(super.argument);
 
   @override
   String get dartType => type;
 }
 
-class EditableInt extends EditableArgument
-    with EditableProperty, NumericProperty {
-  EditableInt(EditableArgument argument)
-    : super(
-        name: argument.name,
-        type: argument.type,
-        value: argument.value,
-        hasArgument: argument.hasArgument,
-        isDefault: argument.isDefault,
-        isNullable: argument.isNullable,
-        isRequired: argument.isRequired,
-        isEditable: argument.isEditable,
-        options: argument.options,
-        displayValue: argument.displayValue,
-        errorText: argument.errorText,
-      );
+class EditableInt extends EditableProperty {
+  EditableInt(super.argument);
 
   @override
   String get dartType => type;
 }
 
-class EditableString extends EditableArgument with EditableProperty {
-  EditableString(EditableArgument argument)
-    : super(
-        name: argument.name,
-        type: argument.type,
-        value: argument.value,
-        hasArgument: argument.hasArgument,
-        isDefault: argument.isDefault,
-        isNullable: argument.isNullable,
-        isRequired: argument.isRequired,
-        isEditable: argument.isEditable,
-        options: argument.options,
-        displayValue: argument.displayValue,
-        errorText: argument.errorText,
-      );
+class EditableString extends EditableProperty {
+  EditableString(super.argument);
+
   @override
   String get dartType => 'String';
 }
 
-class EditableEnum extends EditableArgument with EditableProperty {
-  EditableEnum(EditableArgument argument)
-    : super(
-        name: argument.name,
-        type: argument.type,
-        value: argument.value,
-        hasArgument: argument.hasArgument,
-        isDefault: argument.isDefault,
-        isNullable: argument.isNullable,
-        isRequired: argument.isRequired,
-        isEditable: argument.isEditable,
-        options: argument.options,
-        displayValue: argument.displayValue,
-        errorText: argument.errorText,
-      );
+class EditableEnum extends EditableProperty {
+  EditableEnum(super.argument);
 
   @override
   String get dartType => options?.first.split('.').first ?? type;
 }
 
-mixin EditableProperty on EditableArgument {
+class EditableProperty extends EditableArgument {
+  EditableProperty(EditableArgument argument)
+    : super(
+        name: argument.name,
+        type: argument.type,
+        value: argument.value,
+        hasArgument: argument.hasArgument,
+        isDefault: argument.isDefault,
+        isNullable: argument.isNullable,
+        isRequired: argument.isRequired,
+        isEditable: argument.isEditable,
+        options: argument.options,
+        displayValue: argument.displayValue,
+        errorText: argument.errorText,
+      );
+
   FormFieldValidator<String>? validator;
 
-  String get dartType;
+  String get dartType => type;
 
   String get displayType => isNullable ? '$dartType?' : dartType;
 
