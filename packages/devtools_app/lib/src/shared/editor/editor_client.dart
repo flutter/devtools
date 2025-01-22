@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 import '../analytics/constants.dart';
@@ -37,7 +38,8 @@ class EditorClient extends DisposableController
         }
 
         final service = data.data['service'] as String?;
-        if (service == null || service != editorServiceName) {
+        if (service == null ||
+            (service != editorServiceName && service != lspServiceName)) {
           return;
         }
 
@@ -59,6 +61,18 @@ class EditorClient extends DisposableController
           _supportsOpenDevToolsPage = isRegistered;
           _supportsOpenDevToolsForceExternal =
               capabilities?[Field.supportsForceExternal] == true;
+        } else if (method == LspMethod.editArgument.methodName) {
+          _editArgumentMethodName.value = LspMethod.editArgument.methodName;
+        } else if (method == LspMethod.editArgument.experimentalMethodName) {
+          _editArgumentMethodName.value =
+              LspMethod.editArgument.experimentalMethodName;
+        } else if (method == LspMethod.editableArguments.methodName) {
+          _editableArgumentsMethodName.value =
+              LspMethod.editableArguments.methodName;
+        } else if (method ==
+            LspMethod.editableArguments.experimentalMethodName) {
+          _editableArgumentsMethodName.value =
+              LspMethod.editableArguments.experimentalMethodName;
         } else {
           return;
         }
@@ -151,6 +165,14 @@ class EditorClient extends DisposableController
       _supportsOpenDevToolsForceExternal;
   var _supportsOpenDevToolsForceExternal = false;
 
+  ValueListenable<String?> get editArgumentMethodName =>
+      _editArgumentMethodName;
+  final _editArgumentMethodName = ValueNotifier<String?>(null);
+
+  ValueListenable<String?> get editableArgumentsMethodName =>
+      _editableArgumentsMethodName;
+  final _editableArgumentsMethodName = ValueNotifier<String?>(null);
+
   /// A stream of [ActiveLocationChangedEvent]s from the edtior.
   Stream<ActiveLocationChangedEvent> get activeLocationChangedStream =>
       _activeLocationChangedController.stream;
@@ -235,8 +257,10 @@ class EditorClient extends DisposableController
     required TextDocument textDocument,
     required CursorPosition position,
   }) async {
+    final method = editableArgumentsMethodName.value;
+    if (method == null) return null;
     final response = await _callLspApi(
-      LspMethod.editableArguments,
+      method,
       params: {
         'type': 'Object', // This is required by DTD.
         'textDocument': textDocument.toJson(),
@@ -256,8 +280,10 @@ class EditorClient extends DisposableController
     required String name,
     required T value,
   }) async {
+    final method = editArgumentMethodName.value;
+    if (method == null) return;
     final response = await _callLspApi(
-      LspMethod.editArgument,
+      method,
       params: {
         'type': 'Object', // This is required by DTD.
         'textDocument': textDocument.toJson(),
@@ -278,10 +304,10 @@ class EditorClient extends DisposableController
   }
 
   Future<DTDResponse> _callLspApi(
-    LspMethod method, {
+    String methodName, {
     Map<String, Object?>? params,
   }) {
-    return _dtd.call(lspServiceName, method.methodName, params: params);
+    return _dtd.call(lspServiceName, methodName, params: params);
   }
 }
 
