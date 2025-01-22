@@ -109,8 +109,7 @@ mixin NumericProperty on EditableProperty {
   @override
   String? inputValidator(String? inputValue) {
     // Permit sending null values with an empty input or with explicit "null".
-    final isNull = (inputValue ?? '').isEmpty || inputValue == 'null';
-    if (isNullable && isNull) {
+    if (isNullable && isNully(inputValue)) {
       return null;
     }
     final numValue = toNumber(inputValue);
