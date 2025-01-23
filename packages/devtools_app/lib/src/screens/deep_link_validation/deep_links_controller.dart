@@ -300,9 +300,8 @@ class DeepLinksController extends DisposableController
     if (selectedProject.value!.androidVariants.isEmpty) {
       return;
     }
-    final variant =
-        selectedProject.value!.androidVariants[selectedAndroidVariantIndex
-            .value];
+    final variant = selectedProject
+        .value!.androidVariants[selectedAndroidVariantIndex.value];
     await ga.timeAsync(
       gac.deeplink,
       gac.AnalyzeFlutterProject.loadAppLinks.name,
@@ -317,8 +316,8 @@ class DeepLinksController extends DisposableController
           ga.impression(
             gac.deeplink,
             gac.AnalyzeFlutterProject.androidAppLinksSettingsLoaded.name,
-            screenMetricsProvider:
-                () => DeepLinkScreenMetrics(androidAppId: result.applicationId),
+            screenMetricsProvider: () =>
+                DeepLinkScreenMetrics(androidAppId: result.applicationId),
           );
         } catch (_) {
           ga.select(
@@ -354,9 +353,8 @@ class DeepLinksController extends DisposableController
           ga.impression(
             gac.deeplink,
             gac.AnalyzeFlutterProject.iosUniversalLinkSettingsLoaded.name,
-            screenMetricsProvider:
-                () =>
-                    DeepLinkScreenMetrics(iosBundleId: result.bundleIdentifier),
+            screenMetricsProvider: () =>
+                DeepLinkScreenMetrics(iosBundleId: result.bundleIdentifier),
           );
         } catch (_) {
           pagePhase.value = PagePhase.validationErrorPage;
@@ -509,28 +507,33 @@ class DeepLinksController extends DisposableController
     generatedAssetLinksForSelectedLink.value = null;
     final domain = selectedLink.value!.domain;
     if (domain != null) {
-      generatedAssetLinksForSelectedLink.value = await deepLinksService
-          .generateAssetLinks(
-            domain: domain,
-            applicationId: applicationId,
-            localFingerprint: localFingerprint.value,
-          );
+      generatedAssetLinksForSelectedLink.value =
+          await deepLinksService.generateAssetLinks(
+        domain: domain,
+        applicationId: applicationId,
+        localFingerprint: localFingerprint.value,
+      );
     }
   }
 
   Future<List<LinkData>> _validateDomain(List<LinkData> rawLinkdatas) async {
-    final domains =
-        rawLinkdatas
-            .where((linkdata) => linkdata.domain != null)
-            .map((linkdata) => linkdata.domain!)
-            .toSet()
-            .toList();
+    final domains = rawLinkdatas
+        .where((linkdata) => linkdata.domain != null)
+        .map((linkdata) => linkdata.domain!)
+        .toSet()
+        .toList();
 
     Map<String, List<DomainError>> androidDomainErrors = {};
     Map<String, List<DomainError>> iosDomainErrors = {};
     Map<String, List<Path>> iosDomainPaths = {};
     try {
       if (currentAppLinkSettings != null) {
+        ga.impression(
+          gac.deeplink,
+          gac.AnalyzeFlutterProject.androidValidateDomain.name,
+          screenMetricsProvider: () => DeepLinkScreenMetrics(
+              androidAppId: currentAppLinkSettings!.applicationId),
+        );
         final androidResult = await deepLinksService.validateAndroidDomain(
           domains: domains,
           applicationId: applicationId,
@@ -542,6 +545,12 @@ class DeepLinksController extends DisposableController
       }
       if (FeatureFlags.deepLinkIosCheck &&
           currentUniversalLinkSettings != null) {
+        ga.impression(
+          gac.deeplink,
+          gac.AnalyzeFlutterProject.iosValidateDomain.name,
+          screenMetricsProvider: () => DeepLinkScreenMetrics(
+              iosBundleId: currentUniversalLinkSettings!.bundleIdentifier),
+        );
         final iosResult = await deepLinksService.validateIosDomain(
           bundleId: bundleId,
           teamId: teamId,
@@ -570,11 +579,10 @@ class DeepLinksController extends DisposableController
                 AndroidDomainError.existence,
               ) ??
               false);
-      final hasIosAasaFile =
-          !(iosDomainErrors[linkdata.domain]?.contains(
-                IosDomainError.existence,
-              ) ??
-              false);
+      final hasIosAasaFile = !(iosDomainErrors[linkdata.domain]?.contains(
+            IosDomainError.existence,
+          ) ??
+          false);
 
       if (linkdata.os.contains(PlatformOS.ios)) {
         final iosPaths = iosDomainPaths[linkdata.domain] ?? <Path>[];
@@ -668,14 +676,12 @@ class DeepLinksController extends DisposableController
       byPath: linkDatasByPath(linkdata),
     );
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount:
-          validatedLinkDatas.byDomain
-              .where((element) => element.domainErrors.isNotEmpty)
-              .length,
-      pathErrorCount:
-          validatedLinkDatas.byPath
-              .where((element) => element.pathErrors.isNotEmpty)
-              .length,
+      domainErrorCount: validatedLinkDatas.byDomain
+          .where((element) => element.domainErrors.isNotEmpty)
+          .length,
+      pathErrorCount: validatedLinkDatas.byPath
+          .where((element) => element.pathErrors.isNotEmpty)
+          .length,
     );
     applyFilters();
 
@@ -694,20 +700,17 @@ class DeepLinksController extends DisposableController
     late final LinkData linkdata;
     switch (viewType) {
       case TableViewType.domainView:
-        linkdata =
-            linkDatas.byDomain
+        linkdata = linkDatas.byDomain
                 .where((e) => e.domainErrors.isNotEmpty)
                 .firstOrNull ??
             linkDatas.byDomain.first;
       case TableViewType.pathView:
-        linkdata =
-            linkDatas.byPath
+        linkdata = linkDatas.byPath
                 .where((e) => e.pathErrors.isNotEmpty)
                 .firstOrNull ??
             linkDatas.byPath.first;
       case TableViewType.singleUrlView:
-        linkdata =
-            linkDatas.all
+        linkdata = linkDatas.all
                 .where(
                   (e) => e.domainErrors.isNotEmpty || e.pathErrors.isNotEmpty,
                 )
@@ -769,38 +772,37 @@ class DeepLinksController extends DisposableController
   @visibleForTesting
   List<LinkData> getFilterredLinks(List<LinkData> linkDatas) {
     final searchContent = displayOptions.searchContent;
-    linkDatas =
-        linkDatas.where((linkData) {
-          if (searchContent.isNotEmpty &&
-              !linkData.matchesSearchToken(
-                RegExp(searchContent, caseSensitive: false),
-              )) {
-            return false;
-          }
+    linkDatas = linkDatas.where((linkData) {
+      if (searchContent.isNotEmpty &&
+          !linkData.matchesSearchToken(
+            RegExp(searchContent, caseSensitive: false),
+          )) {
+        return false;
+      }
 
-          if (!((linkData.os.contains(PlatformOS.android) &&
-                  displayOptions.filters.contains(FilterOption.android)) ||
-              (linkData.os.contains(PlatformOS.ios) &&
-                  displayOptions.filters.contains(FilterOption.ios)))) {
-            return false;
-          }
+      if (!((linkData.os.contains(PlatformOS.android) &&
+              displayOptions.filters.contains(FilterOption.android)) ||
+          (linkData.os.contains(PlatformOS.ios) &&
+              displayOptions.filters.contains(FilterOption.ios)))) {
+        return false;
+      }
 
-          if (!((linkData.domainErrors.isNotEmpty &&
-                  displayOptions.filters.contains(
-                    FilterOption.failedDomainCheck,
-                  )) ||
-              (linkData.pathErrors.isNotEmpty &&
-                  displayOptions.filters.contains(
-                    FilterOption.failedPathCheck,
-                  )) ||
-              (linkData.domainErrors.isEmpty &&
-                  linkData.pathErrors.isEmpty &&
-                  displayOptions.filters.contains(FilterOption.noIssue)))) {
-            return false;
-          }
+      if (!((linkData.domainErrors.isNotEmpty &&
+              displayOptions.filters.contains(
+                FilterOption.failedDomainCheck,
+              )) ||
+          (linkData.pathErrors.isNotEmpty &&
+              displayOptions.filters.contains(
+                FilterOption.failedPathCheck,
+              )) ||
+          (linkData.domainErrors.isEmpty &&
+              linkData.pathErrors.isEmpty &&
+              displayOptions.filters.contains(FilterOption.noIssue)))) {
+        return false;
+      }
 
-          return true;
-        }).toList();
+      return true;
+    }).toList();
 
     return linkDatas;
   }

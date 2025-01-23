@@ -32,6 +32,12 @@ enum AnalyzeFlutterProject {
   /// iOS Universal Links settings are loaded.
   iosUniversalLinkSettingsLoaded,
 
+  /// Android App links settings are loaded.
+  androidValidateDomain,
+
+  /// iOS Universal Links settings are loaded.
+  iosValidateDomain,
+
   /// App Links are loaded and there is at least one link.
   flutterHasAppLinks,
 
