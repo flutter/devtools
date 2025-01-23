@@ -11,7 +11,7 @@ class EditableString extends EditableProperty {
   EditableString(super.argument);
 
   @override
-  String? convertFromString(String? valueAsString) => valueAsString;
+  String? convertFromInputString(String? valueAsString) => valueAsString;
 
   @override
   String get dartType => 'String';
@@ -26,7 +26,7 @@ class EditableBool extends EditableProperty with FiniteValuesProperty {
   EditableBool(super.argument);
 
   @override
-  Object? convertFromString(String? valueAsString) =>
+  Object? convertFromInputString(String? valueAsString) =>
       valueAsString == 'true' || valueAsString == 'false'
           ? valueAsString == 'true'
           : valueAsString; // The boolean value might be an expression.
@@ -41,7 +41,7 @@ class EditableDouble extends EditableProperty with NumericProperty {
   EditableDouble(super.argument);
 
   @override
-  double? convertFromString(String? valueAsString) =>
+  double? convertFromInputString(String? valueAsString) =>
       toNumber(valueAsString) as double?;
 }
 
@@ -49,7 +49,7 @@ class EditableInt extends EditableProperty with NumericProperty {
   EditableInt(super.argument);
 
   @override
-  int? convertFromString(String? valueAsString) =>
+  int? convertFromInputString(String? valueAsString) =>
       toNumber(valueAsString) as int?;
 }
 
@@ -57,14 +57,33 @@ class EditableEnum extends EditableProperty with FiniteValuesProperty {
   EditableEnum(super.argument);
 
   @override
-  String? convertFromString(String? valueAsString) => valueAsString;
+  String? convertFromInputString(String? valueAsString) =>
+      valueAsString == null ? null : _enumLonghand(valueAsString);
 
   @override
   String get dartType => options?.first.split('.').first ?? type;
 
   @override
+  String get valueDisplay => _enumShorthand(displayValue ?? value.toString());
+
+  @override
   Set<String> get propertyOptions {
-    return {...(options ?? []), valueDisplay, if (isNullable) 'null'};
+    final shorthandOptions = (options ?? <String>[]).map(_enumShorthand);
+    return {...shorthandOptions, valueDisplay, if (isNullable) 'null'};
+  }
+
+  String _enumShorthand(String fullEnumValue) {
+    if (fullEnumValue.startsWith(dartType)) {
+      return fullEnumValue.split(dartType).last;
+    }
+    return fullEnumValue;
+  }
+
+  String _enumLonghand(String enumShorthandValue) {
+    if (enumShorthandValue.startsWith('.')) {
+      return '$dartType$enumShorthandValue';
+    }
+    return enumShorthandValue;
   }
 }
 
@@ -101,7 +120,7 @@ class EditableProperty extends EditableArgument {
   }
 
   @mustBeOverridden
-  Object? convertFromString(String? _) {
+  Object? convertFromInputString(String? _) {
     throw UnimplementedError();
   }
 }
