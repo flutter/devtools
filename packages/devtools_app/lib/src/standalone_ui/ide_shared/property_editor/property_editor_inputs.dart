@@ -103,11 +103,9 @@ class _DropdownInput<T> extends StatelessWidget with _PropertyInputMixin<T> {
       decoration: decoration(property, theme: theme),
       isExpanded: true,
       items:
-          property.propertyOptions.toList().map((option) {
+          property.propertyOptions.map((option) {
             return DropdownMenuItem(
               value: option,
-              // TODO(https://github.com/flutter/devtools/issues/8531) Handle onTap.
-              onTap: () {},
               child: Text(option, style: theme.fixedFontStyle),
             );
           }).toList(),
@@ -147,7 +145,9 @@ class _TextInputState extends State<_TextInput> {
       decoration: widget.decoration(widget.property, theme: theme),
       style: theme.fixedFontStyle,
       onChanged: (newValue) {
-        currentValue = newValue;
+        setState(() {
+          currentValue = newValue;
+        });
       },
       onEditingComplete: _editProperty,
       onTapOutside: (_) async {

@@ -69,10 +69,10 @@ class _PropertiesList extends StatelessWidget {
               children: <Widget>[
                 ...args
                     .map((arg) => argToProperty(arg))
-                    .where((property) => property != null)
+                    .nonNulls
                     .map(
                       (property) => _EditablePropertyItem(
-                        property: property!,
+                        property: property,
                         controller: controller,
                       ),
                     ),

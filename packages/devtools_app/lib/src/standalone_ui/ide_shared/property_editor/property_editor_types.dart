@@ -100,7 +100,7 @@ class EditableProperty extends EditableArgument {
   }
 
   @mustBeOverridden
-  dynamic convertFromString(String valueAsString) {
+  Object? convertFromString(String _) {
     throw UnimplementedError();
   }
 }
