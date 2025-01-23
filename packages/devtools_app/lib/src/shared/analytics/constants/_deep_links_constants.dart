@@ -32,10 +32,10 @@ enum AnalyzeFlutterProject {
   /// iOS Universal Links settings are loaded.
   iosUniversalLinkSettingsLoaded,
 
-  /// Android App links settings are loaded.
+  /// Validate the host name of Android App Links
   androidValidateDomain,
 
-  /// iOS Universal Links settings are loaded.
+  /// Validate the associated domain of iOS Universal Links
   iosValidateDomain,
 
   /// App Links are loaded and there is at least one link.
