@@ -531,6 +531,14 @@ class DeepLinksController extends DisposableController
     Map<String, List<Path>> iosDomainPaths = {};
     try {
       if (currentAppLinkSettings != null) {
+        ga.impression(
+          gac.deeplink,
+          gac.AnalyzeFlutterProject.androidValidateDomain.name,
+          screenMetricsProvider:
+              () => DeepLinkScreenMetrics(
+                androidAppId: currentAppLinkSettings!.applicationId,
+              ),
+        );
         final androidResult = await deepLinksService.validateAndroidDomain(
           domains: domains,
           applicationId: applicationId,
@@ -542,6 +550,14 @@ class DeepLinksController extends DisposableController
       }
       if (FeatureFlags.deepLinkIosCheck &&
           currentUniversalLinkSettings != null) {
+        ga.impression(
+          gac.deeplink,
+          gac.AnalyzeFlutterProject.iosValidateDomain.name,
+          screenMetricsProvider:
+              () => DeepLinkScreenMetrics(
+                iosBundleId: currentUniversalLinkSettings!.bundleIdentifier,
+              ),
+        );
         final iosResult = await deepLinksService.validateIosDomain(
           bundleId: bundleId,
           teamId: teamId,
