@@ -100,7 +100,7 @@ class _DropdownInput<T> extends StatelessWidget with _PropertyInputMixin<T> {
     final theme = Theme.of(context);
     return DropdownButtonFormField(
       value: property.valueDisplay,
-      decoration: decoration(property, theme: theme),
+      decoration: decoration(property, theme: theme, padding: denseSpacing),
       isExpanded: true,
       items:
           property.propertyOptions.map((option) {
@@ -133,6 +133,8 @@ class _TextInput<T> extends StatefulWidget with _PropertyInputMixin<T> {
 class _TextInputState extends State<_TextInput> {
   String currentValue = '';
 
+  double paddingDiffComparedToDropdown = 1.0;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -142,7 +144,14 @@ class _TextInputState extends State<_TextInput> {
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: widget.property.inputValidator,
       inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
-      decoration: widget.decoration(widget.property, theme: theme),
+      decoration: widget.decoration(
+        widget.property,
+        theme: theme,
+        // Note: The text input has an extra pixel compared to the dropdown
+        // input. Therefore, to have their sizes match, subtract a half pixel
+        // from the padding.
+        padding: defaultSpacing - (paddingDiffComparedToDropdown / 2),
+      ),
       style: theme.fixedFontStyle,
       onChanged: (newValue) {
         setState(() {
@@ -186,8 +195,10 @@ mixin _PropertyInputMixin<T> {
   InputDecoration decoration(
     EditableProperty property, {
     required ThemeData theme,
+    required double padding,
   }) {
     return InputDecoration(
+      contentPadding: EdgeInsets.all(padding),
       helperText: property.isRequired ? '*required' : '',
       errorText: property.errorText,
       isDense: true,
