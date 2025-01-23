@@ -224,17 +224,17 @@ void main() {
       await _verifyDropdownMenuItems(
         alignInput,
         menuOptions: [
-          'Alignment.bottomCenter',
-          'Alignment.bottomLeft',
-          'Alignment.bottomRight',
-          'Alignment.center',
-          'Alignment.centerLeft',
-          'Alignment.centerRight',
-          'Alignment.topCenter',
-          'Alignment.topLeft',
-          'Alignment.topRight',
+          '.bottomCenter',
+          '.bottomLeft',
+          '.bottomRight',
+          '.center',
+          '.centerLeft',
+          '.centerRight',
+          '.topCenter',
+          '.topLeft',
+          '.topRight',
         ],
-        selectedOption: 'Alignment.center',
+        selectedOption: '.center',
         tester: tester,
       );
     });
@@ -368,8 +368,8 @@ void main() {
         final alignInput = _findDropdownButtonFormField('align');
         await _selectDropdownMenuItem(
           alignInput,
-          optionToSelect: 'Alignment.topLeft',
-          currentlySelected: 'Alignment.center',
+          optionToSelect: '.topLeft',
+          currentlySelected: '.center',
           tester: tester,
         );
 
@@ -390,7 +390,7 @@ void main() {
         await _selectDropdownMenuItem(
           alignInput,
           optionToSelect: 'null',
-          currentlySelected: 'Alignment.center',
+          currentlySelected: '.center',
           tester: tester,
         );
 
