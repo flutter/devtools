@@ -11,7 +11,7 @@ class EditableString extends EditableProperty {
   EditableString(super.argument);
 
   @override
-  String? convertFromString(String valueAsString) => valueAsString;
+  String? convertFromString(String? valueAsString) => valueAsString;
 
   @override
   String get dartType => 'String';
@@ -26,7 +26,7 @@ class EditableBool extends EditableProperty with FiniteValuesProperty {
   EditableBool(super.argument);
 
   @override
-  Object? convertFromString(String valueAsString) =>
+  Object? convertFromString(String? valueAsString) =>
       valueAsString == 'true' || valueAsString == 'false'
           ? valueAsString == 'true'
           : valueAsString; // The boolean value might be an expression.
@@ -41,7 +41,7 @@ class EditableDouble extends EditableProperty with NumericProperty {
   EditableDouble(super.argument);
 
   @override
-  double? convertFromString(valueAsString) =>
+  double? convertFromString(String? valueAsString) =>
       toNumber(valueAsString) as double?;
 }
 
@@ -49,14 +49,15 @@ class EditableInt extends EditableProperty with NumericProperty {
   EditableInt(super.argument);
 
   @override
-  int? convertFromString(valueAsString) => toNumber(valueAsString) as int?;
+  int? convertFromString(String? valueAsString) =>
+      toNumber(valueAsString) as int?;
 }
 
 class EditableEnum extends EditableProperty with FiniteValuesProperty {
   EditableEnum(super.argument);
 
   @override
-  String? convertFromString(String valueAsString) => valueAsString;
+  String? convertFromString(String? valueAsString) => valueAsString;
 
   @override
   String get dartType => options?.first.split('.').first ?? type;
@@ -89,7 +90,7 @@ class EditableProperty extends EditableArgument {
 
   String get typeError => 'Please enter ${addIndefiniteArticle(dartType)}.';
 
-  String? inputValidator(String? inputValue) {
+  String? inputValidator(String? _) {
     return null;
   }
 
@@ -100,7 +101,7 @@ class EditableProperty extends EditableArgument {
   }
 
   @mustBeOverridden
-  Object? convertFromString(String _) {
+  Object? convertFromString(String? _) {
     throw UnimplementedError();
   }
 }

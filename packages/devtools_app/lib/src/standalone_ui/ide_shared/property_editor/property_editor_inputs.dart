@@ -179,7 +179,7 @@ mixin _PropertyInputMixin<T> {
       return;
     }
 
-    final value = property.convertFromString(valueAsString!) as T?;
+    final value = property.convertFromString(valueAsString) as T?;
     await controller.editArgument(name: argName, value: value);
   }
 
