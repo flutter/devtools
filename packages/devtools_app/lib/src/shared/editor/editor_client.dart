@@ -61,8 +61,8 @@ class EditorClient extends DisposableController
           _supportsOpenDevToolsPage = isRegistered;
           _supportsOpenDevToolsForceExternal =
               capabilities?[Field.supportsForceExternal] == true;
-        // TODO(https://github.com/flutter/devtools/issues/8804): Switch support
-        // to non-experimental LSP methods.
+          // TODO(https://github.com/flutter/devtools/issues/8804): Switch support
+          // to non-experimental LSP methods.
         } else if (method == LspMethod.editArgument.experimentalMethodName) {
           _editArgumentMethodName.value =
               LspMethod.editArgument.experimentalMethodName;
