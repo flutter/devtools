@@ -61,14 +61,11 @@ class EditorClient extends DisposableController
           _supportsOpenDevToolsPage = isRegistered;
           _supportsOpenDevToolsForceExternal =
               capabilities?[Field.supportsForceExternal] == true;
-        } else if (method == LspMethod.editArgument.methodName) {
-          _editArgumentMethodName.value = LspMethod.editArgument.methodName;
+          // TODO(https://github.com/flutter/devtools/issues/8804): Switch support
+          // to non-experimental LSP methods.
         } else if (method == LspMethod.editArgument.experimentalMethodName) {
           _editArgumentMethodName.value =
               LspMethod.editArgument.experimentalMethodName;
-        } else if (method == LspMethod.editableArguments.methodName) {
-          _editableArgumentsMethodName.value =
-              LspMethod.editableArguments.methodName;
         } else if (method ==
             LspMethod.editableArguments.experimentalMethodName) {
           _editableArgumentsMethodName.value =
