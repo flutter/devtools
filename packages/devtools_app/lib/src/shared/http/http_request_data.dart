@@ -383,36 +383,51 @@ extension HttpProfileRequestExtension on HttpProfileRequest {
 
 extension HttpProfileRequestDataExtension on HttpProfileRequestData {
   Map<String, Object?> toJson() {
-    return {
-      HttpRequestDataKeys.headers.name: headers,
-      HttpRequestDataKeys.followRedirects.name: followRedirects,
-      HttpRequestDataKeys.maxRedirects.name: maxRedirects,
-      HttpRequestDataKeys.connectionInfo.name: connectionInfo,
-      HttpRequestDataKeys.contentLength.name: contentLength,
-      HttpRequestDataKeys.cookies.name: cookies,
-      HttpRequestDataKeys.persistentConnection.name: persistentConnection,
-      HttpRequestDataKeys.proxyDetails.name: proxyDetails,
-    };
+    final Map<String, Object?> jsonMap = {};
+    try {
+      jsonMap[HttpRequestDataKeys.headers.name] = headers ?? {};
+      jsonMap[HttpRequestDataKeys.followRedirects.name] = followRedirects;
+      jsonMap[HttpRequestDataKeys.maxRedirects.name] = maxRedirects;
+      jsonMap[HttpRequestDataKeys.connectionInfo.name] = connectionInfo;
+      jsonMap[HttpRequestDataKeys.contentLength.name] = contentLength;
+      jsonMap[HttpRequestDataKeys.cookies.name] = cookies ?? [];
+      jsonMap[HttpRequestDataKeys.persistentConnection.name] =
+          persistentConnection;
+      jsonMap[HttpRequestDataKeys.proxyDetails.name] = proxyDetails?.toJson();
+    } catch (e, st) {
+      _log.shout('Error serializing HttpProfileRequestData', e, st);
+      jsonMap[HttpRequestDataKeys.error.name] =
+          'Serialization failed due to: $e';
+    }
+    return jsonMap;
   }
 }
 
 extension HttpProfileResponseDataExtension on HttpProfileResponseData {
   Map<String, Object?> toJson() {
-    return {
-      HttpRequestDataKeys.startTime.name: startTime?.microsecondsSinceEpoch,
-      HttpRequestDataKeys.endTime.name: endTime?.microsecondsSinceEpoch,
-      HttpRequestDataKeys.headers.name: headers,
-      HttpRequestDataKeys.compressionState.name: compressionState,
-      HttpRequestDataKeys.connectionInfo.name: connectionInfo,
-      HttpRequestDataKeys.contentLength.name: contentLength,
-      HttpRequestDataKeys.cookies.name: cookies,
-      HttpRequestDataKeys.isRedirect.name: isRedirect,
-      HttpRequestDataKeys.persistentConnection.name: persistentConnection,
-      HttpRequestDataKeys.reasonPhrase.name: reasonPhrase,
-      HttpRequestDataKeys.redirects.name: redirects,
-      HttpRequestDataKeys.statusCode.name: statusCode,
-      HttpRequestDataKeys.error.name: error,
-    };
+    final Map<String, Object?> jsonMap = {};
+    try {
+      jsonMap[HttpRequestDataKeys.startTime.name] =
+          startTime?.microsecondsSinceEpoch;
+      jsonMap[HttpRequestDataKeys.endTime.name] =
+          endTime?.microsecondsSinceEpoch;
+      jsonMap[HttpRequestDataKeys.headers.name] = headers ?? {};
+      jsonMap[HttpRequestDataKeys.compressionState.name] = compressionState;
+      jsonMap[HttpRequestDataKeys.connectionInfo.name] = connectionInfo;
+      jsonMap[HttpRequestDataKeys.contentLength.name] = contentLength;
+      jsonMap[HttpRequestDataKeys.cookies.name] = cookies ?? [];
+      jsonMap[HttpRequestDataKeys.isRedirect.name] = isRedirect;
+      jsonMap[HttpRequestDataKeys.persistentConnection.name] =
+          persistentConnection;
+      jsonMap[HttpRequestDataKeys.reasonPhrase.name] = reasonPhrase;
+      jsonMap[HttpRequestDataKeys.redirects.name] = redirects;
+      jsonMap[HttpRequestDataKeys.statusCode.name] = statusCode;
+    } catch (e, st) {
+      _log.shout('Error serializing HttpProfileResponseData', e, st);
+      jsonMap[HttpRequestDataKeys.error.name] =
+          'Serialization failed due to: $e';
+    }
+    return jsonMap;
   }
 }
 

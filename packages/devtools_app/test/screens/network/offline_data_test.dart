@@ -5,9 +5,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/screens/network/network_model.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/network/offline_network_data.dart';
+import 'package:devtools_app/src/shared/http/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/vm_service.dart';
 
 void main() {
   late Map<String, Object?> jsonData;
@@ -173,6 +175,92 @@ void main() {
       );
       expect(restoredData.socketData.length, offlineData.socketData.length);
       expect(restoredData.selectedRequestId, offlineData.selectedRequestId);
+    });
+
+    test('Handles serialization errors gracefully', () {
+      final requestData = HttpProfileRequestData.buildErrorRequest(
+        error: 'Simulated error',
+      );
+
+      final jsonData = requestData.toJson();
+
+      expect(jsonData[HttpRequestDataKeys.error.name], isNotNull);
+      expect(
+        jsonData[HttpRequestDataKeys.error.name],
+        contains('Serialization failed due to: HttpProfileRequestError'),
+      );
+    });
+
+    test('Handles successful serialization', () {
+      final requestData = HttpProfileRequestData.buildSuccessfulRequest(
+        headers: {'Content-Type': 'application/json'},
+        connectionInfo: {'host': 'example.com'},
+        contentLength: 1024,
+        cookies: ['sessionId=abc123'],
+        followRedirects: true,
+        maxRedirects: 5,
+        persistentConnection: true,
+      );
+
+      final jsonData = requestData.toJson();
+
+      expect(jsonData[HttpRequestDataKeys.headers.name], {
+        'Content-Type': 'application/json',
+      });
+
+      expect(jsonData[HttpRequestDataKeys.connectionInfo.name], {
+        'host': 'example.com',
+      });
+      expect(jsonData[HttpRequestDataKeys.contentLength.name], 1024);
+      expect(jsonData[HttpRequestDataKeys.cookies.name], ['sessionId=abc123']);
+      expect(jsonData[HttpRequestDataKeys.followRedirects.name], true);
+      expect(jsonData[HttpRequestDataKeys.maxRedirects.name], 5);
+      expect(jsonData[HttpRequestDataKeys.persistentConnection.name], true);
+    });
+
+    test('Includes proxy details when available', () {
+      final proxyDetails = HttpProfileProxyData(
+        host: 'proxy.example.com',
+        port: 8080,
+        username: 'user',
+        isDirect: false,
+      );
+
+      final requestData = HttpProfileRequestData.buildSuccessfulRequest(
+        headers: {'Accept': 'text/html'},
+        proxyDetails: proxyDetails,
+        cookies: [],
+      );
+
+      final jsonData = requestData.toJson();
+
+      expect(jsonData[HttpRequestDataKeys.proxyDetails.name], isNotNull);
+      expect(jsonData[HttpRequestDataKeys.proxyDetails.name], {
+        'host': 8080,
+        'username': 'user',
+        'isDirect': false,
+      });
+      expect(
+        jsonData[HttpRequestDataKeys.proxyDetails.name],
+        containsPair('username', 'user'),
+      );
+      expect(
+        jsonData[HttpRequestDataKeys.proxyDetails.name],
+        containsPair('isDirect', false),
+      );
+    });
+
+    test('Handles null and empty fields gracefully', () {
+      final requestData = HttpProfileRequestData.buildSuccessfulRequest(
+        cookies: [],
+      );
+
+      final jsonData = requestData.toJson();
+
+      expect(jsonData[HttpRequestDataKeys.headers.name], {});
+      expect(jsonData[HttpRequestDataKeys.connectionInfo.name], null);
+      expect(jsonData[HttpRequestDataKeys.cookies.name], []);
+      expect(jsonData[HttpRequestDataKeys.contentLength.name], null);
     });
   });
 }
