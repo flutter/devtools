@@ -4,8 +4,7 @@
 
 part of '../constants.dart';
 
-// TODO(elliette): Send the following events from the property editor.
-enum PropertyEditorEvents {
+enum PropertyEditorSidebar {
   /// Analytics event that is sent when the property editor is updated with new
   /// properties.
   widgetPropertiesUpdate,
@@ -15,4 +14,10 @@ enum PropertyEditorEvents {
 
   /// Analytics id to track events that come from the DTD editor sidebar.
   static String get id => 'propertyEditorSidebar';
+
+  /// Analytics event for when a request to edit a property succeeds.
+  static String applyEditSuccess(String argType) => 'editSuccess-$argType';
+
+  /// Analytics event for when a request to edit a property fails.
+  static String applyEditFailed(String argType) => 'editFailed-$argType';
 }
