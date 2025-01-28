@@ -77,7 +77,7 @@ enum ScreenMetaData {
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=547',
     // ignore: avoid_redundant_argument_values, false positive
-    requiresConnection: FeatureFlags.networkOffline,
+    requiresConnection: false,
     // ignore: avoid_redundant_argument_values, false positive
     worksWithOfflineData: FeatureFlags.networkOffline,
   ),

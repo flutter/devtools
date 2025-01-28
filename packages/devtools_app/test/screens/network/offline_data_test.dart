@@ -5,10 +5,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/network/network_model.dart';
 import 'package:devtools_app/src/screens/network/offline_network_data.dart';
 import 'package:devtools_app/src/shared/http/constants.dart';
+import 'package:devtools_app/src/shared/http/http_request_data.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vm_service/src/dart_io_extensions.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
