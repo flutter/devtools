@@ -1,13 +1,13 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// @docImport 'package:devtools_app/devtools_app.dart';
 library;
 
 import 'dart:async';
 
-import 'package:devtools_app/src/service/editor/api_classes.dart';
+import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:stream_channel/stream_channel.dart';

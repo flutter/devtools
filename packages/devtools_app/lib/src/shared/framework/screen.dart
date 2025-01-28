@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:math' as math;
 
@@ -19,7 +19,6 @@ import '../ui/icons.dart';
 
 final _log = Logger('screen.dart');
 
-// TODO(kenz): use correct assets.
 enum ScreenMetaData {
   home(
     'home',
@@ -156,14 +155,12 @@ enum ScreenMetaData {
   }
 }
 
-/// Defines a page shown in the DevTools [TabBar].
+/// Defines a screen shown in the top-level DevTools [TabBar].
 ///
-/// A devtools screen can be in three modes:
-/// * offline-data
-/// * connected
-/// * not-connected
-///
-/// See [devToolsMode].
+/// A DevTools screen can be in three modes:
+/// * showing offline-data
+/// * connected to an application
+/// * not connected to an application
 ///
 /// A screen may support any combination of modes.
 ///

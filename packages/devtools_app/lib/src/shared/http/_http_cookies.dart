@@ -1,8 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// Copyright (c) 2013, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
 
 // This code was pulled from dart:io.
+// https://github.com/dart-lang/sdk/blob/main/sdk/lib/_http/http_headers.dart#L965
+// TODO(mossman): Is there a way to use dart:io directly?
 
 // ignore_for_file: annotate_overrides
 // ignore_for_file: empty_statements

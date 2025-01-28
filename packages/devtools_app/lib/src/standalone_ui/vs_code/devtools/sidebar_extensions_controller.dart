@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -11,7 +11,7 @@ import 'package:logging/logging.dart';
 
 import '../../../extensions/extension_service.dart';
 import '../../../extensions/extension_service_helpers.dart';
-import '../../../service/editor/api_classes.dart';
+import '../../../shared/editor/api_classes.dart';
 import '../../../shared/globals.dart';
 
 final _devToolsExtensionsLog = Logger('Flutter Sidebar - DevTools Extensions');

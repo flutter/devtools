@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
 
@@ -28,14 +28,14 @@ enum EditorMethod {
 ///
 /// [code link]: https://github.com/dart-lang/sdk/blob/ebfcd436da65802a2b20d415afe600b51e432305/pkg/analysis_server/lib/src/lsp/constants.dart#L136
 enum LspMethod {
-  editableArguments(
-    methodName: 'experimental/dart/textDocument/editableArguments',
-  ),
-  editArgument(methodName: 'experimental/dart/textDocument/editArgument');
+  editableArguments(methodName: 'dart/textDocument/editableArguments'),
+  editArgument(methodName: 'dart/textDocument/editArgument');
 
   const LspMethod({required this.methodName});
 
   final String methodName;
+
+  String get experimentalMethodName => 'experimental/$methodName';
 }
 
 /// Known kinds of events that may come from the editor.
@@ -317,7 +317,7 @@ class ActiveLocationChangedEvent extends EditorEvent {
       );
 
   final List<EditorSelection> selections;
-  final TextDocument textDocument;
+  final TextDocument? textDocument;
 
   @override
   EditorEventKind get kind => EditorEventKind.activeLocationChanged;
@@ -341,11 +341,11 @@ class TextDocument with Serializable {
   TextDocument.fromJson(Map<String, Object?> map)
     : this(
         uriAsString: map[Field.uri] as String,
-        version: map[Field.version] as int,
+        version: map[Field.version] as int?,
       );
 
   final String uriAsString;
-  final int version;
+  final int? version;
 
   @override
   Map<String, Object?> toJson() => {
