@@ -442,6 +442,56 @@ class EditableArgumentsResult with Serializable {
   Map<String, Object?> toJson() => {Field.arguments: args};
 }
 
+/// Errors that the Analysis Server returns for failed argument edits.
+///
+/// These should be kept in sync with those listed in:
+/// pkg/analysis_server/lib/src/lsp/constants.dart
+enum EditArgumentError {
+  /// A request was made that requires use of workspace/applyEdit but the
+  /// current editor does not support it.
+  editsUnsupportedByEditor(-32016),
+
+  /// An editArgument request tried to modify an invocation at a position where
+  /// there was no invocation.
+  editArgumentInvalidPosition(-32017),
+
+  /// An editArgument request tried to modify a parameter that does not exist or
+  /// is not editable.
+  editArgumentInvalidParameter(-32018),
+
+  /// An editArgument request tried to set an argument value that is not valid.
+  editArgumentInvalidValue(-32019);
+
+  const EditArgumentError(this.code);
+
+  final int code;
+
+  static final _codeToErrorMap = EditArgumentError.values.fold(
+    <int, EditArgumentError>{},
+    (map, error) {
+      map[error.code] = error;
+      return map;
+    },
+  );
+
+  static EditArgumentError? fromCode(int? code) {
+    if (code == null) return null;
+    return _codeToErrorMap[code];
+  }
+}
+
+/// Response to an edit argument request.
+class EditArgumentResponse {
+  EditArgumentResponse({required this.success, this.errorMessage, errorCode})
+    : _errorCode = errorCode;
+
+  final bool success;
+  final String? errorMessage;
+  final int? _errorCode;
+
+  EditArgumentError? get errorType => EditArgumentError.fromCode(_errorCode);
+}
+
 /// Information about a single editable argument of a widget.
 class EditableArgument with Serializable {
   EditableArgument({
