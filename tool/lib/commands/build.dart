@@ -108,9 +108,14 @@ class BuildCommand extends Command {
           ] else ...[
             // Do not minify stack traces in debug mode.
             if (buildMode == 'debug') '--dart2js-optimization=O1',
-            if (buildMode != 'debug') '--$buildMode',
+            if (buildMode != 'debug') ...[
+              '--$buildMode',
+              // Use -O2 optimization by default (sound dart) but override for
+              // dart2js with -O4 (it's too slow otherwise).
+              '-O2',
+              '--dart2js-optimization=O4',
+            ],
           ],
-          '-O2',
           '--pwa-strategy=offline-first',
           '--no-tree-shake-icons',
         ]),
