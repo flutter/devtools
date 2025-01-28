@@ -181,7 +181,7 @@ void main() {
 
     test('Handles serialization errors gracefully', () {
       final requestData = HttpProfileRequestData.buildErrorRequest(
-        error: 'Simulated error',
+        error: 'Serialization failed due to: HttpProfileRequestError',
       );
 
       final jsonData = requestData.toJson();
@@ -191,6 +191,7 @@ void main() {
         jsonData[HttpRequestDataKeys.error.name],
         contains('Serialization failed due to: HttpProfileRequestError'),
       );
+      expect(jsonData.length, 1);
     });
 
     test('Handles successful serialization', () {

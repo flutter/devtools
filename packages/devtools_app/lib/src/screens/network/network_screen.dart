@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
+import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
@@ -20,6 +21,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/file_import.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
@@ -38,6 +40,11 @@ class NetworkScreen extends Screen {
 
   @override
   Widget buildScreenBody(BuildContext context) => const NetworkScreenBody();
+
+  @override
+  Widget buildDisconnectedScreenBody(BuildContext context) {
+    return const DisconnectedNetworkScreenBody();
+  }
 
   @override
   Widget buildStatus(BuildContext context) {
@@ -78,6 +85,30 @@ class NetworkScreen extends Screen {
           );
         },
       ),
+    );
+  }
+}
+
+class DisconnectedNetworkScreenBody extends StatelessWidget {
+  const DisconnectedNetworkScreenBody({super.key});
+
+  static const importInstructions =
+      'Open a network data file that was previously saved from DevTools.';
+
+  @override
+  Widget build(BuildContext context) {
+    return FileImportContainer(
+      instructions: importInstructions,
+      actionText: 'Load data',
+      gaScreen: gac.network,
+      gaSelectionImport: gac.PerformanceEvents.openDataFile.name,
+      gaSelectionAction: gac.PerformanceEvents.loadDataFromFile.name,
+      onAction: (jsonFile) {
+        Provider.of<ImportController>(
+          context,
+          listen: false,
+        ).importData(jsonFile, expectedScreenId: NetworkScreen.id);
+      },
     );
   }
 }

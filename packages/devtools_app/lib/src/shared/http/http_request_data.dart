@@ -383,7 +383,7 @@ extension HttpProfileRequestExtension on HttpProfileRequest {
 
 extension HttpProfileRequestDataExtension on HttpProfileRequestData {
   Map<String, Object?> toJson() {
-    final Map<String, Object?> jsonMap = {};
+    final jsonMap = <String, Object?>{};
     try {
       jsonMap[HttpRequestDataKeys.headers.name] = headers ?? {};
       jsonMap[HttpRequestDataKeys.followRedirects.name] = followRedirects;
@@ -397,7 +397,7 @@ extension HttpProfileRequestDataExtension on HttpProfileRequestData {
     } catch (e, st) {
       _log.shout('Error serializing HttpProfileRequestData', e, st);
       jsonMap[HttpRequestDataKeys.error.name] =
-          'Serialization failed due to: $e';
+          error ?? 'Serialization failed: $e';
     }
     return jsonMap;
   }
@@ -405,7 +405,7 @@ extension HttpProfileRequestDataExtension on HttpProfileRequestData {
 
 extension HttpProfileResponseDataExtension on HttpProfileResponseData {
   Map<String, Object?> toJson() {
-    final Map<String, Object?> jsonMap = {};
+    final jsonMap = <String, Object?>{};
     try {
       jsonMap[HttpRequestDataKeys.startTime.name] =
           startTime?.microsecondsSinceEpoch;
@@ -425,7 +425,7 @@ extension HttpProfileResponseDataExtension on HttpProfileResponseData {
     } catch (e, st) {
       _log.shout('Error serializing HttpProfileResponseData', e, st);
       jsonMap[HttpRequestDataKeys.error.name] =
-          'Serialization failed due to: $e';
+          error ?? 'Serialization failed: $e';
     }
     return jsonMap;
   }
