@@ -363,7 +363,7 @@ void main() {
 
         await tester.pumpAndSettle();
         expect(
-          find.textContaining('Invalid value for parameter: title.'),
+          find.textContaining('Invalid value for parameter.'),
           findsOneWidget,
         );
       });
