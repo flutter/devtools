@@ -287,11 +287,11 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
     final propertyName = property.name;
     switch (errorType) {
       case EditArgumentError.editArgumentInvalidParameter:
-        return 'Invalid parameter $propertyName.';
+        return 'Invalid parameter: $propertyName.';
       case EditArgumentError.editArgumentInvalidPosition:
-        return 'Invalid position for parameter $propertyName.';
+        return 'Invalid position for parameter: $propertyName.';
       case EditArgumentError.editArgumentInvalidValue:
-        return 'Invalid value for parameter $propertyName.';
+        return 'Invalid value for parameter: $propertyName.';
       case EditArgumentError.editsUnsupportedByEditor:
         return 'IDE does not support property edits.';
       default:
