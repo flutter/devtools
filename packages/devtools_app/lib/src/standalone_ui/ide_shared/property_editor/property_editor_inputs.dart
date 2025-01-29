@@ -204,6 +204,7 @@ mixin _PropertyInputMixin<T> {
       isDense: true,
       label: inputLabel(property, theme: theme),
       border: const OutlineInputBorder(),
+      floatingLabelBehavior: FloatingLabelBehavior.always,
     );
   }
 
