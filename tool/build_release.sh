@@ -1,14 +1,11 @@
-# Copyright 2025 The Flutter Authors
-# Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 #!/bin/bash
 
 # TODO(kenz): delete this script once we can confirm it is not used in the
 # Dart SDK or in infra tooling.
 
-# Copyright 2019 The Chromium Authors. All rights reserved.
+# Copyright 2025 The Flutter Authors
 # Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file.
+# found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 # Contains a path to this script, relative to the directory it was called from.
 RELATIVE_PATH_TO_SCRIPT="${BASH_SOURCE[0]}"
