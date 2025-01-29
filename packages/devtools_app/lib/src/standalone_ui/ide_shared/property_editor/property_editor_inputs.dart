@@ -216,7 +216,7 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
 
     final value = property.convertFromInputString(valueAsString) as U?;
     final response = await controller.editArgument(name: argName, value: value);
-    _maybeHandleServerError(response, property: property);
+    _maybeHandleServerError(response);
   }
 
   InputDecoration decoration(
@@ -270,32 +270,11 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
     });
   }
 
-  void _maybeHandleServerError(
-    EditArgumentResponse? errorResponse, {
-    required EditableProperty property,
-  }) {
+  void _maybeHandleServerError(EditArgumentResponse? errorResponse) {
     if (errorResponse == null || errorResponse.success) return;
     setState(() {
-      _serverError = _errorMessage(errorResponse.errorType, property: property);
+      _serverError =
+          errorResponse.errorType?.message ?? 'Encountered unknown error.';
     });
-  }
-
-  String _errorMessage(
-    EditArgumentError? errorType, {
-    required EditableProperty property,
-  }) {
-    final propertyName = property.name;
-    switch (errorType) {
-      case EditArgumentError.editArgumentInvalidParameter:
-        return 'Invalid parameter: $propertyName.';
-      case EditArgumentError.editArgumentInvalidPosition:
-        return 'Invalid position for parameter: $propertyName.';
-      case EditArgumentError.editArgumentInvalidValue:
-        return 'Invalid value for parameter: $propertyName.';
-      case EditArgumentError.editsUnsupportedByEditor:
-        return 'IDE does not support property edits.';
-      default:
-        return 'Encountered unknown error editing ${property.name}.';
-    }
   }
 }

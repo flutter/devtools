@@ -449,22 +449,32 @@ class EditableArgumentsResult with Serializable {
 enum EditArgumentError {
   /// A request was made that requires use of workspace/applyEdit but the
   /// current editor does not support it.
-  editsUnsupportedByEditor(-32016),
+  editsUnsupportedByEditor(code: -32016, message: 'Invalid argument.'),
 
   /// An editArgument request tried to modify an invocation at a position where
   /// there was no invocation.
-  editArgumentInvalidPosition(-32017),
+  editArgumentInvalidPosition(
+    code: -32017,
+    message: 'Invalid position for argument.',
+  ),
 
   /// An editArgument request tried to modify a parameter that does not exist or
   /// is not editable.
-  editArgumentInvalidParameter(-32018),
+  editArgumentInvalidParameter(
+    code: -32018,
+    message: 'Invalid value for argument.',
+  ),
 
   /// An editArgument request tried to set an argument value that is not valid.
-  editArgumentInvalidValue(-32019);
+  editArgumentInvalidValue(
+    code: -32019,
+    message: 'IDE does not support property edits.',
+  );
 
-  const EditArgumentError(this.code);
+  const EditArgumentError({required this.code, required this.message});
 
   final int code;
+  final String message;
 
   static final _codeToErrorMap = EditArgumentError.values.fold(
     <int, EditArgumentError>{},
