@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:collection';
@@ -14,11 +14,11 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
-import '../../shared/common_widgets.dart';
 import '../../shared/console/eval/inspector_tree.dart';
-import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/error_badge_manager.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/search.dart';
 import '../inspector_shared/inspector_controls.dart';
 import '../inspector_shared/inspector_screen.dart';
@@ -144,19 +144,14 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       initialFractions: const [0.33, 0.67],
       children: [
         summaryTree,
-        InspectorDetails(
-          detailsTree: detailsTree,
-          controller: controller,
-        ),
+        InspectorDetails(detailsTree: detailsTree, controller: controller),
       ],
     );
     return Column(
       children: <Widget>[
         const InspectorControls(),
         const SizedBox(height: intermediateSpacing),
-        Expanded(
-          child: widgetTrees,
-        ),
+        Expanded(child: widgetTrees),
       ],
     );
   }
@@ -172,25 +167,28 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 constraints: constraints,
                 onRefreshInspectorPressed: _refreshInspector,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
-                searchFieldBuilder: () =>
-                    StatelessSearchField<InspectorTreeRow>(
-                  controller: _summaryTreeController,
-                  searchFieldEnabled: true,
-                  shouldRequestFocus: searchVisible,
-                  supportsNavigation: true,
-                  onClose: _onSearchVisibleToggle,
-                ),
+                searchFieldBuilder:
+                    () => StatelessSearchField<InspectorTreeRow>(
+                      controller: _summaryTreeController,
+                      searchFieldEnabled: true,
+                      shouldRequestFocus: searchVisible,
+                      supportsNavigation: true,
+                      onClose: _onSearchVisibleToggle,
+                    ),
               ),
               Expanded(
                 child: ValueListenableBuilder(
                   valueListenable: serviceConnection.errorBadgeManager
                       .erroredItemsForPage(InspectorScreen.id),
-                  builder:
-                      (_, LinkedHashMap<String, DevToolsError> errors, __) {
-                    final inspectableErrors = errors.map(
-                      (key, value) =>
-                          MapEntry(key, value as InspectableWidgetError),
-                    ) as LinkedHashMap<String, InspectableWidgetError>;
+                  builder: (_, LinkedHashMap<String, DevToolsError> errors, _) {
+                    final inspectableErrors =
+                        errors.map(
+                              (key, value) => MapEntry(
+                                key,
+                                value as InspectableWidgetError,
+                              ),
+                            )
+                            as LinkedHashMap<String, InspectableWidgetError>;
                     return Stack(
                       children: [
                         InspectorTree(
@@ -204,15 +202,17 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                         if (errors.isNotEmpty)
                           ValueListenableBuilder<int?>(
                             valueListenable: controller.selectedErrorIndex,
-                            builder: (_, selectedErrorIndex, __) => Positioned(
-                              top: 0,
-                              right: 0,
-                              child: ErrorNavigator(
-                                errors: inspectableErrors,
-                                errorIndex: selectedErrorIndex,
-                                onSelectError: controller.selectErrorByIndex,
-                              ),
-                            ),
+                            builder:
+                                (_, selectedErrorIndex, _) => Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: ErrorNavigator(
+                                    errors: inspectableErrors,
+                                    errorIndex: selectedErrorIndex,
+                                    onSelectError:
+                                        controller.selectErrorByIndex,
+                                  ),
+                                ),
                           ),
                       ],
                     );
@@ -328,18 +328,18 @@ class InspectorSummaryTreeControls extends StatelessWidget {
               ),
               ...!isSearchVisible
                   ? [
-                      const Spacer(),
-                      ToolbarAction(
-                        icon: Icons.search,
-                        onPressed: onSearchVisibleToggle,
-                        tooltip: 'Search Tree',
-                      ),
-                    ]
+                    const Spacer(),
+                    ToolbarAction(
+                      icon: Icons.search,
+                      onPressed: onSearchVisibleToggle,
+                      tooltip: 'Search Tree',
+                    ),
+                  ]
                   : [
-                      constraints.maxWidth >= _searchBreakpoint
-                          ? _buildSearchControls()
-                          : const Spacer(),
-                    ],
+                    constraints.maxWidth >= _searchBreakpoint
+                        ? _buildSearchControls()
+                        : const Spacer(),
+                  ],
               ToolbarAction(
                 icon: Icons.refresh,
                 onPressed: onRefreshInspectorPressed,
@@ -349,10 +349,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
           ),
         ),
         if (isSearchVisible && constraints.maxWidth < _searchBreakpoint)
-          _controlsContainer(
-            context,
-            Row(children: [_buildSearchControls()]),
-          ),
+          _controlsContainer(context, Row(children: [_buildSearchControls()])),
       ],
     );
   }
@@ -361,9 +358,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
     return Container(
       height: defaultHeaderHeight,
       decoration: BoxDecoration(
-        border: Border(
-          bottom: defaultBorderSide(Theme.of(context)),
-        ),
+        border: Border(bottom: defaultBorderSide(Theme.of(context))),
       ),
       child: child,
     );
@@ -396,9 +391,10 @@ class ErrorNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final label = errorIndex != null
-        ? 'Error ${errorIndex! + 1}/${errors.length}'
-        : 'Errors: ${errors.length}';
+    final label =
+        errorIndex != null
+            ? 'Error ${errorIndex! + 1}/${errors.length}'
+            : 'Errors: ${errors.length}';
     return Container(
       color: colorScheme.errorContainer,
       child: Padding(
@@ -412,9 +408,7 @@ class ErrorNavigator extends StatelessWidget {
               padding: const EdgeInsets.only(right: denseSpacing),
               child: Text(
                 label,
-                style: TextStyle(
-                  color: colorScheme.onErrorContainer,
-                ),
+                style: TextStyle(color: colorScheme.onErrorContainer),
               ),
             ),
             _ErrorNavigatorButton(

@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -10,14 +10,14 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../framework/app_error_handling.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
+import '../../shared/framework/app_error_handling.dart';
+import '../../shared/framework/routing.dart';
 import '../../shared/globals.dart';
-import '../../shared/notifications.dart';
+import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/history_manager.dart';
-import '../../shared/routing.dart';
 import '../../shared/ui/search.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
@@ -60,8 +60,9 @@ class CodeViewController extends DisposableController
   }
 
   Future<void> _handleNavigationEvent(DevToolsNavigationState state) async {
-    final processedState =
-        CodeViewSourceLocationNavigationState._fromState(state);
+    final processedState = CodeViewSourceLocationNavigationState._fromState(
+      state,
+    );
     final object = processedState.object;
     _navigationInProgress = true;
     await showScriptLocation(processedState.location, focusLine: true);
@@ -156,9 +157,7 @@ class CodeViewController extends DisposableController
     await _maybeSetUpProgramExplorer();
     addAutoDisposeListener(
       currentScriptRef,
-      () => unawaited(
-        _maybeSetUpProgramExplorer(),
-      ),
+      () => unawaited(_maybeSetUpProgramExplorer()),
     );
   }
 
@@ -192,8 +191,10 @@ class CodeViewController extends DisposableController
     // opener will close automatically when its focus is lost.
     toggleFileOpenerVisibility(false);
 
-    final succeeded =
-        await _showScriptLocation(scriptLocation, focusLine: focusLine);
+    final succeeded = await _showScriptLocation(
+      scriptLocation,
+      focusLine: focusLine,
+    );
 
     if (succeeded) {
       // Update the scripts history (and make sure we don't react to the
@@ -211,10 +212,7 @@ class CodeViewController extends DisposableController
     }
     final isolateRef =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
-    final processedReport = await _getSourceReport(
-      isolateRef,
-      current.script,
-    );
+    final processedReport = await _getSourceReport(isolateRef, current.script);
 
     parsedScript.value = ParsedScript(
       script: current.script,
@@ -275,18 +273,15 @@ class CodeViewController extends DisposableController
     final hitLines = <int>{};
     final missedLines = <int>{};
     try {
-      final report =
-          await serviceConnection.serviceManager.service!.getSourceReport(
-        isolateRef.id!,
-        // TODO(bkonyi): make _Profile a public report type.
-        // See https://github.com/dart-lang/sdk/issues/50641
-        const [
-          SourceReportKind.kCoverage,
-          '_Profile',
-        ],
-        scriptId: script.id!,
-        reportLines: true,
-      );
+      final report = await serviceConnection.serviceManager.service!
+          .getSourceReport(
+            isolateRef.id!,
+            // TODO(bkonyi): make _Profile a public report type.
+            // See https://github.com/dart-lang/sdk/issues/50641
+            const [SourceReportKind.kCoverage, '_Profile'],
+            scriptId: script.id!,
+            reportLines: true,
+          );
 
       for (final range in report.ranges!) {
         final coverage = range.coverage!;
@@ -298,11 +293,11 @@ class CodeViewController extends DisposableController
       return ProcessedSourceReport(
         coverageHitLines: hitLines,
         coverageMissedLines: missedLines,
-        profilerEntries:
-            profileReport.profileRanges.fold<Map<int, ProfileReportEntry>>(
-          {},
-          (last, e) => last..addAll(e.entries),
-        ),
+        profilerEntries: profileReport.profileRanges
+            .fold<Map<int, ProfileReportEntry>>(
+              {},
+              (last, e) => last..addAll(e.entries),
+            ),
       );
     } catch (e, st) {
       // Ignore - not supported for all vm service implementations.
@@ -344,10 +339,7 @@ class CodeViewController extends DisposableController
       _log.warning(e, e, st);
     }
 
-    final processedReport = await _getSourceReport(
-      isolateRef,
-      script,
-    );
+    final processedReport = await _getSourceReport(isolateRef, script);
 
     return ParsedScript(
       script: script,
@@ -384,8 +376,9 @@ class CodeViewController extends DisposableController
     if (isWebApp && enableSourceMapsLink != null) {
       final enableSourceMapsAction = NotificationAction(
         label: 'Enable sourcemaps',
-        onPressed: () =>
-            unawaited(launchUrlWithErrorHandling(enableSourceMapsLink.url)),
+        onPressed:
+            () =>
+                unawaited(launchUrlWithErrorHandling(enableSourceMapsLink.url)),
       );
       notificationService.pushNotification(
         NotificationMessage(
@@ -437,9 +430,9 @@ class ProcessedSourceReport {
   });
 
   const ProcessedSourceReport.empty()
-      : coverageHitLines = const <int>{},
-        coverageMissedLines = const <int>{},
-        profilerEntries = const <int, ProfileReportEntry>{};
+    : coverageHitLines = const <int>{},
+      coverageMissedLines = const <int>{},
+      profilerEntries = const <int, ProfileReportEntry>{};
 
   final Set<int> coverageHitLines;
   final Set<int> coverageMissedLines;
@@ -502,21 +495,18 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
     required int line,
     ObjRef? object,
   }) : super(
-          kind: type,
-          state: <String, String?>{
-            _kScriptId: script.id,
-            _kUri: script.uri,
-            _kLine: line.toString(),
-            if (object != null) _kObject: json.encode(object.json),
-          },
-        );
+         kind: type,
+         state: <String, String?>{
+           _kScriptId: script.id,
+           _kUri: script.uri,
+           _kLine: line.toString(),
+           if (object != null) _kObject: json.encode(object.json),
+         },
+       );
 
   CodeViewSourceLocationNavigationState._fromState(
     DevToolsNavigationState state,
-  ) : super(
-          kind: type,
-          state: state.state,
-        );
+  ) : super(kind: type, state: state.state);
 
   static CodeViewSourceLocationNavigationState? fromState(
     DevToolsNavigationState? state,
@@ -531,10 +521,7 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
   static const _kObject = 'object';
   static const type = 'codeViewSourceLocation';
 
-  ScriptRef get script => ScriptRef(
-        id: state[_kScriptId]!,
-        uri: state[_kUri],
-      );
+  ScriptRef get script => ScriptRef(id: state[_kScriptId]!, uri: state[_kUri]);
 
   int get line => int.parse(state[_kLine]!);
 
@@ -546,10 +533,8 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
     return createServiceObject(json.decode(obj), const []) as ObjRef?;
   }
 
-  ScriptLocation get location => ScriptLocation(
-        script,
-        location: SourcePosition(line: line, column: 1),
-      );
+  ScriptLocation get location =>
+      ScriptLocation(script, location: SourcePosition(line: line, column: 1));
 
   @override
   String toString() {

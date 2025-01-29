@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -12,23 +12,16 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/utils.dart';
+import '../../../../../shared/utils/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 
 final _log = Logger('memory_protocol');
 
-enum _ContinuesState {
-  none,
-  stop,
-  next,
-}
+enum _ContinuesState { none, stop, next }
 
 class MemoryTracker {
-  MemoryTracker(
-    this.timeline, {
-    required this.isAndroidChartVisible,
-  });
+  MemoryTracker(this.timeline, {required this.isAndroidChartVisible});
 
   final MemoryTimeline timeline;
 
@@ -101,7 +94,8 @@ class MemoryTracker {
         in serviceConnection.serviceManager.isolateManager.isolates.value) {
       try {
         isolateMemory[isolateRef] = await serviceConnection
-            .serviceManager.service!
+            .serviceManager
+            .service!
             .getMemoryUsage(isolateRef.id!);
       } on SentinelException {
         // Isolates can disappear during polling, so just swallow this exception.
@@ -110,12 +104,13 @@ class MemoryTracker {
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    _adbMemoryInfo = serviceConnection
-                .serviceManager.connectedState.value.connected &&
-            serviceConnection.serviceManager.vm!.operatingSystem == 'android' &&
-            isAndroidChartVisible.value
-        ? await _fetchAdbInfo()
-        : AdbMemoryInfo.empty();
+    _adbMemoryInfo =
+        serviceConnection.serviceManager.connectedState.value.connected &&
+                serviceConnection.serviceManager.vm!.operatingSystem ==
+                    'android' &&
+                isAndroidChartVisible.value
+            ? await _fetchAdbInfo()
+            : AdbMemoryInfo.empty();
 
     // Query the engine's rasterCache estimate.
     rasterCache = await _fetchRasterCacheInfo();
@@ -153,9 +148,8 @@ class MemoryTracker {
   }
 
   /// Fetch ADB meminfo, ADB returns values in KB convert to total bytes.
-  Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJsonInKB(
-        (await serviceConnection.adbMemoryInfo).json!,
-      );
+  Future<AdbMemoryInfo> _fetchAdbInfo() async =>
+      AdbMemoryInfo.fromJsonInKB((await serviceConnection.adbMemoryInfo).json!);
 
   void _recalculate({bool fromGC = false}) {
     int used = 0;

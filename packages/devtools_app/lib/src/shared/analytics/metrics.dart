@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'analytics_common.dart';
 
@@ -95,10 +95,7 @@ class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
 }
 
 class DeepLinkScreenMetrics extends ScreenAnalyticsMetrics {
-  DeepLinkScreenMetrics({
-    this.androidAppId,
-    this.iosBundleId,
-  });
+  DeepLinkScreenMetrics({this.androidAppId, this.iosBundleId});
 
   /// The Android app id of the Flutter project.
   final String? androidAppId;

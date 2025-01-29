@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -170,14 +170,13 @@ class IosDomainError extends DomainError {
 
   static IosDomainError iosFileFormatDomainError({
     required List<AASAfileFormatSubCheck> subcheckErrors,
-  }) =>
-      IosDomainError(
-        'Apple-App-Site-Association file format is incorrect',
-        'This test checks that your Apple-App-Site-Association file '
-            'follows the correct format guidelines.',
-        'Ensure your Apple-App-Site-Association file follows the correct format guidelines.',
-        subcheckErrors: subcheckErrors,
-      );
+  }) => IosDomainError(
+    'Apple-App-Site-Association file format is incorrect',
+    'This test checks that your Apple-App-Site-Association file '
+        'follows the correct format guidelines.',
+    'Ensure your Apple-App-Site-Association file follows the correct format guidelines.',
+    subcheckErrors: subcheckErrors,
+  );
 
   final List<AASAfileFormatSubCheck> subcheckErrors;
 }
@@ -191,7 +190,7 @@ String propertyTypeMessage({
 
 class AASAfileFormatSubCheck extends CommonError {
   const AASAfileFormatSubCheck(String title, String explanation)
-      : super(title, explanation, '');
+    : super(title, explanation, '');
 
   static final appLinksFormat = AASAfileFormatSubCheck(
     'Applinks format',
@@ -386,10 +385,7 @@ class ValidatedLinkDatas {
     required this.byDomain,
     required this.byPath,
   });
-  ValidatedLinkDatas.empty()
-      : all = [],
-        byDomain = [],
-        byPath = [];
+  ValidatedLinkDatas.empty() : all = [], byDomain = [], byPath = [];
   final List<LinkData> all;
   final List<LinkData> byDomain;
   final List<LinkData> byPath;
@@ -542,12 +538,7 @@ class _ErrorAwareText extends StatelessWidget {
             ),
           ),
         const SizedBox(width: denseSpacing),
-        Flexible(
-          child: Text(
-            text,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
       ],
     );
   }
@@ -556,8 +547,8 @@ class _ErrorAwareText extends StatelessWidget {
 class DomainColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
   DomainColumn(this.controller)
-      : sortingOption = controller.displayOptions.domainSortingOption,
-        super.wide('Domain');
+    : sortingOption = controller.displayOptions.domainSortingOption,
+      super.wide('Domain');
 
   DeepLinksController controller;
   SortingOption? sortingOption;
@@ -578,12 +569,10 @@ class DomainColumn extends ColumnData<LinkData>
       children: [
         const Text('Domain'),
         PopupMenuButton<SortingOption>(
-          itemBuilder: (BuildContext context) =>
-              _buildPopupMenuSortingEntries(controller, isPath: false),
-          child: Icon(
-            Icons.arrow_drop_down,
-            size: actionsIconSize,
-          ),
+          itemBuilder:
+              (BuildContext context) =>
+                  _buildPopupMenuSortingEntries(controller, isPath: false),
+          child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
     );
@@ -603,20 +592,16 @@ class DomainColumn extends ColumnData<LinkData>
     return dataObject.domain == null
         ? Text('missing domain', style: Theme.of(context).errorTextStyle)
         : _ErrorAwareText(
-            isError: dataObject.domainErrors.isNotEmpty,
-            controller: controller,
-            text: dataObject.domain!,
-            link: dataObject,
-          );
+          isError: dataObject.domainErrors.isNotEmpty,
+          controller: controller,
+          text: dataObject.domain!,
+          link: dataObject,
+        );
   }
 
   @override
-  int compare(LinkData a, LinkData b) => _compareLinkData(
-        a,
-        b,
-        sortingOption: sortingOption,
-        compareDomain: true,
-      );
+  int compare(LinkData a, LinkData b) =>
+      _compareLinkData(a, b, sortingOption: sortingOption, compareDomain: true);
 
   @override
   String get config => '$title $sortingOption';
@@ -625,8 +610,8 @@ class DomainColumn extends ColumnData<LinkData>
 class PathColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
   PathColumn(this.controller)
-      : sortingOption = controller.displayOptions.pathSortingOption,
-        super.wide('Path');
+    : sortingOption = controller.displayOptions.pathSortingOption,
+      super.wide('Path');
 
   DeepLinksController controller;
   SortingOption? sortingOption;
@@ -647,12 +632,10 @@ class PathColumn extends ColumnData<LinkData>
       children: [
         const Text('Path'),
         PopupMenuButton<SortingOption>(
-          itemBuilder: (BuildContext context) =>
-              _buildPopupMenuSortingEntries(controller, isPath: true),
-          child: Icon(
-            Icons.arrow_drop_down,
-            size: actionsIconSize,
-          ),
+          itemBuilder:
+              (BuildContext context) =>
+                  _buildPopupMenuSortingEntries(controller, isPath: true),
+          child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
     );
@@ -680,11 +663,11 @@ class PathColumn extends ColumnData<LinkData>
 
   @override
   int compare(LinkData a, LinkData b) => _compareLinkData(
-        a,
-        b,
-        sortingOption: sortingOption,
-        compareDomain: false,
-      );
+    a,
+    b,
+    sortingOption: sortingOption,
+    compareDomain: false,
+  );
 
   @override
   String get config => '$title $sortingOption';
@@ -735,10 +718,7 @@ class SchemeColumn extends ColumnData<LinkData>
               _buildPopupMenuFilterEntry(controller, FilterOption.custom),
             ];
           },
-          child: Icon(
-            Icons.arrow_drop_down,
-            size: actionsIconSize,
-          ),
+          child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
     );
@@ -790,10 +770,7 @@ class OSColumn extends ColumnData<LinkData>
               _buildPopupMenuFilterEntry(controller, FilterOption.ios),
             ];
           },
-          child: Icon(
-            Icons.arrow_drop_down,
-            size: actionsIconSize,
-          ),
+          child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
     );
@@ -866,10 +843,7 @@ class StatusColumn extends ColumnData<LinkData>
               _buildPopupMenuFilterEntry(controller, FilterOption.noIssue),
             ];
           },
-          child: Icon(
-            Icons.arrow_drop_down,
-            size: actionsIconSize,
-          ),
+          child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
     );
@@ -902,11 +876,7 @@ class StatusColumn extends ColumnData<LinkData>
 
 class NavigationColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData> {
-  NavigationColumn()
-      : super(
-          '',
-          fixedWidthPx: scaleByFontFactor(40),
-        );
+  NavigationColumn() : super('', fixedWidthPx: scaleByFontFactor(40));
 
   @override
   bool get supportsSorting => false;
@@ -938,13 +908,15 @@ PopupMenuEntry<FilterOption> _buildPopupMenuFilterEntry(
       children: [
         ValueListenableBuilder<DisplayOptions>(
           valueListenable: controller.displayOptionsNotifier,
-          builder: (context, option, _) => Checkbox(
-            value: option.filters.contains(filterOption),
-            onChanged: (bool? checked) => controller.updateDisplayOptions(
-              removedFilter: checked! ? null : filterOption,
-              addedFilter: checked ? filterOption : null,
-            ),
-          ),
+          builder:
+              (context, option, _) => Checkbox(
+                value: option.filters.contains(filterOption),
+                onChanged:
+                    (bool? checked) => controller.updateDisplayOptions(
+                      removedFilter: checked! ? null : filterOption,
+                      addedFilter: checked ? filterOption : null,
+                    ),
+              ),
         ),
         Text(filterOption.description),
       ],
@@ -962,16 +934,8 @@ List<PopupMenuEntry<SortingOption>> _buildPopupMenuSortingEntries(
       SortingOption.errorOnTop,
       isPath: isPath,
     ),
-    _buildPopupMenuSortingEntry(
-      controller,
-      SortingOption.aToZ,
-      isPath: isPath,
-    ),
-    _buildPopupMenuSortingEntry(
-      controller,
-      SortingOption.zToA,
-      isPath: isPath,
-    ),
+    _buildPopupMenuSortingEntry(controller, SortingOption.aToZ, isPath: isPath),
+    _buildPopupMenuSortingEntry(controller, SortingOption.zToA, isPath: isPath),
   ];
 }
 

@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math';
@@ -11,15 +11,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
-import '../collapsible_mixin.dart';
-import '../common_widgets.dart';
+import '../primitives/collapsible_mixin.dart';
 import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
+import '../ui/common_widgets.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
-import '../utils.dart';
+import '../utils/utils.dart';
 import 'column_widths.dart';
 import 'table_controller.dart';
 import 'table_data.dart';
@@ -29,23 +29,22 @@ part '_table_column.dart';
 part '_table_row.dart';
 part '_tree_table.dart';
 
-// TODO(devoncarew): We need to render the selected row with a different
-// background color.
+typedef IndexedScrollableWidgetBuilder =
+    Widget Function({
+      required BuildContext context,
+      required LinkedScrollControllerGroup linkedScrollControllerGroup,
+      required int index,
+      required List<double> columnWidths,
+      required bool isPinned,
+      required bool enableHoverHandling,
+    });
 
-typedef IndexedScrollableWidgetBuilder = Widget Function({
-  required BuildContext context,
-  required LinkedScrollControllerGroup linkedScrollControllerGroup,
-  required int index,
-  required List<double> columnWidths,
-  required bool isPinned,
-  required bool enableHoverHandling,
-});
-
-typedef TableKeyEventHandler = KeyEventResult Function(
-  KeyEvent event,
-  ScrollController scrollController,
-  BoxConstraints constraints,
-);
+typedef TableKeyEventHandler =
+    KeyEventResult Function(
+      KeyEvent event,
+      ScrollController scrollController,
+      BoxConstraints constraints,
+    );
 
 class Selection<T> {
   Selection({
@@ -56,10 +55,10 @@ class Selection<T> {
   }) : assert(nodeIndex == null || nodeIndexCalculator == null);
 
   Selection.empty()
-      : node = null,
-        nodeIndex = null,
-        nodeIndexCalculator = null,
-        scrollIntoView = true;
+    : node = null,
+      nodeIndex = null,
+      nodeIndexCalculator = null,
+      scrollIntoView = true;
 
   final T? node;
   // TODO (carolynqu): get rid of nodeIndex and only use nodeIndexCalculator, https://github.com/flutter/devtools/issues/4266
@@ -81,6 +80,7 @@ class DevToolsTable<T> extends StatefulWidget {
     this.focusNode,
     this.handleKeyEvent,
     this.autoScrollContent = false,
+    this.startScrolledAtBottom = false,
     this.preserveVerticalScrollPosition = false,
     this.activeSearchMatchNotifier,
     this.rowItemExtent,
@@ -92,6 +92,7 @@ class DevToolsTable<T> extends StatefulWidget {
 
   final TableControllerBase<T> tableController;
   final bool autoScrollContent;
+  final bool startScrolledAtBottom;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
   final double? rowItemExtent;
@@ -135,11 +136,18 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
 
-    final initialScrollOffset = widget.preserveVerticalScrollPosition
-        ? widget.tableController.tableUiState.scrollOffset
-        : 0.0;
+    final initialScrollOffset =
+        widget.preserveVerticalScrollPosition
+            ? widget.tableController.tableUiState.scrollOffset
+            : 0.0;
     widget.tableController.initScrollController(initialScrollOffset);
     scrollController = widget.tableController.verticalScrollController!;
+
+    if (widget.startScrolledAtBottom) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(scrollController.autoScrollToBottom(jump: true));
+      });
+    }
 
     pinnedScrollController = ScrollController();
 
@@ -150,7 +158,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   void didUpdateWidget(covariant DevToolsTable<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final notifiersChanged = widget.tableController.tableData !=
+    final notifiersChanged =
+        widget.tableController.tableData !=
             oldWidget.tableController.tableData ||
         widget.selectionNotifier != oldWidget.selectionNotifier ||
         widget.activeSearchMatchNotifier != oldWidget.activeSearchMatchNotifier;
@@ -188,9 +197,10 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
           final nodeIndex = selection.nodeIndex;
 
           if (selection.scrollIntoView && node != null) {
-            final selectedDisplayRow = nodeIndexCalculator != null
-                ? nodeIndexCalculator(node)!
-                : nodeIndex!;
+            final selectedDisplayRow =
+                nodeIndexCalculator != null
+                    ? nodeIndexCalculator(node)!
+                    : nodeIndex!;
 
             final newPos = selectedDisplayRow * defaultRowHeight;
 
@@ -220,7 +230,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     if (index == -1) return;
 
     final y = index * defaultRowHeight;
-    final indexInView = y > scrollController.offset &&
+    final indexInView =
+        y > scrollController.offset &&
         y < scrollController.offset + scrollController.position.extentInside;
     if (!indexInView) {
       await scrollController.animateTo(
@@ -336,9 +347,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   }
 
   double _pinnedDataHeight(BoxConstraints tableConstraints) => min(
-        widget.rowItemExtent! * pinnedData.length,
-        tableConstraints.maxHeight / 2,
-      );
+    widget.rowItemExtent! * pinnedData.length,
+    tableConstraints.maxHeight / 2,
+  );
 
   int _dataRowCount(
     BoxConstraints tableConstraints,
@@ -350,7 +361,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     var maxHeight = tableConstraints.maxHeight;
     final columnHeadersCount = showColumnGroupHeader ? 2 : 1;
-    maxHeight -= columnHeadersCount *
+    maxHeight -=
+        columnHeadersCount *
         (defaultHeaderHeight +
             (widget.tallHeaders ? scaleByFontFactor(densePadding) : 0.0));
 
@@ -387,7 +399,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     final columnGroups = widget.tableController.columnGroups;
     final includeColumnGroupHeaders =
         widget.tableController.includeColumnGroupHeaders;
-    final showColumnGroupHeader = columnGroups != null &&
+    final showColumnGroupHeader =
+        columnGroups != null &&
         columnGroups.isNotEmpty &&
         includeColumnGroupHeaders;
     final tableUiState = widget.tableController.tableUiState;
@@ -422,6 +435,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                     tall: widget.tallHeaders,
                     backgroundColor: widget.headerColor,
                   ),
+                // TODO(kenz): add support for excluding column headers.
                 TableRow<T>.tableColumnHeader(
                   key: const Key('Table header'),
                   linkedScrollControllerGroup:
@@ -447,11 +461,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                         controller: pinnedScrollController,
                         itemCount: pinnedData.length,
                         itemExtent: widget.rowItemExtent,
-                        itemBuilder: (context, index) => _buildItem(
-                          context,
-                          index,
-                          isPinned: true,
-                        ),
+                        itemBuilder:
+                            (context, index) =>
+                                _buildItem(context, index, isPinned: true),
                       ),
                     ),
                   ),
@@ -466,18 +478,22 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                       onTapDown: (a) => widget.focusNode?.requestFocus(),
                       child: Focus(
                         autofocus: true,
-                        onKeyEvent: (_, event) => widget.handleKeyEvent != null
-                            ? widget.handleKeyEvent!(
-                                event,
-                                scrollController,
-                                constraints,
-                              )
-                            : KeyEventResult.ignored,
+                        onKeyEvent:
+                            (_, event) =>
+                                widget.handleKeyEvent != null
+                                    ? widget.handleKeyEvent!(
+                                      event,
+                                      scrollController,
+                                      constraints,
+                                    )
+                                    : KeyEventResult.ignored,
                         focusNode: widget.focusNode,
                         child: ListView.builder(
                           controller: scrollController,
-                          itemCount:
-                              _dataRowCount(constraints, showColumnGroupHeader),
+                          itemCount: _dataRowCount(
+                            constraints,
+                            showColumnGroupHeader,
+                          ),
                           itemExtent: widget.rowItemExtent,
                           itemBuilder: _buildItem,
                         ),

@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -12,10 +12,10 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../diagnostics/dap_object_node.dart';
 import '../../diagnostics/dart_object_node.dart';
+import '../../framework/routing.dart';
+import '../../framework/screen.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
-import '../../routing.dart';
-import '../../screen.dart';
 import '../../ui/colors.dart';
 import 'description.dart';
 
@@ -48,8 +48,8 @@ class _DisplayProviderState extends State<DisplayProvider> {
         menuButtons: _getMenuButtons(context),
         child: Text.rich(
           TextSpan(
-            children: processAnsiTerminalCodes(
-              widget.variable.text,
+            children: textSpansFromAnsi(
+              widget.variable.text!,
               theme.subtleFixedFontStyle,
             ),
           ),
@@ -78,9 +78,7 @@ class _DisplayProviderState extends State<DisplayProvider> {
     final displayValue = originalDisplayValue.replaceAll('\n', '\\n');
     final contents = InteractivityWrapper(
       onTap: widget.onTap,
-      menuButtons: _getMenuButtons(
-        context,
-      ),
+      menuButtons: _getMenuButtons(context),
       child: DevToolsTooltip(
         message: originalDisplayValue,
         child: Container(
@@ -93,22 +91,21 @@ class _DisplayProviderState extends State<DisplayProvider> {
                   overflow: TextOverflow.ellipsis,
                   TextSpan(
                     text: hasName ? widget.variable.name : null,
-                    style: widget.variable.artificialName
-                        ? theme.subtleFixedFontStyle
-                        : theme.fixedFontStyle.apply(
-                            color: theme.colorScheme.controlFlowSyntaxColor,
-                          ),
+                    style:
+                        widget.variable.artificialName
+                            ? theme.subtleFixedFontStyle
+                            : theme.fixedFontStyle.apply(
+                              color: theme.colorScheme.controlFlowSyntaxColor,
+                            ),
                     children: [
                       if (hasName)
-                        TextSpan(
-                          text: ': ',
-                          style: theme.fixedFontStyle,
-                        ),
+                        TextSpan(text: ': ', style: theme.fixedFontStyle),
                       TextSpan(
                         text: displayValue,
-                        style: widget.variable.artificialValue
-                            ? theme.subtleFixedFontStyle
-                            : _variableDisplayStyle(theme, widget.variable),
+                        style:
+                            widget.variable.artificialValue
+                                ? theme.subtleFixedFontStyle
+                                : _variableDisplayStyle(theme, widget.variable),
                       ),
                     ],
                   ),
@@ -146,9 +143,7 @@ class _DisplayProviderState extends State<DisplayProvider> {
     return contents;
   }
 
-  List<ContextMenuButtonItem> _getMenuButtons(
-    BuildContext context,
-  ) {
+  List<ContextMenuButtonItem> _getMenuButtons(BuildContext context) {
     return [
       if (widget.variable.isRerootable)
         ContextMenuButtonItem(
@@ -176,9 +171,7 @@ class _DisplayProviderState extends State<DisplayProvider> {
     ];
   }
 
-  void _handleInspect(
-    BuildContext context,
-  ) async {
+  void _handleInspect(BuildContext context) async {
     final router = DevToolsRouterDelegate.of(context);
     final inspectorService = serviceConnection.inspectorService;
     if (await widget.variable.inspectWidget()) {
@@ -222,19 +215,13 @@ class _DisplayProviderState extends State<DisplayProvider> {
     }
     switch (kind) {
       case InstanceKind.kString:
-        return style.apply(
-          color: theme.colorScheme.stringSyntaxColor,
-        );
+        return style.apply(color: theme.colorScheme.stringSyntaxColor);
       case InstanceKind.kInt:
       case InstanceKind.kDouble:
-        return style.apply(
-          color: theme.colorScheme.numericConstantSyntaxColor,
-        );
+        return style.apply(color: theme.colorScheme.numericConstantSyntaxColor);
       case InstanceKind.kBool:
       case InstanceKind.kNull:
-        return style.apply(
-          color: theme.colorScheme.modifierSyntaxColor,
-        );
+        return style.apply(color: theme.colorScheme.modifierSyntaxColor);
       default:
         return style;
     }
@@ -270,16 +257,10 @@ class DapDisplayProvider extends StatelessWidget {
           color: theme.colorScheme.controlFlowSyntaxColor,
         ),
         children: [
-          TextSpan(
-            text: ': ',
-            style: theme.fixedFontStyle,
-          ),
+          TextSpan(text: ': ', style: theme.fixedFontStyle),
           // TODO(https://github.com/flutter/devtools/issues/6056): Change text
           // style based on variable type.
-          TextSpan(
-            text: value,
-            style: theme.subtleFixedFontStyle,
-          ),
+          TextSpan(text: value, style: theme.subtleFixedFontStyle),
         ],
       ),
     );

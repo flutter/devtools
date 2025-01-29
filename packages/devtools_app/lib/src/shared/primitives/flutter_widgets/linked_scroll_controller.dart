@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -54,11 +54,14 @@ class LinkedScrollControllerGroup {
 
   /// Creates a new controller that is linked to any existing ones.
   ScrollController addAndGet() {
-    final initialScrollOffset = _attachedControllers.isEmpty
-        ? 0.0
-        : _attachedControllers.first.position.pixels;
-    final controller =
-        _LinkedScrollController(this, initialScrollOffset: initialScrollOffset);
+    final initialScrollOffset =
+        _attachedControllers.isEmpty
+            ? 0.0
+            : _attachedControllers.first.position.pixels;
+    final controller = _LinkedScrollController(
+      this,
+      initialScrollOffset: initialScrollOffset,
+    );
     _allControllers.add(controller);
     controller.addListener(_offsetNotifier.notifyListeners);
     return controller;

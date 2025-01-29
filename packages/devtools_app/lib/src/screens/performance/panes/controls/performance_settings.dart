@@ -1,12 +1,12 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/ui/common_widgets.dart';
 import '../../performance_controller.dart';
 import '../flutter_frames/flutter_frames_controller.dart';
 
@@ -32,9 +32,7 @@ class PerformanceSettingsDialog extends StatelessWidget {
           ),
         ],
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }
@@ -50,8 +48,9 @@ class FlutterSettings extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CheckboxSetting(
-          notifier: flutterFramesController.badgeTabForJankyFrames
-              as ValueNotifier<bool?>,
+          notifier:
+              flutterFramesController.badgeTabForJankyFrames
+                  as ValueNotifier<bool?>,
           title: 'Badge Performance tab when Flutter UI jank is detected',
         ),
       ],

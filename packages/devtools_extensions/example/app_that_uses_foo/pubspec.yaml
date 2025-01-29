@@ -1,3 +1,6 @@
+# Copyright 2025 The Flutter Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 name: app_that_uses_foo
 description: A Flutter app that uses package:foo (which contains a DevTools extension)
 publish_to: 'none'
@@ -20,8 +23,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  integration_test:
-    sdk: flutter
   standalone_extension:
     path: ../packages_with_extensions/standalone_extension
   test: ^1.21.0

@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
@@ -72,10 +72,12 @@ class TestDeepLinksController extends DeepLinksController {
 
   @override
   Future<void> validateLinks() async {
-    androidAppLinks[selectedAndroidVariantIndex.value] =
-        fakeAppLinkSettings(fakeAndroidDeepLinks);
-    iosLinks[selectedIosConfigurationIndex.value] =
-        fakeUniversalLinkSettings(fakeIosDomains);
+    androidAppLinks[selectedAndroidVariantIndex.value] = fakeAppLinkSettings(
+      fakeAndroidDeepLinks,
+    );
+    iosLinks[selectedIosConfigurationIndex.value] = fakeUniversalLinkSettings(
+      fakeIosDomains,
+    );
 
     await super.validateLinks();
   }

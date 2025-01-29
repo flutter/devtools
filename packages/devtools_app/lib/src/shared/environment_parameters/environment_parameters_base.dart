@@ -1,12 +1,12 @@
-// Copyright 2021 The Chromium Authors. All rights reserved.
+// Copyright 2021 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
 import '../../screens/debugger/codeview.dart';
-import '../common_widgets.dart';
 import '../diagnostics/inspector_service.dart';
+import '../ui/common_widgets.dart';
 
 abstract class DevToolsEnvironmentParameters {
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions();

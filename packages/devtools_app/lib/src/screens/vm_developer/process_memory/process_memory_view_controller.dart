@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -42,11 +42,9 @@ class VMProcessMemoryViewController extends DisposableController {
     currentRoot.addChild(
       TreemapNode(
         name: 'Other',
-        byteSize: currentRoot.byteSize -
-            currentRoot.children.fold<int>(
-              0,
-              (sum, e) => sum + e.byteSize,
-            ),
+        byteSize:
+            currentRoot.byteSize -
+            currentRoot.children.fold<int>(0, (sum, e) => sum + e.byteSize),
       ),
     );
 

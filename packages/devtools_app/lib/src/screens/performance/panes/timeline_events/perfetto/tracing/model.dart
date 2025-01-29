@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
 import 'package:fixnum/fixnum.dart';
@@ -9,11 +9,12 @@ import 'package:vm_service_protos/vm_service_protos.dart';
 
 import '../../../../performance_model.dart';
 
-/// A change notifer that contains a Perfetto trace binary object [Uint8List].
+/// A change notifier that contains a Perfetto trace binary object [Uint8List].
 ///
-/// We use this custom change notifier instead of a raw
-/// ValueNotifier<Uint8List?> so that listeners are notified when the content of
-/// the [Uint8List] changes, even if the [Uint8List] object does not change.
+/// We use this custom change notifier instead of
+/// a raw `ValueNotifier<Uint8List?>` so that listeners are
+/// notified when the content of the [Uint8List] changes, even if
+/// the [Uint8List] object does not change.
 class PerfettoTrace extends ChangeNotifier {
   PerfettoTrace(Uint8List? traceBinary) : _traceBinary = traceBinary;
 
@@ -38,9 +39,10 @@ class PerfettoTrackDescriptorEvent extends _PerfettoTracePacket {
 
   final TrackDescriptor trackDescriptor;
 
-  String get name => trackDescriptor.name.isNotEmpty
-      ? trackDescriptor.name
-      : trackDescriptor.thread.threadName;
+  String get name =>
+      trackDescriptor.name.isNotEmpty
+          ? trackDescriptor.name
+          : trackDescriptor.thread.threadName;
 
   Int64 get id => trackDescriptor.uuid;
 

@@ -29,15 +29,17 @@ class HarNetworkData with Serializable {
   /// final harData = HarNetworkData.fromJson(json);
   /// ```
   factory HarNetworkData.fromJson(Map<String, Object?> json) {
-    final entries = ((json[NetworkEventKeys.log.name]
-                as Map<String, Object?>)[NetworkEventKeys.entries.name]
-            as List<Object?>)
-        .map(
-          (entryJson) =>
-              HarDataEntry.fromJson(entryJson as Map<String, Object?>)
-                  .toDartIOHttpRequest(),
-        )
-        .toList();
+    final entries =
+        ((json[NetworkEventKeys.log.name]
+                    as Map<String, Object?>)[NetworkEventKeys.entries.name]
+                as List<Object?>)
+            .map(
+              (entryJson) =>
+                  HarDataEntry.fromJson(
+                    entryJson as Map<String, Object?>,
+                  ).toDartIOHttpRequest(),
+            )
+            .toList();
 
     return HarNetworkData(entries);
   }

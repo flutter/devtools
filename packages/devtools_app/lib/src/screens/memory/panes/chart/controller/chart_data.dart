@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -9,12 +9,7 @@ import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 
 @visibleForTesting
-enum Json {
-  isDeviceAndroid,
-  timeline,
-  interval,
-  isLegendVisible;
-}
+enum Json { isDeviceAndroid, timeline, interval, isLegendVisible }
 
 /// Chart data, that should be saved when transferred to offline data mode.
 class ChartData with Serializable {
@@ -23,8 +18,8 @@ class ChartData with Serializable {
     MemoryTimeline? timeline,
     ChartInterval interval = ChartInterval.theDefault,
     bool isLegendVisible = false,
-  })  : _displayInterval = ValueNotifier<ChartInterval>(interval),
-        _isLegendVisible = ValueNotifier<bool>(isLegendVisible) {
+  }) : _displayInterval = ValueNotifier<ChartInterval>(interval),
+       _isLegendVisible = ValueNotifier<bool>(isLegendVisible) {
     this.timeline = timeline ?? MemoryTimeline();
   }
 
@@ -35,7 +30,8 @@ class ChartData with Serializable {
         json[Json.timeline.name],
         MemoryTimeline.fromJson,
       ),
-      interval: ChartInterval.byName(json[Json.interval.name]) ??
+      interval:
+          ChartInterval.byName(json[Json.interval.name]) ??
           ChartInterval.theDefault,
       isLegendVisible: json[Json.isLegendVisible.name] as bool? ?? false,
     );

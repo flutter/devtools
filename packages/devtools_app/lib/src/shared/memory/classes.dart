@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -19,10 +19,11 @@ class ObjectSetStats {
     from ??= _empty;
     subtract ??= _empty;
 
-    final result = ObjectSetStats()
-      ..instanceCount = from.instanceCount - subtract.instanceCount
-      ..shallowSize = from.shallowSize - subtract.shallowSize
-      ..retainedSize = from.retainedSize - subtract.retainedSize;
+    final result =
+        ObjectSetStats()
+          ..instanceCount = from.instanceCount - subtract.instanceCount
+          ..shallowSize = from.shallowSize - subtract.shallowSize
+          ..retainedSize = from.retainedSize - subtract.retainedSize;
 
     if (result.isZero) return null;
     return result;
@@ -111,22 +112,21 @@ class ObjectSet extends ObjectSetStats {
 }
 
 @immutable
-
 /// List of classes with filtering support.
 ///
 /// Is used to provide a list of classes to widgets.
 class ClassDataList<T extends ClassData> {
   const ClassDataList(this._originalList)
-      : _appliedFilter = null,
-        _filtered = null;
+    : _appliedFilter = null,
+      _filtered = null;
 
   const ClassDataList._filtered({
     required List<T> original,
     required ClassFilter appliedFilter,
     required List<T> filtered,
-  })  : _originalList = original,
-        _appliedFilter = appliedFilter,
-        _filtered = filtered;
+  }) : _originalList = original,
+       _appliedFilter = appliedFilter,
+       _filtered = filtered;
 
   /// The list of classes after filtering.
   List<T> get list => _filtered ?? _originalList;
@@ -135,8 +135,9 @@ class ClassDataList<T extends ClassData> {
   final ClassFilter? _appliedFilter;
   final List<T>? _filtered;
 
-  Map<HeapClassName, T> asMap() =>
-      {for (final c in _originalList) c.className: c};
+  Map<HeapClassName, T> asMap() => {
+    for (final c in _originalList) c.className: c,
+  };
 
   ClassDataList<T> filtered(ClassFilter newFilter, String? rootPackage) {
     final filtered = ClassFilter.filter(
@@ -204,15 +205,17 @@ class SingleClassData extends ClassData {
     required List<int>? retainers,
     required List<int>? retainedSizes,
   }) {
-    final path = retainers == null
-        ? null
-        : PathFromRoot.forObject(
-            graph,
-            shortestRetainers: retainers,
-            index: index,
-          );
+    final path =
+        retainers == null
+            ? null
+            : PathFromRoot.forObject(
+              graph,
+              shortestRetainers: retainers,
+              index: index,
+            );
 
-    final excludeFromRetained = path != null &&
+    final excludeFromRetained =
+        path != null &&
         retainedSizes != null &&
         path.classes.contains(className);
 
@@ -224,10 +227,7 @@ class SingleClassData extends ClassData {
     );
 
     if (path != null) {
-      byPath.putIfAbsent(
-        path,
-        () => ObjectSetStats(),
-      );
+      byPath.putIfAbsent(path, () => ObjectSetStats());
       byPath[path]!.countInstance(
         graph,
         index,

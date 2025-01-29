@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tab.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_body.dart';
@@ -72,10 +72,7 @@ class InspectorDetails extends StatelessWidget {
 }
 
 class InspectorExpandCollapseButtons extends StatefulWidget {
-  const InspectorExpandCollapseButtons({
-    super.key,
-    required this.controller,
-  });
+  const InspectorExpandCollapseButtons({super.key, required this.controller});
 
   final InspectorController controller;
 
@@ -85,7 +82,8 @@ class InspectorExpandCollapseButtons extends StatefulWidget {
 }
 
 class _InspectorExpandCollapseButtonsState
-    extends State<InspectorExpandCollapseButtons> with BlockingActionMixin {
+    extends State<InspectorExpandCollapseButtons>
+    with BlockingActionMixin {
   bool get enableButtons => !actionInProgress;
 
   @override
@@ -93,9 +91,7 @@ class _InspectorExpandCollapseButtonsState
     return Container(
       alignment: Alignment.centerRight,
       decoration: BoxDecoration(
-        border: Border(
-          left: defaultBorderSide(Theme.of(context)),
-        ),
+        border: Border(left: defaultBorderSide(Theme.of(context))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -141,10 +137,7 @@ class _InspectorExpandCollapseButtonsState
   }
 
   void _onCollapseClick() {
-    ga.select(
-      gac.inspector,
-      gac.collapseAll,
-    );
+    ga.select(gac.inspector, gac.collapseAll);
     widget.controller.collapseDetailsToSelected();
   }
 }

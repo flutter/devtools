@@ -1,8 +1,9 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -43,8 +44,9 @@ Future<void> navigateThroughDevToolsScreens(
     shouldExpect: runWithExpectations,
   );
 
-  final screens = (ScreenMetaData.values.toList()
-    ..removeWhere((data) => !visibleScreenIds.contains(data.id)));
+  final screens =
+      (ScreenMetaData.values.toList()
+        ..removeWhere((data) => !visibleScreenIds.contains(data.id)));
   for (final screen in screens) {
     await switchToScreen(
       controller,
@@ -85,11 +87,7 @@ Future<void> switchToScreen(
     icon: tabIcon,
     iconAsset: tabIconAsset,
   );
-  _maybeExpect(
-    tabFinder,
-    findsOneWidget,
-    shouldExpect: runWithExpectations,
-  );
+  _maybeExpect(tabFinder, findsOneWidget, shouldExpect: runWithExpectations);
 
   await controller.tap(tabFinder, warnIfMissed: warnIfTapMissed);
   // We use pump here instead of pumpAndSettle because pumpAndSettle will

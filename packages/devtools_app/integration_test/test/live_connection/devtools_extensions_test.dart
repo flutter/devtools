@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/embedded/view.dart';
@@ -45,30 +45,23 @@ void main() {
     );
     expect(extensionService.availableExtensions.length, 3);
     expect(extensionService.visibleExtensions.length, 3);
-    await _verifyExtensionsSettingsMenu(
-      tester,
-      [
-        ExtensionEnabledState.none, // bar
-        ExtensionEnabledState.none, // baz
-        ExtensionEnabledState.none, // foo
-      ],
-    );
+    await _verifyExtensionsSettingsMenu(tester, [
+      ExtensionEnabledState.none, // bar
+      ExtensionEnabledState.none, // baz
+      ExtensionEnabledState.none, // foo
+    ]);
 
     await connectToTestApp(tester, testApp);
 
     expect(extensionService.availableExtensions.length, 5);
     expect(extensionService.visibleExtensions.length, 5);
-    await _verifyExtensionsSettingsMenu(
-      tester,
-      [
-        ExtensionEnabledState.none, // bar
-        ExtensionEnabledState.none, // baz
-        ExtensionEnabledState.none, // foo
-        ExtensionEnabledState.none, // provider
-        ExtensionEnabledState.none, // some_tool
-      ],
-      closeMenuWhenDone: false,
-    );
+    await _verifyExtensionsSettingsMenu(tester, [
+      ExtensionEnabledState.none, // bar
+      ExtensionEnabledState.none, // baz
+      ExtensionEnabledState.none, // foo
+      ExtensionEnabledState.none, // provider
+      ExtensionEnabledState.none, // some_tool
+    ], closeMenuWhenDone: false);
 
     await _verifyExtensionVisibilitySetting(tester);
 
@@ -80,16 +73,13 @@ void main() {
       initialLoad: true,
     );
     await _answerEnableExtensionPrompt(tester, enable: true);
-    await _verifyExtensionsSettingsMenu(
-      tester,
-      [
-        ExtensionEnabledState.enabled, // bar
-        ExtensionEnabledState.none, // baz
-        ExtensionEnabledState.none, // foo
-        ExtensionEnabledState.none, // provider
-        ExtensionEnabledState.none, // some_tool
-      ],
-    );
+    await _verifyExtensionsSettingsMenu(tester, [
+      ExtensionEnabledState.enabled, // bar
+      ExtensionEnabledState.none, // baz
+      ExtensionEnabledState.none, // foo
+      ExtensionEnabledState.none, // provider
+      ExtensionEnabledState.none, // some_tool
+    ]);
 
     await _verifyContextMenuActionsAndDisable(tester);
 
@@ -100,16 +90,13 @@ void main() {
       extensionIndex: 0,
       visible: false,
     );
-    await _verifyExtensionsSettingsMenu(
-      tester,
-      [
-        ExtensionEnabledState.disabled, // bar
-        ExtensionEnabledState.none, // baz
-        ExtensionEnabledState.none, // foo
-        ExtensionEnabledState.none, // provider
-        ExtensionEnabledState.none, // some_tool
-      ],
-    );
+    await _verifyExtensionsSettingsMenu(tester, [
+      ExtensionEnabledState.disabled, // bar
+      ExtensionEnabledState.none, // baz
+      ExtensionEnabledState.none, // foo
+      ExtensionEnabledState.none, // provider
+      ExtensionEnabledState.none, // some_tool
+    ]);
 
     // Baz extension. Hide immediately.
     await _switchToExtensionScreen(
@@ -126,16 +113,13 @@ void main() {
       extensionIndex: 1,
       visible: false,
     );
-    await _verifyExtensionsSettingsMenu(
-      tester,
-      [
-        ExtensionEnabledState.disabled, // bar
-        ExtensionEnabledState.disabled, // baz
-        ExtensionEnabledState.none, // foo
-        ExtensionEnabledState.none, // provider
-        ExtensionEnabledState.none, // some_tool
-      ],
-    );
+    await _verifyExtensionsSettingsMenu(tester, [
+      ExtensionEnabledState.disabled, // bar
+      ExtensionEnabledState.disabled, // baz
+      ExtensionEnabledState.none, // foo
+      ExtensionEnabledState.none, // provider
+      ExtensionEnabledState.none, // some_tool
+    ]);
 
     // Re-enable Baz extension from the extensions settings menu.
     logStatus('verify we can re-enable an extension from the settings menu');
@@ -147,16 +131,13 @@ void main() {
     expect(find.byType(EnableExtensionPrompt), findsNothing);
     expect(find.byType(EmbeddedExtensionView), findsOneWidget);
     expect(find.byType(HtmlElementView), findsOneWidget);
-    await _verifyExtensionsSettingsMenu(
-      tester,
-      [
-        ExtensionEnabledState.disabled, // bar
-        ExtensionEnabledState.enabled, // baz
-        ExtensionEnabledState.none, // foo
-        ExtensionEnabledState.none, // provider
-        ExtensionEnabledState.none, // some_tool
-      ],
-    );
+    await _verifyExtensionsSettingsMenu(tester, [
+      ExtensionEnabledState.disabled, // bar
+      ExtensionEnabledState.enabled, // baz
+      ExtensionEnabledState.none, // foo
+      ExtensionEnabledState.none, // provider
+      ExtensionEnabledState.none, // some_tool
+    ]);
 
     // Foo extension. Disable directly from settings menu.
     logStatus(
@@ -177,16 +158,13 @@ void main() {
       extensionIndex: 2,
       visible: false,
     );
-    await _verifyExtensionsSettingsMenu(
-      tester,
-      [
-        ExtensionEnabledState.disabled, // bar
-        ExtensionEnabledState.enabled, // baz
-        ExtensionEnabledState.disabled, // foo
-        ExtensionEnabledState.none, // provider
-        ExtensionEnabledState.none, // some_tool
-      ],
-    );
+    await _verifyExtensionsSettingsMenu(tester, [
+      ExtensionEnabledState.disabled, // bar
+      ExtensionEnabledState.enabled, // baz
+      ExtensionEnabledState.disabled, // foo
+      ExtensionEnabledState.none, // provider
+      ExtensionEnabledState.none, // some_tool
+    ]);
   });
 }
 
@@ -251,10 +229,7 @@ Future<void> _answerEnableExtensionPrompt(
     find.byType(EmbeddedExtensionView),
     enable ? findsOneWidget : findsNothing,
   );
-  expect(
-    find.byType(HtmlElementView),
-    enable ? findsOneWidget : findsNothing,
-  );
+  expect(find.byType(HtmlElementView), enable ? findsOneWidget : findsNothing);
 }
 
 Future<void> _verifyContextMenuActionsAndDisable(WidgetTester tester) async {
@@ -293,10 +268,11 @@ Future<void> _verifyExtensionsSettingsMenu(
   await _openExtensionSettingsMenu(tester);
 
   expect(find.byType(ExtensionSetting), findsNWidgets(enabledStates.length));
-  final toggleButtonGroups = tester
-      .widgetList(find.byType(DevToolsToggleButtonGroup))
-      .cast<DevToolsToggleButtonGroup>()
-      .toList();
+  final toggleButtonGroups =
+      tester
+          .widgetList(find.byType(DevToolsToggleButtonGroup))
+          .cast<DevToolsToggleButtonGroup>()
+          .toList();
   for (int i = 0; i < toggleButtonGroups.length; i++) {
     logStatus('verify extension settings toggle button states (index $i)');
     final group = toggleButtonGroups[i];
@@ -337,10 +313,11 @@ Future<void> _changeExtensionSetting(
     'changing the extension setting at index $extensionIndex to value $settingValue',
   );
   await _openExtensionSettingsMenu(tester);
-  final extensionSetting = tester
-      .widgetList(find.byType(DevToolsToggleButtonGroup))
-      .cast<DevToolsToggleButtonGroup>()
-      .toList()[extensionIndex];
+  final extensionSetting =
+      tester
+          .widgetList(find.byType(DevToolsToggleButtonGroup))
+          .cast<DevToolsToggleButtonGroup>()
+          .toList()[extensionIndex];
   await tester.tap(
     find.descendant(
       of: find.byWidget(extensionSetting),

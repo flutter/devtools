@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be found
-// in the LICENSE file.
+// Copyright 2020 The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -45,9 +45,11 @@ final class IdeTheme {
 }
 
 extension type IdeThemeQueryParams(Map<String, String?> params) {
-  Color? get backgroundColor => tryParseColor(params[backgroundColorKey], logger: _log);
+  Color? get backgroundColor =>
+      tryParseColor(params[backgroundColorKey], logger: _log);
 
-  Color? get foregroundColor => tryParseColor(params[foregroundColorKey], logger: _log);
+  Color? get foregroundColor =>
+      tryParseColor(params[foregroundColorKey], logger: _log);
 
   double get fontSize =>
       _tryParseDouble(params[fontSizeKey]) ?? unscaledDefaultFontSize;

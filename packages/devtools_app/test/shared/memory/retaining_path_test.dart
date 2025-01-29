@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app/src/shared/memory/retaining_path.dart';
@@ -33,28 +33,23 @@ void main() {
     final classB = HeapClassName.fromPath(className: 'B', library: 'l');
     final classC = HeapClassName.fromPath(className: 'C', library: 'l');
 
-    final graph = FakeHeapSnapshotGraph()
-      ..setObjects(
-        {
-          1: [2],
-          2: [3],
-          3: [4],
-          4: [],
-        },
-        classes: {
-          1: root,
-          2: classA,
-          3: classB,
-          4: classC,
-        },
-      );
+    final graph =
+        FakeHeapSnapshotGraph()..setObjects(
+          {
+            1: [2],
+            2: [3],
+            3: [4],
+            4: [],
+          },
+          classes: {1: root, 2: classA, 3: classB, 4: classC},
+        );
     const shortestRetainers = [0, 0, 1, 2, 3];
 
     PathFromRoot objectPath(int index) => PathFromRoot.forObject(
-          graph,
-          shortestRetainers: shortestRetainers,
-          index: index,
-        );
+      graph,
+      shortestRetainers: shortestRetainers,
+      index: index,
+    );
 
     test('directly to root', () {
       final path = objectPath(2);

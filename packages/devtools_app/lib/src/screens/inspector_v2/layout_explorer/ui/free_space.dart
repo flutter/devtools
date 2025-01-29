@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +12,7 @@ import 'dimension.dart';
 import 'theme.dart';
 
 class FreeSpaceVisualizerWidget extends StatelessWidget {
-  const FreeSpaceVisualizerWidget(
-    this.renderProperties, {
-    super.key,
-  });
+  const FreeSpaceVisualizerWidget(this.renderProperties, {super.key});
 
   final RenderProperties renderProperties;
 
@@ -32,9 +29,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
       children: [
         Flexible(
           child: dimensionDescription(
-            TextSpan(
-              text: widthDescription,
-            ),
+            TextSpan(text: widthDescription),
             false,
             colorScheme,
           ),
@@ -108,9 +103,7 @@ class PaddingVisualizerWidget extends StatelessWidget {
       children: [
         Flexible(
           child: dimensionDescription(
-            TextSpan(
-              text: widthDescription,
-            ),
+            TextSpan(text: widthDescription),
             false,
             colorScheme,
           ),

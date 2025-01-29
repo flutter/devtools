@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/src/shared/primitives/graph.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -69,10 +69,11 @@ void main() {
     test('predecessor and successor edge counts are accurate', () {
       expect(testNodeA.predecessorEdgeCounts.keys, isEmpty);
       expect(testNodeA.predecessorEdgeCounts.values, isEmpty);
-      expect(
-        testNodeA.successorEdgeCounts.keys,
-        [testNodeB, testNodeC, testNodeD],
-      );
+      expect(testNodeA.successorEdgeCounts.keys, [
+        testNodeB,
+        testNodeC,
+        testNodeD,
+      ]);
       expect(testNodeA.successorEdgeCounts.values, [2, 3, 1]);
 
       expect(testNodeB.predecessorEdgeCounts.keys, [testNodeA, testNodeF]);

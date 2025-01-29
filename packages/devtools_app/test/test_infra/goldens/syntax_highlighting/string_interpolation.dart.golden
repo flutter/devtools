@@ -1,9 +1,9 @@
->// Copyright 2022 The Chromium Authors. All rights reserved.
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// Copyright 2022 The Flutter Authors
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
 >// Use of this source code is governed by a BSD-style license that can be
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
->// found in the LICENSE file.
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
 >
 >void values() {
 #^^^^ storage.type.primitive.dart
@@ -59,30 +59,36 @@
 >void functions() {
 #^^^^ storage.type.primitive.dart
 #     ^^^^^^^^^ entity.name.function.dart
->  print('${() {
+>  print(
 #  ^^^^^ entity.name.function.dart
-#        ^ string.interpolated.single.dart
-#         ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
->    return 'Hello';
-#^^^^ string.interpolated.single.dart string.interpolated.expression.dart
-#    ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
-#          ^^^^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
->  }}');
-#^^^ string.interpolated.single.dart string.interpolated.expression.dart
-#   ^^ string.interpolated.single.dart
-#      ^ punctuation.terminator.dart
->  print('print(${() {
+>    '${() {
+#    ^ string.interpolated.single.dart
+#     ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+>      return 'Hello';
+#^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+#      ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
+#            ^^^^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+>    }}',
+#^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+#     ^^ string.interpolated.single.dart
+#       ^ punctuation.comma.dart
+>  );
+#   ^ punctuation.terminator.dart
+>  print(
 #  ^^^^^ entity.name.function.dart
-#        ^^^^^^^ string.interpolated.single.dart
-#               ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
->    return 'Hello';
-#^^^^ string.interpolated.single.dart string.interpolated.expression.dart
-#    ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
-#          ^^^^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
->  }()})');
-#^^^ string.interpolated.single.dart string.interpolated.expression.dart
-#   ^^^^^ string.interpolated.single.dart
-#         ^ punctuation.terminator.dart
+>    'print(${() {
+#    ^^^^^^^ string.interpolated.single.dart
+#           ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+>      return 'Hello';
+#^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+#      ^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
+#            ^^^^^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+>    }()})',
+#^^^^^ string.interpolated.single.dart string.interpolated.expression.dart
+#     ^^^^^ string.interpolated.single.dart
+#          ^ punctuation.comma.dart
+>  );
+#   ^ punctuation.terminator.dart
 >  print('${() => 'Hello'}');
 #  ^^^^^ entity.name.function.dart
 #        ^ string.interpolated.single.dart

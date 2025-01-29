@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
@@ -191,9 +191,11 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
         selectedColor: selectedColor,
         borderColor: borderColor,
         textStyle: theme.textTheme.bodyMedium,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         constraints: BoxConstraints(
           minWidth: defaultButtonHeight,
           minHeight: defaultButtonHeight,
+          maxHeight: defaultButtonHeight,
         ),
         isSelected: selectedStates,
         onPressed: onPressed,
@@ -349,6 +351,8 @@ final class _ButtonGroupButton extends StatelessWidget {
         child: MaterialIconLabel(
           label: buttonData.label,
           iconData: buttonData.icon,
+          iconAsset: buttonData.iconAsset,
+          iconSize: buttonData.iconSize,
           minScreenWidthForTextBeforeScaling:
               minScreenWidthForTextBeforeScaling,
         ),
@@ -361,14 +365,25 @@ final class ButtonGroupItemData {
   const ButtonGroupItemData({
     this.label,
     this.icon,
+    this.iconAsset,
+    this.iconSize,
     String? tooltip,
     this.onPressed,
     this.autofocus = false,
   })  : tooltip = tooltip ?? label,
-        assert(label != null || icon != null);
+        assert(
+          label != null || icon != null || iconAsset != null,
+          'At least one of icon, iconAsset, or label must be specified.',
+        ),
+        assert(
+          icon == null || iconAsset == null,
+          'Only one of icon and iconAsset may be specified.',
+        );
 
   final String? label;
   final IconData? icon;
+  final String? iconAsset;
+  final double? iconSize;
   final String? tooltip;
   final VoidCallback? onPressed;
   final bool autofocus;

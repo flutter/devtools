@@ -1,6 +1,6 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be found
-// in the LICENSE file.
+// Copyright 2017 The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// Platform independent definition of icons.
 ///
@@ -77,18 +77,12 @@ class CircleIcon extends StatelessWidget {
     return Container(
       width: defaultIconSize,
       height: defaultIconSize,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       alignment: Alignment.center,
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: scaleByFontFactor(9.0),
-          color: textColor,
-        ),
+        style: TextStyle(fontSize: scaleByFontFactor(9.0), color: textColor),
       ),
     );
   }
@@ -154,7 +148,7 @@ class CustomIconMaker {
 
 class IconKind {
   const IconKind(this.name, this.icon, [AssetImageIcon? abstractIcon])
-      : abstractIcon = abstractIcon ?? icon;
+    : abstractIcon = abstractIcon ?? icon;
 
   static IconKind classIcon = const IconKind(
     'class',
@@ -258,10 +252,7 @@ class _ColorIconPainter extends CustomPainter {
         ),
         greyPaint,
       )
-      ..drawRect(
-        iconRect,
-        Paint()..color = color,
-      )
+      ..drawRect(iconRect, Paint()..color = color)
       ..drawRect(
         iconRect,
         Paint()
@@ -290,36 +281,6 @@ class FlutterMaterialIcons {
   }
 }
 
-class AssetImageIcon extends StatelessWidget {
-  const AssetImageIcon({
-    super.key,
-    required this.asset,
-    this.color,
-    double? height,
-    double? width,
-  })  : _width = width,
-        _height = height;
-
-  final String asset;
-  final Color? color;
-  final double? _height;
-  final double? _width;
-
-  double get width => _width ?? defaultIconSize;
-  double get height => _height ?? defaultIconSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return Image(
-      image: AssetImage(asset),
-      height: height,
-      width: width,
-      fit: BoxFit.fill,
-      color: color ?? Theme.of(context).colorScheme.onSurface,
-    );
-  }
-}
-
 class Octicons {
   static const bug = IconData(61714, fontFamily: 'Octicons');
   static const info = IconData(61778, fontFamily: 'Octicons');
@@ -329,51 +290,4 @@ class Octicons {
   static const package = IconData(61812, fontFamily: 'Octicons');
   static const dashboard = IconData(61733, fontFamily: 'Octicons');
   static const pulse = IconData(61823, fontFamily: 'Octicons');
-}
-
-/// A widget that renders either an [icon] from a font glyph or an [iconAsset]
-/// from the app bundle.
-class DevToolsIcon extends StatelessWidget {
-  DevToolsIcon({
-    super.key,
-    this.icon,
-    this.iconAsset,
-    this.color,
-    double? size,
-  })  : assert(
-          (icon == null) != (iconAsset == null),
-          'Exactly one of icon and iconAsset must be specified.',
-        ),
-        size = size ?? defaultIconSize;
-
-  /// The icon to use for this screen's tab.
-  ///
-  /// Exactly one of [icon] and [iconAsset] must be non-null.
-  final IconData? icon;
-
-  /// The icon asset path to render as the icon for this screen's tab.
-  ///
-  /// Exactly one of [icon] and [iconAsset] must be non-null.
-  final String? iconAsset;
-
-  final double size;
-
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = this.color ?? Theme.of(context).colorScheme.onSurface;
-    return icon != null
-        ? Icon(
-            icon,
-            size: size,
-            color: color,
-          )
-        : AssetImageIcon(
-            asset: iconAsset!,
-            height: size,
-            width: size,
-            color: color,
-          );
-  }
 }

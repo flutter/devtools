@@ -1,13 +1,13 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 import '../controller/diff_pane_controller.dart';
 import '../data/classes_diff.dart';
 import 'class_details/class_details.dart';
@@ -26,7 +26,7 @@ class SnapshotView extends StatelessWidget {
         controller.derived.singleClassesToShow,
         controller.derived.diffClassesToShow,
       ],
-      builder: (_, values, __) {
+      builder: (_, values, _) {
         final singleClasses = values.first as ClassDataList<SingleClassData>?;
         final diffClasses = values.second as ClassDataList<DiffClassData>?;
         if (controller.derived.updatingValues) {
@@ -58,12 +58,13 @@ class SnapshotView extends StatelessWidget {
 
         final pathTable = ValueListenableBuilder<ClassData?>(
           valueListenable: controller.derived.classData,
-          builder: (_, classData, __) => HeapClassDetails(
-            classData: classData,
-            pathSelection: controller.derived.selectedPath,
-            isDiff: classes is ClassDataList<DiffClassData>,
-            pathController: controller.retainingPathController,
-          ),
+          builder:
+              (_, classData, _) => HeapClassDetails(
+                classData: classData,
+                pathSelection: controller.derived.selectedPath,
+                isDiff: classes is ClassDataList<DiffClassData>,
+                pathController: controller.retainingPathController,
+              ),
         );
 
         return SplitPane(
@@ -71,12 +72,8 @@ class SnapshotView extends StatelessWidget {
           initialFractions: const [0.4, 0.6],
           minSizes: const [80, 80],
           children: [
-            OutlineDecoration.onlyBottom(
-              child: classTable,
-            ),
-            OutlineDecoration.onlyTop(
-              child: pathTable,
-            ),
+            OutlineDecoration.onlyBottom(child: classTable),
+            OutlineDecoration.onlyTop(child: pathTable),
           ],
         );
       },

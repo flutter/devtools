@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
+import '../../../shared/framework/screen.dart';
 import '../../../shared/primitives/listenable.dart';
-import '../../../shared/screen.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
 import '../panes/diff/diff_pane.dart';
 import 'screen_body.dart';
@@ -97,9 +97,7 @@ class _DisconnectedMemoryScreenBodyState
             roundedTopBorder: false,
             includeTopBorder: false,
           ),
-          Expanded(
-            child: DiffPane(diffController: diffController),
-          ),
+          Expanded(child: DiffPane(diffController: diffController)),
         ],
       ),
     );

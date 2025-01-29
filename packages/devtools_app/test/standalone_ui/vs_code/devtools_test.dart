@@ -1,10 +1,10 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/service/editor/api_classes.dart';
 import 'package:devtools_app/src/shared/development_helpers.dart';
+import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/devtools/devtools_view.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -74,16 +74,17 @@ void main() {
 
   group('$DevToolsSidebarOptions', () {
     for (final hasDebugSessions in [true, false]) {
-      final debugSessions = hasDebugSessions
-          ? {
-              'test session': generateDebugSession(
-                debuggerType: 'Flutter',
-                deviceId: 'macos',
-                flutterMode: 'debug',
-                projectRootPath: testDtdProjectRoot,
-              ),
-            }
-          : <String, EditorDebugSession>{};
+      final debugSessions =
+          hasDebugSessions
+              ? {
+                'test session': generateDebugSession(
+                  debuggerType: 'Flutter',
+                  deviceId: 'macos',
+                  flutterMode: 'debug',
+                  projectRootPath: testDtdProjectRoot,
+                ),
+              }
+              : <String, EditorDebugSession>{};
 
       testWidgetsWithWindowSize(
         'pumps DevTools screens ${hasDebugSessions ? 'with' : 'without'} debug '
@@ -128,38 +129,33 @@ void main() {
         },
       );
 
-      testWidgetsWithWindowSize(
-        'includes DevTools extensions',
-        windowSize,
-        (tester) async {
-          await pumpDevToolsSidebarOptions(
-            tester,
-            debugSessions: debugSessions,
-          );
-          expect(find.text('DevTools Extensions'), findsOneWidget);
+      testWidgetsWithWindowSize('includes DevTools extensions', windowSize, (
+        tester,
+      ) async {
+        await pumpDevToolsSidebarOptions(tester, debugSessions: debugSessions);
+        expect(find.text('DevTools Extensions'), findsOneWidget);
 
-          final expectedExtensions = [
-            StubDevToolsExtensions.barExtension,
-            StubDevToolsExtensions.bazExtension,
-            StubDevToolsExtensions.duplicateFooExtension,
-          ];
-          for (final ext in expectedExtensions) {
-            expect(find.text(ext.displayName), findsOneWidget);
-            final buttonFinder = find.ancestor(
-              of: find.text(ext.displayName),
-              matching: find.byType(InkWell),
-            );
-            expect(buttonFinder, findsOneWidget);
-            final buttonWidget = tester.widget<InkWell>(buttonFinder);
-            expect(
-              buttonWidget.onTap,
-              hasDebugSessions
-                  ? isNotNull
-                  : (ext.requiresConnection ? isNull : isNotNull),
-            );
-          }
-        },
-      );
+        final expectedExtensions = [
+          StubDevToolsExtensions.barExtension,
+          StubDevToolsExtensions.bazExtension,
+          StubDevToolsExtensions.duplicateFooExtension,
+        ];
+        for (final ext in expectedExtensions) {
+          expect(find.text(ext.displayName), findsOneWidget);
+          final buttonFinder = find.ancestor(
+            of: find.text(ext.displayName),
+            matching: find.byType(InkWell),
+          );
+          expect(buttonFinder, findsOneWidget);
+          final buttonWidget = tester.widget<InkWell>(buttonFinder);
+          expect(
+            buttonWidget.onTap,
+            hasDebugSessions
+                ? isNotNull
+                : (ext.requiresConnection ? isNull : isNotNull),
+          );
+        }
+      });
     }
   });
 }

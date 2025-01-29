@@ -1,19 +1,22 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
 import 'common.dart';
 
 class About extends StatefulWidget {
+  // ignore: prefer_const_constructors_in_immutables, intentional example code.
+  About({super.key});
+
   @override
   State<About> createState() => AboutState();
 }
 
 class AboutState extends State<About> {
-  static const String heading = '$aboutMenu\n\n';
-  static const String helpText = '''
+  static const heading = '$aboutMenu\n\n';
+  static const helpText = '''
 This application makes Restful HTTP GET
 requests to three different Restful servers.
 Selecting a request e.g., Weather will
@@ -23,13 +26,13 @@ page to select another Restful request.
 
 The menu, on the main page, has options:
 ''';
-  static const String logOption = '\n    $logMenu';
-  static const String aboutOption = '\n    $aboutMenu';
+  static const logOption = '\n    $logMenu';
+  static const aboutOption = '\n    $aboutMenu';
 
-  static const String logDescr = ' display all messages.';
-  static const String aboutDescr = ' display this page.';
+  static const logDescr = ' display all messages.';
+  static const aboutDescr = ' display this page.';
 
-  final TextStyle defaultStyle = const TextStyle(
+  final defaultStyle = const TextStyle(
     fontSize: 20,
     color: Colors.blueGrey,
   );

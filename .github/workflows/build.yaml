@@ -65,7 +65,7 @@ jobs:
           wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
           echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
           sudo apt-get update
-          sudo apt-get install dcm=1.22.0-1 # To avoid errors add `-1` (build number) to the version
+          sudo apt-get install dcm=1.24.2-1 # To avoid errors add `-1` (build number) to the version
           sudo chmod +x /usr/bin/dcm
           echo "$(dcm --version)"
       - name: Setup Dart SDK
@@ -98,6 +98,24 @@ jobs:
         env:
           PACKAGE: ${{ matrix.package }}
         run: ./tool/ci/package_tests.sh
+
+  test-tool:
+    name: Tool test
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: git clone
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/ci/tool_tests.sh
+        run: ./tool/ci/tool_tests.sh
 
   test:
     name: ${{ matrix.bot }}
@@ -155,7 +173,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
@@ -165,7 +183,7 @@ jobs:
         env:
           WORKFLOW_ID: ${{ github.run_id }}
         run: |
-          echo "::notice title=To Quickly Fix Goldens:: Run \`devtools_tool fix-goldens --run-id=$WORKFLOW_ID\` on your local branch."
+          echo "::notice title=To Quickly Fix Goldens:: Run \`dt fix-goldens --run-id=$WORKFLOW_ID\` on your local branch."
 
   devtools-app-integration-test:
     name: devtools_app integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
@@ -226,7 +244,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
@@ -259,7 +277,7 @@ jobs:
   benchmark-performance:
     name: benchmark-performance
     needs: flutter-prep
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       fail-fast: false
     steps:

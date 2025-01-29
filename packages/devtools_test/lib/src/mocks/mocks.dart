@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -101,14 +101,12 @@ class TestInspectorV2Controller extends Fake
 
   @override
   ValueListenable<inspector_v2.WidgetTreeNodeProperties>
-      get selectedNodeProperties =>
-          ValueNotifier<inspector_v2.WidgetTreeNodeProperties>(
-            (
-              widgetProperties: [],
-              renderProperties: [],
-              layoutProperties: null,
-            ),
-          );
+  get selectedNodeProperties =>
+      ValueNotifier<inspector_v2.WidgetTreeNodeProperties>((
+        widgetProperties: [],
+        renderProperties: [],
+        layoutProperties: null,
+      ));
 
   @override
   void setSelectedNode(inspector_v2.InspectorTreeNode? newSelection) {
@@ -127,10 +125,7 @@ class FakeVM extends Fake implements VM {
   FakeVM();
 
   @override
-  Map<String, dynamic>? json = {
-    '_FAKE_VM': true,
-    '_currentRSS': 0,
-  };
+  Map<String, dynamic>? json = {'_FAKE_VM': true, '_currentRSS': 0};
 }
 
 class TestCodeViewController extends CodeViewController {
@@ -161,8 +156,9 @@ void mockConnectedApp(
   // Flutter app.
   when(connectedApp.isFlutterAppNow).thenReturn(isFlutterApp);
   when(connectedApp.isFlutterApp).thenAnswer((_) => Future.value(isFlutterApp));
-  when(connectedApp.isFlutterNativeAppNow)
-      .thenReturn(isFlutterApp && !isWebApp);
+  when(
+    connectedApp.isFlutterNativeAppNow,
+  ).thenReturn(isFlutterApp && !isWebApp);
   if (isFlutterApp) {
     when(connectedApp.flutterVersionNow).thenReturn(
       FlutterVersion.parse({
@@ -195,11 +191,13 @@ void mockConnectedApp(
   when(connectedApp.isDartCliAppNow).thenReturn(isCliApp);
 
   // Run mode.
-  when(connectedApp.isProfileBuild)
-      .thenAnswer((_) => Future.value(isProfileBuild));
+  when(
+    connectedApp.isProfileBuild,
+  ).thenAnswer((_) => Future.value(isProfileBuild));
   when(connectedApp.isProfileBuildNow).thenReturn(isProfileBuild);
-  when(connectedApp.isDebugFlutterAppNow)
-      .thenReturn(isFlutterApp && !isProfileBuild);
+  when(
+    connectedApp.isDebugFlutterAppNow,
+  ).thenReturn(isFlutterApp && !isProfileBuild);
 
   // Operating system.
   when(connectedApp.operatingSystem).thenReturn(os);
@@ -209,22 +207,16 @@ void mockConnectedApp(
   when(connectedApp.initialized).thenReturn(Completer()..complete(true));
 }
 
-void mockFlutterVersion(
-  ConnectedApp connectedApp,
-  SemanticVersion version,
-) {
-  when(connectedApp.flutterVersionNow).thenReturn(
-    FlutterVersion.parse({
-      'frameworkVersion': '$version',
-    }),
-  );
+void mockFlutterVersion(ConnectedApp connectedApp, SemanticVersion version) {
+  when(
+    connectedApp.flutterVersionNow,
+  ).thenReturn(FlutterVersion.parse({'frameworkVersion': '$version'}));
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
 // ignore: prefer_single_quotes, false positive.
 final mockGrammar = Grammar.fromJson(
-  jsonDecode(
-    '''
+  jsonDecode('''
 {
   "name": "Dart",
   "fileTypes": [
@@ -234,8 +226,7 @@ final mockGrammar = Grammar.fromJson(
   "patterns": [],
   "repository": {}
 }
-''',
-  ),
+'''),
 );
 
 final mockScriptRef = ScriptRef(
@@ -272,48 +263,17 @@ final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
   source: mockScript!.source,
 );
 
-const coverageHitLines = <int>{
-  1,
-  3,
-  4,
-  7,
-};
+const coverageHitLines = <int>{1, 3, 4, 7};
 
-const coverageMissLines = <int>{
-  2,
-  5,
-};
+const coverageMissLines = <int>{2, 5};
 
-const executableLines = <int>{
-  ...coverageHitLines,
-  ...coverageMissLines,
-};
+const executableLines = <int>{...coverageHitLines, ...coverageMissLines};
 
 const profilerEntries = <int, ProfileReportEntry>{
-  1: ProfileReportEntry(
-    sampleCount: 5,
-    line: 1,
-    inclusive: 2,
-    exclusive: 2,
-  ),
-  3: ProfileReportEntry(
-    sampleCount: 5,
-    line: 3,
-    inclusive: 1,
-    exclusive: 1,
-  ),
-  4: ProfileReportEntry(
-    sampleCount: 5,
-    line: 4,
-    inclusive: 1,
-    exclusive: 1,
-  ),
-  7: ProfileReportEntry(
-    sampleCount: 5,
-    line: 7,
-    inclusive: 1,
-    exclusive: 1,
-  ),
+  1: ProfileReportEntry(sampleCount: 5, line: 1, inclusive: 2, exclusive: 2),
+  3: ProfileReportEntry(sampleCount: 5, line: 3, inclusive: 1, exclusive: 1),
+  4: ProfileReportEntry(sampleCount: 5, line: 4, inclusive: 1, exclusive: 1),
+  7: ProfileReportEntry(sampleCount: 5, line: 7, inclusive: 1, exclusive: 1),
 };
 
 final mockParsedScript = ParsedScript(

@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -26,7 +26,7 @@ class _Colors {
 
 class VMChartController extends ChartController {
   VMChartController(this.memoryTimeline, {required this.paused})
-      : super(name: 'VM Memory') {
+    : super(name: 'VM Memory') {
     setupData();
 
     addAutoDisposeListener(memoryTimeline.sampleAdded, () {
@@ -45,10 +45,7 @@ class VMChartController extends ChartController {
     final chartDataLength = timestampsLength;
     final dataLength = memoryTimeline.data.length;
 
-    final dataRange = memoryTimeline.data.getRange(
-      chartDataLength,
-      dataLength,
-    );
+    final dataRange = memoryTimeline.data.getRange(chartDataLength, dataLength);
 
     dataRange.forEach(addSample);
   }
@@ -109,9 +106,7 @@ class VMChartController extends ChartController {
       );
 
       final usedIndex = VmTraceName.used.index;
-      assert(
-        trace(usedIndex).name == VmTraceName.values[usedIndex].toString(),
-      );
+      assert(trace(usedIndex).name == VmTraceName.values[usedIndex].toString());
 
       final capacityIndex = VmTraceName.capacity.index;
       assert(
@@ -120,9 +115,7 @@ class VMChartController extends ChartController {
       );
 
       final rSSIndex = VmTraceName.rSS.index;
-      assert(
-        trace(rSSIndex).name == VmTraceName.values[rSSIndex].toString(),
-      );
+      assert(trace(rSSIndex).name == VmTraceName.values[rSSIndex].toString());
 
       final rasterLayerIndex = VmTraceName.rasterLayer.index;
       assert(
@@ -166,9 +159,7 @@ class VMChartController extends ChartController {
       name: VmTraceName.used.toString(),
     );
     assert(usedIndex == VmTraceName.used.index);
-    assert(
-      trace(usedIndex).name == VmTraceName.values[usedIndex].toString(),
-    );
+    assert(trace(usedIndex).name == VmTraceName.values[usedIndex].toString());
 
     // Heap Capacity
     final capacityIndex = createTrace(
@@ -196,9 +187,7 @@ class VMChartController extends ChartController {
       name: VmTraceName.rSS.toString(),
     );
     assert(rSSIndex == VmTraceName.rSS.index);
-    assert(
-      trace(rSSIndex).name == VmTraceName.values[rSSIndex].toString(),
-    );
+    assert(trace(rSSIndex).name == VmTraceName.values[rSSIndex].toString());
 
     final rasterLayerIndex = createTrace(
       chart_trace.ChartType.line,

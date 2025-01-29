@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:collection';
 import 'dart:math';
@@ -72,8 +72,10 @@ String printBytes(
     // TODO(peterdjlee): Round up to the respective digit when fractionDigits > 0.
     bytes = fractionDigits == 0 ? bytes + 511 : bytes;
   }
-  final bytesDisplay =
-      convertBytes(bytes, to: unit).toStringAsFixed(fractionDigits);
+  final bytesDisplay = convertBytes(
+    bytes,
+    to: unit,
+  ).toStringAsFixed(fractionDigits);
   final unitSuffix = includeUnit ? ' ${unit.display}' : '';
   return '$bytesDisplay$unitSuffix';
 }
@@ -106,7 +108,7 @@ enum ByteUnit {
   gb(multiplierCount: 3);
 
   const ByteUnit({required this.multiplierCount, String? display})
-      : _display = display;
+    : _display = display;
 
   static const unitMultiplier = 1024.0;
 

@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // Do not delete these arguments. They are parsed by test runner.
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
@@ -86,17 +86,11 @@ Future<void> _inboundReferencesAreListed(EvalTester tester) async {
     find.textContaining('MyApp, retained size '),
     next: find.text('references'),
   );
-  next = await tester.tapAndPump(
-    next!,
-    next: find.textContaining('static ('),
-  );
+  next = await tester.tapAndPump(next!, next: find.textContaining('static ('));
   next = await tester.tapAndPump(
     next!,
     description: 'text containing "static ("',
     next: find.text('inbound'),
   );
-  next = await tester.tapAndPump(
-    next!,
-    next: find.text('View'),
-  );
+  next = await tester.tapAndPump(next!, next: find.text('View'));
 }

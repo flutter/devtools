@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // TODO(https://github.com/flutter/devtools/issues/4717): migrate away from
 // deprecated members.
@@ -16,7 +16,7 @@ import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/tree_builder.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
-import '../../shared/tree.dart';
+import '../../shared/ui/tree_view.dart';
 
 class Variables extends StatelessWidget {
   const Variables({super.key});
@@ -36,18 +36,15 @@ class Variables extends StatelessWidget {
     } else {
       return TreeView<DartObjectNode>(
         dataRootsListenable: serviceConnection.appState.variables,
-        dataDisplayProvider: (variable, onPressed) => DisplayProvider(
-          variable: variable,
-          onTap: onPressed,
-        ),
+        dataDisplayProvider:
+            (variable, onPressed) =>
+                DisplayProvider(variable: variable, onTap: onPressed),
         onItemSelected: onItemPressed,
       );
     }
   }
 
-  Future<void> onDapItemExpanded(
-    DapObjectNode node,
-  ) async {
+  Future<void> onDapItemExpanded(DapObjectNode node) async {
     if (node.isExpanded) {
       for (final child in node.children) {
         await child.fetchChildren();
@@ -55,9 +52,7 @@ class Variables extends StatelessWidget {
     }
   }
 
-  Future<void> onItemPressed(
-    DartObjectNode v,
-  ) async {
+  Future<void> onItemPressed(DartObjectNode v) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
       await Future.wait(v.children.map(buildVariablesTree));

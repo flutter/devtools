@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -15,17 +15,11 @@ import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
 @visibleForTesting
-enum Json {
-  profile,
-  rootPackage;
-}
+enum Json { profile, rootPackage }
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
-  ProfilePaneController({
-    required this.rootPackage,
-    AdaptedProfile? profile,
-  }) {
+  ProfilePaneController({required this.rootPackage, AdaptedProfile? profile}) {
     // [profile] should only be non-null when loading offline data.
     if (profile != null) {
       _currentAllocationProfile.value = AdaptedProfile.withNewFilter(

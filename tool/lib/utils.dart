@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -11,7 +11,8 @@ import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
 abstract class DartSdkHelper {
-  static const commandDebugMessage = 'Consider running this command from your'
+  static const commandDebugMessage =
+      'Consider running this command from your'
       'Dart SDK directory locally to debug.';
 
   static Future<void> fetchAndCheckoutMaster(
@@ -33,9 +34,11 @@ abstract class DartSdkHelper {
 String localDartSdkLocation() {
   final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
   if (localDartSdkLocation == null) {
-    throw Exception('LOCAL_DART_SDK environment variable not set. Please add '
-        'the following to your \'.bash_profile\' or \'.bash_rc\' file:\n'
-        'export LOCAL_DART_SDK=<absolute/path/to/my/dart/sdk>');
+    throw Exception(
+      'LOCAL_DART_SDK environment variable not set. Please add '
+      'the following to your \'.bash_profile\' or \'.bash_rc\' file:\n'
+      'export LOCAL_DART_SDK=<absolute/path/to/my/dart/sdk>',
+    );
   }
   return localDartSdkLocation;
 }
@@ -74,28 +77,18 @@ class CliCommand {
   }
 
   /// CliCommand helper for running git commands.
-  factory CliCommand.git(
-    List<String> args, {
-    bool throwOnException = true,
-  }) {
-    return CliCommand(
-      'git',
-      args,
-      throwOnException: throwOnException,
-    );
+  factory CliCommand.git(List<String> args, {bool throwOnException = true}) {
+    return CliCommand('git', args, throwOnException: throwOnException);
   }
 
-  factory CliCommand.tool(
-    List<String> args, {
-    bool throwOnException = true,
-  }) {
+  factory CliCommand.tool(List<String> args, {bool throwOnException = true}) {
     var toolPath = Platform.script.toFilePath();
     if (!File(toolPath).existsSync()) {
       // Handling https://github.com/dart-lang/sdk/issues/54493
       // Platform.script.toFilePath() duplicates next to current directory, when run recursively from itself.
       toolPath = toolPath.replaceAll(
-        'devtools/tool/tool/bin/devtools_tool.dart',
-        'devtools/tool/bin/devtools_tool.dart',
+        'devtools/tool/tool/bin/dt.dart',
+        'devtools/tool/bin/dt.dart',
       );
     }
 
@@ -112,10 +105,7 @@ class CliCommand {
       // tool will automatically select the one that's running the VM and we'll
       // have selected that here.
       FlutterSdk.current.dartExePath,
-      [
-        toolPath,
-        ...args,
-      ],
+      [toolPath, ...args],
       throwOnException: throwOnException,
     );
   }
@@ -161,7 +151,7 @@ extension DevToolsProcessManagerExtension on ProcessManager {
     return (
       exitCode: code,
       stdout: processStdout.toString(),
-      stderr: processStderr.toString()
+      stderr: processStderr.toString(),
     );
   }
 
@@ -180,6 +170,52 @@ extension DevToolsProcessManagerExtension on ProcessManager {
   }
 }
 
+Future<Process> startIndependentProcess(
+  CliCommand command, {
+  String? workingDirectory,
+  String? waitForOutput,
+  Duration waitForOutputTimeout = const Duration(minutes: 2),
+  void Function(String line)? onOutput,
+}) async {
+  final commandDisplay = '${workingDirectory ?? ''} > $command';
+  print(commandDisplay);
+  final process = await Process.start(
+    command.exe,
+    command.args,
+    workingDirectory: workingDirectory,
+  );
+
+  if (waitForOutput != null) {
+    final completer = Completer<void>();
+    final stdoutSub = process.stdout.transform(utf8.decoder).listen((line) {
+      print('> [stdout] $line');
+      onOutput?.call(line);
+      if (line.contains(waitForOutput)) {
+        completer.complete();
+      }
+    });
+    final stderrSub = process.stderr.transform(utf8.decoder).listen((line) {
+      print('> [stderr] $line');
+      onOutput?.call(line);
+      if (line.contains(waitForOutput)) {
+        completer.complete();
+      }
+    });
+    await completer.future.timeout(
+      waitForOutputTimeout,
+      onTimeout: () {
+        throw Exception(
+          'Expected output "$waitForOutput" not received before timeout.',
+        );
+      },
+    );
+    await stdoutSub.cancel();
+    await stderrSub.cancel();
+  }
+
+  return process;
+}
+
 String pathFromRepoRoot(String pathFromRoot) {
   return path.join(DevToolsRepo.getInstance().repoPath, pathFromRoot);
 }
@@ -187,11 +223,11 @@ String pathFromRepoRoot(String pathFromRoot) {
 /// Returns the name of the git remote with id [remoteId] in
 /// [workingDirectory].
 ///
-/// When [workingDirectory] is null, this method will look for the remote in
+/// When [workingDirectory] is `null`, this method will look for the remote in
 /// the current directory.
 ///
-/// [remoteId] should have the form <organization>/<repository>.git. For
-/// example: 'flutter/flutter.git' or 'flutter/devtools.git'.
+/// [remoteId] should have the form `<organization>/<repository>.git`.
+/// For example: `'flutter/flutter.git'` or `'flutter/devtools.git'`.
 Future<String> findRemote(
   ProcessManager processManager, {
   required String remoteId,
@@ -213,8 +249,8 @@ Future<String> findRemote(
   try {
     upstreamRemoteResult = remoteRegexpResults.firstWhere(
       (element) =>
-          // ignore: prefer_interpolation_to_compose_strings
-          RegExp(r'' + remoteId + '\$').hasMatch(element.namedGroup('path')!),
+      // ignore: prefer_interpolation_to_compose_strings
+      RegExp(r'' + remoteId + '\$').hasMatch(element.namedGroup('path')!),
     );
   } on StateError {
     throw StateError(

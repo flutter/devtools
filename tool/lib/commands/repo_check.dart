@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -20,9 +20,7 @@ class RepoCheckCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     print('DevTools repo at ${repo.repoPath}.');
 
-    final checks = <Check>[
-      DevToolsVersionCheck(),
-    ];
+    final checks = <Check>[DevToolsVersionCheck()];
 
     print('\nPerforming checks...');
 
@@ -61,15 +59,17 @@ class DevToolsVersionCheck extends Check {
   Future<void> performCheck(DevToolsRepo repo) {
     // TODO(devoncarew): Update this to use a package to parse the pubspec file;
     //                   https://pub.dev/packages/pubspec.
-    final pubspecContents =
-        repo.readFile(Uri.parse('packages/devtools_app/pubspec.yaml'));
+    final pubspecContents = repo.readFile(
+      Uri.parse('packages/devtools_app/pubspec.yaml'),
+    );
     final versionString = pubspecContents
         .split('\n')
         .firstWhere((line) => line.startsWith('version:'));
     final pubspecVersion = versionString.substring('version:'.length).trim();
 
-    final dartFileContents =
-        repo.readFile(Uri.parse('packages/devtools_app/lib/devtools.dart'));
+    final dartFileContents = repo.readFile(
+      Uri.parse('packages/devtools_app/lib/devtools.dart'),
+    );
 
     final regexp = RegExp(r"version = '(\S+)';");
     final match = regexp.firstMatch(dartFileContents);

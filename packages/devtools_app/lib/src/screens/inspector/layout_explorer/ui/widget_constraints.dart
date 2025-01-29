@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +30,8 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final propertiesLocal = properties;
-    final showChildrenWidthsSum = propertiesLocal is FlexLayoutProperties &&
+    final showChildrenWidthsSum =
+        propertiesLocal is FlexLayoutProperties &&
         propertiesLocal.isOverflowWidth;
     final bottomHeight = widthAndConstraintIndicatorSize;
     final rightWidth = heightAndConstraintIndicatorSize;
@@ -43,24 +44,22 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
       child: dimensionDescription(
         TextSpan(
           children: [
-            TextSpan(
-              text: propertiesLocal.describeHeight(),
-            ),
+            TextSpan(text: propertiesLocal.describeHeight()),
             if (propertiesLocal.constraints != null) ...[
               if (!showOverflowHeight) const TextSpan(text: '\n'),
               TextSpan(
                 text: ' (${propertiesLocal.describeHeightConstraints()})',
-                style: propertiesLocal.constraints!.hasBoundedHeight ||
-                        !warnIfUnconstrained
-                    ? null
-                    : TextStyle(
-                        color: colorScheme.unconstrainedColor,
-                      ),
+                style:
+                    propertiesLocal.constraints!.hasBoundedHeight ||
+                            !warnIfUnconstrained
+                        ? null
+                        : TextStyle(color: colorScheme.unconstrainedColor),
               ),
             ],
             if (showOverflowHeight)
               TextSpan(
-                text: '\nchildren take: '
+                text:
+                    '\nchildren take: '
                     '${toStringAsFixed(sum(propertiesLocal.childrenHeights))}',
               ),
           ],
@@ -95,10 +94,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
                   ),
                 ),
               ),
-              if (displayHeightOutsideArrow)
-                Flexible(
-                  child: heightDescription,
-                ),
+              if (displayHeightOutsideArrow) Flexible(child: heightDescription),
             ],
           );
         },
@@ -113,15 +109,17 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
             if (!showChildrenWidthsSum) const TextSpan(text: '\n'),
             TextSpan(
               text: '(${propertiesLocal.describeWidthConstraints()})',
-              style: propertiesLocal.constraints!.hasBoundedWidth ||
-                      !warnIfUnconstrained
-                  ? null
-                  : TextStyle(color: colorScheme.unconstrainedColor),
+              style:
+                  propertiesLocal.constraints!.hasBoundedWidth ||
+                          !warnIfUnconstrained
+                      ? null
+                      : TextStyle(color: colorScheme.unconstrainedColor),
             ),
           ],
           if (showChildrenWidthsSum)
             TextSpan(
-              text: '\nchildren take '
+              text:
+                  '\nchildren take '
                   '${toStringAsFixed(sum(propertiesLocal.childrenWidths))}',
             ),
         ],

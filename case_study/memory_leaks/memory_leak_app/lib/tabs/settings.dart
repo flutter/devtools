@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -11,15 +11,16 @@ import '../restful_servers.dart';
 import 'http_data.dart';
 
 class Settings extends StatefulWidget {
-  Settings() : restfulRoot = currentRestfulAPI;
+  Settings({super.key}) : restfulRoot = currentRestfulAPI;
 
-  final Logging logs = Logging.logging;
+  final logs = Logging.logging;
 
   static late final SettingsState state;
 
   final RestfulAPI restfulRoot;
 
   @override
+  // ignore: no_logic_in_create_state, intentional leaking example.
   State<Settings> createState() {
     state = SettingsState();
     return state;
@@ -35,17 +36,17 @@ late RestfulAPI currentRestfulAPI;
 
 class SettingsState extends State<Settings> {
   Map<String, IconData> values = {
-    '${CitiBikesNYC.friendlyName}': Icons.directions_bike,
-    '${StarWars.starWarsFilms}': Icons.videocam,
-    '${StarWars.starWarsPeople}': Icons.people_outline,
-    '${StarWars.starWarsPlanets}': Icons.bubble_chart,
-    '${StarWars.starWarsSpecies}': Icons.android,
-    '${StarWars.starWarsStarships}': Icons.tram,
-    '${StarWars.starWarsVehicles}': Icons.time_to_leave,
-    '${OpenWeatherMapAPI.friendlyName}': Icons.cloud,
+    CitiBikesNYC.friendlyName: Icons.directions_bike,
+    StarWars.starWarsFilms: Icons.videocam,
+    StarWars.starWarsPeople: Icons.people_outline,
+    StarWars.starWarsPlanets: Icons.bubble_chart,
+    StarWars.starWarsSpecies: Icons.android,
+    StarWars.starWarsStarships: Icons.tram,
+    StarWars.starWarsVehicles: Icons.time_to_leave,
+    OpenWeatherMapAPI.friendlyName: Icons.cloud,
   };
 
-  final Logging logs = Logging.logging;
+  final logs = Logging.logging;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +67,8 @@ class SettingsState extends State<Settings> {
               unawaited(
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MyGetHttpData()),
+                  MaterialPageRoute(
+                      builder: (context) => const MyGetHttpData()),
                 ),
               );
             },

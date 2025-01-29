@@ -1,10 +1,10 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/service/editor/api_classes.dart';
 import 'package:devtools_app/src/shared/constants.dart';
+import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/debug_sessions.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../test_infra/scenes/standalone_ui/editor_service/simulated_editor_mixin.dart';
+import '../../test_infra/scenes/standalone_ui/editor_service/simulated_editor.dart';
 import '../../test_infra/utils/sidebar_utils.dart';
 
 void main() {
@@ -49,8 +49,9 @@ void main() {
       wrap(
         DebugSessions(
           editor: mockEditorClient,
-          sessions:
-              Map.fromEntries(_debugSessions.map((s) => MapEntry(s.id, s))),
+          sessions: Map.fromEntries(
+            _debugSessions.map((s) => MapEntry(s.id, s)),
+          ),
           devices: deviceMap,
         ),
       ),
@@ -76,10 +77,14 @@ void main() {
     }) {
       expect(find.text(sessionDisplayText), findsOneWidget);
 
-      final hotReloadButtonFinder =
-          iconButtonFinder(hotReloadIcon, index: debugSessionIndex);
-      final hotRestartButtonFinder =
-          iconButtonFinder(hotRestartIcon, index: debugSessionIndex);
+      final hotReloadButtonFinder = iconButtonFinder(
+        hotReloadIcon,
+        index: debugSessionIndex,
+      );
+      final hotRestartButtonFinder = iconButtonFinder(
+        hotRestartIcon,
+        index: debugSessionIndex,
+      );
       expect(hotReloadButtonFinder, findsOneWidget);
       expect(hotRestartButtonFinder, findsOneWidget);
 
@@ -87,10 +92,7 @@ void main() {
           tester.widget(hotReloadButtonFinder) as IconButton;
       final hotRestartButton =
           tester.widget(hotRestartButtonFinder) as IconButton;
-      expect(
-        hotReloadButton.onPressed,
-        hotButtonsEnabled ? isNotNull : isNull,
-      );
+      expect(hotReloadButton.onPressed, hotButtonsEnabled ? isNotNull : isNull);
       expect(
         hotRestartButton.onPressed,
         hotButtonsEnabled ? isNotNull : isNull,
@@ -126,31 +128,26 @@ void main() {
         sessionDisplay: 'Session (Flutter) (chrome) (release)',
         hotButtonsEnabled: false,
       ),
-      (
-        sessionDisplay: 'Session (Dart) (macos)',
-        hotButtonsEnabled: true,
-      ),
+      (sessionDisplay: 'Session (Dart) (macos)', hotButtonsEnabled: true),
     ];
 
-    testWidgetsWithWindowSize(
-      'rows render properly for run mode',
-      windowSize,
-      (tester) async {
-        await pumpDebugSessions(tester);
-        await tester.pump(const Duration(milliseconds: 500));
-        for (var i = 0; i < tests.length; i++) {
-          final test = tests[i];
-          // ignore: avoid_print, defines individual test case.
-          print('testing: ${test.sessionDisplay}');
-          verifyDebugSessionState(
-            tester,
-            debugSessionIndex: i,
-            sessionDisplayText: test.sessionDisplay,
-            hotButtonsEnabled: test.hotButtonsEnabled,
-          );
-        }
-      },
-    );
+    testWidgetsWithWindowSize('rows render properly for run mode', windowSize, (
+      tester,
+    ) async {
+      await pumpDebugSessions(tester);
+      await tester.pump(const Duration(milliseconds: 500));
+      for (var i = 0; i < tests.length; i++) {
+        final test = tests[i];
+        // ignore: avoid_print, defines individual test case.
+        print('testing: ${test.sessionDisplay}');
+        verifyDebugSessionState(
+          tester,
+          debugSessionIndex: i,
+          sessionDisplayText: test.sessionDisplay,
+          hotButtonsEnabled: test.hotButtonsEnabled,
+        );
+      }
+    });
   });
 }
 
@@ -193,8 +190,5 @@ final _debugSessions = [
     flutterMode: 'release',
   ),
   // Dart CLI app.
-  generateDebugSession(
-    debuggerType: 'Dart',
-    deviceId: 'macos',
-  ),
+  generateDebugSession(debuggerType: 'Dart', deviceId: 'macos'),
 ];

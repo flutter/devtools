@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:args/args.dart';
 
@@ -29,7 +29,8 @@ extension BenchmarkArgsExtension on ArgParser {
   void addSaveToFileOption(BenchmarkResultsOutputType type) {
     addOption(
       BenchmarkArgument.saveToFile.flagName,
-      help: 'Saves the benchmark results to a ${type.name} file at the '
+      help:
+          'Saves the benchmark results to a ${type.name} file at the '
           'provided path (absolute).',
       valueHelp: '/Users/me/Downloads/output.${type.name}',
     );
@@ -39,7 +40,8 @@ extension BenchmarkArgsExtension on ArgParser {
     addOption(
       BenchmarkArgument.averageOf.flagName,
       defaultsTo: '1',
-      help: 'The number of times to run the benchmark. The returned results '
+      help:
+          'The number of times to run the benchmark. The returned results '
           'will be the average of all the benchmark runs when this value is '
           'greater than 1.',
       valueHelp: '5',
@@ -49,7 +51,8 @@ extension BenchmarkArgsExtension on ArgParser {
   void addBaselineOption({String? additionalHelp}) {
     addOption(
       BenchmarkArgument.baseline.flagName,
-      help: 'The baseline benchmark data to compare the test benchmark run to. '
+      help:
+          'The baseline benchmark data to compare the test benchmark run to. '
           '${additionalHelp ?? ''}',
       valueHelp: '/Users/me/Downloads/baseline.json',
     );
@@ -73,7 +76,4 @@ enum BenchmarkArgument {
 }
 
 /// The file types that benchmark results may be written to.
-enum BenchmarkResultsOutputType {
-  csv,
-  json,
-}
+enum BenchmarkResultsOutputType { csv, json }

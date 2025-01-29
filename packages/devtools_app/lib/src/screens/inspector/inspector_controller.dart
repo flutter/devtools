@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// This library must not have direct dependencies on dart:html.
 ///
@@ -32,8 +32,8 @@ import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/query_parameters.dart';
 import '../inspector_shared/inspector_screen.dart';
 import 'inspector_tree_controller.dart';
 
@@ -54,9 +54,7 @@ class InspectorController extends DisposableController
     unawaited(_init(detailsTree: detailsTree));
   }
 
-  Future<void> _init({
-    InspectorTreeController? detailsTree,
-  }) async {
+  Future<void> _init({InspectorTreeController? detailsTree}) async {
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
     inspectorTree.config = InspectorTreeConfig(
@@ -65,14 +63,15 @@ class InspectorController extends DisposableController
       onExpand: _onExpand,
       onClientActiveChange: _onClientChange,
     );
-    details = isSummaryTree
-        ? InspectorController(
-            inspectorTree: detailsTree!,
-            treeType: treeType,
-            parent: this,
-            isSummaryTree: false,
-          )
-        : null;
+    details =
+        isSummaryTree
+            ? InspectorController(
+              inspectorTree: detailsTree!,
+              treeType: treeType,
+              parent: this,
+              isSummaryTree: false,
+            )
+            : null;
 
     await serviceConnection.serviceManager.onServiceAvailable;
 
@@ -108,10 +107,10 @@ class InspectorController extends DisposableController
         if (_supportsToggleSelectWidgetMode.value) {
           serviceConnection.serviceManager.serviceExtensionManager
               .setServiceExtensionState(
-            extensions.enableOnDeviceInspector.extension,
-            enabled: true,
-            value: true,
-          );
+                extensions.enableOnDeviceInspector.extension,
+                enabled: true,
+                value: true,
+              );
         }
       });
     }
@@ -153,9 +152,10 @@ class InspectorController extends DisposableController
 
   IsolateRef? _mainIsolate;
 
-  ValueListenable<bool> get _supportsToggleSelectWidgetMode =>
-      serviceConnection.serviceManager.serviceExtensionManager
-          .hasServiceExtension(extensions.toggleSelectWidgetMode.extension);
+  ValueListenable<bool> get _supportsToggleSelectWidgetMode => serviceConnection
+      .serviceManager
+      .serviceExtensionManager
+      .hasServiceExtension(extensions.toggleSelectWidgetMode.extension);
 
   void _onClientChange(bool added) {
     if (!added && _clientCount == 0) {
@@ -450,9 +450,10 @@ class InspectorController extends DisposableController
     treeGroups.cancelNext();
     try {
       final group = treeGroups.next;
-      final node = await (detailsSubtree
-          ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
-          : group.getRoot(treeType, isSummaryTree: true));
+      final node =
+          await (detailsSubtree
+              ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
+              : group.getRoot(treeType, isSummaryTree: true));
       if (node == null || group.disposed || _disposed) {
         return;
       }
@@ -640,7 +641,7 @@ class InspectorController extends DisposableController
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
       treeType,
-      isSummaryTree: isSummaryTree,
+      restrictToLocalProject: isSummaryTree,
     );
 
     final pendingDetailsFuture =
@@ -735,15 +736,17 @@ class InspectorController extends DisposableController
   void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
     final inspectorRef = node?.diagnostic?.valueRef.id;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors =
+        serviceConnection.errorBadgeManager
+            .erroredItemsForPage(InspectorScreen.id)
+            .value;
 
     // Check whether the node that was just selected has any errors associated
     // with it.
-    var errorIndex = inspectorRef != null
-        ? errors.keys.toList().indexOf(inspectorRef)
-        : null;
+    var errorIndex =
+        inspectorRef != null
+            ? errors.keys.toList().indexOf(inspectorRef)
+            : null;
     if (errorIndex == -1) {
       errorIndex = null;
     }
@@ -753,8 +756,10 @@ class InspectorController extends DisposableController
     if (errorIndex != null) {
       // Mark the error as "seen" as this will render slightly differently
       // so the user can track which errored nodes they've viewed.
-      serviceConnection.errorBadgeManager
-          .markErrorAsRead(InspectorScreen.id, errors[inspectorRef!]!);
+      serviceConnection.errorBadgeManager.markErrorAsRead(
+        InspectorScreen.id,
+        errors[inspectorRef!]!,
+      );
       // Also clear the error badge since new errors may have arrived while
       // the inspector was visible (normally they're cleared when visiting
       // the screen) and visiting an errored node seems an appropriate
@@ -767,9 +772,10 @@ class InspectorController extends DisposableController
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors =
+        serviceConnection.errorBadgeManager
+            .erroredItemsForPage(InspectorScreen.id)
+            .value;
 
     unawaited(
       updateSelectionFromService(
@@ -817,7 +823,8 @@ class InspectorController extends DisposableController
       unawaited(_addNodeToConsole(node));
 
       // Don't reroot if the selected value is already visible in the details tree.
-      final maybeReroot = isSummaryTree &&
+      final maybeReroot =
+          isSummaryTree &&
           details != null &&
           selectedDiagnostic != null &&
           !details!.hasDiagnosticsValue(selectedDiagnostic!.valueRef);
@@ -834,8 +841,9 @@ class InspectorController extends DisposableController
         if (isSummaryTree && detailsLocal != null) {
           detailsLocal.selectAndShowNode(selectedDiagnostic);
         } else if (parantLocal != null) {
-          parantLocal
-              .selectAndShowNode(firstAncestorInParentTree(selectedNode.value));
+          parantLocal.selectAndShowNode(
+            firstAncestorInParentTree(selectedNode.value),
+          );
         }
       }
     }

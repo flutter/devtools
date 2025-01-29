@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -15,11 +15,7 @@ import '../../../../shared/globals.dart';
 import 'tracing_data.dart';
 
 @visibleForTesting
-enum Json {
-  stateForIsolate,
-  selection,
-  rootPackage;
-}
+enum Json { stateForIsolate, selection, rootPackage }
 
 class TracePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
@@ -29,10 +25,9 @@ class TracePaneController extends DisposableController
     required this.rootPackage,
   }) {
     this.stateForIsolate = stateForIsolate ?? {};
-    final isolate = this
-        .stateForIsolate
-        .values
-        .firstWhereOrNull((i) => i.isolate.id == selectedIsolateId);
+    final isolate = this.stateForIsolate.values.firstWhereOrNull(
+      (i) => i.isolate.id == selectedIsolateId,
+    );
     if (selectedIsolateId != null && isolate == null) {
       throw ArgumentError(
         '$selectedIsolateId must be a key in stateForIsolate',

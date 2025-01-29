@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:math' as math;
 
@@ -130,8 +130,8 @@ class FixedExtentDelegate extends FixedExtentDelegateBase {
   FixedExtentDelegate({
     required double Function(int index) computeExtent,
     required int Function() computeLength,
-  })  : _computeExtent = computeExtent,
-        _computeLength = computeLength {
+  }) : _computeExtent = computeExtent,
+       _computeLength = computeLength {
     recompute();
   }
 
@@ -331,11 +331,15 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     assert(remainingExtent >= 0.0);
     final targetEndScrollOffset = scrollOffset + remainingExtent;
 
-    final firstIndex =
-        _extentDelegate!.minChildIndexForScrollOffset(scrollOffset);
-    final targetLastIndex = targetEndScrollOffset.isFinite
-        ? _extentDelegate!.maxChildIndexForScrollOffset(targetEndScrollOffset)
-        : null;
+    final firstIndex = _extentDelegate!.minChildIndexForScrollOffset(
+      scrollOffset,
+    );
+    final targetLastIndex =
+        targetEndScrollOffset.isFinite
+            ? _extentDelegate!.maxChildIndexForScrollOffset(
+              targetEndScrollOffset,
+            )
+            : null;
 
     if (firstChild != null) {
       final leadingGarbage = _calculateLeadingGarbage(firstIndex);
@@ -391,11 +395,14 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       trailingChildWithLayout = firstChild;
     }
 
-    double estimatedMaxScrollOffset =
-        _extentDelegate!.layoutOffset(_extentDelegate!.length);
-    for (int index = indexOf(trailingChildWithLayout!) + 1;
-        targetLastIndex == null || index <= targetLastIndex;
-        ++index) {
+    double estimatedMaxScrollOffset = _extentDelegate!.layoutOffset(
+      _extentDelegate!.length,
+    );
+    for (
+      int index = indexOf(trailingChildWithLayout!) + 1;
+      targetLastIndex == null || index <= targetLastIndex;
+      ++index
+    ) {
       RenderBox? child = childAfter(trailingChildWithLayout!);
       if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(
@@ -414,8 +421,9 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       final childParentData =
           child.parentData as SliverMultiBoxAdaptorParentData;
       assert(childParentData.index == index);
-      childParentData.layoutOffset =
-          _extentDelegate!.layoutOffset(childParentData.index);
+      childParentData.layoutOffset = _extentDelegate!.layoutOffset(
+        childParentData.index,
+      );
     }
 
     final lastIndex = indexOf(lastChild!);
@@ -456,10 +464,12 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
 
     final targetEndScrollOffsetForPaint =
         constraints.scrollOffset + constraints.remainingPaintExtent;
-    final targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite
-        ? _extentDelegate!
-            .maxChildIndexForScrollOffset(targetEndScrollOffsetForPaint)
-        : null;
+    final targetLastIndexForPaint =
+        targetEndScrollOffsetForPaint.isFinite
+            ? _extentDelegate!.maxChildIndexForScrollOffset(
+              targetEndScrollOffsetForPaint,
+            )
+            : null;
     assert(paintExtent <= estimatedMaxScrollOffset);
     geometry = SliverGeometry(
       scrollExtent: _extentDelegate!.layoutOffset(_extentDelegate!.length),
@@ -467,7 +477,8 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       cacheExtent: cacheExtent,
       maxPaintExtent: estimatedMaxScrollOffset,
       // Conservative to avoid flickering away the clip during scroll.
-      hasVisualOverflow: (targetLastIndexForPaint != null &&
+      hasVisualOverflow:
+          (targetLastIndexForPaint != null &&
               lastIndex >= targetLastIndexForPaint) ||
           constraints.scrollOffset > 0.0,
     );

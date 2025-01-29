@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -11,8 +11,9 @@ import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../config_specific/notifications/notifications.dart';
-import '../framework_controller.dart';
+import '../framework/framework_controller.dart';
 import '../globals.dart';
+import 'server.dart';
 
 final _log = Logger('lib/src/shared/server_api_client');
 
@@ -40,17 +41,20 @@ class DevToolsServerConnection {
   ///
   /// - http://foo/devtools => http://foo/devtools/api
   @visibleForTesting
-  static Uri apiUriFor(Uri baseUri) => baseUri.path.endsWith('devtools')
-      ? baseUri.resolve('devtools/api/')
-      : baseUri.resolve('api/');
+  static Uri apiUriFor(Uri baseUri) =>
+      baseUri.path.endsWith('devtools')
+          ? baseUri.resolve('devtools/api/')
+          : baseUri.resolve('api/');
 
   static Future<DevToolsServerConnection?> connect() async {
-    final apiUri = apiUriFor(Uri.base);
+    final serverUri = Uri.parse(devToolsServerUriAsString);
+    final apiUri = apiUriFor(serverUri);
     final pingUri = apiUri.resolve('ping');
 
     try {
-      final response =
-          await http.get(pingUri).timeout(const Duration(seconds: 5));
+      final response = await http
+          .get(pingUri)
+          .timeout(const Duration(seconds: 5));
       // When running with the local dev server Flutter may serve its index page
       // for missing files to support the hashless url strategy. Check the response
       // content to confirm it came from our server.
@@ -187,16 +191,13 @@ class DevToolsServerConnection {
 
   void _notifyCurrentPage(PageChangeEvent page) {
     unawaited(
-      _callMethod(
-        'currentPage',
-        {
-          'id': page.id,
-          // TODO(kenz): see if we need to change the client code on the
-          // DevTools server to be aware of the type of embedded mode (many vs.
-          // one).
-          'embedded': page.embedMode.embedded,
-        },
-      ),
+      _callMethod('currentPage', {
+        'id': page.id,
+        // TODO(kenz): see if we need to change the client code on the
+        // DevTools server to be aware of the type of embedded mode (many vs.
+        // one).
+        'embedded': page.embedMode.embedded,
+      }),
     );
   }
 

@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
 import 'dart:io';
@@ -11,8 +11,10 @@ import 'dart:io';
 /// Ex: dart cpu_sample_intervals.dart ~/Downloads/example_json.dart
 void main(List<String> arguments) async {
   if (arguments.isEmpty) {
-    print('You must specify a json input file path.\n'
-        'Ex: dart cpu_sample_intervals.dart ~/Downloads/example.json');
+    print(
+      'You must specify a json input file path.\n'
+      'Ex: dart cpu_sample_intervals.dart ~/Downloads/example.json',
+    );
     return;
   }
 

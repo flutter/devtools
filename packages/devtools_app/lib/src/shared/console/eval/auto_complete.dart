@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -8,7 +8,7 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_app_shared/utils.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../connected_app.dart';
+import '../../../service/connected_app/connected_app.dart';
 import '../../globals.dart';
 import '../../ui/search.dart';
 import 'eval_service.dart';
@@ -59,10 +59,7 @@ Future<List<String>> autoCompleteResultsFor(
         final libraryRef = await evalService.findOwnerLibrary(function);
         if (libraryRef != null) {
           result.addAll(
-            await libraryMemberAndImportsAutocompletes(
-              libraryRef,
-              evalService,
-            ),
+            await libraryMemberAndImportsAutocompletes(libraryRef, evalService),
           );
         }
       }
@@ -113,11 +110,13 @@ Future<Set<String>> libraryMemberAndImportsAutocompletes(
   LibraryRef libraryRef,
   EvalService evalService,
 ) async {
-  final autocompletes =
-      await _appState.cache.libraryMemberAndImportsAutocomplete.putIfAbsent(
-    libraryRef,
-    () => _libraryMemberAndImportsAutocompletes(libraryRef, evalService),
-  );
+  final autocompletes = await _appState
+      .cache
+      .libraryMemberAndImportsAutocomplete
+      .putIfAbsent(
+        libraryRef,
+        () => _libraryMemberAndImportsAutocompletes(libraryRef, evalService),
+      );
 
   return autocompletes.nonNulls.toSet();
 }
@@ -171,11 +170,11 @@ Future<Set<String>> libraryMemberAutocompletes(
   LibraryRef libraryRef, {
   required bool includePrivates,
 }) async {
-  var result = (await _appState.cache.libraryMemberAutocomplete.putIfAbsent(
-    libraryRef,
-    () => _libraryMemberAutocompletes(evalService, libraryRef),
-  ))
-      .nonNulls;
+  var result =
+      (await _appState.cache.libraryMemberAutocomplete.putIfAbsent(
+        libraryRef,
+        () => _libraryMemberAutocompletes(evalService, libraryRef),
+      )).nonNulls;
   if (!includePrivates) {
     result = result.where((name) => !isPrivateMember(name));
   }
@@ -196,8 +195,9 @@ Future<Set<String>> _libraryMemberAutocompletes(
   final functions = library.functions;
   if (functions != null) {
     // The VM shows setters as `<member>=`.
-    final members =
-        functions.map((funcRef) => funcRef.name!.replaceAll('=', ''));
+    final members = functions.map(
+      (funcRef) => funcRef.name!.replaceAll('=', ''),
+    );
     result.addAll(members.nonNulls);
   }
   final classes = library.classes;
@@ -242,11 +242,7 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
   final classRef = instance.classRef;
   if (classRef == null) return;
   result.addAll(
-    await _autoCompleteMembersFor(
-      classRef,
-      controller,
-      staticContext: false,
-    ),
+    await _autoCompleteMembersFor(classRef, controller, staticContext: false),
   );
   final clazz = await controller.classFor(classRef);
   final fields = clazz?.fields;
@@ -255,9 +251,7 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
       .where((field) => field.isStatic ?? false)
       .map((field) => field.name);
   result.addAll(
-    fieldNames.nonNulls.where(
-      (member) => _isAccessible(member, clazz),
-    ),
+    fieldNames.nonNulls.where((member) => _isAccessible(member, clazz)),
   );
 }
 
@@ -319,34 +313,31 @@ bool _validFunction(FuncRef funcRef, Class clazz, bool staticContext) {
 }
 
 bool _isOperator(FuncRef funcRef) => const {
-      '==',
-      '+',
-      '-',
-      '*',
-      '/',
-      '&',
-      '~',
-      '|',
-      '>',
-      '<',
-      '>=',
-      '<=',
-      '>>',
-      '<<',
-      '>>>',
-      '^',
-      '%',
-      '~/',
-      'unary-',
-    }.contains(funcRef.name);
+  '==',
+  '+',
+  '-',
+  '*',
+  '/',
+  '&',
+  '~',
+  '|',
+  '>',
+  '<',
+  '>=',
+  '<=',
+  '>>',
+  '<<',
+  '>>>',
+  '^',
+  '%',
+  '~/',
+  'unary-',
+}.contains(funcRef.name);
 
 bool _isConstructor(FuncRef funcRef, Class clazz) =>
     funcRef.name == clazz.name || funcRef.name!.startsWith('${clazz.name}.');
 
-bool _isAccessible(
-  String member,
-  Class? clazz,
-) {
+bool _isAccessible(String member, Class? clazz) {
   final frame = _appState.currentFrame.value!;
   final currentScript = frame.location!.script;
   return !isPrivateMember(member) ||

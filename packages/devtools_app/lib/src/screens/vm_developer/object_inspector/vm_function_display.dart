@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
@@ -61,10 +61,7 @@ class VmFuncDisplay extends StatelessWidget {
     }
 
     return [
-      selectableTextBuilderMapEntry(
-        'Kind',
-        _kindDescription(function.kind),
-      ),
+      selectableTextBuilderMapEntry('Kind', _kindDescription(function.kind)),
       selectableTextBuilderMapEntry(
         'Deoptimizations',
         function.deoptimizations?.toString(),
@@ -85,10 +82,7 @@ class VmFuncDisplay extends StatelessWidget {
         'Recognized',
         boolYesOrNo(function.isRecognized),
       ),
-      selectableTextBuilderMapEntry(
-        'Native',
-        boolYesOrNo(function.isNative),
-      ),
+      selectableTextBuilderMapEntry('Native', boolYesOrNo(function.isNative)),
       selectableTextBuilderMapEntry('VM Name', function.vmName),
     ];
   }
@@ -113,9 +107,7 @@ class VmFuncDisplay extends StatelessWidget {
 
     addSpace();
 
-    kind.write(
-      funcKind.kindDescription().toLowerCase(),
-    );
+    kind.write(funcKind.kindDescription().toLowerCase());
 
     return kind.toString();
   }
@@ -135,20 +127,17 @@ class CallSiteDataArrayWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return VmExpansionTile(
       title: 'Call Site Data (${callSiteDataArray.length})',
-      children: prettyRows(
-        context,
-        [
-          for (final entry in callSiteDataArray.elements!)
-            Row(
-              children: [
-                VmServiceObjectLink(
-                  object: entry as ObjRef,
-                  onTap: controller.findAndSelectNodeForObject,
-                ),
-              ],
-            ),
-        ],
-      ),
+      children: prettyRows(context, [
+        for (final entry in callSiteDataArray.elements!)
+          Row(
+            children: [
+              VmServiceObjectLink(
+                object: entry as ObjRef,
+                onTap: controller.findAndSelectNodeForObject,
+              ),
+            ],
+          ),
+      ]),
     );
   }
 }

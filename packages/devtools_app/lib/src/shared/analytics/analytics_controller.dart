@@ -1,15 +1,14 @@
-// Copyright 2021 The Chromium Authors. All rights reserved.
+// Copyright 2021 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
 import '../development_helpers.dart';
-import '../dtd_manager_extensions.dart';
 import '../globals.dart';
-
+import '../managers/dtd_manager_extensions.dart';
 import 'analytics.dart' as ga;
 
 Future<AnalyticsController> get analyticsController async {
@@ -23,7 +22,8 @@ Future<AnalyticsController> get analyticsController async {
   var shouldShowConsentMessage = false;
   try {
     enabled = await ga.isAnalyticsEnabled();
-    shouldShowConsentMessage = debugShowAnalyticsConsentMessage ||
+    shouldShowConsentMessage =
+        debugShowAnalyticsConsentMessage ||
         await ga.shouldShowAnalyticsConsentMessage();
   } catch (_) {
     // Ignore issues if analytics could not be initialized.
@@ -52,10 +52,10 @@ class AnalyticsController {
     this.legacyOnEnableAnalytics,
     this.legacyOnDisableAnalytics,
     this.legacyOnSetupAnalytics,
-  })  : analyticsEnabled = ValueNotifier<bool>(enabled),
-        _shouldPrompt = ValueNotifier<bool>(
-          shouldShowConsentMessage && consentMessage.isNotEmpty,
-        ) {
+  }) : analyticsEnabled = ValueNotifier<bool>(enabled),
+       _shouldPrompt = ValueNotifier<bool>(
+         shouldShowConsentMessage && consentMessage.isNotEmpty,
+       ) {
     if (_shouldPrompt.value) {
       unawaited(toggleAnalyticsEnabled(true));
     }

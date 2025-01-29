@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -42,15 +42,18 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
             style: theme.subtleTextStyle,
           ),
           if (serviceConnection
-              .serviceManager.connectedApp!.isProfileBuildNow!) ...[
+              .serviceManager
+              .connectedApp!
+              .isProfileBuildNow!) ...[
             const SizedBox(height: denseSpacing),
             RichText(
               text: TextSpan(
                 text:
                     "These debugging options aren't available in profile mode. "
                     'To use them, run your app in debug mode.',
-                style: theme.subtleTextStyle
-                    .copyWith(color: theme.colorScheme.error),
+                style: theme.subtleTextStyle.copyWith(
+                  color: theme.colorScheme.error,
+                ),
               ),
             ),
           ],

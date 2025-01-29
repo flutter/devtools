@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -22,7 +22,8 @@ class PubGetCommand extends Command {
       ..addFlag(
         _onlyMainFlag,
         negatable: false,
-        help: 'Only execute on the top-level `devtools/packages/devtools_*` '
+        help:
+            'Only execute on the top-level `devtools/packages/devtools_*` '
             'packages and any of their subdirectories',
       );
   }
@@ -50,7 +51,8 @@ class PubGetCommand extends Command {
 
     for (final p in packages) {
       final packagePathParts = path.split(p.relativePath);
-      final isMainPackageOrSubdirectory = packagePathParts.length >= 2 &&
+      final isMainPackageOrSubdirectory =
+          packagePathParts.length >= 2 &&
           packagePathParts.first == 'packages' &&
           packagePathParts[1].startsWith('devtools_');
       if (onlyMainPackages && !isMainPackageOrSubdirectory) continue;

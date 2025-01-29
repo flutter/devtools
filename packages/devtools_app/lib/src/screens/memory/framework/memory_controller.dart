@@ -1,17 +1,17 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../shared/framework/screen.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
-import '../../../shared/offline_data.dart';
-import '../../../shared/screen.dart';
+import '../../../shared/offline/offline_data.dart';
 import '../panes/chart/controller/chart_data.dart';
 import '../panes/chart/controller/chart_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
@@ -34,10 +34,7 @@ class MemoryController extends DisposableController
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) {
     unawaited(
-      _init(
-        connectedDiff: connectedDiff,
-        connectedProfile: connectedProfile,
-      ),
+      _init(connectedDiff: connectedDiff, connectedProfile: connectedProfile),
     );
   }
 
@@ -115,11 +112,13 @@ class MemoryController extends DisposableController
 
     chart = MemoryChartPaneController(data: offlineData?.chart ?? ChartData());
 
-    final rootPackage = isConnected
-        ? serviceConnection.serviceManager.rootInfoNow().package!
-        : null;
+    final rootPackage =
+        isConnected
+            ? serviceConnection.serviceManager.rootInfoNow().package!
+            : null;
 
-    diff = diffPaneController ??
+    diff =
+        diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
           loader:
@@ -127,7 +126,8 @@ class MemoryController extends DisposableController
           rootPackage: rootPackage,
         );
 
-    profile = profilePaneController ??
+    profile =
+        profilePaneController ??
         offlineData?.profile ??
         ProfilePaneController(rootPackage: rootPackage!);
 
@@ -172,9 +172,7 @@ class MemoryController extends DisposableController
     });
 
     diff.core.classFilter.addListener(() {
-      theProfile.setFilter(
-        diff.core.classFilter.value,
-      );
+      theProfile.setFilter(diff.core.classFilter.value);
     });
   }
 
@@ -186,7 +184,11 @@ class MemoryController extends DisposableController
     try {
       await serviceConnection.serviceManager.service!.getAllocationProfile(
         (serviceConnection
-            .serviceManager.isolateManager.selectedIsolate.value?.id)!,
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value
+            ?.id)!,
         gc: true,
       );
       chart.data.timeline.addGCEvent();

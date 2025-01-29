@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -26,10 +26,10 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     this._resolvedUriMap,
     this._classList,
     List<({String flagName, String value})>? flags,
-  )   : _startingSockets = _socketProfile?.sockets ?? [],
-        _startingRequests = _httpProfile?.requests ?? [],
-        cpuSamples = cpuSamples ?? _defaultProfile,
-        allocationSamples = allocationSamples ?? _defaultProfile {
+  ) : _startingSockets = _socketProfile?.sockets ?? [],
+      _startingRequests = _httpProfile?.requests ?? [],
+      cpuSamples = cpuSamples ?? _defaultProfile,
+      allocationSamples = allocationSamples ?? _defaultProfile {
     _reverseResolvedUriMap = <String, String>{};
     if (_resolvedUriMap != null) {
       for (final e in _resolvedUriMap.entries) {
@@ -44,16 +44,17 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     }
   }
 
-  static final _defaultProfile = CpuSamples.parse({
-    'samplePeriod': 50,
-    'maxStackDepth': 12,
-    'sampleCount': 0,
-    'timeOriginMicros': 47377796685,
-    'timeExtentMicros': 3000,
-    'pid': 54321,
-    'functions': <Object?>[],
-    'samples': <Object?>[],
-  })!;
+  static final _defaultProfile =
+      CpuSamples.parse({
+        'samplePeriod': 50,
+        'maxStackDepth': 12,
+        'sampleCount': 0,
+        'timeOriginMicros': 47377796685,
+        'timeExtentMicros': 3000,
+        'pid': 54321,
+        'functions': <Object?>[],
+        'samples': <Object?>[],
+      })!;
 
   CpuSamples cpuSamples;
 
@@ -88,7 +89,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     'flags': <Flag>[
       Flag(
         name: 'flag 1 name',
-        comment: 'flag 1 comment contains some very long text '
+        comment:
+            'flag 1 comment contains some very long text '
             'that the renderer will have to wrap around to prevent '
             'it from overflowing the screen. This will cause a '
             'failure if one of the two Row entries the flags lay out '
@@ -128,9 +130,10 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Future<UriList> lookupPackageUris(String isolateId, List<String> uris) {
     return Future.value(
       UriList(
-        uris: _resolvedUriMap != null
-            ? (uris.map((e) => _resolvedUriMap[e]).toList())
-            : null,
+        uris:
+            _resolvedUriMap != null
+                ? (uris.map((e) => _resolvedUriMap[e]).toList())
+                : null,
       ),
     );
   }
@@ -143,9 +146,10 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }) {
     return Future.value(
       UriList(
-        uris: _reverseResolvedUriMap != null
-            ? (uris.map((e) => _reverseResolvedUriMap[e]).toList())
-            : null,
+        uris:
+            _reverseResolvedUriMap != null
+                ? (uris.map((e) => _reverseResolvedUriMap[e]).toList())
+                : null,
       ),
     );
   }
@@ -155,13 +159,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<void> forEachIsolate(Future<void> Function(IsolateRef) callback) =>
-      callback(
-        IsolateRef.parse(
-          {
-            'id': 'fake_isolate_id',
-          },
-        )!,
-      );
+      callback(IsolateRef.parse({'id': 'fake_isolate_id'})!);
 
   @override
   Future<AllocationProfile> getAllocationProfile(
@@ -192,8 +190,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
     allocationProfile.json = allocationProfile.toJson();
     // Fake GC statistics
-    allocationProfile.json![AllocationProfilePrivateViewExtension.heapsKey] =
-        <String, dynamic>{
+    allocationProfile.json![AllocationProfilePrivateViewExtension
+        .heapsKey] = <String, dynamic>{
       AllocationProfilePrivateViewExtension.newSpaceKey: <String, dynamic>{
         GCStats.usedKey: 1234,
         GCStats.capacityKey: 12345,
@@ -226,8 +224,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     String isolateId,
     String classId,
     bool enable,
-  ) =>
-      Future.value(Success());
+  ) => Future.value(Success());
 
   @override
   Future<HeapSnapshotGraph> getHeapSnapshotGraph(
@@ -252,17 +249,13 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   @override
   Future<Isolate> getIsolate(String isolateId) {
     return Future.value(
-      Isolate.parse(
-        {
-          'rootLib': LibraryRef.parse(
-            {
-              'name': 'fake_isolate_name',
-              'uri': 'package:fake_uri_root/main.dart',
-            },
-          ),
-          'extensionRPCs': ['ext.dart.io.getHttpProfile'],
-        },
-      )!,
+      Isolate.parse({
+        'rootLib': LibraryRef.parse({
+          'name': 'fake_isolate_name',
+          'uri': 'package:fake_uri_root/main.dart',
+        }),
+        'extensionRPCs': ['ext.dart.io.getHttpProfile'],
+      })!,
     );
   }
 
@@ -299,11 +292,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<Stack> getStack(
-    String isolateId, {
-    int? limit,
-    String? idZoneId,
-  }) {
+  Future<Stack> getStack(String isolateId, {int? limit, String? idZoneId}) {
     return Future.value(Stack(frames: [], messages: [], truncated: false));
   }
 
@@ -364,15 +353,13 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Future<PerfettoTimeline> getPerfettoVMTimeline({
     int? timeOriginMicros,
     int? timeExtentMicros,
-  }) =>
-      _getPerfettoVMTimeline();
+  }) => _getPerfettoVMTimeline();
 
   @override
   Future<PerfettoTimeline> getPerfettoVMTimelineWithCpuSamplesWrapper({
     int? timeOriginMicros,
     int? timeExtentMicros,
-  }) =>
-      _getPerfettoVMTimeline();
+  }) => _getPerfettoVMTimeline();
 
   Future<PerfettoTimeline> _getPerfettoVMTimeline() {
     final perfettoTimeline = _timelineData;
@@ -497,11 +484,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<ObjectStore?> getObjectStore(String isolateId) => Future.value(
-        const ObjectStore(
-          fields: {},
-        ),
-      );
+  Future<ObjectStore?> getObjectStore(String isolateId) =>
+      Future.value(const ObjectStore(fields: {}));
 
   @override
   final fakeServiceCache = JsonToServiceCache();
@@ -529,11 +513,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Stream<Event> get onGCEvent => _gcEventStream.stream;
 
   void emitGCEvent() {
-    _gcEventStream.sink.add(
-      Event(
-        kind: EventKind.kGC,
-      ),
-    );
+    _gcEventStream.sink.add(Event(kind: EventKind.kGC));
   }
 
   @override

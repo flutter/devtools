@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // Do not delete these arguments. They are parsed by test runner.
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
@@ -45,10 +45,22 @@ void main() {
 
     logStatus('testing variable assignment');
     await testAssignment(evalTester);
-
-    logStatus('testing eval on widget tree node');
-    await _testEvalOnWidgetTreeNode(evalTester);
   });
+
+  testWidgets(
+    'eval with scope on widget tree node',
+    (tester) async {
+      await pumpAndConnectDevTools(tester, testApp);
+
+      final evalTester = EvalTester(tester);
+      await evalTester.prepareInspectorUI();
+
+      logStatus('testing eval on widget tree node');
+      await _testEvalOnWidgetTreeNode(evalTester);
+    },
+    // https://github.com/flutter/devtools/issues/8389
+    skip: true,
+  );
 }
 
 Future<void> _testEvalOnWidgetTreeNode(EvalTester tester) async {

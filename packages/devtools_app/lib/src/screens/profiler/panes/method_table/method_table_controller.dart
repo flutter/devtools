@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -65,13 +65,14 @@ class MethodTableController extends DisposableController
       depthFirstTraversal(
         root,
         action: (CpuStackFrame frame) {
-          final parentNode = frame.parent != null &&
-                  frame.parentId != CpuProfileData.rootId &&
-                  !frame.parent!.isTag
-              // Since we are performing a DFS, the parent should always be in
-              // the map.
-              ? methodMap[frame.parent!.methodTableId]!
-              : null;
+          final parentNode =
+              frame.parent != null &&
+                      frame.parentId != CpuProfileData.rootId &&
+                      !frame.parent!.isTag
+                  // Since we are performing a DFS, the parent should always be in
+                  // the map.
+                  ? methodMap[frame.parent!.methodTableId]!
+                  : null;
 
           var graphNode = MethodTableGraphNode.fromStackFrame(frame);
           final existingNode = methodMap[frame.methodTableId];

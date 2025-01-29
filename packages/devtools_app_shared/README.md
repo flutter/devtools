@@ -1,3 +1,8 @@
+<!--
+Copyright 2025 The Flutter Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+-->
 # Shared DevTools Components
 
 This package contains UI, utility, and service components from
@@ -159,3 +164,12 @@ void main() {
 This package is developed as part of the larger
 [flutter/devtools](https://github.com/flutter/devtools) project.
 Please report any issues or feedback there.
+
+## Supported Flutter versions
+
+This package follows the `flutter/packages`
+[policy](https://github.com/flutter/flutter/blob/master/docs/ecosystem/contributing/README.md#supported-flutter-versions)
+for supported Flutter versions, which states that a package will support the latest `stable`
+version of Flutter, as well as the current `master`. In practice, this package will often
+support older versions as well, as minimum version requirements are generally only updated
+when there is a specific need, such as using a new DevTools or Flutter feature.

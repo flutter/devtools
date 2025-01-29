@@ -1,9 +1,10 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
 
 class DevToolsRepo {
@@ -38,20 +39,39 @@ class DevToolsRepo {
     final repoPath = _findRepoRoot(Directory.current);
     if (repoPath == null) {
       throw Exception(
-        'devtools_tool must be run from inside of the DevTools repository directory',
+        'dt must be run from inside of the DevTools repository directory',
       );
     }
     return DevToolsRepo._create(repoPath);
   }
 
-  List<Package> getPackages() {
+  /// Returns the list of Dart or Flutter packages contained within the DevTools
+  /// repository.
+  ///
+  /// A Dart or Flutter package is defined as any directory with a pubspec.yaml
+  /// file.
+  ///
+  /// If a package path contains any part on its path that is in [skip], the
+  /// package will not be included in the returned results.
+  ///
+  /// If [includeSubdirectories] is false, packages that are a subdirectory of
+  /// another package will not be included in the returned results.
+  List<Package> getPackages({
+    List<String> skip = const [],
+    bool includeSubdirectories = true,
+  }) {
     final result = <Package>[];
     final repoDir = Directory(repoPath);
 
     for (final entity in repoDir.listSync()) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.')) {
-        _collectPackages(entity, result);
+        _collectPackages(
+          entity,
+          result,
+          skip: skip,
+          includeSubdirectories: includeSubdirectories,
+        );
       }
     }
 
@@ -75,22 +95,62 @@ class DevToolsRepo {
     }
   }
 
-  void _collectPackages(Directory dir, List<Package> result) {
+  void _collectPackages(
+    Directory dir,
+    List<Package> result, {
+    bool includeSubdirectories = true,
+    List<String> skip = const [],
+  }) {
     // Do not collect packages from the Flutter SDK that is stored in the tool/
     // directory.
     if (dir.path.contains(path.join('tool', 'flutter-sdk'))) return;
 
-    // Do not include the top level devtools/packages directory in the results
-    // even though it has a pubspec.yaml file.
-    if (_fileExists(dir, 'pubspec.yaml') &&
-        !dir.path.endsWith(path.join('devtools', 'packages'))) {
-      result.add(Package._(this, dir.path));
+    if (_fileExists(dir, 'pubspec.yaml')) {
+      final isTopLevelPackagesDir = dir.path.endsWith('packages');
+      final shouldSkip =
+          skip.firstWhereOrNull((skipDir) => dir.path.contains(skipDir)) !=
+          null;
+      if (isTopLevelPackagesDir || shouldSkip) {
+        // Do not include the top level devtools/packages directory in the results
+        // even though it has a pubspec.yaml file. Also skip any directories
+        // specified by [skip].
+        final reason =
+            isTopLevelPackagesDir
+                ? 'each DevTools package is analyzed individually'
+                : '${skip.toString()} directories are intentionally skipped';
+        print('Skipping ${dir.path} in _collectPackages because $reason.');
+      } else {
+        final ancestor = result.firstWhereOrNull(
+          (p) =>
+          // Remove the last segment of [dir]'s pathSegments to ensure we
+          // are only checking ancestors and not sibling directories with
+          // similar names.
+          (List.from(dir.uri.pathSegments)..safeRemoveLast())
+              // TODO(kenz): this may cause issues for Windows paths.
+              .join('/')
+              .startsWith(p.packagePath),
+        );
+        final ancestorDirectoryAdded = ancestor != null;
+        if (!includeSubdirectories && ancestorDirectoryAdded) {
+          print(
+            'Skipping ${dir.path} in _collectPackages because it is a '
+            'subdirectory of another package (${ancestor.packagePath}).',
+          );
+        } else {
+          result.add(Package._(this, dir.path));
+        }
+      }
     }
 
     for (final entity in dir.listSync(followLinks: false)) {
       final name = path.basename(entity.path);
       if (entity is Directory && !name.startsWith('.') && name != 'build') {
-        _collectPackages(entity, result);
+        _collectPackages(
+          entity,
+          result,
+          skip: skip,
+          includeSubdirectories: includeSubdirectories,
+        );
       }
     }
   }
@@ -190,9 +250,7 @@ class FlutterSdk {
       }
     }
 
-    throw Exception(
-      'Unable to locate the Flutter SDK on PATH',
-    );
+    throw Exception('Unable to locate the Flutter SDK on PATH');
   }
 
   final String sdkPath;
@@ -256,4 +314,8 @@ bool _fileExists(Directory parent, String name) {
 
 bool _dirExists(Directory parent, String name) {
   return FileSystemEntity.isDirectorySync(path.join(parent.path, name));
+}
+
+extension _SafeAccessList<T> on List<T> {
+  T? safeRemoveLast() => isNotEmpty ? removeLast() : null;
 }

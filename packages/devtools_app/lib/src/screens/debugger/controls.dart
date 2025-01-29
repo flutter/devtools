@@ -1,26 +1,31 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
-import 'package:codicon/codicon.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/utils.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/utils/utils.dart';
 import 'debugger_controller.dart';
 
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({super.key});
 
   static const minWidthBeforeScaling = 1750.0;
+
+  // The icon size for the material_symbol icons needs to be increased to
+  // account for padding included in the icon assets.
+  static final materialIconSize = scaleByFontFactor(
+    defaultIconSizeBeforeScaling + 3.0,
+  );
 
   @override
   State<DebuggingControls> createState() => _DebuggingControlsState();
@@ -36,7 +41,10 @@ class _DebuggingControlsState extends State<DebuggingControls>
     if (!initController()) return;
     addAutoDisposeListener(
       serviceConnection
-          .serviceManager.isolateManager.mainIsolateState?.isPaused,
+          .serviceManager
+          .isolateManager
+          .mainIsolateState
+          ?.isPaused,
     );
     addAutoDisposeListener(controller.resuming);
     addAutoDisposeListener(controller.stackFramesWithLocation);
@@ -47,13 +55,14 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
-    final canStep = serviceConnection.serviceManager.isMainIsolatePaused &&
+    final canStep =
+        serviceConnection.serviceManager.isMainIsolatePaused &&
         !resuming &&
         hasStackFrames &&
         !isSystemIsolate;
     final isVmApp =
         serviceConnection.serviceManager.connectedApp?.isRunningOnDartVM ??
-            false;
+        false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
@@ -86,21 +95,24 @@ class _DebuggingControlsState extends State<DebuggingControls>
       items: [
         ButtonGroupItemData(
           tooltip: 'Pause',
-          icon: Codicons.debugPause,
+          icon: Icons.pause,
           autofocus: true,
           // Disable when paused or selected isolate is a system isolate.
-          onPressed: (isPaused || isSystemIsolate)
-              ? null
-              : () => unawaited(controller.pause()),
+          onPressed:
+              (isPaused || isSystemIsolate)
+                  ? null
+                  : () => unawaited(controller.pause()),
         ),
         ButtonGroupItemData(
           tooltip: 'Resume',
-          icon: Codicons.debugContinue,
+          iconAsset: 'icons/material_symbols/resume.png',
+          iconSize: DebuggingControls.materialIconSize,
           // Enable while paused + not resuming and selected isolate is not
           // a system isolate.
-          onPressed: ((isPaused && !resuming) && !isSystemIsolate)
-              ? () => unawaited(controller.resume())
-              : null,
+          onPressed:
+              ((isPaused && !resuming) && !isSystemIsolate)
+                  ? () => unawaited(controller.resume())
+                  : null,
         ),
       ],
     );
@@ -111,17 +123,20 @@ class _DebuggingControlsState extends State<DebuggingControls>
       items: [
         ButtonGroupItemData(
           label: 'Step Over',
-          icon: Codicons.debugStepOver,
+          iconAsset: 'icons/material_symbols/step_over.png',
+          iconSize: DebuggingControls.materialIconSize,
           onPressed: canStep ? () => unawaited(controller.stepOver()) : null,
         ),
         ButtonGroupItemData(
           label: 'Step In',
-          icon: Codicons.debugStepInto,
+          iconAsset: 'icons/material_symbols/step_into.png',
+          iconSize: DebuggingControls.materialIconSize,
           onPressed: canStep ? () => unawaited(controller.stepIn()) : null,
         ),
         ButtonGroupItemData(
           label: 'Step Out',
-          icon: Codicons.debugStepOut,
+          iconAsset: 'icons/material_symbols/step_out.png',
+          iconSize: DebuggingControls.materialIconSize,
           onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
         ),
       ],
@@ -139,9 +154,10 @@ class _DebuggingControlsState extends State<DebuggingControls>
           label: 'File Explorer',
           onPressed: controller.codeViewController.toggleLibrariesVisible,
           gaScreen: gac.debugger,
-          gaSelection: visible
-              ? gac.DebuggerEvents.hideFileExplorer.name
-              : gac.DebuggerEvents.showFileExplorer.name,
+          gaSelection:
+              visible
+                  ? gac.DebuggerEvents.hideFileExplorer.name
+                  : gac.DebuggerEvents.showFileExplorer.name,
           minScreenWidthForTextBeforeScaling:
               DebuggingControls.minWidthBeforeScaling,
         );
@@ -151,10 +167,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
 }
 
 class CodeStatisticsControls extends StatelessWidget {
-  const CodeStatisticsControls({
-    super.key,
-    required this.controller,
-  });
+  const CodeStatisticsControls({super.key, required this.controller});
 
   final DebuggerController controller;
 
@@ -177,11 +190,11 @@ class CodeStatisticsControls extends StatelessWidget {
               children: const [
                 _CodeStatsControl(
                   tooltip: 'Show code coverage',
-                  icon: Codicons.checklist,
+                  icon: Icons.checklist,
                 ),
                 _CodeStatsControl(
                   tooltip: 'Show profiler hits',
-                  icon: Codicons.flame,
+                  icon: Icons.local_fire_department,
                 ),
               ],
               onPressed: (index) {
@@ -198,11 +211,12 @@ class CodeStatisticsControls extends StatelessWidget {
               tooltip: 'Refresh statistics',
               gaScreen: gac.debugger,
               gaSelection: gac.DebuggerEvents.refreshStatistics.name,
-              onPressed: showCodeCoverage || showProfileInformation
-                  ? () => unawaited(
+              onPressed:
+                  showCodeCoverage || showProfileInformation
+                      ? () => unawaited(
                         controller.codeViewController.refreshCodeStatistics(),
                       )
-                  : null,
+                      : null,
             ),
           ],
         );
@@ -212,10 +226,7 @@ class CodeStatisticsControls extends StatelessWidget {
 }
 
 class _CodeStatsControl extends StatelessWidget {
-  const _CodeStatsControl({
-    required this.icon,
-    required this.tooltip,
-  });
+  const _CodeStatsControl({required this.icon, required this.tooltip});
 
   final IconData icon;
   final String tooltip;
@@ -226,26 +237,21 @@ class _CodeStatsControl extends StatelessWidget {
       message: tooltip,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: Icon(
-          icon,
-          size: defaultIconSize,
-        ),
+        child: Icon(icon, size: defaultIconSize),
       ),
     );
   }
 }
 
 class BreakOnExceptionsControl extends StatelessWidget {
-  const BreakOnExceptionsControl({
-    super.key,
-    required this.controller,
-  });
+  const BreakOnExceptionsControl({super.key, required this.controller});
 
   final DebuggerController controller;
 
   @override
   Widget build(BuildContext context) {
-    final isInSmallMode = MediaQuery.of(context).size.width <
+    final isInSmallMode =
+        MediaQuery.of(context).size.width <
         DebuggingControls.minWidthBeforeScaling;
     return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
@@ -253,19 +259,18 @@ class BreakOnExceptionsControl extends StatelessWidget {
         return RoundedDropDownButton<ExceptionMode>(
           value: ExceptionMode.from(modeId),
           // Cannot set exception pause mode for system isolates.
-          onChanged: controller.isSystemIsolate
-              ? null
-              : (ExceptionMode? mode) {
-                  unawaited(controller.setIsolatePauseMode(mode!.id));
-                },
+          onChanged:
+              controller.isSystemIsolate
+                  ? null
+                  : (ExceptionMode? mode) {
+                    unawaited(controller.setIsolatePauseMode(mode!.id));
+                  },
           isDense: true,
           items: [
             for (final mode in ExceptionMode.modes)
               DropdownMenuItem<ExceptionMode>(
                 value: mode,
-                child: Text(
-                  isInSmallMode ? mode.name : mode.description,
-                ),
+                child: Text(isInSmallMode ? mode.name : mode.description),
               ),
           ],
         );

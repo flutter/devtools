@@ -1,13 +1,13 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/ui/common_widgets.dart';
 
 class HeapClassView extends StatelessWidget {
   const HeapClassView({
@@ -73,12 +73,7 @@ class ClassTypeLegend extends StatelessWidget {
       children: [
         const Text('Class type legend:'),
         ...ClassType.values.map(
-          (t) => Row(
-            children: [
-              t.icon,
-              Text(' ${t.aliasDescription}'),
-            ],
-          ),
+          (t) => Row(children: [t.icon, Text(' ${t.aliasDescription}')]),
         ),
       ],
     );

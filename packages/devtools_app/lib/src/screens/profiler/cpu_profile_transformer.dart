@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:math' as math;
 
@@ -64,9 +64,11 @@ class CpuProfileTransformer {
       // Check to see if there are any empty tag roots as a result of filtering
       // and remove them.
       final nodeIndicesToRemove = <int>[];
-      for (int i = cpuProfileData.cpuProfileRoot.children.length - 1;
-          i >= 0;
-          --i) {
+      for (
+        int i = cpuProfileData.cpuProfileRoot.children.length - 1;
+        i >= 0;
+        --i
+      ) {
         final root = cpuProfileData.cpuProfileRoot.children[i];
         if (root.isTag && root.children.isEmpty) {
           nodeIndicesToRemove.add(i);
@@ -80,15 +82,13 @@ class CpuProfileTransformer {
     _setExclusiveSampleCountsAndTags(cpuProfileData);
     cpuProfileData.processed = true;
 
-    // TODO(kenz): investigate why this assert is firing again.
-    // https://github.com/flutter/devtools/issues/1529.
-//    assert(
-//      cpuProfileData.profileMetaData.sampleCount ==
-//          cpuProfileData.cpuProfileRoot.inclusiveSampleCount,
-//      'SampleCount from response (${cpuProfileData.profileMetaData.sampleCount})'
-//      ' != sample count from root '
-//      '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
-//    );
+    assert(
+      cpuProfileData.profileMetaData.sampleCount ==
+          cpuProfileData.cpuProfileRoot.inclusiveSampleCount,
+      'SampleCount from response (${cpuProfileData.profileMetaData.sampleCount})'
+      ' != sample count from root '
+      '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
+    );
 
     // Reset the transformer after processing.
     reset();
@@ -99,8 +99,10 @@ class CpuProfileTransformer {
     CpuProfileData cpuProfileData, {
     required String processId,
   }) {
-    final batchEnd =
-        math.min(_stackFramesProcessed + batchSize, _stackFramesCount);
+    final batchEnd = math.min(
+      _stackFramesProcessed + batchSize,
+      _stackFramesCount,
+    );
     for (int i = _stackFramesProcessed; i < batchEnd; i++) {
       if (processId != _activeProcessId) {
         throw ProcessCancelledException();

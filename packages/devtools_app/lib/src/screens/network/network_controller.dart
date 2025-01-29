@@ -17,7 +17,7 @@ import '../../shared/http/http_service.dart' as http_service;
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
-import '../../shared/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'har_network_data.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
@@ -40,10 +40,7 @@ enum NetworkResponseViewType {
   }
 }
 
-enum _NetworkTrafficType {
-  http,
-  socket,
-}
+enum _NetworkTrafficType { http, socket }
 
 class NetworkController extends DisposableController
     with
@@ -57,7 +54,9 @@ class NetworkController extends DisposableController
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
     );
-    subscribeToFilterChanges();
+    // TODO(https://github.com/flutter/devtools/issues/7727): add support for
+    // persisting network filter.
+    initFilterController();
   }
   List<DartIOHttpRequestData>? _httpRequests;
 
@@ -92,22 +91,28 @@ class NetworkController extends DisposableController
 
   @override
   Map<String, QueryFilterArgument<NetworkRequest>> createQueryFilterArgs() => {
-        methodFilterId: QueryFilterArgument<NetworkRequest>(
-          keys: ['method', 'm'],
-          dataValueProvider: (request) => request.method,
-          substringMatch: false,
-        ),
-        statusFilterId: QueryFilterArgument<NetworkRequest>(
-          keys: ['status', 's'],
-          dataValueProvider: (request) => request.status,
-          substringMatch: false,
-        ),
-        typeFilterId: QueryFilterArgument<NetworkRequest>(
-          keys: ['type', 't'],
-          dataValueProvider: (request) => request.type,
-          substringMatch: false,
-        ),
-      };
+    methodFilterId: QueryFilterArgument<NetworkRequest>(
+      keys: ['method', 'm'],
+      exampleUsages: ['m:get', '-m:put,patch'],
+      dataValueProvider: (request) => request.method,
+      substringMatch: false,
+    ),
+    statusFilterId: QueryFilterArgument<NetworkRequest>(
+      keys: ['status', 's'],
+      exampleUsages: ['s:200', '-s:404'],
+      dataValueProvider: (request) => request.status,
+      substringMatch: false,
+    ),
+    typeFilterId: QueryFilterArgument<NetworkRequest>(
+      keys: ['type', 't'],
+      exampleUsages: ['t:json', '-t:text'],
+      dataValueProvider: (request) => request.type,
+      substringMatch: false,
+    ),
+  };
+
+  @override
+  ValueNotifier<String>? get filterTagNotifier => preferences.network.filterTag;
 
   /// Notifies that new Network requests have been processed.
   ValueListenable<List<NetworkRequest>> get requests => _currentNetworkRequests;
@@ -116,8 +121,9 @@ class NetworkController extends DisposableController
   ValueListenable<NetworkResponseViewType> get currentResponseViewType =>
       _currentResponseViewType;
 
-  final _currentResponseViewType =
-      ValueNotifier<NetworkResponseViewType>(NetworkResponseViewType.auto);
+  final _currentResponseViewType = ValueNotifier<NetworkResponseViewType>(
+    NetworkResponseViewType.auto,
+  );
 
   /// Change current response type
   set setResponseViewType(NetworkResponseViewType type) =>
@@ -177,8 +183,9 @@ class NetworkController extends DisposableController
     // the value.
     final currentSelectedRequestId = selectedRequest.value?.id;
     if (currentSelectedRequestId != null) {
-      selectedRequest.value =
-          currentRequests.getRequest(currentSelectedRequestId);
+      selectedRequest.value = currentRequests.getRequest(
+        currentSelectedRequestId,
+      );
     }
   }
 
@@ -213,10 +220,12 @@ class NetworkController extends DisposableController
 
   Future<void> startRecording() async {
     await _startRecording(
-      alreadyRecordingHttp:
-          await _recordingNetworkTraffic(type: _NetworkTrafficType.http),
-      alreadyRecordingSocketData:
-          await _recordingNetworkTraffic(type: _NetworkTrafficType.socket),
+      alreadyRecordingHttp: await _recordingNetworkTraffic(
+        type: _NetworkTrafficType.http,
+      ),
+      alreadyRecordingSocketData: await _recordingNetworkTraffic(
+        type: _NetworkTrafficType.socket,
+      ),
     );
   }
 
@@ -248,8 +257,11 @@ class NetworkController extends DisposableController
     // fewer flags risks breaking functionality on the timeline view that
     // assumes that all flags are set.
     await allowedError(
-      serviceConnection.serviceManager.service!
-          .setVMTimelineFlags(['GC', 'Dart', 'Embedder']),
+      serviceConnection.serviceManager.service!.setVMTimelineFlags([
+        'GC',
+        'Dart',
+        'Embedder',
+      ]),
     );
 
     // TODO(kenz): only call these if http logging and socket profiling are not
@@ -291,22 +303,22 @@ class NetworkController extends DisposableController
   }) async {
     bool enabled = true;
     final service = serviceConnection.serviceManager.service!;
-    await service.forEachIsolate(
-      (isolate) async {
-        final future = switch (type) {
-          _NetworkTrafficType.http =>
-            service.httpEnableTimelineLoggingWrapper(isolate.id!),
-          _NetworkTrafficType.socket =>
-            service.socketProfilingEnabledWrapper(isolate.id!),
-        };
-        // The above call won't complete immediately if the isolate is paused,
-        // so give up waiting after 500ms.
-        final state = await timeout(future, 500);
-        if (state?.enabled != true) {
-          enabled = false;
-        }
-      },
-    );
+    await service.forEachIsolate((isolate) async {
+      final future = switch (type) {
+        _NetworkTrafficType.http => service.httpEnableTimelineLoggingWrapper(
+          isolate.id!,
+        ),
+        _NetworkTrafficType.socket => service.socketProfilingEnabledWrapper(
+          isolate.id!,
+        ),
+      };
+      // The above call won't complete immediately if the isolate is paused,
+      // so give up waiting after 500ms.
+      final state = await timeout(future, 500);
+      if (state?.enabled != true) {
+        enabled = false;
+      }
+    });
     return enabled;
   }
 
@@ -354,7 +366,8 @@ class NetworkController extends DisposableController
       ..addAll(
         _currentNetworkRequests.value.where((NetworkRequest r) {
           final filteredOutByQueryFilterArgument = queryFilter
-              .filterArguments.values
+              .filterArguments
+              .values
               .any((argument) => !argument.matchesValue(r));
           if (filteredOutByQueryFilterArgument) return false;
 
@@ -388,10 +401,10 @@ class NetworkController extends DisposableController
   }
 
   Future<void> _fetchFullDataBeforeExport() => Future.wait(
-        filteredData.value
-            .whereType<DartIOHttpRequestData>()
-            .map((item) => item.getFullRequestData()),
-      );
+    filteredData.value.whereType<DartIOHttpRequestData>().map(
+      (item) => item.getFullRequestData(),
+    ),
+  );
 }
 
 /// Class for managing the set of all current sockets, and

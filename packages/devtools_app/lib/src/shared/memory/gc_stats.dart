@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
 
@@ -47,12 +47,12 @@ class GCStats with Serializable {
 
   @override
   Map<String, dynamic> toJson() => {
-        _Json.heap: heap,
-        _Json.usage: usage,
-        _Json.capacity: capacity,
-        _Json.collections: collections,
-        _Json.averageCollectionTime: averageCollectionTime,
-      };
+    _Json.heap: heap,
+    _Json.usage: usage,
+    _Json.capacity: capacity,
+    _Json.collections: collections,
+    _Json.averageCollectionTime: averageCollectionTime,
+  };
 
   static const usedKey = 'used';
   static const capacityKey = 'capacity';

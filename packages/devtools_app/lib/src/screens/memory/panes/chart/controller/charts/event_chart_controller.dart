@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -53,12 +53,12 @@ enum _EventsTraceName {
 /// Their y-position is such that the symbols won't overlap.
 class EventChartController extends ChartController {
   EventChartController(this.memoryTimeline, {required this.paused})
-      : super(
-          displayYLabels: false,
-          displayXAxis: false,
-          displayXLabels: false,
-          name: 'Event Pane',
-        ) {
+    : super(
+        displayYLabels: false,
+        displayXAxis: false,
+        displayXLabels: false,
+        name: 'Event Pane',
+      ) {
     setFixedYRange(_Sizes.visibleVm, _Sizes.extensions);
     setupData();
 
@@ -78,10 +78,7 @@ class EventChartController extends ChartController {
     final chartDataLength = timestampsLength;
     final dataLength = memoryTimeline.data.length;
 
-    final dataRange = memoryTimeline.data.getRange(
-      chartDataLength,
-      dataLength,
-    );
+    final dataRange = memoryTimeline.data.getRange(chartDataLength, dataLength);
 
     dataRange.forEach(addSample);
   }
@@ -258,9 +255,7 @@ class EventChartController extends ChartController {
       name: _EventsTraceName.gc.toString(),
     );
     assert(gcIndex == _EventsTraceName.gc.index);
-    assert(
-      trace(gcIndex).name == _EventsTraceName.values[gcIndex].toString(),
-    );
+    assert(trace(gcIndex).name == _EventsTraceName.values[gcIndex].toString());
 
     assert(traces.length == _EventsTraceName.values.length);
   }
@@ -290,10 +285,7 @@ class EventChartController extends ChartController {
 
     // User events snapshot, auto-snapshot, manual GC, are plotted on the top-line
     // of the event pane (visible Events).
-    final data = chart_trace.Data(
-      sample.timestamp,
-      _Sizes.visible,
-    );
+    final data = chart_trace.Data(sample.timestamp, _Sizes.visible);
 
     if (events.isEventGC) {
       // Plot manual requested GC on the visibleEvent Y coordinate.
@@ -312,10 +304,7 @@ class EventChartController extends ChartController {
 
     if (sample.memoryEventInfo.isEventAllocationAccumulator) {
       final allocationEvent = events.allocationAccumulator!;
-      final data = chart_trace.Data(
-        sample.timestamp,
-        _Sizes.visibleMonitor,
-      );
+      final data = chart_trace.Data(sample.timestamp, _Sizes.visibleMonitor);
       if (allocationEvent.isReset) {
         addDataToTrace(_EventsTraceName.monitorReset.index, data);
       } else if (allocationEvent.isStart) {

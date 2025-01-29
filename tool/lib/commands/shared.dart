@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -14,27 +14,27 @@ extension CommandExtension on Command {
 extension BuildCommandArgsExtension on ArgParser {
   void addBulidModeOption() {
     addOption(
-      BuildCommandArgs.buildMode.flagName,
+      SharedCommandArgs.buildMode.flagName,
       allowed: ['debug', 'profile', 'release'],
       defaultsTo: 'release',
-      help: 'The build mode to use for the DevTools web app. This should only'
-          ' be "debug" or "profile" for the purpose of local development.',
+      help: 'The build mode to use for the DevTools web app.',
     );
   }
 
   void addPubGetFlag() {
     addFlag(
-      BuildCommandArgs.pubGet.flagName,
+      SharedCommandArgs.pubGet.flagName,
       negatable: true,
       defaultsTo: true,
-      help: 'Whether to run `devtools_tool pub-get --only-main` before building'
+      help:
+          'Whether to run `dt pub-get --only-main` before building'
           ' the DevTools web app.',
     );
   }
 
   void addUpdatePerfettoFlag() {
     addFlag(
-      BuildCommandArgs.updatePerfetto.flagName,
+      SharedCommandArgs.updatePerfetto.flagName,
       negatable: false,
       defaultsTo: false,
       help: 'Whether to update the Perfetto assets before building DevTools.',
@@ -43,17 +43,18 @@ extension BuildCommandArgsExtension on ArgParser {
 
   void addUpdateFlutterFlag() {
     addFlag(
-      BuildCommandArgs.updateFlutter.flagName,
+      SharedCommandArgs.updateFlutter.flagName,
       negatable: true,
       defaultsTo: true,
-      help: 'Whether to update the Flutter SDK contained in the '
+      help:
+          'Whether to update the Flutter SDK contained in the '
           '"tool/flutter-sdk" directory.',
     );
   }
 
   void addWasmFlag() {
     addFlag(
-      BuildCommandArgs.wasm.flagName,
+      SharedCommandArgs.wasm.flagName,
       defaultsTo: true,
       negatable: true,
       help: 'Whether to build DevTools with dart2wasm instead of dart2js.',
@@ -62,7 +63,7 @@ extension BuildCommandArgsExtension on ArgParser {
 
   void addNoStripWasmFlag() {
     addFlag(
-      BuildCommandArgs.noStripWasm.flagName,
+      SharedCommandArgs.noStripWasm.flagName,
       defaultsTo: false,
       help:
           'When this flag is present, static symbol names will be included in '
@@ -70,17 +71,28 @@ extension BuildCommandArgsExtension on ArgParser {
           'not present.',
     );
   }
+
+  void addDebugServerFlag() {
+    addFlag(
+      SharedCommandArgs.debugServer.flagName,
+      negatable: false,
+      defaultsTo: false,
+      help: 'Enable debugging for the DevTools server.',
+    );
+  }
 }
 
-enum BuildCommandArgs {
+enum SharedCommandArgs {
   buildMode('build-mode'),
+  debugServer('debug-server'),
   pubGet('pub-get'),
   wasm('wasm'),
   noStripWasm('no-strip-wasm'),
+  runApp('run-app'),
   updateFlutter('update-flutter'),
   updatePerfetto('update-perfetto');
 
-  const BuildCommandArgs(this.flagName);
+  const SharedCommandArgs(this.flagName);
 
   final String flagName;
 

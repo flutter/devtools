@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -17,10 +17,10 @@ import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/development_helpers.dart';
-import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/byte_utils.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/utils/future_work_tracker.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
 import '../../performance_utils.dart';
@@ -30,11 +30,7 @@ import 'perfetto/tracing/model.dart';
 
 final _log = Logger('timeline_events_controller');
 
-enum EventsControllerStatus {
-  empty,
-  refreshing,
-  ready,
-}
+enum EventsControllerStatus { empty, refreshing, ready }
 
 class TimelineEventsController extends PerformanceFeatureController
     with AutoDisposeControllerMixin {
@@ -110,8 +106,9 @@ class TimelineEventsController extends PerformanceFeatureController
 
   /// Whether the recorded timeline data is currently being processed.
   ValueListenable<EventsControllerStatus> get status => _status;
-  final _status =
-      ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty);
+  final _status = ValueNotifier<EventsControllerStatus>(
+    EventsControllerStatus.empty,
+  );
 
   final _refreshWorkTracker = FutureWorkTracker();
 
@@ -184,40 +181,33 @@ class TimelineEventsController extends PerformanceFeatureController
 
     late PerfettoTimeline rawPerfettoTimeline;
     if (preferences.performance.includeCpuSamplesInTimeline.value) {
-      await debugTimeAsync(
-        () async {
-          await ga.timeAsync(
-            gac.performance,
-            gac.PerformanceEvents.getPerfettoVMTimelineWithCpuSamplesTime.name,
-            asyncOperation: () async {
-              rawPerfettoTimeline =
-                  await service.getPerfettoVMTimelineWithCpuSamplesWrapper(
-                timeOriginMicros: _nextPollStartMicros,
-                timeExtentMicros:
-                    currentVmTime.timestamp! - _nextPollStartMicros,
-              );
-            },
-          );
-        },
-        debugName: 'VmService.getPerfettoVMTimelineWithCpuSamples',
-      );
+      await debugTimeAsync(() async {
+        await ga.timeAsync(
+          gac.performance,
+          gac.PerformanceEvents.getPerfettoVMTimelineWithCpuSamplesTime.name,
+          asyncOperation: () async {
+            rawPerfettoTimeline = await service
+                .getPerfettoVMTimelineWithCpuSamplesWrapper(
+                  timeOriginMicros: _nextPollStartMicros,
+                  timeExtentMicros:
+                      currentVmTime.timestamp! - _nextPollStartMicros,
+                );
+          },
+        );
+      }, debugName: 'VmService.getPerfettoVMTimelineWithCpuSamples');
     } else {
-      await debugTimeAsync(
-        () async {
-          await ga.timeAsync(
-            gac.performance,
-            gac.PerformanceEvents.getPerfettoVMTimelineTime.name,
-            asyncOperation: () async {
-              rawPerfettoTimeline = await service.getPerfettoVMTimeline(
-                timeOriginMicros: _nextPollStartMicros,
-                timeExtentMicros:
-                    currentVmTime.timestamp! - _nextPollStartMicros,
-              );
-            },
-          );
-        },
-        debugName: 'VmService.getPerfettoVMTimeline',
-      );
+      await debugTimeAsync(() async {
+        await ga.timeAsync(
+          gac.performance,
+          gac.PerformanceEvents.getPerfettoVMTimelineTime.name,
+          asyncOperation: () async {
+            rawPerfettoTimeline = await service.getPerfettoVMTimeline(
+              timeOriginMicros: _nextPollStartMicros,
+              timeExtentMicros: currentVmTime.timestamp! - _nextPollStartMicros,
+            );
+          },
+        );
+      }, debugName: 'VmService.getPerfettoVMTimeline');
     }
     _nextPollStartMicros = currentVmTime.timestamp! + 1;
 
@@ -241,8 +231,9 @@ class TimelineEventsController extends PerformanceFeatureController
   }) {
     if (!_isFlutterAppHelper()) {
       debugTraceCallback(
-        () => _log
-            .info('[_prepareTraceForProcessing] not a flutter app, returning.'),
+        () => _log.info(
+          '[_prepareTraceForProcessing] not a flutter app, returning.',
+        ),
       );
       return;
     }
@@ -251,8 +242,9 @@ class TimelineEventsController extends PerformanceFeatureController
     final newTrackDescriptors = <PerfettoTrackDescriptorEvent>[];
     for (final packet in trace.packet) {
       if (packet.hasTrackDescriptor()) {
-        final trackDescriptor =
-            PerfettoTrackDescriptorEvent(packet.trackDescriptor);
+        final trackDescriptor = PerfettoTrackDescriptorEvent(
+          packet.trackDescriptor,
+        );
         final added = _trackDescriptors.add(trackDescriptor);
         if (added) {
           newTrackDescriptors.add(trackDescriptor);
@@ -290,9 +282,7 @@ class TimelineEventsController extends PerformanceFeatureController
       // iOS: "io.flutter.1.raster (12651)"
       // Linux, Windows, Dream (g3): "io.flutter.raster (12651)"
       // MacOS: Does not exist
-      // Also look for .gpu here for older versions of Flutter.
-      // TODO(kenz): remove check for .gpu name in April 2021.
-      if (name.contains(rasterThreadSuffix) || name.contains(gpuThreadSuffix)) {
+      if (name.contains(rasterThreadSuffix)) {
         rasterTrackId = id;
       }
 
@@ -367,10 +357,12 @@ class TimelineEventsController extends PerformanceFeatureController
     ga.timeSync(
       gac.performance,
       gac.PerformanceEvents.perfettoModeTraceEventProcessingTime.nameOverride!,
-      syncOperation: () => perfettoController.processor
-          .processTrackEvents(_unprocessedTrackEvents),
-      screenMetricsProvider: () =>
-          PerformanceScreenMetrics(traceEventCount: eventCount),
+      syncOperation:
+          () => perfettoController.processor.processTrackEvents(
+            _unprocessedTrackEvents,
+          ),
+      screenMetricsProvider:
+          () => PerformanceScreenMetrics(traceEventCount: eventCount),
     );
     _unprocessedTrackEvents.clear();
   }
@@ -388,11 +380,11 @@ class TimelineEventsController extends PerformanceFeatureController
     void processMoreEventsOrExitHelper({
       required FutureOr<void> Function() onProcessMore,
     }) async {
-      final hasProcessedTimelineEventsForFrame =
-          perfettoController.processor.hasProcessedEventsForFrame(frame.id);
+      final hasProcessedTimelineEventsForFrame = perfettoController.processor
+          .hasProcessedEventsForFrame(frame.id);
       if (!hasProcessedTimelineEventsForFrame) {
-        final timelineEventsUnavailable =
-            perfettoController.processor.frameIsBeforeTimelineData(frame.id);
+        final timelineEventsUnavailable = perfettoController.processor
+            .frameIsBeforeTimelineData(frame.id);
         if (timelineEventsUnavailable) {
           _maybePushNoTimelineEventsWarning();
           return;
@@ -429,8 +421,9 @@ class TimelineEventsController extends PerformanceFeatureController
           );
           await forceRefresh();
 
-          final hasProcessedTimelineEventsForFrame =
-              perfettoController.processor.hasProcessedEventsForFrame(frame.id);
+          final hasProcessedTimelineEventsForFrame = perfettoController
+              .processor
+              .hasProcessedEventsForFrame(frame.id);
           if (!hasProcessedTimelineEventsForFrame) {
             // At this point, we still have not processed any timeline events
             // for this Flutter frame, which means we will never have access to
@@ -465,11 +458,8 @@ class TimelineEventsController extends PerformanceFeatureController
           event,
         );
       } else {
-        final unassignedEventsForFrame =
-            _unassignedFlutterTimelineEvents.putIfAbsent(
-          frameNumber,
-          () => FrameTimelineEventData(),
-        );
+        final unassignedEventsForFrame = _unassignedFlutterTimelineEvents
+            .putIfAbsent(frameNumber, () => FrameTimelineEventData());
         unassignedEventsForFrame.setEventFlow(event: event, setTimeData: false);
       }
     }
@@ -516,8 +506,9 @@ class TimelineEventsController extends PerformanceFeatureController
     await loadPerfettoTrace();
 
     if (offlineData.selectedFrame != null) {
-      perfettoController
-          .scrollToTimeRange(offlineData.selectedFrame!.timeFromFrameTiming);
+      perfettoController.scrollToTimeRange(
+        offlineData.selectedFrame!.timeFromFrameTiming,
+      );
     }
   }
 

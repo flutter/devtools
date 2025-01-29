@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,13 +9,13 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../service/connected_app/connection_info.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/config_specific/import_export/import_export.dart';
-import '../shared/connection_info.dart';
+import '../shared/framework/routing.dart';
 import '../shared/globals.dart';
-import '../shared/query_parameters.dart';
-import '../shared/routing.dart';
+import '../shared/primitives/query_parameters.dart';
 
 class DisconnectObserver extends StatefulWidget {
   const DisconnectObserver({
@@ -85,10 +85,7 @@ class DisconnectObserverState extends State<DisconnectObserver>
       return;
     }
     WidgetsBinding.instance.scheduleFrameCallback((_) {
-      ga.select(
-        gac.devToolsMain,
-        gac.appDisconnected,
-      );
+      ga.select(gac.devToolsMain, gac.appDisconnected);
       Overlay.of(context).insert(_createDisconnectedOverlay());
     });
   }
@@ -107,8 +104,11 @@ class DisconnectObserverState extends State<DisconnectObserver>
     hideDisconnectedOverlay();
     final args = <String, String?>{
       DevToolsQueryParams.vmServiceUriKey: null,
-      DevToolsQueryParams.offlineScreenIdKey: offlineDataController
-          .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String,
+      DevToolsQueryParams.offlineScreenIdKey:
+          offlineDataController.offlineDataJson[DevToolsExportKeys
+                  .activeScreenId
+                  .name]
+              as String,
     };
     await widget.routerDelegate.popRoute();
     widget.routerDelegate.navigate(snapshotScreenId, args);
@@ -117,36 +117,37 @@ class DisconnectObserverState extends State<DisconnectObserver>
   OverlayEntry _createDisconnectedOverlay() {
     final theme = Theme.of(context);
     currentDisconnectedOverlay = OverlayEntry(
-      builder: (context) => Material(
-        child: Container(
-          color: theme.colorScheme.surface,
-          child: Center(
-            child: Column(
-              children: [
-                const Spacer(),
-                Text('Disconnected', style: theme.textTheme.headlineMedium),
-                const SizedBox(height: defaultSpacing),
-                if (!isEmbedded())
-                  ConnectToNewAppButton(
-                    routerDelegate: widget.routerDelegate,
-                    onPressed: hideDisconnectedOverlay,
-                    gaScreen: gac.devToolsMain,
-                  )
-                else
-                  const Text('Run a new debug session to reconnect.'),
-                const Spacer(),
-                if (offlineDataController.offlineDataJson.isNotEmpty) ...[
-                  ElevatedButton(
-                    onPressed: _reviewHistory,
-                    child: const Text('Review recent data (offline)'),
-                  ),
-                  const Spacer(),
-                ],
-              ],
+      builder:
+          (context) => Material(
+            child: Container(
+              color: theme.colorScheme.surface,
+              child: Center(
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    Text('Disconnected', style: theme.textTheme.headlineMedium),
+                    const SizedBox(height: defaultSpacing),
+                    if (!isEmbedded())
+                      ConnectToNewAppButton(
+                        routerDelegate: widget.routerDelegate,
+                        onPressed: hideDisconnectedOverlay,
+                        gaScreen: gac.devToolsMain,
+                      )
+                    else
+                      const Text('Run a new debug session to reconnect.'),
+                    const Spacer(),
+                    if (offlineDataController.offlineDataJson.isNotEmpty) ...[
+                      ElevatedButton(
+                        onPressed: _reviewHistory,
+                        child: const Text('Review recent data (offline)'),
+                      ),
+                      const Spacer(),
+                    ],
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
     return currentDisconnectedOverlay!;
   }

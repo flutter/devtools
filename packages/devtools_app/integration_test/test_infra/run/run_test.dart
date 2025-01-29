@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // ignore_for_file: avoid_print
 
@@ -60,9 +60,7 @@ Future<void> runFlutterIntegrationTest(
   // Run the flutter integration test.
   final testRunner = IntegrationTestRunner();
   try {
-    final testArgs = <String, Object>{
-      if (!offline) 'service_uri': testAppUri,
-    };
+    final testArgs = <String, Object>{if (!offline) 'service_uri': testAppUri};
     final testTarget = testRunnerArgs.testTarget!;
     debugLog('starting test run for $testTarget');
     await testRunner.run(
@@ -89,10 +87,11 @@ Future<void> runFlutterIntegrationTest(
 
 class DevToolsAppTestRunnerArgs extends IntegrationTestRunnerArgs {
   DevToolsAppTestRunnerArgs(super.args, {super.verifyValidTarget = true})
-      : super(addExtraArgs: _addExtraArgs) {
-    testAppDevice = TestAppDevice.fromArgName(
-      argResults[_testAppDeviceArg] ?? TestAppDevice.flutterTester.argName,
-    )!;
+    : super(addExtraArgs: _addExtraArgs) {
+    testAppDevice =
+        TestAppDevice.fromArgName(
+          argResults[_testAppDeviceArg] ?? TestAppDevice.flutterTester.argName,
+        )!;
   }
 
   /// The type of device for the test app to run on.
@@ -116,7 +115,8 @@ class DevToolsAppTestRunnerArgs extends IntegrationTestRunnerArgs {
     argParser
       ..addOption(
         _testAppUriArg,
-        help: 'The vm service connection to use for the app that DevTools will '
+        help:
+            'The vm service connection to use for the app that DevTools will '
             'connect to during the integration test. If left empty, a sample app '
             'will be spun up as part of the integration test process.',
       )

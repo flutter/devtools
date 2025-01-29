@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -93,8 +93,9 @@ class HeapData {
           continue;
         }
 
-        final className =
-            HeapClassName.fromHeapSnapshotClass(graph.classes[object.classId]);
+        final className = HeapClassName.fromHeapSnapshotClass(
+          graph.classes[object.classId],
+        );
 
         // Ignore sentinels, because their size is not known.
         if (className.isSentinel) {
@@ -105,10 +106,7 @@ class HeapData {
         reachableSize += object.shallowSize;
 
         nameToClass
-            .putIfAbsent(
-              className,
-              () => SingleClassData(className: className),
-            )
+            .putIfAbsent(className, () => SingleClassData(className: className))
             .countInstance(
               graph,
               index: i,

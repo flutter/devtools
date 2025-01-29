@@ -1,6 +1,6 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // This file contain low level utils, i.e. utils that do not depend on
 // libraries in this package.
@@ -10,7 +10,6 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:ansi_up/ansi_up.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +18,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
+import 'ansi_utils.dart';
 import 'byte_utils.dart';
 import 'simple_items.dart';
 
@@ -168,7 +168,7 @@ Future<void> delayToReleaseUiThread({int micros = 0}) async {
 /// Use in long calculations, to release UI thread after each N steps.
 class UiReleaser {
   UiReleaser({this.stepsBetweenDelays = 100000, this.delayLength = 0})
-      : assert(stepsBetweenDelays > 0);
+    : assert(stepsBetweenDelays > 0);
 
   final int stepsBetweenDelays;
   final int delayLength;
@@ -365,7 +365,7 @@ typedef RateLimiterCallback = Future<void> Function();
 /// specified rate and that at most one async [callback] is running at a time.
 class RateLimiter {
   RateLimiter(double requestsPerSecond, this.callback)
-      : delayBetweenRequests = 1000 ~/ requestsPerSecond;
+    : delayBetweenRequests = 1000 ~/ requestsPerSecond;
 
   final RateLimiterCallback callback;
   Completer<void>? _pendingRequest;
@@ -446,10 +446,7 @@ class RateLimiter {
 /// remaining time units supported by [Duration] - (seconds, minutes, etc.). If
 /// you add a unit of time to this enum, modify the toString() method in
 /// [TimeRange] to handle the new case.
-enum TimeUnit {
-  microseconds,
-  milliseconds,
-}
+enum TimeUnit { microseconds, milliseconds }
 
 class TimeRange {
   TimeRange({this.singleAssignment = true});
@@ -636,10 +633,15 @@ String toStringAsFixed(double num, [int fractionDigit = 1]) {
   return num.toStringAsFixed(fractionDigit);
 }
 
-extension SafeAccessList<T> on List<T> {
+extension SafeListOperations<T> on List<T> {
   T? safeGet(int index) => index < 0 || index >= length ? null : this[index];
 
   T? safeRemoveLast() => isNotEmpty ? removeLast() : null;
+
+  List<T> safeSublist(int start, [int? end]) {
+    if (start >= length || start >= (end ?? length)) return <T>[];
+    return sublist(max(start, 0), min(length, end ?? length));
+  }
 }
 
 extension SafeAccess<T> on Iterable<T> {
@@ -675,10 +677,7 @@ class Range {
   int get hashCode => Object.hash(begin, end);
 }
 
-enum SortDirection {
-  ascending,
-  descending,
-}
+enum SortDirection { ascending, descending }
 
 /// A Range-like class that works for inclusive ranges of lines in source code.
 class LineRange {
@@ -819,31 +818,29 @@ class MovingAverage {
   }
 }
 
-List<TextSpan> processAnsiTerminalCodes(String? input, TextStyle defaultStyle) {
-  if (input == null) {
-    return [];
-  }
-  return decodeAnsiColorEscapeCodes(input, AnsiUp())
-      .map(
-        (entry) => TextSpan(
-          text: entry.text,
-          style: entry.style.isEmpty
-              ? defaultStyle
-              : TextStyle(
-                  color: entry.fgColor != null
-                      ? colorFromAnsi(entry.fgColor!)
-                      : null,
-                  backgroundColor: entry.bgColor != null
-                      ? colorFromAnsi(entry.bgColor!)
-                      : null,
-                  fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
-                ),
-        ),
-      )
-      .toList();
+List<TextSpan> textSpansFromAnsi(String input, TextStyle defaultStyle) {
+  final parser = AnsiParser(input);
+  return parser.parse().map((entry) {
+    final styled = entry.bold || entry.fgColor != null || entry.bgColor != null;
+    return TextSpan(
+      text: entry.text,
+      style:
+          styled
+              ? TextStyle(
+                color: ansiToColor(entry.fgColor),
+                backgroundColor: ansiToColor(entry.bgColor),
+                fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
+              )
+              : defaultStyle,
+    );
+  }).toList();
 }
 
-Color colorFromAnsi(List<int> ansiInput) {
+Color? ansiToColor(List<int>? ansiInput) {
+  if (ansiInput == null) {
+    return null;
+  }
+
   assert(ansiInput.length == 3, 'Ansi color list should contain 3 elements');
   return Color.fromRGBO(ansiInput[0], ansiInput[1], ansiInput[2], 1);
 }
@@ -869,17 +866,17 @@ extension LogicalKeySetExtension on LogicalKeySet {
   String describeKeys({bool isMacOS = false}) {
     // Put the modifiers first. If it has a synonym, then it's something like
     // shiftLeft, altRight, etc.
-    final sortedKeys = keys.toList()
-      ..sort((a, b) {
-        final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
-        final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
-        if (aIsModifier && !bIsModifier) {
-          return -1;
-        } else if (bIsModifier && !aIsModifier) {
-          return 1;
-        }
-        return a.keyLabel.compareTo(b.keyLabel);
-      });
+    final sortedKeys =
+        keys.toList()..sort((a, b) {
+          final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
+          final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
+          if (aIsModifier && !bIsModifier) {
+            return -1;
+          } else if (bIsModifier && !aIsModifier) {
+            return 1;
+          }
+          return a.keyLabel.compareTo(b.keyLabel);
+        });
 
     return sortedKeys.map((key) {
       if (_modifiers.contains(key)) {
@@ -939,8 +936,10 @@ extension StringExtension on String {
       return contains(pattern);
     } else if (pattern is String) {
       final lowerCase = _lowercaseLookup.putIfAbsent(this, () => toLowerCase());
-      final strLowerCase =
-          _lowercaseLookup.putIfAbsent(pattern, () => pattern.toLowerCase());
+      final strLowerCase = _lowercaseLookup.putIfAbsent(
+        pattern,
+        () => pattern.toLowerCase(),
+      );
       return lowerCase.contains(strLowerCase);
     }
     throw Exception(
@@ -1052,10 +1051,7 @@ double safePositiveDouble(double value) {
 /// @param isUTC - if true for testing, the UTC locale is used (instead of
 /// the user's locale). Tests will then pass when run in any timezone. All
 /// formatted timestamps are displayed using the UTC locale.
-String prettyTimestamp(
-  int? timestamp, {
-  bool isUtc = false,
-}) {
+String prettyTimestamp(int? timestamp, {bool isUtc = false}) {
   if (timestamp == null) return '';
   final timestampDT = DateTime.fromMillisecondsSinceEpoch(
     timestamp,
@@ -1077,30 +1073,6 @@ const connectToNewAppText = 'Connect to a new app';
 /// Exception thrown when a request to process data has been cancelled in
 /// favor of a new request.
 class ProcessCancelledException implements Exception {}
-
-extension UriExtension on Uri {
-  Uri copyWith({
-    String? scheme,
-    String? userInfo,
-    String? host,
-    int? port,
-    Iterable<String>? pathSegments,
-    String? query,
-    Map<String, dynamic>? queryParameters,
-    String? fragment,
-  }) {
-    return Uri(
-      scheme: scheme ?? this.scheme,
-      userInfo: userInfo ?? this.userInfo,
-      host: host ?? this.host,
-      port: port ?? this.port,
-      pathSegments: pathSegments ?? this.pathSegments,
-      query: query ?? this.query,
-      queryParameters: queryParameters ?? this.queryParameters,
-      fragment: fragment ?? this.fragment,
-    );
-  }
-}
 
 // TODO(mtaylee): Prefer to use this helper method whenever a call to
 // .split('/').last is made on a String (usually on URIs).

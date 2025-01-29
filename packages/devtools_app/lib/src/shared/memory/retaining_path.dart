@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -42,18 +42,18 @@ class PathFromRoot {
   PathFromRoot._(
     this.path, {
     @visibleForTesting bool debugOmitClassesInRetainingPath = false,
-  })  : assert(() {
-          debugUsage.constructed++;
-          return true;
-        }()),
-        hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
-        classes = debugOmitClassesInRetainingPath ? const {} : path.toSet();
+  }) : assert(() {
+         debugUsage.constructed++;
+         return true;
+       }()),
+       hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
+       classes = debugOmitClassesInRetainingPath ? const {} : path.toSet();
 
   /// For objects directly referenced from root.
   const PathFromRoot._empty()
-      : path = const [],
-        classes = const {},
-        hashCode = _hashOfEmptyPath;
+    : path = const [],
+      classes = const {},
+      hashCode = _hashOfEmptyPath;
 
   factory PathFromRoot.forObject(
     HeapSnapshotGraph graph, {

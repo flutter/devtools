@@ -1,10 +1,10 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
-import 'package:devtools_app/src/shared/utils.dart';
+import 'package:devtools_app/src/shared/utils/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
@@ -18,18 +18,12 @@ void main() {
   group('utils', () {
     group('durationText', () {
       test('infers unit based on duration', () {
-        expect(
-          durationText(Duration.zero),
-          equals('0 μs'),
-        );
+        expect(durationText(Duration.zero), equals('0 μs'));
         expect(
           durationText(const Duration(microseconds: 100)),
           equals('0.1 ms'),
         );
-        expect(
-          durationText(const Duration(microseconds: 99)),
-          equals('99 μs'),
-        );
+        expect(durationText(const Duration(microseconds: 99)), equals('99 μs'));
         expect(
           durationText(const Duration(microseconds: 1000)),
           equals('1.0 ms'),
@@ -49,10 +43,7 @@ void main() {
       });
 
       test('displays proper number of fraction digits', () {
-        expect(
-          durationText(const Duration(microseconds: 99)),
-          equals('99 μs'),
-        );
+        expect(durationText(const Duration(microseconds: 99)), equals('99 μs'));
         expect(
           durationText(
             const Duration(microseconds: 99),
@@ -77,10 +68,7 @@ void main() {
 
       test('does not include unit when specified', () {
         expect(
-          durationText(
-            const Duration(microseconds: 1000),
-            includeUnit: false,
-          ),
+          durationText(const Duration(microseconds: 1000), includeUnit: false),
           equals('1.0'),
         );
         expect(
@@ -96,12 +84,9 @@ void main() {
       test('does not allow rounding to zero when specified', () {
         // Setting [allowRoundingToZero] to false without specifying a unit
         // throws an assertion error.
-        expect(
-          () {
-            durationText(Duration.zero, allowRoundingToZero: false);
-          },
-          throwsAssertionError,
-        );
+        expect(() {
+          durationText(Duration.zero, allowRoundingToZero: false);
+        }, throwsAssertionError);
 
         // Displays zero for true zero values.
         expect(
@@ -216,14 +201,10 @@ void main() {
       int? end;
 
       // Condition n >= 2 is false, so we should execute with a delay.
-      executeWithDelay(
-        const Duration(milliseconds: 500),
-        () {
-          n++;
-          end = DateTime.now().millisecondsSinceEpoch;
-        },
-        executeNow: n >= 2,
-      );
+      executeWithDelay(const Duration(milliseconds: 500), () {
+        n++;
+        end = DateTime.now().millisecondsSinceEpoch;
+      }, executeNow: n >= 2);
 
       expect(n, equals(1));
       expect(end, isNull);
@@ -243,14 +224,10 @@ void main() {
       // Condition n >= 2 is true, so we should not execute with a delay.
       end = null;
       start = DateTime.now().millisecondsSinceEpoch;
-      executeWithDelay(
-        const Duration(milliseconds: 500),
-        () {
-          n++;
-          end = DateTime.now().millisecondsSinceEpoch;
-        },
-        executeNow: true,
-      );
+      executeWithDelay(const Duration(milliseconds: 500), () {
+        n++;
+        end = DateTime.now().millisecondsSinceEpoch;
+      }, executeNow: true);
       expect(n, equals(3));
       expect(end, isNotNull);
       // 400ms is arbitrary. It is less than 500, which is what matters. This
@@ -297,24 +274,30 @@ void main() {
       });
 
       test('overlaps', () {
-        final t = TimeRange()
-          ..start = const Duration(milliseconds: 100)
-          ..end = const Duration(milliseconds: 200);
-        final overlapBeginning = TimeRange()
-          ..start = const Duration(milliseconds: 50)
-          ..end = const Duration(milliseconds: 150);
-        final overlapMiddle = TimeRange()
-          ..start = const Duration(milliseconds: 125)
-          ..end = const Duration(milliseconds: 175);
-        final overlapEnd = TimeRange()
-          ..start = const Duration(milliseconds: 150)
-          ..end = const Duration(milliseconds: 250);
-        final overlapAll = TimeRange()
-          ..start = const Duration(milliseconds: 50)
-          ..end = const Duration(milliseconds: 250);
-        final noOverlap = TimeRange()
-          ..start = const Duration(milliseconds: 300)
-          ..end = const Duration(milliseconds: 400);
+        final t =
+            TimeRange()
+              ..start = const Duration(milliseconds: 100)
+              ..end = const Duration(milliseconds: 200);
+        final overlapBeginning =
+            TimeRange()
+              ..start = const Duration(milliseconds: 50)
+              ..end = const Duration(milliseconds: 150);
+        final overlapMiddle =
+            TimeRange()
+              ..start = const Duration(milliseconds: 125)
+              ..end = const Duration(milliseconds: 175);
+        final overlapEnd =
+            TimeRange()
+              ..start = const Duration(milliseconds: 150)
+              ..end = const Duration(milliseconds: 250);
+        final overlapAll =
+            TimeRange()
+              ..start = const Duration(milliseconds: 50)
+              ..end = const Duration(milliseconds: 250);
+        final noOverlap =
+            TimeRange()
+              ..start = const Duration(milliseconds: 300)
+              ..end = const Duration(milliseconds: 400);
 
         expect(t.overlaps(t), isTrue);
         expect(t.overlaps(overlapBeginning), isTrue);
@@ -325,24 +308,30 @@ void main() {
       });
 
       test('containsRange', () {
-        final t = TimeRange()
-          ..start = const Duration(milliseconds: 100)
-          ..end = const Duration(milliseconds: 200);
-        final containsStart = TimeRange()
-          ..start = const Duration(milliseconds: 50)
-          ..end = const Duration(milliseconds: 150);
-        final containsStartAndEnd = TimeRange()
-          ..start = const Duration(milliseconds: 125)
-          ..end = const Duration(milliseconds: 175);
-        final containsEnd = TimeRange()
-          ..start = const Duration(milliseconds: 150)
-          ..end = const Duration(milliseconds: 250);
-        final invertedContains = TimeRange()
-          ..start = const Duration(milliseconds: 50)
-          ..end = const Duration(milliseconds: 250);
-        final containsNeither = TimeRange()
-          ..start = const Duration(milliseconds: 300)
-          ..end = const Duration(milliseconds: 400);
+        final t =
+            TimeRange()
+              ..start = const Duration(milliseconds: 100)
+              ..end = const Duration(milliseconds: 200);
+        final containsStart =
+            TimeRange()
+              ..start = const Duration(milliseconds: 50)
+              ..end = const Duration(milliseconds: 150);
+        final containsStartAndEnd =
+            TimeRange()
+              ..start = const Duration(milliseconds: 125)
+              ..end = const Duration(milliseconds: 175);
+        final containsEnd =
+            TimeRange()
+              ..start = const Duration(milliseconds: 150)
+              ..end = const Duration(milliseconds: 250);
+        final invertedContains =
+            TimeRange()
+              ..start = const Duration(milliseconds: 50)
+              ..end = const Duration(milliseconds: 250);
+        final containsNeither =
+            TimeRange()
+              ..start = const Duration(milliseconds: 300)
+              ..end = const Duration(milliseconds: 400);
 
         expect(t.containsRange(containsStart), isFalse);
         expect(t.containsRange(containsStartAndEnd), isTrue);
@@ -352,43 +341,31 @@ void main() {
       });
 
       test('start setter throws exception when single assignment is true', () {
-        expect(
-          () {
-            final t = TimeRange()..start = Duration.zero;
-            t.start = Duration.zero;
-          },
-          throwsAssertionError,
-        );
+        expect(() {
+          final t = TimeRange()..start = Duration.zero;
+          t.start = Duration.zero;
+        }, throwsAssertionError);
       });
 
       test('start setter throws exception when value is after end', () {
-        expect(
-          () {
-            final t = TimeRange()..end = const Duration(seconds: 1);
-            t.start = const Duration(seconds: 2);
-          },
-          throwsAssertionError,
-        );
+        expect(() {
+          final t = TimeRange()..end = const Duration(seconds: 1);
+          t.start = const Duration(seconds: 2);
+        }, throwsAssertionError);
       });
 
       test('end setter throws exception when single assignment is true', () {
-        expect(
-          () {
-            final t = TimeRange()..end = Duration.zero;
-            t.end = Duration.zero;
-          },
-          throwsAssertionError,
-        );
+        expect(() {
+          final t = TimeRange()..end = Duration.zero;
+          t.end = Duration.zero;
+        }, throwsAssertionError);
       });
 
       test('end setter throws exception when value is before start', () {
-        expect(
-          () {
-            final t = TimeRange()..start = const Duration(seconds: 1);
-            t.end = Duration.zero;
-          },
-          throwsAssertionError,
-        );
+        expect(() {
+          final t = TimeRange()..start = const Duration(seconds: 1);
+          t.end = Duration.zero;
+        }, throwsAssertionError);
       });
 
       test('isWellFormed', () {
@@ -405,9 +382,10 @@ void main() {
 
       group('offset', () {
         test('from well formed time range', () {
-          final t = TimeRange()
-            ..start = const Duration(milliseconds: 100)
-            ..end = const Duration(milliseconds: 200);
+          final t =
+              TimeRange()
+                ..start = const Duration(milliseconds: 100)
+                ..end = const Duration(milliseconds: 200);
           final offset = TimeRange.offset(
             original: t,
             offset: const Duration(milliseconds: 300),
@@ -572,7 +550,8 @@ void main() {
         equals('SchedulerBinding.handleBeginFrame.<closure>'),
       );
 
-      name = '__CompactLinkedHashSet&_HashFieldBase&_HashBase&_OperatorEquals'
+      name =
+          '__CompactLinkedHashSet&_HashFieldBase&_HashBase&_OperatorEquals'
           'AndHashCode&_SetMixin.toList';
       expect(getSimpleStackFrameName(name), equals('_SetMixin.toList'));
 
@@ -609,11 +588,7 @@ void main() {
       test('produces the safe value on infinite division', () {
         expect(safeDivide(double.infinity, 1.0), 0.0);
         expect(
-          safeDivide(
-            double.nan,
-            double.negativeInfinity,
-            ifNotFinite: 50.0,
-          ),
+          safeDivide(double.nan, double.negativeInfinity, ifNotFinite: 50.0),
           50.0,
         );
       });
@@ -712,7 +687,7 @@ void main() {
       });
     });
 
-    group('SafeAccess', () {
+    group('SafeListOperations', () {
       test('safeFirst', () {
         final list = <int?>[];
         final iterable = list;
@@ -752,25 +727,37 @@ void main() {
         expect(list.safeRemoveLast(), 1);
         expect(list.safeRemoveLast(), isNull);
       });
+
+      test('safeSublist', () {
+        expect([1, 2, 3].safeSublist(-1, 2), [1, 2]);
+        expect([1, 2, 3].safeSublist(0, 6), [1, 2, 3]);
+        expect([1, 2, 3].safeSublist(2, 1), []);
+      });
     });
   });
 
   group('LogicalKeySetExtension', () {
     testWidgets('meta non-mac', (WidgetTester tester) async {
-      final keySet =
-          LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyP);
+      final keySet = LogicalKeySet(
+        LogicalKeyboardKey.meta,
+        LogicalKeyboardKey.keyP,
+      );
       expect(keySet.describeKeys(), 'Meta-P');
     });
 
     testWidgets('meta mac', (WidgetTester tester) async {
-      final keySet =
-          LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyP);
+      final keySet = LogicalKeySet(
+        LogicalKeyboardKey.meta,
+        LogicalKeyboardKey.keyP,
+      );
       expect(keySet.describeKeys(isMacOS: true), '⌘P');
     });
 
     testWidgets('ctrl', (WidgetTester tester) async {
-      final keySet =
-          LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyP);
+      final keySet = LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.keyP,
+      );
       expect(keySet.describeKeys(), 'Control-P');
     });
   });
@@ -1212,41 +1199,39 @@ void main() {
         setGlobal(IdeTheme, IdeTheme());
       });
 
-      testWidgets(
-        'updates controller when provided controller changes',
-        (WidgetTester tester) async {
-          final controller1 = TestProvidedController('id_1');
-          final controller2 = TestProvidedController('id_2');
-          final controllerNotifier =
-              ValueNotifier<TestProvidedController>(controller1);
+      testWidgets('updates controller when provided controller changes', (
+        WidgetTester tester,
+      ) async {
+        final controller1 = TestProvidedController('id_1');
+        final controller2 = TestProvidedController('id_2');
+        final controllerNotifier = ValueNotifier<TestProvidedController>(
+          controller1,
+        );
 
-          final provider = ValueListenableBuilder<TestProvidedController>(
-            valueListenable: controllerNotifier,
-            builder: (context, controller, _) {
-              return Provider<TestProvidedController>.value(
-                value: controller,
-                child: Builder(
-                  builder: (context) {
-                    return wrapSimple(
-                      const TestStatefulWidget(),
-                    );
-                  },
-                ),
-              );
-            },
-          );
+        final provider = ValueListenableBuilder<TestProvidedController>(
+          valueListenable: controllerNotifier,
+          builder: (context, controller, _) {
+            return Provider<TestProvidedController>.value(
+              value: controller,
+              child: Builder(
+                builder: (context) {
+                  return wrapSimple(const TestStatefulWidget());
+                },
+              ),
+            );
+          },
+        );
 
-          await tester.pumpWidget(provider);
-          expect(find.text('Value 1'), findsOneWidget);
-          expect(find.text('Controller id_1'), findsOneWidget);
+        await tester.pumpWidget(provider);
+        expect(find.text('Value 1'), findsOneWidget);
+        expect(find.text('Controller id_1'), findsOneWidget);
 
-          controllerNotifier.value = controller2;
-          await tester.pumpAndSettle();
+        controllerNotifier.value = controller2;
+        await tester.pumpAndSettle();
 
-          expect(find.text('Value 2'), findsOneWidget);
-          expect(find.text('Controller id_2'), findsOneWidget);
-        },
-      );
+        expect(find.text('Value 2'), findsOneWidget);
+        expect(find.text('Controller id_2'), findsOneWidget);
+      });
     });
 
     group('subtractMaps', () {
@@ -1256,8 +1241,7 @@ void main() {
         _SubtractionResult? elementSubtractor({
           required String? subtract,
           required double? from,
-        }) =>
-            _SubtractionResult(subtract: subtract, from: from);
+        }) => _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
           subtract: subtract,
@@ -1284,8 +1268,7 @@ void main() {
         _SubtractionResult? elementSubtractor({
           required String? subtract,
           required double? from,
-        }) =>
-            _SubtractionResult(subtract: subtract, from: from);
+        }) => _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
           subtract: null,
@@ -1305,8 +1288,7 @@ void main() {
         _SubtractionResult? elementSubtractor({
           required String? subtract,
           required double? from,
-        }) =>
-            _SubtractionResult(subtract: subtract, from: from);
+        }) => _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
           subtract: subtract,
@@ -1358,10 +1340,7 @@ void main() {
 }
 
 class _SubtractionResult {
-  _SubtractionResult({
-    required this.subtract,
-    required this.from,
-  });
+  _SubtractionResult({required this.subtract, required this.from});
   final String? subtract;
   final double? from;
 
@@ -1410,10 +1389,7 @@ class _TestStatefulWidgetState extends State<TestStatefulWidget>
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        Text('Value $_value'),
-        Text('Controller ${controller.id}'),
-      ],
+      children: [Text('Value $_value'), Text('Controller ${controller.id}')],
     );
   }
 }

@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/service.dart';
@@ -8,7 +8,7 @@ import 'package:mockito/annotations.dart';
 import 'package:vm_service/vm_service.dart';
 
 // See https://github.com/dart-lang/mockito/blob/master/NULL_SAFETY_README.md
-// Run `devtools_tool generate-code` to regenerate mocks.
+// Run `dt generate-code` to regenerate mocks.
 @GenerateNiceMocks([
   MockSpec<ConnectedApp>(),
   MockSpec<DebuggerController>(),
@@ -22,7 +22,6 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<FlutterFramesController>(),
   MockSpec<TimelineEventsController>(),
   MockSpec<LoggingController>(),
-  MockSpec<LoggingControllerV2>(),
   MockSpec<ProgramExplorerController>(),
   MockSpec<ScriptManager>(),
   MockSpec<ServiceConnectionManager>(),

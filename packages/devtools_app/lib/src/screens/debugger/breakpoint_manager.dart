@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -27,7 +27,7 @@ class BreakpointManager with DisposerMixin {
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
   ValueListenable<List<BreakpointAndSourcePosition>>
-      get breakpointsWithLocation => _breakpointsWithLocation;
+  get breakpointsWithLocation => _breakpointsWithLocation;
   final _breakpointsWithLocation =
       ValueNotifier<List<BreakpointAndSourcePosition>>([]);
 
@@ -70,8 +70,9 @@ class BreakpointManager with DisposerMixin {
       return;
     }
 
-    final breakpointsForIsolate =
-        await _getBreakpointsForIsolate(_isolateRefId);
+    final breakpointsForIsolate = await _getBreakpointsForIsolate(
+      _isolateRefId,
+    );
     if (breakpointsForIsolate.isNotEmpty) {
       // If the isolate already has breakpoints, then update them:
       await _updateBreakpoints(
@@ -87,8 +88,9 @@ class BreakpointManager with DisposerMixin {
     }
 
     // Resume the isolate now that the breakpoints have been set:
-    await serviceConnection.serviceManager.isolateManager
-        .resumeIsolate(isolateRef);
+    await serviceConnection.serviceManager.isolateManager.resumeIsolate(
+      isolateRef,
+    );
   }
 
   void clearCache({required bool isServiceShutdown}) {
@@ -152,19 +154,20 @@ class BreakpointManager with DisposerMixin {
     _breakpointsWithLocation.value = [];
   }
 
-  void _updateAfterIsolateReload(
-    Event _,
-  ) async {
+  void _updateAfterIsolateReload(Event _) async {
     // TODO(devoncarew): We need to coordinate this with other debugger clients
     // as well as pause before re-setting the breakpoints.
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
-    final currentScriptRefs =
-        await scriptManager.retrieveAndSortScripts(_isolateRef!);
-    final removedScripts = Set<ScriptRef>.of(previousScriptRefs)
-        .difference(Set<ScriptRef>.of(currentScriptRefs));
-    final addedScripts = Set<ScriptRef>.of(currentScriptRefs)
-        .difference(Set<ScriptRef>.of(previousScriptRefs));
+    final currentScriptRefs = await scriptManager.retrieveAndSortScripts(
+      _isolateRef!,
+    );
+    final removedScripts = Set<ScriptRef>.of(
+      previousScriptRefs,
+    ).difference(Set<ScriptRef>.of(currentScriptRefs));
+    final addedScripts = Set<ScriptRef>.of(
+      currentScriptRefs,
+    ).difference(Set<ScriptRef>.of(previousScriptRefs));
     final breakpointsToRemove = <BreakpointAndSourcePosition>[];
 
     // Find all breakpoints set in files where we have newer versions of those
@@ -246,20 +249,19 @@ class BreakpointManager with DisposerMixin {
     required List<BreakpointAndSourcePosition> breakpoints,
     required IsolateRef isolateRef,
   }) async {
-    final bpScriptUris = breakpoints.fold(
-      <String>{},
-      (scriptSet, breakpoint) {
-        final scriptUri = breakpoint.scriptUri;
-        if (scriptUri != null) {
-          scriptSet.add(scriptUri);
-        }
-        return scriptSet;
-      },
-    );
+    final bpScriptUris = breakpoints.fold(<String>{}, (scriptSet, breakpoint) {
+      final scriptUri = breakpoint.scriptUri;
+      if (scriptUri != null) {
+        scriptSet.add(scriptUri);
+      }
+      return scriptSet;
+    });
 
     final newScripts = await scriptManager.retrieveAndSortScripts(isolateRef);
-    final scriptUriToRef =
-        newScripts.fold(<String, ScriptRef>{}, (scriptMap, script) {
+    final scriptUriToRef = newScripts.fold(<String, ScriptRef>{}, (
+      scriptMap,
+      script,
+    ) {
       final scriptUri = script.uri;
       if (scriptUri != null && bpScriptUris.contains(scriptUri)) {
         scriptMap[scriptUri] = script;
@@ -278,8 +280,10 @@ class BreakpointManager with DisposerMixin {
     final key = script.id;
     if (key == null) return [];
     if (!_breakPositionsMap.containsKey(key)) {
-      _breakPositionsMap[key] =
-          await _getBreakablePositions(isolateRef, script);
+      _breakPositionsMap[key] = await _getBreakablePositions(
+        isolateRef,
+        script,
+      );
     }
 
     return _breakPositionsMap[key] ?? [];
@@ -342,18 +346,16 @@ class BreakpointManager with DisposerMixin {
       // that knows how to notify when performing a list edit operation.
       case EventKind.kBreakpointAdded:
         final breakpoint = event.breakpoint!;
-        final isDuplicate =
-            _breakpoints.value.any((bp) => bp.id == breakpoint.id);
+        final isDuplicate = _breakpoints.value.any(
+          (bp) => bp.id == breakpoint.id,
+        );
         if (isDuplicate) break;
         _breakpoints.value = [..._breakpoints.value, breakpoint];
 
-        await breakpointManager
-            .createBreakpointWithLocation(breakpoint)
-            .then((bp) {
-          final list = [
-            ..._breakpointsWithLocation.value,
-            bp,
-          ]..sort();
+        await breakpointManager.createBreakpointWithLocation(breakpoint).then((
+          bp,
+        ) {
+          final list = [..._breakpointsWithLocation.value, bp]..sort();
           _breakpointsWithLocation.value = list;
         });
 
@@ -366,9 +368,9 @@ class BreakpointManager with DisposerMixin {
           breakpoint,
         ];
 
-        await breakpointManager
-            .createBreakpointWithLocation(breakpoint)
-            .then((bp) {
+        await breakpointManager.createBreakpointWithLocation(breakpoint).then((
+          bp,
+        ) {
           final list = _breakpointsWithLocation.value;
           // Remove the bp with the older, unresolved information from the list.
           list.removeWhere((breakpoint) => breakpoint.id == bp.id);
@@ -386,8 +388,11 @@ class BreakpointManager with DisposerMixin {
         // the restart. Note we only track hot restarts triggered by DevTools,
         // if a hot-restart was triggered by another client we won't know.
         // See https://github.com/flutter/flutter/issues/134470
-        final hotRestartInProgress = serviceConnection
-            .serviceManager.isolateManager.hotRestartInProgress;
+        final hotRestartInProgress =
+            serviceConnection
+                .serviceManager
+                .isolateManager
+                .hotRestartInProgress;
         if (hotRestartInProgress) break;
 
         final breakpoint = event.breakpoint;

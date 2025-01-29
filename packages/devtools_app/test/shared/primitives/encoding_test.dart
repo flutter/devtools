@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
 
@@ -33,11 +33,7 @@ void main() {
   });
 
   test('$IsolateRef', () {
-    final isolateRef = IsolateRef(
-      id: '1',
-      name: 'name',
-      number: '2',
-    );
+    final isolateRef = IsolateRef(id: '1', name: 'name', number: '2');
     final encodeDecode = IsolateRefEncodeDecode.instance;
 
     final encoded = encodeDecode.toEncodable(isolateRef);
@@ -52,10 +48,7 @@ void main() {
     final classRef = ClassRef(
       id: '1',
       name: 'name',
-      library: LibraryRef(
-        id: '2',
-        name: 'name',
-      ),
+      library: LibraryRef(id: '2', name: 'name'),
     );
     final encodeDecode = ClassRefEncodeDecode.instance;
 

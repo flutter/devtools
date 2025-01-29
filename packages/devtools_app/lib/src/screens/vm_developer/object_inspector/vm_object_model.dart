@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -60,30 +60,31 @@ abstract class VmObject {
 
   ValueListenable<List<InboundReferencesTreeNode>> get inboundReferencesTree =>
       _inboundReferencesTree;
-  final _inboundReferencesTree =
-      ListValueNotifier<InboundReferencesTreeNode>([]);
+  final _inboundReferencesTree = ListValueNotifier<InboundReferencesTreeNode>(
+    [],
+  );
 
   @mustCallSuper
   Future<void> initialize() async {
     _isolate =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
 
-    _obj = ref is Obj
-        ? ref as Obj
-        : await _service.getObject(_isolate!.id!, ref.id!);
+    _obj =
+        ref is Obj
+            ? ref as Obj
+            : await _service.getObject(_isolate!.id!, ref.id!);
 
     if (_sourceLocation != null) {
-      _sourceScript = await _service.getObject(
-        _isolate!.id!,
-        scriptRef?.id ?? _sourceLocation!.script!.id!,
-      ) as Script;
+      _sourceScript =
+          await _service.getObject(
+                _isolate!.id!,
+                scriptRef?.id ?? _sourceLocation!.script!.id!,
+              )
+              as Script;
 
       final token = _sourceLocation!.tokenPos!;
 
-      _pos = SourcePosition.calculatePosition(
-        _sourceScript!,
-        token,
-      );
+      _pos = SourcePosition.calculatePosition(_sourceScript!, token);
     }
   }
 
@@ -100,8 +101,11 @@ abstract class VmObject {
   }
 
   Future<void> requestRetainingPath() async {
-    _retainingPath.value =
-        await _service.getRetainingPath(_isolate!.id!, ref.id!, 100);
+    _retainingPath.value = await _service.getRetainingPath(
+      _isolate!.id!,
+      ref.id!,
+      100,
+    );
   }
 
   /// Retrieves the root set of inbound references to the current object.
@@ -127,9 +131,7 @@ abstract class VmObject {
       node.ref.source!.id!,
       100,
     );
-    node.addAllChildren(
-      InboundReferencesTreeNode.buildTreeRoots(inboundRefs),
-    );
+    node.addAllChildren(InboundReferencesTreeNode.buildTreeRoots(inboundRefs));
     _inboundReferencesTree.notifyListeners();
   }
 }
@@ -192,8 +194,9 @@ class FuncObject extends VmObject {
     final funcKind = obj.kind;
     return funcKind == null
         ? null
-        : FunctionKind.values
-            .firstWhereOrNull((element) => element.kind() == funcKind);
+        : FunctionKind.values.firstWhereOrNull(
+          (element) => element.kind() == funcKind,
+        );
   }
 
   int? get deoptimizations => obj.deoptimizations;
@@ -321,8 +324,13 @@ class CodeObject extends VmObject {
     await super.initialize();
 
     final service = serviceConnection.serviceManager.service!;
-    final isolateId = serviceConnection
-        .serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final isolateId =
+        serviceConnection
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value!
+            .id!;
 
     // Attempt to retrieve the CPU profile data for this code object.
     try {

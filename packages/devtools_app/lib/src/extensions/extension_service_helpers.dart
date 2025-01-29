@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
@@ -13,7 +13,7 @@ import 'package:logging/logging.dart';
 void deduplicateExtensionsAndTakeLatest(
   List<DevToolsExtensionConfig> extensions, {
   required void Function(DevToolsExtensionConfig ext, {required bool ignore})
-      onSetIgnored,
+  onSetIgnored,
   Logger? logger,
   String extensionType = '',
 }) {

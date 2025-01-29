@@ -1,3 +1,8 @@
+<!--
+Copyright 2025 The Flutter Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+-->
 > [!NOTE]
 > There are parts of this release process that can only be completed by Googlers
 on the Dash team. If you are not a Googler on the Dash team, please reach out on the
@@ -20,7 +25,7 @@ bash for quality assurance and to prevent regressions from slipping into the rel
 
 # Pre-requisites
 
-1. Ensure that you have access to `devtools_tool` by adding the `tool/bin` folder to your
+1. Ensure that you have access to `dt` by adding the `tool/bin` folder to your
 `PATH` environment variable
   - **MacOS Users**
     - add the following to your `~/.bashrc` file.
@@ -69,11 +74,15 @@ Make sure:
    git checkout main; git rebase-update
    ```
 
-> Note: Until https://github.com/flutter/devtools/issues/7939, skip this step.
+2. Your Flutter SDK in `devtools/tool/flutter-sdk` and the one on PATH are updated to the latest candidate release branch.
 
-2. Your Flutter SDK in `devtools/tool/flutter-sdk` and the one on PATH are updated to the latest candidate release branch:
+   **The following is required until https://github.com/flutter/devtools/issues/7939 is fixed:**
+   - Update the `flutter-candidate.txt` to the latest Flutter candidate in g3 (see instructions in DevTools Release Rotation email).
+   This change should get committed with the DevTools release PR so that we know which version it was released with.
+
+   Now, update your Flutter SDK in `devtools/tool/flutter-sdk` and the one on PATH to the latest Flutter candidate:
    ```shell
-   devtools_tool update-flutter-sdk --update-on-path
+   dt update-flutter-sdk --update-on-path
    ```
 
 ### Prepare the release
@@ -86,21 +95,11 @@ can run: `brew install gh`
 
 From the `devtools/tool` directory, run the following:
 ```shell
-devtools_tool release-helper
+dt release-helper
 ```
 This command will automatically:
    - create a new branch using the tip of master and check out locally
    - create a PR for release changes
-   - update your local version of flutter to the latest flutter candidate
-
-**The following is required until https://github.com/flutter/devtools/issues/7939 is fixed:**
-
-1. Update the `flutter-candidate.txt` to the latest Flutter candidate in g3 (see instructions in DevTools Release Rotation email). This change should get committed with the DevTools release PR so that we know which version it was released with.
-
-2. Update your Flutter SDK in `devtools/tool/flutter-sdk` and the one on PATH to the latest Flutter candidate:
-   ```shell
-   devtools_tool update-flutter-sdk --update-on-path --use-cache
-   ```
 
 #### Verify the version changes for the Release PR
 
@@ -119,7 +118,7 @@ version bumps.
 1. Build DevTools in release mode and serve it from a locally running DevTools
 server instance:
    ```shell
-   devtools_tool serve
+   dt serve
    ```
 
 2. Launch DevTools and verify that everything generally works.
@@ -162,7 +161,7 @@ Within minutes, a build should be uploaded for the commit you just merged and ta
 
 Run the tool script with the commit hash you just merged and tagged:
 ```shell
-devtools_tool update-sdk-deps -c <commit-hash>
+dt update-sdk-deps -c <commit-hash>
 ```
 
 This automatically creates a Gerrit CL with the DEPS update for DevTools.
@@ -200,7 +199,7 @@ just released into the Dart SDK (the hash you updated the DEPS file with):
 
 2. Then, tag the release:
    ```shell
-   devtools_tool tag-version
+   dt tag-version
    ```
    This command creates a tag on the `flutter/devtools` repo for this release. The
    version for the tag is automatically determined from `packages/devtools/pubspec.yaml`
@@ -266,7 +265,7 @@ example, we'll use `v2.29.0` as the base branch and `2.29.1` as the cherry-pick 
 DevTools version number:
    ```
    git cherry-pick <commit>
-   devtools_tool update-version auto -t patch
+   dt update-version auto -t patch
    ```
 
 5. Commit your changes and push to the `upstream` remote.
@@ -352,7 +351,7 @@ create another DevTools cherry-pick release from the tip of the one we just crea
 Check out the cherry-pick branch you created earlier, and create a git tag:
 ```sh
 git checkout upstream/2.29.1
-devtools_tool tag-version
+dt tag-version
 ```
 
 ### Create the merge commit in the `flutter/devtools` repo

@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:meta/meta.dart';
 
@@ -28,16 +28,21 @@ HeapDiffData calculateHeapDiffData({
   required HeapData before,
   required HeapData after,
 }) {
-  final classesByName = subtractMaps<HeapClassName, SingleClassData,
-      SingleClassData, DiffClassData>(
+  final classesByName = subtractMaps<
+    HeapClassName,
+    SingleClassData,
+    SingleClassData,
+    DiffClassData
+  >(
     from: after.classes!.asMap(),
     subtract: before.classes!.asMap(),
-    subtractor: ({subtract, from}) => DiffClassData.compare(
-      before: subtract,
-      after: from,
-      dataBefore: before,
-      dataAfter: after,
-    ),
+    subtractor:
+        ({subtract, from}) => DiffClassData.compare(
+          before: subtract,
+          after: from,
+          dataBefore: before,
+          dataAfter: after,
+        ),
   );
 
   return HeapDiffData._(

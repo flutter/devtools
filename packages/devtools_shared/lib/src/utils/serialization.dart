@@ -1,12 +1,13 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 typedef FromJson<T> = T Function(Map<String, dynamic> json);
 
 /// Mixin to declare a class as serializable.
 ///
-/// Classes that implement this mixin should also implement [toJson] method.
+/// Classes that implement this mixin should also implement [fromJson] factory
+/// constructor.
 /// See https://docs.flutter.dev/data-and-backend/serialization/json#serializing-json-inside-model-classes.
 mixin Serializable {
   Map<String, Object?> toJson();

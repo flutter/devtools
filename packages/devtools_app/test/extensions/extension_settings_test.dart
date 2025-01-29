@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/extension_settings.dart';
@@ -29,8 +29,9 @@ void main() {
       final mockServiceConnection = createMockServiceConnectionWithDefaults();
       final mockServiceManager =
           mockServiceConnection.serviceManager as MockServiceManager;
-      when(mockServiceManager.connectedState)
-          .thenReturn(ValueNotifier(const ConnectedState(true)));
+      when(
+        mockServiceManager.connectedState,
+      ).thenReturn(ValueNotifier(const ConnectedState(true)));
       setGlobal(ServiceConnectionManager, mockServiceConnection);
 
       setGlobal(
@@ -53,45 +54,43 @@ void main() {
       resetDevToolsExtensionEnabledStates();
     });
 
-    testWidgets(
-      'builds dialog with no available extensions',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(const ExtensionSettingsDialog(extensions: [])),
-        );
-        await tester.pumpAndSettle();
-        expect(find.text('DevTools Extensions'), findsOneWidget);
-        expect(
-          find.textContaining('Extensions are provided by the pub packages'),
-          findsOneWidget,
-        );
-        expect(find.text('No extensions available.'), findsOneWidget);
-        expect(find.byType(ListView), findsNothing);
-        expect(find.byType(ExtensionSetting), findsNothing);
-      },
-    );
+    testWidgets('builds dialog with no available extensions', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(const ExtensionSettingsDialog(extensions: [])),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('DevTools Extensions'), findsOneWidget);
+      expect(
+        find.textContaining('Extensions are provided by the pub packages'),
+        findsOneWidget,
+      );
+      expect(find.text('No extensions available.'), findsOneWidget);
+      expect(find.byType(ListView), findsNothing);
+      expect(find.byType(ExtensionSetting), findsNothing);
+    });
 
-    testWidgets(
-      'builds dialog with available extensions',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(dialog));
-        await tester.pumpAndSettle();
-        expect(find.text('DevTools Extensions'), findsOneWidget);
-        expect(
-          find.textContaining('Extensions are provided by the pub packages'),
-          findsOneWidget,
-        );
-        expect(find.text('No extensions available.'), findsNothing);
-        expect(find.byType(ListView), findsOneWidget);
-        expect(find.byType(ExtensionSetting), findsNWidgets(5));
-        await expectLater(
-          find.byWidget(dialog),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/extensions/settings_state_none.png',
-          ),
-        );
-      },
-    );
+    testWidgets('builds dialog with available extensions', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(wrap(dialog));
+      await tester.pumpAndSettle();
+      expect(find.text('DevTools Extensions'), findsOneWidget);
+      expect(
+        find.textContaining('Extensions are provided by the pub packages'),
+        findsOneWidget,
+      );
+      expect(find.text('No extensions available.'), findsNothing);
+      expect(find.byType(ListView), findsOneWidget);
+      expect(find.byType(ExtensionSetting), findsNWidgets(5));
+      await expectLater(
+        find.byWidget(dialog),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/extensions/settings_state_none.png',
+        ),
+      );
+    });
 
     testWidgets(
       'pressing toggle buttons makes calls to the $ExtensionService',
@@ -134,38 +133,46 @@ void main() {
           ExtensionEnabledState.none,
         );
 
-        final barSetting = tester
-            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
-            .where(
-              (setting) => setting.extension.name.caseInsensitiveEquals('bar'),
-            )
-            .first;
-        final bazSetting = tester
-            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
-            .where(
-              (setting) => setting.extension.name.caseInsensitiveEquals('baz'),
-            )
-            .first;
-        final fooSetting = tester
-            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
-            .where(
-              (setting) => setting.extension.name.caseInsensitiveEquals('foo'),
-            )
-            .first;
-        final providerSetting = tester
-            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
-            .where(
-              (setting) =>
-                  setting.extension.name.caseInsensitiveEquals('provider'),
-            )
-            .first;
-        final someToolSetting = tester
-            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
-            .where(
-              (setting) =>
-                  setting.extension.name.caseInsensitiveEquals('some_tool'),
-            )
-            .first;
+        final barSetting =
+            tester
+                .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+                .where(
+                  (setting) =>
+                      setting.extension.name.caseInsensitiveEquals('bar'),
+                )
+                .first;
+        final bazSetting =
+            tester
+                .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+                .where(
+                  (setting) =>
+                      setting.extension.name.caseInsensitiveEquals('baz'),
+                )
+                .first;
+        final fooSetting =
+            tester
+                .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+                .where(
+                  (setting) =>
+                      setting.extension.name.caseInsensitiveEquals('foo'),
+                )
+                .first;
+        final providerSetting =
+            tester
+                .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+                .where(
+                  (setting) =>
+                      setting.extension.name.caseInsensitiveEquals('provider'),
+                )
+                .first;
+        final someToolSetting =
+            tester
+                .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+                .where(
+                  (setting) =>
+                      setting.extension.name.caseInsensitiveEquals('some_tool'),
+                )
+                .first;
 
         // Disable the 'bar' extension.
         await tester.tap(
@@ -257,48 +264,47 @@ void main() {
       },
     );
 
-    testWidgets(
-      'toggle buttons update for changes to value notifiers',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(dialog));
-        await tester.pumpAndSettle();
-        await expectLater(
-          find.byWidget(dialog),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/extensions/settings_state_none.png',
-          ),
-        );
+    testWidgets('toggle buttons update for changes to value notifiers', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(wrap(dialog));
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byWidget(dialog),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/extensions/settings_state_none.png',
+        ),
+      );
 
-        await extensionService.setExtensionEnabledState(
-          StubDevToolsExtensions.barExtension,
-          enable: false,
-        );
-        await extensionService.setExtensionEnabledState(
-          StubDevToolsExtensions.bazExtension,
-          enable: false,
-        );
-        await extensionService.setExtensionEnabledState(
-          StubDevToolsExtensions.fooExtension,
-          enable: true,
-        );
-        await extensionService.setExtensionEnabledState(
-          StubDevToolsExtensions.providerExtension,
-          enable: true,
-        );
-        await extensionService.setExtensionEnabledState(
-          StubDevToolsExtensions.someToolExtension,
-          enable: true,
-        );
+      await extensionService.setExtensionEnabledState(
+        StubDevToolsExtensions.barExtension,
+        enable: false,
+      );
+      await extensionService.setExtensionEnabledState(
+        StubDevToolsExtensions.bazExtension,
+        enable: false,
+      );
+      await extensionService.setExtensionEnabledState(
+        StubDevToolsExtensions.fooExtension,
+        enable: true,
+      );
+      await extensionService.setExtensionEnabledState(
+        StubDevToolsExtensions.providerExtension,
+        enable: true,
+      );
+      await extensionService.setExtensionEnabledState(
+        StubDevToolsExtensions.someToolExtension,
+        enable: true,
+      );
 
-        await tester.pumpWidget(wrap(dialog));
-        await tester.pumpAndSettle();
-        await expectLater(
-          find.byWidget(dialog),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/extensions/settings_state_modified.png',
-          ),
-        );
-      },
-    );
+      await tester.pumpWidget(wrap(dialog));
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byWidget(dialog),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/extensions/settings_state_modified.png',
+        ),
+      );
+    });
   });
 }

@@ -1,13 +1,13 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/screen.dart';
-import '../../shared/utils.dart';
+import '../../shared/framework/screen.dart';
+import '../../shared/utils/utils.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
@@ -56,7 +56,7 @@ class _DeepLinkPageState extends State<DeepLinkPage>
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: controller.selectedProject,
-      builder: (_, FlutterProject? project, __) {
+      builder: (_, FlutterProject? project, _) {
         return project == null
             ? const SelectProjectView()
             : const DeepLinkListView();

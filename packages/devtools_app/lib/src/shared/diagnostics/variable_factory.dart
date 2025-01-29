@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -12,7 +12,7 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../memory/heap_object.dart';
-import '../vm_utils.dart';
+import '../utils/vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
 import 'object_group_api.dart';
@@ -305,8 +305,9 @@ Future<DartObjectNode> _buildVariable(
   InspectorObjectGroupApi<RemoteDiagnosticsNode> objectGroup,
   IsolateRef? isolateRef,
 ) async {
-  final instanceRef =
-      await objectGroup.toObservatoryInstanceRef(diagnostic.valueRef);
+  final instanceRef = await objectGroup.toObservatoryInstanceRef(
+    diagnostic.valueRef,
+  );
   return DartObjectNode.fromValue(
     name: diagnostic.name,
     value: instanceRef,
@@ -469,10 +470,7 @@ List<DartObjectNode> createVariablesForSets(
 ) {
   final elements = instance.elements ?? [];
   return elements.map((element) {
-    return DartObjectNode.fromValue(
-      value: element,
-      isolateRef: isolateRef,
-    );
+    return DartObjectNode.fromValue(value: element, isolateRef: isolateRef);
   }).toList();
 }
 
@@ -555,10 +553,7 @@ List<DartObjectNode> createVariablesForFields(
     final name = field.name;
     if (name is! String) {
       result.add(
-        DartObjectNode.fromValue(
-          value: field.value,
-          isolateRef: isolateRef,
-        ),
+        DartObjectNode.fromValue(value: field.value, isolateRef: isolateRef),
       );
     } else {
       if (existingNames != null && existingNames.contains(name)) continue;

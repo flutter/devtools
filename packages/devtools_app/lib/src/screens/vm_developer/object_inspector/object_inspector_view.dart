@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -23,10 +23,7 @@ import 'object_viewport.dart';
 /// information about objects in the Dart VM.
 class ObjectInspectorView extends VMDeveloperView {
   ObjectInspectorView()
-      : super(
-          title: 'Objects',
-          icon: Icons.data_object_outlined,
-        );
+    : super(title: 'Objects', icon: Icons.data_object_outlined);
 
   @override
   bool get showIsolateSelector => true;
@@ -47,8 +44,9 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final vmDeveloperToolsController =
-        Provider.of<VMDeveloperToolsController>(context);
+    final vmDeveloperToolsController = Provider.of<VMDeveloperToolsController>(
+      context,
+    );
     controller = vmDeveloperToolsController.objectInspectorViewController;
     unawaited(controller.init());
   }
@@ -60,20 +58,14 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
       initialFractions: const [0.2, 0.8],
       children: [
         const ObjectInspectorSelector(),
-        SelectionArea(
-          child: ObjectViewport(
-            controller: controller,
-          ),
-        ),
+        SelectionArea(child: ObjectViewport(controller: controller)),
       ],
     );
   }
 }
 
 class ObjectInspectorSelector extends StatefulWidget {
-  const ObjectInspectorSelector({
-    super.key,
-  });
+  const ObjectInspectorSelector({super.key});
 
   static const kProgramExplorer = 'Program Explorer';
   static const kObjectStore = 'Object Store';
@@ -91,8 +83,9 @@ class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final vmDeveloperToolsController =
-        Provider.of<VMDeveloperToolsController>(context);
+    final vmDeveloperToolsController = Provider.of<VMDeveloperToolsController>(
+      context,
+    );
     controller = vmDeveloperToolsController.objectInspectorViewController;
     unawaited(controller.init());
   }
@@ -125,9 +118,10 @@ class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
               gac.classHierarchy,
             ),
           ],
-          onChanged: (newValue) => setState(() {
-            value = newValue!;
-          }),
+          onChanged:
+              (newValue) => setState(() {
+                value = newValue!;
+              }),
         ),
         Expanded(
           child: RoundedOutlinedBorder(
@@ -145,10 +139,7 @@ class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
     String gaId,
   ) {
     return (
-      item: DropdownMenuItem<String>(
-        value: text,
-        child: Text(text),
-      ),
+      item: DropdownMenuItem<String>(value: text, child: Text(text)),
       gaId: gaId,
     );
   }
@@ -167,9 +158,7 @@ class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
           onLinkTapped: controller.findAndSelectNodeForObject,
         );
       case ObjectInspectorSelector.kClassHierarchy:
-        return ClassHierarchyExplorer(
-          controller: controller,
-        );
+        return ClassHierarchyExplorer(controller: controller);
       default:
         throw StateError('Unexpected value: $value');
     }

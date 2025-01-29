@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -16,12 +16,12 @@ import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/common_widgets.dart';
 import '../shared/constants.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/ui/colors.dart';
+import '../shared/ui/common_widgets.dart';
 import '../shared/ui/hover.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';
@@ -101,17 +101,15 @@ class _ServiceExtensionButtonGroupState
 
       // Track whether the extension is actually exposed by the VM.
       final listenable = serviceConnection
-          .serviceManager.serviceExtensionManager
+          .serviceManager
+          .serviceExtensionManager
           .hasServiceExtension(extensionName);
       extension.isAvailable = listenable.value;
-      addAutoDisposeListener(
-        listenable,
-        () {
-          setState(() {
-            extension.isAvailable = listenable.value;
-          });
-        },
-      );
+      addAutoDisposeListener(listenable, () {
+        setState(() {
+          extension.isAvailable = listenable.value;
+        });
+      });
     }
   }
 
@@ -164,12 +162,13 @@ class _ServiceExtensionButtonGroupState
         unawaited(
           serviceConnection.serviceManager.serviceExtensionManager
               .setServiceExtensionState(
-            extensionState.description.extension,
-            enabled: !wasSelected,
-            value: wasSelected
-                ? extensionState.description.disabledValue
-                : extensionState.description.enabledValue,
-          ),
+                extensionState.description.extension,
+                enabled: !wasSelected,
+                value:
+                    wasSelected
+                        ? extensionState.description.disabledValue
+                        : extensionState.description.enabledValue,
+              ),
         );
       });
     } else {
@@ -238,38 +237,32 @@ class HotReloadButton extends StatelessWidget {
         // reload directly on the VM service (e.g. for Dart CLI apps).
         ? _HotReloadScaffoldAction()
         : DevToolsTooltip(
-            message: _hotReloadTooltip,
-            child: _RegisteredServiceExtensionButton._(
-              serviceDescription: hotReload,
-              action: _callHotReload,
-              completedText: 'Hot reload completed.',
-              describeError: (error) => 'Unable to hot reload the app: $error',
-            ),
-          );
+          message: _hotReloadTooltip,
+          child: _RegisteredServiceExtensionButton._(
+            serviceDescription: hotReload,
+            action: _callHotReload,
+            completedText: 'Hot reload completed.',
+            describeError: (error) => 'Unable to hot reload the app: $error',
+          ),
+        );
   }
 }
 
 class _HotReloadScaffoldAction extends ScaffoldAction {
   _HotReloadScaffoldAction()
-      : super(
-          icon: hotReloadIcon,
-          tooltip: HotReloadButton._hotReloadTooltip,
-          onPressed: (context) {
-            ga.select(gac.devToolsMain, gac.hotReload);
-            _callHotReload();
-          },
-        );
+    : super(
+        icon: hotReloadIcon,
+        tooltip: HotReloadButton._hotReloadTooltip,
+        onPressed: (_) => _callHotReload(),
+      );
 }
 
 Future<void> _callHotReload() {
-  // The future is returned.
-  // ignore: discarded_futures
-  return serviceConnection.serviceManager.runDeviceBusyTask(
-    // The future is returned.
-    // ignore: discarded_futures
+  return serviceConnection.serviceManager.runDeviceBusyTask<void>(
     _wrapReloadCall(
       'reload',
       serviceConnection.serviceManager.performHotReload,
+      gaName: gac.hotReload,
     ),
   );
 }
@@ -286,20 +279,19 @@ class HotRestartButton extends StatelessWidget {
       message: 'Hot restart',
       child: _RegisteredServiceExtensionButton._(
         serviceDescription: hotRestart,
-        action: () {
-          // The future is returned.
-          // ignore: discarded_futures
-          return serviceConnection.serviceManager.runDeviceBusyTask(
-            // The future is returned.
-            // ignore: discarded_futures
-            _wrapReloadCall(
-              'restart',
-              serviceConnection.serviceManager.performHotRestart,
-            ),
-          );
-        },
+        action: _callHotRestart,
         completedText: 'Hot restart completed.',
         describeError: (error) => 'Unable to hot restart the app: $error',
+      ),
+    );
+  }
+
+  Future<void> _callHotRestart() {
+    return serviceConnection.serviceManager.runDeviceBusyTask<void>(
+      _wrapReloadCall(
+        'restart',
+        serviceConnection.serviceManager.performHotRestart,
+        gaName: gac.hotRestart,
       ),
     );
   }
@@ -307,8 +299,9 @@ class HotRestartButton extends StatelessWidget {
 
 Future<void> _wrapReloadCall(
   String name,
-  Future<void> Function() reloadCall,
-) async {
+  Future<void> Function() reloadCall, {
+  required String gaName,
+}) async {
   try {
     final timer = Stopwatch()..start();
     messageBus.addEvent(BusEvent('$name.start'));
@@ -317,8 +310,7 @@ Future<void> _wrapReloadCall(
     // 'restarted in 1.6s'
     final message = '${name}ed in ${durationText(timer.elapsed)}';
     messageBus.addEvent(BusEvent('$name.end', data: message));
-    // TODO(devoncarew): Add analytics.
-    //ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);
+    ga.select(gac.devToolsMain, gaName, value: timer.elapsed.inMilliseconds);
   } catch (_) {
     final message = 'error performing $name';
     messageBus.addEvent(BusEvent('$name.end', data: message));
@@ -374,16 +366,17 @@ class _RegisteredServiceExtensionButtonState
     if (_hidden) return const SizedBox.shrink();
 
     return InkWell(
-      onTap: () => unawaited(
-        invokeAndCatchErrors(() async {
-          final gaScreenName = widget.serviceDescription.gaScreenName;
-          final gaItem = widget.serviceDescription.gaItem;
-          if (gaScreenName != null && gaItem != null) {
-            ga.select(gaScreenName, gaItem);
-          }
-          await widget.action();
-        }),
-      ),
+      onTap:
+          () => unawaited(
+            invokeAndCatchErrors(() async {
+              final gaScreenName = widget.serviceDescription.gaScreenName;
+              final gaItem = widget.serviceDescription.gaItem;
+              if (gaScreenName != null && gaItem != null) {
+                ga.select(gaScreenName, gaItem);
+              }
+              await widget.action();
+            }),
+          ),
       child: Container(
         constraints: BoxConstraints.tightFor(
           width: actionWidgetSize,
@@ -407,8 +400,8 @@ class StructuredErrorsToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return _ServiceExtensionToggle(
       service: structuredErrors,
-      describeError: (error) =>
-          'Failed to update structuredError settings: $error',
+      describeError:
+          (error) => 'Failed to update structuredError settings: $error',
     );
   }
 }
@@ -420,9 +413,7 @@ class _ServiceExtensionToggle extends ServiceExtensionWidget {
   const _ServiceExtensionToggle({
     required this.service,
     required super.describeError,
-  }) : super(
-          completedText: null,
-        );
+  }) : super(completedText: null);
   final ToggleableServiceExtensionDescription service;
 
   @override
@@ -487,12 +478,13 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
       invokeAndCatchErrors(() async {
         await serviceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
-          widget.service.extension,
-          enabled: value,
-          value: value
-              ? widget.service.enabledValue
-              : widget.service.disabledValue,
-        );
+              widget.service.extension,
+              enabled: value,
+              value:
+                  value
+                      ? widget.service.enabledValue
+                      : widget.service.disabledValue,
+            );
       }),
     );
   }
@@ -507,12 +499,10 @@ class ServiceExtensionCheckbox extends ServiceExtensionWidget {
     required this.serviceExtension,
     this.showDescription = true,
   }) : super(
-          completedText: null,
-          describeError: (error) => _errorMessage(
-            serviceExtension.extension,
-            error,
-          ),
-        );
+         completedText: null,
+         describeError:
+             (error) => _errorMessage(serviceExtension.extension, error),
+       );
 
   static String _errorMessage(String extensionName, Object? error) {
     return 'Failed to update $extensionName setting: $error';
@@ -562,16 +552,18 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
       serviceConnection.serviceManager.serviceExtensionManager
           .waitForServiceExtensionAvailable(widget.serviceExtension.extension)
           .then((isServiceAvailable) {
-        if (isServiceAvailable) {
-          extensionAvailable.value = true;
-          final state = serviceConnection.serviceManager.serviceExtensionManager
-              .getServiceExtensionState(widget.serviceExtension.extension);
-          _setValueFromState(state.value);
-          addAutoDisposeListener(state, () {
-            _setValueFromState(state.value);
-          });
-        }
-      }),
+            if (isServiceAvailable) {
+              extensionAvailable.value = true;
+              final state = serviceConnection
+                  .serviceManager
+                  .serviceExtensionManager
+                  .getServiceExtensionState(widget.serviceExtension.extension);
+              _setValueFromState(state.value);
+              addAutoDisposeListener(state, () {
+                _setValueFromState(state.value);
+              });
+            }
+          }),
     );
   }
 
@@ -593,9 +585,10 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
               child: CheckboxSetting(
                 notifier: value,
                 title: widget.serviceExtension.title,
-                description: widget.showDescription
-                    ? widget.serviceExtension.description
-                    : null,
+                description:
+                    widget.showDescription
+                        ? widget.serviceExtension.description
+                        : null,
                 tooltip: widget.serviceExtension.tooltip,
                 onChanged: _onChanged,
                 enabled: available,
@@ -627,12 +620,13 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
         if (widget.serviceExtension.inverted) enabled = !enabled;
         await serviceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
-          widget.serviceExtension.extension,
-          enabled: enabled,
-          value: enabled
-              ? widget.serviceExtension.enabledValue
-              : widget.serviceExtension.disabledValue,
-        );
+              widget.serviceExtension.extension,
+              enabled: enabled,
+              value:
+                  enabled
+                      ? widget.serviceExtension.enabledValue
+                      : widget.serviceExtension.disabledValue,
+            );
       }),
     );
   }
@@ -1015,10 +1009,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
       preferBelow: true,
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        border: Border.all(
-          color: focusColor,
-          width: hoverCardBorderSize,
-        ),
+        border: Border.all(color: focusColor, width: hoverCardBorderSize),
         borderRadius: defaultBorderRadius,
       ),
       textStyle: theme.regularTextStyle.copyWith(color: colorScheme.onSurface),
@@ -1058,9 +1049,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              description.tooltip,
-            ),
+            Text(description.tooltip),
             if (description.documentationUrl != null &&
                 description.gaScreenName != null)
               Align(
@@ -1086,15 +1075,13 @@ class ServiceExtensionIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = extensionState.isSelected
-        ? theme.colorScheme.primary
-        : theme.colorScheme.onSurface;
+    final color =
+        extensionState.isSelected
+            ? theme.colorScheme.primary
+            : theme.colorScheme.onSurface;
     final description = extensionState.description;
     if (description.iconData != null) {
-      return Icon(
-        description.iconData,
-        color: color,
-      );
+      return Icon(description.iconData, color: color);
     }
     return Image(
       image: AssetImage(extensionState.description.iconAsset!),

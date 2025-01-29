@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,8 +9,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../common_widgets.dart';
 import '../primitives/utils.dart';
+import '../ui/common_widgets.dart';
 import 'console_service.dart';
 import 'widgets/expandable_variable.dart';
 
@@ -21,12 +21,7 @@ import 'widgets/expandable_variable.dart';
 /// Renders a Console widget with output [lines] and an optional [title] and
 /// [footer].
 class Console extends StatelessWidget {
-  const Console({
-    super.key,
-    required this.lines,
-    this.title,
-    this.footer,
-  });
+  const Console({super.key, required this.lines, this.title, this.footer});
 
   final Widget? title;
   final Widget? footer;
@@ -42,11 +37,7 @@ class Console extends StatelessWidget {
 }
 
 class ConsoleFrame extends StatelessWidget {
-  const ConsoleFrame({
-    super.key,
-    required this.child,
-    this.title,
-  });
+  const ConsoleFrame({super.key, required this.child, this.title});
 
   final Widget? title;
   final Widget child;
@@ -57,12 +48,7 @@ class ConsoleFrame extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: densePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (title != null) title!,
-          Expanded(
-            child: child,
-          ),
-        ],
+        children: [if (title != null) title!, Expanded(child: child)],
       ),
     );
   }
@@ -72,10 +58,7 @@ class ConsoleFrame extends StatelessWidget {
 ///
 /// This is a ListView of text lines, with a monospace font and a border.
 class _ConsoleOutput extends StatefulWidget {
-  const _ConsoleOutput({
-    required this.lines,
-    this.footer,
-  });
+  const _ConsoleOutput({required this.lines, this.footer});
 
   final ValueListenable<List<ConsoleLine>> lines;
 
@@ -187,7 +170,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
             physics: const ClampingScrollPhysics(
               parent: RangeMaintainingScrollPhysics(),
             ),
-            separatorBuilder: (_, __) {
+            separatorBuilder: (_, _) {
               return const PaddedDivider.noPadding();
             },
             itemBuilder: (context, index) {
@@ -200,7 +183,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
                   TextSpan(
                     // TODO(jacobr): consider caching the processed ansi terminal
                     // codes.
-                    children: processAnsiTerminalCodes(
+                    children: textSpansFromAnsi(
                       line.text,
                       theme.regularTextStyle,
                     ),

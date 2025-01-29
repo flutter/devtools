@@ -1,21 +1,12 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 part of 'table.dart';
 
-enum _TableRowType {
-  data,
-  columnHeader,
-  columnGroupHeader,
-  filler,
-}
+enum _TableRowType { data, columnHeader, columnGroupHeader, filler }
 
-enum _TableRowPartDisplayType {
-  column,
-  columnSpacer,
-  columnGroupSpacer,
-}
+enum _TableRowPartDisplayType { column, columnSpacer, columnGroupSpacer }
 
 /// Presents a [node] as a row in a table.
 ///
@@ -43,12 +34,12 @@ class TableRow<T> extends StatefulWidget {
     this.displayTreeGuidelines = false,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
-  })  : sortColumn = null,
-        sortDirection = null,
-        secondarySortColumn = null,
-        onSortChanged = null,
-        _rowType = _TableRowType.data,
-        tall = false;
+  }) : sortColumn = null,
+       sortDirection = null,
+       secondarySortColumn = null,
+       onSortChanged = null,
+       _rowType = _TableRowType.data,
+       tall = false;
 
   /// Constructs a [TableRow] that is empty.
   const TableRow.filler({
@@ -58,23 +49,23 @@ class TableRow<T> extends StatefulWidget {
     required this.columnWidths,
     this.columnGroups,
     this.backgroundColor,
-  })  : node = null,
-        isExpanded = false,
-        isExpandable = false,
-        isSelected = false,
-        onPressed = null,
-        expandableColumn = null,
-        isShown = true,
-        sortColumn = null,
-        sortDirection = null,
-        secondarySortColumn = null,
-        onSortChanged = null,
-        searchMatchesNotifier = null,
-        activeSearchMatchNotifier = null,
-        tall = false,
-        enableHoverHandling = false,
-        displayTreeGuidelines = false,
-        _rowType = _TableRowType.filler;
+  }) : node = null,
+       isExpanded = false,
+       isExpandable = false,
+       isSelected = false,
+       onPressed = null,
+       expandableColumn = null,
+       isShown = true,
+       sortColumn = null,
+       sortDirection = null,
+       secondarySortColumn = null,
+       onSortChanged = null,
+       searchMatchesNotifier = null,
+       activeSearchMatchNotifier = null,
+       tall = false,
+       enableHoverHandling = false,
+       displayTreeGuidelines = false,
+       _rowType = _TableRowType.filler;
 
   /// Constructs a [TableRow] that presents the column titles instead
   /// of any [node].
@@ -91,17 +82,17 @@ class TableRow<T> extends StatefulWidget {
     this.onPressed,
     this.tall = false,
     this.backgroundColor,
-  })  : node = null,
-        isExpanded = false,
-        isExpandable = false,
-        isSelected = false,
-        expandableColumn = null,
-        isShown = true,
-        searchMatchesNotifier = null,
-        activeSearchMatchNotifier = null,
-        displayTreeGuidelines = false,
-        enableHoverHandling = false,
-        _rowType = _TableRowType.columnHeader;
+  }) : node = null,
+       isExpanded = false,
+       isExpandable = false,
+       isSelected = false,
+       expandableColumn = null,
+       isShown = true,
+       searchMatchesNotifier = null,
+       activeSearchMatchNotifier = null,
+       displayTreeGuidelines = false,
+       enableHoverHandling = false,
+       _rowType = _TableRowType.columnHeader;
 
   /// Constructs a [TableRow] that presents column group titles instead of any
   /// [node].
@@ -117,18 +108,18 @@ class TableRow<T> extends StatefulWidget {
     this.onPressed,
     this.tall = false,
     this.backgroundColor,
-  })  : node = null,
-        isExpanded = false,
-        isExpandable = false,
-        isSelected = false,
-        expandableColumn = null,
-        columns = const [],
-        isShown = true,
-        searchMatchesNotifier = null,
-        activeSearchMatchNotifier = null,
-        displayTreeGuidelines = false,
-        enableHoverHandling = false,
-        _rowType = _TableRowType.columnGroupHeader;
+  }) : node = null,
+       isExpanded = false,
+       isExpandable = false,
+       isSelected = false,
+       expandableColumn = null,
+       columns = const [],
+       isShown = true,
+       searchMatchesNotifier = null,
+       activeSearchMatchNotifier = null,
+       displayTreeGuidelines = false,
+       enableHoverHandling = false,
+       _rowType = _TableRowType.columnGroupHeader;
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
 
@@ -188,7 +179,8 @@ class TableRow<T> extends StatefulWidget {
     ColumnData<T> column,
     SortDirection direction, {
     ColumnData<T>? secondarySortColumn,
-  })? onSortChanged;
+  })?
+  onSortChanged;
 
   final ValueListenable<List<T>>? searchMatchesNotifier;
 
@@ -280,26 +272,25 @@ class _TableRowState<T> extends State<TableRow<T>>
       onPressed = () => widgetOnPressed(node);
     }
 
-    final row = tableRowFor(
-      context,
-      onPressed: onPressed,
-    );
+    final row = tableRowFor(context, onPressed: onPressed);
 
     final box = SizedBox(
-      height: widget._rowType == _TableRowType.data
-          ? defaultRowHeight
-          : defaultHeaderHeight +
-              (widget.tall ? scaleByFontFactor(densePadding) : 0.0),
+      height:
+          widget._rowType == _TableRowType.data
+              ? defaultRowHeight
+              : defaultHeaderHeight +
+                  (widget.tall ? scaleByFontFactor(densePadding) : 0.0),
       child: Material(
         color: _searchAwareBackgroundColor(),
-        child: onPressed != null
-            ? InkWell(
-                canRequestFocus: false,
-                key: contentKey,
-                onTap: onPressed,
-                child: row,
-              )
-            : row,
+        child:
+            onPressed != null
+                ? InkWell(
+                  canRequestFocus: false,
+                  key: contentKey,
+                  onTap: onPressed,
+                  child: row,
+                )
+                : row,
       ),
     );
     return box;
@@ -347,14 +338,15 @@ class _TableRowState<T> extends State<TableRow<T>>
     if (widget.isSelected) {
       return colorScheme.selectedRowBackgroundColor;
     }
-    final searchAwareBackgroundColor = isSearchMatch
-        ? Color.alphaBlend(
-            isActiveSearchMatch
-                ? activeSearchMatchColorOpaque
-                : searchMatchColorOpaque,
-            backgroundColor,
-          )
-        : backgroundColor;
+    final searchAwareBackgroundColor =
+        isSearchMatch
+            ? Color.alphaBlend(
+              isActiveSearchMatch
+                  ? activeSearchMatchColorOpaque
+                  : searchMatchColorOpaque,
+              backgroundColor,
+            )
+            : backgroundColor;
     return searchAwareBackgroundColor;
   }
 
@@ -422,17 +414,19 @@ class _TableRowState<T> extends State<TableRow<T>>
         content = const SizedBox.shrink();
       } else if (widget._rowType == _TableRowType.columnHeader) {
         Widget defaultHeaderRenderer() => _ColumnHeader(
-              column: column,
-              isSortColumn: column == widget.sortColumn,
-              secondarySortColumn: widget.secondarySortColumn,
-              sortDirection: widget.sortDirection!,
-              onSortChanged: widget.onSortChanged,
-            );
+          column: column,
+          isSortColumn: column == widget.sortColumn,
+          secondarySortColumn: widget.secondarySortColumn,
+          sortDirection: widget.sortDirection!,
+          onSortChanged: widget.onSortChanged,
+        );
 
         // ignore: avoid-unrelated-type-assertions, false positive.
         if (column is ColumnHeaderRenderer) {
-          content = (column as ColumnHeaderRenderer)
-              .buildHeader(context, defaultHeaderRenderer);
+          content = (column as ColumnHeaderRenderer).buildHeader(
+            context,
+            defaultHeaderRenderer,
+          );
         }
         // If ColumnHeaderRenderer.build returns null, fall back to the default
         // rendering.
@@ -461,9 +455,7 @@ class _TableRowState<T> extends State<TableRow<T>>
               if (column.getCaption(node) != null)
                 TextSpan(
                   text: ' ${column.getCaption(node)}',
-                  style: const TextStyle(
-                    fontStyle: FontStyle.italic,
-                  ),
+                  style: const TextStyle(fontStyle: FontStyle.italic),
                 ),
             ],
             style: column.contentTextStyle(
@@ -489,34 +481,30 @@ class _TableRowState<T> extends State<TableRow<T>>
         }
 
         if (column == widget.expandableColumn) {
-          final expandIndicator = widget.isExpandable
-              ? ValueListenableBuilder(
-                  valueListenable: expandController,
-                  builder: (context, _, __) {
-                    return RotationTransition(
-                      turns: expandArrowAnimation,
-                      child: Icon(
-                        Icons.expand_more,
-                        color: theme.colorScheme.onSurface,
-                        size: defaultIconSize,
-                      ),
-                    );
-                  },
-                )
-              : SizedBox(width: defaultIconSize, height: defaultIconSize);
+          final expandIndicator =
+              widget.isExpandable
+                  ? ValueListenableBuilder(
+                    valueListenable: expandController,
+                    builder: (context, _, _) {
+                      return RotationTransition(
+                        turns: expandArrowAnimation,
+                        child: Icon(
+                          Icons.expand_more,
+                          color: theme.colorScheme.onSurface,
+                          size: defaultIconSize,
+                        ),
+                      );
+                    },
+                  )
+                  : SizedBox(width: defaultIconSize, height: defaultIconSize);
           content = Row(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              expandIndicator,
-              Expanded(child: content),
-            ],
+            children: [expandIndicator, Expanded(child: content)],
           );
         }
         content = Padding(
           padding: EdgeInsets.only(left: padding),
-          child: ClipRect(
-            child: content,
-          ),
+          child: ClipRect(child: content),
         );
       } else {
         throw Exception(
@@ -526,27 +514,18 @@ class _TableRowState<T> extends State<TableRow<T>>
 
       content = SizedBox(
         width: columnWidth,
-        child: Align(
-          alignment: _alignmentFor(column),
-          child: content,
-        ),
+        child: Align(alignment: _alignmentFor(column), child: content),
       );
       if (widget.displayTreeGuidelines &&
           node != null &&
           node is TreeNode &&
           column is TreeColumnData) {
         content = CustomPaint(
-          painter: _RowGuidelinePainter(
-            node.level,
-            theme.colorScheme,
-          ),
+          painter: _RowGuidelinePainter(node.level, theme.colorScheme),
           child: content,
         );
       }
-      return DefaultTextStyle(
-        style: theme.regularTextStyle,
-        child: content,
-      );
+      return DefaultTextStyle(style: theme.regularTextStyle, child: content);
     }
 
     if (widget._rowType == _TableRowType.columnGroupHeader) {
@@ -565,28 +544,25 @@ class _TableRowState<T> extends State<TableRow<T>>
         physics: const ClampingScrollPhysics(),
         controller: scrollController,
         extentDelegate: rowExtentDelegate,
-        childrenDelegate: SliverChildBuilderDelegate(
-          (context, int i) {
-            final columnIndexMap = _columnIndexMapHelper(_rowDisplayParts);
-            final displayTypeForIndex = _rowDisplayParts[i];
-            switch (displayTypeForIndex) {
-              case _TableRowPartDisplayType.column:
-                final index = columnIndexMap[i]!;
-                return columnFor(
-                  widget.columns[index],
-                  widget.columnWidths[index],
-                );
-              case _TableRowPartDisplayType.columnSpacer:
-                return const SizedBox(
-                  width: columnSpacing,
-                  child: VerticalDivider(width: columnSpacing),
-                );
-              case _TableRowPartDisplayType.columnGroupSpacer:
-                return const _ColumnGroupSpacer();
-            }
-          },
-          childCount: _rowDisplayParts.length,
-        ),
+        childrenDelegate: SliverChildBuilderDelegate((context, int i) {
+          final columnIndexMap = _columnIndexMapHelper(_rowDisplayParts);
+          final displayTypeForIndex = _rowDisplayParts[i];
+          switch (displayTypeForIndex) {
+            case _TableRowPartDisplayType.column:
+              final index = columnIndexMap[i]!;
+              return columnFor(
+                widget.columns[index],
+                widget.columnWidths[index],
+              );
+            case _TableRowPartDisplayType.columnSpacer:
+              return const SizedBox(
+                width: columnSpacing,
+                child: VerticalDivider(width: columnSpacing),
+              );
+            case _TableRowPartDisplayType.columnGroupSpacer:
+              return const _ColumnGroupSpacer();
+          }
+        }, childCount: _rowDisplayParts.length),
       ),
     );
 

@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// Assignment of an item in console to a named variable.
 class ConsoleVariableAssignment {
@@ -18,8 +18,12 @@ class ConsoleVariableAssignment {
     const variableNameGroup = '([_a-zA-Z][_a-zA-Z0-9]{0,30})';
     const indexGroup = '([_012345])';
 
-    final regex =
-        RegExp(r'var\s+' '$variableNameGroup' r'\s*=\s*\$' '$indexGroup');
+    final regex = RegExp(
+      r'var\s+'
+      '$variableNameGroup'
+      r'\s*=\s*\$'
+      '$indexGroup',
+    );
 
     final matches = regex.allMatches(expression);
     if (matches.length != 1) return null;

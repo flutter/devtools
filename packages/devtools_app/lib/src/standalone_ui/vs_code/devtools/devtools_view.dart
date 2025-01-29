@@ -1,19 +1,19 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../service/editor/api_classes.dart';
-import '../../../service/editor/editor_client.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/common_widgets.dart';
+import '../../../shared/editor/api_classes.dart';
+import '../../../shared/editor/editor_client.dart';
+import '../../../shared/framework/screen.dart';
 import '../../../shared/primitives/utils.dart';
-import '../../../shared/screen.dart';
+import '../../../shared/ui/common_widgets.dart';
 import 'extensions_view.dart';
 import 'shared.dart';
 
@@ -79,10 +79,7 @@ class SidebarDevToolsScreens extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'DevTools',
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('DevTools', style: theme.textTheme.titleMedium),
             if (editor.supportsOpenDevToolsForceExternal)
               ToolbarAction(
                 icon: Icons.open_in_browser_outlined,
@@ -92,21 +89,20 @@ class SidebarDevToolsScreens extends StatelessWidget {
                     editor.gaId,
                     gac.EditorSidebar.openDevToolsExternally.name,
                   );
-                  unawaited(
-                    editor.openDevToolsPage(null, forceExternal: true),
-                  );
+                  unawaited(editor.openDevToolsPage(null, forceExternal: true));
                 },
               ),
           ],
         ),
         Table(
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          columnWidths: singleColumn
-              ? null
-              : const <int, TableColumnWidth>{
-                  0: FlexColumnWidth(),
-                  1: FlexColumnWidth(),
-                },
+          columnWidths:
+              singleColumn
+                  ? null
+                  : const <int, TableColumnWidth>{
+                    0: FlexColumnWidth(),
+                    1: FlexColumnWidth(),
+                  },
           children: generateRows(singleColumn),
         ),
       ],
@@ -125,12 +121,13 @@ class SidebarDevToolsScreens extends StatelessWidget {
               editor: editor,
               singleColumn: singleColumn,
               hasDebugSessions: debugSessions.isNotEmpty,
-              onPressed: (data) => openDevToolsScreen(
-                screenId: data.screenId,
-                requiresDebugSession: data.requiresDebugSession,
-                prefersDebugSession: data.prefersDebugSession,
-                editor: editor,
-              ),
+              onPressed:
+                  (data) => openDevToolsScreen(
+                    screenId: data.screenId,
+                    requiresDebugSession: data.requiresDebugSession,
+                    prefersDebugSession: data.prefersDebugSession,
+                    editor: editor,
+                  ),
             ),
           )
           .toList();
@@ -147,12 +144,13 @@ class SidebarDevToolsScreens extends StatelessWidget {
           editor: editor,
           singleColumn: singleColumn,
           hasDebugSessions: debugSessions.isNotEmpty,
-          onPressed: (data) => openDevToolsScreen(
-            screenId: data.screenId,
-            requiresDebugSession: data.requiresDebugSession,
-            prefersDebugSession: data.prefersDebugSession,
-            editor: editor,
-          ),
+          onPressed:
+              (data) => openDevToolsScreen(
+                screenId: data.screenId,
+                requiresDebugSession: data.requiresDebugSession,
+                prefersDebugSession: data.prefersDebugSession,
+                editor: editor,
+              ),
         ),
       );
     }
@@ -182,8 +180,7 @@ class SidebarDevToolsScreens extends StatelessWidget {
       // If the user depends on package:provider, the provider extension should
       // show up in the DevTools extensions list instead.
       ScreenMetaData.provider ||
-      ScreenMetaData.simple =>
-        false,
+      ScreenMetaData.simple => false,
       _ => true,
     };
   }

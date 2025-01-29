@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/src/shared/memory/heap_graph_loader.dart';
 import 'package:vm_service/vm_service.dart';
@@ -17,10 +17,7 @@ abstract class HeapTest {
 }
 
 class GoldenHeapTest extends HeapTest {
-  GoldenHeapTest({
-    required super.appClassName,
-    required this.fileName,
-  });
+  GoldenHeapTest({required super.appClassName, required this.fileName});
 
   final String fileName;
 
@@ -33,9 +30,7 @@ class GoldenHeapTest extends HeapTest {
 }
 
 class MockedHeapTest extends HeapTest {
-  MockedHeapTest({
-    required super.appClassName,
-  });
+  MockedHeapTest({required super.appClassName});
 
   @override
   Future<HeapSnapshotGraph> loadHeap() async {
@@ -81,20 +76,8 @@ class HeapGraphLoaderProvided implements HeapGraphLoader {
 }
 
 List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
-  GoldenHeapTest(
-    fileName: 'counter_snapshot1',
-    appClassName: 'MyApp',
-  ),
-  GoldenHeapTest(
-    fileName: 'counter_snapshot2',
-    appClassName: 'MyApp',
-  ),
-  GoldenHeapTest(
-    fileName: 'counter_snapshot3',
-    appClassName: 'MyApp',
-  ),
-  GoldenHeapTest(
-    fileName: 'counter_snapshot4',
-    appClassName: 'MyApp',
-  ),
+  GoldenHeapTest(fileName: 'counter_snapshot1', appClassName: 'MyApp'),
+  GoldenHeapTest(fileName: 'counter_snapshot2', appClassName: 'MyApp'),
+  GoldenHeapTest(fileName: 'counter_snapshot3', appClassName: 'MyApp'),
+  GoldenHeapTest(fileName: 'counter_snapshot4', appClassName: 'MyApp'),
 ];

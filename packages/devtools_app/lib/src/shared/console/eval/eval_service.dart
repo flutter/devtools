@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -11,7 +11,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
 import '../../memory/heap_object.dart';
-import '../../vm_utils.dart';
+import '../../utils/vm_utils.dart';
 import '../primitives/scope.dart';
 
 class EvalService extends DisposableController with AutoDisposeControllerMixin {
@@ -24,7 +24,11 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
 
   String? get _isolateRefId {
     return serviceConnection
-        .serviceManager.isolateManager.selectedIsolate.value?.id;
+        .serviceManager
+        .isolateManager
+        .selectedIsolate
+        .value
+        ?.id;
   }
 
   /// Returns the class for the provided [ClassRef].
@@ -165,12 +169,12 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     }
 
     Future<Response> evalFunction() => _service.evaluateInFrame(
-          isolateRefId,
-          frame.index!,
-          expression,
-          disableBreakpoints: true,
-          scope: scope.value(isolateId: isolateRefId),
-        );
+      isolateRefId,
+      frame.index!,
+      expression,
+      disableBreakpoints: true,
+      scope: scope.value(isolateId: isolateRefId),
+    );
 
     return await _evalWithVariablesRefresh(evalFunction, isolateRefId);
   }
@@ -182,9 +186,9 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     final isolateId = isolateRef.id!;
 
     final theClass = (await serviceConnection.serviceManager.service!
-            .getClassList(isolateId))
-        .classes!
-        .firstWhereOrNull((ref) => object.className?.matches(ref) ?? false);
+        .getClassList(isolateId)).classes!.firstWhereOrNull(
+      (ref) => object.className?.matches(ref) ?? false,
+    );
 
     return await findInstance(isolateId, theClass?.id, object.code);
   }

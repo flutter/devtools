@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/initialization.dart';
@@ -14,7 +14,7 @@ import 'common.dart';
 /// A recorder that measures frame building durations for the DevTools.
 class DevToolsRecorder extends WidgetRecorder {
   DevToolsRecorder({required this.benchmark})
-      : super(name: benchmark.id, useCustomWarmUp: true);
+    : super(name: benchmark.id, useCustomWarmUp: true);
 
   /// The name of the DevTools benchmark to be run.
   ///
@@ -34,6 +34,7 @@ class DevToolsRecorder extends WidgetRecorder {
     _devToolsAutomator = DevToolsAutomater(
       benchmark: benchmark,
       stopWarmingUpCallback: profile.stopWarmingUp,
+      profile: profile,
     );
     return _devToolsAutomator!.createWidget();
   }

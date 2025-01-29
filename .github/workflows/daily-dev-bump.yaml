@@ -41,7 +41,6 @@ jobs:
         with:
           ref: master
 
-      - uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
       - name: Load Cached Flutter SDK
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
@@ -59,14 +58,18 @@ jobs:
         id: version-bump
         run: |
           set -ex
+
+          # Ensure we are using the Dart executable from the Flutter SDK
+          export PATH=`pwd`/tool/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/tool/flutter-sdk/bin:`pwd`/bin:$PATH
+
           pushd tool/
           dart pub get
           popd
 
-          # Ensure the devtools_tool command is available
+          # Ensure the dt command is available
           export PATH="$PATH":`pwd`/tool/bin
 
-          ORIGINAL_VERSION=$(devtools_tool update-version current-version | tail -1)
+          ORIGINAL_VERSION=$(dt update-version current-version | tail -1)
 
           if [ -z "$UPDATE_TYPE" ]; then
             # If $UPDATE_TYPE is not set, then assume it is dev
@@ -76,14 +79,14 @@ jobs:
           # If there is a major, minor, or patch bump, do it.
 
           if [ "$UPDATE_TYPE" == "patch+dev" ]; then
-            devtools_tool update-version auto --type patch
-            devtools_tool update-version auto --type dev
+            dt update-version auto --type patch
+            dt update-version auto --type dev
           elif [ "$UPDATE_TYPE" == "minor+dev" ]; then
-            devtools_tool update-version auto --type minor
-            devtools_tool update-version auto --type dev
+            dt update-version auto --type minor
+            dt update-version auto --type dev
           elif [ "$UPDATE_TYPE" == "major+dev" ]; then
-            devtools_tool update-version auto --type major
-            devtools_tool update-version auto --type dev
+            dt update-version auto --type major
+            dt update-version auto --type dev
           elif [ "$UPDATE_TYPE" == "dev" ]; then
             if ! echo "$ORIGINAL_VERSION" | grep -Eq "\-dev\.[0-9]+" ; then
               ERROR_DESCRIPTION="Doing \
@@ -94,13 +97,13 @@ jobs:
               echo "::error ,title=Cannot do a dev bump on a Release Version ($ORIGINAL_VERSION)::$ERROR_DESCRIPTION" 
               exit 1;
             fi
-            devtools_tool update-version auto --type dev
+            dt update-version auto --type dev
           else
             echo "ERROR: UNEXPECTED UPDATE TYPE: $UPDATE_TYPE"
             exit 1
           fi
 
-          NEW_VERSION=$(devtools_tool update-version current-version | tail -1)
+          NEW_VERSION=$(dt update-version current-version | tail -1)
 
           echo "COMMIT_MESSAGE=Updating from $ORIGINAL_VERSION to $NEW_VERSION" >> $GITHUB_OUTPUT
         env:

@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -8,7 +8,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../analytics/constants.dart' as gac;
-import '../../common_widgets.dart';
+import '../../ui/common_widgets.dart';
 
 const _documentationTopic = gac.console;
 
@@ -40,10 +40,7 @@ Use debug console to:
 Assign previously evaluated objects to variable using $0, $1 … $5.
 Example: ''',
                 ),
-                TextSpan(
-                  text: r'var x = $0',
-                  style: theme.fixedFontStyle,
-                ),
+                TextSpan(text: r'var x = $0', style: theme.fixedFontStyle),
               ],
             ),
           ),
@@ -51,14 +48,13 @@ Example: ''',
             // TODO(polina-c): create content and change url.
             url: 'https://docs.flutter.dev/tools/devtools/console',
             gaScreenName: gac.console,
-            gaSelectedItemDescription:
-                gac.topicDocumentationLink(_documentationTopic),
+            gaSelectedItemDescription: gac.topicDocumentationLink(
+              _documentationTopic,
+            ),
           ),
         ],
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 }

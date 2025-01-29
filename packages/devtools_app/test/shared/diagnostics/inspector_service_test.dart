@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // ignore_for_file: avoid_print
 
@@ -90,26 +90,27 @@ void main() {
           // Empty the pubroot directories.
           final initialPubRootDirectories =
               await inspectorServiceLocal.getPubRootDirectories();
-          await inspectorServiceLocal
-              .removePubRootDirectories(initialPubRootDirectories!);
+          await inspectorServiceLocal.removePubRootDirectories(
+            initialPubRootDirectories!,
+          );
           expect(
             await inspectorServiceLocal.getPubRootDirectories(),
             equals([]),
           );
 
           // Can add a new pub root directory.
-          await inspectorServiceLocal
-              .addPubRootDirectories([testPubRootDirectory]);
+          await inspectorServiceLocal.addPubRootDirectories([
+            testPubRootDirectory,
+          ]);
           expect(
             await inspectorServiceLocal.getPubRootDirectories(),
-            equals([
-              testPubRootDirectory,
-            ]),
+            equals([testPubRootDirectory]),
           );
 
           // Can remove the new pub root directory.
-          await inspectorServiceLocal
-              .removePubRootDirectories([testPubRootDirectory]);
+          await inspectorServiceLocal.removePubRootDirectories([
+            testPubRootDirectory,
+          ]);
           expect(
             await inspectorServiceLocal.getPubRootDirectories(),
             equals([]),
@@ -127,50 +128,48 @@ void main() {
               await inspectorServiceLocal.isWidgetCreationTracked(),
               isTrue,
             );
-            final rootLibrary = await serviceConnection.serviceManager
-                .mainIsolateRootLibraryUriAsString();
+            final rootLibrary =
+                await serviceConnection.serviceManager
+                    .mainIsolateRootLibraryUriAsString();
             await inspectorServiceLocal.addPubRootDirectories([rootLibrary!]);
             final rootDirectories =
                 await inspectorServiceLocal.getPubRootDirectories() ??
-                    <String>[];
+                <String>[];
             expect(rootDirectories.length, 1);
             expect(rootDirectories.first, endsWith('/fixtures/flutter_app'));
             final originalRootDirectories = rootDirectories.toList();
             try {
               expect(
                 (inspectorServiceLocal.localClasses.keys.toList()..sort()),
-                equals(
-                  [
-                    'AnotherClass',
-                    'ExportedClass',
-                    'FooClass',
-                    'MyApp',
-                    'MyOtherWidget',
-                    'NotAWidget',
-                    '_PrivateClass',
-                    '_PrivateExportedClass',
-                  ],
-                ),
+                equals([
+                  'AnotherClass',
+                  'ExportedClass',
+                  'FooClass',
+                  'MyApp',
+                  'MyOtherWidget',
+                  'NotAWidget',
+                  '_PrivateClass',
+                  '_PrivateExportedClass',
+                ]),
               );
 
-              await inspectorServiceLocal
-                  .addPubRootDirectories(['${rootDirectories.first}/lib/src']);
+              await inspectorServiceLocal.addPubRootDirectories([
+                '${rootDirectories.first}/lib/src',
+              ]);
               // Adding src does not change the directory as local classes are
               // computed at the library level.
               expect(
                 (inspectorServiceLocal.localClasses.keys.toList()..sort()),
-                equals(
-                  [
-                    'AnotherClass',
-                    'ExportedClass',
-                    'FooClass',
-                    'MyApp',
-                    'MyOtherWidget',
-                    'NotAWidget',
-                    '_PrivateClass',
-                    '_PrivateExportedClass',
-                  ],
-                ),
+                equals([
+                  'AnotherClass',
+                  'ExportedClass',
+                  'FooClass',
+                  'MyApp',
+                  'MyOtherWidget',
+                  'NotAWidget',
+                  '_PrivateClass',
+                  '_PrivateExportedClass',
+                ]),
               );
 
               expect(
@@ -178,17 +177,19 @@ void main() {
                 isEmpty,
               );
 
-              await inspectorServiceLocal.addPubRootDirectories(
-                ['/usr/jacobr/foo/lib', '/usr/jacobr/bar/lib/bla'],
-              );
+              await inspectorServiceLocal.addPubRootDirectories([
+                '/usr/jacobr/foo/lib',
+                '/usr/jacobr/bar/lib/bla',
+              ]);
               expect(
                 inspectorServiceLocal.rootPackagePrefixes.toList(),
                 isEmpty,
               );
             } finally {
               // Restore.
-              await inspectorServiceLocal
-                  .addPubRootDirectories(originalRootDirectories);
+              await inspectorServiceLocal.addPubRootDirectories(
+                originalRootDirectories,
+              );
 
               await group.dispose();
             }
@@ -207,9 +208,9 @@ void main() {
           final originalRootDirectories =
               await inspectorServiceLocal.getPubRootDirectories();
           try {
-            await inspectorServiceLocal.addPubRootDirectories(
-              ['/usr/me/clients/google3/foo/bar/baz/lib/src/bla'],
-            );
+            await inspectorServiceLocal.addPubRootDirectories([
+              '/usr/me/clients/google3/foo/bar/baz/lib/src/bla',
+            ]);
             expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
               equals(['foo.bar.baz.']),
@@ -221,9 +222,7 @@ void main() {
             ]);
             expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
-              equals(
-                ['foo.bar.baz.', 'foo.core.'],
-              ),
+              equals(['foo.bar.baz.', 'foo.core.']),
             );
 
             // Test bazel directories without a lib directory.
@@ -233,9 +232,7 @@ void main() {
             ]);
             expect(
               inspectorServiceLocal.rootPackagePrefixes.toList(),
-              equals(
-                ['foo.bar.baz.', 'foo.core.'],
-              ),
+              equals(['foo.bar.baz.', 'foo.core.']),
             );
             await inspectorServiceLocal.addPubRootDirectories([
               '/usr/me/clients/google3/third_party/dart/foo/lib/src/bla',
@@ -256,8 +253,9 @@ void main() {
             );
           } finally {
             // Restore.
-            await inspectorServiceLocal
-                .addPubRootDirectories(originalRootDirectories ?? []);
+            await inspectorServiceLocal.addPubRootDirectories(
+              originalRootDirectories ?? [],
+            );
 
             await group.dispose();
           }
@@ -268,10 +266,11 @@ void main() {
         test('isSummaryTree = true', () async {
           await env.setupEnvironment();
           final group = inspectorService!.createObjectGroup('test-group');
-          final root = (await group.getRoot(
-            FlutterTreeType.widget,
-            isSummaryTree: true,
-          ))!;
+          final root =
+              (await group.getRoot(
+                FlutterTreeType.widget,
+                isSummaryTree: true,
+              ))!;
           // Tree only contains widgets from local app.
           expect(
             treeToDebugString(root),
@@ -328,10 +327,11 @@ void main() {
 
           // First get a node in the summary tree:
           final group = inspectorService!.createObjectGroup('test-group');
-          final root = (await group.getRoot(
-            FlutterTreeType.widget,
-            isSummaryTree: true,
-          ))!;
+          final root =
+              (await group.getRoot(
+                FlutterTreeType.widget,
+                isSummaryTree: true,
+              ))!;
           RemoteDiagnosticsNode nodeInSummaryTree =
               findNodeMatching(root, 'MaterialApp')!;
           expect(nodeInSummaryTree, isNotNull);
@@ -351,9 +351,7 @@ void main() {
           expect(nodeInSummaryTree, isNotNull);
           expect(
             treeToDebugString(nodeInSummaryTree),
-            equalsIgnoringHashCodes(
-              'Text\n',
-            ),
+            equalsIgnoringHashCodes('Text\n'),
           );
 
           nodeInDetailsTree =
@@ -372,10 +370,8 @@ void main() {
           );
 
           await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
-          final selection = (await group.getSelection(
-            null,
-            FlutterTreeType.widget,
-          ))!;
+          final selection =
+              (await group.getSelection(null, FlutterTreeType.widget))!;
           expect(selection, isNotNull);
           expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
           expect(
@@ -401,81 +397,77 @@ void main() {
         expect(inspectorService!.hoverEvalModeEnabledByDefault, isFalse);
       });
 
-// TODO(jacobr): uncomment this test once we have a more dependable golden
-//      test('render tree', () async {
-//        await env.setupEnvironment(
-//          config: const FlutterRunConfiguration(
-//            withDebugger: true,
-//            trackWidgetCreation: false,
-//          ),
-//        );
-//
-//        final group = inspectorService.createObjectGroup('test-group');
-//        final RemoteDiagnosticsNode root =
-//            await group.getRoot(FlutterTreeType.renderObject);
-//        // Tree only contains widgets from local app.
-//        expect(
-//          treeToDebugString(root),
-//          equalsIgnoringHashCodes(
-//            'RenderView#00000\n'
-//            ' └─child: RenderSemanticsAnnotations#00000\n',
-//          ),
-//        );
-//        final child = findNodeMatching(root, 'RenderSemanticsAnnotations');
-//        expect(child, isNotNull);
-//        final childDetailsSubtree = await group.getDetailsSubtree(child);
-//        expect(
-//          treeToDebugString(childDetailsSubtree),
-//          equalsIgnoringHashCodes(
-//            'child: RenderSemanticsAnnotations#00000\n'
-//            ' │ parentData: <none>\n'
-//            ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-//            ' │ size: Size(800.0, 600.0)\n'
-//            ' │\n'
-//            ' └─child: RenderCustomPaint#00000\n'
-//            '   │ parentData: <none> (can use size)\n'
-//            '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-//            '   │ size: Size(800.0, 600.0)\n'
-//            '   │\n'
-//            '   └─child: RenderPointerListener#00000\n'
-//            '       parentData: <none> (can use size)\n'
-//            '       constraints: BoxConstraints(w=800.0, h=600.0)\n'
-//            '       size: Size(800.0, 600.0)\n'
-//            '       behavior: deferToChild\n'
-//            '       listeners: down, up, cancel\n',
-//          ),
-//        );
-//
-//        await group.setSelectionInspector(child.valueRef, true);
-//        final selection =
-//            await group.getSelection(null, FlutterTreeType.renderObject, false);
-//        expect(selection, isNotNull);
-//        expect(selection.valueRef, equals(child.valueRef));
-//        expect(
-//          treeToDebugString(selection),
-//          equalsIgnoringHashCodes(
-//            'RenderSemanticsAnnotations#00000\n'
-//            ' └─child: RenderCustomPaint#00000\n',
-//          ),
-//        );
-//      });
+      // TODO(jacobr): uncomment this test once we have a more dependable golden
+      //      test('render tree', () async {
+      //        await env.setupEnvironment(
+      //          config: const FlutterRunConfiguration(
+      //            withDebugger: true,
+      //            trackWidgetCreation: false,
+      //          ),
+      //        );
+      //
+      //        final group = inspectorService.createObjectGroup('test-group');
+      //        final RemoteDiagnosticsNode root =
+      //            await group.getRoot(FlutterTreeType.renderObject);
+      //        // Tree only contains widgets from local app.
+      //        expect(
+      //          treeToDebugString(root),
+      //          equalsIgnoringHashCodes(
+      //            'RenderView#00000\n'
+      //            ' └─child: RenderSemanticsAnnotations#00000\n',
+      //          ),
+      //        );
+      //        final child = findNodeMatching(root, 'RenderSemanticsAnnotations');
+      //        expect(child, isNotNull);
+      //        final childDetailsSubtree = await group.getDetailsSubtree(child);
+      //        expect(
+      //          treeToDebugString(childDetailsSubtree),
+      //          equalsIgnoringHashCodes(
+      //            'child: RenderSemanticsAnnotations#00000\n'
+      //            ' │ parentData: <none>\n'
+      //            ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+      //            ' │ size: Size(800.0, 600.0)\n'
+      //            ' │\n'
+      //            ' └─child: RenderCustomPaint#00000\n'
+      //            '   │ parentData: <none> (can use size)\n'
+      //            '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+      //            '   │ size: Size(800.0, 600.0)\n'
+      //            '   │\n'
+      //            '   └─child: RenderPointerListener#00000\n'
+      //            '       parentData: <none> (can use size)\n'
+      //            '       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+      //            '       size: Size(800.0, 600.0)\n'
+      //            '       behavior: deferToChild\n'
+      //            '       listeners: down, up, cancel\n',
+      //          ),
+      //        );
+      //
+      //        await group.setSelectionInspector(child.valueRef, true);
+      //        final selection =
+      //            await group.getSelection(null, FlutterTreeType.renderObject, false);
+      //        expect(selection, isNotNull);
+      //        expect(selection.valueRef, equals(child.valueRef));
+      //        expect(
+      //          treeToDebugString(selection),
+      //          equalsIgnoringHashCodes(
+      //            'RenderSemanticsAnnotations#00000\n'
+      //            ' └─child: RenderCustomPaint#00000\n',
+      //          ),
+      //        );
+      //      });
 
       // Run this test last as it will take a long time due to setting up the test
       // environment from scratch.
-      test(
-        'track widget creation off',
-        () async {
-          await env.setupEnvironment(
-            config: const FlutterRunConfiguration(
-              withDebugger: true,
-              trackWidgetCreation: false,
-            ),
-          );
+      test('track widget creation off', () async {
+        await env.setupEnvironment(
+          config: const FlutterRunConfiguration(
+            withDebugger: true,
+            trackWidgetCreation: false,
+          ),
+        );
 
-          expect(await inspectorService!.isWidgetCreationTracked(), isFalse);
-        },
-        skip: true,
-      );
+        expect(await inspectorService!.isWidgetCreationTracked(), isFalse);
+      }, skip: true);
       // TODO(albertusangga): remove or fix this test
 
       // TODO(jacobr): add tests verifying that we can stop the running device

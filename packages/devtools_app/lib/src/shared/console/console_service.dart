@@ -1,6 +1,6 @@
-// Copyright 2021 The Chromium Authors. All rights reserved.
+// Copyright 2021 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -24,23 +24,13 @@ import '../primitives/utils.dart';
 /// TODO(jacobr): support console lines that are structured error messages as
 /// well.
 class ConsoleLine {
-  factory ConsoleLine.text(
-    String text, {
-    bool forceScrollIntoView = false,
-  }) =>
-      TextConsoleLine(
-        text,
-        forceScrollIntoView: forceScrollIntoView,
-      );
+  factory ConsoleLine.text(String text, {bool forceScrollIntoView = false}) =>
+      TextConsoleLine(text, forceScrollIntoView: forceScrollIntoView);
 
   factory ConsoleLine.dartObjectNode(
     DartObjectNode variable, {
     bool forceScrollIntoView = false,
-  }) =>
-      VariableConsoleLine(
-        variable,
-        forceScrollIntoView: forceScrollIntoView,
-      );
+  }) => VariableConsoleLine(variable, forceScrollIntoView: forceScrollIntoView);
 
   ConsoleLine._(this.forceScrollIntoView);
 
@@ -50,7 +40,7 @@ class ConsoleLine {
 
 class TextConsoleLine extends ConsoleLine {
   TextConsoleLine(this.text, {bool forceScrollIntoView = false})
-      : super._(forceScrollIntoView);
+    : super._(forceScrollIntoView);
   final String text;
 
   @override
@@ -61,9 +51,7 @@ class TextConsoleLine extends ConsoleLine {
 
 class VariableConsoleLine extends ConsoleLine {
   VariableConsoleLine(this.variable, {bool forceScrollIntoView = false})
-      : super._(
-          forceScrollIntoView,
-        );
+    : super._(forceScrollIntoView);
   final DartObjectNode variable;
 
   @override
@@ -178,8 +166,9 @@ class ConsoleService with DisposerMixin {
         last is TextConsoleLine) {
       _stdio.last = ConsoleLine.text('${last.text}${newLines.first}');
       if (newLines.length > 1) {
-        _stdio
-            .addAll(newLines.sublist(1).map((text) => ConsoleLine.text(text)));
+        _stdio.addAll(
+          newLines.sublist(1).map((text) => ConsoleLine.text(text)),
+        );
       }
     } else {
       _stdio.addAll(newLines.map((text) => ConsoleLine.text(text)));
@@ -267,7 +256,9 @@ class ConsoleService with DisposerMixin {
       );
       autoDisposeStreamSubscription(
         serviceConnection
-            .serviceManager.service!.onExtensionEventWithHistorySafe
+            .serviceManager
+            .service!
+            .onExtensionEventWithHistorySafe
             .listen(_handleExtensionEvent),
       );
       _serviceInitialized = true;

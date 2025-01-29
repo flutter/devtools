@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -12,13 +12,13 @@ import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/banner_messages.dart';
-import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/import_export/import_export.dart';
-import '../../shared/file_import.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
-import '../../shared/screen.dart';
-import '../../shared/utils.dart';
+import '../../shared/managers/banner_messages.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/file_import.dart';
+import '../../shared/utils/utils.dart';
 import 'panes/controls/performance_controls.dart';
 import 'panes/flutter_frames/flutter_frames_chart.dart';
 import 'performance_controller.dart';
@@ -94,7 +94,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
         final showingOfflineData =
             offlineDataController.showingOfflineData.value;
-        final isOfflineFlutterApp = showingOfflineData &&
+        final isOfflineFlutterApp =
+            showingOfflineData &&
             controller.offlinePerformanceData != null &&
             controller.offlinePerformanceData!.frames.isNotEmpty;
         return Column(
@@ -107,7 +108,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             if (isOfflineFlutterApp ||
                 (!showingOfflineData &&
                     serviceConnection
-                        .serviceManager.connectedApp!.isFlutterAppNow!))
+                        .serviceManager
+                        .connectedApp!
+                        .isFlutterAppNow!))
               FlutterFramesChart(
                 controller.flutterFramesController,
                 showingOfflineData: showingOfflineData,
@@ -128,10 +131,10 @@ class WebPerformanceScreenBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final isFlutterWebApp =
         serviceConnection.serviceManager.connectedApp?.isFlutterWebAppNow ??
-            false;
+        false;
     return Markdown(
       data: isFlutterWebApp ? flutterWebInstructionsMd : dartWebInstructionsMd,
-      onTapLink: (_, url, __) {
+      onTapLink: (_, url, _) {
         if (url != null) {
           unawaited(launchUrlWithErrorHandling(url));
         }
@@ -155,8 +158,10 @@ class DisconnectedPerformanceScreenBody extends StatelessWidget {
       gaSelectionImport: gac.PerformanceEvents.openDataFile.name,
       gaSelectionAction: gac.PerformanceEvents.loadDataFromFile.name,
       onAction: (jsonFile) {
-        Provider.of<ImportController>(context, listen: false)
-            .importData(jsonFile, expectedScreenId: PerformanceScreen.id);
+        Provider.of<ImportController>(
+          context,
+          listen: false,
+        ).importData(jsonFile, expectedScreenId: PerformanceScreen.id);
       },
     );
   }

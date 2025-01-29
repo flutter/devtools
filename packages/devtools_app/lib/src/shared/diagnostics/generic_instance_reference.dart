@@ -1,12 +1,12 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:vm_service/vm_service.dart';
 
 import '../memory/heap_object.dart';
 import '../memory/simple_items.dart';
-import '../vm_utils.dart';
+import '../utils/vm_utils.dart';
 import 'diagnostics_node.dart';
 
 /// True, if [ref] contains static or live information about references and thus
@@ -73,12 +73,12 @@ class ObjectReferences extends GenericInstanceRef {
     ObjectReferences ref, {
     RefNodeType? refNodeType,
     HeapObject? heapSelection,
-  })  : refNodeType = refNodeType ?? ref.refNodeType,
-        super(
-          isolateRef: ref.isolateRef,
-          value: ref.value,
-          heapSelection: heapSelection ?? ref.heapSelection,
-        );
+  }) : refNodeType = refNodeType ?? ref.refNodeType,
+       super(
+         isolateRef: ref.isolateRef,
+         value: ref.value,
+         heapSelection: heapSelection ?? ref.heapSelection,
+       );
 
   final RefNodeType refNodeType;
 
@@ -119,8 +119,7 @@ enum RefNodeType {
   liveInRefs(RefDirection.inbound),
 
   /// Subitem of [liveRefRoot] for outbound live references.
-  liveOutRefs(RefDirection.outbound),
-  ;
+  liveOutRefs(RefDirection.outbound);
 
   const RefNodeType([this.direction]);
 

@@ -1,10 +1,11 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -18,13 +19,15 @@ import '../constants.dart';
 import '../diagnostics/inspector_service.dart';
 import '../feature_flags.dart';
 import '../globals.dart';
-import '../query_parameters.dart';
-import '../utils.dart';
+import '../primitives/query_parameters.dart';
+import '../utils/utils.dart';
 
+part '_cpu_profiler_preferences.dart';
 part '_extension_preferences.dart';
 part '_inspector_preferences.dart';
-part '_memory_preferences.dart';
 part '_logging_preferences.dart';
+part '_memory_preferences.dart';
+part '_network_preferences.dart';
 part '_performance_preferences.dart';
 
 final _log = Logger('PreferencesController');
@@ -53,9 +56,7 @@ enum _UiPreferences {
 /// DevTools preferences for general settings.
 ///
 /// These values are not stored in the DevTools storage file with a prefix.
-enum _GeneralPreferences {
-  verboseLogging,
-}
+enum _GeneralPreferences { verboseLogging }
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -76,25 +77,32 @@ class PreferencesController extends DisposableController
   /// dart2js + canvaskit
   final wasmEnabled = ValueNotifier<bool>(false);
 
-  final verboseLoggingEnabled =
-      ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
+  final verboseLoggingEnabled = ValueNotifier<bool>(
+    Logger.root.level == verboseLoggingLevel,
+  );
+
+  CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
+  final _cpuProfiler = CpuProfilerPreferencesController();
+
+  ExtensionsPreferencesController get devToolsExtensions => _extensions;
+  final _extensions = ExtensionsPreferencesController();
 
   // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
   // Inspector V2 has been released.
   InspectorPreferencesController get inspector => _inspector;
   final _inspector = InspectorPreferencesController();
 
-  MemoryPreferencesController get memory => _memory;
-  final _memory = MemoryPreferencesController();
-
   LoggingPreferencesController get logging => _logging;
   final _logging = LoggingPreferencesController();
 
+  MemoryPreferencesController get memory => _memory;
+  final _memory = MemoryPreferencesController();
+
+  NetworkPreferencesController get network => _network;
+  final _network = NetworkPreferencesController();
+
   PerformancePreferencesController get performance => _performance;
   final _performance = PerformancePreferencesController();
-
-  ExtensionsPreferencesController get devToolsExtensions => _extensions;
-  final _extensions = ExtensionsPreferencesController();
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
@@ -105,19 +113,23 @@ class PreferencesController extends DisposableController
     }
     await _initVerboseLogging();
 
-    await inspector.init();
-    await memory.init();
-    await logging.init();
-    await performance.init();
+    await cpuProfiler.init();
     await devToolsExtensions.init();
+    await inspector.init();
+    await logging.init();
+    await memory.init();
+    await network.init();
+    await performance.init();
 
     setGlobal(PreferencesController, this);
   }
 
   Future<void> _initDarkMode() async {
-    final darkModeValue =
-        await storage.getValue(_UiPreferences.darkMode.storageKey);
-    final useDarkMode = (darkModeValue == null && useDarkThemeAsDefault) ||
+    final darkModeValue = await storage.getValue(
+      _UiPreferences.darkMode.storageKey,
+    );
+    final useDarkMode =
+        (darkModeValue == null && useDarkThemeAsDefault) ||
         darkModeValue == 'true';
     ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
     toggleDarkModeTheme(useDarkMode);
@@ -199,7 +211,17 @@ class PreferencesController extends DisposableController
       return;
     }
 
-    final shouldEnableWasm = enabledFromStorage || enabledFromQueryParams;
+    // Whether DevTools was run using the `dt run` command, which runs DevTools
+    // using `flutter run` and connects it to a locally running instance of the
+    // DevTools server.
+    final usingDebugDevToolsServer =
+        (const String.fromEnvironment('debug_devtools_server')).isNotEmpty &&
+        !kReleaseMode;
+    final shouldEnableWasm =
+        (enabledFromStorage || enabledFromQueryParams) &&
+        kIsWeb &&
+        // Wasm cannot be enabled if DevTools was built using `flutter run`.
+        !usingDebugDevToolsServer;
     assert(kIsWasm == shouldEnableWasm);
     // This should be a no-op if the flutter_bootstrap.js logic set the
     // renderer properly, but we call this to be safe in case something went
@@ -223,11 +245,13 @@ class PreferencesController extends DisposableController
 
   @override
   void dispose() {
-    inspector.dispose();
-    memory.dispose();
-    logging.dispose();
-    performance.dispose();
+    cpuProfiler.dispose();
     devToolsExtensions.dispose();
+    inspector.dispose();
+    logging.dispose();
+    memory.dispose();
+    network.dispose();
+    performance.dispose();
     super.dispose();
   }
 

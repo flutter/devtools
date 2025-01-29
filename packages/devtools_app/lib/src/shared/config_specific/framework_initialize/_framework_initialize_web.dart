@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:js_interop';
 
@@ -17,7 +17,9 @@ import '../../server/server_api_client.dart';
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
   // Clear out the unneeded HTML from index.html.
-  document.body!.querySelectorAll('.legacy-dart').forEach(
+  document.body!
+      .querySelectorAll('.legacy-dart')
+      .forEach(
         (Node element) {
           if (element.parentNode != null) {
             element.parentNode!.removeChild(element);
@@ -30,9 +32,11 @@ Future<String> initializePlatform() async {
   // Here, we try and initialize the connection between the DevTools web app and
   // its local server. DevTools can be launched without the server however, so
   // establishing this connection is a best-effort.
+  // TODO(kenz): investigate it we can remove the DevToolsServerConnection
+  // code in general. We do not appear to be using the SSE connection.
   final connection = await DevToolsServerConnection.connect();
   if (connection != null) {
-    setGlobal(Storage, ServerConnectionStorage());
+    setGlobal(Storage, server.ServerConnectionStorage());
   } else {
     setGlobal(Storage, BrowserStorage());
   }
@@ -89,19 +93,6 @@ void _sendKeyPressToParent(KeyboardEvent event) {
     {'command': 'keydown', 'data': data}.jsify(),
     '*'.toJS,
   );
-}
-
-class ServerConnectionStorage implements Storage {
-  @override
-  Future<String?> getValue(String key) async {
-    final value = await server.getPreferenceValue(key);
-    return value == null ? null : '$value';
-  }
-
-  @override
-  Future<void> setValue(String key, String value) async {
-    await server.setPreferenceValue(key, value);
-  }
 }
 
 class BrowserStorage implements Storage {

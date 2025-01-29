@@ -1,25 +1,25 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../service/editor/editor_client.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/ui/icons.dart';
+import '../../../shared/editor/editor_client.dart';
 
-typedef DevToolsButtonData = ({
-  String label,
-  IconData? icon,
-  String? iconAsset,
-  String screenId,
-  bool requiresDebugSession,
-  bool prefersDebugSession,
-});
+typedef DevToolsButtonData =
+    ({
+      String label,
+      IconData? icon,
+      String? iconAsset,
+      String screenId,
+      bool requiresDebugSession,
+      bool prefersDebugSession,
+    });
 
 TableRow createDevToolsScreenRow({
   required DevToolsButtonData dataLeft,
@@ -33,14 +33,15 @@ TableRow createDevToolsScreenRow({
     !singleColumn || dataRight == null,
     'dataRight must be null is singleColumn is true',
   );
-  final cellRight = dataRight != null
-      ? _DevToolsScreenButton(
-          data: dataRight,
-          editor: editor,
-          hasDebugSessions: hasDebugSessions,
-          onPressed: onPressed,
-        )
-      : const SizedBox();
+  final cellRight =
+      dataRight != null
+          ? _DevToolsScreenButton(
+            data: dataRight,
+            editor: editor,
+            hasDebugSessions: hasDebugSessions,
+            onPressed: onPressed,
+          )
+          : const SizedBox();
   return TableRow(
     children: [
       _DevToolsScreenButton(
@@ -108,10 +109,7 @@ void openDevToolsScreen({
   required bool prefersDebugSession,
   required EditorClient editor,
 }) {
-  ga.select(
-    editor.gaId,
-    gac.EditorSidebar.openDevToolsScreen(screenId),
-  );
+  ga.select(editor.gaId, gac.EditorSidebar.openDevToolsScreen(screenId));
   unawaited(
     editor.openDevToolsPage(
       null,

@@ -1,8 +1,8 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-const String appName = 'Memory Leak';
+const appName = 'Memory Leak';
 
-const String logMenu = 'Log';
-const String aboutMenu = 'About';
+const logMenu = 'Log';
+const aboutMenu = 'About';

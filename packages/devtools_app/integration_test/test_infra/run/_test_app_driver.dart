@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // ignore_for_file: avoid_print
 
@@ -23,18 +23,14 @@ class TestFlutterApp extends IntegrationTestApp {
 
   @override
   Future<void> startProcess() async {
-    runProcess = await Process.start(
-      'flutter',
-      [
-        'run',
-        '--machine',
-        '-d',
-        testAppDevice.argName,
-        // Do not serve DevTools from Flutter Tools.
-        '--no-devtools',
-      ],
-      workingDirectory: testAppPath,
-    );
+    runProcess = await Process.start('flutter', [
+      'run',
+      '--machine',
+      '-d',
+      testAppDevice.argName,
+      // Do not serve DevTools from Flutter Tools.
+      '--no-devtools',
+    ], workingDirectory: testAppPath);
   }
 
   @override
@@ -50,19 +46,23 @@ class TestFlutterApp extends IntegrationTestApp {
       event: FlutterDaemonConstants.appDebugPort.key,
       timeout: IntegrationTestApp._appStartTimeout,
     );
-    final wsUriString = (debugPort[FlutterDaemonConstants.params.key]!
-        as Map<String, Object?>)[FlutterDaemonConstants.wsUri.key] as String;
+    final wsUriString =
+        (debugPort[FlutterDaemonConstants.params.key]!
+                as Map<String, Object?>)[FlutterDaemonConstants.wsUri.key]
+            as String;
     _vmServiceWsUri = Uri.parse(wsUriString);
 
     // Map to WS URI.
-    _vmServiceWsUri =
-        convertToWebSocketUrl(serviceProtocolUrl: _vmServiceWsUri);
+    _vmServiceWsUri = convertToWebSocketUrl(
+      serviceProtocolUrl: _vmServiceWsUri,
+    );
 
     // Now await the started event; if it had already happened the future will
     // have already completed.
     final startedResult = await started;
-    final params = startedResult[FlutterDaemonConstants.params.key]!
-        as Map<String, Object?>;
+    final params =
+        startedResult[FlutterDaemonConstants.params.key]!
+            as Map<String, Object?>;
     _currentRunningAppId = params[FlutterDaemonConstants.appId.key] as String?;
   }
 
@@ -72,10 +72,9 @@ class TestFlutterApp extends IntegrationTestApp {
       _debugPrint('Stopping app');
       await Future.any<void>(<Future<void>>[
         runProcess!.exitCode,
-        _sendFlutterDaemonRequest(
-          'app.stop',
-          <String, dynamic>{'appId': _currentRunningAppId},
-        ),
+        _sendFlutterDaemonRequest('app.stop', <String, dynamic>{
+          'appId': _currentRunningAppId,
+        }),
       ]).timeout(
         IOMixin.killTimeout,
         onTimeout: () {
@@ -140,9 +139,10 @@ class TestFlutterApp extends IntegrationTestApp {
     return _timeoutWithMessages<Map<String, Object?>>(
       () => response.future,
       timeout: timeout,
-      message: event != null
-          ? 'Did not receive expected $event event.'
-          : 'Did not receive response to request "$id".',
+      message:
+          event != null
+              ? 'Did not receive expected $event event.'
+              : 'Did not receive response to request "$id".',
     ).whenComplete(() => sub.cancel());
   }
 
@@ -171,13 +171,15 @@ class TestFlutterApp extends IntegrationTestApp {
       error.write(
         '${event != null ? '$event event' : 'response to request $id.'}.\n\n',
       );
-      final errorFromJson = (json[FlutterDaemonConstants.params.key]
-          as Map<String, Object?>?)?[FlutterDaemonConstants.error.key];
+      final errorFromJson =
+          (json[FlutterDaemonConstants.params.key]
+              as Map<String, Object?>?)?[FlutterDaemonConstants.error.key];
       if (errorFromJson != null) {
         error.write('$errorFromJson\n\n');
       }
-      final traceFromJson = (json[FlutterDaemonConstants.params.key]
-          as Map<String, Object?>?)?[FlutterDaemonConstants.trace.key];
+      final traceFromJson =
+          (json[FlutterDaemonConstants.params.key]
+              as Map<String, Object?>?)?[FlutterDaemonConstants.trace.key];
       if (traceFromJson != null) {
         error.write('$traceFromJson\n\n');
       }
@@ -200,9 +202,8 @@ class TestFlutterApp extends IntegrationTestApp {
 }
 
 class TestDartCliApp extends IntegrationTestApp {
-  TestDartCliApp({
-    String appPath = 'test/test_infra/fixtures/empty_app.dart',
-  }) : super(appPath, TestAppDevice.cli);
+  TestDartCliApp({String appPath = 'test/test_infra/fixtures/empty_app.dart'})
+    : super(appPath, TestAppDevice.cli);
 
   static const vmServicePrefix = 'The Dart VM service is listening on ';
 
@@ -212,15 +213,11 @@ class TestDartCliApp extends IntegrationTestApp {
     final parts = testAppPath.split(separator);
     final scriptName = parts.removeLast();
     final workingDir = parts.join(separator);
-    runProcess = await Process.start(
-      'dart',
-      [
-        '--observe=0',
-        'run',
-        scriptName,
-      ],
-      workingDirectory: workingDir,
-    );
+    runProcess = await Process.start('dart', [
+      '--observe=0',
+      'run',
+      scriptName,
+    ], workingDirectory: workingDir);
   }
 
   @override
@@ -232,8 +229,9 @@ class TestDartCliApp extends IntegrationTestApp {
     final parsedVmServiceUri = Uri.parse(vmServiceUri);
 
     // Map to WS URI.
-    _vmServiceWsUri =
-        convertToWebSocketUrl(serviceProtocolUrl: parsedVmServiceUri);
+    _vmServiceWsUri = convertToWebSocketUrl(
+      serviceProtocolUrl: parsedVmServiceUri,
+    );
   }
 
   Future<String> waitFor({required String message, Duration? timeout}) {
@@ -262,8 +260,9 @@ class TestDartCliApp extends IntegrationTestApp {
     required String message,
   }) async {
     if (message == vmServicePrefix && line.startsWith(vmServicePrefix)) {
-      final vmServiceUri = line
-          .substring(line.indexOf(vmServicePrefix) + vmServicePrefix.length);
+      final vmServiceUri = line.substring(
+        line.indexOf(vmServicePrefix) + vmServicePrefix.length,
+      );
       await subscription.cancel();
       response.complete(vmServiceUri);
     }
@@ -331,10 +330,8 @@ abstract class IntegrationTestApp with IOMixin {
     _debugPrint('Waiting for process to end');
     return runProcess!.exitCode.timeout(
       IOMixin.killTimeout,
-      onTimeout: () => killGracefully(
-        runProcess!,
-        debugLogging: debugTestScript,
-      ),
+      onTimeout:
+          () => killGracefully(runProcess!, debugLogging: debugTestScript),
     );
   }
 
@@ -354,15 +351,18 @@ abstract class IntegrationTestApp with IOMixin {
 
     final sub = _allMessages.stream.listen(logMessage);
 
-    return f().timeout(
-      timeout ?? _defaultTimeout,
-      onTimeout: () {
-        logMessage('<timed out>');
-        throw '$message';
-      },
-    ).catchError((Object? error) {
-      throw '$error\nReceived:\n${messages.toString()}';
-    }).whenComplete(() => sub.cancel());
+    return f()
+        .timeout(
+          timeout ?? _defaultTimeout,
+          onTimeout: () {
+            logMessage('<timed out>');
+            throw '$message';
+          },
+        )
+        .catchError((Object? error) {
+          throw '$error\nReceived:\n${messages.toString()}';
+        })
+        .whenComplete(() => sub.cancel());
   }
 
   String _debugPrint(String msg) {
@@ -379,15 +379,17 @@ abstract class IntegrationTestApp with IOMixin {
 ///
 /// If the URI is already a VM Service WebSocket URI it will not be modified.
 Uri convertToWebSocketUrl({required Uri serviceProtocolUrl}) {
-  final isSecure = serviceProtocolUrl.isScheme('wss') ||
+  final isSecure =
+      serviceProtocolUrl.isScheme('wss') ||
       serviceProtocolUrl.isScheme('https');
   final scheme = isSecure ? 'wss' : 'ws';
 
-  final path = serviceProtocolUrl.path.endsWith('/ws')
-      ? serviceProtocolUrl.path
-      : (serviceProtocolUrl.path.endsWith('/')
-          ? '${serviceProtocolUrl.path}ws'
-          : '${serviceProtocolUrl.path}/ws');
+  final path =
+      serviceProtocolUrl.path.endsWith('/ws')
+          ? serviceProtocolUrl.path
+          : (serviceProtocolUrl.path.endsWith('/')
+              ? '${serviceProtocolUrl.path}ws'
+              : '${serviceProtocolUrl.path}/ws');
 
   return serviceProtocolUrl.replace(scheme: scheme, path: path);
 }
@@ -410,7 +412,7 @@ enum FlutterDaemonConstants {
   daemonConnected(nameOverride: 'daemon.connected');
 
   const FlutterDaemonConstants({String? nameOverride})
-      : _nameOverride = nameOverride;
+    : _nameOverride = nameOverride;
 
   final String? _nameOverride;
 
@@ -447,11 +449,13 @@ enum TestAppDevice {
     ],
   };
 
-  static final _argNameToDeviceMap =
-      TestAppDevice.values.fold(<String, TestAppDevice>{}, (map, device) {
-    map[device.argName] = device;
-    return map;
-  });
+  static final _argNameToDeviceMap = TestAppDevice.values.fold(
+    <String, TestAppDevice>{},
+    (map, device) {
+      map[device.argName] = device;
+      return map;
+    },
+  );
 
   static TestAppDevice? fromArgName(String argName) {
     return _argNameToDeviceMap[argName];
@@ -459,7 +463,8 @@ enum TestAppDevice {
 
   bool supportsTest(String testPath) {
     final unsupportedTests = _unsupportedTestsForDevice[this] ?? [];
-    return unsupportedTests
-        .none((unsupportedTestPath) => testPath.endsWith(unsupportedTestPath));
+    return unsupportedTests.none(
+      (unsupportedTestPath) => testPath.endsWith(unsupportedTestPath),
+    );
   }
 }

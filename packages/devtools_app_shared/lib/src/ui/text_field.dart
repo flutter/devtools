@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
@@ -11,8 +11,8 @@ import 'theme/theme.dart';
 final class DevToolsClearableTextField extends StatelessWidget {
   DevToolsClearableTextField({
     super.key,
-    required this.labelText,
     TextEditingController? controller,
+    this.labelText,
     this.hintText,
     this.prefixIcon,
     this.additionalSuffixActions = const <Widget>[],
@@ -27,7 +27,7 @@ final class DevToolsClearableTextField extends StatelessWidget {
   final String? hintText;
   final Widget? prefixIcon;
   final List<Widget> additionalSuffixActions;
-  final String labelText;
+  final String? labelText;
   final void Function(String)? onChanged;
   final void Function(String)? onSubmitted;
   final bool autofocus;
@@ -80,13 +80,13 @@ final class DevToolsClearableTextField extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                ...additionalSuffixActions,
                 InputDecorationSuffixButton.clear(
                   onPressed: () {
                     controller.clear();
                     onChanged?.call('');
                   },
                 ),
-                ...additionalSuffixActions,
               ],
             ),
           ),
@@ -122,6 +122,15 @@ final class InputDecorationSuffixButton extends StatelessWidget {
         icon: Icons.close,
         onPressed: onPressed,
         tooltip: 'Close',
+      );
+
+  factory InputDecorationSuffixButton.help({
+    required VoidCallback? onPressed,
+  }) =>
+      InputDecorationSuffixButton(
+        icon: Icons.question_mark,
+        onPressed: onPressed,
+        tooltip: 'Help',
       );
 
   final IconData icon;

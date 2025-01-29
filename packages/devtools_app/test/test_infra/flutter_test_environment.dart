@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:io';
@@ -11,12 +11,12 @@ import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:path/path.dart' as p;
 
 import 'flutter_test_driver.dart';
 
-typedef FlutterDriverFactory = FlutterTestDriver Function(
-  Directory testAppDirectory,
-);
+typedef FlutterDriverFactory =
+    FlutterTestDriver Function(Directory testAppDirectory);
 
 /// The default [FlutterDriverFactory] method. Runs a normal flutter app.
 FlutterRunTestDriver defaultFlutterRunDriver(Directory appDir) =>
@@ -27,10 +27,20 @@ final defaultFlutterExecutable = Platform.isWindows ? 'flutter.bat' : 'flutter';
 class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
-    this.testAppDirectory = 'test/test_infra/fixtures/flutter_app',
+    String testAppDirectory = 'test/test_infra/fixtures/flutter_app',
+    bool useTempDirectory = false,
     FlutterDriverFactory? flutterDriverFactory,
-  })  : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
-        _flutterExe = _parseFlutterExeFromEnv();
+  }) : _testAppDirectory = testAppDirectory,
+       _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
+       _flutterExe = _parseFlutterExeFromEnv() {
+    if (useTempDirectory) {
+      final tempDirectory = Directory.systemTemp.createTempSync(
+        'flutter_test_temp',
+      );
+      _tempTestAppDirectory = tempDirectory.path;
+      _copyToTempDirectory(testAppDirectory, tempDirectory);
+    }
+  }
 
   static String _parseFlutterExeFromEnv() {
     const flutterExe = String.fromEnvironment('FLUTTER_CMD');
@@ -44,7 +54,11 @@ class FlutterTestEnvironment {
   VmServiceWrapper get service => _service;
 
   /// Path relative to the `devtools_app` dir for the test fixture.
-  final String testAppDirectory;
+  String get testAppDirectory => _tempTestAppDirectory ?? _testAppDirectory;
+
+  final String _testAppDirectory;
+
+  String? _tempTestAppDirectory;
 
   /// A factory method which can return a [FlutterRunTestDriver] for a test
   /// fixture directory.
@@ -113,8 +127,9 @@ class FlutterTestEnvironment {
         // Update the run configuration if we have a new one.
         if (_isNewRunConfig(config)) _runConfig = config!;
 
-        _flutter = _flutterDriverFactory(Directory(testAppDirectory))
-            as FlutterRunTestDriver?;
+        _flutter =
+            _flutterDriverFactory(Directory(testAppDirectory))
+                as FlutterRunTestDriver?;
         await _flutter!.run(
           flutterExecutable: _flutterExe,
           runConfig: _runConfig,
@@ -199,7 +214,37 @@ class FlutterTestEnvironment {
     _needsSetup = true;
   }
 
+  void finalTeardown() {
+    // Delete the temporary directory created for the test suite.
+    if (_tempTestAppDirectory != null) {
+      final tempDirectory = Directory(_tempTestAppDirectory!);
+      if (tempDirectory.existsSync()) {
+        Directory(_tempTestAppDirectory!).deleteSync(recursive: true);
+      }
+    }
+  }
+
   bool _isNewRunConfig(FlutterRunConfiguration? config) {
     return config != null && config != _runConfig;
+  }
+
+  void _copyToTempDirectory(String directoryPath, Directory tempDirectory) {
+    if (!Directory(directoryPath).existsSync()) return;
+
+    if (!tempDirectory.existsSync()) {
+      tempDirectory.createSync(recursive: true);
+    }
+
+    for (final entity in Directory(directoryPath).listSync()) {
+      final copyTo = p.join(
+        tempDirectory.path,
+        p.relative(entity.path, from: directoryPath),
+      );
+      if (entity is File) {
+        entity.copySync(copyTo);
+      } else if (entity is Directory) {
+        _copyToTempDirectory(entity.path, Directory(copyTo));
+      }
+    }
   }
 }

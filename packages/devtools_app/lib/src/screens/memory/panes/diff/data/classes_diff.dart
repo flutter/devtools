@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
@@ -56,8 +56,9 @@ class ObjectSetDiff {
     HeapData data,
     ObjectSet originalSet,
   ) {
-    final excludeFromRetained =
-        originalSet.excludedFromRetainedSize.contains(index);
+    final excludeFromRetained = originalSet.excludedFromRetainedSize.contains(
+      index,
+    );
     setToAlter.countInstance(
       data.graph,
       index,
@@ -72,8 +73,9 @@ class ObjectSetDiff {
     HeapData data,
     ObjectSet originalSet,
   ) {
-    final excludeFromRetained =
-        originalSet.excludedFromRetainedSize.contains(index);
+    final excludeFromRetained = originalSet.excludedFromRetainedSize.contains(
+      index,
+    );
     setToAlter.uncountInstance(
       data.graph,
       index,
@@ -82,10 +84,7 @@ class ObjectSetDiff {
     );
   }
 
-  static Map<int, int> _hashCodeToIndexMap(
-    ObjectSet? ids,
-    HeapData? data,
-  ) {
+  static Map<int, int> _hashCodeToIndexMap(ObjectSet? ids, HeapData? data) {
     if (ids == null || data == null) return const {};
     return {
       for (final id in ids.indexes) data.graph.objects[id].identityHashCode: id,
@@ -133,12 +132,17 @@ class DiffClassData extends ClassData {
         dataAfter: dataAfter,
       ),
       // PathFromRoot, ObjectSetStats
-      byPath: subtractMaps<PathFromRoot, ObjectSetStats, ObjectSetStats,
-          ObjectSetStats>(
+      byPath: subtractMaps<
+        PathFromRoot,
+        ObjectSetStats,
+        ObjectSetStats,
+        ObjectSetStats
+      >(
         from: after?.byPath,
         subtract: before?.byPath,
-        subtractor: ({subtract, from}) =>
-            ObjectSetStats.subtract(subtract: subtract, from: from),
+        subtractor:
+            ({subtract, from}) =>
+                ObjectSetStats.subtract(subtract: subtract, from: from),
       ),
     );
 

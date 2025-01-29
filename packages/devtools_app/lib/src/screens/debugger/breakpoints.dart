@@ -1,14 +1,14 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart' hide Badge;
 
-import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/utils.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/utils/utils.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
@@ -46,10 +46,7 @@ class _BreakpointsState extends State<Breakpoints>
           itemCount: breakpoints.length,
           itemExtent: defaultListItemHeight,
           itemBuilder: (_, index) {
-            return buildBreakpoint(
-              breakpoints[index],
-              selectedBreakpoint,
-            );
+            return buildBreakpoint(breakpoints[index], selectedBreakpoint);
           },
         );
       },
@@ -91,9 +88,10 @@ class _BreakpointsState extends State<Breakpoints>
                     children: [
                       TextSpan(
                         text: ' (${bp.scriptUri})',
-                        style: isSelected
-                            ? theme.selectedSubtleTextStyle
-                            : theme.subtleTextStyle,
+                        style:
+                            isSelected
+                                ? theme.selectedSubtleTextStyle
+                                : theme.subtleTextStyle,
                       ),
                     ],
                   ),

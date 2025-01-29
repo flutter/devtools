@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be found
-// in the LICENSE file.
+// Copyright 2020 The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math';
@@ -157,7 +157,8 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
         // offset controller.
         double delta = 0.0;
         if (widget.offsetController.position.hasContentDimensions) {
-          delta = widget.offsetController.offset -
+          delta =
+              widget.offsetController.offset -
               widget.offsetController.position.maxScrollExtent +
               widget.offsetController.position.minScrollExtent;
           if (widget.offsetController.position.hasViewportDimension) {
@@ -165,22 +166,21 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
             // The viewport dimension from the offsetController may be one frame
             // behind the true viewport dimension. We add this delta so the
             // scrollbar always appears stuck to the side of the viewport.
-            delta += widget.offsetControllerViewportDimension -
+            delta +=
+                widget.offsetControllerViewportDimension -
                 widget.offsetController.position.viewportDimension;
           }
         }
-        final offset = widget.axis == Axis.vertical
-            ? Offset(delta, 0.0)
-            : Offset(0.0, delta);
+        final offset =
+            widget.axis == Axis.vertical
+                ? Offset(delta, 0.0)
+                : Offset(0.0, delta);
         return Transform.translate(
           offset: offset,
           child: Scrollbar(
             thumbVisibility: widget.isAlwaysShown,
             controller: widget.controller,
-            child: Transform.translate(
-              offset: -offset,
-              child: child,
-            ),
+            child: Transform.translate(offset: -offset, child: child),
           ),
         );
       },
@@ -190,10 +190,7 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
 }
 
 /// Scrolls to [position] if [position] is not already visible in the scroll view.
-void maybeScrollToPosition(
-  ScrollController scrollController,
-  double position,
-) {
+void maybeScrollToPosition(ScrollController scrollController, double position) {
   final extentVisible = Range(
     scrollController.offset,
     scrollController.offset + scrollController.position.extentInside,
@@ -246,9 +243,7 @@ class ThemedColorPair {
 class ThemedColor {
   const ThemedColor({required this.light, required this.dark});
 
-  const ThemedColor.fromSingle(Color color)
-      : light = color,
-        dark = color;
+  const ThemedColor.fromSingle(Color color) : light = color, dark = color;
 
   final Color light;
 
@@ -276,29 +271,30 @@ enum MediaSize with EnumIndexOrdering {
   final double heightThreshold;
 }
 
-class ScreenSize {
-  ScreenSize(BuildContext context) {
-    _height = _calculateHeight(context);
-    _width = _calculateWidth(context);
+final class ScreenSize {
+  factory ScreenSize(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    return ScreenSize._(
+      height: _calculateHeight(size.height),
+      width: _calculateWidth(size.width),
+    );
   }
 
-  MediaSize get height => _height;
-  MediaSize get width => _width;
-  late MediaSize _height;
-  late MediaSize _width;
+  ScreenSize._({required this.height, required this.width});
 
-  MediaSize _calculateWidth(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+  final MediaSize height;
+  final MediaSize width;
+
+  static MediaSize _calculateHeight(double height) {
     return MediaSize.values.firstWhere(
-      (size) => width < size.widthThreshold,
+      (size) => height < size.heightThreshold,
       orElse: () => MediaSize.xl,
     );
   }
 
-  MediaSize _calculateHeight(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
+  static MediaSize _calculateWidth(double width) {
     return MediaSize.values.firstWhere(
-      (size) => height < size.heightThreshold,
+      (size) => width < size.widthThreshold,
       orElse: () => MediaSize.xl,
     );
   }

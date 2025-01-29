@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -25,10 +25,11 @@ class HeapInstanceTableCell extends StatelessWidget {
     super.key,
     required bool isSelected,
     this.liveItemsEnabled = true,
-  })  : _sampleObtainer = _shouldShowMenu(isSelected, objects)
-            ? SnapshotClassSampler(heapClass, objects, heap())
-            : null,
-        _count = objects.instanceCount;
+  }) : _sampleObtainer =
+           _shouldShowMenu(isSelected, objects)
+               ? SnapshotClassSampler(heapClass, objects, heap())
+               : null,
+       _count = objects.instanceCount;
 
   static bool _shouldShowMenu(bool isSelected, ObjectSet objects) =>
       isSelected && objects.instanceCount > 0;
@@ -42,10 +43,11 @@ class HeapInstanceTableCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return InstanceViewWithContextMenu(
       count: _count,
-      menuBuilder: () => _buildHeapInstancesMenu(
-        sampler: _sampleObtainer,
-        liveItemsEnabled: liveItemsEnabled,
-      ),
+      menuBuilder:
+          () => _buildHeapInstancesMenu(
+            sampler: _sampleObtainer,
+            liveItemsEnabled: liveItemsEnabled,
+          ),
     );
   }
 }
@@ -62,10 +64,7 @@ List<Widget> _buildHeapInstancesMenu({
 }
 
 class _StoreAllAsVariableMenu extends StatelessWidget {
-  const _StoreAllAsVariableMenu(
-    this.sampler, {
-    required this.liveItemsEnabled,
-  });
+  const _StoreAllAsVariableMenu(this.sampler, {required this.liveItemsEnabled});
 
   final SnapshotClassSampler sampler;
 
@@ -86,14 +85,14 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
       String title, {
       required bool subclasses,
       required bool implementers,
-    }) =>
-        MenuItemButton(
-          onPressed: () async => await sampler.allLiveToConsole(
+    }) => MenuItemButton(
+      onPressed:
+          () async => await sampler.allLiveToConsole(
             includeImplementers: implementers,
             includeSubclasses: subclasses,
           ),
-          child: Text(title),
-        );
+      child: Text(title),
+    );
 
     return SubmenuButton(
       menuChildren: <Widget>[
@@ -112,10 +111,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
 }
 
 class _StoreAsOneVariableMenu extends StatelessWidget {
-  const _StoreAsOneVariableMenu(
-    this.sampler, {
-    required this.liveItemsEnabled,
-  });
+  const _StoreAsOneVariableMenu(this.sampler, {required this.liveItemsEnabled});
 
   final SnapshotClassSampler sampler;
   final bool liveItemsEnabled;
@@ -132,21 +128,23 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
     return SubmenuButton(
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed: () => unawaited(
-            sampler.oneStaticToConsole(
-              sourceFeature: MemoryAreas.snapshotDiff.name,
-            ),
-          ),
+          onPressed:
+              () => unawaited(
+                sampler.oneStaticToConsole(
+                  sourceFeature: MemoryAreas.snapshotDiff.name,
+                ),
+              ),
           child: const Text('Any'),
         ),
         MenuItemButton(
-          onPressed: liveItemsEnabled
-              ? () => unawaited(
+          onPressed:
+              liveItemsEnabled
+                  ? () => unawaited(
                     sampler.oneLiveStaticToConsole(
                       sourceFeature: MemoryAreas.snapshotDiff.name,
                     ),
                   )
-              : null,
+                  : null,
           child: const Text('Any, not garbage collected'),
         ),
       ],

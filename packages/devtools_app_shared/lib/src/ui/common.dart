@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
 
@@ -9,7 +9,39 @@ import 'package:flutter/material.dart';
 
 import '../utils/url/url.dart';
 import '../utils/utils.dart';
+import 'icons.dart';
 import 'theme/theme.dart';
+
+/// A DevTools-styled area pane to hold a section of UI on a screen.
+///
+/// It is strongly recommended to use [AreaPaneHeader] or a Widget that builds
+/// an [AreaPaneHeader] for the value of the [header] parameter.
+class DevToolsAreaPane extends StatelessWidget {
+  const DevToolsAreaPane({
+    super.key,
+    required this.header,
+    required this.child,
+  });
+
+  final Widget header;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedOutlinedBorder(
+      clip: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          Expanded(
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 /// Create a bordered, fixed-height header area with a title and optional child
 /// on the right-hand side.
@@ -396,15 +428,23 @@ final class MaterialIconLabel extends StatelessWidget {
   const MaterialIconLabel({
     super.key,
     required this.label,
-    required this.iconData,
+    this.iconData,
+    this.iconAsset,
+    this.iconSize,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
-  }) : assert(
-          label != null || iconData != null,
-          'Either iconData or label must be specified.',
+  })  : assert(
+          label != null || iconData != null || iconAsset != null,
+          'At least one of iconData, iconAsset, or label must be specified.',
+        ),
+        assert(
+          iconData == null || iconAsset == null,
+          'Only one of iconData and iconAsset may be specified.',
         );
 
   final IconData? iconData;
+  final String? iconAsset;
+  final double? iconSize;
   final Color? color;
   final String? label;
   final double? minScreenWidthForTextBeforeScaling;
@@ -416,10 +456,11 @@ final class MaterialIconLabel extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (iconData != null)
-          Icon(
-            iconData,
-            size: defaultIconSize,
+        if (iconData != null || iconAsset != null)
+          DevToolsIcon(
+            icon: iconData,
+            iconAsset: iconAsset,
+            size: iconSize ?? defaultIconSize,
             color: color,
           ),
         // TODO(jacobr): animate showing and hiding the text.
@@ -495,14 +536,21 @@ extension ScrollControllerAutoScroll on ScrollController {
     return pos.pixels == pos.maxScrollExtent;
   }
 
-  /// Scroll the content to the bottom using the app's default animation
-  /// duration and curve..
-  Future<void> autoScrollToBottom() async {
-    await animateTo(
-      position.maxScrollExtent,
-      duration: rapidDuration,
-      curve: defaultCurve,
-    );
+  /// Scroll the content to the bottom.
+  ///
+  /// By default, this will scroll using the app's default animation
+  /// duration and curve. When [jump] is false, this will scroll by jumping
+  /// instead.
+  Future<void> autoScrollToBottom({bool jump = false}) async {
+    if (jump) {
+      jumpTo(position.maxScrollExtent);
+    } else {
+      await animateTo(
+        position.maxScrollExtent,
+        duration: rapidDuration,
+        curve: defaultCurve,
+      );
+    }
 
     // Scroll again if we've received new content in the interim.
     if (hasClients) {
@@ -561,4 +609,45 @@ class RoundedCornerOptions {
   final bool showTopRight;
   final bool showBottomLeft;
   final bool showBottomRight;
+}
+
+/// A rounded label containing [labelText].
+class RoundedLabel extends StatelessWidget {
+  const RoundedLabel({
+    super.key,
+    required this.labelText,
+    this.backgroundColor,
+    this.textColor,
+    this.tooltipText,
+  });
+
+  final String labelText;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final String? tooltipText;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final label = Container(
+      padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+      decoration: BoxDecoration(
+        borderRadius: defaultBorderRadius,
+        color: backgroundColor ?? colorScheme.secondary,
+      ),
+      child: Text(
+        labelText,
+        overflow: TextOverflow.clip,
+        softWrap: false,
+        style: theme.regularTextStyleWithColor(
+          textColor ?? colorScheme.onSecondary,
+          backgroundColor: backgroundColor ?? colorScheme.secondary,
+        ),
+      ),
+    );
+    return tooltipText != null
+        ? DevToolsTooltip(message: tooltipText, child: label)
+        : label;
+  }
 }

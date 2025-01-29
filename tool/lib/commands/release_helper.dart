@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:io';
@@ -17,7 +17,8 @@ class ReleaseHelperCommand extends Command {
     argParser.addFlag(
       _debugFlag,
       negatable: false,
-      help: 'Whether to run this script for development purposes. This allows '
+      help:
+          'Whether to run this script for development purposes. This allows '
           'local changes to be made to this script without throwing an '
           'exception, and will checkout the current branch after executing.',
     );
@@ -58,14 +59,15 @@ class ReleaseHelperCommand extends Command {
         if (debug) {
           // Temporarily commit any local changes to this script to the current
           // branch. This commit will be reset at the end of the script.
-          final pathToReleaseHelperScript = Uri.parse(
-            p.posix.join(
-              DevToolsRepo.getInstance().toolDirectoryPath,
-              'lib',
-              'commands',
-              'release_helper.dart',
-            ),
-          ).toFilePath();
+          final pathToReleaseHelperScript =
+              Uri.parse(
+                p.posix.join(
+                  DevToolsRepo.getInstance().toolDirectoryPath,
+                  'lib',
+                  'commands',
+                  'release_helper.dart',
+                ),
+              ).toFilePath();
           await processManager.runProcess(
             CliCommand.git(['add', pathToReleaseHelperScript]),
           );
@@ -89,14 +91,12 @@ class ReleaseHelperCommand extends Command {
       releaseBranch =
           'release_helper_branch_${DateTime.now().millisecondsSinceEpoch}';
       await processManager.runProcess(
-        CliCommand.git(
-          [
-            'checkout',
-            '-b',
-            releaseBranch,
-            '$remoteUpstream/master',
-          ],
-        ),
+        CliCommand.git([
+          'checkout',
+          '-b',
+          releaseBranch,
+          '$remoteUpstream/master',
+        ]),
       );
 
       log.stdout("Ensuring ./tool package is ready.");
@@ -112,9 +112,7 @@ class ReleaseHelperCommand extends Command {
       );
 
       final getNewVersionResult = await processManager.runProcess(
-        CliCommand.tool(
-          ['update-version', 'current-version'],
-        ),
+        CliCommand.tool(['update-version', 'current-version']),
       );
 
       final newVersion = getNewVersionResult.stdout.trim().split('\n').last;
@@ -132,28 +130,23 @@ class ReleaseHelperCommand extends Command {
 
       log.stdout('Creating the PR.');
       final prURL = await processManager.runProcess(
-        CliCommand(
-          'gh',
-          [
-            'pr',
-            'create',
-            '--repo',
-            'flutter/devtools',
-            '--draft',
-            '--title',
-            commitMessage,
-            '--fill',
-          ],
-        ),
+        CliCommand('gh', [
+          'pr',
+          'create',
+          '--repo',
+          'flutter/devtools',
+          '--draft',
+          '--title',
+          commitMessage,
+          '--fill',
+        ]),
       );
 
       log.stdout(
         'Your Draft release PR can be found at: ${prURL.stdout.trim()}',
       );
       log.stdout('DONE');
-      log.stdout(
-        'Build, run and test this release using: `devtools_tool serve`',
-      );
+      log.stdout('Build, run and test this release using: `dt serve`');
     } catch (e) {
       log.stderr(e.toString());
 
@@ -164,11 +157,7 @@ class ReleaseHelperCommand extends Command {
 
       // try to clean up the temporary branch we made
       if (releaseBranch != null) {
-        await Process.run('git', [
-          'branch',
-          '-D',
-          releaseBranch,
-        ]);
+        await Process.run('git', ['branch', '-D', releaseBranch]);
       }
     } finally {
       if (debug && committedLocalChanges) {

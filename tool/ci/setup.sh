@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Copyright 2023 The Chromium Authors. All rights reserved.
+# Copyright 2023 The Flutter Authors
 # Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file.
+# found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 # Fast fail the script on failures.
 set -ex
@@ -66,11 +66,11 @@ pushd $DEVTOOLS_DIR/tool
 flutter pub get
 popd
 
-# Ensure the devtools_tool command is available
+# Ensure the dt command is available
 export PATH="$PATH":"$DEVTOOLS_DIR/tool/bin"
 
 # Fetch dependencies
-devtools_tool pub-get --only-main
+dt pub-get --only-main
 
 # Generate code.
-devtools_tool generate-code
+dt generate-code

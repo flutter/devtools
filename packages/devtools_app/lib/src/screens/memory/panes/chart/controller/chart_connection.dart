@@ -1,12 +1,12 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/utils.dart';
+import '../../../../../shared/utils/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 import '../data/primitives.dart';
 import 'memory_tracker.dart';
@@ -61,41 +61,42 @@ class ChartVmConnection extends DisposableController
     });
 
     autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onExtensionEvent
-          .listen(_memoryTracker.onMemoryData),
+      serviceConnection.serviceManager.service!.onExtensionEvent.listen(
+        _memoryTracker.onMemoryData,
+      ),
     );
 
     autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onGCEvent
-          .listen(_memoryTracker.onGCEvent),
+      serviceConnection.serviceManager.service!.onGCEvent.listen(
+        _memoryTracker.onGCEvent,
+      ),
     );
 
     autoDisposeStreamSubscription(
-      serviceConnection.serviceManager.service!.onIsolateEvent
-          .listen(_memoryTracker.onIsolateEvent),
+      serviceConnection.serviceManager.service!.onIsolateEvent.listen(
+        _memoryTracker.onIsolateEvent,
+      ),
     );
 
-    _polling = DebounceTimer.periodic(
-      chartUpdateDelay,
-      () async {
-        if (!_isConnected) {
-          _polling?.cancel();
-          return;
-        }
-        try {
-          await _memoryTracker.pollMemory();
-        } catch (e, trace) {
-          // TODO (polina-c): remove after fixing https://github.com/flutter/devtools/issues/7808
-          // and https://github.com/flutter/devtools/issues/7722
-          final isDisconnectionError = e.toString().contains('connection') ||
-              trace.toString().contains('isFlutterApp');
+    _polling = DebounceTimer.periodic(chartUpdateDelay, () async {
+      if (!_isConnected) {
+        _polling?.cancel();
+        return;
+      }
+      try {
+        await _memoryTracker.pollMemory();
+      } catch (e, trace) {
+        // TODO (polina-c): remove after fixing https://github.com/flutter/devtools/issues/7808
+        // and https://github.com/flutter/devtools/issues/7722
+        final isDisconnectionError =
+            e.toString().contains('connection') ||
+            trace.toString().contains('isFlutterApp');
 
-          if (_isConnected && !isDisconnectionError) {
-            rethrow;
-          }
+        if (_isConnected && !isDisconnectionError) {
+          rethrow;
         }
-      },
-    );
+      }
+    });
 
     initialized = true;
   }

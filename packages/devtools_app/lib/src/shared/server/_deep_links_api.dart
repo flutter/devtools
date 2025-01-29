@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be found
-// in the LICENSE file.
+// Copyright 2020 The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 part of 'server.dart';
 
@@ -8,9 +8,7 @@ Future<List<String>> requestAndroidBuildVariants(String path) async {
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: DeeplinkApi.androidBuildVariants,
-      queryParameters: {
-        DeeplinkApi.deeplinkRootPathPropertyName: path,
-      },
+      queryParameters: {DeeplinkApi.deeplinkRootPathPropertyName: path},
     );
     final resp = await request(uri.toString());
     if (resp?.statusOk ?? false) {
@@ -51,9 +49,7 @@ Future<XcodeBuildOptions> requestIosBuildOptions(String path) async {
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: DeeplinkApi.iosBuildOptions,
-      queryParameters: {
-        DeeplinkApi.deeplinkRootPathPropertyName: path,
-      },
+      queryParameters: {DeeplinkApi.deeplinkRootPathPropertyName: path},
     );
     final resp = await request(uri.toString());
     if (resp?.statusOk ?? false) {

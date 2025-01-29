@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -11,7 +11,7 @@ import '../primitives/trees.dart';
 
 class DapObjectNode extends TreeNode<DapObjectNode> {
   DapObjectNode({required this.variable, required VmServiceWrapper service})
-      : _service = service;
+    : _service = service;
 
   final dap.Variable variable;
   final VmServiceWrapper _service;
@@ -27,18 +27,11 @@ class DapObjectNode extends TreeNode<DapObjectNode> {
     if (!hasChildren) return;
 
     final variablesResponse = await _service.dapVariablesRequest(
-      dap.VariablesArguments(
-        variablesReference: variable.variablesReference,
-      ),
+      dap.VariablesArguments(variablesReference: variable.variablesReference),
     );
     final children = variablesResponse?.variables ?? [];
     for (final child in children) {
-      addChild(
-        DapObjectNode(
-          variable: child,
-          service: _service,
-        ),
-      );
+      addChild(DapObjectNode(variable: child, service: _service));
     }
   }
 

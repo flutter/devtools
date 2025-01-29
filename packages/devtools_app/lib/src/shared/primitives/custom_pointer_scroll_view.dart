@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // ignore_for_file: avoid-explicit-type-declaration, forked code from Flutter framework.
 
@@ -35,8 +35,9 @@ abstract class CustomPointerScrollView extends BoxScrollView {
     super.semanticChildCount,
     super.dragStartBehavior,
     this.customPointerSignalHandler,
-  }) : _primary = primary ??
-            controller == null && identical(scrollDirection, Axis.vertical);
+  }) : _primary =
+           primary ??
+           controller == null && identical(scrollDirection, Axis.vertical);
 
   final void Function(PointerSignalEvent event)? customPointerSignalHandler;
 
@@ -266,8 +267,9 @@ class CustomPointerScrollable extends StatefulWidget {
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
-    CustomPointerScrollableState? scrollable =
-        CustomPointerScrollable.of(context);
+    CustomPointerScrollableState? scrollable = CustomPointerScrollable.of(
+      context,
+    );
     while (scrollable != null) {
       futures.add(
         scrollable.position!.ensureVisible(
@@ -333,11 +335,11 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
 
     _position =
         controller?.createScrollPosition(_physics!, this, oldPosition) ??
-            ScrollPositionWithSingleContext(
-              physics: _physics!,
-              context: this,
-              oldPosition: oldPosition,
-            );
+        ScrollPositionWithSingleContext(
+          physics: _physics!,
+          context: this,
+          oldPosition: oldPosition,
+        );
     assert(position != null);
     controller?.attach(position!);
   }
@@ -350,7 +352,8 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
 
   @override
   void didChangeDependencies() {
-    _devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ??
+    _devicePixelRatio =
+        MediaQuery.maybeDevicePixelRatioOf(context) ??
         View.of(context).devicePixelRatio;
     _updatePosition();
     super.didChangeDependencies();
@@ -427,42 +430,42 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-                VerticalDragGestureRecognizer>(
-              () => VerticalDragGestureRecognizer(),
-              (VerticalDragGestureRecognizer instance) {
-                instance
-                  ..onDown = _handleDragDown
-                  ..onStart = _handleDragStart
-                  ..onUpdate = _handleDragUpdate
-                  ..onEnd = _handleDragEnd
-                  ..onCancel = _handleDragCancel
-                  ..minFlingDistance = _physics?.minFlingDistance
-                  ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity
-                  ..dragStartBehavior = widget.dragStartBehavior;
-              },
-            ),
+              VerticalDragGestureRecognizer
+            >(() => VerticalDragGestureRecognizer(), (
+              VerticalDragGestureRecognizer instance,
+            ) {
+              instance
+                ..onDown = _handleDragDown
+                ..onStart = _handleDragStart
+                ..onUpdate = _handleDragUpdate
+                ..onEnd = _handleDragEnd
+                ..onCancel = _handleDragCancel
+                ..minFlingDistance = _physics?.minFlingDistance
+                ..minFlingVelocity = _physics?.minFlingVelocity
+                ..maxFlingVelocity = _physics?.maxFlingVelocity
+                ..dragStartBehavior = widget.dragStartBehavior;
+            }),
           };
           break;
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer:
                 GestureRecognizerFactoryWithHandlers<
-                    HorizontalDragGestureRecognizer>(
-              () => HorizontalDragGestureRecognizer(),
-              (HorizontalDragGestureRecognizer instance) {
-                instance
-                  ..onDown = _handleDragDown
-                  ..onStart = _handleDragStart
-                  ..onUpdate = _handleDragUpdate
-                  ..onEnd = _handleDragEnd
-                  ..onCancel = _handleDragCancel
-                  ..minFlingDistance = _physics?.minFlingDistance
-                  ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity
-                  ..dragStartBehavior = widget.dragStartBehavior;
-              },
-            ),
+                  HorizontalDragGestureRecognizer
+                >(() => HorizontalDragGestureRecognizer(), (
+                  HorizontalDragGestureRecognizer instance,
+                ) {
+                  instance
+                    ..onDown = _handleDragDown
+                    ..onStart = _handleDragStart
+                    ..onUpdate = _handleDragUpdate
+                    ..onEnd = _handleDragEnd
+                    ..onCancel = _handleDragCancel
+                    ..minFlingDistance = _physics?.minFlingDistance
+                    ..minFlingVelocity = _physics?.minFlingVelocity
+                    ..maxFlingVelocity = _physics?.maxFlingVelocity
+                    ..dragStartBehavior = widget.dragStartBehavior;
+                }),
           };
           break;
       }
@@ -470,8 +473,9 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
     _lastCanDrag = canDrag;
     _lastAxisDirection = widget.axis;
     if (_gestureDetectorKey.currentState != null) {
-      _gestureDetectorKey.currentState!
-          .replaceGestureRecognizers(_gestureRecognizers);
+      _gestureDetectorKey.currentState!.replaceGestureRecognizers(
+        _gestureRecognizers,
+      );
     }
   }
 
@@ -484,8 +488,9 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
     if (_shouldIgnorePointer == value) return;
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext!
-          .findRenderObject() as RenderIgnorePointer;
+      final RenderIgnorePointer renderBox =
+          _ignorePointerKey.currentContext!.findRenderObject()
+              as RenderIgnorePointer;
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
@@ -553,9 +558,10 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
   // Returns the offset that should result from applying [event] to the current
   // position, taking min/max scroll extent into account.
   double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
-    double delta = widget.axis == Axis.horizontal
-        ? event.scrollDelta.dx
-        : event.scrollDelta.dy;
+    double delta =
+        widget.axis == Axis.horizontal
+            ? event.scrollDelta.dx
+            : event.scrollDelta.dy;
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;
@@ -569,12 +575,15 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
 
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && position != null) {
-      final double targetScrollOffset =
-          _targetScrollOffsetForPointerScroll(event);
+      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(
+        event,
+      );
       // Only express interest in the event if it would actually result in a scroll.
       if (targetScrollOffset != position!.pixels) {
-        GestureBinding.instance.pointerSignalResolver
-            .register(event, _handlePointerScroll);
+        GestureBinding.instance.pointerSignalResolver.register(
+          event,
+          _handlePointerScroll,
+        );
       }
     }
   }
@@ -584,8 +593,9 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
     if (_physics != null && !_physics!.shouldAcceptUserOffset(position!)) {
       return;
     }
-    final double targetScrollOffset =
-        _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(
+      event as PointerScrollEvent,
+    );
     if (targetScrollOffset != position!.pixels) {
       position!.jumpTo(targetScrollOffset);
     }
@@ -633,7 +643,8 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
       result = _ScrollSemantics(
         key: _scrollSemanticsKey,
         position: position!,
-        allowImplicitScrolling: widget.physics?.allowImplicitScrolling ??
+        allowImplicitScrolling:
+            widget.physics?.allowImplicitScrolling ??
             _physics!.allowImplicitScrolling,
         semanticChildCount: widget.semanticChildCount,
         child: result,
@@ -736,10 +747,10 @@ class _RenderScrollSemantics extends RenderProxyBox {
     required bool allowImplicitScrolling,
     required int? semanticChildCount,
     RenderBox? child,
-  })  : _position = position,
-        _allowImplicitScrolling = allowImplicitScrolling,
-        _semanticChildCount = semanticChildCount,
-        super(child) {
+  }) : _position = position,
+       _allowImplicitScrolling = allowImplicitScrolling,
+       _semanticChildCount = semanticChildCount,
+       super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
 
@@ -817,8 +828,10 @@ class _RenderScrollSemantics extends RenderProxyBox {
     }
     config.scrollIndex = firstVisibleIndex;
     node.updateWith(config: null, childrenInInversePaintOrder: excluded);
-    _innerNode!
-        .updateWith(config: config, childrenInInversePaintOrder: included);
+    _innerNode!.updateWith(
+      config: config,
+      childrenInInversePaintOrder: included,
+    );
   }
 
   @override

@@ -1,0 +1,17 @@
+# Copyright 2025 The Flutter Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+name: _devtools
+environment:
+  sdk: ^3.6.0
+workspace:
+  - packages/devtools_app
+  - packages/devtools_app_shared
+  - packages/devtools_extensions
+  - packages/devtools_shared
+  - packages/devtools_test
+  - tool
+
+dev_dependencies:
+  build_runner: ^2.3.3
+  flutter_lints: ^5.0.0

@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,13 +9,10 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
-import '../../service/editor/api_classes.dart';
-import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
-import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/common_widgets.dart';
-import '../api/dart_tooling_api.dart';
-import '../api/impl/dart_tooling_api.dart';
+import '../../shared/editor/api_classes.dart';
+import '../../shared/editor/editor_client.dart';
+import '../../shared/ui/common_widgets.dart';
 import 'debug_sessions.dart';
 import 'devices.dart';
 import 'devtools/devtools_view.dart';
@@ -24,19 +21,17 @@ import 'devtools/devtools_view.dart';
 ///
 /// Provides some basic functionality to improve discoverability of features
 /// such as creation of new projects, device selection and DevTools features.
-class DtdEditorSidebarPanel extends StatefulWidget {
-  // TODO(dantup): Remove the Dtd prefix from these classes when the postMessage
-  //  versions are removed.
-  const DtdEditorSidebarPanel(this.dtd, {super.key});
+class EditorSidebarPanel extends StatefulWidget {
+  const EditorSidebarPanel(this.dtd, {super.key});
 
   final DartToolingDaemon dtd;
 
   @override
-  State<DtdEditorSidebarPanel> createState() => _DtdEditorSidebarPanelState();
+  State<EditorSidebarPanel> createState() => _EditorSidebarPanelState();
 }
 
-class _DtdEditorSidebarPanelState extends State<DtdEditorSidebarPanel> {
-  _DtdEditorSidebarPanelState();
+class _EditorSidebarPanelState extends State<EditorSidebarPanel> {
+  _EditorSidebarPanelState();
 
   Future<EditorClient>? _editor;
 
@@ -44,7 +39,7 @@ class _DtdEditorSidebarPanelState extends State<DtdEditorSidebarPanel> {
   void initState() {
     super.initState();
 
-    final editor = DtdEditorClient(widget.dtd);
+    final editor = EditorClient(widget.dtd);
     ga.screen(editor.gaId);
     unawaited(_editor = editor.initialized.then((_) => editor));
   }
@@ -56,62 +51,16 @@ class _DtdEditorSidebarPanelState extends State<DtdEditorSidebarPanel> {
         Expanded(
           child: FutureBuilder(
             future: _editor,
-            builder: (context, snapshot) =>
-                switch ((snapshot.connectionState, snapshot.data)) {
-              (ConnectionState.done, final editor?) =>
-                _EditorConnectedPanel(editor),
-              _ => const CenteredCircularProgressIndicator(),
-            },
+            builder:
+                (context, snapshot) => switch ((
+                  snapshot.connectionState,
+                  snapshot.data,
+                )) {
+                  (ConnectionState.done, final editor?) =>
+                    _EditorConnectedPanel(editor),
+                  _ => const CenteredCircularProgressIndicator(),
+                },
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// A general Flutter sidebar panel for embedding inside postMessage-based
-/// editors.
-///
-/// Provides some basic functionality to improve discoverability of features
-/// such as creation of new projects, device selection and DevTools features.
-class VsCodePostMessageSidebarPanel extends StatefulWidget {
-  const VsCodePostMessageSidebarPanel(this.api, {super.key});
-
-  final PostMessageToolApi api;
-
-  @override
-  State<VsCodePostMessageSidebarPanel> createState() =>
-      _VsCodePostMessageSidebarPanelState();
-}
-
-class _VsCodePostMessageSidebarPanelState
-    extends State<VsCodePostMessageSidebarPanel> {
-  @override
-  void initState() {
-    super.initState();
-    ga.screen(gac.EditorSidebar.legacyId);
-  }
-
-  @override
-  void dispose() {
-    widget.api.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        FutureBuilder(
-          future: widget.api.vsCode,
-          builder: (context, snapshot) =>
-              switch ((snapshot.connectionState, snapshot.data)) {
-            (ConnectionState.done, final vsCodeApi?) =>
-              _EditorConnectedPanel(PostMessageEditorClient(vsCodeApi)),
-            (ConnectionState.done, null) =>
-              const Text('VS Code is not available'),
-            _ => const CenteredCircularProgressIndicator(),
-          },
         ),
       ],
     );
@@ -193,6 +142,9 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
             case ThemeChangedEvent():
             // Do nothing; this is handled in
             // lib/src/framework/theme_manager.dart.
+            case ActiveLocationChangedEvent():
+            // Do nothing; this is handled in
+            // lib/src/standalone_ui/ide_shared/property_editor.
           }
         });
       }),

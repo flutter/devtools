@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:ui';
 
@@ -23,11 +23,7 @@ String mainAxisAssetImageUrl(Axis direction, MainAxisAlignment alignment) {
 class AnimatedFlexLayoutProperties
     extends AnimatedLayoutProperties<FlexLayoutProperties>
     implements FlexLayoutProperties {
-  AnimatedFlexLayoutProperties(
-    super.begin,
-    super.end,
-    super.animation,
-  );
+  AnimatedFlexLayoutProperties(super.begin, super.end, super.animation);
 
   @override
   CrossAxisAlignment? get crossAxisAlignment => end.crossAxisAlignment;
@@ -85,7 +81,8 @@ class AnimatedFlexLayoutProperties
   }
 
   @override
-  double get crossAxisDimension => lerpDouble(
+  double get crossAxisDimension =>
+      lerpDouble(
         begin.crossAxisDimension,
         end.crossAxisDimension,
         animation.value,
@@ -119,7 +116,8 @@ class AnimatedFlexLayoutProperties
   bool get isMainAxisVertical => end.isMainAxisVertical;
 
   @override
-  double get mainAxisDimension => lerpDouble(
+  double get mainAxisDimension =>
+      lerpDouble(
         begin.mainAxisDimension,
         end.mainAxisDimension,
         animation.value,

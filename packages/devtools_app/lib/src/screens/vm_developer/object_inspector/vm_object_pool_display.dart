@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -23,11 +23,7 @@ abstract class _ObjectPoolColumnData extends ColumnData<ObjectPoolEntry> {
 }
 
 class _AddressColumn extends _ObjectPoolColumnData {
-  _AddressColumn()
-      : super(
-          'Offset',
-          fixedWidthPx: 160,
-        );
+  _AddressColumn() : super('Offset', fixedWidthPx: 160);
 
   @override
   int getValue(ObjectPoolEntry dataObject) {

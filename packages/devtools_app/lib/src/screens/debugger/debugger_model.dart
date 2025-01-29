@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:vm_service/vm_service.dart';
 
@@ -24,10 +24,7 @@ bool includeDiagnosticChildren = false;
 
 /// A tuple of a script and an optional location.
 class ScriptLocation {
-  ScriptLocation(
-    this.scriptRef, {
-    this.location,
-  });
+  ScriptLocation(this.scriptRef, {this.location});
 
   final ScriptRef scriptRef;
 
@@ -186,10 +183,7 @@ class _BreakpointAndSourcePositionUnresolved
 
 /// A tuple of a stack frame and a source position.
 class StackFrameAndSourcePosition {
-  StackFrameAndSourcePosition(
-    this.frame, {
-    this.position,
-  });
+  StackFrameAndSourcePosition(this.frame, {this.position});
 
   final Frame frame;
 

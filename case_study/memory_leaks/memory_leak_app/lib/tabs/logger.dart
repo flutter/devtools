@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,11 +9,13 @@ import 'package:flutter/material.dart';
 import '../common.dart';
 import '../logging.dart';
 
-//  class Logger extends StatelessWidget {
 class Logger extends StatefulWidget {
-  final Logging _logging = Logging.logging;
+  Logger({super.key});
+
+  final _logging = Logging.logging;
 
   @override
+  // ignore: no_logic_in_create_state, intentional leaking example.
   State<Logger> createState() => LoggerState(_logging);
 }
 
@@ -21,7 +23,7 @@ class LoggerState extends State<Logger> {
   LoggerState(this._logging);
 
   final Logging _logging;
-  final List<String> _saved = [];
+  final _saved = <String>[];
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
   @override
@@ -34,7 +36,7 @@ class LoggerState extends State<Logger> {
     );
   }
 
-  // ignore: unused_element
+  // ignore: unused_element, intentional example code.
   void _pushSaved() {
     unawaited(
       Navigator.of(context).push(

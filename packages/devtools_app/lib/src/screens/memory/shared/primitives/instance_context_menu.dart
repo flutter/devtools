@@ -1,11 +1,11 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/ui/common_widgets.dart';
 
 typedef MenuBuilder = List<Widget> Function();
 
@@ -30,12 +30,7 @@ class InstanceViewWithContextMenu extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Expanded(
-          child: Text(
-            nf.format(count),
-            textAlign: TextAlign.end,
-          ),
-        ),
+        Expanded(child: Text(nf.format(count), textAlign: TextAlign.end)),
         if (shouldShowMenu)
           ContextMenuButton(
             // ignore: avoid_redundant_argument_values, ensures consistency with [SizedBox] below.

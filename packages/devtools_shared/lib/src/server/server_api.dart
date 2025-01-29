@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // ignore_for_file: avoid_classes_with_only_static_members, avoid_print
 
@@ -62,8 +62,6 @@ class ServerApi {
   }) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
-    // TODO(kenz): break this switch statement up so that it uses helper methods
-    // for each case. Also use [_checkRequiredParameters] helper.
     switch (request.url.path) {
       case apiNotifyForVmServiceConnection:
         return Handler.handleNotifyForVmServiceConnection(
@@ -71,6 +69,9 @@ class ServerApi {
           queryParams,
           dtd,
         );
+
+      // TODO(kenz): remove legacy analytics once the unified analytics rollout
+      // is complete and verified for robustness (est. Fall 2025).
 
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:

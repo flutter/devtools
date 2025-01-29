@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,9 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 class TestProgramExplorerController extends ProgramExplorerController {
-  TestProgramExplorerController({
-    required this.initializer,
-  });
+  TestProgramExplorerController({required this.initializer});
 
   @override
   ValueListenable<bool> get initialized => _initialized;

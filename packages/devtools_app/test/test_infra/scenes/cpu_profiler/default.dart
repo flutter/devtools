@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be found
-// in the LICENSE file.
+// Copyright 2023 The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -55,20 +55,18 @@ class CpuProfilerDefaultScene extends Scene {
       isProfileBuild: false,
       isWebApp: false,
     );
-    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('profiler'))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('profiler'),
+    ).thenReturn(ValueNotifier<int>(0));
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
     final mockScriptManager = MockScriptManager();
-    when(mockScriptManager.scriptRefForUri(any)).thenReturn(
-      ScriptRef(
-        uri: 'package:test/script.dart',
-        id: 'script.dart',
-      ),
-    );
-    when(mockScriptManager.sortedScripts).thenReturn(
-      ValueNotifier<List<ScriptRef>>([]),
-    );
+    when(
+      mockScriptManager.scriptRefForUri(any),
+    ).thenReturn(ScriptRef(uri: 'package:test/script.dart', id: 'script.dart'));
+    when(
+      mockScriptManager.sortedScripts,
+    ).thenReturn(ValueNotifier<List<ScriptRef>>([]));
     setGlobal(ScriptManager, mockScriptManager);
 
     controller = ProfilerScreenController();

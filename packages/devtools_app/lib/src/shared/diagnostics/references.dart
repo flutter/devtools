@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math';
@@ -44,15 +44,10 @@ HeapObject _refreshStaticSelection(
   final index = selection.heap.indexByCode[code];
   if (index == null) return selection;
 
-  return HeapObject(
-    selection.heap,
-    index: index,
-  );
+  return HeapObject(selection.heap, index: index);
 }
 
-Future<void> addChildReferences(
-  DartObjectNode variable,
-) async {
+Future<void> addChildReferences(DartObjectNode variable) async {
   final ref = variable.ref!;
   if (ref is! ObjectReferences) {
     throw StateError('Wrong type: ${ref.runtimeType}');
@@ -62,8 +57,10 @@ Future<void> addChildReferences(
 
   switch (refNodeType) {
     case RefNodeType.refRoot:
-      final selection =
-          _refreshStaticSelection(ref.heapSelection, ref.instanceRef);
+      final selection = _refreshStaticSelection(
+        ref.heapSelection,
+        ref.instanceRef,
+      );
 
       variable.addAllChildren([
         if (ref.instanceRef != null)
@@ -104,41 +101,43 @@ Future<void> addChildReferences(
 
       return;
     case RefNodeType.staticInRefs:
-      final children = ref.heapSelection
-          .references(ref.refNodeType.direction!)
-          .where((s) => !s.className!.isNull)
-          .map(
-            (s) => DartObjectNode.references(
-              s.className!.className,
-              ObjectReferences(
-                refNodeType: RefNodeType.staticInRefs,
-                heapSelection: s,
-                isolateRef: ref.isolateRef,
-                value: null,
-              ),
-              isRerootable: true,
-            ),
-          )
-          .toList();
+      final children =
+          ref.heapSelection
+              .references(ref.refNodeType.direction!)
+              .where((s) => !s.className!.isNull)
+              .map(
+                (s) => DartObjectNode.references(
+                  s.className!.className,
+                  ObjectReferences(
+                    refNodeType: RefNodeType.staticInRefs,
+                    heapSelection: s,
+                    isolateRef: ref.isolateRef,
+                    value: null,
+                  ),
+                  isRerootable: true,
+                ),
+              )
+              .toList();
       variable.addAllChildren(children);
       return;
     case RefNodeType.staticOutRefs:
-      final children = ref.heapSelection
-          .references(ref.refNodeType.direction!)
-          .where((s) => !s.className!.isNull)
-          .map(
-            (s) => DartObjectNode.references(
-              '${s.className!.className}, ${prettyPrintRetainedSize(s.retainedSize)}',
-              ObjectReferences(
-                refNodeType: RefNodeType.staticOutRefs,
-                heapSelection: s,
-                isolateRef: ref.isolateRef,
-                value: null,
-              ),
-              isRerootable: true,
-            ),
-          )
-          .toList();
+      final children =
+          ref.heapSelection
+              .references(ref.refNodeType.direction!)
+              .where((s) => !s.className!.isNull)
+              .map(
+                (s) => DartObjectNode.references(
+                  '${s.className!.className}, ${prettyPrintRetainedSize(s.retainedSize)}',
+                  ObjectReferences(
+                    refNodeType: RefNodeType.staticOutRefs,
+                    heapSelection: s,
+                    isolateRef: ref.isolateRef,
+                    value: null,
+                  ),
+                  isRerootable: true,
+                ),
+              )
+              .toList();
       variable.addAllChildren(children);
       return;
     case RefNodeType.liveRefRoot:
@@ -162,12 +161,11 @@ Future<void> addChildReferences(
       final limit = preferences.memory.refLimit.value;
       final refs =
           (await serviceConnection.serviceManager.service!.getInboundReferences(
-                ref.isolateRef.id!,
-                value.id!,
-                limit + 1,
-              ))
-                  .references ??
-              [];
+            ref.isolateRef.id!,
+            value.id!,
+            limit + 1,
+          )).references ??
+          [];
 
       final refsToShow = min(limit, refs.length);
       final children = <DartObjectNode>[];

@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -49,12 +49,7 @@ class MemoryChartLegend extends StatelessWidget {
     while (iterator.moveNext()) {
       final leftEntry = iterator.current;
       final rightEntry = iterator.moveNext() ? iterator.current : null;
-      legendRows.add(
-        _LegendRow(
-          entry1: leftEntry,
-          entry2: rightEntry,
-        ),
-      );
+      legendRows.add(_LegendRow(entry1: leftEntry, entry2: rightEntry));
     }
 
     final vms = vmLegendContent(chartController.vm);
@@ -66,11 +61,7 @@ class MemoryChartLegend extends StatelessWidget {
     );
 
     for (final entry in vms.entries) {
-      legendRows.add(
-        _LegendRow(
-          entry1: entry,
-        ),
-      );
+      legendRows.add(_LegendRow(entry1: entry));
     }
 
     if (isAndroidVisible) {
@@ -83,11 +74,7 @@ class MemoryChartLegend extends StatelessWidget {
       );
 
       for (final entry in androids.entries) {
-        legendRows.add(
-          _LegendRow(
-            entry1: entry,
-          ),
-        );
+        legendRows.add(_LegendRow(entry1: entry));
       }
     }
 
@@ -111,10 +98,7 @@ class MemoryChartLegend extends StatelessWidget {
 }
 
 class _LegendRow extends StatelessWidget {
-  const _LegendRow({
-    required this.entry1,
-    this.entry2,
-  });
+  const _LegendRow({required this.entry1, this.entry2});
 
   final MapEntry<String, Map<String, Object?>> entry1;
   final MapEntry<String, Map<String, Object?>>? entry2;
@@ -138,9 +122,7 @@ class _LegendRow extends StatelessWidget {
             child: Text(name, style: legendEntry),
           ),
         ),
-        const PaddedDivider(
-          padding: EdgeInsets.only(left: denseRowSpacing),
-        ),
+        const PaddedDivider(padding: EdgeInsets.only(left: denseRowSpacing)),
         widget,
       ]);
 
@@ -148,15 +130,18 @@ class _LegendRow extends StatelessWidget {
     }
 
     Widget legendSymbol(Map<String, Object?> dataToDisplay) {
-      final image = dataToDisplay.containsKey(renderImage)
-          ? dataToDisplay[renderImage] as String?
-          : null;
-      final color = dataToDisplay.containsKey(renderLine)
-          ? dataToDisplay[renderLine] as Color?
-          : null;
-      final dashedLine = dataToDisplay.containsKey(renderDashed)
-          ? dataToDisplay[renderDashed]
-          : false;
+      final image =
+          dataToDisplay.containsKey(renderImage)
+              ? dataToDisplay[renderImage] as String?
+              : null;
+      final color =
+          dataToDisplay.containsKey(renderLine)
+              ? dataToDisplay[renderLine] as Color?
+              : null;
+      final dashedLine =
+          dataToDisplay.containsKey(renderDashed)
+              ? dataToDisplay[renderDashed]
+              : false;
 
       Widget traceColor;
       if (color != null) {
@@ -205,8 +190,7 @@ enum _LegendCategory {
   vmGC('GC VM'),
   manualGC('Manual'),
   event('Event'),
-  events('Events'),
-  ;
+  events('Events');
 
   const _LegendCategory(this.displayName);
 
@@ -214,32 +198,22 @@ enum _LegendCategory {
 }
 
 Map<String, Map<String, Object?>> _eventLegendContent(bool isLight) => {
-      _LegendCategory.manualSnapshot.displayName: traceRender(
-        image: snapshotManualLegend,
-      ),
-      _LegendCategory.autoSnapshot.displayName: traceRender(
-        image: snapshotAutoLegend,
-      ),
-      _LegendCategory.monitor.displayName: traceRender(
-        image: monitorLegend,
-      ),
-      _LegendCategory.reset.displayName: traceRender(
-        image: isLight ? resetLightLegend : resetDarkLegend,
-      ),
-      _LegendCategory.vmGC.displayName: traceRender(
-        image: gcVMLegend,
-      ),
-      _LegendCategory.manualGC.displayName: traceRender(
-        image: gcManualLegend,
-      ),
-      // TODO: why do we need both a singular and plural legend entry for event?
-      _LegendCategory.event.displayName: traceRender(
-        image: eventLegendAsset(1),
-      ),
-      _LegendCategory.events.displayName: traceRender(
-        image: eventLegendAsset(2),
-      ),
-    };
+  _LegendCategory.manualSnapshot.displayName: traceRender(
+    image: snapshotManualLegend,
+  ),
+  _LegendCategory.autoSnapshot.displayName: traceRender(
+    image: snapshotAutoLegend,
+  ),
+  _LegendCategory.monitor.displayName: traceRender(image: monitorLegend),
+  _LegendCategory.reset.displayName: traceRender(
+    image: isLight ? resetLightLegend : resetDarkLegend,
+  ),
+  _LegendCategory.vmGC.displayName: traceRender(image: gcVMLegend),
+  _LegendCategory.manualGC.displayName: traceRender(image: gcManualLegend),
+  // TODO: why do we need both a singular and plural legend entry for event?
+  _LegendCategory.event.displayName: traceRender(image: eventLegendAsset(1)),
+  _LegendCategory.events.displayName: traceRender(image: eventLegendAsset(2)),
+};
 
 Map<String, Map<String, Object?>> vmLegendContent(
   VMChartController vmChartController,

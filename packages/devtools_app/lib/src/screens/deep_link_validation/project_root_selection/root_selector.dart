@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -102,12 +102,11 @@ class _ProjectRootsDropdownState extends State<ProjectRootsDropdown> {
         isDense: true,
         isExpanded: true,
         value: selectedUri,
-        items: [
-          for (final uri in widget.projectRoots) _buildMenuItem(uri),
-        ],
-        onChanged: (uri) => setState(() {
-          selectedUri = uri;
-        }),
+        items: [for (final uri in widget.projectRoots) _buildMenuItem(uri)],
+        onChanged:
+            (uri) => setState(() {
+              selectedUri = uri;
+            }),
       ),
     );
   }
@@ -118,10 +117,7 @@ class _ProjectRootsDropdownState extends State<ProjectRootsDropdown> {
       child: DevToolsTooltip(
         message: uri.path,
         waitDuration: tooltipWaitExtraLong,
-        child: Text(
-          uri.path,
-          overflow: TextOverflow.ellipsis,
-        ),
+        child: Text(uri.path, overflow: TextOverflow.ellipsis),
       ),
     );
   }
@@ -152,15 +148,8 @@ class _FlexibleProjectSelectionView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Spacer(),
-        Flexible(
-          flex: 8,
-          fit: FlexFit.tight,
-          child: child,
-        ),
-        if (showButtonInRow) ...[
-          const SizedBox(width: defaultSpacing),
-          button,
-        ],
+        Flexible(flex: 8, fit: FlexFit.tight, child: child),
+        if (showButtonInRow) ...[const SizedBox(width: defaultSpacing), button],
         const Spacer(),
       ],
     );
@@ -170,11 +159,7 @@ class _FlexibleProjectSelectionView extends StatelessWidget {
     if (!showButtonInRow) {
       content = Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          content,
-          const SizedBox(height: defaultSpacing),
-          button,
-        ],
+        children: [content, const SizedBox(height: defaultSpacing), button],
       );
     }
 

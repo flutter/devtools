@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -23,16 +23,14 @@ class _IntervalDropdownState extends State<IntervalDropdown> {
   @override
   Widget build(BuildContext context) {
     final displayTypes =
-        ChartInterval.values.map<DropdownMenuItem<ChartInterval>>(
-      (
-        ChartInterval value,
-      ) {
-        return DropdownMenuItem<ChartInterval>(
-          value: value,
-          child: Text(value.displayName),
-        );
-      },
-    ).toList();
+        ChartInterval.values.map<DropdownMenuItem<ChartInterval>>((
+          ChartInterval value,
+        ) {
+          return DropdownMenuItem<ChartInterval>(
+            value: value,
+            child: Text(value.displayName),
+          );
+        }).toList();
 
     return RoundedDropDownButton<ChartInterval>(
       isDense: true,

@@ -1,11 +1,11 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
-import '../../../shared/common_widgets.dart';
-import '../../../shared/tree.dart';
+import '../../../shared/ui/common_widgets.dart';
+import '../../../shared/ui/tree_view.dart';
 import '../vm_developer_common_widgets.dart';
 import 'class_hierarchy_explorer_controller.dart';
 import 'object_inspector_view_controller.dart';
@@ -32,10 +32,11 @@ class ClassHierarchyExplorer extends StatelessWidget {
     return TreeView<ClassHierarchyNode>(
       dataRootsListenable:
           controller.classHierarchyController.selectedIsolateClassHierarchy,
-      dataDisplayProvider: (node, onPressed) => VmServiceObjectLink(
-        object: node.cls,
-        onTap: controller.findAndSelectNodeForObject,
-      ),
+      dataDisplayProvider:
+          (node, onPressed) => VmServiceObjectLink(
+            object: node.cls,
+            onTap: controller.findAndSelectNodeForObject,
+          ),
       emptyTreeViewBuilder: () => const CenteredCircularProgressIndicator(),
     );
   }

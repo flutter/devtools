@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import '../../../shared/charts/treemap.dart';
 import '../../../shared/table/table_data.dart';
@@ -25,10 +25,10 @@ class DescriptionColumn extends ColumnData<TreemapNode> {
 
 class MemoryColumn extends SizeAndPercentageColumn<TreemapNode> {
   MemoryColumn({required VMProcessMemoryViewController controller})
-      : super(
-          title: 'Memory Usage',
-          sizeProvider: (node) => node.byteSize,
-          percentAsDoubleProvider: (node) =>
-              node.byteSize / controller.treeRoot.value!.byteSize,
-        );
+    : super(
+        title: 'Memory Usage',
+        sizeProvider: (node) => node.byteSize,
+        percentAsDoubleProvider:
+            (node) => node.byteSize / controller.treeRoot.value!.byteSize,
+      );
 }

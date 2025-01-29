@@ -1,0 +1,5 @@
+{
+    // Set current working directory to devtools_app.
+    "terminal.integrated.cwd": "packages/devtools_app",
+    "dart.showTodos": false,
+}

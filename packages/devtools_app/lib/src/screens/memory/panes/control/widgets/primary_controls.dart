@@ -1,12 +1,12 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/ui/common_widgets.dart';
 import '../../../shared/primitives/simple_elements.dart';
 
 class PrimaryControls extends StatelessWidget {

@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -11,9 +11,9 @@ import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/common_widgets.dart';
+import '../shared/framework/routing.dart';
 import '../shared/globals.dart';
-import '../shared/routing.dart';
+import '../shared/ui/common_widgets.dart';
 
 class EmbeddedExtensionHeader extends StatelessWidget {
   const EmbeddedExtensionHeader({
@@ -41,8 +41,9 @@ class EmbeddedExtensionHeader extends StatelessWidget {
             child: RichText(
               text: TextSpan(
                 text: 'package:$extensionName extension',
-                style: theme.regularTextStyle
-                    .copyWith(fontWeight: FontWeight.bold),
+                style: theme.regularTextStyle.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
                 children: [
                   TextSpan(
                     text: ' (v${ext.version})',
@@ -63,8 +64,8 @@ class EmbeddedExtensionHeader extends StatelessWidget {
                     url: ext.issueTrackerLink,
                     gaScreenName:
                         gac.DevToolsExtensionEvents.extensionScreenId.name,
-                    gaSelectedItemDescription:
-                        gac.DevToolsExtensionEvents.extensionFeedback(ext),
+                    gaSelectedItemDescription: gac
+                        .DevToolsExtensionEvents.extensionFeedback(ext),
                   ),
                   context: context,
                 ),
@@ -167,10 +168,7 @@ class DisableExtensionDialog extends StatelessWidget {
               text: 'Are you sure you want to disable the ',
               style: theme.regularTextStyle,
               children: [
-                TextSpan(
-                  text: ext.displayName,
-                  style: theme.fixedFontStyle,
-                ),
+                TextSpan(text: ext.displayName, style: theme.fixedFontStyle),
                 const TextSpan(text: ' extension?'),
               ],
             ),
@@ -186,10 +184,7 @@ class DisableExtensionDialog extends StatelessWidget {
                   style: theme.boldTextStyle,
                 ),
                 WidgetSpan(
-                  child: Icon(
-                    Icons.extension_rounded,
-                    size: defaultIconSize,
-                  ),
+                  child: Icon(Icons.extension_rounded, size: defaultIconSize),
                 ),
                 const TextSpan(text: ' menu.'),
               ],
@@ -208,8 +203,9 @@ class DisableExtensionDialog extends StatelessWidget {
               extensionService.setExtensionEnabledState(ext, enable: false),
             );
             Navigator.of(context).pop(dialogDefaultContext);
-            DevToolsRouterDelegate.of(context)
-                .navigateHome(clearScreenParam: true);
+            DevToolsRouterDelegate.of(
+              context,
+            ).navigateHome(clearScreenParam: true);
           },
           child: const Text('YES, DISABLE'),
         ),
@@ -237,12 +233,10 @@ class EnableExtensionPrompt extends StatelessWidget {
               text: 'The ',
               style: theme.regularTextStyle,
               children: [
-                TextSpan(
-                  text: ext.name,
-                  style: theme.fixedFontStyle,
-                ),
+                TextSpan(text: ext.name, style: theme.fixedFontStyle),
                 const TextSpan(
-                  text: ' extension has not been enabled. Do you want to enable'
+                  text:
+                      ' extension has not been enabled. Do you want to enable'
                       ' this extension?\nYou can always change this setting '
                       'later from the DevTools Extensions ',
                 ),
@@ -252,9 +246,7 @@ class EnableExtensionPrompt extends StatelessWidget {
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
-                const TextSpan(
-                  text: ' menu. ',
-                ),
+                const TextSpan(text: ' menu. '),
               ],
             ),
           ),
@@ -292,8 +284,9 @@ class EnableExtensionPrompt extends StatelessWidget {
                       enable: false,
                     ),
                   );
-                  DevToolsRouterDelegate.of(context)
-                      .navigateHome(clearScreenParam: true);
+                  DevToolsRouterDelegate.of(
+                    context,
+                  ).navigateHome(clearScreenParam: true);
                 },
               ),
             ],

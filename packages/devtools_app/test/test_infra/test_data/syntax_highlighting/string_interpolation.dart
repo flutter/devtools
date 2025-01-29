@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 void values() {
   final i = 1;
@@ -12,12 +12,16 @@ void values() {
 }
 
 void functions() {
-  print('${() {
-    return 'Hello';
-  }}');
-  print('print(${() {
-    return 'Hello';
-  }()})');
+  print(
+    '${() {
+      return 'Hello';
+    }}',
+  );
+  print(
+    'print(${() {
+      return 'Hello';
+    }()})',
+  );
   print('${() => 'Hello'}');
   print('print(${(() => 'Hello')()})');
 }

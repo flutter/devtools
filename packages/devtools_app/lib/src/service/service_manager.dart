@@ -1,6 +1,6 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -10,14 +10,14 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../shared/analytics/analytics.dart' as ga;
-import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
 import '../shared/diagnostics/inspector_service.dart';
-import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
+import '../shared/managers/error_badge_manager.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/title.dart';
-import '../shared/utils.dart';
+import '../shared/utils/utils.dart';
+import 'connected_app/connected_app.dart';
 import 'service_registrations.dart' as registrations;
 import 'timeline_streams.dart';
 import 'vm_flags.dart';
@@ -36,29 +36,30 @@ const defaultRefreshRate = 60.0;
 
 class ServiceConnectionManager {
   ServiceConnectionManager() {
-    serviceManager = ServiceManager()
-      ..registerLifecycleCallback(
-        ServiceManagerLifecycle.beforeOpenVmService,
-        _beforeOpenVmService,
-      )
-      ..registerLifecycleCallback(
-        ServiceManagerLifecycle.afterOpenVmService,
-        _afterOpenVmService,
-      )
-      ..registerLifecycleCallback(
-        ServiceManagerLifecycle.beforeCloseVmService,
-        _beforeCloseVmService,
-      )
-      ..registerLifecycleCallback(
-        ServiceManagerLifecycle.afterCloseVmService,
-        _afterCloseVmService,
-      )
-      ..registerOverride(
-        ServiceManagerOverride.initIsolates,
-        (service) async => await serviceManager.isolateManager.init(
-          serviceManager.vm?.isolatesForDevToolsMode() ?? <IsolateRef>[],
-        ),
-      );
+    serviceManager =
+        ServiceManager()
+          ..registerLifecycleCallback(
+            ServiceManagerLifecycle.beforeOpenVmService,
+            _beforeOpenVmService,
+          )
+          ..registerLifecycleCallback(
+            ServiceManagerLifecycle.afterOpenVmService,
+            _afterOpenVmService,
+          )
+          ..registerLifecycleCallback(
+            ServiceManagerLifecycle.beforeCloseVmService,
+            _beforeCloseVmService,
+          )
+          ..registerLifecycleCallback(
+            ServiceManagerLifecycle.afterCloseVmService,
+            _afterCloseVmService,
+          )
+          ..registerOverride(
+            ServiceManagerOverride.initIsolates,
+            (service) async => await serviceManager.isolateManager.init(
+              serviceManager.vm?.isolatesForDevToolsMode() ?? <IsolateRef>[],
+            ),
+          );
   }
 
   late final ServiceManager<VmServiceWrapper> serviceManager;
@@ -100,15 +101,17 @@ class ServiceConnectionManager {
   Future<void> _afterOpenVmService(VmServiceWrapper? service) async {
     // Re-initialize isolates when VM developer mode is enabled/disabled to
     // display/hide system isolates.
-    preferences.vmDeveloperModeEnabled
-        .addListener(_handleVmDeveloperModeChanged);
+    preferences.vmDeveloperModeEnabled.addListener(
+      _handleVmDeveloperModeChanged,
+    );
 
     // This needs to be called before calling
     // `ga.setupUserApplicationDimensions()` and before initializing
     // [_inspectorService], since both require access to an initialized
     // [serviceManager.connectedApp] object.
-    await serviceManager.connectedApp!
-        .initializeValues(onComplete: generateDevToolsTitle);
+    await serviceManager.connectedApp!.initializeValues(
+      onComplete: generateDevToolsTitle,
+    );
 
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
@@ -135,9 +138,10 @@ class ServiceConnectionManager {
     // Set [offlineController.previousConnectedApp] in case we need it for
     // viewing data after disconnect. This must be done before resetting the
     // rest of the service manager state.
-    final previousConnectedApp = serviceManager.connectedApp != null
-        ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
-        : null;
+    final previousConnectedApp =
+        serviceManager.connectedApp != null
+            ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
+            : null;
     offlineDataController.previousConnectedApp = previousConnectedApp;
 
     // This must be called before we close the VM service so that
@@ -159,8 +163,9 @@ class ServiceConnectionManager {
     _inspectorService?.dispose();
     _inspectorService = null;
     serviceTrafficLogger?.dispose();
-    preferences.vmDeveloperModeEnabled
-        .removeListener(_handleVmDeveloperModeChanged);
+    preferences.vmDeveloperModeEnabled.removeListener(
+      _handleVmDeveloperModeChanged,
+    );
   }
 
   Future<void> _handleVmDeveloperModeChanged() async {
@@ -169,8 +174,9 @@ class ServiceConnectionManager {
     final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
     if (serviceManager.isolateManager.selectedIsolate.value!.isSystemIsolate! &&
         !vmDeveloperModeEnabled) {
-      serviceManager.isolateManager
-          .selectIsolate(serviceManager.isolateManager.isolates.value.first);
+      serviceManager.isolateManager.selectIsolate(
+        serviceManager.isolateManager.isolates.value.first,
+      );
     }
     await serviceManager.isolateManager.init(isolates);
   }
@@ -185,12 +191,11 @@ class ServiceConnectionManager {
   ///
   /// Throws an Exception if no 'FlutterView' is present in this isolate.
   Future<String> get flutterViewId async {
-    final flutterViewListResponse =
-        await serviceManager.callServiceExtensionOnMainIsolate(
-      registrations.flutterListViews,
-    );
-    final views = (flutterViewListResponse.json!['views'] as List)
-        .cast<Map<String, Object?>>();
+    final flutterViewListResponse = await serviceManager
+        .callServiceExtensionOnMainIsolate(registrations.flutterListViews);
+    final views =
+        (flutterViewListResponse.json!['views'] as List)
+            .cast<Map<String, Object?>>();
 
     // Each isolate should only have one FlutterView.
     final flutterView = views.firstWhereOrNull(
@@ -223,9 +228,7 @@ class ServiceConnectionManager {
 
     return await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.flutterEngineEstimateRasterCache,
-      args: {
-        'viewId': viewId,
-      },
+      args: {'viewId': viewId},
     );
   }
 
@@ -239,9 +242,7 @@ class ServiceConnectionManager {
 
     return await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.renderFrameWithRasterStats,
-      args: {
-        'viewId': viewId,
-      },
+      args: {'viewId': viewId},
     );
   }
 
@@ -254,11 +255,11 @@ class ServiceConnectionManager {
     const unknownRefreshRate = 0.0;
 
     final viewId = await flutterViewId;
-    final displayRefreshRateResponse =
-        await serviceManager.callServiceExtensionOnMainIsolate(
-      registrations.displayRefreshRate,
-      args: {'viewId': viewId},
-    );
+    final displayRefreshRateResponse = await serviceManager
+        .callServiceExtensionOnMainIsolate(
+          registrations.displayRefreshRate,
+          args: {'viewId': viewId},
+        );
     final double fps = displayRefreshRateResponse.json!['fps'];
 
     // The Flutter engine returns 0.0 if the refresh rate is unknown. Return
@@ -281,10 +282,7 @@ class ServiceConnectionManager {
       registrations.dwdsSendEvent,
       args: {
         'type': 'DevtoolsEvent',
-        'payload': {
-          'screen': screen,
-          'action': action,
-        },
+        'payload': {'screen': screen, 'action': action},
       },
     );
   }

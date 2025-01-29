@@ -1,7 +1,8 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/widgets.dart';
 
@@ -35,22 +36,21 @@ class _WidgetDetailsState extends State<WidgetDetails> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<InspectorTreeNode?>(
       valueListenable: controller.selectedNode,
-      builder: (context, _, __) {
+      builder: (context, _, _) {
         final node = selectedNode;
         if (node == null) {
-          return const Center(
-            child: Text(
-              'Select a widget to view its layout and properties.',
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.clip,
+          return const RoundedOutlinedBorder(
+            child: Center(
+              child: Text(
+                'Select a widget to view its layout and properties.',
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.clip,
+              ),
             ),
           );
         }
 
-        return DetailsTable(
-          controller: controller,
-          node: node,
-        );
+        return DetailsTable(controller: controller, node: node);
       },
     );
   }

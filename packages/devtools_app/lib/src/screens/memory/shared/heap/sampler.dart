@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
@@ -12,7 +12,7 @@ import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/memory/classes.dart';
 import '../../../../shared/memory/heap_data.dart';
 import '../../../../shared/memory/heap_object.dart';
-import '../../../../shared/vm_utils.dart';
+import '../../../../shared/utils/vm_utils.dart';
 
 class _HeapObjects {
   _HeapObjects(this.objects, this.heap);
@@ -32,13 +32,10 @@ class _HeapObjects {
 }
 
 class LiveClassSampler {
-  LiveClassSampler(
-    this.heapClass, {
-    ObjectSet? objects,
-    HeapData? heap,
-  })  : assert(objects?.indexes.isNotEmpty ?? true),
-        assert((objects == null) == (heap == null)),
-        _objects = objects == null ? null : _HeapObjects(objects, heap!);
+  LiveClassSampler(this.heapClass, {ObjectSet? objects, HeapData? heap})
+    : assert(objects?.indexes.isNotEmpty ?? true),
+      assert((objects == null) == (heap == null)),
+      _objects = objects == null ? null : _HeapObjects(objects, heap!);
 
   final HeapClassName heapClass;
   final _HeapObjects? _objects;
@@ -55,11 +52,10 @@ class LiveClassSampler {
 
       final object =
           (await serviceConnection.serviceManager.service!.getInstances(
-        isolateId,
-        theClass.id!,
-        1,
-      ))
-              .instances?[0];
+            isolateId,
+            theClass.id!,
+            1,
+          )).instances?[0];
 
       if (object is InstanceRef) return object;
       return null;
@@ -109,8 +105,9 @@ class LiveClassSampler {
   }
 
   bool get isEvalEnabled =>
-      heapClass
-          .classType(serviceConnection.serviceManager.rootInfoNow().package) !=
+      heapClass.classType(
+        serviceConnection.serviceManager.rootInfoNow().package,
+      ) !=
       ClassType.runtime;
 
   Future<void> allLiveToConsole({
@@ -161,11 +158,8 @@ class LiveClassSampler {
 }
 
 class SnapshotClassSampler extends LiveClassSampler {
-  SnapshotClassSampler(
-    super.heapClass,
-    ObjectSet objects,
-    HeapData heap,
-  ) : super(heap: heap, objects: objects);
+  SnapshotClassSampler(super.heapClass, ObjectSet objects, HeapData heap)
+    : super(heap: heap, objects: objects);
 
   Future<void> oneLiveStaticToConsole({required String sourceFeature}) async {
     ga.select(
@@ -176,11 +170,13 @@ class SnapshotClassSampler extends LiveClassSampler {
     final heapObjects = _objects!;
     final instances = (await _liveInstances())?.instances;
 
-    final instanceRef = instances?.firstWhereOrNull(
-      (objRef) =>
-          objRef is InstanceRef &&
-          heapObjects.codes.contains(objRef.identityHashCode),
-    ) as InstanceRef?;
+    final instanceRef =
+        instances?.firstWhereOrNull(
+              (objRef) =>
+                  objRef is InstanceRef &&
+                  heapObjects.codes.contains(objRef.identityHashCode),
+            )
+            as InstanceRef?;
 
     if (instanceRef == null) {
       serviceConnection.consoleService.appendStdio(

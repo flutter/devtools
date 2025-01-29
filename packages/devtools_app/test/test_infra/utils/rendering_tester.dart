@@ -1,4 +1,4 @@
-// Copyright 2020 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,8 +42,10 @@ class TestRenderingFlutterBinding extends BindingBase
   TestRenderingFlutterBinding({this.onErrors}) {
     FlutterError.onError = (FlutterErrorDetails details) {
       FlutterError.dumpErrorToConsole(details);
-      Zone.current.parent!
-          .handleUncaughtError(details.exception, details.stack!);
+      Zone.current.parent!.handleUncaughtError(
+        details.exception,
+        details.stack!,
+      );
     };
   }
 
@@ -485,6 +487,8 @@ void expectNoFlutterErrors() {
 }
 
 RenderConstrainedBox get box200x200 => RenderConstrainedBox(
-      additionalConstraints:
-          const BoxConstraints.tightFor(height: 200.0, width: 200.0),
-    );
+  additionalConstraints: const BoxConstraints.tightFor(
+    height: 200.0,
+    width: 200.0,
+  ),
+);

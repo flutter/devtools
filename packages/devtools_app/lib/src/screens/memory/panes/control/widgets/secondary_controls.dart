@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,11 +9,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/feature_flags.dart';
-import '../../../../../shared/file_import.dart';
+import '../../../../../shared/framework/screen.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/screen.dart';
+import '../../../../../shared/ui/common_widgets.dart';
+import '../../../../../shared/ui/file_import.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import 'settings_dialog.dart';
 

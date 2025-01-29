@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// Inspector specific tree rendering support.
 ///
@@ -36,12 +36,10 @@ double get inspectorRowHeight => scaleByFontFactor(16.0);
 /// specific as that is the only case we care about.
 // TODO(kenz): extend TreeNode class to share tree logic.
 class InspectorTreeNode {
-  InspectorTreeNode({
-    InspectorTreeNode? parent,
-    bool expandChildren = true,
-  })  : _children = <InspectorTreeNode>[],
-        _parent = parent,
-        _isExpanded = expandChildren;
+  InspectorTreeNode({InspectorTreeNode? parent, bool expandChildren = true})
+    : _children = <InspectorTreeNode>[],
+      _parent = parent,
+      _isExpanded = expandChildren;
 
   bool get showLinesToChildren {
     return _children.length > 1 && !_children.last.isProperty;
@@ -197,7 +195,8 @@ class InspectorTreeNode {
     // Iterate till getting the result to return.
     while (true) {
       final style = node.diagnostic?.style;
-      final indented = style != DiagnosticsTreeStyle.flat &&
+      final indented =
+          style != DiagnosticsTreeStyle.flat &&
           style != DiagnosticsTreeStyle.error;
       if (current == index) {
         return InspectorTreeRow(
@@ -205,7 +204,8 @@ class InspectorTreeNode {
           index: index,
           ticks: ticks,
           depth: depth,
-          lineToParent: !node.isProperty &&
+          lineToParent:
+              !node.isProperty &&
               index != 0 &&
               node.parent!.showLinesToChildren,
         );
@@ -278,10 +278,11 @@ class InspectorTreeRow with SearchableDataMixin {
 }
 
 /// Callback issued every time a node is added to the tree.
-typedef NodeAddedCallback = void Function(
-  InspectorTreeNode node,
-  RemoteDiagnosticsNode diagnosticsNode,
-);
+typedef NodeAddedCallback =
+    void Function(
+      InspectorTreeNode node,
+      RemoteDiagnosticsNode diagnosticsNode,
+    );
 
 class InspectorTreeConfig {
   InspectorTreeConfig({

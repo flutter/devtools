@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:collection';
 import 'dart:math';
@@ -201,10 +201,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
   }
 
   T? firstChildWithCondition(bool Function(T node) condition) {
-    return breadthFirstTraversal<T>(
-      this as T,
-      returnCondition: condition,
-    );
+    return breadthFirstTraversal<T>(this as T, returnCondition: condition);
   }
 
   /// Locates the first sub-node in the tree at level [level].
@@ -228,8 +225,9 @@ abstract class TreeNode<T extends TreeNode<T>> {
       // When this condition is called, we have already ensured that
       // [level] < [depth], so at least one child is guaranteed to meet the
       // firstWhere condition.
-      (currentNode, levelWithOffset) => currentNode.children
-          .firstWhere((n) => n.depth + n.level > levelWithOffset),
+      (currentNode, levelWithOffset) => currentNode.children.firstWhere(
+        (n) => n.depth + n.level > levelWithOffset,
+      ),
     );
   }
 
@@ -254,8 +252,9 @@ abstract class TreeNode<T extends TreeNode<T>> {
       // When this condition is called, we have already ensured that
       // [level] < [depth], so at least one child is guaranteed to meet the
       // lastWhere condition.
-      (currentNode, levelWithOffset) => currentNode.children
-          .lastWhere((n) => n.depth + n.level > levelWithOffset),
+      (currentNode, levelWithOffset) => currentNode.children.lastWhere(
+        (n) => n.depth + n.level > levelWithOffset,
+      ),
     );
   }
 
@@ -337,11 +336,7 @@ T? breadthFirstTraversal<T extends TreeNode<T>>(
   bool Function(T node)? returnCondition,
   void Function(T node)? action,
 }) {
-  return _treeTraversal(
-    root,
-    returnCondition: returnCondition,
-    action: action,
-  );
+  return _treeTraversal(root, returnCondition: returnCondition, action: action);
 }
 
 /// Traverses a tree in depth-first preorder order.
@@ -409,10 +404,7 @@ List<T> buildFlatList<T extends TreeNode<T>>(
   return flatList;
 }
 
-void _traverse<T extends TreeNode<T>>(
-  T node,
-  bool Function(T) callback,
-) {
+void _traverse<T extends TreeNode<T>>(T node, bool Function(T) callback) {
   final shouldContinue = callback(node);
   if (shouldContinue) {
     for (final child in node.children) {

@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_test_utils.dart';
 
@@ -55,22 +55,22 @@ void main(List<String> args) async {
     testRunnerArgs: testRunnerArgs,
     runTest: _runTest,
     newArgsGenerator: (args) => DevToolsAppTestRunnerArgs(args),
-    testIsSupported: (testFile) =>
-        testRunnerArgs.testAppDevice.supportsTest(testFile.path),
+    testIsSupported:
+        (testFile) => testRunnerArgs.testAppDevice.supportsTest(testFile.path),
     debugLogging: debugTestScript,
   );
 }
 
-Future<void> _runTest(
-  DevToolsAppTestRunnerArgs testRunnerArgs,
-) async {
+Future<void> _runTest(DevToolsAppTestRunnerArgs testRunnerArgs) async {
   final testTarget = testRunnerArgs.testTarget!;
   final testDevice = testRunnerArgs.testAppDevice.name;
 
   final disabledForAllDevices = _disabledTestsForDevice[_testDeviceAll]!;
   final disabledForDevice = _disabledTestsForDevice[testDevice] ?? {};
-  final disabled = {...disabledForAllDevices, ...disabledForDevice}
-      .any((t) => testTarget.endsWith(t));
+  final disabled = {
+    ...disabledForAllDevices,
+    ...disabledForDevice,
+  }.any((t) => testTarget.endsWith(t));
   if (disabled) {
     debugLog('Disabled test - skipping $testTarget for $testDevice.');
     return;

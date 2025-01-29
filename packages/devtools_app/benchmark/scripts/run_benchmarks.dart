@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
 import 'dart:io';
@@ -55,12 +55,13 @@ Future<BenchmarkResults> runBenchmarks({
     benchmarkResults.add(
       await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
-        entryPoint: 'benchmark/test_infra/client.dart',
-        compilationOptions: useWasm
-            ? const CompilationOptions.wasm()
-            : const CompilationOptions.js(),
+        entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
+        compilationOptions:
+            useWasm
+                ? const CompilationOptions.wasm()
+                : const CompilationOptions.js(),
         treeShakeIcons: false,
-        initialPage: benchmarkInitialPage,
+        benchmarkPath: benchmarkPath(useWasm: useWasm),
         headless: !useBrowser,
       ),
     );
@@ -86,8 +87,9 @@ void printAndMaybeSaveResults({
   required String? saveToFileLocation,
 }) {
   final resultsAsMap = benchmarkResults.toJson();
-  final resultsAsJsonString =
-      const JsonEncoder.withIndent('  ').convert(resultsAsMap);
+  final resultsAsJsonString = const JsonEncoder.withIndent(
+    '  ',
+  ).convert(resultsAsMap);
 
   if (saveToFileLocation != null) {
     final location = Uri.parse(saveToFileLocation);

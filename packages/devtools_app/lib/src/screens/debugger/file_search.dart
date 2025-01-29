@@ -1,6 +1,6 @@
-// Copyright 2021 The Chromium Authors. All rights reserved.
+// Copyright 2021 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +21,7 @@ const noResultsMsg = 'No files found.';
 final _fileNamesCache = <String, String>{};
 
 class FileSearchField extends StatefulWidget {
-  const FileSearchField({
-    super.key,
-    required this.codeViewController,
-  });
+  const FileSearchField({super.key, required this.codeViewController});
 
   final CodeViewController codeViewController;
 
@@ -98,9 +95,10 @@ class FileSearchFieldState extends State<FileSearchField>
 
     // If the current query is a continuation of the previous query, then
     // filter down the previous matches. Otherwise search through all scripts:
-    final scripts = currentQuery.startsWith(previousQuery)
-        ? _searchResults.scriptRefs
-        : scriptManager.sortedScripts.value;
+    final scripts =
+        currentQuery.startsWith(previousQuery)
+            ? _searchResults.scriptRefs
+            : scriptManager.sortedScripts.value;
 
     final searchResults = _createSearchResults(currentQuery, scripts);
     if (searchResults.scriptRefs.isEmpty) {
@@ -137,8 +135,9 @@ class FileSearchFieldState extends State<FileSearchField>
       return;
     }
     final scriptRef = _scriptsCache[scriptUri]!;
-    await widget.codeViewController
-        .showScriptLocation(ScriptLocation(scriptRef));
+    await widget.codeViewController.showScriptLocation(
+      ScriptLocation(scriptRef),
+    );
     _onClose();
   }
 
@@ -196,12 +195,13 @@ class FileQuery {
 
     final fileName = _fileName(scriptUri);
     final fileNameIndex = scriptUri.lastIndexOf(fileName);
-    final matchedSegments = _findExactSegments(fileName)
-        .map(
-          (range) =>
-              Range(range.begin + fileNameIndex, range.end + fileNameIndex),
-        )
-        .toList();
+    final matchedSegments =
+        _findExactSegments(fileName)
+            .map(
+              (range) =>
+                  Range(range.begin + fileNameIndex, range.end + fileNameIndex),
+            )
+            .toList();
     return AutoCompleteMatch(scriptUri, matchedSegments: matchedSegments);
   }
 
@@ -241,17 +241,22 @@ class FileQuery {
 
     List<Range> matchedSegments;
     if (isMultiToken) {
-      matchedSegments =
-          _findFuzzySegments(scriptUri, query.replaceAll(' ', ''));
+      matchedSegments = _findFuzzySegments(
+        scriptUri,
+        query.replaceAll(' ', ''),
+      );
     } else {
       final fileName = _fileName(scriptUri);
       final fileNameIndex = scriptUri.lastIndexOf(fileName);
-      matchedSegments = _findFuzzySegments(fileName, query)
-          .map(
-            (range) =>
-                Range(range.begin + fileNameIndex, range.end + fileNameIndex),
-          )
-          .toList();
+      matchedSegments =
+          _findFuzzySegments(fileName, query)
+              .map(
+                (range) => Range(
+                  range.begin + fileNameIndex,
+                  range.end + fileNameIndex,
+                ),
+              )
+              .toList();
     }
 
     return AutoCompleteMatch(scriptUri, matchedSegments: matchedSegments);
@@ -264,8 +269,9 @@ class FileQuery {
       final end = start + token.length;
       matchedSegments.add(Range(start, end));
     }
-    matchedSegments
-        .sort((rangeA, rangeB) => rangeA.begin.compareTo(rangeB.begin));
+    matchedSegments.sort(
+      (rangeA, rangeB) => rangeA.begin.compareTo(rangeB.begin),
+    );
 
     return matchedSegments;
   }
@@ -335,9 +341,9 @@ class FileSearchResults {
     required List<ScriptRef> exactFileNameMatches,
     required List<ScriptRef> exactFullPathMatches,
     required List<ScriptRef> fuzzyMatches,
-  })  : _exactFileNameMatches = exactFileNameMatches,
-        _exactFullPathMatches = exactFullPathMatches,
-        _fuzzyMatches = fuzzyMatches;
+  }) : _exactFileNameMatches = exactFileNameMatches,
+       _exactFullPathMatches = exactFullPathMatches,
+       _fuzzyMatches = fuzzyMatches;
 
   final List<ScriptRef> allScripts;
   final FileQuery query;
@@ -347,23 +353,27 @@ class FileSearchResults {
 
   FileSearchResults get topMatches => _buildTopMatches();
 
-  List<ScriptRef> get scriptRefs => query.isEmpty
-      ? allScripts
-      : [
-          ..._exactFileNameMatches,
-          ..._exactFullPathMatches,
-          ..._fuzzyMatches,
-        ];
+  List<ScriptRef> get scriptRefs =>
+      query.isEmpty
+          ? allScripts
+          : [
+            ..._exactFileNameMatches,
+            ..._exactFullPathMatches,
+            ..._fuzzyMatches,
+          ];
 
-  List<AutoCompleteMatch> get autoCompleteMatches => query.isEmpty
-      ? allScripts.map((script) => AutoCompleteMatch(script.uri!)).toList()
-      : [
-          ..._exactFileNameMatches
-              .map(query.createExactFileNameAutoCompleteMatch),
-          ..._exactFullPathMatches
-              .map(query.createExactFullPathAutoCompleteMatch),
-          ..._fuzzyMatches.map(query.createFuzzyMatchAutoCompleteMatch),
-        ];
+  List<AutoCompleteMatch> get autoCompleteMatches =>
+      query.isEmpty
+          ? allScripts.map((script) => AutoCompleteMatch(script.uri!)).toList()
+          : [
+            ..._exactFileNameMatches.map(
+              query.createExactFileNameAutoCompleteMatch,
+            ),
+            ..._exactFullPathMatches.map(
+              query.createExactFullPathAutoCompleteMatch,
+            ),
+            ..._fuzzyMatches.map(query.createFuzzyMatchAutoCompleteMatch),
+          ];
 
   FileSearchResults copyWith({
     List<ScriptRef>? allScripts,
@@ -383,9 +393,7 @@ class FileSearchResults {
 
   FileSearchResults _buildTopMatches() {
     if (query.isEmpty) {
-      return copyWith(
-        allScripts: allScripts.sublist(0, numOfMatchesToShow),
-      );
+      return copyWith(allScripts: allScripts.sublist(0, numOfMatchesToShow));
     }
 
     if (scriptRefs.length <= numOfMatchesToShow) {

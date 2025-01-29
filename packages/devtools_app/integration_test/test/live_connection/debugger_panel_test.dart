@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoints.dart';
@@ -78,11 +78,7 @@ void main() {
 
     // Verify that the gutter item and line item are aligned:
     expect(
-      areHorizontallyAligned(
-        gutter57Finder,
-        line57Finder,
-        tester: tester,
-      ),
+      areHorizontallyAligned(gutter57Finder, line57Finder, tester: tester),
       isTrue,
     );
 
@@ -113,11 +109,7 @@ void main() {
 
     // Verify that the gutter item and line item are aligned:
     expect(
-      areHorizontallyAligned(
-        gutter30Finder,
-        line30Finder,
-        tester: tester,
-      ),
+      areHorizontallyAligned(gutter30Finder, line30Finder, tester: tester),
       isTrue,
     );
 
@@ -177,11 +169,7 @@ void main() {
 
     // Verify that the gutter item and line item are aligned:
     expect(
-      areHorizontallyAligned(
-        gutter46Finder,
-        line46Finder,
-        tester: tester,
-      ),
+      areHorizontallyAligned(gutter46Finder, line46Finder, tester: tester),
       isTrue,
     );
 
@@ -229,14 +217,12 @@ T getWidgetFromFinder<T>(Finder finder) =>
     finder.first.evaluate().first.widget as T;
 
 Finder findLineItemWithText(String text) => find.ancestor(
-      of: find.textContaining(text),
-      matching: find.byType(LineItem),
-    );
+  of: find.textContaining(text),
+  matching: find.byType(LineItem),
+);
 
-Finder findGutterItemWithText(String text) => find.ancestor(
-      of: find.text(text),
-      matching: find.byType(GutterItem),
-    );
+Finder findGutterItemWithText(String text) =>
+    find.ancestor(of: find.text(text), matching: find.byType(GutterItem));
 
 bool isLineFocused(Finder lineItemFinder) {
   final lineWidget = getWidgetFromFinder<LineItem>(lineItemFinder);
@@ -244,11 +230,11 @@ bool isLineFocused(Finder lineItemFinder) {
 }
 
 Finder findStackFrameWithText(String text) => find.descendant(
-      of: find.byType(CallStack),
-      matching: find.richTextContaining(text),
-    );
+  of: find.byType(CallStack),
+  matching: find.richTextContaining(text),
+);
 
 Finder findBreakpointWithText(String text) => find.descendant(
-      of: find.byType(Breakpoints),
-      matching: find.richTextContaining(text),
-    );
+  of: find.byType(Breakpoints),
+  matching: find.richTextContaining(text),
+);

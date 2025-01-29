@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:math';
 
@@ -55,15 +55,15 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
     maxWidth = max(0, maxWidth);
     double available = maxWidth;
     // Columns sorted by increasing minWidth.
-    final sortedColumns = columns.toList()
-      ..sort((a, b) {
-        if (a.minWidthPx != null && b.minWidthPx != null) {
-          return a.minWidthPx!.compareTo(b.minWidthPx!);
-        }
-        if (a.minWidthPx != null) return -1;
-        if (b.minWidthPx != null) return 1;
-        return 0;
-      });
+    final sortedColumns =
+        columns.toList()..sort((a, b) {
+          if (a.minWidthPx != null && b.minWidthPx != null) {
+            return a.minWidthPx!.compareTo(b.minWidthPx!);
+          }
+          if (a.minWidthPx != null) return -1;
+          if (b.minWidthPx != null) return 1;
+          return 0;
+        });
 
     for (final col in columns) {
       if (col.fixedWidthPx != null) {

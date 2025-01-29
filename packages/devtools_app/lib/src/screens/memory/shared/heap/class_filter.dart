@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -8,11 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../shared/memory/class_name.dart';
 
-enum ClassFilterType {
-  showAll,
-  except,
-  only,
-}
+enum ClassFilterType { showAll, except, only }
 
 class ClassFilterData {
   ClassFilterData({
@@ -57,29 +53,29 @@ class ClassFilter with Serializable {
     required this.filterType,
     required String except,
     required String? only,
-  })  : except = _trimByLine(except),
-        only = only == null ? null : _trimByLine(only);
+  }) : except = _trimByLine(except),
+       only = only == null ? null : _trimByLine(only);
 
   ClassFilter.theDefault()
-      : this(
-          filterType: _defaultFilterType,
-          except: defaultExceptString,
-          only: null,
-        );
+    : this(
+        filterType: _defaultFilterType,
+        except: defaultExceptString,
+        only: null,
+      );
 
   ClassFilter.empty()
-      : this(
-          filterType: ClassFilterType.showAll,
-          except: defaultExceptString,
-          only: null,
-        );
+    : this(
+        filterType: ClassFilterType.showAll,
+        except: defaultExceptString,
+        only: null,
+      );
 
   factory ClassFilter.fromJson(Map<String, dynamic> json) {
     final type = json[_Json.type] as String?;
     return ClassFilter(
       filterType:
           ClassFilterType.values.lastWhereOrNull((t) => t.name == type) ??
-              _defaultFilterType,
+          _defaultFilterType,
       except: json[_Json.except] as String? ?? defaultExceptString,
       only: json[_Json.only] as String?,
     );
@@ -132,13 +128,14 @@ class ClassFilter with Serializable {
   int get hashCode => Object.hash(filterType, except, only);
 
   Set<String> _filtersAsSet() {
-    Set<String> stringToSet(String? s) => s == null
-        ? {}
-        : s
-            .split(RegExp(',|\n'))
-            .map((e) => e.trim())
-            .where((e) => e.isNotEmpty)
-            .toSet();
+    Set<String> stringToSet(String? s) =>
+        s == null
+            ? {}
+            : s
+                .split(RegExp(',|\n'))
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toSet();
 
     switch (filterType) {
       case ClassFilterType.showAll:
@@ -240,9 +237,10 @@ class ClassFilter with Serializable {
       throw StateError('Unexpected task: $task.');
     }
 
-    final result = dataToFilter
-        .where((e) => newFilter.apply(extractClass(e), rootPackage))
-        .toList();
+    final result =
+        dataToFilter
+            .where((e) => newFilter.apply(extractClass(e), rootPackage))
+            .toList();
 
     return result;
   }

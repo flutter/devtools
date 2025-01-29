@@ -1,9 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// TODO(kenz): remove once min flutter version of devtools_app_shared >= 3.25
-// ignore_for_file: deprecated_member_use, analysis performed with newer flutter version than min sdk
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
@@ -231,9 +228,10 @@ const darkColorScheme = ColorScheme(
 );
 
 const searchMatchColor = Colors.yellow;
-final searchMatchColorOpaque = Colors.yellow.withOpacity(0.5);
+final searchMatchColorOpaque = Colors.yellow.withValues(alpha: 255 / 2);
 const activeSearchMatchColor = Colors.orangeAccent;
-final activeSearchMatchColorOpaque = Colors.orangeAccent.withOpacity(0.5);
+final activeSearchMatchColorOpaque =
+    Colors.orangeAccent.withValues(alpha: 255 / 2);
 
 /// Gets an alternating color to use for indexed UI elements.
 Color alternatingColorForIndex(int index, ColorScheme colorScheme) {

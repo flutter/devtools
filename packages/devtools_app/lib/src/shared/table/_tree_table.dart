@@ -1,14 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 part of 'table.dart';
 
-enum TreeTableScrollKind {
-  up,
-  down,
-  parent,
-}
+enum TreeTableScrollKind { up, down, parent }
 
 /// A table that shows [TreeNode]s.
 ///
@@ -42,10 +38,10 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     this.tallHeaders = false,
     this.headerColor,
     ValueNotifier<Selection<T?>>? selectionNotifier,
-  })  : selectionNotifier = selectionNotifier ??
-            ValueNotifier<Selection<T?>>(Selection.empty()),
-        assert(columns.contains(treeColumn)),
-        assert(columns.contains(defaultSortColumn));
+  }) : selectionNotifier =
+           selectionNotifier ?? ValueNotifier<Selection<T?>>(Selection.empty()),
+       assert(columns.contains(treeColumn)),
+       assert(columns.contains(defaultSortColumn));
 
   /// Factory that creates keys for each row in this table.
   final Key Function(T) keyFactory;
@@ -207,7 +203,8 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     TreeTable<T> oldWidget,
     TreeTable<T> newWidget,
   ) {
-    final columnsChanged = !collectionEquals(
+    final columnsChanged =
+        !collectionEquals(
           oldWidget.columns.map((c) => c.title),
           newWidget.columns.map((c) => c.title),
         ) ||
@@ -336,10 +333,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
     // If there is no selected node, choose the first one.
     if (widget.selectionNotifier.value.node == null) {
-      widget.selectionNotifier.value = Selection(
-        node: _data[0],
-        nodeIndex: 0,
-      );
+      widget.selectionNotifier.value = Selection(node: _data[0], nodeIndex: 0);
     }
 
     final selection = widget.selectionNotifier.value;
@@ -397,8 +391,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     // occupies space in the viewport so we must subtract 1 for that, and we
     // subtract 1 to account for the fact that a partial row could be displayed
     // at the top and bottom of the view.
-    final minCompleteItemsInView =
-        max((viewportHeight / defaultRowHeight).floor() - 2, 0);
+    final minCompleteItemsInView = max(
+      (viewportHeight / defaultRowHeight).floor() - 2,
+      0,
+    );
     final lastItemIndex = firstItemIndex + minCompleteItemsInView - 1;
     late int newSelectedNodeIndex;
 
@@ -412,9 +408,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         newSelectedNodeIndex = max(selectedNodeIndex! - 1, 0);
         break;
       case TreeTableScrollKind.parent:
-        newSelectedNodeIndex = selectionValue.node!.parent != null
-            ? max(_data.indexOf(selectionValue.node!.parent!), 0)
-            : 0;
+        newSelectedNodeIndex =
+            selectionValue.node!.parent != null
+                ? max(_data.indexOf(selectionValue.node!.parent!), 0)
+                : 0;
         break;
     }
 
@@ -458,10 +455,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 class _RowGuidelinePainter extends CustomPainter {
   _RowGuidelinePainter(this.level, this.colorScheme);
 
-  static const _treeGuidelineColors = [
-    Color(0xFF13B9FD),
-    Color(0xFF5BC43B),
-  ];
+  static const _treeGuidelineColors = [Color(0xFF13B9FD), Color(0xFF5BC43B)];
 
   final int level;
   final ColorScheme colorScheme;

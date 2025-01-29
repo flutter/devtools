@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:core';
@@ -36,14 +36,14 @@ class TimelineStreamManager with DisposerMixin {
   final _streamDescriptions = <String, String>{
     dartTimelineStream:
         'Events emitted from dart:developer Timeline APIs (including'
-            ' Flutter framework events)',
+        ' Flutter framework events)',
     embedderTimelineStream:
         'Additional platform events (often emitted from the Flutter engine)',
     gcTimelineStream: 'Garbage collection',
     apiTimelineStream: 'Calls to the VM embedding API',
     compilerTimelineStream:
         'Compiler phases (loading code, compilation, optimization,'
-            ' etc.)',
+        ' etc.)',
     compilerVerboseTimelineStream: 'More detailed compiler phases',
     debuggerTimelineStream: 'Debugger paused events',
     isolateTimelineStream:
@@ -75,21 +75,19 @@ class TimelineStreamManager with DisposerMixin {
     final timelineFlags = await service!.getVMTimelineFlags();
     _streams
       ..clear()
-      ..addEntries(
-        [
-          for (final streamName in timelineFlags.availableStreams ?? <String>[])
-            MapEntry(
-              streamName,
-              TimelineStream(
-                name: streamName,
-                description: _streamDescriptions[streamName] ?? '',
-                advanced: _advancedStreams.contains(streamName),
-                recorded: timelineFlags.recordedStreams?.contains(streamName) ??
-                    false,
-              ),
+      ..addEntries([
+        for (final streamName in timelineFlags.availableStreams ?? <String>[])
+          MapEntry(
+            streamName,
+            TimelineStream(
+              name: streamName,
+              description: _streamDescriptions[streamName] ?? '',
+              advanced: _advancedStreams.contains(streamName),
+              recorded:
+                  timelineFlags.recordedStreams?.contains(streamName) ?? false,
             ),
-        ],
-      );
+          ),
+      ]);
   }
 
   /// Handles events from the VM service 'TimelineEvent' stream to track updates
@@ -120,10 +118,7 @@ class TimelineStreamManager with DisposerMixin {
     }
   }
 
-  void vmServiceOpened(
-    VmServiceWrapper service,
-    ConnectedApp connectedApp,
-  ) {
+  void vmServiceOpened(VmServiceWrapper service, ConnectedApp connectedApp) {
     cancelStreamSubscriptions();
     _service = service;
 
@@ -158,17 +153,19 @@ class TimelineStreamManager with DisposerMixin {
   /// Sends an update to the VM service that the new recorded value for [stream]
   /// should match [value].
   Future<void> updateTimelineStream(TimelineStream stream, bool value) async {
-    final recordedStreamNames = _streams.keys
-        .where((streamName) => _streams[streamName]!.recorded.value)
-        .toList();
+    final recordedStreamNames =
+        _streams.keys
+            .where((streamName) => _streams[streamName]!.recorded.value)
+            .toList();
     final alreadyBeingRecorded = recordedStreamNames.contains(stream.name);
     if (alreadyBeingRecorded && !value) {
       recordedStreamNames.remove(stream.name);
     } else if (!alreadyBeingRecorded && value) {
       recordedStreamNames.add(stream.name);
     }
-    await serviceConnection.serviceManager.service!
-        .setVMTimelineFlags(recordedStreamNames);
+    await serviceConnection.serviceManager.service!.setVMTimelineFlags(
+      recordedStreamNames,
+    );
   }
 }
 

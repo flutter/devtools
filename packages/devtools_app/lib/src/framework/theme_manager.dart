@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:ui';
 
@@ -9,8 +9,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:logging/logging.dart';
 
-import '../service/editor/api_classes.dart';
 import '../shared/config_specific/post_message/post_message.dart';
+import '../shared/editor/api_classes.dart';
 import '../shared/globals.dart';
 
 final _log = Logger('theme_manager');
@@ -44,11 +44,10 @@ class EditorThemeManager extends DisposableController
     // Handle themeChanged from postMessage.
     autoDisposeStreamSubscription(
       onPostMessage.listen((event) {
-        if (event.data
-            case {
-              'method': 'editor.themeChanged',
-              'params': {'theme': final Map themeJson}
-            }) {
+        if (event.data case {
+          'method': 'editor.themeChanged',
+          'params': {'theme': final Map themeJson},
+        }) {
           try {
             _updateTheme(
               EditorTheme.fromJson(themeJson.cast<String, Object?>()),
@@ -73,8 +72,10 @@ class EditorThemeManager extends DisposableController
     }
 
     if (newTheme.backgroundColor != null) {
-      final newBackgroundColor =
-          tryParseColor(newTheme.backgroundColor!, logger: _log);
+      final newBackgroundColor = tryParseColor(
+        newTheme.backgroundColor!,
+        logger: _log,
+      );
       if (newBackgroundColor != null &&
           newBackgroundColor != currentTheme.backgroundColor) {
         updateQueryParameter(
@@ -85,8 +86,10 @@ class EditorThemeManager extends DisposableController
     }
 
     if (newTheme.foregroundColor != null) {
-      final newForegroundColor =
-          tryParseColor(newTheme.foregroundColor!, logger: _log);
+      final newForegroundColor = tryParseColor(
+        newTheme.foregroundColor!,
+        logger: _log,
+      );
       if (newForegroundColor != null &&
           newForegroundColor != currentTheme.foregroundColor) {
         updateQueryParameter(

@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:typed_data';
 
@@ -8,16 +8,10 @@ import 'package:file_selector/file_selector.dart';
 import 'package:vm_service/vm_service.dart';
 
 /// Direction of reference between objects in memory.
-enum RefDirection {
-  inbound,
-  outbound,
-}
+enum RefDirection { inbound, outbound }
 
 class MemoryFootprint {
-  MemoryFootprint({
-    required this.dart,
-    required this.reachable,
-  });
+  MemoryFootprint({required this.dart, required this.reachable});
 
   /// Reachable and unreachable total dart heap size.
   final int dart;

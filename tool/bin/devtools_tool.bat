@@ -1,18 +1,7 @@
+REM Copyright 2025 The Flutter Authors
+REM Use of this source code is governed by a BSD-style license that can be
+REM found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 @echo off
 
-IF DEFINED DEVTOOLS_TOOL_FLUTTER_FROM_PATH (
-	echo Running devtools_tool using Dart/Flutter from PATH because DEVTOOLS_TOOL_FLUTTER_FROM_PATH is set
-	dart run %~dp0/devtools_tool.dart %*
-) ELSE (
-
-	rem If the `devtools/tool/flutter-sdk` directory does not exist yet, use whatever Dart
-	rem is on the user's path to update it before proceeding.
-	IF NOT EXIST "%~dp0/../flutter-sdk/" (
-		echo Running devtools_tool using the Dart SDK from `where.exe dart` to create the Flutter SDK in tool/flutter-sdk.
-  		dart run %~dp0/devtools_tool.dart update-flutter-sdk
-	)
-
-	%~dp0/../flutter-sdk/bin/dart run %~dp0/devtools_tool.dart %*
-)
-
-EXIT /B %errorlevel%
+echo Warning: devtools_tool has been replaced by dt. Please use dt instead.
+%~dp0/dt.bat %*

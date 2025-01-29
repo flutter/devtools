@@ -1,22 +1,23 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:devtools_app/src/utils/list_queue_value_notifier.dart';
+import 'package:devtools_app/src/shared/primitives/list_queue_value_notifier.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import 'editor_service/simulated_editor_mixin.dart';
+import 'editor_service/simulated_editor.dart';
+import 'shared/common_ui.dart';
 
 /// A simple UI that acts as a stand-in host editor to simplify the development
 /// workflow when working on embedded tooling.
 ///
-/// Uses a [SimulatedEditorMixin] to provide functionality over DTD (or legacy
+/// Uses a [SimulatedEditor] to provide functionality over DTD (or legacy
 /// `postMessage`).
 class MockEditorWidget extends StatefulWidget {
   const MockEditorWidget({
@@ -27,7 +28,7 @@ class MockEditorWidget extends StatefulWidget {
   });
 
   /// The fake editor API we can use to simulate an editor.
-  final SimulatedEditorMixin editor;
+  final SimulatedEditor editor;
 
   /// A stream of protocol traffic between the sidebar and DTD.
   final Stream<String> clientLog;
@@ -40,7 +41,7 @@ class MockEditorWidget extends StatefulWidget {
 
 class _MockEditorWidgetState extends State<MockEditorWidget>
     with AutoDisposeMixin {
-  SimulatedEditorMixin get editor => widget.editor;
+  SimulatedEditor get editor => widget.editor;
 
   Stream<String> get clientLog => widget.clientLog;
 
@@ -125,10 +126,7 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Mock Editor',
-                    style: theme.textTheme.headlineMedium,
-                  ),
+                  Text('Mock Editor', style: theme.textTheme.headlineMedium),
                   const SizedBox(height: defaultSpacing),
                   const Text(
                     'Use these buttons to simulate actions that would usually occur in the IDE.',
@@ -138,16 +136,18 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                     children: [
                       const Text('Editor: '),
                       ElevatedButton(
-                        onPressed: editor.connected
-                            ? null
-                            : _withUpdate(editor.connectEditor),
+                        onPressed:
+                            editor.connected
+                                ? null
+                                : _withUpdate(editor.connectEditor),
                         child: const Text('Connect'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: editor.connected
-                            ? _withUpdate(editor.disconnectEditor)
-                            : null,
+                        onPressed:
+                            editor.connected
+                                ? _withUpdate(editor.disconnectEditor)
+                                : null,
                         child: const Text('Disconnect'),
                       ),
                     ],
@@ -173,38 +173,42 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'macos',
-                          flutterMode: 'debug',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'macos',
+                              flutterMode: 'debug',
+                            ),
                         child: const Text('Desktop debug'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'macos',
-                          flutterMode: 'profile',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'macos',
+                              flutterMode: 'profile',
+                            ),
                         child: const Text('Desktop profile'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'macos',
-                          flutterMode: 'release',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'macos',
+                              flutterMode: 'release',
+                            ),
                         child: const Text('Desktop release'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'macos',
-                          flutterMode: 'jit_release',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'macos',
+                              flutterMode: 'jit_release',
+                            ),
                         child: const Text('Desktop jit_release'),
                       ),
                     ],
@@ -213,29 +217,32 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'chrome',
-                          flutterMode: 'debug',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'chrome',
+                              flutterMode: 'debug',
+                            ),
                         child: const Text('Web debug'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'chrome',
-                          flutterMode: 'profile',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'chrome',
+                              flutterMode: 'profile',
+                            ),
                         child: const Text('Web profile'),
                       ),
                       const SizedBox(width: denseSpacing),
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Flutter',
-                          deviceId: 'chrome',
-                          flutterMode: 'release',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Flutter',
+                              deviceId: 'chrome',
+                              flutterMode: 'release',
+                            ),
                         child: const Text('Web release'),
                       ),
                     ],
@@ -244,10 +251,11 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                   Row(
                     children: [
                       ElevatedButton(
-                        onPressed: () => editor.startSession(
-                          debuggerType: 'Dart',
-                          deviceId: 'macos',
-                        ),
+                        onPressed:
+                            () => editor.startSession(
+                              debuggerType: 'Dart',
+                              deviceId: 'macos',
+                            ),
                         child: const Text('Dart CLI'),
                       ),
                     ],
@@ -256,9 +264,7 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                   ElevatedButton(
                     onPressed: () => editor.stopAllSessions(),
                     style: theme.elevatedButtonTheme.style!.copyWith(
-                      backgroundColor: const WidgetStatePropertyAll(
-                        Colors.red,
-                      ),
+                      backgroundColor: const WidgetStatePropertyAll(Colors.red),
                     ),
                     child: const Text('Stop All'),
                   ),
@@ -288,19 +294,24 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                               builder: (context, logRing, _) {
                                 return ListView.builder(
                                   itemCount: logRing.length,
-                                  itemBuilder: (context, index) =>
-                                      OutlineDecoration.onlyBottom(
-                                    child: Container(
-                                      width: double.infinity,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: denseSpacing,
-                                      ),
-                                      child: Text(
-                                        logRing.elementAt(index),
-                                        style: Theme.of(context).fixedFontStyle,
-                                      ),
-                                    ),
-                                  ),
+                                  itemBuilder:
+                                      (context, index) =>
+                                          OutlineDecoration.onlyBottom(
+                                            child: Container(
+                                              width: double.infinity,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: denseSpacing,
+                                                  ),
+                                              child: Text(
+                                                logRing.elementAt(index),
+                                                style:
+                                                    Theme.of(
+                                                      context,
+                                                    ).fixedFontStyle,
+                                              ),
+                                            ),
+                                          ),
                                 );
                               },
                             ),
@@ -324,42 +335,4 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
       setState(() {});
     };
   }
-}
-
-/// A basic theme that matches the default colours of VS Code dart/light themes
-/// so the mock environment can be displayed in either.
-class VsCodeTheme {
-  const VsCodeTheme._({
-    required this.activityBarBackgroundColor,
-    required this.editorBackgroundColor,
-    required this.foregroundColor,
-    required this.sidebarBackgroundColor,
-  });
-
-  const VsCodeTheme.dark()
-      : this._(
-          activityBarBackgroundColor: const Color(0xFF333333),
-          editorBackgroundColor: const Color(0xFF1E1E1E),
-          foregroundColor: const Color(0xFFD4D4D4),
-          sidebarBackgroundColor: const Color(0xFF252526),
-        );
-
-  const VsCodeTheme.light()
-      : this._(
-          activityBarBackgroundColor: const Color(0xFF2C2C2C),
-          editorBackgroundColor: const Color(0xFFFFFFFF),
-          foregroundColor: const Color(0xFF000000),
-          sidebarBackgroundColor: const Color(0xFFF3F3F3),
-        );
-
-  static VsCodeTheme of(BuildContext context) {
-    return Theme.of(context).isDarkTheme
-        ? const VsCodeTheme.dark()
-        : const VsCodeTheme.light();
-  }
-
-  final Color activityBarBackgroundColor;
-  final Color editorBackgroundColor;
-  final Color foregroundColor;
-  final Color sidebarBackgroundColor;
 }

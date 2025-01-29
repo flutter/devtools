@@ -1,3 +1,8 @@
+<!--
+Copyright 2025 The Flutter Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+-->
 # DevTools benchmark tests
 
 There are two types of benchmarks that we currently support: size and performance.
@@ -33,7 +38,7 @@ Provide arguments to the `run_benchmarks.dart` script in order to:
 
 Run `dart run benchmark/scripts/run_benchmarks.dart -h` to see details.
 
-To run the test that verifies we can run benchmark tests, run:
+To run the performance benchmark test locally, run:
 ```sh
 flutter test benchmark/devtools_benchmarks_test.dart
 ```

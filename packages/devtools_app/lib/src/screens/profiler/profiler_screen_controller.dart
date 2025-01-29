@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -10,7 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
-import '../../shared/offline_data.dart';
+import '../../shared/offline/offline_data.dart';
 import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
@@ -38,8 +38,9 @@ class ProfilerScreenController extends DisposableController
   Future<void> _initHelper() async {
     if (!offlineDataController.showingOfflineData.value) {
       await allowedError(
-        serviceConnection.serviceManager.service!
-            .setProfilePeriod(mediumProfilePeriod),
+        serviceConnection.serviceManager.service!.setProfilePeriod(
+          mediumProfilePeriod,
+        ),
         logError: false,
       );
 
@@ -48,8 +49,12 @@ class ProfilerScreenController extends DisposableController
       addAutoDisposeListener(
         serviceConnection.serviceManager.isolateManager.selectedIsolate,
         () {
-          final selectedIsolate = serviceConnection
-              .serviceManager.isolateManager.selectedIsolate.value;
+          final selectedIsolate =
+              serviceConnection
+                  .serviceManager
+                  .isolateManager
+                  .selectedIsolate
+                  .value;
           if (selectedIsolate != null) {
             switchToIsolate(selectedIsolate);
           }
@@ -68,8 +73,9 @@ class ProfilerScreenController extends DisposableController
           // need to default to the basic view of the profile.
           final userTagFilter = cpuProfilerController.userTagFilter.value;
           if (userTagFilter == CpuProfilerController.groupByVmTag) {
-            await cpuProfilerController
-                .loadDataWithTag(CpuProfilerController.userTagNone);
+            await cpuProfilerController.loadDataWithTag(
+              CpuProfilerController.userTagNone,
+            );
           }
         }
         // Always reset to the function view when the VM developer mode state
@@ -93,10 +99,7 @@ class ProfilerScreenController extends DisposableController
       processId: 'offline data processing',
     );
     cpuProfilerController.loadProcessedData(
-      CpuProfilePair(
-        functionProfile: data,
-        codeProfile: null,
-      ),
+      CpuProfilePair(functionProfile: data, codeProfile: null),
       storeAsUserTagNone: true,
     );
   }
@@ -151,9 +154,9 @@ class ProfilerScreenController extends DisposableController
 
   @override
   OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
-        screenId: ProfilerScreen.id,
-        data: cpuProfileData!.toJson(),
-      );
+    screenId: ProfilerScreen.id,
+    data: cpuProfileData!.toJson(),
+  );
 
   Future<void> clear() async {
     await cpuProfilerController.clear();

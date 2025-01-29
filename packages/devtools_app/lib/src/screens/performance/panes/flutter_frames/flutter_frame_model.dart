@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:math' as math;
 
@@ -27,9 +27,10 @@ class FlutterFrame {
     final timeStart = Duration(microseconds: json[startTimeKey]! as int);
     final timeEnd =
         timeStart + Duration(microseconds: json[elapsedKey]! as int);
-    final frameTime = TimeRange()
-      ..start = timeStart
-      ..end = timeEnd;
+    final frameTime =
+        TimeRange()
+          ..start = timeStart
+          ..end = timeEnd;
     return FlutterFrame._(
       id: json[numberKey]! as int,
       timeFromFrameTiming: frameTime,
@@ -107,8 +108,10 @@ class FlutterFrame {
     if (timelineEventData.rasterEvent == null) return Duration.zero;
     final shaderEvents = timelineEventData.rasterEvent!
         .shallowNodesWithCondition((event) => event.isShaderEvent);
-    final duration =
-        shaderEvents.fold<Duration>(Duration.zero, (previous, event) {
+    final duration = shaderEvents.fold<Duration>(Duration.zero, (
+      previous,
+      event,
+    ) {
       return previous + event.time.duration;
     });
     return _shaderTime = duration;
@@ -147,13 +150,13 @@ class FlutterFrame {
   }
 
   Map<String, Object?> get json => {
-        numberKey: id,
-        startTimeKey: timeFromFrameTiming.start!.inMicroseconds,
-        elapsedKey: timeFromFrameTiming.duration.inMicroseconds,
-        buildKey: buildTime.inMicroseconds,
-        rasterKey: rasterTime.inMicroseconds,
-        vsyncOverheadKey: vsyncOverheadTime.inMicroseconds,
-      };
+    numberKey: id,
+    startTimeKey: timeFromFrameTiming.start!.inMicroseconds,
+    elapsedKey: timeFromFrameTiming.duration.inMicroseconds,
+    buildKey: buildTime.inMicroseconds,
+    rasterKey: rasterTime.inMicroseconds,
+    vsyncOverheadKey: vsyncOverheadTime.inMicroseconds,
+  };
 
   @override
   String toString() {

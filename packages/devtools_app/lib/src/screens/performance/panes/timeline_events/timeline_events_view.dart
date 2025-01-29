@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -10,9 +10,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
+import '../../../../shared/ui/common_widgets.dart';
 import 'perfetto/perfetto.dart';
 import 'timeline_events_controller.dart';
 
@@ -131,18 +131,28 @@ class TimelineEventsTabControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showingOfflineData = offlineDataController.showingOfflineData.value;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(right: densePadding),
-          child: PerfettoHelpButton(
-            perfettoController: controller.perfettoController,
+        if (!showingOfflineData)
+          Row(
+            children: [
+              const Text('Include CPU samples'),
+              const SizedBox(width: densePadding),
+              DevToolsTooltip(
+                message:
+                    'Include CPU samples in the timeline\n'
+                    '(this may negatively impact performance)',
+                child: NotifierSwitch(
+                  notifier: preferences.performance.includeCpuSamplesInTimeline,
+                ),
+              ),
+            ],
           ),
-        ),
-        if (!offlineDataController.showingOfflineData.value) ...[
-          // TODO(kenz): add a switch to enable the CPU profiler once the
-          // tracing format supports it (when we switch to protozero).
+        const SizedBox(width: densePadding),
+        PerfettoHelpButton(perfettoController: controller.perfettoController),
+        if (!showingOfflineData) ...[
           const SizedBox(width: densePadding),
           const TimelineSettingsButton(),
           const SizedBox(width: densePadding),
@@ -191,9 +201,10 @@ class RefreshTimelineEventsButton extends StatelessWidget {
         return RefreshButton(
           iconOnly: true,
           outlined: false,
-          onPressed: status == EventsControllerStatus.refreshing
-              ? null
-              : controller.forceRefresh,
+          onPressed:
+              status == EventsControllerStatus.refreshing
+                  ? null
+                  : controller.forceRefresh,
           tooltip: 'Refresh timeline events',
           gaScreen: gac.performance,
           gaSelection: gac.PerformanceEvents.refreshTimelineEvents.name,
@@ -251,28 +262,14 @@ class _TimelineSettingsDialogState extends State<TimelineSettingsDialog>
           ],
         ),
       ),
-      actions: const [
-        DialogCloseButton(),
-      ],
+      actions: const [DialogCloseButton()],
     );
   }
 
   List<Widget> _defaultRecordedStreams(ThemeData theme) {
     return [
-      ...dialogSubHeader(theme, 'General'),
-      CheckboxSetting(
-        notifier: preferences.performance.includeCpuSamplesInTimeline,
-        title: 'Include CPU samples in the timeline',
-        description: 'This may negatively affect performance.',
-      ),
-      const SizedBox(height: defaultSpacing),
       ...dialogSubHeader(theme, 'Trace categories'),
-      RichText(
-        text: TextSpan(
-          text: 'Default',
-          style: theme.subtleTextStyle,
-        ),
-      ),
+      RichText(text: TextSpan(text: 'Default', style: theme.subtleTextStyle)),
       ..._timelineStreams(advanced: false),
       // Special case "Network Traffic" because it is not implemented as a
       // Timeline recorded stream in the VM. The user does not need to be aware of
@@ -281,46 +278,41 @@ class _TimelineSettingsDialogState extends State<TimelineSettingsDialog>
         title: 'Network',
         description: 'Http traffic',
         notifier: _httpLogging,
-        onChanged: (value) => unawaited(
-          http_service.toggleHttpRequestLogging(value ?? false),
-        ),
+        onChanged:
+            (value) => unawaited(
+              http_service.toggleHttpRequestLogging(value ?? false),
+            ),
       ),
     ];
   }
 
   List<Widget> _advancedStreams(ThemeData theme) {
     return [
-      RichText(
-        text: TextSpan(
-          text: 'Advanced',
-          style: theme.subtleTextStyle,
-        ),
-      ),
+      RichText(text: TextSpan(text: 'Advanced', style: theme.subtleTextStyle)),
       ..._timelineStreams(advanced: true),
     ];
   }
 
-  List<Widget> _timelineStreams({
-    required bool advanced,
-  }) {
-    final streams = advanced
-        ? serviceConnection.timelineStreamManager.advancedStreams
-        : serviceConnection.timelineStreamManager.basicStreams;
-    final settings = streams
-        .map(
-          (stream) => CheckboxSetting(
-            title: stream.name,
-            description: stream.description,
-            notifier: stream.recorded as ValueNotifier<bool?>,
-            onChanged: (newValue) => unawaited(
-              serviceConnection.timelineStreamManager.updateTimelineStream(
-                stream,
-                newValue ?? false,
+  List<Widget> _timelineStreams({required bool advanced}) {
+    final streams =
+        advanced
+            ? serviceConnection.timelineStreamManager.advancedStreams
+            : serviceConnection.timelineStreamManager.basicStreams;
+    final settings =
+        streams
+            .map(
+              (stream) => CheckboxSetting(
+                title: stream.name,
+                description: stream.description,
+                notifier: stream.recorded as ValueNotifier<bool?>,
+                onChanged:
+                    (newValue) => unawaited(
+                      serviceConnection.timelineStreamManager
+                          .updateTimelineStream(stream, newValue ?? false),
+                    ),
               ),
-            ),
-          ),
-        )
-        .toList();
+            )
+            .toList();
     return settings;
   }
 }

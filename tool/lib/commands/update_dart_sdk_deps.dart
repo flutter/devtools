@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:io';
 
@@ -19,7 +19,7 @@ const _argCommit = 'commit';
 /// automatically built and uploaded to CIPD on each DevTools commit.
 ///
 /// To run this script:
-/// `devtools_tool update-sdk-deps -c <commit-hash>`
+/// `dt update-sdk-deps -c <commit-hash>`
 class UpdateDartSdkDepsCommand extends Command {
   UpdateDartSdkDepsCommand() {
     argParser.addOption(
@@ -49,10 +49,11 @@ class UpdateDartSdkDepsCommand extends Command {
       workingDirectory: dartSdkLocation,
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
-        CliCommand.git(
-          ['branch', '-D', 'devtools-$commit'],
-          throwOnException: false,
-        ),
+        CliCommand.git([
+          'branch',
+          '-D',
+          'devtools-$commit',
+        ], throwOnException: false),
         CliCommand.git(['new-branch', 'devtools-$commit']),
       ],
     );
@@ -66,13 +67,7 @@ class UpdateDartSdkDepsCommand extends Command {
       additionalErrorMessage: DartSdkHelper.commandDebugMessage,
       commands: [
         CliCommand.git(['add', 'DEPS']),
-        CliCommand.git(
-          [
-            'commit',
-            '-m',
-            'Update DevTools rev to $commit',
-          ],
-        ),
+        CliCommand.git(['commit', '-m', 'Update DevTools rev to $commit']),
         CliCommand.git(['cl', 'upload', '-s', '-f']),
       ],
     );

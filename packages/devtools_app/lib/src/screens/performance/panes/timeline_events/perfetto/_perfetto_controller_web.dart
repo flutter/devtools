@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:ui_web' as ui_web;
@@ -123,8 +123,9 @@ class PerfettoControllerImpl extends PerfettoController {
       origin: window.location.origin,
       path: window.location.pathname,
     );
-    final indexFilePath = ui_web.assetManager
-        .getAssetUrl(devToolsEnvironmentParameters.perfettoIndexLocation);
+    final indexFilePath = ui_web.assetManager.getAssetUrl(
+      devToolsEnvironmentParameters.perfettoIndexLocation,
+    );
     final baseUrl = '$basePath/$indexFilePath';
     return '$baseUrl$_embeddedModeQuery';
   }
@@ -164,12 +165,12 @@ class PerfettoControllerImpl extends PerfettoController {
     );
     _initialized = true;
 
-    _perfettoIFrame = HTMLIFrameElement()
-      // This url is safe because we built it ourselves and it does not include
-      // any user input.
-      // ignore: unsafe_html
-      ..src = perfettoUrl
-      ..allow = 'usb';
+    _perfettoIFrame =
+        HTMLIFrameElement()
+          // This url is safe because we built it ourselves and it does not include
+          // any user input.
+          ..src = perfettoUrl
+          ..allow = 'usb';
     _perfettoIFrame.style
       ..border = 'none'
       ..height = '100%'

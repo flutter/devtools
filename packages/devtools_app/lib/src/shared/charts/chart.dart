@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:math';
 import 'dart:ui';
@@ -40,11 +40,7 @@ void drawTranslate(
 }
 
 class Chart extends StatefulWidget {
-  Chart(
-    this.controller, {
-    super.key,
-    String title = '',
-  }) {
+  Chart(this.controller, {super.key, String title = ''}) {
     controller.title = title;
   }
 
@@ -99,26 +95,28 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
     return RepaintBoundary(
       child: LayoutBuilder(
         // Inner container
-        builder: (_, constraints) => GestureDetector(
-          onTapDown: (TapDownDetails details) {
-            final xLocalPosition = details.localPosition.dx;
-            final timestampIndex =
-                controller.xCoordToTimestampIndex(xLocalPosition);
-            final timestamp = controller.xCoordToTimestamp(xLocalPosition);
-            controller.tapLocation.value = TapLocation(
-              details,
-              timestamp,
-              timestampIndex,
-            );
-          },
-          child: SizedBox(
-            width: constraints.widthConstraints().maxWidth,
-            height: constraints.widthConstraints().maxHeight,
-            child: CustomPaint(
-              painter: ChartPainter(controller, colorScheme),
+        builder:
+            (_, constraints) => GestureDetector(
+              onTapDown: (TapDownDetails details) {
+                final xLocalPosition = details.localPosition.dx;
+                final timestampIndex = controller.xCoordToTimestampIndex(
+                  xLocalPosition,
+                );
+                final timestamp = controller.xCoordToTimestamp(xLocalPosition);
+                controller.tapLocation.value = TapLocation(
+                  details,
+                  timestamp,
+                  timestampIndex,
+                );
+              },
+              child: SizedBox(
+                width: constraints.widthConstraints().maxWidth,
+                height: constraints.widthConstraints().maxHeight,
+                child: CustomPaint(
+                  painter: ChartPainter(controller, colorScheme),
+                ),
+              ),
             ),
-          ),
-        ),
       ),
     );
   }
@@ -128,11 +126,7 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
 /// is for stacked traces. If the Trace is stacked then yBase is the previous
 /// trace's Y position. If a trace is not stacked then yBase is always 0.
 class PointAndBase {
-  PointAndBase(
-    this.x,
-    this.y, {
-    double? yBase,
-  }) : base = yBase;
+  PointAndBase(this.x, this.y, {double? yBase}) : base = yBase;
 
   final double x;
   final double y;
@@ -141,7 +135,7 @@ class PointAndBase {
 
 class ChartPainter extends CustomPainter {
   ChartPainter(this.chartController, this.colorScheme) {
-//    marginTopY = createText(chartController.title, 1.5).height + paddingY;
+    //    marginTopY = createText(chartController.title, 1.5).height + paddingY;
   }
 
   final debugTrackPaintTime = false;
@@ -160,9 +154,10 @@ class ChartPainter extends CustomPainter {
     //              sampling 1 point per horizontal pixel.
     final startTime = DateTime.now();
 
-    final axis = Paint()
-      ..strokeWidth = axisWidth
-      ..color = Colors.grey;
+    final axis =
+        Paint()
+          ..strokeWidth = axisWidth
+          ..color = Colors.grey;
 
     if (size != chartController.size) {
       chartController.size = size;
@@ -174,22 +169,15 @@ class ChartPainter extends CustomPainter {
       chartController.xCanvasChart,
       chartController.yCanvasChart,
       (canavas) {
-        drawAxes(
-          canvas,
-          axis,
-          displayX: chartController.displayXAxis,
-        );
+        drawAxes(canvas, axis, displayX: chartController.displayXAxis);
       },
     );
 
     final traces = chartController.traces;
-    final tracesDataIndex = List<int>.generate(
-      traces.length,
-      (int index) {
-        final length = traces[index].data.length;
-        return length > 0 ? length - 1 : -1;
-      },
-    );
+    final tracesDataIndex = List<int>.generate(traces.length, (int index) {
+      final length = traces[index].data.length;
+      return length > 0 ? length - 1 : -1;
+    });
 
     /// Key is trace index and value is x,y point.
     final previousTracesData = <int, PointAndBase>{};
@@ -243,35 +231,65 @@ class ChartPainter extends CustomPainter {
           final yValue = (trace.stacked) ? stackedY + traceData.y : traceData.y;
 
           final xTimestamp = traceData.timestamp;
-          final xCanvasCoord =
-              chartController.timestampToXCanvasCoord(xTimestamp);
+          final xCanvasCoord = chartController.timestampToXCanvasCoord(
+            xTimestamp,
+          );
           if (currentTimestamp == xTimestamp) {
             // Get ready to render on canvas. Remember old canvas state
             // and setup translations for x,y coordinates into the rendering
             // area of the chart.
-            drawTranslate(
-              canvas,
-              xTranslation,
-              yTranslation,
-              (canvas) {
-                final xCoord = xCanvasCoord;
-                final yCoord = chartController.yPositionToYCanvasCoord(yValue);
-                final hasMultipleExtensionEvents =
-                    traceData is DataAggregate ? traceData.count > 1 : false;
+            drawTranslate(canvas, xTranslation, yTranslation, (canvas) {
+              final xCoord = xCanvasCoord;
+              final yCoord = chartController.yPositionToYCanvasCoord(yValue);
+              final hasMultipleExtensionEvents =
+                  traceData is DataAggregate ? traceData.count > 1 : false;
 
-                // Is the visible Y-axis max larger.
-                if (yValue > visibleYMax) {
-                  visibleYMax = yValue;
-                }
+              // Is the visible Y-axis max larger.
+              if (yValue > visibleYMax) {
+                visibleYMax = yValue;
+              }
 
-                currentTracesData[index] = PointAndBase(
+              currentTracesData[index] = PointAndBase(
+                xCoord,
+                yCoord,
+                yBase: chartController.yPositionToYCanvasCoord(stackedY),
+              );
+
+              if (trace.chartType == ChartType.symbol) {
+                assert(!trace.stacked);
+                drawSymbol(
+                  canvas,
+                  trace.characteristics,
                   xCoord,
                   yCoord,
-                  yBase: chartController.yPositionToYCanvasCoord(stackedY),
+                  hasMultipleExtensionEvents,
+                  trace.symbolPath,
                 );
+              } else if (trace.chartType == ChartType.line) {
+                if (trace.characteristics.symbol == ChartSymbol.dashedLine) {
+                  // TODO(terry): Collect all points and draw a dashed line using
+                  // path_drawing package.
+                  drawDashed(
+                    canvas,
+                    trace.characteristics,
+                    xCoord,
+                    yCoord,
+                    chartController.tickWidth - 4,
+                  );
+                } else if (previousTracesData[index] != null) {
+                  final previous = previousTracesData[index]!;
+                  final current = currentTracesData[index]!;
 
-                if (trace.chartType == ChartType.symbol) {
-                  assert(!trace.stacked);
+                  // Stacked lines.
+                  // Drawline from previous plotted point to new point.
+                  drawConnectedLine(
+                    canvas,
+                    trace.characteristics,
+                    xCoord,
+                    yCoord,
+                    previous.x,
+                    previous.y,
+                  );
                   drawSymbol(
                     canvas,
                     trace.characteristics,
@@ -280,83 +298,41 @@ class ChartPainter extends CustomPainter {
                     hasMultipleExtensionEvents,
                     trace.symbolPath,
                   );
-                } else if (trace.chartType == ChartType.line) {
-                  if (trace.characteristics.symbol == ChartSymbol.dashedLine) {
-                    // TODO(terry): Collect all points and draw a dashed line using
-                    // path_drawing package.
-                    drawDashed(
-                      canvas,
-                      trace.characteristics,
-                      xCoord,
-                      yCoord,
-                      chartController.tickWidth - 4,
-                    );
-                  } else if (previousTracesData[index] != null) {
-                    final previous = previousTracesData[index]!;
-                    final current = currentTracesData[index]!;
-
-                    // Stacked lines.
-                    // Drawline from previous plotted point to new point.
-                    drawConnectedLine(
-                      canvas,
-                      trace.characteristics,
-                      xCoord,
-                      yCoord,
-                      previous.x,
-                      previous.y,
-                    );
-                    drawSymbol(
-                      canvas,
-                      trace.characteristics,
-                      xCoord,
-                      yCoord,
-                      hasMultipleExtensionEvents,
-                      trace.symbolPath,
-                    );
-                    // TODO(terry): Honor z-order and also maybe path just on the traces e.g.,
-                    //              fill from top of trace 0 to top of trace 1 don't origin
-                    //              from zero.
-                    // Fill area between traces.
-                    drawFillArea(
-                      canvas,
-                      trace.characteristics,
-                      previous.x,
-                      previous.y,
-                      previous.base!,
-                      current.x,
-                      current.y,
-                      current.base!,
-                    );
-                  } else {
-                    // Draw point
-                    drawSymbol(
-                      canvas,
-                      trace.characteristics,
-                      xCoord,
-                      yCoord,
-                      hasMultipleExtensionEvents,
-                      trace.symbolPath,
-                    );
-                  }
+                  // TODO(terry): Honor z-order and also maybe path just on the traces e.g.,
+                  //              fill from top of trace 0 to top of trace 1 don't origin
+                  //              from zero.
+                  // Fill area between traces.
+                  drawFillArea(
+                    canvas,
+                    trace.characteristics,
+                    previous.x,
+                    previous.y,
+                    previous.base!,
+                    current.x,
+                    current.y,
+                    current.base!,
+                  );
+                } else {
+                  // Draw point
+                  drawSymbol(
+                    canvas,
+                    trace.characteristics,
+                    xCoord,
+                    yCoord,
+                    hasMultipleExtensionEvents,
+                    trace.symbolPath,
+                  );
                 }
-                tracesDataIndex[index]--;
-              },
-            );
+              }
+              tracesDataIndex[index]--;
+            });
 
             final tapLocation = chartController.tapLocation.value;
             if (tapLocation?.index == xTickIndex ||
                 tapLocation?.timestamp == currentTimestamp) {
-              drawTranslate(
-                canvas,
-                xTranslation,
-                yTranslation,
-                (canavas) {
-                  drawSelection(
-                    canvas,
-                    xCanvasCoord,
-                  );
-                },
-              );
+              drawTranslate(canvas, xTranslation, yTranslation, (canavas) {
+                drawSelection(canvas, xCanvasCoord);
+              });
             }
           }
 
@@ -378,36 +354,30 @@ class ChartPainter extends CustomPainter {
 
     if (chartController.displayXAxis || chartController.displayXLabels) {
       // Y translation is below X-axis line.
-      drawTranslate(
+      drawTranslate(canvas, xTranslation, chartController.zeroYPosition + 1, (
         canvas,
-        xTranslation,
-        chartController.zeroYPosition + 1,
-        (canvas) {
-          // Draw the X-axis labels.
-          for (final timestamp in chartController.labelTimestamps) {
-            final xCoord = chartController.timestampToXCanvasCoord(timestamp);
-            drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
-          }
-        },
-      );
+      ) {
+        // Draw the X-axis labels.
+        for (final timestamp in chartController.labelTimestamps) {
+          final xCoord = chartController.timestampToXCanvasCoord(timestamp);
+          drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
+        }
+      });
 
       // X translation is left-most edge of chart widget.
-      drawTranslate(
+      drawTranslate(canvas, chartController.xCanvasChart, yTranslation, (
         canvas,
-        chartController.xCanvasChart,
-        yTranslation,
-        (canvas) {
-          // Rescale Y-axis to max visible Y range.
-          chartController.resetYMaxValue(visibleYMax);
+      ) {
+        // Rescale Y-axis to max visible Y range.
+        chartController.resetYMaxValue(visibleYMax);
 
-          // Draw Y-axis ticks and labels.
-          // TODO(terry): Optimization add a listener for Y-axis range changing
-          //              only need to redraw Y-axis if the range changed.
-          if (chartController.displayYLabels) {
-            drawYTicks(canvas, chartController, axis);
-          }
-        },
-      );
+        // Draw Y-axis ticks and labels.
+        // TODO(terry): Optimization add a listener for Y-axis range changing
+        //              only need to redraw Y-axis if the range changed.
+        if (chartController.displayYLabels) {
+          drawYTicks(canvas, chartController, axis);
+        }
+      });
     }
 
     drawTitle(canvas, size, chartController.title);
@@ -457,11 +427,7 @@ class ChartPainter extends CustomPainter {
 
     // Left-side of chart
     if (displayY) {
-      canvas.drawLine(
-        const Offset(0, 0),
-        Offset(0, chartHeight),
-        axis,
-      );
+      canvas.drawLine(const Offset(0, 0), Offset(0, chartHeight), axis);
     }
 
     // Bottom line of chart.
@@ -475,9 +441,10 @@ class ChartPainter extends CustomPainter {
   }
 
   void drawSelection(Canvas canvas, double x) {
-    final paint = Paint()
-      ..strokeWidth = 2.0
-      ..color = colorScheme.hoverSelectionBarColor;
+    final paint =
+        Paint()
+          ..strokeWidth = 2.0
+          ..color = colorScheme.hoverSelectionBarColor;
 
     // Draw the vertical selection bar.
     canvas.drawLine(
@@ -506,11 +473,7 @@ class ChartPainter extends CustomPainter {
       drawText(labelName, canvas, -chartController.xCanvasChart / 2, yCoord);
 
       // Draw horizontal tick 6 pixels from Y-axis line.
-      canvas.drawLine(
-        Offset(0, yCoord),
-        Offset(-6, yCoord),
-        axis,
-      );
+      canvas.drawLine(Offset(0, yCoord), Offset(-6, yCoord), axis);
     }
   }
 
@@ -580,10 +543,7 @@ class ChartPainter extends CustomPainter {
       final tp = createText(prettyTimestamp(timestamp), 1);
       tp.paint(
         canvas,
-        Offset(
-          xTickCoord - tp.width ~/ 2,
-          15.0 - tp.height ~/ 2,
-        ),
+        Offset(xTickCoord - tp.width ~/ 2, 15.0 - tp.height ~/ 2),
       );
     }
   }
@@ -644,12 +604,14 @@ class ChartPainter extends CustomPainter {
         break;
     }
 
-    final paintFirst = Paint()
-      ..style = firstStyle
-      ..strokeWidth = characteristics.strokeWidth
-      ..color = aggregateEvents
-          ? characteristics.colorAggregate!
-          : characteristics.color;
+    final paintFirst =
+        Paint()
+          ..style = firstStyle
+          ..strokeWidth = characteristics.strokeWidth
+          ..color =
+              aggregateEvents
+                  ? characteristics.colorAggregate!
+                  : characteristics.color;
 
     switch (characteristics.symbol) {
       case ChartSymbol.dashedLine:
@@ -670,13 +632,15 @@ class ChartPainter extends CustomPainter {
         canvas.drawCircle(Offset(x, y), characteristics.diameter, paintFirst);
 
         // Inner disc.
-        final paintSecond = Paint()
-          ..style = secondStyle
-          ..strokeWidth = 0
-          // TODO(terry): Aggregate for concentric maybe needed someday.
-          ..color = aggregateEvents
-              ? characteristics.colorAggregate!
-              : characteristics.concentricCenterColor;
+        final paintSecond =
+            Paint()
+              ..style = secondStyle
+              ..strokeWidth = 0
+              // TODO(terry): Aggregate for concentric maybe needed someday.
+              ..color =
+                  aggregateEvents
+                      ? characteristics.colorAggregate!
+                      : characteristics.concentricCenterColor;
         canvas.drawCircle(
           Offset(x, y),
           characteristics.concentricCenterDiameter,
@@ -691,10 +655,7 @@ class ChartPainter extends CustomPainter {
       case ChartSymbol.triangleDown:
         // Draw symbol centered on [x,y] point (*).
         final path = symbolPathToDraw!.shift(
-          Offset(
-            x - characteristics.width / 2,
-            y - characteristics.height / 2,
-          ),
+          Offset(x - characteristics.width / 2, y - characteristics.height / 2),
         );
         canvas.drawPath(path, paintFirst);
         break;
@@ -710,13 +671,7 @@ class ChartPainter extends CustomPainter {
     double tickWidth,
   ) {
     assert(characteristics.symbol == ChartSymbol.dashedLine);
-    drawLine(
-      canvas,
-      characteristics,
-      x,
-      y,
-      tickWidth,
-    );
+    drawLine(canvas, characteristics, x, y, tickWidth);
   }
 
   void drawConnectedLine(
@@ -727,10 +682,11 @@ class ChartPainter extends CustomPainter {
     double endX,
     double endY,
   ) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = characteristics.strokeWidth
-      ..color = characteristics.color;
+    final paint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = characteristics.strokeWidth
+          ..color = characteristics.color;
 
     canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
   }
@@ -742,10 +698,11 @@ class ChartPainter extends CustomPainter {
     double y,
     double tickWidth,
   ) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = characteristics.strokeWidth
-      ..color = characteristics.color;
+    final paint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = characteristics.strokeWidth
+          ..color = characteristics.color;
 
     canvas.drawLine(Offset(x, y), Offset(x + tickWidth, y), paint);
   }
@@ -762,16 +719,18 @@ class ChartPainter extends CustomPainter {
     double y1,
     double y1Bottom,
   ) {
-    final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..strokeWidth = characteristics.strokeWidth
-      ..color = characteristics.color.withAlpha(140);
+    final paint =
+        Paint()
+          ..style = PaintingStyle.fill
+          ..strokeWidth = characteristics.strokeWidth
+          ..color = characteristics.color.withAlpha(140);
 
-    final fillArea = Path()
-      ..moveTo(x0, y0)
-      ..lineTo(x1, y1)
-      ..lineTo(x1, y1Bottom)
-      ..lineTo(x0, y0Bottom);
+    final fillArea =
+        Path()
+          ..moveTo(x0, y0)
+          ..lineTo(x1, y1)
+          ..lineTo(x1, y1Bottom)
+          ..lineTo(x0, y0Bottom);
     fillArea.close();
     canvas.drawPath(fillArea, paint);
 

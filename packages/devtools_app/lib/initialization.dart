@@ -1,18 +1,18 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'src/app.dart';
-import 'src/framework/app_error_handling.dart';
 import 'src/framework/framework_core.dart';
 import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/shared/config_specific/logger/logger_helpers.dart';
 import 'src/shared/feature_flags.dart';
+import 'src/shared/framework/app_error_handling.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/primitives/url_utils.dart';
 import 'src/shared/primitives/utils.dart';
@@ -22,13 +22,17 @@ import 'src/shared/primitives/utils.dart';
 /// Any initialization that needs to happen before running DevTools, regardless
 /// of context, should happen here.
 ///
-/// If the initialization is specific to running Devtools in google3 or
+/// If any initialization is specific to running Devtools in google3 or
 /// externally, then it should be added to that respective main.dart file.
+/// Alternatively, the [onDevToolsInitialized] callback can be used to perform
+/// additional logic that runs after DevTools initialization but before running
+/// the app.
 void runDevTools({
   bool integrationTestMode = false,
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
   List<DevToolsScreen>? screens,
+  Future<void> Function()? onDevToolsInitialized,
 }) {
   setupErrorHandling(() async {
     await initializeDevTools(
@@ -38,6 +42,8 @@ void runDevTools({
 
     // Load the Dart syntax highlighting grammar.
     await SyntaxHighlighter.initialize();
+
+    await onDevToolsInitialized?.call();
 
     // Run the app.
     runApp(

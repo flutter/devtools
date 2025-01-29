@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -11,7 +11,7 @@ import 'package:logging/logging.dart';
 
 import '../../../extensions/extension_service.dart';
 import '../../../extensions/extension_service_helpers.dart';
-import '../../../service/editor/api_classes.dart';
+import '../../../shared/editor/api_classes.dart';
 import '../../../shared/globals.dart';
 
 final _devToolsExtensionsLog = Logger('Flutter Sidebar - DevTools Extensions');
@@ -76,8 +76,9 @@ class SidebarDevToolsExtensionsController extends DisposableController
   /// [_deduplicateAndUpdate].
   ValueListenable<List<DevToolsExtensionConfig>> get uniqueExtensions =>
       _uniqueExtensions;
-  final _uniqueExtensions =
-      ValueNotifier<List<DevToolsExtensionConfig>>(<DevToolsExtensionConfig>[]);
+  final _uniqueExtensions = ValueNotifier<List<DevToolsExtensionConfig>>(
+    <DevToolsExtensionConfig>[],
+  );
 
   /// The set of extension hashcodes that have been ignored due to being a
   /// duplicate of some kind.
@@ -104,8 +105,9 @@ class SidebarDevToolsExtensionsController extends DisposableController
     await _initialized.future;
 
     // Cleanup state for debug sessions that are no longer available.
-    final removed =
-        _debugSessions.keys.toSet().difference(newDebugSessions.keys.toSet());
+    final removed = _debugSessions.keys.toSet().difference(
+      newDebugSessions.keys.toSet(),
+    );
     for (final sessionId in removed) {
       final session = _debugSessions[sessionId]!;
       final rootFileUri = session.projectRootFileUri;
@@ -123,8 +125,7 @@ class SidebarDevToolsExtensionsController extends DisposableController
         (await dtdManager.projectRoots(
               depth: staticExtensionsSearchDepth,
               forceRefresh: true,
-            ))
-                ?.uris ??
+            ))?.uris ??
             <Uri>[],
       );
     }
@@ -159,15 +160,16 @@ class SidebarDevToolsExtensionsController extends DisposableController
   // watch event from the IDE or analysis server to signal when any
   // package_config.json file in the workspace changes.
   Future<void> _detectExtensions(Uri? projectRootUri) async {
-    final extensionService = projectRootUri == null
-        ?
-        // A null [projectRootUri] indicates that this is an extensions lookup
-        // for the entire workspace, not a debug session with a fixed root URI.
-        ExtensionService(ignoreServiceConnection: true)
-        : ExtensionService(
-            fixedAppRoot: projectRootUri,
-            ignoreServiceConnection: true,
-          );
+    final extensionService =
+        projectRootUri == null
+            ?
+            // A null [projectRootUri] indicates that this is an extensions lookup
+            // for the entire workspace, not a debug session with a fixed root URI.
+            ExtensionService(ignoreServiceConnection: true)
+            : ExtensionService(
+              fixedAppRoot: projectRootUri,
+              ignoreServiceConnection: true,
+            );
     assert(
       !_extensionServiceByRootUri.containsKey(projectRootUri),
       'The initialization for the ExtensionService for root uri '
@@ -205,12 +207,13 @@ class SidebarDevToolsExtensionsController extends DisposableController
       extensionType: 'all',
     );
 
-    final deduped = allExtensions
-        .where(
-          (ext) =>
-              !_ignoredExtensionsByHashCode.contains(identityHashCode(ext)),
-        )
-        .toList();
+    final deduped =
+        allExtensions
+            .where(
+              (ext) =>
+                  !_ignoredExtensionsByHashCode.contains(identityHashCode(ext)),
+            )
+            .toList();
     _uniqueExtensions.value = deduped..sort();
   }
 

@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -21,14 +21,8 @@ final uiColorPalette = [
 ];
 
 final rasterColorPalette = [
-  const ColorPair(
-    background: mainRasterColor,
-    foreground: Colors.white,
-  ),
-  const ColorPair(
-    background: Color(0xFF386EB6),
-    foreground: Colors.white,
-  ),
+  const ColorPair(background: mainRasterColor, foreground: Colors.white),
+  const ColorPair(background: Color(0xFF386EB6), foreground: Colors.white),
 ];
 
 // TODO(jacobr): merge this with other color scheme extensions.
@@ -68,44 +62,23 @@ const tableDecreaseColor = Color(0xFFEE284F);
 const treemapDeferredColor = Color(0xFFBDBDBD);
 
 const appCodeColor = ThemedColorPair(
-  background: ThemedColor(
-    light: Color(0xFFFA7B17),
-    dark: Color(0xFFFCAD70),
-  ),
+  background: ThemedColor(light: Color(0xFFFA7B17), dark: Color(0xFFFCAD70)),
   foreground: ThemedColor.fromSingle(Color(0xFF202124)),
 );
 
 const nativeCodeColor = ThemedColorPair(
-  background: ThemedColor(
-    light: Color(0xFF007B83),
-    dark: Color(0xFF72B6C6),
-  ),
-  foreground: ThemedColor(
-    light: Color(0xFFF8F9FA),
-    dark: Color(0xFF202124),
-  ),
+  background: ThemedColor(light: Color(0xFF007B83), dark: Color(0xFF72B6C6)),
+  foreground: ThemedColor(light: Color(0xFFF8F9FA), dark: Color(0xFF202124)),
 );
 
 const flutterCoreColor = ThemedColorPair(
-  background: ThemedColor(
-    light: Color(0xFF6864D3),
-    dark: Color(0xFF928EF9),
-  ),
-  foreground: ThemedColor(
-    light: Color(0xFFF8F9FA),
-    dark: Color(0xFF202124),
-  ),
+  background: ThemedColor(light: Color(0xFF6864D3), dark: Color(0xFF928EF9)),
+  foreground: ThemedColor(light: Color(0xFFF8F9FA), dark: Color(0xFF202124)),
 );
 
 const dartCoreColor = ThemedColorPair(
-  background: ThemedColor(
-    light: Color(0xFF1D649C),
-    dark: Color(0xFF6887F7),
-  ),
-  foreground: ThemedColor(
-    light: Color(0xFFF8F9FA),
-    dark: Color(0xFF202124),
-  ),
+  background: ThemedColor(light: Color(0xFF1D649C), dark: Color(0xFF6887F7)),
+  foreground: ThemedColor(light: Color(0xFFF8F9FA), dark: Color(0xFF202124)),
 );
 
 extension SyntaxHighlightingExtension on ColorScheme {

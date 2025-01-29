@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:math';
 
@@ -133,7 +133,8 @@ class FlutterTimelineEventProcessor {
   TimelineEventType _inferTrackType(PerfettoTrackEvent event) {
     // Whether the UI and Raster events are expected to come on a single track.
     // This is expected when DevTools is connected to a flutter-tester device.
-    final singleTrackType = uiTrackId != null &&
+    final singleTrackType =
+        uiTrackId != null &&
         rasterTrackId != null &&
         uiTrackId == rasterTrackId;
 

@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:io' as io;
@@ -28,12 +28,11 @@ class RollbackCommand extends Command {
     print('DevTools repo at ${repo.repoPath}.');
 
     final tempDir =
-        (await io.Directory.systemTemp.createTemp('devtools-rollback'))
-            .absolute;
+        (await io.Directory.systemTemp.createTemp(
+          'devtools-rollback',
+        )).absolute;
     print('file://${tempDir.path}');
-    final tarball = io.File(
-      '${tempDir.path}/devtools.tar.gz',
-    );
+    final tarball = io.File('${tempDir.path}/devtools.tar.gz');
     final extractDir =
         await io.Directory('${tempDir.path}/extract/').absolute.create();
     final client = io.HttpClient();
@@ -49,23 +48,31 @@ class RollbackCommand extends Command {
     await tarballResponse.pipe(tarball.openWrite());
     print('Tarball written; unzipping.');
 
-    await io.Process.run(
-      'tar',
-      ['-x', '-z', '-f', tarball.path.split('/').last, '-C', extractDir.path],
-      workingDirectory: tempDir.path,
-    );
+    await io.Process.run('tar', [
+      '-x',
+      '-z',
+      '-f',
+      tarball.path.split('/').last,
+      '-C',
+      extractDir.path,
+    ], workingDirectory: tempDir.path);
     print('file://${tempDir.path}');
 
     final buildDir = io.Directory('${repo.repoPath}/packages/devtools/build/');
     await buildDir.delete(recursive: true);
-    await io.Directory('${extractDir.path}build/')
-        .rename('${repo.repoPath}/packages/devtools/build/');
+    await io.Directory(
+      '${extractDir.path}build/',
+    ).rename('${repo.repoPath}/packages/devtools/build/');
 
-    print('Build outputs from Devtools version $version checked out and moved '
-        'to ${buildDir.path}');
-    print('To complete the rollback, go to ${repo.repoPath}/packages/devtools, '
-        'rev pubspec.yaml, update the changelog, unhide build/ from the '
-        'packages/devtools/.gitignore file, then run pub publish.');
+    print(
+      'Build outputs from Devtools version $version checked out and moved '
+      'to ${buildDir.path}',
+    );
+    print(
+      'To complete the rollback, go to ${repo.repoPath}/packages/devtools, '
+      'rev pubspec.yaml, update the changelog, unhide build/ from the '
+      'packages/devtools/.gitignore file, then run pub publish.',
+    );
     // TODO(djshuckerow): automatically rev pubspec.yaml and update the
     // changelog so that the user can just run pub publish from
     // packages/devtools.

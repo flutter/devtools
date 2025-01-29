@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 part of 'sample_performance_data.dart';
 
@@ -21,42 +21,15 @@ final trackDescriptorEvents = [
     '1': '5933',
     '3': {'1': 5933},
   },
-  {
-    '1': '1023884196851599509',
-    '5': '5933',
-  },
-  {
-    '1': '6',
-    '5': '5933',
-  },
-  {
-    '1': '1',
-    '5': '5933',
-  },
-  {
-    '1': '1023884196851599508',
-    '5': '5933',
-  },
-  {
-    '1': '1023884196851599506',
-    '5': '5933',
-  },
-  {
-    '1': '2',
-    '5': '5933',
-  },
-  {
-    '1': '3',
-    '5': '5933',
-  },
-  {
-    '1': '4',
-    '5': '5933',
-  },
-  {
-    '1': '5',
-    '5': '5933',
-  },
+  {'1': '1023884196851599509', '5': '5933'},
+  {'1': '6', '5': '5933'},
+  {'1': '1', '5': '5933'},
+  {'1': '1023884196851599508', '5': '5933'},
+  {'1': '1023884196851599506', '5': '5933'},
+  {'1': '2', '5': '5933'},
+  {'1': '3', '5': '5933'},
+  {'1': '4', '5': '5933'},
+  {'1': '5', '5': '5933'},
   {
     '1': '42755',
     '4': {'1': 5933, '2': 42755, '5': 'FlutterConcurrentMessageLoopWorker'},

@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
@@ -24,88 +24,96 @@ void main() {
     expect(testApp.vmServiceUri, isNotNull);
   });
 
-  testWidgets(
-    'can process and refresh timeline data',
-    (tester) async {
-      await pumpAndConnectDevTools(tester, testApp);
+  testWidgets('can process and refresh timeline data', (tester) async {
+    await pumpAndConnectDevTools(tester, testApp);
 
-      logStatus(
-        'Open the Performance screen and switch to the Timeline Events tab',
-      );
+    logStatus(
+      'Open the Performance screen and switch to the Timeline Events tab',
+    );
 
-      await switchToScreen(
-        tester,
-        tabIcon: ScreenMetaData.performance.icon,
-        tabIconAsset: ScreenMetaData.performance.iconAsset,
-        screenId: ScreenMetaData.performance.id,
-      );
-      await tester.pump(safePumpDuration);
+    await switchToScreen(
+      tester,
+      tabIcon: ScreenMetaData.performance.icon,
+      tabIconAsset: ScreenMetaData.performance.iconAsset,
+      screenId: ScreenMetaData.performance.id,
+    );
+    await tester.pump(safePumpDuration);
 
-      await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-      await tester.pumpAndSettle(longPumpDuration);
+    await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
+    await tester.pumpAndSettle(longPumpDuration);
 
-      // Find the [PerformanceController] to access its data.
-      final performanceScreenFinder = find.byType(PerformanceScreenBody);
-      expect(performanceScreenFinder, findsOneWidget);
-      final screenState =
-          tester.state<PerformanceScreenBodyState>(performanceScreenFinder);
-      final performanceController = screenState.controller;
+    // Find the [PerformanceController] to access its data.
+    final performanceScreenFinder = find.byType(PerformanceScreenBody);
+    expect(performanceScreenFinder, findsOneWidget);
+    final screenState = tester.state<PerformanceScreenBodyState>(
+      performanceScreenFinder,
+    );
+    final performanceController = screenState.controller;
 
-      logStatus('Verifying that data is processed upon first load');
-      final initialTrace = Trace.fromBuffer(
-        performanceController.timelineEventsController.fullPerfettoTrace,
-      );
-      final initialTracePacket = List.of(initialTrace.packet, growable: false);
-      final initialTrackDescriptors =
-          initialTracePacket.where((e) => e.hasTrackDescriptor());
-      expect(initialTracePacket, isNotEmpty);
-      expect(initialTrackDescriptors, isNotEmpty);
+    logStatus('Verifying that data is processed upon first load');
+    final initialTrace = Trace.fromBuffer(
+      performanceController.timelineEventsController.fullPerfettoTrace,
+    );
+    final initialTracePacket = List.of(initialTrace.packet, growable: false);
+    final initialTrackDescriptors = initialTracePacket.where(
+      (e) => e.hasTrackDescriptor(),
+    );
+    expect(initialTracePacket, isNotEmpty);
+    expect(initialTrackDescriptors, isNotEmpty);
 
-      final trackEvents = initialTracePacket.where((e) => e.hasTrackEvent());
-      expect(trackEvents, isNotEmpty);
+    final trackEvents = initialTracePacket.where((e) => e.hasTrackEvent());
+    expect(trackEvents, isNotEmpty);
 
-      expect(
-        performanceController
-            .timelineEventsController.perfettoController.processor.uiTrackId,
-        isNotNull,
-        reason: 'Expected uiTrackId to be non-null',
-      );
-      expect(
-        performanceController.timelineEventsController.perfettoController
-            .processor.rasterTrackId,
-        isNotNull,
-        reason: 'Expected rasterTrackId to be non-null',
-      );
-      expect(
-        performanceController.timelineEventsController.perfettoController
-            .processor.frameRangeFromTimelineEvents,
-        isNotNull,
-        reason: 'Expected frameRangeFromTimelineEvents to be non-null',
-      );
+    expect(
+      performanceController
+          .timelineEventsController
+          .perfettoController
+          .processor
+          .uiTrackId,
+      isNotNull,
+      reason: 'Expected uiTrackId to be non-null',
+    );
+    expect(
+      performanceController
+          .timelineEventsController
+          .perfettoController
+          .processor
+          .rasterTrackId,
+      isNotNull,
+      reason: 'Expected rasterTrackId to be non-null',
+    );
+    expect(
+      performanceController
+          .timelineEventsController
+          .perfettoController
+          .processor
+          .frameRangeFromTimelineEvents,
+      isNotNull,
+      reason: 'Expected frameRangeFromTimelineEvents to be non-null',
+    );
 
-      logStatus(
-        'toggling the Performance Overlay to trigger new Flutter frames',
-      );
-      final performanceOverlayFinder = find.text('Performance Overlay');
-      expect(performanceOverlayFinder, findsOneWidget);
-      await tester.tap(performanceOverlayFinder);
-      await tester.pump(longPumpDuration);
+    logStatus('toggling the Performance Overlay to trigger new Flutter frames');
+    final performanceOverlayFinder = find.text('Performance Overlay');
+    expect(performanceOverlayFinder, findsOneWidget);
+    await tester.tap(performanceOverlayFinder);
+    await tester.pump(longPumpDuration);
 
-      logStatus('Refreshing the timeline to load new events');
-      await tester.tap(find.byType(RefreshTimelineEventsButton));
-      await tester.pump(longPumpDuration);
+    logStatus('Refreshing the timeline to load new events');
+    await tester.tap(find.byType(RefreshTimelineEventsButton));
+    await tester.pump(longPumpDuration);
 
-      logStatus('Verifying that we have recorded new events');
-      final refreshedTrace = Trace.fromBuffer(
-        performanceController.timelineEventsController.fullPerfettoTrace,
-      );
-      final refreshedTracePacket =
-          List.of(refreshedTrace.packet, growable: false);
-      expect(
-        refreshedTracePacket.length,
-        greaterThan(initialTracePacket.length),
-        reason: 'Expected new events to have been recorded, but none were.',
-      );
-    },
-  );
+    logStatus('Verifying that we have recorded new events');
+    final refreshedTrace = Trace.fromBuffer(
+      performanceController.timelineEventsController.fullPerfettoTrace,
+    );
+    final refreshedTracePacket = List.of(
+      refreshedTrace.packet,
+      growable: false,
+    );
+    expect(
+      refreshedTracePacket.length,
+      greaterThan(initialTracePacket.length),
+      reason: 'Expected new events to have been recorded, but none were.',
+    );
+  });
 }

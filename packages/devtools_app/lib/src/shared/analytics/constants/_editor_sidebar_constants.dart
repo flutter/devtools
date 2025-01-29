@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 part of '../constants.dart';
 
@@ -15,10 +15,6 @@ enum EditorSidebar {
 
   /// Analytics id to track events that come from the DTD editor sidebar.
   static String get id => 'editorSidebar';
-
-  /// Analytics id to track events that come from the legacy VS Code
-  /// (postMessage) Flutter sidebar.
-  static String get legacyId => 'vsCodeFlutterSidebar';
 
   /// Analytics event for when a request to enable a new platform type is sent
   /// to VS Code.

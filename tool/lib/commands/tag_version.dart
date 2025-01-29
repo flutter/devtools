@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:io';
 
@@ -26,8 +26,10 @@ class TagVersionCommand extends Command {
     final log = Logger.standard();
 
     final repo = DevToolsRepo.getInstance();
-    final devtoolsAppPubspecPath =
-        path.join(repo.devtoolsAppDirectoryPath, 'pubspec.yaml');
+    final devtoolsAppPubspecPath = path.join(
+      repo.devtoolsAppDirectoryPath,
+      'pubspec.yaml',
+    );
     final devtoolsAppPubspec = File(devtoolsAppPubspecPath);
     if (!devtoolsAppPubspec.existsSync()) {
       throw FileSystemException(

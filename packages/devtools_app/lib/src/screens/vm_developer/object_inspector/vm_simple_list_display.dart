@@ -1,14 +1,14 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
+import '../../../shared/ui/common_widgets.dart';
 import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
@@ -59,10 +59,17 @@ class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
         return;
       }
 
-      final isolateId = serviceConnection
-          .serviceManager.isolateManager.selectedIsolate.value!.id!;
+      final isolateId =
+          serviceConnection
+              .serviceManager
+              .isolateManager
+              .selectedIsolate
+              .value!
+              .id!;
       final service = serviceConnection.serviceManager.service!;
-      _initialized = service.getObject(isolateId, elementsInstance.id!).then(
+      _initialized = service
+          .getObject(isolateId, elementsInstance.id!)
+          .then(
             (e) => entries.addAll((e as Instance).elements!.cast<Response?>()),
           );
       return;
@@ -88,10 +95,7 @@ class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
           controller: widget.controller,
           object: widget.vmObject,
           generalDataRows: [
-            ...vmObjectGeneralDataRows(
-              widget.controller,
-              widget.vmObject,
-            ),
+            ...vmObjectGeneralDataRows(widget.controller, widget.vmObject),
           ],
           expandableWidgets: [
             ExpansionTileInstanceList(

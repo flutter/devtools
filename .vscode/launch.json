@@ -1,0 +1,167 @@
+{
+    // Adjusted copy of devtools_app/.vscode/launch.json,
+    // made for thouse who prefer to work in the folder `packages` to
+    // see mock errors in devtools_test.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "opened test or devtools",
+            "cwd": "packages/devtools_app",
+            "request": "launch",
+            "type": "dart",
+        },
+        {
+            "name": "devtools",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/lib/main.dart",
+        },
+        {
+            "name": "devtools + experiments",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/lib/main.dart",
+            "args": [
+                "--dart-define",
+                "memory_disconnect_experience=true",
+                "--dart-define",
+                "enable_experiments=true",
+            ],
+        },
+        {
+            "name": "devtools + profile",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/lib/main.dart",
+            "flutterMode": "profile",
+        },
+        {
+            "name": "devtools + release",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/lib/main.dart",
+            "flutterMode": "release",
+        },
+        {
+            "name": "devtools + profile + experiments",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/lib/main.dart",
+            "flutterMode": "profile",
+            "args": [
+                "--dart-define=enable_experiments=true"
+            ],
+        },
+        {
+            "name": "devtools + release",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/lib/main.dart",
+            "flutterMode": "release",
+        },
+        {
+            "name": "memory/default",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/test/test_infra/scenes/memory/default.stager_app.g.dart",
+        },
+        {
+            "name": "memory/diff_snapshot",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/test/test_infra/scenes/memory/diff_snapshot.stager_app.g.dart",
+        },
+        {
+            "name": "performance/default",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/test/test_infra/scenes/performance/default.stager_app.g.dart",
+        },
+        {
+            "name": "profiler/default",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/test/test_infra/scenes/cpu_profiler/default.stager_app.g.dart",
+        },
+        {
+            "name": "fixtures/flutter_app",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/test/test_infra/fixtures/flutter_app/lib/main.dart",
+        },
+        {
+            "name": "fixtures/memory_app",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/test/test_infra/fixtures/memory_app/lib/main.dart",
+        },
+        {
+            "name": "standalone_ui/editor_sidebar",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/test/test_infra/scenes/standalone_ui/editor_sidebar.stager_app.g.dart",
+            "preLaunchTask": "Start DTD on Port 8500",
+        },
+        {
+            "name": "standalone_ui/editor_sidebar + experiments",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/test/test_infra/scenes/standalone_ui/editor_sidebar.stager_app.g.dart",
+            "preLaunchTask": "Start DTD on Port 8500",
+            "args": [
+                "--dart-define=enable_experiments=true"
+            ],
+        },
+        {
+            "name": "standalone_ui/property_editor_sidebar",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/test/test_infra/scenes/standalone_ui/property_editor_sidebar.stager_app.g.dart",
+            "preLaunchTask": "Start DTD on Port 8500",
+        },
+        {
+            "name": "devtools_extensions: foo + sim",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_extensions/example/packages_with_extensions/foo/packages/foo_devtools_extension/lib/main.dart",
+            "args": [
+                "--dart-define=use_simulated_environment=true"
+            ],
+        },
+        {
+            "name": "devtools_extensions: dart_foo + sim",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_extensions/example/packages_with_extensions/dart_foo/packages/dart_foo_devtools_extension/lib/main.dart",
+            "args": [
+                "--dart-define=use_simulated_environment=true"
+            ],
+        },
+        {
+            "name": "devtools_extensions: app_that_uses_foo",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_extensions/example/app_that_uses_foo/lib/main.dart",
+        },
+        {
+            "name": "devtools_extensions: app_that_uses_foo - bin",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_extensions/example/app_that_uses_foo/bin/script.dart",
+        },
+        {
+            "name": "attach",
+            "type": "dart",
+            "request": "attach",
+        },
+        {
+            "name": "foo_devtools_extension example + simulated environment",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_extensions/example/foo/packages/foo_devtools_extension/lib/main.dart",
+            "args": [
+                "--dart-define=use_simulated_environment=true"
+            ],
+        },
+    ],
+}

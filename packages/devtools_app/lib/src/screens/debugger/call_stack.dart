@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,9 +9,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/common_widgets.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/utils.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/utils/utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
@@ -59,10 +59,7 @@ class _CallStackState extends State<CallStack>
     );
   }
 
-  Widget _buildStackFrame(
-    StackFrameAndSourcePosition frame,
-    bool selected,
-  ) {
+  Widget _buildStackFrame(StackFrameAndSourcePosition frame, bool selected) {
     final theme = Theme.of(context);
 
     Widget child;
@@ -79,10 +76,7 @@ class _CallStackState extends State<CallStack>
           const SizedBox(width: defaultSpacing, child: Divider()),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: densePadding),
-            child: Text(
-              frameDescription,
-              style: theme.regularTextStyle,
-            ),
+            child: Text(frameDescription, style: theme.regularTextStyle),
           ),
           const Expanded(child: Divider()),
         ],
@@ -98,9 +92,10 @@ class _CallStackState extends State<CallStack>
             if (locationDescription != null)
               TextSpan(
                 text: ' $locationDescription',
-                style: selected
-                    ? theme.selectedSubtleTextStyle
-                    : theme.subtleTextStyle,
+                style:
+                    selected
+                        ? theme.selectedSubtleTextStyle
+                        : theme.subtleTextStyle,
               ),
           ],
         ),
@@ -124,12 +119,13 @@ class _CallStackState extends State<CallStack>
     return isAsyncBreak
         ? result
         : DevToolsTooltip(
-            message: locationDescription == null
-                ? frameDescription
-                : '$frameDescription $locationDescription',
-            waitDuration: tooltipWaitLong,
-            child: result,
-          );
+          message:
+              locationDescription == null
+                  ? frameDescription
+                  : '$frameDescription $locationDescription',
+          waitDuration: tooltipWaitLong,
+          child: result,
+        );
   }
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {

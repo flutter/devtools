@@ -1,13 +1,13 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/src/shared/diagnostics/dart_object_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/generic_instance_reference.dart';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../debugger/typed_data_variable_test.dart';
+import '../../screens/debugger/typed_data_variable_test.dart';
 
 void resetRef() {
   _refNumber = 0;
@@ -214,37 +214,33 @@ DartObjectNode buildBooleanVariable(bool value) {
 }
 
 InstanceRef _buildInstanceRefForMap({required int length}) => InstanceRef(
-      id: _incrementRef(),
-      kind: InstanceKind.kMap,
-      classRef: ClassRef(
-        name: '_InternalLinkedHashmap',
-        id: _incrementRef(),
-        library: _libraryRef,
-      ),
-      length: length,
-    );
+  id: _incrementRef(),
+  kind: InstanceKind.kMap,
+  classRef: ClassRef(
+    name: '_InternalLinkedHashmap',
+    id: _incrementRef(),
+    library: _libraryRef,
+  ),
+  length: length,
+);
 
 InstanceRef _buildInstanceRefForList({required int length}) => InstanceRef(
-      id: _incrementRef(),
-      kind: InstanceKind.kList,
-      classRef: ClassRef(
-        name: '_GrowableList',
-        id: _incrementRef(),
-        library: _libraryRef,
-      ),
-      length: length,
-    );
+  id: _incrementRef(),
+  kind: InstanceKind.kList,
+  classRef: ClassRef(
+    name: '_GrowableList',
+    id: _incrementRef(),
+    library: _libraryRef,
+  ),
+  length: length,
+);
 
 InstanceRef _buildInstanceRefForSet({required int length}) => InstanceRef(
-      id: _incrementRef(),
-      kind: InstanceKind.kSet,
-      classRef: ClassRef(
-        name: '_Set',
-        id: _incrementRef(),
-        library: _libraryRef,
-      ),
-      length: length,
-    );
+  id: _incrementRef(),
+  kind: InstanceKind.kSet,
+  classRef: ClassRef(name: '_Set', id: _incrementRef(), library: _libraryRef),
+  length: length,
+);
 
 final _libraryRef = LibraryRef(
   name: 'some library',

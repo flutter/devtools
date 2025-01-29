@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
@@ -12,17 +12,15 @@ import 'cpu_profile_columns.dart';
 
 /// A table of the CPU's top-down call tree.
 class CpuCallTreeTable extends StatelessWidget {
-  const CpuCallTreeTable({
-    required this.dataRoots,
-    super.key,
-  });
+  const CpuCallTreeTable({required this.dataRoots, super.key});
 
   static final methodColumn = MethodAndSourceColumn();
 
   static final selfTimeColumn = SelfTimeColumn(titleTooltip: selfTimeTooltip);
 
-  static final totalTimeColumn =
-      TotalTimeColumn(titleTooltip: totalTimeTooltip);
+  static final totalTimeColumn = TotalTimeColumn(
+    titleTooltip: totalTimeTooltip,
+  );
 
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
     totalTimeColumn,

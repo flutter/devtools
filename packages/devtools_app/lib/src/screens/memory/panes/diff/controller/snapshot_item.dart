@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -23,13 +23,7 @@ class SnapshotDocItem extends SnapshotItem {
 }
 
 @visibleForTesting
-enum Json {
-  defaultName,
-  displayNumber,
-  graph,
-  created,
-  nameOverride;
-}
+enum Json { defaultName, displayNumber, graph, created, nameOverride }
 
 class SnapshotDataItem extends SnapshotItem
     with Serializable
@@ -47,14 +41,17 @@ class SnapshotDataItem extends SnapshotItem
       nameOverride: json[Json.nameOverride.name] as String?,
     );
 
-    final graph = HeapSnapshotGraphEncodeDecode.instance
-        .decodeNullable(json[Json.graph.name]);
+    final graph = HeapSnapshotGraphEncodeDecode.instance.decodeNullable(
+      json[Json.graph.name],
+    );
     if (graph == null) return result;
 
     final loader = HeapGraphLoaderDirect(
       graph: graph,
-      created: DateTimeEncodeDecode.instance
-              .decodeNullable(json[Json.created.name]) ??
+      created:
+          DateTimeEncodeDecode.instance.decodeNullable(
+            json[Json.created.name],
+          ) ??
           DateTime.now(),
     );
 

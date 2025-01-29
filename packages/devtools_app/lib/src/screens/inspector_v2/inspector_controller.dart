@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// This library must not have direct dependencies on dart:html.
 ///
@@ -32,8 +32,9 @@ import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/notifications.dart';
+import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/query_parameters.dart';
 import '../inspector_shared/inspector_screen.dart';
 import 'inspector_data_models.dart';
 import 'inspector_tree_controller.dart';
@@ -42,26 +43,24 @@ final _log = Logger('inspector_controller');
 
 /// Data pattern containing the properties and render properties for a widget
 /// tree node.
-typedef WidgetTreeNodeProperties = ({
-  /// Properties defined directly on the widget.
-  List<RemoteDiagnosticsNode> widgetProperties,
+typedef WidgetTreeNodeProperties =
+    ({
+      /// Properties defined directly on the widget.
+      List<RemoteDiagnosticsNode> widgetProperties,
 
-  /// Properties defined on the widget's render object.
-  List<RemoteDiagnosticsNode> renderProperties,
+      /// Properties defined on the widget's render object.
+      List<RemoteDiagnosticsNode> renderProperties,
 
-  /// Layout properties for the widget.
-  LayoutProperties? layoutProperties,
-});
+      /// Layout properties for the widget.
+      LayoutProperties? layoutProperties,
+    });
 
 /// This class is based on the InspectorPanel class from the Flutter IntelliJ
 /// plugin with some refactors to make it more of a true controller than a view.
 class InspectorController extends DisposableController
     with AutoDisposeControllerMixin
     implements InspectorServiceClient {
-  InspectorController({
-    required this.inspectorTree,
-    required this.treeType,
-  }) {
+  InspectorController({required this.inspectorTree, required this.treeType}) {
     unawaited(_init());
   }
 
@@ -113,10 +112,10 @@ class InspectorController extends DisposableController
       if (_supportsToggleSelectWidgetMode.value) {
         serviceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
-          extensions.enableOnDeviceInspector.extension,
-          enabled: true,
-          value: true,
-        );
+              extensions.enableOnDeviceInspector.extension,
+              enabled: true,
+              value: true,
+            );
       }
     });
 
@@ -133,6 +132,17 @@ class InspectorController extends DisposableController
     }
 
     serviceConnection.consoleService.ensureServiceInitialized();
+
+    final vmService = serviceConnection.serviceManager.service;
+    if (vmService != null) {
+      autoDisposeStreamSubscription(
+        vmService.onIsolateEvent.listen(_maybeAutoRefreshInspector),
+      );
+
+      autoDisposeStreamSubscription(
+        vmService.onExtensionEvent.listen(_maybeAutoRefreshInspector),
+      );
+    }
   }
 
   void _handleConnectionStart() {
@@ -155,9 +165,10 @@ class InspectorController extends DisposableController
 
   IsolateRef? _mainIsolate;
 
-  ValueListenable<bool> get _supportsToggleSelectWidgetMode =>
-      serviceConnection.serviceManager.serviceExtensionManager
-          .hasServiceExtension(extensions.toggleSelectWidgetMode.extension);
+  ValueListenable<bool> get _supportsToggleSelectWidgetMode => serviceConnection
+      .serviceManager
+      .serviceExtensionManager
+      .hasServiceExtension(extensions.toggleSelectWidgetMode.extension);
 
   Future<void> _onClientChange(bool added) async {
     if (!added && _clientCount == 0) {
@@ -228,14 +239,16 @@ class InspectorController extends DisposableController
 
   ValueListenable<WidgetTreeNodeProperties> get selectedNodeProperties =>
       _selectedNodeProperties;
-  final _selectedNodeProperties = ValueNotifier<WidgetTreeNodeProperties>(
-    (widgetProperties: [], renderProperties: [], layoutProperties: null),
-  );
+  final _selectedNodeProperties = ValueNotifier<WidgetTreeNodeProperties>((
+    widgetProperties: [],
+    renderProperties: [],
+    layoutProperties: null,
+  ));
 
   /// Whether the implementation widgets are hidden in the widget tree.
   ValueListenable<bool> get implementationWidgetsHidden =>
       _implementationWidgetsHidden;
-  final _implementationWidgetsHidden = ValueNotifier<bool>(false);
+  final _implementationWidgetsHidden = ValueNotifier<bool>(true);
 
   InspectorTreeNode? lastExpanded;
 
@@ -423,9 +436,7 @@ class InspectorController extends DisposableController
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
       final inspectorRef = DevToolsQueryParams.load().inspectorRef;
-      await updateSelectionFromService(
-        inspectorRef: inspectorRef,
-      );
+      await updateSelectionFromService(inspectorRef: inspectorRef);
     } else {
       if (_disposed) return;
       if (inspectorService is InspectorService) {
@@ -439,11 +450,41 @@ class InspectorController extends DisposableController
     }
   }
 
+  bool _receivedIsolateReloadEvent = false;
+  bool _receivedFlutterNavigationEvent = false;
+
+  Future<void> _maybeAutoRefreshInspector(Event event) async {
+    if (!preferences.inspector.autoRefreshEnabled.value) return;
+
+    // It is not sufficent to wait for the navigation and isolate reload events
+    // only, because Flutter might not have re-painted the app. Instead, we need
+    // to wait for the first frame AFTER the isolate reload or navigation event
+    // in order to request the new tree.
+    if (event.kind == EventKind.kExtension) {
+      final extensionEventKind = event.extensionKind;
+      if (extensionEventKind == 'Flutter.Navigation') {
+        _receivedFlutterNavigationEvent = true;
+      }
+      if ((_receivedFlutterNavigationEvent || _receivedIsolateReloadEvent) &&
+          extensionEventKind == 'Flutter.Frame') {
+        _refreshingAfterNavigationEvent = _receivedFlutterNavigationEvent;
+        _receivedFlutterNavigationEvent = false;
+        _receivedIsolateReloadEvent = false;
+        await refreshInspector();
+      }
+    }
+
+    if (event.kind == EventKind.kIsolateReload) {
+      _receivedIsolateReloadEvent = true;
+    }
+  }
+
   Future<void> _recomputeTreeRoot(
     RemoteDiagnosticsNode? newSelection, {
-    bool hideImplementationWidgets = false,
+    bool? hideImplementationWidgets,
   }) async {
     assert(!_disposed);
+    hideImplementationWidgets ??= _implementationWidgetsHidden.value;
     final treeGroups = _treeGroups;
     if (_disposed || treeGroups == null) {
       return;
@@ -455,6 +496,7 @@ class InspectorController extends DisposableController
       final node = await group.getRoot(
         treeType,
         isSummaryTree: hideImplementationWidgets,
+        includeFullDetails: false,
       );
       if (node == null || group.disposed || _disposed) {
         return;
@@ -471,14 +513,102 @@ class InspectorController extends DisposableController
         expandChildren: true,
       );
       inspectorTree.root = rootNode;
-
-      refreshSelection(newSelection);
+      final selectedNode = _determineNewSelection(
+        newSelection ?? selectedDiagnostic,
+      );
+      refreshSelection(selectedNode);
       _implementationWidgetsHidden.value = hideImplementationWidgets;
     } catch (error, st) {
       _log.shout(error, error, st);
       treeGroups.cancelNext();
       return;
     }
+  }
+
+  var _refreshingAfterNavigationEvent = false;
+
+  RemoteDiagnosticsNode? _determineNewSelection(
+    RemoteDiagnosticsNode? previousSelection,
+  ) {
+    if (previousSelection == null) return null;
+    if (valueToInspectorTreeNode.containsKey(previousSelection.valueRef)) {
+      return previousSelection;
+    }
+
+    // TODO(https://github.com/flutter/devtools/issues/8481): Consider using a
+    // variation of a path-finding algorithm to determine the new selection,
+    // instead of looking for the first matching descendant.
+    final (
+      closestUnchangedAncestor,
+      distanceToAncestor,
+    ) = _findClosestUnchangedAncestor(previousSelection);
+    if (closestUnchangedAncestor == null) return inspectorTree.root?.diagnostic;
+
+    // TODO(elliette): This might cause a race event that will set this to false
+    // for a subsequent navigate event. Consider passing the value of
+    // _refreshingAfterNavigationEvent through the method chain from where the
+    // navigation event is detected. This would require updating the interface
+    // of InspectorServiceClient.onForceRefresh, or refactoring to avoid doing
+    // so.
+    if (_refreshingAfterNavigationEvent) {
+      _refreshingAfterNavigationEvent = false;
+      return closestUnchangedAncestor;
+    }
+
+    const distanceOffset = 3;
+    final matchingDescendant = _findMatchingDescendant(
+      of: closestUnchangedAncestor,
+      matching: previousSelection,
+      inRange: Range(
+        distanceToAncestor - distanceOffset,
+        distanceToAncestor + distanceOffset,
+      ),
+    );
+
+    return matchingDescendant ?? closestUnchangedAncestor;
+  }
+
+  (RemoteDiagnosticsNode?, int) _findClosestUnchangedAncestor(
+    RemoteDiagnosticsNode node, [
+    int distanceToAncestor = 1,
+  ]) {
+    final inspectorTreeNode = valueToInspectorTreeNode[node.valueRef];
+    if (inspectorTreeNode != null) {
+      return (inspectorTreeNode.diagnostic, distanceToAncestor);
+    }
+
+    final ancestor = node.parent;
+    if (ancestor == null) return (null, distanceToAncestor);
+    return _findClosestUnchangedAncestor(ancestor, distanceToAncestor++);
+  }
+
+  RemoteDiagnosticsNode? _findMatchingDescendant({
+    required RemoteDiagnosticsNode of,
+    required RemoteDiagnosticsNode matching,
+    required Range inRange,
+    int currentDistance = 1,
+  }) {
+    if (currentDistance > inRange.end) return null;
+
+    if (inRange.contains(currentDistance)) {
+      if (of.description == matching.description) {
+        return of;
+      }
+    }
+
+    final children = of.childrenNow;
+    final distance = currentDistance++;
+    for (final child in children) {
+      final matchingDescendant = _findMatchingDescendant(
+        of: child,
+        matching: matching,
+        inRange: inRange,
+        currentDistance: distance,
+      );
+      if (matchingDescendant != null) return matchingDescendant;
+    }
+
+    return null;
   }
 
   Future<void> toggleImplementationWidgetsVisibility() async {
@@ -491,6 +621,9 @@ class InspectorController extends DisposableController
       );
       // Persist the selected node after refreshing the widget tree:
       refreshSelection(currentSelectedNode?.diagnostic);
+
+      // If the user is searching the tree, refresh the search matches.
+      inspectorTree.refreshSearchMatches();
     }
   }
 
@@ -532,7 +665,7 @@ class InspectorController extends DisposableController
     final matchingNode = findMatchingInspectorTreeNode(newSelection);
     if (matchingNode != null) {
       setSelectedNode(matchingNode);
-      syncSelectionHelper(selection: newSelection);
+      syncSelectionHelper(selection: matchingNode.diagnostic);
 
       syncTreeSelection();
     }
@@ -596,9 +729,7 @@ class InspectorController extends DisposableController
     unawaited(updateSelectionFromService());
   }
 
-  Future<void> updateSelectionFromService({
-    String? inspectorRef,
-  }) async {
+  Future<void> updateSelectionFromService({String? inspectorRef}) async {
     final selectionGroups = _selectionGroups;
     if (selectionGroups == null) {
       // Already disposed. Ignore this requested to update selection.
@@ -620,28 +751,13 @@ class InspectorController extends DisposableController
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
       treeType,
+      // If implementation widgets are hidden, the only widgets in the tree are
+      // those that were created by the local project.
+      restrictToLocalProject: implementationWidgetsHidden.value,
     );
 
     try {
       final newSelection = await pendingSelectionFuture;
-
-      // Show an error and don't update the selected node in the tree if the
-      // user selected an implementation widget in the app while implementation
-      // widgets are hidden in the tree.
-      if (implementationWidgetsHidden.value && newSelection != null) {
-        final isInTree =
-            valueToInspectorTreeNode.containsKey(newSelection.valueRef);
-        final hasParent = newSelection.parent != null;
-        final isImplementationWidget = !isInTree && !hasParent;
-        if (isImplementationWidget) {
-          notificationService.pushError(
-            'Selected an implementation widget. Please toggle "Show Implementation Widgets" and select a widget from the device again.',
-            allowDuplicates: true,
-            isReportable: false,
-          );
-          return;
-        }
-      }
 
       if (_disposed || group.disposed) return;
 
@@ -650,6 +766,11 @@ class InspectorController extends DisposableController
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection);
+
+      await _maybeShowNotificationForSelectedNode(
+        selectedNode: newSelection,
+        group: group,
+      );
 
       // Send an event that a widget was selected on the device.
       ga.select(
@@ -711,6 +832,60 @@ class InspectorController extends DisposableController
     }
 
     animateTo(selectedNode.value);
+  }
+
+  static const _implementationWidgetMessage =
+      'Selected an implementation widget';
+
+  static const _notificationDuration = Duration(seconds: 4);
+
+  Future<void> _maybeShowNotificationForSelectedNode({
+    required RemoteDiagnosticsNode? selectedNode,
+    required ObjectGroup group,
+  }) async {
+    if (selectedNode == null ||
+        !implementationWidgetsHidden.value ||
+        _selectionIsOutOfDate(selectedNode)) {
+      return;
+    }
+
+    final possibleImplementationWidget = await group.getSelection(
+      selectedDiagnostic,
+      treeType,
+    );
+
+    // Return early if we have a new selected node.
+    if (_selectionIsOutOfDate(selectedNode)) return;
+
+    final isImplementationWidget =
+        possibleImplementationWidget != null &&
+        !possibleImplementationWidget.isCreatedByLocalProject;
+    if (isImplementationWidget) {
+      final selectedWidgetName = selectedNode.description ?? '';
+      final implementationWidgetName =
+          possibleImplementationWidget.description ?? '';
+
+      // Return early if we have a new selected node.
+      if (_selectionIsOutOfDate(selectedNode)) return;
+
+      // Show a notification that the user selected an implementation widget,
+      // e.g. "Selected an implementation widget of Text: RichText."
+      final messageDetails =
+          selectedWidgetName.isEmpty
+              ? ''
+              : ' of $selectedWidgetName${implementationWidgetName.isEmpty ? '' : ': $implementationWidgetName'}';
+      notificationService.pushNotification(
+        NotificationMessage(
+          '$_implementationWidgetMessage$messageDetails.',
+          duration: _notificationDuration,
+        ),
+        allowDuplicates: false,
+      );
+    }
+  }
+
+  bool _selectionIsOutOfDate(RemoteDiagnosticsNode selected) {
+    return selected.valueRef != selectedNode.value?.diagnostic?.valueRef;
   }
 
   Future<void> _loadPropertiesForNode(InspectorTreeNode? node) async {
@@ -787,15 +962,17 @@ class InspectorController extends DisposableController
   void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
     final inspectorRef = node?.diagnostic?.valueRef.id;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors =
+        serviceConnection.errorBadgeManager
+            .erroredItemsForPage(InspectorScreen.id)
+            .value;
 
     // Check whether the node that was just selected has any errors associated
     // with it.
-    var errorIndex = inspectorRef != null
-        ? errors.keys.toList().indexOf(inspectorRef)
-        : null;
+    var errorIndex =
+        inspectorRef != null
+            ? errors.keys.toList().indexOf(inspectorRef)
+            : null;
     if (errorIndex == -1) {
       errorIndex = null;
     }
@@ -805,8 +982,10 @@ class InspectorController extends DisposableController
     if (errorIndex != null) {
       // Mark the error as "seen" as this will render slightly differently
       // so the user can track which errored nodes they've viewed.
-      serviceConnection.errorBadgeManager
-          .markErrorAsRead(InspectorScreen.id, errors[inspectorRef!]!);
+      serviceConnection.errorBadgeManager.markErrorAsRead(
+        InspectorScreen.id,
+        errors[inspectorRef!]!,
+      );
       // Also clear the error badge since new errors may have arrived while
       // the inspector was visible (normally they're cleared when visiting
       // the screen) and visiting an errored node seems an appropriate
@@ -819,14 +998,13 @@ class InspectorController extends DisposableController
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors =
+        serviceConnection.errorBadgeManager
+            .erroredItemsForPage(InspectorScreen.id)
+            .value;
 
     unawaited(
-      updateSelectionFromService(
-        inspectorRef: errors.keys.elementAt(index),
-      ),
+      updateSelectionFromService(inspectorRef: errors.keys.elementAt(index)),
     );
   }
 
@@ -851,7 +1029,13 @@ class InspectorController extends DisposableController
     }
   }
 
-  void selectionChanged() {
+  /// Handles updating the widget tree when the selecected widget changes.
+  ///
+  /// [notifyFlutterInspector] determines whether a request should be sent to
+  /// the Widget Inspector in the Flutter framework to update the on-device
+  /// selection. This should only be true if the the selection was changed due
+  /// to a user action in DevTools (e.g. clicking on a widget in the tree).
+  void selectionChanged({bool notifyFlutterInspector = false}) {
     if (!visibleToUser) {
       return;
     }
@@ -867,18 +1051,30 @@ class InspectorController extends DisposableController
       setSelectedNode(node);
       unawaited(_addNodeToConsole(node));
 
-      syncSelectionHelper(selection: selectedDiagnostic);
+      syncSelectionHelper(
+        selection: selectedDiagnostic,
+        notifyFlutterInspector: notifyFlutterInspector,
+      );
     }
   }
 
-  void syncSelectionHelper({required RemoteDiagnosticsNode? selection}) {
+  /// Syncs the selection state after a new widgets was selected.
+  ///
+  /// [notifyFlutterInspector] determines whether a request should be sent to
+  /// the Widget Inspector in the Flutter framework to update the on-device
+  /// selection. This should only be true if the the selection was changed due
+  /// to a user action in DevTools (e.g. clicking on a widget in the tree).
+  void syncSelectionHelper({
+    required RemoteDiagnosticsNode? selection,
+    bool notifyFlutterInspector = false,
+  }) {
     if (selection != null) {
       if (selection.isCreatedByLocalProject) {
         _navigateTo(selection);
       }
     }
 
-    if (selection != null) {
+    if (notifyFlutterInspector && selection != null) {
       unawaited(selection.setSelectionInspector(true));
     }
   }

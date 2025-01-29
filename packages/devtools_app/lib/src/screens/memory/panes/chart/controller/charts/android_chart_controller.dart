@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -30,10 +30,7 @@ class AndroidChartController extends ChartController {
     this.memoryTimeline, {
     required this.paused,
     List<int> sharedLabels = const <int>[],
-  }) : super(
-          name: 'Android',
-          sharedLabelTimestamps: sharedLabels,
-        ) {
+  }) : super(name: 'Android', sharedLabelTimestamps: sharedLabels) {
     setupData();
 
     addAutoDisposeListener(memoryTimeline.sampleAdded, () {
@@ -276,19 +273,13 @@ class AndroidChartController extends ChartController {
     final graphicValue = adb.graphics.toDouble();
     addDataToTrace(
       AndroidTraceName.graphics.index,
-      chart_trace.Data(
-        timestamp,
-        graphicValue,
-      ),
+      chart_trace.Data(timestamp, graphicValue),
     );
 
     final nativeHeapValue = adb.nativeHeap.toDouble();
     addDataToTrace(
       AndroidTraceName.nativeHeap.index,
-      chart_trace.Data(
-        timestamp,
-        nativeHeapValue,
-      ),
+      chart_trace.Data(timestamp, nativeHeapValue),
     );
 
     final javaHeapValue = adb.javaHeap.toDouble();

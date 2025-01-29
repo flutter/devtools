@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// Inspector specific tree rendering support.
 ///
@@ -10,7 +10,6 @@
 library;
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../diagnostics/diagnostics_node.dart';
 import '../../ui/search.dart';
@@ -40,9 +39,9 @@ class InspectorTreeNode {
     InspectorTreeNode? parent,
     bool expandChildren = true,
     this.whenDirty,
-  })  : _children = <InspectorTreeNode>[],
-        _parent = parent,
-        _isExpanded = expandChildren;
+  }) : _children = <InspectorTreeNode>[],
+       _parent = parent,
+       _isExpanded = expandChildren;
 
   /// Callback that is called when the node is marked as dirty.
   void Function(InspectorTreeNode node)? whenDirty;
@@ -184,10 +183,11 @@ class InspectorTreeRow with SearchableDataMixin {
 }
 
 /// Callback issued every time a node is added to the tree.
-typedef NodeAddedCallback = void Function(
-  InspectorTreeNode node,
-  RemoteDiagnosticsNode diagnosticsNode,
-);
+typedef NodeAddedCallback =
+    void Function(
+      InspectorTreeNode node,
+      RemoteDiagnosticsNode diagnosticsNode,
+    );
 
 class InspectorTreeConfig {
   InspectorTreeConfig({
@@ -198,7 +198,7 @@ class InspectorTreeConfig {
   });
 
   final NodeAddedCallback? onNodeAdded;
-  final VoidCallback? onSelectionChange;
+  final void Function({bool notifyFlutterInspector})? onSelectionChange;
   final void Function(bool added)? onClientActiveChange;
   final TreeEventCallback? onExpand;
 }

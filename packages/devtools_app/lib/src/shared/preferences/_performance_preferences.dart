@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 part of 'preferences.dart';
 
@@ -20,39 +20,33 @@ class PerformancePreferencesController extends DisposableController
       '${gac.performance}.${gac.PerformanceEvents.includeCpuSamplesInTimeline.name}';
 
   Future<void> init() async {
-    addAutoDisposeListener(
-      showFlutterFramesChart,
-      () {
-        storage.setValue(
-          _showFlutterFramesChartId,
-          showFlutterFramesChart.value.toString(),
-        );
-        ga.select(
-          gac.performance,
-          gac.PerformanceEvents.framesChartVisibility.name,
-          value: showFlutterFramesChart.value ? 1 : 0,
-        );
-      },
-    );
+    addAutoDisposeListener(showFlutterFramesChart, () {
+      storage.setValue(
+        _showFlutterFramesChartId,
+        showFlutterFramesChart.value.toString(),
+      );
+      ga.select(
+        gac.performance,
+        gac.PerformanceEvents.framesChartVisibility.name,
+        value: showFlutterFramesChart.value ? 1 : 0,
+      );
+    });
     showFlutterFramesChart.value = await boolValueFromStorage(
       _showFlutterFramesChartId,
       defaultsTo: true,
     );
 
-    addAutoDisposeListener(
-      includeCpuSamplesInTimeline,
-      () {
-        storage.setValue(
-          _includeCpuSamplesInTimelineId,
-          includeCpuSamplesInTimeline.value.toString(),
-        );
-        ga.select(
-          gac.performance,
-          gac.PerformanceEvents.includeCpuSamplesInTimeline.name,
-          value: includeCpuSamplesInTimeline.value ? 1 : 0,
-        );
-      },
-    );
+    addAutoDisposeListener(includeCpuSamplesInTimeline, () {
+      storage.setValue(
+        _includeCpuSamplesInTimelineId,
+        includeCpuSamplesInTimeline.value.toString(),
+      );
+      ga.select(
+        gac.performance,
+        gac.PerformanceEvents.includeCpuSamplesInTimeline.name,
+        value: includeCpuSamplesInTimeline.value ? 1 : 0,
+      );
+    });
     includeCpuSamplesInTimeline.value = await boolValueFromStorage(
       _includeCpuSamplesInTimelineId,
       defaultsTo: false,

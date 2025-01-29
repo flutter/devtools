@@ -1,6 +1,6 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -10,17 +10,17 @@ import 'package:flutter/widgets.dart';
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service_manager.dart';
-import '../shared/banner_messages.dart';
-import '../shared/notifications.dart';
 import 'console/eval/eval_service.dart';
 import 'environment_parameters/environment_parameters_base.dart';
-import 'framework_controller.dart';
-import 'offline_data.dart';
+import 'framework/framework_controller.dart';
+import 'managers/banner_messages.dart';
+import 'managers/notifications.dart';
+import 'managers/script_manager.dart';
+import 'managers/survey.dart';
+import 'offline/offline_data.dart';
 import 'preferences/preferences.dart';
 import 'primitives/message_bus.dart';
 import 'primitives/storage.dart';
-import 'scripts/script_manager.dart';
-import 'survey.dart';
 
 /// Whether this DevTools build is external.
 bool get isExternalBuild => _isExternalBuild;

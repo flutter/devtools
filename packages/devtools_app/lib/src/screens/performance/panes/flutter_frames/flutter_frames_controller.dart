@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -75,9 +75,10 @@ class FlutterFramesController extends PerformanceFeatureController {
         // Default to true for profile builds only.
         _badgeTabForJankyFrames.value = await connectedApp.isProfileBuild;
 
-        final refreshRate = connectedApp.isFlutterAppNow!
-            ? await serviceConnection.queryDisplayRefreshRate
-            : defaultRefreshRate;
+        final refreshRate =
+            connectedApp.isFlutterAppNow!
+                ? await serviceConnection.queryDisplayRefreshRate
+                : defaultRefreshRate;
 
         _displayRefreshRate.value = refreshRate ?? defaultRefreshRate;
       }
@@ -143,8 +144,9 @@ class FlutterFramesController extends PerformanceFeatureController {
   void _maybeBadgeTabForJankyFrame(FlutterFrame frame) {
     if (_badgeTabForJankyFrames.value) {
       if (frame.isJanky(_displayRefreshRate.value)) {
-        serviceConnection.errorBadgeManager
-            .incrementBadgeCount(PerformanceScreen.id);
+        serviceConnection.errorBadgeManager.incrementBadgeCount(
+          PerformanceScreen.id,
+        );
       }
     }
   }

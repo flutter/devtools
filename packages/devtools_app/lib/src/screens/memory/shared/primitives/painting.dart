@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
@@ -10,18 +10,9 @@ const _dashWidth = 5.0;
 const _spaceBetweenDash = 3.0;
 
 Widget createDashWidget(Color color) {
-  final dash = Container(
-    width: _dashWidth,
-    height: _dashHeight,
-    color: color,
-  );
-  const space = SizedBox(
-    width: _spaceBetweenDash,
-    height: _dashHeight,
-  );
-  return Row(
-    children: [dash, space, dash, space, dash],
-  );
+  final dash = Container(width: _dashWidth, height: _dashHeight, color: color);
+  const space = SizedBox(width: _spaceBetweenDash, height: _dashHeight);
+  return Row(children: [dash, space, dash, space, dash]);
 }
 
 Widget createSolidLine(Color color) {
@@ -59,9 +50,10 @@ class DashedLine extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     double startX = 0;
-    final paint = Paint()
-      ..color = _color
-      ..strokeWidth = _dashHeight;
+    final paint =
+        Paint()
+          ..color = _color
+          ..strokeWidth = _dashHeight;
 
     while (_totalWidth >= 0) {
       canvas.drawLine(Offset(startX, 0), Offset(startX + _dashWidth, 0), paint);

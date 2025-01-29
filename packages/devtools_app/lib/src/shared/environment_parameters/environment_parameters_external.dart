@@ -1,15 +1,15 @@
-// Copyright 2021 The Chromium Authors. All rights reserved.
+// Copyright 2021 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
 import '../../screens/debugger/codeview.dart';
 import '../analytics/constants.dart' as gac;
-import '../common_widgets.dart';
 import '../diagnostics/inspector_service.dart';
 import '../globals.dart';
-import '../utils.dart';
+import '../ui/common_widgets.dart';
+import '../utils/utils.dart';
 import 'environment_parameters_base.dart';
 
 class ExternalDevToolsEnvironmentParameters
@@ -22,11 +22,12 @@ class ExternalDevToolsEnvironmentParameters
   GaLink issueTrackerLink({String? additionalInfo, String? issueTitle}) {
     return GaLink(
       display: _newDevToolsIssueUriDisplay,
-      url: newDevToolsGitHubIssueUriLengthSafe(
-        additionalInfo: additionalInfo,
-        issueTitle: issueTitle,
-        environment: issueLinkDetails(),
-      ).toString(),
+      url:
+          newDevToolsGitHubIssueUriLengthSafe(
+            additionalInfo: additionalInfo,
+            issueTitle: issueTitle,
+            environment: issueLinkDetails(),
+          ).toString(),
       gaScreenName: gac.devToolsMain,
       gaSelectedItemDescription: gac.feedbackLink,
     );
@@ -115,8 +116,10 @@ Uri newDevToolsGitHubIssueUriLengthSafe({
   }
 
   // Truncate the additional info if the URL is too long:
-  final truncatedInfo =
-      additionalInfo.substring(0, additionalInfo.length - lengthToCut);
+  final truncatedInfo = additionalInfo.substring(
+    0,
+    additionalInfo.length - lengthToCut,
+  );
 
   final truncatedUri = _newDevToolsGitHubIssueUri(
     additionalInfo: truncatedInfo,
@@ -137,10 +140,7 @@ Uri _newDevToolsGitHubIssueUri({
     ...environment,
   ].join('\n');
 
-  return Uri.parse('https://$_newDevToolsIssueUriDisplay').replace(
-    queryParameters: {
-      'title': issueTitle,
-      'body': issueBody,
-    },
-  );
+  return Uri.parse(
+    'https://$_newDevToolsIssueUriDisplay',
+  ).replace(queryParameters: {'title': issueTitle, 'body': issueBody});
 }

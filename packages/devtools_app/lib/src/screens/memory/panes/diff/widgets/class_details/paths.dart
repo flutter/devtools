@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/widgets.dart';
@@ -17,12 +17,13 @@ import '../../controller/class_data.dart';
 
 class _RetainingPathColumn extends ColumnData<PathData> {
   _RetainingPathColumn(String className)
-      : super.wide(
-          'Shortest Retaining Path for Instances of $className',
-          titleTooltip: 'The shortest sequence of objects\n'
-              'retaining $className instances from garbage collection.',
-          alignment: ColumnAlignment.left,
-        );
+    : super.wide(
+        'Shortest Retaining Path for Instances of $className',
+        titleTooltip:
+            'The shortest sequence of objects\n'
+            'retaining $className instances from garbage collection.',
+        alignment: ColumnAlignment.left,
+      );
 
   @override
   String? getValue(PathData record) =>
@@ -34,13 +35,14 @@ class _RetainingPathColumn extends ColumnData<PathData> {
 
 class _InstanceColumn extends ColumnData<PathData> {
   _InstanceColumn(bool isDiff)
-      : super(
-          isDiff ? 'Instance\nDelta' : 'Instances',
-          titleTooltip: 'Number of instances of the class\n'
-              'retained by the path.',
-          fixedWidthPx: scaleByFontFactor(80.0),
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        isDiff ? 'Instance\nDelta' : 'Instances',
+        titleTooltip:
+            'Number of instances of the class\n'
+            'retained by the path.',
+        fixedWidthPx: scaleByFontFactor(80.0),
+        alignment: ColumnAlignment.right,
+      );
 
   @override
   int getValue(PathData record) => record.objects.instanceCount;
@@ -51,12 +53,12 @@ class _InstanceColumn extends ColumnData<PathData> {
 
 class _ShallowSizeColumn extends ColumnData<PathData> {
   _ShallowSizeColumn(bool isDiff)
-      : super(
-          isDiff ? 'Shallow\nSize Delta' : 'Shallow\nDart Size',
-          titleTooltip: SizeType.shallow.description,
-          fixedWidthPx: scaleByFontFactor(80.0),
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        isDiff ? 'Shallow\nSize Delta' : 'Shallow\nDart Size',
+        titleTooltip: SizeType.shallow.description,
+        fixedWidthPx: scaleByFontFactor(80.0),
+        alignment: ColumnAlignment.right,
+      );
 
   @override
   int getValue(PathData record) => record.objects.shallowSize;
@@ -65,20 +67,18 @@ class _ShallowSizeColumn extends ColumnData<PathData> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(PathData record) => prettyPrintBytes(
-        getValue(record),
-        includeUnit: true,
-      )!;
+  String getDisplayValue(PathData record) =>
+      prettyPrintBytes(getValue(record), includeUnit: true)!;
 }
 
 class _RetainedSizeColumn extends ColumnData<PathData> {
   _RetainedSizeColumn(bool isDiff)
-      : super(
-          isDiff ? 'Retained\nSize Delta' : 'Retained\nDart Size',
-          titleTooltip: SizeType.retained.description,
-          fixedWidthPx: scaleByFontFactor(80.0),
-          alignment: ColumnAlignment.right,
-        );
+    : super(
+        isDiff ? 'Retained\nSize Delta' : 'Retained\nDart Size',
+        titleTooltip: SizeType.retained.description,
+        fixedWidthPx: scaleByFontFactor(80.0),
+        alignment: ColumnAlignment.right,
+      );
 
   @override
   int getValue(PathData record) => record.objects.retainedSize;
@@ -87,10 +87,8 @@ class _RetainedSizeColumn extends ColumnData<PathData> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(PathData record) => prettyPrintBytes(
-        getValue(record),
-        includeUnit: true,
-      )!;
+  String getDisplayValue(PathData record) =>
+      prettyPrintBytes(getValue(record), includeUnit: true)!;
 }
 
 class _RetainingPathTableColumns {
@@ -133,11 +131,10 @@ class RetainingPathTable extends StatelessWidget {
     String dataKey,
     bool isDiff,
     String className,
-  ) =>
-      _columnStore.putIfAbsent(
-        dataKey,
-        () => _RetainingPathTableColumns(isDiff, className),
-      );
+  ) => _columnStore.putIfAbsent(
+    dataKey,
+    () => _RetainingPathTableColumns(isDiff, className),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -150,10 +147,11 @@ class RetainingPathTable extends StatelessWidget {
       data: _data,
       keyFactory: (e) => ValueKey(e.path),
       selectionNotifier: selection,
-      onItemSelected: (_) => ga.select(
-        gac.memory,
-        '${gac.MemoryEvents.diffPathSelect.name}-${isDiff ? "diff" : "single"}',
-      ),
+      onItemSelected:
+          (_) => ga.select(
+            gac.memory,
+            '${gac.MemoryEvents.diffPathSelect.name}-${isDiff ? "diff" : "single"}',
+          ),
       defaultSortColumn: columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
       tallHeaders: true,

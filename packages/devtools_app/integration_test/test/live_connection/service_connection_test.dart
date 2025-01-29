@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -47,7 +47,8 @@ void main() {
       // that are unintentionally added at start up.
       const Range(35, 70).contains(vmServiceCallCount),
       isTrue,
-      reason: 'Unexpected number of vm service calls upon connection: '
+      reason:
+          'Unexpected number of vm service calls upon connection: '
           '$vmServiceCallCount. If this is expected, please update this test '
           'to the new expected number of calls. Here are the calls for this '
           'test run:\n ${serviceConnection.serviceManager.service!.vmServiceCalls.toString()}',
@@ -71,7 +72,8 @@ void main() {
         'getDartDevelopmentServiceVersion',
         'getVM',
       ]),
-      reason: 'Unexpected order of vm service calls upon connection. '
+      reason:
+          'Unexpected order of vm service calls upon connection. '
           'Here are the calls for this test run:\n '
           '${serviceConnection.serviceManager.service!.vmServiceCalls.toString()}',
     );

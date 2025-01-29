@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,17 +21,17 @@ class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame?> {
     required ValueListenable<CpuStackFrame?> activeSearchMatchNotifier,
     required void Function(CpuStackFrame? stackFrame) onDataSelected,
   }) : super(
-          data,
-          time: data.profileMetaData.time!,
-          containerWidth: width,
-          containerHeight: height,
-          startInset: sideInsetSmall,
-          endInset: sideInsetSmall,
-          selectionNotifier: selectionNotifier,
-          searchMatchesNotifier: searchMatchesNotifier,
-          activeSearchMatchNotifier: activeSearchMatchNotifier,
-          onDataSelected: onDataSelected,
-        );
+         data,
+         time: data.profileMetaData.time!,
+         containerWidth: width,
+         containerHeight: height,
+         startInset: sideInsetSmall,
+         endInset: sideInsetSmall,
+         selectionNotifier: selectionNotifier,
+         searchMatchesNotifier: searchMatchesNotifier,
+         activeSearchMatchNotifier: activeSearchMatchNotifier,
+         onDataSelected: onDataSelected,
+       );
 
   @override
   State<CpuProfileFlameChart> createState() => _CpuProfileFlameChartState();
@@ -53,7 +53,8 @@ class _CpuProfileFlameChartState
     );
 
     void createChartNodes(CpuStackFrame stackFrame, int row) {
-      final width = widget.startingContentWidth * stackFrame.totalTimeRatio -
+      final width =
+          widget.startingContentWidth * stackFrame.totalTimeRatio -
           stackFramePadding;
       final left = startingLeftForStackFrame(stackFrame);
       final colorPair = _colorPairForStackFrame(stackFrame);
@@ -144,7 +145,8 @@ class _CpuProfileFlameChartState
         // [stackFrame] is not the first child of its parent. [left] should
         // equal the right value of its previous sibling.
         final previous = parent.children[stackFrameIndex - 1];
-        left = stackFrameLefts[previous.id]! +
+        left =
+            stackFrameLefts[previous.id]! +
             (widget.startingContentWidth * previous.totalTimeRatio);
       }
     }

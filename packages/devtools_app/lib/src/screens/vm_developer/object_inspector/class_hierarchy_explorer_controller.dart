@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -37,10 +37,7 @@ class ClassHierarchyExplorerController {
   @visibleForTesting
   void buildHierarchy(List<Class> classes) {
     final nodes = <String?, ClassHierarchyNode>{
-      for (final cls in classes)
-        cls.id: ClassHierarchyNode(
-          cls: cls,
-        ),
+      for (final cls in classes) cls.id: ClassHierarchyNode(cls: cls),
     };
 
     late final ClassHierarchyNode objectNode;

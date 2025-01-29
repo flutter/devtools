@@ -1,6 +1,6 @@
-// Copyright 2021 The Chromium Authors. All rights reserved.
+// Copyright 2021 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:collection';
 import 'dart:convert';
@@ -18,10 +18,8 @@ final _log = Logger('syntax_highlighter');
 class SyntaxHighlighter {
   SyntaxHighlighter({String? source}) : source = source ?? '';
 
-  SyntaxHighlighter.withGrammar({
-    Grammar? grammar,
-    String? source,
-  }) : source = source ?? '' {
+  SyntaxHighlighter.withGrammar({Grammar? grammar, String? source})
+    : source = source ?? '' {
     _grammar = grammar;
   }
 
@@ -113,10 +111,7 @@ class SyntaxHighlighter {
 
   /// Enters a new scope for a span of text. Returns a [List<TextSpan>]
   /// containing the stylized text from within the scope.
-  List<TextSpan> _scope(
-    ScopeSpan currentScope,
-    List<ScopeSpan> scopes,
-  ) {
+  List<TextSpan> _scope(ScopeSpan currentScope, List<ScopeSpan> scopes) {
     return _highlightLoopHelper(
       currentScope: currentScope,
       loopCondition: () => currentScope.contains(_currentPosition),
@@ -143,27 +138,14 @@ class SyntaxHighlighter {
           _currentPosition,
         );
         if (text.isNotEmpty) {
-          sourceSpans.add(
-            TextSpan(
-              style: _getStyleForSpan(),
-              text: text,
-            ),
-          );
+          sourceSpans.add(TextSpan(style: _getStyleForSpan(), text: text));
         }
-        sourceSpans.addAll(
-          _scope(
-            scopes.removeAt(0),
-            scopes,
-          ),
-        );
+        sourceSpans.addAll(_scope(scopes.removeAt(0), scopes));
         // Reset the beginning of the current span to the first position after
         // the close of the span that was just processed.
         currentScopeBegin = _currentPosition;
       } else if (_atNewline()) {
-        currentScopeBegin = _processNewlines(
-          sourceSpans,
-          currentScopeBegin!,
-        );
+        currentScopeBegin = _processNewlines(sourceSpans, currentScopeBegin!);
       } else {
         ++_currentPosition;
       }
@@ -175,12 +157,7 @@ class SyntaxHighlighter {
       _currentPosition,
     );
     if (text.isNotEmpty) {
-      sourceSpans.add(
-        TextSpan(
-          style: _getStyleForSpan(),
-          text: text,
-        ),
-      );
+      sourceSpans.add(TextSpan(style: _getStyleForSpan(), text: text));
     }
     if (currentScope != null) {
       _spanStack.removeLast();
@@ -201,10 +178,7 @@ class SyntaxHighlighter {
       sourceSpans.add(
         TextSpan(
           style: _getStyleForSpan(),
-          text: _processedSource.substring(
-            currentScopeBegin,
-            _currentPosition,
-          ),
+          text: _processedSource.substring(currentScopeBegin, _currentPosition),
         ),
       );
     }
@@ -220,9 +194,7 @@ class SyntaxHighlighter {
   }
 
   Map<String, TextStyle> _buildSyntaxColorTable(ThemeData theme) {
-    final commentStyle = TextStyle(
-      color: theme.colorScheme.commentSyntaxColor,
-    );
+    final commentStyle = TextStyle(color: theme.colorScheme.commentSyntaxColor);
     final functionStyle = TextStyle(
       color: theme.colorScheme.functionSyntaxColor,
     );
@@ -238,9 +210,7 @@ class SyntaxHighlighter {
     final variableStyle = TextStyle(
       color: theme.colorScheme.variableSyntaxColor,
     );
-    final stringStyle = TextStyle(
-      color: theme.colorScheme.stringSyntaxColor,
-    );
+    final stringStyle = TextStyle(color: theme.colorScheme.stringSyntaxColor);
     final numericConstantStyle = TextStyle(
       color: theme.colorScheme.numericConstantSyntaxColor,
     );
@@ -268,13 +238,9 @@ class SyntaxHighlighter {
       'variable.language.dart',
     ];
 
-    const numericConstantScopes = <String>[
-      'constant.numeric.dart',
-    ];
+    const numericConstantScopes = <String>['constant.numeric.dart'];
 
-    const functionScopes = <String>[
-      'entity.name.function.dart',
-    ];
+    const functionScopes = <String>['entity.name.function.dart'];
 
     const controlFlowScopes = <String>[
       'keyword.control.catch-exception.dart',
@@ -308,9 +274,7 @@ class SyntaxHighlighter {
       List<String> scopes,
       TextStyle style,
     ) {
-      return {
-        for (final scope in scopes) scope: style,
-      };
+      return {for (final scope in scopes) scope: style};
     }
 
     return <String, TextStyle>{
