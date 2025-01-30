@@ -9,8 +9,6 @@
 // (the test verifies that breakpoints are hit at specific lines).
 
 import 'package:flutter/material.dart';
-// Unused imports are useful for testing autocomplete.
-// ignore_for_file: unused_import
 import 'src/autocomplete.dart';
 import 'src/other_classes.dart';
 

@@ -214,7 +214,6 @@ void mockFlutterVersion(ConnectedApp connectedApp, SemanticVersion version) {
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
-// ignore: prefer_single_quotes, false positive.
 final mockGrammar = Grammar.fromJson(
   jsonDecode('''
 {
