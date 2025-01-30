@@ -243,6 +243,9 @@ void main() {
   group('editing arguments', () {
     late Completer<String> nextEditCompleter;
 
+    // A fake argument that the server can't support.
+    const fakeBogusArgument = 'fakeBogusArgument';
+
     setUp(() {
       controller.initForTestsOnly(
         document: textDocument1,
@@ -262,10 +265,17 @@ void main() {
         final calledWithArgs = realInvocation.namedArguments;
         final name = calledWithArgs[const Symbol('name')];
         final value = calledWithArgs[const Symbol('value')];
+        final success = value != fakeBogusArgument;
         nextEditCompleter.complete(
-          '$name: $value (TYPE: ${value?.runtimeType ?? 'null'})',
+          '$name: $value (TYPE: ${value?.runtimeType ?? 'null'}, SUCCESS: $success)',
         );
-        return Future.value();
+
+        return Future.value(
+          EditArgumentResponse(
+            success: success,
+            errorCode: success ? null : -32019,
+          ),
+        );
       });
     });
 
@@ -282,7 +292,10 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('title: Brand New Title! (TYPE: String)'));
+        expect(
+          nextEdit,
+          equals('title: Brand New Title! (TYPE: String, SUCCESS: true)'),
+        );
       });
     });
 
@@ -298,7 +311,7 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('title: null (TYPE: null)'));
+        expect(nextEdit, equals('title: null (TYPE: null, SUCCESS: true)'));
       });
     });
 
@@ -320,8 +333,38 @@ void main() {
           nextEdit,
           equals(
             'title: '
-            ' (TYPE: String)',
+            ' (TYPE: String, SUCCESS: true)',
           ),
+        );
+      });
+    });
+
+    testWidgets('editing a string input to an invalid parameter (title)', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: fakeBogusArgument, tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals(
+            'title: fakeBogusArgument'
+            ' (TYPE: String, SUCCESS: false)',
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('Invalid value for parameter. (Property: title)'),
+          findsOneWidget,
         );
       });
     });
@@ -338,7 +381,7 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('height: 55.81 (TYPE: double)'));
+        expect(nextEdit, equals('height: 55.81 (TYPE: double, SUCCESS: true)'));
       });
     });
 
@@ -354,7 +397,7 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('height: null (TYPE: null)'));
+        expect(nextEdit, equals('height: null (TYPE: null, SUCCESS: true)'));
       });
     });
 
@@ -375,7 +418,10 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('align: Alignment.topLeft (TYPE: String)'));
+        expect(
+          nextEdit,
+          equals('align: Alignment.topLeft (TYPE: String, SUCCESS: true)'),
+        );
       });
     });
 
@@ -396,7 +442,7 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('align: null (TYPE: null)'));
+        expect(nextEdit, equals('align: null (TYPE: null, SUCCESS: true)'));
       });
     });
 
@@ -417,7 +463,7 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('softWrap: false (TYPE: bool)'));
+        expect(nextEdit, equals('softWrap: false (TYPE: bool, SUCCESS: true)'));
       });
     });
   });

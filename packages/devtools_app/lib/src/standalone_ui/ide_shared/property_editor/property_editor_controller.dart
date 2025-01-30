@@ -49,11 +49,14 @@ class PropertyEditorController extends DisposableController
     );
   }
 
-  Future<void> editArgument<T>({required String name, required T value}) async {
+  Future<EditArgumentResponse?> editArgument<T>({
+    required String name,
+    required T value,
+  }) async {
     final document = _currentDocument;
     final position = _currentCursorPosition;
-    if (document == null || position == null) return;
-    await editorClient.editArgument(
+    if (document == null || position == null) return null;
+    return editorClient.editArgument(
       textDocument: document,
       position: position,
       name: name,
