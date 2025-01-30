@@ -27,7 +27,6 @@ final class ListValueNotifier<T> extends ChangeNotifier
 
   @override
   // This override is needed to change visibility of the method.
-  // ignore: unnecessary_overrides
   void notifyListeners() {
     super.notifyListeners();
   }
