@@ -1336,6 +1336,22 @@ void main() {
       ),
       equals('http://127.0.0.1:61962'),
     );
+    // This is how a DevTools url will be structured when DevTools is ran
+    // locally using `dt run`.
+    expect(
+      devtoolsAssetsBasePath(origin: 'http://127.0.0.1:9100/', path: '/home'),
+      equals('http://127.0.0.1:9100'),
+    );
+    // This is how a DevTools url will be structured when it has query
+    // parameters (e.g. when it is connected to an app).
+    expect(
+      devtoolsAssetsBasePath(
+        origin:
+            'http://127.0.0.1:9100/home?uri=ws://127.0.0.1:50416/Hnr3zwp99d0=/ws',
+        path: '/home',
+      ),
+      equals('http://127.0.0.1:9100'),
+    );
   });
 }
 
