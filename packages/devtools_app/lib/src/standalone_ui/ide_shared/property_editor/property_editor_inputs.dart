@@ -208,22 +208,25 @@ mixin _PropertyInputMixin<T> {
   }
 
   Widget inputLabel(EditableProperty property, {required ThemeData theme}) {
+    final fixedFontStyle = theme.fixedFontStyle.copyWith(
+      fontSize: defaultFontSize + 1,
+    );
     return RichText(
       overflow: TextOverflow.ellipsis,
       text: TextSpan(
         text: '${property.displayType} ',
-        style: theme.fixedFontStyle,
+        style: fixedFontStyle,
         children: [
           TextSpan(
             text: property.name,
-            style: theme.fixedFontStyle.copyWith(
+            style: fixedFontStyle.copyWith(
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.primary,
             ),
             children: [
               TextSpan(
                 text: property.isRequired ? '*' : '',
-                style: theme.fixedFontStyle,
+                style: fixedFontStyle,
               ),
             ],
           ),
