@@ -60,5 +60,12 @@
             "type": "dart",
             "request": "attach",
         },
+        {
+            "name": "standalone_ui/property_editor_sidebar",
+            "request": "launch",
+            "type": "dart",
+            "program": "test/test_infra/scenes/standalone_ui/property_editor_sidebar.stager_app.g.dart",
+        },
+        
     ]
 }
