@@ -216,7 +216,7 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
 
     final value = property.convertFromInputString(valueAsString) as U?;
     final response = await controller.editArgument(name: argName, value: value);
-    _maybeHandleServerError(response);
+    _maybeHandleServerError(response, property: property);
   }
 
   InputDecoration decoration(
@@ -270,11 +270,14 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
     });
   }
 
-  void _maybeHandleServerError(EditArgumentResponse? errorResponse) {
+  void _maybeHandleServerError(
+    EditArgumentResponse? errorResponse, {
+    required EditableProperty property,
+  }) {
     if (errorResponse == null || errorResponse.success) return;
     setState(() {
       _serverError =
-          errorResponse.errorType?.message ?? 'Encountered unknown error.';
+          '${errorResponse.errorType?.message ?? 'Encountered unknown error.'} (Property: ${property.name})';
     });
   }
 }
