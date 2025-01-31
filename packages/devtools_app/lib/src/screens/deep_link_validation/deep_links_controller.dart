@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math';
@@ -531,6 +531,14 @@ class DeepLinksController extends DisposableController
     Map<String, List<Path>> iosDomainPaths = {};
     try {
       if (currentAppLinkSettings != null) {
+        ga.impression(
+          gac.deeplink,
+          gac.AnalyzeFlutterProject.androidValidateDomain.name,
+          screenMetricsProvider:
+              () => DeepLinkScreenMetrics(
+                androidAppId: currentAppLinkSettings!.applicationId,
+              ),
+        );
         final androidResult = await deepLinksService.validateAndroidDomain(
           domains: domains,
           applicationId: applicationId,
@@ -542,6 +550,14 @@ class DeepLinksController extends DisposableController
       }
       if (FeatureFlags.deepLinkIosCheck &&
           currentUniversalLinkSettings != null) {
+        ga.impression(
+          gac.deeplink,
+          gac.AnalyzeFlutterProject.iosValidateDomain.name,
+          screenMetricsProvider:
+              () => DeepLinkScreenMetrics(
+                iosBundleId: currentUniversalLinkSettings!.bundleIdentifier,
+              ),
+        );
         final iosResult = await deepLinksService.validateIosDomain(
           bundleId: bundleId,
           teamId: teamId,

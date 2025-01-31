@@ -1,6 +1,6 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
@@ -687,7 +687,7 @@ void main() {
       });
     });
 
-    group('SafeAccess', () {
+    group('SafeListOperations', () {
       test('safeFirst', () {
         final list = <int?>[];
         final iterable = list;
@@ -726,6 +726,12 @@ void main() {
         expect(list.safeRemoveLast(), 2);
         expect(list.safeRemoveLast(), 1);
         expect(list.safeRemoveLast(), isNull);
+      });
+
+      test('safeSublist', () {
+        expect([1, 2, 3].safeSublist(-1, 2), [1, 2]);
+        expect([1, 2, 3].safeSublist(0, 6), [1, 2, 3]);
+        expect([1, 2, 3].safeSublist(2, 1), []);
       });
     });
   });
@@ -1329,6 +1335,22 @@ void main() {
         path: '/performance',
       ),
       equals('http://127.0.0.1:61962'),
+    );
+    // This is how a DevTools url will be structured when DevTools is ran
+    // locally using `dt run`.
+    expect(
+      devtoolsAssetsBasePath(origin: 'http://127.0.0.1:9100/', path: '/home'),
+      equals('http://127.0.0.1:9100'),
+    );
+    // This is how a DevTools url will be structured when it has query
+    // parameters (e.g. when it is connected to an app).
+    expect(
+      devtoolsAssetsBasePath(
+        origin:
+            'http://127.0.0.1:9100/home?uri=ws://127.0.0.1:50416/Hnr3zwp99d0=/ws',
+        path: '/home',
+      ),
+      equals('http://127.0.0.1:9100'),
     );
   });
 }

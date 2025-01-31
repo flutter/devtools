@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,10 +9,10 @@ import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../../../extensions/extension_screen.dart';
-import '../../../service/editor/api_classes.dart';
-import '../../../service/editor/editor_client.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/editor/api_classes.dart';
+import '../../../shared/editor/editor_client.dart';
 import 'shared.dart';
 import 'sidebar_extensions_controller.dart';
 

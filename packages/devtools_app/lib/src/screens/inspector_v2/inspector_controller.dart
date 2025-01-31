@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// This library must not have direct dependencies on dart:html.
 ///
@@ -25,6 +25,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/console/eval/inspector_tree_v2.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
@@ -392,7 +393,11 @@ class InspectorController extends DisposableController
       // We do not want to complete this timing operation because the force
       // refresh will skew the results.
       ga.cancelTimingOperation(InspectorScreen.id, gac.pageReady);
-      ga.select(gac.inspector, gac.refreshEmptyTree);
+      ga.select(
+        gac.inspector,
+        gac.refreshEmptyTree,
+        screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+      );
       firstInspectorTreeLoadCompleted = true;
     }
     await onForceRefresh();
@@ -765,6 +770,13 @@ class InspectorController extends DisposableController
       await _maybeShowNotificationForSelectedNode(
         selectedNode: newSelection,
         group: group,
+      );
+
+      // Send an event that a widget was selected on the device.
+      ga.select(
+        gac.inspector,
+        gac.onDeviceSelection,
+        screenMetricsProvider: () => InspectorScreenMetrics.v2(),
       );
     } catch (error, st) {
       if (selectionGroups.next == group) {

@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:logging/logging.dart';
 
@@ -16,9 +16,6 @@ Future<T> allowedError<T>(Future<T> future, {bool logError = true}) {
       _log.shout('[${error.runtimeType}] ${errorLines.first}');
       _log.shout(errorLines.skip(1).join('\n'));
     }
-    // TODO(srawlins): This is an illegal return value (`null`) for all `T`.
-    // This function must return an actual `T`.
-    // ignore: null_argument_to_non_null_type
     return Future<T>.value();
   });
 }

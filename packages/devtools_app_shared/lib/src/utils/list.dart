@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:collection';
 import 'dart:math';
@@ -27,7 +27,6 @@ final class ListValueNotifier<T> extends ChangeNotifier
 
   @override
   // This override is needed to change visibility of the method.
-  // ignore: unnecessary_overrides
   void notifyListeners() {
     super.notifyListeners();
   }

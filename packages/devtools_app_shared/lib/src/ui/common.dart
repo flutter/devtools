@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
 
@@ -618,17 +618,19 @@ class RoundedLabel extends StatelessWidget {
     required this.labelText,
     this.backgroundColor,
     this.textColor,
+    this.tooltipText,
   });
 
   final String labelText;
   final Color? backgroundColor;
   final Color? textColor;
+  final String? tooltipText;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    return Container(
+    final label = Container(
       padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
       decoration: BoxDecoration(
         borderRadius: defaultBorderRadius,
@@ -644,5 +646,8 @@ class RoundedLabel extends StatelessWidget {
         ),
       ),
     );
+    return tooltipText != null
+        ? DevToolsTooltip(message: tooltipText, child: label)
+        : label;
   }
 }

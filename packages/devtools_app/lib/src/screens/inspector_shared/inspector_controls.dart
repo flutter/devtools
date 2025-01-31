@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -58,23 +58,6 @@ class InspectorControls extends StatelessWidget {
           ShowImplementationWidgetsButton(controller: controller!),
         ],
         const Spacer(),
-        // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
-        // Inspector V2 has been released.
-        if (FeatureFlags.inspectorV2) ...[
-          const SizedBox(width: defaultSpacing),
-          SwitchSetting(
-            notifier:
-                preferences.inspector.inspectorV2Enabled as ValueNotifier<bool>,
-            title: 'New Inspector',
-            tooltip: 'Try out the redesigned Flutter Inspector.',
-            gaScreen: gac.inspector,
-            gaItem: gac.inspectorV2Enabled,
-            activeColor: activeButtonColor,
-            inactiveColor: Colors.transparent,
-            minScreenWidthForTextBeforeScaling:
-                minScreenWidthForTextBeforeScaling,
-          ),
-        ],
         const SizedBox(width: defaultSpacing),
         const InspectorServiceExtensionButtonGroup(),
       ],

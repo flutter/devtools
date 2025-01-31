@@ -325,13 +325,11 @@ class NetworkRequestsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return RoundedOutlinedBorder(
       clip: true,
-      // TODO(kenz): use SearchableFlatTable instead.
-      child: FlatTable<NetworkRequest?>(
-        keyFactory: (NetworkRequest? data) => ValueKey<NetworkRequest?>(data),
+      child: SearchableFlatTable<NetworkRequest>(
+        searchController: networkController,
+        keyFactory: (NetworkRequest data) => ValueKey<NetworkRequest>(data),
         data: requests,
         dataKey: 'network-requests',
-        searchMatchesNotifier: searchMatchesNotifier,
-        activeSearchMatchNotifier: activeSearchMatchNotifier,
         autoScrollContent: true,
         columns: columns,
         selectionNotifier: networkController.selectedRequest,

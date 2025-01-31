@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_extensions.dart';
 
@@ -84,6 +84,7 @@ const selectWidgetMode = 'selectWidgetMode';
 const enableOnDeviceInspector = 'enableOnDeviceInspector';
 const showOnDeviceInspector = 'showInspector';
 const treeNodeSelection = 'treeNodeSelection';
+const onDeviceSelection = 'onDeviceSelection';
 const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
@@ -119,7 +120,9 @@ const wasm = 'wasm';
 const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const inspectorV2Enabled = 'inspectorV2Enabled';
+const inspectorV2Disabled = 'inspectorV2Disabled';
 const inspectorAutoRefreshEnabled = 'inspectorAutoRefreshEnabled';
+const inspectorV2Docs = 'inspectorV2Docs';
 const clearLogs = 'clearLogs';
 const copyLogs = 'copyLogs';
 

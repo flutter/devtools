@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:vm_service/vm_service.dart';
 
@@ -35,8 +35,9 @@ class InboundReferencesTreeNode extends TreeNode<InboundReferencesTreeNode> {
     }
 
     return switch (objectRef) {
-      ClassRef(:final name) || FuncRef(:final name) || FieldRef(:final name) =>
-        name,
+      ClassRef(:final name) ||
+      FuncRef(:final name) ||
+      FieldRef(:final name) => name,
       LibraryRef(:final name, :final uri) => name.isNullOrEmpty ? uri : name,
       ScriptRef(:final uri) => fileNameFromUri(uri),
       InstanceRef(:final name, :final classRef) =>

@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -62,8 +62,6 @@ class EnhanceTracingController extends DisposableController
               _firstLiveFrameId == null) {
             _firstLiveFrameId =
                 FlutterFrame.fromJson(event.extensionData!.data).id;
-            // See https://github.com/dart-lang/linter/issues/3801
-            // ignore: discarded_futures
             unawaited(_firstFrameEventSubscription!.cancel());
             _firstFrameEventSubscription = null;
           }
@@ -120,8 +118,6 @@ class EnhanceTracingController extends DisposableController
   @override
   void dispose() {
     unawaited(showMenuStreamController.close());
-    // See https://github.com/dart-lang/linter/issues/3801
-    // ignore: discarded_futures
     unawaited(_firstFrameEventSubscription?.cancel());
     super.dispose();
   }

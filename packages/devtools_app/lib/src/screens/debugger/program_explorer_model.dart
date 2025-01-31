@@ -1,6 +1,6 @@
-// Copyright 2021 The Chromium Authors. All rights reserved.
+// Copyright 2021 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:vm_service/vm_service.dart';
 
@@ -333,8 +333,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     final sourceLocation = switch (object) {
       FieldRef(:final location) ||
       FuncRef(:final location) ||
-      ClassRef(:final location) =>
-        location,
+      ClassRef(:final location) => location,
       _ => null,
     };
 

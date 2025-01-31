@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -214,7 +214,6 @@ void mockFlutterVersion(ConnectedApp connectedApp, SemanticVersion version) {
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
-// ignore: prefer_single_quotes, false positive.
 final mockGrammar = Grammar.fromJson(
   jsonDecode('''
 {

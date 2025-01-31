@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math';
@@ -28,9 +28,6 @@ part '_flat_table.dart';
 part '_table_column.dart';
 part '_table_row.dart';
 part '_tree_table.dart';
-
-// TODO(devoncarew): We need to render the selected row with a different
-// background color.
 
 typedef IndexedScrollableWidgetBuilder =
     Widget Function({

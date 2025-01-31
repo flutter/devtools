@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // ignore_for_file: non_constant_identifier_names
 
@@ -13,13 +13,13 @@ import 'dart:js_interop';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:unified_analytics/unified_analytics.dart' as ua;
 import 'package:web/web.dart';
 
 import '../globals.dart';
 import '../managers/dtd_manager_extensions.dart';
 import '../primitives/query_parameters.dart';
-import '../primitives/utils.dart';
 import '../server/server.dart' as server;
 import '../utils/utils.dart';
 import 'analytics_common.dart';
@@ -67,6 +67,8 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
+    // IMPORTANT! Only string and int values are supported. All other value
+    // types will be ignored in GA4.
     String? user_app, // dimension1 (flutter or web)
     String? user_build, // dimension2 (debug or profile)
     String? user_platform, // dimension3 (android/ios/fuchsia/linux/mac/windows)
@@ -112,7 +114,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    bool? is_v2_inspector, // metric15
+    String? is_v2_inspector, // metric15
   });
 
   factory GtagEventDevTools._create({
@@ -207,7 +209,9 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
               : null,
       // [InspectorScreenMetrics]
       is_v2_inspector:
-          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.isV2.toString()
+              : null,
     );
   }
 
@@ -243,7 +247,7 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
   external int? get inspector_tree_controller_id;
   external String? get android_app_id;
   external String? get ios_bundle_id;
-  external bool? get is_v2_inspector;
+  external String? get is_v2_inspector;
 }
 
 extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
@@ -254,6 +258,8 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
+    // IMPORTANT! Only string and int values are supported. All other value
+    // types will be ignored in GA4.
     String? user_app, // dimension1 (flutter or web)
     String? user_build, // dimension2 (debug or profile)
     String? user_platform, // dimension3 (android or ios)
@@ -298,7 +304,7 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     String? android_app_id, //metric13
     String? ios_bundle_id, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    bool? is_v2_inspector, // metric15
+    String? is_v2_inspector, // metric15
   });
 
   factory GtagExceptionDevTools._create(
@@ -385,7 +391,9 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
               : null,
       // [InspectorScreenMetrics]
       is_v2_inspector:
-          screenMetrics is InspectorScreenMetrics ? screenMetrics.isV2 : null,
+          screenMetrics is InspectorScreenMetrics
+              ? screenMetrics.isV2.toString()
+              : null,
     );
   }
 
@@ -673,7 +681,7 @@ String? _lastGaError;
 /// chunks to GA4 through unified_analytics.
 void reportError(
   String errorMessage, {
-  List<String> stackTraceSubstrings = const <String>[],
+  stack_trace.Trace? stackTrace,
   bool fatal = false,
 }) {
   // Don't keep recording same last error.
@@ -682,14 +690,14 @@ void reportError(
 
   final gTagExceptionWithStackTrace = GtagExceptionDevTools._create(
     // Include the stack trace in the message for legacy analytics.
-    '$errorMessage\n${stackTraceSubstrings.join()}',
+    '$errorMessage\n${stackTrace?.toString() ?? ''}',
     fatal: fatal,
   );
   GTag.exception(gaExceptionProvider: () => gTagExceptionWithStackTrace);
 
   final uaEvent = _uaEventFromGtagException(
     GtagExceptionDevTools._create(errorMessage, fatal: fatal),
-    stackTraceSubstrings: stackTraceSubstrings,
+    stackTrace: stackTrace,
   );
   unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
 }
@@ -950,25 +958,17 @@ ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
 
 ua.Event _uaEventFromGtagException(
   GtagExceptionDevTools gtagException, {
-  List<String> stackTraceSubstrings = const <String>[],
+  stack_trace.Trace? stackTrace,
 }) {
+  final stackTraceAsMap = createStackTraceForAnalytics(stackTrace);
+
   // Any data entries that have a null value will be removed from the event data
   // in the [ua.Event.exception] constructor.
   return ua.Event.exception(
     exception: gtagException.description ?? 'unknown exception',
     data: {
       'fatal': gtagException.fatal,
-      // Each stack trace substring of length [ga4ParamValueCharacterLimit]
-      // contains information for ~1 stack frame, so including 8 chunks should
-      // give us enough information to understand the source of the exception.
-      'stackTraceChunk0': stackTraceSubstrings.safeGet(0),
-      'stackTraceChunk1': stackTraceSubstrings.safeGet(1),
-      'stackTraceChunk2': stackTraceSubstrings.safeGet(2),
-      'stackTraceChunk3': stackTraceSubstrings.safeGet(3),
-      'stackTraceChunk4': stackTraceSubstrings.safeGet(4),
-      'stackTraceChunk5': stackTraceSubstrings.safeGet(5),
-      'stackTraceChunk6': stackTraceSubstrings.safeGet(6),
-      'stackTraceChunk7': stackTraceSubstrings.safeGet(7),
+      ...stackTraceAsMap,
       'userApp': gtagException.user_app,
       'userBuild': gtagException.user_build,
       'userPlatform': gtagException.user_platform,
@@ -1026,7 +1026,7 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
   final int? rootSetCount;
   final int? rowCount;
   final int? inspectorTreeControllerId;
-  final bool? isV2Inspector;
+  final String? isV2Inspector;
 
   // [DeepLinkScreenMetrics]
   final String? androidAppId;

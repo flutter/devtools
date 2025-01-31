@@ -456,14 +456,8 @@ class HttpRequestCookiesView extends StatelessWidget {
         label: Expanded(
           child: Text(
             title,
-            // TODO(kenz): use top level overflow parameter if
-            // https://github.com/flutter/flutter/issues/82722 is fixed.
-            // TODO(kenz): add overflow after flutter 2.3.0 is stable. It was
-            // added in commit 65388ee2eeaf0d2cf087eaa4a325e3689020c46a.
-            // style: theme.textTheme.titleMedium.copyWith(
-            //   overflow: TextOverflow.fade,
-            // ),
             style: theme.textTheme.titleMedium,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         numeric: numeric,

@@ -1,14 +1,16 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import '../../../service/editor/api_classes.dart';
+import '../../../shared/editor/api_classes.dart';
 import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/common_widgets.dart';
 import 'property_editor_controller.dart';
+import 'property_editor_inputs.dart';
+import 'property_editor_types.dart';
 
 class PropertyEditorView extends StatelessWidget {
   const PropertyEditorView({required this.controller, super.key});
@@ -17,13 +19,28 @@ class PropertyEditorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Property Editor', style: Theme.of(context).textTheme.titleMedium),
-        const PaddedDivider.noPadding(),
-        _PropertiesList(controller: controller),
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.editorClient.editArgumentMethodName,
+        controller.editorClient.editableArgumentsMethodName,
       ],
+      builder: (_, values, _) {
+        final editArgumentMethodName = values.first as String?;
+        final editableArgumentsMethodName = values.second as String?;
+
+        if (editArgumentMethodName == null ||
+            editableArgumentsMethodName == null) {
+          return const CenteredCircularProgressIndicator();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // TODO(elliette): Include widget name and documentation.
+            _PropertiesList(controller: controller),
+          ],
+        );
+      },
     );
   }
 }
@@ -33,7 +50,7 @@ class _PropertiesList extends StatelessWidget {
 
   final PropertyEditorController controller;
 
-  static const itemPadding = densePadding;
+  static const itemPadding = borderPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +67,15 @@ class _PropertiesList extends StatelessWidget {
             )
             : Column(
               children: <Widget>[
-                ...args.map(
-                  (arg) => _EditablePropertyItem(
-                    argument: arg,
-                    controller: controller,
-                  ),
-                ),
+                ...args
+                    .map((arg) => argToProperty(arg))
+                    .nonNulls
+                    .map(
+                      (property) => _EditablePropertyItem(
+                        property: property,
+                        controller: controller,
+                      ),
+                    ),
               ].joinWith(const PaddedDivider.noPadding()),
             );
       },
@@ -65,11 +85,11 @@ class _PropertiesList extends StatelessWidget {
 
 class _EditablePropertyItem extends StatelessWidget {
   const _EditablePropertyItem({
-    required this.argument,
+    required this.property,
     required this.controller,
   });
 
-  final EditableArgument argument;
+  final EditableProperty property;
   final PropertyEditorController controller;
 
   @override
@@ -81,11 +101,11 @@ class _EditablePropertyItem extends StatelessWidget {
           flex: 3,
           child: Padding(
             padding: const EdgeInsets.all(_PropertiesList.itemPadding),
-            child: _PropertyInput(argument: argument, controller: controller),
+            child: _PropertyInput(property: property, controller: controller),
           ),
         ),
-        if (argument.isRequired || argument.isDefault) ...[
-          Flexible(child: _PropertyLabels(argument: argument)),
+        if (property.hasArgument || property.isDefault) ...[
+          Flexible(child: _PropertyLabels(property: property)),
         ] else
           const Spacer(),
       ],
@@ -94,184 +114,86 @@ class _EditablePropertyItem extends StatelessWidget {
 }
 
 class _PropertyLabels extends StatelessWidget {
-  const _PropertyLabels({required this.argument});
+  const _PropertyLabels({required this.property});
 
-  final EditableArgument argument;
+  final EditableProperty property;
+
+  static const _widthForFullLabels = 60;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isRequired = argument.isRequired;
-    final isDefault = argument.isDefault;
+    final isSet = property.hasArgument;
+    final isDefault = property.isDefault;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (isRequired)
-          Padding(
-            padding: const EdgeInsets.all(_PropertiesList.itemPadding),
-            child: RoundedLabel(
-              labelText: 'required',
-              backgroundColor: colorScheme.primary,
-              textColor: colorScheme.onPrimary,
-            ),
-          ),
-        if (isDefault)
-          const Padding(
-            padding: EdgeInsets.all(_PropertiesList.itemPadding),
-            child: RoundedLabel(labelText: 'default'),
-          ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isSet)
+              Padding(
+                padding: const EdgeInsets.all(_PropertiesList.itemPadding),
+                child: RoundedLabel(
+                  labelText: _maybeTruncateLabel('set', width: width),
+                  backgroundColor: colorScheme.primary,
+                  textColor: colorScheme.onPrimary,
+                  tooltipText: 'Property argument is set.',
+                ),
+              ),
+            if (isDefault)
+              Padding(
+                padding: const EdgeInsets.all(_PropertiesList.itemPadding),
+                child: RoundedLabel(
+                  labelText: _maybeTruncateLabel('default', width: width),
+                  tooltipText: 'Property argument matches the default value.',
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
+
+  String _maybeTruncateLabel(String labelText, {required double width}) =>
+      width >= _widthForFullLabels ? labelText : labelText[0].toUpperCase();
 }
 
-class _PropertyInput extends StatefulWidget {
-  const _PropertyInput({required this.argument, required this.controller});
+class _PropertyInput extends StatelessWidget {
+  const _PropertyInput({required this.property, required this.controller});
 
-  final EditableArgument argument;
+  final EditableProperty property;
   final PropertyEditorController controller;
 
   @override
-  State<_PropertyInput> createState() => _PropertyInputState();
-}
-
-class _PropertyInputState extends State<_PropertyInput> {
-  String get typeError => 'Please enter a ${widget.argument.type}.';
-
-  String currentValue = '';
-
-  @override
   Widget build(BuildContext context) {
-    final decoration = InputDecoration(
-      helperText: '',
-      errorText: widget.argument.errorText,
-      isDense: true,
-      label: Text(widget.argument.name),
-      border: const OutlineInputBorder(),
-    );
-
-    switch (widget.argument.type) {
-      case 'enum':
-      case 'bool':
-        final options =
-            widget.argument.type == 'bool'
-                ? ['true', 'false']
-                : (widget.argument.options ?? <String>[]);
-        options.add(widget.argument.valueDisplay);
-        if (widget.argument.isNullable) {
-          options.add('null');
-        }
-
-        return DropdownButtonFormField(
-          value: widget.argument.valueDisplay,
-          decoration: decoration,
-          items:
-              options.toSet().toList().map((option) {
-                return DropdownMenuItem(
-                  value: option,
-                  // TODO(https://github.com/flutter/devtools/issues/8531) Handle onTap.
-                  onTap: () {},
-                  child: Text(option),
-                );
-              }).toList(),
-          onChanged: (newValue) async {
-            await _editArgument(newValue);
-          },
+    final argType = property.type;
+    switch (argType) {
+      case boolType:
+        return BooleanInput(
+          property: property as FiniteValuesProperty,
+          controller: controller,
         );
-      case 'double':
-      case 'int':
-      case 'string':
-        return TextFormField(
-          initialValue: widget.argument.valueDisplay,
-          enabled: widget.argument.isEditable,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          validator: _inputValidator,
-          inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
-          decoration: decoration,
-          style: Theme.of(context).fixedFontStyle,
-          // TODO(https://github.com/flutter/devtools/issues/8531) Handle onChanged.
-          onChanged: (newValue) {
-            currentValue = newValue;
-          },
-          onEditingComplete: () async {
-            await _editArgument(currentValue);
-          },
-          onTapOutside: (_) async {
-            await _editArgument(currentValue);
-          },
+      case doubleType:
+        return DoubleInput(
+          property: property as NumericProperty,
+          controller: controller,
         );
+      case enumType:
+        return EnumInput(
+          property: property as FiniteValuesProperty,
+          controller: controller,
+        );
+      case intType:
+        return IntegerInput(
+          property: property as NumericProperty,
+          controller: controller,
+        );
+      case stringType:
+        return StringInput(property: property, controller: controller);
       default:
-        return Text(widget.argument.valueDisplay);
+        return Text(property.valueDisplay);
     }
-  }
-
-  Future<void> _editArgument(String? valueAsString) async {
-    final argName = widget.argument.name;
-
-    // Can edit values to null.
-    if (widget.argument.isNullable && valueAsString == null ||
-        (valueAsString == '' && widget.argument.type != 'string')) {
-      await widget.controller.editArgument(name: argName, value: null);
-      return;
-    }
-
-    switch (widget.argument.type) {
-      case 'string':
-      case 'enum':
-        await widget.controller.editArgument(
-          name: argName,
-          value: valueAsString,
-        );
-        break;
-      case 'bool':
-        await widget.controller.editArgument(
-          name: argName,
-          value:
-              valueAsString == 'true' || valueAsString == 'false'
-                  ? valueAsString == 'true'
-                  : valueAsString, // The boolean value might be an expression.
-        );
-        break;
-      case 'double':
-        final numValue = _toNumber(valueAsString);
-        if (numValue != null) {
-          await widget.controller.editArgument(
-            name: argName,
-            value: numValue as double,
-          );
-        }
-        break;
-      case 'int':
-        final numValue = _toNumber(valueAsString);
-        if (numValue != null) {
-          await widget.controller.editArgument(
-            name: argName,
-            value: numValue as int,
-          );
-        }
-        break;
-    }
-  }
-
-  String? _inputValidator(String? inputValue) {
-    final numValue = _toNumber(inputValue);
-    if (numValue == null) {
-      return typeError;
-    }
-    return null;
-  }
-
-  Object? _toNumber(String? valueAsString) {
-    if (valueAsString == null || valueAsString == '') return null;
-
-    final isDouble = widget.argument.type == 'double';
-    final isInt = widget.argument.type == 'int';
-    // Only try to convert numeric types.
-    if (!isDouble && !isInt) {
-      return null;
-    }
-
-    return isInt ? int.tryParse(valueAsString) : double.tryParse(valueAsString);
   }
 }

@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:io';
 
@@ -108,7 +108,13 @@ class BuildCommand extends Command {
           ] else ...[
             // Do not minify stack traces in debug mode.
             if (buildMode == 'debug') '--dart2js-optimization=O1',
-            if (buildMode != 'debug') '--$buildMode',
+            if (buildMode != 'debug') ...[
+              '--$buildMode',
+              // Use -O2 optimization by default (sound dart) but override for
+              // dart2js with -O4 (it's too slow otherwise).
+              '-O2',
+              '--dart2js-optimization=O4',
+            ],
           ],
           '--pwa-strategy=offline-first',
           '--no-tree-shake-icons',

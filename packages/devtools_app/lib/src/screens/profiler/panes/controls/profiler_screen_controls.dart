@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -32,24 +32,22 @@ class ProfilerScreenControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(kenz): use the [OfflineAwareControls] helper widget.
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        if (offline)
-          Padding(
-            padding: const EdgeInsets.only(right: defaultSpacing),
-            child: ExitOfflineButton(gaScreen: gac.cpuProfiler),
-          )
-        else ...[
-          _PrimaryControls(controller: controller, recording: recording),
-          const SizedBox(width: defaultSpacing),
-          _SecondaryControls(
-            controller: controller,
-            profilerBusy: recording || processing,
-          ),
-        ],
-      ],
+    return OfflineAwareControls(
+      gaScreen: gac.cpuProfiler,
+      controlsBuilder: (offline) {
+        if (offline) return const SizedBox.shrink();
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _PrimaryControls(controller: controller, recording: recording),
+            const SizedBox(width: defaultSpacing),
+            _SecondaryControls(
+              controller: controller,
+              profilerBusy: recording || processing,
+            ),
+          ],
+        );
+      },
     );
   }
 }

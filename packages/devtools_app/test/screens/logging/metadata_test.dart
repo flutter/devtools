@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/metadata.dart';
@@ -97,7 +97,7 @@ void main() {
                   return Flexible(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: MetadataChips(data: log, maxWidth: 1000.0),
+                      child: MetadataChips(data: log),
                     ),
                   );
                 }).toList(),
