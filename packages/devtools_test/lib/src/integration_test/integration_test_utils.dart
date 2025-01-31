@@ -25,7 +25,6 @@ Future<void> resetHistory() async {
       // the web-specific implementation of the Flutter Engine, at
       // `lib/web_ui/lib/src/engine/window.dart` in the Flutter engine
       // repository.
-      // ignore: avoid_dynamic_calls
       .resetHistory();
 }
 

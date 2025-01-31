@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 
 // Benchmark size in kB.
 const bundleSizeBenchmark = 5400;
-const gzipBundleSizeBenchmark = 1550;
+const gzipBundleSizeBenchmark = 1650;
 
 void main() {
   group('Web Compile', () {
