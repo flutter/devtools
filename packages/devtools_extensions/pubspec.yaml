@@ -3,7 +3,7 @@
 # found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 name: devtools_extensions
 description: A package for building and supporting extensions for Dart DevTools.
-version: 0.3.0
+version: 0.3.1
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_extensions
 
