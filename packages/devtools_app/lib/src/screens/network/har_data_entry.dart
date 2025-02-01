@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import '../../screens/network/utils/http_utils.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
 import 'constants.dart';
@@ -137,7 +138,7 @@ class HarDataEntry {
           NetworkEventKeys.mimeType.name: e.contentType,
           NetworkEventKeys.text.name: e.requestBody,
         },
-        NetworkEventKeys.headersSize.name: _calculateHeadersSize(
+        NetworkEventKeys.headersSize.name: calculateHeadersSize(
           e.requestHeaders,
         ),
         NetworkEventKeys.bodySize.name: _calculateBodySize(e.requestBody),
@@ -157,7 +158,7 @@ class HarDataEntry {
           NetworkEventKeys.text.name: e.responseBody,
         },
         NetworkEventKeys.redirectURL.name: '',
-        NetworkEventKeys.headersSize.name: _calculateHeadersSize(
+        NetworkEventKeys.headersSize.name: calculateHeadersSize(
           e.responseHeaders,
         ),
         NetworkEventKeys.bodySize.name: _calculateBodySize(e.responseBody),
@@ -270,28 +271,6 @@ class HarDataEntry {
 
     return convertedMap;
   }
-}
-
-int _calculateHeadersSize(Map<String, Object?>? headers) {
-  if (headers == null) return -1;
-
-  // Combine headers into a single string with CRLF endings
-  String headersString =
-      headers.entries.map((entry) {
-        final key = entry.key;
-        var value = entry.value;
-        // If the value is a List, join it with a comma
-        if (value is List<String>) {
-          value = value.join(', ');
-        }
-        return '$key: $value\r\n';
-      }).join();
-
-  // Add final CRLF to indicate end of headers
-  headersString += '\r\n';
-
-  // Calculate the byte length of the headers string
-  return utf8.encode(headersString).length;
 }
 
 int _calculateBodySize(String? requestBody) {
