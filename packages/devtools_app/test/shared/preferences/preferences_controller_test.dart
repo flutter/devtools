@@ -162,6 +162,10 @@ void main() {
           'my_user/google3/dart_apps/test_app/lib/main.dart': '/dart_apps/',
           'my_user/google3/third_party/dart/dart_apps/test_app/lib/main.dart':
               '/third_party/dart/',
+          'my_user/fake_app/.dart_tool/widget_preview_scaffold':
+              'my_user/fake_app/',
+          'my_user/fake_app/lib/.dart_tool/widget_preview_scaffold':
+              'my_user/fake_app/',
         };
 
         for (final MapEntry(key: rootLib, value: expectedPubRoot)

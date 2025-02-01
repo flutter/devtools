@@ -47,6 +47,21 @@ class InspectorPreferencesController extends DisposableController
       'inspector.defaultDetailsViewType';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
+
+  static const _dartToolDir = '.dart_tool';
+  static const _libDir = 'lib';
+  static const _webDir = 'web';
+  static const _packagesDir = 'packages';
+
+  /// The following are directories that DevTools can use to determine the
+  /// correct pub root directory.
+  static const _knownDirectories = {
+    _dartToolDir,
+    _libDir,
+    _webDir,
+    _packagesDir,
+  };
+
   String? _mainScriptDir;
   bool _checkedFlutterPubRoot = false;
 
@@ -300,21 +315,8 @@ class InspectorPreferencesController extends DisposableController
     // /third_party/dart):
     if (isGoogle3Path(parts)) {
       pubRootDirectory = _pubRootDirectoryForGoogle3(parts);
-    } else {
-      final parts = fileUriString.split('/');
-
-      for (int i = parts.length - 1; i >= 0; i--) {
-        final part = parts[i];
-        if (part == 'lib' || part == 'web') {
-          pubRootDirectory = parts.sublist(0, i).join('/');
-          break;
-        }
-
-        if (part == 'packages') {
-          pubRootDirectory = parts.sublist(0, i + 1).join('/');
-          break;
-        }
-      }
+    } else if (_pathContainsKnownDirectories(parts)) {
+      pubRootDirectory = _determinePubRootFromKnownDirectories(parts);
     }
     pubRootDirectory ??= (parts..removeLast()).join('/');
     // Make sure the root directory ends with /, otherwise we will patch with
@@ -324,6 +326,34 @@ class InspectorPreferencesController extends DisposableController
             ? pubRootDirectory
             : '$pubRootDirectory/';
     return pubRootDirectory;
+  }
+
+  bool _pathContainsKnownDirectories(List<String> pathParts) =>
+      _knownDirectories.any((dir) => pathParts.contains(dir));
+
+  String? _determinePubRootFromKnownDirectories(List<String> pathParts) {
+    pathParts = _maybeRemoveDartToolDirectory(pathParts);
+    for (int i = pathParts.length - 1; i >= 0; i--) {
+      final part = pathParts[i];
+
+      if (part == _libDir || part == _webDir) {
+        pathParts = pathParts.sublist(0, i);
+        break;
+      }
+
+      if (part == _packagesDir) {
+        pathParts = pathParts.sublist(0, i + 1);
+        break;
+      }
+    }
+    return pathParts.join('/');
+  }
+
+  List<String> _maybeRemoveDartToolDirectory(List<String> pathParts) {
+    if (pathParts.contains(_dartToolDir)) {
+      return pathParts.sublist(0, pathParts.indexOf(_dartToolDir));
+    }
+    return pathParts;
   }
 
   String? _pubRootDirectoryForGoogle3(List<String> pathParts) {
