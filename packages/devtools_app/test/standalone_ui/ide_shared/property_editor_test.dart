@@ -13,6 +13,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -369,6 +370,31 @@ void main() {
       });
     });
 
+    testWidgets('submitting a string input with TAB (title)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title*');
+        expect(titleInput, findsOneWidget);
+        await _inputText(
+          titleInput,
+          text: 'Enter with TAB!',
+          tester: tester,
+          inputDoneKey: LogicalKeyboardKey.tab,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals('title: Enter with TAB! (TYPE: String, SUCCESS: true)'),
+        );
+      });
+    });
+
     testWidgets('editing a numeric input (height)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
@@ -398,6 +424,27 @@ void main() {
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
         expect(nextEdit, equals('height: null (TYPE: null, SUCCESS: true)'));
+      });
+    });
+
+    testWidgets('submitting a numeric input with TAB (height)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(
+          heightInput,
+          text: '63.5',
+          tester: tester,
+          inputDoneKey: LogicalKeyboardKey.tab,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('height: 63.5 (TYPE: double, SUCCESS: true)'));
       });
     });
 
@@ -562,9 +609,14 @@ Future<void> _inputText(
   Finder textFormField, {
   required String text,
   required WidgetTester tester,
+  LogicalKeyboardKey? inputDoneKey,
 }) async {
   await tester.enterText(textFormField, text);
-  await tester.testTextInput.receiveAction(TextInputAction.done);
+  if (inputDoneKey != null) {
+    await tester.sendKeyDownEvent(inputDoneKey);
+  } else {
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+  }
   await tester.pump();
 }
 
