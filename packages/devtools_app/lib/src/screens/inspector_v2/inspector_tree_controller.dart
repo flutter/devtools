@@ -1237,14 +1237,10 @@ Paint _defaultPaint(ColorScheme colorScheme) =>
       ..color = colorScheme.treeGuidelineColor
       ..strokeWidth = chartLineStrokeWidth;
 
-/// The distance (on the x-axis) between the expand/collapse and the start of
-/// the row, as determined by a percentage of the [inspectorColumnIndent].
-const _expandCollapseToRowStartXDistancePercentage = 0.68;
-
 /// The distance (on the x-axis) between the center of the widget icon and the
 /// start of the row, as determined by a percentage of the
 /// [inspectorColumnIndent].
-const _iconCenterToRowStartXDistancePercentage = 0.15;
+const _iconCenterToRowStartXDistancePercentage = 0.41;
 
 /// The distance (on the y-axis) between the bottom of the widget icon and the
 /// top of the row, as determined by a percentage of the [inspectorRowHeight].
@@ -1277,12 +1273,11 @@ class _RowPainter extends CustomPainter {
 
     final node = row.node;
     final showExpandCollapse = node.showExpandCollapse;
-    final distanceFromExpandCollapseToRowStart =
-        inspectorColumnIndent * _expandCollapseToRowStartXDistancePercentage;
+    final distanceFromIconCenterToRowStart =
+        inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
     for (final tick in row.ticks) {
       final expandCollapseX =
-          _controller.getDepthIndent(tick) -
-          distanceFromExpandCollapseToRowStart;
+          _controller.getDepthIndent(tick) - distanceFromIconCenterToRowStart;
       // Draw a vertical line for each tick identifying a connection between
       // an ancestor of this node and some other node in the tree.
       canvas.drawLine(
@@ -1296,11 +1291,11 @@ class _RowPainter extends CustomPainter {
     if (row.lineToParent) {
       final parentExpandCollapseX =
           _controller.getDepthIndent(row.depth - 1) -
-          distanceFromExpandCollapseToRowStart;
+          distanceFromIconCenterToRowStart;
       final width =
           showExpandCollapse
-              ? inspectorColumnIndent * 0.6
-              : inspectorColumnIndent;
+              ? inspectorColumnIndent * 0.45
+              : inspectorColumnIndent * .8;
       canvas.drawLine(
         Offset(parentExpandCollapseX, 0.0),
         Offset(parentExpandCollapseX, inspectorRowHeight * 0.5),
