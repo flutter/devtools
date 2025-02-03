@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:logging/logging.dart';
 
 import '../analytics/constants.dart';
@@ -61,14 +62,11 @@ class EditorClient extends DisposableController
           _supportsOpenDevToolsPage = isRegistered;
           _supportsOpenDevToolsForceExternal =
               capabilities?[Field.supportsForceExternal] == true;
-        } else if (method == LspMethod.editArgument.methodName) {
-          _editArgumentMethodName.value = LspMethod.editArgument.methodName;
+          // TODO(https://github.com/flutter/devtools/issues/8804): Switch support
+          // to non-experimental LSP methods.
         } else if (method == LspMethod.editArgument.experimentalMethodName) {
           _editArgumentMethodName.value =
               LspMethod.editArgument.experimentalMethodName;
-        } else if (method == LspMethod.editableArguments.methodName) {
-          _editableArgumentsMethodName.value =
-              LspMethod.editableArguments.methodName;
         } else if (method ==
             LspMethod.editableArguments.experimentalMethodName) {
           _editableArgumentsMethodName.value =
@@ -274,26 +272,46 @@ class EditorClient extends DisposableController
   }
 
   /// Requests that the Analysis Server makes a code edit for an argument.
-  Future<void> editArgument<T>({
+  Future<EditArgumentResponse> editArgument<T>({
     required TextDocument textDocument,
     required CursorPosition position,
     required String name,
     required T value,
   }) async {
     final method = editArgumentMethodName.value;
-    if (method == null) return;
-    final response = await _callLspApi(
-      method,
-      params: {
-        'type': 'Object', // This is required by DTD.
-        'textDocument': textDocument.toJson(),
-        'position': position.toJson(),
-        'edit': {'name': name, 'newValue': value},
-      },
-    );
-    // TODO(elliette): Handle response, currently the response from the Analysis
-    // Server is null.
-    _log.info('editArgument response: ${response.result}');
+    if (method == null) {
+      return EditArgumentResponse(
+        success: false,
+        errorMessage: 'API is unavailable.',
+      );
+    }
+    try {
+      await _callLspApi(
+        method,
+        params: {
+          'type': 'Object', // This is required by DTD.
+          'textDocument': textDocument.toJson(),
+          'position': position.toJson(),
+          'edit': {'name': name, 'newValue': value},
+        },
+      );
+      return EditArgumentResponse(success: true);
+    } on RpcException catch (e) {
+      final errorMessage = e.message;
+      _log.severe(errorMessage);
+      return EditArgumentResponse(
+        success: false,
+        errorCode: e.code,
+        errorMessage: errorMessage,
+      );
+    } catch (e) {
+      final errorMessage = 'Unknown error: $e';
+      _log.severe(errorMessage);
+      return EditArgumentResponse(
+        success: false,
+        errorMessage: 'Unknown error: $e',
+      );
+    }
   }
 
   Future<DTDResponse> _call(

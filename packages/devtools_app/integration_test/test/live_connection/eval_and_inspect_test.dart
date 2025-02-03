@@ -5,8 +5,6 @@
 // Do not delete these arguments. They are parsed by test runner.
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
 
-// ignore_for_file: avoid_print
-
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';

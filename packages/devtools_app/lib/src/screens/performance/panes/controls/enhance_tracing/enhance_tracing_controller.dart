@@ -62,8 +62,6 @@ class EnhanceTracingController extends DisposableController
               _firstLiveFrameId == null) {
             _firstLiveFrameId =
                 FlutterFrame.fromJson(event.extensionData!.data).id;
-            // See https://github.com/dart-lang/linter/issues/3801
-            // ignore: discarded_futures
             unawaited(_firstFrameEventSubscription!.cancel());
             _firstFrameEventSubscription = null;
           }
@@ -120,8 +118,6 @@ class EnhanceTracingController extends DisposableController
   @override
   void dispose() {
     unawaited(showMenuStreamController.close());
-    // See https://github.com/dart-lang/linter/issues/3801
-    // ignore: discarded_futures
     unawaited(_firstFrameEventSubscription?.cancel());
     super.dispose();
   }

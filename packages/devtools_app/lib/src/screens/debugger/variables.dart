@@ -4,7 +4,6 @@
 
 // TODO(https://github.com/flutter/devtools/issues/4717): migrate away from
 // deprecated members.
-// ignore_for_file: deprecated_member_use
 
 import 'dart:async';
 

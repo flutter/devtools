@@ -3,13 +3,15 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
+## 0.3.1
+* Bump `vm_service` dependency to `>=13.0.0 <16.0.0`.
+
 ## 0.3.0
 * Fix `build_and_copy` command by removing deprecated `--web-renderer` option.
 * Bump minimum Dart SDK version to `3.6.0` and minimum Flutter SDK version
 to `3.27.1`.
 * Bump `devtools_app_shared` dependency to `0.3.0`.
 * Bump `devtools_shared` dependency to `11.1.0`.
-* Bump `vm_service` dependency to `>=13.0.0 <16.0.0`.
 * Clarify VS Code configuration in `README.md`.
 * Add "Supported Flutter versions" policy to the README.
 
