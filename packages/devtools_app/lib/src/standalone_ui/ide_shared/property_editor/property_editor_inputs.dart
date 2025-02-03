@@ -6,6 +6,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../shared/analytics/analytics.dart' as ga;
+import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_types.dart';
@@ -207,16 +209,20 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
   }) async {
     clearServerError();
     final argName = property.name;
-
-    // Can edit values to null.
-    if (property.isNullable && property.isNully(valueAsString)) {
-      await controller.editArgument(name: argName, value: null);
-      return;
-    }
-
-    final value = property.convertFromInputString(valueAsString) as U?;
+    ga.select(
+      gac.PropertyEditorSidebar.id,
+      gac.PropertyEditorSidebar.applyEditRequest(
+        argName: property.name,
+        argType: property.type,
+      ),
+    );
+    final editToNull = property.isNullable && property.isNully(valueAsString);
+    final value =
+        editToNull
+            ? null
+            : property.convertFromInputString(valueAsString) as U?;
     final response = await controller.editArgument(name: argName, value: value);
-    _maybeHandleServerError(response, property: property);
+    _handleServerResponse(response, property: property);
   }
 
   InputDecoration decoration(
@@ -276,14 +282,24 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
     });
   }
 
-  void _maybeHandleServerError(
+  void _handleServerResponse(
     EditArgumentResponse? errorResponse, {
     required EditableProperty property,
   }) {
-    if (errorResponse == null || errorResponse.success) return;
-    setState(() {
-      _serverError =
-          '${errorResponse.errorType?.message ?? 'Encountered unknown error.'} (Property: ${property.name})';
-    });
+    final succeeded = errorResponse == null || errorResponse.success;
+    if (!succeeded) {
+      setState(() {
+        _serverError =
+            '${errorResponse.errorType?.message ?? 'Encountered unknown error.'} (Property: ${property.name})';
+      });
+    }
+    ga.select(
+      gac.PropertyEditorSidebar.id,
+      gac.PropertyEditorSidebar.applyEditComplete(
+        argName: property.name,
+        argType: property.type,
+        succeeded: succeeded,
+      ),
+    );
   }
 }
