@@ -52,6 +52,8 @@ late File testFile9;
 late File testFile10;
 late File excludeFile1;
 late File excludeFile2;
+late File skipFile;
+late File doNothingFile;
 
 void main() {
   group('config file tests', () {
@@ -73,24 +75,20 @@ void main() {
 
       expect(config.removeLicenses.length, equals(4));
 
-      var expectedVal = '''// This is some <value1> multiline license
-// text that should be removed from the file.
-''';
+      var expectedVal = '''// This is some <value> multiline license
+// text that should be removed from the file.''';
       expect(config.removeLicenses[0], equals(expectedVal));
 
-      expectedVal = '''/* This is other <value2> multiline license
-text that should be removed from the file. */
-''';
+      expectedVal = '''/* This is other <value> multiline license
+text that should be removed from the file. */''';
       expect(config.removeLicenses[1], equals(expectedVal));
 
-      expectedVal = '''# This is more <value3> multiline license
-# text that should be removed from the file.
-''';
+      expectedVal = '''# This is more <value> multiline license
+# text that should be removed from the file.''';
       expect(config.removeLicenses[2], equals(expectedVal));
 
       expectedVal = '''// This is some multiline license text to
-// remove that does not contain a stored value.
-''';
+// remove that does not contain a stored value.''';
       expect(config.removeLicenses[3], equals(expectedVal));
     });
 
@@ -99,19 +97,16 @@ text that should be removed from the file. */
 
       expect(config.addLicenses.length, equals(3));
 
-      var expectedVal = '''// This is some <value1> multiline license
-// text that should be added to the file.
-''';
+      var expectedVal = '''// This is some <value> multiline license
+// text that should be added to the file.''';
       expect(config.addLicenses[0], equals(expectedVal));
 
-      expectedVal = '''# This is other <value3> multiline license
-# text that should be added to the file.
-''';
+      expectedVal = '''# This is other <value> multiline license
+# text that should be added to the file.''';
       expect(config.addLicenses[1], equals(expectedVal));
 
       expectedVal = '''// This is some multiline license text to
-// add that does not contain a stored value.
-''';
+// add that does not contain a stored value.''';
       expect(config.addLicenses[2], equals(expectedVal));
     });
 
@@ -179,10 +174,11 @@ text that should be removed from the file. */
       const existingLicenseText = '''// This is some multiline license text to
 // remove that does not contain a stored value.''';
       const replacementLicenseText =
-          '''// This is some <value4> multiline license
+          '''// This is some <value> multiline license
 // text that should be added to the file.''';
 
-      final replacementInfo = await _getTestReplacementInfo(
+      // Contains existing license
+      var replacementInfo = await _getTestReplacementInfo(
         testFile: testFile10,
         existingLicenseText: existingLicenseText,
         replacementLicenseText: replacementLicenseText,
@@ -198,6 +194,20 @@ text that should be removed from the file. */
       final expectedReplacementHeader =
           '''// This is some $currentYear multiline license
 // text that should be added to the file.''';
+
+      expect(replacementInfo.existingHeader, equals(expectedExistingHeader));
+
+      expect(
+        replacementInfo.replacementHeader,
+        equals(expectedReplacementHeader),
+      );
+
+      // Missing existing license
+      replacementInfo = await _getTestReplacementInfo(
+        testFile: testFile10,
+        existingLicenseText: existingLicenseText,
+        replacementLicenseText: replacementLicenseText,
+      );
 
       expect(replacementInfo.existingHeader, equals(expectedExistingHeader));
 
@@ -263,27 +273,6 @@ text that should be added to the file. */''',
       }
     });
 
-    test('update skipped if license text not found', () async {
-      var errorMessage = '';
-      final header = LicenseHeader();
-      try {
-        await header.getReplacementInfo(
-          file: testFile9,
-          existingLicenseText: 'test',
-          replacementLicenseText: 'test',
-          byteCount: 50,
-        );
-      } on StateError catch (e) {
-        errorMessage = e.toString();
-      }
-      expect(
-        errorMessage,
-        equals(
-          'Bad state: License header expected in ${testFile9.path}, but not found!',
-        ),
-      );
-    });
-
     test("update skipped if file can't be read", () async {
       var errorMessage = '';
       final header = LicenseHeader();
@@ -300,7 +289,7 @@ text that should be added to the file. */''',
       expect(
         errorMessage,
         contains(
-          'Bad state: License header expected, but error reading file - PathNotFoundException',
+          'Bad state: License header expected, but error reading File: \'bad.txt\' - PathNotFoundException',
         ),
       );
     });
@@ -337,42 +326,69 @@ text that should be added to the file. */''',
       );
     });
 
+    test('license header can be added on disk', () async {
+      final header = LicenseHeader();
+      const replacementHeader = '''// This is some 2015 multiline license
+// text that should be added to the file.''';
+      final rewrittenFile = header.addLicenseHeader(
+        file: testFile9,
+        replacementHeader: replacementHeader,
+      );
+
+      expect(rewrittenFile.lengthSync(), greaterThan(0));
+
+      final rewrittenContents = rewrittenFile.readAsStringSync();
+      expect(
+        rewrittenContents.substring(0, replacementHeader.length),
+        equals(replacementHeader),
+      );
+    });
+
     test('license headers can be updated in bulk', () async {
       await _setupTestConfigFile();
       final config = LicenseConfig.fromYamlFile(configFile);
       final header = LicenseHeader();
 
-      final contentsBeforeUpdate = testFile1.readAsStringSync();
+      // missing license
+      final contentsBeforeUpdate = testFile9.readAsStringSync();
       final results = await header.bulkUpdate(
         directory: testDirectory,
         config: config,
       );
-      final contentsAfterUpdate = testFile1.readAsStringSync();
+      final contentsAfterUpdate = testFile9.readAsStringSync();
 
       final includedPaths = results.includedPaths;
       expect(includedPaths, isNotNull);
-      expect(includedPaths.length, equals(7));
+      expect(includedPaths.length, equals(9));
       // Order is not guaranteed
       expect(includedPaths.contains(testFile1.path), true);
-      expect(contentsBeforeUpdate, isNot(equals(contentsAfterUpdate)));
       expect(includedPaths.contains(testFile2.path), true);
       expect(includedPaths.contains(testFile3.path), true);
       expect(includedPaths.contains(testFile7.path), true);
       expect(includedPaths.contains(testFile8.path), true);
       expect(includedPaths.contains(testFile9.path), true);
       expect(includedPaths.contains(testFile10.path), true);
+      expect(includedPaths.contains(skipFile.path), true);
+      expect(includedPaths.contains(doNothingFile.path), true);
 
       final updatedPaths = results.updatedPaths;
       expect(updatedPaths, isNotNull);
-      // testFile9 and testFile10 are intentionally misconfigured and so they
-      // won't be updated even though they are on the include list.
-      expect(updatedPaths.length, equals(5));
+      expect(updatedPaths.length, equals(7));
       // Order is not guaranteed
       expect(updatedPaths.contains(testFile1.path), true);
       expect(updatedPaths.contains(testFile2.path), true);
       expect(updatedPaths.contains(testFile3.path), true);
       expect(updatedPaths.contains(testFile7.path), true);
       expect(updatedPaths.contains(testFile8.path), true);
+      expect(updatedPaths.contains(testFile9.path), true);
+      expect(updatedPaths.contains(testFile10.path), true);
+      expect(updatedPaths.contains(skipFile.path), false);
+      expect(updatedPaths.contains(doNothingFile.path), false);
+
+      expect(contentsBeforeUpdate, isNot(equals(contentsAfterUpdate)));
+      // There is an extremely rare failure case on the year boundary.
+      // TODO(mossmana): Handle running test on Dec 31 - Jan 1.
+      expect(contentsAfterUpdate, contains(DateTime.now().year.toString()));
     });
 
     test('license headers bulk update can be dry run', () async {
@@ -390,7 +406,7 @@ text that should be added to the file. */''',
 
       final updatedPaths = results.updatedPaths;
       expect(updatedPaths, isNotNull);
-      expect(updatedPaths.length, equals(5));
+      expect(updatedPaths.length, equals(7));
       expect(updatedPaths.contains(testFile1.path), true);
       expect(contentsBeforeUpdate, equals(contentsAfterUpdate));
     });
@@ -483,27 +499,34 @@ Future<void> _setupTestConfigFile() async {
   final contents = '''---
 # sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
 remove_licenses:
-  - |
-    // This is some <value1> multiline license
+  #0
+  - |-
+    // This is some <value> multiline license
     // text that should be removed from the file.
-  - |
-    /* This is other <value2> multiline license
+  #1
+  - |-
+    /* This is other <value> multiline license
     text that should be removed from the file. */
-  - |
-    # This is more <value3> multiline license
+  #2
+  - |-
+    # This is more <value> multiline license
     # text that should be removed from the file.
-  - |
+  #3
+  - |-
     // This is some multiline license text to
     // remove that does not contain a stored value.
-# sequence of license text strings that should be added to the top of a file. {value} will be replaced.
-add_licenses: 
-  - |
-    // This is some <value1> multiline license
+# sequence of license text strings that should be added to the top of a file. <value> will be replaced.
+add_licenses:
+  #0
+  - |-
+    // This is some <value> multiline license
     // text that should be added to the file.
-  - |
-    # This is other <value3> multiline license
+  #1
+  - |-
+    # This is other <value> multiline license
     # text that should be added to the file.
-  - |
+  #2
+  - |-
     // This is some multiline license text to
     // add that does not contain a stored value.
 # defines which files should have license text added or updated.
@@ -530,6 +553,10 @@ update_paths:
     ext2:
       remove:
         - 2
+      add: 1
+    ext3:
+      remove:
+        - 3
       add: 1''';
 
   configFile.writeAsStringSync(contents, flush: true);
@@ -539,6 +566,7 @@ update_paths:
 /// repo_root/
 ///    test1.ext1
 ///    test2.ext2
+///    test.skip
 ///    .hidden/
 ///       test3.ext1
 ///    sub_dir1/
@@ -572,6 +600,18 @@ Future<void> _setupTestDirectoryStructure() async {
   testFile2 = File(p.join(repoRoot.path, 'test2.ext2'))
     ..createSync(recursive: true);
   testFile2.writeAsStringSync(licenseText3 + extraText, flush: true);
+
+  final licenseText = '''
+# This is other 2001 multiline license
+# text that should be added to the file.
+''';
+  doNothingFile = File(p.join(repoRoot.path, 'doNothingFile.ext3'))
+    ..createSync(recursive: true);
+  doNothingFile.writeAsStringSync(licenseText + extraText, flush: true);
+
+  skipFile = File(p.join(repoRoot.path, 'test.skip'))
+    ..createSync(recursive: true);
+  skipFile.writeAsStringSync(extraText, flush: true);
 
   // Setup /repo_root/.hidden directory structure
   Directory(p.join(repoRoot.path, '.hidden')).createSync(recursive: true);
@@ -624,6 +664,7 @@ Future<void> _setupTestDirectoryStructure() async {
     p.join(repoRoot.path, 'sub_dir2', 'sub_dir4'),
   ).createSync(recursive: true);
 
+  // Missing license header
   testFile9 = File(p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'test9.ext1'))
     ..createSync(recursive: true);
   testFile9.writeAsStringSync(extraText, flush: true);
@@ -633,6 +674,7 @@ Future<void> _setupTestDirectoryStructure() async {
     p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'sub_dir5'),
   ).createSync(recursive: true);
 
+  // Will be treated like a missing license header since not configured
   testFile10 = File(
     p.join(repoRoot.path, 'sub_dir2', 'sub_dir4', 'sub_dir5', 'test10.ext2'),
   )..createSync(recursive: true);
