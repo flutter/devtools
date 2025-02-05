@@ -23,7 +23,7 @@ class InspectorControls extends StatelessWidget {
   final v2.InspectorController? controller;
 
   static const minScreenWidthForTextBeforeTruncating = 800.0;
-  static const minScreenWidthForTextBeforeScaling = 550.0;
+  static const minScreenWidthForTextBeforeScaling = 200.0;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +70,7 @@ class InspectorControls extends StatelessWidget {
 class InspectorServiceExtensionButtonGroup extends StatelessWidget {
   const InspectorServiceExtensionButtonGroup({super.key});
 
-  static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
+  static const serviceExtensionButtonsIncludeTextWidth = 1300.0;
 
   @override
   Widget build(BuildContext context) {
