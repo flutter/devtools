@@ -58,7 +58,7 @@ Typing `which flutter` and `which dart` (or `where.exe flutter` and `where.exe d
 into your terminal should print the path to the binaries from the Flutter SDK you cloned from GitHub.
 
 Be sure to run `flutter doctor -v` to ensure your Flutter environment is set up correctly.
-If you plan to develop on MacOS or run a test app on an iOS simulator, you will need
+If you plan to develop on macOS or run a test app on an iOS simulator, you will need
 to ensure CocoaPods is setup correctly.
 
 1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the DevTools repo to your
