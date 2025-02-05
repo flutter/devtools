@@ -35,7 +35,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* The console in the debugger now soft wraps lines.
+  [#8855](https://github.com/flutter/devtools/pull/8855).
 
 ## Network profiler updates
 
