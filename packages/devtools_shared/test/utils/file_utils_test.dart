@@ -12,6 +12,8 @@ import 'package:test/test.dart';
 import '../helpers/helpers.dart';
 
 const projectRootParts = ['absolute_path_to', 'my_app_root'];
+
+/// The project root as a URI string.
 late String projectRoot;
 
 late Directory testDirectory;
@@ -130,12 +132,12 @@ void main() {
           // Dart file in a nested project.
           await verifyPackageRoot(
             nestedProjectLibFile.uri.toString(),
-            expected: p.join(projectRoot, 'example', 'nested_project'),
+            expected: p.posix.join(projectRoot, 'example', 'nested_project'),
             useDtd: useDtd,
           );
           await verifyPackageRoot(
             nestedProjectTestFile.uri.toString(),
-            expected: p.join(projectRoot, 'example', 'nested_project'),
+            expected: p.posix.join(projectRoot, 'example', 'nested_project'),
             useDtd: useDtd,
           );
 
@@ -207,23 +209,27 @@ void _setupTestDirectoryStructure() {
   projectRoot = directoryPath.substring(0, directoryPath.length - 1);
 
   // Set up the project root contents.
-  Directory(p.join(projectRootDirectory.path, '.dart_tool'))
+  Directory(p.posix.join(projectRootDirectory.path, '.dart_tool'))
       .createSync(recursive: true);
-  libFile = File(p.join(projectRootDirectory.path, 'lib', 'foo.dart'))
+  libFile = File(p.posix.join(projectRootDirectory.path, 'lib', 'foo.dart'))
     ..createSync(recursive: true);
-  libSubFile = File(p.join(projectRootDirectory.path, 'lib', 'sub', 'foo.dart'))
+  libSubFile =
+      File(p.posix.join(projectRootDirectory.path, 'lib', 'sub', 'foo.dart'))
+        ..createSync(recursive: true);
+  binFile = File(p.posix.join(projectRootDirectory.path, 'bin', 'foo.dart'))
     ..createSync(recursive: true);
-  binFile = File(p.join(projectRootDirectory.path, 'bin', 'foo.dart'))
-    ..createSync(recursive: true);
-  binSubFile = File(p.join(projectRootDirectory.path, 'bin', 'sub', 'foo.dart'))
-    ..createSync(recursive: true);
-  testFile = File(p.join(projectRootDirectory.path, 'test', 'foo_test.dart'))
-    ..createSync(recursive: true);
+  binSubFile =
+      File(p.posix.join(projectRootDirectory.path, 'bin', 'sub', 'foo.dart'))
+        ..createSync(recursive: true);
+  testFile =
+      File(p.posix.join(projectRootDirectory.path, 'test', 'foo_test.dart'))
+        ..createSync(recursive: true);
   testSubFile = File(
-    p.join(projectRootDirectory.path, 'test', 'sub', 'foo_test.dart'),
+    p.posix.join(projectRootDirectory.path, 'test', 'sub', 'foo_test.dart'),
   )..createSync(recursive: true);
   integrationTestFile = File(
-    p.join(projectRootDirectory.path, 'integration_test', 'foo_test.dart'),
+    p.posix
+        .join(projectRootDirectory.path, 'integration_test', 'foo_test.dart'),
   )..createSync(recursive: true);
   integrationTestSubFile = File(
     p.join(
@@ -234,16 +240,17 @@ void _setupTestDirectoryStructure() {
     ),
   )..createSync(recursive: true);
   benchmarkFile =
-      File(p.join(projectRootDirectory.path, 'benchmark', 'foo.dart'))
+      File(p.posix.join(projectRootDirectory.path, 'benchmark', 'foo.dart'))
         ..createSync(recursive: true);
   benchmarkSubFile = File(
-    p.join(projectRootDirectory.path, 'benchmark', 'sub', 'foo.dart'),
+    p.posix.join(projectRootDirectory.path, 'benchmark', 'sub', 'foo.dart'),
   )..createSync(recursive: true);
-  exampleFile = File(p.join(projectRootDirectory.path, 'example', 'foo.dart'))
-    ..createSync(recursive: true);
-  exampleSubFile =
-      File(p.join(projectRootDirectory.path, 'example', 'sub', 'foo.dart'))
+  exampleFile =
+      File(p.posix.join(projectRootDirectory.path, 'example', 'foo.dart'))
         ..createSync(recursive: true);
+  exampleSubFile = File(
+      p.posix.join(projectRootDirectory.path, 'example', 'sub', 'foo.dart'))
+    ..createSync(recursive: true);
   // Setup a nested Dart project under the 'example' directory.
   Directory(
     p.join(
@@ -271,9 +278,10 @@ void _setupTestDirectoryStructure() {
       'foo_test.dart',
     ),
   )..createSync(recursive: true);
-  anyFile = File(p.join(projectRootDirectory.path, 'any_name', 'foo.dart'))
-    ..createSync(recursive: true);
-  anySubFile =
-      File(p.join(projectRootDirectory.path, 'any_name', 'sub', 'foo.dart'))
+  anyFile =
+      File(p.posix.join(projectRootDirectory.path, 'any_name', 'foo.dart'))
         ..createSync(recursive: true);
+  anySubFile = File(
+      p.posix.join(projectRootDirectory.path, 'any_name', 'sub', 'foo.dart'))
+    ..createSync(recursive: true);
 }

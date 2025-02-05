@@ -394,6 +394,10 @@ class TestPackageWithExtension {
   final bool requiresConnection;
   final bool isPubliclyHosted;
   final String? packageVersion;
+
+  /// The relative path from the extensions.
+  ///
+  /// Uses the paths separator for the current platform.
   final String relativePathFromExtensions;
 
   String get configYamlContent => '''
@@ -439,8 +443,9 @@ ${_dependenciesAsString()}
       } else {
         sb
           ..writeln() // Add a new line for the path dependency.
+          // Always write paths in pubspec.yaml with forward slashes.
           ..writeln(
-            '    path: $pathToExtensions/${dep.relativePathFromExtensions}',
+            '    path: $pathToExtensions/${dep.relativePathFromExtensions.replaceAll(r'\', '/')}',
           );
       }
     }
