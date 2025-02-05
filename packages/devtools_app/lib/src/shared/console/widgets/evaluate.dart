@@ -35,8 +35,6 @@ class ExpressionEvalField extends StatefulWidget {
 
   final AutoCompleteResultsFunction getAutoCompleteResults;
 
-  static const _evalFieldHeight = 32.0;
-
   @override
   ExpressionEvalFieldState createState() => ExpressionEvalFieldState();
 }
@@ -218,46 +216,44 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
               return KeyEventResult.ignored;
             },
-            child: SizedBox(
-              height: ExpressionEvalField._evalFieldHeight,
-              child: AutoCompleteSearchField(
-                controller: _autoCompleteController,
-                searchFieldEnabled: true,
-                shouldRequestFocus: false,
-                clearFieldOnEscapeWhenOverlayHidden: true,
-                onSelection: _onSelection,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.all(denseSpacing),
-                  border: const OutlineInputBorder(),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                  ),
-                  labelText: 'Eval. Enter "?" for help.',
-                  labelStyle: Theme.of(context).subtleTextStyle,
+            child: AutoCompleteSearchField(
+              controller: _autoCompleteController,
+              searchFieldEnabled: true,
+              shouldRequestFocus: false,
+              clearFieldOnEscapeWhenOverlayHidden: true,
+              onSelection: _onSelection,
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.all(denseSpacing),
+                border: const OutlineInputBorder(),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide.none,
                 ),
-                overlayXPositionBuilder: (
-                  String inputValue,
-                  TextStyle? inputStyle,
-                ) {
-                  // X-coordinate is equivalent to the width of the input text
-                  // up to the last "." or the insertion point (cursor):
-                  final indexOfDot = inputValue.lastIndexOf('.');
-                  final textSegment =
-                      indexOfDot != -1
-                          ? inputValue.substring(0, indexOfDot + 1)
-                          : inputValue;
-                  return calculateTextSpanWidth(
-                    TextSpan(text: textSegment, style: inputStyle),
-                  );
-                },
-                // Disable ligatures, so the suggestions of the auto complete work correcly.
-                style: Theme.of(context).fixedFontStyle.copyWith(
-                  fontFeatures: [const FontFeature.disable('liga')],
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide.none,
                 ),
+                labelText: 'Eval. Enter "?" for help.',
+                labelStyle: Theme.of(context).subtleTextStyle,
               ),
+              overlayXPositionBuilder: (
+                String inputValue,
+                TextStyle? inputStyle,
+              ) {
+                // X-coordinate is equivalent to the width of the input text
+                // up to the last "." or the insertion point (cursor):
+                final indexOfDot = inputValue.lastIndexOf('.');
+                final textSegment =
+                    indexOfDot != -1
+                        ? inputValue.substring(0, indexOfDot + 1)
+                        : inputValue;
+                return calculateTextSpanWidth(
+                  TextSpan(text: textSegment, style: inputStyle),
+                );
+              },
+              // Disable ligatures, so the suggestions of the auto complete work correcly.
+              style: Theme.of(context).fixedFontStyle.copyWith(
+                fontFeatures: [const FontFeature.disable('liga')],
+              ),
+              shouldExpandHeight: true,
             ),
           ),
         ),

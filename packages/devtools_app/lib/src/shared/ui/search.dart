@@ -893,8 +893,10 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
     this.onClose,
     this.searchFieldWidth = defaultSearchFieldWidth,
     double? searchFieldHeight,
+    bool shouldExpandHeight = true,
     super.key,
-  }) : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight;
+  }) : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight,
+       _shouldExpandHeight = shouldExpandHeight;
 
   final T searchController;
 
@@ -917,6 +919,9 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
   /// triggered.
   final VoidCallback? onClose;
 
+  /// Whether the search field should soft wrap lines, expanding the height.
+  final bool _shouldExpandHeight;
+
   @override
   State<SearchField> createState() => _SearchFieldState();
 }
@@ -928,18 +933,23 @@ class _SearchFieldState extends State<SearchField>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.searchFieldWidth,
-      height: widget.searchFieldHeight,
-      child: StatelessSearchField(
-        controller: searchController,
-        searchFieldEnabled: widget.searchFieldEnabled,
-        shouldRequestFocus: widget.shouldRequestFocus,
-        supportsNavigation: widget.supportsNavigation,
-        onClose: widget.onClose,
-        searchFieldHeight: widget.searchFieldHeight,
-      ),
+    final searchField = StatelessSearchField(
+      controller: searchController,
+      searchFieldEnabled: widget.searchFieldEnabled,
+      shouldRequestFocus: widget.shouldRequestFocus,
+      supportsNavigation: widget.supportsNavigation,
+      onClose: widget.onClose,
+      searchFieldHeight: widget.searchFieldHeight,
+      shouldExpandHeight: widget._shouldExpandHeight,
     );
+
+    return widget._shouldExpandHeight
+        ? searchField
+        : SizedBox(
+          width: widget.searchFieldWidth,
+          height: widget.searchFieldHeight,
+          child: searchField,
+        );
   }
 }
 
@@ -970,7 +980,8 @@ class StatelessSearchField<T extends SearchableDataMixin>
     this.suffix,
     this.style,
     this.searchFieldHeight,
-  });
+    bool shouldExpandHeight = false,
+  }) : _shouldExpandHeight = shouldExpandHeight;
 
   final SearchControllerMixin<T> controller;
 
@@ -1014,6 +1025,9 @@ class StatelessSearchField<T extends SearchableDataMixin>
 
   final double? searchFieldHeight;
 
+  /// Whether the search field should soft wrap lines, expanding the height.
+  final bool _shouldExpandHeight;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1032,6 +1046,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
       focusNode: controller.searchFieldFocusNode,
       controller: controller.searchTextFieldController,
       style: textStyle,
+      maxLines: _shouldExpandHeight ? null : 1,
       onChanged: onChanged,
       onEditingComplete: () {
         controller.searchFieldFocusNode?.requestFocus();
@@ -1116,7 +1131,8 @@ class AutoCompleteSearchField extends StatefulWidget {
     this.onFocusLost,
     this.style,
     this.keyEventsToIgnore = const {},
-  });
+    bool shouldExpandHeight = false,
+  }) : _shouldExpandHeight = shouldExpandHeight;
 
   final AutoCompleteSearchControllerMixin controller;
 
@@ -1163,6 +1179,9 @@ class AutoCompleteSearchField extends StatefulWidget {
   /// Handler called when either [controller.searchFieldFocusNode] or
   /// [controller.autocompleteFocusNode] has lost focus.
   final VoidCallback? onFocusLost;
+
+  /// Whether the search field should soft wrap lines, expanding the height.
+  final bool _shouldExpandHeight;
 
   @override
   State<AutoCompleteSearchField> createState() =>
@@ -1214,6 +1233,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
           },
           onClose: widget.onClose,
           style: widget.style,
+          shouldExpandHeight: widget._shouldExpandHeight,
         ),
       ),
     );
