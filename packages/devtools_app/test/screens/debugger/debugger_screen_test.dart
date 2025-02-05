@@ -183,10 +183,7 @@ void main() {
         ),
       );
       expect(
-        _findDevToolsTooltip(
-          'Stop on uncaught exceptions',
-          skipOffstage: false,
-        ),
+        find.byTooltip('Stop on uncaught exceptions', skipOffstage: false),
         findsOneWidget,
       );
     },
@@ -251,18 +248,4 @@ void main() {
     expect(state!.script, libScriptRef);
     expect(state.line, testClassRef.location!.line);
   });
-}
-
-/// Finds [DevToolsTooltip] widgets with the given message.
-/// (Based on [CommonFinders.byTooltip].)
-Finder _findDevToolsTooltip(Pattern message, {bool skipOffstage = true}) {
-  return find.byWidgetPredicate((Widget widget) {
-    return widget is DevToolsTooltip &&
-        (message is RegExp
-            ? ((widget.message != null && message.hasMatch(widget.message!)) ||
-                (widget.richMessage != null &&
-                    message.hasMatch(widget.richMessage!.toPlainText())))
-            : ((widget.message ?? widget.richMessage?.toPlainText()) ==
-                message));
-  }, skipOffstage: skipOffstage);
 }
