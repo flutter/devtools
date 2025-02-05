@@ -172,6 +172,26 @@ void main() {
     },
   );
 
+  testWidgetsWithWindowSize(
+    'debugger exception mode tooltip',
+    smallWindowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.build),
+          debugger: debuggerController,
+        ),
+      );
+      expect(
+        find.byDevToolsTooltip(
+          'Stop on uncaught exceptions',
+          skipOffstage: false,
+        ),
+        findsOneWidget,
+      );
+    },
+  );
+
   testWidgetsWithWindowSize('node selection state', windowSize, (
     WidgetTester tester,
   ) async {
@@ -231,4 +251,20 @@ void main() {
     expect(state!.script, libScriptRef);
     expect(state.line, testClassRef.location!.line);
   });
+}
+
+extension on CommonFinders {
+  /// Finds [DevToolsTooltip] widgets with the given message.
+  Finder byDevToolsTooltip(Pattern message, {bool skipOffstage = true}) {
+    return byWidgetPredicate((Widget widget) {
+      return widget is DevToolsTooltip &&
+          (message is RegExp
+              ? ((widget.message != null &&
+                      message.hasMatch(widget.message!)) ||
+                  (widget.richMessage != null &&
+                      message.hasMatch(widget.richMessage!.toPlainText())))
+              : ((widget.message ?? widget.richMessage?.toPlainText()) ==
+                  message));
+    }, skipOffstage: skipOffstage);
+  }
 }
