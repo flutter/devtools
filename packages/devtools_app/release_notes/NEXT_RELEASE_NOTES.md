@@ -36,7 +36,7 @@ TODO: Remove this section if there are not any general updates.
 ## Debugger updates
 
 * Added a tooltip to describe the exception mode drop-down. -
-[#4876](https://github.com/flutter/devtools/issues/4876)
+[#8849](https://github.com/flutter/devtools/pull/8849)
 
 ## Network profiler updates
 
