@@ -37,6 +37,9 @@ TODO: Remove this section if there are not any general updates.
 
 * Added a tooltip to describe the exception mode drop-down. -
 [#8849](https://github.com/flutter/devtools/pull/8849)
+* Either the 'pause' or the 'resume' buttons is displayed,
+  never both. -
+  [#4924](https://github.com/flutter/devtools/issues/4924)
 
 ## Network profiler updates
 
