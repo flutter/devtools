@@ -112,7 +112,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
             onPressed:
                 (!resuming && !isSystemIsolate)
                     ? () => unawaited(controller.resume())
-                  
+                    : null,
+          ),
       ],
     );
   }
