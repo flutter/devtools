@@ -62,7 +62,8 @@ class IntegrationTestRunner with IOMixin {
       ];
 
       debugLog('> flutter ${flutterDriveArgs.join(' ')}');
-      final process = await Process.start('flutter', flutterDriveArgs);
+      final process = await Process.start(
+          Platform.isWindows ? 'flutter.bat' : 'flutter', flutterDriveArgs);
 
       bool stdOutWriteInProgress = false;
       bool stdErrWriteInProgress = false;
