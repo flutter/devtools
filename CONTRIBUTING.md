@@ -52,7 +52,7 @@ You can do this online, and it only takes a minute.
 **Before setting up your DevTools environment**, please make sure you have
 [cloned the Flutter SDK from GitHub](https://github.com/flutter/flutter/blob/main/docs/contributing/Setting-up-the-Framework-development-environment.md)
 and added the included `flutter` and `dart` executables to your `PATH` environment variable (see Flutter
-instructions for how to [update your PATH](https://docs.flutter.dev/get-started/install/macos/mobile-ios#add-flutter-to-your-path)).
+instructions for how to [update your PATH](https://flutter.dev/to/update-macos-path)).
 
 Typing `which flutter` and `which dart` (or `where.exe flutter` and `where.exe dart` for Windows)
 into your terminal should print the path to the binaries from the Flutter SDK you cloned from GitHub.
