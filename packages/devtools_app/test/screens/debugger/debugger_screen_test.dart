@@ -255,6 +255,7 @@ void main() {
 
 extension on CommonFinders {
   /// Finds [DevToolsTooltip] widgets with the given message.
+  /// (Based on [CommonFinders.byTooltip].)
   Finder byDevToolsTooltip(Pattern message, {bool skipOffstage = true}) {
     return byWidgetPredicate((Widget widget) {
       return widget is DevToolsTooltip &&
