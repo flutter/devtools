@@ -3,6 +3,7 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
+
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
@@ -39,7 +40,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+- Fixed issue where the HTTP requests would sometimes not be displayed properly, particularly when DevTools is communicating with an application over a slow network connection. - [#8860](https://github.com/flutter/devtools/pull/8860)
 
 ## Logging updates
 
