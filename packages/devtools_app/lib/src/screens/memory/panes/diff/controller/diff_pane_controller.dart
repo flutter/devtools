@@ -448,7 +448,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   bool get updatingValues => _updatingValues;
   bool _updatingValues = false;
 
-  /// Updates fields in this instance based on the values in [core].
+  /// Updates fields in this instance based on the values in [_core].
   void _updateValues() {
     _startUpdatingValues();
     try {

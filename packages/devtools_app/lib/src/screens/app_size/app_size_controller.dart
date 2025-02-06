@@ -632,9 +632,9 @@ class AppSizeController {
   ///
   /// The tree can be filtered with different [DiffTreeType] values:
   /// * [DiffTreeType.increaseOnly] - returns a tree with nodes with positive
-  ///   [byteSize].
+  ///   `byteSize`.
   /// * [DiffTreeType.decreaseOnly] - returns a tree with nodes with negative
-  ///   [byteSize].
+  ///   `byteSize`.
   /// * [DiffTreeType.combined] - returns a tree with all nodes.
   TreemapNode? generateDiffTree(
     Map<String, dynamic> treeJson,

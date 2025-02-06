@@ -341,7 +341,7 @@ const _widePaddingVisualizerPercent = 0.35;
 /// display based on the display's [availableSize] and the real widget's
 /// [WidgetSizes].
 ///
-/// Uses a constant [paddingFraction] for the display padding, regardless of
+/// Uses a constant `paddingFraction` for the display padding, regardless of
 /// the actual size.
 WidgetSizes _simpleFractionalLayout({
   required double availableSize,
