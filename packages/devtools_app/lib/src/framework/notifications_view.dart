@@ -173,7 +173,7 @@ class _NotificationOverlay extends StatelessWidget {
 
 class _Notification extends StatefulWidget {
   _Notification({required this.message, required this.remove})
-    : super(key:  UniqueKey());
+    : super(key: UniqueKey());
 
   final NotificationMessage message;
   final void Function(_Notification) remove;
