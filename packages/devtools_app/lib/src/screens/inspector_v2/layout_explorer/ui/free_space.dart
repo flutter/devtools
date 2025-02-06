@@ -23,7 +23,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
         'h=${toStringAsFixed(renderProperties.realHeight)}';
     final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
     final showWidth =
-        renderProperties.realWidth != renderProperties.layoutProperties?.width;
+        renderProperties.realWidth != renderProperties.layoutProperties.width;
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
