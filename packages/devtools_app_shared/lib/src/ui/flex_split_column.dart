@@ -2,25 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport 'package:devtools_app_shared/src/ui/common.dart';
+library;
+
 import 'package:flutter/material.dart';
 
 import 'split_pane.dart';
 
-/// A widget that takes a list of [children] and lays them out in a column where
+/// A widget that takes a list of `children` and lays them out in a column where
 /// each child has a flexible height.
 ///
-/// Each child in [children] must have an accompanying header in [header]. Since
-/// each header must be a [PreferredSizeWidget], it is common to use the shared
-/// widgets [AreaPaneHeader] or [BlankHeader] for the column [headers].
+/// Each child in `children` must have an accompanying header in [headers].
+/// Since each header must be a [PreferredSizeWidget], it is common to use the
+/// shared widgets [AreaPaneHeader] or [BlankHeader] for the column [headers].
 ///
 /// The user can customize the amount of space allocated to each child by
-/// clicking and dragging the [header]s that separate the children.
+/// clicking and dragging the [headers] that separate the children.
 ///
-/// [initialFractions] defines how much space to give each child when building
-/// this widget.
+/// The constructor's `initialFractions` parameter defines how much space to
+/// give each child when building this widget.
 ///
-/// [minSizes] defines the minimum size that each child can be set to when
-/// adjusting the sizes of the children.
+/// The constructor's `minSizes` defines the minimum size that each child can be
+/// set to when adjusting the sizes of the children.
 final class FlexSplitColumn extends StatelessWidget {
   FlexSplitColumn({
     super.key,
@@ -42,45 +45,45 @@ final class FlexSplitColumn extends StatelessWidget {
         _minSizes = modifyMinSizesToIncludeFirstHeader(minSizes, headers);
 
   /// The headers that will be laid out above each corresponding child in
-  /// [children].
+  /// `children`.
   ///
   /// All headers but the first will be passed into [SplitPane.splitters] when
   /// creating the [SplitPane] widget in `build`. Instead of being passed into
-  /// [SplitPane.splitters], it will be combined with the first child in [children]
+  /// [SplitPane.splitters], it will be combined with the first child in `children`
   /// to create the first child we will pass into [SplitPane.children].
   ///
   /// We do this because the first header will not actually be a splitter as
   /// there is not any content above it for it to split.
   ///
   /// We modify other values [_children], [_initialFractions], and [_minSizes]
-  /// from [children], [initialFractions], and [minSizes], respectively, to
+  /// from `children`, `initialFractions`, and `minSizes`, respectively, to
   /// account for the first header. We do this adjustment here so that the
   /// creators of [FlexSplitColumn] can be unaware of the under-the-hood
   /// calculations necessary to achieve the UI requirements specified by
-  /// [initialFractions] and [minSizes].
+  /// `initialFractions` and `minSizes`.
   final List<PreferredSizeWidget> headers;
 
   /// The children that will be laid out below each corresponding header in
   /// [headers].
   ///
-  /// All [children] except the first will be passed into [SplitPane.children]
-  /// unmodified. We need to modify the first child from [children] to account
+  /// All `children` except the first will be passed into [SplitPane.children]
+  /// unmodified. We need to modify the first child from `children` to account
   /// for the first header (see above).
   final List<Widget> _children;
 
-  /// The fraction of the layout to allocate to each child in [children].
+  /// The fraction of the layout to allocate to each child in `children`.
   ///
-  /// We need to modify the values given by [initialFractions] to account for
+  /// We need to modify the values given by `initialFractions` to account for
   /// the first header (see above).
   final List<double> _initialFractions;
 
   /// The minimum size each child is allowed to be.
   ///
-  /// We need to modify the values given by [minSizes] to account for the first
+  /// We need to modify the values given by `minSizes` to account for the first
   /// header (see above).
   final List<double> _minSizes;
 
-  /// The total height of the column, including all [headers] and [children].
+  /// The total height of the column, including all [headers] and `children`.
   final double totalHeight;
 
   @visibleForTesting

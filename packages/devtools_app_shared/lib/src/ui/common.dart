@@ -163,7 +163,8 @@ final class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
 /// Wraps [child] in a rounded border with default styling.
 ///
 /// This border can optionally be made non-uniform by setting any of
-/// [showTop], [showBottom], [showLeft] or [showRight] to false.
+/// [showTopLeft], [showTopRight], [showBottomLeft], or [showBottomRight] to
+/// false.
 ///
 /// If [clip] is true, the child will be wrapped in a [ClipRRect] to ensure the
 /// rounded corner of the border is drawn as expected. This should not be
@@ -562,7 +563,8 @@ extension ScrollControllerAutoScroll on ScrollController {
   }
 }
 
-/// A text span that will launch the provided URL from [link] when clicked.
+/// A text span that, when clicked, will launch the provided URL from the `link`
+/// given in the constructor.
 class LinkTextSpan extends TextSpan {
   LinkTextSpan({
     required Link link,
