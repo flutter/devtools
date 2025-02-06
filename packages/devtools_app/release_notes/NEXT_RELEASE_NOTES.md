@@ -40,7 +40,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed the context menu style to be consistent with other screens
+  [#8859](https://github.com/flutter/devtools/pull/8859).
 
 ## Logging updates
 
