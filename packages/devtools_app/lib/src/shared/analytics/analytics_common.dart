@@ -130,11 +130,15 @@ Map<String, String?> createStackTraceForAnalytics(
   return stackTraceChunks;
 }
 
+/// A regex that matches a string that starts with a Windows drive letter (with
+/// colon).
+final _startsWithWindowsDriveLetterRegex = RegExp(r'^[a-zA-Z]:');
+
 /// Normalize a file path from either platform to the POSIX equivalent so that
 /// paths are the same for both Windows and non-Windows paths.
 String _normalizePath(String path) {
   // Windows path with drive letter.
-  if (!path.startsWith('/') && path.length > 2 && path[1] == ':') {
+  if (_startsWithWindowsDriveLetterRegex.hasMatch(path)) {
     // Strip drive letter and normalize slashes to match POSIX.
     // C:\foo\bar -> /foo/bar
     return path.substring(2).replaceAll(r'\', '/');
