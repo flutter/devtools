@@ -36,7 +36,10 @@ TODO: Remove this section if there are not any general updates.
 ## Debugger updates
 
 * Added a tooltip to describe the exception mode drop-down. -
-[#8849](https://github.com/flutter/devtools/pull/8849)
+  [#8849](https://github.com/flutter/devtools/pull/8849)
+* Updated syntax highlighting with support for digit separators,
+  and improved comment and string interpolation handling. -
+  [#8861](https://github.com/flutter/devtools/pull/8861)
 
 ## Network profiler updates
 
