@@ -44,7 +44,6 @@ class ExtensionManager {
   /// removed in [dispose].
   EventListener? _handleMessageListener;
 
-  // ignore: unused_element, false positive due to part files
   Future<void> _init() async {
     window.addEventListener(
       'message',
@@ -76,7 +75,6 @@ class ExtensionManager {
     }
   }
 
-  // ignore: unused_element, false positive due to part files
   void _dispose() {
     _registeredEventHandlers.clear();
     window.removeEventListener('message', _handleMessageListener);

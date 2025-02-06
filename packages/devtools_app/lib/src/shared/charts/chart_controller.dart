@@ -220,10 +220,9 @@ class ChartController extends DisposableController
       // Greater or equal to range we're zooming in on?
       if (lastDT.difference(firstDT).inMinutes >= duration.inMinutes) {
         // Grab the duration in minutes passed in.
-        final startOfLastNMinutes =
-        // We need this cast to be able to return null if nothing is found.
-        // ignore: unnecessary_cast
-        timestamps.reversed.firstWhereOrNull((timestamp) {
+        final startOfLastNMinutes = timestamps.reversed.firstWhereOrNull((
+          timestamp,
+        ) {
           final currentDT = DateTime.fromMillisecondsSinceEpoch(timestamp);
           final diff = lastDT.difference(currentDT);
           if (diff.inMinutes >= duration.inMinutes) {

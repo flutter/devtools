@@ -161,7 +161,6 @@ class FlutterTestEnvironment {
         setGlobal(DTDManager, DTDManager());
 
         // Clear out VM service calls from the test driver.
-        // ignore: invalid_use_of_visible_for_testing_member
         _service.clearVmServiceCalls();
 
         await serviceConnection.serviceManager.vmServiceOpened(
