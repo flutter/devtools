@@ -391,8 +391,9 @@ class ActionsColumn extends ColumnData<NetworkRequest>
   }) {
     // Only show the actions button when there are options and the row is
     // currently selected.
-    if (data is! DartIOHttpRequestData) return const SizedBox.shrink();
-    if (!isRowSelected) return const SizedBox.shrink();
+    if (data is! DartIOHttpRequestData || !isRowSelected) {
+      return const SizedBox.shrink();
+    }
 
     return ContextMenuButton(
       menuChildren: [
