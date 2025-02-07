@@ -5,7 +5,7 @@
 import 'package:devtools_app_shared/ui.dart' as devtools_shared_ui;
 import 'package:flutter/material.dart';
 
-/// Example of using a [DevToolsDialog] widget from
+/// Example of using a [devtools_shared_ui.DevToolsDialog] widget from
 /// 'package:devtools_app_shared/ui.dart'.
 class MyDialog extends StatelessWidget {
   const MyDialog({super.key});
