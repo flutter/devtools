@@ -3,6 +3,9 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
+## 0.3.1
+* Bump `vm_service` dependency to `>=13.0.0 <16.0.0`.
+
 ## 0.3.0
 * Bump minimum Dart SDK version to `3.6.0`.
 * Bump minimum Flutter SDK version to `3.27.1`.
@@ -11,7 +14,6 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 * Add `iconAsset` and `iconSize` fields to the `ButtonGroupItemData` class.
 * Add `iconAsset` and `iconSize` fields to the `MaterialIconLabel` class.
 * Add "Supported Flutter versions" policy to the README.
-* Bump `vm_service` dependency to `>=13.0.0 <16.0.0`.
 
 ## 0.2.4
 * Add `updateQueryParameter` utility method.

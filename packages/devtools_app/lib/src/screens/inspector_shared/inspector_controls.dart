@@ -70,7 +70,7 @@ class InspectorControls extends StatelessWidget {
 class InspectorServiceExtensionButtonGroup extends StatelessWidget {
   const InspectorServiceExtensionButtonGroup({super.key});
 
-  static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
+  static const serviceExtensionButtonsIncludeTextWidth = 1300.0;
 
   @override
   Widget build(BuildContext context) {

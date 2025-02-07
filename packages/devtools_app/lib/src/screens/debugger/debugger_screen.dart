@@ -499,7 +499,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
       return 'paused$reason';
     }
 
-    final fileName = ' at ${scriptUri.split('/').last}';
+    final fileName = ' at ${fileNameFromUri(scriptUri)}';
     final tokenPos = location?.tokenPos;
     final scriptRef = location?.script;
     if (tokenPos == null || scriptRef == null) {

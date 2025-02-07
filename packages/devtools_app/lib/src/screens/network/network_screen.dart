@@ -400,8 +400,6 @@ class ActionsColumn extends ColumnData<NetworkRequest>
         alignment: ColumnAlignment.right,
       );
 
-  static const _actionSplashRadius = 16.0;
-
   @override
   bool get supportsSorting => false;
 
@@ -413,12 +411,25 @@ class ActionsColumn extends ColumnData<NetworkRequest>
     return '';
   }
 
-  List<PopupMenuItem> _buildOptions(NetworkRequest data) {
-    return [
-      if (data is DartIOHttpRequestData) ...[
-        PopupMenuItem(
+  @override
+  Widget build(
+    BuildContext context,
+    NetworkRequest data, {
+    bool isRowSelected = false,
+    bool isRowHovered = false,
+    VoidCallback? onPressed,
+  }) {
+    // Only show the actions button when there are options and the row is
+    // currently selected.
+    if (data is! DartIOHttpRequestData || !isRowSelected) {
+      return const SizedBox.shrink();
+    }
+
+    return ContextMenuButton(
+      menuChildren: [
+        MenuItemButton(
           child: const Text('Copy as URL'),
-          onTap: () {
+          onPressed: () {
             unawaited(
               copyToClipboard(
                 data.uri,
@@ -427,9 +438,9 @@ class ActionsColumn extends ColumnData<NetworkRequest>
             );
           },
         ),
-        PopupMenuItem(
+        MenuItemButton(
           child: const Text('Copy as cURL'),
-          onTap: () {
+          onPressed: () {
             unawaited(
               copyToClipboard(
                 CurlCommand.from(data).toString(),
@@ -439,29 +450,6 @@ class ActionsColumn extends ColumnData<NetworkRequest>
           },
         ),
       ],
-    ];
-  }
-
-  @override
-  Widget build(
-    BuildContext context,
-    NetworkRequest data, {
-    bool isRowSelected = false,
-    bool isRowHovered = false,
-    VoidCallback? onPressed,
-  }) {
-    final options = _buildOptions(data);
-
-    // Only show the actions button when there are options and the row is
-    // currently selected.
-    if (options.isEmpty || !isRowSelected) return const SizedBox.shrink();
-
-    return PopupMenuButton(
-      icon: const Icon(Icons.more_vert),
-      padding: const EdgeInsets.symmetric(horizontal: densePadding),
-      splashRadius: _actionSplashRadius,
-      tooltip: '',
-      itemBuilder: (context) => options,
     );
   }
 }

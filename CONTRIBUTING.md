@@ -57,6 +57,10 @@ instructions for how to [update your PATH](https://flutter.dev/to/update-macos-p
 Typing `which flutter` and `which dart` (or `where.exe flutter` and `where.exe dart` for Windows)
 into your terminal should print the path to the binaries from the Flutter SDK you cloned from GitHub.
 
+Be sure to run `flutter doctor -v` to ensure your Flutter environment is set up correctly.
+If you plan to develop on macOS or run a test app on an iOS simulator, you will need
+to ensure CocoaPods is setup correctly.
+
 1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the DevTools repo to your
 own Github account, and then clone it using SSH.
 	- If you haven't already, you may need to
@@ -89,7 +93,7 @@ with the upstream DevTools repo.
 
 We recommend using VS Code for your DevTools development environment because this gives you
 access to some advanced development and configuration features. When you open DevTools in VS Code,
-open the `devtools/packages` directory in your VS Code workspace. This will give you access to a set
+open the top-level `devtools/` directory in your VS Code workspace. This will give you access to a set
 of launch configurations for running and debugging DevTools:
 
 ![VS Code launch configurations](_markdown_images/vs_code_launch_configurations.png)
@@ -170,8 +174,8 @@ You can run DevTools in debug mode as either a Flutter web or Flutter desktop ap
 Desktop app whenever possible for a more efficient development workflow. Please see the
 [running on Flutter desktop](#running-devtools-on-flutter-desktop) section below for instructions.
 
-- To run DevTools as a Flutter web app **from VS Code**, run with the **devtools (packages)** configuration and the "Chrome" device
-	- To run with experiments enabled, run from VS Code with the **devtools + experiments (packages)** configuration
+- To run DevTools as a Flutter web app **from VS Code**, run with the **devtools** configuration and the "Chrome" device
+	- To run with experiments enabled, run from VS Code with the **devtools + experiments** configuration
 - To run DevTools as a Flutter web app **from the command line**, run `flutter run -d chrome`
 	- To run with experiments enabled, add the flag `--dart-define=enable_experiments=true`
 
