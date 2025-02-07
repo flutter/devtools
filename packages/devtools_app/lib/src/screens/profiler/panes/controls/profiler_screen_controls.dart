@@ -127,7 +127,8 @@ class _SecondaryControls extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         RefreshButton(
           label: 'Load all CPU samples',
-          tooltip: 'Load all available CPU samples from the profiler',
+          tooltip:
+              'Load all CPU samples for the connected app. This is the data \ncollected by the VM and is limited by the available buffer space.',
           gaScreen: gac.cpuProfiler,
           gaSelection: gac.CpuProfilerEvents.loadAllCpuSamples.name,
           minScreenWidthForTextBeforeScaling:
