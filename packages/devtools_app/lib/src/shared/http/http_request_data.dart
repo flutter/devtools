@@ -94,16 +94,21 @@ class DartIOHttpRequestData extends NetworkRequest {
     try {
       if (isFetchingFullData) return; // We are already fetching
       isFetchingFullData = true;
-      final updated = await serviceConnection.serviceManager.service!
-          .getHttpProfileRequestWrapper(
-            _request.isolateId,
-            _request.id.toString(),
-          );
-      _request = updated;
-      final fullRequest = _request as HttpProfileRequest;
-      _responseBody = utf8.decode(fullRequest.responseBody!);
-      _requestBody = utf8.decode(fullRequest.requestBody!);
-      notifyListeners();
+      final connected =
+          serviceConnection.serviceManager.connectedState.value.connected &&
+          serviceConnection.serviceManager.connectedAppInitialized;
+      if (connected) {
+        final updated = await serviceConnection.serviceManager.service!
+            .getHttpProfileRequestWrapper(
+              _request.isolateId,
+              _request.id.toString(),
+            );
+        _request = updated;
+        final fullRequest = _request as HttpProfileRequest;
+        _responseBody = utf8.decode(fullRequest.responseBody!);
+        _requestBody = utf8.decode(fullRequest.requestBody!);
+        notifyListeners();
+      }
     } finally {
       isFetchingFullData = false;
     }
