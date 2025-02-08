@@ -523,7 +523,7 @@ class DevToolsScreen<C extends Object?> {
   /// widgets depending on this controller can access it by calling
   /// `Provider<C>.of(context)`.
   ///
-  /// If [createController] and [controller] are both null, [screen] will be
+  /// If [createController] and `controller` are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
   ///
   /// In the controller initialization, if logic requires a connected [VmService]

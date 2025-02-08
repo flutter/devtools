@@ -172,6 +172,23 @@ void main() {
     },
   );
 
+  testWidgetsWithWindowSize(
+    'debugger exception mode tooltip',
+    smallWindowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.build),
+          debugger: debuggerController,
+        ),
+      );
+      expect(
+        find.byTooltip('Stop on uncaught exceptions', skipOffstage: false),
+        findsOneWidget,
+      );
+    },
+  );
+
   testWidgetsWithWindowSize('node selection state', windowSize, (
     WidgetTester tester,
   ) async {

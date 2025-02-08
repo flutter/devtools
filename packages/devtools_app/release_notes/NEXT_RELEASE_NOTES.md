@@ -35,12 +35,16 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Added a tooltip to describe the exception mode drop-down. -
+[#8849](https://github.com/flutter/devtools/pull/8849)
 
 ## Network profiler updates
 
 * Offline support added for the network screen. - [#8332](https://github.com/flutter/devtools/pull/8332)
   
+* Changed the context menu style to be consistent with other screens
+  [#8859](https://github.com/flutter/devtools/pull/8859).
+
 ## Logging updates
 
 TODO: Remove this section if there are not any general updates.

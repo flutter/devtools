@@ -3,7 +3,7 @@
 # found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 name: devtools_app_shared
 description: Package of Dart & Flutter structures shared between devtools_app and devtools extensions.
-version: 0.3.0
+version: 0.3.1
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app_shared
 
 environment:

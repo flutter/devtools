@@ -59,7 +59,9 @@ Map<String, String?> createStackTraceForAnalytics(
 
   // Reduce whitespace characters to optimize available space.
   final trimmedStackFrames =
-      stackTrace.frames.map((f) => '${f.location} | ${f.member}\n').toList();
+      stackTrace.frames
+          .map((f) => '${_normalizePath(f.location)} | ${f.member}\n')
+          .toList();
   final stackTraceAsString = trimmedStackFrames.join();
 
   var stackTraceChunksForGa = chunkForGa(
@@ -126,6 +128,24 @@ Map<String, String?> createStackTraceForAnalytics(
   };
   assert(stackTraceChunks.length == stackTraceChunksLimit);
   return stackTraceChunks;
+}
+
+/// A regex that matches a string that starts with a Windows drive letter (with
+/// colon).
+final _startsWithWindowsDriveLetterRegex = RegExp(r'^[a-zA-Z]:');
+
+/// Normalize a file path from either platform to the POSIX equivalent so that
+/// paths are the same for both Windows and non-Windows paths.
+String _normalizePath(String path) {
+  // Windows path with drive letter.
+  if (_startsWithWindowsDriveLetterRegex.hasMatch(path)) {
+    // Strip drive letter and normalize slashes to match POSIX.
+    // C:\foo\bar -> /foo/bar
+    return path.substring(2).replaceAll(r'\', '/');
+  }
+
+  // Otherwise, return as-is.
+  return path;
 }
 
 /// Returns the number of stack frames from [stackFrameStrings] that fit within

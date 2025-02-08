@@ -292,7 +292,7 @@ class FileQuery {
   }
 
   String _fileName(String fullPath) {
-    return _fileNamesCache[fullPath] ??= fullPath.split('/').last;
+    return _fileNamesCache[fullPath] ??= fileNameFromUri(fullPath)!;
   }
 }
 

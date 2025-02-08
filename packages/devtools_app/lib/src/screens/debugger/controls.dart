@@ -256,23 +256,27 @@ class BreakOnExceptionsControl extends StatelessWidget {
     return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
       builder: (BuildContext context, modeId, _) {
-        return RoundedDropDownButton<ExceptionMode>(
-          value: ExceptionMode.from(modeId),
-          // Cannot set exception pause mode for system isolates.
-          onChanged:
-              controller.isSystemIsolate
-                  ? null
-                  : (ExceptionMode? mode) {
-                    unawaited(controller.setIsolatePauseMode(mode!.id));
-                  },
-          isDense: true,
-          items: [
-            for (final mode in ExceptionMode.modes)
-              DropdownMenuItem<ExceptionMode>(
-                value: mode,
-                child: Text(isInSmallMode ? mode.name : mode.description),
-              ),
-          ],
+        final exceptionMode = ExceptionMode.from(modeId);
+        return DevToolsTooltip(
+          message: exceptionMode.description,
+          child: RoundedDropDownButton<ExceptionMode>(
+            value: exceptionMode,
+            // Cannot set exception pause mode for system isolates.
+            onChanged:
+                controller.isSystemIsolate
+                    ? null
+                    : (ExceptionMode? mode) {
+                      unawaited(controller.setIsolatePauseMode(mode!.id));
+                    },
+            isDense: true,
+            items: [
+              for (final mode in ExceptionMode.modes)
+                DropdownMenuItem<ExceptionMode>(
+                  value: mode,
+                  child: Text(isInSmallMode ? mode.name : mode.description),
+                ),
+            ],
+          ),
         );
       },
     );
