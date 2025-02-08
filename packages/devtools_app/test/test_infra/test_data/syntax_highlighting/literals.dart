@@ -17,3 +17,7 @@ const set4 = <String>{'', '$a'};
 const map1 = <String, String>{};
 const map2 = {'': '$a'};
 const map3 = <String, String>{'': '$a'};
+
+const num1 = 12345;
+const num2 = 12345.678;
+const num3 = 888_888_888;
