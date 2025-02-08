@@ -22,7 +22,7 @@ elif [ "$PACKAGE" = "devtools_extensions" ]; then
     echo `pwd`
     flutter test test/*_test.dart
     # Skip this on Windows because `flutter test --platform chrome`
-    # appears to hand there.
+    # appears to hang there.
     # https://github.com/flutter/flutter/issues/162798
     if [[ $RUNNER_OS != "Windows" ]]; then
         flutter test test/web --platform chrome
