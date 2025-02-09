@@ -1230,7 +1230,7 @@ class _JsonViewerState extends State<JsonViewer> {
     }
 
     // Directly convert object to JSON if not connected
-    return const JsonEncoder.withIndent('  ').convert(variable.value);
+    return const JsonEncoder.withIndent('  ').convert(copiedVariable.value);
   }
 }
 
