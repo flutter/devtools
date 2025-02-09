@@ -23,11 +23,11 @@ import 'controller.dart';
 /// DevTools lifecycle.
 ///
 /// Each time [EmbeddedExtensionControllerImpl.init] is called, we create a new
-/// [html.IFrameElement] and register it to
+/// [HTMLIFrameElement] and register it to
 /// [EmbeddedExtensionControllerImpl.viewId] via
-/// [ui_web.platformViewRegistry.registerViewFactory]. Each new
-/// [html.IFrameElement] must have a unique id in the [PlatformViewRegistry],
-/// which [_viewIdIncrementer] is used to create.
+/// `ui_web.platformViewRegistry.registerViewFactory`. Each new
+/// [HTMLIFrameElement] must have a unique id in the
+/// [ui_web.PlatformViewRegistry], which [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
 
 class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController

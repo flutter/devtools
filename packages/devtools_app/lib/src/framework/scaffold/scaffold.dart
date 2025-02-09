@@ -92,7 +92,7 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// Actions that it's possible to perform in this Scaffold.
   ///
-  /// These will generally be [RegisteredServiceExtensionButton]s.
+  /// These will generally be `_RegisteredServiceExtensionButton`s.
   final List<Widget> actions;
 
   @override

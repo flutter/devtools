@@ -24,7 +24,7 @@ import '../shared/ui/common_widgets.dart';
 /// See [_InitializerState.build] for the logic that determines whether the
 /// business logic is loaded.
 ///
-/// Use this widget to wrap pages that require [service.serviceManager] to be
+/// Use this widget to wrap pages that require `service.serviceManager` to be
 /// connected. As we require additional services to be available, add them
 /// here.
 class Initializer extends StatefulWidget {

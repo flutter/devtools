@@ -33,7 +33,7 @@ import 'inspector_controller.dart';
 
 final _log = Logger('inspector_tree_controller');
 
-/// Presents a [TreeNode].
+/// Presents a [InspectorTreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
   /// Constructs a [_InspectorTreeRowWidget] that presents a line in the
   /// Inspector tree.
@@ -394,7 +394,7 @@ class InspectorTreeController extends DisposableController
     );
   }
 
-  /// Given [shouldShow], toggles the visibility of a hideable group.
+  /// Given [showGroup], toggles the visibility of a hideable group.
   ///
   /// Returns a [bool] representing whether or not the group was toggled.
   bool _maybeToggleHideableGroup(

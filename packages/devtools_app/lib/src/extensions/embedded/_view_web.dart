@@ -92,7 +92,7 @@ class _ExtensionIFrameController extends DisposableController
 
   static const _pollUntilReadyTimeout = Duration(seconds: 10);
 
-  /// The listener that is added to DevTools' [html.window] to receive messages
+  /// The listener that is added to DevTools' [Window] to receive messages
   /// from the extension.
   ///
   /// We need to store this in a variable so that the listener is properly

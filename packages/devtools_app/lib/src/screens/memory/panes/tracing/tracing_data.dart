@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport 'class_table.dart';
+library;
+
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -142,7 +145,7 @@ class TracingIsolateState with Serializable {
   late final Map<String, CpuProfileData> profiles;
   late final List<TracedClass> classes;
 
-  /// The current class selection in the [AllocationTracingTable]
+  /// The current class selection in the [AllocationTracingTable].
   final selectedClass = ValueNotifier<TracedClass?>(null);
 
   /// The list of classes for the currently selected isolate.
