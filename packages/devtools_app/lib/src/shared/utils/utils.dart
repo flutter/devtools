@@ -56,6 +56,22 @@ bool isDarkThemeEnabled() {
       : preferences.darkModeEnabled.value;
 }
 
+/// Checks whether the application is connected to a running Dart or Flutter instance.
+///
+/// This function verifies two key conditions:
+/// 1. The service connection state (`connectedState.value.connected`) is `true`,
+///    meaning that DevTools is actively connected to a running Dart VM or Flutter app.
+/// 2. The connected app has been fully initialized (`connectedAppInitialized` is `true`),
+///    ensuring that all required app metadata is available.
+///
+/// Returns:
+/// - `true` if the application is currently connected and fully initialized.
+/// - `false` if there is no active connection.
+bool isConnected() {
+  return serviceConnection.serviceManager.connectedState.value.connected &&
+      serviceConnection.serviceManager.connectedAppInitialized;
+}
+
 extension VmExtension on VM {
   List<IsolateRef> isolatesForDevToolsMode() {
     final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;

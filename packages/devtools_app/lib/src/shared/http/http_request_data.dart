@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../screens/network/network_model.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
+import '../utils/utils.dart';
 import 'constants.dart';
 import 'http.dart';
 
@@ -94,10 +95,7 @@ class DartIOHttpRequestData extends NetworkRequest {
     try {
       if (isFetchingFullData) return; // We are already fetching
       isFetchingFullData = true;
-      final connected =
-          serviceConnection.serviceManager.connectedState.value.connected &&
-          serviceConnection.serviceManager.connectedAppInitialized;
-      if (connected) {
+      if (isConnected()) {
         final updated = await serviceConnection.serviceManager.service!
             .getHttpProfileRequestWrapper(
               _request.isolateId,
