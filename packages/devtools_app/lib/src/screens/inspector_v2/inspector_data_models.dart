@@ -728,10 +728,10 @@ class FlexLayoutProperties extends LayoutProperties {
             size: Size(widths[i], heights[i]),
             offset: Offset.zero,
             realSize: displayChildren[i].size,
+            layoutProperties: displayChildren[i],
           )
           ..mainAxisOffset = calculateMainAxisOffset(i)
-          ..crossAxisOffset = calculateCrossAxisOffset(i)
-          ..layoutProperties = displayChildren[i],
+          ..crossAxisOffset = calculateCrossAxisOffset(i),
       );
     }
 
@@ -739,16 +739,18 @@ class FlexLayoutProperties extends LayoutProperties {
     final actualLeadingSpace = leadingSpace(freeSpace);
     final actualBetweenSpace = betweenSpace(freeSpace);
     final renderPropsWithFullCrossAxisDimension =
-        RenderProperties(axis: direction)
+        RenderProperties(
+            axis: direction,
+            isFreeSpace: true,
+            layoutProperties: this,
+          )
           ..crossAxisDimension = maxSizeAvailable(crossAxisDirection)
           ..crossAxisRealDimension = dimension(crossAxisDirection)
-          ..crossAxisOffset = 0.0
-          ..isFreeSpace = true
-          ..layoutProperties = this;
+          ..crossAxisOffset = 0.0;
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.start) {
       spaces.add(
-        renderPropsWithFullCrossAxisDimension.clone()
+        renderPropsWithFullCrossAxisDimension.copyWith()
           ..mainAxisOffset = 0.0
           ..mainAxisDimension = renderLeadingSpace
           ..mainAxisRealDimension = actualLeadingSpace,
@@ -758,7 +760,7 @@ class FlexLayoutProperties extends LayoutProperties {
       for (var i = 0; i < childrenRenderProps.length - 1; ++i) {
         final child = childrenRenderProps[i];
         spaces.add(
-          renderPropsWithFullCrossAxisDimension.clone()
+          renderPropsWithFullCrossAxisDimension.copyWith()
             ..mainAxisDimension = renderBetweenSpace
             ..mainAxisRealDimension = actualBetweenSpace
             ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension,
@@ -768,7 +770,7 @@ class FlexLayoutProperties extends LayoutProperties {
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.end) {
       spaces.add(
-        renderPropsWithFullCrossAxisDimension.clone()
+        renderPropsWithFullCrossAxisDimension.copyWith()
           ..mainAxisOffset =
               childrenRenderProps.last.mainAxisDimension +
               childrenRenderProps.last.mainAxisOffset
@@ -794,7 +796,7 @@ class FlexLayoutProperties extends LayoutProperties {
       }
 
       final renderProperties = childrenRenderProperties[i];
-      final space = renderProperties.clone()..isFreeSpace = true;
+      final space = renderProperties.copyWith(isFreeSpace: true);
 
       space.crossAxisRealDimension =
           crossAxisDimension - space.crossAxisRealDimension;
@@ -805,9 +807,9 @@ class FlexLayoutProperties extends LayoutProperties {
         space.crossAxisDimension *= 0.5;
         final crossAxisRealDimension = space.crossAxisRealDimension;
         space.crossAxisRealDimension = crossAxisRealDimension * 0.5;
-        spaces.add(space.clone()..crossAxisOffset = 0.0);
+        spaces.add(space.copyWith()..crossAxisOffset = 0.0);
         spaces.add(
-          space.clone()
+          space.copyWith()
             ..crossAxisOffset =
                 renderProperties.crossAxisDimension +
                 renderProperties.crossAxisOffset,
@@ -835,15 +837,15 @@ class FlexLayoutProperties extends LayoutProperties {
   static final _textBaselineNamesToValues = TextBaseline.values.asNameMap();
 }
 
-/// RenderProperties contains information for rendering a [LayoutProperties] node
+/// Information for rendering a [LayoutProperties] node.
 class RenderProperties {
   RenderProperties({
     required this.axis,
+    required this.layoutProperties,
+    this.isFreeSpace = false,
     Size? size,
     Offset? offset,
     Size? realSize,
-    this.layoutProperties,
-    this.isFreeSpace = false,
   }) : width = size?.width ?? 0.0,
        height = size?.height ?? 0.0,
        realWidth = realSize?.width ?? 0.0,
@@ -853,14 +855,14 @@ class RenderProperties {
 
   final Axis axis;
 
-  /// represents which node is rendered for this object.
-  LayoutProperties? layoutProperties;
+  /// Represents which node is rendered for this object.
+  final LayoutProperties layoutProperties;
+
+  final bool isFreeSpace;
 
   double dx, dy;
   double width, height;
   double realWidth, realHeight;
-
-  bool isFreeSpace;
 
   Size get size => Size(width, height);
 
@@ -930,14 +932,14 @@ class RenderProperties {
     }
   }
 
-  RenderProperties clone() {
+  RenderProperties copyWith({bool? isFreeSpace}) {
     return RenderProperties(
       axis: axis,
       size: size,
       offset: offset,
       realSize: realSize,
       layoutProperties: layoutProperties,
-      isFreeSpace: isFreeSpace,
+      isFreeSpace: isFreeSpace ?? this.isFreeSpace,
     );
   }
 

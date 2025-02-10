@@ -147,12 +147,14 @@ void main() {
               size: const Size(250, 250),
               realSize: const Size(50.0, 0.0),
               offset: const Offset(0.0, 125.0),
+              layoutProperties: properties,
             ),
             RenderProperties(
               axis: Axis.horizontal,
               size: const Size(261.5, 500),
               realSize: const Size(75.0, 25.0),
               offset: const Offset(250.0, 0.0),
+              layoutProperties: properties,
             ),
             RenderProperties(
               axis: Axis.horizontal,
@@ -160,6 +162,7 @@ void main() {
               realSize: const Size(375.0, 25.0),
               offset: const Offset(511.5, 0.0),
               isFreeSpace: true,
+              layoutProperties: properties,
             ),
           ]);
         },
@@ -192,12 +195,14 @@ void main() {
               size: const Size(261.5, 500.0),
               realSize: const Size(75.0, 25.0),
               offset: const Offset(400.0, 0.0),
+              layoutProperties: properties,
             ),
             RenderProperties(
               axis: Axis.horizontal,
               size: const Size(250.0, 250.0),
               realSize: const Size(50.0, 0.0),
               offset: const Offset(661.5, 125.0),
+              layoutProperties: properties,
             ),
             RenderProperties(
               axis: Axis.horizontal,
@@ -205,6 +210,7 @@ void main() {
               realSize: const Size(375.0, 25.0),
               offset: const Offset(0.0, 0.0),
               isFreeSpace: true,
+              layoutProperties: properties,
             ),
           ]);
         },

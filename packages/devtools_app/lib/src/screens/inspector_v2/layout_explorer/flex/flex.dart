@@ -591,8 +591,7 @@ class FlexChildVisualizer extends StatelessWidget {
   // TODO(polina-c, jacob314): consider refactoring to remove `!`.
   FlexLayoutProperties get root => state.properties!;
 
-  // TODO(polina-c, jacob314): consider refactoring to remove `!`.
-  LayoutProperties get properties => renderProperties.layoutProperties!;
+  LayoutProperties get properties => renderProperties.layoutProperties;
 
   ObjectGroup? get objectGroup =>
       properties.node.objectGroupApi as ObjectGroup?;
