@@ -153,9 +153,6 @@ class NetworkController extends DisposableController
   /// timeline events.
   late int _timelineMicrosOffset;
 
-  /// The last time at which HTTP information was refreshed.
-  DateTime lastHttpDataRefreshTime = DateTime.fromMicrosecondsSinceEpoch(0);
-
   /// The last timestamp at which Socket information was refreshed.
   ///
   /// This timestamp is on the monotonic clock used by the timeline.
