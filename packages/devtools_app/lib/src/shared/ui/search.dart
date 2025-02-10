@@ -895,7 +895,8 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
     double? searchFieldHeight,
     int? maxLines = 1,
     super.key,
-  }) : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight,
+  }) : assert(maxLines != 0, "'maxLines' must not be 0"),
+       searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight,
        _maxLines = maxLines;
 
   final T searchController;
@@ -983,7 +984,8 @@ class StatelessSearchField<T extends SearchableDataMixin>
     this.style,
     this.searchFieldHeight,
     int? maxLines = 1,
-  }) : _maxLines = maxLines;
+  }) : assert(maxLines != 0, "'maxLines' must not be 0"),
+       _maxLines = maxLines;
 
   final SearchControllerMixin<T> controller;
 
@@ -1136,7 +1138,8 @@ class AutoCompleteSearchField extends StatefulWidget {
     this.style,
     this.keyEventsToIgnore = const {},
     int? maxLines = 1,
-  }) : _maxLines = maxLines;
+  }) : assert(maxLines != 0, "'maxLines' must not be 0"),
+       _maxLines = maxLines;
 
   final AutoCompleteSearchControllerMixin controller;
 
