@@ -923,11 +923,10 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   final String? parentId;
 
-  /// The set of ids for all ancestors of this [CpuStackFrame].
+  /// The ids for all ancestors of this [CpuStackFrame].
   ///
-  /// This is late and final, so it will only be created once for performance
-  /// reasons. This method should only be called when the [CpuStackFrame] is
-  /// part of a processed CPU profile.
+  /// This method should only be called when the [CpuStackFrame] is part of a
+  /// processed CPU profile.
   // ignore: avoid-explicit-type-declaration, required due to cyclic definition.
   Iterable<String> get ancestorIds sync* {
     CpuStackFrame? next = this;
