@@ -51,8 +51,9 @@ class PropertyEditorController extends DisposableController
         // Register impression.
         ga.impression(
           gaId,
+          // TODO(https://github.com/flutter/devtools/issues/8716): Postfix with
+          // widget name.
           gac.PropertyEditorSidebar.widgetPropertiesUpdate.name,
-          // TODO(): Add metrics for widget name.
         );
         _editableArgs.value = args;
       }),
