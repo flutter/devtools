@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -152,15 +155,29 @@ class _TextInput<T> extends StatefulWidget {
 }
 
 class _TextInputState<T> extends State<_TextInput<T>>
-    with _PropertyInputMixin<_TextInput<T>, T> {
+    with _PropertyInputMixin<_TextInput<T>, T>, AutoDisposeMixin {
   String currentValue = '';
 
   double paddingDiffComparedToDropdown = 1.0;
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode(debugLabel: 'text-input-${widget.property.name}');
+
+    addAutoDisposeListener(_focusNode, () async {
+      if (_focusNode.hasFocus) return;
+      // Edit property when clicking or tabbing away from input.
+      await _editProperty();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextFormField(
+      focusNode: _focusNode,
       initialValue: widget.property.valueDisplay,
       enabled: widget.property.isEditable,
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -182,9 +199,6 @@ class _TextInputState<T> extends State<_TextInput<T>>
         });
       },
       onEditingComplete: _editProperty,
-      onTapOutside: (_) async {
-        await _editProperty();
-      },
     );
   }
 
