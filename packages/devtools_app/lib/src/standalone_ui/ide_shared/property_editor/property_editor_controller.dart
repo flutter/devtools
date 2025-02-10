@@ -5,6 +5,8 @@
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../shared/analytics/analytics.dart' as ga;
+import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
 
@@ -15,6 +17,8 @@ class PropertyEditorController extends DisposableController
   }
 
   final EditorClient editorClient;
+
+  String get gaId => gac.PropertyEditorSidebar.id;
 
   TextDocument? _currentDocument;
   CursorPosition? _currentCursorPosition;
@@ -44,6 +48,13 @@ class PropertyEditorController extends DisposableController
           position: cursorPosition,
         );
         final args = result?.args ?? <EditableArgument>[];
+        // Register impression.
+        ga.impression(
+          gaId,
+          // TODO(https://github.com/flutter/devtools/issues/8716): Postfix with
+          // widget name.
+          gac.PropertyEditorSidebar.widgetPropertiesUpdate.name,
+        );
         _editableArgs.value = args;
       }),
     );
