@@ -927,7 +927,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   ///
   /// This method should only be called when the [CpuStackFrame] is part of a
   /// processed CPU profile.
-  // ignore: avoid-explicit-type-declaration, required due to cyclic definition.
   Iterable<String> get ancestorIds sync* {
     CpuStackFrame? next = this;
     while (next != null) {
