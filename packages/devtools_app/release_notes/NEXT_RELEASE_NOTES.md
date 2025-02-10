@@ -20,6 +20,10 @@ To learn more about DevTools, check out the
 * Enabled auto-refreshes of the widget tree on hot-reloads and navigation events by default. This can be disabled in the inspector settings. - [#8646](https://github.com/flutter/devtools/pull/8646)
     ![Auto-refresh setting](images/inspector_auto_refresh_setting.png "Inspector auto-refresh setting")
 
+## Network profiler updates
+
+* Fixed issue where the HTTP requests would sometimes not be displayed properly, particularly when DevTools is communicating with an application over a slow network connection. - [#8860](https://github.com/flutter/devtools/pull/8860)
+
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
