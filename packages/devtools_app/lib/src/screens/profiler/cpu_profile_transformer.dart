@@ -13,12 +13,6 @@ class CpuProfileTransformer {
   /// Number of stack frames we will process in each batch.
   static const _defaultBatchSize = 100;
 
-  late int _stackFramesCount;
-
-  List<String?>? _stackFrameKeys;
-
-  List<CpuStackFrame>? _stackFrameValues;
-
   int _stackFramesProcessed = 0;
 
   String? _activeProcessId;
@@ -34,21 +28,25 @@ class CpuProfileTransformer {
     reset();
 
     _activeProcessId = processId;
-    _stackFramesCount = cpuProfileData.stackFrames.length;
-    _stackFrameKeys = cpuProfileData.stackFrames.keys.toList();
-    _stackFrameValues = cpuProfileData.stackFrames.values.toList();
+    final stackFramesCount = cpuProfileData.stackFrames.length;
+    final stackFrameValues = cpuProfileData.stackFrames.values.iterator;
 
     // At minimum, process the data in 4 batches to smooth the appearance of
     // the progress indicator.
-    final quarterBatchSize = (_stackFramesCount / 4).round();
+    final quarterBatchSize = (stackFramesCount / 4).round();
     final batchSize = math.min(
       _defaultBatchSize,
       quarterBatchSize == 0 ? 1 : quarterBatchSize,
     );
 
     // Use batch processing to maintain a responsive UI.
-    while (_stackFramesProcessed < _stackFramesCount) {
-      _processBatch(batchSize, cpuProfileData, processId: processId);
+    while (_stackFramesProcessed < stackFramesCount) {
+      _processBatch(
+        batchSize,
+        cpuProfileData,
+        processId: processId,
+        stackFrameValues: stackFrameValues,
+      );
 
       // Await a small delay to give the UI thread a chance to update the
       // progress indicator. Use a longer delay than the default (0) so that the
@@ -74,6 +72,8 @@ class CpuProfileTransformer {
           nodeIndicesToRemove.add(i);
         }
       }
+      // TODO(jakemac53): This is O(N^2), we should have a function to remove
+      // multiple children at once.
       nodeIndicesToRemove.forEach(
         cpuProfileData.cpuProfileRoot.removeChildAtIndex,
       );
@@ -98,19 +98,14 @@ class CpuProfileTransformer {
     int batchSize,
     CpuProfileData cpuProfileData, {
     required String processId,
+    required Iterator<CpuStackFrame> stackFrameValues,
   }) {
-    final batchEnd = math.min(
-      _stackFramesProcessed + batchSize,
-      _stackFramesCount,
-    );
-    for (int i = _stackFramesProcessed; i < batchEnd; i++) {
+    for (int i = 0; i < batchSize && stackFrameValues.moveNext(); i++) {
       if (processId != _activeProcessId) {
         throw ProcessCancelledException();
       }
-      final key = _stackFrameKeys![i];
-      final value = _stackFrameValues![i];
-      final stackFrame = cpuProfileData.stackFrames[key]!;
-      final parent = cpuProfileData.stackFrames[value.parentId];
+      final stackFrame = stackFrameValues.current;
+      final parent = cpuProfileData.stackFrames[stackFrame.parentId];
       _processStackFrame(stackFrame, parent, cpuProfileData);
       _stackFramesProcessed++;
     }
@@ -150,8 +145,6 @@ class CpuProfileTransformer {
   void reset() {
     _activeProcessId = null;
     _stackFramesProcessed = 0;
-    _stackFrameKeys = null;
-    _stackFrameValues = null;
   }
 }
 

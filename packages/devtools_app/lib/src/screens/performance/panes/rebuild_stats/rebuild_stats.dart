@@ -248,7 +248,7 @@ class _LocationColumn extends ColumnData<RebuildLocationStats> {
       return '<resolving location>';
     }
 
-    return '${fileUriString.split('/').last}:${dataObject.location.line}';
+    return '${fileNameFromUri(fileUriString)}:${dataObject.location.line}';
   }
 
   @override

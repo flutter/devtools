@@ -1074,9 +1074,6 @@ const connectToNewAppText = 'Connect to a new app';
 /// favor of a new request.
 class ProcessCancelledException implements Exception {}
 
-// TODO(mtaylee): Prefer to use this helper method whenever a call to
-// .split('/').last is made on a String (usually on URIs).
-// See https://github.com/flutter/devtools/issues/4360.
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
 String? fileNameFromUri(String? uri) => uri?.split('/').lastOrNull;
@@ -1114,10 +1111,13 @@ Map<K, R> subtractMaps<K, F, S, R>({
 ///     ==> 'http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools'
 /// * 'http://127.0.0.1:61962/performance' ==> 'http://127.0.0.1:61962'
 String devtoolsAssetsBasePath({required String origin, required String path}) {
+  // Ensure that we are truly only using the origin of the URI String passed as
+  // the [origin] parameter.
+  final trimmedOrigin = Uri.parse(origin).origin;
   const separator = '/';
   final pathParts = path.split(separator);
   // The last path part is the DevTools page (e.g. 'performance' or 'snapshot'),
   // which is not part of the hosted asset path.
   pathParts.removeLast();
-  return '$origin${pathParts.join(separator)}';
+  return '$trimmedOrigin${pathParts.join(separator)}';
 }

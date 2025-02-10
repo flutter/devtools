@@ -36,11 +36,14 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Added a tooltip to describe the exception mode drop-down. -
+[#8849](https://github.com/flutter/devtools/pull/8849)
 
 ## Network profiler updates
 
-- Fixed issue where the HTTP requests would sometimes not be displayed properly, particularly when DevTools is communicating with an application over a slow network connection. - [#8860](https://github.com/flutter/devtools/pull/8860)
+* Changed the context menu style to be consistent with other screens
+  [#8859](https://github.com/flutter/devtools/pull/8859).
+* Fixed issue where the HTTP requests would sometimes not be displayed properly, particularly when DevTools is communicating with an application over a slow network connection. - [#8860](https://github.com/flutter/devtools/pull/8860)
 
 ## Logging updates
 

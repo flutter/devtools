@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../shared/editor/api_classes.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_types.dart';
 
@@ -89,21 +90,37 @@ class StringInput extends StatelessWidget {
   }
 }
 
-class _DropdownInput<T> extends StatelessWidget with _PropertyInputMixin<T> {
-  _DropdownInput({super.key, required this.property, required this.controller});
+class _DropdownInput<T> extends StatefulWidget {
+  const _DropdownInput({
+    super.key,
+    required this.property,
+    required this.controller,
+  });
 
   final FiniteValuesProperty property;
   final PropertyEditorController controller;
 
   @override
+  State<_DropdownInput<T>> createState() => _DropdownInputState<T>();
+}
+
+class _DropdownInputState<T> extends State<_DropdownInput<T>>
+    with _PropertyInputMixin<_DropdownInput<T>, T> {
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return DropdownButtonFormField(
-      value: property.valueDisplay,
-      decoration: decoration(property, theme: theme, padding: denseSpacing),
+      value: widget.property.valueDisplay,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: (text) => inputValidator(text, property: widget.property),
+      decoration: decoration(
+        widget.property,
+        theme: theme,
+        padding: denseSpacing,
+      ),
       isExpanded: true,
       items:
-          property.propertyOptions.map((option) {
+          widget.property.propertyOptions.map((option) {
             return DropdownMenuItem(
               value: option,
               child: Text(option, style: theme.fixedFontStyle),
@@ -111,26 +128,31 @@ class _DropdownInput<T> extends StatelessWidget with _PropertyInputMixin<T> {
           }).toList(),
       onChanged: (newValue) async {
         await editProperty(
-          property,
+          widget.property,
           valueAsString: newValue,
-          controller: controller,
+          controller: widget.controller,
         );
       },
     );
   }
 }
 
-class _TextInput<T> extends StatefulWidget with _PropertyInputMixin<T> {
-  _TextInput({super.key, required this.property, required this.controller});
+class _TextInput<T> extends StatefulWidget {
+  const _TextInput({
+    super.key,
+    required this.property,
+    required this.controller,
+  });
 
   final EditableProperty property;
   final PropertyEditorController controller;
 
   @override
-  State<_TextInput> createState() => _TextInputState();
+  State<_TextInput> createState() => _TextInputState<T>();
 }
 
-class _TextInputState extends State<_TextInput> {
+class _TextInputState<T> extends State<_TextInput<T>>
+    with _PropertyInputMixin<_TextInput<T>, T> {
   String currentValue = '';
 
   double paddingDiffComparedToDropdown = 1.0;
@@ -142,9 +164,9 @@ class _TextInputState extends State<_TextInput> {
       initialValue: widget.property.valueDisplay,
       enabled: widget.property.isEditable,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      validator: widget.property.inputValidator,
+      validator: (text) => inputValidator(text, property: widget.property),
       inputFormatters: [FilteringTextInputFormatter.singleLineFormatter],
-      decoration: widget.decoration(
+      decoration: decoration(
         widget.property,
         theme: theme,
         // Note: The text input has an extra pixel compared to the dropdown
@@ -154,6 +176,7 @@ class _TextInputState extends State<_TextInput> {
       ),
       style: theme.fixedFontStyle,
       onChanged: (newValue) {
+        clearServerError();
         setState(() {
           currentValue = newValue;
         });
@@ -166,7 +189,7 @@ class _TextInputState extends State<_TextInput> {
   }
 
   Future<void> _editProperty() async {
-    await widget.editProperty(
+    await editProperty(
       widget.property,
       valueAsString: currentValue,
       controller: widget.controller,
@@ -174,12 +197,15 @@ class _TextInputState extends State<_TextInput> {
   }
 }
 
-mixin _PropertyInputMixin<T> {
+mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
+  String? _serverError;
+
   Future<void> editProperty(
     EditableProperty property, {
     required PropertyEditorController controller,
     required String? valueAsString,
   }) async {
+    clearServerError();
     final argName = property.name;
 
     // Can edit values to null.
@@ -188,8 +214,9 @@ mixin _PropertyInputMixin<T> {
       return;
     }
 
-    final value = property.convertFromInputString(valueAsString) as T?;
-    await controller.editArgument(name: argName, value: value);
+    final value = property.convertFromInputString(valueAsString) as U?;
+    final response = await controller.editArgument(name: argName, value: value);
+    _maybeHandleServerError(response, property: property);
   }
 
   InputDecoration decoration(
@@ -204,31 +231,59 @@ mixin _PropertyInputMixin<T> {
       isDense: true,
       label: inputLabel(property, theme: theme),
       border: const OutlineInputBorder(),
+      floatingLabelBehavior: FloatingLabelBehavior.always,
     );
   }
 
   Widget inputLabel(EditableProperty property, {required ThemeData theme}) {
+    // Flutter scales down the label font size by 75%, therefore we need to
+    // increase the size to make it glegible.
+    final fixedFontStyle = theme.fixedFontStyle.copyWith(
+      fontSize: defaultFontSize + 1,
+    );
     return RichText(
       overflow: TextOverflow.ellipsis,
       text: TextSpan(
         text: '${property.displayType} ',
-        style: theme.fixedFontStyle,
+        style: fixedFontStyle,
         children: [
           TextSpan(
             text: property.name,
-            style: theme.fixedFontStyle.copyWith(
+            style: fixedFontStyle.copyWith(
               fontWeight: FontWeight.bold,
               color: theme.colorScheme.primary,
             ),
             children: [
               TextSpan(
                 text: property.isRequired ? '*' : '',
-                style: theme.fixedFontStyle,
+                style: fixedFontStyle,
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  String? inputValidator(String? input, {required EditableProperty property}) {
+    if (_serverError != null) return _serverError;
+    return property.inputValidator(input);
+  }
+
+  void clearServerError() {
+    setState(() {
+      _serverError = null;
+    });
+  }
+
+  void _maybeHandleServerError(
+    EditArgumentResponse? errorResponse, {
+    required EditableProperty property,
+  }) {
+    if (errorResponse == null || errorResponse.success) return;
+    setState(() {
+      _serverError =
+          '${errorResponse.errorType?.message ?? 'Encountered unknown error.'} (Property: ${property.name})';
+    });
   }
 }

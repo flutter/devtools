@@ -27,6 +27,9 @@ enum EditorMethod {
 /// [pkg/analysis_server/lib/src/lsp/constants.dart][code link]
 ///
 /// [code link]: https://github.com/dart-lang/sdk/blob/ebfcd436da65802a2b20d415afe600b51e432305/pkg/analysis_server/lib/src/lsp/constants.dart#L136
+///
+/// TODO(https://github.com/flutter/devtools/issues/8824): Add tests that these
+/// are in-sync with analysis_server.
 enum LspMethod {
   editableArguments(methodName: 'dart/textDocument/editableArguments'),
   editArgument(methodName: 'dart/textDocument/editArgument');
@@ -440,6 +443,71 @@ class EditableArgumentsResult with Serializable {
 
   @override
   Map<String, Object?> toJson() => {Field.arguments: args};
+}
+
+/// Errors that the Analysis Server returns for failed argument edits.
+///
+/// These should be kept in sync with the error coes defined at
+/// [pkg/analysis_server/lib/src/lsp/constants.dart][code link]
+///
+/// [code link]: https://github.com/dart-lang/sdk/blob/35a10987e1652b7d49991ab2dc2ee7f521fe8d8f/pkg/analysis_server/lib/src/lsp/constants.dart#L300
+///
+/// TODO(https://github.com/flutter/devtools/issues/8824): Add tests that these
+/// are in-sync with analysis_server.
+enum EditArgumentError {
+  /// A request was made that requires use of workspace/applyEdit but the
+  /// current editor does not support it.
+  editsUnsupportedByEditor(
+    code: -32016,
+    message: 'IDE does not support property edits.',
+  ),
+
+  /// An editArgument request tried to modify an invocation at a position where
+  /// there was no invocation.
+  editArgumentInvalidPosition(
+    code: -32017,
+    message: 'Invalid position for argument.',
+  ),
+
+  /// An editArgument request tried to modify a parameter that does not exist or
+  /// is not editable.
+  editArgumentInvalidParameter(code: -32018, message: 'Invalid parameter.'),
+
+  /// An editArgument request tried to set an argument value that is not valid.
+  editArgumentInvalidValue(
+    code: -32019,
+    message: 'Invalid value for parameter.',
+  );
+
+  const EditArgumentError({required this.code, required this.message});
+
+  final int code;
+  final String message;
+
+  static final _codeToErrorMap = EditArgumentError.values.fold(
+    <int, EditArgumentError>{},
+    (map, error) {
+      map[error.code] = error;
+      return map;
+    },
+  );
+
+  static EditArgumentError? fromCode(int? code) {
+    if (code == null) return null;
+    return _codeToErrorMap[code];
+  }
+}
+
+/// Response to an edit argument request.
+class EditArgumentResponse {
+  EditArgumentResponse({required this.success, this.errorMessage, errorCode})
+    : _errorCode = errorCode;
+
+  final bool success;
+  final String? errorMessage;
+  final int? _errorCode;
+
+  EditArgumentError? get errorType => EditArgumentError.fromCode(_errorCode);
 }
 
 /// Information about a single editable argument of a widget.
