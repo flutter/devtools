@@ -104,12 +104,11 @@ class Truncateable extends StatelessWidget {
   }
 }
 
-/// Widget that draws bounding box with the title (usually widget name) in its top left
+/// Widget that draws bounding box with the title (usually widget name) in its
+/// top left.
 ///
-/// [hint] is an optional widget to be placed in the top right of the box
-/// [child] is an optional widget to be placed in the center of the box
-/// [borderColor] outer box border color and background color for the title
-/// [textColor] color for title text
+/// * [hint] is an optional widget to be placed in the top right of the box.
+/// * [child] is an optional widget to be placed in the center of the box.
 class WidgetVisualizer extends StatelessWidget {
   const WidgetVisualizer({
     super.key,

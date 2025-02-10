@@ -460,7 +460,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
           text:
-              '${location.getFile()!.split('/').last}:${location.getLine()}:${location.getColumn()}            ',
+              '${fileNameFromUri(location.getFile())}:${location.getLine()}:${location.getColumn()}            ',
           style: DiagnosticsTextStyles.regular(Theme.of(context).colorScheme),
         ),
       ),

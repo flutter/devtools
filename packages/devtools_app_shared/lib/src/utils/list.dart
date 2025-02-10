@@ -92,10 +92,10 @@ final class ListValueNotifier<T> extends ChangeNotifier
 
   /// Truncates to just the elements between [start] and [end].
   ///
-  /// If [end] is omitted, it defaults to the [length] of this list.
+  /// If [end] is omitted, it defaults to the `length` of this list.
   ///
   /// The `start` and `end` positions must satisfy the relations
-  /// 0 ≤ `start` ≤ `end` ≤ [length]
+  /// 0 ≤ `start` ≤ `end` ≤ `length`.
   /// If `end` is equal to `start`, then the returned list is empty.
   void trimToSublist(int start, [int? end]) {
     // TODO(jacobr): use a more sophisticated data structure such as

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport '../inspector/layout_explorer/ui/overflow_indicator_painter.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -32,24 +35,33 @@ const overflowEpsilon = 0.1;
 /// the sum of the render size to be equals to [maxSizeAvailable]
 ///
 /// Formula for computing render size:
-///   renderSize[i] = (size[i] - smallestSize)
-///               * (largestRenderSize - smallestRenderSize)
-///               / (largestSize - smallestSize) + smallestRenderSize
+/// ```
+/// renderSize[i] = (size[i] - smallestSize)
+///             * (largestRenderSize - smallestRenderSize)
+///             / (largestSize - smallestSize) + smallestRenderSize
+/// ```
+///
 /// Explanation:
 /// - The computation formula for transforming size to renderSize is based on these two things:
 ///   - smallest element will be rendered to [smallestRenderSize]
 ///   - largest element will be rendered to [largestRenderSize]
 ///   - any other size will be scaled accordingly
 /// - The formula above is derived from:
-///    (renderSize[i] - smallestRenderSize) / (largestRenderSize - smallestRenderSize)
-///     = (size[i] - smallestSize) / (size[i] - smallestSize)
+///   ```
+///   (renderSize[i] - smallestRenderSize) / (largestRenderSize - smallestRenderSize)
+///    = (size[i] - smallestSize) / (size[i] - smallestSize)
+///   ```
 ///
 /// Formula for computing forced [largestRenderSize]:
-///   largestRenderSize = (maxSizeAvailable - sizes.length * smallestRenderSize)
-///     * (largestSize - smallestSize) / sum(s[i] - ss) + smallestRenderSize
+/// ```
+/// largestRenderSize = (maxSizeAvailable - sizes.length * smallestRenderSize)
+///   * (largestSize - smallestSize) / sum(s[i] - ss) + smallestRenderSize
+/// ```
 /// Explanation:
 /// - This formula is derived from the equation:
-///    sum(renderSize) = maxSizeAvailable
+///   ```
+///   sum(renderSize) = maxSizeAvailable
+///   ```
 ///
 List<double> computeRenderSizes({
   required Iterable<double> sizes,

@@ -83,7 +83,7 @@ class DevToolsTable<T> extends StatefulWidget {
     this.startScrolledAtBottom = false,
     this.preserveVerticalScrollPosition = false,
     this.activeSearchMatchNotifier,
-    this.rowItemExtent,
+    required this.rowItemExtent,
     this.tallHeaders = false,
     this.headerColor,
     this.fillWithEmptyRows = false,
@@ -95,7 +95,7 @@ class DevToolsTable<T> extends StatefulWidget {
   final bool startScrolledAtBottom;
   final List<double> columnWidths;
   final IndexedScrollableWidgetBuilder rowBuilder;
-  final double? rowItemExtent;
+  final double rowItemExtent;
   final FocusNode? focusNode;
   final TableKeyEventHandler? handleKeyEvent;
   final ValueNotifier<Selection<T?>>? selectionNotifier;
@@ -347,7 +347,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   }
 
   double _pinnedDataHeight(BoxConstraints tableConstraints) => min(
-    widget.rowItemExtent! * pinnedData.length,
+    widget.rowItemExtent * pinnedData.length,
     tableConstraints.maxHeight / 2,
   );
 
@@ -371,7 +371,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
           _pinnedDataHeight(tableConstraints) + ThickDivider.thickDividerHeight;
     }
 
-    return max(_data.length, maxHeight ~/ widget.rowItemExtent!);
+    return max(_data.length, maxHeight ~/ widget.rowItemExtent);
   }
 
   Widget _buildItem(BuildContext context, int index, {bool isPinned = false}) {

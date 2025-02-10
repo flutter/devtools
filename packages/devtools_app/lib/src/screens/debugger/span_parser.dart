@@ -608,7 +608,7 @@ class ScopeStack {
     pop(scope, end);
   }
 
-  /// Pushes a new scope onto the stack starting at [start].
+  /// Pushes a new scope onto the stack starting at [location].
   void push(String? scope, ScopeStackLocation location) {
     if (scope == null) return;
 

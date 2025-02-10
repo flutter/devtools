@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport 'package:vm_service/vm_service.dart';
+library;
+
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -523,7 +526,7 @@ class DevToolsScreen<C extends Object?> {
   /// widgets depending on this controller can access it by calling
   /// `Provider<C>.of(context)`.
   ///
-  /// If [createController] and [controller] are both null, [screen] will be
+  /// If [createController] and `controller` are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
   ///
   /// In the controller initialization, if logic requires a connected [VmService]
@@ -627,7 +630,7 @@ class ScreenUnavailable extends StatelessWidget {
 /// provided here.
 ///
 /// Conditional screens can be added to this list, and they will automatically
-/// be shown or hidden based on the [Screen.conditionalLibrary] provided.
+/// be shown or hidden based on the [Screen] conditionalLibrary provided.
 List<DevToolsScreen> defaultScreens({
   List<DevToolsJsonFile> sampleData = const [],
 }) {
