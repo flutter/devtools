@@ -253,7 +253,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
               style: Theme.of(context).fixedFontStyle.copyWith(
                 fontFeatures: [const FontFeature.disable('liga')],
               ),
-              shouldExpandHeight: true,
+              maxLines: null,
             ),
           ),
         ),

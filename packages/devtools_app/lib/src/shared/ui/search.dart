@@ -893,10 +893,10 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
     this.onClose,
     this.searchFieldWidth = defaultSearchFieldWidth,
     double? searchFieldHeight,
-    bool shouldExpandHeight = true,
+    int? maxLines = 1,
     super.key,
   }) : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight,
-       _shouldExpandHeight = shouldExpandHeight;
+       _maxLines = maxLines;
 
   final T searchController;
 
@@ -919,8 +919,10 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
   /// triggered.
   final VoidCallback? onClose;
 
-  /// Whether the search field should soft wrap lines, expanding the height.
-  final bool _shouldExpandHeight;
+  /// The maximum number of lines, by default one.
+  ///
+  /// Can be set to null to remove the restriction; must not be zero.
+  final int? _maxLines;
 
   @override
   State<SearchField> createState() => _SearchFieldState();
@@ -940,10 +942,10 @@ class _SearchFieldState extends State<SearchField>
       supportsNavigation: widget.supportsNavigation,
       onClose: widget.onClose,
       searchFieldHeight: widget.searchFieldHeight,
-      shouldExpandHeight: widget._shouldExpandHeight,
+      maxLines: widget._maxLines,
     );
 
-    return widget._shouldExpandHeight
+    return widget._maxLines != 1
         ? searchField
         : SizedBox(
           width: widget.searchFieldWidth,
@@ -980,8 +982,8 @@ class StatelessSearchField<T extends SearchableDataMixin>
     this.suffix,
     this.style,
     this.searchFieldHeight,
-    bool shouldExpandHeight = false,
-  }) : _shouldExpandHeight = shouldExpandHeight;
+    int? maxLines = 1,
+  }) : _maxLines = maxLines;
 
   final SearchControllerMixin<T> controller;
 
@@ -1025,8 +1027,10 @@ class StatelessSearchField<T extends SearchableDataMixin>
 
   final double? searchFieldHeight;
 
-  /// Whether the search field should soft wrap lines, expanding the height.
-  final bool _shouldExpandHeight;
+  /// The maximum number of lines, by default one.
+  ///
+  /// Can be set to null to remove the restriction; must not be zero.
+  final int? _maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -1046,7 +1050,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
       focusNode: controller.searchFieldFocusNode,
       controller: controller.searchTextFieldController,
       style: textStyle,
-      maxLines: _shouldExpandHeight ? null : 1,
+      maxLines: _maxLines,
       onChanged: onChanged,
       onEditingComplete: () {
         controller.searchFieldFocusNode?.requestFocus();
@@ -1131,8 +1135,8 @@ class AutoCompleteSearchField extends StatefulWidget {
     this.onFocusLost,
     this.style,
     this.keyEventsToIgnore = const {},
-    bool shouldExpandHeight = false,
-  }) : _shouldExpandHeight = shouldExpandHeight;
+    int? maxLines = 1,
+  }) : _maxLines = maxLines;
 
   final AutoCompleteSearchControllerMixin controller;
 
@@ -1180,8 +1184,10 @@ class AutoCompleteSearchField extends StatefulWidget {
   /// [controller.autocompleteFocusNode] has lost focus.
   final VoidCallback? onFocusLost;
 
-  /// Whether the search field should soft wrap lines, expanding the height.
-  final bool _shouldExpandHeight;
+  /// The maximum number of lines, by default one.
+  ///
+  /// Can be set to null to remove the restriction; must not be zero.
+  final int? _maxLines;
 
   @override
   State<AutoCompleteSearchField> createState() =>
@@ -1233,7 +1239,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
           },
           onClose: widget.onClose,
           style: widget.style,
-          shouldExpandHeight: widget._shouldExpandHeight,
+          maxLines: widget._maxLines,
         ),
       ),
     );
