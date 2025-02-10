@@ -44,11 +44,15 @@ class NetworkService {
   ///
   /// If [alreadyRecordingHttp] is true it's unclear when the last refresh time
   /// would have occurred, so the refresh time is not updated. Otherwise,
-  /// [NetworkController.lastHttpDataRefreshTime] is updated to the current
+  /// [lastHttpDataRefreshTimePerIsolate] is updated to the current
   /// time.
   void updateLastHttpDataRefreshTime({bool alreadyRecordingHttp = false}) {
     if (!alreadyRecordingHttp) {
       for (final isolateId in lastHttpDataRefreshTimePerIsolate.keys.toList()) {
+        // It's safe to use `DateTime.now()` here since we don't need to worry
+        // about dropping data between the time the last profile was generated
+        // by the target application and the time `DateTime.now()` is called
+        // here.
         lastHttpDataRefreshTimePerIsolate[isolateId] =
             DateTime.now().microsecondsSinceEpoch;
       }
