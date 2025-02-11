@@ -16,15 +16,20 @@ if [ "$PACKAGE" = "devtools_app_shared" ]; then
     flutter test test/
     popd
 
-elif [ "$PACKAGE" = "devtools_extensions" ]; then 
+elif [ "$PACKAGE" = "devtools_extensions" ]; then
 
     pushd $DEVTOOLS_DIR/packages/devtools_extensions
     echo `pwd`
     flutter test test/*_test.dart
-    flutter test test/web --platform chrome
+    # Skip this on Windows because `flutter test --platform chrome`
+    # appears to hang there.
+    # https://github.com/flutter/flutter/issues/162798
+    if [[ $RUNNER_OS != "Windows" ]]; then
+        flutter test test/web --platform chrome
+    fi
     popd
 
-elif [ "$PACKAGE" = "devtools_shared" ]; then 
+elif [ "$PACKAGE" = "devtools_shared" ]; then
 
     pushd $DEVTOOLS_DIR/packages/devtools_shared
     echo `pwd`

@@ -13,6 +13,12 @@ on:
 # Declare default permissions as read only.
 permissions: read-all
 
+defaults:
+  run:
+    # Use Bash on all platforms including Windows to avoid
+    # two copies of bot scripts.
+    shell: bash
+
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
@@ -20,11 +26,14 @@ jobs:
     uses: ./.github/workflows/flutter-prep.yaml
 
   main:
-    name: main
+    name: ${{ matrix.os }} main
     needs: flutter-prep
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
@@ -75,9 +84,9 @@ jobs:
           dcm analyze packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
 
   test-packages:
-    name: ${{ matrix.package }} test
+    name: ${{ matrix.os }} ${{ matrix.package }} test
     needs: flutter-prep
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -85,6 +94,7 @@ jobs:
           - devtools_app_shared
           - devtools_extensions
           - devtools_shared
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
@@ -100,11 +110,13 @@ jobs:
         run: ./tool/ci/package_tests.sh
 
   test-tool:
-    name: Tool test
+    name: ${{ matrix.os }} Tool test
     needs: flutter-prep
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
@@ -118,9 +130,9 @@ jobs:
         run: ./tool/ci/tool_tests.sh
 
   test:
-    name: ${{ matrix.bot }}
+    name: ${{ matrix.os }} ${{ matrix.bot }}
     needs: flutter-prep
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -129,6 +141,7 @@ jobs:
           - build_dart2js
           - test_ddc
           - test_dart2js
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
@@ -186,12 +199,13 @@ jobs:
           echo "::notice title=To Quickly Fix Goldens:: Run \`dt fix-goldens --run-id=$WORKFLOW_ID\` on your local branch."
 
   devtools-app-integration-test:
-    name: devtools_app integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
+    name: ${{ matrix.os }} devtools_app integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
     needs: flutter-prep
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [macos-latest, windows-latest]
         # Consider running integration tests in ddc mode, too.
         bot: [integration_dart2js]
         device: [flutter, flutter-web, dart-cli]
@@ -251,14 +265,15 @@ jobs:
           path: packages/devtools_app/integration_test/**/failures/*.png
 
   devtools-extensions-integration-test:
-    name: devtools_extensions integration-test ${{ matrix.bot }}
+    name: ${{ matrix.os }} devtools_extensions integration-test ${{ matrix.bot }}
     needs: flutter-prep
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         # Consider running integration tests in ddc mode, too.
         bot: [integration_dart2js]
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
