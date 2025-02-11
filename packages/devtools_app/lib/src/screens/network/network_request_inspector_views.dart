@@ -214,15 +214,6 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
   final DartIOHttpRequestData data;
   final ValueChanged<NetworkResponseViewType> onChanged;
 
-  bool isJsonDecodable() {
-    try {
-      json.decode(data.responseBody!);
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -235,7 +226,8 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
 
         final availableResponseTypes = <NetworkResponseViewType>[
           NetworkResponseViewType.auto,
-          if (isJsonDecodable()) NetworkResponseViewType.json,
+          if (_isJsonDecodable(data.responseBody!))
+            NetworkResponseViewType.json,
           NetworkResponseViewType.text,
         ];
 
@@ -319,13 +311,13 @@ class HttpResponseView extends StatelessWidget {
 class HttpTextResponseViewer extends StatelessWidget {
   const HttpTextResponseViewer({
     super.key,
-    required this.contentType,
+    required String? contentType,
     required this.responseBody,
     required this.currentResponseNotifier,
     required this.textStyle,
-  });
+  }) : _contentType = contentType;
 
-  final String? contentType;
+  final String? _contentType;
   final String responseBody;
   final ValueListenable<NetworkResponseViewType> currentResponseNotifier;
   final TextStyle textStyle;
@@ -338,8 +330,8 @@ class HttpTextResponseViewer extends StatelessWidget {
         NetworkResponseViewType currentLocalResponseType = currentResponseType;
 
         if (currentResponseType == NetworkResponseViewType.auto) {
-          if (contentType != null &&
-              contentType!.contains('json') &&
+          if (_contentType != null &&
+              _contentType.contains('json') &&
               responseBody.isNotEmpty) {
             currentLocalResponseType = NetworkResponseViewType.json;
           } else {
@@ -348,7 +340,15 @@ class HttpTextResponseViewer extends StatelessWidget {
         }
 
         return switch (currentLocalResponseType) {
-          NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
+          NetworkResponseViewType.json =>
+            // Don't load the JsonViewer if we can't decode the JSON.
+            _isJsonDecodable(responseBody)
+                ? JsonViewer(encodedJson: responseBody)
+                : TextViewer(
+                  // We could also include the decoding exception.
+                  text: responseBody,
+                  style: textStyle.copyWith(color: Colors.red),
+                ),
           NetworkResponseViewType.text => TextViewer(
             text: responseBody,
             style: textStyle,
@@ -403,6 +403,15 @@ class ImageResponseView extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+bool _isJsonDecodable(String source) {
+  try {
+    json.decode(source);
+    return true;
+  } catch (_) {
+    return false;
   }
 }
 
