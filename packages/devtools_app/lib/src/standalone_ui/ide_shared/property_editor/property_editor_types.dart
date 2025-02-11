@@ -64,7 +64,7 @@ class EditableEnum extends EditableProperty with FiniteValuesProperty {
   String get dartType => options?.first.split('.').first ?? type;
 
   @override
-  String get valueDisplay => _enumShorthand(displayValue ?? value.toString());
+  String get valueDisplay => _enumShorthand(displayValue ?? currentValue.toString());
 
   @override
   Set<String> get propertyOptions {
@@ -93,8 +93,9 @@ class EditableProperty extends EditableArgument {
         name: argument.name,
         type: argument.type,
         value: argument.value,
+        hasDefault: argument.hasDefault,
         hasArgument: argument.hasArgument,
-        isDefault: argument.isDefault,
+        defaultValue: argument.defaultValue,
         isNullable: argument.isNullable,
         isRequired: argument.isRequired,
         isEditable: argument.isEditable,
