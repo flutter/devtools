@@ -288,7 +288,7 @@ Future<List<XFile>> importRawFilesFromPicker({
 
 @visibleForTesting
 Future<DevToolsJsonFile> toDevToolsFile(XFile file) async {
-  final data = jsonDecode(await file.readAsString());
+  final data = json.fuse(utf8).decode(await file.readAsBytes())!;
   final lastModifiedTime = await file.lastModified();
   // TODO(kenz): this will need to be modified if we need to support other file
   // extensions than .json. We will need to return a more generic file type.
