@@ -27,7 +27,10 @@ class BooleanInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _DropdownInput<Object>(property: property, editProperty: editProperty);
+    return _DropdownInput<Object>(
+      property: property,
+      editProperty: editProperty,
+    );
   }
 }
 
@@ -59,7 +62,10 @@ class EnumInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _DropdownInput<String>(property: property, editProperty: editProperty);
+    return _DropdownInput<String>(
+      property: property,
+      editProperty: editProperty,
+    );
   }
 }
 
