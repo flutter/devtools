@@ -20,7 +20,8 @@ void main(List<String> arguments) async {
 
   final File file = File(arguments.first);
   final Map<String, dynamic> timelineDump =
-      (jsonDecode(await file.readAsString()) as Map).cast<String, dynamic>();
+      (json.fuse(utf8).decode(await file.readAsBytes())
+          as Map<String, dynamic>);
   final List<dynamic> cpuSampleTraceEvents =
       timelineDump['cpuProfile']['traceEvents'] as List;
 
