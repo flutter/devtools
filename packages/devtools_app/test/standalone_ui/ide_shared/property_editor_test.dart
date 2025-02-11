@@ -58,9 +58,9 @@ void main() {
     Future<List<EditableArgument>> waitForEditableArgs() {
       final argsCompleter = Completer<List<EditableArgument>>();
       listener = () {
-        argsCompleter.complete(controller.editableArgs.value);
+        argsCompleter.complete(controller.editableWidgetData.value!.args);
       };
-      controller.editableArgs.addListener(listener!);
+      controller.editableWidgetData.addListener(listener!);
       return argsCompleter.future;
     }
 
@@ -94,7 +94,7 @@ void main() {
 
     tearDown(() {
       if (listener != null) {
-        controller.editableArgs.removeListener(listener!);
+        controller.editableWidgetData.removeListener(listener!);
       }
     });
 
@@ -141,7 +141,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.initForTestsOnly(editableArgs: result1.args);
+      controller.initForTestsOnly(editableArgsResult: result1);
       await tester.pumpAndSettle();
 
       final titleInput = _findTextFormField('String? title');
@@ -173,7 +173,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.initForTestsOnly(editableArgs: result2.args);
+      controller.initForTestsOnly(editableArgsResult: result2);
       await tester.pumpAndSettle();
 
       final softWrapInput = _findDropdownButtonFormField('bool softWrap');
@@ -199,7 +199,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.initForTestsOnly(editableArgs: result2.args);
+      controller.initForTestsOnly(editableArgsResult: result2);
       await tester.pumpAndSettle();
 
       // Verify the input options are expected.
@@ -217,7 +217,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.initForTestsOnly(editableArgs: result2.args);
+      controller.initForTestsOnly(editableArgsResult: result2);
       await tester.pumpAndSettle();
 
       // Verify the input options are expected.
@@ -283,7 +283,7 @@ void main() {
     testWidgets('editing a string input (title)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
@@ -303,7 +303,7 @@ void main() {
     testWidgets('editing a string input to null (title)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
@@ -321,7 +321,7 @@ void main() {
     ) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
@@ -345,7 +345,7 @@ void main() {
     ) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
@@ -373,7 +373,7 @@ void main() {
     testWidgets('submitting a string input with TAB (title)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
@@ -398,7 +398,7 @@ void main() {
     testWidgets('editing a numeric input (height)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the height.
@@ -414,7 +414,7 @@ void main() {
     testWidgets('editing a numeric input to null (height)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the height.
@@ -430,7 +430,7 @@ void main() {
     testWidgets('submitting a numeric input with TAB (height)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the height.
@@ -451,7 +451,7 @@ void main() {
     testWidgets('editing an enum input (align)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result2.args);
+        controller.initForTestsOnly(editableArgsResult: result2);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Select the align: Alignment.topLeft option.
@@ -475,7 +475,7 @@ void main() {
     testWidgets('editing a nullable enum input (align)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result2.args);
+        controller.initForTestsOnly(editableArgsResult: result2);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Select the align: null option.
@@ -496,7 +496,7 @@ void main() {
     testWidgets('editing a boolean input (softWrap)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result2.args);
+        controller.initForTestsOnly(editableArgsResult: result2);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Select the softWrap: false option.
@@ -686,6 +686,12 @@ final heightProperty = EditableArgument(
   isRequired: false,
 );
 final result1 = EditableArgumentsResult(
+  name: 'MyFlutterWidget1',
+  documentation: '''
+  Creates a MyFlutterWidget1.
+
+  Takes [title], [width], and `height` as arguments.
+''',
   args: [titleProperty, widthProperty, heightProperty],
 );
 
@@ -722,5 +728,6 @@ final alignProperty = EditableArgument(
   ],
 );
 final result2 = EditableArgumentsResult(
+  name: 'MyFlutterWidget2',
   args: [softWrapProperty, alignProperty],
 );

@@ -23,7 +23,7 @@ class PropertyEditorView extends StatelessWidget {
       listenables: [
         controller.editorClient.editArgumentMethodName,
         controller.editorClient.editableArgumentsMethodName,
-        controller.editableArgs,
+        controller.editableWidgetData,
       ],
       builder: (_, values, _) {
         final editArgumentMethodName = values.first as String?;

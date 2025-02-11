@@ -32,8 +32,8 @@ class PropertyEditorController extends DisposableController
   TextDocument? _currentDocument;
   CursorPosition? _currentCursorPosition;
 
-  ValueListenable<EditableWidgetData?> get editableArgs => _editableArgs;
-  final _editableArgs = ValueNotifier<EditableWidgetData?>(null);
+  ValueListenable<EditableWidgetData?> get editableWidgetData => _editableWidgetData;
+  final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
 
   void _init() {
     autoDisposeStreamSubscription(
@@ -58,8 +58,7 @@ class PropertyEditorController extends DisposableController
         );
         final args = result?.args ?? <EditableArgument>[];
         final name = result?.name;
-        print('NAME IS $name');
-        _editableArgs.value = (
+        _editableWidgetData.value = (
           args: args,
           name: name,
           documentation: result?.documentation,
@@ -92,17 +91,15 @@ class PropertyEditorController extends DisposableController
 
   @visibleForTesting
   void initForTestsOnly({
-    List<EditableArgument>? editableArgs,
-    String? name,
-    String? documentation,
+    EditableArgumentsResult? editableArgsResult,
     TextDocument? document,
     CursorPosition? cursorPosition,
   }) {
-    if (editableArgs != null) {
-      _editableArgs.value = (
-        args: editableArgs,
-        name: name,
-        documentation: documentation,
+    if (editableArgsResult != null) {
+      _editableWidgetData.value = (
+        args: editableArgsResult.args,
+        name: editableArgsResult.name,
+        documentation: editableArgsResult.documentation,
       );
     }
     if (document != null) {
