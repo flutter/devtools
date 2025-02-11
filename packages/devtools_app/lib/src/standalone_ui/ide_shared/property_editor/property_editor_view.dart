@@ -218,6 +218,9 @@ class _NoEditablePropertiesMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fixedFontStyle = theme.fixedFontStyle.copyWith(
+      color: theme.colorScheme.primary,
+    );
 
     return RichText(
       text: TextSpan(
@@ -225,21 +228,21 @@ class _NoEditablePropertiesMessage extends StatelessWidget {
         children: [
           name == null
               ? const TextSpan(text: 'The selected widget ')
-              : TextSpan(text: name, style: theme.fixedFontStyle),
+              : TextSpan(text: name, style: fixedFontStyle),
           TextSpan(
             text:
                 ' has no editable widget properties.\n\nThe Flutter Property Editor currently supports editing properties of type ',
             style: theme.regularTextStyle,
           ),
-          TextSpan(text: 'string', style: theme.fixedFontStyle),
+          TextSpan(text: 'string', style: fixedFontStyle),
           const TextSpan(text: ', '),
-          TextSpan(text: 'int', style: theme.fixedFontStyle),
+          TextSpan(text: 'int', style: fixedFontStyle),
           const TextSpan(text: ', '),
-          TextSpan(text: 'double', style: theme.fixedFontStyle),
+          TextSpan(text: 'double', style: fixedFontStyle),
           const TextSpan(text: ', '),
-          TextSpan(text: 'bool', style: theme.fixedFontStyle),
+          TextSpan(text: 'bool', style: fixedFontStyle),
           const TextSpan(text: ', and '),
-          TextSpan(text: 'enum', style: theme.fixedFontStyle),
+          TextSpan(text: 'enum', style: fixedFontStyle),
           const TextSpan(text: '.'),
         ],
       ),
@@ -298,52 +301,96 @@ class _ExpandableWidgetDocumentation extends StatefulWidget {
 }
 
 class _ExpandableWidgetDocumentationState
-    extends State<_ExpandableWidgetDocumentation> {
+    extends State<_ExpandableWidgetDocumentation>
+    with SingleTickerProviderStateMixin {
   bool _isExpanded = false;
+  late AnimationController _expandAnimationController;
+  late Animation<double> _expandAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _expandAnimationController = defaultAnimationController(this);
+    _expandAnimation = defaultCurvedAnimation(_expandAnimationController);
+  }
+
+  @override
+  void dispose() {
+    _expandAnimationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final regularFontStyle = theme.regularTextStyle;
+    final fixedFontStyle = theme.fixedFontStyle.copyWith(
+      color: theme.colorScheme.primary,
+    );
     final paragraphs = widget.documentation.split('\n');
 
-    if (paragraphs.length > 1) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          RichText(
-            // Currently this will process the Dart doc each time a user expands
-            // or collapses the text block. Because the Dart doc is never very
-            // large, this is not an expensive operation. However, we could
-            // consider caching the result if this needs to be optimized.
-            text: _convertDartDoc(
-              _isExpanded ? widget.documentation : paragraphs.first,
-              regularFontStyle: theme.regularTextStyle,
-              fixedFontStyle: theme.fixedFontStyle.copyWith(
+    if (paragraphs.length == 1) {
+      return RichText(
+        text: _convertDartDoc(
+          widget.documentation,
+          regularFontStyle: regularFontStyle,
+          fixedFontStyle: fixedFontStyle,
+        ),
+      );
+    }
+
+    final [firstParagraph, ...otherParagraphs] = paragraphs;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Currently this will process the Dart doc each time a user expands
+        // or collapses the text block. Because the Dart doc is never very
+        // large, this is not an expensive operation. However, we could
+        // consider caching the result if this needs to be optimized.
+        RichText(
+          text: _convertDartDoc(
+            firstParagraph,
+            regularFontStyle: regularFontStyle,
+            fixedFontStyle: fixedFontStyle,
+          ),
+        ),
+        if (_isExpanded)
+          FadeTransition(
+            opacity: _expandAnimation,
+            child: RichText(
+              text: _convertDartDoc(
+                otherParagraphs.join('\n'),
+                regularFontStyle: regularFontStyle,
+                fixedFontStyle: fixedFontStyle,
+              ),
+            ),
+          ),
+        GestureDetector(
+          onTap: _toggleExpansion,
+          child: Padding(
+            padding: const EdgeInsets.only(top: denseSpacing),
+            child: Text(
+              _isExpanded ? 'Show less' : 'Show more',
+              style: theme.boldTextStyle.copyWith(
                 color: theme.colorScheme.primary,
               ),
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(top: densePadding),
-              child: Text(
-                _isExpanded ? 'Show less' : 'Show more',
-                style: theme.boldTextStyle.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Text(widget.documentation);
-    }
+        ),
+      ],
+    );
+  }
+
+  void _toggleExpansion() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
+        _expandAnimationController.forward();
+      } else {
+        _expandAnimationController.reverse();
+      }
+    });
   }
 
   /// Converts a [dartDocText] String into a [TextSpan].
