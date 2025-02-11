@@ -171,7 +171,7 @@ class NetworkController extends DisposableController
   bool get isPolling => _pollingTimer != null;
 
   void _initHelper() async {
-    if (!isConnected() || offlineDataController.showingOfflineData.value) {
+    if (offlineDataController.showingOfflineData.value) {
       await maybeLoadOfflineData(
         NetworkScreen.id,
         createData: (json) => OfflineNetworkData.fromJson(json),
@@ -181,7 +181,8 @@ class NetworkController extends DisposableController
         shouldLoad: (data) => !data.isEmpty,
         loadData: (data) => loadOfflineData(data),
       );
-    } else {
+    }
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
       await startRecording();
     }
   }

@@ -1109,7 +1109,7 @@ class _JsonViewerState extends State<JsonViewer> {
     assert(widget.encodedJson.isNotEmpty);
     final responseJson = json.decode(widget.encodedJson);
 
-    if (isConnected()) {
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
       final root = serviceConnection.serviceManager.service!.fakeServiceCache
           .insertJsonObject(responseJson);
 
@@ -1135,7 +1135,7 @@ class _JsonViewerState extends State<JsonViewer> {
     _initializeTree = _buildAndExpand(variable);
   }
 
-  DartObjectNode _buildJsonTree(dynamic jsonValue, String nodeName) {
+  DartObjectNode _buildJsonTree(Object? jsonValue, String nodeName) {
     final node = DartObjectNode.fromValue(
       name: nodeName,
       value: jsonValue,
@@ -1149,13 +1149,13 @@ class _JsonViewerState extends State<JsonViewer> {
     );
 
     // Add children for objects (Maps)
-    if (jsonValue is Map<String, dynamic>) {
+    if (jsonValue is Map<String, Object?>) {
       for (final entry in jsonValue.entries) {
         node.addChild(_buildJsonTree(entry.value, entry.key));
       }
     }
     // Add children for lists (Arrays)
-    else if (jsonValue is List<dynamic>) {
+    else if (jsonValue is List<Object?>) {
       for (int i = 0; i < jsonValue.length; i++) {
         node.addChild(_buildJsonTree(jsonValue[i], '[$i]'));
       }
@@ -1184,7 +1184,7 @@ class _JsonViewerState extends State<JsonViewer> {
     // Remove the JSON object from the fake service cache (while in connected mode) to avoid holding on
     // to large objects indefinitely.
 
-    if (isConnected()) {
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
       serviceConnection.serviceManager.service!.fakeServiceCache
           .removeJsonObject(variable.value as Instance);
     }
@@ -1222,7 +1222,7 @@ class _JsonViewerState extends State<JsonViewer> {
 
   String copyJsonData(DartObjectNode copiedVariable) {
     // Check if service connection is active
-    if (isConnected()) {
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
       return jsonEncoder.convert(
         serviceConnection.serviceManager.service!.fakeServiceCache
             .instanceToJson(copiedVariable.value as Instance),
