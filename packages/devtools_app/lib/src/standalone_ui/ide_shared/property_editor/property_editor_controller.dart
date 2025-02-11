@@ -32,7 +32,8 @@ class PropertyEditorController extends DisposableController
   TextDocument? _currentDocument;
   CursorPosition? _currentCursorPosition;
 
-  ValueListenable<EditableWidgetData?> get editableWidgetData => _editableWidgetData;
+  ValueListenable<EditableWidgetData?> get editableWidgetData =>
+      _editableWidgetData;
   final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
 
   void _init() {
@@ -66,9 +67,7 @@ class PropertyEditorController extends DisposableController
         // Register impression.
         ga.impression(
           gaId,
-          // TODO(https://github.com/flutter/devtools/issues/8716): Postfix with
-          // widget name.
-          gac.PropertyEditorSidebar.widgetPropertiesUpdate.name,
+          gac.PropertyEditorSidebar.widgetPropertiesUpdate(name: name),
         );
       }),
     );

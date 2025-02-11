@@ -44,7 +44,6 @@ class PropertyEditorView extends StatelessWidget {
         }
 
         final (:args, :name, :documentation) = editableWidgetData;
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
