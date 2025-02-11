@@ -36,9 +36,9 @@ void main(List<String> args) {
     (jsonFilePath.split('/')..removeLast()).join('/'),
   );
 
-  final Map<String, Object?> jsonAsMap =
-      json.fuse(utf8).decode(jsonFile.readAsBytesSync())
-          as Map<String, Object?>;
+  final Map<String, Object?> jsonAsMap = jsonDecode(
+    jsonFile.readAsStringSync(),
+  );
   var jsonFormattedString = JsonEncoder.withIndent('  ').convert(jsonAsMap);
 
   // Escape any '$' characters so that Dart does not think we are trying to do

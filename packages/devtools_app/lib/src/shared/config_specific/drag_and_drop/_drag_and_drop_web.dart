@@ -80,17 +80,14 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     (reader as Element).onLoad.listen((event) {
       try {
         // The reader's result is a string as `readAsText` was used.
-        final Object decoded =
-            json
-                .fuse(utf8)
-                .decode((reader.result as JSArrayBuffer).toDart.asUint8List())!;
+        final Object json = jsonDecode((reader.result as JSString).toDart);
         final devToolsJsonFile = DevToolsJsonFile(
           name: droppedFile!.name,
           lastModifiedTime: DateTime.fromMillisecondsSinceEpoch(
             droppedFile.lastModified,
             isUtc: true,
           ),
-          data: decoded,
+          data: json,
         );
         activeState!.widget.handleDrop!(devToolsJsonFile);
       } on FormatException catch (e) {
@@ -104,7 +101,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     });
 
     try {
-      reader.readAsArrayBuffer(droppedFile!);
+      reader.readAsText(droppedFile!);
     } catch (e) {
       notificationService.push('Could not import file: $e');
     }

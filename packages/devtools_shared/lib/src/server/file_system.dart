@@ -69,10 +69,10 @@ class LocalFileSystem {
     final fileName = path.basename(file.path);
     if (!fileName.endsWith('.json')) return null;
 
-    final content = file.readAsBytesSync();
-    final decoded = json.fuse(utf8).decode(content) as Map;
-    decoded['lastModifiedTime'] = file.lastModifiedSync().toString();
-    return jsonEncode(decoded);
+    final content = file.readAsStringSync();
+    final json = jsonDecode(content) as Map;
+    json['lastModifiedTime'] = file.lastModifiedSync().toString();
+    return jsonEncode(json);
   }
 
   /// Whether the flutter store file exists.

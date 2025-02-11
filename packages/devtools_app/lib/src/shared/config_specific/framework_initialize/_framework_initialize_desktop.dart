@@ -44,8 +44,7 @@ class FlutterDesktopStorage implements Storage {
     final file = _preferencesFile;
     try {
       if (file.existsSync()) {
-        return json.fuse(utf8).decode(file.readAsBytesSync())
-            as Map<String, Object?>;
+        return jsonDecode(file.readAsStringSync()) ?? {};
       } else {
         return {};
       }
