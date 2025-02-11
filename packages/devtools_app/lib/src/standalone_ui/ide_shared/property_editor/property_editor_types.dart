@@ -64,7 +64,8 @@ class EditableEnum extends EditableProperty with FiniteValuesProperty {
   String get dartType => options?.first.split('.').first ?? type;
 
   @override
-  String get valueDisplay => _enumShorthand(displayValue ?? currentValue.toString());
+  String get valueDisplay =>
+      _enumShorthand(displayValue ?? currentValue.toString());
 
   @override
   Set<String> get propertyOptions {

@@ -575,8 +575,8 @@ class EditableArgument with Serializable {
   /// This will only be included if the parameter's [type] is "enum".
   final List<String>? options;
 
-  /// Whether the argument has an explicit default value. 
-  /// 
+  /// Whether the argument has an explicit default value.
+  ///
   /// This is used to distinguish whether the [defaultValue] is actually `null`
   /// or is not provided.
   final bool hasDefault;
@@ -595,8 +595,8 @@ class EditableArgument with Serializable {
   String get valueDisplay => displayValue ?? currentValue.toString();
 
   bool get isDefault => hasDefault && currentValue == defaultValue;
-  
-  Object? get currentValue => hasArgument ? value : defaultValue; 
+
+  Object? get currentValue => hasArgument ? value : defaultValue;
 
   @override
   Map<String, Object?> toJson() => {
