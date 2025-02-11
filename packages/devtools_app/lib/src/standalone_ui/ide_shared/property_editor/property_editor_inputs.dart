@@ -19,15 +19,15 @@ class BooleanInput extends StatelessWidget {
   const BooleanInput({
     super.key,
     required this.property,
-    required this.controller,
+    required this.editProperty,
   });
 
   final FiniteValuesProperty property;
-  final PropertyEditorController controller;
+  final EditArgumentFn editProperty;
 
   @override
   Widget build(BuildContext context) {
-    return _DropdownInput<Object>(property: property, controller: controller);
+    return _DropdownInput<Object>(property: property, editProperty: editProperty);
   }
 }
 
@@ -35,15 +35,15 @@ class DoubleInput extends StatelessWidget {
   const DoubleInput({
     super.key,
     required this.property,
-    required this.controller,
+    required this.editProperty,
   });
 
   final NumericProperty property;
-  final PropertyEditorController controller;
+  final EditArgumentFn editProperty;
 
   @override
   Widget build(BuildContext context) {
-    return _TextInput<double>(property: property, controller: controller);
+    return _TextInput<double>(property: property, editProperty: editProperty);
   }
 }
 
@@ -51,15 +51,15 @@ class EnumInput extends StatelessWidget {
   const EnumInput({
     super.key,
     required this.property,
-    required this.controller,
+    required this.editProperty,
   });
 
   final FiniteValuesProperty property;
-  final PropertyEditorController controller;
+  final EditArgumentFn editProperty;
 
   @override
   Widget build(BuildContext context) {
-    return _DropdownInput<String>(property: property, controller: controller);
+    return _DropdownInput<String>(property: property, editProperty: editProperty);
   }
 }
 
@@ -67,15 +67,15 @@ class IntegerInput extends StatelessWidget {
   const IntegerInput({
     super.key,
     required this.property,
-    required this.controller,
+    required this.editProperty,
   });
 
   final NumericProperty property;
-  final PropertyEditorController controller;
+  final EditArgumentFn editProperty;
 
   @override
   Widget build(BuildContext context) {
-    return _TextInput<int>(property: property, controller: controller);
+    return _TextInput<int>(property: property, editProperty: editProperty);
   }
 }
 
@@ -83,15 +83,15 @@ class StringInput extends StatelessWidget {
   const StringInput({
     super.key,
     required this.property,
-    required this.controller,
+    required this.editProperty,
   });
 
   final EditableProperty property;
-  final PropertyEditorController controller;
+  final EditArgumentFn editProperty;
 
   @override
   Widget build(BuildContext context) {
-    return _TextInput<String>(property: property, controller: controller);
+    return _TextInput<String>(property: property, editProperty: editProperty);
   }
 }
 
@@ -99,11 +99,11 @@ class _DropdownInput<T> extends StatefulWidget {
   const _DropdownInput({
     super.key,
     required this.property,
-    required this.controller,
+    required this.editProperty,
   });
 
   final FiniteValuesProperty property;
-  final PropertyEditorController controller;
+  final EditArgumentFn editProperty;
 
   @override
   State<_DropdownInput<T>> createState() => _DropdownInputState<T>();
@@ -135,7 +135,7 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
         await editProperty(
           widget.property,
           valueAsString: newValue,
-          controller: widget.controller,
+          editPropertyCallback: widget.editProperty,
         );
       },
     );
@@ -146,11 +146,11 @@ class _TextInput<T> extends StatefulWidget {
   const _TextInput({
     super.key,
     required this.property,
-    required this.controller,
+    required this.editProperty,
   });
 
   final EditableProperty property;
-  final PropertyEditorController controller;
+  final EditArgumentFn editProperty;
 
   @override
   State<_TextInput> createState() => _TextInputState<T>();
@@ -208,7 +208,7 @@ class _TextInputState<T> extends State<_TextInput<T>>
     await editProperty(
       widget.property,
       valueAsString: currentValue,
-      controller: widget.controller,
+      editPropertyCallback: widget.editProperty,
     );
   }
 }
@@ -218,7 +218,7 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
 
   Future<void> editProperty(
     EditableProperty property, {
-    required PropertyEditorController controller,
+    required EditArgumentFn editPropertyCallback,
     required String? valueAsString,
   }) async {
     clearServerError();
@@ -235,7 +235,7 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
         editToNull
             ? null
             : property.convertFromInputString(valueAsString) as U?;
-    final response = await controller.editArgument(name: argName, value: value);
+    final response = await editPropertyCallback(name: argName, value: value);
     _handleServerResponse(response, property: property);
   }
 
