@@ -1108,7 +1108,8 @@ class _JsonViewerState extends State<JsonViewer> {
   void _updateVariablesTree() {
     assert(widget.encodedJson.isNotEmpty);
     final responseJson = json.decode(widget.encodedJson);
-
+    // Insert the JSON data into the fake service cache so we can use it with
+    // the `ExpandableVariable` widget.
     if (serviceConnection.serviceManager.connectedState.value.connected) {
       final root = serviceConnection.serviceManager.service!.fakeServiceCache
           .insertJsonObject(responseJson);
