@@ -345,9 +345,8 @@ class HttpTextResponseViewer extends StatelessWidget {
             _isJsonDecodable(responseBody)
                 ? JsonViewer(encodedJson: responseBody)
                 : TextViewer(
-                  // We could also include the decoding exception.
+                  // We could also include the decoding exception. Or push a notification.
                   text: responseBody,
-                  style: textStyle.copyWith(color: Colors.red),
                 ),
           NetworkResponseViewType.text => TextViewer(
             text: responseBody,
