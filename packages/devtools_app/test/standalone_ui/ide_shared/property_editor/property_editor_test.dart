@@ -154,16 +154,19 @@ void main() {
       expect(widthInput, findsOneWidget);
       expect(heightInput, findsOneWidget);
 
-      // Verify the labels are expected.
-      expect(_labelForInput(titleInput, matching: 'set'), findsNothing);
-      expect(_labelForInput(titleInput, matching: 'default'), findsNothing);
-      expect(_labelForInput(widthInput, matching: 'set'), findsNothing);
-      expect(_labelForInput(widthInput, matching: 'default'), findsNothing);
-      expect(_labelForInput(heightInput, matching: 'set'), findsNothing);
-      expect(_labelForInput(heightInput, matching: 'default'), findsOneWidget);
-
-      // Verify required comments exist.
-      expect(_requiredTextForInput(titleInput), findsOneWidget);
+      // Verify the labels and required are expected.
+      _labelsAndRequiredTextAreExpected(
+        titleInput,
+        inputExpectations: titleInputExpectations,
+      );
+      _labelsAndRequiredTextAreExpected(
+        widthInput,
+        inputExpectations: widthInputExpectations,
+      );
+      _labelsAndRequiredTextAreExpected(
+        heightInput,
+        inputExpectations: heightInputExpectations,
+      );
     });
 
     testWidgets('inputs are expected for second group of editable arguments', (
@@ -184,14 +187,15 @@ void main() {
       expect(softWrapInput, findsOneWidget);
       expect(alignInput, findsOneWidget);
 
-      // Verify the labels are expected.
-      expect(_labelForInput(softWrapInput, matching: 'set'), findsNothing);
-      expect(
-        _labelForInput(softWrapInput, matching: 'default'),
-        findsOneWidget,
+      // Verify the labels and required are expected.
+      _labelsAndRequiredTextAreExpected(
+        softWrapInput,
+        inputExpectations: softWrapInputExpectations,
       );
-      expect(_labelForInput(alignInput, matching: 'set'), findsOneWidget);
-      expect(_labelForInput(alignInput, matching: 'default'), findsNothing);
+      _labelsAndRequiredTextAreExpected(
+        alignInput,
+        inputExpectations: alignInputExpectations,
+      );
     });
 
     testWidgets('softWrap input has expected options', (tester) async {
@@ -635,6 +639,34 @@ Finder _labelForInput(Finder inputFinder, {required String matching}) {
 Finder _requiredTextForInput(Finder inputFinder) =>
     _helperTextForInput(inputFinder, matching: '*required');
 
+void _labelsAndRequiredTextAreExpected(
+  Finder inputFinder, {
+  required Map<String, bool> inputExpectations,
+}) {
+  // Check for the existence/non-existence of the "set" badge.
+  final shouldBeSet = inputExpectations['isSet'] == true;
+  expect(
+    _labelForInput(inputFinder, matching: 'set'),
+    shouldBeSet ? findsOneWidget : findsNothing,
+    reason: 'Expected to find ${shouldBeSet ? 'a' : 'no'} "set" badge.',
+  );
+  // Check for the existence/non-existence of the "default" badge.
+  final shouldBeDefault = inputExpectations['isDefault'] == true;
+  expect(
+    _labelForInput(inputFinder, matching: 'default'),
+    shouldBeDefault ? findsOneWidget : findsNothing,
+    reason: 'Expected to find ${shouldBeDefault ? 'a' : 'no'} "default" badge.',
+  );
+  // Check for the existence/non-existence of the required text ('*').
+  final shouldBeRequired = inputExpectations['isRequired'] == true;
+  expect(
+    _requiredTextForInput(inputFinder),
+    shouldBeRequired ? findsOneWidget : findsNothing,
+    reason:
+        'Expected to find ${shouldBeRequired ? 'the' : 'no'} "required" indicator.',
+  );
+}
+
 Finder _helperTextForInput(Finder inputFinder, {required String matching}) {
   final rowFinder = find.ancestor(of: inputFinder, matching: find.byType(Row));
   return find.descendant(of: rowFinder, matching: find.richText(matching));
@@ -768,38 +800,50 @@ Example: `MyWidget(title: 1.0, height: 2.0)`
 ''';
 
 // Result 1
-final titleProperty = EditableArgument(
-  name: 'title',
-  value: 'Hello world!',
-  type: 'string',
-  isDefault: false,
-  isEditable: true,
-  isNullable: true,
-  isRequired: true,
-  hasArgument: false,
-);
-final widthProperty = EditableArgument(
-  name: 'width',
-  displayValue: '100.0',
-  type: 'double',
-  isEditable: false,
-  isDefault: false,
-  errorText: 'Some reason for why this can\'t be edited.',
-  isNullable: false,
-  value: 20.0,
-  isRequired: false,
-  hasArgument: false,
-);
-final heightProperty = EditableArgument(
-  name: 'height',
-  type: 'double',
-  hasArgument: false,
-  isEditable: true,
-  isNullable: true,
-  value: 20.0,
-  isDefault: true,
-  isRequired: false,
-);
+final titleProperty = EditableArgument.fromJson({
+  'name': 'title',
+  'value': 'Hello world!',
+  'type': 'string',
+  'isEditable': true,
+  'isNullable': true,
+  'isRequired': true,
+  'hasArgument': true,
+});
+final titleInputExpectations = {
+  'isSet': true,
+  'isRequired': true,
+  'isDefault': false,
+};
+
+final widthProperty = EditableArgument.fromJson({
+  'name': 'width',
+  'displayValue': 'myWidth',
+  'type': 'double',
+  'errorText': 'Some reason why this can\'t be edited.',
+  'isNullable': false,
+  'isRequired': false,
+  'hasArgument': true,
+});
+final widthInputExpectations = {
+  'isSet': true,
+  'isRequired': false,
+  'isDefault': false,
+};
+
+final heightProperty = EditableArgument.fromJson({
+  'name': 'height',
+  'type': 'double',
+  'hasArgument': false,
+  'isEditable': true,
+  'isNullable': true,
+  'defaultValue': 20.0,
+  'isRequired': false,
+});
+final heightInputExpectations = {
+  'isSet': false,
+  'isRequired': false,
+  'isDefault': true,
+};
 final result1 = EditableArgumentsResult(
   name: widgetName,
   documentation: dartDocText,
@@ -807,26 +851,30 @@ final result1 = EditableArgumentsResult(
 );
 
 // Result 2
-final softWrapProperty = EditableArgument(
-  name: 'softWrap',
-  type: 'bool',
-  isNullable: false,
-  value: true,
-  isDefault: true,
-  hasArgument: false,
-  isEditable: true,
-  isRequired: false,
-);
-final alignProperty = EditableArgument(
-  name: 'align',
-  type: 'enum',
-  isNullable: true,
-  hasArgument: true,
-  isDefault: false,
-  isRequired: false,
-  isEditable: true,
-  value: 'Alignment.center',
-  options: [
+final softWrapProperty = EditableArgument.fromJson({
+  'name': 'softWrap',
+  'type': 'bool',
+  'isNullable': false,
+  'defaultValue': true,
+  'hasArgument': false,
+  'isEditable': true,
+  'isRequired': false,
+});
+final softWrapInputExpectations = {
+  'isSet': false,
+  'isRequired': false,
+  'isDefault': true,
+};
+final alignProperty = EditableArgument.fromJson({
+  'name': 'align',
+  'type': 'enum',
+  'isNullable': true,
+  'hasArgument': true,
+  'defaultValue': 'Alignment.bottomLeft',
+  'isRequired': false,
+  'isEditable': true,
+  'value': 'Alignment.center',
+  'options': [
     'Alignment.bottomCenter',
     'Alignment.bottomLeft',
     'Alignment.bottomRight',
@@ -837,7 +885,12 @@ final alignProperty = EditableArgument(
     'Alignment.topLeft',
     'Alignment.topRight',
   ],
-);
+});
+final alignInputExpectations = {
+  'isSet': true,
+  'isRequired': false,
+  'isDefault': false,
+};
 final result2 = EditableArgumentsResult(
   name: widgetName,
   args: [softWrapProperty, alignProperty],

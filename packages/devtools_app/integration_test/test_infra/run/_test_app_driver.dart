@@ -21,14 +21,18 @@ class TestFlutterApp extends IntegrationTestApp {
 
   @override
   Future<void> startProcess() async {
-    runProcess = await Process.start('flutter', [
-      'run',
-      '--machine',
-      '-d',
-      testAppDevice.argName,
-      // Do not serve DevTools from Flutter Tools.
-      '--no-devtools',
-    ], workingDirectory: testAppPath);
+    runProcess = await Process.start(
+      Platform.isWindows ? 'flutter.bat' : 'flutter',
+      [
+        'run',
+        '--machine',
+        '-d',
+        testAppDevice.argName,
+        // Do not serve DevTools from Flutter Tools.
+        '--no-devtools',
+      ],
+      workingDirectory: testAppPath,
+    );
   }
 
   @override
