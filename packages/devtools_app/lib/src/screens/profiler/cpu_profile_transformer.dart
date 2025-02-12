@@ -13,6 +13,9 @@ class CpuProfileTransformer {
   /// Number of stack frames we will process in each batch.
   static const _defaultBatchSize = 100;
 
+  /// Number of ms per frame alloted to maintain 60fps.
+  static const _frameBudget = 16;
+
   int _stackFramesProcessed = 0;
 
   String? _activeProcessId;
@@ -50,9 +53,11 @@ class CpuProfileTransformer {
       watch.stop();
       // Avoid divide by zero
       final elapsedMs = math.max(watch.elapsedMilliseconds, 1);
-      // 16ms is the budget for 60fps, adjust to use less than half that so there
-      // is some budget left for other things.
-      batchSize = math.max((batchSize * 8 / elapsedMs).ceil(), 1);
+      // Adjust to use half the frame budget.
+      batchSize = math.max(
+        (batchSize * _frameBudget * 0.5 / elapsedMs).ceil(),
+        1,
+      );
 
       // Await a small delay to give the UI thread a chance to update the
       // progress indicator. Use a longer delay than the default (0) so that the
