@@ -128,7 +128,14 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
           widget.property.propertyOptions.map((option) {
             return DropdownMenuItem(
               value: option,
-              child: Text(option, style: theme.fixedFontStyle),
+              child: Row(
+                children: [
+                  Text(option, style: theme.fixedFontStyle),
+                  if (widget.property.hasDefault &&
+                      widget.property.defaultValue.toString() == option)
+                    const RoundedLabel(labelText: 'default'),
+                ],
+              ),
             );
           }).toList(),
       onChanged: (newValue) async {
