@@ -41,7 +41,7 @@ const _kMemoryDisconnectExperience = bool.fromEnvironment(
   defaultValue: true,
 );
 
-const _kNetworkOfflineExperiment = bool.fromEnvironment(
+const _kNetworkDisconnectExperience = bool.fromEnvironment(
   'network_disconnect_experience',
   defaultValue: true,
 );
@@ -70,15 +70,21 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/5606
   static const memoryDisconnectExperience = _kMemoryDisconnectExperience;
 
-  /// Flag to enable offline data on network screen.
-  ///
-  /// https://github.com/flutter/devtools/issues/3806
-  static const networkOffline = _kNetworkOfflineExperiment;
-
   /// Flag to enable save/load for the Memory screen.
   ///
   /// https://github.com/flutter/devtools/issues/8019
   static bool memorySaveLoad = enableExperiments;
+
+  /// Flag to enable viewing offline data on the network screen when an app
+  /// disconnects.
+  ///
+  /// https://github.com/flutter/devtools/issues/3806
+  static const networkDisconnectExperience = _kNetworkDisconnectExperience;
+
+  /// Flag to enable save/load for the Network screen.
+  ///
+  /// https://github.com/flutter/devtools/issues/4470
+  static bool networkSaveLoad = true;
 
   /// Flag to enable the deep link validation tooling in DevTools, both for the
   /// DevTools screen and the standalone tool for IDE embedding.

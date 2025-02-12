@@ -76,7 +76,7 @@ enum ScreenMetaData {
     // ignore: avoid_redundant_argument_values, false positive
     requiresConnection: false,
     // ignore: avoid_redundant_argument_values, false positive
-    worksWithOfflineData: FeatureFlags.networkOffline,
+    worksWithOfflineData: FeatureFlags.networkDisconnectExperience,
   ),
   logging(
     'logging',

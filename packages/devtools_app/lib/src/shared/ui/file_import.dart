@@ -17,54 +17,203 @@ import '../globals.dart';
 import '../primitives/utils.dart';
 import 'common_widgets.dart';
 
+enum SaveFormat {
+  devtools('Save as DevTools .json file'),
+  har('Save as .har file');
+
+  const SaveFormat(this.display);
+
+  final String display;
+
+  static final dropdownWidth = scaleByFontFactor(200.0);
+}
+
 class OpenSaveButtonGroup extends StatelessWidget {
   const OpenSaveButtonGroup({
     super.key,
     required this.screenId,
     required this.onSave,
+    this.saveFormats = const [SaveFormat.devtools],
+    this.gaItemForSaveFormatSelection,
+  }) : assert(saveFormats.length >= 1);
+
+  final String screenId;
+
+  final void Function(SaveFormat)? onSave;
+
+  final List<SaveFormat> saveFormats;
+
+  final String Function(SaveFormat)? gaItemForSaveFormatSelection;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: RoundedOutlinedBorder(
+        clip: true,
+        child: Row(
+          children: [
+            _SimpleOpenSaveButton(
+              icon: Icons.file_upload,
+              tooltip: 'Open a file that was previously saved from DevTools',
+              roundedLeftBorder: true,
+              roundedRightBorder: false,
+              onPressed: () async {
+                ga.select(screenId, gac.openFile);
+                final importedFile = await importFileFromPicker(
+                  acceptedTypes: const ['json'],
+                );
+                if (importedFile != null) {
+                  Provider.of<ImportController>(
+                    // ignore: use_build_context_synchronously, intentional use.
+                    context,
+                    listen: false,
+                  ).importData(importedFile, expectedScreenId: screenId);
+                } else {
+                  notificationService.push(
+                    'Something went wrong. Could not open selected file.',
+                  );
+                }
+              },
+            ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(color: Theme.of(context).focusColor),
+                ),
+              ),
+              child:
+                  saveFormats.length == 1 &&
+                          saveFormats.first == SaveFormat.devtools
+                      ? _SimpleOpenSaveButton(
+                        icon: Icons.file_download,
+                        tooltip: 'Save this screen\'s data for offline viewing',
+                        roundedLeftBorder: false,
+                        roundedRightBorder: true,
+                        onPressed:
+                            onSave != null
+                                ? () {
+                                  ga.select(screenId, gac.saveFile);
+                                  onSave!.call(SaveFormat.devtools);
+                                }
+                                : null,
+                      )
+                      : _DropdownSaveButton(
+                        screenId: screenId,
+                        onSave: onSave,
+                        saveFormats: saveFormats,
+                        gaItemForSaveFormatSelection:
+                            gaItemForSaveFormatSelection,
+                      ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SimpleOpenSaveButton extends StatelessWidget {
+  const _SimpleOpenSaveButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    required this.roundedLeftBorder,
+    required this.roundedRightBorder,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
+  final bool roundedLeftBorder;
+  final bool roundedRightBorder;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      message: tooltip,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: densePadding),
+          side: BorderSide.none,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.horizontal(
+              left: roundedLeftBorder ? defaultRadius : Radius.zero,
+              right: roundedRightBorder ? defaultRadius : Radius.zero,
+            ),
+          ),
+        ),
+        onPressed: onPressed,
+        child: DevToolsIcon(icon: icon, size: defaultIconSize),
+      ),
+    );
+  }
+}
+
+class _DropdownSaveButton extends StatefulWidget {
+  const _DropdownSaveButton({
+    required this.screenId,
+    required this.onSave,
+    this.saveFormats = const [SaveFormat.devtools],
+    this.gaItemForSaveFormatSelection,
   });
 
   final String screenId;
 
-  final VoidCallback? onSave;
+  final void Function(SaveFormat)? onSave;
+
+  final List<SaveFormat> saveFormats;
+
+  final String Function(SaveFormat)? gaItemForSaveFormatSelection;
+
+  @override
+  State<_DropdownSaveButton> createState() => __DropdownSaveButtonState();
+}
+
+class __DropdownSaveButtonState extends State<_DropdownSaveButton> {
+  var saveFormat = SaveFormat.devtools;
 
   @override
   Widget build(BuildContext context) {
-    return RoundedButtonGroup(
-      items: [
-        ButtonGroupItemData(
-          icon: Icons.file_upload,
-          tooltip: 'Open a file that was previously saved from DevTools',
-          onPressed: () async {
-            ga.select(screenId, gac.openFile);
-            final importedFile = await importFileFromPicker(
-              acceptedTypes: const ['json'],
-            );
-            if (importedFile != null) {
-              Provider.of<ImportController>(
-                // ignore: use_build_context_synchronously, intentional use.
-                context,
-                listen: false,
-              ).importData(importedFile, expectedScreenId: screenId);
-            } else {
-              notificationService.push(
-                'Something went wrong. Could not open selected file.',
-              );
-            }
-          },
+    return DropdownButtonHideUnderline(
+      child: DropdownButton<SaveFormat>(
+        value: saveFormat,
+        menuWidth: SaveFormat.dropdownWidth,
+        padding: const EdgeInsets.symmetric(horizontal: densePadding),
+        borderRadius: const BorderRadius.only(
+          topRight: defaultRadius,
+          bottomRight: defaultRadius,
         ),
-        ButtonGroupItemData(
-          icon: Icons.file_download,
-          tooltip: 'Save this screen\'s data for offline viewing',
-          onPressed:
-              onSave != null
-                  ? () {
-                    ga.select(screenId, gac.saveFile);
-                    onSave!.call();
-                  }
-                  : null,
-        ),
-      ],
+        onChanged: (selectedFormat) {
+          final gaItem =
+              widget.gaItemForSaveFormatSelection?.call(selectedFormat!) ??
+              gac.saveFile;
+          ga.select(widget.screenId, gaItem);
+          widget.onSave!.call(selectedFormat!);
+          setState(() {
+            saveFormat = selectedFormat;
+          });
+        },
+        selectedItemBuilder: (context) {
+          return widget.saveFormats
+              .map(
+                (f) => DevToolsIcon(
+                  icon: Icons.file_download,
+                  size: defaultIconSize,
+                ),
+              )
+              .toList();
+        },
+        items:
+            widget.saveFormats
+                .map(
+                  (f) => DropdownMenuItem<SaveFormat>(
+                    value: f,
+                    child: Text(f.display),
+                  ),
+                )
+                .toList(),
+      ),
     );
   }
 }
