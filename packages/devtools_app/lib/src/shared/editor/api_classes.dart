@@ -92,6 +92,7 @@ abstract class Field {
   static const debugSession = 'debugSession';
   static const debugSessionId = 'debugSessionId';
   static const debugSessions = 'debugSessions';
+  static const defaultValue = 'defaultValue';
   static const device = 'device';
   static const deviceId = 'deviceId';
   static const devices = 'devices';
@@ -108,7 +109,6 @@ abstract class Field {
   static const hasArgument = 'hasArgument';
   static const id = 'id';
   static const isDarkMode = 'isDarkMode';
-  static const isDefault = 'isDefault';
   static const isEditable = 'isEditable';
   static const isNullable = 'isNullable';
   static const isRequired = 'isRequired';
@@ -515,13 +515,14 @@ class EditableArgument with Serializable {
   EditableArgument({
     required this.name,
     required this.type,
-    required this.value,
     required this.hasArgument,
-    required this.isDefault,
     required this.isNullable,
     required this.isRequired,
     required this.isEditable,
+    required this.hasDefault,
     this.options,
+    this.value,
+    this.defaultValue,
     this.displayValue,
     this.errorText,
   });
@@ -530,13 +531,14 @@ class EditableArgument with Serializable {
     : this(
         name: map[Field.name] as String,
         type: map[Field.type] as String,
-        value: map[Field.value],
         hasArgument: (map[Field.hasArgument] as bool?) ?? false,
-        isDefault: (map[Field.isDefault] as bool?) ?? false,
         isNullable: (map[Field.isNullable] as bool?) ?? false,
         isRequired: (map[Field.isRequired] as bool?) ?? false,
         isEditable: (map[Field.isEditable] as bool?) ?? true,
+        hasDefault: map.containsKey(Field.defaultValue),
         options: (map[Field.options] as List<Object?>?)?.cast<String>(),
+        value: map[Field.value],
+        defaultValue: map[Field.defaultValue],
         displayValue: map[Field.displayValue] as String?,
         errorText: map[Field.errorText] as String?,
       );
@@ -556,9 +558,6 @@ class EditableArgument with Serializable {
   /// Whether an explicit argument exists for this parameter in the code.
   final bool hasArgument;
 
-  /// Whether the value is the default for this parameter.
-  final bool isDefault;
-
   /// Whether this argument can be `null`.
   final bool isNullable;
 
@@ -576,6 +575,15 @@ class EditableArgument with Serializable {
   /// This will only be included if the parameter's [type] is "enum".
   final List<String>? options;
 
+  /// Whether the argument has an explicit default value.
+  ///
+  /// This is used to distinguish whether the [defaultValue] is actually `null`
+  /// or is not provided.
+  final bool hasDefault;
+
+  /// The default value for this parameter.
+  final Object? defaultValue;
+
   /// A string that can be displayed to indicate the value for this argument.
   ///
   /// This is populated in cases where the source code is not literally the same
@@ -584,7 +592,11 @@ class EditableArgument with Serializable {
 
   final String? errorText;
 
-  String get valueDisplay => displayValue ?? value.toString();
+  String get valueDisplay => displayValue ?? currentValue.toString();
+
+  bool get isDefault => hasDefault && currentValue == defaultValue;
+
+  Object? get currentValue => hasArgument ? value : defaultValue;
 
   @override
   Map<String, Object?> toJson() => {
@@ -592,7 +604,7 @@ class EditableArgument with Serializable {
     Field.type: type,
     Field.value: value,
     Field.hasArgument: hasArgument,
-    Field.isDefault: isDefault,
+    Field.defaultValue: defaultValue,
     Field.isNullable: isNullable,
     Field.isRequired: isRequired,
     Field.isEditable: isEditable,
