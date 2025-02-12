@@ -233,7 +233,7 @@ void main() {
           ProfilerScreen, // Works offline, so appears regardless of web flag
           MemoryScreen, // Works offline, so appears regardless of web flag
           // DebuggerScreen,
-          // NetworkScreen,
+          NetworkScreen,
           // LoggingScreen,
           // AppSizeScreen,
           // DeepLinksScreen,
