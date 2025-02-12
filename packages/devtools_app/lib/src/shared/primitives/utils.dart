@@ -1009,6 +1009,10 @@ extension ListExtension<T> on List<T> {
 
   T get third => this[2];
 
+  T get fourth => this[3];
+
+  T get fifth => this[4];
+
   List<int> allIndicesWhere(bool Function(T element) test) {
     final indices = <int>[];
     for (var i = 0; i < length; i++) {

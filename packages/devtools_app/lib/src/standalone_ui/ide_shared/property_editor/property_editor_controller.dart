@@ -13,7 +13,7 @@ import '../../../shared/editor/editor_client.dart';
 typedef EditableWidgetData =
     ({List<EditableArgument> args, String? name, String? documentation});
 
-typedef EditArgumentFn =
+typedef EditArgumentFunction =
     Future<EditArgumentResponse?> Function<T>({
       required String name,
       required T value,

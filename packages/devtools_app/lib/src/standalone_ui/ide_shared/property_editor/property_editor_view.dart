@@ -11,6 +11,7 @@ import '../../../shared/ui/common_widgets.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
 import 'property_editor_types.dart';
+import 'utils/utils.dart';
 
 class PropertyEditorView extends StatelessWidget {
   const PropertyEditorView({required this.controller, super.key});
@@ -36,10 +37,8 @@ class PropertyEditorView extends StatelessWidget {
 
         final editableWidgetData = values.third as EditableWidgetData?;
         if (editableWidgetData == null) {
-          return const Center(
-            child: Text(
-              'No Flutter widget found at the current cursor location.',
-            ),
+          return const CenteredMessage(
+            message: 'No Flutter widget found at the current cursor location.',
           );
         }
 
@@ -72,7 +71,7 @@ class _PropertiesList extends StatelessWidget {
   });
 
   final List<EditableProperty> editableProperties;
-  final EditArgumentFn editProperty;
+  final EditArgumentFunction editProperty;
 
   static const itemPadding = borderPadding;
 
@@ -98,7 +97,7 @@ class _EditablePropertyItem extends StatelessWidget {
   });
 
   final EditableProperty property;
-  final EditArgumentFn editProperty;
+  final EditArgumentFunction editProperty;
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +174,7 @@ class _PropertyInput extends StatelessWidget {
   const _PropertyInput({required this.property, required this.editProperty});
 
   final EditableProperty property;
-  final EditArgumentFn editProperty;
+  final EditArgumentFunction editProperty;
 
   @override
   Widget build(BuildContext context) {
@@ -258,20 +257,17 @@ class _WidgetNameAndDocumentation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: denseSpacing),
-              child: Text(
-                name,
-                style: Theme.of(context).fixedFontStyle.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: defaultFontSize + 1,
-                ),
-              ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: denseSpacing),
+          child: Text(
+            name,
+            style: Theme.of(context).fixedFontStyle.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: defaultFontSize + 1,
             ),
-          ],
+          ),
         ),
         Row(
           children: [
@@ -329,12 +325,10 @@ class _ExpandableWidgetDocumentationState
     final paragraphs = widget.documentation.split('\n');
 
     if (paragraphs.length == 1) {
-      return RichText(
-        text: _convertDartDoc(
-          widget.documentation,
-          regularFontStyle: regularFontStyle,
-          fixedFontStyle: fixedFontStyle,
-        ),
+      return convertDartDocToRichText(
+        widget.documentation,
+        regularFontStyle: regularFontStyle,
+        fixedFontStyle: fixedFontStyle,
       );
     }
 
@@ -347,33 +341,27 @@ class _ExpandableWidgetDocumentationState
         // or collapses the text block. Because the Dart doc is never very
         // large, this is not an expensive operation. However, we could
         // consider caching the result if this needs to be optimized.
-        RichText(
-          text: _convertDartDoc(
-            firstParagraph,
-            regularFontStyle: regularFontStyle,
-            fixedFontStyle: fixedFontStyle,
-          ),
+        convertDartDocToRichText(
+          firstParagraph,
+          regularFontStyle: regularFontStyle,
+          fixedFontStyle: fixedFontStyle,
         ),
         if (_isExpanded)
           FadeTransition(
             opacity: _expandAnimation,
-            child: RichText(
-              text: _convertDartDoc(
-                otherParagraphs.join('\n'),
-                regularFontStyle: regularFontStyle,
-                fixedFontStyle: fixedFontStyle,
-              ),
+            child: convertDartDocToRichText(
+              otherParagraphs.join('\n'),
+              regularFontStyle: regularFontStyle,
+              fixedFontStyle: fixedFontStyle,
             ),
           ),
-        GestureDetector(
+        const SizedBox(height: denseSpacing),
+        InkWell(
           onTap: _toggleExpansion,
-          child: Padding(
-            padding: const EdgeInsets.only(top: denseSpacing),
-            child: Text(
-              _isExpanded ? 'Show less' : 'Show more',
-              style: theme.boldTextStyle.copyWith(
-                color: theme.colorScheme.primary,
-              ),
+          child: Text(
+            _isExpanded ? 'Show less' : 'Show more',
+            style: theme.boldTextStyle.copyWith(
+              color: theme.colorScheme.primary,
             ),
           ),
         ),
@@ -390,84 +378,5 @@ class _ExpandableWidgetDocumentationState
         _expandAnimationController.reverse();
       }
     });
-  }
-
-  /// Converts a [dartDocText] String into a [TextSpan].
-  ///
-  /// Removes any brackets and backticks and displays the text inside them as
-  /// fixed font.
-  TextSpan _convertDartDoc(
-    String dartDocText, {
-    required TextStyle regularFontStyle,
-    required TextStyle fixedFontStyle,
-  }) {
-    final children = <TextSpan>[];
-    int currentIndex = 0;
-
-    while (currentIndex < dartDocText.length) {
-      final openBracketIndex = dartDocText.indexOf('[', currentIndex);
-      final openBacktickIndex = dartDocText.indexOf('`', currentIndex);
-
-      int nextSpecialCharIndex = -1;
-      bool isLink = false;
-
-      if (openBracketIndex != -1 &&
-          (openBacktickIndex == -1 || openBracketIndex < openBacktickIndex)) {
-        nextSpecialCharIndex = openBracketIndex;
-        isLink = true;
-      } else if (openBacktickIndex != -1 &&
-          (openBracketIndex == -1 || openBacktickIndex < openBracketIndex)) {
-        nextSpecialCharIndex = openBacktickIndex;
-      }
-
-      if (nextSpecialCharIndex == -1) {
-        // No more special characters, add the remaining text.
-        children.add(
-          TextSpan(
-            text: dartDocText.substring(currentIndex),
-            style: regularFontStyle,
-          ),
-        );
-        break;
-      }
-
-      // Add text before the special character.
-      children.add(
-        TextSpan(
-          text: dartDocText.substring(currentIndex, nextSpecialCharIndex),
-          style: regularFontStyle,
-        ),
-      );
-
-      int closeIndex = -1;
-      TextStyle currentStyle = regularFontStyle;
-      if (isLink) {
-        closeIndex = dartDocText.indexOf(']', nextSpecialCharIndex);
-        currentStyle = fixedFontStyle;
-      } else {
-        closeIndex = dartDocText.indexOf('`', nextSpecialCharIndex + 1);
-        currentStyle = fixedFontStyle;
-      }
-
-      if (closeIndex == -1) {
-        // Treat unmatched brackets/backticks as regular text.
-        children.add(
-          TextSpan(
-            text: dartDocText.substring(nextSpecialCharIndex),
-            style: regularFontStyle,
-          ),
-        );
-        currentIndex = dartDocText.length; // Effectively break the loop.
-      } else {
-        final content = dartDocText.substring(
-          nextSpecialCharIndex + 1,
-          closeIndex,
-        );
-        children.add(TextSpan(text: content, style: currentStyle));
-        currentIndex = closeIndex + 1;
-      }
-    }
-
-    return TextSpan(children: children);
   }
 }

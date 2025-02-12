@@ -23,7 +23,7 @@ class BooleanInput extends StatelessWidget {
   });
 
   final FiniteValuesProperty property;
-  final EditArgumentFn editProperty;
+  final EditArgumentFunction editProperty;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class DoubleInput extends StatelessWidget {
   });
 
   final NumericProperty property;
-  final EditArgumentFn editProperty;
+  final EditArgumentFunction editProperty;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class EnumInput extends StatelessWidget {
   });
 
   final FiniteValuesProperty property;
-  final EditArgumentFn editProperty;
+  final EditArgumentFunction editProperty;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +77,7 @@ class IntegerInput extends StatelessWidget {
   });
 
   final NumericProperty property;
-  final EditArgumentFn editProperty;
+  final EditArgumentFunction editProperty;
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +93,7 @@ class StringInput extends StatelessWidget {
   });
 
   final EditableProperty property;
-  final EditArgumentFn editProperty;
+  final EditArgumentFunction editProperty;
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +109,7 @@ class _DropdownInput<T> extends StatefulWidget {
   });
 
   final FiniteValuesProperty property;
-  final EditArgumentFn editProperty;
+  final EditArgumentFunction editProperty;
 
   @override
   State<_DropdownInput<T>> createState() => _DropdownInputState<T>();
@@ -156,7 +156,7 @@ class _TextInput<T> extends StatefulWidget {
   });
 
   final EditableProperty property;
-  final EditArgumentFn editProperty;
+  final EditArgumentFunction editProperty;
 
   @override
   State<_TextInput> createState() => _TextInputState<T>();
@@ -224,7 +224,7 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
 
   Future<void> editProperty(
     EditableProperty property, {
-    required EditArgumentFn editPropertyCallback,
+    required EditArgumentFunction editPropertyCallback,
     required String? valueAsString,
   }) async {
     clearServerError();
