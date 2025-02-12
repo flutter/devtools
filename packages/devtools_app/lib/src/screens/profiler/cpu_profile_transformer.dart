@@ -34,19 +34,25 @@ class CpuProfileTransformer {
     // At minimum, process the data in 4 batches to smooth the appearance of
     // the progress indicator.
     final quarterBatchSize = (stackFramesCount / 4).round();
-    final batchSize = math.min(
+    var batchSize = math.min(
       _defaultBatchSize,
       quarterBatchSize == 0 ? 1 : quarterBatchSize,
     );
-
     // Use batch processing to maintain a responsive UI.
     while (_stackFramesProcessed < stackFramesCount) {
+      final watch = Stopwatch()..start();
       _processBatch(
         batchSize,
         cpuProfileData,
         processId: processId,
         stackFrameValues: stackFrameValues,
       );
+      watch.stop();
+      // Avoid divide by zero
+      final elapsedMs = math.max(watch.elapsedMilliseconds, 1);
+      // 16ms is the budget for 60fps, adjust to use less than half that so there
+      // is some budget left for other things.
+      batchSize = math.max((batchSize * 8 / elapsedMs).ceil(), 1);
 
       // Await a small delay to give the UI thread a chance to update the
       // progress indicator. Use a longer delay than the default (0) so that the
