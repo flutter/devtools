@@ -43,7 +43,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-* Offline support added for the network screen (thanks to @hrajwade96!) - 
+* Added offline support for the network screen (thanks to @hrajwade96!) - 
 [#8332](https://github.com/flutter/devtools/pull/8332)
 
   ![Network profiler controls](images/network_controls.png "Network profiler controls")
