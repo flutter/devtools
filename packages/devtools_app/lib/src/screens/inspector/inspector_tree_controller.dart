@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:collection';
@@ -34,7 +34,7 @@ import 'inspector_controller.dart';
 
 final _log = Logger('inspector_tree_controller');
 
-/// Presents a [TreeNode].
+/// Presents a [InspectorTreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
   /// Constructs a [_InspectorTreeRowWidget] that presents a line in the
   /// Inspector tree.

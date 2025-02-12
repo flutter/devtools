@@ -13,6 +13,10 @@ class NetworkService {
 
   final NetworkController networkController;
 
+  /// Tracks the time (microseconds since epoch) that the HTTP profile was last
+  /// retrieved for a given isolate ID.
+  final lastHttpDataRefreshTimePerIsolate = <String, int>{};
+
   /// Updates the last Socket data refresh time to the current time.
   ///
   /// If [alreadyRecordingSocketData] is true, it's unclear when the last
@@ -40,11 +44,18 @@ class NetworkService {
   ///
   /// If [alreadyRecordingHttp] is true it's unclear when the last refresh time
   /// would have occurred, so the refresh time is not updated. Otherwise,
-  /// [NetworkController.lastHttpDataRefreshTime] is updated to the current
+  /// [lastHttpDataRefreshTimePerIsolate] is updated to the current
   /// time.
   void updateLastHttpDataRefreshTime({bool alreadyRecordingHttp = false}) {
     if (!alreadyRecordingHttp) {
-      networkController.lastHttpDataRefreshTime = DateTime.now();
+      for (final isolateId in lastHttpDataRefreshTimePerIsolate.keys.toList()) {
+        // It's safe to use `DateTime.now()` here since we don't need to worry
+        // about dropping data between the time the last profile was generated
+        // by the target application and the time `DateTime.now()` is called
+        // here.
+        lastHttpDataRefreshTimePerIsolate[isolateId] =
+            DateTime.now().microsecondsSinceEpoch;
+      }
     }
   }
 
@@ -59,7 +70,6 @@ class NetworkService {
     networkController.lastSocketDataRefreshMicros = timestamp;
     List<HttpProfileRequest>? httpRequests;
     httpRequests = await _refreshHttpProfile();
-    networkController.lastHttpDataRefreshTime = DateTime.now();
     networkController.processNetworkTraffic(
       sockets: sockets,
       httpRequests: httpRequests,
@@ -74,9 +84,22 @@ class NetworkService {
     await service.forEachIsolate((isolate) async {
       final request = await service.getHttpProfileWrapper(
         isolate.id!,
-        updatedSince: networkController.lastHttpDataRefreshTime,
+        updatedSince: DateTime.fromMicrosecondsSinceEpoch(
+          lastHttpDataRefreshTimePerIsolate.putIfAbsent(
+            isolate.id!,
+            // If a new isolate has spawned, request all HTTP requests from the
+            // start of time when retrieving the first profile.
+            () => 0,
+          ),
+        ),
       );
       requests.addAll(request.requests);
+      // Update the last request time using the timestamp from the HTTP profile
+      // instead of DateTime.now() to avoid missing events due to the delay
+      // between the last profile creation in the target process and the call
+      // to DateTime.now() here.
+      lastHttpDataRefreshTimePerIsolate[isolate.id!] =
+          request.timestamp.microsecondsSinceEpoch;
     });
     return requests;
   }

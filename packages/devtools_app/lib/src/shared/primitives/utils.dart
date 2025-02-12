@@ -1,6 +1,6 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // This file contain low level utils, i.e. utils that do not depend on
 // libraries in this package.
@@ -1074,9 +1074,6 @@ const connectToNewAppText = 'Connect to a new app';
 /// favor of a new request.
 class ProcessCancelledException implements Exception {}
 
-// TODO(mtaylee): Prefer to use this helper method whenever a call to
-// .split('/').last is made on a String (usually on URIs).
-// See https://github.com/flutter/devtools/issues/4360.
 /// Returns the file name from a URI or path string, by splitting the [uri] at
 /// the directory separators '/', and returning the last element.
 String? fileNameFromUri(String? uri) => uri?.split('/').lastOrNull;

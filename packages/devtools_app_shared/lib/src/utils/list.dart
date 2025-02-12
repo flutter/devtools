@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:collection';
 import 'dart:math';
@@ -27,7 +27,6 @@ final class ListValueNotifier<T> extends ChangeNotifier
 
   @override
   // This override is needed to change visibility of the method.
-  // ignore: unnecessary_overrides
   void notifyListeners() {
     super.notifyListeners();
   }
@@ -93,10 +92,10 @@ final class ListValueNotifier<T> extends ChangeNotifier
 
   /// Truncates to just the elements between [start] and [end].
   ///
-  /// If [end] is omitted, it defaults to the [length] of this list.
+  /// If [end] is omitted, it defaults to the `length` of this list.
   ///
   /// The `start` and `end` positions must satisfy the relations
-  /// 0 ≤ `start` ≤ `end` ≤ [length]
+  /// 0 ≤ `start` ≤ `end` ≤ `length`.
   /// If `end` is equal to `start`, then the returned list is empty.
   void trimToSublist(int start, [int? end]) {
     // TODO(jacobr): use a more sophisticated data structure such as

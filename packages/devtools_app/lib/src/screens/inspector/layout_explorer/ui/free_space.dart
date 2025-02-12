@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +23,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
         'h=${toStringAsFixed(renderProperties.realHeight)}';
     final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
     final showWidth =
-        renderProperties.realWidth != renderProperties.layoutProperties?.width;
+        renderProperties.realWidth != renderProperties.layoutProperties.width;
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

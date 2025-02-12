@@ -5,8 +5,7 @@
 >///
 #^^^ comment.block.documentation.dart
 >/// This should not cause parsing to fail.
-#^^^ comment.block.documentation.dart
-#   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart variable.other.source.dart
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart variable.other.source.dart
 >
 >void main() {
 #^^^^ storage.type.primitive.dart

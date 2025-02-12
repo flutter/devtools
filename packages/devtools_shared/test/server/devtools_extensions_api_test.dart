@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
 import 'dart:io';
@@ -146,14 +146,14 @@ void main() {
 
   group(ExtensionsApi.apiExtensionEnabledState, () {
     late File optionsFile;
-    late final optionsFileUriString = p.join(
+    late final optionsFileUriString = p.posix.join(
       extensionTestManager.runtimeAppRoot,
       devtoolsOptionsFileName,
     );
 
     setUp(() async {
       await initializeTestDirectory();
-      optionsFile = File.fromUri(Uri.file(optionsFileUriString));
+      optionsFile = File.fromUri(Uri.parse(optionsFileUriString));
     });
 
     Future<Response> sendEnabledStateRequest({
@@ -374,7 +374,7 @@ void _verifyExtension(
       ext.extensionAssetsPath,
       endsWith(
         p.join(
-          '.pub-cache',
+          Platform.isWindows ? r'Pub\Cache' : '.pub-cache',
           'hosted',
           'pub.dev',
           '${extensionPackage.name}-${extensionPackage.packageVersion}',
@@ -401,7 +401,7 @@ void _verifyExtension(
   expect(
     ext.devtoolsOptionsUri,
     endsWith(
-      p.join('packages', detectedFromPath, devtoolsOptionsFileName),
+      p.posix.join('packages', detectedFromPath, devtoolsOptionsFileName),
     ),
   );
   expect(ext.detectedFromStaticContext, fromStaticContext);

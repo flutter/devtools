@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -923,16 +923,17 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   final String? parentId;
 
-  /// The set of ids for all ancestors of this [CpuStackFrame].
+  /// The ids for all ancestors of this [CpuStackFrame].
   ///
-  /// This is late and final, so it will only be created once for performance
-  /// reasons. This method should only be called when the [CpuStackFrame] is
-  /// part of a processed CPU profile.
-  // ignore: avoid-explicit-type-declaration, required due to cyclic definition.
-  late final Set<String> ancestorIds = <String>{
-    if (parentId != null) parentId!,
-    ...parent?.ancestorIds ?? {},
-  };
+  /// This method should only be called when the [CpuStackFrame] is part of a
+  /// processed CPU profile.
+  Iterable<String> get ancestorIds sync* {
+    CpuStackFrame? next = this;
+    while (next != null) {
+      if (next.parentId case final parentId?) yield parentId;
+      next = next.parent;
+    }
+  }
 
   @override
   CpuProfileMetaData get profileMetaData => _profileMetaData;

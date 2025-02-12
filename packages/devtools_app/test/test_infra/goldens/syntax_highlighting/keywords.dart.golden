@@ -1,9 +1,9 @@
->// Copyright 2022 The Chromium Authors. All rights reserved.
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// Copyright 2022 The Flutter Authors
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
 >// Use of this source code is governed by a BSD-style license that can be
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
->// found in the LICENSE file.
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
 >
 >library foo;
 #^^^^^^^ meta.declaration.dart keyword.other.import.dart
@@ -74,7 +74,7 @@
 #           ^ punctuation.dot.dart
 #            ^^^^^^ entity.name.function.dart
 >    return _b;
-#    ^^^^^^ keyword.control.dart
+#    ^^^^^^ keyword.control.return.dart
 #             ^ punctuation.terminator.dart
 >  }
 >
@@ -97,7 +97,7 @@
 #                ^^ keyword.operator.comparison.dart
 #                   ^^^^^^ support.class.dart
 >    return false;
-#    ^^^^^^ keyword.control.dart
+#    ^^^^^^ keyword.control.return.dart
 #           ^^^^^ constant.language.dart
 #                ^ punctuation.terminator.dart
 >  }
@@ -193,7 +193,7 @@
 #^^^^ storage.type.primitive.dart
 #     ^^^^^^^ entity.name.function.dart
 >  return;
-#  ^^^^^^ keyword.control.dart
+#  ^^^^^^ keyword.control.return.dart
 #        ^ punctuation.terminator.dart
 >}
 >
@@ -322,7 +322,7 @@
 #           ^ punctuation.terminator.dart
 >    }
 >    return;
-#    ^^^^^^ keyword.control.dart
+#    ^^^^^^ keyword.control.return.dart
 #          ^ punctuation.terminator.dart
 >  }
 >
@@ -364,7 +364,7 @@
 #    ^^^^^^^ keyword.control.dart
 #           ^ keyword.operator.ternary.dart
 >      return;
-#      ^^^^^^ keyword.control.dart
+#      ^^^^^^ keyword.control.return.dart
 #            ^ punctuation.terminator.dart
 >  }
 >}

@@ -1,5 +1,14 @@
+<!--
+Copyright 2025 The Flutter Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+-->
+# 11.2.0
+* Bump `vm_service` dependency upper bound to `<16.0.0`.
+
 # 11.1.0
 * Bump minimum SDK version to `3.6.0`.
+* Update `package:vm_service` to `>=13.0.0 <16.0.0`.
 
 # 11.0.0
 * **Breaking change:** replace `apiGetLastReleaseNotesVersion` with `ReleaseNotesApi.getLastReleaseNotesVersion`.

@@ -138,14 +138,16 @@ class LicenseConfig {
   bool shouldExclude(File file) {
     var included = false;
     for (final includePath in includePaths) {
-      if (file.path.startsWith(includePath)) {
+      if (p.equals(includePath, file.path) ||
+          p.isWithin(includePath, file.path)) {
         included = true;
         break;
       }
     }
     var excluded = false;
     for (final excludePath in excludePaths) {
-      if (file.path.startsWith(excludePath)) {
+      if (p.equals(excludePath, file.path) ||
+          p.isWithin(excludePath, file.path)) {
         excluded = true;
         break;
       }

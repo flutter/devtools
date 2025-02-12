@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../screens/network/network_model.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
+import 'constants.dart';
 import 'http.dart';
 
 final _log = Logger('http_request_data');
@@ -51,12 +52,34 @@ class DartIOHttpRequestData extends NetworkRequest {
     Map<String, Object?>? requestPostData,
     Map<String, Object?>? responseContent,
   ) {
+    final isFullRequest =
+        modifiedRequestData.containsKey(HttpRequestDataKeys.requestBody.name) &&
+        modifiedRequestData.containsKey(HttpRequestDataKeys.responseBody.name);
+
+    final parsedRequest =
+        isFullRequest
+            ? HttpProfileRequest.parse(modifiedRequestData)
+            : HttpProfileRequestRef.parse(modifiedRequestData);
+
+    final responseBody =
+        responseContent?[HttpRequestDataKeys.text.name]?.toString();
+    final requestBody =
+        requestPostData?[HttpRequestDataKeys.text.name]?.toString();
+
     return DartIOHttpRequestData(
-        HttpProfileRequestRef.parse(modifiedRequestData)!,
-        requestFullDataFromVmService: false,
+        parsedRequest!,
+        requestFullDataFromVmService: parsedRequest is! HttpProfileRequest,
       )
-      .._responseBody = responseContent?['text'].toString()
-      .._requestBody = requestPostData?['text'].toString();
+      .._responseBody = responseBody
+      .._requestBody = requestBody;
+  }
+
+  @override
+  Map<String, Object?> toJson() {
+    return {
+      HttpRequestDataKeys.request.name:
+          (_request as HttpProfileRequest).toJson(),
+    };
   }
 
   static const _connectionInfoKey = 'connectionInfo';
@@ -71,16 +94,18 @@ class DartIOHttpRequestData extends NetworkRequest {
     try {
       if (isFetchingFullData) return; // We are already fetching
       isFetchingFullData = true;
-      final updated = await serviceConnection.serviceManager.service!
-          .getHttpProfileRequestWrapper(
-            _request.isolateId,
-            _request.id.toString(),
-          );
-      _request = updated;
-      final fullRequest = _request as HttpProfileRequest;
-      _responseBody = utf8.decode(fullRequest.responseBody!);
-      _requestBody = utf8.decode(fullRequest.requestBody!);
-      notifyListeners();
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        final updated = await serviceConnection.serviceManager.service!
+            .getHttpProfileRequestWrapper(
+              _request.isolateId,
+              _request.id.toString(),
+            );
+        _request = updated;
+        final fullRequest = _request as HttpProfileRequest;
+        _responseBody = utf8.decode(fullRequest.responseBody!);
+        _requestBody = utf8.decode(fullRequest.requestBody!);
+        notifyListeners();
+      }
     } finally {
       isFetchingFullData = false;
     }
@@ -330,4 +355,101 @@ class DartIOHttpRequestData extends NetworkRequest {
   @override
   int get hashCode =>
       Object.hash(id, method, uri, contentType, type, port, startTimestamp);
+}
+
+extension HttpRequestExtension on List<DartIOHttpRequestData> {
+  List<HttpProfileRequest> get mapToHttpProfileRequests {
+    return map(
+      (httpRequestData) => httpRequestData._request as HttpProfileRequest,
+    ).toList();
+  }
+}
+
+extension HttpProfileRequestExtension on HttpProfileRequest {
+  Map<String, Object?> toJson() {
+    return {
+      HttpRequestDataKeys.id.name: id,
+      HttpRequestDataKeys.method.name: method,
+      HttpRequestDataKeys.uri.name: uri.toString(),
+      HttpRequestDataKeys.startTime.name: startTime.microsecondsSinceEpoch,
+      HttpRequestDataKeys.endTime.name: endTime?.microsecondsSinceEpoch,
+      HttpRequestDataKeys.response.name: response?.toJson(),
+      HttpRequestDataKeys.request.name: request?.toJson(),
+      HttpRequestDataKeys.isolateId.name: isolateId,
+      HttpRequestDataKeys.events.name: events.map((e) => e.toJson()).toList(),
+      HttpRequestDataKeys.requestBody.name: requestBody?.toList(),
+      HttpRequestDataKeys.responseBody.name: responseBody?.toList(),
+    };
+  }
+}
+
+extension HttpProfileRequestDataExtension on HttpProfileRequestData {
+  Map<String, Object?> toJson() {
+    final jsonMap = <String, Object?>{};
+    try {
+      jsonMap[HttpRequestDataKeys.headers.name] = headers ?? {};
+      jsonMap[HttpRequestDataKeys.followRedirects.name] = followRedirects;
+      jsonMap[HttpRequestDataKeys.maxRedirects.name] = maxRedirects;
+      jsonMap[HttpRequestDataKeys.connectionInfo.name] = connectionInfo;
+      jsonMap[HttpRequestDataKeys.contentLength.name] = contentLength;
+      jsonMap[HttpRequestDataKeys.cookies.name] = cookies ?? [];
+      jsonMap[HttpRequestDataKeys.persistentConnection.name] =
+          persistentConnection;
+      jsonMap[HttpRequestDataKeys.proxyDetails.name] = proxyDetails?.toJson();
+    } catch (e, st) {
+      _log.shout('Error serializing HttpProfileRequestData', e, st);
+      jsonMap[HttpRequestDataKeys.error.name] =
+          error ?? 'Serialization failed: $e';
+    }
+    return jsonMap;
+  }
+}
+
+extension HttpProfileResponseDataExtension on HttpProfileResponseData {
+  Map<String, Object?> toJson() {
+    final jsonMap = <String, Object?>{};
+    try {
+      jsonMap[HttpRequestDataKeys.startTime.name] =
+          startTime?.microsecondsSinceEpoch;
+      jsonMap[HttpRequestDataKeys.endTime.name] =
+          endTime?.microsecondsSinceEpoch;
+      jsonMap[HttpRequestDataKeys.headers.name] = headers ?? {};
+      jsonMap[HttpRequestDataKeys.compressionState.name] = compressionState;
+      jsonMap[HttpRequestDataKeys.connectionInfo.name] = connectionInfo;
+      jsonMap[HttpRequestDataKeys.contentLength.name] = contentLength;
+      jsonMap[HttpRequestDataKeys.cookies.name] = cookies ?? [];
+      jsonMap[HttpRequestDataKeys.isRedirect.name] = isRedirect;
+      jsonMap[HttpRequestDataKeys.persistentConnection.name] =
+          persistentConnection;
+      jsonMap[HttpRequestDataKeys.reasonPhrase.name] = reasonPhrase;
+      jsonMap[HttpRequestDataKeys.redirects.name] = redirects;
+      jsonMap[HttpRequestDataKeys.statusCode.name] = statusCode;
+    } catch (e, st) {
+      _log.shout('Error serializing HttpProfileResponseData', e, st);
+      jsonMap[HttpRequestDataKeys.error.name] =
+          error ?? 'Serialization failed: $e';
+    }
+    return jsonMap;
+  }
+}
+
+extension HttpProfileRequestEventExtension on HttpProfileRequestEvent {
+  Map<String, Object?> toJson() {
+    return {
+      HttpRequestDataKeys.event.name: event,
+      HttpRequestDataKeys.timestamp.name: timestamp.microsecondsSinceEpoch,
+      HttpRequestDataKeys.arguments.name: arguments,
+    };
+  }
+}
+
+extension HttpProfileProxyDataExtension on HttpProfileProxyData {
+  Map<String, Object?> toJson() {
+    return {
+      HttpRequestDataKeys.host.name: host,
+      HttpRequestDataKeys.username.name: username,
+      HttpRequestDataKeys.isDirect.name: isDirect,
+      HttpRequestDataKeys.host.name: port,
+    };
+  }
 }

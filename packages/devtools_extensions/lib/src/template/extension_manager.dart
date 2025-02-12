@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 part of 'devtools_extension.dart';
 
@@ -44,7 +44,6 @@ class ExtensionManager {
   /// removed in [dispose].
   EventListener? _handleMessageListener;
 
-  // ignore: unused_element, false positive due to part files
   Future<void> _init() async {
     window.addEventListener(
       'message',
@@ -76,7 +75,6 @@ class ExtensionManager {
     }
   }
 
-  // ignore: unused_element, false positive due to part files
   void _dispose() {
     _registeredEventHandlers.clear();
     window.removeEventListener('message', _handleMessageListener);

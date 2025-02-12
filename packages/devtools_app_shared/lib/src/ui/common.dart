@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
 
@@ -163,7 +163,8 @@ final class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
 /// Wraps [child] in a rounded border with default styling.
 ///
 /// This border can optionally be made non-uniform by setting any of
-/// [showTop], [showBottom], [showLeft] or [showRight] to false.
+/// [showTopLeft], [showTopRight], [showBottomLeft], or [showBottomRight] to
+/// false.
 ///
 /// If [clip] is true, the child will be wrapped in a [ClipRRect] to ensure the
 /// rounded corner of the border is drawn as expected. This should not be
@@ -562,7 +563,8 @@ extension ScrollControllerAutoScroll on ScrollController {
   }
 }
 
-/// A text span that will launch the provided URL from [link] when clicked.
+/// A text span that, when clicked, will launch the provided URL from the `link`
+/// given in the constructor.
 class LinkTextSpan extends TextSpan {
   LinkTextSpan({
     required Link link,
@@ -618,17 +620,19 @@ class RoundedLabel extends StatelessWidget {
     required this.labelText,
     this.backgroundColor,
     this.textColor,
+    this.tooltipText,
   });
 
   final String labelText;
   final Color? backgroundColor;
   final Color? textColor;
+  final String? tooltipText;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    return Container(
+    final label = Container(
       padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
       decoration: BoxDecoration(
         borderRadius: defaultBorderRadius,
@@ -644,5 +648,8 @@ class RoundedLabel extends StatelessWidget {
         ),
       ),
     );
+    return tooltipText != null
+        ? DevToolsTooltip(message: tooltipText, child: label)
+        : label;
   }
 }

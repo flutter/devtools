@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
@@ -167,6 +167,23 @@ void main() {
       );
       expect(
         find.text('Ignore exceptions', skipOffstage: false),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgetsWithWindowSize(
+    'debugger exception mode tooltip',
+    smallWindowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.build),
+          debugger: debuggerController,
+        ),
+      );
+      expect(
+        find.byTooltip('Stop on uncaught exceptions', skipOffstage: false),
         findsOneWidget,
       );
     },

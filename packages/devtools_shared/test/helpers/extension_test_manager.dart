@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:io';
 
@@ -394,6 +394,10 @@ class TestPackageWithExtension {
   final bool requiresConnection;
   final bool isPubliclyHosted;
   final String? packageVersion;
+
+  /// The relative path from the extensions.
+  ///
+  /// Uses the paths separator for the current platform.
   final String relativePathFromExtensions;
 
   String get configYamlContent => '''
@@ -439,8 +443,9 @@ ${_dependenciesAsString()}
       } else {
         sb
           ..writeln() // Add a new line for the path dependency.
+          // Always write paths in pubspec.yaml with forward slashes.
           ..writeln(
-            '    path: $pathToExtensions/${dep.relativePathFromExtensions}',
+            '    path: $pathToExtensions/${dep.relativePathFromExtensions.replaceAll(r'\', '/')}',
           );
       }
     }

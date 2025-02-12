@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// Inspector specific tree rendering support.
 ///
@@ -27,7 +27,7 @@ typedef TreeEventCallback = void Function(InspectorTreeNode node);
 
 const iconPadding = 4.0;
 const chartLineStrokeWidth = 1.0;
-double get inspectorColumnIndent => scaleByFontFactor(24.0);
+double get inspectorColumnIndent => scaleByFontFactor(36.0);
 double get inspectorRowHeight => scaleByFontFactor(20.0);
 
 /// This class could be refactored out to be a reasonable generic collapsible

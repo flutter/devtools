@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:vm_service/vm_service.dart';
 
@@ -44,13 +44,14 @@ final class ResolvedUriManager {
     }
   }
 
-  /// Calls out to the [VMService] to lookup package uri to full file path
-  /// mappings
+  /// Calls out to the [VmService] to lookup package URI to full file path
+  /// mappings.
   ///
   /// Known mappings are cached to avoid asking [VmService] redundantly.
   ///
-  /// [isolateId] The id of the isolate that the [packageUris] were generated on.
-  /// [packageUris] List of uris to fetch full file paths for.
+  /// * [isolateId] - The ID of the isolate that the [packageUris] were
+  ///   generated on.
+  /// * [packageUris] - List of URIs to fetch full file paths for.
   Future<void> fetchFileUris(String isolateId, List<String> packageUris) async {
     if (_packagePathMappings != null) {
       final fileUris =
@@ -69,10 +70,11 @@ final class ResolvedUriManager {
     }
   }
 
-  /// Returns a package uri for the given uri, if one exists in the cache.
+  /// Returns a package URI for the given URI, if one exists in the cache.
   ///
-  /// [isolateId] The id of the isolate that the [uris] were generated on.
-  /// [uri] Absolute path uri to look up in the package uri mapping cache.
+  /// * [isolateId] - The id of the isolate that the URIs were generated on.
+  /// * [fileUri] - Absolute path uri to look up in the package uri mapping
+  ///   cache.
   String? lookupPackageUri(String isolateId, String fileUri) =>
       _packagePathMappings?.lookupFullPathToPackageMapping(isolateId, fileUri);
 

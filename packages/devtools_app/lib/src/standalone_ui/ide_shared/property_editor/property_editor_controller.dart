@@ -1,12 +1,14 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../service/editor/api_classes.dart';
-import '../../../service/editor/editor_client.dart';
+import '../../../shared/analytics/analytics.dart' as ga;
+import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/editor/api_classes.dart';
+import '../../../shared/editor/editor_client.dart';
 
 class PropertyEditorController extends DisposableController
     with AutoDisposeControllerMixin {
@@ -15,6 +17,8 @@ class PropertyEditorController extends DisposableController
   }
 
   final EditorClient editorClient;
+
+  String get gaId => gac.PropertyEditorSidebar.id;
 
   TextDocument? _currentDocument;
   CursorPosition? _currentCursorPosition;
@@ -27,6 +31,10 @@ class PropertyEditorController extends DisposableController
       editorClient.activeLocationChangedStream.listen((event) async {
         final textDocument = event.textDocument;
         final cursorPosition = event.selections.first.active;
+        // Don't do anything if the text document is null.
+        if (textDocument == null) {
+          return;
+        }
         // Don't do anything if the event corresponds to the current position.
         if (textDocument == _currentDocument &&
             cursorPosition == _currentCursorPosition) {
@@ -40,16 +48,26 @@ class PropertyEditorController extends DisposableController
           position: cursorPosition,
         );
         final args = result?.args ?? <EditableArgument>[];
+        // Register impression.
+        ga.impression(
+          gaId,
+          // TODO(https://github.com/flutter/devtools/issues/8716): Postfix with
+          // widget name.
+          gac.PropertyEditorSidebar.widgetPropertiesUpdate.name,
+        );
         _editableArgs.value = args;
       }),
     );
   }
 
-  Future<void> editArgument<T>({required String name, required T value}) async {
+  Future<EditArgumentResponse?> editArgument<T>({
+    required String name,
+    required T value,
+  }) async {
     final document = _currentDocument;
     final position = _currentCursorPosition;
-    if (document == null || position == null) return;
-    await editorClient.editArgument(
+    if (document == null || position == null) return null;
+    return editorClient.editArgument(
       textDocument: document,
       position: position,
       name: name,

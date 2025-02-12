@@ -1,0 +1,301 @@
+{
+  "httpRequestData": [
+    {
+      "request": {
+        "id": "975585676925010898",
+        "method": "GET",
+        "uri": "https://jsonplaceholder.typicode.com/albums/1",
+        "startTime": 1731654001072706,
+        "endTime": 1731654001547377,
+        "response": {
+          "startTime": 1731654001589754,
+          "endTime": 1731654001591776,
+          "headers": {
+            "x-ratelimit-reset": [
+              "1730729357"
+            ],
+            "x-ratelimit-limit": [
+              "1000"
+            ],
+            "date": [
+              "Fri, 15 Nov 2024 07:00:01 GMT"
+            ],
+            "transfer-encoding": [
+              "chunked"
+            ],
+            "vary": [
+              "Origin, Accept-Encoding"
+            ],
+            "content-encoding": [
+              "gzip"
+            ],
+            "x-ratelimit-remaining": [
+              "999"
+            ],
+            "pragma": [
+              "no-cache"
+            ],
+            "server": [
+              "cloudflare"
+            ],
+            "reporting-endpoints": [
+              "heroku-nel=https://nel.heroku.com/reports?ts=1730729316&sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d&s=486jdn49YhgGKLCA8ntm7fq%2BpZFtSZ0mXlRJhpb9Drs%3D"
+            ],
+            "cf-ray": [
+              "8e2d5ca65edc3b19-BOM"
+            ],
+            "etag": [
+              "W/\"40-74G1+b66MteeTYAz6G+NybtDGFA\""
+            ],
+            "connection": [
+              "keep-alive"
+            ],
+            "cache-control": [
+              "max-age=43200"
+            ],
+            "age": [
+              "428"
+            ],
+            "server-timing": [
+              "cfL4;desc=\"?proto=TCP&rtt=1937&sent=6&recv=7&lost=0&retrans=0&sent_bytes=3149&recv_bytes=601&delivery_rate=2286315&cwnd=252&unsent_bytes=0&cid=b3587511212928f2&ts=96&x=0\""
+            ],
+            "report-to": [
+              "{\"group\":\"heroku-nel\",\"max_age\":3600,\"endpoints\":[{\"url\":\"https://nel.heroku.com/reports?ts=1730729316&sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d&s=486jdn49YhgGKLCA8ntm7fq%2BpZFtSZ0mXlRJhpb9Drs%3D\"}]}"
+            ],
+            "cf-cache-status": [
+              "HIT"
+            ],
+            "content-type": [
+              "application/json; charset=utf-8"
+            ],
+            "access-control-allow-credentials": [
+              "true"
+            ],
+            "x-powered-by": [
+              "Express"
+            ],
+            "alt-svc": [
+              "h3=\":443\"; ma=86400"
+            ],
+            "nel": [
+              "{\"report_to\":\"heroku-nel\",\"max_age\":3600,\"success_fraction\":0.005,\"failure_fraction\":0.05,\"response_headers\":[\"Via\"]}"
+            ],
+            "via": [
+              "1.1 vegur"
+            ],
+            "x-content-type-options": [
+              "nosniff"
+            ],
+            "expires": [
+              "-1"
+            ]
+          },
+          "compressionState": "HttpClientResponseCompressionState.decompressed",
+          "connectionInfo": {
+            "localPort": 62852,
+            "remoteAddress": "172.67.167.151",
+            "remotePort": 443
+          },
+          "contentLength": -1,
+          "cookies": [],
+          "isRedirect": false,
+          "persistentConnection": true,
+          "reasonPhrase": "OK",
+          "redirects": [],
+          "statusCode": 200,
+          "error": null
+        },
+        "request": {
+          "headers": {
+            "user-agent": [
+              "Dart/3.6 (dart:io)"
+            ],
+            "accept-encoding": [
+              "gzip"
+            ],
+            "content-length": [
+              "0"
+            ],
+            "host": [
+              "jsonplaceholder.typicode.com"
+            ]
+          },
+          "followRedirects": true,
+          "maxRedirects": 5,
+          "connectionInfo": {
+            "localPort": 62852,
+            "remoteAddress": "172.67.167.151",
+            "remotePort": 443
+          },
+          "contentLength": 0,
+          "cookies": [],
+          "persistentConnection": true,
+          "proxyDetails": null
+        },
+        "isolateId": "isolates/6270534775640395",
+        "events": [
+          {
+            "event": "Connection established",
+            "timestamp": 1731654001547154,
+            "arguments": null
+          },
+          {
+            "event": "Request sent",
+            "timestamp": 1731654001547179,
+            "arguments": null
+          },
+          {
+            "event": "Waiting (TTFB)",
+            "timestamp": 1731654001589068,
+            "arguments": null
+          },
+          {
+            "event": "Content Download",
+            "timestamp": 1731654001591839,
+            "arguments": null
+          }
+        ],
+        "requestBody": [],
+        "responseBody": []
+      }
+    },
+    {
+      "request": {
+        "id": "975585676925010899",
+        "method": "PUT",
+        "uri": "https://fake-store-api.mock.beeceptor.com",
+        "startTime": 1731654001073364,
+        "endTime": 1731654001502615,
+        "response": {
+          "startTime": 1731654001763913,
+          "endTime": 1731654001764397,
+          "headers": {
+            "content-type": [
+              "text/plain"
+            ],
+            "alt-svc": [
+              "h3=\":443\"; ma=2592000"
+            ],
+            "date": [
+              "Fri, 15 Nov 2024 07:00:01 GMT"
+            ],
+            "access-control-allow-origin": [
+              "*"
+            ],
+            "vary": [
+              "Accept-Encoding"
+            ],
+            "content-length": [
+              "125"
+            ]
+          },
+          "compressionState": "HttpClientResponseCompressionState.notCompressed",
+          "connectionInfo": {
+            "localPort": 62851,
+            "remoteAddress": "159.89.140.122",
+            "remotePort": 443
+          },
+          "contentLength": 125,
+          "cookies": [],
+          "isRedirect": false,
+          "persistentConnection": true,
+          "reasonPhrase": "OK",
+          "redirects": [],
+          "statusCode": 200,
+          "error": null
+        },
+        "request": {
+          "headers": {
+            "user-agent": [
+              "Dart/3.6 (dart:io)"
+            ],
+            "accept-encoding": [
+              "gzip"
+            ],
+            "user_id": [
+              "1"
+            ],
+            "content-length": [
+              "0"
+            ],
+            "items": [
+              "[{\"product_id\":1,\"quantity\":2},{\"product_id\":3,\"quantity\":1}]"
+            ],
+            "host": [
+              "fake-store-api.mock.beeceptor.com"
+            ]
+          },
+          "followRedirects": true,
+          "maxRedirects": 5,
+          "connectionInfo": {
+            "localPort": 62851,
+            "remoteAddress": "159.89.140.122",
+            "remotePort": 443
+          },
+          "contentLength": 0,
+          "cookies": [],
+          "persistentConnection": true,
+          "proxyDetails": null
+        },
+        "isolateId": "isolates/6270534775640395",
+        "events": [
+          {
+            "event": "Connection established",
+            "timestamp": 1731654001501363,
+            "arguments": null
+          },
+          {
+            "event": "Request sent",
+            "timestamp": 1731654001501436,
+            "arguments": null
+          },
+          {
+            "event": "Waiting (TTFB)",
+            "timestamp": 1731654001763857,
+            "arguments": null
+          },
+          {
+            "event": "Content Download",
+            "timestamp": 1731654001764409,
+            "arguments": null
+          }
+        ],
+        "requestBody": [],
+        "responseBody": []
+      }
+    }
+  ],
+  "selectedRequestId": null,
+  "socketData": [
+    {
+      "timelineMicrosBase": 1731482170837171,
+      "socket": {
+        "id": "105553123901536",
+        "startTime": 171830570040,
+        "endTime": 171830929647,
+        "lastReadTime": 171830928421,
+        "lastWriteTime": 171830669180,
+        "socketType": "tcp",
+        "address": "159.89.140.122",
+        "port": 443,
+        "readBytes": 4367,
+        "writeBytes": 18237
+      }
+    },
+    {
+      "timelineMicrosBase": 1731482170837171,
+      "socket": {
+        "id": "105553123902256",
+        "startTime": 171830571806,
+        "endTime": 171830757188,
+        "lastReadTime": 171830753067,
+        "lastWriteTime": 171830712602,
+        "socketType": "tcp",
+        "address": "172.67.167.151",
+        "port": 443,
+        "readBytes": 5447,
+        "writeBytes": 18247
+      }
+    }
+  ]
+}

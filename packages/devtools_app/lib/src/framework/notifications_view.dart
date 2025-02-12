@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -172,7 +172,8 @@ class _NotificationOverlay extends StatelessWidget {
 }
 
 class _Notification extends StatefulWidget {
-  const _Notification({required this.message, required this.remove});
+  _Notification({required this.message, required this.remove})
+    : super(key: UniqueKey());
 
   final NotificationMessage message;
   final void Function(_Notification) remove;

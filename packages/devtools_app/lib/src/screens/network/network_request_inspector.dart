@@ -60,73 +60,63 @@ class NetworkRequestInspector extends StatelessWidget {
     );
   }
 
-  List<({DevToolsTab tab, Widget tabView})> _generateTabs(
-    NetworkRequest data,
-  ) =>
-      [
-            (
-              tab: _buildTab(
-                tabName: NetworkRequestInspector._overviewTabTitle,
+  List<({DevToolsTab tab, Widget tabView})> _generateTabs(NetworkRequest data) {
+    final tabs = [
+      (
+        tab: _buildTab(tabName: NetworkRequestInspector._overviewTabTitle),
+        tabView: NetworkRequestOverviewView(data),
+      ),
+      if (data is DartIOHttpRequestData) ...[
+        (
+          tab: _buildTab(tabName: NetworkRequestInspector._headersTabTitle),
+          tabView: HttpRequestHeadersView(data),
+        ),
+        if (data.requestBody != null)
+          (
+            tab: _buildTab(
+              tabName: NetworkRequestInspector._requestTabTitle,
+              trailing: HttpViewTrailingCopyButton(
+                data,
+                (data) => data.requestBody,
               ),
-              tabView: NetworkRequestOverviewView(data),
             ),
-            if (data is DartIOHttpRequestData) ...[
-              (
-                tab: _buildTab(
-                  tabName: NetworkRequestInspector._headersTabTitle,
-                ),
-                tabView: HttpRequestHeadersView(data),
-              ),
-              if (data.requestBody != null)
-                (
-                  tab: _buildTab(
-                    tabName: NetworkRequestInspector._requestTabTitle,
-                    trailing: HttpViewTrailingCopyButton(
-                      data,
-                      (data) => data.requestBody,
-                    ),
-                  ),
-                  tabView: HttpRequestView(data),
-                ),
-              if (data.responseBody != null)
-                (
-                  tab: _buildTab(
-                    tabName: NetworkRequestInspector._responseTabTitle,
-                    trailing: Row(
-                      children: [
-                        HttpResponseTrailingDropDown(
-                          data,
-                          currentResponseViewType:
-                              controller.currentResponseViewType,
-                          onChanged:
-                              (value) => controller.setResponseViewType = value,
-                        ),
-                        HttpViewTrailingCopyButton(
-                          data,
-                          (data) => data.responseBody,
-                        ),
-                      ],
-                    ),
-                  ),
-                  tabView: HttpResponseView(
+            tabView: HttpRequestView(data),
+          ),
+        if (data.responseBody != null)
+          (
+            tab: _buildTab(
+              tabName: NetworkRequestInspector._responseTabTitle,
+              trailing: Row(
+                children: [
+                  HttpResponseTrailingDropDown(
                     data,
                     currentResponseViewType: controller.currentResponseViewType,
+                    onChanged:
+                        (value) => controller.setResponseViewType = value,
                   ),
-                ),
-              if (data.hasCookies)
-                (
-                  tab: _buildTab(
-                    tabName: NetworkRequestInspector._cookiesTabTitle,
-                  ),
-                  tabView: HttpRequestCookiesView(data),
-                ),
-            ],
-          ]
-          .map(
-            (t) => (
-              tab: t.tab,
-              tabView: OutlineDecoration.onlyTop(child: t.tabView),
+                  HttpViewTrailingCopyButton(data, (data) => data.responseBody),
+                ],
+              ),
             ),
-          )
-          .toList();
+            tabView: HttpResponseView(
+              data,
+              currentResponseViewType: controller.currentResponseViewType,
+            ),
+          ),
+        if (data.hasCookies)
+          (
+            tab: _buildTab(tabName: NetworkRequestInspector._cookiesTabTitle),
+            tabView: HttpRequestCookiesView(data),
+          ),
+      ],
+    ];
+    return tabs
+        .map(
+          (t) => (
+            tab: t.tab,
+            tabView: OutlineDecoration.onlyTop(child: t.tabView),
+          ),
+        )
+        .toList();
+  }
 }
