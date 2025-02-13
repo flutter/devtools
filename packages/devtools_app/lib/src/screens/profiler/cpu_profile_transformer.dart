@@ -99,6 +99,8 @@ class CpuProfileTransformer {
       '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
     );
 
+    // We always show the bottom up roots first, so it is fine to eagerly
+    // compute.
     await cpuProfileData.computeBottomUpRoots();
 
     // Reset the transformer after processing.
