@@ -175,7 +175,7 @@ Future<void> mergeCpuProfileRoots(
 }) async {
   stopwatch ??= Stopwatch()..start();
   if (stopwatch.elapsedMilliseconds > frameBudgetMs * 0.5) {
-    await delayToReleaseUiThread(micros: 2000);
+    await delayToReleaseUiThread(micros: 5000);
     stopwatch.reset();
   }
   final mergedRoots = <CpuStackFrame>[];
