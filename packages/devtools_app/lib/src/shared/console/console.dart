@@ -162,46 +162,55 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
         child: SelectionArea(
-          child: ListView.separated(
-            padding: const EdgeInsets.all(denseSpacing),
-            itemCount: _currentLines.length + (widget.footer != null ? 1 : 0),
-            controller: _scroll,
-            // Scroll physics to try to keep content within view and avoid bouncing.
-            physics: const ClampingScrollPhysics(
-              parent: RangeMaintainingScrollPhysics(),
-            ),
-            separatorBuilder: (_, _) {
-              return const PaddedDivider.noPadding();
-            },
-            itemBuilder: (context, index) {
-              if (index == _currentLines.length && widget.footer != null) {
-                return widget.footer!;
-              }
-              final line = _currentLines[index];
-              if (line is TextConsoleLine) {
-                return Text.rich(
-                  TextSpan(
-                    // TODO(jacobr): consider caching the processed ansi terminal
-                    // codes.
-                    children: textSpansFromAnsi(
-                      line.text,
-                      theme.regularTextStyle,
-                    ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(denseSpacing),
+                  itemCount: _currentLines.length,
+                  controller: _scroll,
+                  // Scroll physics to try to keep content within view and avoid bouncing.
+                  physics: const ClampingScrollPhysics(
+                    parent: RangeMaintainingScrollPhysics(),
                   ),
-                );
-              } else if (line is VariableConsoleLine) {
-                return ExpandableVariable(
-                  variable: line.variable,
-                  isSelectable: false,
-                );
-              } else {
-                assert(
-                  false,
-                  'ConsoleLine of unsupported type ${line.runtimeType} encountered',
-                );
-                return const SizedBox();
-              }
-            },
+                  separatorBuilder: (_, _) {
+                    return const PaddedDivider.noPadding();
+                  },
+                  itemBuilder: (context, index) {
+                    final line = _currentLines[index];
+                    if (line is TextConsoleLine) {
+                      return Text.rich(
+                        TextSpan(
+                          // TODO(jacobr): consider caching the processed ansi terminal
+                          // codes.
+                          children: textSpansFromAnsi(
+                            line.text,
+                            theme.regularTextStyle,
+                          ),
+                        ),
+                      );
+                    } else if (line is VariableConsoleLine) {
+                      return ExpandableVariable(
+                        variable: line.variable,
+                        isSelectable: false,
+                      );
+                    } else {
+                      assert(
+                        false,
+                        'ConsoleLine of unsupported type ${line.runtimeType} encountered',
+                      );
+                      return const SizedBox();
+                    }
+                  },
+                ),
+              ),
+              // consider constraining a max height.
+              Padding(
+                padding: const EdgeInsets.only(top: denseSpacing),
+                child: widget.footer!,
+              ),
+            ],
           ),
         ),
       ),

@@ -40,6 +40,8 @@ TODO: Remove this section if there are not any general updates.
 * Updated syntax highlighting with support for digit separators,
   and improved comment and string interpolation handling. -
   [#8861](https://github.com/flutter/devtools/pull/8861)
+* Added soft line wrapping in the debugger console.
+  [#8855](https://github.com/flutter/devtools/pull/8855).
 
 ## Network profiler updates
 
