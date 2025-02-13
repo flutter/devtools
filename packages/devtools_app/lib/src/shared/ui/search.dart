@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math';
@@ -893,8 +893,11 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
     this.onClose,
     this.searchFieldWidth = defaultSearchFieldWidth,
     double? searchFieldHeight,
+    int? maxLines = 1,
     super.key,
-  }) : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight;
+  }) : assert(maxLines != 0, "'maxLines' must not be 0"),
+       searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight,
+       _maxLines = maxLines;
 
   final T searchController;
 
@@ -917,6 +920,11 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
   /// triggered.
   final VoidCallback? onClose;
 
+  /// The maximum number of lines, by default one.
+  ///
+  /// Can be set to null to remove the restriction; must not be zero.
+  final int? _maxLines;
+
   @override
   State<SearchField> createState() => _SearchFieldState();
 }
@@ -928,18 +936,23 @@ class _SearchFieldState extends State<SearchField>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.searchFieldWidth,
-      height: widget.searchFieldHeight,
-      child: StatelessSearchField(
-        controller: searchController,
-        searchFieldEnabled: widget.searchFieldEnabled,
-        shouldRequestFocus: widget.shouldRequestFocus,
-        supportsNavigation: widget.supportsNavigation,
-        onClose: widget.onClose,
-        searchFieldHeight: widget.searchFieldHeight,
-      ),
+    final searchField = StatelessSearchField(
+      controller: searchController,
+      searchFieldEnabled: widget.searchFieldEnabled,
+      shouldRequestFocus: widget.shouldRequestFocus,
+      supportsNavigation: widget.supportsNavigation,
+      onClose: widget.onClose,
+      searchFieldHeight: widget.searchFieldHeight,
+      maxLines: widget._maxLines,
     );
+
+    return widget._maxLines != 1
+        ? searchField
+        : SizedBox(
+          width: widget.searchFieldWidth,
+          height: widget.searchFieldHeight,
+          child: searchField,
+        );
   }
 }
 
@@ -970,7 +983,9 @@ class StatelessSearchField<T extends SearchableDataMixin>
     this.suffix,
     this.style,
     this.searchFieldHeight,
-  });
+    int? maxLines = 1,
+  }) : assert(maxLines != 0, "'maxLines' must not be 0"),
+       _maxLines = maxLines;
 
   final SearchControllerMixin<T> controller;
 
@@ -1014,6 +1029,11 @@ class StatelessSearchField<T extends SearchableDataMixin>
 
   final double? searchFieldHeight;
 
+  /// The maximum number of lines, by default one.
+  ///
+  /// Can be set to null to remove the restriction; must not be zero.
+  final int? _maxLines;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1032,6 +1052,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
       focusNode: controller.searchFieldFocusNode,
       controller: controller.searchTextFieldController,
       style: textStyle,
+      maxLines: _maxLines,
       onChanged: onChanged,
       onEditingComplete: () {
         controller.searchFieldFocusNode?.requestFocus();
@@ -1116,7 +1137,9 @@ class AutoCompleteSearchField extends StatefulWidget {
     this.onFocusLost,
     this.style,
     this.keyEventsToIgnore = const {},
-  });
+    int? maxLines = 1,
+  }) : assert(maxLines != 0, "'maxLines' must not be 0"),
+       _maxLines = maxLines;
 
   final AutoCompleteSearchControllerMixin controller;
 
@@ -1163,6 +1186,11 @@ class AutoCompleteSearchField extends StatefulWidget {
   /// Handler called when either [controller.searchFieldFocusNode] or
   /// [controller.autocompleteFocusNode] has lost focus.
   final VoidCallback? onFocusLost;
+
+  /// The maximum number of lines, by default one.
+  ///
+  /// Can be set to null to remove the restriction; must not be zero.
+  final int? _maxLines;
 
   @override
   State<AutoCompleteSearchField> createState() =>
@@ -1214,6 +1242,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
           },
           onClose: widget.onClose,
           style: widget.style,
+          maxLines: widget._maxLines,
         ),
       ),
     );

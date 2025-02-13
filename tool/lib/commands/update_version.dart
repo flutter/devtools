@@ -1,15 +1,11 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import '../utils.dart';
-
-// This script must be executed from the top level devtools/ directory.
-// TODO(kenz): If changes are made to this script, first consider refactoring to
-// use https://github.com/dart-lang/pubspec_parse.
 
 // All other devtools_* pubspecs have their own versioning strategies, or do not
 // have a version at all (in the case of devtools_test).

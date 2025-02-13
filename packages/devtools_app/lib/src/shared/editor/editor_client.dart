@@ -1,14 +1,16 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
+import 'package:flutter/foundation.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:logging/logging.dart';
 
-import '../../shared/analytics/constants.dart';
+import '../analytics/constants.dart';
 import 'api_classes.dart';
 
 final _log = Logger('editor_client');
@@ -37,7 +39,8 @@ class EditorClient extends DisposableController
         }
 
         final service = data.data['service'] as String?;
-        if (service == null || service != editorServiceName) {
+        if (service == null ||
+            (service != editorServiceName && service != lspServiceName)) {
           return;
         }
 
@@ -59,6 +62,15 @@ class EditorClient extends DisposableController
           _supportsOpenDevToolsPage = isRegistered;
           _supportsOpenDevToolsForceExternal =
               capabilities?[Field.supportsForceExternal] == true;
+          // TODO(https://github.com/flutter/devtools/issues/8804): Switch support
+          // to non-experimental LSP methods.
+        } else if (method == LspMethod.editArgument.experimentalMethodName) {
+          _editArgumentMethodName.value =
+              LspMethod.editArgument.experimentalMethodName;
+        } else if (method ==
+            LspMethod.editableArguments.experimentalMethodName) {
+          _editableArgumentsMethodName.value =
+              LspMethod.editableArguments.experimentalMethodName;
         } else {
           return;
         }
@@ -151,6 +163,14 @@ class EditorClient extends DisposableController
       _supportsOpenDevToolsForceExternal;
   var _supportsOpenDevToolsForceExternal = false;
 
+  ValueListenable<String?> get editArgumentMethodName =>
+      _editArgumentMethodName;
+  final _editArgumentMethodName = ValueNotifier<String?>(null);
+
+  ValueListenable<String?> get editableArgumentsMethodName =>
+      _editableArgumentsMethodName;
+  final _editableArgumentsMethodName = ValueNotifier<String?>(null);
+
   /// A stream of [ActiveLocationChangedEvent]s from the edtior.
   Stream<ActiveLocationChangedEvent> get activeLocationChangedStream =>
       _activeLocationChangedController.stream;
@@ -235,8 +255,10 @@ class EditorClient extends DisposableController
     required TextDocument textDocument,
     required CursorPosition position,
   }) async {
+    final method = editableArgumentsMethodName.value;
+    if (method == null) return null;
     final response = await _callLspApi(
-      LspMethod.editableArguments,
+      method,
       params: {
         'type': 'Object', // This is required by DTD.
         'textDocument': textDocument.toJson(),
@@ -250,24 +272,46 @@ class EditorClient extends DisposableController
   }
 
   /// Requests that the Analysis Server makes a code edit for an argument.
-  Future<void> editArgument<T>({
+  Future<EditArgumentResponse> editArgument<T>({
     required TextDocument textDocument,
     required CursorPosition position,
     required String name,
     required T value,
   }) async {
-    final response = await _callLspApi(
-      LspMethod.editArgument,
-      params: {
-        'type': 'Object', // This is required by DTD.
-        'textDocument': textDocument.toJson(),
-        'position': position.toJson(),
-        'edit': {'name': name, 'newValue': value},
-      },
-    );
-    // TODO(elliette): Handle response, currently the response from the Analysis
-    // Server is null.
-    _log.info('editArgument response: ${response.result}');
+    final method = editArgumentMethodName.value;
+    if (method == null) {
+      return EditArgumentResponse(
+        success: false,
+        errorMessage: 'API is unavailable.',
+      );
+    }
+    try {
+      await _callLspApi(
+        method,
+        params: {
+          'type': 'Object', // This is required by DTD.
+          'textDocument': textDocument.toJson(),
+          'position': position.toJson(),
+          'edit': {'name': name, 'newValue': value},
+        },
+      );
+      return EditArgumentResponse(success: true);
+    } on RpcException catch (e) {
+      final errorMessage = e.message;
+      _log.severe(errorMessage);
+      return EditArgumentResponse(
+        success: false,
+        errorCode: e.code,
+        errorMessage: errorMessage,
+      );
+    } catch (e) {
+      final errorMessage = 'Unknown error: $e';
+      _log.severe(errorMessage);
+      return EditArgumentResponse(
+        success: false,
+        errorMessage: 'Unknown error: $e',
+      );
+    }
   }
 
   Future<DTDResponse> _call(
@@ -278,10 +322,10 @@ class EditorClient extends DisposableController
   }
 
   Future<DTDResponse> _callLspApi(
-    LspMethod method, {
+    String methodName, {
     Map<String, Object?>? params,
   }) {
-    return _dtd.call(lspServiceName, method.methodName, params: params);
+    return _dtd.call(lspServiceName, methodName, params: params);
   }
 }
 

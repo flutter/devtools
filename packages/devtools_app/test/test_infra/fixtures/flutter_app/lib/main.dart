@@ -1,16 +1,14 @@
 // FILE: main.dart (Note: Do not remove comment, for testing.)
 
-// Copyright 2021 The Chromium Authors. All rights reserved.
+// Copyright 2021 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // ATTENTION: If any lines are added to or  deleted from this file then the
 // debugger panel integration test will need to be updated with new line numbers
 // (the test verifies that breakpoints are hit at specific lines).
 
 import 'package:flutter/material.dart';
-// Unused imports are useful for testing autocomplete.
-// ignore_for_file: unused_import
 import 'src/autocomplete.dart';
 import 'src/other_classes.dart';
 

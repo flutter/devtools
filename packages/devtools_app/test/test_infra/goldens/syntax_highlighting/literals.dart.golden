@@ -1,9 +1,9 @@
->// Copyright 2022 The Chromium Authors. All rights reserved.
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// Copyright 2022 The Flutter Authors
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
 >// Use of this source code is governed by a BSD-style license that can be
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
->// found in the LICENSE file.
-#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
 >
 >const a = 'aaaaa';
 #^^^^^ storage.modifier.dart
@@ -28,8 +28,8 @@
 #               ^^ string.interpolated.single.dart
 #                 ^ punctuation.comma.dart
 #                   ^ string.interpolated.single.dart
-#                    ^ string.interpolated.single.dart string.interpolated.expression.dart
-#                     ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
+#                    ^ string.interpolated.single.dart meta.embedded.expression.dart
+#                     ^ string.interpolated.single.dart meta.embedded.expression.dart variable.parameter.dart
 #                      ^ string.interpolated.single.dart
 #                        ^ punctuation.terminator.dart
 >const list4 = <String>['', '$a'];
@@ -41,8 +41,8 @@
 #                       ^^ string.interpolated.single.dart
 #                         ^ punctuation.comma.dart
 #                           ^ string.interpolated.single.dart
-#                            ^ string.interpolated.single.dart string.interpolated.expression.dart
-#                             ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
+#                            ^ string.interpolated.single.dart meta.embedded.expression.dart
+#                             ^ string.interpolated.single.dart meta.embedded.expression.dart variable.parameter.dart
 #                              ^ string.interpolated.single.dart
 #                                ^ punctuation.terminator.dart
 >
@@ -63,8 +63,8 @@
 #              ^^ string.interpolated.single.dart
 #                ^ punctuation.comma.dart
 #                  ^ string.interpolated.single.dart
-#                   ^ string.interpolated.single.dart string.interpolated.expression.dart
-#                    ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
+#                   ^ string.interpolated.single.dart meta.embedded.expression.dart
+#                    ^ string.interpolated.single.dart meta.embedded.expression.dart variable.parameter.dart
 #                     ^ string.interpolated.single.dart
 #                       ^ punctuation.terminator.dart
 >const set4 = <String>{'', '$a'};
@@ -76,8 +76,8 @@
 #                      ^^ string.interpolated.single.dart
 #                        ^ punctuation.comma.dart
 #                          ^ string.interpolated.single.dart
-#                           ^ string.interpolated.single.dart string.interpolated.expression.dart
-#                            ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
+#                           ^ string.interpolated.single.dart meta.embedded.expression.dart
+#                            ^ string.interpolated.single.dart meta.embedded.expression.dart variable.parameter.dart
 #                             ^ string.interpolated.single.dart
 #                               ^ punctuation.terminator.dart
 >
@@ -96,8 +96,8 @@
 #              ^^ string.interpolated.single.dart
 #                ^ keyword.operator.ternary.dart
 #                  ^ string.interpolated.single.dart
-#                   ^ string.interpolated.single.dart string.interpolated.expression.dart
-#                    ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
+#                   ^ string.interpolated.single.dart meta.embedded.expression.dart
+#                    ^ string.interpolated.single.dart meta.embedded.expression.dart variable.parameter.dart
 #                     ^ string.interpolated.single.dart
 #                       ^ punctuation.terminator.dart
 >const map3 = <String, String>{'': '$a'};
@@ -111,7 +111,23 @@
 #                              ^^ string.interpolated.single.dart
 #                                ^ keyword.operator.ternary.dart
 #                                  ^ string.interpolated.single.dart
-#                                   ^ string.interpolated.single.dart string.interpolated.expression.dart
-#                                    ^ string.interpolated.single.dart string.interpolated.expression.dart variable.parameter.dart
+#                                   ^ string.interpolated.single.dart meta.embedded.expression.dart
+#                                    ^ string.interpolated.single.dart meta.embedded.expression.dart variable.parameter.dart
 #                                     ^ string.interpolated.single.dart
 #                                       ^ punctuation.terminator.dart
+>
+>const num1 = 12345;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^^ constant.numeric.dart
+#                  ^ punctuation.terminator.dart
+>const num2 = 12345.678;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^^^^^^ constant.numeric.dart
+#                      ^ punctuation.terminator.dart
+>const num3 = 888_888_888;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^^^^^^^^ constant.numeric.dart
+#                        ^ punctuation.terminator.dart

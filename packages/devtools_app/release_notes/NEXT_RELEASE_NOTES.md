@@ -1,24 +1,75 @@
+<!--
+Copyright 2025 The Flutter Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+-->
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.42.0 release notes
+# DevTools 2.43.0 release notes
 
-The 2.42.0 release of the Dart and Flutter DevTools
+The 2.43.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](/tools/devtools/overview).
 
 ## General updates
 
-* View licenses added to about dialog. - [#8610](https://github.com/flutter/devtools/pull/8610)
+TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 
-* The new inspector is enabled by default. This can be disabled in the inspector settings. - [#8650](https://github.com/flutter/devtools/pull/8650)
-    ![Legacy inspector setting](images/legacy_inspector_setting.png "Legacy inspector setting")
-* Selecting an implementation widget on the device while implementation widget's are hidden in the [new inspector's](https://docs.flutter.dev/tools/devtools/release-notes/release-notes-2.40.1#inspector-updates) does not show an error. - [#8625](https://github.com/flutter/devtools/pull/8625)
-* Enabled auto-refreshes of the widget tree on hot-reloads and navigation events by default. This can be disabled in the inspector settings. - [#8646](https://github.com/flutter/devtools/pull/8646)
-    ![Auto-refresh setting](images/inspector_auto_refresh_setting.png "Inspector auto-refresh setting")
+TODO: Remove this section if there are not any general updates.
+
+## Performance updates
+
+TODO: Remove this section if there are not any general updates.
+
+## CPU profiler updates
+
+TODO: Remove this section if there are not any general updates.
+
+## Memory updates
+
+TODO: Remove this section if there are not any general updates.
+
+## Debugger updates
+
+* Added a tooltip to describe the exception mode drop-down. -
+  [#8849](https://github.com/flutter/devtools/pull/8849)
+* Updated syntax highlighting with support for digit separators,
+  and improved comment and string interpolation handling. -
+  [#8861](https://github.com/flutter/devtools/pull/8861)
+* Added soft line wrapping in the debugger console.
+  [#8855](https://github.com/flutter/devtools/pull/8855).
+
+## Network profiler updates
+
+* Offline support added for the network screen. - [#8332](https://github.com/flutter/devtools/pull/8332)
+  
+* Changed the context menu style to be consistent with other screens
+  [#8859](https://github.com/flutter/devtools/pull/8859).
+* Fixed issue where the HTTP requests would sometimes not be displayed properly, particularly when DevTools is communicating with an application over a slow network connection. - [#8860](https://github.com/flutter/devtools/pull/8860)
+
+## Logging updates
+
+TODO: Remove this section if there are not any general updates.
+
+## App size tool updates
+
+TODO: Remove this section if there are not any general updates.
+
+## Deep links tool updates
+
+TODO: Remove this section if there are not any general updates.
+
+## VS Code Sidebar updates
+
+TODO: Remove this section if there are not any general updates.
+
+## DevTools Extension updates
+
+TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
@@ -27,4 +78,4 @@ To learn more about DevTools, check out the
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.42.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.43.0).

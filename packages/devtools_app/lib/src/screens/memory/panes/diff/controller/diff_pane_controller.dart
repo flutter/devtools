@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math';
@@ -448,7 +448,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   bool get updatingValues => _updatingValues;
   bool _updatingValues = false;
 
-  /// Updates fields in this instance based on the values in [core].
+  /// Updates fields in this instance based on the values in [_core].
   void _updateValues() {
     _startUpdatingValues();
     try {

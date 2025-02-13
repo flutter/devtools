@@ -1,11 +1,9 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // Do not delete these arguments. They are parsed by test runner.
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
-
-// ignore_for_file: avoid_print
 
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/integration_test.dart';

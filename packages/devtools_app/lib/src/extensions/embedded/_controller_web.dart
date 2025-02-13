@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:ui_web' as ui_web;
@@ -23,11 +23,11 @@ import 'controller.dart';
 /// DevTools lifecycle.
 ///
 /// Each time [EmbeddedExtensionControllerImpl.init] is called, we create a new
-/// [html.IFrameElement] and register it to
+/// [HTMLIFrameElement] and register it to
 /// [EmbeddedExtensionControllerImpl.viewId] via
-/// [ui_web.platformViewRegistry.registerViewFactory]. Each new
-/// [html.IFrameElement] must have a unique id in the [PlatformViewRegistry],
-/// which [_viewIdIncrementer] is used to create.
+/// `ui_web.platformViewRegistry.registerViewFactory`. Each new
+/// [HTMLIFrameElement] must have a unique id in the
+/// [ui_web.PlatformViewRegistry], which [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
 
 class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController

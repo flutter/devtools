@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -41,6 +41,11 @@ const _kMemoryDisconnectExperience = bool.fromEnvironment(
   defaultValue: true,
 );
 
+const _kNetworkOfflineExperiment = bool.fromEnvironment(
+  'network_disconnect_experience',
+  defaultValue: true,
+);
+
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
@@ -64,6 +69,11 @@ abstract class FeatureFlags {
   ///
   /// https://github.com/flutter/devtools/issues/5606
   static const memoryDisconnectExperience = _kMemoryDisconnectExperience;
+
+  /// Flag to enable offline data on network screen.
+  ///
+  /// https://github.com/flutter/devtools/issues/3806
+  static const networkOffline = _kNetworkOfflineExperiment;
 
   /// Flag to enable save/load for the Memory screen.
   ///

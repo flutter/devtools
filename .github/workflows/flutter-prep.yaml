@@ -4,11 +4,17 @@
 
 name: Flutter SDK prep
 
+defaults:
+  run:
+    # Use Bash on all platforms including Windows to avoid
+    # two copies of bot scripts.
+    shell: bash
+
 on:
   workflow_call:
     inputs:
       os-name:
-        description: 'The OS to run against, either "macos" or "ubuntu". If neither is provided, will run against both.'
+        description: 'The OS to run against, either "macos", "ubuntu" or "windows". If none is provided, will run against all.'
         type: string
 
     outputs:
@@ -23,7 +29,7 @@ jobs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
     strategy:
       matrix:
-        os: ${{ (inputs.os-name == 'macos' && fromJSON('[ "macos-latest"]')) || (inputs.os-name == 'ubuntu' && fromJSON('[ "ubuntu-latest"]')) || fromJSON('["ubuntu-latest", "macos-latest"]') }}
+        os: ${{ (inputs.os-name == 'macos' && fromJSON('[ "macos-latest"]')) || (inputs.os-name == 'ubuntu' && fromJSON('[ "ubuntu-latest"]')) || (inputs.os-name == 'windows' && fromJSON('[ "windows-latest"]')) || fromJSON('["ubuntu-latest", "macos-latest", "windows-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
       # TODO(https://github.com/flutter/devtools/issues/5729) Consider caching DevTools so that we
@@ -39,7 +45,7 @@ jobs:
 
       - name: Load Cached Flutter SDK
         id: cache-flutter
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
+        uses: actions/cache@faf639248d95d2a6c5884b8e6588e233eb3b10a0
         with:
           path: |
             ./tool/flutter-sdk

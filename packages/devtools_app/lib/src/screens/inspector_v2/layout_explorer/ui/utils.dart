@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:ui';
 
@@ -104,12 +104,11 @@ class Truncateable extends StatelessWidget {
   }
 }
 
-/// Widget that draws bounding box with the title (usually widget name) in its top left
+/// Widget that draws bounding box with the title (usually widget name) in its
+/// top left.
 ///
-/// [hint] is an optional widget to be placed in the top right of the box
-/// [child] is an optional widget to be placed in the center of the box
-/// [borderColor] outer box border color and background color for the title
-/// [textColor] color for title text
+/// * [hint] is an optional widget to be placed in the top right of the box.
+/// * [child] is an optional widget to be placed in the center of the box.
 class WidgetVisualizer extends StatelessWidget {
   const WidgetVisualizer({
     super.key,

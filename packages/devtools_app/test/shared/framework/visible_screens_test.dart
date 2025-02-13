@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/framework/framework_controller.dart';
@@ -233,7 +233,7 @@ void main() {
           ProfilerScreen, // Works offline, so appears regardless of web flag
           MemoryScreen, // Works offline, so appears regardless of web flag
           // DebuggerScreen,
-          // NetworkScreen,
+          NetworkScreen,
           // LoggingScreen,
           // AppSizeScreen,
           // DeepLinksScreen,

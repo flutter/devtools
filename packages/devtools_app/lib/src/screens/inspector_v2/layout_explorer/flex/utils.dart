@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:ui';
 
@@ -64,10 +64,9 @@ class AnimatedFlexLayoutProperties
           offset: Offset.lerp(beginProps.offset, endProps.offset, t),
           size: Size.lerp(beginProps.size, endProps.size, t),
           realSize: Size.lerp(beginProps.realSize, endProps.realSize, t),
-          // TODO(polina-c, jacob314): crnsider refactoring to get rid of `!`.
           layoutProperties: AnimatedLayoutProperties(
-            beginProps.layoutProperties!,
-            endProps.layoutProperties!,
+            beginProps.layoutProperties,
+            endProps.layoutProperties,
             animation,
           ),
         ),

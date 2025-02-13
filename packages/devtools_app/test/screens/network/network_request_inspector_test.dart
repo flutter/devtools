@@ -43,6 +43,7 @@ void main() {
       );
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());
+      setGlobal(OfflineDataController, OfflineDataController());
       controller = NetworkController();
       setupClipboardCopyListener(
         clipboardContentsCallback: (contents) {

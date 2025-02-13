@@ -1,11 +1,11 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/service/editor/api_classes.dart';
+import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_controller.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_view.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -13,6 +13,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -37,6 +38,12 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
 
     mockEditorClient = MockEditorClient();
+    when(
+      mockEditorClient.editArgumentMethodName,
+    ).thenReturn(ValueNotifier(LspMethod.editArgument.methodName));
+    when(
+      mockEditorClient.editableArgumentsMethodName,
+    ).thenReturn(ValueNotifier(LspMethod.editableArguments.methodName));
     when(
       mockEditorClient.activeLocationChangedStream,
     ).thenAnswer((_) => eventStream);
@@ -137,11 +144,29 @@ void main() {
       controller.initForTestsOnly(editableArgs: result1.args);
       await tester.pumpAndSettle();
 
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
       // Verify the inputs are expected.
       expect(_findNoPropertiesMessage, findsNothing);
-      expect(_findTextFormField('title'), findsOneWidget);
-      expect(_findTextFormField('width'), findsOneWidget);
-      expect(_findTextFormField('height'), findsOneWidget);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Verify the labels and required are expected.
+      _labelsAndRequiredTextAreExpected(
+        titleInput,
+        inputExpectations: titleInputExpectations,
+      );
+      _labelsAndRequiredTextAreExpected(
+        widthInput,
+        inputExpectations: widthInputExpectations,
+      );
+      _labelsAndRequiredTextAreExpected(
+        heightInput,
+        inputExpectations: heightInputExpectations,
+      );
     });
 
     testWidgets('inputs are expected for second group of editable arguments', (
@@ -154,12 +179,23 @@ void main() {
       controller.initForTestsOnly(editableArgs: result2.args);
       await tester.pumpAndSettle();
 
+      final softWrapInput = _findDropdownButtonFormField('bool softWrap');
+      final alignInput = _findDropdownButtonFormField('Alignment? align');
+
       // Verify the inputs are expected.
       expect(_findNoPropertiesMessage, findsNothing);
-      final softWrapInput = _findDropdownButtonFormField('softWrap');
       expect(softWrapInput, findsOneWidget);
-      final alignInput = _findDropdownButtonFormField('align');
       expect(alignInput, findsOneWidget);
+
+      // Verify the labels and required are expected.
+      _labelsAndRequiredTextAreExpected(
+        softWrapInput,
+        inputExpectations: softWrapInputExpectations,
+      );
+      _labelsAndRequiredTextAreExpected(
+        alignInput,
+        inputExpectations: alignInputExpectations,
+      );
     });
 
     testWidgets('softWrap input has expected options', (tester) async {
@@ -193,17 +229,17 @@ void main() {
       await _verifyDropdownMenuItems(
         alignInput,
         menuOptions: [
-          'Alignment.bottomCenter',
-          'Alignment.bottomLeft',
-          'Alignment.bottomRight',
-          'Alignment.center',
-          'Alignment.centerLeft',
-          'Alignment.centerRight',
-          'Alignment.topCenter',
-          'Alignment.topLeft',
-          'Alignment.topRight',
+          '.bottomCenter',
+          '.bottomLeft',
+          '.bottomRight',
+          '.center',
+          '.centerLeft',
+          '.centerRight',
+          '.topCenter',
+          '.topLeft',
+          '.topRight',
         ],
-        selectedOption: 'Alignment.center',
+        selectedOption: '.center',
         tester: tester,
       );
     });
@@ -211,6 +247,9 @@ void main() {
 
   group('editing arguments', () {
     late Completer<String> nextEditCompleter;
+
+    // A fake argument that the server can't support.
+    const fakeBogusArgument = 'fakeBogusArgument';
 
     setUp(() {
       controller.initForTestsOnly(
@@ -225,14 +264,23 @@ void main() {
           textDocument: argThat(isNotNull, named: 'textDocument'),
           position: argThat(isNotNull, named: 'position'),
           name: argThat(isNotNull, named: 'name'),
-          value: argThat(isNotNull, named: 'value'),
+          value: argThat(anything, named: 'value'),
         ),
       ).thenAnswer((realInvocation) {
         final calledWithArgs = realInvocation.namedArguments;
         final name = calledWithArgs[const Symbol('name')];
         final value = calledWithArgs[const Symbol('value')];
-        nextEditCompleter.complete('$name: $value');
-        return Future.value();
+        final success = value != fakeBogusArgument;
+        nextEditCompleter.complete(
+          '$name: $value (TYPE: ${value?.runtimeType ?? 'null'}, SUCCESS: $success)',
+        );
+
+        return Future.value(
+          EditArgumentResponse(
+            success: success,
+            errorCode: success ? null : -32019,
+          ),
+        );
       });
     });
 
@@ -243,12 +291,111 @@ void main() {
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
-        final titleInput = _findTextFormField('title');
+        final titleInput = _findTextFormField('title*');
+        expect(titleInput, findsOneWidget);
         await _inputText(titleInput, text: 'Brand New Title!', tester: tester);
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('title: Brand New Title!'));
+        expect(
+          nextEdit,
+          equals('title: Brand New Title! (TYPE: String, SUCCESS: true)'),
+        );
+      });
+    });
+
+    testWidgets('editing a string input to null (title)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: 'null', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('title: null (TYPE: null, SUCCESS: true)'));
+      });
+    });
+
+    testWidgets('editing a string input to empty string (title)', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: '', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals(
+            'title: '
+            ' (TYPE: String, SUCCESS: true)',
+          ),
+        );
+      });
+    });
+
+    testWidgets('editing a string input to an invalid parameter (title)', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: fakeBogusArgument, tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals(
+            'title: fakeBogusArgument'
+            ' (TYPE: String, SUCCESS: false)',
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('Invalid value for parameter. (Property: title)'),
+          findsOneWidget,
+        );
+      });
+    });
+
+    testWidgets('submitting a string input with TAB (title)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title*');
+        expect(titleInput, findsOneWidget);
+        await _inputText(
+          titleInput,
+          text: 'Enter with TAB!',
+          tester: tester,
+          inputDoneKey: LogicalKeyboardKey.tab,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals('title: Enter with TAB! (TYPE: String, SUCCESS: true)'),
+        );
       });
     });
 
@@ -264,7 +411,44 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('height: 55.81'));
+        expect(nextEdit, equals('height: 55.81 (TYPE: double, SUCCESS: true)'));
+      });
+    });
+
+    testWidgets('editing a numeric input to null (height)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(heightInput, text: '', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('height: null (TYPE: null, SUCCESS: true)'));
+      });
+    });
+
+    testWidgets('submitting a numeric input with TAB (height)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(
+          heightInput,
+          text: '63.5',
+          tester: tester,
+          inputDoneKey: LogicalKeyboardKey.tab,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('height: 63.5 (TYPE: double, SUCCESS: true)'));
       });
     });
 
@@ -278,14 +462,38 @@ void main() {
         final alignInput = _findDropdownButtonFormField('align');
         await _selectDropdownMenuItem(
           alignInput,
-          optionToSelect: 'Alignment.topLeft',
-          currentlySelected: 'Alignment.center',
+          optionToSelect: '.topLeft',
+          currentlySelected: '.center',
           tester: tester,
         );
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('align: Alignment.topLeft'));
+        expect(
+          nextEdit,
+          equals('align: Alignment.topLeft (TYPE: String, SUCCESS: true)'),
+        );
+      });
+    });
+
+    testWidgets('editing a nullable enum input (align)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result2.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Select the align: null option.
+        final alignInput = _findDropdownButtonFormField('align');
+        await _selectDropdownMenuItem(
+          alignInput,
+          optionToSelect: 'null',
+          currentlySelected: '.center',
+          tester: tester,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('align: null (TYPE: null, SUCCESS: true)'));
       });
     });
 
@@ -306,7 +514,7 @@ void main() {
 
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
-        expect(nextEdit, equals('softWrap: false'));
+        expect(nextEdit, equals('softWrap: false (TYPE: bool, SUCCESS: true)'));
       });
     });
   });
@@ -317,12 +525,57 @@ final _findNoPropertiesMessage = find.text(
 );
 
 Finder _findTextFormField(String inputName) => find.ancestor(
-  of: find.text(inputName),
+  of: find.richTextContaining(inputName),
   matching: find.byType(TextFormField),
 );
 
+Finder _labelForInput(Finder inputFinder, {required String matching}) {
+  final rowFinder = find.ancestor(of: inputFinder, matching: find.byType(Row));
+  final labelFinder = find.descendant(
+    of: rowFinder,
+    matching: find.byType(RoundedLabel),
+  );
+  return find.descendant(of: labelFinder, matching: find.text(matching));
+}
+
+Finder _requiredTextForInput(Finder inputFinder) =>
+    _helperTextForInput(inputFinder, matching: '*required');
+
+void _labelsAndRequiredTextAreExpected(
+  Finder inputFinder, {
+  required Map<String, bool> inputExpectations,
+}) {
+  // Check for the existence/non-existence of the "set" badge.
+  final shouldBeSet = inputExpectations['isSet'] == true;
+  expect(
+    _labelForInput(inputFinder, matching: 'set'),
+    shouldBeSet ? findsOneWidget : findsNothing,
+    reason: 'Expected to find ${shouldBeSet ? 'a' : 'no'} "set" badge.',
+  );
+  // Check for the existence/non-existence of the "default" badge.
+  final shouldBeDefault = inputExpectations['isDefault'] == true;
+  expect(
+    _labelForInput(inputFinder, matching: 'default'),
+    shouldBeDefault ? findsOneWidget : findsNothing,
+    reason: 'Expected to find ${shouldBeDefault ? 'a' : 'no'} "default" badge.',
+  );
+  // Check for the existence/non-existence of the required text ('*').
+  final shouldBeRequired = inputExpectations['isRequired'] == true;
+  expect(
+    _requiredTextForInput(inputFinder),
+    shouldBeRequired ? findsOneWidget : findsNothing,
+    reason:
+        'Expected to find ${shouldBeRequired ? 'the' : 'no'} "required" indicator.',
+  );
+}
+
+Finder _helperTextForInput(Finder inputFinder, {required String matching}) {
+  final rowFinder = find.ancestor(of: inputFinder, matching: find.byType(Row));
+  return find.descendant(of: rowFinder, matching: find.richText(matching));
+}
+
 Finder _findDropdownButtonFormField(String inputName) => find.ancestor(
-  of: find.text(inputName),
+  of: find.richTextContaining(inputName),
   matching: find.byType(DropdownButtonFormField<String>),
 );
 
@@ -388,9 +641,14 @@ Future<void> _inputText(
   Finder textFormField, {
   required String text,
   required WidgetTester tester,
+  LogicalKeyboardKey? inputDoneKey,
 }) async {
   await tester.enterText(textFormField, text);
-  await tester.testTextInput.receiveAction(TextInputAction.done);
+  if (inputDoneKey != null) {
+    await tester.sendKeyDownEvent(inputDoneKey);
+  } else {
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+  }
   await tester.pump();
 }
 
@@ -427,63 +685,79 @@ final activeLocationChangedEvent2 = ActiveLocationChangedEvent(
 );
 
 // Result 1
-final titleProperty = EditableArgument(
-  name: 'title',
-  value: 'Hello world!',
-  type: 'string',
-  isDefault: false,
-  isEditable: true,
-  isNullable: false,
-  isRequired: true,
-  hasArgument: false,
-);
-final widthProperty = EditableArgument(
-  name: 'width',
-  displayValue: '100.0',
-  type: 'double',
-  isEditable: false,
-  isDefault: false,
-  errorText: 'Some reason for why this can\'t be edited.',
-  isNullable: false,
-  value: 20.0,
-  isRequired: true,
-  hasArgument: false,
-);
-final heightProperty = EditableArgument(
-  name: 'height',
-  type: 'double',
-  hasArgument: false,
-  isEditable: true,
-  isNullable: false,
-  value: 20.0,
-  isDefault: true,
-  isRequired: true,
-);
+final titleProperty = EditableArgument.fromJson({
+  'name': 'title',
+  'value': 'Hello world!',
+  'type': 'string',
+  'isEditable': true,
+  'isNullable': true,
+  'isRequired': true,
+  'hasArgument': true,
+});
+final titleInputExpectations = {
+  'isSet': true,
+  'isRequired': true,
+  'isDefault': false,
+};
+
+final widthProperty = EditableArgument.fromJson({
+  'name': 'width',
+  'displayValue': 'myWidth',
+  'type': 'double',
+  'errorText': 'Some reason why this can\'t be edited.',
+  'isNullable': false,
+  'isRequired': false,
+  'hasArgument': true,
+});
+final widthInputExpectations = {
+  'isSet': true,
+  'isRequired': false,
+  'isDefault': false,
+};
+
+final heightProperty = EditableArgument.fromJson({
+  'name': 'height',
+  'type': 'double',
+  'hasArgument': false,
+  'isEditable': true,
+  'isNullable': true,
+  'defaultValue': 20.0,
+  'isRequired': false,
+});
+final heightInputExpectations = {
+  'isSet': false,
+  'isRequired': false,
+  'isDefault': true,
+};
 final result1 = EditableArgumentsResult(
   args: [titleProperty, widthProperty, heightProperty],
 );
 
 // Result 2
-final softWrapProperty = EditableArgument(
-  name: 'softWrap',
-  type: 'bool',
-  isNullable: false,
-  value: true,
-  isDefault: true,
-  hasArgument: false,
-  isEditable: true,
-  isRequired: false,
-);
-final alignProperty = EditableArgument(
-  name: 'align',
-  type: 'enum',
-  isNullable: false,
-  hasArgument: true,
-  isDefault: false,
-  isRequired: false,
-  isEditable: true,
-  value: 'Alignment.center',
-  options: [
+final softWrapProperty = EditableArgument.fromJson({
+  'name': 'softWrap',
+  'type': 'bool',
+  'isNullable': false,
+  'defaultValue': true,
+  'hasArgument': false,
+  'isEditable': true,
+  'isRequired': false,
+});
+final softWrapInputExpectations = {
+  'isSet': false,
+  'isRequired': false,
+  'isDefault': true,
+};
+final alignProperty = EditableArgument.fromJson({
+  'name': 'align',
+  'type': 'enum',
+  'isNullable': true,
+  'hasArgument': true,
+  'defaultValue': 'Alignment.bottomLeft',
+  'isRequired': false,
+  'isEditable': true,
+  'value': 'Alignment.center',
+  'options': [
     'Alignment.bottomCenter',
     'Alignment.bottomLeft',
     'Alignment.bottomRight',
@@ -494,7 +768,12 @@ final alignProperty = EditableArgument(
     'Alignment.topLeft',
     'Alignment.topRight',
   ],
-);
+});
+final alignInputExpectations = {
+  'isSet': true,
+  'isRequired': false,
+  'isDefault': false,
+};
 final result2 = EditableArgumentsResult(
   args: [softWrapProperty, alignProperty],
 );

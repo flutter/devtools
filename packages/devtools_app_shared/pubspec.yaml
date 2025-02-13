@@ -1,6 +1,9 @@
+# Copyright 2025 The Flutter Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 name: devtools_app_shared
 description: Package of Dart & Flutter structures shared between devtools_app and devtools extensions.
-version: 0.3.0
+version: 0.3.1
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app_shared
 
 environment:
@@ -21,7 +24,7 @@ dependencies:
   path: ^1.8.0
   pointer_interceptor: ^0.10.1+1
   url_launcher: ^6.1.0
-  vm_service: ^14.2.1
+  vm_service: '>=13.0.0 <16.0.0'
   web: ^1.0.0
 
 dev_dependencies:

@@ -1,3 +1,8 @@
+<!--
+Copyright 2025 The Flutter Authors
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+-->
 # Build DevTools
 
 This page describes the fastest way to build DevTools with the goal to use it. Do not mix this setup with development environment. If you want to make code changes, follow [contributing guidance](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md).
@@ -30,20 +35,23 @@ to the project.
 
     In your terminal, navigate to a directory where you want to clone DevTools: `cd some/directory`.
     This folder must not already contain a folder named 'devtools'.
- 
-    **To clone flutter/devtools**:
-    - Clone the DevTools repo: `git clone git@github.com:flutter/devtools.git` 
-        - If you haven't already, you may need to
+
+    If you do not already have an SSH key set up for your machine, you may need to
     [generate a new SSH key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
-    to connect to Github with SSH.
+    to connect to Github.
+ 
+    **To clone `flutter/devtools`**:
+    ```shell
+    git clone git@github.com:flutter/devtools.git
+    ``` 
 
     **To clone your fork of flutter/devtools**:
     - [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the DevTools repo to your
     own Github account.
-    - Clone your fork of the DevTools repo: `git clone git@github.com:your_github_account/devtools.git` 
-        - If you haven't already, you may need to
-    [generate a new SSH key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
-    to connect to Github with SSH.
+    - Clone your fork of the DevTools repo:
+        ```shell
+        git clone git@github.com:<your_github_account>/devtools.git
+        ``` 
     - Make sure to [configure Git to keep your fork in sync](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-upstream-repository)
     with the upstream DevTools repo.
 
@@ -52,7 +60,7 @@ to the project.
 	- Adding the `devtools/tool/bin` folder to your `PATH` environment variable:
 	  - **MacOS Users**
 	    - add the following to your `~/.zshrc` file (or `~/.bashrc`, `~/.bash_profile` if you use Bash),
-		replacing `<DEVTOOLS_DIR>` with the local path to your DevTools repo:
+		replacing `<DEVTOOLS_DIR>` with the absolute path to your DevTools repo:
 
 			```
 			export PATH=$PATH:<DEVTOOLS_DIR>/tool/bin
@@ -61,7 +69,7 @@ to the project.
 		- Open "Edit environment variables for your account" from Control Panel
 		- Locate the `Path` variable and click **Edit**
 		- Click the **New** button and paste in `<DEVTOOLS_DIR>/tool/bin`, replacing `<DEVTOOLS_DIR>`
-		with the local path to your DevTools repo.
+		with the absolute path to your DevTools repo.
 	
 	Explore the commands and helpers that the `dt` provides by running `dt -h`. 
 
@@ -71,7 +79,7 @@ To ensure your DevTools repository is up to date and ready to build, run the fol
 `devtools` directory (this will delete any local changes you have made to your DevTools clone):
 ```bash
 git checkout master
-git reset --hard origin/master
+git reset --hard origin/master # (use upstream/master instead if you cloned a fork of DevTools)
 
 dt update-flutter-sdk
 dt pub-get --only-main --upgrade

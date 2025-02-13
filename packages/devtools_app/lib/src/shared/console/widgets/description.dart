@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -460,7 +460,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
           text:
-              '${location.getFile()!.split('/').last}:${location.getLine()}:${location.getColumn()}            ',
+              '${fileNameFromUri(location.getFile())}:${location.getLine()}:${location.getColumn()}            ',
           style: DiagnosticsTextStyles.regular(Theme.of(context).colorScheme),
         ),
       ),

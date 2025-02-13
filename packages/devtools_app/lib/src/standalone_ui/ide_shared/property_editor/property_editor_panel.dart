@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,9 +9,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
-import '../../../service/editor/editor_client.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
-import '../../../shared/analytics/constants.dart';
+import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/editor/editor_client.dart';
 import '../../../shared/ui/common_widgets.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_view.dart';
@@ -37,7 +37,7 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
     super.initState();
 
     final editor = EditorClient(widget.dtd);
-    ga.screen(PropertyEditorEvents.id);
+    ga.screen(gac.PropertyEditorSidebar.id);
     unawaited(
       _editor = editor.initialized.then((_) {
         _propertyEditorController = PropertyEditorController(editor);

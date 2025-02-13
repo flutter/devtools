@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -120,8 +120,8 @@ mixin DisposerMixin {
   final _listenables = <Listenable>[];
   final _listeners = <VoidCallback>[];
 
-  /// An [Expando] that tracks listener ids when [addAutoDisposeListener] is
-  /// called with a non-null [id] parameter.
+  /// An [Expando] that tracks listener IDs when [addAutoDisposeListener] is
+  /// called with a non-null `id` parameter.
   final _listenerIdExpando = Expando<String>();
 
   /// Track a stream subscription to be automatically cancelled on dispose.
@@ -166,8 +166,8 @@ mixin DisposerMixin {
   ///
   /// It is fine to call this method and then add additional listeners.
   ///
-  /// If [excludeIds] is non-empty, any listeners that have an associated id
-  /// from [_listenersById] will not be cancelled.
+  /// If [excludeIds] is non-empty, any listeners that have an associated ID
+  /// from [_listenerIdExpando] will not be cancelled.
   void cancelListeners({List<String> excludeIds = const <String>[]}) {
     assert(_listenables.length == _listeners.length);
     final skipCancelIndices = <int>[];

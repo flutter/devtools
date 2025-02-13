@@ -26,6 +26,7 @@ void main() {
     late List<NetworkRequest> requests;
 
     setUpAll(() {
+      setGlobal(OfflineDataController, OfflineDataController());
       httpProfile = loadHttpProfile();
       socketProfile = loadSocketProfile();
       fakeServiceConnection = FakeServiceConnectionManager(

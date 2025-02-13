@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:math' as math;
@@ -591,8 +591,7 @@ class FlexChildVisualizer extends StatelessWidget {
   // TODO(polina-c, jacob314): consider refactoring to remove `!`.
   FlexLayoutProperties get root => state.properties!;
 
-  // TODO(polina-c, jacob314): consider refactoring to remove `!`.
-  LayoutProperties get properties => renderProperties.layoutProperties!;
+  LayoutProperties get properties => renderProperties.layoutProperties;
 
   ObjectGroup? get objectGroup =>
       properties.node.objectGroupApi as ObjectGroup?;

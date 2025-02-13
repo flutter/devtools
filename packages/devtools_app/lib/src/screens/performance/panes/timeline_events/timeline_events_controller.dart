@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -282,9 +282,7 @@ class TimelineEventsController extends PerformanceFeatureController
       // iOS: "io.flutter.1.raster (12651)"
       // Linux, Windows, Dream (g3): "io.flutter.raster (12651)"
       // MacOS: Does not exist
-      // Also look for .gpu here for older versions of Flutter.
-      // TODO(kenz): remove check for .gpu name in April 2021.
-      if (name.contains(rasterThreadSuffix) || name.contains(gpuThreadSuffix)) {
+      if (name.contains(rasterThreadSuffix)) {
         rasterTrackId = id;
       }
 

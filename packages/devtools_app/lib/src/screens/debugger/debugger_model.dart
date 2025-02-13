@@ -1,11 +1,12 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/primitives/simple_items.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
 /// Whether to include properties surfaced through Diagnosticable objects as
@@ -230,7 +231,7 @@ class StackFrameAndSourcePosition {
     if (uri == null) {
       return uri;
     }
-    final file = uri.split('/').last;
+    final file = fileNameFromUri(uri);
     return line == null ? file : '$file:$line';
   }
 }
@@ -238,5 +239,5 @@ class StackFrameAndSourcePosition {
 // ignore: avoid_classes_with_only_static_members, fine for utility method.
 abstract class ScriptRefUtils {
   static String fileName(ScriptRef scriptRef) =>
-      Uri.parse(scriptRef.uri!).path.split('/').last;
+      fileNameFromUri(Uri.parse(scriptRef.uri!).path)!;
 }

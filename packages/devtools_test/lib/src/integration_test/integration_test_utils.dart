@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -25,7 +25,6 @@ Future<void> resetHistory() async {
       // the web-specific implementation of the Flutter Engine, at
       // `lib/web_ui/lib/src/engine/window.dart` in the Flutter engine
       // repository.
-      // ignore: avoid_dynamic_calls
       .resetHistory();
 }
 

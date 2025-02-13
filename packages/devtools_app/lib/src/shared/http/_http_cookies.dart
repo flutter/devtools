@@ -1,24 +1,19 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// Copyright (c) 2013, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
 
 // This code was pulled from dart:io.
+// https://github.com/dart-lang/sdk/blob/main/sdk/lib/_http/http_headers.dart#L965
+// TODO(mossman): Is there a way to use dart:io directly?
 
-// ignore_for_file: annotate_overrides
-// ignore_for_file: empty_statements
-// ignore_for_file: non_constant_identifier_names
-// ignore_for_file: prefer_const_declarations
 // ignore_for_file: prefer_contains
 // ignore_for_file: prefer_final_locals
 // ignore_for_file: prefer_is_empty
 // ignore_for_file: prefer_single_quotes
-// ignore_for_file: slash_for_doc_comments
 // ignore_for_file: sort_constructors_first
 // ignore_for_file: unnecessary_const
 // ignore_for_file: unnecessary_new
-// ignore_for_file: unused_catch_clause
 // ignore_for_file: unused_element
-// ignore_for_file: unused_local_variable
 
 part of 'http.dart';
 

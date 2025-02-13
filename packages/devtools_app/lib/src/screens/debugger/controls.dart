@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -256,23 +256,27 @@ class BreakOnExceptionsControl extends StatelessWidget {
     return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
       builder: (BuildContext context, modeId, _) {
-        return RoundedDropDownButton<ExceptionMode>(
-          value: ExceptionMode.from(modeId),
-          // Cannot set exception pause mode for system isolates.
-          onChanged:
-              controller.isSystemIsolate
-                  ? null
-                  : (ExceptionMode? mode) {
-                    unawaited(controller.setIsolatePauseMode(mode!.id));
-                  },
-          isDense: true,
-          items: [
-            for (final mode in ExceptionMode.modes)
-              DropdownMenuItem<ExceptionMode>(
-                value: mode,
-                child: Text(isInSmallMode ? mode.name : mode.description),
-              ),
-          ],
+        final exceptionMode = ExceptionMode.from(modeId);
+        return DevToolsTooltip(
+          message: exceptionMode.description,
+          child: RoundedDropDownButton<ExceptionMode>(
+            value: exceptionMode,
+            // Cannot set exception pause mode for system isolates.
+            onChanged:
+                controller.isSystemIsolate
+                    ? null
+                    : (ExceptionMode? mode) {
+                      unawaited(controller.setIsolatePauseMode(mode!.id));
+                    },
+            isDense: true,
+            items: [
+              for (final mode in ExceptionMode.modes)
+                DropdownMenuItem<ExceptionMode>(
+                  value: mode,
+                  child: Text(isInSmallMode ? mode.name : mode.description),
+                ),
+            ],
+          ),
         );
       },
     );

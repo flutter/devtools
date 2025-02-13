@@ -1,7 +1,8 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'extension_test_manager.dart';
@@ -115,7 +116,7 @@ requiresConnection: false
       expect(newerStaticExtension1Package.packageVersion, null);
       expect(
         newerStaticExtension1Package.relativePathFromExtensions,
-        'newer/static_extension_1',
+        p.join('newer', 'static_extension_1'),
       );
       expect(
         newerStaticExtension1Package.pubspecContent,
