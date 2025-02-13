@@ -71,10 +71,6 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
-## Network profiler updates
-
-* Fixed issue where the HTTP requests would sometimes not be displayed properly, particularly when DevTools is communicating with an application over a slow network connection. - [#8860](https://github.com/flutter/devtools/pull/8860)
-
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
