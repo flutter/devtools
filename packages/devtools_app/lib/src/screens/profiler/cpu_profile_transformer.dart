@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import '../../shared/constants.dart';
 import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
 
@@ -12,9 +13,6 @@ import 'cpu_profile_model.dart';
 class CpuProfileTransformer {
   /// Number of stack frames we will process in each batch.
   static const _defaultBatchSize = 100;
-
-  /// Number of ms per frame alloted to maintain 60fps.
-  static const _frameBudget = 16;
 
   int _stackFramesProcessed = 0;
 
@@ -55,7 +53,7 @@ class CpuProfileTransformer {
       final elapsedMs = math.max(watch.elapsedMilliseconds, 1);
       // Adjust to use half the frame budget.
       batchSize = math.max(
-        (batchSize * _frameBudget * 0.5 / elapsedMs).ceil(),
+        (batchSize * frameBudgetMs * 0.5 / elapsedMs).ceil(),
         1,
       );
 
@@ -100,6 +98,8 @@ class CpuProfileTransformer {
       ' != sample count from root '
       '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
     );
+
+    await cpuProfileData.computeBottomUpRoots();
 
     // Reset the transformer after processing.
     reset();
@@ -169,7 +169,15 @@ class CpuProfileTransformer {
 ///
 /// At the time this method is called, we assume we have a list of roots with
 /// accurate inclusive/exclusive sample counts.
-void mergeCpuProfileRoots(List<CpuStackFrame> roots) {
+Future<void> mergeCpuProfileRoots(
+  List<CpuStackFrame> roots, {
+  Stopwatch? stopwatch,
+}) async {
+  stopwatch ??= Stopwatch()..start();
+  if (stopwatch.elapsedMilliseconds > frameBudgetMs * 0.5) {
+    await delayToReleaseUiThread(micros: 2000);
+    stopwatch.reset();
+  }
   final mergedRoots = <CpuStackFrame>[];
   final rootIndicesToRemove = <int>{};
 
@@ -197,7 +205,7 @@ void mergeCpuProfileRoots(List<CpuStackFrame> roots) {
         root.exclusiveSampleCount += otherRoot.exclusiveSampleCount;
         root.inclusiveSampleCount += otherRoot.inclusiveSampleCount;
         rootIndicesToRemove.add(j);
-        mergeCpuProfileRoots(root.children);
+        await mergeCpuProfileRoots(root.children, stopwatch: stopwatch);
       }
     }
     mergedRoots.add(root);

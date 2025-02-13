@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../screens/debugger/codeview_controller.dart';
 import '../../screens/debugger/debugger_screen.dart';
 import '../../screens/vm_developer/vm_developer_common_widgets.dart';
+import '../../shared/constants.dart';
 import '../framework/routing.dart';
 import '../globals.dart';
 import '../primitives/trees.dart';
@@ -109,12 +110,14 @@ class ProfileMetaData {
 /// [rootedAtTags] specifies whether or not the top-down tree is rooted
 /// at synthetic nodes representing user / VM tags.
 class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
-  List<T> bottomUpRootsFor({
+  Future<List<T>> bottomUpRootsFor({
     required T topDownRoot,
-    required void Function(List<T>) mergeSamples,
+    required Future<void> Function(List<T>, {Stopwatch? stopwatch})
+    mergeSamples,
     // TODO(bkonyi): can this take a list instead of a single root?
     required bool rootedAtTags,
-  }) {
+  }) async {
+    final watch = Stopwatch()..start();
     List<T> bottomUpRoots;
     // If the top-down tree has synthetic tag nodes as its roots, we need to
     // skip the synthetic nodes when inverting the tree and re-insert them at
@@ -128,10 +131,11 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
         // and insert them into the new synthetic tag node, [root].
         for (final child in tagRoot.children) {
           root.addAllChildren(
-            generateBottomUpRoots(
+            await generateBottomUpRoots(
               node: child,
               parent: null,
               bottomUpRoots: <T>[],
+              stopwatch: watch,
             ),
           );
         }
@@ -140,15 +144,16 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
         // are synthetic and we'll calculate the counts for the tag nodes
         // later.
         root.children.forEach(cascadeSampleCounts);
-        mergeSamples(root.children);
+        await mergeSamples(root.children, stopwatch: watch);
         bottomUpRoots.add(root);
       }
     } else {
-      bottomUpRoots = generateBottomUpRoots(
+      bottomUpRoots = await generateBottomUpRoots(
         node: topDownRoot,
         parent: null,
         bottomUpRoots: <T>[],
         skipRoot: true,
+        stopwatch: watch,
       );
 
       // Set the bottom up sample counts for each sample.
@@ -156,7 +161,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
 
       // Merge samples when possible starting at the root (the leaf node of the
       // original sample).
-      mergeSamples(bottomUpRoots);
+      await mergeSamples(bottomUpRoots, stopwatch: watch);
     }
 
     if (rootedAtTags) {
@@ -177,18 +182,28 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   /// Returns the roots for a bottom up representation of a
   /// [ProfilableDataMixin] node.
   ///
+  /// The [stopwatch] is used to chunk up work and try to avoid dropping frames,
+  /// and doesn't need to be passed in from the outside.
+  ///
   /// Each root is a leaf from the original [ProfilableDataMixin] tree, and its
   /// children will be the reverse stack of the original profile sample. The
   /// stack returned will not be merged to combine common roots, and the sample
   /// counts will not reflect the bottom up sample counts. These steps will
   /// occur later in the bottom-up conversion process.
   @visibleForTesting
-  List<T> generateBottomUpRoots({
+  Future<List<T>> generateBottomUpRoots({
     required T node,
     required T? parent,
     required List<T> bottomUpRoots,
     bool skipRoot = false,
-  }) {
+    Stopwatch? stopwatch,
+  }) async {
+    stopwatch ??= Stopwatch()..start();
+    if (stopwatch.elapsedMilliseconds > frameBudgetMs * 0.5) {
+      await delayToReleaseUiThread(micros: 5000);
+      stopwatch.reset();
+    }
+
     if (skipRoot && node.isRoot) {
       // When [skipRoot] is true, do not include the root node at the leaf of
       // each bottom up tree. This is to avoid having the 'all' node at the
@@ -220,10 +235,11 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
       parent = copy;
     }
     for (final child in node.children.cast<T>()) {
-      generateBottomUpRoots(
+      await generateBottomUpRoots(
         node: child,
         parent: parent,
         bottomUpRoots: bottomUpRoots,
+        stopwatch: stopwatch,
       );
     }
     return bottomUpRoots;
