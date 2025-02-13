@@ -130,7 +130,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
           root.addAllChildren(
             generateBottomUpRoots(
               node: child,
-              currentBottomUpRoot: null,
+              parent: null,
               bottomUpRoots: <T>[],
             ),
           );
@@ -146,7 +146,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     } else {
       bottomUpRoots = generateBottomUpRoots(
         node: topDownRoot,
-        currentBottomUpRoot: null,
+        parent: null,
         bottomUpRoots: <T>[],
         skipRoot: true,
       );
@@ -185,7 +185,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   @visibleForTesting
   List<T> generateBottomUpRoots({
     required T node,
-    required T? currentBottomUpRoot,
+    required T? parent,
     required List<T> bottomUpRoots,
     bool skipRoot = false,
   }) {
@@ -197,30 +197,32 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
       // Inclusive and exclusive sample counts are copied by default.
       final copy = node.shallowCopy() as T;
 
-      if (currentBottomUpRoot != null) {
-        copy.addChild(currentBottomUpRoot.deepCopy());
+      if (parent != null) {
+        copy.addChild(parent);
       }
-
-      // [copy] is the new root of the bottom up stack.
-      currentBottomUpRoot = copy;
 
       if (node.exclusiveSampleCount > 0) {
         // This node is a leaf node, meaning that one or more CPU samples
-        // contain [currentBottomUpRoot] as the top stack frame. This means it
-        // is a bottom up root.
-        bottomUpRoots.add(currentBottomUpRoot);
+        // contain it as the top stack frame. This means it is a bottom up root.
+        //
+        // Each bottom up root needs a deep copy of the entire tree reaching to
+        // it.
+        bottomUpRoots.add(copy.deepCopy());
       } else {
-        // If [currentBottomUpRoot] is not a bottom up root, the inclusive count
-        // should be set to null. This will allow the inclusive count to be
-        // recalculated now that this node is part of its parent's bottom up
-        // tree, not its own.
-        currentBottomUpRoot.inclusiveSampleCount = null;
+        // If the node is not a bottom up root, the inclusive count should be
+        // set to null. This will allow the inclusive count to be recalculated
+        // now that this node is part of its parent's bottom up tree, not its
+        // own.
+        copy.inclusiveSampleCount = null;
       }
+
+      // [copy] is the new parent
+      parent = copy;
     }
     for (final child in node.children.cast<T>()) {
       generateBottomUpRoots(
         node: child,
-        currentBottomUpRoot: currentBottomUpRoot,
+        parent: parent,
         bottomUpRoots: bottomUpRoots,
       );
     }

@@ -89,7 +89,7 @@ void main() {
       expect(testStackFrame.profileAsString(), testStackFrameStringGolden);
       final bottomUpRoots = transformer.generateBottomUpRoots(
         node: testStackFrame,
-        currentBottomUpRoot: null,
+        parent: null,
         bottomUpRoots: [],
       );
 
@@ -122,7 +122,7 @@ void main() {
     test('processData step by step when skipping the root node', () {
       final bottomUpRoots = transformer.generateBottomUpRoots(
         node: testStackFrameWithRoot,
-        currentBottomUpRoot: null,
+        parent: null,
         bottomUpRoots: [],
         skipRoot: true,
       );
