@@ -14,6 +14,7 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/config_specific/import_export/import_export.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
@@ -226,16 +227,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
             gaSelection: gac.clear,
             onPressed: widget.controller.clear,
           ),
-          const SizedBox(width: defaultSpacing),
-          DownloadButton(
-            tooltip: 'Download as .har file',
-            minScreenWidthForTextBeforeScaling:
-                _NetworkProfilerControls._includeTextWidth,
-            onPressed: widget.controller.exportAsHarFile,
-            gaScreen: gac.network,
-            gaSelection: gac.NetworkEvent.downloadAsHar.name,
-          ),
-          const Spacer(),
+          const SizedBox(width: denseSpacing),
           // TODO(kenz): fix focus issue when state is refreshed
           Expanded(
             child: SearchField<NetworkController>(
@@ -254,6 +246,35 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               filteredItem: 'request',
             ),
           ),
+          const SizedBox(width: denseSpacing),
+          if (FeatureFlags.networkSaveLoad)
+            OpenSaveButtonGroup(
+              screenId: ScreenMetaData.network.id,
+              saveFormats: const [SaveFormat.devtools, SaveFormat.har],
+              gaItemForSaveFormatSelection:
+                  (SaveFormat format) => switch (format) {
+                    SaveFormat.devtools => gac.saveFile,
+                    SaveFormat.har => gac.NetworkEvent.downloadAsHar.name,
+                  },
+              onSave: (SaveFormat format) async {
+                switch (format) {
+                  case SaveFormat.devtools:
+                    await widget.controller.fetchFullDataBeforeExport();
+                    widget.controller.exportData();
+                  case SaveFormat.har:
+                    await widget.controller.exportAsHarFile();
+                }
+              },
+            )
+          else
+            DownloadButton(
+              tooltip: 'Download as .har file',
+              minScreenWidthForTextBeforeScaling:
+                  _NetworkProfilerControls._includeTextWidth,
+              onPressed: widget.controller.exportAsHarFile,
+              gaScreen: gac.network,
+              gaSelection: gac.NetworkEvent.downloadAsHar.name,
+            ),
         ],
       ],
     );

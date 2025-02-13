@@ -45,8 +45,13 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-* Offline support added for the network screen. - [#8332](https://github.com/flutter/devtools/pull/8332)
-  
+* Added offline support for the network screen (thanks to @hrajwade96!) - 
+[#8332](https://github.com/flutter/devtools/pull/8332)
+
+  ![Network profiler controls](images/network_controls.png "Network profiler controls")
+
+  ![Network profiler open / save button](images/network_open_save_button.png "Network profiler open / save button")
+
 * Changed the context menu style to be consistent with other screens
   [#8859](https://github.com/flutter/devtools/pull/8859).
 * Fixed issue where the HTTP requests would sometimes not be displayed properly, particularly when DevTools is communicating with an application over a slow network connection. - [#8860](https://github.com/flutter/devtools/pull/8860)
