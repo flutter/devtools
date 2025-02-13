@@ -97,6 +97,7 @@ abstract class Field {
   static const deviceId = 'deviceId';
   static const devices = 'devices';
   static const displayValue = 'displayValue';
+  static const documentation = 'documentation';
   static const emulator = 'emulator';
   static const emulatorId = 'emulatorId';
   static const ephemeral = 'ephemeral';
@@ -428,10 +429,12 @@ class CursorPosition with Serializable {
 
 /// The result of an `editableArguments` request.
 class EditableArgumentsResult with Serializable {
-  EditableArgumentsResult({required this.args});
+  EditableArgumentsResult({required this.args, this.name, this.documentation});
 
   EditableArgumentsResult.fromJson(Map<String, Object?> map)
     : this(
+        name: map[Field.name] as String?,
+        documentation: map[Field.documentation] as String?,
         args:
             (map[Field.arguments] as List<Object?>? ?? <Object?>[])
                 .cast<Map<String, Object?>>()
@@ -440,6 +443,8 @@ class EditableArgumentsResult with Serializable {
       );
 
   final List<EditableArgument> args;
+  final String? name;
+  final String? documentation;
 
   @override
   Map<String, Object?> toJson() => {Field.arguments: args};

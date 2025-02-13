@@ -58,9 +58,9 @@ void main() {
     Future<List<EditableArgument>> waitForEditableArgs() {
       final argsCompleter = Completer<List<EditableArgument>>();
       listener = () {
-        argsCompleter.complete(controller.editableArgs.value);
+        argsCompleter.complete(controller.editableWidgetData.value!.args);
       };
-      controller.editableArgs.addListener(listener!);
+      controller.editableWidgetData.addListener(listener!);
       return argsCompleter.future;
     }
 
@@ -94,7 +94,7 @@ void main() {
 
     tearDown(() {
       if (listener != null) {
-        controller.editableArgs.removeListener(listener!);
+        controller.editableWidgetData.removeListener(listener!);
       }
     });
 
@@ -141,7 +141,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.initForTestsOnly(editableArgs: result1.args);
+      controller.initForTestsOnly(editableArgsResult: result1);
       await tester.pumpAndSettle();
 
       final titleInput = _findTextFormField('String? title');
@@ -176,7 +176,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.initForTestsOnly(editableArgs: result2.args);
+      controller.initForTestsOnly(editableArgsResult: result2);
       await tester.pumpAndSettle();
 
       final softWrapInput = _findDropdownButtonFormField('bool softWrap');
@@ -203,7 +203,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.initForTestsOnly(editableArgs: result2.args);
+      controller.initForTestsOnly(editableArgsResult: result2);
       await tester.pumpAndSettle();
 
       // Verify the input options are expected.
@@ -221,7 +221,7 @@ void main() {
       await tester.pumpWidget(wrap(propertyEditor));
 
       // Change the editable args.
-      controller.initForTestsOnly(editableArgs: result2.args);
+      controller.initForTestsOnly(editableArgsResult: result2);
       await tester.pumpAndSettle();
 
       // Verify the input options are expected.
@@ -287,7 +287,7 @@ void main() {
     testWidgets('editing a string input (title)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
@@ -307,7 +307,7 @@ void main() {
     testWidgets('editing a string input to null (title)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
@@ -325,7 +325,7 @@ void main() {
     ) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
@@ -349,7 +349,7 @@ void main() {
     ) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
@@ -377,7 +377,7 @@ void main() {
     testWidgets('submitting a string input with TAB (title)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the title.
@@ -402,7 +402,7 @@ void main() {
     testWidgets('editing a numeric input (height)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the height.
@@ -418,7 +418,7 @@ void main() {
     testWidgets('editing a numeric input to null (height)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the height.
@@ -434,7 +434,7 @@ void main() {
     testWidgets('submitting a numeric input with TAB (height)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result1.args);
+        controller.initForTestsOnly(editableArgsResult: result1);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Edit the height.
@@ -455,7 +455,7 @@ void main() {
     testWidgets('editing an enum input (align)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result2.args);
+        controller.initForTestsOnly(editableArgsResult: result2);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Select the align: Alignment.topLeft option.
@@ -479,7 +479,7 @@ void main() {
     testWidgets('editing a nullable enum input (align)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result2.args);
+        controller.initForTestsOnly(editableArgsResult: result2);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Select the align: null option.
@@ -500,7 +500,7 @@ void main() {
     testWidgets('editing a boolean input (softWrap)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
-        controller.initForTestsOnly(editableArgs: result2.args);
+        controller.initForTestsOnly(editableArgsResult: result2);
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Select the softWrap: false option.
@@ -516,6 +516,104 @@ void main() {
         final nextEdit = await nextEditCompleter.future;
         expect(nextEdit, equals('softWrap: false (TYPE: bool, SUCCESS: true)'));
       });
+    });
+  });
+
+  group('widget name and documentation', () {
+    testWidgets('expanding and collapsing documentation', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the result from the server.
+      controller.initForTestsOnly(
+        editableArgsResult: resultWithWidgetNameAndDocs,
+      );
+      await tester.pumpAndSettle();
+
+      final widgetName = find.text('MyFlutterWidget');
+      final truncatedDocsFinder = find.richText('Creates a Flutter widget.');
+      final expandedDocsFinder = _findDocsWithText([
+        // Checks that brackets/backticks are removed.
+        'Takes width and height as arguments.',
+        'Example: MyWidget(title: 1.0, height: 2.0)',
+      ]);
+      final expandDocsButton = _findExpandDocsButton(isExpanded: false);
+      final collapseDocsButton = _findExpandDocsButton(isExpanded: true);
+
+      // Verify the documentation is collapsed.
+      expect(widgetName, findsOneWidget);
+      expect(truncatedDocsFinder, findsOneWidget);
+      for (final finder in expandedDocsFinder) {
+        expect(finder, findsNothing);
+      }
+      expect(expandDocsButton, findsOneWidget);
+      expect(collapseDocsButton, findsNothing);
+
+      // Expand the documentation.
+      await tester.tap(expandDocsButton);
+      await tester.pumpAndSettle();
+
+      // Verify the documentation is now expanded.
+      expect(widgetName, findsOneWidget);
+      expect(truncatedDocsFinder, findsOneWidget);
+      for (final finder in expandedDocsFinder) {
+        expect(finder, findsOneWidget);
+      }
+      expect(expandDocsButton, findsNothing);
+      expect(collapseDocsButton, findsOneWidget);
+    });
+
+    testWidgets('widget name is present but no documentation', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the result from the server.
+      controller.initForTestsOnly(
+        editableArgsResult: resultWithWidgetNameNoDocs,
+      );
+      await tester.pumpAndSettle();
+
+      // Verify widget name and short description are present.
+      final widgetName = find.text('MyFlutterWidget');
+      final shortDescriptionFinder = find.richText(
+        // We create a short description based on the widget name.
+        'Creates a MyFlutterWidget.',
+      );
+      expect(widgetName, findsOneWidget);
+      expect(shortDescriptionFinder, findsOneWidget);
+
+      // Verify there is no expand/collapse button.
+      final expandDocsButton = _findExpandDocsButton(isExpanded: false);
+      final collapseDocsButton = _findExpandDocsButton(isExpanded: true);
+      expect(expandDocsButton, findsNothing);
+      expect(collapseDocsButton, findsNothing);
+    });
+
+    testWidgets('widget name and docs are present but no arguments', (
+      tester,
+    ) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the result from the server.
+      controller.initForTestsOnly(
+        editableArgsResult: resultWithWidgetNameAndDocsNoArgs,
+      );
+      await tester.pumpAndSettle();
+
+      // Verify the truncated documentation is visible.
+      final widgetName = find.text('MyFlutterWidget');
+      final truncatedDocsFinder = find.richText('Creates a Flutter widget.');
+      final expandDocsButton = _findExpandDocsButton(isExpanded: false);
+      expect(widgetName, findsOneWidget);
+      expect(truncatedDocsFinder, findsOneWidget);
+      expect(expandDocsButton, findsOneWidget);
+
+      // Verify the message about no editable properties is visible.
+      final noEditablePropertiesMessage = find.richTextContaining(
+        'MyFlutterWidget has no editable widget properties.',
+      );
+      expect(noEditablePropertiesMessage, findsOneWidget);
     });
   });
 }
@@ -578,6 +676,12 @@ Finder _findDropdownButtonFormField(String inputName) => find.ancestor(
   of: find.richTextContaining(inputName),
   matching: find.byType(DropdownButtonFormField<String>),
 );
+
+List<Finder> _findDocsWithText(List<String> paragraphs) =>
+    paragraphs.map((paragraph) => find.richTextContaining(paragraph)).toList();
+
+Finder _findExpandDocsButton({required bool isExpanded}) =>
+    find.text(isExpanded ? 'Show less' : 'Show more');
 
 Future<void> _verifyDropdownMenuItems(
   Finder dropdownButton, {
@@ -684,6 +788,17 @@ final activeLocationChangedEvent2 = ActiveLocationChangedEvent(
   textDocument: textDocument2,
 );
 
+// Widget name and documentation
+const widgetName = 'MyFlutterWidget';
+
+const dartDocText = '''
+Creates a Flutter widget.
+
+Takes [width] and [height] as arguments.
+
+Example: `MyWidget(title: 1.0, height: 2.0)`
+''';
+
 // Result 1
 final titleProperty = EditableArgument.fromJson({
   'name': 'title',
@@ -730,6 +845,8 @@ final heightInputExpectations = {
   'isDefault': true,
 };
 final result1 = EditableArgumentsResult(
+  name: widgetName,
+  documentation: dartDocText,
   args: [titleProperty, widthProperty, heightProperty],
 );
 
@@ -775,5 +892,15 @@ final alignInputExpectations = {
   'isDefault': false,
 };
 final result2 = EditableArgumentsResult(
+  name: widgetName,
   args: [softWrapProperty, alignProperty],
+);
+
+// Example results for documentation test cases.
+final resultWithWidgetNameAndDocs = result1;
+final resultWithWidgetNameNoDocs = result2;
+final resultWithWidgetNameAndDocsNoArgs = EditableArgumentsResult(
+  name: widgetName,
+  documentation: dartDocText,
+  args: [],
 );
