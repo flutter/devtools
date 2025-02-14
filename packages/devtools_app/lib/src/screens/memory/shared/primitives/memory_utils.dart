@@ -12,7 +12,6 @@ Future<HeapSnapshotGraph?> snapshotMemoryInSelectedIsolate() async {
   if (isolate == null) return null;
   return await serviceConnection.serviceManager.service?.getHeapSnapshotGraph(
     isolate,
-    calculateReferrers: false,
     decodeExternalProperties: false,
     decodeObjectData: false,
   );
