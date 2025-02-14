@@ -17,6 +17,17 @@
             "program": "packages/devtools_app/lib/main.dart",
         },
         {
+            "name": "devtools + web hot reload",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-experimental-hot-reload",
+            ]
+        },
+        {
             "name": "devtools + experiments",
             "request": "launch",
             "type": "dart",
