@@ -31,7 +31,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed memory heap snapshot tool so that references are included in snapshots
+by default. - [#8899](https://github.com/flutter/devtools/pull/8899)
 
 ## Debugger updates
 
