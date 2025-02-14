@@ -212,6 +212,7 @@ void main() {
         softWrapInput,
         menuOptions: ['true', 'false'],
         selectedOption: 'true',
+        defaultOption: 'true',
         tester: tester,
       );
     });
@@ -240,6 +241,7 @@ void main() {
           '.topRight',
         ],
         selectedOption: '.center',
+        defaultOption: '.bottomLeft',
         tester: tester,
       );
     });
@@ -584,6 +586,7 @@ Future<void> _verifyDropdownMenuItems(
   required List<String> menuOptions,
   required String selectedOption,
   required WidgetTester tester,
+  String? defaultOption,
 }) async {
   // Click button to open the options.
   await tester.tap(dropdownButton);
@@ -595,6 +598,17 @@ Future<void> _verifyDropdownMenuItems(
       of: find.text(menuOptionValue),
       matching: find.byType(DropdownMenuItem<String>),
     );
+    // Verify the default value has a label.
+    if (menuOptionValue == defaultOption) {
+      final defaultLabelFinder = find.descendant(
+        of: menuOptionFinder,
+        matching: find.descendant(
+          of: find.byType(RoundedLabel),
+          matching: find.text('D'),
+        ),
+      );
+      expect(defaultLabelFinder, findsOneWidget);
+    }
     if (menuOptionValue == selectedOption) {
       // Flutter renders two menu options for the selected option.
       expect(menuOptionFinder, findsNWidgets(2));

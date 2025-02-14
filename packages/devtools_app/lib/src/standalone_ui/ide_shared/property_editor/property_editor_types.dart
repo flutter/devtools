@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:meta/meta.dart';
 
 import '../../../shared/editor/api_classes.dart';
+
+/// Record representing an option for an [EditableProperty].
+typedef PropertyOption = ({String text, bool isDefault});
 
 class EditableString extends EditableProperty {
   EditableString(super.argument);
@@ -32,8 +36,21 @@ class EditableBool extends EditableProperty with FiniteValuesProperty {
           : valueAsString; // The boolean value might be an expression.
 
   @override
-  Set<String> get propertyOptions {
-    return {'true', 'false', valueDisplay, if (isNullable) 'null'};
+  Set<PropertyOption> get propertyOptions {
+    final shouldIncludeValueDisplay =
+        !['true', 'false', 'null'].contains(valueDisplay);
+
+    return {
+      (text: 'true', isDefault: defaultValue == true),
+      (text: 'false', isDefault: defaultValue == false),
+      if (shouldIncludeValueDisplay)
+        (
+          text: valueDisplay,
+          isDefault: hasDefault && defaultValue.toString() == valueDisplay,
+        ),
+      if (isNullable)
+        (text: 'null', isDefault: hasDefault && defaultValue == null),
+    };
   }
 }
 
@@ -68,9 +85,34 @@ class EditableEnum extends EditableProperty with FiniteValuesProperty {
       _enumShorthand(displayValue ?? currentValue.toString());
 
   @override
-  Set<String> get propertyOptions {
-    final shorthandOptions = (options ?? <String>[]).map(_enumShorthand);
-    return {...shorthandOptions, valueDisplay, if (isNullable) 'null'};
+  Set<PropertyOption> get propertyOptions {
+    final longhandOptions = options ?? <String>[];
+    final shorthandOptions = <PropertyOption>{};
+
+    for (final option in longhandOptions) {
+      final isDefault = hasDefault && option == defaultValue.toString();
+      shorthandOptions.add((
+        text: _enumShorthand(option),
+        isDefault: isDefault,
+      ));
+    }
+    final shorthandValueDisplay = _enumShorthand(valueDisplay);
+    if (shorthandOptions.none(
+      (option) => option.text == shorthandValueDisplay,
+    )) {
+      shorthandOptions.add((
+        text: shorthandValueDisplay,
+        isDefault: hasDefault && defaultValue == valueDisplay,
+      ));
+    }
+    if (isNullable) {
+      shorthandOptions.add((
+        text: 'null',
+        isDefault: hasDefault && defaultValue == null,
+      ));
+    }
+
+    return shorthandOptions;
   }
 
   String _enumShorthand(String fullEnumValue) {
@@ -149,7 +191,7 @@ mixin NumericProperty on EditableProperty {
 }
 
 mixin FiniteValuesProperty on EditableProperty {
-  Set<String> get propertyOptions;
+  Set<PropertyOption> get propertyOptions;
 }
 
 EditableProperty? argToProperty(EditableArgument argument) {
