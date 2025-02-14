@@ -221,14 +221,10 @@ final _benchmarkThresholds = {
       p90: _frameTimeFor60FPSInMicros,
     ),
   },
-  // Note that some of these benchmarks exceed the 60fps frame budget,
-  // especially the p90 benchmarks.
-  //
-  // See https://github.com/flutter/devtools/pull/8892 which exposes this.
   DevToolsBenchmark.offlinePerformanceScreen: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
-      avg: _frameTimeFor60FPSInMicros * 1.5,
+      avg: _frameTimeFor60FPSInMicros,
       p50: _frameTimeFor60FPSInMicros,
       p90: _frameTimeFor60FPSInMicros,
     ),
