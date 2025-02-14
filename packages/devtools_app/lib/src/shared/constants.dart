@@ -19,3 +19,6 @@ const hotReloadIcon = Icons.electric_bolt_outlined;
 
 /// The icon used for Hot Restart.
 const hotRestartIcon = Icons.settings_backup_restore_outlined;
+
+/// Number of ms per frame alloted to maintain 60fps.
+const frameBudgetMs = 16;
