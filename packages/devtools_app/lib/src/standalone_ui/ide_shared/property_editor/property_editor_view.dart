@@ -124,30 +124,29 @@ class _PropertyLabels extends StatelessWidget {
     final isSet = property.hasArgument;
     final isDefault = property.isDefault;
 
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (isSet)
-              Padding(
-                padding: const EdgeInsets.all(_PropertiesList.itemPadding),
-                child: RoundedLabel(
-                  labelText: 'S',
-                  backgroundColor: colorScheme.primary,
-                  textColor: colorScheme.onPrimary,
-                  tooltipText: 'Property argument is set.',
-                ),
-              ),
-            if (isDefault)
-              const Padding(
-                padding: EdgeInsets.all(_PropertiesList.itemPadding),
-                child: RoundedLabel(
-                  labelText: 'D',
-                  tooltipText: 'Property argument matches the default value.',
-                ),
-              ),
-          ],
-        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (isSet)
+          Padding(
+            padding: const EdgeInsets.all(_PropertiesList.itemPadding),
+            child: RoundedLabel(
+              labelText: 'S',
+              backgroundColor: colorScheme.primary,
+              textColor: colorScheme.onPrimary,
+              tooltipText: 'Property argument is set.',
+            ),
+          ),
+        if (isDefault)
+          const Padding(
+            padding: EdgeInsets.all(_PropertiesList.itemPadding),
+            child: RoundedLabel(
+              labelText: 'D',
+              tooltipText: 'Property argument matches the default value.',
+            ),
+          ),
+      ],
+    );
   }
 }
 
