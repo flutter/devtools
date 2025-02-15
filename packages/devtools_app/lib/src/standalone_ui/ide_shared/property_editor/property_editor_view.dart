@@ -118,17 +118,13 @@ class _PropertyLabels extends StatelessWidget {
 
   final EditableProperty property;
 
-  static const _widthForFullLabels = 60;
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isSet = property.hasArgument;
     final isDefault = property.isDefault;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -136,28 +132,23 @@ class _PropertyLabels extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(_PropertiesList.itemPadding),
                 child: RoundedLabel(
-                  labelText: _maybeTruncateLabel('set', width: width),
+                  labelText: 'S',
                   backgroundColor: colorScheme.primary,
                   textColor: colorScheme.onPrimary,
                   tooltipText: 'Property argument is set.',
                 ),
               ),
             if (isDefault)
-              Padding(
-                padding: const EdgeInsets.all(_PropertiesList.itemPadding),
+              const Padding(
+                padding: EdgeInsets.all(_PropertiesList.itemPadding),
                 child: RoundedLabel(
-                  labelText: _maybeTruncateLabel('default', width: width),
+                  labelText: 'D',
                   tooltipText: 'Property argument matches the default value.',
                 ),
               ),
           ],
         );
-      },
-    );
   }
-
-  String _maybeTruncateLabel(String labelText, {required double width}) =>
-      width >= _widthForFullLabels ? labelText : labelText[0].toUpperCase();
 }
 
 class _PropertyInput extends StatelessWidget {
