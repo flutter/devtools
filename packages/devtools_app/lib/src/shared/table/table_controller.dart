@@ -353,6 +353,7 @@ abstract class TableControllerBase<T> extends DisposableController {
   void dispose() {
     verticalScrollController?.dispose();
     verticalScrollController = null;
+    _tableData.dispose();
     super.dispose();
   }
 }

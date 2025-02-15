@@ -233,6 +233,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
 
   @override
   void dispose() {
+    _tableController?.dispose();
     _tableController = null;
     super.dispose();
   }
