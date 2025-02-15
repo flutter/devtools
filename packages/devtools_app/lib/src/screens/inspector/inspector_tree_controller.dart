@@ -1006,7 +1006,6 @@ class _InspectorTreeState extends State<InspectorTree>
     if (!controller.firstInspectorTreeLoadCompleted && widget.isSummaryTree) {
       final screenId = widget.screenId;
       if (screenId != null) {
-        print('LEGACY ROW COUNT: ${treeControllerLocal.numRows}');
         ga.timeEnd(
           screenId,
           gac.pageReady,
