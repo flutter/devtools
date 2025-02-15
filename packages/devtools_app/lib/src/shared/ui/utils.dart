@@ -48,14 +48,16 @@ TextSpan truncateTextSpan(TextSpan span, int length) {
 }
 
 /// Returns the width in pixels of the [span].
-double calculateTextSpanWidth(TextSpan? span) {
+double calculateTextSpanWidth(TextSpan span) {
   final textPainter = TextPainter(
     text: span,
     textAlign: TextAlign.left,
     textDirection: TextDirection.ltr,
   )..layout();
+  final width = textPainter.width;
+  textPainter.dispose();
 
-  return textPainter.width;
+  return width;
 }
 
 /// Returns the height in pixels of the [span].
@@ -78,9 +80,10 @@ double calculateTextSpanHeight(TextSpan span, {double? maxWidth}) {
   return calculateTextSpanSize(span, maxWidth: maxWidth).height;
 }
 
-TextSpan? findLongestTextSpan(List<TextSpan> spans) {
-  int longestLength = 0;
-  TextSpan? longestSpan;
+TextSpan findLongestTextSpan(List<TextSpan> spans) {
+  assert(spans.isNotEmpty, 'Cannot find longest text span of 0 spans.');
+  var longestSpan = spans.removeAt(0);
+  var longestLength = longestSpan.toPlainText().length;
   for (final span in spans) {
     final currentLength = span.toPlainText().length;
     if (currentLength > longestLength) {
