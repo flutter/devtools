@@ -28,7 +28,7 @@ TextStyle get _hoverTitleTextStyle => fixBlurryText(
 final _identifier = RegExp(r'^[a-zA-Z0-9]|_|\$');
 
 /// Returns the word in the [line] for the provided hover [dx] offset given
-/// the [line]'s [textStyle].
+/// the [line]'s `textStyle`.
 String wordForHover(double dx, TextSpan line) {
   String word = '';
   final hoverIndex = _hoverIndexFor(dx, line);
@@ -85,17 +85,14 @@ bool isPrimitiveValueOrNull(String valueAsString) {
   return isNull || isBool || isInt || isDouble || isString;
 }
 
-/// Returns the index in the Textspan's plainText for which the hover offset is
-/// located.
+/// Returns the index in the [TextSpan]'s `plainText` for which the hover offset
+/// is located.
 int _hoverIndexFor(double dx, TextSpan line) {
   int hoverIndex = -1;
   final length = line.toPlainText().length;
   for (var i = 0; i < length; i++) {
-    final painter = TextPainter(
-      text: truncateTextSpan(line, i + 1),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    if (dx <= painter.width) {
+    final textWidth = calculateTextSpanWidth(truncateTextSpan(line, i + 1));
+    if (dx <= textWidth) {
       hoverIndex = i;
       break;
     }

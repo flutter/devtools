@@ -901,6 +901,7 @@ class ChartAxisPainter extends CustomPainter {
             baselineAdjust,
       ),
     );
+    textPainter.dispose();
   }
 
   @override
@@ -953,19 +954,20 @@ class FPSLinePainter extends CustomPainter {
       Paint()..color = themeData.colorScheme.chartAccentColor,
     );
 
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: '${displayRefreshRate.toStringAsFixed(0)} FPS',
-        style: themeData.subtleChartTextStyle,
-      ),
-      textAlign: TextAlign.right,
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    textPainter.paint(
-      canvas,
-      Offset(chartArea.right - fpsTextSpace, targetLineY + borderPadding),
-    );
+    TextPainter(
+        text: TextSpan(
+          text: '${displayRefreshRate.toStringAsFixed(0)} FPS',
+          style: themeData.subtleChartTextStyle,
+        ),
+        textAlign: TextAlign.right,
+        textDirection: TextDirection.ltr,
+      )
+      ..layout()
+      ..paint(
+        canvas,
+        Offset(chartArea.right - fpsTextSpace, targetLineY + borderPadding),
+      )
+      ..dispose();
   }
 
   @override
