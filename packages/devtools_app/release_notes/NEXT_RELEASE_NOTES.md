@@ -41,6 +41,9 @@ by default. - [#8899](https://github.com/flutter/devtools/pull/8899)
 * Updated syntax highlighting with support for digit separators,
   and improved comment and string interpolation handling. -
   [#8861](https://github.com/flutter/devtools/pull/8861)
+* Updated `string_scanner` dependency to avoid some syntax highlighting issues
+  when source contains `\r\n` in certain positions on Windows. -
+  [#8904](https://github.com/flutter/devtools/pull/8904)
 * Added soft line wrapping in the debugger console.
   [#8855](https://github.com/flutter/devtools/pull/8855).
 
