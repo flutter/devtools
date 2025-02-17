@@ -1,6 +1,9 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+
+/// @docImport 'layout_explorer/ui/overflow_indicator_painter.dart';
+library;
 
 import 'dart:math' as math;
 
@@ -32,25 +35,32 @@ const overflowEpsilon = 0.1;
 /// the sum of the render size to be equals to [maxSizeAvailable]
 ///
 /// Formula for computing render size:
-///   renderSize[i] = (size[i] - smallestSize)
-///               * (largestRenderSize - smallestRenderSize)
-///               / (largestSize - smallestSize) + smallestRenderSize
+/// ```
+/// renderSize[i] = (size[i] - smallestSize)
+///             * (largestRenderSize - smallestRenderSize)
+///             / (largestSize - smallestSize) + smallestRenderSize
+/// ```
 /// Explanation:
 /// - The computation formula for transforming size to renderSize is based on these two things:
 ///   - smallest element will be rendered to [smallestRenderSize]
 ///   - largest element will be rendered to [largestRenderSize]
 ///   - any other size will be scaled accordingly
 /// - The formula above is derived from:
-///    (renderSize[i] - smallestRenderSize) / (largestRenderSize - smallestRenderSize)
-///     = (size[i] - smallestSize) / (size[i] - smallestSize)
+///   ```
+///   (renderSize[i] - smallestRenderSize) / (largestRenderSize - smallestRenderSize)
+///    = (size[i] - smallestSize) / (size[i] - smallestSize)
+///   ```
 ///
 /// Formula for computing forced [largestRenderSize]:
-///   largestRenderSize = (maxSizeAvailable - sizes.length * smallestRenderSize)
-///     * (largestSize - smallestSize) / sum(s[i] - ss) + smallestRenderSize
+/// ```
+/// largestRenderSize = (maxSizeAvailable - sizes.length * smallestRenderSize)
+///   * (largestSize - smallestSize) / sum(s[i] - ss) + smallestRenderSize
+/// ```
 /// Explanation:
 /// - This formula is derived from the equation:
-///    sum(renderSize) = maxSizeAvailable
-///
+///   ```
+///   sum(renderSize) = maxSizeAvailable
+///   ```
 List<double> computeRenderSizes({
   required Iterable<double> sizes,
   required double smallestSize,
@@ -624,10 +634,10 @@ class FlexLayoutProperties extends LayoutProperties {
             size: Size(widths[i], heights[i]),
             offset: Offset.zero,
             realSize: displayChildren[i].size,
+            layoutProperties: displayChildren[i],
           )
           ..mainAxisOffset = calculateMainAxisOffset(i)
-          ..crossAxisOffset = calculateCrossAxisOffset(i)
-          ..layoutProperties = displayChildren[i],
+          ..crossAxisOffset = calculateCrossAxisOffset(i),
       );
     }
 
@@ -635,16 +645,18 @@ class FlexLayoutProperties extends LayoutProperties {
     final actualLeadingSpace = leadingSpace(freeSpace);
     final actualBetweenSpace = betweenSpace(freeSpace);
     final renderPropsWithFullCrossAxisDimension =
-        RenderProperties(axis: direction)
+        RenderProperties(
+            axis: direction,
+            isFreeSpace: true,
+            layoutProperties: this,
+          )
           ..crossAxisDimension = maxSizeAvailable(crossAxisDirection)
           ..crossAxisRealDimension = dimension(crossAxisDirection)
-          ..crossAxisOffset = 0.0
-          ..isFreeSpace = true
-          ..layoutProperties = this;
+          ..crossAxisOffset = 0.0;
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.start) {
       spaces.add(
-        renderPropsWithFullCrossAxisDimension.clone()
+        renderPropsWithFullCrossAxisDimension.copyWith()
           ..mainAxisOffset = 0.0
           ..mainAxisDimension = renderLeadingSpace
           ..mainAxisRealDimension = actualLeadingSpace,
@@ -654,7 +666,7 @@ class FlexLayoutProperties extends LayoutProperties {
       for (var i = 0; i < childrenRenderProps.length - 1; ++i) {
         final child = childrenRenderProps[i];
         spaces.add(
-          renderPropsWithFullCrossAxisDimension.clone()
+          renderPropsWithFullCrossAxisDimension.copyWith()
             ..mainAxisDimension = renderBetweenSpace
             ..mainAxisRealDimension = actualBetweenSpace
             ..mainAxisOffset = child.mainAxisOffset + child.mainAxisDimension,
@@ -664,7 +676,7 @@ class FlexLayoutProperties extends LayoutProperties {
     if (actualLeadingSpace > 0.0 &&
         displayMainAxisAlignment != MainAxisAlignment.end) {
       spaces.add(
-        renderPropsWithFullCrossAxisDimension.clone()
+        renderPropsWithFullCrossAxisDimension.copyWith()
           ..mainAxisOffset =
               childrenRenderProps.last.mainAxisDimension +
               childrenRenderProps.last.mainAxisOffset
@@ -690,7 +702,7 @@ class FlexLayoutProperties extends LayoutProperties {
       }
 
       final renderProperties = childrenRenderProperties[i];
-      final space = renderProperties.clone()..isFreeSpace = true;
+      final space = renderProperties.copyWith(isFreeSpace: true);
 
       space.crossAxisRealDimension =
           crossAxisDimension - space.crossAxisRealDimension;
@@ -701,9 +713,9 @@ class FlexLayoutProperties extends LayoutProperties {
         space.crossAxisDimension *= 0.5;
         final crossAxisRealDimension = space.crossAxisRealDimension;
         space.crossAxisRealDimension = crossAxisRealDimension * 0.5;
-        spaces.add(space.clone()..crossAxisOffset = 0.0);
+        spaces.add(space.copyWith()..crossAxisOffset = 0.0);
         spaces.add(
-          space.clone()
+          space.copyWith()
             ..crossAxisOffset =
                 renderProperties.crossAxisDimension +
                 renderProperties.crossAxisOffset,
@@ -731,15 +743,15 @@ class FlexLayoutProperties extends LayoutProperties {
   static final _textBaselineNamesToValues = TextBaseline.values.asNameMap();
 }
 
-/// RenderProperties contains information for rendering a [LayoutProperties] node
+/// Information for rendering a [LayoutProperties] node.
 class RenderProperties {
   RenderProperties({
     required this.axis,
+    required this.layoutProperties,
+    this.isFreeSpace = false,
     Size? size,
     Offset? offset,
     Size? realSize,
-    this.layoutProperties,
-    this.isFreeSpace = false,
   }) : width = size?.width ?? 0.0,
        height = size?.height ?? 0.0,
        realWidth = realSize?.width ?? 0.0,
@@ -749,14 +761,14 @@ class RenderProperties {
 
   final Axis axis;
 
-  /// represents which node is rendered for this object.
-  LayoutProperties? layoutProperties;
+  /// Represents which node is rendered for this object.
+  final LayoutProperties layoutProperties;
+
+  final bool isFreeSpace;
 
   double dx, dy;
   double width, height;
   double realWidth, realHeight;
-
-  bool isFreeSpace;
 
   Size get size => Size(width, height);
 
@@ -826,14 +838,14 @@ class RenderProperties {
     }
   }
 
-  RenderProperties clone() {
+  RenderProperties copyWith({bool? isFreeSpace}) {
     return RenderProperties(
       axis: axis,
       size: size,
       offset: offset,
       realSize: realSize,
       layoutProperties: layoutProperties,
-      isFreeSpace: isFreeSpace,
+      isFreeSpace: isFreeSpace ?? this.isFreeSpace,
     );
   }
 

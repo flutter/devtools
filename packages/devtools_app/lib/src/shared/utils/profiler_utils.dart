@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../screens/debugger/codeview_controller.dart';
 import '../../screens/debugger/debugger_screen.dart';
 import '../../screens/vm_developer/vm_developer_common_widgets.dart';
+import '../../shared/constants.dart';
 import '../framework/routing.dart';
 import '../globals.dart';
 import '../primitives/trees.dart';
@@ -109,12 +110,14 @@ class ProfileMetaData {
 /// [rootedAtTags] specifies whether or not the top-down tree is rooted
 /// at synthetic nodes representing user / VM tags.
 class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
-  List<T> bottomUpRootsFor({
+  Future<List<T>> bottomUpRootsFor({
     required T topDownRoot,
-    required void Function(List<T>) mergeSamples,
+    required Future<void> Function(List<T>, {Stopwatch? stopwatch})
+    mergeSamples,
     // TODO(bkonyi): can this take a list instead of a single root?
     required bool rootedAtTags,
-  }) {
+  }) async {
+    final watch = Stopwatch()..start();
     List<T> bottomUpRoots;
     // If the top-down tree has synthetic tag nodes as its roots, we need to
     // skip the synthetic nodes when inverting the tree and re-insert them at
@@ -128,10 +131,11 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
         // and insert them into the new synthetic tag node, [root].
         for (final child in tagRoot.children) {
           root.addAllChildren(
-            generateBottomUpRoots(
+            await generateBottomUpRoots(
               node: child,
-              currentBottomUpRoot: null,
+              parent: null,
               bottomUpRoots: <T>[],
+              stopwatch: watch,
             ),
           );
         }
@@ -140,15 +144,16 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
         // are synthetic and we'll calculate the counts for the tag nodes
         // later.
         root.children.forEach(cascadeSampleCounts);
-        mergeSamples(root.children);
+        await mergeSamples(root.children, stopwatch: watch);
         bottomUpRoots.add(root);
       }
     } else {
-      bottomUpRoots = generateBottomUpRoots(
+      bottomUpRoots = await generateBottomUpRoots(
         node: topDownRoot,
-        currentBottomUpRoot: null,
+        parent: null,
         bottomUpRoots: <T>[],
         skipRoot: true,
+        stopwatch: watch,
       );
 
       // Set the bottom up sample counts for each sample.
@@ -156,7 +161,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
 
       // Merge samples when possible starting at the root (the leaf node of the
       // original sample).
-      mergeSamples(bottomUpRoots);
+      await mergeSamples(bottomUpRoots, stopwatch: watch);
     }
 
     if (rootedAtTags) {
@@ -177,18 +182,28 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   /// Returns the roots for a bottom up representation of a
   /// [ProfilableDataMixin] node.
   ///
+  /// The [stopwatch] is used to chunk up work and try to avoid dropping frames,
+  /// and doesn't need to be passed in from the outside.
+  ///
   /// Each root is a leaf from the original [ProfilableDataMixin] tree, and its
   /// children will be the reverse stack of the original profile sample. The
   /// stack returned will not be merged to combine common roots, and the sample
   /// counts will not reflect the bottom up sample counts. These steps will
   /// occur later in the bottom-up conversion process.
   @visibleForTesting
-  List<T> generateBottomUpRoots({
+  Future<List<T>> generateBottomUpRoots({
     required T node,
-    required T? currentBottomUpRoot,
+    required T? parent,
     required List<T> bottomUpRoots,
     bool skipRoot = false,
-  }) {
+    Stopwatch? stopwatch,
+  }) async {
+    stopwatch ??= Stopwatch()..start();
+    if (stopwatch.elapsedMilliseconds > frameBudgetMs * 0.5) {
+      await delayToReleaseUiThread(micros: 5000);
+      stopwatch.reset();
+    }
+
     if (skipRoot && node.isRoot) {
       // When [skipRoot] is true, do not include the root node at the leaf of
       // each bottom up tree. This is to avoid having the 'all' node at the
@@ -197,31 +212,34 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
       // Inclusive and exclusive sample counts are copied by default.
       final copy = node.shallowCopy() as T;
 
-      if (currentBottomUpRoot != null) {
-        copy.addChild(currentBottomUpRoot.deepCopy());
+      if (parent != null) {
+        copy.addChild(parent);
       }
-
-      // [copy] is the new root of the bottom up stack.
-      currentBottomUpRoot = copy;
 
       if (node.exclusiveSampleCount > 0) {
         // This node is a leaf node, meaning that one or more CPU samples
-        // contain [currentBottomUpRoot] as the top stack frame. This means it
-        // is a bottom up root.
-        bottomUpRoots.add(currentBottomUpRoot);
+        // contain it as the top stack frame. This means it is a bottom up root.
+        //
+        // Each bottom up root needs a deep copy of the entire tree reaching to
+        // it.
+        bottomUpRoots.add(copy.deepCopy());
       } else {
-        // If [currentBottomUpRoot] is not a bottom up root, the inclusive count
-        // should be set to null. This will allow the inclusive count to be
-        // recalculated now that this node is part of its parent's bottom up
-        // tree, not its own.
-        currentBottomUpRoot.inclusiveSampleCount = null;
+        // If the node is not a bottom up root, the inclusive count should be
+        // set to null. This will allow the inclusive count to be recalculated
+        // now that this node is part of its parent's bottom up tree, not its
+        // own.
+        copy.inclusiveSampleCount = null;
       }
+
+      // [copy] is the new parent
+      parent = copy;
     }
     for (final child in node.children.cast<T>()) {
-      generateBottomUpRoots(
+      await generateBottomUpRoots(
         node: child,
-        currentBottomUpRoot: currentBottomUpRoot,
+        parent: parent,
         bottomUpRoots: bottomUpRoots,
+        stopwatch: stopwatch,
       );
     }
     return bottomUpRoots;

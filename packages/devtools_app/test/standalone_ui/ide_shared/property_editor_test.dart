@@ -1,88 +1,581 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+
+import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_sidebar.dart';
+import 'package:devtools_app/src/shared/editor/api_classes.dart';
+import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_controller.dart';
+import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+
+typedef Location = ({TextDocument document, CursorPosition position});
+typedef LocationToArgsResult = Map<Location, EditableArgumentsResult>;
 
 void main() {
-  const propertyEditor = PropertyEditorSidebar();
+  final eventController = StreamController<ActiveLocationChangedEvent>();
+  final eventStream = eventController.stream;
 
-  group('Property Editor input types', () {
-    setUpAll(() {
-      setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
-      setGlobal(IdeTheme, IdeTheme());
+  final LocationToArgsResult locationToArgsResult = {
+    (document: textDocument1, position: activeCursorPosition1): result1,
+    (document: textDocument2, position: activeCursorPosition2): result2,
+  };
+
+  late MockEditorClient mockEditorClient;
+  late PropertyEditorController controller;
+  late PropertyEditorView propertyEditor;
+
+  setUpAll(() {
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+    setGlobal(IdeTheme, IdeTheme());
+
+    mockEditorClient = MockEditorClient();
+    when(
+      mockEditorClient.editArgumentMethodName,
+    ).thenReturn(ValueNotifier(LspMethod.editArgument.methodName));
+    when(
+      mockEditorClient.editableArgumentsMethodName,
+    ).thenReturn(ValueNotifier(LspMethod.editableArguments.methodName));
+    when(
+      mockEditorClient.activeLocationChangedStream,
+    ).thenAnswer((_) => eventStream);
+
+    controller = PropertyEditorController(mockEditorClient);
+    propertyEditor = PropertyEditorView(controller: controller);
+  });
+
+  group('on cursor location change', () {
+    void Function()? listener;
+
+    Future<List<EditableArgument>> waitForEditableArgs() {
+      final argsCompleter = Completer<List<EditableArgument>>();
+      listener = () {
+        argsCompleter.complete(controller.editableArgs.value);
+      };
+      controller.editableArgs.addListener(listener!);
+      return argsCompleter.future;
+    }
+
+    void verifyEditableArgs({
+      required List<EditableArgument> actual,
+      required List<EditableArgument> expected,
+    }) {
+      final actualArgNames = actual.map((arg) => arg.name).toList();
+      final expectedArgNames = expected.map((arg) => arg.name).toList();
+
+      expect(
+        collectionEquals(actualArgNames, expectedArgNames),
+        isTrue,
+        reason:
+            'Expected ${expectedArgNames.join(', ')} not ${actualArgNames.join(', ')}',
+      );
+    }
+
+    setUp(() {
+      for (final MapEntry(key: location, value: result)
+          in locationToArgsResult.entries) {
+        when(
+          // ignore: discarded_futures, for mocking purposes.
+          mockEditorClient.getEditableArguments(
+            textDocument: location.document,
+            position: location.position,
+          ),
+        ).thenAnswer((realInvocation) => Future.value(result));
+      }
     });
 
-    testWidgets('string input', (tester) async {
-      await tester.pumpWidget(wrap(propertyEditor));
-
-      final stringInput = _findTextFormField('title');
-
-      expect(stringInput, findsOneWidget);
+    tearDown(() {
+      if (listener != null) {
+        controller.editableArgs.removeListener(listener!);
+      }
     });
 
-    testWidgets('double input', (tester) async {
-      await tester.pumpWidget(wrap(propertyEditor));
+    testWidgets('verify editable arguments for first cursor location', (
+      tester,
+    ) async {
+      await tester.runAsync(() async {
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+        final editableArgsFuture = waitForEditableArgs();
 
-      final doubleInput = _findTextFormField('width');
+        // Send an active location changed event.
+        eventController.add(activeLocationChangedEvent1);
 
-      expect(doubleInput, findsOneWidget);
+        // Wait for the expected editable args.
+        final editableArgs = await editableArgsFuture;
+        verifyEditableArgs(actual: editableArgs, expected: result1.args);
+      });
     });
 
-    testWidgets('bool input', (tester) async {
+    testWidgets('verify editable arguments for second cursor location', (
+      tester,
+    ) async {
+      await tester.runAsync(() async {
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+        final editableArgsFuture = waitForEditableArgs();
+
+        // Send an active location changed event.
+        eventController.add(activeLocationChangedEvent2);
+
+        // Wait for the expected editable args.
+        final editableArgs = await editableArgsFuture;
+        verifyEditableArgs(actual: editableArgs, expected: result2.args);
+      });
+    });
+  });
+
+  group('inputs for editable arguments', () {
+    testWidgets('inputs are expected for first group of editable arguments', (
+      tester,
+    ) async {
+      // Load the property editor.
       await tester.pumpWidget(wrap(propertyEditor));
 
-      final boolInput = _findDropdownButtonFormField('softWrap');
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgs: result1.args);
+      await tester.pumpAndSettle();
 
-      expect(boolInput, findsOneWidget);
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify the inputs are expected.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Verify the labels and required are expected.
+      _labelsAndRequiredTextAreExpected(
+        titleInput,
+        inputExpectations: titleInputExpectations,
+      );
+      _labelsAndRequiredTextAreExpected(
+        widthInput,
+        inputExpectations: widthInputExpectations,
+      );
+      _labelsAndRequiredTextAreExpected(
+        heightInput,
+        inputExpectations: heightInputExpectations,
+      );
+    });
+
+    testWidgets('inputs are expected for second group of editable arguments', (
+      tester,
+    ) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgs: result2.args);
+      await tester.pumpAndSettle();
+
+      final softWrapInput = _findDropdownButtonFormField('bool softWrap');
+      final alignInput = _findDropdownButtonFormField('Alignment? align');
+
+      // Verify the inputs are expected.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(softWrapInput, findsOneWidget);
+      expect(alignInput, findsOneWidget);
+
+      // Verify the labels and required are expected.
+      _labelsAndRequiredTextAreExpected(
+        softWrapInput,
+        inputExpectations: softWrapInputExpectations,
+      );
+      _labelsAndRequiredTextAreExpected(
+        alignInput,
+        inputExpectations: alignInputExpectations,
+      );
+    });
+
+    testWidgets('softWrap input has expected options', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgs: result2.args);
+      await tester.pumpAndSettle();
+
+      // Verify the input options are expected.
+      final softWrapInput = _findDropdownButtonFormField('softWrap');
       await _verifyDropdownMenuItems(
-        boolInput,
+        softWrapInput,
         menuOptions: ['true', 'false'],
         selectedOption: 'true',
         tester: tester,
       );
     });
 
-    testWidgets('enum input', (tester) async {
+    testWidgets('align input has expected options', (tester) async {
+      // Load the property editor.
       await tester.pumpWidget(wrap(propertyEditor));
 
-      final enumInput = _findDropdownButtonFormField('align');
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgs: result2.args);
+      await tester.pumpAndSettle();
 
-      expect(enumInput, findsOneWidget);
+      // Verify the input options are expected.
+      final alignInput = _findDropdownButtonFormField('align');
       await _verifyDropdownMenuItems(
-        enumInput,
+        alignInput,
         menuOptions: [
-          'Alignment.bottomCenter',
-          'Alignment.bottomLeft',
-          'Alignment.bottomRight',
-          'Alignment.center',
-          'Alignment.centerLeft',
-          'Alignment.centerRight',
-          'Alignment.topCenter',
-          'Alignment.topLeft',
-          'Alignment.topRight',
+          '.bottomCenter',
+          '.bottomLeft',
+          '.bottomRight',
+          '.center',
+          '.centerLeft',
+          '.centerRight',
+          '.topCenter',
+          '.topLeft',
+          '.topRight',
         ],
-        selectedOption: 'Alignment.center',
+        selectedOption: '.center',
         tester: tester,
       );
     });
   });
+
+  group('editing arguments', () {
+    late Completer<String> nextEditCompleter;
+
+    // A fake argument that the server can't support.
+    const fakeBogusArgument = 'fakeBogusArgument';
+
+    setUp(() {
+      controller.initForTestsOnly(
+        document: textDocument1,
+        cursorPosition: activeCursorPosition1,
+      );
+
+      nextEditCompleter = Completer<String>();
+      when(
+        // ignore: discarded_futures, for mocking purposes.
+        mockEditorClient.editArgument(
+          textDocument: argThat(isNotNull, named: 'textDocument'),
+          position: argThat(isNotNull, named: 'position'),
+          name: argThat(isNotNull, named: 'name'),
+          value: argThat(anything, named: 'value'),
+        ),
+      ).thenAnswer((realInvocation) {
+        final calledWithArgs = realInvocation.namedArguments;
+        final name = calledWithArgs[const Symbol('name')];
+        final value = calledWithArgs[const Symbol('value')];
+        final success = value != fakeBogusArgument;
+        nextEditCompleter.complete(
+          '$name: $value (TYPE: ${value?.runtimeType ?? 'null'}, SUCCESS: $success)',
+        );
+
+        return Future.value(
+          EditArgumentResponse(
+            success: success,
+            errorCode: success ? null : -32019,
+          ),
+        );
+      });
+    });
+
+    testWidgets('editing a string input (title)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title*');
+        expect(titleInput, findsOneWidget);
+        await _inputText(titleInput, text: 'Brand New Title!', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals('title: Brand New Title! (TYPE: String, SUCCESS: true)'),
+        );
+      });
+    });
+
+    testWidgets('editing a string input to null (title)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: 'null', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('title: null (TYPE: null, SUCCESS: true)'));
+      });
+    });
+
+    testWidgets('editing a string input to empty string (title)', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: '', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals(
+            'title: '
+            ' (TYPE: String, SUCCESS: true)',
+          ),
+        );
+      });
+    });
+
+    testWidgets('editing a string input to an invalid parameter (title)', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: fakeBogusArgument, tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals(
+            'title: fakeBogusArgument'
+            ' (TYPE: String, SUCCESS: false)',
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining('Invalid value for parameter. (Property: title)'),
+          findsOneWidget,
+        );
+      });
+    });
+
+    testWidgets('submitting a string input with TAB (title)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title*');
+        expect(titleInput, findsOneWidget);
+        await _inputText(
+          titleInput,
+          text: 'Enter with TAB!',
+          tester: tester,
+          inputDoneKey: LogicalKeyboardKey.tab,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals('title: Enter with TAB! (TYPE: String, SUCCESS: true)'),
+        );
+      });
+    });
+
+    testWidgets('editing a numeric input (height)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(heightInput, text: '55.81', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('height: 55.81 (TYPE: double, SUCCESS: true)'));
+      });
+    });
+
+    testWidgets('editing a numeric input to null (height)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(heightInput, text: '', tester: tester);
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('height: null (TYPE: null, SUCCESS: true)'));
+      });
+    });
+
+    testWidgets('submitting a numeric input with TAB (height)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result1.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(
+          heightInput,
+          text: '63.5',
+          tester: tester,
+          inputDoneKey: LogicalKeyboardKey.tab,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('height: 63.5 (TYPE: double, SUCCESS: true)'));
+      });
+    });
+
+    testWidgets('editing an enum input (align)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result2.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Select the align: Alignment.topLeft option.
+        final alignInput = _findDropdownButtonFormField('align');
+        await _selectDropdownMenuItem(
+          alignInput,
+          optionToSelect: '.topLeft',
+          currentlySelected: '.center',
+          tester: tester,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(
+          nextEdit,
+          equals('align: Alignment.topLeft (TYPE: String, SUCCESS: true)'),
+        );
+      });
+    });
+
+    testWidgets('editing a nullable enum input (align)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result2.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Select the align: null option.
+        final alignInput = _findDropdownButtonFormField('align');
+        await _selectDropdownMenuItem(
+          alignInput,
+          optionToSelect: 'null',
+          currentlySelected: '.center',
+          tester: tester,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('align: null (TYPE: null, SUCCESS: true)'));
+      });
+    });
+
+    testWidgets('editing a boolean input (softWrap)', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgs: result2.args);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Select the softWrap: false option.
+        final softWrapInput = _findDropdownButtonFormField('softWrap');
+        await _selectDropdownMenuItem(
+          softWrapInput,
+          optionToSelect: 'false',
+          currentlySelected: 'true',
+          tester: tester,
+        );
+
+        // Verify the edit is expected.
+        final nextEdit = await nextEditCompleter.future;
+        expect(nextEdit, equals('softWrap: false (TYPE: bool, SUCCESS: true)'));
+      });
+    });
+  });
 }
 
+final _findNoPropertiesMessage = find.text(
+  'No widget properties at current cursor location.',
+);
+
 Finder _findTextFormField(String inputName) => find.ancestor(
-  of: find.text(inputName),
+  of: find.richTextContaining(inputName),
   matching: find.byType(TextFormField),
 );
 
+Finder _labelForInput(Finder inputFinder, {required String matching}) {
+  final rowFinder = find.ancestor(of: inputFinder, matching: find.byType(Row));
+  final labelFinder = find.descendant(
+    of: rowFinder,
+    matching: find.byType(RoundedLabel),
+  );
+  return find.descendant(of: labelFinder, matching: find.text(matching));
+}
+
+Finder _requiredTextForInput(Finder inputFinder) =>
+    _helperTextForInput(inputFinder, matching: '*required');
+
+void _labelsAndRequiredTextAreExpected(
+  Finder inputFinder, {
+  required Map<String, bool> inputExpectations,
+}) {
+  // Check for the existence/non-existence of the "set" badge.
+  final shouldBeSet = inputExpectations['isSet'] == true;
+  expect(
+    _labelForInput(inputFinder, matching: 'set'),
+    shouldBeSet ? findsOneWidget : findsNothing,
+    reason: 'Expected to find ${shouldBeSet ? 'a' : 'no'} "set" badge.',
+  );
+  // Check for the existence/non-existence of the "default" badge.
+  final shouldBeDefault = inputExpectations['isDefault'] == true;
+  expect(
+    _labelForInput(inputFinder, matching: 'default'),
+    shouldBeDefault ? findsOneWidget : findsNothing,
+    reason: 'Expected to find ${shouldBeDefault ? 'a' : 'no'} "default" badge.',
+  );
+  // Check for the existence/non-existence of the required text ('*').
+  final shouldBeRequired = inputExpectations['isRequired'] == true;
+  expect(
+    _requiredTextForInput(inputFinder),
+    shouldBeRequired ? findsOneWidget : findsNothing,
+    reason:
+        'Expected to find ${shouldBeRequired ? 'the' : 'no'} "required" indicator.',
+  );
+}
+
+Finder _helperTextForInput(Finder inputFinder, {required String matching}) {
+  final rowFinder = find.ancestor(of: inputFinder, matching: find.byType(Row));
+  return find.descendant(of: rowFinder, matching: find.richText(matching));
+}
+
 Finder _findDropdownButtonFormField(String inputName) => find.ancestor(
-  of: find.text(inputName),
+  of: find.richTextContaining(inputName),
   matching: find.byType(DropdownButtonFormField<String>),
 );
 
@@ -103,10 +596,184 @@ Future<void> _verifyDropdownMenuItems(
       matching: find.byType(DropdownMenuItem<String>),
     );
     if (menuOptionValue == selectedOption) {
-      // Flutter renders twoo menu options for the selected option.
+      // Flutter renders two menu options for the selected option.
       expect(menuOptionFinder, findsNWidgets(2));
     } else {
       expect(menuOptionFinder, findsOneWidget);
     }
   }
 }
+
+Future<void> _selectDropdownMenuItem(
+  Finder dropdownButton, {
+  required String optionToSelect,
+  required String currentlySelected,
+  required WidgetTester tester,
+}) async {
+  final optionToSelectFinder = find.descendant(
+    of: find.byType(DropdownMenuItem<String>),
+    matching: find.text(optionToSelect),
+  );
+  final currentlySelectedFinder = find.descendant(
+    of: find.byType(DropdownMenuItem<String>),
+    matching: find.text(currentlySelected),
+  );
+
+  // Verify the option is not yet selected.
+  expect(currentlySelectedFinder, findsOneWidget);
+  expect(optionToSelectFinder, findsNothing);
+
+  // Click button to open the options.
+  await tester.tap(dropdownButton);
+  await tester.pumpAndSettle();
+
+  // Click on the option.
+  expect(optionToSelectFinder, findsOneWidget);
+  await tester.tap(optionToSelectFinder);
+  await tester.pumpAndSettle();
+
+  // Verify the option is now selected.
+  expect(currentlySelectedFinder, findsNothing);
+  expect(optionToSelectFinder, findsOneWidget);
+}
+
+Future<void> _inputText(
+  Finder textFormField, {
+  required String text,
+  required WidgetTester tester,
+  LogicalKeyboardKey? inputDoneKey,
+}) async {
+  await tester.enterText(textFormField, text);
+  if (inputDoneKey != null) {
+    await tester.sendKeyDownEvent(inputDoneKey);
+  } else {
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+  }
+  await tester.pump();
+}
+
+// Location position 1
+final activeCursorPosition1 = CursorPosition(character: 10, line: 20);
+final anchorCursorPosition1 = CursorPosition(character: 12, line: 7);
+final editorSelection1 = EditorSelection(
+  active: activeCursorPosition1,
+  anchor: anchorCursorPosition1,
+);
+final textDocument1 = TextDocument(
+  uriAsString: '/my/fake/file.dart',
+  version: 1,
+);
+final activeLocationChangedEvent1 = ActiveLocationChangedEvent(
+  selections: [editorSelection1],
+  textDocument: textDocument1,
+);
+
+// Location position 2
+final activeCursorPosition2 = CursorPosition(character: 18, line: 6);
+final anchorCursorPosition2 = CursorPosition(character: 22, line: 9);
+final editorSelection2 = EditorSelection(
+  active: activeCursorPosition2,
+  anchor: anchorCursorPosition2,
+);
+final textDocument2 = TextDocument(
+  uriAsString: '/my/fake/other.dart',
+  version: 1,
+);
+final activeLocationChangedEvent2 = ActiveLocationChangedEvent(
+  selections: [editorSelection2],
+  textDocument: textDocument2,
+);
+
+// Result 1
+final titleProperty = EditableArgument.fromJson({
+  'name': 'title',
+  'value': 'Hello world!',
+  'type': 'string',
+  'isEditable': true,
+  'isNullable': true,
+  'isRequired': true,
+  'hasArgument': true,
+});
+final titleInputExpectations = {
+  'isSet': true,
+  'isRequired': true,
+  'isDefault': false,
+};
+
+final widthProperty = EditableArgument.fromJson({
+  'name': 'width',
+  'displayValue': 'myWidth',
+  'type': 'double',
+  'errorText': 'Some reason why this can\'t be edited.',
+  'isNullable': false,
+  'isRequired': false,
+  'hasArgument': true,
+});
+final widthInputExpectations = {
+  'isSet': true,
+  'isRequired': false,
+  'isDefault': false,
+};
+
+final heightProperty = EditableArgument.fromJson({
+  'name': 'height',
+  'type': 'double',
+  'hasArgument': false,
+  'isEditable': true,
+  'isNullable': true,
+  'defaultValue': 20.0,
+  'isRequired': false,
+});
+final heightInputExpectations = {
+  'isSet': false,
+  'isRequired': false,
+  'isDefault': true,
+};
+final result1 = EditableArgumentsResult(
+  args: [titleProperty, widthProperty, heightProperty],
+);
+
+// Result 2
+final softWrapProperty = EditableArgument.fromJson({
+  'name': 'softWrap',
+  'type': 'bool',
+  'isNullable': false,
+  'defaultValue': true,
+  'hasArgument': false,
+  'isEditable': true,
+  'isRequired': false,
+});
+final softWrapInputExpectations = {
+  'isSet': false,
+  'isRequired': false,
+  'isDefault': true,
+};
+final alignProperty = EditableArgument.fromJson({
+  'name': 'align',
+  'type': 'enum',
+  'isNullable': true,
+  'hasArgument': true,
+  'defaultValue': 'Alignment.bottomLeft',
+  'isRequired': false,
+  'isEditable': true,
+  'value': 'Alignment.center',
+  'options': [
+    'Alignment.bottomCenter',
+    'Alignment.bottomLeft',
+    'Alignment.bottomRight',
+    'Alignment.center',
+    'Alignment.centerLeft',
+    'Alignment.centerRight',
+    'Alignment.topCenter',
+    'Alignment.topLeft',
+    'Alignment.topRight',
+  ],
+});
+final alignInputExpectations = {
+  'isSet': true,
+  'isRequired': false,
+  'isDefault': false,
+};
+final result2 = EditableArgumentsResult(
+  args: [softWrapProperty, alignProperty],
+);

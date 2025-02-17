@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:io';
 
@@ -12,7 +12,9 @@ import 'package:test/test.dart';
 import '../helpers/helpers.dart';
 
 const projectRootParts = ['absolute_path_to', 'my_app_root'];
-late String projectRoot;
+
+/// The project root as a URI string.
+late String projectRootUriString;
 
 late Directory testDirectory;
 late File libFile;
@@ -46,7 +48,7 @@ void main() {
 
       await testDtdConnection!.setIDEWorkspaceRoots(
         dtd!.info!.secret!,
-        [Uri.parse(projectRoot)],
+        [Uri.parse(projectRootUriString)],
       );
     });
 
@@ -72,7 +74,7 @@ void main() {
         dtd: useDtd ? testDtdConnection! : null,
         throwOnDtdSearchFailed: useDtd,
       );
-      expect(result, equals(expected ?? projectRoot));
+      expect(result, equals(expected ?? projectRootUriString));
     }
 
     test('packageRootFromFileUriString throw exception for invalid input', () {
@@ -130,24 +132,26 @@ void main() {
           // Dart file in a nested project.
           await verifyPackageRoot(
             nestedProjectLibFile.uri.toString(),
-            expected: p.join(projectRoot, 'example', 'nested_project'),
+            expected:
+                p.posix.join(projectRootUriString, 'example', 'nested_project'),
             useDtd: useDtd,
           );
           await verifyPackageRoot(
             nestedProjectTestFile.uri.toString(),
-            expected: p.join(projectRoot, 'example', 'nested_project'),
+            expected:
+                p.posix.join(projectRootUriString, 'example', 'nested_project'),
             useDtd: useDtd,
           );
 
           // Dart file under an unknown directory.
           await verifyPackageRoot(
             anyFile.uri.toString(),
-            expected: useDtd ? projectRoot : anyFile.uri.toString(),
+            expected: useDtd ? projectRootUriString : anyFile.uri.toString(),
             useDtd: useDtd,
           );
           await verifyPackageRoot(
             anySubFile.uri.toString(),
-            expected: useDtd ? projectRoot : anySubFile.uri.toString(),
+            expected: useDtd ? projectRootUriString : anySubFile.uri.toString(),
             useDtd: useDtd,
           );
         },
@@ -200,11 +204,12 @@ void _setupTestDirectoryStructure() {
   final projectRootDirectory =
       Directory(p.joinAll([testDirectory.path, ...projectRootParts]))
         ..createSync(recursive: true);
-  final directoryPath =
+  final projectRootDirectoryUriString =
       Uri.file(projectRootDirectory.uri.toFilePath()).toString();
 
   // Remove the trailing slash and set the value of [projectRoot].
-  projectRoot = directoryPath.substring(0, directoryPath.length - 1);
+  projectRootUriString = projectRootDirectoryUriString.substring(
+      0, projectRootDirectoryUriString.length - 1);
 
   // Set up the project root contents.
   Directory(p.join(projectRootDirectory.path, '.dart_tool'))

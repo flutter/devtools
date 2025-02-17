@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
@@ -268,7 +268,7 @@ final class DevToolsToggleButton extends StatelessWidget {
 /// A group of buttons that share a common border.
 ///
 /// This widget ensures the buttons are displayed with proper borders on the
-/// interior and exterior of the group. The attirbutes for each button can be
+/// interior and exterior of the group. The attributes for each button can be
 /// defined by [ButtonGroupItemData] and included in [items].
 final class RoundedButtonGroup extends StatelessWidget {
   const RoundedButtonGroup({

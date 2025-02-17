@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
 
@@ -162,6 +162,10 @@ void main() {
           'my_user/google3/dart_apps/test_app/lib/main.dart': '/dart_apps/',
           'my_user/google3/third_party/dart/dart_apps/test_app/lib/main.dart':
               '/third_party/dart/',
+          'my_user/fake_app/.dart_tool/widget_preview_scaffold':
+              'my_user/fake_app/',
+          'my_user/fake_app/lib/.dart_tool/widget_preview_scaffold':
+              'my_user/fake_app/',
         };
 
         for (final MapEntry(key: rootLib, value: expectedPubRoot)

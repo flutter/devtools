@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // ignore_for_file: invalid_use_of_visible_for_testing_member, devtools_test is only used in test code.
 
@@ -12,7 +12,6 @@ import 'package:devtools_app_shared/src/service/service_extension_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 
-// ignore: subtype_of_sealed_class, fake for testing.
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
 // TODO(jacobr): refactor ServiceExtensionManager so this fake can reuse more

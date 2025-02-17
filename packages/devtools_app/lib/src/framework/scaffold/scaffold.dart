@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -92,7 +92,7 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// Actions that it's possible to perform in this Scaffold.
   ///
-  /// These will generally be [RegisteredServiceExtensionButton]s.
+  /// These will generally be `_RegisteredServiceExtensionButton`s.
   final List<Widget> actions;
 
   @override

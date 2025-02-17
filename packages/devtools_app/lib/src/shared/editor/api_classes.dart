@@ -1,11 +1,12 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
 
 const editorServiceName = 'Editor';
 const editorStreamName = 'Editor';
+const lspServiceName = 'Lsp';
 
 enum EditorMethod {
   // Device.
@@ -18,6 +19,26 @@ enum EditorMethod {
   hotReload,
   hotRestart,
   openDevToolsPage,
+}
+
+/// Method names of LSP requests registered on the Analysis Server.
+///
+/// These should be kept in sync with the methods defined at
+/// [pkg/analysis_server/lib/src/lsp/constants.dart][code link]
+///
+/// [code link]: https://github.com/dart-lang/sdk/blob/ebfcd436da65802a2b20d415afe600b51e432305/pkg/analysis_server/lib/src/lsp/constants.dart#L136
+///
+/// TODO(https://github.com/flutter/devtools/issues/8824): Add tests that these
+/// are in-sync with analysis_server.
+enum LspMethod {
+  editableArguments(methodName: 'dart/textDocument/editableArguments'),
+  editArgument(methodName: 'dart/textDocument/editArgument');
+
+  const LspMethod({required this.methodName});
+
+  final String methodName;
+
+  String get experimentalMethodName => 'experimental/$methodName';
 }
 
 /// Known kinds of events that may come from the editor.
@@ -53,41 +74,64 @@ enum EditorEventKind {
 
   /// The kind for a [ThemeChangedEvent].
   themeChanged,
+
+  /// The kind for an [ActiveLocationChangedEvent] event.
+  activeLocationChanged,
 }
 
 /// Constants for all fields used in JSON maps to avoid literal strings that
 /// may have typos sprinkled throughout the API classes.
 abstract class Field {
+  static const active = 'active';
+  static const anchor = 'anchor';
+  static const arguments = 'arguments';
   static const backgroundColor = 'backgroundColor';
   static const category = 'category';
+  static const character = 'character';
   static const debuggerType = 'debuggerType';
   static const debugSession = 'debugSession';
   static const debugSessionId = 'debugSessionId';
   static const debugSessions = 'debugSessions';
+  static const defaultValue = 'defaultValue';
   static const device = 'device';
   static const deviceId = 'deviceId';
   static const devices = 'devices';
+  static const displayValue = 'displayValue';
   static const emulator = 'emulator';
   static const emulatorId = 'emulatorId';
   static const ephemeral = 'ephemeral';
+  static const errorText = 'errorText';
   static const flutterDeviceId = 'flutterDeviceId';
   static const flutterMode = 'flutterMode';
   static const fontSize = 'fontSize';
   static const forceExternal = 'forceExternal';
   static const foregroundColor = 'foregroundColor';
+  static const hasArgument = 'hasArgument';
   static const id = 'id';
   static const isDarkMode = 'isDarkMode';
+  static const isEditable = 'isEditable';
+  static const isNullable = 'isNullable';
+  static const isRequired = 'isRequired';
+  static const line = 'line';
   static const name = 'name';
+  static const options = 'options';
   static const page = 'page';
   static const platform = 'platform';
   static const platformType = 'platformType';
   static const prefersDebugSession = 'prefersDebugSession';
   static const projectRootPath = 'projectRootPath';
   static const requiresDebugSession = 'requiresDebugSession';
+  static const result = 'result';
   static const selectedDeviceId = 'selectedDeviceId';
+  static const selections = 'selections';
   static const supported = 'supported';
   static const supportsForceExternal = 'supportsForceExternal';
+  static const textDocument = 'textDocument';
   static const theme = 'theme';
+  static const type = 'type';
+  static const uri = 'uri';
+  static const value = 'value';
+  static const version = 'version';
   static const vmServiceUri = 'vmServiceUri';
 }
 
@@ -254,6 +298,320 @@ class ThemeChangedEvent extends EditorEvent {
 
   @override
   Map<String, Object?> toJson() => {Field.theme: theme};
+}
+
+/// An event sent by an editor when the current cursor position/s change.
+class ActiveLocationChangedEvent extends EditorEvent {
+  ActiveLocationChangedEvent({
+    required this.selections,
+    required this.textDocument,
+  });
+
+  ActiveLocationChangedEvent.fromJson(Map<String, Object?> map)
+    : this(
+        textDocument: TextDocument.fromJson(
+          map[Field.textDocument] as Map<String, Object?>,
+        ),
+        selections:
+            (map[Field.selections] as List<Object?>)
+                .cast<Map<String, Object?>>()
+                .map(EditorSelection.fromJson)
+                .toList(),
+      );
+
+  final List<EditorSelection> selections;
+  final TextDocument? textDocument;
+
+  @override
+  EditorEventKind get kind => EditorEventKind.activeLocationChanged;
+
+  @override
+  Map<String, Object?> toJson() => {
+    Field.selections: selections,
+    Field.textDocument: textDocument,
+  };
+}
+
+/// A reference to a text document in the editor.
+///
+/// The [uriAsString] is a file URI to the text document.
+///
+/// The [version] is an integer corresponding to LSP's
+/// [VersionedTextDocumentIdentifier](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#versionedTextDocumentIdentifier)
+class TextDocument with Serializable {
+  TextDocument({required this.uriAsString, required this.version});
+
+  TextDocument.fromJson(Map<String, Object?> map)
+    : this(
+        uriAsString: map[Field.uri] as String,
+        version: map[Field.version] as int?,
+      );
+
+  final String uriAsString;
+  final int? version;
+
+  @override
+  Map<String, Object?> toJson() => {
+    Field.uri: uriAsString,
+    Field.version: version,
+  };
+
+  @override
+  bool operator ==(Object other) {
+    return other is TextDocument &&
+        other.uriAsString == uriAsString &&
+        other.version == version;
+  }
+
+  @override
+  int get hashCode => Object.hash(uriAsString, version);
+}
+
+/// The starting and ending cursor positions in the editor.
+class EditorSelection with Serializable {
+  EditorSelection({required this.active, required this.anchor});
+
+  EditorSelection.fromJson(Map<String, Object?> map)
+    : this(
+        active: CursorPosition.fromJson(
+          map[Field.active] as Map<String, Object?>,
+        ),
+        anchor: CursorPosition.fromJson(
+          map[Field.anchor] as Map<String, Object?>,
+        ),
+      );
+
+  final CursorPosition active;
+  final CursorPosition anchor;
+
+  @override
+  Map<String, Object?> toJson() => {
+    Field.active: active.toJson(),
+    Field.anchor: anchor.toJson(),
+  };
+}
+
+/// Representation of a single cursor position in the editor.
+///
+/// The cursor position is after the given [character] of the [line].
+class CursorPosition with Serializable {
+  CursorPosition({required this.character, required this.line});
+
+  CursorPosition.fromJson(Map<String, Object?> map)
+    : this(
+        character: map[Field.character] as int,
+        line: map[Field.line] as int,
+      );
+
+  /// The zero-based character number of this position.
+  final int character;
+
+  /// The zero-based line number of this position.
+  final int line;
+
+  @override
+  Map<String, Object?> toJson() => {
+    Field.character: character,
+    Field.line: line,
+  };
+
+  @override
+  bool operator ==(Object other) {
+    return other is CursorPosition &&
+        other.character == character &&
+        other.line == line;
+  }
+
+  @override
+  int get hashCode => Object.hash(character, line);
+}
+
+/// The result of an `editableArguments` request.
+class EditableArgumentsResult with Serializable {
+  EditableArgumentsResult({required this.args});
+
+  EditableArgumentsResult.fromJson(Map<String, Object?> map)
+    : this(
+        args:
+            (map[Field.arguments] as List<Object?>? ?? <Object?>[])
+                .cast<Map<String, Object?>>()
+                .map(EditableArgument.fromJson)
+                .toList(),
+      );
+
+  final List<EditableArgument> args;
+
+  @override
+  Map<String, Object?> toJson() => {Field.arguments: args};
+}
+
+/// Errors that the Analysis Server returns for failed argument edits.
+///
+/// These should be kept in sync with the error coes defined at
+/// [pkg/analysis_server/lib/src/lsp/constants.dart][code link]
+///
+/// [code link]: https://github.com/dart-lang/sdk/blob/35a10987e1652b7d49991ab2dc2ee7f521fe8d8f/pkg/analysis_server/lib/src/lsp/constants.dart#L300
+///
+/// TODO(https://github.com/flutter/devtools/issues/8824): Add tests that these
+/// are in-sync with analysis_server.
+enum EditArgumentError {
+  /// A request was made that requires use of workspace/applyEdit but the
+  /// current editor does not support it.
+  editsUnsupportedByEditor(
+    code: -32016,
+    message: 'IDE does not support property edits.',
+  ),
+
+  /// An editArgument request tried to modify an invocation at a position where
+  /// there was no invocation.
+  editArgumentInvalidPosition(
+    code: -32017,
+    message: 'Invalid position for argument.',
+  ),
+
+  /// An editArgument request tried to modify a parameter that does not exist or
+  /// is not editable.
+  editArgumentInvalidParameter(code: -32018, message: 'Invalid parameter.'),
+
+  /// An editArgument request tried to set an argument value that is not valid.
+  editArgumentInvalidValue(
+    code: -32019,
+    message: 'Invalid value for parameter.',
+  );
+
+  const EditArgumentError({required this.code, required this.message});
+
+  final int code;
+  final String message;
+
+  static final _codeToErrorMap = EditArgumentError.values.fold(
+    <int, EditArgumentError>{},
+    (map, error) {
+      map[error.code] = error;
+      return map;
+    },
+  );
+
+  static EditArgumentError? fromCode(int? code) {
+    if (code == null) return null;
+    return _codeToErrorMap[code];
+  }
+}
+
+/// Response to an edit argument request.
+class EditArgumentResponse {
+  EditArgumentResponse({required this.success, this.errorMessage, errorCode})
+    : _errorCode = errorCode;
+
+  final bool success;
+  final String? errorMessage;
+  final int? _errorCode;
+
+  EditArgumentError? get errorType => EditArgumentError.fromCode(_errorCode);
+}
+
+/// Information about a single editable argument of a widget.
+class EditableArgument with Serializable {
+  EditableArgument({
+    required this.name,
+    required this.type,
+    required this.hasArgument,
+    required this.isNullable,
+    required this.isRequired,
+    required this.isEditable,
+    required this.hasDefault,
+    this.options,
+    this.value,
+    this.defaultValue,
+    this.displayValue,
+    this.errorText,
+  });
+
+  EditableArgument.fromJson(Map<String, Object?> map)
+    : this(
+        name: map[Field.name] as String,
+        type: map[Field.type] as String,
+        hasArgument: (map[Field.hasArgument] as bool?) ?? false,
+        isNullable: (map[Field.isNullable] as bool?) ?? false,
+        isRequired: (map[Field.isRequired] as bool?) ?? false,
+        isEditable: (map[Field.isEditable] as bool?) ?? true,
+        hasDefault: map.containsKey(Field.defaultValue),
+        options: (map[Field.options] as List<Object?>?)?.cast<String>(),
+        value: map[Field.value],
+        defaultValue: map[Field.defaultValue],
+        displayValue: map[Field.displayValue] as String?,
+        errorText: map[Field.errorText] as String?,
+      );
+
+  /// The name of the corresponding parameter.
+  final String name;
+
+  /// The type of the corresponding parameter.
+  ///
+  /// This is not necessarily the Dart type, it is from a defined set of values
+  /// that clients may understand how to edit.
+  final String type;
+
+  /// The current value for this argument.
+  final Object? value;
+
+  /// Whether an explicit argument exists for this parameter in the code.
+  final bool hasArgument;
+
+  /// Whether this argument can be `null`.
+  final bool isNullable;
+
+  /// Whether this argument is required.
+  final bool isRequired;
+
+  /// Whether this argument can be edited by the Analysis Server.
+  ///
+  /// An argument might not be editable, e.g. if it is a positional parameter
+  /// where previous positional parameters have no argument.
+  final bool isEditable;
+
+  /// A list of values that could be provided for this argument.
+  ///
+  /// This will only be included if the parameter's [type] is "enum".
+  final List<String>? options;
+
+  /// Whether the argument has an explicit default value.
+  ///
+  /// This is used to distinguish whether the [defaultValue] is actually `null`
+  /// or is not provided.
+  final bool hasDefault;
+
+  /// The default value for this parameter.
+  final Object? defaultValue;
+
+  /// A string that can be displayed to indicate the value for this argument.
+  ///
+  /// This is populated in cases where the source code is not literally the same
+  /// as the value field, for example an expression or named constant.
+  final String? displayValue;
+
+  final String? errorText;
+
+  String get valueDisplay => displayValue ?? currentValue.toString();
+
+  bool get isDefault => hasDefault && currentValue == defaultValue;
+
+  Object? get currentValue => hasArgument ? value : defaultValue;
+
+  @override
+  Map<String, Object?> toJson() => {
+    Field.name: name,
+    Field.type: type,
+    Field.value: value,
+    Field.hasArgument: hasArgument,
+    Field.defaultValue: defaultValue,
+    Field.isNullable: isNullable,
+    Field.isRequired: isRequired,
+    Field.isEditable: isEditable,
+    Field.options: options,
+    Field.displayValue: displayValue,
+    Field.errorText: errorText,
+  };
 }
 
 /// The result of a `GetDevices` request.

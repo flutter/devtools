@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// About a 30 second run starting at 08:45:10 till 08:45:39
 /// Contains 1 manual snapshot, 2 auto snapshots, 3 manual GCs,

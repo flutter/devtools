@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:collection';
@@ -33,7 +33,7 @@ import 'inspector_controller.dart';
 
 final _log = Logger('inspector_tree_controller');
 
-/// Presents a [TreeNode].
+/// Presents a [InspectorTreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
   /// Constructs a [_InspectorTreeRowWidget] that presents a line in the
   /// Inspector tree.
@@ -193,7 +193,10 @@ class InspectorTreeController extends DisposableController
     }
   }
 
-  bool setSelectedNode(InspectorTreeNode? node) {
+  bool setSelectedNode(
+    InspectorTreeNode? node, {
+    bool notifyFlutterInspector = false,
+  }) {
     if (node == _selection) return false;
 
     _selection?.selected = false;
@@ -201,7 +204,9 @@ class InspectorTreeController extends DisposableController
     _selection?.selected = true;
     final configLocal = config;
     if (configLocal.onSelectionChange != null) {
-      configLocal.onSelectionChange!();
+      configLocal.onSelectionChange!(
+        notifyFlutterInspector: notifyFlutterInspector,
+      );
     }
     return true;
   }
@@ -389,7 +394,7 @@ class InspectorTreeController extends DisposableController
     );
   }
 
-  /// Given [shouldShow], toggles the visibility of a hideable group.
+  /// Given [showGroup], toggles the visibility of a hideable group.
   ///
   /// Returns a [bool] representing whether or not the group was toggled.
   bool _maybeToggleHideableGroup(
@@ -547,8 +552,12 @@ class InspectorTreeController extends DisposableController
   }
 
   void onSelectNode(InspectorTreeNode? node) {
-    setSelectedNode(node);
-    ga.select(gac.inspector, gac.treeNodeSelection);
+    setSelectedNode(node, notifyFlutterInspector: true);
+    ga.select(
+      gac.inspector,
+      gac.treeNodeSelection,
+      screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+    );
     final diagnostic = node?.diagnostic;
     if (diagnostic != null && diagnostic.groupIsHidden) {
       diagnostic.hideableGroupLeader?.toggleHiddenGroup();
@@ -1131,7 +1140,12 @@ class _InspectorTreeState extends State<InspectorTree>
         if (!controller.firstInspectorTreeLoadCompleted) {
           final screenId = widget.screenId;
           if (screenId != null) {
-            ga.timeEnd(screenId, gac.pageReady);
+            ga.timeEnd(
+              screenId,
+              gac.pageReady,
+              screenMetricsProvider:
+                  () => InspectorScreenMetrics.v2(rowCount: rows.length),
+            );
             unawaited(
               serviceConnection.sendDwdsEvent(
                 screen: screenId,
@@ -1223,14 +1237,10 @@ Paint _defaultPaint(ColorScheme colorScheme) =>
       ..color = colorScheme.treeGuidelineColor
       ..strokeWidth = chartLineStrokeWidth;
 
-/// The distance (on the x-axis) between the expand/collapse and the start of
-/// the row, as determined by a percentage of the [inspectorColumnIndent].
-const _expandCollapseToRowStartXDistancePercentage = 0.68;
-
 /// The distance (on the x-axis) between the center of the widget icon and the
 /// start of the row, as determined by a percentage of the
 /// [inspectorColumnIndent].
-const _iconCenterToRowStartXDistancePercentage = 0.15;
+const _iconCenterToRowStartXDistancePercentage = 0.41;
 
 /// The distance (on the y-axis) between the bottom of the widget icon and the
 /// top of the row, as determined by a percentage of the [inspectorRowHeight].
@@ -1263,12 +1273,11 @@ class _RowPainter extends CustomPainter {
 
     final node = row.node;
     final showExpandCollapse = node.showExpandCollapse;
-    final distanceFromExpandCollapseToRowStart =
-        inspectorColumnIndent * _expandCollapseToRowStartXDistancePercentage;
+    final distanceFromIconCenterToRowStart =
+        inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
     for (final tick in row.ticks) {
       final expandCollapseX =
-          _controller.getDepthIndent(tick) -
-          distanceFromExpandCollapseToRowStart;
+          _controller.getDepthIndent(tick) - distanceFromIconCenterToRowStart;
       // Draw a vertical line for each tick identifying a connection between
       // an ancestor of this node and some other node in the tree.
       canvas.drawLine(
@@ -1282,11 +1291,11 @@ class _RowPainter extends CustomPainter {
     if (row.lineToParent) {
       final parentExpandCollapseX =
           _controller.getDepthIndent(row.depth - 1) -
-          distanceFromExpandCollapseToRowStart;
+          distanceFromIconCenterToRowStart;
       final width =
           showExpandCollapse
-              ? inspectorColumnIndent * 0.6
-              : inspectorColumnIndent;
+              ? inspectorColumnIndent * 0.45
+              : inspectorColumnIndent * .6;
       canvas.drawLine(
         Offset(parentExpandCollapseX, 0.0),
         Offset(parentExpandCollapseX, inspectorRowHeight * 0.5),

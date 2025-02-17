@@ -1,8 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// ignore_for_file: avoid_print
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -23,14 +21,18 @@ class TestFlutterApp extends IntegrationTestApp {
 
   @override
   Future<void> startProcess() async {
-    runProcess = await Process.start('flutter', [
-      'run',
-      '--machine',
-      '-d',
-      testAppDevice.argName,
-      // Do not serve DevTools from Flutter Tools.
-      '--no-devtools',
-    ], workingDirectory: testAppPath);
+    runProcess = await Process.start(
+      Platform.isWindows ? 'flutter.bat' : 'flutter',
+      [
+        'run',
+        '--machine',
+        '-d',
+        testAppDevice.argName,
+        // Do not serve DevTools from Flutter Tools.
+        '--no-devtools',
+      ],
+      workingDirectory: testAppPath,
+    );
   }
 
   @override

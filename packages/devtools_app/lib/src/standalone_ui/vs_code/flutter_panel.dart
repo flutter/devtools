@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -9,9 +9,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
-import '../../service/editor/api_classes.dart';
-import '../../service/editor/editor_client.dart';
 import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/editor/api_classes.dart';
+import '../../shared/editor/editor_client.dart';
 import '../../shared/ui/common_widgets.dart';
 import 'debug_sessions.dart';
 import 'devices.dart';
@@ -142,6 +142,9 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
             case ThemeChangedEvent():
             // Do nothing; this is handled in
             // lib/src/framework/theme_manager.dart.
+            case ActiveLocationChangedEvent():
+            // Do nothing; this is handled in
+            // lib/src/standalone_ui/ide_shared/property_editor.
           }
         });
       }),

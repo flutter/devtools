@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'analytics_common.dart';
 
@@ -64,15 +64,15 @@ class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
 
 class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
   InspectorScreenMetrics.legacy({
-    required this.rootSetCount,
-    required this.rowCount,
-    required this.inspectorTreeControllerId,
+    this.rootSetCount,
+    this.rowCount,
+    this.inspectorTreeControllerId,
   }) : isV2 = false;
 
   InspectorScreenMetrics.v2({
-    required this.rootSetCount,
-    required this.rowCount,
-    required this.inspectorTreeControllerId,
+    this.rootSetCount,
+    this.rowCount,
+    this.inspectorTreeControllerId,
   }) : isV2 = true;
 
   static const summaryTreeGaId = 0;

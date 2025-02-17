@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be found
-// in the LICENSE file.
+// Copyright 2020 The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -11,25 +11,48 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as path;
 
 import '../development_helpers.dart';
+import '../globals.dart';
+import '../primitives/storage.dart';
 import '../primitives/utils.dart';
 
 part '_analytics_api.dart';
 part '_app_size_api.dart';
 part '_deep_links_api.dart';
+part '_dtd_api.dart';
 part '_extensions_api.dart';
 part '_preferences_api.dart';
 part '_release_notes_api.dart';
 part '_survey_api.dart';
-part '_dtd_api.dart';
 
 final _log = Logger('devtools_server_client');
 
-// The DevTools server is only available in release mode right now.
-// TODO(kenz): design a way to run the DevTools server and DevTools app together
-// in debug mode.
-bool get isDevToolsServerAvailable => kReleaseMode;
+/// Whether the DevTools server is available.
+///
+/// Since the DevTools server is a web server, it is only available for the
+/// web platform.
+///
+/// In `framework_initialize_web.dart`, we test the DevTools server connection
+/// by pinging the server and checking the response. If this is successful, we
+/// set the [storage] global to an instance of [ServerConnectionStorage].
+bool get isDevToolsServerAvailable =>
+    kIsWeb && storage is ServerConnectionStorage;
+
+const _debugDevToolsServerFlag = 'debug_devtools_server';
+
+String get devToolsServerUriAsString {
+  const debugDevToolsServerUriAsString = String.fromEnvironment(
+    _debugDevToolsServerFlag,
+  );
+  // Ensure we only use the debug DevTools server URI in non-release
+  // builds. By running `dt run`, an instance of DevTools run with `flutter run`
+  // can be connected to the DevTools server on a different port.
+  return debugDevToolsServerUriAsString.isNotEmpty && !kReleaseMode
+      ? debugDevToolsServerUriAsString
+      : Uri.base.toString();
+}
 
 /// Helper to catch any server request which could fail.
 ///
@@ -38,8 +61,10 @@ Future<Response?> request(String url) async {
   Response? response;
 
   try {
-    _log.fine('requesting $url');
-    response = await post(Uri.parse(url));
+    // This will be the empty string if this environment declaration was not
+    // set using `--dart-define`.
+    const baseUri = String.fromEnvironment(_debugDevToolsServerFlag);
+    response = await post(Uri.parse(path.join(baseUri, url)));
   } catch (_) {}
 
   return response;
@@ -106,4 +131,17 @@ extension ResponseExtension on Response {
   bool get statusOk => statusCode == 200;
   bool get statusForbidden => statusCode == 403;
   bool get statusError => statusCode == 500;
+}
+
+class ServerConnectionStorage implements Storage {
+  @override
+  Future<String?> getValue(String key) async {
+    final value = await getPreferenceValue(key);
+    return value == null ? null : '$value';
+  }
+
+  @override
+  Future<void> setValue(String key, String value) async {
+    await setPreferenceValue(key, value);
+  }
 }

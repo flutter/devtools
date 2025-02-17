@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // Note: this test was modeled after the example test from Flutter Gallery:
 // https://github.com/flutter/gallery/blob/master/test_benchmarks/benchmarks_test.dart
@@ -173,42 +173,50 @@ void _verifyScoresAgainstThresholds(
 const _frameTimeFor60FPSInMicros = 16666.6;
 
 final _benchmarkThresholds = {
+  // Note that some of these benchmarks exceed the 60fps frame budget,
+  // especially the p90 benchmarks.
+  //
+  // See https://github.com/flutter/devtools/pull/8892 which exposes this.
   DevToolsBenchmark.navigateThroughOfflineScreens: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
-      avg: _frameTimeFor60FPSInMicros,
+      avg: _frameTimeFor60FPSInMicros * 2,
       p50: _frameTimeFor60FPSInMicros,
-      p90: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros * 6,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameBuildTime,
-      avg: _frameTimeFor60FPSInMicros,
+      avg: _frameTimeFor60FPSInMicros * 2,
       p50: _frameTimeFor60FPSInMicros,
       p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameRasterTime,
-      avg: _frameTimeFor60FPSInMicros,
+      avg: _frameTimeFor60FPSInMicros * 2,
       p50: _frameTimeFor60FPSInMicros,
       p90: _frameTimeFor60FPSInMicros,
     ),
   },
+  // Note that some of these benchmarks exceed the 60fps frame budget,
+  // especially the p90 benchmarks.
+  //
+  // See https://github.com/flutter/devtools/pull/8892 which exposes this.
   DevToolsBenchmark.offlineCpuProfilerScreen: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
-      avg: _frameTimeFor60FPSInMicros,
+      avg: _frameTimeFor60FPSInMicros * 2,
       p50: _frameTimeFor60FPSInMicros,
-      p90: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros * 6,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameBuildTime,
-      avg: _frameTimeFor60FPSInMicros,
+      avg: _frameTimeFor60FPSInMicros * 2,
       p50: _frameTimeFor60FPSInMicros,
       p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameRasterTime,
-      avg: _frameTimeFor60FPSInMicros,
+      avg: _frameTimeFor60FPSInMicros * 2,
       p50: _frameTimeFor60FPSInMicros,
       p90: _frameTimeFor60FPSInMicros,
     ),

@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
@@ -41,8 +41,8 @@ class ExtensionService extends DisposableController
   /// The fixed (unchanging) root file:// URI for the application this
   /// [ExtensionService] will manage DevTools extensions for.
   ///
-  /// When null, [_appRoot] will be calculated from the [serviceManager]'s
-  /// currently connected app. See [_initAppRoot].
+  /// When null, [_appRoot] will be calculated from the
+  /// `serviceConnection.serviceManager`'s currently connected app. See [_initAppRoot].
   final Uri? fixedAppRoot;
 
   /// Whether to ignore the VM service connection for the context of this

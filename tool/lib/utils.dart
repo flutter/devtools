@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -168,6 +168,52 @@ extension DevToolsProcessManagerExtension on ProcessManager {
       );
     }
   }
+}
+
+Future<Process> startIndependentProcess(
+  CliCommand command, {
+  String? workingDirectory,
+  String? waitForOutput,
+  Duration waitForOutputTimeout = const Duration(minutes: 2),
+  void Function(String line)? onOutput,
+}) async {
+  final commandDisplay = '${workingDirectory ?? ''} > $command';
+  print(commandDisplay);
+  final process = await Process.start(
+    command.exe,
+    command.args,
+    workingDirectory: workingDirectory,
+  );
+
+  if (waitForOutput != null) {
+    final completer = Completer<void>();
+    final stdoutSub = process.stdout.transform(utf8.decoder).listen((line) {
+      print('> [stdout] $line');
+      onOutput?.call(line);
+      if (line.contains(waitForOutput)) {
+        completer.complete();
+      }
+    });
+    final stderrSub = process.stderr.transform(utf8.decoder).listen((line) {
+      print('> [stderr] $line');
+      onOutput?.call(line);
+      if (line.contains(waitForOutput)) {
+        completer.complete();
+      }
+    });
+    await completer.future.timeout(
+      waitForOutputTimeout,
+      onTimeout: () {
+        throw Exception(
+          'Expected output "$waitForOutput" not received before timeout.',
+        );
+      },
+    );
+    await stdoutSub.cancel();
+    await stderrSub.cancel();
+  }
+
+  return process;
 }
 
 String pathFromRepoRoot(String pathFromRoot) {

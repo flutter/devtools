@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:js_interop';
@@ -92,7 +92,7 @@ class _ExtensionIFrameController extends DisposableController
 
   static const _pollUntilReadyTimeout = Duration(seconds: 10);
 
-  /// The listener that is added to DevTools' [html.window] to receive messages
+  /// The listener that is added to DevTools' [Window] to receive messages
   /// from the extension.
   ///
   /// We need to store this in a variable so that the listener is properly

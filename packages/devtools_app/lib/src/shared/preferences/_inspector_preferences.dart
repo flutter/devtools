@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 part of 'preferences.dart';
 
@@ -19,7 +19,7 @@ enum InspectorDetailsViewType {
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
-  ValueListenable<bool> get inspectorV2Enabled => _inspectorV2Enabled;
+  ValueListenable<bool> get legacyInspectorEnabled => _legacyInspectorEnabled;
   ValueListenable<bool> get autoRefreshEnabled => _autoRefreshEnabled;
   ValueListenable<InspectorDetailsViewType> get defaultDetailsView =>
       _defaultDetailsView;
@@ -30,10 +30,8 @@ class InspectorPreferencesController extends DisposableController
       serviceConnection.inspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
-  final _inspectorV2Enabled = ValueNotifier<bool>(false);
-  // TODO(https://github.com/flutter/devtools/issues/1423): Default to true
-  // after verifying auto-refreshes are performant.
-  final _autoRefreshEnabled = ValueNotifier<bool>(false);
+  final _legacyInspectorEnabled = ValueNotifier<bool>(false);
+  final _autoRefreshEnabled = ValueNotifier<bool>(true);
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
@@ -42,12 +40,28 @@ class InspectorPreferencesController extends DisposableController
   );
 
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
-  static const _inspectorV2EnabledStorageId = 'inspector.inspectorV2Enabled';
+  static const _legacyInspectorEnabledStorageId =
+      'inspector.legacyInspectorEnabled';
   static const _autoRefreshEnabledStorageId = 'inspector.autoRefreshEnabled';
   static const _defaultDetailsViewStorageId =
       'inspector.defaultDetailsViewType';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
+
+  static const _dartToolDir = '.dart_tool';
+  static const _libDir = 'lib';
+  static const _webDir = 'web';
+  static const _packagesDir = 'packages';
+
+  /// The following are directories that DevTools can use to determine the
+  /// correct pub root directory.
+  static const _knownDirectories = {
+    _dartToolDir,
+    _libDir,
+    _webDir,
+    _packagesDir,
+  };
+
   String? _mainScriptDir;
   bool _checkedFlutterPubRoot = false;
 
@@ -68,7 +82,7 @@ class InspectorPreferencesController extends DisposableController
 
   Future<void> init() async {
     await _initHoverEvalMode();
-    await _initInspectorV2Enabled();
+    await _initLegacyInspectorEnabled();
     await _initAutoRefreshEnabled();
     // TODO(jacobr): consider initializing this first as it is not blocking.
     _initPubRootDirectories();
@@ -83,11 +97,13 @@ class InspectorPreferencesController extends DisposableController
     );
   }
 
-  Future<void> _initInspectorV2Enabled() async {
-    await _updateInspectorV2Enabled();
+  Future<void> _initLegacyInspectorEnabled() async {
+    // TODO(https://github.com/flutter/devtools/issues/8667): Consider removing
+    // the old 'inspector.inspectorV2Enabled' key if it is set.
+    await _updateLegacyInspectorEnabled();
     _saveBooleanPreferenceChanges(
-      preferenceStorageId: _inspectorV2EnabledStorageId,
-      preferenceNotifier: _inspectorV2Enabled,
+      preferenceStorageId: _legacyInspectorEnabledStorageId,
+      preferenceNotifier: _legacyInspectorEnabled,
     );
   }
 
@@ -107,10 +123,10 @@ class InspectorPreferencesController extends DisposableController
     );
   }
 
-  Future<void> _updateInspectorV2Enabled() async {
+  Future<void> _updateLegacyInspectorEnabled() async {
     await _updateBooleanPreference(
-      preferenceStorageId: _inspectorV2EnabledStorageId,
-      preferenceNotifier: _inspectorV2Enabled,
+      preferenceStorageId: _legacyInspectorEnabledStorageId,
+      preferenceNotifier: _legacyInspectorEnabled,
       defaultValue: false,
     );
   }
@@ -226,7 +242,7 @@ class InspectorPreferencesController extends DisposableController
     _checkedFlutterPubRoot = false;
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
-    await _updateInspectorV2Enabled();
+    await _updateLegacyInspectorEnabled();
     await loadPubRootDirectories();
     await _updateInspectorDetailsViewSelection();
   }
@@ -299,21 +315,8 @@ class InspectorPreferencesController extends DisposableController
     // /third_party/dart):
     if (isGoogle3Path(parts)) {
       pubRootDirectory = _pubRootDirectoryForGoogle3(parts);
-    } else {
-      final parts = fileUriString.split('/');
-
-      for (int i = parts.length - 1; i >= 0; i--) {
-        final part = parts[i];
-        if (part == 'lib' || part == 'web') {
-          pubRootDirectory = parts.sublist(0, i).join('/');
-          break;
-        }
-
-        if (part == 'packages') {
-          pubRootDirectory = parts.sublist(0, i + 1).join('/');
-          break;
-        }
-      }
+    } else if (_pathContainsKnownDirectories(parts)) {
+      pubRootDirectory = _determinePubRootFromKnownDirectories(parts);
     }
     pubRootDirectory ??= (parts..removeLast()).join('/');
     // Make sure the root directory ends with /, otherwise we will patch with
@@ -323,6 +326,34 @@ class InspectorPreferencesController extends DisposableController
             ? pubRootDirectory
             : '$pubRootDirectory/';
     return pubRootDirectory;
+  }
+
+  bool _pathContainsKnownDirectories(List<String> pathParts) =>
+      _knownDirectories.any((dir) => pathParts.contains(dir));
+
+  String? _determinePubRootFromKnownDirectories(List<String> pathParts) {
+    pathParts = _maybeRemoveDartToolDirectory(pathParts);
+    for (int i = pathParts.length - 1; i >= 0; i--) {
+      final part = pathParts[i];
+
+      if (part == _libDir || part == _webDir) {
+        pathParts = pathParts.sublist(0, i);
+        break;
+      }
+
+      if (part == _packagesDir) {
+        pathParts = pathParts.sublist(0, i + 1);
+        break;
+      }
+    }
+    return pathParts.join('/');
+  }
+
+  List<String> _maybeRemoveDartToolDirectory(List<String> pathParts) {
+    if (pathParts.contains(_dartToolDir)) {
+      return pathParts.sublist(0, pathParts.indexOf(_dartToolDir));
+    }
+    return pathParts;
   }
 
   String? _pubRootDirectoryForGoogle3(List<String> pathParts) {
@@ -442,8 +473,8 @@ class InspectorPreferencesController extends DisposableController
   }
 
   @visibleForTesting
-  void setInspectorV2Enabled(bool inspectorV2Enabled) {
-    _inspectorV2Enabled.value = inspectorV2Enabled;
+  void setLegacyInspectorEnabled(bool legacyInspectorEnabled) {
+    _legacyInspectorEnabled.value = legacyInspectorEnabled;
   }
 
   @visibleForTesting

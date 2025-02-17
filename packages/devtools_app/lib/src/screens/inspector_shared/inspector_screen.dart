@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -52,21 +52,24 @@ class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
         > {
   bool get shouldShowInspectorV2 =>
       FeatureFlags.inspectorV2 &&
-      preferences.inspector.inspectorV2Enabled.value;
+      !preferences.inspector.legacyInspectorEnabled.value;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
 
-    addAutoDisposeListener(preferences.inspector.inspectorV2Enabled, () async {
-      controller.legacyInspectorController.setVisibleToUser(
-        !shouldShowInspectorV2,
-      );
-      await controller.v2InspectorController.setVisibleToUser(
-        shouldShowInspectorV2,
-      );
-    });
+    addAutoDisposeListener(
+      preferences.inspector.legacyInspectorEnabled,
+      () async {
+        controller.legacyInspectorController.setVisibleToUser(
+          !shouldShowInspectorV2,
+        );
+        await controller.v2InspectorController.setVisibleToUser(
+          shouldShowInspectorV2,
+        );
+      },
+    );
   }
 
   @override
@@ -74,8 +77,8 @@ class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
     final controller = Provider.of<InspectorScreenController>(context);
 
     return ValueListenableBuilder(
-      valueListenable: preferences.inspector.inspectorV2Enabled,
-      builder: (context, v2Enabled, _) {
+      valueListenable: preferences.inspector.legacyInspectorEnabled,
+      builder: (context, _, _) {
         if (shouldShowInspectorV2) {
           return v2.InspectorScreenBody(
             controller: controller.v2InspectorController,

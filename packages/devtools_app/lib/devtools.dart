@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 /// The DevTools application version
 ///
@@ -10,4 +10,4 @@
 /// Note: a regexp in the `dt update-version' command logic matches the constant
 /// declaration `const version =`. If you change the declaration you must also
 /// modify the regex in the `dt update-version' command logic.
-const version = '2.42.0-dev.0';
+const version = '2.43.0';

@@ -1,6 +1,6 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // Code needs to match API from VmService.
 // ignore_for_file: avoid-dynamic
@@ -20,6 +20,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../screens/vm_developer/vm_service_private_extensions.dart';
 import '../shared/feature_flags.dart';
+import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import 'json_to_service_cache.dart';
 
@@ -142,9 +143,7 @@ class VmServiceWrapper extends VmService {
         // running with VM developer mode enabled. This data isn't accessible
         // in non-VM developer mode, so not requesting the code profile will
         // save on space and network usage.
-        // TODO(bkonyi): re-enable when package:vm_service 15.0.0 is rolled
-        // into Flutter. See https://github.com/flutter/devtools/issues/8567.
-        // '_code': preferences.vmDeveloperModeEnabled.value,
+        '_code': preferences.vmDeveloperModeEnabled.value,
       },
     ).then((e) => e as CpuSamples);
   }

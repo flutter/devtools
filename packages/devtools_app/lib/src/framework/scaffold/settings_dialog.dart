@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -94,19 +94,6 @@ class SettingsDialog extends StatelessWidget {
                 gaItem: gac.wasm,
               ),
             ),
-            // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up
-            // after Inspector V2 has been released.
-            if (FeatureFlags.inspectorV2)
-              Flexible(
-                child: CheckboxSetting(
-                  notifier:
-                      preferences.inspector.inspectorV2Enabled
-                          as ValueNotifier<bool?>,
-                  title: 'Enable the new Inspector',
-                  description: 'Try out the redesigned Flutter Inspector.',
-                  gaItem: gac.inspectorV2Enabled,
-                ),
-              ),
           ],
           const SizedBox(height: largeSpacing),
           ...dialogSubHeader(theme, 'Troubleshooting'),

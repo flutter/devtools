@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/material.dart';
 
@@ -341,7 +341,7 @@ const _widePaddingVisualizerPercent = 0.35;
 /// display based on the display's [availableSize] and the real widget's
 /// [WidgetSizes].
 ///
-/// Uses a constant [paddingFraction] for the display padding, regardless of
+/// Uses a constant `paddingFraction` for the display padding, regardless of
 /// the actual size.
 WidgetSizes _simpleFractionalLayout({
   required double availableSize,

@@ -14,6 +14,7 @@ import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/http/http_service.dart' as http_service;
+import '../../shared/offline/offline_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
@@ -22,6 +23,7 @@ import 'har_network_data.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
+import 'offline_network_data.dart';
 
 /// Different types of Network Response which can be used to visualise response
 /// on Response tab
@@ -46,10 +48,12 @@ class NetworkController extends DisposableController
     with
         SearchControllerMixin<NetworkRequest>,
         FilterControllerMixin<NetworkRequest>,
+        OfflineScreenControllerMixin,
         AutoDisposeControllerMixin {
   NetworkController() {
     _networkService = NetworkService(this);
     _currentNetworkRequests = CurrentNetworkRequests();
+    _initHelper();
     addAutoDisposeListener(
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
@@ -61,7 +65,7 @@ class NetworkController extends DisposableController
   List<DartIOHttpRequestData>? _httpRequests;
 
   Future<String?> exportAsHarFile() async {
-    await _fetchFullDataBeforeExport();
+    await fetchFullDataBeforeExport();
     _httpRequests =
         filteredData.value.whereType<DartIOHttpRequestData>().toList();
 
@@ -153,9 +157,6 @@ class NetworkController extends DisposableController
   /// timeline events.
   late int _timelineMicrosOffset;
 
-  /// The last time at which HTTP information was refreshed.
-  DateTime lastHttpDataRefreshTime = DateTime.fromMicrosecondsSinceEpoch(0);
-
   /// The last timestamp at which Socket information was refreshed.
   ///
   /// This timestamp is on the monotonic clock used by the timeline.
@@ -165,6 +166,49 @@ class NetworkController extends DisposableController
 
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
+
+  void _initHelper() async {
+    if (offlineDataController.showingOfflineData.value) {
+      await maybeLoadOfflineData(
+        NetworkScreen.id,
+        createData: (json) => OfflineNetworkData.fromJson(json),
+        // This ignore is used because the 'data' parameter can have a dynamic type,
+        // which cannot be explicitly typed here due to its dependency on JSON parsing.
+        // ignore: avoid_dynamic_calls
+        shouldLoad: (data) => !data.isEmpty,
+        loadData: (data) => loadOfflineData(data),
+      );
+    }
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
+      await startRecording();
+    }
+  }
+
+  void loadOfflineData(OfflineNetworkData offlineData) {
+    final httpProfileData =
+        offlineData.httpRequestData.mapToHttpProfileRequests;
+    final socketStatsData = offlineData.socketData.mapToSocketStatistics;
+
+    _currentNetworkRequests
+      ..clear()
+      ..updateOrAddAll(
+        requests: httpProfileData,
+        sockets: socketStatsData,
+        timelineMicrosOffset: offlineData.timelineMicrosOffset ?? 0,
+      );
+    _filterAndRefreshSearchMatches();
+
+    // If a selectedRequestId is available, select it in offline mode.
+    if (offlineData.selectedRequestId != null) {
+      final selected = _currentNetworkRequests.getRequest(
+        offlineData.selectedRequestId ?? '',
+      );
+      if (selected != null) {
+        selectedRequest.value = selected;
+        resetDropDown();
+      }
+    }
+  }
 
   @visibleForTesting
   void processNetworkTrafficHelper(
@@ -266,10 +310,10 @@ class NetworkController extends DisposableController
 
     // TODO(kenz): only call these if http logging and socket profiling are not
     // already enabled. Listen to service manager streams for this info.
-    await [
+    await Future.wait([
       http_service.toggleHttpRequestLogging(true),
       networkService.toggleSocketProfiling(true),
-    ].wait;
+    ]);
     await togglePolling(true);
   }
 
@@ -400,11 +444,36 @@ class NetworkController extends DisposableController
     }
   }
 
-  Future<void> _fetchFullDataBeforeExport() =>
-      filteredData.value
-          .whereType<DartIOHttpRequestData>()
-          .map((item) => item.getFullRequestData())
-          .wait;
+  @override
+  OfflineScreenData prepareOfflineScreenData() {
+    final httpRequestData = <DartIOHttpRequestData>[];
+    final socketData = <Socket>[];
+    for (final request in _currentNetworkRequests.value) {
+      if (request is DartIOHttpRequestData) {
+        httpRequestData.add(request);
+      } else if (request is Socket) {
+        socketData.add(request);
+      }
+    }
+
+    final offlineData = OfflineNetworkData(
+      httpRequestData: httpRequestData,
+      socketData: socketData,
+      selectedRequestId: selectedRequest.value?.id,
+      timelineMicrosOffset: _timelineMicrosOffset,
+    );
+
+    return OfflineScreenData(
+      screenId: NetworkScreen.id,
+      data: offlineData.toJson(),
+    );
+  }
+
+  Future<void> fetchFullDataBeforeExport() => Future.wait(
+    filteredData.value.whereType<DartIOHttpRequestData>().map(
+      (item) => item.getFullRequestData(),
+    ),
+  );
 }
 
 /// Class for managing the set of all current sockets, and

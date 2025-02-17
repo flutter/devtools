@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // Avoid unused parameters does not play well with conditional imports.
 // ignore_for_file: avoid-unused-parameters
@@ -9,6 +9,7 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 import 'analytics_common.dart';
 
@@ -94,7 +95,7 @@ void impression(
 
 void reportError(
   String errorMessage, {
-  List<String> stackTraceSubstrings = const <String>[],
+  stack_trace.Trace? stackTrace,
   bool fatal = false,
 }) {}
 

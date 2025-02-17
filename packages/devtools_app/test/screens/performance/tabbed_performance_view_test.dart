@@ -1,6 +1,6 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
@@ -198,6 +198,7 @@ void main() {
           await tester.tap(find.text('Timeline Events'));
           await tester.pumpAndSettle();
 
+          expect(find.byType(NotifierSwitch), findsOneWidget);
           expect(find.byType(TimelineSettingsButton), findsOneWidget);
           expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
           expect(find.byType(TimelineEventsTabView), findsOneWidget);
@@ -227,6 +228,7 @@ void main() {
           expect(find.byType(DevToolsTab), findsOneWidget);
           expect(find.text('Timeline Events'), findsOneWidget);
           expect(find.text('Frame Analysis'), findsNothing);
+          expect(find.text('Rebuild Stats'), findsNothing);
         });
       },
     );

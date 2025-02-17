@@ -1,11 +1,11 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be found
-// in the LICENSE file.
+// Copyright 2024 The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/standalone_ui/vs_code/property_editor_panel.dart';
+import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_panel.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -71,7 +71,7 @@ class _PropertyEditorState extends State<_PropertyEditorSidebar> {
                 ? MockEditorWidget(
                   editor: editor!,
                   clientLog: clientLog!,
-                  child: PropertyEditorSidebarPanel(clientDtd!),
+                  child: PropertyEditorPanel(clientDtd!),
                 )
                 : _DtdUriForm(
                   onSaved: _connectToDtd,

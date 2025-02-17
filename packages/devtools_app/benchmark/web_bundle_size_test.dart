@@ -1,6 +1,6 @@
-// Copyright 2023 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // Note: this test was modeled after the example test from Flutter Gallery:
 // https://github.com/flutter/gallery/blob/master/test_benchmarks/web_bundle_size_test.dart
@@ -11,8 +11,8 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 // Benchmark size in kB.
-const bundleSizeBenchmark = 5200;
-const gzipBundleSizeBenchmark = 1550;
+const bundleSizeBenchmark = 5400;
+const gzipBundleSizeBenchmark = 1650;
 
 void main() {
   group('Web Compile', () {
@@ -31,8 +31,6 @@ void main() {
       await _runProcess('flutter', [
         'build',
         'web',
-        '--web-renderer',
-        'canvaskit',
         '--pwa-strategy=offline-first',
         '--release',
         '--no-tree-shake-icons',

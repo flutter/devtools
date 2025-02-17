@@ -1,6 +1,6 @@
-// Copyright 2024 The Chromium Authors. All rights reserved.
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:typed_data';
 
@@ -24,16 +24,14 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
 
   @override
   // ignore: avoid-explicit-type-declaration, required to override base class.
-  final List<HeapSnapshotClass>
-  classes = <HeapSnapshotClass>[
+  final List<HeapSnapshotClass> classes = <HeapSnapshotClass>[
     _FakeHeapSnapshotClass(),
     _FakeHeapSnapshotClass.weak(),
   ];
 
   @override
   // ignore: avoid-explicit-type-declaration, required to override base class.
-  final List<FakeSnapshotObject>
-  objects = <FakeSnapshotObject>[
+  final List<FakeSnapshotObject> objects = <FakeSnapshotObject>[
     _sentinelObject,
     FakeSnapshotObject(shallowSize: 1), // root
   ];

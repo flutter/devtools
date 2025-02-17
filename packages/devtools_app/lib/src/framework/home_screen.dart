@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 
@@ -203,7 +203,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
               height: defaultTextFieldHeight,
               width: scaleByFontFactor(350.0),
               child: DevToolsClearableTextField(
-                labelText: 'VM service URL',
+                labelText: 'URL',
                 onSubmitted:
                     actionInProgress ? null : (str) => unawaited(_connect()),
                 autofocus: true,
@@ -221,7 +221,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: densePadding),
           child: Text(
-            '(e.g., http://127.0.0.1:12345/auth_code=...)',
+            '(e.g., http://127.0.0.1:12345/auth_code=... or ws://...)',
             textAlign: TextAlign.start,
             style: Theme.of(context).textTheme.bodySmall,
           ),
@@ -236,10 +236,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
         children: [
           Text('Connect to a Running App', style: textTheme.titleMedium),
           const SizedBox(height: denseRowSpacing),
-          Text(
-            'Enter a URL to a running Dart or Flutter application',
-            style: textTheme.bodySmall,
-          ),
+          Text('Enter a Dart VM Service URL', style: textTheme.bodySmall),
           const SizedBox(height: denseSpacing),
           connectorInput,
         ],

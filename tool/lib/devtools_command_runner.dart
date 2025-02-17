@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -8,6 +8,7 @@ import 'package:devtools_tool/commands/build.dart';
 import 'package:devtools_tool/commands/fix_goldens.dart';
 import 'package:devtools_tool/commands/generate_code.dart';
 import 'package:devtools_tool/commands/release_notes_helper.dart';
+import 'package:devtools_tool/commands/run.dart';
 import 'package:devtools_tool/commands/serve.dart';
 import 'package:devtools_tool/commands/sync.dart';
 import 'package:devtools_tool/commands/tag_version.dart';
@@ -39,6 +40,7 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(ReleaseNotesCommand());
     addCommand(RepoCheckCommand());
     addCommand(RollbackCommand());
+    addCommand(RunCommand());
     addCommand(ServeCommand());
     addCommand(SyncCommand());
     addCommand(TagVersionCommand());
