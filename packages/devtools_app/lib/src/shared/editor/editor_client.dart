@@ -127,7 +127,7 @@ class EditorClient extends DisposableController
         }
       }),
     );
-    await Future.wait([
+    await [
       _dtd.streamListen('Service'),
       _dtd.streamListen(editorStreamName).catchError((_) {
         // Because we currently call streamListen in two places (here and
@@ -135,7 +135,7 @@ class EditorClient extends DisposableController
         // however we should refactor this code to better support using the DTD
         // connection in multiple places without them having to coordinate.
       }),
-    ]);
+    ].wait;
   }
 
   /// Close the connection to DTD.

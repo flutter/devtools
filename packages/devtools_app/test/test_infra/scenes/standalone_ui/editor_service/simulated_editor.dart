@@ -45,7 +45,7 @@ class SimulatedEditor {
   Stream<String> get log => _logger.stream;
 
   Future<void> _registerServices() {
-    return Future.wait([
+    return [
       _registerService(EditorMethod.getDevices, _getDevices),
       _registerService(EditorMethod.selectDevice, _selectDevice),
       _registerService(EditorMethod.getDebugSessions, _getDebugSessions),
@@ -57,7 +57,7 @@ class SimulatedEditor {
         capabilities: {Field.supportsForceExternal: true},
       ),
       _registerService(EditorMethod.enablePlatformType, _enablePlatformType),
-    ]);
+    ].wait;
   }
 
   /// Whether the editor is currently connected to DTD.

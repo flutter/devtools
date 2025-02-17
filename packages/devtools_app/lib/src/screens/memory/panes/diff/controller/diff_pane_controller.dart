@@ -129,7 +129,7 @@ class DiffPaneController extends DisposableController with Serializable {
       final item = SnapshotDataItem(defaultName: file.name);
       await _addSnapshot(HeapGraphLoaderFile(file), item);
     });
-    await Future.wait(importers);
+    await importers.wait;
     derived._updateValues();
   }
 

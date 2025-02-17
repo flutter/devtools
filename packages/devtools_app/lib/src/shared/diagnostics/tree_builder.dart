@@ -36,7 +36,7 @@ Future<void> _addExpandableChildren(
     variable.addChild(child);
   }
   if (tasks.isNotEmpty) {
-    await Future.wait(tasks);
+    await tasks.wait;
   }
 }
 
@@ -337,7 +337,7 @@ Future<void> _addInspectorItems(
       tasks.add(maybeUpdateRef(child));
     }
     if (tasks.isNotEmpty) {
-      await Future.wait(tasks);
+      await tasks.wait;
       unawaited(group?.dispose());
     }
   }

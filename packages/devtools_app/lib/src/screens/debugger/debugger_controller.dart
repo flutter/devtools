@@ -453,7 +453,7 @@ class DebuggerController extends DisposableController
     );
 
     return _StackInfo(
-      await Future.wait(frames.map(_createStackFrameWithLocation)),
+      await frames.map(_createStackFrameWithLocation).wait,
       stack.truncated ?? false,
     );
   }

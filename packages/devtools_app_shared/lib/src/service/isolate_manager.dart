@@ -95,9 +95,9 @@ final class IsolateManager with DisposerMixin {
   Future<void> initIsolates(List<IsolateRef> isolates) async {
     _clearIsolateStates();
 
-    await Future.wait([
+    await [
       for (final isolateRef in isolates) _registerIsolate(isolateRef),
-    ]);
+    ].wait;
 
     // It is critical that the _serviceExtensionManager is already listening
     // for events indicating that new extension rpcs are registered before this

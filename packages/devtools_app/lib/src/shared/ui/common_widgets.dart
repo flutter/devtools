@@ -1099,7 +1099,7 @@ class _JsonViewerState extends State<JsonViewer> {
     // Build the root node
     await buildVariablesTree(variable);
     // Build the contents of all children
-    await Future.wait(variable.children.map(buildVariablesTree));
+    await variable.children.map(buildVariablesTree).wait;
 
     // Expand the root node to show the first level of contents
     variable.expand();

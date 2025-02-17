@@ -310,10 +310,10 @@ class NetworkController extends DisposableController
 
     // TODO(kenz): only call these if http logging and socket profiling are not
     // already enabled. Listen to service manager streams for this info.
-    await Future.wait([
+    await [
       http_service.toggleHttpRequestLogging(true),
       networkService.toggleSocketProfiling(true),
-    ]);
+    ].wait;
     await togglePolling(true);
   }
 
@@ -469,11 +469,11 @@ class NetworkController extends DisposableController
     );
   }
 
-  Future<void> fetchFullDataBeforeExport() => Future.wait(
-    filteredData.value.whereType<DartIOHttpRequestData>().map(
-      (item) => item.getFullRequestData(),
-    ),
-  );
+  Future<void> fetchFullDataBeforeExport() =>
+      filteredData.value
+          .whereType<DartIOHttpRequestData>()
+          .map((item) => item.getFullRequestData())
+          .wait;
 }
 
 /// Class for managing the set of all current sockets, and
