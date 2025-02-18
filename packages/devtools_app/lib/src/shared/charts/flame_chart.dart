@@ -1389,6 +1389,7 @@ class TimelineGridPainter extends FlameChartPainter {
     if (xOffset > 0) {
       textPainter.paint(canvas, Offset(xOffset, rowPadding));
     }
+    textPainter.dispose();
   }
 
   void _paintGridLine(Canvas canvas, double lineX) {

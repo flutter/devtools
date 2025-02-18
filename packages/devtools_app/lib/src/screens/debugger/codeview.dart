@@ -368,7 +368,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                           child: LayoutBuilder(
                             builder: (context, constraints) {
                               final fileWidth = calculateTextSpanWidth(
-                                findLongestTextSpan(lines),
+                                findLongestTextSpan(lines)!,
                               );
 
                               return Scrollbar(
