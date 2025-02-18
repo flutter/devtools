@@ -578,7 +578,7 @@ Finder _helperTextForInput(Finder inputFinder, {required String matching}) {
 
 Finder _findDropdownButtonFormField(String inputName) => find.ancestor(
   of: find.richTextContaining(inputName),
-  matching: find.byType(DropdownButtonFormField<String>),
+  matching: find.byType(DropdownButtonFormField),
 );
 
 Future<void> _verifyDropdownMenuItems(
