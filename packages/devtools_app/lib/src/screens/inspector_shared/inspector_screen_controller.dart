@@ -11,7 +11,11 @@ import '../inspector/inspector_tree_controller.dart' as legacy;
 import '../inspector_v2/inspector_controller.dart' as v2;
 import '../inspector_v2/inspector_tree_controller.dart' as v2;
 
-class InspectorScreenController extends DevToolsScreenController {
+class InspectorScreenController extends DisposableController {
+  InspectorScreenController() {
+    _init();
+  }
+
   late v2.InspectorController v2InspectorController;
   late v2.InspectorTreeController v2InspectorTreeController;
 
@@ -19,10 +23,7 @@ class InspectorScreenController extends DevToolsScreenController {
   late legacy.InspectorTreeController legacyInspectorTreeController;
   late legacy.InspectorTreeController legacyDetailsTreeController;
 
-  @override
-  void init() {
-    super.init();
-
+  void _init() {
     v2InspectorTreeController = v2.InspectorTreeController(
       gaId: InspectorScreenMetrics.summaryTreeGaId,
     );
