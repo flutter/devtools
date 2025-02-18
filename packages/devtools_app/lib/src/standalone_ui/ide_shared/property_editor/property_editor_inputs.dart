@@ -124,20 +124,60 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
         padding: denseSpacing,
       ),
       isExpanded: true,
-      items:
-          widget.property.propertyOptions.map((option) {
-            return DropdownMenuItem(
-              value: option,
-              child: Text(option, style: theme.fixedFontStyle),
-            );
-          }).toList(),
+      selectedItemBuilder:
+          (context) => _dropdownItems(withDefaultLabels: false),
+      items: _dropdownItems(withDefaultLabels: true),
       onChanged: (newValue) async {
-        await editProperty(
-          widget.property,
-          valueAsString: newValue,
-          controller: widget.controller,
-        );
+        if (newValue != widget.property.valueDisplay) {
+          await editProperty(
+            widget.property,
+            valueAsString: newValue,
+            controller: widget.controller,
+          );
+        }
       },
+    );
+  }
+
+  List<DropdownMenuItem> _dropdownItems({required bool withDefaultLabels}) =>
+      widget.property.propertyOptions.map((option) {
+        return DropdownMenuItem(
+          value: option.text,
+          child: _DropdownContent(
+            option: option,
+            showDefaultLabel: withDefaultLabels,
+          ),
+        );
+      }).toList();
+}
+
+class _DropdownContent extends StatelessWidget {
+  const _DropdownContent({
+    required this.option,
+    required this.showDefaultLabel,
+  });
+
+  final PropertyOption option;
+  final bool showDefaultLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            option.text,
+            style: Theme.of(context).fixedFontStyle,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (showDefaultLabel && option.isDefault)
+          const RoundedLabel(
+            labelText: 'D',
+            tooltipText: 'Matches the default value.',
+          ),
+      ],
     );
   }
 }
