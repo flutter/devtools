@@ -146,7 +146,7 @@ class _PropertyLabels extends StatelessWidget {
               ),
             if (isDefault)
               Padding(
-                padding: _labelPadding(isTopLabel: false),
+                padding: _labelPadding(isTopLabel: !isSet),
                 child: RoundedLabel(
                   labelText: _maybeTruncateLabel('default', width: width),
                   tooltipText: 'Property argument matches the default value.',
