@@ -67,15 +67,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
 
   @override
-  void dispose() {
-    _summaryTreeController.dispose();
-    if (controller.isSummaryTree && controller.details != null) {
-      _detailsTreeController.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   void initState() {
     super.initState();
     ga.screen(InspectorScreen.id);
