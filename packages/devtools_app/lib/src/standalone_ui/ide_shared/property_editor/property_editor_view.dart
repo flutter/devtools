@@ -50,7 +50,8 @@ class _PropertiesList extends StatelessWidget {
 
   final PropertyEditorController controller;
 
-  static const itemPadding = borderPadding;
+  static const defaultItemPadding = borderPadding;
+  static const denseItemPadding = defaultItemPadding / 2;
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +101,7 @@ class _EditablePropertyItem extends StatelessWidget {
         Flexible(
           flex: 3,
           child: Padding(
-            padding: const EdgeInsets.all(_PropertiesList.itemPadding),
+            padding: const EdgeInsets.all(_PropertiesList.defaultItemPadding),
             child: _PropertyInput(property: property, controller: controller),
           ),
         ),
@@ -118,36 +119,59 @@ class _PropertyLabels extends StatelessWidget {
 
   final EditableProperty property;
 
+  static const _widthForFullLabels = 60;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isSet = property.hasArgument;
     final isDefault = property.isDefault;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (isSet)
-          Padding(
-            padding: const EdgeInsets.all(_PropertiesList.itemPadding),
-            child: RoundedLabel(
-              labelText: 'S',
-              backgroundColor: colorScheme.primary,
-              textColor: colorScheme.onPrimary,
-              tooltipText: 'Property argument is set.',
-            ),
-          ),
-        if (isDefault)
-          const Padding(
-            padding: EdgeInsets.all(_PropertiesList.itemPadding),
-            child: RoundedLabel(
-              labelText: 'D',
-              tooltipText: 'Property argument matches the default value.',
-            ),
-          ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isSet)
+              Padding(
+                padding: _labelPadding(isTopLabel: true),
+                child: RoundedLabel(
+                  labelText: _maybeTruncateLabel('set', width: width),
+                  tooltipText: 'Property argument is set.',
+                  fontSize: smallFontSize,
+                  backgroundColor: colorScheme.primary,
+                  textColor: colorScheme.onPrimary,
+                ),
+              ),
+            if (isDefault)
+              Padding(
+                padding: _labelPadding(isTopLabel: false),
+                child: RoundedLabel(
+                  labelText: _maybeTruncateLabel('default', width: width),
+                  tooltipText: 'Property argument matches the default value.',
+                  fontSize: smallFontSize,
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
+
+  EdgeInsets _labelPadding({required bool isTopLabel}) => EdgeInsets.fromLTRB(
+    _PropertiesList.defaultItemPadding,
+    isTopLabel
+        ? _PropertiesList.defaultItemPadding
+        : _PropertiesList.denseItemPadding,
+    _PropertiesList.defaultItemPadding,
+    isTopLabel
+        ? _PropertiesList.denseItemPadding
+        : _PropertiesList.defaultItemPadding,
+  );
+
+  String _maybeTruncateLabel(String labelText, {required double width}) =>
+      width >= _widthForFullLabels ? labelText : labelText[0].toUpperCase();
 }
 
 class _PropertyInput extends StatelessWidget {
