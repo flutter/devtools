@@ -385,12 +385,12 @@ class InspectorController extends DisposableController
     return _waitForPendingUpdateDone();
   }
 
-  Future<void> refreshInspector() async {
-    // If the user is force refreshing the inspector before the first load has
-    // completed, this could indicate a slow load time or that the inspector
+  Future<void> refreshInspector({bool isManualRefresh = false}) async {
+    // If the user is manually refreshing the inspector before the first load
+    // has completed, this could indicate a slow load time or that the inspector
     // failed to load the tree once available.
-    if (!firstInspectorTreeLoadCompleted) {
-      // We do not want to complete this timing operation because the force
+    if (isManualRefresh && !firstInspectorTreeLoadCompleted) {
+      // We do not want to complete this timing operation because the manual
       // refresh will skew the results.
       ga.cancelTimingOperation(InspectorScreen.id, gac.pageReady);
       ga.select(

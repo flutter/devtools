@@ -33,7 +33,8 @@ class _VmICDataDisplayState extends State<VmICDataDisplay> {
   final argumentsDescriptor = <ObjRef?>[];
   final entries = <ObjRef?>[];
 
-  late Future<void> _initialized;
+  Future<void> get _initialized => _initializingCompleter.future;
+  final Completer<void> _initializingCompleter = Completer<void>();
 
   @override
   void initState() {
@@ -64,7 +65,7 @@ class _VmICDataDisplayState extends State<VmICDataDisplay> {
     final icDataEntries = icData.entries;
     if (icDataArgsDescriptor is Instance && icDataEntries is Instance) {
       populateLists(icDataArgsDescriptor, icDataEntries);
-      _initialized = Future.value();
+      _initializingCompleter.complete();
       return;
     }
 
@@ -82,10 +83,10 @@ class _VmICDataDisplayState extends State<VmICDataDisplay> {
     final entriesFuture = service
         .getObject(isolateId, icData.entries.id!)
         .then((e) => e as Instance);
-    _initialized = Future.wait([
-      argumentsDescriptorFuture,
-      entriesFuture,
-    ]).then((result) => populateLists(result[0], result[1]));
+    final (argDescriptor, entryList) =
+        await (argumentsDescriptorFuture, entriesFuture).wait;
+    populateLists(argDescriptor, entryList);
+    _initializingCompleter.complete();
   }
 
   @override

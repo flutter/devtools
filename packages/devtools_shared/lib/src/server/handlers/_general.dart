@@ -201,12 +201,9 @@ extension on VmService {
   /// 3. The isolate is the first in the list of isolates on the VM.
   Future<Isolate> get _detectMainIsolate async {
     final isolateRefs = (await getVM()).isolates!;
-    final isolateCandidates =
-        await Future.wait<({IsolateRef ref, Isolate isolate})>(
-      isolateRefs.map(
-        (ref) async => (ref: ref, isolate: await getIsolate(ref.id!)),
-      ),
-    );
+    final isolateCandidates = await isolateRefs
+        .map((ref) async => (ref: ref, isolate: await getIsolate(ref.id!)))
+        .wait;
 
     Isolate? mainIsolate;
     for (final isolate in isolateCandidates) {
