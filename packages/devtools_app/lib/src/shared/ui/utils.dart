@@ -80,10 +80,9 @@ double calculateTextSpanHeight(TextSpan span, {double? maxWidth}) {
   return calculateTextSpanSize(span, maxWidth: maxWidth).height;
 }
 
-TextSpan findLongestTextSpan(List<TextSpan> spans) {
-  assert(spans.isNotEmpty, 'Cannot find longest text span of 0 spans.');
-  var longestSpan = spans.removeAt(0);
-  var longestLength = longestSpan.toPlainText().length;
+TextSpan? findLongestTextSpan(List<TextSpan> spans) {
+  int longestLength = 0;
+  TextSpan? longestSpan;
   for (final span in spans) {
     final currentLength = span.toPlainText().length;
     if (currentLength > longestLength) {
