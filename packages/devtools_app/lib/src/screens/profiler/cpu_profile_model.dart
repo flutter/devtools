@@ -693,13 +693,17 @@ class CpuProfileData with Serializable {
   List<CpuStackFrame> get bottomUpRoots {
     if (!processed) return <CpuStackFrame>[];
 
-    _bottomUpRoots ??= BottomUpTransformer<CpuStackFrame>().bottomUpRootsFor(
-      topDownRoot: _cpuProfileRoot,
-      mergeSamples: mergeCpuProfileRoots,
-      rootedAtTags: rootedAtTags,
-    );
-
     return _bottomUpRoots!;
+  }
+
+  Future<void> computeBottomUpRoots() async {
+    assert(_bottomUpRoots == null);
+    _bottomUpRoots = await BottomUpTransformer<CpuStackFrame>()
+        .bottomUpRootsFor(
+          topDownRoot: _cpuProfileRoot,
+          mergeSamples: mergeCpuProfileRoots,
+          rootedAtTags: rootedAtTags,
+        );
   }
 
   List<CpuStackFrame>? _bottomUpRoots;

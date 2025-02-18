@@ -50,6 +50,7 @@ void main() {
   const windowSize = Size(1599.0, 1000.0);
 
   setUpAll(() {
+    setGlobal(OfflineDataController, OfflineDataController());
     socketProfile = loadSocketProfile();
     httpProfile = loadHttpProfile();
     setGlobal(IdeTheme, IdeTheme());

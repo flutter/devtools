@@ -73,6 +73,10 @@ enum ScreenMetaData {
     iconAsset: 'icons/app_bar/network.png',
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=547',
+    // ignore: avoid_redundant_argument_values, false positive
+    requiresConnection: false,
+    // ignore: avoid_redundant_argument_values, false positive
+    worksWithOfflineData: FeatureFlags.networkDisconnectExperience,
   ),
   logging(
     'logging',

@@ -151,7 +151,7 @@ class _SecondaryControls extends StatelessWidget {
               !profilerBusy &&
                       controller.cpuProfileData != null &&
                       controller.cpuProfileData?.isEmpty == false
-                  ? _exportPerformance
+                  ? (_) => _exportPerformance()
                   : null,
         ),
       ],

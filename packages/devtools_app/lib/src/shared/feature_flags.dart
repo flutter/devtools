@@ -41,6 +41,11 @@ const _kMemoryDisconnectExperience = bool.fromEnvironment(
   defaultValue: true,
 );
 
+const _kNetworkDisconnectExperience = bool.fromEnvironment(
+  'network_disconnect_experience',
+  defaultValue: true,
+);
+
 // It is ok to have enum-like static only classes.
 // ignore: avoid_classes_with_only_static_members
 /// Flags to hide features under construction.
@@ -69,6 +74,17 @@ abstract class FeatureFlags {
   ///
   /// https://github.com/flutter/devtools/issues/8019
   static bool memorySaveLoad = enableExperiments;
+
+  /// Flag to enable viewing offline data on the network screen when an app
+  /// disconnects.
+  ///
+  /// https://github.com/flutter/devtools/issues/3806
+  static const networkDisconnectExperience = _kNetworkDisconnectExperience;
+
+  /// Flag to enable save/load for the Network screen.
+  ///
+  /// https://github.com/flutter/devtools/issues/4470
+  static bool networkSaveLoad = true;
 
   /// Flag to enable the deep link validation tooling in DevTools, both for the
   /// DevTools screen and the standalone tool for IDE embedding.

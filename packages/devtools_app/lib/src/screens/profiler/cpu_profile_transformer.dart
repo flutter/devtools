@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import '../../shared/constants.dart';
 import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
 
@@ -34,18 +35,26 @@ class CpuProfileTransformer {
     // At minimum, process the data in 4 batches to smooth the appearance of
     // the progress indicator.
     final quarterBatchSize = (stackFramesCount / 4).round();
-    final batchSize = math.min(
+    var batchSize = math.min(
       _defaultBatchSize,
       quarterBatchSize == 0 ? 1 : quarterBatchSize,
     );
-
     // Use batch processing to maintain a responsive UI.
     while (_stackFramesProcessed < stackFramesCount) {
+      final watch = Stopwatch()..start();
       _processBatch(
         batchSize,
         cpuProfileData,
         processId: processId,
         stackFrameValues: stackFrameValues,
+      );
+      watch.stop();
+      // Avoid divide by zero
+      final elapsedMs = math.max(watch.elapsedMilliseconds, 1);
+      // Adjust to use half the frame budget.
+      batchSize = math.max(
+        (batchSize * frameBudgetMs * 0.5 / elapsedMs).ceil(),
+        1,
       );
 
       // Await a small delay to give the UI thread a chance to update the
@@ -89,6 +98,10 @@ class CpuProfileTransformer {
       ' != sample count from root '
       '(${cpuProfileData.cpuProfileRoot.inclusiveSampleCount})',
     );
+
+    // We always show the bottom up roots first, so it is fine to eagerly
+    // compute.
+    await cpuProfileData.computeBottomUpRoots();
 
     // Reset the transformer after processing.
     reset();
@@ -158,7 +171,15 @@ class CpuProfileTransformer {
 ///
 /// At the time this method is called, we assume we have a list of roots with
 /// accurate inclusive/exclusive sample counts.
-void mergeCpuProfileRoots(List<CpuStackFrame> roots) {
+Future<void> mergeCpuProfileRoots(
+  List<CpuStackFrame> roots, {
+  Stopwatch? stopwatch,
+}) async {
+  stopwatch ??= Stopwatch()..start();
+  if (stopwatch.elapsedMilliseconds > frameBudgetMs * 0.5) {
+    await delayToReleaseUiThread(micros: 5000);
+    stopwatch.reset();
+  }
   final mergedRoots = <CpuStackFrame>[];
   final rootIndicesToRemove = <int>{};
 
@@ -186,7 +207,7 @@ void mergeCpuProfileRoots(List<CpuStackFrame> roots) {
         root.exclusiveSampleCount += otherRoot.exclusiveSampleCount;
         root.inclusiveSampleCount += otherRoot.inclusiveSampleCount;
         rootIndicesToRemove.add(j);
-        mergeCpuProfileRoots(root.children);
+        await mergeCpuProfileRoots(root.children, stopwatch: stopwatch);
       }
     }
     mergedRoots.add(root);

@@ -1099,7 +1099,7 @@ class _JsonViewerState extends State<JsonViewer> {
     // Build the root node
     await buildVariablesTree(variable);
     // Build the contents of all children
-    await Future.wait(variable.children.map(buildVariablesTree));
+    await variable.children.map(buildVariablesTree).wait;
 
     // Expand the root node to show the first level of contents
     variable.expand();
@@ -1110,11 +1110,36 @@ class _JsonViewerState extends State<JsonViewer> {
     final responseJson = json.decode(widget.encodedJson);
     // Insert the JSON data into the fake service cache so we can use it with
     // the `ExpandableVariable` widget.
-    final root = serviceConnection.serviceManager.service!.fakeServiceCache
-        .insertJsonObject(responseJson);
-    variable = DartObjectNode.fromValue(
-      name: '[root]',
-      value: root,
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
+      final root = serviceConnection.serviceManager.service!.fakeServiceCache
+          .insertJsonObject(responseJson);
+
+      variable = DartObjectNode.fromValue(
+        name: '[root]',
+        value: root,
+        artificialName: true,
+        isolateRef: IsolateRef(
+          id: 'fake-isolate',
+          number: 'fake-isolate',
+          name: 'local-cache',
+          isSystemIsolate: true,
+        ),
+      );
+    } else {
+      variable = _buildJsonTree(
+        responseJson,
+        '[root]',
+      ); // Creates tree structure
+    }
+    // Intended to be unawaited.
+    // ignore: discarded_futures
+    _initializeTree = _buildAndExpand(variable);
+  }
+
+  DartObjectNode _buildJsonTree(Object? jsonValue, String nodeName) {
+    final node = DartObjectNode.fromValue(
+      name: nodeName,
+      value: jsonValue,
       artificialName: true,
       isolateRef: IsolateRef(
         id: 'fake-isolate',
@@ -1123,9 +1148,21 @@ class _JsonViewerState extends State<JsonViewer> {
         isSystemIsolate: true,
       ),
     );
-    // Intended to be unawaited.
-    // ignore: discarded_futures
-    _initializeTree = _buildAndExpand(variable);
+
+    // Add children for objects (Maps)
+    if (jsonValue is Map<String, Object?>) {
+      for (final entry in jsonValue.entries) {
+        node.addChild(_buildJsonTree(entry.value, entry.key));
+      }
+    }
+    // Add children for lists (Arrays)
+    else if (jsonValue is List<Object?>) {
+      for (int i = 0; i < jsonValue.length; i++) {
+        node.addChild(_buildJsonTree(jsonValue[i], '[$i]'));
+      }
+    }
+
+    return node; // Returning a properly structured tree
   }
 
   @override
@@ -1145,11 +1182,13 @@ class _JsonViewerState extends State<JsonViewer> {
   @override
   void dispose() {
     super.dispose();
-    // Remove the JSON object from the fake service cache to avoid holding on
+    // Remove the JSON object from the fake service cache (while in connected mode) to avoid holding on
     // to large objects indefinitely.
-    serviceConnection.serviceManager.service!.fakeServiceCache.removeJsonObject(
-      variable.value as Instance,
-    );
+
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
+      serviceConnection.serviceManager.service!.fakeServiceCache
+          .removeJsonObject(variable.value as Instance);
+    }
   }
 
   @override
@@ -1163,12 +1202,10 @@ class _JsonViewerState extends State<JsonViewer> {
         return ExpandableVariable(
           variable: variable,
           onCopy: (copiedVariable) {
+            final jsonData = copyJsonData(copiedVariable);
             unawaited(
               copyToClipboard(
-                jsonEncoder.convert(
-                  serviceConnection.serviceManager.service!.fakeServiceCache
-                      .instanceToJson(copiedVariable.value as Instance),
-                ),
+                jsonData,
                 successMessage: 'JSON copied to clipboard',
               ),
             );
@@ -1182,6 +1219,19 @@ class _JsonViewerState extends State<JsonViewer> {
     return SelectionArea(
       child: Padding(padding: const EdgeInsets.all(denseSpacing), child: child),
     );
+  }
+
+  String copyJsonData(DartObjectNode copiedVariable) {
+    // Check if service connection is active
+    if (serviceConnection.serviceManager.connectedState.value.connected) {
+      return jsonEncoder.convert(
+        serviceConnection.serviceManager.service!.fakeServiceCache
+            .instanceToJson(copiedVariable.value as Instance),
+      );
+    }
+
+    // Directly convert object to JSON if not connected
+    return const JsonEncoder.withIndent('  ').convert(copiedVariable.value);
   }
 }
 

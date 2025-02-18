@@ -15,7 +15,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed various memory leaks. - []()
 
 ## Inspector updates
 
@@ -31,7 +31,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+* Changed memory heap snapshot tool so that references are included in snapshots
+by default. - [#8899](https://github.com/flutter/devtools/pull/8899)
 
 ## Debugger updates
 
@@ -40,8 +41,20 @@ TODO: Remove this section if there are not any general updates.
 * Updated syntax highlighting with support for digit separators,
   and improved comment and string interpolation handling. -
   [#8861](https://github.com/flutter/devtools/pull/8861)
+* Updated `string_scanner` dependency to avoid some syntax highlighting issues
+  when source contains `\r\n` in certain positions on Windows. -
+  [#8904](https://github.com/flutter/devtools/pull/8904)
+* Added soft line wrapping in the debugger console.
+  [#8855](https://github.com/flutter/devtools/pull/8855).
 
 ## Network profiler updates
+
+* Added offline support for the network screen (thanks to @hrajwade96!) - 
+[#8332](https://github.com/flutter/devtools/pull/8332)
+
+  ![Network profiler controls](images/network_controls.png "Network profiler controls")
+
+  ![Network profiler open / save button](images/network_open_save_button.png "Network profiler open / save button")
 
 * Changed the context menu style to be consistent with other screens
   [#8859](https://github.com/flutter/devtools/pull/8859).

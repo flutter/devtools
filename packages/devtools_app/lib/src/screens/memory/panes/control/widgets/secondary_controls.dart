@@ -56,7 +56,7 @@ class SecondaryControls extends StatelessWidget {
         if (FeatureFlags.memorySaveLoad) ...[
           OpenSaveButtonGroup(
             screenId: ScreenMetaData.memory.id,
-            onSave: onSave,
+            onSave: (_) => onSave(),
           ),
           const SizedBox(width: denseSpacing),
         ],

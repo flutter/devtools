@@ -17,6 +17,17 @@
             "program": "packages/devtools_app/lib/main.dart",
         },
         {
+            "name": "devtools + web hot reload",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/devtools_app/lib/main.dart",
+            "args": [
+                "-d",
+                "chrome",
+                "--web-experimental-hot-reload",
+            ]
+        },
+        {
             "name": "devtools + experiments",
             "request": "launch",
             "type": "dart",
@@ -117,7 +128,6 @@
             "request": "launch",
             "type": "dart",
             "program": "packages/devtools_app/test/test_infra/scenes/standalone_ui/property_editor_sidebar.stager_app.g.dart",
-            "preLaunchTask": "Start DTD on Port 8500",
         },
         {
             "name": "devtools_extensions: foo + sim",

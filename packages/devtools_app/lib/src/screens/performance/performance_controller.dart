@@ -210,11 +210,10 @@ class PerformanceController extends DisposableController
       await futureOr(controller);
     }
 
-    final futures = <Future<void>>[];
-    for (final controller in _featureControllers) {
-      futures.add(helper(callback, controller));
-    }
-    await Future.wait(futures);
+    await [
+      for (final controller in _featureControllers)
+        helper(callback, controller),
+    ].wait;
   }
 
   Future<void> setActiveFeature(

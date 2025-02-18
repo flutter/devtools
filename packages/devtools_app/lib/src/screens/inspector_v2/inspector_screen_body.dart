@@ -107,7 +107,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     addAutoDisposeListener(preferences.inspector.pubRootDirectories, () {
       if (serviceConnection.serviceManager.connectedState.value.connected &&
           controller.firstInspectorTreeLoadCompleted) {
-        _refreshInspector();
+        controller.refreshInspector();
       }
     });
 
@@ -152,7 +152,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               InspectorTreeControls(
                 isSearchVisible: searchVisible,
                 constraints: constraints,
-                onRefreshInspectorPressed: _refreshInspector,
+                onRefreshInspectorPressed: _manualInspectorRefresh,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
                 searchFieldBuilder:
                     () => StatelessSearchField<InspectorTreeRow>(
@@ -219,7 +219,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     _inspectorTreeController.resetSearch();
   }
 
-  void _refreshInspector() {
+  void _manualInspectorRefresh() {
     ga.select(
       gac.inspector,
       gac.refresh,
@@ -227,7 +227,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     );
     unawaited(
       blockWhileInProgress(() async {
-        await controller.refreshInspector();
+        await controller.refreshInspector(isManualRefresh: true);
       }),
     );
   }

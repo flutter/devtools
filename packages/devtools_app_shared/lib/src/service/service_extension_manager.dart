@@ -149,10 +149,10 @@ final class ServiceExtensionManager with DisposerMixin {
 
     final extensionsToProcess = _pendingServiceExtensions.toList();
     _pendingServiceExtensions.clear();
-    await Future.wait([
+    await [
       for (final extension in extensionsToProcess)
-        _addServiceExtension(extension),
-    ]);
+        _addServiceExtension(extension)
+    ].wait;
   }
 
   Future<void> _onMainIsolateChanged() async {
@@ -185,15 +185,15 @@ final class ServiceExtensionManager with DisposerMixin {
           // Isolate has changed again.
           return;
         }
-        await Future.wait([
+        await [
           for (final extension in mainIsolate.extensionRPCs!)
-            _maybeAddServiceExtension(extension),
-        ]);
+            _maybeAddServiceExtension(extension)
+        ].wait;
       } else {
-        await Future.wait([
+        await [
           for (final extension in mainIsolate.extensionRPCs!)
-            _addServiceExtension(extension),
-        ]);
+            _addServiceExtension(extension)
+        ].wait;
       }
     }
   }

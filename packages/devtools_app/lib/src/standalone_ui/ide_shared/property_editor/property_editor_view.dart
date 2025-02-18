@@ -73,7 +73,8 @@ class _PropertiesList extends StatelessWidget {
   final List<EditableProperty> editableProperties;
   final EditArgumentFunction editProperty;
 
-  static const itemPadding = borderPadding;
+  static const defaultItemPadding = borderPadding;
+  static const denseItemPadding = defaultItemPadding / 2;
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +108,7 @@ class _EditablePropertyItem extends StatelessWidget {
         Flexible(
           flex: 3,
           child: Padding(
-            padding: const EdgeInsets.all(_PropertiesList.itemPadding),
+            padding: const EdgeInsets.all(_PropertiesList.defaultItemPadding),
             child: _PropertyInput(
               property: property,
               editProperty: editProperty,
@@ -144,20 +145,22 @@ class _PropertyLabels extends StatelessWidget {
           children: [
             if (isSet)
               Padding(
-                padding: const EdgeInsets.all(_PropertiesList.itemPadding),
+                padding: _labelPadding(isTopLabel: true),
                 child: RoundedLabel(
                   labelText: _maybeTruncateLabel('set', width: width),
+                  tooltipText: 'Property argument is set.',
+                  fontSize: smallFontSize,
                   backgroundColor: colorScheme.primary,
                   textColor: colorScheme.onPrimary,
-                  tooltipText: 'Property argument is set.',
                 ),
               ),
             if (isDefault)
               Padding(
-                padding: const EdgeInsets.all(_PropertiesList.itemPadding),
+                padding: _labelPadding(isTopLabel: !isSet),
                 child: RoundedLabel(
                   labelText: _maybeTruncateLabel('default', width: width),
                   tooltipText: 'Property argument matches the default value.',
+                  fontSize: smallFontSize,
                 ),
               ),
           ],
@@ -165,6 +168,17 @@ class _PropertyLabels extends StatelessWidget {
       },
     );
   }
+
+  EdgeInsets _labelPadding({required bool isTopLabel}) => EdgeInsets.fromLTRB(
+    _PropertiesList.defaultItemPadding,
+    isTopLabel
+        ? _PropertiesList.defaultItemPadding
+        : _PropertiesList.denseItemPadding,
+    _PropertiesList.defaultItemPadding,
+    isTopLabel
+        ? _PropertiesList.denseItemPadding
+        : _PropertiesList.defaultItemPadding,
+  );
 
   String _maybeTruncateLabel(String labelText, {required double width}) =>
       width >= _widthForFullLabels ? labelText : labelText[0].toUpperCase();

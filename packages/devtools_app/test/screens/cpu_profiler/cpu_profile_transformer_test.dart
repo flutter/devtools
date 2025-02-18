@@ -85,11 +85,11 @@ void main() {
       );
     });
 
-    test('processData step by step', () {
+    test('processData step by step', () async {
       expect(testStackFrame.profileAsString(), testStackFrameStringGolden);
-      final bottomUpRoots = transformer.generateBottomUpRoots(
+      final bottomUpRoots = await transformer.generateBottomUpRoots(
         node: testStackFrame,
-        currentBottomUpRoot: null,
+        parent: null,
         bottomUpRoots: [],
       );
 
@@ -108,7 +108,7 @@ void main() {
       expect(buf.toString(), bottomUpPreMergeGolden);
 
       // Merge the bottom up roots.
-      mergeCpuProfileRoots(bottomUpRoots);
+      await mergeCpuProfileRoots(bottomUpRoots);
 
       expect(bottomUpRoots.length, 4);
 
@@ -119,10 +119,10 @@ void main() {
       expect(buf.toString(), bottomUpGolden);
     });
 
-    test('processData step by step when skipping the root node', () {
-      final bottomUpRoots = transformer.generateBottomUpRoots(
+    test('processData step by step when skipping the root node', () async {
+      final bottomUpRoots = await transformer.generateBottomUpRoots(
         node: testStackFrameWithRoot,
-        currentBottomUpRoot: null,
+        parent: null,
         bottomUpRoots: [],
         skipRoot: true,
       );
@@ -139,7 +139,7 @@ void main() {
       expect(buf.toString(), bottomUpPreMergeGolden);
 
       // Merge the bottom up roots.
-      mergeCpuProfileRoots(bottomUpRoots);
+      await mergeCpuProfileRoots(bottomUpRoots);
 
       expect(bottomUpRoots.length, 4);
 
@@ -150,12 +150,12 @@ void main() {
       expect(buf.toString(), bottomUpGolden);
     });
 
-    test('bottomUpRootsFor', () {
+    test('bottomUpRootsFor', () async {
       expect(
         testStackFrameWithRoot.profileAsString(),
         testStackFrameWithRootStringGolden,
       );
-      final bottomUpRoots = transformer.bottomUpRootsFor(
+      final bottomUpRoots = await transformer.bottomUpRootsFor(
         topDownRoot: testStackFrameWithRoot,
         mergeSamples: mergeCpuProfileRoots,
         rootedAtTags: false,
@@ -176,7 +176,7 @@ void main() {
       expect(buf.toString(), bottomUpGolden);
     });
 
-    test('bottomUpRootsFor rootedAtTags', () {
+    test('bottomUpRootsFor rootedAtTags', () async {
       expect(
         testTagRootedStackFrame.profileAsString(),
         testTagRootedStackFrameStringGolden,
@@ -184,7 +184,7 @@ void main() {
 
       // Note: this needs to be rooted at a root frame before transforming as
       // a tree rooted at a root frame is what is provided in cpu_profile_model.dart.
-      final bottomUpRoots = transformer.bottomUpRootsFor(
+      final bottomUpRoots = await transformer.bottomUpRootsFor(
         topDownRoot: CpuStackFrame.root(zeroProfileMetaData)
           ..addChild(testTagRootedStackFrame),
         mergeSamples: mergeCpuProfileRoots,
