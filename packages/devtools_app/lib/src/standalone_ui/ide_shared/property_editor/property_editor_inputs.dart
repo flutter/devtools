@@ -124,21 +124,9 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
         padding: denseSpacing,
       ),
       isExpanded: true,
-      selectedItemBuilder: (context) {
-        return widget.property.propertyOptions.map((option) {
-          return DropdownMenuItem(
-            value: option.text,
-            child: _DropdownContent(option: option, showDefaultLabel: false),
-          );
-        }).toList();
-      },
-      items:
-          widget.property.propertyOptions.map((option) {
-            return DropdownMenuItem(
-              value: option.text,
-              child: _DropdownContent(option: option, showDefaultLabel: true),
-            );
-          }).toList(),
+      selectedItemBuilder:
+          (context) => _dropdownItems(withDefaultLabels: false),
+      items: _dropdownItems(withDefaultLabels: true),
       onChanged: (newValue) async {
         if (newValue != widget.property.valueDisplay) {
           await editProperty(
@@ -150,6 +138,17 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
       },
     );
   }
+
+  List<DropdownMenuItem> _dropdownItems({required bool withDefaultLabels}) =>
+      widget.property.propertyOptions.map((option) {
+        return DropdownMenuItem(
+          value: option.text,
+          child: _DropdownContent(
+            option: option,
+            showDefaultLabel: withDefaultLabels,
+          ),
+        );
+      }).toList();
 }
 
 class _DropdownContent extends StatelessWidget {
@@ -164,6 +163,7 @@ class _DropdownContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Text(
@@ -172,13 +172,11 @@ class _DropdownContent extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        if (showDefaultLabel && option.isDefault) ...[
-          const Spacer(),
+        if (showDefaultLabel && option.isDefault)
           const RoundedLabel(
             labelText: 'D',
             tooltipText: 'Matches the default value.',
           ),
-        ],
       ],
     );
   }
