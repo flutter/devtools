@@ -530,14 +530,16 @@ class ChartPainter extends CustomPainter {
     canvas.drawLine(Offset(xTickCoord, 0), Offset(xTickCoord, 2), axis);
 
     final tp = _createText(prettyTimestamp(timestamp), 1);
-    tp.paint(canvas, Offset(xTickCoord - tp.width ~/ 2, 15.0 - tp.height ~/ 2));
-    tp.dispose();
+    tp
+      ..paint(canvas, Offset(xTickCoord - tp.width ~/ 2, 15.0 - tp.height ~/ 2))
+      ..dispose();
   }
 
   void _drawText(String textValue, Canvas canvas, double x, double y) {
     final tp = _createText(textValue, 1);
-    tp.paint(canvas, Offset(x + -tp.width / 2, y - tp.height / 2));
-    tp.dispose();
+    tp
+      ..paint(canvas, Offset(x + -tp.width / 2, y - tp.height / 2))
+      ..dispose();
   }
 
   TextPainter _createText(String textValue, double scale) {

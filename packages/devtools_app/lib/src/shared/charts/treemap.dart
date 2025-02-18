@@ -892,8 +892,9 @@ class MultiCellPainter extends CustomPainter {
           positionedCell.left! + bounds.width / 2 - textPainter.width / 2;
       final centerY =
           positionedCell.top! + bounds.height / 2 - textPainter.height / 2;
-      textPainter.paint(canvas, Offset(centerX, centerY));
-      textPainter.dispose();
+      textPainter
+        ..paint(canvas, Offset(centerX, centerY))
+        ..dispose();
     }
   }
 

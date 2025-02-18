@@ -879,29 +879,30 @@ class ChartAxisPainter extends CustomPainter {
       Paint()..color = themeData.colorScheme.chartAccentColor,
     );
 
+    const baselineAdjust = 2.0;
+
     // Paint the axis label.
     final textPainter = TextPainter(
       text: TextSpan(text: labelText, style: themeData.subtleChartTextStyle),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
-    )..layout();
-
-    const baselineAdjust = 2.0;
-
-    textPainter.paint(
-      canvas,
-      Offset(
-        yAxisUnitsSpace -
-            yAxisTickWidth / 2 -
-            densePadding - // Padding between y axis tick and label
-            textPainter.width,
-        chartArea.height -
-            timeMs / msPerPx -
-            textPainter.height / 2 -
-            baselineAdjust,
-      ),
     );
-    textPainter.dispose();
+    textPainter
+      ..layout()
+      ..paint(
+        canvas,
+        Offset(
+          yAxisUnitsSpace -
+              yAxisTickWidth / 2 -
+              densePadding - // Padding between y axis tick and label
+              textPainter.width,
+          chartArea.height -
+              timeMs / msPerPx -
+              textPainter.height / 2 -
+              baselineAdjust,
+        ),
+      )
+      ..dispose();
   }
 
   @override
