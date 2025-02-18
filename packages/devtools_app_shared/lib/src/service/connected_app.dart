@@ -152,7 +152,7 @@ class ConnectedApp {
 
     assert(serviceManager!.isServiceAvailable);
 
-    await Future.wait([isFlutterApp, isProfileBuild, isDartWebApp]);
+    await [isFlutterApp, isProfileBuild, isDartWebApp].wait;
 
     _operatingSystem = serviceManager!.vm!.operatingSystem ?? unknownOS;
 
