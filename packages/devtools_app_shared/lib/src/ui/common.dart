@@ -619,14 +619,15 @@ class RoundedLabel extends StatelessWidget {
     super.key,
     required this.labelText,
     this.backgroundColor,
-    this.fontSize,
     this.textColor,
+    this.fontSize,
     this.tooltipText,
   });
 
   final String labelText;
   final Color? backgroundColor;
   final Color? textColor;
+  final double? fontSize;
   final String? tooltipText;
 
   @override
@@ -645,7 +646,7 @@ class RoundedLabel extends StatelessWidget {
         softWrap: false,
         style: theme.regularTextStyle.copyWith(
             color: textColor ?? colorScheme.onSecondary,
-            backgroundColor: backgroundColor ?? colorScheme.secondary
+            backgroundColor: backgroundColor ?? colorScheme.secondary,
             fontSize: fontSize ?? defaultFontSize),
       ),
     );
