@@ -4,13 +4,15 @@
 
 part of '../constants.dart';
 
-enum PropertyEditorSidebar {
-  /// Analytics event that is sent when the property editor is updated with new
-  /// properties.
-  widgetPropertiesUpdate;
-
+// ignore: avoid_classes_with_only_static_members, used for namespacing.
+class PropertyEditorSidebar {
   /// Analytics id to track events that come from the DTD editor sidebar.
   static String get id => 'propertyEditorSidebar';
+
+  /// Analytics event that is sent when the property editor is updated with new
+  /// properties.
+  static String widgetPropertiesUpdate({String? name}) =>
+      'widgetPropertiesUpdate${name != null ? '-$name' : ''}';
 
   /// Analytics event for an edit request.
   static String applyEditRequest({

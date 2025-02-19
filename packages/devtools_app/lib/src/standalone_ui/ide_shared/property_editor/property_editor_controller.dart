@@ -10,6 +10,15 @@ import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
 
+typedef EditableWidgetData =
+    ({List<EditableArgument> args, String? name, String? documentation});
+
+typedef EditArgumentFunction =
+    Future<EditArgumentResponse?> Function<T>({
+      required String name,
+      required T value,
+    });
+
 class PropertyEditorController extends DisposableController
     with AutoDisposeControllerMixin {
   PropertyEditorController(this.editorClient) {
@@ -23,8 +32,9 @@ class PropertyEditorController extends DisposableController
   TextDocument? _currentDocument;
   CursorPosition? _currentCursorPosition;
 
-  ValueListenable<List<EditableArgument>> get editableArgs => _editableArgs;
-  final _editableArgs = ValueNotifier<List<EditableArgument>>([]);
+  ValueListenable<EditableWidgetData?> get editableWidgetData =>
+      _editableWidgetData;
+  final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
 
   void _init() {
     autoDisposeStreamSubscription(
@@ -48,14 +58,17 @@ class PropertyEditorController extends DisposableController
           position: cursorPosition,
         );
         final args = result?.args ?? <EditableArgument>[];
+        final name = result?.name;
+        _editableWidgetData.value = (
+          args: args,
+          name: name,
+          documentation: result?.documentation,
+        );
         // Register impression.
         ga.impression(
           gaId,
-          // TODO(https://github.com/flutter/devtools/issues/8716): Postfix with
-          // widget name.
-          gac.PropertyEditorSidebar.widgetPropertiesUpdate.name,
+          gac.PropertyEditorSidebar.widgetPropertiesUpdate(name: name),
         );
-        _editableArgs.value = args;
       }),
     );
   }
@@ -77,12 +90,16 @@ class PropertyEditorController extends DisposableController
 
   @visibleForTesting
   void initForTestsOnly({
-    List<EditableArgument>? editableArgs,
+    EditableArgumentsResult? editableArgsResult,
     TextDocument? document,
     CursorPosition? cursorPosition,
   }) {
-    if (editableArgs != null) {
-      _editableArgs.value = editableArgs;
+    if (editableArgsResult != null) {
+      _editableWidgetData.value = (
+        args: editableArgsResult.args,
+        name: editableArgsResult.name,
+        documentation: editableArgsResult.documentation,
+      );
     }
     if (document != null) {
       _currentDocument = document;
