@@ -42,18 +42,11 @@ class ScreenControllers {
     T Function() controllerCreator, {
     bool offline = false,
   }) {
-    final lazyController = _LazyController<T>(creator: controllerCreator);
-    if (offline) {
-      if (offlineControllers.containsKey(T)) {
-        offlineControllers.remove(T)?.dispose();
-      }
-      offlineControllers[T] = lazyController;
-    } else {
-      if (controllers.containsKey(T)) {
-        controllers.remove(T)?.dispose();
-      }
-      controllers[T] = lazyController;
+    final controllers = offline ? offlineControllers : this.controllers;
+    if (controllers.containsKey(T)) {
+      controllers.remove(T)?.dispose();
     }
+    controllers[T] = _LazyController<T>(creator: controllerCreator);
   }
 
   /// Returns the active screen controller of type [T].
