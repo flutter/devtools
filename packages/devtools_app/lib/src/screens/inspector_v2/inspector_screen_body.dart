@@ -62,12 +62,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   static const _welcomeShownStorageId = 'inspectorV2WelcomeShown';
 
   @override
-  void dispose() {
-    _inspectorTreeController.dispose();
-    super.dispose();
-  }
-
-  @override
   void initState() {
     super.initState();
     ga.screen(InspectorScreen.id);
