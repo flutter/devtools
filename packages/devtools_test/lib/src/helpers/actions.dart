@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+// ignore_for_file: invalid_use_of_visible_for_testing_member, valid use from package:devtools_test
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ import 'utils.dart';
 Future<void> navigateThroughDevToolsScreens(
   WidgetController controller, {
   bool runWithExpectations = true,
+  required bool connectedToApp,
 }) async {
   final visibleScreenIds = generateVisibleScreenIds();
   final tabs = controller.widgetList<Tab>(
@@ -44,6 +47,14 @@ Future<void> navigateThroughDevToolsScreens(
     shouldExpect: runWithExpectations,
   );
 
+  _maybeExpect(
+    screenControllers.controllers.length,
+    connectedToApp
+        ? devtoolsScreens!.where((s) => s.providesController).length
+        : ScreenMetaData.values.where((v) => !v.requiresConnection).length,
+  );
+  _maybeExpect(screenControllers.offlineControllers.length, 0);
+
   final screens =
       (ScreenMetaData.values.toList()
         ..removeWhere((data) => !visibleScreenIds.contains(data.id)));
@@ -60,7 +71,6 @@ Future<void> navigateThroughDevToolsScreens(
 
 List<String> generateVisibleScreenIds() {
   final availableScreenIds = <String>[];
-  // ignore: invalid_use_of_visible_for_testing_member, valid use from package:devtools_test
   for (final screen in devtoolsScreens!) {
     if (shouldShowScreen(screen.screen).show) {
       availableScreenIds.add(screen.screen.screenId);

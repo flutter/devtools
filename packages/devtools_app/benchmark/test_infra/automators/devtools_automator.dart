@@ -105,6 +105,7 @@ class DevToolsAutomater {
     await navigateThroughDevToolsScreens(
       controller,
       runWithExpectations: false,
+      connectedToApp: false,
     );
     logStatus('End navigate through offline DevTools tabs');
   }

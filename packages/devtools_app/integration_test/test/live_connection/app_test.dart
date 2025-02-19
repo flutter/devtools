@@ -33,6 +33,6 @@ void main() {
     await tester.pumpAndSettle(shortPumpDuration);
 
     logStatus('verify that we can load each DevTools screen');
-    await navigateThroughDevToolsScreens(tester);
+    await navigateThroughDevToolsScreens(tester, connectedToApp: true);
   });
 }
