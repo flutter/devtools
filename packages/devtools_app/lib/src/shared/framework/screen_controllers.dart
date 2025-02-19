@@ -110,5 +110,5 @@ class _LazyController<T extends DevToolsScreenController> {
 
 /// Base class for all DevTools screen controllers.
 abstract class DevToolsScreenController extends DisposableController {
-  void init();
+  void init() {}
 }

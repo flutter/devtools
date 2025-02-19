@@ -422,7 +422,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         (s) => !s.screen.requiresConnection,
       );
     }
-    print('registering ${screens.length} controllers');
     for (final s in screens) {
       s.registerController(routerDelegate, offline: offline);
     }
