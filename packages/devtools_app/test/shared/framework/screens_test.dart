@@ -6,7 +6,6 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/extension_screen.dart';
 import 'package:devtools_app/src/framework/scaffold/scaffold.dart';
 import 'package:devtools_app/src/shared/development_helpers.dart';
-import 'package:devtools_app/src/shared/framework/screen_controllers.dart';
 import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';

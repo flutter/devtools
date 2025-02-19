@@ -95,29 +95,85 @@ Widget wrapWithControllers(
   bool includeRouter = true,
   DevToolsQueryParams? queryParams,
 }) {
+  // The [ScreenControllers] class uses the [OfflineDataController] class to
+  // determine which type of controller should be returned from
+  // [ScreenController.lookup]. Set the global here if it is not already set.
+  if (globals[OfflineDataController] == null) {
+    setGlobal(OfflineDataController, OfflineDataController());
+  }
+  final offline = offlineDataController.showingOfflineData.value;
+  setGlobal(ScreenControllers, ScreenControllers());
+  if (inspector != null) {
+    screenControllers.register<InspectorScreenController>(
+      () => inspector,
+      offline: offline,
+    );
+  }
+  if (logging != null) {
+    screenControllers.register<LoggingController>(
+      () => logging,
+      offline: offline,
+    );
+  }
+  if (memory != null) {
+    screenControllers.register<MemoryController>(
+      () => memory,
+      offline: offline,
+    );
+  }
+  if (performance != null) {
+    screenControllers.register<PerformanceController>(
+      () => performance,
+      offline: offline,
+    );
+  }
+  if (profiler != null) {
+    screenControllers.register<ProfilerScreenController>(
+      () => profiler,
+      offline: offline,
+    );
+  }
+  if (network != null) {
+    screenControllers.register<NetworkController>(
+      () => network,
+      offline: offline,
+    );
+  }
+  if (debugger != null) {
+    screenControllers.register<DebuggerController>(
+      () => debugger,
+      offline: offline,
+    );
+  }
+  if (deepLink != null) {
+    screenControllers.register<DeepLinksController>(
+      () => deepLink,
+      offline: offline,
+    );
+  }
+  if (appSize != null) {
+    screenControllers.register<AppSizeController>(
+      () => appSize,
+      offline: offline,
+    );
+  }
+  if (vmDeveloperTools != null) {
+    screenControllers.register<VMDeveloperToolsController>(
+      () => vmDeveloperTools,
+      offline: offline,
+    );
+  }
+
+  var child = wrapWithNotifications(widget);
   final providers = [
-    if (inspector != null)
-      Provider<InspectorScreenController>.value(value: inspector),
-    if (logging != null) Provider<LoggingController>.value(value: logging),
-    if (memory != null) Provider<MemoryController>.value(value: memory),
-    if (performance != null)
-      Provider<PerformanceController>.value(value: performance),
-    if (profiler != null)
-      Provider<ProfilerScreenController>.value(value: profiler),
-    if (network != null) Provider<NetworkController>.value(value: network),
-    if (debugger != null) Provider<DebuggerController>.value(value: debugger),
-    if (deepLink != null) Provider<DeepLinksController>.value(value: deepLink),
-    if (appSize != null) Provider<AppSizeController>.value(value: appSize),
     if (analytics != null)
       Provider<AnalyticsController>.value(value: analytics),
     if (releaseNotes != null)
       Provider<ReleaseNotesController>.value(value: releaseNotes),
-    if (vmDeveloperTools != null)
-      Provider<VMDeveloperToolsController>.value(value: vmDeveloperTools),
   ];
-  final child = wrapWithNotifications(
-    MultiProvider(providers: providers, child: widget),
-  );
+  if (providers.isNotEmpty) {
+    child = MultiProvider(providers: providers, child: child);
+  }
   return includeRouter
       ? wrap(child, queryParams: queryParams)
       : wrapSimple(child);

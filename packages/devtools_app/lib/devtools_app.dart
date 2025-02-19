@@ -82,6 +82,7 @@ export 'src/shared/environment_parameters/environment_parameters_base.dart';
 export 'src/shared/environment_parameters/environment_parameters_external.dart';
 export 'src/shared/framework/routing.dart';
 export 'src/shared/framework/screen.dart';
+export 'src/shared/framework/screen_controllers.dart';
 export 'src/shared/globals.dart';
 export 'src/shared/http/http_request_data.dart';
 export 'src/shared/managers/banner_messages.dart';
