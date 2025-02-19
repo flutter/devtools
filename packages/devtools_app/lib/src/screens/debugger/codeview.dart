@@ -156,7 +156,6 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     if (widget.codeViewController != oldWidget.codeViewController) {
       cancelListeners();
       widget.codeViewController.initSearch();
-      widget.codeViewController.init();
       addAutoDisposeListener(
         widget.codeViewController.scriptLocation,
         _handleScriptLocationChanged,

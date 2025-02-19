@@ -99,7 +99,7 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          NetworkRequestInspector(controller),
+          const NetworkRequestInspector(),
           debugger: createMockDebuggerControllerWithDefaults(),
         ),
       );

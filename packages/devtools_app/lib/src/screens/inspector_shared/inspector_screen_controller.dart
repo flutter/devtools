@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-
 import '../../shared/analytics/metrics.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/framework/screen_controllers.dart';
@@ -11,11 +10,11 @@ import '../inspector/inspector_tree_controller.dart' as legacy;
 import '../inspector_v2/inspector_controller.dart' as v2;
 import '../inspector_v2/inspector_tree_controller.dart' as v2;
 
+class InspectorScreenController extends DevToolsScreenController {
   InspectorScreenController() {
     _init();
   }
 
-class InspectorScreenController extends DevToolsScreenController {
   late v2.InspectorController v2InspectorController;
   late v2.InspectorTreeController v2InspectorTreeController;
 

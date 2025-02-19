@@ -54,7 +54,7 @@ class DebuggerController extends DevToolsScreenController
     addAutoDisposeListener(_stackFramesWithLocation, _updateCurrentFrame);
 
     if (serviceConnection.serviceManager.connectedState.value.connected) {
-      _initialize();
+      _initializeForConnection();
     }
   }
 
@@ -106,13 +106,13 @@ class DebuggerController extends DevToolsScreenController
     if (service == _lastService) return;
     _lastService = service;
     _onServiceShutdown();
-    _initialize();
+    _initializeForConnection();
   }
 
   ValueListenable<IsolateRef?> get _isolate =>
       serviceConnection.serviceManager.isolateManager.selectedIsolate;
 
-  void _initialize() {
+  void _initializeForConnection() {
     if (_initialSwitchToIsolate) {
       assert(_isolate.value != null);
       _switchToIsolate(_isolate.value);
