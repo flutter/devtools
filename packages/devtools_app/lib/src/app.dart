@@ -126,9 +126,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       frameworkController.onConnectVmEvent.listen(_connectVm),
     );
 
+    _initScreenControllers(
+      connected:
+          serviceConnection.serviceManager.connectedState.value.connected,
+      offline: offlineDataController.showingOfflineData.value,
+    );
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
-        _initScreenControllersForScaffold();
+        _initScreenControllers(connected: true);
       } else {
         screenControllers.disposeConnectedControllers();
       }
@@ -368,7 +373,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         // If an offline route is pushed on top of another offline route, this
         // will cause the oldest set of controllers to be destroyed.
         screenControllers.disposeOfflineControllers();
-        _initScreenControllersForScaffold(offline: true);
+        _initScreenControllers(offline: true);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
           embedMode: params.embedMode,
@@ -401,16 +406,25 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> _visibleScreens() =>
       _screens.where((screen) => shouldShowScreen(screen).show).toList();
 
-  void _initScreenControllersForScaffold({bool offline = false}) {
+  void _initScreenControllers({bool connected = false, bool offline = false}) {
     // We use [widget.originalScreens] here instead of [_screens] because
     // extension screens do not provide a controller through this mechanism.
     final screensThatProvideController = widget.originalScreens.where(
-      (s) =>
-          s.providesController &&
-          (offline ? s.screen.worksWithOfflineData : true),
+      (s) => s.providesController,
     );
-    for (final s in screensThatProvideController) {
-      s.registerController(routerDelegate);
+    var screens = screensThatProvideController;
+    if (offline) {
+      screens = screensThatProvideController.where(
+        (s) => s.screen.worksWithOfflineData,
+      );
+    } else if (!connected) {
+      screens = screensThatProvideController.where(
+        (s) => !s.screen.requiresConnection,
+      );
+    }
+    print('registering ${screens.length} controllers');
+    for (final s in screens) {
+      s.registerController(routerDelegate, offline: offline);
     }
   }
 
@@ -554,7 +568,11 @@ class DevToolsScreen<C extends DevToolsScreenController> {
   /// [screen] is responsible for creating and maintaining its own controller.
   bool get providesController => createController != null;
 
-  void registerController(DevToolsRouterDelegate routerDelegate) {
+  /// Registers a screen controller with the [ScreenControllers] manager.
+  void registerController(
+    DevToolsRouterDelegate routerDelegate, {
+    required bool offline,
+  }) {
     screenControllers.register<C>(() {
       final controller =
           createController!(routerDelegate) as DisposableController;
@@ -562,7 +580,7 @@ class DevToolsScreen<C extends DevToolsScreenController> {
         controller.initReviewHistoryOnDisconnectListener();
       }
       return controller as C;
-    });
+    }, offline: offline);
   }
 }
 

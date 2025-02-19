@@ -9,8 +9,8 @@ import '../globals.dart';
 /// Manager for DevTools screen controllers.
 ///
 /// There are two distinct sets of screen controllers:
-/// 1. the controllers for connected mode (when DevTools is connected to a live
-///    VM service connection).
+/// 1. the controllers used for interaction with DevTools in standard mode (not
+///    showing offline data). A VM service connection may or may not be present.
 /// 2. the controllers for offline mode (when DevTools is showing offline data).
 ///    DevTools may be showing offline data even when DevTools is connected. In
 ///    this case, DevTools displays this data on another route, and there will
@@ -20,13 +20,16 @@ import '../globals.dart';
 /// screen. Each controller is globally accessible from anywhere in DevTools via
 /// the [screenControllers] global variable.
 class ScreenControllers {
-  final _connectedControllers =
+  final _controllers =
       <Type, _LazyController<DevToolsScreenController>>{};
 
   final _offlineControllers =
       <Type, _LazyController<DevToolsScreenController>>{};
 
   /// Registers a DevTools screen controller and stores the value.
+  /// 
+  /// If there is an existing controller of type `T`, the existing controller
+  /// will be disposed and removed from the set of stored controllers.
   ///
   /// [controllerCreator] is a callback that will be computed lazily when the
   /// controller is first accessed via [ScreenControllers.lookup].
@@ -39,11 +42,15 @@ class ScreenControllers {
   }) {
     final lazyController = _LazyController<T>(creator: controllerCreator);
     if (offline) {
-      assert(!_offlineControllers.containsKey(T));
+      if (_offlineControllers.containsKey(T)) {
+        _offlineControllers.remove(T)?.dispose();
+      }
       _offlineControllers[T] = lazyController;
     } else {
-      assert(!_connectedControllers.containsKey(T));
-      _connectedControllers[T] = lazyController;
+      if (_controllers.containsKey(T)) {
+        _controllers.remove(T)?.dispose();
+      }
+      _controllers[T] = lazyController;
     }
   }
 
@@ -56,8 +63,8 @@ class ScreenControllers {
       assert(_offlineControllers.containsKey(T));
       return _offlineControllers[T]!.controller as T;
     } else {
-      assert(_connectedControllers.containsKey(T));
-      return _connectedControllers[T]!.controller as T;
+      assert(_controllers.containsKey(T));
+      return _controllers[T]!.controller as T;
     }
   }
 
@@ -66,10 +73,10 @@ class ScreenControllers {
   /// This method is called when DevTools disconnects from a VM service
   /// instance.
   void disposeConnectedControllers() {
-    for (final lazyController in _connectedControllers.values) {
+    for (final lazyController in _controllers.values) {
       lazyController.dispose();
     }
-    _connectedControllers.clear();
+    _controllers.clear();
   }
 
   /// Disposes all controllers for the current offline data.
@@ -103,5 +110,5 @@ class _LazyController<T extends DevToolsScreenController> {
 
 /// Base class for all DevTools screen controllers.
 abstract class DevToolsScreenController extends DisposableController {
-  void init() {}
+  void init();
 }
