@@ -22,15 +22,14 @@ import '../globals.dart';
 /// the [screenControllers] global variable.
 class ScreenControllers {
   @visibleForTesting
-  final controllers =
-      <Type, _LazyController<DevToolsScreenController>>{};
+  final controllers = <Type, _LazyController<DevToolsScreenController>>{};
 
   @visibleForTesting
   final offlineControllers =
       <Type, _LazyController<DevToolsScreenController>>{};
 
   /// Registers a DevTools screen controller and stores the value.
-  /// 
+  ///
   /// If there is an existing controller of type `T`, the existing controller
   /// will be disposed and removed from the set of stored controllers.
   ///
