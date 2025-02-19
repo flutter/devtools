@@ -63,7 +63,7 @@ class _Breakpoint extends StatelessWidget {
     return Material(
       color: isSelected ? theme.colorScheme.selectedRowBackgroundColor : null,
       child: InkWell(
-        onTap: () async => await _onBreakpointSelected(breakpoint, controller),
+        onTap: () async => await controller.selectBreakpoint(breakpoint),
         child: Padding(
           padding: const EdgeInsets.all(borderPadding),
           child: Row(
@@ -102,13 +102,6 @@ class _Breakpoint extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _onBreakpointSelected(
-    BreakpointAndSourcePosition bp,
-    DebuggerController controller,
-  ) async {
-    await controller.selectBreakpoint(bp);
   }
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {
