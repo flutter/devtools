@@ -49,6 +49,15 @@ class NetworkScreen extends Screen {
 
   @override
   Widget? buildStatus(BuildContext context) {
+    final connected =
+        serviceConnection.serviceManager.connectedState.value.connected &&
+        serviceConnection.serviceManager.connectedAppInitialized;
+    if (!connected && !offlineDataController.showingOfflineData.value) {
+      // Do not show status for the Network screen when showing the disconnected
+      // body.
+      return null;
+    }
+
     final networkController = screenControllers.lookup<NetworkController>();
     final color = Theme.of(context).colorScheme.onPrimary;
     return MultiValueListenableBuilder(
