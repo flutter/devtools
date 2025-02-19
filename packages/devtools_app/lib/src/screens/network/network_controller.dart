@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
+import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/http/http_service.dart' as http_service;
@@ -44,7 +45,7 @@ enum NetworkResponseViewType {
 
 enum _NetworkTrafficType { http, socket }
 
-class NetworkController extends DisposableController
+class NetworkController extends DevToolsScreenController
     with
         SearchControllerMixin<NetworkRequest>,
         FilterControllerMixin<NetworkRequest>,

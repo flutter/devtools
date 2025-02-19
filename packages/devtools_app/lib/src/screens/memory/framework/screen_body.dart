@@ -11,7 +11,6 @@ import '../../../shared/globals.dart';
 import '../../../shared/http/http_service.dart' as http_service;
 import '../../../shared/managers/banner_messages.dart';
 import '../../../shared/ui/common_widgets.dart';
-import '../../../shared/utils/utils.dart';
 import '../panes/chart/widgets/chart_pane.dart';
 import '../panes/control/widgets/control_pane.dart';
 import 'memory_controller.dart';
@@ -25,10 +24,7 @@ class ConnectedMemoryBody extends StatefulWidget {
 }
 
 class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
-    with
-        AutoDisposeMixin,
-        SingleTickerProviderStateMixin,
-        ProvidedControllerMixin<MemoryController, ConnectedMemoryBody> {
+    with AutoDisposeMixin, SingleTickerProviderStateMixin {
   final _focusNode = FocusNode(debugLabel: 'memory');
 
   @override
@@ -40,9 +36,6 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    if (!initController()) return;
-
     if (!offlineDataController.showingOfflineData.value) {
       maybePushDebugModeMemoryMessage(context, ScreenMetaData.memory.id);
       maybePushHttpLoggingMessage(context, ScreenMetaData.memory.id);
@@ -55,6 +48,7 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
 
   @override
   Widget build(BuildContext context) {
+    final controller = screenControllers.lookup<MemoryController>();
     return FutureBuilder<void>(
       future: controller.initialized,
       builder: (context, snapshot) {

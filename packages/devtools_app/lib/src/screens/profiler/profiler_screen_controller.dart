@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/logger/allowed_error.dart';
+import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/offline/offline_data.dart';
 import '../../shared/primitives/utils.dart';
@@ -18,7 +19,7 @@ import 'cpu_profiler_controller.dart';
 import 'profiler_screen.dart';
 import 'sampling_rate.dart';
 
-class ProfilerScreenController extends DisposableController
+class ProfilerScreenController extends DevToolsScreenController
     with
         AutoDisposeControllerMixin,
         OfflineScreenControllerMixin<CpuProfileData> {

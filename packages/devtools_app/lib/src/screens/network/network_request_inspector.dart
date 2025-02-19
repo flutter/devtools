@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/ui/tab.dart';
 import 'network_controller.dart';
@@ -14,7 +15,7 @@ import 'network_request_inspector_views.dart';
 
 /// A [Widget] which displays information about a network request.
 class NetworkRequestInspector extends StatelessWidget {
-  const NetworkRequestInspector(this.controller, {super.key});
+  const NetworkRequestInspector({super.key});
 
   static const _overviewTabTitle = 'Overview';
   static const _headersTabTitle = 'Headers';
@@ -22,7 +23,8 @@ class NetworkRequestInspector extends StatelessWidget {
   static const _responseTabTitle = 'Response';
   static const _cookiesTabTitle = 'Cookies';
 
-  final NetworkController controller;
+  NetworkController get controller =>
+      screenControllers.lookup<NetworkController>();
 
   DevToolsTab _buildTab({required String tabName, Widget? trailing}) {
     return DevToolsTab.create(

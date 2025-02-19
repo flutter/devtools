@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 
 import '../config_specific/import_export/import_export.dart';
 import '../framework/routing.dart';
+import '../framework/screen_controllers.dart';
 import '../globals.dart';
 
 /// Controller that manages offline mode for DevTools.
@@ -127,7 +128,8 @@ class OfflineDataController {
 ///   ),
 /// }
 /// ```
-mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
+mixin OfflineScreenControllerMixin<T>
+    on DevToolsScreenController, AutoDisposeControllerMixin {
   final _exportController = ExportController();
 
   /// Whether this controller is actively loading offline data.

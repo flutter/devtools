@@ -6,6 +6,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/extension_screen.dart';
 import 'package:devtools_app/src/framework/scaffold/scaffold.dart';
 import 'package:devtools_app/src/shared/development_helpers.dart';
+import 'package:devtools_app/src/shared/framework/screen_controllers.dart';
 import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -44,11 +45,11 @@ void main() {
       screen1 = SimpleScreen(const Placeholder());
       screen2 = SimpleScreen(const Placeholder());
       extensionScreen1 =
-          DevToolsScreen<void>(
+          DevToolsScreen<DevToolsScreenController>(
             ExtensionScreen(StubDevToolsExtensions.someToolExtension),
           ).screen;
       extensionScreen2 =
-          DevToolsScreen<void>(
+          DevToolsScreen<DevToolsScreenController>(
             ExtensionScreen(StubDevToolsExtensions.barExtension),
           ).screen;
       screens = <Screen>[screen1, screen2, extensionScreen1, extensionScreen2];

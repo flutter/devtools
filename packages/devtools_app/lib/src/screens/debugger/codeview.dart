@@ -27,7 +27,6 @@ import '../../shared/ui/history_viewport.dart';
 import '../../shared/ui/hover.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
-import '../../shared/utils/utils.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'breakpoints.dart';
 import 'codeview_controller.dart';
@@ -157,6 +156,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     if (widget.codeViewController != oldWidget.codeViewController) {
       cancelListeners();
       widget.codeViewController.initSearch();
+      widget.codeViewController.init();
       addAutoDisposeListener(
         widget.codeViewController.scriptLocation,
         _handleScriptLocationChanged,
@@ -1162,8 +1162,15 @@ class LineItem extends StatefulWidget {
   State<LineItem> createState() => _LineItemState();
 }
 
-class _LineItemState extends State<LineItem>
-    with ProvidedControllerMixin<DebuggerController, LineItem> {
+class _LineItemState extends State<LineItem> {
+  late DebuggerController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = screenControllers.lookup<DebuggerController>();
+  }
+
   Future<HoverCardData?> _generateHoverCardData({
     required PointerEvent event,
     required bool Function() isHoverStale,
@@ -1198,17 +1205,6 @@ class _LineItemState extends State<LineItem>
       }
     }
     return null;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override

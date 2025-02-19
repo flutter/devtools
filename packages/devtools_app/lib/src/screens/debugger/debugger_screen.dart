@@ -10,7 +10,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/scheduler.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
@@ -23,7 +22,6 @@ import '../../shared/managers/banner_messages.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/common_widgets.dart';
-import '../../shared/utils/utils.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
@@ -50,7 +48,7 @@ class DebuggerScreen extends Screen {
 
   @override
   ShortcutsConfiguration buildKeyboardShortcuts(BuildContext context) {
-    final controller = Provider.of<DebuggerController>(context);
+    final controller = screenControllers.lookup<DebuggerController>();
     final shortcuts = <LogicalKeySet, Intent>{
       goToLineNumberKeySet: GoToLineNumberIntent(context, controller),
       searchInFileKeySet: SearchInFileIntent(controller),
@@ -79,7 +77,7 @@ class DebuggerScreen extends Screen {
 
   @override
   Widget buildStatus(BuildContext context) {
-    final controller = Provider.of<DebuggerController>(context);
+    final controller = screenControllers.lookup<DebuggerController>();
     return DebuggerStatus(controller: controller);
   }
 }
@@ -95,12 +93,9 @@ class _DebuggerScreenBodyWrapper extends StatefulWidget {
 }
 
 class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<
-          DebuggerController,
-          _DebuggerScreenBodyWrapper
-        > {
+    with AutoDisposeMixin {
+  late DebuggerController controller;
+
   late bool _shownFirstScript;
 
   @override
@@ -108,6 +103,8 @@ class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
     super.initState();
     ga.screen(DebuggerScreen.id);
     ga.timeStart(DebuggerScreen.id, gac.pageReady);
+
+    controller = screenControllers.lookup<DebuggerController>();
     _shownFirstScript = false;
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       if (!_shownFirstScript ||
@@ -122,14 +119,13 @@ class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
         ),
       );
     });
+    unawaited(controller.onFirstDebuggerScreenLoad());
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     pushDebuggerIdeRecommendationMessage(context, DebuggerScreen.id);
-    if (!initController()) return;
-    unawaited(controller.onFirstDebuggerScreenLoad());
   }
 
   @override
@@ -178,7 +174,7 @@ class DebuggerWindows extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<DebuggerController>(context);
+    final controller = screenControllers.lookup<DebuggerController>();
     return LayoutBuilder(
       builder: (context, constraints) {
         return FlexSplitColumn(
@@ -265,7 +261,7 @@ class DebuggerSourceAndControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<DebuggerController>(context);
+    final controller = screenControllers.lookup<DebuggerController>();
     final codeViewController = controller.codeViewController;
     return Column(
       children: [
@@ -522,17 +518,22 @@ class FloatingDebuggerControls extends StatefulWidget {
 }
 
 class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<DebuggerController, FloatingDebuggerControls> {
+    with AutoDisposeMixin {
   late double controlHeight;
 
   bool get _isPaused => serviceConnection.serviceManager.isMainIsolatePaused;
 
+  late final DebuggerController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = screenControllers.lookup<DebuggerController>();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initController()) return;
     cancelListeners();
 
     controlHeight = _isPaused ? defaultButtonHeight : 0.0;

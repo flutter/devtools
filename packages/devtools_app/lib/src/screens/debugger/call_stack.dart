@@ -9,9 +9,9 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/common_widgets.dart';
-import '../../shared/utils/utils.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
 
@@ -22,14 +22,15 @@ class CallStack extends StatefulWidget {
   State<CallStack> createState() => _CallStackState();
 }
 
-class _CallStackState extends State<CallStack>
-    with ProvidedControllerMixin<DebuggerController, CallStack> {
+class _CallStackState extends State<CallStack> {
   StackFrameAndSourcePosition? _clickedOnFrame;
 
+  late DebuggerController controller;
+
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
+  void initState() {
+    super.initState();
+    controller = screenControllers.lookup<DebuggerController>();
   }
 
   @override

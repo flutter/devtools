@@ -24,6 +24,7 @@ import '../shared/config_specific/framework_initialize/framework_initialize.dart
 import '../shared/console/eval/eval_service.dart';
 import '../shared/framework/app_error_handling.dart' as error_handling;
 import '../shared/framework/framework_controller.dart';
+import '../shared/framework/screen_controllers.dart';
 import '../shared/globals.dart';
 import '../shared/managers/banner_messages.dart';
 import '../shared/managers/notifications.dart';
@@ -81,6 +82,7 @@ abstract class FrameworkCore {
   }
 
   static void _initGlobals() {
+    setGlobal(ScreenControllers, ScreenControllers());
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     setGlobal(MessageBus, MessageBus());
     setGlobal(FrameworkController, FrameworkController());

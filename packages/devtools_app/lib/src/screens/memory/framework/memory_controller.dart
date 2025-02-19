@@ -11,6 +11,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../shared/framework/screen.dart';
+import '../../../shared/framework/screen_controllers.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/memory/class_name.dart';
 import '../../../shared/memory/heap_graph_loader.dart';
@@ -28,7 +29,7 @@ import 'offline_data/offline_data.dart';
 /// allows tests of the complicated logic in this class to run on the VM.
 ///
 /// The controller should be recreated for every new connection.
-class MemoryController extends DisposableController
+class MemoryController extends DevToolsScreenController
     with
         AutoDisposeControllerMixin,
         OfflineScreenControllerMixin<OfflineMemoryData> {
