@@ -48,14 +48,16 @@ TextSpan truncateTextSpan(TextSpan span, int length) {
 }
 
 /// Returns the width in pixels of the [span].
-double calculateTextSpanWidth(TextSpan? span) {
+double calculateTextSpanWidth(TextSpan span) {
   final textPainter = TextPainter(
     text: span,
     textAlign: TextAlign.left,
     textDirection: TextDirection.ltr,
   )..layout();
+  final width = textPainter.width;
+  textPainter.dispose();
 
-  return textPainter.width;
+  return width;
 }
 
 /// Returns the height in pixels of the [span].

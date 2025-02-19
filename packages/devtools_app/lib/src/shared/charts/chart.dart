@@ -360,7 +360,7 @@ class ChartPainter extends CustomPainter {
         // Draw the X-axis labels.
         for (final timestamp in chartController.labelTimestamps) {
           final xCoord = chartController.timestampToXCanvasCoord(timestamp);
-          drawXTick(canvas, timestamp, xCoord, axis, displayTime: true);
+          _drawXTick(canvas, timestamp, xCoord, axis);
         }
       });
 
@@ -380,7 +380,7 @@ class ChartPainter extends CustomPainter {
       });
     }
 
-    drawTitle(canvas, size, chartController.title);
+    _drawTitle(canvas, size, chartController.title);
 
     final elapsedTime = DateTime.now().difference(startTime).inMilliseconds;
     if (debugTrackPaintTime && elapsedTime > 500) {
@@ -410,9 +410,10 @@ class ChartPainter extends CustomPainter {
   }
 
   // TODO(terry): Use drawText?
-  void drawTitle(Canvas canvas, Size size, String title) {
-    final tp = createText(title, 1.5);
+  void _drawTitle(Canvas canvas, Size size, String title) {
+    final tp = _createText(title, 1.5);
     tp.paint(canvas, Offset(size.width / 2 - tp.width / 2, 0));
+    tp.dispose();
   }
 
   void drawAxes(
@@ -470,7 +471,7 @@ class ChartPainter extends CustomPainter {
       );
 
       // Label starts at left edge.
-      drawText(labelName, canvas, -chartController.xCanvasChart / 2, yCoord);
+      _drawText(labelName, canvas, -chartController.xCanvasChart / 2, yCoord);
 
       // Draw horizontal tick 6 pixels from Y-axis line.
       canvas.drawLine(Offset(0, yCoord), Offset(-6, yCoord), axis);
@@ -524,36 +525,24 @@ class ChartPainter extends CustomPainter {
     return label == 0 ? '0' : '$label$unit';
   }
 
-  void drawXTick(
-    Canvas canvas,
-    int timestamp,
-    double xTickCoord,
-    Paint axis, {
-    bool shortTick = true,
-    bool displayTime = false,
-  }) {
-    if (displayTime) {
-      // Draw vertical tick (short or long).
-      canvas.drawLine(
-        Offset(xTickCoord, 0),
-        Offset(xTickCoord, shortTick ? 2 : 6),
-        axis,
-      );
+  void _drawXTick(Canvas canvas, int timestamp, double xTickCoord, Paint axis) {
+    // Draw vertical tick (short or long).
+    canvas.drawLine(Offset(xTickCoord, 0), Offset(xTickCoord, 2), axis);
 
-      final tp = createText(prettyTimestamp(timestamp), 1);
-      tp.paint(
-        canvas,
-        Offset(xTickCoord - tp.width ~/ 2, 15.0 - tp.height ~/ 2),
-      );
-    }
+    final tp = _createText(prettyTimestamp(timestamp), 1);
+    tp
+      ..paint(canvas, Offset(xTickCoord - tp.width ~/ 2, 15.0 - tp.height ~/ 2))
+      ..dispose();
   }
 
-  void drawText(String textValue, Canvas canvas, double x, double y) {
-    final tp = createText(textValue, 1);
-    tp.paint(canvas, Offset(x + -tp.width / 2, y - tp.height / 2));
+  void _drawText(String textValue, Canvas canvas, double x, double y) {
+    final tp = _createText(textValue, 1);
+    tp
+      ..paint(canvas, Offset(x + -tp.width / 2, y - tp.height / 2))
+      ..dispose();
   }
 
-  TextPainter createText(String textValue, double scale) {
+  TextPainter _createText(String textValue, double scale) {
     final span = TextSpan(
       // TODO(terry): All text in a chart is grey. A chart like a Trace
       //              should have PaintCharacteristics.

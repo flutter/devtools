@@ -16,6 +16,7 @@ import '../feature_flags.dart';
 import '../globals.dart';
 import '../primitives/listenable.dart';
 import '../ui/icons.dart';
+import '../ui/utils.dart';
 
 final _log = Logger('screen.dart');
 
@@ -355,12 +356,9 @@ abstract class Screen {
     bool includeTabBarSpacing = true,
   }) {
     final title = _userFacingTitle;
-    final painter = TextPainter(
-      text: TextSpan(text: title),
-      textDirection: TextDirection.ltr,
-    )..layout();
+    final textWidth = calculateTextSpanWidth(TextSpan(text: title));
     const measurementBuffer = 1.0;
-    return painter.width +
+    return textWidth +
         denseSpacing +
         defaultIconSize +
         (includeTabBarSpacing ? tabBarSpacing * 2 : 0.0) +
@@ -408,15 +406,10 @@ abstract class Screen {
 
         if (count > 0) {
           // Calculate the width of the title text so that we can provide an accurate
-          // size for the [BadgePainter]
-          final painter = TextPainter(
-            text: TextSpan(
-              text: title,
-              style: Theme.of(context).regularTextStyle,
-            ),
-            textDirection: TextDirection.ltr,
-          )..layout();
-          final titleWidth = painter.width;
+          // size for the [BadgePainter].
+          final titleWidth = calculateTextSpanWidth(
+            TextSpan(text: title, style: Theme.of(context).regularTextStyle),
+          );
 
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -604,6 +597,7 @@ class BadgePainter extends CustomPainter {
       canvas,
       Offset(size.width + (badgeWidth - countPainter.width) / 2, 0),
     );
+    countPainter.dispose();
   }
 
   @override
