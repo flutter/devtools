@@ -58,8 +58,13 @@ Future<void> navigateThroughDevToolsScreens(
     connectedToApp
         ? expectedConnectedControllersCount
         : expectedDisconnectedControllersCount,
+    shouldExpect: runWithExpectations,
   );
-  _maybeExpect(screenControllers.offlineControllers.length, 0);
+  _maybeExpect(
+    screenControllers.offlineControllers.length,
+    0,
+    shouldExpect: runWithExpectations,
+  );
 
   final screens =
       (ScreenMetaData.values.toList()
