@@ -47,11 +47,17 @@ Future<void> navigateThroughDevToolsScreens(
     shouldExpect: runWithExpectations,
   );
 
+  final expectedConnectedControllersCount =
+      devtoolsScreens!.where((s) => s.providesController).length;
+  final expectedDisconnectedControllersCount =
+      devtoolsScreens!
+          .where((s) => s.providesController && !s.screen.requiresConnection)
+          .length;
   _maybeExpect(
     screenControllers.controllers.length,
     connectedToApp
-        ? devtoolsScreens!.where((s) => s.providesController).length
-        : ScreenMetaData.values.where((v) => !v.requiresConnection).length,
+        ? expectedConnectedControllersCount
+        : expectedDisconnectedControllersCount,
   );
   _maybeExpect(screenControllers.offlineControllers.length, 0);
 
