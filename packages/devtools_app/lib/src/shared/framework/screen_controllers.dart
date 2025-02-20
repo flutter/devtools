@@ -54,13 +54,12 @@ class ScreenControllers {
   /// When DevTools is showing offline data, the offline screen controller will
   /// be returned.
   T lookup<T>() {
-    if (offlineDataController.showingOfflineData.value) {
-      assert(offlineControllers.containsKey(T));
-      return offlineControllers[T]!.controller as T;
-    } else {
-      assert(controllers.containsKey(T));
-      return controllers[T]!.controller as T;
-    }
+    final controllers =
+        offlineDataController.showingOfflineData.value
+            ? offlineControllers
+            : this.controllers;
+    assert(controllers.containsKey(T));
+    return controllers[T]!.controller as T;
   }
 
   /// Disposes all controllers for the current VM service connection.
