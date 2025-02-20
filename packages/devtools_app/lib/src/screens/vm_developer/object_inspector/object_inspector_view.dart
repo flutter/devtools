@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/globals.dart';
 import '../../../shared/ui/drop_down_button.dart';
 import '../../debugger/program_explorer.dart';
 import '../../debugger/program_explorer_model.dart';
@@ -44,9 +44,9 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final vmDeveloperToolsController = Provider.of<VMDeveloperToolsController>(
-      context,
-    );
+
+    final vmDeveloperToolsController =
+        screenControllers.lookup<VMDeveloperToolsController>();
     controller = vmDeveloperToolsController.objectInspectorViewController;
     unawaited(controller.init());
   }
@@ -83,9 +83,8 @@ class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final vmDeveloperToolsController = Provider.of<VMDeveloperToolsController>(
-      context,
-    );
+    final vmDeveloperToolsController =
+        screenControllers.lookup<VMDeveloperToolsController>();
     controller = vmDeveloperToolsController.objectInspectorViewController;
     unawaited(controller.init());
   }

@@ -5,13 +5,12 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/framework/screen.dart';
+import '../../shared/globals.dart';
 import '../../shared/ui/utils.dart';
-import '../../shared/utils/utils.dart';
 import '_log_details.dart';
 import '_logs_table.dart';
 import 'logging_controller.dart';
@@ -31,8 +30,7 @@ class LoggingScreen extends Screen {
 
   @override
   Widget buildStatus(BuildContext context) {
-    final controller = Provider.of<LoggingController>(context);
-
+    final controller = screenControllers.lookup<LoggingController>();
     return StreamBuilder<String>(
       initialData: controller.statusText,
       stream: controller.onLogStatusChanged,
@@ -51,21 +49,14 @@ class LoggingScreenBody extends StatefulWidget {
 }
 
 class _LoggingScreenState extends State<LoggingScreenBody>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<LoggingController, LoggingScreenBody> {
+    with AutoDisposeMixin {
+  late LoggingController controller;
+
   @override
   void initState() {
     super.initState();
     ga.screen(gac.logging);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-
-    cancelListeners();
+    controller = screenControllers.lookup<LoggingController>();
     addAutoDisposeListener(controller.filteredData);
   }
 

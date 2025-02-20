@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../ui/common_widgets.dart';
-import '../utils/utils.dart';
 import 'analytics_controller.dart';
 
 /// Conditionally displays a prompt to request permission for collection of
@@ -22,12 +22,13 @@ class AnalyticsPrompt extends StatefulWidget {
   State<AnalyticsPrompt> createState() => _AnalyticsPromptState();
 }
 
-class _AnalyticsPromptState extends State<AnalyticsPrompt>
-    with ProvidedControllerMixin<AnalyticsController, AnalyticsPrompt> {
+class _AnalyticsPromptState extends State<AnalyticsPrompt> {
+  late AnalyticsController controller;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    initController();
+    controller = context.watch<AnalyticsController>();
   }
 
   @override

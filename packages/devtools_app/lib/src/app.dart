@@ -51,6 +51,7 @@ import 'shared/feature_flags.dart';
 import 'shared/framework/framework_controller.dart';
 import 'shared/framework/routing.dart';
 import 'shared/framework/screen.dart';
+import 'shared/framework/screen_controllers.dart';
 import 'shared/globals.dart';
 import 'shared/offline/offline_data.dart';
 import 'shared/offline/offline_screen.dart';
@@ -104,8 +105,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _originalScreens =>
       widget.originalScreens.map((s) => s.screen).toList();
 
-  Iterable<Screen> get _extensionScreens => extensionService.visibleExtensions
-      .map((e) => DevToolsScreen<void>(ExtensionScreen(e)).screen);
+  Iterable<Screen> get _extensionScreens =>
+      extensionService.visibleExtensions.map(
+        (e) =>
+            DevToolsScreen<DevToolsScreenController>(ExtensionScreen(e)).screen,
+      );
 
   final hoverCardController = HoverCardController();
 
@@ -121,6 +125,19 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     autoDisposeStreamSubscription(
       frameworkController.onConnectVmEvent.listen(_connectVm),
     );
+
+    _initScreenControllers(
+      connected:
+          serviceConnection.serviceManager.connectedState.value.connected,
+      offline: offlineDataController.showingOfflineData.value,
+    );
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        _initScreenControllers(connected: true);
+      } else {
+        screenControllers.disposeConnectedControllers();
+      }
+    });
 
     // TODO(https://github.com/flutter/devtools/issues/6018): Once
     // https://github.com/flutter/flutter/issues/129692 is fixed, disable the
@@ -335,10 +352,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                       ],
             );
           }
-          return MultiProvider(
-            providers: _providedControllers(),
-            child: scaffold,
-          );
+          return scaffold;
         },
       );
     }
@@ -354,13 +368,16 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       homeScreenId: _buildTabbedPage,
       for (final screen in _screens) screen.screenId: _buildTabbedPage,
       snapshotScreenId: (_, _, params, _) {
+        // TODO(kenz): support multiple offline routes, or prevent an offline
+        // route from being pushed on top of another one.
+        // If an offline route is pushed on top of another offline route, this
+        // will cause the oldest set of controllers to be destroyed.
+        screenControllers.disposeOfflineControllers();
+        _initScreenControllers(offline: true);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
           embedMode: params.embedMode,
-          child: MultiProvider(
-            providers: _providedControllers(offline: true),
-            child: OfflineScreenBody(params.offlineScreenId, _screens),
-          ),
+          child: OfflineScreenBody(params.offlineScreenId, _screens),
         );
       },
       ..._standaloneScreens,
@@ -389,17 +406,25 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> _visibleScreens() =>
       _screens.where((screen) => shouldShowScreen(screen).show).toList();
 
-  List<Provider> _providedControllers({bool offline = false}) {
+  void _initScreenControllers({bool connected = false, bool offline = false}) {
     // We use [widget.originalScreens] here instead of [_screens] because
     // extension screens do not provide a controller through this mechanism.
-    return widget.originalScreens
-        .where(
-          (s) =>
-              s.providesController &&
-              (offline ? s.screen.worksWithOfflineData : true),
-        )
-        .map((s) => s.controllerProvider(routerDelegate))
-        .toList();
+    final screensThatProvideController = widget.originalScreens.where(
+      (s) => s.providesController,
+    );
+    var screens = screensThatProvideController;
+    if (offline) {
+      screens = screensThatProvideController.where(
+        (s) => s.screen.worksWithOfflineData,
+      );
+    } else if (!connected) {
+      screens = screensThatProvideController.where(
+        (s) => !s.screen.requiresConnection,
+      );
+    }
+    for (final s in screens) {
+      s.registerController(routerDelegate, offline: offline);
+    }
   }
 
   @override
@@ -515,7 +540,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 ///
 /// [C] corresponds to the type of the screen's controller, which is created by
 /// [createController] or provided by [controllerProvider].
-class DevToolsScreen<C extends Object?> {
+class DevToolsScreen<C extends DevToolsScreenController> {
   const DevToolsScreen(this.screen, {this.createController});
 
   final Screen screen;
@@ -542,16 +567,19 @@ class DevToolsScreen<C extends Object?> {
   /// [screen] is responsible for creating and maintaining its own controller.
   bool get providesController => createController != null;
 
-  Provider<C> controllerProvider(DevToolsRouterDelegate routerDelegate) {
-    return Provider<C>(
-      create: (_) {
-        final controller = createController!(routerDelegate);
-        if (controller is OfflineScreenControllerMixin) {
-          controller.initReviewHistoryOnDisconnectListener();
-        }
-        return controller;
-      },
-    );
+  /// Registers a screen controller with the [ScreenControllers] manager.
+  void registerController(
+    DevToolsRouterDelegate routerDelegate, {
+    required bool offline,
+  }) {
+    screenControllers.register<C>(() {
+      final controller =
+          createController!(routerDelegate) as DisposableController;
+      if (controller is OfflineScreenControllerMixin) {
+        controller.initReviewHistoryOnDisconnectListener();
+      }
+      return controller as C;
+    }, offline: offline);
   }
 }
 
@@ -635,7 +663,9 @@ List<DevToolsScreen> defaultScreens({
   List<DevToolsJsonFile> sampleData = const [],
 }) {
   return devtoolsScreens ??= <DevToolsScreen>[
-    DevToolsScreen<void>(HomeScreen(sampleData: sampleData)),
+    DevToolsScreen<DevToolsScreenController>(
+      HomeScreen(sampleData: sampleData),
+    ),
     // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
     // Inspector V2 has been released.
     DevToolsScreen<InspectorScreenController>(
@@ -668,7 +698,7 @@ List<DevToolsScreen> defaultScreens({
       LoggingScreen(),
       createController: (_) => LoggingController(),
     ),
-    DevToolsScreen<void>(ProviderScreen()),
+    DevToolsScreen<DevToolsScreenController>(ProviderScreen()),
     DevToolsScreen<AppSizeController>(
       AppSizeScreen(),
       createController: (_) => AppSizeController(),

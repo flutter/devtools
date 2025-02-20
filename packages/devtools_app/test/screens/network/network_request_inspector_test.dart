@@ -59,7 +59,8 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          NetworkRequestInspector(controller),
+          const NetworkRequestInspector(),
+          network: controller,
           debugger: createMockDebuggerControllerWithDefaults(),
         ),
       );
@@ -99,7 +100,8 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          NetworkRequestInspector(controller),
+          const NetworkRequestInspector(),
+          network: controller,
           debugger: createMockDebuggerControllerWithDefaults(),
         ),
       );
@@ -167,6 +169,7 @@ void main() {
                   currentResponseViewType.value = value;
                 },
               ),
+              network: controller,
               debugger: createMockDebuggerControllerWithDefaults(),
             ),
           );
@@ -206,6 +209,7 @@ void main() {
                   initial = afterOnChanged;
                 },
               ),
+              network: controller,
               debugger: createMockDebuggerControllerWithDefaults(),
             ),
           );
@@ -257,6 +261,7 @@ void main() {
                 ),
               ],
             ),
+            network: controller,
             debugger: createMockDebuggerControllerWithDefaults(),
           ),
         );

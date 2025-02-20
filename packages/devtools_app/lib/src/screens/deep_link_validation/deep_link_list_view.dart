@@ -5,16 +5,15 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../shared/feature_flags.dart';
+import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/ui/colors.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tab.dart';
-import '../../shared/utils/utils.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
 import 'validation_details_view.dart';
@@ -33,15 +32,15 @@ class DeepLinkListView extends StatefulWidget {
   State<DeepLinkListView> createState() => _DeepLinkListViewState();
 }
 
-class _DeepLinkListViewState extends State<DeepLinkListView>
-    with ProvidedControllerMixin<DeepLinksController, DeepLinkListView> {
+class _DeepLinkListViewState extends State<DeepLinkListView> {
+  late DeepLinksController controller;
+
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-    callWhenControllerReady((_) {
-      controller.firstLoadWithDefaultConfigurations();
-    });
+  void initState() {
+    super.initState();
+    controller =
+        screenControllers.lookup<DeepLinksController>()
+          ..firstLoadWithDefaultConfigurations();
   }
 
   @override
@@ -66,7 +65,7 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<DeepLinksController>(context);
+    final controller = screenControllers.lookup<DeepLinksController>();
     final theme = Theme.of(context);
     return ValueListenableBuilder<PagePhase>(
       valueListenable: controller.pagePhase,
@@ -133,7 +132,7 @@ class _ValidatedDeepLinksView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<DeepLinksController>(context);
+    final controller = screenControllers.lookup<DeepLinksController>();
     return ValueListenableBuilder<DisplayOptions>(
       valueListenable: controller.displayOptionsNotifier,
       builder: (context, displayOptions, _) {
@@ -246,7 +245,7 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<DeepLinksController>(context);
+    final controller = screenControllers.lookup<DeepLinksController>();
     return AreaPaneHeader(
       roundedTopBorder: false,
       includeTopBorder: false,

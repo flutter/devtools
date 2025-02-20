@@ -8,7 +8,6 @@ import 'package:flutter/material.dart' hide Badge;
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/common_widgets.dart';
-import '../../shared/utils/utils.dart';
 import 'common.dart';
 import 'debugger_controller.dart';
 import 'debugger_model.dart';
@@ -16,23 +15,12 @@ import 'debugger_model.dart';
 double get executableLineRadius => scaleByFontFactor(1.5);
 double get breakpointRadius => scaleByFontFactor(6.0);
 
-class Breakpoints extends StatefulWidget {
+class Breakpoints extends StatelessWidget {
   const Breakpoints({super.key});
 
   @override
-  State<Breakpoints> createState() => _BreakpointsState();
-}
-
-class _BreakpointsState extends State<Breakpoints>
-    with ProvidedControllerMixin<DebuggerController, Breakpoints> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final controller = screenControllers.lookup<DebuggerController>();
     return MultiValueListenableBuilder(
       listenables: [
         breakpointManager.breakpointsWithLocation,
@@ -46,24 +34,36 @@ class _BreakpointsState extends State<Breakpoints>
           itemCount: breakpoints.length,
           itemExtent: defaultListItemHeight,
           itemBuilder: (_, index) {
-            return buildBreakpoint(breakpoints[index], selectedBreakpoint);
+            return _Breakpoint(
+              breakpoint: breakpoints[index],
+              selectedBreakpoint: selectedBreakpoint,
+            );
           },
         );
       },
     );
   }
+}
 
-  Widget buildBreakpoint(
-    BreakpointAndSourcePosition bp,
-    BreakpointAndSourcePosition? selectedBreakpoint,
-  ) {
+class _Breakpoint extends StatelessWidget {
+  const _Breakpoint({
+    required this.breakpoint,
+    required this.selectedBreakpoint,
+  });
+
+  final BreakpointAndSourcePosition breakpoint;
+  final BreakpointAndSourcePosition? selectedBreakpoint;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isSelected = bp.id == selectedBreakpoint?.id;
+    final isSelected = breakpoint.id == selectedBreakpoint?.id;
+    final controller = screenControllers.lookup<DebuggerController>();
 
     return Material(
       color: isSelected ? theme.colorScheme.selectedRowBackgroundColor : null,
       child: InkWell(
-        onTap: () async => await _onBreakpointSelected(bp),
+        onTap: () async => await controller.selectBreakpoint(breakpoint),
         child: Padding(
           padding: const EdgeInsets.all(borderPadding),
           child: Row(
@@ -83,11 +83,11 @@ class _BreakpointsState extends State<Breakpoints>
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
-                    text: _descriptionFor(bp),
+                    text: _descriptionFor(breakpoint),
                     style: theme.regularTextStyle,
                     children: [
                       TextSpan(
-                        text: ' (${bp.scriptUri})',
+                        text: ' (${breakpoint.scriptUri})',
                         style:
                             isSelected
                                 ? theme.selectedSubtleTextStyle
@@ -102,10 +102,6 @@ class _BreakpointsState extends State<Breakpoints>
         ),
       ),
     );
-  }
-
-  Future<void> _onBreakpointSelected(BreakpointAndSourcePosition bp) async {
-    await controller.selectBreakpoint(bp);
   }
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {

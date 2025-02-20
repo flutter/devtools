@@ -21,6 +21,7 @@ import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/diagnostics/tree_builder.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/framework/routing.dart';
+import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
@@ -33,7 +34,7 @@ final _debugTimingLog = DebugTimingLogger('debugger', mute: true);
 final _log = Logger('debugger_controller');
 
 /// Responsible for managing the debug state of the app.
-class DebuggerController extends DisposableController
+class DebuggerController extends DevToolsScreenController
     with AutoDisposeControllerMixin {
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
@@ -53,7 +54,7 @@ class DebuggerController extends DisposableController
     addAutoDisposeListener(_stackFramesWithLocation, _updateCurrentFrame);
 
     if (serviceConnection.serviceManager.connectedState.value.connected) {
-      _initialize();
+      _initializeForConnection();
     }
   }
 
@@ -105,13 +106,13 @@ class DebuggerController extends DisposableController
     if (service == _lastService) return;
     _lastService = service;
     _onServiceShutdown();
-    _initialize();
+    _initializeForConnection();
   }
 
   ValueListenable<IsolateRef?> get _isolate =>
       serviceConnection.serviceManager.isolateManager.selectedIsolate;
 
-  void _initialize() {
+  void _initializeForConnection() {
     if (_initialSwitchToIsolate) {
       assert(_isolate.value != null);
       _switchToIsolate(_isolate.value);

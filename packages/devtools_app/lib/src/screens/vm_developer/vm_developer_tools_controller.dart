@@ -4,10 +4,11 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../shared/framework/screen_controllers.dart';
 import 'object_inspector/object_inspector_view_controller.dart';
 import 'vm_developer_tools_screen.dart';
 
-class VMDeveloperToolsController {
+class VMDeveloperToolsController extends DevToolsScreenController {
   VMDeveloperToolsController({
     ObjectInspectorViewController? objectInspectorViewController,
   }) : objectInspectorViewController =

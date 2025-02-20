@@ -19,6 +19,7 @@ import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/framework/app_error_handling.dart' as error_handling;
+import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/message_bus.dart';
@@ -82,7 +83,7 @@ final _hideSummaryLogKinds = <String>{
   FlutterEvent.frameworkInitialization,
 };
 
-class LoggingController extends DisposableController
+class LoggingController extends DevToolsScreenController
     with
         SearchControllerMixin<LogData>,
         FilterControllerMixin<LogData>,

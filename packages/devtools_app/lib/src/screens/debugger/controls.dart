@@ -13,7 +13,6 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/common_widgets.dart';
-import '../../shared/utils/utils.dart';
 import 'debugger_controller.dart';
 
 class DebuggingControls extends StatefulWidget {
@@ -32,13 +31,13 @@ class DebuggingControls extends StatefulWidget {
 }
 
 class _DebuggingControlsState extends State<DebuggingControls>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<DebuggerController, DebuggingControls> {
+    with AutoDisposeMixin {
+  late DebuggerController controller;
+
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
+  void initState() {
+    super.initState();
+    controller = screenControllers.lookup<DebuggerController>();
     addAutoDisposeListener(
       serviceConnection
           .serviceManager

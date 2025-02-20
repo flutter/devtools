@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../service/service_registrations.dart' as registrations;
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
+import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/offline/offline_data.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
@@ -27,7 +28,7 @@ import 'performance_screen.dart';
 /// The controller manages the performance data model and feature controllers,
 /// which handle things like data processing and communication with the view
 /// to give and receive data updates.
-class PerformanceController extends DisposableController
+class PerformanceController extends DevToolsScreenController
     with
         AutoDisposeControllerMixin,
         OfflineScreenControllerMixin<OfflinePerformanceData> {

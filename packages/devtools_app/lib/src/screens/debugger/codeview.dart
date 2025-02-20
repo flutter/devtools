@@ -27,7 +27,6 @@ import '../../shared/ui/history_viewport.dart';
 import '../../shared/ui/hover.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
-import '../../shared/utils/utils.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'breakpoints.dart';
 import 'codeview_controller.dart';
@@ -1140,7 +1139,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   }
 }
 
-class LineItem extends StatefulWidget {
+class LineItem extends StatelessWidget {
   const LineItem({
     super.key,
     required this.lineContents,
@@ -1159,18 +1158,97 @@ class LineItem extends StatefulWidget {
   final SourceToken? activeSearchMatch;
 
   @override
-  State<LineItem> createState() => _LineItemState();
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    Widget child;
+    final column = pausedFrame?.column;
+    if (column != null) {
+      final breakpointColor = theme.colorScheme.primary;
+      final widthToCurrentColumn = calculateTextSpanWidth(
+        truncateTextSpan(lineContents, column - 1),
+      );
+      // The following constants are tweaked for using the
+      // 'Icons.label_important' icon.
+      const colIconSize = 13.0;
+      // Subtract 3 to offset the icon at the start of the character:
+      final colLeftOffset = widthToCurrentColumn - 3.0;
+      const colBottomOffset = 13.0;
+      const colIconRotate = -90 * math.pi / 180;
+
+      // TODO: support selecting text across multiples lines.
+      child = Stack(
+        children: [
+          Row(
+            children: [
+              Transform.translate(
+                offset: Offset(colLeftOffset, colBottomOffset),
+                child: Transform.rotate(
+                  angle: colIconRotate,
+                  child: Icon(
+                    Icons.label_important,
+                    size: colIconSize,
+                    color: breakpointColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          _HoverableLine(
+            lineContents: lineContents,
+            searchMatches: searchMatches,
+            activeSearchMatch: activeSearchMatch,
+          ),
+        ],
+      );
+    } else {
+      child = _HoverableLine(
+        lineContents: lineContents,
+        searchMatches: searchMatches,
+        activeSearchMatch: activeSearchMatch,
+      );
+    }
+
+    final backgroundColor =
+        focused ? theme.colorScheme.selectedRowBackgroundColor : null;
+
+    return Container(
+      alignment: Alignment.centerLeft,
+      height: CodeView.rowHeight,
+      color: backgroundColor,
+      child: child,
+    );
+  }
 }
 
-class _LineItemState extends State<LineItem>
-    with ProvidedControllerMixin<DebuggerController, LineItem> {
+class _HoverableLine extends StatelessWidget {
+  const _HoverableLine({
+    required this.lineContents,
+    this.searchMatches,
+    this.activeSearchMatch,
+  });
+
+  final TextSpan lineContents;
+  final List<SourceToken>? searchMatches;
+  final SourceToken? activeSearchMatch;
+
+  @override
+  Widget build(BuildContext context) {
+    return HoverCardTooltip.async(
+      enabled: () => true,
+      asyncTimeout: 100,
+      asyncGenerateHoverCardData: _generateHoverCardData,
+      child: Text.rich(searchAwareLineContents(context), maxLines: 1),
+    );
+  }
+
   Future<HoverCardData?> _generateHoverCardData({
     required PointerEvent event,
     required bool Function() isHoverStale,
   }) async {
     if (!serviceConnection.serviceManager.isMainIsolatePaused) return null;
 
-    final word = wordForHover(event.localPosition.dx, widget.lineContents);
+    final word = wordForHover(event.localPosition.dx, lineContents);
 
     if (word.isNotEmpty && !isPrimitiveValueOrNull(word)) {
       try {
@@ -1200,100 +1278,12 @@ class _LineItemState extends State<LineItem>
     return null;
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    Widget child;
-    final column = widget.pausedFrame?.column;
-    if (column != null) {
-      final breakpointColor = theme.colorScheme.primary;
-      final widthToCurrentColumn = calculateTextSpanWidth(
-        truncateTextSpan(widget.lineContents, column - 1),
-      );
-      // The following constants are tweaked for using the
-      // 'Icons.label_important' icon.
-      const colIconSize = 13.0;
-      // Subtract 3 to offset the icon at the start of the character:
-      final colLeftOffset = widthToCurrentColumn - 3.0;
-      const colBottomOffset = 13.0;
-      const colIconRotate = -90 * math.pi / 180;
-
-      // TODO: support selecting text across multiples lines.
-      child = Stack(
-        children: [
-          Row(
-            children: [
-              Transform.translate(
-                offset: Offset(colLeftOffset, colBottomOffset),
-                child: Transform.rotate(
-                  angle: colIconRotate,
-                  child: Icon(
-                    Icons.label_important,
-                    size: colIconSize,
-                    color: breakpointColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          _hoverableLine(),
-        ],
-      );
-    } else {
-      child = _hoverableLine();
-    }
-
-    final backgroundColor =
-        widget.focused ? theme.colorScheme.selectedRowBackgroundColor : null;
-
-    return Container(
-      alignment: Alignment.centerLeft,
-      height: CodeView.rowHeight,
-      color: backgroundColor,
-      child: child,
-    );
-  }
-
-  Widget _hoverableLine() => HoverCardTooltip.async(
-    enabled: () => true,
-    asyncTimeout: 100,
-    asyncGenerateHoverCardData: _generateHoverCardData,
-    child: Text.rich(searchAwareLineContents(), maxLines: 1),
-  );
-
-  TextSpan searchAwareLineContents() {
-    // If syntax highlighting is disabled for the script, then
-    // `widget.lineContents` is simply a `TextSpan` with no children.
-    final lineContents = widget.lineContents.children ?? [widget.lineContents];
-    final activeSearchAwareContents = _activeSearchAwareLineContents(
-      lineContents,
-    );
-    final allSearchAwareContents = _searchMatchAwareLineContents(
-      activeSearchAwareContents!,
-    );
-    return TextSpan(
-      children: allSearchAwareContents,
-      style: widget.lineContents.style,
-    );
-  }
-
   List<InlineSpan> _contentsWithMatch(
     List<InlineSpan> startingContents,
     SourceToken match,
-    Color matchColor,
-  ) {
+    Color matchColor, {
+    required BuildContext context,
+  }) {
     final contentsWithMatch = <InlineSpan>[];
     var startColumnForSpan = 0;
     for (final span in startingContents) {
@@ -1361,25 +1351,46 @@ class _LineItemState extends State<LineItem>
     return contentsWithMatch;
   }
 
+  TextSpan searchAwareLineContents(BuildContext context) {
+    // If syntax highlighting is disabled for the script, then
+    // `lineContents` is simply a `TextSpan` with no children.
+    final lineContentsSpans = lineContents.children ?? [lineContents];
+    final activeSearchAwareContents = _activeSearchAwareLineContents(
+      lineContentsSpans,
+      context: context,
+    );
+    final allSearchAwareContents = _searchMatchAwareLineContents(
+      activeSearchAwareContents!,
+      context: context,
+    );
+    return TextSpan(
+      children: allSearchAwareContents,
+      style: lineContents.style,
+    );
+  }
+
   List<InlineSpan>? _activeSearchAwareLineContents(
-    List<InlineSpan> startingContents,
-  ) {
-    final activeSearchMatch = widget.activeSearchMatch;
-    if (activeSearchMatch == null) return startingContents;
+    List<InlineSpan> startingContents, {
+    required BuildContext context,
+  }) {
+    final match = activeSearchMatch;
+    if (match == null) return startingContents;
     return _contentsWithMatch(
       startingContents,
-      activeSearchMatch,
+      match,
       activeSearchMatchColor,
+      context: context,
     );
   }
 
   List<InlineSpan> _searchMatchAwareLineContents(
-    List<InlineSpan> startingContents,
-  ) {
-    final searchMatches = widget.searchMatches;
-    if (searchMatches == null || searchMatches.isEmpty) return startingContents;
-    final searchMatchesToFind = List<SourceToken>.of(searchMatches)
-      ..remove(widget.activeSearchMatch);
+    List<InlineSpan> startingContents, {
+    required BuildContext context,
+  }) {
+    final matches = searchMatches;
+    if (matches == null || matches.isEmpty) return startingContents;
+    final searchMatchesToFind = List<SourceToken>.of(matches)
+      ..remove(activeSearchMatch);
 
     var contentsWithMatch = startingContents;
     for (final match in searchMatchesToFind) {
@@ -1387,6 +1398,7 @@ class _LineItemState extends State<LineItem>
         contentsWithMatch,
         match,
         searchMatchColor,
+        context: context,
       );
     }
     return contentsWithMatch;

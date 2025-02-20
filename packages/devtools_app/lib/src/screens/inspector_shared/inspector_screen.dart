@@ -5,12 +5,10 @@
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../shared/feature_flags.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
-import '../../shared/utils/utils.dart';
 import '../inspector/inspector_screen_body.dart' as legacy;
 import '../inspector_v2/inspector_screen_body.dart' as v2;
 import 'inspector_screen_controller.dart';
@@ -44,21 +42,17 @@ class InspectorScreenSwitcher extends StatefulWidget {
 }
 
 class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<
-          InspectorScreenController,
-          InspectorScreenSwitcher
-        > {
+    with AutoDisposeMixin {
+  late InspectorScreenController controller;
+
   bool get shouldShowInspectorV2 =>
       FeatureFlags.inspectorV2 &&
       !preferences.inspector.legacyInspectorEnabled.value;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-
+  void initState() {
+    super.initState();
+    controller = screenControllers.lookup<InspectorScreenController>();
     addAutoDisposeListener(
       preferences.inspector.legacyInspectorEnabled,
       () async {
@@ -74,8 +68,6 @@ class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<InspectorScreenController>(context);
-
     return ValueListenableBuilder(
       valueListenable: preferences.inspector.legacyInspectorEnabled,
       builder: (context, _, _) {

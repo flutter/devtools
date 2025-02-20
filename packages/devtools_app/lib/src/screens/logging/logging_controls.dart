@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../service/service_extension_widgets.dart';
 import '../../shared/analytics/constants.dart' as gac;
@@ -24,7 +23,7 @@ class LoggingControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<LoggingController>(context);
+    final controller = screenControllers.lookup<LoggingController>();
     return Row(
       children: [
         ClearButton(

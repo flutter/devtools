@@ -13,7 +13,6 @@ import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tab.dart';
-import '../../shared/utils/utils.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
@@ -29,23 +28,20 @@ class TabbedPerformanceView extends StatefulWidget {
 }
 
 class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<PerformanceController, TabbedPerformanceView> {
+    with AutoDisposeMixin {
   static const _gaPrefix = 'performanceTab';
+
+  late PerformanceController controller;
 
   late FlutterFramesController _flutterFramesController;
 
   FlutterFrame? _selectedFlutterFrame;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-
+  void initState() {
+    super.initState();
+    controller = screenControllers.lookup<PerformanceController>();
     _flutterFramesController = controller.flutterFramesController;
-
-    cancelListeners();
 
     _selectedFlutterFrame = _flutterFramesController.selectedFrame.value;
     addAutoDisposeListener(_flutterFramesController.selectedFrame, () {

@@ -11,6 +11,7 @@ import 'package:vm_snapshot_analysis/utils.dart';
 import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../../shared/charts/treemap.dart';
+import '../../shared/framework/screen_controllers.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/ui/colors.dart';
@@ -73,7 +74,7 @@ class DiffTreeMap {
   final TreemapNode? decreaseOnly;
 }
 
-class AppSizeController {
+class AppSizeController extends DevToolsScreenController {
   static const unsupportedFileTypeError =
       'Failed to load size analysis file: file type not supported.\n\n'
       'The app size tool supports Dart AOT v8 snapshots, instruction sizes, '

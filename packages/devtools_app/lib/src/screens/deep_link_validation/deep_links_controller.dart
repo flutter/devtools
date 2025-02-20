@@ -14,6 +14,7 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
 import '../../shared/feature_flags.dart';
+import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/server/server.dart' as server;
@@ -145,7 +146,7 @@ class DisplayOptions {
   }
 }
 
-class DeepLinksController extends DisposableController
+class DeepLinksController extends DevToolsScreenController
     with AutoDisposeControllerMixin {
   @override
   void dispose() {

@@ -18,7 +18,6 @@ import '../../shared/managers/banner_messages.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/file_import.dart';
-import '../../shared/utils/utils.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';
 import 'cpu_profiler_controller.dart';
@@ -57,9 +56,9 @@ class ProfilerScreenBody extends StatefulWidget {
 }
 
 class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<ProfilerScreenController, ProfilerScreenBody> {
+    with AutoDisposeMixin {
+  late ProfilerScreenController controller;
+
   bool recording = false;
 
   late CpuProfilerBusyStatus profilerBusyStatus;
@@ -70,17 +69,8 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   void initState() {
     super.initState();
     ga.screen(ProfilerScreen.id);
+    controller = screenControllers.lookup<ProfilerScreenController>();
     addAutoDisposeListener(offlineDataController.showingOfflineData);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    maybePushDebugModePerformanceMessage(context, ProfilerScreen.id);
-    if (!initController()) return;
-
-    cancelListeners();
-
     addAutoDisposeListener(controller.loadingOfflineData);
 
     recording = controller.recordingNotifier.value;
@@ -101,6 +91,12 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
         });
       },
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    maybePushDebugModePerformanceMessage(context, ProfilerScreen.id);
   }
 
   @override

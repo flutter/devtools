@@ -44,11 +44,11 @@ void main() {
       screen1 = SimpleScreen(const Placeholder());
       screen2 = SimpleScreen(const Placeholder());
       extensionScreen1 =
-          DevToolsScreen<void>(
+          DevToolsScreen<DevToolsScreenController>(
             ExtensionScreen(StubDevToolsExtensions.someToolExtension),
           ).screen;
       extensionScreen2 =
-          DevToolsScreen<void>(
+          DevToolsScreen<DevToolsScreenController>(
             ExtensionScreen(StubDevToolsExtensions.barExtension),
           ).screen;
       screens = <Screen>[screen1, screen2, extensionScreen1, extensionScreen2];

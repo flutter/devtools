@@ -21,7 +21,6 @@ import '../../shared/server/server.dart' as server;
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/file_import.dart';
 import '../../shared/ui/tab.dart';
-import '../../shared/utils/utils.dart';
 import 'app_size_controller.dart';
 import 'app_size_table.dart';
 import 'code_size_attribution.dart';
@@ -73,10 +72,7 @@ class AppSizeBody extends StatefulWidget {
 }
 
 class _AppSizeBodyState extends State<AppSizeBody>
-    with
-        AutoDisposeMixin,
-        SingleTickerProviderStateMixin,
-        ProvidedControllerMixin<AppSizeController, AppSizeBody> {
+    with AutoDisposeMixin, SingleTickerProviderStateMixin {
   static const _gaPrefix = 'appSizeTab';
   static final diffTab = DevToolsTab.create(
     tabName: 'Diff',
@@ -90,6 +86,8 @@ class _AppSizeBodyState extends State<AppSizeBody>
   );
   static final tabs = [analysisTab, diffTab];
 
+  late AppSizeController controller;
+
   late final TabController _tabController;
 
   bool _preLoadingData = false;
@@ -98,8 +96,11 @@ class _AppSizeBodyState extends State<AppSizeBody>
   void initState() {
     super.initState();
     ga.screen(gac.appSize);
+    controller = screenControllers.lookup<AppSizeController>();
     _tabController = TabController(length: tabs.length, vsync: this);
     addAutoDisposeListener(_tabController);
+    unawaited(maybeLoadAppSizeFiles());
+    addAutoDisposeListener(controller.activeDiffTreeType);
   }
 
   Future<void> maybeLoadAppSizeFiles() async {
@@ -148,16 +149,6 @@ class _AppSizeBodyState extends State<AppSizeBody>
 
   void _pushErrorMessage(String error) {
     if (mounted) notificationService.pushError(error);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-
-    unawaited(maybeLoadAppSizeFiles());
-
-    addAutoDisposeListener(controller.activeDiffTreeType);
   }
 
   @override
@@ -328,17 +319,15 @@ class AnalysisView extends StatefulWidget {
   State<AnalysisView> createState() => _AnalysisViewState();
 }
 
-class _AnalysisViewState extends State<AnalysisView>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<AppSizeController, AnalysisView> {
+class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
+  late AppSizeController controller;
+
   TreemapNode? analysisRoot;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-
+  void initState() {
+    super.initState();
+    controller = screenControllers.lookup<AppSizeController>();
     analysisRoot = controller.analysisRoot.value.node;
 
     addAutoDisposeListener(controller.analysisRoot, () {
@@ -433,16 +422,15 @@ class DiffView extends StatefulWidget {
   State<DiffView> createState() => _DiffViewState();
 }
 
-class _DiffViewState extends State<DiffView>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<AppSizeController, DiffView> {
+class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
+  late AppSizeController controller;
+
   TreemapNode? diffRoot;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
+  void initState() {
+    super.initState();
+    controller = screenControllers.lookup<AppSizeController>();
 
     diffRoot = controller.diffRoot.value;
     addAutoDisposeListener(controller.diffRoot, () {

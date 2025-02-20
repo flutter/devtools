@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../devtools.dart' as devtools;
@@ -151,59 +150,6 @@ List<String> issueLinkDetails() {
     ]);
   }
   return issueDescriptionItems;
-}
-
-typedef ProvidedControllerCallback<T> = void Function(T);
-
-/// Mixin that provides a [controller] from package:provider for a State class.
-///
-/// [initController] must be called from [State.didChangeDependencies]. If
-/// [initController] returns false, return early from [didChangeDependencies] to
-/// avoid calling any initialization code that should only be called once for a
-/// controller. See [initController] documentation below for more details.
-mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
-  T get controller => _controller!;
-
-  T? _controller;
-
-  final _callWhenReady = <ProvidedControllerCallback>[];
-
-  /// Calls the provided [callback] once [_controller] has been initialized.
-  ///
-  /// The [callback] will be called immediately if [_controller] has already
-  /// been initialized.
-  void callWhenControllerReady(ProvidedControllerCallback callback) {
-    if (_controller != null) {
-      callback(_controller!);
-    } else {
-      _callWhenReady.add(callback);
-    }
-  }
-
-  /// Initializes [_controller] from package:provider.
-  ///
-  /// This method should be called in [didChangeDependencies]. Returns whether
-  /// or not a new controller was provided upon subsequent calls to
-  /// [initController].
-  ///
-  /// This method will commonly be used to return early from
-  /// [didChangeDependencies] when initialization code should not be run again
-  /// if the provided controller has not changed.
-  ///
-  /// E.g. `if (!initController()) return;`
-  bool initController() {
-    final newController = Provider.of<T>(context);
-    if (newController == _controller) return false;
-    final firstInitialization = _controller == null;
-    _controller = newController;
-    if (firstInitialization) {
-      for (final callback in _callWhenReady) {
-        callback(_controller!);
-      }
-      _callWhenReady.clear();
-    }
-    return true;
-  }
 }
 
 class ConnectionDescription {

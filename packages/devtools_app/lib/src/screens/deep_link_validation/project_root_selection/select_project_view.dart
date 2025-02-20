@@ -14,7 +14,6 @@ import '../../../shared/feature_flags.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/server/server.dart' as server;
-import '../../../shared/utils/utils.dart';
 import '../deep_links_controller.dart';
 import '../deep_links_model.dart';
 import 'root_selector.dart';
@@ -29,8 +28,9 @@ class SelectProjectView extends StatefulWidget {
   State<SelectProjectView> createState() => _SelectProjectViewState();
 }
 
-class _SelectProjectViewState extends State<SelectProjectView>
-    with ProvidedControllerMixin<DeepLinksController, SelectProjectView> {
+class _SelectProjectViewState extends State<SelectProjectView> {
+  late DeepLinksController controller;
+
   bool _retrievingFlutterProject = false;
 
   List<Uri>? projectRoots;
@@ -39,6 +39,8 @@ class _SelectProjectViewState extends State<SelectProjectView>
   void initState() {
     super.initState();
     unawaited(_initProjectRoots());
+    controller = screenControllers.lookup<DeepLinksController>();
+    unawaited(_validateProject());
   }
 
   Future<void> _initProjectRoots() async {
@@ -48,17 +50,12 @@ class _SelectProjectViewState extends State<SelectProjectView>
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
-    callWhenControllerReady((_) async {
-      final packageDirectoryForMainIsolate =
-          await controller.packageDirectoryForMainIsolate();
-      if (packageDirectoryForMainIsolate != null) {
-        _handleValidateProject(packageDirectoryForMainIsolate);
-      }
-    });
+  Future<void> _validateProject() async {
+    final packageDirectoryForMainIsolate =
+        await controller.packageDirectoryForMainIsolate();
+    if (packageDirectoryForMainIsolate != null) {
+      _handleValidateProject(packageDirectoryForMainIsolate);
+    }
   }
 
   Future<List<String>> _requestAndridVariants(String directory) async {

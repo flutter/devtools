@@ -58,25 +58,22 @@ class PerformanceScreenBody extends StatefulWidget {
 }
 
 class PerformanceScreenBodyState extends State<PerformanceScreenBody>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<PerformanceController, PerformanceScreenBody> {
+    with AutoDisposeMixin {
+  late PerformanceController controller;
+
   @override
   void initState() {
     super.initState();
     ga.screen(PerformanceScreen.id);
+    controller = screenControllers.lookup<PerformanceController>();
     addAutoDisposeListener(offlineDataController.showingOfflineData);
+    addAutoDisposeListener(controller.loadingOfflineData);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
-
-    if (!initController()) return;
-
-    cancelListeners();
-    addAutoDisposeListener(controller.loadingOfflineData);
   }
 
   @override

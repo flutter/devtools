@@ -3,12 +3,11 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/framework/screen.dart';
-import '../../shared/utils/utils.dart';
+import '../../shared/globals.dart';
 import 'isolate_statistics/isolate_statistics_view.dart';
 import 'object_inspector/object_inspector_view.dart';
 import 'process_memory/process_memory_view.dart';
@@ -47,7 +46,7 @@ class VMDeveloperToolsScreen extends Screen {
       const VMDeveloperToolsScreenBody();
 }
 
-class VMDeveloperToolsScreenBody extends StatefulWidget {
+class VMDeveloperToolsScreenBody extends StatelessWidget {
   const VMDeveloperToolsScreenBody({super.key});
 
   static final views = <VMDeveloperView>[
@@ -58,37 +57,20 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
   ];
 
   @override
-  State<VMDeveloperToolsScreenBody> createState() =>
-      _VMDeveloperToolsScreenState();
-}
-
-class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
-    with
-        AutoDisposeMixin,
-        ProvidedControllerMixin<
-          VMDeveloperToolsController,
-          VMDeveloperToolsScreenBody
-        > {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final controller = screenControllers.lookup<VMDeveloperToolsController>();
     return ValueListenableBuilder<int>(
       valueListenable: controller.selectedIndex,
       builder: (context, selectedIndex, _) {
         return Row(
           children: [
-            if (VMDeveloperToolsScreenBody.views.length > 1)
+            if (views.length > 1)
               NavigationRail(
                 selectedIndex: selectedIndex,
                 labelType: NavigationRailLabelType.all,
                 onDestinationSelected: controller.selectIndex,
                 destinations: [
-                  for (final view in VMDeveloperToolsScreenBody.views)
+                  for (final view in views)
                     NavigationRailDestination(
                       label: Text(view.title),
                       icon: Icon(view.icon),
@@ -100,10 +82,7 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                 padding: const EdgeInsets.only(left: defaultSpacing),
                 child: IndexedStack(
                   index: selectedIndex,
-                  children: [
-                    for (final view in VMDeveloperToolsScreenBody.views)
-                      view.build(context),
-                  ],
+                  children: [for (final view in views) view.build(context)],
                 ),
               ),
             ),

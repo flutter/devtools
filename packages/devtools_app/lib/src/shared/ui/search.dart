@@ -851,17 +851,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
   @override
   void initState() {
     super.initState();
-    // ignore: avoid-unrelated-type-assertions, false positive.
-    if (this is ProvidedControllerMixin) {
-      // Controllers provided through package:provider will not be ready until
-      // [didChangeDependencies] is called, so ensure [searchController] is
-      // ready before calling [searchController.initSearch].
-      (this as ProvidedControllerMixin).callWhenControllerReady((_) {
-        searchController.initSearch();
-      });
-    } else {
-      searchController.initSearch();
-    }
+    searchController.initSearch();
   }
 
   @override

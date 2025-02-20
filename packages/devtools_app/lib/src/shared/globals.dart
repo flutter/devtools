@@ -13,6 +13,7 @@ import '../service/service_manager.dart';
 import 'console/eval/eval_service.dart';
 import 'environment_parameters/environment_parameters_base.dart';
 import 'framework/framework_controller.dart';
+import 'framework/screen_controllers.dart';
 import 'managers/banner_messages.dart';
 import 'managers/notifications.dart';
 import 'managers/script_manager.dart';
@@ -26,6 +27,9 @@ import 'primitives/storage.dart';
 bool get isExternalBuild => _isExternalBuild;
 bool _isExternalBuild = true;
 void setInternalBuild() => _isExternalBuild = false;
+
+ScreenControllers get screenControllers =>
+    globals[ScreenControllers] as ScreenControllers;
 
 ServiceConnectionManager get serviceConnection =>
     globals[ServiceConnectionManager] as ServiceConnectionManager;
