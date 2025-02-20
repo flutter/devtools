@@ -33,7 +33,17 @@ final _debugTimingLog = DebugTimingLogger('debugger', mute: true);
 
 final _log = Logger('debugger_controller');
 
-/// Responsible for managing the debug state of the app.
+/// Screen controller for the Debugger screen and generally for managing the
+/// debug state of the connected app.
+/// 
+/// This controller can be accessed from anywhere in DevTools, as long as it was
+/// first registered, by
+/// calling `screenControllers.lookup<DebuggerController>()`.
+/// 
+/// The controller lifecycle is managed by the [ScreenControllers] class. The
+/// `init` method is called lazily upon the first controller access from
+/// `screenControllers`. The `dispose` method is called by `screenControllers`
+/// when DevTools is destroying a set of DevTools screen controllers.
 class DebuggerController extends DevToolsScreenController
     with AutoDisposeControllerMixin {
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
@@ -42,20 +52,39 @@ class DebuggerController extends DevToolsScreenController
     DevToolsRouterDelegate? routerDelegate,
     bool initialSwitchToIsolate = true,
   }) : _initialSwitchToIsolate = initialSwitchToIsolate {
+    init();
+    if (routerDelegate != null) {
+      codeViewController.subscribeToRouterEvents(routerDelegate);
+    }
+  }
+
+  @override
+  void init() {
+    super.init();
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
         _handleConnectionAvailable(serviceConnection.serviceManager.service!);
       }
     });
-    if (routerDelegate != null) {
-      codeViewController.subscribeToRouterEvents(routerDelegate);
-    }
+
     addAutoDisposeListener(_selectedStackFrame, _updateCurrentFrame);
     addAutoDisposeListener(_stackFramesWithLocation, _updateCurrentFrame);
 
     if (serviceConnection.serviceManager.connectedState.value.connected) {
       _initializeForConnection();
     }
+  }
+
+  @override
+  void dispose() {
+    codeViewController.dispose();
+    _resuming.dispose();
+    _stackFramesWithLocation.dispose();
+    _selectedStackFrame.dispose();
+    _selectedBreakpoint.dispose();
+    _exceptionPauseMode.dispose();
+    _hasTruncatedFrames.dispose();
+    super.dispose();
   }
 
   final codeViewController = CodeViewController();

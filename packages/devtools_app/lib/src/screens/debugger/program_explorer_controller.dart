@@ -419,4 +419,16 @@ class ProgramExplorerController extends DisposableController
     }
     return null;
   }
+
+  @override
+  void dispose() {
+    _outlineNodes.dispose();
+    _isLoadingOutline.dispose();
+    rootObjectNodesInternal.dispose();
+    _selectedNodeIndex.dispose();
+    _initialized.dispose();
+    _scriptSelection = null;
+    _outlineSelection = null;
+    super.dispose();
+  }
 }

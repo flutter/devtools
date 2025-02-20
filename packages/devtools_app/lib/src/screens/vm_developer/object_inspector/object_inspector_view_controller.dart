@@ -59,6 +59,17 @@ class ObjectInspectorViewController extends DisposableController
     }
   }
 
+  @override
+  void dispose() {
+    classHierarchyController.dispose();
+    programExplorerController.dispose();
+    codeViewController.dispose();
+    objectStoreController.dispose();
+    objectHistory.dispose();
+    _refreshing.dispose();
+    super.dispose();
+  }
+
   Future<void> _onCurrentObjectChanged() async {
     final currentObjectValue = objectHistory.current.value;
 

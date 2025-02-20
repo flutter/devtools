@@ -31,6 +31,12 @@ class CodeViewController extends DisposableController
         SearchControllerMixin<SourceToken>,
         RouteStateHandlerMixin {
   CodeViewController() {
+    init();
+  }
+
+  @override
+  void init() {
+    super.init();
     _scriptHistoryListener = () async {
       final currentScriptValue = scriptsHistory.current.value;
       if (currentScriptValue != null) {
@@ -42,8 +48,19 @@ class CodeViewController extends DisposableController
 
   @override
   void dispose() {
-    super.dispose();
     scriptsHistory.current.removeListener(_scriptHistoryListener);
+    _scriptLocation.dispose();
+    _currentScriptRef.dispose();
+    parsedScript.dispose();
+    _showSearchInFileField.dispose();
+    _showFileOpener.dispose();
+    _librariesVisible.dispose();
+    programExplorerController.dispose();
+    scriptsHistory.dispose();
+    _showCodeCoverage.dispose();
+    _showProfileInformation.dispose();
+    _focusLine.dispose();
+    super.dispose();
   }
 
   /// Perform operations based on changes in navigation state.
