@@ -20,7 +20,8 @@ class AdbMemoryInfo with Serializable {
 
   /// All data inside of [AdbMemoryInfo] is in total bytes.
   /// When receiving ADB data from the service extension (directly from ADB)
-  /// then the data is in kilobytes. See the factory constructor [fromJsonInKB].
+  /// then the data is in kilobytes. See the factory constructor
+  /// [AdbMemoryInfo.fromJsonInKB].
   factory AdbMemoryInfo.fromJson(Map<String, Object?> json) => AdbMemoryInfo(
         json[realTimeKey] as int,
         json[javaHeapKey] as int,
@@ -106,7 +107,7 @@ class AdbMemoryInfo with Serializable {
   final int realtime;
 
   /// All remaining values are received from ADB in kilobytes but converted to
-  /// total bytes using the [fromJsonInKB] factory.
+  /// total bytes using the [AdbMemoryInfo.fromJsonInKB] factory.
   final int javaHeap;
 
   final int nativeHeap;

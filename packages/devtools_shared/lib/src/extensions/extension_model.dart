@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:collection/collection.dart';
 
 // TODO(https://github.com/flutter/devtools/issues/7955): let extensions declare
@@ -175,7 +178,7 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
   /// [IconData] class for displaying in DevTools.
   ///
   /// This value should be defined by the extension's config.yaml file. If the
-  /// provided value cannot be parsed, [defaultCodePoint] will be used.
+  /// provided value cannot be parsed, `defaultCodePoint` will be used.
   ///
   /// This code point should be part of the 'MaterialIcons' font family.
   /// See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart.

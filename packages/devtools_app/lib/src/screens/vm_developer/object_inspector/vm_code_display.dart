@@ -318,7 +318,7 @@ class VmCodeDisplay extends StatelessWidget {
   }
 
   /// Returns a list of key-value pairs (map entries)
-  /// containing detailed information of a VM Func object [function].
+  /// containing detailed information of a VM Func object `function`.
   List<MapEntry<String, Widget Function(BuildContext)>> _codeDetailRows(
     CodeObject code,
   ) {

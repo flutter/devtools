@@ -6,7 +6,7 @@ typedef FromJson<T> = T Function(Map<String, dynamic> json);
 
 /// Mixin to declare a class as serializable.
 ///
-/// Classes that implement this mixin should also implement [fromJson] factory
+/// Classes that implement this mixin should also implement a `fromJson` factory
 /// constructor.
 /// See https://docs.flutter.dev/data-and-backend/serialization/json#serializing-json-inside-model-classes.
 mixin Serializable {
