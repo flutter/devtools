@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport '../../framework/scaffold/scaffold.dart';
+/// @docImport '../offline/offline_data.dart';
+/// @docImport '../utils/utils.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';

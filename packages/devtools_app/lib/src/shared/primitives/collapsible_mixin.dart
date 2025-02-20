@@ -5,11 +5,11 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-/// Provides [animations] triggered by toggling the expanded and visible state
+/// Provides `animations` triggered by toggling the expanded and visible state
 /// of a widget.
 ///
 /// See also:
-/// * [TreeNodeWidget], which uses this mixin to manage state for animations
+/// * `TreeNodeWidget`, which uses this mixin to manage state for animations
 ///   on expand and collapse of tree nodes.
 mixin CollapsibleAnimationMixin<T extends StatefulWidget>
     on TickerProviderStateMixin<T> {

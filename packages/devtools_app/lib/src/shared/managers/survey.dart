@@ -231,7 +231,7 @@ class DevToolsSurvey {
   /// If [devEnvironments] is null, the survey can be shown to any platform.
   ///
   /// The possible values for this list correspond to the possible values of
-  /// [_ideLaunched] from [shared/analytics/_analytics_web.dart].
+  /// `_ideLaunched` from [shared/analytics/_analytics_web.dart].
   final List<String>? devEnvironments;
 }
 
