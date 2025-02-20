@@ -131,12 +131,22 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           serviceConnection.serviceManager.connectedState.value.connected,
       offline: offlineDataController.showingOfflineData.value,
     );
-    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
-      if (serviceConnection.serviceManager.connectedState.value.connected) {
-        _initScreenControllers(connected: true);
-      } else {
-        screenControllers.disposeConnectedControllers();
+    addAutoDisposeListener(offlineDataController.showingOfflineData, () {
+      final offlineMode = offlineDataController.showingOfflineData.value;
+      // Dispose the current offline controllers, if any, for any change to the
+      // showing offline data value.
+      screenControllers.disposeOfflineControllers();
+      if (offlineMode) {
+        _initScreenControllers(offline: offlineMode);
       }
+    });
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      final connected =
+          serviceConnection.serviceManager.connectedState.value.connected;
+      // Dispose the current connected controllers, if any, for any change to
+      // the connected state.
+      screenControllers.disposeConnectedControllers();
+      _initScreenControllers(connected: connected);
     });
 
     // TODO(https://github.com/flutter/devtools/issues/6018): Once
