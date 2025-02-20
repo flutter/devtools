@@ -80,6 +80,7 @@ class InspectorPreferencesController extends DisposableController
     _mainScriptDir = rootLibDirectory.path;
   }
 
+  @override
   Future<void> init() async {
     await _initHoverEvalMode();
     await _initLegacyInspectorEnabled();

@@ -44,6 +44,7 @@ class ChartVmConnection extends DisposableController
   ///
   /// This method should be called without async gap after validation that
   /// the application is still connected.
+  @override
   void init() {
     if (initialized) return;
 

@@ -20,8 +20,6 @@ abstract class EmbeddedExtensionController extends DisposableController {
 
   final DevToolsExtensionConfig extensionConfig;
 
-  void init() {}
-
   void postMessage(
     DevToolsExtensionEventType type, {
     Map<String, String> data = const <String, String>{},

@@ -104,6 +104,7 @@ class PreferencesController extends DisposableController
   PerformancePreferencesController get performance => _performance;
   final _performance = PerformancePreferencesController();
 
+  @override
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     await _initDarkMode();

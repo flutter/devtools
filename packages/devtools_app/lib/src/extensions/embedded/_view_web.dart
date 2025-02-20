@@ -100,6 +100,7 @@ class _ExtensionIFrameController extends DisposableController
   /// leaking listeners when an extension is disabled and re-enabled.
   EventListener? _handleMessageListener;
 
+  @override
   void init() {
     _iFrameReady = Completer<void>();
     _extensionHandlerReady = Completer<void>();

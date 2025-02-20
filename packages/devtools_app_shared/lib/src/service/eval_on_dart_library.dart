@@ -85,14 +85,10 @@ class EvalOnDartLibrary extends DisposableController
     }
   }
 
-  bool get disposed => _disposed;
-  bool _disposed = false;
-
   @override
   void dispose() {
     _dartDeveloperEvalCache?.dispose();
     _widgetInspectorEvalCache?.dispose();
-    _disposed = true;
     super.dispose();
   }
 
@@ -207,7 +203,7 @@ class EvalOnDartLibrary extends DisposableController
     required Map<String, String>? scope,
     bool shouldLogError = true,
   }) async {
-    if (_disposed) return null;
+    if (disposed) return null;
 
     try {
       final libraryRef = await _waitForLibraryRef();
@@ -239,7 +235,7 @@ class EvalOnDartLibrary extends DisposableController
     List<String> argRefs, {
     bool shouldLogError = true,
   }) async {
-    if (_disposed) return null;
+    if (disposed) return null;
 
     try {
       final result = await service.invoke(
@@ -265,7 +261,7 @@ class EvalOnDartLibrary extends DisposableController
   }
 
   void _handleError(Object e, StackTrace stack) {
-    if (_disposed || !logExceptions) return;
+    if (disposed || !logExceptions) return;
 
     if (e is RPCError) {
       _log.shout('RPCError: $e', e, stack);
@@ -571,19 +567,19 @@ class EvalOnDartLibrary extends DisposableController
     final response = Completer<T?>();
     // This is an optimization to avoid sending stale requests across the wire.
     void wrappedRequest() async {
-      if (isAlive != null && isAlive.disposed || _disposed) {
+      if (isAlive != null && isAlive.disposed || disposed) {
         response.complete(null);
         return;
       }
       try {
         final value = await request();
-        if (!_disposed && value is! Sentinel) {
+        if (!disposed && value is! Sentinel) {
           response.complete(value);
         } else {
           response.complete(null);
         }
       } catch (e) {
-        if (_disposed || isAlive?.disposed == true) {
+        if (disposed || isAlive?.disposed == true) {
           response.complete(null);
         } else {
           response.completeError(e);
@@ -595,7 +591,7 @@ class EvalOnDartLibrary extends DisposableController
       allPendingRequestsDone = response;
       wrappedRequest();
     } else {
-      if (isAlive != null && isAlive.disposed || _disposed) {
+      if (isAlive != null && isAlive.disposed || disposed) {
         response.complete(null);
         return response.future;
       }
@@ -606,7 +602,7 @@ class EvalOnDartLibrary extends DisposableController
       try {
         await previousDone;
       } catch (e, st) {
-        if (!_disposed) {
+        if (!disposed) {
           _log.shout(e, e, st);
         }
       }

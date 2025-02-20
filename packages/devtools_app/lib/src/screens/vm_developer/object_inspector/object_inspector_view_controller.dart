@@ -49,6 +49,7 @@ class ObjectInspectorViewController extends DisposableController
 
   bool _initialized = false;
 
+  @override
   Future<void> init() async {
     if (!_initialized) {
       await programExplorerController.initialize();

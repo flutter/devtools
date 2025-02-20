@@ -68,6 +68,7 @@ class EnhanceTracingController extends DisposableController
         });
   }
 
+  @override
   void init() {
     for (int i = 0; i < enhanceTracingExtensions.length; i++) {
       final extension = enhanceTracingExtensions[i];

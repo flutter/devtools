@@ -14,6 +14,7 @@ class NetworkPreferencesController extends DisposableController
   @visibleForTesting
   static const filterStorageId = 'network.filter';
 
+  @override
   Future<void> init() async {
     filterTag.value = await storage.getValue(filterStorageId) ?? '';
     addAutoDisposeListener(
