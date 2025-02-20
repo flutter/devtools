@@ -35,11 +35,11 @@ final _log = Logger('debugger_controller');
 
 /// Screen controller for the Debugger screen and generally for managing the
 /// debug state of the connected app.
-/// 
+///
 /// This controller can be accessed from anywhere in DevTools, as long as it was
 /// first registered, by
 /// calling `screenControllers.lookup<DebuggerController>()`.
-/// 
+///
 /// The controller lifecycle is managed by the [ScreenControllers] class. The
 /// `init` method is called lazily upon the first controller access from
 /// `screenControllers`. The `dispose` method is called by `screenControllers`
