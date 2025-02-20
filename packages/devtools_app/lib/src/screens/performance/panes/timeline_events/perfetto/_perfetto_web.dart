@@ -135,6 +135,7 @@ class _PerfettoViewController extends DisposableController
   /// removed in [dispose].
   EventListener? _handleMessageListener;
 
+  @override
   void init() {
     _perfettoIFrameReady = Completer<void>();
     _perfettoHandlerReady = Completer<void>();

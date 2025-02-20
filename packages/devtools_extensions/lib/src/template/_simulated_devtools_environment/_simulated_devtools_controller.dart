@@ -19,6 +19,7 @@ class SimulatedDevToolsController extends DisposableController
   /// removed in [dispose].
   EventListener? _handleMessageListener;
 
+  @override
   void init() {
     window.addEventListener(
       'message',

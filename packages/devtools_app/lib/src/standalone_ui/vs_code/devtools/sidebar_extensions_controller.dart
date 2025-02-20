@@ -92,7 +92,9 @@ class SidebarDevToolsExtensionsController extends DisposableController
 
   final _initialized = Completer<bool>();
 
-  Future<void> init(Map<String, EditorDebugSession> debugSessions) async {
+  // This method does not override [DisposableController.init] because it has
+  // an additional parameter.
+  Future<void> initialize(Map<String, EditorDebugSession> debugSessions) async {
     _debugSessions = debugSessions;
     await _initExtensionsForWorkspace();
     await _initExtensionsForDebugSessions();

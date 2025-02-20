@@ -39,8 +39,6 @@ abstract class PerfettoController extends DisposableController {
   /// For non-flutter apps, this processor will not be used.
   late final FlutterTimelineEventProcessor processor;
 
-  void init() {}
-
   void onBecomingActive() {}
 
   Future<void> loadTrace(Uint8List traceBinary) async {}

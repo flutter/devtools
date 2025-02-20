@@ -3,6 +3,9 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
+## 0.3.2 (not released)
+* Bump `devtools_app_shared` dependency to `0.3.2`.
+
 ## 0.3.1
 * Bump `vm_service` dependency to `>=13.0.0 <16.0.0`.
 

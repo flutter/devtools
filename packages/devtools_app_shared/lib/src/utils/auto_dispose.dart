@@ -243,8 +243,16 @@ mixin DisposerMixin {
 
 /// Base class for controllers that need to manage their lifecycle.
 abstract class DisposableController {
+  void init() {}
+
+  bool get disposed => _disposed;
+
+  bool _disposed = false;
+
   @mustCallSuper
-  void dispose() {}
+  void dispose() {
+    _disposed = true;
+  }
 }
 
 /// Mixin to simplifying managing the lifetime of listeners used by a

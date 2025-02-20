@@ -54,7 +54,7 @@ class _SidebarDevToolsExtensionsState extends State<SidebarDevToolsExtensions>
   @override
   void initState() {
     super.initState();
-    unawaited(sidebarExtensionsController.init(widget.debugSessions));
+    unawaited(sidebarExtensionsController.initialize(widget.debugSessions));
     addAutoDisposeListener(sidebarExtensionsController.uniqueExtensions);
   }
 

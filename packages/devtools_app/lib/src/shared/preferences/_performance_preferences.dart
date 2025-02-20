@@ -19,6 +19,7 @@ class PerformancePreferencesController extends DisposableController
   static final _includeCpuSamplesInTimelineId =
       '${gac.performance}.${gac.PerformanceEvents.includeCpuSamplesInTimeline.name}';
 
+  @override
   Future<void> init() async {
     addAutoDisposeListener(showFlutterFramesChart, () {
       storage.setValue(

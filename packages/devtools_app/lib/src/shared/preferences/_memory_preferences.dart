@@ -23,6 +23,7 @@ class MemoryPreferencesController extends DisposableController
   static const _defaultRefLimit = 100000;
   static const _refLimitStorageId = 'memory.refLimit';
 
+  @override
   Future<void> init() async {
     addAutoDisposeListener(androidCollectionEnabled, () {
       storage.setValue(

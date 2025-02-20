@@ -14,6 +14,7 @@ class CpuProfilerPreferencesController extends DisposableController
   @visibleForTesting
   static const filterStorageId = 'cpuProfiler.filter';
 
+  @override
   Future<void> init() async {
     filterTag.value = await storage.getValue(filterStorageId) ?? '';
     addAutoDisposeListener(

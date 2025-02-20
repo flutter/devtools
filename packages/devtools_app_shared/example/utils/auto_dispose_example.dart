@@ -83,9 +83,19 @@ class MyController extends DisposableController
 
   final ValueNotifier<String> notifier;
 
+  final otherNotifierICreated = ValueNotifier<bool>(false);
+
+  @override
   void init() {
     addAutoDisposeListener(notifier, () {
-      // Do something.
+      otherNotifierICreated.value = notifier.value == 'expected value';
     });
+  }
+
+  @override
+  void dispose() {
+    // dispose anything that [MyController] created that needs to be cleaned up.
+    otherNotifierICreated.dispose();
+    super.dispose();
   }
 }

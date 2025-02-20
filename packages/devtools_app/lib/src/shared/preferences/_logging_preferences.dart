@@ -33,6 +33,7 @@ class LoggingPreferencesController extends DisposableController
   @visibleForTesting
   static const filterStorageId = 'logging.filter';
 
+  @override
   Future<void> init() async {
     retentionLimit.value =
         int.tryParse(await storage.getValue(_retentionLimitStorageId) ?? '') ??
