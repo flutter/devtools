@@ -48,6 +48,10 @@ class _RebuildCountStats {
   void dataChanged() {
     _locations.notifyListeners();
   }
+
+  void dispose() {
+    _locations.dispose();
+  }
 }
 
 const _idsKey = 'ids';
@@ -170,6 +174,10 @@ class LocationMap {
 
     _locationsResolved.value = _countUnknownLocations == 0;
   }
+
+  void dispose() {
+    _locationsResolved.dispose();
+  }
 }
 
 class RebuildCountModel {
@@ -272,6 +280,11 @@ class RebuildCountModel {
     while (_rebuildsForFrame.length > rebuildFrameCacheSize) {
       _rebuildsForFrame.remove(_rebuildsForFrame.keys.first);
     }
+  }
+
+  void dispose() {
+    _stats.dispose();
+    locationMap.dispose();
   }
 }
 
