@@ -19,17 +19,29 @@ import 'cpu_profiler_controller.dart';
 import 'profiler_screen.dart';
 import 'sampling_rate.dart';
 
+/// Screen controller for the Cpu Profiler screen.
+///
+/// This controller can be accessed from anywhere in DevTools, as long as it was
+/// first registered, by
+/// calling `screenControllers.lookup<ProfilerScreenController>()`.
+///
+/// The controller lifecycle is managed by the [ScreenControllers] class. The
+/// `init` method is called lazily upon the first controller access from
+/// `screenControllers`. The `dispose` method is called by `screenControllers`
+/// when DevTools is destroying a set of DevTools screen controllers.
 class ProfilerScreenController extends DevToolsScreenController
     with
         AutoDisposeControllerMixin,
         OfflineScreenControllerMixin<CpuProfileData> {
-  ProfilerScreenController() {
-    unawaited(_init());
-  }
-
   final _initialized = Completer<void>();
 
   Future<void> get initialized => _initialized.future;
+
+  @override
+  void init() {
+    super.init();
+    unawaited(_init());
+  }
 
   Future<void> _init() async {
     await _initHelper();

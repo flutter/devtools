@@ -56,9 +56,10 @@ class MessageColumn extends ColumnData<LogData>
     // initial build.
     bool hasDetails() => !data.details.isNullOrEmpty;
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: data.detailsComputed,
-      builder: (context, detailsComputed, _) {
+    return FutureBuilder<bool>(
+      future: data.detailsComputed.future,
+      builder: (context, _) {
+        final detailsComputed = data.detailsComputed.isCompleted;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
