@@ -23,6 +23,7 @@ void main() {
 
     setUp(() {
       setGlobal(OfflineDataController, OfflineDataController());
+      setGlobal(ScreenControllers, ScreenControllers());
       socketProfile = loadSocketProfile();
       httpProfile = loadHttpProfile();
       fakeServiceConnection = FakeServiceConnectionManager(
@@ -33,7 +34,13 @@ void main() {
       );
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(PreferencesController, PreferencesController());
-      controller = NetworkController();
+      screenControllers.register<NetworkController>(() => NetworkController());
+      // Lookup the controller immediately to force initialization.
+      controller = screenControllers.lookup<NetworkController>();
+    });
+
+    tearDown(() {
+      screenControllers.disposeConnectedControllers();
     });
 
     test('initialize recording state', () async {
@@ -48,11 +55,10 @@ void main() {
 
     test('start and pause recording', () async {
       expect(controller.isPolling, false);
-      final notifier = controller.recordingNotifier;
       await addListenerScope(
-        listenable: notifier,
-        listener: () {
-          expect(notifier.value, true);
+        listenable: controller.recordingNotifier,
+        listener: () async {
+          expect(controller.recordingNotifier.value, true);
           expect(controller.isPolling, true);
         },
         callback: () async {
@@ -62,16 +68,16 @@ void main() {
 
       // Pause polling.
       await controller.togglePolling(false);
-      expect(notifier.value, false);
+      expect(controller.recordingNotifier.value, false);
       expect(controller.isPolling, false);
 
       // Resume polling.
       await controller.togglePolling(true);
-      expect(notifier.value, true);
+      expect(controller.recordingNotifier.value, true);
       expect(controller.isPolling, true);
 
       await controller.stopRecording();
-      expect(notifier.value, false);
+      expect(controller.recordingNotifier.value, false);
       expect(controller.isPolling, false);
     });
 

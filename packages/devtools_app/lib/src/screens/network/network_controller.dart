@@ -164,6 +164,8 @@ class NetworkController extends DevToolsScreenController
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
 
+  static const _pollingDuration = Duration(milliseconds: 2000);
+
   @override
   void init() {
     super.init();
@@ -273,7 +275,7 @@ class NetworkController extends DevToolsScreenController
       _pollingTimer ??= DebounceTimer.periodic(
         // TODO(kenz): look into improving performance by caching more data.
         // Polling less frequently helps performance.
-        const Duration(milliseconds: 2000),
+        _pollingDuration,
         networkService.refreshNetworkData,
       );
     } else {
@@ -395,6 +397,15 @@ class NetworkController extends DevToolsScreenController
     _currentNetworkRequests.clear();
     _filterAndRefreshSearchMatches();
     _updateSelection();
+  }
+
+  @override
+  void setActiveFilter({
+    String? query,
+    SettingFilters<NetworkRequest>? settingFilters,
+  }) {
+    super.setActiveFilter(query: query, settingFilters: settingFilters);
+    _filterAndRefreshSearchMatches();
   }
 
   void _filterAndRefreshSearchMatches() {
