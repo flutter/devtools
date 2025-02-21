@@ -104,12 +104,18 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     if (offlineDataController.showingOfflineData.value) {
       return _buildProfilerScreenBody(controller);
     }
+    late final cpuProfilerDisabled = CpuProfilerDisabled(
+      controller.cpuProfilerController,
+    );
+    if (controller.cpuProfilerController.profilerFlagNotifier == null) {
+      return cpuProfilerDisabled;
+    }
     return ValueListenableBuilder<Flag>(
       valueListenable: controller.cpuProfilerController.profilerFlagNotifier!,
       builder: (context, profilerFlag, _) {
         return profilerFlag.valueAsString == 'true'
             ? _buildProfilerScreenBody(controller)
-            : CpuProfilerDisabled(controller.cpuProfilerController);
+            : cpuProfilerDisabled;
       },
     );
   }

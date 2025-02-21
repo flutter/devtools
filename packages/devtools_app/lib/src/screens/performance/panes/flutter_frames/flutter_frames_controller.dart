@@ -215,4 +215,14 @@ class FlutterFramesController extends PerformanceFeatureController {
 
   @override
   void onBecomingActive() {}
+
+  @override
+  void dispose() {
+    _selectedFrameNotifier.dispose();
+    _flutterFrames.dispose();
+    _recordingFrames.dispose();
+    _badgeTabForJankyFrames.dispose();
+    _displayRefreshRate.dispose();
+    super.dispose();
+  }
 }

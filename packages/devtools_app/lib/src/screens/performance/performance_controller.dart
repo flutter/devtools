@@ -23,36 +23,24 @@ import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
 
-/// This class contains the business logic for [performance_screen.dart].
+/// Screen controller for the Performance screen.
 ///
-/// The controller manages the performance data model and feature controllers,
+/// This controller manages the performance data model and feature controllers,
 /// which handle things like data processing and communication with the view
 /// to give and receive data updates.
+///
+/// This controller can be accessed from anywhere in DevTools, as long as it was
+/// first registered, by
+/// calling `screenControllers.lookup<PerformanceController>()`.
+///
+/// The controller lifecycle is managed by the [ScreenControllers] class. The
+/// `init` method is called lazily upon the first controller access from
+/// `screenControllers`. The `dispose` method is called by `screenControllers`
+/// when DevTools is destroying a set of DevTools screen controllers.
 class PerformanceController extends DevToolsScreenController
     with
         AutoDisposeControllerMixin,
         OfflineScreenControllerMixin<OfflinePerformanceData> {
-  PerformanceController() {
-    // TODO(https://github.com/flutter/devtools/issues/5100): clean this up to
-    // only create a controller when it is needed,
-    flutterFramesController = FlutterFramesController(this);
-    timelineEventsController = TimelineEventsController(this);
-    rebuildStatsController = RebuildStatsController(this);
-    _featureControllers = [
-      flutterFramesController,
-      timelineEventsController,
-      rebuildStatsController,
-    ];
-
-    if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
-        false) {
-      // Do not perform initialization for web apps.
-      return;
-    }
-
-    unawaited(_init());
-  }
-
   late final FlutterFramesController flutterFramesController;
 
   late final TimelineEventsController timelineEventsController;
@@ -93,6 +81,29 @@ class PerformanceController extends DevToolsScreenController
 
   Future<void> get initialized => _initialized.future;
   final _initialized = Completer<void>();
+
+  @override
+  void init() {
+    super.init();
+    // TODO(https://github.com/flutter/devtools/issues/5100): clean this up to
+    // only create a controller when it is needed,
+    flutterFramesController = FlutterFramesController(this);
+    timelineEventsController = TimelineEventsController(this);
+    rebuildStatsController = RebuildStatsController(this);
+    _featureControllers = [
+      flutterFramesController,
+      timelineEventsController,
+      rebuildStatsController,
+    ];
+
+    if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
+        false) {
+      // Do not perform initialization for web apps.
+      return;
+    }
+
+    unawaited(_init());
+  }
 
   Future<void> _init() async {
     await _initHelper();
@@ -242,6 +253,7 @@ class PerformanceController extends DevToolsScreenController
   void dispose() {
     _applyToFeatureControllers((c) => c.dispose());
     enhanceTracingController.dispose();
+    rebuildCountModel.dispose();
     super.dispose();
   }
 
