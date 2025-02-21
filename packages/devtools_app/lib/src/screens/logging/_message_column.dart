@@ -57,10 +57,9 @@ class MessageColumn extends ColumnData<LogData>
     bool hasDetails() => !data.details.isNullOrEmpty;
 
     return FutureBuilder<bool>(
-      future: data.detailsComputed,
-      builder: (context, snapshot) {
-        final detailsComputed =
-            snapshot.connectionState == ConnectionState.done;
+      future: data.detailsComputed.future,
+      builder: (context, _) {
+        final detailsComputed = data.detailsComputed.isCompleted;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,

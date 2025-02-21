@@ -924,7 +924,7 @@ class LogData with SearchableDataMixin {
       compute().catchError((Object? error) {
         // On error, set the value of details to its original value.
         _details = originalDetails;
-        _detailsComputed.safeComplete(true);
+        detailsComputed.safeComplete(true);
         error_handling.reportError(
           'Error fetching details for $kind log'
           '${error != null ? ': $error' : ''}.',
@@ -953,24 +953,22 @@ class LogData with SearchableDataMixin {
 
   String? get details => _details;
 
-  bool get needsComputing => !_detailsComputed.isCompleted;
+  bool get needsComputing => !detailsComputed.isCompleted;
 
-  Future<bool> get detailsComputed => _detailsComputed.future;
-
-  final _detailsComputed = Completer<bool>();
+  final detailsComputed = Completer<bool>();
 
   Future<void> compute() async {
-    if (!_detailsComputed.isCompleted) {
+    if (!detailsComputed.isCompleted) {
       if (detailsComputer != null) {
         _details = await detailsComputer!();
       }
       detailsComputer = null;
-      _detailsComputed.safeComplete(true);
+      detailsComputed.safeComplete(true);
     }
   }
 
   String? prettyPrinted() {
-    if (!_detailsComputed.isCompleted) {
+    if (!detailsComputed.isCompleted) {
       return details?.trim();
     }
 
@@ -1001,7 +999,7 @@ class LogData with SearchableDataMixin {
     }
 
     // Only cache the value if details have already been computed.
-    if (_detailsComputed.isCompleted) _encodedDetails = encoded;
+    if (detailsComputed.isCompleted) _encodedDetails = encoded;
     return encoded;
   }
 
