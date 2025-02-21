@@ -74,6 +74,16 @@ class DiffTreeMap {
   final TreemapNode? decreaseOnly;
 }
 
+/// Screen controller for the App Size screen.
+/// 
+/// This controller can be accessed from anywhere in DevTools, as long as it was
+/// first registered, by
+/// calling `screenControllers.lookup<AppSizeController>()`.
+/// 
+/// The controller lifecycle is managed by the [ScreenControllers] class. The
+/// `init` method is called lazily upon the first controller access from
+/// `screenControllers`. The `dispose` method is called by `screenControllers`
+/// when DevTools is destroying a set of DevTools screen controllers.
 class AppSizeController extends DevToolsScreenController {
   static const unsupportedFileTypeError =
       'Failed to load size analysis file: file type not supported.\n\n'
@@ -739,6 +749,22 @@ class AppSizeController extends DevToolsScreenController {
       backgroundColor: isDeferred ? treemapDeferredColor : null,
       caption: isDeferred ? '(Deferred)' : null,
     )..addAllChildren(children);
+  }
+
+  @override
+  void dispose() {
+    _analysisCallGraphRoot.dispose();
+    _diffCallGraphRoot.dispose();
+    analysisRoot.dispose();
+    _isDeferredApp.dispose();
+    _analysisJsonFile.dispose();
+    _diffRoot.dispose();
+    _oldDiffJsonFile.dispose();
+    _newDiffJsonFile.dispose();
+    _activeDiffTreeType.dispose();
+    _selectedAppUnit.dispose();
+    _processingNotifier.dispose();
+    super.dispose();
   }
 }
 
