@@ -55,4 +55,8 @@ class FutureWorkTracker {
     );
     return future;
   }
+
+  void dispose() {
+    _active.dispose();
+  }
 }
