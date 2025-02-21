@@ -133,7 +133,7 @@ void main() {
       setGlobal(MessageBus, MessageBus());
       setGlobal(PreferencesController, PreferencesController());
 
-      controller = LoggingController();
+      controller = LoggingController()..init();
       // Ensure default filters are applied.
       for (final filter in controller.activeFilter.value.settingFilters) {
         filter.setting.value = filter.defaultValue;

@@ -83,12 +83,29 @@ final _hideSummaryLogKinds = <String>{
   FlutterEvent.frameworkInitialization,
 };
 
+/// Screen controller for the Logging screen.
+///
+/// This controller can be accessed from anywhere in DevTools, as long as it was
+/// first registered, by
+/// calling `screenControllers.lookup<LoggingController>()`.
+///
+/// The controller lifecycle is managed by the [ScreenControllers] class. The
+/// `init` method is called lazily upon the first controller access from
+/// `screenControllers`. The `dispose` method is called by `screenControllers`
+/// when DevTools is destroying a set of DevTools screen controllers.
 class LoggingController extends DevToolsScreenController
     with
         SearchControllerMixin<LogData>,
         FilterControllerMixin<LogData>,
         AutoDisposeControllerMixin {
-  LoggingController() {
+  static const _minLogLevelFilterId = 'min-log-level';
+  static const _verboseFlutterFrameworkFilterId = 'verbose-flutter-framework';
+  static const _verboseFlutterServiceFilterId = 'verbose-flutter-service';
+  static const _gcFilterId = 'gc';
+
+  @override
+  void init() {
+    super.init();
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
         _handleConnectionStart(serviceConnection.serviceManager.service!);
@@ -116,10 +133,12 @@ class LoggingController extends DevToolsScreenController
     );
   }
 
-  static const _minLogLevelFilterId = 'min-log-level';
-  static const _verboseFlutterFrameworkFilterId = 'verbose-flutter-framework';
-  static const _verboseFlutterServiceFilterId = 'verbose-flutter-service';
-  static const _gcFilterId = 'gc';
+  @override
+  void dispose() {
+    selectedLog.dispose();
+    unawaited(_logStatusController.close());
+    super.dispose();
+  }
 
   /// The setting filters available for the Logging screen.
   @override
@@ -905,7 +924,7 @@ class LogData with SearchableDataMixin {
       compute().catchError((Object? error) {
         // On error, set the value of details to its original value.
         _details = originalDetails;
-        _detailsComputed.value = true;
+        detailsComputed.safeComplete(true);
         error_handling.reportError(
           'Error fetching details for $kind log'
           '${error != null ? ': $error' : ''}.',
@@ -934,23 +953,22 @@ class LogData with SearchableDataMixin {
 
   String? get details => _details;
 
-  bool get needsComputing => !_detailsComputed.value;
+  bool get needsComputing => !detailsComputed.isCompleted;
 
-  ValueListenable<bool> get detailsComputed => _detailsComputed;
-  final _detailsComputed = ValueNotifier<bool>(false);
+  final detailsComputed = Completer<bool>();
 
   Future<void> compute() async {
-    if (!detailsComputed.value) {
+    if (!detailsComputed.isCompleted) {
       if (detailsComputer != null) {
         _details = await detailsComputer!();
       }
       detailsComputer = null;
-      _detailsComputed.value = true;
+      detailsComputed.safeComplete(true);
     }
   }
 
   String? prettyPrinted() {
-    if (!detailsComputed.value) {
+    if (!detailsComputed.isCompleted) {
       return details?.trim();
     }
 
@@ -981,7 +999,7 @@ class LogData with SearchableDataMixin {
     }
 
     // Only cache the value if details have already been computed.
-    if (detailsComputed.value) _encodedDetails = encoded;
+    if (detailsComputed.isCompleted) _encodedDetails = encoded;
     return encoded;
   }
 
