@@ -175,6 +175,7 @@ class NetworkController extends DevToolsScreenController
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
     );
+    initFilterController();
   }
 
   @override
