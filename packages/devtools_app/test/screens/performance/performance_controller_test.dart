@@ -43,7 +43,7 @@ void main() {
       offlineDataController.startShowingOfflineData(
         offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
-      controller = PerformanceController();
+      controller = PerformanceController()..init();
     });
 
     test('setActiveFeature', () async {

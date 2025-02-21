@@ -82,7 +82,7 @@ void main() {
           performance: controller,
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       if (runAsync) {
         // Await a small delay to allow the PerformanceController to complete
@@ -98,7 +98,6 @@ void main() {
       await setUpServiceManagerWithTimeline();
       await shortDelay();
       controller = PerformanceController();
-      await controller.initialized;
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

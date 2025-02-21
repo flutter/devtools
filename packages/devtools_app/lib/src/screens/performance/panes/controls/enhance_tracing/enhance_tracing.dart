@@ -164,6 +164,14 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
     }
   }
 
+  @override
+  void dispose() {
+    _tracingEnabled.dispose();
+    _selectedScope.dispose();
+    _tracingAvailable.dispose();
+    super.dispose();
+  }
+
   Future<void> _updateForServiceExtensionState(
     ServiceExtensionState newState,
     TraceWidgetBuildsScope type,

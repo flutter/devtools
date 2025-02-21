@@ -526,10 +526,15 @@ class TimelineEventsController extends PerformanceFeatureController
 
   @override
   void dispose() {
+    _status.dispose();
     _pollingTimer?.cancel();
+    _pollingTimer = null;
     _timelinePollingRateLimiter?.dispose();
+    _timelinePollingRateLimiter = null;
     perfettoController.dispose();
-    _refreshWorkTracker.clear();
+    _refreshWorkTracker
+      ..clear()
+      ..dispose();
     super.dispose();
   }
 }
