@@ -18,8 +18,11 @@ To learn more about DevTools, check out the
 * Fixed various memory leaks and lifecycle issues. - 
 [#8901](https://github.com/flutter/devtools/pull/8901),
 [#8902](https://github.com/flutter/devtools/pull/8902),
-[#8907](https://github.com/flutter/devtools/pull/8907)
-[#8917](https://github.com/flutter/devtools/pull/8917)
+[#8907](https://github.com/flutter/devtools/pull/8907),
+[#8917](https://github.com/flutter/devtools/pull/8917),
+[#8932](https://github.com/flutter/devtools/pull/8932),
+[#8933](https://github.com/flutter/devtools/pull/8933)
+[]()
 
 ## Inspector updates
 
