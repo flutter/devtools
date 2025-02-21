@@ -26,4 +26,10 @@ class ObjectStoreController extends DisposableController
       isolate.id!,
     );
   }
+
+  @override
+  void dispose() {
+    _selectedIsolateObjectStore.dispose();
+    super.dispose();
+  }
 }

@@ -3,13 +3,14 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/trees.dart';
 
-class ClassHierarchyExplorerController {
+class ClassHierarchyExplorerController extends DisposableController {
   ValueListenable<List<ClassHierarchyNode>> get selectedIsolateClassHierarchy =>
       _selectedIsolateClassHierarchy;
   final _selectedIsolateClassHierarchy =
@@ -59,6 +60,12 @@ class ClassHierarchyExplorerController {
     );
 
     _selectedIsolateClassHierarchy.value = [objectNode];
+  }
+
+  @override
+  void dispose() {
+    _selectedIsolateClassHierarchy.dispose();
+    super.dispose();
   }
 }
 

@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
-class HistoryManager<T> {
+class HistoryManager<T> extends DisposableController {
   /// The currently selected historical item.
   ///
   /// Returns null if there is no historical items.
@@ -97,5 +98,11 @@ class HistoryManager<T> {
       _history[_historyIndex] = value;
       _current.value = _history[_historyIndex];
     }
+  }
+
+  @override
+  void dispose() {
+    _current.dispose();
+    super.dispose();
   }
 }

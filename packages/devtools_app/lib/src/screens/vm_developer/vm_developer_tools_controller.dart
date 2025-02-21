@@ -8,8 +8,19 @@ import '../../shared/framework/screen_controllers.dart';
 import 'object_inspector/object_inspector_view_controller.dart';
 import 'vm_developer_tools_screen.dart';
 
+/// Screen controller for the VM Tools screen.
+///
+/// This controller can be accessed from anywhere in DevTools, as long as it was
+/// first registered, by calling
+/// `screenControllers.lookup<VMDeveloperToolsController>()`.
+///
+/// The controller lifecycle is managed by the [ScreenControllers] class. The
+/// `init` method is called lazily upon the first controller access from
+/// `screenControllers`. The `dispose` method is called by `screenControllers`
+/// when DevTools is destroying a set of DevTools screen controllers.
 class VMDeveloperToolsController extends DevToolsScreenController {
   VMDeveloperToolsController({
+    @visibleForTesting
     ObjectInspectorViewController? objectInspectorViewController,
   }) : objectInspectorViewController =
            objectInspectorViewController ?? ObjectInspectorViewController();
@@ -26,4 +37,11 @@ class VMDeveloperToolsController extends DevToolsScreenController {
   }
 
   static final showIsolateSelector = ValueNotifier<bool>(false);
+
+  @override
+  void dispose() {
+    _selectedIndex.dispose();
+    objectInspectorViewController.dispose();
+    super.dispose();
+  }
 }
