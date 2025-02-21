@@ -9,9 +9,8 @@ import '../../shared/primitives/utils.dart';
 import 'network_controller.dart';
 
 class NetworkService {
-  NetworkService(this.networkController);
-
-  final NetworkController networkController;
+  NetworkController get networkController =>
+      screenControllers.lookup<NetworkController>();
 
   /// Tracks the time (microseconds since epoch) that the HTTP profile was last
   /// retrieved for a given isolate ID.
