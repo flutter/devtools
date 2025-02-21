@@ -216,8 +216,7 @@ class CpuProfilerController extends DisposableController
 
   /// Notifies that the vm profiler flag has changed.
   ValueNotifier<Flag>? get profilerFlagNotifier =>
-      serviceConnection.vmFlagManager.flag(vm_flags.profiler) ??
-      ValueNotifier<Flag>(Flag());
+      serviceConnection.vmFlagManager.flag(vm_flags.profiler);
 
   ValueNotifier<Flag>? get profilePeriodFlag =>
       serviceConnection.vmFlagManager.flag(vm_flags.profilePeriod);
@@ -597,9 +596,10 @@ class CpuProfilerController extends DisposableController
     // it is late initialized with a reference to [_dataNotifier].
     methodTableController.dispose();
     _dataNotifier.dispose();
-    _selectedCpuStackFrameNotifier.dispose();
     _profilerBusyStatus.dispose();
-    methodTableController.dispose();
+    _selectedCpuStackFrameNotifier.dispose();
+    _userTagFilter.dispose();
+    _viewType.dispose();
     super.dispose();
   }
 
