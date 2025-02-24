@@ -204,14 +204,17 @@ class _TextInput<T> extends StatefulWidget {
 
 class _TextInputState<T> extends State<_TextInput<T>>
     with _PropertyInputMixin<_TextInput<T>, T>, AutoDisposeMixin {
-  String currentValue = '';
+  static const _paddingDiffComparedToDropdown = 1.0;
 
-  double paddingDiffComparedToDropdown = 1.0;
-  late FocusNode _focusNode;
+  String _currentValue = '';
+
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
+    _controller = TextEditingController(text: widget.property.valueDisplay);
     _focusNode = FocusNode(debugLabel: 'text-input-${widget.property.name}');
 
     addAutoDisposeListener(_focusNode, () async {
@@ -222,11 +225,19 @@ class _TextInputState<T> extends State<_TextInput<T>>
   }
 
   @override
+  void didUpdateWidget(_TextInput<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.property != widget.property) {
+      _controller.text = widget.property.valueDisplay;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextFormField(
       focusNode: _focusNode,
-      initialValue: widget.property.valueDisplay,
+      controller: _controller,
       enabled: widget.property.isEditable,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (text) => inputValidator(text, property: widget.property),
@@ -237,13 +248,13 @@ class _TextInputState<T> extends State<_TextInput<T>>
         // Note: The text input has an extra pixel compared to the dropdown
         // input. Therefore, to have their sizes match, subtract a half pixel
         // from the padding.
-        padding: defaultSpacing - (paddingDiffComparedToDropdown / 2),
+        padding: defaultSpacing - (_paddingDiffComparedToDropdown / 2),
       ),
       style: theme.fixedFontStyle,
       onChanged: (newValue) {
         clearServerError();
         setState(() {
-          currentValue = newValue;
+          _currentValue = newValue;
         });
       },
       onEditingComplete: _editProperty,
@@ -253,7 +264,7 @@ class _TextInputState<T> extends State<_TextInput<T>>
   Future<void> _editProperty() async {
     await editProperty(
       widget.property,
-      valueAsString: currentValue,
+      valueAsString: _currentValue,
       editPropertyCallback: widget.editProperty,
     );
   }
