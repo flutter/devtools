@@ -7,6 +7,9 @@
 // If you add methods to this class you should also add them to
 // InspectorService.java.
 
+/// @docImport '../../screens/performance/panes/rebuild_stats/rebuild_stats_model.dart';
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -861,12 +864,8 @@ abstract class InspectorObjectGroupBase
         );
   }
 
-  /// Evaluate an expression where `object` references the [inspectorRef] or
-  /// [instanceRef] passed in.
-  ///
-  /// If both [inspectorRef] and [instanceRef] are passed in they are assumed to
-  /// reference the same object and the [inspectorRef] is used as it is longer
-  /// lived than an InstanceRef.
+  /// Evaluate an expression where `object` references the `inspectorRef` or
+  /// `instanceRef` passed in.
   Future<InstanceRef?> evalOnRef(
     String expression,
     GenericInstanceRef? ref,

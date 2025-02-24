@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'dart:convert';
+
 import 'package:logging/logging.dart';
 
 import 'primitives/utils.dart';
@@ -14,7 +15,7 @@ class LogStorage {
 
   final _logs = Queue<LogRecord>();
 
-  /// Adds [message] to the end of the log queue.
+  /// Adds [record] to the end of the log queue.
   ///
   /// If there are more than [maxLogEntries] messages in the logs, then the
   /// oldest message will be removed from the queue.

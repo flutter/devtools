@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport 'inspector_service.dart';
+/// @docImport 'primitives/instance_ref.dart';
+library;
+
 import 'package:vm_service/vm_service.dart';
 
 import '../memory/heap_object.dart';
@@ -51,7 +55,7 @@ class GenericInstanceRef {
   InstanceRef? get instanceRef =>
       value is InstanceRef ? value as InstanceRef? : null;
 
-  /// If both [diagnostic] and [instanceRef] are provided, [diagnostic.valueRef]
+  /// If both [diagnostic] and [instanceRef] are provided, `diagnostic.valueRef`
   /// must reference the same underlying object just using the
   /// [InspectorInstanceRef] scheme.
   final RemoteDiagnosticsNode? diagnostic;

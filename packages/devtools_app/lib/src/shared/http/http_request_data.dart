@@ -273,7 +273,8 @@ class DartIOHttpRequestData extends NetworkRequest {
     return false;
   }
 
-  /// Merges the information from another [HttpRequestData] into this instance.
+  /// Merges the information from another [DartIOHttpRequestData] into this
+  /// instance.
   void merge(DartIOHttpRequestData data) {
     _request = data._request;
     notifyListeners();
