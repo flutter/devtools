@@ -122,6 +122,16 @@ void main() {
       );
     });
 
+    test('converts samples with no functions regression test', () async {
+      expect(
+        CpuProfileData.generateFromCpuSamples(
+          isolateId: goldenSamplesIsolate,
+          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!..functions = null,
+        ),
+        completes,
+      );
+    });
+
     test('to json defaults packageUri to resolvedUrl', () {
       const id = '140357727781376-12';
 
