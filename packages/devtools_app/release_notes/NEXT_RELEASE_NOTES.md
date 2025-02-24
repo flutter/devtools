@@ -35,7 +35,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed incorrect duration calculations when there is time during which no
+  samples were taken - [#8941](https://github.com/flutter/devtools/pull/8941).
 
 ## Memory updates
 
