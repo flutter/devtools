@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
@@ -122,8 +124,10 @@ void main() {
       );
     });
 
-    test('converts samples with no functions regression test', () async {
+    test('converts samples with no functions regression test', () {
       expect(
+        // False positive for this lint, it is used by the matcher.
+        // ignore: discarded_futures
         CpuProfileData.generateFromCpuSamples(
           isolateId: goldenSamplesIsolate,
           cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!..functions = null,
