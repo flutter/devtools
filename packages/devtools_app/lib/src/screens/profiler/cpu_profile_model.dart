@@ -379,9 +379,7 @@ class CpuProfileData with Serializable {
             .toList();
     assert(samplesWithTag.isNotEmpty);
 
-    final originalTime = originalData.profileMetaData.time!.duration;
-    final microsPerSample =
-        originalTime.inMicroseconds / originalData.profileMetaData.sampleCount;
+    final microsPerSample = originalData.profileMetaData.samplePeriod;
     final newSampleCount = samplesWithTag.length;
     final metaData = originalData.profileMetaData.copyWith(
       sampleCount: newSampleCount,
@@ -486,7 +484,7 @@ class CpuProfileData with Serializable {
       return null;
     }
 
-    final originalTime = originalData.profileMetaData.time!.duration;
+    final originalTime = originalData.profileMetaData.measuredDuration;
     final microsPerSample =
         originalTime.inMicroseconds / originalData.profileMetaData.sampleCount;
     final updatedMetaData = originalData.profileMetaData.copyWith(
@@ -791,12 +789,10 @@ extension type _CpuProfileDataJson(Map<String, Object?> json) {
 class CpuProfileMetaData extends ProfileMetaData {
   CpuProfileMetaData({
     required super.sampleCount,
-    required this.samplePeriod,
+    required super.samplePeriod,
     required this.stackDepth,
     required super.time,
   });
-
-  final int samplePeriod;
 
   final int stackDepth;
 
