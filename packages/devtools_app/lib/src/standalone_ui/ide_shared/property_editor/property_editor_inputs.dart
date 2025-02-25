@@ -120,7 +120,8 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return DropdownButtonFormField(
+    return DropdownButtonFormField(g
+      key: Key(widget.property.hashCode.toString()),
       value: widget.property.valueDisplay,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (text) => inputValidator(text, property: widget.property),
@@ -208,13 +209,11 @@ class _TextInputState<T> extends State<_TextInput<T>>
 
   String _currentValue = '';
 
-  late final TextEditingController _controller;
   late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.property.valueDisplay);
     _focusNode = FocusNode(debugLabel: 'text-input-${widget.property.name}');
 
     addAutoDisposeListener(_focusNode, () async {
@@ -225,19 +224,12 @@ class _TextInputState<T> extends State<_TextInput<T>>
   }
 
   @override
-  void didUpdateWidget(_TextInput<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.property != widget.property) {
-      _controller.text = widget.property.valueDisplay;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextFormField(
+      key: Key(widget.property.hashCode.toString()),
       focusNode: _focusNode,
-      controller: _controller,
+      initialValue: widget.property.valueDisplay,
       enabled: widget.property.isEditable,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (text) => inputValidator(text, property: widget.property),

@@ -675,8 +675,7 @@ String? _textFormFieldValue(
   required WidgetTester tester,
 }) {
   final textFormFieldWidget = tester.widget<TextFormField>(textFormFieldFinder);
-  final textEditingController = textFormFieldWidget.controller;
-  return textEditingController?.text;
+  return textFormFieldWidget.initialValue;
 }
 
 Finder _labelForInput(Finder inputFinder, {required String matching}) {
