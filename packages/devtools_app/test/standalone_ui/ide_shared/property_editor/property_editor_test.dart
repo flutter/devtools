@@ -417,6 +417,30 @@ void main() {
       });
     });
 
+    testWidgets('editing a string input to its current value (title)', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgsResult: result1);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: 'Hello world!', tester: tester);
+
+        // Verify it doesn't trigger an edit.
+        try {
+          await nextEditCompleter.future.timeout(
+            const Duration(milliseconds: 100),
+          );
+          fail('nextEditCompleter was unexpectedly completed.');
+        } on TimeoutException catch (e) {
+          expect(e, isA<TimeoutException>());
+        }
+      });
+    });
+
     testWidgets('submitting a string input with TAB (title)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
