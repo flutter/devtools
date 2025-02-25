@@ -25,7 +25,7 @@ jobs:
         with:
           ref: master
 
-      - uses: dart-lang/setup-dart@0a8a0fc875eb934c15d08629302413c671d3f672
+      - uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c
 
       - name: setup git config
         run: |
