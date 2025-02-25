@@ -48,7 +48,7 @@ bool get _useSimulatedEnvironment =>
 ///
 /// [extensionManager] can only be accessed below the [DevToolsExtension] widget
 /// in the widget tree, since it is initialized as part of the
-/// [DevToolsExtension]'s [initState] lifecycle method.
+/// [_DevToolsExtensionState.initState] lifecycle method.
 ExtensionManager get extensionManager =>
     _accessGlobalOrThrow<ExtensionManager>(globalName: 'extensionManager');
 
@@ -59,7 +59,7 @@ ExtensionManager get extensionManager =>
 ///
 /// [serviceManager] can only be accessed below the [DevToolsExtension] widget
 /// in the widget tree, since it is initialized as part of the
-/// [DevToolsExtension]'s [initState] lifecycle method.
+/// [_DevToolsExtensionState.initState] lifecycle method.
 ServiceManager get serviceManager =>
     _accessGlobalOrThrow<ServiceManager>(globalName: 'serviceManager');
 
@@ -72,10 +72,10 @@ ServiceManager get serviceManager =>
 ///
 /// [dtdManager] can only be accessed below the [DevToolsExtension] widget
 /// in the widget tree, since it is initialized as part of the
-/// [DevToolsExtension]'s [initState] lifecycle method.
+/// [_DevToolsExtensionState.initState] lifecycle method.
 ///
-/// DevTools extensions should not manually call [dtdManager.connect] or
-/// [dtdManager.disconnect], since this lifecycle is already handled by the
+/// DevTools extensions should not manually call `dtdManager.connect` or
+/// `dtdManager.disconnect`, since this lifecycle is already handled by the
 /// [DevToolsExtension] widget.
 DTDManager get dtdManager =>
     _accessGlobalOrThrow<DTDManager>(globalName: 'dtdManager');

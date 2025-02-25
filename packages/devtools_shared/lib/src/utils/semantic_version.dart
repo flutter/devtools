@@ -72,14 +72,14 @@ class SemanticVersion with CompareMixin<SemanticVersion> {
     );
   }
 
-  /// Returns a new [SemanticVersion] that is downgraded from [this].
+  /// Returns a new [SemanticVersion] that is downgraded from `this`.
   ///
   /// At a minimum, the pre-release version will be removed. Other downgrades
   /// can be applied by specifying any of [downgradeMajor], [downgradeMinor],
   /// and [downgradePatch], which will decrement the value of their respective
   /// version part by one (unless the value is already 0).
   ///
-  /// This method may return a version equal to [this] if no downgrade options
+  /// This method may return a version equal to `this` if no downgrade options
   /// are specified.
   SemanticVersion downgrade({
     bool downgradeMajor = false,

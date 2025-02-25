@@ -41,7 +41,7 @@ class ExtensionManager {
   /// from DevTools.
   ///
   /// We need to store this in a variable so that the listener is properly
-  /// removed in [dispose].
+  /// removed in [_dispose].
   EventListener? _handleMessageListener;
 
   Future<void> _init() async {
@@ -132,11 +132,10 @@ class ExtensionManager {
 
   /// Posts a [DevToolsExtensionEvent] to the DevTools extension host.
   ///
-  /// If [targetOrigin] is null, the message will be posed to
-  /// [html.window.origin].
+  /// If [targetOrigin] is null, the message will be posed to [Window.origin].
   ///
-  /// When [_useSimulatedEnvironment] is true, this message will be posted
-  /// to the same [html.window] that the extension is hosted in.
+  /// When [_useSimulatedEnvironment] is true, this message will be posted to
+  /// the same [Window] that the extension is hosted in.
   void postMessageToDevTools(
     DevToolsExtensionEvent event, {
     String? targetOrigin,
