@@ -214,6 +214,7 @@ class _TextInputState<T> extends State<_TextInput<T>>
   @override
   void initState() {
     super.initState();
+    _currentValue = widget.property.valueDisplay;
     _focusNode = FocusNode(debugLabel: 'text-input-${widget.property.name}');
 
     addAutoDisposeListener(_focusNode, () async {
@@ -270,6 +271,9 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
     required EditArgumentFunction editPropertyCallback,
     required String? valueAsString,
   }) async {
+    // If no changes have been made to the property, don't send an edit request.
+    if (property.valueDisplay == valueAsString) return;
+
     clearServerError();
     final argName = property.name;
     ga.select(
