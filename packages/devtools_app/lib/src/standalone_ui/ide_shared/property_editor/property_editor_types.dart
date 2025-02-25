@@ -167,18 +167,6 @@ class EditableProperty extends EditableArgument {
   Object? convertFromInputString(String? _) {
     throw UnimplementedError();
   }
-
-  @override
-  bool operator ==(Object other) {
-    return other is EditableProperty &&
-        other.name == name &&
-        other.type == type &&
-        other.value == value &&
-        other.hasArgument == hasArgument;
-  }
-
-  @override
-  int get hashCode => Object.hash(name, type, value, hasArgument);
 }
 
 mixin NumericProperty on EditableProperty {
