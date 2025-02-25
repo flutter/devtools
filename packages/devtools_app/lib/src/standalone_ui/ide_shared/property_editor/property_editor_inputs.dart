@@ -121,6 +121,7 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return DropdownButtonFormField(
+      key: Key(widget.property.hashCode.toString()),
       value: widget.property.valueDisplay,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (text) => inputValidator(text, property: widget.property),
@@ -204,10 +205,11 @@ class _TextInput<T> extends StatefulWidget {
 
 class _TextInputState<T> extends State<_TextInput<T>>
     with _PropertyInputMixin<_TextInput<T>, T>, AutoDisposeMixin {
-  String currentValue = '';
+  static const _paddingDiffComparedToDropdown = 1.0;
 
-  double paddingDiffComparedToDropdown = 1.0;
-  late FocusNode _focusNode;
+  String _currentValue = '';
+
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
@@ -225,6 +227,7 @@ class _TextInputState<T> extends State<_TextInput<T>>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextFormField(
+      key: Key(widget.property.hashCode.toString()),
       focusNode: _focusNode,
       initialValue: widget.property.valueDisplay,
       enabled: widget.property.isEditable,
@@ -237,13 +240,13 @@ class _TextInputState<T> extends State<_TextInput<T>>
         // Note: The text input has an extra pixel compared to the dropdown
         // input. Therefore, to have their sizes match, subtract a half pixel
         // from the padding.
-        padding: defaultSpacing - (paddingDiffComparedToDropdown / 2),
+        padding: defaultSpacing - (_paddingDiffComparedToDropdown / 2),
       ),
       style: theme.fixedFontStyle,
       onChanged: (newValue) {
         clearServerError();
         setState(() {
-          currentValue = newValue;
+          _currentValue = newValue;
         });
       },
       onEditingComplete: _editProperty,
@@ -253,7 +256,7 @@ class _TextInputState<T> extends State<_TextInput<T>>
   Future<void> _editProperty() async {
     await editProperty(
       widget.property,
-      valueAsString: currentValue,
+      valueAsString: _currentValue,
       editPropertyCallback: widget.editProperty,
     );
   }
