@@ -498,6 +498,30 @@ void main() {
       });
     });
 
+    testWidgets('editing a numeric input to its default value (height)', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgsResult: result1);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(heightInput, text: '20.0', tester: tester);
+
+        // Verify it doesn't trigger an edit.
+        try {
+          await nextEditCompleter.future.timeout(
+            const Duration(milliseconds: 100),
+          );
+          fail('nextEditCompleter was unexpectedly completed.');
+        } on TimeoutException catch (e) {
+          expect(e, isA<TimeoutException>());
+        }
+      });
+    });
+
     testWidgets('submitting a numeric input with TAB (height)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
