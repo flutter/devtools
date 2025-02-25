@@ -87,8 +87,15 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(OfflineDataController, OfflineDataController());
-      controller = NetworkController();
+      setGlobal(ScreenControllers, ScreenControllers());
+      screenControllers.register<NetworkController>(() => NetworkController());
+      // Lookup the controller immediately to force initialization.
+      controller = screenControllers.lookup<NetworkController>();
       await controller.startRecording();
+    });
+
+    tearDown(() {
+      screenControllers.disposeConnectedControllers();
     });
 
     test('method returns correct value', () {

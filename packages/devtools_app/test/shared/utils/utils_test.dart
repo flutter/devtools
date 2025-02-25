@@ -16,7 +16,9 @@ void main() {
     test('the callback happens immediately', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        DebounceTimer.periodic(const Duration(seconds: 1), () async {
+        DebounceTimer.periodic(const Duration(seconds: 1), ({
+          DebounceCancelledCallback? cancelledCallback,
+        }) async {
           callbackCounter++;
           await Future<void>.delayed(const Duration(seconds: 60));
         });
@@ -28,7 +30,9 @@ void main() {
     test('only triggers another callback after the first is done', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        DebounceTimer.periodic(const Duration(milliseconds: 500), () async {
+        DebounceTimer.periodic(const Duration(milliseconds: 500), ({
+          DebounceCancelledCallback? cancelledCallback,
+        }) async {
           callbackCounter++;
           await Future<void>.delayed(const Duration(seconds: 30));
         });
@@ -40,7 +44,9 @@ void main() {
     test('calls the callback at the beginning and then once per period', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        DebounceTimer.periodic(const Duration(seconds: 1), () async {
+        DebounceTimer.periodic(const Duration(seconds: 1), ({
+          DebounceCancelledCallback? cancelledCallback,
+        }) async {
           callbackCounter++;
           await Future<void>.delayed(const Duration(milliseconds: 1));
         });
@@ -54,13 +60,12 @@ void main() {
       () {
         fakeAsync((async) {
           int callbackCounter = 0;
-          final timer = DebounceTimer.periodic(
-            const Duration(seconds: 1),
-            () async {
-              callbackCounter++;
-              await Future<void>.delayed(const Duration(milliseconds: 1));
-            },
-          );
+          final timer = DebounceTimer.periodic(const Duration(seconds: 1), ({
+            DebounceCancelledCallback? cancelledCallback,
+          }) async {
+            callbackCounter++;
+            await Future<void>.delayed(const Duration(milliseconds: 1));
+          });
           async.elapse(const Duration(milliseconds: 500));
           expect(callbackCounter, 1);
 
@@ -77,13 +82,12 @@ void main() {
       () {
         fakeAsync((async) {
           int callbackCounter = 0;
-          final timer = DebounceTimer.periodic(
-            const Duration(seconds: 1),
-            () async {
-              callbackCounter++;
-              await Future<void>.delayed(const Duration(milliseconds: 1));
-            },
-          );
+          final timer = DebounceTimer.periodic(const Duration(seconds: 1), ({
+            DebounceCancelledCallback? cancelledCallback,
+          }) async {
+            callbackCounter++;
+            await Future<void>.delayed(const Duration(milliseconds: 1));
+          });
           async.elapse(const Duration(milliseconds: 20500));
           expect(callbackCounter, 21);
 
@@ -94,6 +98,48 @@ void main() {
         });
       },
     );
+
+    test('cancels the callback when cancelled during the first callback', () {
+      fakeAsync((async) {
+        int callbackCounter = 0;
+        final timer = DebounceTimer.periodic(const Duration(seconds: 1), ({
+          DebounceCancelledCallback? cancelledCallback,
+        }) async {
+          callbackCounter++;
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+          if (cancelledCallback?.call() ?? false) return;
+          callbackCounter++;
+        });
+        async.elapse(const Duration(milliseconds: 250));
+        expect(callbackCounter, 1);
+
+        timer.cancel();
+
+        async.elapse(const Duration(milliseconds: 500));
+        expect(callbackCounter, 1);
+      });
+    });
+
+    test('cancels the callback when cancelled during the Nth callback', () {
+      fakeAsync((async) {
+        int callbackCounter = 0;
+        final timer = DebounceTimer.periodic(const Duration(seconds: 1), ({
+          DebounceCancelledCallback? cancelledCallback,
+        }) async {
+          callbackCounter++;
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+          if (cancelledCallback?.call() ?? false) return;
+          callbackCounter++;
+        });
+        async.elapse(const Duration(milliseconds: 5250));
+        expect(callbackCounter, 11);
+
+        timer.cancel();
+
+        async.elapse(const Duration(milliseconds: 500));
+        expect(callbackCounter, 11);
+      });
+    });
   });
 
   group('InterruptableChunkWorker', () {

@@ -185,6 +185,8 @@ extension IsKeyType on KeyEvent {
   bool get isKeyDownOrRepeat => this is KeyDownEvent || this is KeyRepeatEvent;
 }
 
+typedef DebounceCancelledCallback = bool Function();
+
 /// A helper class for [Timer] functionality, where the callbacks are debounced.
 class DebounceTimer {
   /// A periodic timer that ensures [callback] is only called at most once
@@ -193,8 +195,11 @@ class DebounceTimer {
   /// [callback] is triggered once immediately, and then every [duration] the
   /// timer checks to see if the previous [callback] call has finished running.
   /// If it has finished, then then next call to [callback] will begin.
-  DebounceTimer.periodic(Duration duration, Future<void> Function() callback)
-    : _callback = callback {
+  DebounceTimer.periodic(
+    Duration duration,
+    Future<void> Function({DebounceCancelledCallback? cancelledCallback})
+    callback,
+  ) : _callback = callback {
     // Start running the first call to the callback.
     _runCallback();
 
@@ -210,23 +215,28 @@ class DebounceTimer {
       return;
     }
 
+    if (isCancelled) return;
+
     try {
       _isRunning = true;
-      await _callback();
+      await _callback(cancelledCallback: () => isCancelled);
     } finally {
       _isRunning = false;
     }
   }
 
-  late final Timer _timer;
-  final Future<void> Function() _callback;
+  Timer? _timer;
+  final Future<void> Function({DebounceCancelledCallback? cancelledCallback})
+  _callback;
   bool _isRunning = false;
+  bool _isCancelled = false;
 
   void cancel() {
-    _timer.cancel();
+    _isCancelled = true;
+    _timer?.cancel();
   }
 
-  bool get isCancelled => !_timer.isActive;
+  bool get isCancelled => _isCancelled || (_timer != null && !_timer!.isActive);
 
   void dispose() {
     cancel();

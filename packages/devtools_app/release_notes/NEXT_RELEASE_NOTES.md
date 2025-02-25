@@ -23,7 +23,8 @@ To learn more about DevTools, check out the
 [#8932](https://github.com/flutter/devtools/pull/8932),
 [#8933](https://github.com/flutter/devtools/pull/8933),
 [#8934](https://github.com/flutter/devtools/pull/8934),
-[#8935](https://github.com/flutter/devtools/pull/8935)
+[#8935](https://github.com/flutter/devtools/pull/8935),
+[#8937](https://github.com/flutter/devtools/pull/8937)
 
 ## Inspector updates
 

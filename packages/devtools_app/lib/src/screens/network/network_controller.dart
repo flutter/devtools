@@ -45,24 +45,22 @@ enum NetworkResponseViewType {
 
 enum _NetworkTrafficType { http, socket }
 
+/// Screen controller for the Network screen.
+///
+/// This controller can be accessed from anywhere in DevTools, as long as it was
+/// first registered, by
+/// calling `screenControllers.lookup<NetworkController>()`.
+///
+/// The controller lifecycle is managed by the [ScreenControllers] class. The
+/// `init` method is called lazily upon the first controller access from
+/// `screenControllers`. The `dispose` method is called by `screenControllers`
+/// when DevTools is destroying a set of DevTools screen controllers.
 class NetworkController extends DevToolsScreenController
     with
         SearchControllerMixin<NetworkRequest>,
         FilterControllerMixin<NetworkRequest>,
         OfflineScreenControllerMixin,
         AutoDisposeControllerMixin {
-  NetworkController() {
-    _networkService = NetworkService(this);
-    _currentNetworkRequests = CurrentNetworkRequests();
-    _initHelper();
-    addAutoDisposeListener(
-      _currentNetworkRequests,
-      _filterAndRefreshSearchMatches,
-    );
-    // TODO(https://github.com/flutter/devtools/issues/7727): add support for
-    // persisting network filter.
-    initFilterController();
-  }
   List<DartIOHttpRequestData>? _httpRequests;
 
   Future<String?> exportAsHarFile() async {
@@ -146,9 +144,7 @@ class NetworkController extends DevToolsScreenController
   ValueListenable<bool> get recordingNotifier => _recordingNotifier;
   final _recordingNotifier = ValueNotifier<bool>(false);
 
-  @visibleForTesting
-  NetworkService get networkService => _networkService;
-  late NetworkService _networkService;
+  final networkService = NetworkService();
 
   /// The timeline timestamps are relative to when the VM started.
   ///
@@ -167,6 +163,32 @@ class NetworkController extends DevToolsScreenController
 
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
+
+  static const _pollingDuration = Duration(milliseconds: 2000);
+
+  @override
+  void init() {
+    super.init();
+    _currentNetworkRequests = CurrentNetworkRequests();
+    _initHelper();
+    addAutoDisposeListener(
+      _currentNetworkRequests,
+      _filterAndRefreshSearchMatches,
+    );
+    initFilterController();
+  }
+
+  @override
+  void dispose() {
+    // Cancel and dispose the polling timer before disposing anything else.
+    _pollingTimer?.dispose();
+    _pollingTimer = null;
+    _currentResponseViewType.dispose();
+    selectedRequest.dispose();
+    _recordingNotifier.dispose();
+    _currentNetworkRequests.dispose();
+    super.dispose();
+  }
 
   void _initHelper() async {
     if (offlineDataController.showingOfflineData.value) {
@@ -254,8 +276,8 @@ class NetworkController extends DevToolsScreenController
       _pollingTimer ??= DebounceTimer.periodic(
         // TODO(kenz): look into improving performance by caching more data.
         // Polling less frequently helps performance.
-        const Duration(milliseconds: 2000),
-        _networkService.refreshNetworkData,
+        _pollingDuration,
+        networkService.refreshNetworkData,
       );
     } else {
       _pollingTimer?.cancel();
@@ -286,10 +308,10 @@ class NetworkController extends DevToolsScreenController
     // Cancel existing polling timer before starting recording.
     _updatePollingState(false);
 
-    _networkService.updateLastHttpDataRefreshTime(
+    networkService.updateLastHttpDataRefreshTime(
       alreadyRecordingHttp: alreadyRecordingHttp,
     );
-    final timestamp = await _networkService.updateLastSocketDataRefreshTime(
+    final timestamp = await networkService.updateLastSocketDataRefreshTime(
       alreadyRecordingSocketData: alreadyRecordingSocketData,
     );
 
@@ -319,7 +341,9 @@ class NetworkController extends DevToolsScreenController
   }
 
   Future<void> stopRecording() async {
-    await togglePolling(false);
+    if (!disposed) {
+      await togglePolling(false);
+    }
   }
 
   Future<void> togglePolling(bool state) async {
@@ -339,8 +363,8 @@ class NetworkController extends DevToolsScreenController
   /// This will ensure that future fetches for http and socket requests will at
   /// most fetch requests since [updateLastRefreshTime] was called.
   Future<void> updateLastRefreshTime() async {
-    _networkService.updateLastHttpDataRefreshTime();
-    await _networkService.updateLastSocketDataRefreshTime();
+    networkService.updateLastHttpDataRefreshTime();
+    await networkService.updateLastSocketDataRefreshTime();
   }
 
   Future<bool> _recordingNetworkTraffic({
@@ -370,10 +394,19 @@ class NetworkController extends DevToolsScreenController
   /// Clears the HTTP profile and socket profile from the vm, and resets the
   /// last refresh timestamp to the current time.
   Future<void> clear() async {
-    await _networkService.clearData();
+    await networkService.clearData();
     _currentNetworkRequests.clear();
     _filterAndRefreshSearchMatches();
     _updateSelection();
+  }
+
+  @override
+  void setActiveFilter({
+    String? query,
+    SettingFilters<NetworkRequest>? settingFilters,
+  }) {
+    super.setActiveFilter(query: query, settingFilters: settingFilters);
+    _filterAndRefreshSearchMatches();
   }
 
   void _filterAndRefreshSearchMatches() {

@@ -6,12 +6,12 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'network_controller.dart';
 
 class NetworkService {
-  NetworkService(this.networkController);
-
-  final NetworkController networkController;
+  NetworkController get networkController =>
+      screenControllers.lookup<NetworkController>();
 
   /// Tracks the time (microseconds since epoch) that the HTTP profile was last
   /// retrieved for a given isolate ID.
@@ -61,15 +61,26 @@ class NetworkService {
 
   /// Force refreshes the HTTP requests logged to the timeline as well as any
   /// recorded Socket traffic.
-  Future<void> refreshNetworkData() async {
+  ///
+  /// This method calls `cancelledCallback` after each async gap to ensure that
+  /// this operation has not been cancelled during the async gap.
+  Future<void> refreshNetworkData({
+    DebounceCancelledCallback? cancelledCallback,
+  }) async {
     if (serviceConnection.serviceManager.service == null) return;
     final timestampObj =
         await serviceConnection.serviceManager.service!.getVMTimelineMicros();
+    if (cancelledCallback?.call() ?? false) return;
+
     final timestamp = timestampObj.timestamp!;
     final sockets = await _refreshSockets();
+    if (cancelledCallback?.call() ?? false) return;
+
     networkController.lastSocketDataRefreshMicros = timestamp;
     List<HttpProfileRequest>? httpRequests;
     httpRequests = await _refreshHttpProfile();
+    if (cancelledCallback?.call() ?? false) return;
+
     networkController.processNetworkTraffic(
       sockets: sockets,
       httpRequests: httpRequests,
