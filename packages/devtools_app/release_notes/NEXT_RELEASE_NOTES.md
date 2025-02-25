@@ -35,7 +35,10 @@ TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Major improvements to the load time and memory usage of CPU profiles.
+  * [#8892](https://github.com/flutter/devtools/pull/8892)
+  * [#8878](https://github.com/flutter/devtools/pull/8878)
+  * [#8839](https://github.com/flutter/devtools/pull/8839)
 
 ## Memory updates
 
