@@ -20,11 +20,10 @@ enum Json { stateForIsolate, selection, rootPackage }
 class TracePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
   TracePaneController({
-    Map<String, TracingIsolateState>? stateForIsolate,
-    String? selectedIsolateId,
     required this.rootPackage,
+    Map<String, TracingIsolateState> stateForIsolate = const {},
+    String? selectedIsolateId,
   }) {
-    this.stateForIsolate = stateForIsolate ?? {};
     final isolate = this.stateForIsolate.values.firstWhereOrNull(
       (i) => i.isolate.id == selectedIsolateId,
     );
@@ -128,6 +127,8 @@ class TracePaneController extends DisposableController
 
   @override
   void dispose() {
+    _selection.dispose();
+    _refreshing.dispose();
     textEditingController.dispose();
     super.dispose();
   }

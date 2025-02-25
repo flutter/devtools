@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:devtools_app_shared/service.dart' show FlutterEvent;
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -20,7 +21,7 @@ final _log = Logger('memory_protocol');
 
 enum _ContinuesState { none, stop, next }
 
-class MemoryTracker {
+class MemoryTracker extends Disposable {
   MemoryTracker(this.timeline, {required this.isAndroidChartVisible});
 
   final MemoryTimeline timeline;
@@ -290,5 +291,12 @@ class MemoryTracker {
     }
 
     return null;
+  }
+
+  @override
+  void dispose() {
+    _monitorContinues?.cancel();
+    _monitorContinues = null;
+    super.dispose();
   }
 }

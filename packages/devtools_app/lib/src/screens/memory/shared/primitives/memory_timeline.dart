@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -9,7 +10,7 @@ import 'package:intl/intl.dart';
 import '../../../../shared/primitives/utils.dart';
 
 /// All Raw data received from the VM or offline data.
-class MemoryTimeline with Serializable {
+class MemoryTimeline extends Disposable with Serializable {
   MemoryTimeline({List<HeapSample>? data}) {
     this.data = data ?? []; // Not using const because data is mutable.
   }
@@ -123,5 +124,11 @@ class MemoryTimeline with Serializable {
   void addGCEvent() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     _eventSamples.add(EventSample.gcEvent(timestamp, events: extensionEvents));
+  }
+
+  @override
+  void dispose() {
+    _sampleAdded.dispose();
+    super.dispose();
   }
 }

@@ -15,6 +15,24 @@ import 'charts/vm_chart_controller.dart';
 class MemoryChartPaneController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryChartPaneController({required this.data}) {
+    init();
+  }
+
+  late final ChartData data;
+
+  ChartVmConnection? _chartConnection;
+
+  late final event = EventChartController(data.timeline, paused: paused);
+  late final vm = VMChartController(data.timeline, paused: paused);
+  late final android = AndroidChartController(
+    data.timeline,
+    sharedLabels: vm.labelTimestamps,
+    paused: paused,
+  );
+
+  @override
+  void init() {
+    super.init();
     if (offlineDataController.showingOfflineData.value) {
       // Setting paused to false, because `recomputeChartData` is noop when it is true.
       _paused.value = false;
@@ -31,18 +49,6 @@ class MemoryChartPaneController extends DisposableController
       _maybeCalculateAndroidChartVisibility,
     );
   }
-
-  late final ChartData data;
-
-  ChartVmConnection? _chartConnection;
-
-  late final event = EventChartController(data.timeline, paused: paused);
-  late final vm = VMChartController(data.timeline, paused: paused);
-  late final android = AndroidChartController(
-    data.timeline,
-    sharedLabels: vm.labelTimestamps,
-    paused: paused,
-  );
 
   void resetAll() {
     event.reset();
@@ -101,12 +107,13 @@ class MemoryChartPaneController extends DisposableController
 
   @override
   void dispose() {
-    super.dispose();
     data.dispose();
     event.dispose();
     vm.dispose();
     android.dispose();
+    _paused.dispose();
     isAndroidChartVisible.dispose();
     _chartConnection?.dispose();
+    super.dispose();
   }
 }

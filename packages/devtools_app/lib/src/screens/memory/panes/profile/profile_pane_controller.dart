@@ -48,7 +48,9 @@ class ProfilePaneController extends DisposableController
   bool _initialized = false;
 
   /// Initializes the controller if it is not initialized yet.
-  void initialize() {
+  @override
+  void init() {
+    super.init();
     if (_initialized) return;
 
     if (!offlineDataController.showingOfflineData.value) {
@@ -201,5 +203,14 @@ class ProfilePaneController extends DisposableController
       csvBuffer.toString(),
       type: ExportFileType.csv,
     );
+  }
+
+  @override
+  void dispose() {
+    _currentAllocationProfile.dispose();
+    _classFilter.dispose();
+    _refreshOnGc.dispose();
+    selection.dispose();
+    super.dispose();
   }
 }
