@@ -61,8 +61,8 @@ class NetworkService {
 
   /// Force refreshes the HTTP requests logged to the timeline as well as any
   /// recorded Socket traffic.
-  /// 
-  /// This methoc calls `cancelledCallback` after each async gap to ensure that
+  ///
+  /// This method calls `cancelledCallback` after each async gap to ensure that
   /// this operation has not been cancelled during the async gap.
   Future<void> refreshNetworkData({
     DebounceCancelledCallback? cancelledCallback,
