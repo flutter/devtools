@@ -57,7 +57,7 @@ void main() {
       expect(controller.isPolling, false);
       await addListenerScope(
         listenable: controller.recordingNotifier,
-        listener: () async {
+        listener: () {
           expect(controller.recordingNotifier.value, true);
           expect(controller.isPolling, true);
         },
