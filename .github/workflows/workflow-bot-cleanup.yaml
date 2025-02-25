@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Sparse checkout of the repository
-        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac
+        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
         with:
           sparse-checkout: |
             README.md
