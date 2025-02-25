@@ -120,7 +120,7 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return DropdownButtonFormField(g
+    return DropdownButtonFormField(
       key: Key(widget.property.hashCode.toString()),
       value: widget.property.valueDisplay,
       autovalidateMode: AutovalidateMode.onUserInteraction,
