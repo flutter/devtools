@@ -99,12 +99,11 @@ class _PropertiesListState extends State<_PropertiesList> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        ...widget.editableProperties.map(
-          (property) => _EditablePropertyItem(
+        for (final property in widget.editableProperties)
+          _EditablePropertyItem(
             property: property,
             editProperty: widget.editProperty,
           ),
-        ),
       ].joinWith(const PaddedDivider.noPadding()),
     );
   }

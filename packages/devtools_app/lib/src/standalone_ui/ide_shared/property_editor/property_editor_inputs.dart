@@ -14,7 +14,6 @@ import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_types.dart';
-import 'utils/utils.dart';
 
 class BooleanInput extends StatelessWidget {
   const BooleanInput({
