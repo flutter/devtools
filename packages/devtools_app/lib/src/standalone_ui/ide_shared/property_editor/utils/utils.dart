@@ -78,7 +78,7 @@ RichText convertDartDocToRichText(
   return RichText(text: TextSpan(children: children));
 }
 
-/// Workaround to prevent TextField from holding onto focus when IFRAME-ed.
+/// Workaround to prevent TextFields from holding onto focus when IFRAME-ed.
 ///
 /// See https://github.com/flutter/devtools/issues/8929 for details.
 void setUpTextFieldFocusFixHandler() {

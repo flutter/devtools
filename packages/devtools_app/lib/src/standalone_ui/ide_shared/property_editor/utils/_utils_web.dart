@@ -15,5 +15,6 @@ void removeBlurListener() {
 }
 
 void _onBlur(Event _) {
-  (document.activeElement as HTMLElement?)?.blur();
+  final inputElement = document.activeElement as HTMLElement?;
+  inputElement?.blur();
 }

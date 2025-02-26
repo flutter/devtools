@@ -223,14 +223,6 @@ class _TextInputState<T> extends State<_TextInput<T>>
       // Edit property when clicking or tabbing away from input.
       await _editProperty();
     });
-
-    setUpTextFieldFocusFixHandler();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    removeTextFieldFocusFixHandler();
   }
 
   @override

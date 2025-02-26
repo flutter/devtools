@@ -64,7 +64,7 @@ class PropertyEditorView extends StatelessWidget {
   }
 }
 
-class _PropertiesList extends StatelessWidget {
+class _PropertiesList extends StatefulWidget {
   const _PropertiesList({
     required this.editableProperties,
     required this.editProperty,
@@ -77,13 +77,32 @@ class _PropertiesList extends StatelessWidget {
   static const denseItemPadding = defaultItemPadding / 2;
 
   @override
+  State<_PropertiesList> createState() => _PropertiesListState();
+}
+
+class _PropertiesListState extends State<_PropertiesList> {
+  @override
+  void initState() {
+    super.initState();
+    // Workaround for https://github.com/flutter/devtools/issues/8929.
+    setUpTextFieldFocusFixHandler();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Workaround for https://github.com/flutter/devtools/issues/8929.
+    removeTextFieldFocusFixHandler();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        ...editableProperties.map(
+        ...widget.editableProperties.map(
           (property) => _EditablePropertyItem(
             property: property,
-            editProperty: editProperty,
+            editProperty: widget.editProperty,
           ),
         ),
       ].joinWith(const PaddedDivider.noPadding()),
