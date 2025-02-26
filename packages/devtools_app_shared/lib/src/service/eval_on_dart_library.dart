@@ -20,15 +20,6 @@ import 'service_manager.dart';
 
 final _log = Logger('eval_on_dart_library');
 
-class Disposable {
-  bool disposed = false;
-
-  @mustCallSuper
-  void dispose() {
-    disposed = true;
-  }
-}
-
 // TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
 @sealed
 class EvalOnDartLibrary extends DisposableController
