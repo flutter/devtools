@@ -1295,7 +1295,7 @@ class _RowPainter extends CustomPainter {
       final width =
           showExpandCollapse
               ? inspectorColumnIndent * 0.45
-              : inspectorColumnIndent * .6;
+              : inspectorColumnIndent * 0.6;
       canvas.drawLine(
         Offset(parentExpandCollapseX, 0.0),
         Offset(parentExpandCollapseX, inspectorRowHeight * 0.5),

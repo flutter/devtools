@@ -14,6 +14,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart' hide Error;
 
+import '../utils/auto_dispose.dart';
 import '../utils/utils.dart';
 import 'connected_app.dart';
 import 'dtd_manager.dart';

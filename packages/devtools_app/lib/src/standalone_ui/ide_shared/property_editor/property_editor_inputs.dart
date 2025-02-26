@@ -204,14 +204,16 @@ class _TextInput<T> extends StatefulWidget {
 
 class _TextInputState<T> extends State<_TextInput<T>>
     with _PropertyInputMixin<_TextInput<T>, T>, AutoDisposeMixin {
-  String currentValue = '';
+  static const _paddingDiffComparedToDropdown = 1.0;
 
-  double paddingDiffComparedToDropdown = 1.0;
-  late FocusNode _focusNode;
+  late final FocusNode _focusNode;
+
+  late String _currentValue;
 
   @override
   void initState() {
     super.initState();
+    _currentValue = widget.property.valueDisplay;
     _focusNode = FocusNode(debugLabel: 'text-input-${widget.property.name}');
 
     addAutoDisposeListener(_focusNode, () async {
@@ -237,13 +239,13 @@ class _TextInputState<T> extends State<_TextInput<T>>
         // Note: The text input has an extra pixel compared to the dropdown
         // input. Therefore, to have their sizes match, subtract a half pixel
         // from the padding.
-        padding: defaultSpacing - (paddingDiffComparedToDropdown / 2),
+        padding: defaultSpacing - (_paddingDiffComparedToDropdown / 2),
       ),
       style: theme.fixedFontStyle,
       onChanged: (newValue) {
         clearServerError();
         setState(() {
-          currentValue = newValue;
+          _currentValue = newValue;
         });
       },
       onEditingComplete: _editProperty,
@@ -253,7 +255,7 @@ class _TextInputState<T> extends State<_TextInput<T>>
   Future<void> _editProperty() async {
     await editProperty(
       widget.property,
-      valueAsString: currentValue,
+      valueAsString: _currentValue,
       editPropertyCallback: widget.editProperty,
     );
   }
@@ -267,6 +269,9 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
     required EditArgumentFunction editPropertyCallback,
     required String? valueAsString,
   }) async {
+    // If no changes have been made to the property, don't send an edit request.
+    if (property.valueDisplay == valueAsString) return;
+
     clearServerError();
     final argName = property.name;
     ga.select(

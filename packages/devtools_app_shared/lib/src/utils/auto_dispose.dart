@@ -242,9 +242,12 @@ mixin DisposerMixin {
 }
 
 /// Base class for controllers that need to manage their lifecycle.
-abstract class DisposableController {
+abstract class DisposableController extends Disposable {
   void init() {}
+}
 
+/// Represents a disposable object.
+class Disposable {
   bool get disposed => _disposed;
 
   bool _disposed = false;

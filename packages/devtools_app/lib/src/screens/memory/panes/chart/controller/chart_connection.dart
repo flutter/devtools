@@ -79,7 +79,9 @@ class ChartVmConnection extends DisposableController
       ),
     );
 
-    _polling = DebounceTimer.periodic(chartUpdateDelay, () async {
+    _polling = DebounceTimer.periodic(chartUpdateDelay, ({
+      DebounceCancelledCallback? cancelledCallback,
+    }) async {
       if (!_isConnected) {
         _polling?.cancel();
         return;

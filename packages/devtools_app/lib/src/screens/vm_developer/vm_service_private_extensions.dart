@@ -444,7 +444,7 @@ class Disassembly {
     }
   }
 
-  /// The list of [Instructions] that make up the generated code.
+  /// The list of [Instruction]s that make up the generated code.
   final instructions = <Instruction>[];
 
   List toJson() => [for (final i in instructions) ...i.toJson()];

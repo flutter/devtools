@@ -27,6 +27,8 @@ void main() {
   final LocationToArgsResult locationToArgsResult = {
     (document: textDocument1, position: activeCursorPosition1): result1,
     (document: textDocument2, position: activeCursorPosition2): result2,
+    (document: textDocument1, position: activeCursorPosition3): resultWithText,
+    (document: textDocument1, position: activeCursorPosition4): resultWithTitle,
   };
 
   late MockEditorClient mockEditorClient;
@@ -58,7 +60,9 @@ void main() {
     Future<List<EditableArgument>> waitForEditableArgs() {
       final argsCompleter = Completer<List<EditableArgument>>();
       listener = () {
-        argsCompleter.complete(controller.editableWidgetData.value!.args);
+        if (!argsCompleter.isCompleted) {
+          argsCompleter.complete(controller.editableWidgetData.value!.args);
+        }
       };
       controller.editableWidgetData.addListener(listener!);
       return argsCompleter.future;
@@ -129,6 +133,43 @@ void main() {
         // Wait for the expected editable args.
         final editableArgs = await editableArgsFuture;
         verifyEditableArgs(actual: editableArgs, expected: result2.args);
+      });
+    });
+
+    testWidgets('verify editable arguments update when widget changes', (
+      tester,
+    ) async {
+      await tester.runAsync(() async {
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Send an active location changed event.
+        final editableArgsFuture1 = waitForEditableArgs();
+        eventController.add(activeLocationChangedEvent3);
+
+        // Wait for the expected editable args.
+        await editableArgsFuture1;
+        await tester.pumpAndSettle();
+
+        // Verify the inputs.
+        final textInput = _findTextFormField('text');
+        expect(textInput, findsOneWidget);
+        final textValue = _textFormFieldValue(textInput, tester: tester);
+        expect(textValue, equals('This is some text.'));
+
+        // Send an active location changed event.
+        final editableArgsFuture2 = waitForEditableArgs();
+        eventController.add(activeLocationChangedEvent4);
+
+        // Wait for the expected editable args.
+        await editableArgsFuture2;
+        await tester.pumpAndSettle();
+
+        // Verify the inputs.
+        final titleInput = _findTextFormField('title*');
+        expect(titleInput, findsOneWidget);
+        final titleValue = _textFormFieldValue(titleInput, tester: tester);
+        expect(titleValue, equals('Hello world!'));
       });
     });
   });
@@ -376,6 +417,30 @@ void main() {
       });
     });
 
+    testWidgets('editing a string input to its current value (title)', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgsResult: result1);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the title.
+        final titleInput = _findTextFormField('title');
+        await _inputText(titleInput, text: 'Hello world!', tester: tester);
+
+        // Verify it doesn't trigger an edit.
+        try {
+          await nextEditCompleter.future.timeout(
+            const Duration(milliseconds: 100),
+          );
+          fail('nextEditCompleter was unexpectedly completed.');
+        } on TimeoutException catch (e) {
+          expect(e, isA<TimeoutException>());
+        }
+      });
+    });
+
     testWidgets('submitting a string input with TAB (title)', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
@@ -430,6 +495,30 @@ void main() {
         // Verify the edit is expected.
         final nextEdit = await nextEditCompleter.future;
         expect(nextEdit, equals('height: null (TYPE: null, SUCCESS: true)'));
+      });
+    });
+
+    testWidgets('editing a numeric input to its default value (height)', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        controller.initForTestsOnly(editableArgsResult: result1);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Edit the height.
+        final heightInput = _findTextFormField('height');
+        await _inputText(heightInput, text: '20.0', tester: tester);
+
+        // Verify it doesn't trigger an edit.
+        try {
+          await nextEditCompleter.future.timeout(
+            const Duration(milliseconds: 100),
+          );
+          fail('nextEditCompleter was unexpectedly completed.');
+        } on TimeoutException catch (e) {
+          expect(e, isA<TimeoutException>());
+        }
       });
     });
 
@@ -629,6 +718,14 @@ Finder _findTextFormField(String inputName) => find.ancestor(
   matching: find.byType(TextFormField),
 );
 
+String? _textFormFieldValue(
+  Finder textFormFieldFinder, {
+  required WidgetTester tester,
+}) {
+  final textFormFieldWidget = tester.widget<TextFormField>(textFormFieldFinder);
+  return textFormFieldWidget.initialValue;
+}
+
 Finder _labelForInput(Finder inputFinder, {required String matching}) {
   final rowFinder = find.ancestor(of: inputFinder, matching: find.byType(Row));
   final labelFinder = find.descendant(
@@ -802,6 +899,30 @@ final activeLocationChangedEvent2 = ActiveLocationChangedEvent(
   textDocument: textDocument2,
 );
 
+// Location position 3
+final activeCursorPosition3 = CursorPosition(character: 55, line: 2);
+final anchorCursorPosition3 = CursorPosition(character: 60, line: 4);
+final editorSelection3 = EditorSelection(
+  active: activeCursorPosition3,
+  anchor: anchorCursorPosition3,
+);
+final activeLocationChangedEvent3 = ActiveLocationChangedEvent(
+  selections: [editorSelection3],
+  textDocument: textDocument1,
+);
+
+// Location position 4
+final activeCursorPosition4 = CursorPosition(character: 10, line: 11);
+final anchorCursorPosition4 = CursorPosition(character: 12, line: 2);
+final editorSelection4 = EditorSelection(
+  active: activeCursorPosition4,
+  anchor: anchorCursorPosition4,
+);
+final activeLocationChangedEvent4 = ActiveLocationChangedEvent(
+  selections: [editorSelection4],
+  textDocument: textDocument1,
+);
+
 // Widget name and documentation
 const widgetName = 'MyFlutterWidget';
 
@@ -917,4 +1038,23 @@ final resultWithWidgetNameAndDocsNoArgs = EditableArgumentsResult(
   name: widgetName,
   documentation: dartDocText,
   args: [],
+);
+
+// Example results for text input state change test cases.
+final textProperty = EditableArgument.fromJson({
+  'name': 'text',
+  'value': 'This is some text.',
+  'type': 'string',
+  'isEditable': true,
+  'isNullable': true,
+  'isRequired': false,
+  'hasArgument': true,
+});
+final resultWithText = EditableArgumentsResult(
+  name: 'WidgetWithText',
+  args: [textProperty],
+);
+final resultWithTitle = EditableArgumentsResult(
+  name: 'WidgetWithTitle',
+  args: [titleProperty],
 );

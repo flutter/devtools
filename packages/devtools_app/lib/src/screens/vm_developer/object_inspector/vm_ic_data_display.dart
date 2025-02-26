@@ -34,7 +34,7 @@ class _VmICDataDisplayState extends State<VmICDataDisplay> {
   final entries = <ObjRef?>[];
 
   Future<void> get _initialized => _initializingCompleter.future;
-  final Completer<void> _initializingCompleter = Completer<void>();
+  final _initializingCompleter = Completer<void>();
 
   @override
   void initState() {

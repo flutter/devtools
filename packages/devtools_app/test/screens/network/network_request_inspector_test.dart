@@ -20,7 +20,6 @@ import '../../test_infra/utils/test_utils.dart';
 
 void main() {
   group('NetworkRequestInspector', () {
-    late NetworkController controller;
     late FakeServiceConnectionManager fakeServiceConnection;
     final httpRequest = HttpProfileRequest.parse(httpPostJson);
     String clipboardContents = '';
@@ -44,7 +43,6 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());
       setGlobal(OfflineDataController, OfflineDataController());
-      controller = NetworkController();
       setupClipboardCopyListener(
         clipboardContentsCallback: (contents) {
           clipboardContents = contents ?? '';
@@ -52,25 +50,27 @@ void main() {
       );
     });
 
+    tearDown(() {
+      screenControllers.disposeConnectedControllers();
+    });
+
     testWidgets('copy request body', (tester) async {
-      final requestsNotifier = controller.requests;
-
-      await controller.startRecording();
-
       await tester.pumpWidget(
         wrapWithControllers(
           const NetworkRequestInspector(),
-          network: controller,
+          network: NetworkController(),
           debugger: createMockDebuggerControllerWithDefaults(),
         ),
       );
+      final controller = screenControllers.lookup<NetworkController>();
+      await controller.startRecording();
 
       // Load the network request.
       await controller.networkService.refreshNetworkData();
-      expect(requestsNotifier.value.length, equals(1));
+      expect(controller.requests.value.length, 1);
 
       // Select the request in the network request list.
-      final networkRequest = requestsNotifier.value.first;
+      final networkRequest = controller.requests.value.first;
       controller.selectedRequest.value = networkRequest;
       await tester.pumpAndSettle();
       await tester.tap(find.text('Request'));
@@ -94,24 +94,22 @@ void main() {
     });
 
     testWidgets('copy response body', (tester) async {
-      final requestsNotifier = controller.requests;
-
-      await controller.startRecording();
-
       await tester.pumpWidget(
         wrapWithControllers(
           const NetworkRequestInspector(),
-          network: controller,
+          network: NetworkController(),
           debugger: createMockDebuggerControllerWithDefaults(),
         ),
       );
+      final controller = screenControllers.lookup<NetworkController>();
+      await controller.startRecording();
 
       // Load the network request.
       await controller.networkService.refreshNetworkData();
-      expect(requestsNotifier.value.length, equals(1));
+      expect(controller.requests.value.length, 1);
 
       // Select the request in the network request list.
-      final networkRequest = requestsNotifier.value.first;
+      final networkRequest = controller.requests.value.first;
       controller.selectedRequest.value = networkRequest;
       await tester.pumpAndSettle();
       await tester.tap(find.text('Response'));
@@ -169,7 +167,7 @@ void main() {
                   currentResponseViewType.value = value;
                 },
               ),
-              network: controller,
+              network: NetworkController(),
               debugger: createMockDebuggerControllerWithDefaults(),
             ),
           );
@@ -209,7 +207,7 @@ void main() {
                   initial = afterOnChanged;
                 },
               ),
-              network: controller,
+              network: NetworkController(),
               debugger: createMockDebuggerControllerWithDefaults(),
             ),
           );
@@ -261,7 +259,7 @@ void main() {
                 ),
               ],
             ),
-            network: controller,
+            network: NetworkController(),
             debugger: createMockDebuggerControllerWithDefaults(),
           ),
         );

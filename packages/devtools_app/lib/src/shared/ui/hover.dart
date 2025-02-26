@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

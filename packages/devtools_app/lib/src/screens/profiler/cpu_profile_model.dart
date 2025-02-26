@@ -1250,7 +1250,7 @@ class _CpuProfileTimelineTree {
     if (isCodeTree) {
       return _code.function!;
     }
-    final function = samples.functions![index].function;
+    final function = samples.functions?[index].function;
     if (function is vm_service.FuncRef ||
         function is vm_service.NativeFunction) {
       return function;
@@ -1290,7 +1290,7 @@ class _CpuProfileTimelineTree {
           // critical since this is only displayed when VM developer mode is
           // enabled.
           (_function as vm_service.FuncRef?)?.location?.script?.uri
-          : samples.functions![index].resolvedUrl;
+          : samples.functions?[index].resolvedUrl;
 
   int? get sourceLine {
     final function = _function;

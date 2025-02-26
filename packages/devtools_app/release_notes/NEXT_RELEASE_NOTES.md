@@ -23,7 +23,8 @@ To learn more about DevTools, check out the
 [#8932](https://github.com/flutter/devtools/pull/8932),
 [#8933](https://github.com/flutter/devtools/pull/8933),
 [#8934](https://github.com/flutter/devtools/pull/8934),
-[#8935](https://github.com/flutter/devtools/pull/8935)
+[#8935](https://github.com/flutter/devtools/pull/8935),
+[#8937](https://github.com/flutter/devtools/pull/8937)
 
 ## Inspector updates
 
@@ -35,6 +36,10 @@ TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
+* Major improvements to the load time and memory usage of CPU profiles.
+  * [#8892](https://github.com/flutter/devtools/pull/8892)
+  * [#8878](https://github.com/flutter/devtools/pull/8878)
+  * [#8839](https://github.com/flutter/devtools/pull/8839)
 * Fixed incorrect duration calculations when there is time during which no
   samples were taken - [#8941](https://github.com/flutter/devtools/pull/8941).
 
