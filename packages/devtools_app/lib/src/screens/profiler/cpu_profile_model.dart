@@ -172,7 +172,7 @@ class CpuProfileData with Serializable {
     final json = _CpuProfileDataJson(json_);
 
     // All CPU samples.
-    final samples = json.traceEvents ?? [];
+    final samples = json.traceEvents ?? <CpuSampleEvent>[];
 
     // Sort the samples so we can compute the observed time difference between
     // each sample.
@@ -1414,8 +1414,8 @@ extension on vm_service.CpuSamples {
   }
 }
 
-// Computes the median of 5 numbers without allocating a list
-// or actually sorting all the numbers.
+/// Computes the median of 5 numbers without allocating a list
+/// or actually sorting all the numbers.
 int _median5(int a, int b, int c, int d, int e) {
   while (true) {
     if (c < a) {
