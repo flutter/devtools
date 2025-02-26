@@ -122,6 +122,18 @@ void main() {
       );
     });
 
+    test('converts samples with no functions regression test', () {
+      expect(
+        // False positive for this lint, it is used by the matcher.
+        // ignore: discarded_futures
+        CpuProfileData.generateFromCpuSamples(
+          isolateId: goldenSamplesIsolate,
+          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!..functions = null,
+        ),
+        completes,
+      );
+    });
+
     test('to json defaults packageUri to resolvedUrl', () {
       const id = '140357727781376-12';
 
