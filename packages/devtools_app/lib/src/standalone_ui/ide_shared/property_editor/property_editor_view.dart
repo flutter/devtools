@@ -193,29 +193,38 @@ class _PropertyInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final argType = property.type;
+    final propertyKey = Key(property.hashCode.toString());
     switch (argType) {
       case boolType:
         return BooleanInput(
+          key: propertyKey,
           property: property as FiniteValuesProperty,
           editProperty: editProperty,
         );
       case doubleType:
         return DoubleInput(
+          key: propertyKey,
           property: property as NumericProperty,
           editProperty: editProperty,
         );
       case enumType:
         return EnumInput(
+          key: propertyKey,
           property: property as FiniteValuesProperty,
           editProperty: editProperty,
         );
       case intType:
         return IntegerInput(
+          key: propertyKey,
           property: property as NumericProperty,
           editProperty: editProperty,
         );
       case stringType:
-        return StringInput(property: property, editProperty: editProperty);
+        return StringInput(
+          key: propertyKey,
+          property: property,
+          editProperty: editProperty,
+        );
       default:
         return Text(property.valueDisplay);
     }
