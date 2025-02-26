@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/widgets.dart';
+import '_utils_desktop.dart' if (dart.library.js_interop) '_utils_web.dart';
 
 /// Converts a [dartDocText] String into a [RichText] widget.
 ///
@@ -75,4 +76,18 @@ RichText convertDartDocToRichText(
   }
 
   return RichText(text: TextSpan(children: children));
+}
+
+/// Workaround to prevent TextFields from holding onto focus when IFRAME-ed.
+///
+/// See https://github.com/flutter/devtools/issues/8929 for details.
+void setUpTextFieldFocusFixHandler() {
+  addBlurListener();
+}
+
+/// Workaround to prevent TextFields from holding onto focus when IFRAME-ed.
+///
+/// See https://github.com/flutter/devtools/issues/8929 for details.
+void removeTextFieldFocusFixHandler() {
+  removeBlurListener();
 }
