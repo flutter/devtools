@@ -170,9 +170,43 @@ class CpuProfileData with Serializable {
 
   factory CpuProfileData.fromJson(Map<String, Object?> json_) {
     final json = _CpuProfileDataJson(json_);
+
+    // All CPU samples.
+    final samples = json.traceEvents ?? [];
+
+    // Sort the samples so we can compute the observed time difference between
+    // each sample.
+    samples.sort((a, b) => a.timestampMicros!.compareTo(b.timestampMicros!));
+
+    // To compute the median efficiently, we compute the median of groups of 5
+    // elements, and then grab the median of those medians by sorting, which
+    // brings us a linear time complexity.
+    final mediansOfGroupsOf5 = <int>[];
+    for (var i = 1; i + 5 < samples.length; i += 5) {
+      // The time diff between the sample at index and the previous sample.
+      int diff(int index) {
+        return samples[index].timestampMicros! -
+            samples[index - 1].timestampMicros!;
+      }
+
+      mediansOfGroupsOf5.add(
+        _median5(diff(i), diff(i + 1), diff(i + 2), diff(i + 3), diff(i + 4)),
+      );
+    }
+    mediansOfGroupsOf5.sort();
+
+    // Sort the remaining diffs and grab the median, or trust the given period
+    // if we don't have any data.
+    //
+    // See https://github.com/flutter/devtools/pull/8941 for more information.
+    final samplePeriod =
+        mediansOfGroupsOf5.isNotEmpty
+            ? mediansOfGroupsOf5[(mediansOfGroupsOf5.length / 2).floor()]
+            : json.samplePeriod ?? 0;
+
     final profileMetaData = CpuProfileMetaData(
       sampleCount: json.sampleCount ?? 0,
-      samplePeriod: json.samplePeriod ?? 0,
+      samplePeriod: samplePeriod,
       stackDepth: json.stackDepth ?? 0,
       time:
           (json.timeOriginMicros != null && json.timeExtentMicros != null)
@@ -210,9 +244,6 @@ class CpuProfileData with Serializable {
       );
       stackFrames[stackFrame.id] = stackFrame;
     }
-
-    // Initialize all CPU samples.
-    final samples = json.traceEvents ?? [];
 
     return CpuProfileData._(
       stackFrames: stackFrames,
@@ -1380,5 +1411,23 @@ extension on vm_service.CpuSamples {
     );
     processStackFrame(current: root, parent: null);
     return traceObject;
+  }
+}
+
+// Computes the median of 5 numbers without allocating a list
+// or actually sorting all the numbers.
+int _median5(int a, int b, int c, int d, int e) {
+  while (true) {
+    if (c < a) {
+      (a, c) = (c, a);
+    } else if (c < b) {
+      (b, c) = (c, b);
+    } else if (c > d) {
+      (c, d) = (d, c);
+    } else if (c > e) {
+      (c, e) = (e, c);
+    } else {
+      return c;
+    }
   }
 }
