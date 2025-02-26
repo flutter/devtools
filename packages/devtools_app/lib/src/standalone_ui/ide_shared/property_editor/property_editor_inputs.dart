@@ -14,6 +14,7 @@ import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_types.dart';
+import 'utils/utils.dart';
 
 class BooleanInput extends StatelessWidget {
   const BooleanInput({
@@ -222,6 +223,14 @@ class _TextInputState<T> extends State<_TextInput<T>>
       // Edit property when clicking or tabbing away from input.
       await _editProperty();
     });
+
+    setUpTextFieldFocusFixHandler();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    removeTextFieldFocusFixHandler();
   }
 
   @override
