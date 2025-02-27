@@ -1211,7 +1211,9 @@ final profileMetaData = CpuProfileMetaData(
   time:
       TimeRange()
         ..start = const Duration()
-        ..end = const Duration(microseconds: 10000),
+        // Note this intentionally adds 10000 microseconds more than what
+        // was measured, regression test for Issue #8870.
+        ..end = const Duration(microseconds: 20000),
 );
 
 final tagFrameA = CpuStackFrame(

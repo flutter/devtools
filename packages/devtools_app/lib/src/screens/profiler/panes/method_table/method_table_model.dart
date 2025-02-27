@@ -68,7 +68,8 @@ class MethodTableGraphNode extends GraphNode with SearchableDataMixin {
 
   Duration get selfTime => Duration(
     microseconds:
-        (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds).round(),
+        (selfTimeRatio * profileMetaData.measuredDuration.inMicroseconds)
+            .round(),
   );
 
   double get totalTimeRatio =>
@@ -76,7 +77,7 @@ class MethodTableGraphNode extends GraphNode with SearchableDataMixin {
 
   Duration get totalTime => Duration(
     microseconds:
-        (totalTimeRatio * profileMetaData.time!.duration.inMicroseconds)
+        (totalTimeRatio * profileMetaData.measuredDuration.inMicroseconds)
             .round(),
   );
 

@@ -98,11 +98,11 @@ void _sendKeyPressToParent(KeyboardEvent event) {
 class BrowserStorage implements Storage {
   @override
   Future<String?> getValue(String key) async {
-    return window.localStorage[key];
+    return window.localStorage.getItem(key);
   }
 
   @override
   Future<void> setValue(String key, String value) async {
-    window.localStorage[key] = value;
+    window.localStorage.setItem(key, value);
   }
 }

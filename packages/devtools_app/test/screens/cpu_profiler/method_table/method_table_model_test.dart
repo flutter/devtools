@@ -17,6 +17,7 @@ void main() {
       selfCount: 1,
       profileMetaData: ProfileMetaData(
         sampleCount: 10,
+        samplePeriod: 250,
         time:
             TimeRange()
               ..start = Duration.zero
@@ -32,6 +33,7 @@ void main() {
       selfCount: 4,
       profileMetaData: ProfileMetaData(
         sampleCount: 10,
+        samplePeriod: 250,
         time:
             TimeRange()
               ..start = Duration.zero
@@ -47,6 +49,7 @@ void main() {
       selfCount: 2,
       profileMetaData: ProfileMetaData(
         sampleCount: 10,
+        samplePeriod: 250,
         time:
             TimeRange()
               ..start = Duration.zero
@@ -62,6 +65,7 @@ void main() {
       selfCount: 3,
       profileMetaData: ProfileMetaData(
         sampleCount: 10,
+        samplePeriod: 250,
         time:
             TimeRange()
               ..start = Duration.zero

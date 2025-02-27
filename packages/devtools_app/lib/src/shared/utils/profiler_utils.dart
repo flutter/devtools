@@ -42,7 +42,7 @@ mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
 
   late Duration totalTime = Duration(
     microseconds:
-        (totalTimeRatio * profileMetaData.time!.duration.inMicroseconds)
+        (totalTimeRatio * profileMetaData.measuredDuration.inMicroseconds)
             .round(),
   );
 
@@ -53,7 +53,8 @@ mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
 
   late Duration selfTime = Duration(
     microseconds:
-        (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds).round(),
+        (selfTimeRatio * profileMetaData.measuredDuration.inMicroseconds)
+            .round(),
   );
 
   double get inclusiveSampleRatio =>
@@ -97,11 +98,31 @@ mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
 }
 
 class ProfileMetaData {
-  const ProfileMetaData({required this.sampleCount, required this.time});
+  const ProfileMetaData({
+    required this.sampleCount,
+    required this.samplePeriod,
+    required this.time,
+  });
 
+  /// The total number of samples in this profile.
   final int sampleCount;
 
+  /// The sample period for this profile in microseconds.
+  final int samplePeriod;
+
+  /// The time range of the entire profile.
+  ///
+  /// Note that there may be periods of time with no samples, so the duration
+  /// of this time should not be used in any calculations for how long a given
+  /// sample took, instead use [measuredDuration].
   final TimeRange? time;
+
+  /// The amount of time measured by all the samples taken in this profile.
+  ///
+  /// This is different from [time] which is just the start to end time of the
+  /// entire profile which includes time where no samples were taken.
+  Duration get measuredDuration =>
+      Duration(microseconds: sampleCount * samplePeriod);
 }
 
 /// Process for converting a [ProfilableDataMixin] into a bottom-up
