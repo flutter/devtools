@@ -5,6 +5,7 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../shared/charts/flame_chart.dart';
@@ -178,31 +179,12 @@ class CpuProfileData with Serializable {
     // each sample.
     samples.sort((a, b) => a.timestampMicros!.compareTo(b.timestampMicros!));
 
-    // To compute the median efficiently, we compute the median of groups of 5
-    // elements, and then grab the median of those medians by sorting, which
-    // brings us a linear time complexity.
-    final mediansOfGroupsOf5 = <int>[];
-    for (var i = 1; i + 5 < samples.length; i += 5) {
-      // The time diff between the sample at index and the previous sample.
-      int diff(int index) {
-        return samples[index].timestampMicros! -
-            samples[index - 1].timestampMicros!;
-      }
-
-      mediansOfGroupsOf5.add(
-        _median5(diff(i), diff(i + 1), diff(i + 2), diff(i + 3), diff(i + 4)),
-      );
-    }
-    mediansOfGroupsOf5.sort();
-
-    // Sort the remaining diffs and grab the median, or trust the given period
-    // if we don't have any data.
+    // Prefer the approximate observed median time between samples over the
+    // reported sample period.
     //
     // See https://github.com/flutter/devtools/pull/8941 for more information.
     final samplePeriod =
-        mediansOfGroupsOf5.isNotEmpty
-            ? mediansOfGroupsOf5[(mediansOfGroupsOf5.length / 2).floor()]
-            : json.samplePeriod ?? 0;
+        observedSamplePeriod(samples) ?? json.samplePeriod ?? 0;
 
     final profileMetaData = CpuProfileMetaData(
       sampleCount: json.sampleCount ?? 0,
@@ -1412,6 +1394,42 @@ extension on vm_service.CpuSamples {
     processStackFrame(current: root, parent: null);
     return traceObject;
   }
+}
+
+/// Efficiently approximates the observed sample period of [samples], by
+/// calculating the approximate median time difference between each sample.
+///
+/// The [samples] must be sorted by timestampMicros before calling this
+/// function.
+///
+/// If there are fewer than 100 samples, returns `null`, because there isn't
+/// enough data to be confident about the observed sample period.
+///
+/// This does not return the exact median, but instead the median of medians
+/// of groups of 5 elements, which makes the algorithm much more efficient.
+@visibleForTesting
+int? observedSamplePeriod(List<CpuSampleEvent> samples) {
+  if (samples.length < 100) return null;
+
+  // To compute the median efficiently, we compute the median of groups of 5
+  // elements, and then grab the median of those medians by sorting, which
+  // brings us a linear time complexity while retaining high accuracy.
+  final mediansOfGroupsOf5 = <int>[];
+  for (var i = 1; i + 5 < samples.length; i += 5) {
+    // The time diff between the sample at index and the previous sample.
+    int diff(int index) {
+      final result =
+          samples[index].timestampMicros! - samples[index - 1].timestampMicros!;
+      assert(result >= 0);
+      return result;
+    }
+
+    mediansOfGroupsOf5.add(
+      _median5(diff(i), diff(i + 1), diff(i + 2), diff(i + 3), diff(i + 4)),
+    );
+  }
+  mediansOfGroupsOf5.sort();
+  return mediansOfGroupsOf5[(mediansOfGroupsOf5.length / 2).floor()];
 }
 
 /// Computes the median of 5 numbers without allocating a list
