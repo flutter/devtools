@@ -86,7 +86,7 @@ class MemoryController extends DevToolsScreenController
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) async {
-    assert(!_initialized.isCompleted);
+    if (_initialized.isCompleted) return;
     if (offlineDataController.showingOfflineData.value) {
       assert(connectedDiff == null && connectedProfile == null);
       await maybeLoadOfflineData(

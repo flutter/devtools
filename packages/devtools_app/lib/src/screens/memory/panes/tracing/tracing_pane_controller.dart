@@ -21,9 +21,10 @@ class TracePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
   TracePaneController({
     required this.rootPackage,
-    Map<String, TracingIsolateState> stateForIsolate = const {},
+    Map<String, TracingIsolateState>? stateForIsolate,
     String? selectedIsolateId,
   }) {
+    this.stateForIsolate = stateForIsolate ?? {};
     final isolate = this.stateForIsolate.values.firstWhereOrNull(
       (i) => i.isolate.id == selectedIsolateId,
     );
