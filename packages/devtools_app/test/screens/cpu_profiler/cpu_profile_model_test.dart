@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/primitives/trace_event.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -119,6 +120,18 @@ void main() {
       expect(
         generatedCpuProfileData.toJson(),
         equals(goldenCpuProfileDataJson),
+      );
+    });
+
+    test('converts samples with no functions regression test', () {
+      expect(
+        // False positive for this lint, it is used by the matcher.
+        // ignore: discarded_futures
+        CpuProfileData.generateFromCpuSamples(
+          isolateId: goldenSamplesIsolate,
+          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson)!..functions = null,
+        ),
+        completes,
       );
     });
 
@@ -425,5 +438,54 @@ void main() {
     expect(stackFrameC.matches(stackFrameC2), isTrue);
     expect(stackFrameC.matches(stackFrameG), isFalse);
     expect(stackFrameC.matches(stackFrameC4), isFalse);
+  });
+
+  group('observedSamplePeriod', () {
+    CpuSampleEvent sampleEventWithTimestamp(int timestampMicros) {
+      return CpuSampleEvent.fromJson({
+        CpuProfileData.stackFrameIdKey: '0',
+        ChromeTraceEvent.timestampKey: timestampMicros,
+      });
+    }
+
+    test('returns null if less than 100 samples', () {
+      expect(observedSamplePeriod([]), isNull);
+      expect(
+        observedSamplePeriod(List.filled(99, sampleEventWithTimestamp(1))),
+        isNull,
+      );
+      expect(
+        observedSamplePeriod(
+          List.generate(100, (i) => sampleEventWithTimestamp(i)),
+        ),
+        1,
+      );
+    });
+
+    test('asserts that samples are sorted', () {
+      expect(
+        () => observedSamplePeriod([
+          sampleEventWithTimestamp(10),
+          sampleEventWithTimestamp(5),
+          // Need at least 100 elements for anything to happen.
+          ...List.filled(100, sampleEventWithTimestamp(1)),
+        ]),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('computes an approximate time difference median', () {
+      final samples = List.generate(
+        100,
+        (i) => sampleEventWithTimestamp(i * i),
+      );
+      // Better to hard code this than rely on computing the median correctly.
+      const actualMedianSamplePeriod = 50 * 50 - 49 * 49;
+      expect(
+        observedSamplePeriod(samples),
+        // Ensure we are within 5%, this is not a perfect median.
+        closeTo(actualMedianSamplePeriod, actualMedianSamplePeriod * 0.05),
+      );
+    });
   });
 }

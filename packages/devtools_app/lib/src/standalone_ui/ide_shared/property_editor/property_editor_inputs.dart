@@ -121,7 +121,6 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return DropdownButtonFormField(
-      key: Key(widget.property.hashCode.toString()),
       value: widget.property.valueDisplay,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (text) => inputValidator(text, property: widget.property),
@@ -207,13 +206,14 @@ class _TextInputState<T> extends State<_TextInput<T>>
     with _PropertyInputMixin<_TextInput<T>, T>, AutoDisposeMixin {
   static const _paddingDiffComparedToDropdown = 1.0;
 
-  String _currentValue = '';
-
   late final FocusNode _focusNode;
+
+  late String _currentValue;
 
   @override
   void initState() {
     super.initState();
+    _currentValue = widget.property.valueDisplay;
     _focusNode = FocusNode(debugLabel: 'text-input-${widget.property.name}');
 
     addAutoDisposeListener(_focusNode, () async {
@@ -227,7 +227,6 @@ class _TextInputState<T> extends State<_TextInput<T>>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextFormField(
-      key: Key(widget.property.hashCode.toString()),
       focusNode: _focusNode,
       initialValue: widget.property.valueDisplay,
       enabled: widget.property.isEditable,
@@ -270,6 +269,9 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
     required EditArgumentFunction editPropertyCallback,
     required String? valueAsString,
   }) async {
+    // If no changes have been made to the property, don't send an edit request.
+    if (property.valueDisplay == valueAsString) return;
+
     clearServerError();
     final argName = property.name;
     ga.select(

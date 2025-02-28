@@ -64,7 +64,7 @@ class PropertyEditorView extends StatelessWidget {
   }
 }
 
-class _PropertiesList extends StatelessWidget {
+class _PropertiesList extends StatefulWidget {
   const _PropertiesList({
     required this.editableProperties,
     required this.editProperty,
@@ -77,15 +77,33 @@ class _PropertiesList extends StatelessWidget {
   static const denseItemPadding = defaultItemPadding / 2;
 
   @override
+  State<_PropertiesList> createState() => _PropertiesListState();
+}
+
+class _PropertiesListState extends State<_PropertiesList> {
+  @override
+  void initState() {
+    super.initState();
+    // Workaround for https://github.com/flutter/devtools/issues/8929.
+    setUpTextFieldFocusFixHandler();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Workaround for https://github.com/flutter/devtools/issues/8929.
+    removeTextFieldFocusFixHandler();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        ...editableProperties.map(
-          (property) => _EditablePropertyItem(
+        for (final property in widget.editableProperties)
+          _EditablePropertyItem(
             property: property,
-            editProperty: editProperty,
+            editProperty: widget.editProperty,
           ),
-        ),
       ].joinWith(const PaddedDivider.noPadding()),
     );
   }
@@ -193,29 +211,38 @@ class _PropertyInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final argType = property.type;
+    final propertyKey = Key(property.hashCode.toString());
     switch (argType) {
       case boolType:
         return BooleanInput(
+          key: propertyKey,
           property: property as FiniteValuesProperty,
           editProperty: editProperty,
         );
       case doubleType:
         return DoubleInput(
+          key: propertyKey,
           property: property as NumericProperty,
           editProperty: editProperty,
         );
       case enumType:
         return EnumInput(
+          key: propertyKey,
           property: property as FiniteValuesProperty,
           editProperty: editProperty,
         );
       case intType:
         return IntegerInput(
+          key: propertyKey,
           property: property as NumericProperty,
           editProperty: editProperty,
         );
       case stringType:
-        return StringInput(property: property, editProperty: editProperty);
+        return StringInput(
+          key: propertyKey,
+          property: property,
+          editProperty: editProperty,
+        );
       default:
         return Text(property.valueDisplay);
     }

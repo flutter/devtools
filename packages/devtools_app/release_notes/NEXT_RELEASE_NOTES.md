@@ -41,6 +41,8 @@ TODO: Remove this section if there are not any general updates.
   * [#8892](https://github.com/flutter/devtools/pull/8892)
   * [#8878](https://github.com/flutter/devtools/pull/8878)
   * [#8839](https://github.com/flutter/devtools/pull/8839)
+* Fixed incorrect duration calculations when there is time during which no
+  samples were taken - [#8941](https://github.com/flutter/devtools/pull/8941).
 
 ## Memory updates
 
