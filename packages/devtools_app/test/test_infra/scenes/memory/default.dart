@@ -154,10 +154,11 @@ class MemoryDefaultScene extends Scene {
     final profileController = ProfilePaneController(rootPackage: 'root')
       ..setFilter(showAllFilter);
 
-    controller = MemoryController()..init(
-      connectedDiff: diffController,
-      connectedProfile: profileController,
-    );
+    controller =
+        MemoryController()..init(
+          connectedDiff: diffController,
+          connectedProfile: profileController,
+        );
 
     await controller.initialized;
 
