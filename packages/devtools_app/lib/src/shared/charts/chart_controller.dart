@@ -124,6 +124,7 @@ class ChartController extends DisposableController
 
   final traces = <Trace>[];
 
+  // TODO(kenz): clean this up by replacing with a stream.
   ValueNotifier<TraceNotifier> get traceChanged => _traceNotifier;
 
   final _traceNotifier = ValueNotifier<TraceNotifier>(TraceNotifier());
@@ -555,6 +556,13 @@ class ChartController extends DisposableController
 
   void addDataToTrace(int traceIndex, Data data) {
     trace(traceIndex).addDatum(data);
+  }
+
+  @override
+  void dispose() {
+    _traceNotifier.dispose();
+    tapLocation.dispose();
+    super.dispose();
   }
 }
 

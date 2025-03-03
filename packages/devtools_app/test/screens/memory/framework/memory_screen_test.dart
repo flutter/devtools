@@ -100,7 +100,7 @@ void main() {
 
     group('with connected app', () {
       setUp(() async {
-        controller = MemoryController();
+        controller = MemoryController()..init();
         await controller.initialized;
       });
 
@@ -127,7 +127,7 @@ void main() {
             offlineApp: serviceConnection.serviceManager.connectedApp!,
           );
 
-        controller = MemoryController();
+        controller = MemoryController()..init();
         await controller.initialized;
       });
 

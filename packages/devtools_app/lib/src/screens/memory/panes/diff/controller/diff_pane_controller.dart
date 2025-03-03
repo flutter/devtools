@@ -220,13 +220,21 @@ class DiffPaneController extends DisposableController with Serializable {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    retainingPathController.dispose();
+    core.dispose();
+    derived.dispose();
+    super.dispose();
+  }
 }
 
 /// Values that define what data to show on diff screen.
 ///
 /// Widgets should not update the fields directly, they should use
 /// [DiffPaneController] or [DerivedData] for this.
-class CoreData {
+class CoreData extends Disposable {
   CoreData(this.rootPackage);
 
   final String? rootPackage;
@@ -263,44 +271,21 @@ class CoreData {
   /// This filter is applied to all snapshots.
   ValueListenable<ClassFilter> get classFilter => _classFilter;
   final _classFilter = ValueNotifier(ClassFilter.theDefault());
+
+  @override
+  void dispose() {
+    _snapshots.dispose();
+    _selectedSnapshotIndex.dispose();
+    _classFilter.dispose();
+    super.dispose();
+  }
 }
 
 /// Values that can be calculated from [CoreData] and notifiers that take signal
 /// from widgets.
 class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   DerivedData(this._core) {
-    _selectedItem = ValueNotifier<SnapshotItem>(_core.selectedItem);
-
-    final classFilterData = ClassFilterData(
-      filter: _core.classFilter,
-      onChanged: applyFilter,
-      rootPackage: _core.rootPackage,
-    );
-
-    classesTableSingle = ClassesTableSingleData(
-      heap: () => (_core.selectedItem as SnapshotDataItem).heap!,
-      filterData: classFilterData,
-      totalHeapSize: () => (_core.selectedItem as SnapshotDataItem).totalSize!,
-    );
-
-    classesTableDiff = ClassesTableDiffData(
-      heapBefore: () => _currentDiff()!.before,
-      heapAfter: () => _currentDiff()!.after,
-      filterData: classFilterData,
-    );
-
-    addAutoDisposeListener(
-      classesTableSingle.selection,
-      () => _setClassIfNotNull(classesTableSingle.selection.value?.className),
-    );
-    addAutoDisposeListener(
-      classesTableDiff.selection,
-      () => _setClassIfNotNull(classesTableDiff.selection.value?.className),
-    );
-    addAutoDisposeListener(
-      selectedPath,
-      () => _setPathIfNotNull(selectedPath.value?.path),
-    );
+    init();
   }
 
   final CoreData _core;
@@ -336,6 +321,56 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Storage for already calculated diffs between snapshots.
   final _diffStore = HeapDiffStore();
+
+  @override
+  void init() {
+    super.init();
+    _selectedItem = ValueNotifier<SnapshotItem>(_core.selectedItem);
+
+    final classFilterData = ClassFilterData(
+      filter: _core.classFilter,
+      onChanged: applyFilter,
+      rootPackage: _core.rootPackage,
+    );
+
+    classesTableSingle = ClassesTableSingleData(
+      heap: () => (_core.selectedItem as SnapshotDataItem).heap!,
+      filterData: classFilterData,
+      totalHeapSize: () => (_core.selectedItem as SnapshotDataItem).totalSize!,
+    );
+
+    classesTableDiff = ClassesTableDiffData(
+      heapBefore: () => _currentDiff()!.before,
+      heapAfter: () => _currentDiff()!.after,
+      filterData: classFilterData,
+    );
+
+    addAutoDisposeListener(
+      classesTableSingle.selection,
+      () => _setClassIfNotNull(classesTableSingle.selection.value?.className),
+    );
+    addAutoDisposeListener(
+      classesTableDiff.selection,
+      () => _setClassIfNotNull(classesTableDiff.selection.value?.className),
+    );
+    addAutoDisposeListener(
+      selectedPath,
+      () => _setPathIfNotNull(selectedPath.value?.path),
+    );
+  }
+
+  @override
+  void dispose() {
+    _selectedItem.dispose();
+    classesBeforeFiltering.dispose();
+    _singleClassesToShow.dispose();
+    _diffClassesToShow.dispose();
+    classData.dispose();
+    selectedPath.dispose();
+    classesTableSingle.dispose();
+    classesTableDiff.dispose();
+    super.dispose();
+  }
 
   void applyFilter(ClassFilter filter) {
     if (filter == _core.classFilter.value) return;
