@@ -240,6 +240,7 @@ class DebounceTimer {
 
   void dispose() {
     cancel();
+    _timer = null;
   }
 }
 

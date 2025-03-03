@@ -48,9 +48,7 @@ class CpuProfilerController extends DisposableController
         FilterControllerMixin<CpuStackFrame>,
         AutoDisposeControllerMixin {
   CpuProfilerController() {
-    // TODO(https://github.com/flutter/devtools/issues/7727): add support for
-    // persisting cpu profiler filter.
-    initFilterController();
+    super.init();
   }
 
   /// Tag to represent when no user tag filters are applied.

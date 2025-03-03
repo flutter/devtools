@@ -138,7 +138,8 @@ class NetworkController extends DevToolsScreenController
   }
 
   final selectedRequest = ValueNotifier<NetworkRequest?>(null);
-  late CurrentNetworkRequests _currentNetworkRequests;
+
+  final _currentNetworkRequests = CurrentNetworkRequests();
 
   /// Notifies that the timeline is currently being recorded.
   ValueListenable<bool> get recordingNotifier => _recordingNotifier;
@@ -169,13 +170,11 @@ class NetworkController extends DevToolsScreenController
   @override
   void init() {
     super.init();
-    _currentNetworkRequests = CurrentNetworkRequests();
     _initHelper();
     addAutoDisposeListener(
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
     );
-    initFilterController();
   }
 
   @override

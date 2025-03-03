@@ -35,10 +35,7 @@ class InspectorScreenBody extends StatefulWidget {
 }
 
 class InspectorScreenBodyState extends State<InspectorScreenBody>
-    with
-        BlockingActionMixin,
-        AutoDisposeMixin,
-        SearchFieldMixin<InspectorScreenBody> {
+    with BlockingActionMixin, AutoDisposeMixin {
   InspectorController get controller => widget.controller;
 
   InspectorTreeController get _inspectorTreeController =>
@@ -46,7 +43,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   bool searchVisible = false;
 
-  @override
   SearchControllerMixin get searchController => _inspectorTreeController;
 
   /// Indicates whether search can be closed. The value is set to true when

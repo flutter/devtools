@@ -41,7 +41,7 @@ class ExpressionEvalField extends StatefulWidget {
 
 @visibleForTesting
 class ExpressionEvalFieldState extends State<ExpressionEvalField>
-    with AutoDisposeMixin, SearchFieldMixin<ExpressionEvalField> {
+    with AutoDisposeMixin {
   static final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
 
   final _autoCompleteController = AutoCompleteController(evalTextFieldKey);
@@ -54,9 +54,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   SearchTextEditingController get searchTextFieldController =>
       _autoCompleteController.searchTextFieldController;
-
-  @override
-  SearchControllerMixin get searchController => _autoCompleteController;
 
   @override
   void initState() {

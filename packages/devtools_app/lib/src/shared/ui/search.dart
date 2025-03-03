@@ -29,7 +29,12 @@ int topMatchesLimit = defaultTopMatchesLimit;
 
 final _log = Logger('packages/devtools_app/lib/src/shared/ui/search');
 
-mixin SearchControllerMixin<T extends SearchableDataMixin> {
+/// Mixin that manages search logic.
+///
+/// When mixing this mixin into a class, dispose() must be called as part of the
+/// class' lifecycle management.
+mixin SearchControllerMixin<T extends SearchableDataMixin>
+    on DisposableController {
   final _searchNotifier = ValueNotifier<String>('');
   final _searchInProgress = ValueNotifier<bool>(false);
 
@@ -247,16 +252,22 @@ mixin SearchControllerMixin<T extends SearchableDataMixin> {
   }
 
   @mustCallSuper
-  void initSearch() {
-    _searchTextFieldController?.dispose();
-    _searchFieldFocusNode?.dispose();
+  @override
+  void init() {
     _searchTextFieldController =
         SearchTextEditingController()..text = _searchNotifier.value;
     _searchFieldFocusNode = FocusNode(debugLabel: 'search-field');
   }
 
   @mustCallSuper
-  void disposeSearch() {
+  @override
+  void dispose() {
+    _searchNotifier.dispose();
+    _searchInProgress.dispose();
+    _searchMatches.dispose();
+    _activeSearchMatch.dispose();
+    matchIndex.dispose();
+
     unawaited(_searchOperation?.cancel());
     if (_searchDebounce?.isActive ?? false) {
       _searchDebounce!.cancel();
@@ -265,6 +276,7 @@ mixin SearchControllerMixin<T extends SearchableDataMixin> {
     _searchFieldFocusNode?.dispose();
     _searchTextFieldController = null;
     _searchFieldFocusNode = null;
+    super.dispose();
   }
 }
 
@@ -583,17 +595,18 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   FocusNode? _autocompleteFocusNode;
 
   @override
-  void initSearch() {
-    super.initSearch();
+  void init() {
+    super.init();
     _autocompleteFocusNode?.dispose();
     _autocompleteFocusNode = FocusNode(debugLabel: 'search-keyboard');
   }
 
   @override
-  void disposeSearch() {
+  void dispose() {
+    _currentHoveredIndex.dispose();
     _autocompleteFocusNode?.dispose();
     _autocompleteFocusNode = null;
-    super.disposeSearch();
+    super.dispose();
   }
 
   void setCurrentHoveredIndexValue(int index) {
@@ -840,27 +853,6 @@ class SearchTextEditingController extends TextEditingController {
   }
 }
 
-/// Mixin for managing search field lifecycle.
-///
-/// This should be mixed into any [State] class that builds [SearchField] or
-/// [AutoCompleteSearchField].
-mixin SearchFieldMixin<T extends StatefulWidget>
-    on AutoDisposeMixin<T>, State<T> {
-  SearchControllerMixin get searchController;
-
-  @override
-  void initState() {
-    super.initState();
-    searchController.initSearch();
-  }
-
-  @override
-  void dispose() {
-    searchController.disposeSearch();
-    super.dispose();
-  }
-}
-
 /// A stateful text field with search capability.
 ///
 /// [_SearchFieldState] automatically handles the lifecycle of the search field
@@ -919,15 +911,11 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
   State<SearchField> createState() => _SearchFieldState();
 }
 
-class _SearchFieldState extends State<SearchField>
-    with AutoDisposeMixin, SearchFieldMixin {
-  @override
-  SearchControllerMixin get searchController => widget.searchController;
-
+class _SearchFieldState extends State<SearchField> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     final searchField = StatelessSearchField(
-      controller: searchController,
+      controller: widget.searchController,
       searchFieldEnabled: widget.searchFieldEnabled,
       shouldRequestFocus: widget.shouldRequestFocus,
       supportsNavigation: widget.supportsNavigation,
@@ -1488,7 +1476,9 @@ mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
 
 class AutoCompleteController extends DisposableController
     with SearchControllerMixin, AutoCompleteSearchControllerMixin {
-  AutoCompleteController(this._searchFieldKey);
+  AutoCompleteController(this._searchFieldKey) {
+    init();
+  }
 
   @override
   GlobalKey get searchFieldKey => _searchFieldKey;

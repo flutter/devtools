@@ -123,7 +123,6 @@ class LoggingController extends DevToolsScreenController
       _handleConnectionStart(serviceConnection.serviceManager.service!);
     }
     _handleBusEvents();
-    initFilterController();
 
     addAutoDisposeListener(
       preferences.logging.retentionLimit,

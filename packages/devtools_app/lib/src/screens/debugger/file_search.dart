@@ -30,7 +30,7 @@ class FileSearchField extends StatefulWidget {
 }
 
 class FileSearchFieldState extends State<FileSearchField>
-    with AutoDisposeMixin, SearchFieldMixin {
+    with AutoDisposeMixin {
   static final fileSearchFieldKey = GlobalKey(debugLabel: 'fileSearchFieldKey');
 
   final autoCompleteController = AutoCompleteController(fileSearchFieldKey);
@@ -39,9 +39,6 @@ class FileSearchFieldState extends State<FileSearchField>
 
   late String _query;
   late FileSearchResults _searchResults;
-
-  @override
-  SearchControllerMixin get searchController => autoCompleteController;
 
   @override
   void initState() {

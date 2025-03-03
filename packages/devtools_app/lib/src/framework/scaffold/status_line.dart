@@ -76,6 +76,8 @@ class StatusLine extends StatelessWidget {
     final theme = Theme.of(context);
     final color = highlightForConnection ? theme.colorScheme.onPrimary : null;
     final screenWidth = ScreenSize(context).width;
+    // TODO(https://github.com/flutter/devtools/issues/8913): this builds the
+    // wrong status items for offline mode.
     final pageStatus = currentScreen.buildStatus(context);
     final widerThanXxs = screenWidth > MediaSize.xxs;
     final screenMetaData = ScreenMetaData.lookup(currentScreen.screenId);

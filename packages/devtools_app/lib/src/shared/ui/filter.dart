@@ -64,7 +64,10 @@ mixin FilterControllerMixin<T> on DisposableController
     );
   }
 
-  void initFilterController() {
+  @mustCallSuper
+  @override
+  void init() {
+    super.init();
     if (filterTagNotifier != null) {
       final tag = FilterTag.parse(filterTagNotifier!.value);
       setFilterFromTag(tag);
@@ -172,6 +175,15 @@ mixin FilterControllerMixin<T> on DisposableController
       queryFilter: QueryFilter.empty(args: queryFilterArgs),
       settingFilters: settingFilters,
     );
+  }
+
+  @mustCallSuper
+  @override
+  void dispose() {
+    filteredData.dispose();
+    useRegExp.dispose();
+    _activeFilter.dispose();
+    super.dispose();
   }
 }
 

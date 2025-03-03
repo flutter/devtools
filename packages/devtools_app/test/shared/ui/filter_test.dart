@@ -387,7 +387,7 @@ void main() {
 class _TestController extends DisposableController
     with FilterControllerMixin<_TestDataClass>, AutoDisposeControllerMixin {
   _TestController(this.data) {
-    initFilterController();
+    init();
   }
 
   final List<_TestDataClass> data;
