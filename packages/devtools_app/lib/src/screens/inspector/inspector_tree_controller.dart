@@ -105,17 +105,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 class InspectorTreeController extends DisposableController
     with SearchControllerMixin<InspectorTreeRow> {
   InspectorTreeController({this.gaId}) {
-    ga.select(
-      gac.inspector,
-      gac.inspectorTreeControllerInitialized,
-      nonInteraction: true,
-      screenMetricsProvider:
-          () => InspectorScreenMetrics.legacy(
-            inspectorTreeControllerId: gaId,
-            rootSetCount: _rootSetCount,
-            rowCount: _root?.subtreeSize,
-          ),
-    );
+    init();
   }
 
   /// Clients the controller notifies to trigger changes to the UI.
@@ -129,6 +119,22 @@ class InspectorTreeController extends DisposableController
 
   SearchTargetType _searchTarget = SearchTargetType.widget;
   int _rootSetCount = 0;
+
+  @override
+  void init() {
+    super.init();
+    ga.select(
+      gac.inspector,
+      gac.inspectorTreeControllerInitialized,
+      nonInteraction: true,
+      screenMetricsProvider:
+          () => InspectorScreenMetrics.legacy(
+            inspectorTreeControllerId: gaId,
+            rootSetCount: _rootSetCount,
+            rowCount: _root?.subtreeSize,
+          ),
+    );
+  }
 
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
@@ -163,6 +169,8 @@ class InspectorTreeController extends DisposableController
   InspectorTreeNode? _root;
 
   set root(InspectorTreeNode? node) {
+    if (disposed) return;
+
     setState(() {
       _root = node;
       _populateSearchableCachedRows();
@@ -826,11 +834,11 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   void dispose() {
-    super.dispose();
     treeController?.removeClient(this);
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     _constraintDisplayController?.dispose();
+    super.dispose();
   }
 
   @override
