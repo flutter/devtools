@@ -23,25 +23,22 @@ import '../panes/profile/profile_pane_controller.dart';
 import '../panes/tracing/tracing_pane_controller.dart';
 import 'offline_data/offline_data.dart';
 
-/// This class contains the business logic for memory screen.
+/// Screen controller for the Memory screen.
+///
+/// This controller can be accessed from anywhere in DevTools, as long as it was
+/// first registered, by calling `screenControllers.lookup<MemoryController>()`.
+///
+/// The controller lifecycle is managed by the [ScreenControllers] class. The
+/// `init` method is called lazily upon the first controller access from
+/// `screenControllers`. The `dispose` method is called by `screenControllers`
+/// when DevTools is destroying a set of DevTools screen controllers.
 ///
 /// This class must not have direct dependencies on web-only libraries. This
 /// allows tests of the complicated logic in this class to run on the VM.
-///
-/// The controller should be recreated for every new connection.
 class MemoryController extends DevToolsScreenController
     with
         AutoDisposeControllerMixin,
         OfflineScreenControllerMixin<OfflineMemoryData> {
-  MemoryController({
-    @visibleForTesting DiffPaneController? connectedDiff,
-    @visibleForTesting ProfilePaneController? connectedProfile,
-  }) {
-    unawaited(
-      _init(connectedDiff: connectedDiff, connectedProfile: connectedProfile),
-    );
-  }
-
   Future<void> get initialized => _initialized.future;
   final _initialized = Completer<void>();
 
@@ -62,13 +59,25 @@ class MemoryController extends DevToolsScreenController
   late final TracePaneController? trace;
 
   @override
+  void init({
+    @visibleForTesting DiffPaneController? connectedDiff,
+    @visibleForTesting ProfilePaneController? connectedProfile,
+  }) {
+    super.init();
+    unawaited(
+      _init(connectedDiff: connectedDiff, connectedProfile: connectedProfile),
+    );
+  }
+
+  @override
   void dispose() {
-    super.dispose();
     HeapClassName.dispose();
-    chart.dispose();
-    trace?.dispose();
     diff.dispose();
     profile?.dispose();
+    chart.dispose();
+    trace?.dispose();
+    _gcing.dispose();
+    super.dispose();
   }
 
   static const _dataKey = 'data';
@@ -77,7 +86,7 @@ class MemoryController extends DevToolsScreenController
     @visibleForTesting DiffPaneController? connectedDiff,
     @visibleForTesting ProfilePaneController? connectedProfile,
   }) async {
-    assert(!_initialized.isCompleted);
+    if (_initialized.isCompleted) return;
     if (offlineDataController.showingOfflineData.value) {
       assert(connectedDiff == null && connectedProfile == null);
       await maybeLoadOfflineData(

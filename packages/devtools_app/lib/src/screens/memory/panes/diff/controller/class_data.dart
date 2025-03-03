@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/classes.dart';
@@ -11,12 +12,19 @@ import '../../../shared/heap/class_filter.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../data/classes_diff.dart';
 
-class RetainingPathController {
+class RetainingPathController extends Disposable {
   final hideStandard = ValueNotifier<bool>(true);
   final invert = ValueNotifier<bool>(true);
+
+  @override
+  void dispose() {
+    hideStandard.dispose();
+    invert.dispose();
+    super.dispose();
+  }
 }
 
-class ClassesTableSingleData {
+class ClassesTableSingleData extends Disposable {
   ClassesTableSingleData({
     required this.heap,
     required this.totalHeapSize,
@@ -37,9 +45,15 @@ class ClassesTableSingleData {
 
   /// Selected class.
   final selection = ValueNotifier<SingleClassData?>(null);
+
+  @override
+  void dispose() {
+    selection.dispose();
+    super.dispose();
+  }
 }
 
-class ClassesTableDiffData {
+class ClassesTableDiffData extends Disposable {
   ClassesTableDiffData({
     required this.heapBefore,
     required this.heapAfter,
@@ -63,6 +77,13 @@ class ClassesTableDiffData {
 
   /// Selected class.
   final selection = ValueNotifier<DiffClassData?>(null);
+
+  @override
+  void dispose() {
+    selectedSizeType.dispose();
+    selection.dispose();
+    super.dispose();
+  }
 }
 
 /// Data for visualization of a path.

@@ -72,5 +72,6 @@ class ChartData with Serializable {
   void dispose() {
     _displayInterval.dispose();
     _isLegendVisible.dispose();
+    timeline.dispose();
   }
 }

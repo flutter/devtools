@@ -438,14 +438,14 @@ class AllocationProfileTableViewState
   @override
   void initState() {
     super.initState();
-    widget.controller.initialize();
+    widget.controller.init();
   }
 
   @override
   void didUpdateWidget(AllocationProfileTableView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      widget.controller.initialize();
+      widget.controller.init();
     }
   }
 

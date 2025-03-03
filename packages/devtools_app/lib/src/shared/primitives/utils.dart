@@ -437,6 +437,7 @@ class RateLimiter {
 
   void dispose() {
     _activeTimer?.cancel();
+    _activeTimer = null;
   }
 }
 

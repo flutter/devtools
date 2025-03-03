@@ -112,6 +112,7 @@ class ChartVmConnection extends DisposableController
     _polling?.cancel();
     _polling?.dispose();
     _polling = null;
+    _memoryTracker.dispose();
     super.dispose();
   }
 }
