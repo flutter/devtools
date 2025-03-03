@@ -73,9 +73,9 @@ class _DetailsTableState extends State<DetailsTable> {
 
   @override
   void dispose() {
-    super.dispose();
     _widgetPropertiesScrollController.dispose();
     _renderPropertiesScrollController.dispose();
+    super.dispose();
   }
 
   @override
