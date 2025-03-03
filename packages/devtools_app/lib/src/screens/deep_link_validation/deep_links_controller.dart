@@ -146,10 +146,32 @@ class DisplayOptions {
   }
 }
 
+/// Screen controller for the Deep Links screen.
+///
+/// This controller can be accessed from anywhere in DevTools, as long as it was
+/// first registered, by
+/// calling `screenControllers.lookup<DeepLinksController>()`.
+///
+/// The controller lifecycle is managed by the [ScreenControllers] class. The
+/// `init` method is called lazily upon the first controller access from
+/// `screenControllers`. The `dispose` method is called by `screenControllers`
+/// when DevTools is destroying a set of DevTools screen controllers.
 class DeepLinksController extends DevToolsScreenController
     with AutoDisposeControllerMixin {
   @override
   void dispose() {
+    _selectedAndroidVariantIndex.dispose();
+    _selectedIosConfigurationIndex.dispose();
+    _selectedIosTargetIndex.dispose();
+    selectedProject.dispose();
+    googlePlayFingerprintsAvailability.dispose();
+    localFingerprint.dispose();
+    selectedLink.dispose();
+    pagePhase.dispose();
+    displayLinkDatasNotifier.dispose();
+    generatedAssetLinksForSelectedLink.dispose();
+    displayOptionsNotifier.dispose();
+    textEditingController.dispose();
     deepLinksService.dispose();
     super.dispose();
   }
