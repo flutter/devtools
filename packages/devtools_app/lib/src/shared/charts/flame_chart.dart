@@ -764,9 +764,9 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
 
   @override
   void dispose() {
-    super.dispose();
     scrollController.dispose();
     _resetHovered();
+    super.dispose();
   }
 
   void _initNodeDataList() {

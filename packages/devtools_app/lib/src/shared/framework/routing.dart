@@ -387,8 +387,8 @@ mixin RouteStateHandlerMixin on DisposableController {
 
   @override
   void dispose() {
-    super.dispose();
     _delegate?.removeListener(_onRouteStateUpdate);
+    super.dispose();
   }
 
   void subscribeToRouterEvents(DevToolsRouterDelegate delegate) {

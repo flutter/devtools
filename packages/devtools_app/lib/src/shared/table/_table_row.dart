@@ -258,8 +258,8 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   @override
   void dispose() {
-    super.dispose();
     scrollController.dispose();
+    super.dispose();
   }
 
   @override

@@ -143,8 +143,8 @@ class _AppSizeBodyState extends State<AppSizeBody>
 
   @override
   void dispose() {
-    super.dispose();
     _tabController.dispose();
+    super.dispose();
   }
 
   void _pushErrorMessage(String error) {

@@ -1181,14 +1181,13 @@ class _JsonViewerState extends State<JsonViewer> {
 
   @override
   void dispose() {
-    super.dispose();
     // Remove the JSON object from the fake service cache (while in connected mode) to avoid holding on
     // to large objects indefinitely.
-
     if (serviceConnection.serviceManager.connectedState.value.connected) {
       serviceConnection.serviceManager.service!.fakeServiceCache
           .removeJsonObject(variable.value as Instance);
     }
+    super.dispose();
   }
 
   @override

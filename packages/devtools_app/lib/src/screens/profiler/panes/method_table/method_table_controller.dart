@@ -23,10 +23,18 @@ class MethodTableController extends DisposableController
   MethodTableController({
     required ValueListenable<CpuProfileData?> dataNotifier,
   }) {
+    super.init();
     createMethodTableGraph(dataNotifier.value);
     addAutoDisposeListener(dataNotifier, () {
       createMethodTableGraph(dataNotifier.value);
     });
+  }
+
+  @override
+  void dispose() {
+    selectedNode.dispose();
+    _methods.dispose();
+    super.dispose();
   }
 
   final selectedNode = ValueNotifier<MethodTableGraphNode?>(null);
