@@ -549,17 +549,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 /// screen's controller, if one exists, as well as enabling offline support.
 ///
 /// [C] corresponds to the type of the screen's controller, which is created by
-/// [createController] or provided by [controllerProvider].
+/// [createController].
 class DevToolsScreen<C extends DevToolsScreenController> {
   const DevToolsScreen(this.screen, {this.createController});
 
   final Screen screen;
 
   /// Responsible for creating the controller for this screen, if non-null.
-  ///
-  /// The controller will then be provided via [controllerProvider], and
-  /// widgets depending on this controller can access it by calling
-  /// `Provider<C>.of(context)`.
   ///
   /// If [createController] and `controller` are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.

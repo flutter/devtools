@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport '../timeline_events_controller.dart';
+/// @docImport '../timeline_events_view.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui_web' as ui_web;
 
@@ -29,15 +33,15 @@ const _debugUseLocalPerfetto = false;
 ///
 /// A new instance of [PerfettoController] will be created for each connected
 /// app and for each load of offline data. Each time [PerfettoController.init]
-/// is called, we create a new [html.IFrameElement] and register it to
-/// [PerfettoController.viewId] via
-/// [ui_web.platformViewRegistry.registerViewFactory]. Each new [html.IFrameElement]
-/// must have a unique id in the [PlatformViewRegistry], which
-/// [_viewIdIncrementer] is used to create.
+/// is called, we create a new [HTMLIFrameElement] and register it to
+/// `PerfettoController.viewId` via
+/// [ui_web.PlatformViewRegistry.registerViewFactory]. Each new
+/// [HTMLIFrameElement] must have a unique id in the
+/// [ui_web.PlatformViewRegistry], which [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
 
 /// Events that are passed between DevTools and the embedded Perfetto iFrame via
-/// [window.postMessage].
+/// [Window.postMessage].
 enum EmbeddedPerfettoEvent {
   /// Id for an event Perfetto expects to verify the trace viewer is ready.
   ping('PING'),
@@ -54,7 +58,7 @@ enum EmbeddedPerfettoEvent {
   /// re-initialized.
   reloadCssConstants('RELOAD-CSS-CONSTANTS'),
 
-  /// Id for a [postMessage] request that is sent before trying to change the
+  /// Id for a `postMessage` request that is sent before trying to change the
   /// DevTools theme (see [devtoolsThemeChange]).
   ///
   /// Once the DevTools theme handler in the bundled Perfetto web app has been
@@ -63,11 +67,11 @@ enum EmbeddedPerfettoEvent {
   ///
   /// This message must be sent with the argument 'perfettoIgnore' set to true
   /// so that the message handler in the Perfetto codebase
-  /// [post_message_handler.ts] will not try to handle this message and warn
+  /// `post_message_handler.ts` will not try to handle this message and warn
   /// "Unknown postMessage() event received".
   devtoolsThemePing('DART-DEVTOOLS-THEME-PING'),
 
-  /// Id for a [postMessage] response that should be received when the DevTools
+  /// Id for a `postMessage` response that should be received when the DevTools
   /// theme handler has been registered.
   ///
   /// We will send a "ping" event [devtoolsThemePing] to the DevTools theme
@@ -76,11 +80,11 @@ enum EmbeddedPerfettoEvent {
   /// before we can send a theme change request [devtoolsThemeChange].
   devtoolsThemePong('DART-DEVTOOLS-THEME-PONG'),
 
-  /// Id for a [postMessage] request that is sent on DevTools theme changes.
+  /// Id for a `postMessage` request that is sent on DevTools theme changes.
   ///
   /// This message must be sent with the argument 'perfettoIgnore' set to true
   /// so that the message handler in the Perfetto codebase
-  /// [post_message_handler.ts] will not try to handle this message and warn
+  /// `post_message_handler.ts` will not try to handle this message and warn
   /// "Unknown postMessage() event received".
   devtoolsThemeChange('DART-DEVTOOLS-THEME-CHANGE');
 

@@ -42,7 +42,7 @@ class ExtensionService extends DisposableController
   /// [ExtensionService] will manage DevTools extensions for.
   ///
   /// When null, [_appRoot] will be calculated from the
-  /// `serviceConnection.serviceManager`'s currently connected app. See [_initAppRoot].
+  /// `serviceConnection.serviceManager`'s currently connected app.
   final Uri? fixedAppRoot;
 
   /// Whether to ignore the VM service connection for the context of this
