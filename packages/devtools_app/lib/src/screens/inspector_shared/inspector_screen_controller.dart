@@ -10,11 +10,17 @@ import '../inspector/inspector_tree_controller.dart' as legacy;
 import '../inspector_v2/inspector_controller.dart' as v2;
 import '../inspector_v2/inspector_tree_controller.dart' as v2;
 
+/// Screen controller for the Inspector screen.
+///
+/// This controller can be accessed from anywhere in DevTools, as long as it was
+/// first registered, by
+/// calling `screenControllers.lookup<InspectorScreenController>()`.
+///
+/// The controller lifecycle is managed by the [ScreenControllers] class. The
+/// `init` method is called lazily upon the first controller access from
+/// `screenControllers`. The `dispose` method is called by `screenControllers`
+/// when DevTools is destroying a set of DevTools screen controllers.
 class InspectorScreenController extends DevToolsScreenController {
-  InspectorScreenController() {
-    _init();
-  }
-
   late v2.InspectorController v2InspectorController;
   late v2.InspectorTreeController v2InspectorTreeController;
 
@@ -22,7 +28,9 @@ class InspectorScreenController extends DevToolsScreenController {
   late legacy.InspectorTreeController legacyInspectorTreeController;
   late legacy.InspectorTreeController legacyDetailsTreeController;
 
-  void _init() {
+  @override
+  void init() {
+    super.init();
     v2InspectorTreeController = v2.InspectorTreeController(
       gaId: InspectorScreenMetrics.summaryTreeGaId,
     );

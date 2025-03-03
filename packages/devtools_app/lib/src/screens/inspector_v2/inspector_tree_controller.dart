@@ -110,17 +110,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 class InspectorTreeController extends DisposableController
     with SearchControllerMixin<InspectorTreeRow> {
   InspectorTreeController({this.gaId}) {
-    ga.select(
-      gac.inspector,
-      gac.inspectorTreeControllerInitialized,
-      nonInteraction: true,
-      screenMetricsProvider:
-          () => InspectorScreenMetrics.v2(
-            inspectorTreeControllerId: gaId,
-            rootSetCount: _rootSetCount,
-            rowCount: _rowsInTree.value.length,
-          ),
-    );
+    init();
   }
 
   /// Clients the controller notifies to trigger changes to the UI.
@@ -135,6 +125,28 @@ class InspectorTreeController extends DisposableController
 
   SearchTargetType _searchTarget = SearchTargetType.widget;
   int _rootSetCount = 0;
+
+  @override
+  void init() {
+    super.init();
+    ga.select(
+      gac.inspector,
+      gac.inspectorTreeControllerInitialized,
+      nonInteraction: true,
+      screenMetricsProvider:
+          () => InspectorScreenMetrics.v2(
+            inspectorTreeControllerId: gaId,
+            rootSetCount: _rootSetCount,
+            rowCount: _rowsInTree.value.length,
+          ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _rowsInTree.dispose();
+    super.dispose();
+  }
 
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
@@ -243,6 +255,8 @@ class InspectorTreeController extends DisposableController
     InspectorTreeNode? node,
     bool updateSearchableRows = false,
   }) {
+    if (disposed) return;
+
     // TODO(elliette): Consider only updating an [InspectorTreeNode]'s branch
     // when it is marked as dirty, instead of the entire tree. See:
     // https://github.com/flutter/devtools/issues/7980
@@ -940,11 +954,11 @@ class _InspectorTreeState extends State<InspectorTree>
 
   @override
   void dispose() {
-    super.dispose();
     treeController?.removeClient(this);
     _scrollControllerX.dispose();
     _scrollControllerY.dispose();
     _constraintDisplayController?.dispose();
+    super.dispose();
   }
 
   @override

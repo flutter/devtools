@@ -61,10 +61,12 @@ class InspectorController extends DisposableController
     with AutoDisposeControllerMixin
     implements InspectorServiceClient {
   InspectorController({required this.inspectorTree, required this.treeType}) {
-    unawaited(_init());
+    unawaited(init());
   }
 
-  Future<void> _init() async {
+  @override
+  Future<void> init() async {
+    super.init();
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
     inspectorTree.config = InspectorTreeConfig(
@@ -200,8 +202,6 @@ class InspectorController extends DisposableController
   InspectorTreeController inspectorTree;
   final FlutterTreeType treeType;
 
-  bool _disposed = false;
-
   late RateLimiter _refreshRateLimiter;
 
   InspectorServiceBase get inspectorService =>
@@ -265,9 +265,8 @@ class InspectorController extends DisposableController
   RemoteDiagnosticsNode? get selectedDiagnostic =>
       selectedNode.value?.diagnostic;
 
-  final _selectedErrorIndex = ValueNotifier<int?>(null);
-
   ValueListenable<int?> get selectedErrorIndex => _selectedErrorIndex;
+  final _selectedErrorIndex = ValueNotifier<int?>(null);
 
   /// Tracks whether the first load of the inspector tree has been completed.
   ///
@@ -371,12 +370,12 @@ class InspectorController extends DisposableController
 
   @override
   Future<void> onForceRefresh() async {
-    assert(!_disposed);
-    if (!visibleToUser || _disposed) {
+    assert(!disposed);
+    if (!visibleToUser || disposed) {
       return;
     }
     await _recomputeTreeRoot(null);
-    if (_disposed) {
+    if (disposed) {
       return;
     }
 
@@ -432,13 +431,13 @@ class InspectorController extends DisposableController
     }
 
     if (flutterAppFrameReady) {
-      if (_disposed) return;
+      if (disposed) return;
       // We need to start by querying the inspector service to find out the
       // current state of the UI.
       final inspectorRef = DevToolsQueryParams.load().inspectorRef;
       await updateSelectionFromService(inspectorRef: inspectorRef);
     } else {
-      if (_disposed) return;
+      if (disposed) return;
       if (inspectorService is InspectorService) {
         final widgetTreeReady =
             await (inspectorService as InspectorService).isWidgetTreeReady();
@@ -483,10 +482,10 @@ class InspectorController extends DisposableController
     RemoteDiagnosticsNode? newSelection, {
     bool? hideImplementationWidgets,
   }) async {
-    assert(!_disposed);
+    assert(!disposed);
     hideImplementationWidgets ??= _implementationWidgetsHidden.value;
     final treeGroups = _treeGroups;
-    if (_disposed || treeGroups == null) {
+    if (disposed || treeGroups == null) {
       return;
     }
 
@@ -498,7 +497,7 @@ class InspectorController extends DisposableController
         isSummaryTree: hideImplementationWidgets,
         includeFullDetails: false,
       );
-      if (node == null || group.disposed || _disposed) {
+      if (node == null || group.disposed || disposed) {
         return;
       }
       // TODO(jacobr): as a performance optimization we should check if the
@@ -746,7 +745,7 @@ class InspectorController extends DisposableController
         InspectorInstanceRef(inspectorRef),
         false,
       );
-      if (_disposed) return;
+      if (disposed) return;
     }
     final pendingSelectionFuture = group.getSelection(
       selectedDiagnostic,
@@ -759,7 +758,7 @@ class InspectorController extends DisposableController
     try {
       final newSelection = await pendingSelectionFuture;
 
-      if (_disposed || group.disposed) return;
+      if (disposed || group.disposed) return;
 
       selectionGroups.promoteNext();
 
@@ -1017,7 +1016,7 @@ class InspectorController extends DisposableController
     final isolateRef = inspectorService.isolateRef;
     final instanceRef = await node.diagnostic!.objectGroupApi
         ?.toObservatoryInstanceRef(valueRef);
-    if (_disposed) return;
+    if (disposed) return;
 
     if (instanceRef != null) {
       await serviceConnection.consoleService.appendInstanceRef(
@@ -1088,15 +1087,23 @@ class InspectorController extends DisposableController
 
   @override
   void dispose() {
-    assert(!_disposed);
-    _disposed = true;
+    assert(!disposed);
     if (serviceConnection.inspectorService != null) {
       shutdownTree(false);
     }
+
     _treeGroups?.clear(false);
     _treeGroups = null;
     _selectionGroups?.clear(false);
     _selectionGroups = null;
+    _layoutGroups?.clear(false);
+    _layoutGroups = null;
+
+    _refreshRateLimiter.dispose();
+    _selectedNode.dispose();
+    _selectedNodeProperties.dispose();
+    _implementationWidgetsHidden.dispose();
+    _selectedErrorIndex.dispose();
     super.dispose();
   }
 
