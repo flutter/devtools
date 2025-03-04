@@ -72,6 +72,10 @@ void main() {
 
       verifyNever(controller1.init());
       verifyNever(controller2.init());
+      expect(
+        screenControllers.controllers.values.any((c) => c.initialized),
+        false,
+      );
     });
 
     test('register overwrites existing controller', () {
@@ -170,9 +174,17 @@ void main() {
       );
 
       verifyNever(controller.init()); // Not initialized yet
+      expect(
+        screenControllers.controllers.values.first.initialized,
+        false,
+      );
 
       screenControllers.lookup<MockDevToolsScreenController>();
       verify(controller.init()).called(1); // Now it's initialized
+      expect(
+        screenControllers.controllers.values.first.initialized,
+        true,
+      );
     });
   });
 }
