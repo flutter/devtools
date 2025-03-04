@@ -82,6 +82,25 @@ class ScreenControllers {
     }
     offlineControllers.clear();
   }
+
+  /// Calls the [callback] function on each initialized screen controller.
+  ///
+  /// Optionally, calls the [callback] on the offline screen controllers when
+  /// [includeOfflineControllers] is true.
+  void forEachInitialized(
+    void Function(DevToolsScreenController screenController) callback, {
+    bool includeOfflineControllers = false,
+  }) {
+    final controllers =
+        includeOfflineControllers
+            ? [...this.controllers.values, ...offlineControllers.values]
+            : this.controllers.values;
+    for (final lazyController in controllers) {
+      if (lazyController.initialized) {
+        callback(lazyController.controller);
+      }
+    }
+  }
 }
 
 /// Helper class that performs lazy initialization for
@@ -95,6 +114,9 @@ class _LazyController<T extends DevToolsScreenController> {
   /// Lazily create and initialize the controller on the first use.
   T get controller => _controller ??= creator()..init();
   T? _controller;
+
+  /// Whether the controller has been initialized.
+  bool get initialized => _controller != null;
 
   void dispose() {
     _controller?.dispose();

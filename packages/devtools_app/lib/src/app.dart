@@ -141,12 +141,23 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       }
     });
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
-      final connected =
-          serviceConnection.serviceManager.connectedState.value.connected;
+      final connectionState =
+          serviceConnection.serviceManager.connectedState.value;
+
+      // When disconnecting from an app, prepare the offline state for reviewing
+      // history.
+      screenControllers.forEachInitialized((screenController) {
+        if (screenController is OfflineScreenControllerMixin &&
+            !connectionState.connected &&
+            !connectionState.userInitiatedConnectionState) {
+          screenController.maybePrepareDataForReviewingHistory();
+        }
+      });
+
       // Dispose the current connected controllers, if any, for any change to
       // the connected state.
       screenControllers.disposeConnectedControllers();
-      _initScreenControllers(connected: connected);
+      _initScreenControllers(connected: connectionState.connected);
     });
 
     // TODO(https://github.com/flutter/devtools/issues/6018): Once
@@ -582,14 +593,10 @@ class DevToolsScreen<C extends DevToolsScreenController> {
     DevToolsRouterDelegate routerDelegate, {
     required bool offline,
   }) {
-    screenControllers.register<C>(() {
-      final controller =
-          createController!(routerDelegate) as DisposableController;
-      if (controller is OfflineScreenControllerMixin) {
-        controller.initReviewHistoryOnDisconnectListener();
-      }
-      return controller as C;
-    }, offline: offline);
+    screenControllers.register<C>(
+      () => createController!(routerDelegate),
+      offline: offline,
+    );
   }
 }
 

@@ -15,7 +15,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+* Fix a bug with the review history on disconnect experience. -
+[#8985](https://github.com/flutter/devtools/pull/8985)
 
 ## Inspector updates
 
