@@ -84,7 +84,7 @@ class ScreenControllers {
   }
 
   /// Calls the [callback] function on each initialized screen controller.
-  /// 
+  ///
   /// Optionally, calls the [callback] on the offline screen controllers when
   /// [includeOfflineControllers] is true.
   void forEachInitialized(

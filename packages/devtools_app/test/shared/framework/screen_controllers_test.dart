@@ -174,17 +174,11 @@ void main() {
       );
 
       verifyNever(controller.init()); // Not initialized yet
-      expect(
-        screenControllers.controllers.values.first.initialized,
-        false,
-      );
+      expect(screenControllers.controllers.values.first.initialized, false);
 
       screenControllers.lookup<MockDevToolsScreenController>();
       verify(controller.init()).called(1); // Now it's initialized
-      expect(
-        screenControllers.controllers.values.first.initialized,
-        true,
-      );
+      expect(screenControllers.controllers.values.first.initialized, true);
     });
   });
 }
