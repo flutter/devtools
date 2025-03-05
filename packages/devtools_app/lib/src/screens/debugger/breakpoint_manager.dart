@@ -88,7 +88,7 @@ class BreakpointManager with DisposerMixin {
     }
 
     // Maybe resume the isolate now that the breakpoints have been set:
-    final isolate = await _service.getIsolate(isolateRef.id!);
+    final isolate = await _service.getIsolate(_isolateRefId);
     final pauseEventKind = isolate.pauseEvent?.kind;
     if ([
       EventKind.kPauseStart,
