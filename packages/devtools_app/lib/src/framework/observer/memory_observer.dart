@@ -23,15 +23,14 @@ import '_memory_desktop.dart' if (dart.library.js_interop) '_memory_web.dart';
 /// from features that have not been recently used, or stale data in general.
 class MemoryObserver extends DisposableController {
   MemoryObserver({
-    @visibleForTesting this.debugMeasureUsageInBytes,
-    @visibleForTesting this.debugPollingDuration,
-  });
+    @visibleForTesting Future<int?> Function()? debugMeasureUsageInBytes,
+    @visibleForTesting Duration pollingDuration = _pollForMemoryDuration,
+  }) : _debugMeasureUsageInBytes = debugMeasureUsageInBytes,
+       _pollingDuration = pollingDuration;
 
-  @visibleForTesting
-  final Future<int?> Function()? debugMeasureUsageInBytes;
+  final Future<int?> Function()? _debugMeasureUsageInBytes;
 
-  @visibleForTesting
-  final Duration? debugPollingDuration;
+  final Duration _pollingDuration;
 
   static const _pollForMemoryDuration = Duration(seconds: 45);
 
@@ -42,10 +41,7 @@ class MemoryObserver extends DisposableController {
   @override
   void init() {
     super.init();
-    _timer = DebounceTimer.periodic(
-      debugPollingDuration ?? _pollForMemoryDuration,
-      _pollForMemoryUsage,
-    );
+    _timer = DebounceTimer.periodic(_pollingDuration, _pollForMemoryUsage);
   }
 
   @override
@@ -59,8 +55,8 @@ class MemoryObserver extends DisposableController {
     DebounceCancelledCallback? cancelledCallback,
   }) async {
     final memoryUsageInBytes =
-        debugMeasureUsageInBytes != null
-            ? await debugMeasureUsageInBytes!()
+        _debugMeasureUsageInBytes != null
+            ? await _debugMeasureUsageInBytes!()
             : await measureMemoryUsageInBytes();
     if (memoryUsageInBytes == null) return;
 

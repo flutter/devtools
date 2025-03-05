@@ -24,10 +24,10 @@ extension on Performance {
   @JS('measureUserAgentSpecificMemory')
   external JSPromise<_UserAgentSpecificMemory> _measureUserAgentSpecificMemory();
 
-  Future<_UserAgentSpecificMemory?> measureUserAgentSpecificMemory() =>
+  Future<_UserAgentSpecificMemory>? measureUserAgentSpecificMemory() =>
       has('measureUserAgentSpecificMemory')
           ? _measureUserAgentSpecificMemory().toDart
-          : Future<_UserAgentSpecificMemory?>.value();
+          : null;
 }
 
 @JS()

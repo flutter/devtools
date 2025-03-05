@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/observer/memory_observer.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/analytics/constants.dart' as gac;
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/primitives/byte_utils.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
@@ -23,8 +23,8 @@ void main() {
     setUp(() {
       FeatureFlags.memoryObserver = true;
       observer = MemoryObserver(
-        debugMeasureUsageInBytes: testMeasureMemoryUsage,
-        debugPollingDuration: const Duration(seconds: 2),
+        measureUsageInBytes: testMeasureMemoryUsage,
+        pollingDuration: const Duration(seconds: 2),
       );
       setGlobal(BannerMessagesController, BannerMessagesController());
     });
