@@ -22,7 +22,8 @@ Future<int?> measureMemoryUsageInBytes() async {
 
 extension on Performance {
   @JS('measureUserAgentSpecificMemory')
-  external JSPromise<_UserAgentSpecificMemory> _measureUserAgentSpecificMemory();
+  external JSPromise<_UserAgentSpecificMemory>
+  _measureUserAgentSpecificMemory();
 
   Future<_UserAgentSpecificMemory>? measureUserAgentSpecificMemory() =>
       has('measureUserAgentSpecificMemory')

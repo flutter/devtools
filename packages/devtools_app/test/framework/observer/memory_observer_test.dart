@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/observer/memory_observer.dart';
 import 'package:devtools_app/src/shared/analytics/constants.dart' as gac;
 import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/primitives/byte_utils.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -18,13 +19,26 @@ void main() {
 
     int memoryUsageBytes = 0;
 
-    Future<int?> testMeasureMemoryUsage() async => memoryUsageBytes;
+    var measurementComplete = Completer<void>();
+
+    Future<int?> testMeasureMemoryUsage() async {
+      unawaited(
+        Future.delayed(
+          Duration.zero,
+          // Complete after releasing the UI thread to allow the memory observer
+          // logic to complete during the async gap.
+          () => measurementComplete.complete(),
+        ),
+      );
+      return memoryUsageBytes;
+    }
 
     setUp(() {
+      measurementComplete = Completer();
       FeatureFlags.memoryObserver = true;
       observer = MemoryObserver(
-        measureUsageInBytes: testMeasureMemoryUsage,
-        pollingDuration: const Duration(seconds: 2),
+        debugMeasureUsageInBytes: testMeasureMemoryUsage,
+        pollingDuration: const Duration(milliseconds: 1),
       );
       setGlobal(BannerMessagesController, BannerMessagesController());
     });
@@ -39,7 +53,7 @@ void main() {
         memoryUsageBytes =
             convertBytes(1, from: ByteUnit.gb, to: ByteUnit.byte).round();
         observer.init();
-        await delay(duration: const Duration(seconds: 3));
+        await measurementComplete.future;
 
         // If this value is not null, then the call to
         // `bannerMessages.messagesForScreen` below will lookup messages for the
@@ -57,7 +71,7 @@ void main() {
       memoryUsageBytes =
           convertBytes(3.1, from: ByteUnit.gb, to: ByteUnit.byte).round();
       observer.init();
-      await delay(duration: const Duration(seconds: 3));
+      await measurementComplete.future;
 
       // If this value is not null, then the call to
       // `bannerMessages.messagesForScreen` below will lookup messages for the
