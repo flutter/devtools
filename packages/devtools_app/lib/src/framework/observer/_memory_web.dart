@@ -9,7 +9,7 @@ import 'package:web/web.dart';
 
 /// Estimates the memory usage of the DevTools web aplication, including all
 /// iFrames and workers.
-/// 
+///
 /// See https://developer.mozilla.org/en-US/docs/Web/API/Performance/measureUserAgentSpecificMemory.
 Future<int?> measureMemoryUsageInBytes() async {
   // Use of this API requires a secure context and cross origin isolation.

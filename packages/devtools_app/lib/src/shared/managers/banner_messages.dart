@@ -226,9 +226,7 @@ class BannerMessage extends StatelessWidget {
                   left:
                       // Info messages do not have a leading icon to match
                       // padding for.
-                      messageType != BannerMessageType.info
-                          ? iconPadding
-                          : 0.0,
+                      messageType != BannerMessageType.info ? iconPadding : 0.0,
                 ),
                 child: Row(children: buildActions!(context)),
               ),

@@ -61,7 +61,7 @@ abstract class FeatureFlags {
 
   /// Flag to enable the DevTools memory observer, which attempts to help users
   /// avoid OOM crashes.
-  /// 
+  ///
   /// https://github.com/flutter/devtools/issues/7002
   static bool memoryObserver = enableExperiments;
 
