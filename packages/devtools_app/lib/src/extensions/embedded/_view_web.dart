@@ -314,12 +314,13 @@ class _ExtensionIFrameController extends DisposableController
         '${showBannerMessageEvent.messageId}',
       ),
       screenId: '${showBannerMessageEvent.extensionName}_ext',
-      textSpans: [
-        TextSpan(
-          text: showBannerMessageEvent.message,
-          style: TextStyle(fontSize: defaultFontSize),
-        ),
-      ],
+      buildTextSpans:
+          (_) => [
+            TextSpan(
+              text: showBannerMessageEvent.message,
+              style: TextStyle(fontSize: defaultFontSize),
+            ),
+          ],
     );
     bannerMessages.addMessage(
       bannerMessage,

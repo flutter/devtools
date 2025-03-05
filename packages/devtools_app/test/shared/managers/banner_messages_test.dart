@@ -168,13 +168,13 @@ const k1 = Key('test message 1');
 const k2 = Key('test message 2');
 final testMessage1 = BannerMessage(
   key: k1,
-  textSpans: const [TextSpan(text: 'Test Message 1')],
+  buildTextSpans: (_) => const [TextSpan(text: 'Test Message 1')],
   screenId: testMessage1ScreenId,
   messageType: BannerMessageType.warning,
 );
 final testMessage2 = BannerMessage(
   key: k2,
-  textSpans: const [TextSpan(text: 'Test Message 2')],
+  buildTextSpans: (_) => const [TextSpan(text: 'Test Message 2')],
   screenId: testMessage2ScreenId,
   messageType: BannerMessageType.warning,
 );

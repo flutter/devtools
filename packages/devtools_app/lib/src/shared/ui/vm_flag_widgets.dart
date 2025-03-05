@@ -57,11 +57,11 @@ class CpuSamplingRateDropdown extends StatelessWidget {
 
         if (safeValue == highProfilePeriod) {
           bannerMessages.addMessage(
-            HighCpuSamplingRateMessage(screenId).build(context),
+            HighCpuSamplingRateMessage(screenId: screenId),
           );
         } else {
           bannerMessages.removeMessageByKey(
-            HighCpuSamplingRateMessage(screenId).key,
+            HighCpuSamplingRateMessage.generateKey(screenId),
             screenId,
           );
         }

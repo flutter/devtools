@@ -123,12 +123,13 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
       );
       bannerMessages.addMessage(
         ShaderJankMessage(
-          offlineDataController.showingOfflineData.value
-              ? ScreenMetaData.simple.id
-              : ScreenMetaData.performance.id,
+          screenId:
+              offlineDataController.showingOfflineData.value
+                  ? ScreenMetaData.simple.id
+                  : ScreenMetaData.performance.id,
           jankyFramesCount: shaderJankFrames.length,
           jankDuration: shaderJankDuration,
-        ).build(context),
+        ),
       );
     }
   }
