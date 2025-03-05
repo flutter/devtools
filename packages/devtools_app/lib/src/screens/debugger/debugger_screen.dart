@@ -125,7 +125,7 @@ class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    pushDebuggerIdeRecommendationMessage(context, DebuggerScreen.id);
+    pushDebuggerIdeRecommendationMessage(DebuggerScreen.id);
   }
 
   @override

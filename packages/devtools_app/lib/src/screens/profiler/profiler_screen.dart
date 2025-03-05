@@ -96,7 +96,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushDebugModePerformanceMessage(context, ProfilerScreen.id);
+    maybePushDebugModePerformanceMessage(ProfilerScreen.id);
   }
 
   @override

@@ -73,7 +73,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    maybePushDebugModePerformanceMessage(context, PerformanceScreen.id);
+    maybePushDebugModePerformanceMessage(PerformanceScreen.id);
   }
 
   @override

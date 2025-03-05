@@ -219,7 +219,7 @@ class BannerMessage extends StatelessWidget {
             if (buildActions != null) ...[
               const SizedBox(height: defaultSpacing),
               Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: buildActions!(context),
               ),
             ],
@@ -522,10 +522,7 @@ class WelcomeToNewInspectorMessage extends BannerInfo {
       );
 }
 
-void maybePushDebugModePerformanceMessage(
-  BuildContext context,
-  String screenId,
-) {
+void maybePushDebugModePerformanceMessage(String screenId) {
   if (offlineDataController.showingOfflineData.value) return;
   if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
       false) {
@@ -533,7 +530,7 @@ void maybePushDebugModePerformanceMessage(
   }
 }
 
-void maybePushDebugModeMemoryMessage(BuildContext context, String screenId) {
+void maybePushDebugModeMemoryMessage(String screenId) {
   if (offlineDataController.showingOfflineData.value) return;
   if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
       false) {
@@ -541,22 +538,19 @@ void maybePushDebugModeMemoryMessage(BuildContext context, String screenId) {
   }
 }
 
-void maybePushHttpLoggingMessage(BuildContext context, String screenId) {
+void maybePushHttpLoggingMessage(String screenId) {
   if (http_service.httpLoggingEnabled) {
     bannerMessages.addMessage(HttpLoggingEnabledMessage(screenId: screenId));
   }
 }
 
-void pushDebuggerIdeRecommendationMessage(
-  BuildContext context,
-  String screenId,
-) {
+void pushDebuggerIdeRecommendationMessage(String screenId) {
   bannerMessages.addMessage(
     DebuggerIdeRecommendationMessage(screenId: screenId),
   );
 }
 
-void pushWelcomeToNewInspectorMessage(BuildContext context, String screenId) {
+void pushWelcomeToNewInspectorMessage(String screenId) {
   bannerMessages.addMessage(WelcomeToNewInspectorMessage(screenId: screenId));
 }
 
