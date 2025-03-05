@@ -20,27 +20,27 @@ Future<int?> measureMemoryUsageInBytes() async {
   return null;
 }
 
-extension PerformanceMemory on Performance {
+extension on Performance {
   @JS('measureUserAgentSpecificMemory')
-  external JSPromise<UserAgentSpecificMemory> _measureUserAgentSpecificMemory();
+  external JSPromise<_UserAgentSpecificMemory> _measureUserAgentSpecificMemory();
 
-  Future<UserAgentSpecificMemory?> measureUserAgentSpecificMemory() =>
+  Future<_UserAgentSpecificMemory?> measureUserAgentSpecificMemory() =>
       has('measureUserAgentSpecificMemory')
           ? _measureUserAgentSpecificMemory().toDart
-          : Future<UserAgentSpecificMemory?>.value();
+          : Future<_UserAgentSpecificMemory?>.value();
 }
 
 @JS()
-extension type UserAgentSpecificMemory._(JSObject _) implements JSObject {
+extension type _UserAgentSpecificMemory._(JSObject _) implements JSObject {
   external int get bytes;
 
-  external JSArray<UserAgentSpecificMemoryBreakdownElement> get breakdown;
+  external JSArray<_UserAgentSpecificMemoryBreakdownElement> get breakdown;
 }
 
 @JS()
-extension type UserAgentSpecificMemoryBreakdownElement._(JSObject _)
+extension type _UserAgentSpecificMemoryBreakdownElement._(JSObject _)
     implements JSObject {
-  external JSArray<UserAgentSpecificMemoryBreakdownAttributionElement>
+  external JSArray<_UserAgentSpecificMemoryBreakdownAttributionElement>
   get attribution;
 
   external int get bytes;
@@ -49,9 +49,9 @@ extension type UserAgentSpecificMemoryBreakdownElement._(JSObject _)
 }
 
 @JS()
-extension type UserAgentSpecificMemoryBreakdownAttributionElement._(JSObject _)
+extension type _UserAgentSpecificMemoryBreakdownAttributionElement._(JSObject _)
     implements JSObject {
-  external UserAgentSpecificMemoryBreakdownAttributionContainerElement?
+  external _UserAgentSpecificMemoryBreakdownAttributionContainerElement?
   get container;
 
   external String get scope;
@@ -60,7 +60,7 @@ extension type UserAgentSpecificMemoryBreakdownAttributionElement._(JSObject _)
 }
 
 @JS()
-extension type UserAgentSpecificMemoryBreakdownAttributionContainerElement._(
+extension type _UserAgentSpecificMemoryBreakdownAttributionContainerElement._(
   JSObject _
 )
     implements JSObject {
