@@ -59,6 +59,12 @@ abstract class FeatureFlags {
   /// Example usage of a flag for an experimental feature.
   static bool myExperimentalFeature = enableExperiments;
 
+  /// Flag to enable the DevTools memory observer, which attempts to help users
+  /// avoid OOM crashes.
+  /// 
+  /// https://github.com/flutter/devtools/issues/7002
+  static bool memoryObserver = enableExperiments;
+
   /// Flag to enable widget rebuild stats ui.
   ///
   /// https://github.com/flutter/devtools/issues/4564.

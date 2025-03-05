@@ -3,7 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/framework/disconnect_observer.dart';
+import 'package:devtools_app/src/framework/observer/disconnect_observer.dart';
 import 'package:devtools_app/src/shared/framework/framework_controller.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -13,7 +13,7 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_infra/matchers/matchers.dart';
+import '../../test_infra/matchers/matchers.dart';
 
 void main() {
   group('DisconnectObserver', () {

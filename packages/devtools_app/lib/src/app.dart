@@ -16,11 +16,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'extensions/extension_screen.dart';
-import 'framework/disconnect_observer.dart';
 import 'framework/framework_core.dart';
 import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
 import 'framework/notifications_view.dart';
+import 'framework/observer/disconnect_observer.dart';
 import 'framework/release_notes.dart';
 import 'framework/scaffold/scaffold.dart';
 import 'screens/app_size/app_size_controller.dart';

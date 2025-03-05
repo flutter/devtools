@@ -167,6 +167,7 @@ class BannerMessage extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final backgroundColor = _backgroundColor(colorScheme);
     final foregroundColor = _foregroundColor(colorScheme);
+    const iconPadding = 12.0;
 
     return Card(
       color: backgroundColor,
@@ -185,7 +186,9 @@ class BannerMessage extends StatelessWidget {
               children: [
                 if (messageType != BannerMessageType.info)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: iconPadding,
+                    ),
                     child: Icon(
                       messageType == BannerMessageType.error
                           ? Icons.error_outline
@@ -217,10 +220,17 @@ class BannerMessage extends StatelessWidget {
               ],
             ),
             if (buildActions != null) ...[
-              const SizedBox(height: defaultSpacing),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: buildActions!(context),
+              const SizedBox(height: denseSpacing),
+              Padding(
+                padding: EdgeInsets.only(
+                  left:
+                      // Info messages do not have a leading icon to match
+                      // padding for.
+                      messageType != BannerMessageType.info
+                          ? iconPadding
+                          : 0.0,
+                ),
+                child: Row(children: buildActions!(context)),
               ),
             ],
           ],

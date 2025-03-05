@@ -47,6 +47,8 @@ final deeplink = ScreenMetaData.deepLinks.id;
 const devToolsMain = 'main';
 const appDisconnected = 'appDisconnected';
 const init = 'init';
+const memoryPressure = 'memoryPressure';
+const memoryPressureReduce = 'memoryPressureReduce';
 
 /// Event that signals we fell back to JS when trying to load DevTools with
 /// Wasm.
