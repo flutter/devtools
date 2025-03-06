@@ -23,6 +23,13 @@ const _runInProfileModeDocsUrl = 'https://flutter.dev/to/use-profile-mode';
 const _cpuSamplingRateDocsUrl =
     'https://docs.flutter.dev/tools/devtools/cpu-profiler#cpu-sampling-rate';
 
+/// Screen id to use for banner messages that are intended to be universal for
+/// every DevTools screen.
+///
+/// Messages with this screen id will be added to the list of messages for
+/// every screen from the [BannerMessages] widget.
+const universalBannerMessageId = 'universal';
+
 class BannerMessagesController {
   final _messages = <String, ListValueNotifier<BannerMessage>>{};
   final _dismissedMessageKeys = <Key?>{};
@@ -77,13 +84,13 @@ class BannerMessagesController {
     });
   }
 
-  void removeMessageByKey(Key key, String screenId) {
+  void removeMessageByKey(Key key, String screenId, {bool dismiss = false}) {
     final currentMessages = _messagesForScreen(screenId);
     final messageWithKey = currentMessages.value.firstWhereOrNull(
       (m) => m.key == key,
     );
     if (messageWithKey != null) {
-      removeMessage(messageWithKey);
+      removeMessage(messageWithKey, dismiss: dismiss);
     }
   }
 
@@ -119,13 +126,18 @@ class BannerMessages extends StatelessWidget {
   // TODO(kenz): use an AnimatedList for message changes.
   @override
   Widget build(BuildContext context) {
+    final universalMessages = bannerMessages.messagesForScreen(
+      universalBannerMessageId,
+    );
     final messagesForScreen = bannerMessages.messagesForScreen(screen.screenId);
     return Column(
       children: [
-        ValueListenableBuilder<List<BannerMessage>>(
-          valueListenable: messagesForScreen,
-          builder: (context, messages, _) {
-            return Column(children: messages);
+        MultiValueListenableBuilder(
+          listenables: [universalMessages, messagesForScreen],
+          builder: (context, values, _) {
+            final universalMessages = values[0] as List<BannerMessage>;
+            final messages = values[1] as List<BannerMessage>;
+            return Column(children: [...universalMessages, ...messages]);
           },
         ),
         Expanded(child: screen.build(context)),
