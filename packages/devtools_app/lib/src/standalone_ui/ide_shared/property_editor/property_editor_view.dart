@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/common_widgets.dart';
+import '../../../shared/ui/search.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
 import 'property_editor_types.dart';
@@ -54,8 +55,8 @@ class PropertyEditorView extends StatelessWidget {
             args.isEmpty
                 ? _NoEditablePropertiesMessage(name: name)
                 : _PropertiesList(
+                  controller: controller,
                   editableProperties: args.map(argToProperty).nonNulls.toList(),
-                  editProperty: controller.editArgument,
                 ),
           ],
         );
@@ -66,12 +67,12 @@ class PropertyEditorView extends StatelessWidget {
 
 class _PropertiesList extends StatefulWidget {
   const _PropertiesList({
+    required this.controller,
     required this.editableProperties,
-    required this.editProperty,
   });
 
+  final PropertyEditorController controller;
   final List<EditableProperty> editableProperties;
-  final EditArgumentFunction editProperty;
 
   static const defaultItemPadding = borderPadding;
   static const denseItemPadding = defaultItemPadding / 2;
@@ -99,10 +100,11 @@ class _PropertiesListState extends State<_PropertiesList> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
+        _SearchControls(controller: widget.controller),
         for (final property in widget.editableProperties)
           _EditablePropertyItem(
             property: property,
-            editProperty: widget.editProperty,
+            editProperty: widget.controller.editArgument,
           ),
       ].joinWith(const PaddedDivider.noPadding()),
     );
@@ -137,6 +139,28 @@ class _EditablePropertyItem extends StatelessWidget {
           Flexible(child: _PropertyLabels(property: property)),
         ] else
           const Spacer(),
+      ],
+    );
+  }
+}
+
+class _SearchControls extends StatelessWidget {
+  const _SearchControls({required this.controller});
+
+  final PropertyEditorController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: SearchField<PropertyEditorController>(
+            searchController: controller,
+            // searchFieldEnabled: parsedScript != null,
+            shouldRequestFocus: true,
+            searchFieldWidth: wideSearchFieldWidth,
+          ),
+        ),
       ],
     );
   }

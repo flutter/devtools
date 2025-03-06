@@ -9,6 +9,8 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
+import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/search.dart';
 
 typedef EditableWidgetData =
     ({List<EditableArgument> args, String? name, String? documentation});
@@ -20,9 +22,9 @@ typedef EditArgumentFunction =
     });
 
 class PropertyEditorController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin, SearchControllerMixin {
   PropertyEditorController(this.editorClient) {
-    _init();
+    init();
   }
 
   final EditorClient editorClient;
@@ -36,7 +38,9 @@ class PropertyEditorController extends DisposableController
       _editableWidgetData;
   final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
 
-  void _init() {
+  @override
+  void init() {
+    super.init();
     autoDisposeStreamSubscription(
       editorClient.activeLocationChangedStream.listen((event) async {
         final textDocument = event.textDocument;
@@ -64,6 +68,7 @@ class PropertyEditorController extends DisposableController
           name: name,
           documentation: result?.documentation,
         );
+
         // Register impression.
         ga.impression(
           gaId,
@@ -72,6 +77,12 @@ class PropertyEditorController extends DisposableController
       }),
     );
   }
+
+  @override
+  Iterable<SearchableArgument> get currentDataToSearchThrough =>
+      (_editableWidgetData.value?.args ?? <EditableArgument>[]).map(
+        (arg) => SearchableArgument(arg),
+      );
 
   Future<EditArgumentResponse?> editArgument<T>({
     required String name,
@@ -107,5 +118,18 @@ class PropertyEditorController extends DisposableController
     if (cursorPosition != null) {
       _currentCursorPosition = cursorPosition;
     }
+  }
+}
+
+class SearchableArgument with SearchableDataMixin {
+  SearchableArgument(this.argument);
+
+  final EditableArgument argument;
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return argument.name.caseInsensitiveContains(regExpSearch) ||
+        argument.valueDisplay.caseInsensitiveContains(regExpSearch) ||
+        argument.type.caseInsensitiveContains(regExpSearch);
   }
 }
