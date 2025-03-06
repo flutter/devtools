@@ -15,6 +15,9 @@ To learn more about DevTools, check out the
 
 ## General updates
 
+* Fixed bug where DevTools would automatically resume instead of
+pausing on breakpoint on connection. - 
+[#8991](https://github.com/flutter/devtools/pull/8991)
 * Fixed various memory leaks and lifecycle issues. - 
 [#8901](https://github.com/flutter/devtools/pull/8901),
 [#8902](https://github.com/flutter/devtools/pull/8902),
