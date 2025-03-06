@@ -11,6 +11,8 @@ import 'package:vm_snapshot_analysis/utils.dart';
 import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../../shared/charts/treemap.dart';
+import '../../shared/feature_flags.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
@@ -85,6 +87,9 @@ class DiffTreeMap {
 /// `screenControllers`. The `dispose` method is called by `screenControllers`
 /// when DevTools is destroying a set of DevTools screen controllers.
 class AppSizeController extends DevToolsScreenController {
+  @override
+  final screenId = ScreenMetaData.appSize.id;
+
   static const unsupportedFileTypeError =
       'Failed to load size analysis file: file type not supported.\n\n'
       'The app size tool supports Dart AOT v8 snapshots, instruction sizes, '
@@ -765,6 +770,16 @@ class AppSizeController extends DevToolsScreenController {
     _selectedAppUnit.dispose();
     _processingNotifier.dispose();
     super.dispose();
+  }
+
+  @override
+  void releaseMemory({bool partial = false}) {
+    if (FeatureFlags.memoryObserver) {
+      // This behavior is the same regardless of the value of `partial`. We can
+      // implement a partial clearing if it becomes necessary.
+      clear(AppSizeScreen.analysisTabKey);
+      clear(AppSizeScreen.diffTabKey);
+    }
   }
 }
 
