@@ -8,10 +8,13 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../devtools_app.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/framework/routing.dart';
+import '../../shared/globals.dart';
+import '../../shared/managers/banner_messages.dart' as banner_messages;
 import '../../shared/primitives/byte_utils.dart';
+import '../../shared/utils/utils.dart';
 import '_memory_desktop.dart' if (dart.library.js_interop) '_memory_web.dart';
 
 /// Observes the memory usage of the DevTools app (web only) and shows a memory
@@ -64,7 +67,7 @@ class MemoryObserver extends DisposableController {
       final gaScreen = DevToolsRouterDelegate.currentPage ?? gac.devToolsMain;
       ga.impression(gaScreen, gac.memoryPressure);
       bannerMessages.addMessage(
-        _MemoryPressureBannerMessage(screenId: gaScreen),
+        _MemoryPressureBannerMessage(),
         callInPostFrameCallback: false,
       );
     }
@@ -74,10 +77,11 @@ class MemoryObserver extends DisposableController {
 // TODO(https://github.com/flutter/devtools/issues/7002): modify the banner
 // messages code to ensure this message is screen agnostic and will show on all
 // screens.
-class _MemoryPressureBannerMessage extends BannerWarning {
-  _MemoryPressureBannerMessage({required super.screenId})
+class _MemoryPressureBannerMessage extends banner_messages.BannerWarning {
+  _MemoryPressureBannerMessage()
     : super(
-        key: Key('MemoryPressureBannerMessage - $screenId'),
+        screenId: banner_messages.universalScreenId,
+        key: _messageKey,
         buildTextSpans: (_) {
           final limitAsBytes = convertBytes(
             MemoryObserver._memoryPressureLimitGb,
@@ -109,4 +113,6 @@ class _MemoryPressureBannerMessage extends BannerWarning {
               ),
             ],
       );
+
+  static const _messageKey = Key('MemoryPressureBannerMessage');
 }
