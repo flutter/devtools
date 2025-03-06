@@ -550,7 +550,7 @@ class CpuProfileData with Serializable {
 
   factory CpuProfileData.empty() => CpuProfileData.fromJson({});
 
-  /// Generates [CpuProfileData] from the provided [CpuSamples].
+  /// Generates [CpuProfileData] from the provided [cpuSamples].
   ///
   /// [isolateId] The isolate id which was used to get the [cpuSamples].
   /// This will be used to tag the stack frames and trace events.
@@ -1015,9 +1015,8 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// profile, changing the exclusive counts.
   ///
   /// When [copySampleCounts] is true, inclusive sample counts are also reset
-  /// by default, unless [resetInclusiveSampleCount] is also set to false.
-  /// Inclusive sample counts should only be copied as part of a deep copy of
-  /// a tree.
+  /// by default. Inclusive sample counts should only be copied as part of a
+  /// deep copy of a tree.
   @override
   CpuStackFrame shallowCopy({
     String? id,
@@ -1063,7 +1062,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     return copy;
   }
 
-  /// Whether [this] stack frame matches another stack frame [other].
+  /// Whether `this` stack frame matches another stack frame [other].
   ///
   /// Two stack frames are said to be matching if they share the following
   /// properties.
