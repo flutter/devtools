@@ -74,9 +74,6 @@ class MemoryObserver extends DisposableController {
   }
 }
 
-// TODO(https://github.com/flutter/devtools/issues/7002): modify the banner
-// messages code to ensure this message is screen agnostic and will show on all
-// screens.
 class _MemoryPressureBannerMessage extends banner_messages.BannerWarning {
   _MemoryPressureBannerMessage()
     : super(
