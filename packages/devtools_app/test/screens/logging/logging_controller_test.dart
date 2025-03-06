@@ -309,6 +309,24 @@ void main() {
       expect(controller.data, hasLength(17));
       expect(controller.filteredData.value, hasLength(3));
     });
+
+    test('releaseMemory - full release', () {
+      prepareTestLogs();
+      expect(controller.data, isNotEmpty);
+      expect(controller.filteredData.value, isNotEmpty);
+      controller.releaseMemory();
+      expect(controller.data, isEmpty);
+      expect(controller.filteredData.value, isEmpty);
+    });
+
+    test('releaseMemory - partial release', () {
+      prepareTestLogs();
+      expect(controller.data, hasLength(17));
+      expect(controller.filteredData.value, hasLength(10));
+      controller.releaseMemory(partial: true);
+      expect(controller.data, hasLength(9));
+      expect(controller.filteredData.value, hasLength(2));
+    });
   });
 
   group('LogData', () {
