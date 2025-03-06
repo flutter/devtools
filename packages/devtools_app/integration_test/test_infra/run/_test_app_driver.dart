@@ -40,17 +40,17 @@ class TestFlutterApp extends IntegrationTestApp {
     // Set this up now, but we don't await it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
     final started = waitFor(
-      event: FlutterDaemonConstants.appStarted.key,
+      event: FlutterDaemonConstants.appStartedKey,
       timeout: IntegrationTestApp._appStartTimeout,
     );
 
     final debugPort = await waitFor(
-      event: FlutterDaemonConstants.appDebugPort.key,
+      event: FlutterDaemonConstants.appDebugPortKey,
       timeout: IntegrationTestApp._appStartTimeout,
     );
     final wsUriString =
-        (debugPort[FlutterDaemonConstants.params.key]!
-                as Map<String, Object?>)[FlutterDaemonConstants.wsUri.key]
+        (debugPort[FlutterDaemonConstants.paramsKey]!
+                as Map<String, Object?>)[FlutterDaemonConstants.wsUriKey]
             as String;
     _vmServiceWsUri = Uri.parse(wsUriString);
 
@@ -63,9 +63,9 @@ class TestFlutterApp extends IntegrationTestApp {
     // have already completed.
     final startedResult = await started;
     final params =
-        startedResult[FlutterDaemonConstants.params.key]!
+        startedResult[FlutterDaemonConstants.paramsKey]!
             as Map<String, Object?>;
-    _currentRunningAppId = params[FlutterDaemonConstants.appId.key] as String?;
+    _currentRunningAppId = params[FlutterDaemonConstants.appIdKey] as String?;
   }
 
   @override
@@ -88,11 +88,7 @@ class TestFlutterApp extends IntegrationTestApp {
   }
 
   int _requestId = 1;
-  // ignore: avoid-dynamic, dynamic by design.
-  Future<dynamic> _sendFlutterDaemonRequest(
-    String method,
-    Object? params,
-  ) async {
+  Future<void> _sendFlutterDaemonRequest(String method, Object? params) async {
     final requestId = _requestId++;
     final request = <String, dynamic>{
       'id': requestId,
@@ -115,8 +111,6 @@ class TestFlutterApp extends IntegrationTestApp {
     if (response['error'] != null || response['result'] == null) {
       throw Exception('Unexpected error response');
     }
-
-    return response['result'];
   }
 
   Future<Map<String, Object?>> waitFor({
@@ -159,29 +153,26 @@ class TestFlutterApp extends IntegrationTestApp {
     final json = _parseFlutterResponse(line);
     if (json == null) {
       return;
-    } else if ((event != null &&
-            json[FlutterDaemonConstants.event.key] == event) ||
-        (id != null && json[FlutterDaemonConstants.id.key] == id)) {
+    }
+    final eventFromJson = json[FlutterDaemonConstants.eventKey];
+    if ((event != null && eventFromJson == event) ||
+        (id != null && json[FlutterDaemonConstants.idKey] == id)) {
       await subscription.cancel();
       response.complete(json);
     } else if (!ignoreAppStopEvent &&
-        json[FlutterDaemonConstants.event.key] ==
-            FlutterDaemonConstants.appStop.key) {
+        eventFromJson == FlutterDaemonConstants.appStopKey) {
       await subscription.cancel();
       final error = StringBuffer();
       error.write('Received app.stop event while waiting for ');
       error.write(
         '${event != null ? '$event event' : 'response to request $id.'}.\n\n',
       );
-      final errorFromJson =
-          (json[FlutterDaemonConstants.params.key]
-              as Map<String, Object?>?)?[FlutterDaemonConstants.error.key];
+      final paramsFromJson = json[FlutterDaemonConstants.paramsKey] as Map?;
+      final errorFromJson = paramsFromJson?[FlutterDaemonConstants.errorKey];
       if (errorFromJson != null) {
         error.write('$errorFromJson\n\n');
       }
-      final traceFromJson =
-          (json[FlutterDaemonConstants.params.key]
-              as Map<String, Object?>?)?[FlutterDaemonConstants.trace.key];
+      final traceFromJson = paramsFromJson?[FlutterDaemonConstants.traceKey];
       if (traceFromJson != null) {
         error.write('$traceFromJson\n\n');
       }
@@ -399,26 +390,19 @@ Uri convertToWebSocketUrl({required Uri serviceProtocolUrl}) {
 // TODO(kenz): consider moving these constants to devtools_shared if they are
 // used outside of these integration tests. Optionally, we could consider making
 // these constants where the flutter daemon is defined in flutter tools.
-enum FlutterDaemonConstants {
-  event,
-  error,
-  id,
-  appId,
-  params,
-  trace,
-  wsUri,
-  pid,
-  appStop(nameOverride: 'app.stop'),
-  appStarted(nameOverride: 'app.started'),
-  appDebugPort(nameOverride: 'app.debugPort'),
-  daemonConnected(nameOverride: 'daemon.connected');
-
-  const FlutterDaemonConstants({String? nameOverride})
-    : _nameOverride = nameOverride;
-
-  final String? _nameOverride;
-
-  String get key => _nameOverride ?? name;
+final class FlutterDaemonConstants {
+  static const eventKey = 'event';
+  static const errorKey = 'error';
+  static const idKey = 'id';
+  static const appIdKey = 'appId';
+  static const paramsKey = 'params';
+  static const traceKey = 'trace';
+  static const wsUriKey = 'wsUri';
+  static const pidKey = 'pid';
+  static const appStopKey = 'app.stop';
+  static const appStartedKey = 'app.started';
+  static const appDebugPortKey = 'app.debugPort';
+  static const daemonConnectedKey = 'daemon.connected';
 }
 
 enum TestAppDevice {

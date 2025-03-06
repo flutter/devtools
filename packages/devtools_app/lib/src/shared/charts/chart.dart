@@ -542,6 +542,10 @@ class ChartPainter extends CustomPainter {
       ..dispose();
   }
 
+  /// Returns a [TextPainter] containing [textValue], scaled to [scale], with
+  /// some other styling.
+  ///
+  /// Callers are responsible for disposing the [TextPainter].
   TextPainter _createText(String textValue, double scale) {
     final span = TextSpan(
       // TODO(terry): All text in a chart is grey. A chart like a Trace

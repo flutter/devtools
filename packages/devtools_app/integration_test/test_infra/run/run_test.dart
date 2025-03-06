@@ -88,7 +88,8 @@ class DevToolsAppTestRunnerArgs extends IntegrationTestRunnerArgs {
     : super(addExtraArgs: _addExtraArgs) {
     testAppDevice =
         TestAppDevice.fromArgName(
-          argResults[_testAppDeviceArg] ?? TestAppDevice.flutterTester.argName,
+          argResults.option(_testAppDeviceArg) ??
+              TestAppDevice.flutterTester.argName,
         )!;
   }
 
@@ -98,10 +99,10 @@ class DevToolsAppTestRunnerArgs extends IntegrationTestRunnerArgs {
   /// The Vm Service URI for the test app to connect devtools to.
   ///
   /// This value will only be used for tests with live connection.
-  String? get testAppUri => argResults[_testAppUriArg];
+  String? get testAppUri => argResults.option(_testAppUriArg);
 
   /// Whether golden images should be updated with the result of this test run.
-  bool get updateGoldens => argResults[_updateGoldensArg];
+  bool get updateGoldens => argResults.flag(_updateGoldensArg);
 
   static const _testAppUriArg = 'test-app-uri';
   static const _testAppDeviceArg = 'test-app-device';

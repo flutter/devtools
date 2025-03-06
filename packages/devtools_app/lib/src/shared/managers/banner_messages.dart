@@ -23,6 +23,13 @@ const _runInProfileModeDocsUrl = 'https://flutter.dev/to/use-profile-mode';
 const _cpuSamplingRateDocsUrl =
     'https://docs.flutter.dev/tools/devtools/cpu-profiler#cpu-sampling-rate';
 
+/// Screen id to use for banner messages that are intended to be universal for
+/// every DevTools screen.
+///
+/// Messages with this screen id will be added to the list of messages for
+/// every screen from the [BannerMessages] widget.
+const universalBannerMessageId = 'universal';
+
 class BannerMessagesController {
   final _messages = <String, ListValueNotifier<BannerMessage>>{};
   final _dismissedMessageKeys = <Key?>{};
@@ -77,13 +84,13 @@ class BannerMessagesController {
     });
   }
 
-  void removeMessageByKey(Key key, String screenId) {
+  void removeMessageByKey(Key key, String screenId, {bool dismiss = false}) {
     final currentMessages = _messagesForScreen(screenId);
     final messageWithKey = currentMessages.value.firstWhereOrNull(
       (m) => m.key == key,
     );
     if (messageWithKey != null) {
-      removeMessage(messageWithKey);
+      removeMessage(messageWithKey, dismiss: dismiss);
     }
   }
 
@@ -119,13 +126,18 @@ class BannerMessages extends StatelessWidget {
   // TODO(kenz): use an AnimatedList for message changes.
   @override
   Widget build(BuildContext context) {
+    final universalMessages = bannerMessages.messagesForScreen(
+      universalBannerMessageId,
+    );
     final messagesForScreen = bannerMessages.messagesForScreen(screen.screenId);
     return Column(
       children: [
-        ValueListenableBuilder<List<BannerMessage>>(
-          valueListenable: messagesForScreen,
-          builder: (context, messages, _) {
-            return Column(children: messages);
+        MultiValueListenableBuilder(
+          listenables: [universalMessages, messagesForScreen],
+          builder: (context, values, _) {
+            final universalMessages = values[0] as List<BannerMessage>;
+            final messages = values[1] as List<BannerMessage>;
+            return Column(children: [...universalMessages, ...messages]);
           },
         ),
         Expanded(child: screen.build(context)),
@@ -134,7 +146,6 @@ class BannerMessages extends StatelessWidget {
   }
 }
 
-// TODO(kenz): add an 'info' type.
 enum BannerMessageType {
   warning,
   error,
@@ -148,16 +159,17 @@ enum BannerMessageType {
   }
 }
 
-@visibleForTesting
 class BannerMessage extends StatelessWidget {
   const BannerMessage({
     required super.key,
-    required this.textSpans,
+    required this.buildTextSpans,
     required this.screenId,
     required this.messageType,
+    this.buildActions,
   });
 
-  final List<InlineSpan> textSpans;
+  final List<InlineSpan> Function(BuildContext) buildTextSpans;
+  final List<Widget> Function(BuildContext)? buildActions;
   final String screenId;
   final BannerMessageType messageType;
 
@@ -200,7 +212,7 @@ class BannerMessage extends StatelessWidget {
                       style: theme.regularTextStyle.copyWith(
                         color: foregroundColor,
                       ),
-                      children: textSpans,
+                      children: buildTextSpans(context),
                     ),
                   ),
                 ),
@@ -216,6 +228,13 @@ class BannerMessage extends StatelessWidget {
                 ),
               ],
             ),
+            if (buildActions != null) ...[
+              const SizedBox(height: defaultSpacing),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: buildActions!(context),
+              ),
+            ],
           ],
         ),
       ),
@@ -245,8 +264,8 @@ class BannerMessage extends StatelessWidget {
 
 class _BannerError extends BannerMessage {
   const _BannerError({
-    required Key super.key,
-    required List<TextSpan> super.textSpans,
+    required super.key,
+    required super.buildTextSpans,
     required super.screenId,
   }) : super(messageType: BannerMessageType.error);
 }
@@ -255,351 +274,296 @@ class _BannerError extends BannerMessage {
 class BannerWarning extends BannerMessage {
   const BannerWarning({
     required super.key,
-    required super.textSpans,
+    required super.buildTextSpans,
     required super.screenId,
+    super.buildActions,
   }) : super(messageType: BannerMessageType.warning);
 }
 
 class BannerInfo extends BannerMessage {
   const BannerInfo({
     required super.key,
-    required super.textSpans,
+    required super.buildTextSpans,
     required super.screenId,
+    super.buildActions,
   }) : super(messageType: BannerMessageType.info);
 }
 
-class DebugModePerformanceMessage {
-  const DebugModePerformanceMessage(this.screenId);
-
-  final String screenId;
-
-  BannerMessage build(BuildContext context) {
-    final theme = Theme.of(context);
-    return BannerWarning(
-      key: Key('DebugModePerformanceMessage - $screenId'),
-      textSpans: [
-        const TextSpan(
-          text:
-              'You are running your app in debug mode. Debug mode performance '
-              'is not indicative of release performance, but you may use debug '
-              'mode to gain visibility into the work the system performs (e.g. '
-              'building widgets, calculating layouts, rasterizing scenes,'
-              ' etc.). For precise measurement of performance, relaunch your '
-              'application in ',
-        ),
-        _runInProfileModeTextSpan(
-          context,
-          screenId: screenId,
-          style: theme.warningMessageLinkStyle,
-        ),
-        const TextSpan(text: '.'),
-      ],
-      screenId: screenId,
-    );
-  }
+class DebugModePerformanceMessage extends BannerWarning {
+  DebugModePerformanceMessage({required super.screenId})
+    : super(
+        key: Key('DebugModePerformanceMessage - $screenId'),
+        buildTextSpans:
+            (context) => [
+              const TextSpan(
+                text:
+                    'You are running your app in debug mode. Debug mode performance '
+                    'is not indicative of release performance, but you may use debug '
+                    'mode to gain visibility into the work the system performs (e.g. '
+                    'building widgets, calculating layouts, rasterizing scenes,'
+                    ' etc.). For precise measurement of performance, relaunch your '
+                    'application in ',
+              ),
+              _runInProfileModeTextSpan(
+                context,
+                screenId: screenId,
+                style: Theme.of(context).warningMessageLinkStyle,
+              ),
+              const TextSpan(text: '.'),
+            ],
+      );
 }
 
-// TODO(jacobr): cleanup this class that looks like a Widget but can't quite be
-// a widget due to some questionable design choices involving BannerMessage.
-class ProviderUnknownErrorBanner {
-  const ProviderUnknownErrorBanner({required this.screenId});
-
-  final String screenId;
-
-  BannerMessage build() {
-    return _BannerError(
-      key: Key('ProviderUnknownErrorBanner - $screenId'),
-      screenId: screenId,
-      textSpans: [
-        TextSpan(
-          text: '''
+class ProviderUnknownErrorBanner extends _BannerError {
+  ProviderUnknownErrorBanner({required super.screenId})
+    : super(
+        key: Key('ProviderUnknownErrorBanner - $screenId'),
+        buildTextSpans:
+            (_) => [
+              TextSpan(
+                text: '''
 DevTools failed to connect with package:provider.
 
 This could be caused by an older version of package:provider; please make sure that you are using version >=5.0.0.''',
-          style: TextStyle(fontSize: defaultFontSize),
-        ),
-      ],
-    );
-  }
+                style: TextStyle(fontSize: defaultFontSize),
+              ),
+            ],
+      );
 }
 
-class ShaderJankMessage {
-  const ShaderJankMessage(
-    this.screenId, {
-    required this.jankyFramesCount,
-    required this.jankDuration,
-  });
-
-  final String screenId;
-
-  final int jankyFramesCount;
-
-  final Duration jankDuration;
-
-  BannerMessage build(BuildContext context) {
-    final theme = Theme.of(context);
-    final jankDurationText = durationText(
-      jankDuration,
-      unit: DurationDisplayUnit.milliseconds,
-    );
-    return _BannerError(
-      key: Key('ShaderJankMessage - $screenId'),
-      textSpans: [
-        TextSpan(
-          text:
-              'Shader compilation jank detected. $jankyFramesCount '
-              '${pluralize('frame', jankyFramesCount)} janked with a total of '
-              '$jankDurationText spent in shader compilation. To pre-compile '
-              'shaders, see the instructions at ',
-        ),
-        GaLinkTextSpan(
-          link: GaLink(
-            display: preCompileShadersDocsUrl,
-            url: preCompileShadersDocsUrl,
-            gaScreenName: screenId,
-            gaSelectedItemDescription:
-                gac.PerformanceDocs.shaderCompilationDocs.name,
-          ),
-          context: context,
-          style: theme.errorMessageLinkStyle,
-        ),
-        const TextSpan(text: '.'),
-        if (serviceConnection.serviceManager.connectedApp!.isIosApp) ...[
-          const TextSpan(
-            text:
-                '\n\nNote: this is a legacy solution with many pitfalls. '
-                'Try ',
-          ),
-          GaLinkTextSpan(
-            link: GaLink(
-              display: 'Impeller',
-              url: impellerDocsUrl,
-              gaScreenName: screenId,
-              gaSelectedItemDescription:
-                  gac.PerformanceDocs.impellerDocsLink.name,
-            ),
-            context: context,
-            style: theme.errorMessageLinkStyle,
-          ),
-          const TextSpan(text: ' instead!'),
-        ],
-      ],
-      screenId: screenId,
-    );
-  }
+class ShaderJankMessage extends _BannerError {
+  ShaderJankMessage({
+    required super.screenId,
+    required int jankyFramesCount,
+    required Duration jankDuration,
+  }) : super(
+         key: Key('ShaderJankMessage - $screenId'),
+         buildTextSpans: (context) {
+           final theme = Theme.of(context);
+           final jankDurationText = durationText(
+             jankDuration,
+             unit: DurationDisplayUnit.milliseconds,
+           );
+           return [
+             TextSpan(
+               text:
+                   'Shader compilation jank detected. $jankyFramesCount '
+                   '${pluralize('frame', jankyFramesCount)} janked with a total of '
+                   '$jankDurationText spent in shader compilation. To pre-compile '
+                   'shaders, see the instructions at ',
+             ),
+             GaLinkTextSpan(
+               link: GaLink(
+                 display: preCompileShadersDocsUrl,
+                 url: preCompileShadersDocsUrl,
+                 gaScreenName: screenId,
+                 gaSelectedItemDescription:
+                     gac.PerformanceDocs.shaderCompilationDocs.name,
+               ),
+               context: context,
+               style: theme.errorMessageLinkStyle,
+             ),
+             const TextSpan(text: '.'),
+             if (serviceConnection.serviceManager.connectedApp!.isIosApp) ...[
+               const TextSpan(
+                 text:
+                     '\n\nNote: this is a legacy solution with many pitfalls. '
+                     'Try ',
+               ),
+               GaLinkTextSpan(
+                 link: GaLink(
+                   display: 'Impeller',
+                   url: impellerDocsUrl,
+                   gaScreenName: screenId,
+                   gaSelectedItemDescription:
+                       gac.PerformanceDocs.impellerDocsLink.name,
+                 ),
+                 context: context,
+                 style: theme.errorMessageLinkStyle,
+               ),
+               const TextSpan(text: ' instead!'),
+             ],
+           ];
+         },
+       );
 }
 
-class HighCpuSamplingRateMessage {
-  HighCpuSamplingRateMessage(this.screenId)
-    : key = Key('HighCpuSamplingRateMessage - $screenId');
-
-  final Key key;
-
-  final String screenId;
-
-  BannerMessage build(BuildContext context) {
-    final theme = Theme.of(context);
-    return BannerWarning(
-      key: key,
-      textSpans: [
-        const TextSpan(
-          text: '''
+class HighCpuSamplingRateMessage extends BannerWarning {
+  HighCpuSamplingRateMessage({required super.screenId})
+    : super(
+        key: generateKey(screenId),
+        buildTextSpans:
+            (context) => [
+              const TextSpan(
+                text: '''
 You are opting in to a high CPU sampling rate. This may affect the performance of your application. Please read our ''',
-        ),
-        GaLinkTextSpan(
-          link: GaLink(
-            display: 'documentation',
-            url: _cpuSamplingRateDocsUrl,
-            gaScreenName: screenId,
-            gaSelectedItemDescription:
-                gac.CpuProfilerDocs.profileGranularityDocs.name,
-          ),
-          context: context,
-          style: theme.warningMessageLinkStyle,
-        ),
-        const TextSpan(
-          text: ' to understand the trade-offs associated with this setting.',
-        ),
-      ],
-      screenId: screenId,
-    );
-  }
+              ),
+              GaLinkTextSpan(
+                link: GaLink(
+                  display: 'documentation',
+                  url: _cpuSamplingRateDocsUrl,
+                  gaScreenName: screenId,
+                  gaSelectedItemDescription:
+                      gac.CpuProfilerDocs.profileGranularityDocs.name,
+                ),
+                context: context,
+                style: Theme.of(context).warningMessageLinkStyle,
+              ),
+              const TextSpan(
+                text:
+                    ' to understand the trade-offs associated with this setting.',
+              ),
+            ],
+      );
+
+  static Key generateKey(String screenId) =>
+      Key('HighCpuSamplingRateMessage - $screenId');
 }
 
-class HttpLoggingEnabledMessage {
-  HttpLoggingEnabledMessage(this.screenId)
-    : key = Key('HttpLoggingEnabledMessage - $screenId');
-
-  final Key key;
-
-  final String screenId;
-
-  BannerMessage build(BuildContext context) {
-    final theme = Theme.of(context);
-    late final BannerWarning message;
-    message = BannerWarning(
-      key: key,
-      textSpans: [
-        const TextSpan(
-          text: '''
+class HttpLoggingEnabledMessage extends BannerWarning {
+  HttpLoggingEnabledMessage({required super.screenId})
+    : super(
+        key: _generateKey(screenId),
+        buildTextSpans:
+            (context) => [
+              const TextSpan(
+                text: '''
 HTTP traffic is being logged for debugging purposes. This may result in increased memory usage for your app. If this is not intentional, consider ''',
-        ),
-        TextSpan(
-          text: 'disabling http logging',
-          style: theme.warningMessageLinkStyle,
-          recognizer:
-              TapGestureRecognizer()
-                ..onTap = () async {
-                  await http_service.toggleHttpRequestLogging(false).then((_) {
-                    if (!http_service.httpLoggingEnabled) {
-                      notificationService.push('Http logging disabled.');
-                      bannerMessages.removeMessage(message);
-                    }
-                  });
-                },
-        ),
-        const TextSpan(
-          text: ' before profiling the memory of your application.',
-        ),
-      ],
-      screenId: screenId,
-    );
-    return message;
-  }
+              ),
+              TextSpan(
+                text: 'disabling http logging',
+                style: Theme.of(context).warningMessageLinkStyle,
+                recognizer:
+                    TapGestureRecognizer()
+                      ..onTap = () async {
+                        await http_service.toggleHttpRequestLogging(false).then(
+                          (_) {
+                            if (!http_service.httpLoggingEnabled) {
+                              notificationService.push(
+                                'Http logging disabled.',
+                              );
+                              bannerMessages.removeMessageByKey(
+                                _generateKey(screenId),
+                                screenId,
+                              );
+                            }
+                          },
+                        );
+                      },
+              ),
+              const TextSpan(
+                text: ' before profiling the memory of your application.',
+              ),
+            ],
+      );
+
+  static Key _generateKey(String screenId) =>
+      Key('HttpLoggingEnabledMessage - $screenId');
 }
 
-class DebugModeMemoryMessage {
-  const DebugModeMemoryMessage(this.screenId);
-
-  final String screenId;
-
-  BannerMessage build(BuildContext context) {
-    return BannerWarning(
-      key: Key('DebugModeMemoryMessage - $screenId'),
-      textSpans: [
-        const TextSpan(
-          text: '''
+class DebugModeMemoryMessage extends BannerWarning {
+  DebugModeMemoryMessage({required super.screenId})
+    : super(
+        key: Key('DebugModeMemoryMessage - $screenId'),
+        buildTextSpans:
+            (context) => [
+              const TextSpan(
+                text: '''
 You are running your app in debug mode. Absolute memory usage may be higher in a debug build than in a release build.
 For the most accurate absolute memory stats, relaunch your application in ''',
-        ),
-        _runInProfileModeTextSpan(
-          context,
-          screenId: screenId,
-          style: Theme.of(context).warningMessageLinkStyle,
-        ),
-        const TextSpan(text: '.'),
-      ],
-      screenId: screenId,
-    );
-  }
+              ),
+              _runInProfileModeTextSpan(
+                context,
+                screenId: screenId,
+                style: Theme.of(context).warningMessageLinkStyle,
+              ),
+              const TextSpan(text: '.'),
+            ],
+      );
 }
 
-class DebuggerIdeRecommendationMessage {
-  const DebuggerIdeRecommendationMessage(this.screenId);
-
-  final String screenId;
-
-  BannerMessage build(BuildContext context) {
-    final isFlutterApp =
-        serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ?? false;
-    final codeType = isFlutterApp ? 'Flutter' : 'Dart';
-    final recommendedDebuggers = devToolsEnvironmentParameters
-        .recommendedDebuggers(context, isFlutterApp: isFlutterApp);
-
-    return BannerWarning(
-      key: Key('DebuggerIdeRecommendationMessage - $screenId'),
-      textSpans: [
-        TextSpan(
-          text: '''
+class DebuggerIdeRecommendationMessage extends BannerWarning {
+  DebuggerIdeRecommendationMessage({required super.screenId})
+    : super(
+        key: Key('DebuggerIdeRecommendationMessage - $screenId'),
+        buildTextSpans: (context) {
+          final isFlutterApp =
+              serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+              false;
+          final codeType = isFlutterApp ? 'Flutter' : 'Dart';
+          final recommendedDebuggers = devToolsEnvironmentParameters
+              .recommendedDebuggers(context, isFlutterApp: isFlutterApp);
+          return [
+            TextSpan(
+              text: '''
 The $codeType DevTools debugger is in maintenance mode. For the best debugging experience, we recommend debugging your $codeType code in a supported IDE''',
-        ),
-        if (recommendedDebuggers != null) ...[
-          const TextSpan(text: ', such as '),
-          ...recommendedDebuggers,
-        ],
-        const TextSpan(text: '.'),
-      ],
-      screenId: screenId,
-    );
-  }
+            ),
+            if (recommendedDebuggers != null) ...[
+              const TextSpan(text: ', such as '),
+              ...recommendedDebuggers,
+            ],
+            const TextSpan(text: '.'),
+          ];
+        },
+      );
 }
 
-class WelcomeToNewInspectorMessage {
-  WelcomeToNewInspectorMessage(this.screenId)
-    : key = Key('WelcomeToNewInspectorMessage - $screenId');
+class WelcomeToNewInspectorMessage extends BannerInfo {
+  WelcomeToNewInspectorMessage({required super.screenId})
+    : super(
+        key: Key('WelcomeToNewInspectorMessage - $screenId'),
 
-  final Key key;
-
-  final String screenId;
-
-  BannerMessage build(BuildContext context) {
-    const docsUrl = 'https://docs.flutter.dev/tools/devtools/inspector#new';
-    return BannerInfo(
-      key: key,
-      textSpans: [
-        const TextSpan(
-          text: '''
+        buildTextSpans:
+            (context) => [
+              const TextSpan(
+                text: '''
 👋 Welcome to the new Flutter inspector! To get started, check out the ''',
-        ),
-        GaLinkTextSpan(
-          link: GaLink(
-            display: 'documentation',
-            url: docsUrl,
-            gaScreenName: screenId,
-            gaSelectedItemDescription: gac.inspectorV2Docs,
-          ),
-          context: context,
-          style: Theme.of(context).linkTextStyle,
-        ),
-        const TextSpan(text: '.'),
-      ],
-      screenId: screenId,
-    );
-  }
+              ),
+              GaLinkTextSpan(
+                link: GaLink(
+                  display: 'documentation',
+                  url: 'https://docs.flutter.dev/tools/devtools/inspector#new',
+                  gaScreenName: screenId,
+                  gaSelectedItemDescription: gac.inspectorV2Docs,
+                ),
+                context: context,
+                style: Theme.of(context).linkTextStyle,
+              ),
+              const TextSpan(text: '.'),
+            ],
+      );
 }
 
-void maybePushDebugModePerformanceMessage(
-  BuildContext context,
-  String screenId,
-) {
+void maybePushDebugModePerformanceMessage(String screenId) {
   if (offlineDataController.showingOfflineData.value) return;
   if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
       false) {
-    bannerMessages.addMessage(
-      DebugModePerformanceMessage(screenId).build(context),
-    );
+    bannerMessages.addMessage(DebugModePerformanceMessage(screenId: screenId));
   }
 }
 
-void maybePushDebugModeMemoryMessage(BuildContext context, String screenId) {
+void maybePushDebugModeMemoryMessage(String screenId) {
   if (offlineDataController.showingOfflineData.value) return;
   if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
       false) {
-    bannerMessages.addMessage(DebugModeMemoryMessage(screenId).build(context));
+    bannerMessages.addMessage(DebugModeMemoryMessage(screenId: screenId));
   }
 }
 
-void maybePushHttpLoggingMessage(BuildContext context, String screenId) {
+void maybePushHttpLoggingMessage(String screenId) {
   if (http_service.httpLoggingEnabled) {
-    bannerMessages.addMessage(
-      HttpLoggingEnabledMessage(screenId).build(context),
-    );
+    bannerMessages.addMessage(HttpLoggingEnabledMessage(screenId: screenId));
   }
 }
 
-void pushDebuggerIdeRecommendationMessage(
-  BuildContext context,
-  String screenId,
-) {
+void pushDebuggerIdeRecommendationMessage(String screenId) {
   bannerMessages.addMessage(
-    DebuggerIdeRecommendationMessage(screenId).build(context),
+    DebuggerIdeRecommendationMessage(screenId: screenId),
   );
 }
 
-void pushWelcomeToNewInspectorMessage(BuildContext context, String screenId) {
-  bannerMessages.addMessage(
-    WelcomeToNewInspectorMessage(screenId).build(context),
-  );
+void pushWelcomeToNewInspectorMessage(String screenId) {
+  bannerMessages.addMessage(WelcomeToNewInspectorMessage(screenId: screenId));
 }
 
 extension BannerMessageThemeExtension on ThemeData {
