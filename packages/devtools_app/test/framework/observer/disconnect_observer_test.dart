@@ -147,7 +147,7 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesDevToolsGolden(
-            '../test_infra/goldens/shared/disconnect_observer_connected.png',
+            '../../test_infra/goldens/shared/disconnect_observer_connected.png',
           ),
         );
 
@@ -161,7 +161,7 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesDevToolsGolden(
-            '../test_infra/goldens/shared/disconnect_observer_disconnected.png',
+            '../../test_infra/goldens/shared/disconnect_observer_disconnected.png',
           ),
         );
       });
