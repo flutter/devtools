@@ -82,6 +82,7 @@ void main() {
         debugger: controller,
       ),
     );
+    await tester.pumpAndSettle();
   }
 
   testWidgetsWithWindowSize(

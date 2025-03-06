@@ -187,7 +187,7 @@ final testMessage2 = BannerMessage(
 final universalMessage = BannerMessage(
   key: kUniversal,
   buildTextSpans: (_) => const [TextSpan(text: 'Universal Message')],
-  screenId: universalBannerMessageId,
+  screenId: universalScreenId,
   messageType: BannerMessageType.warning,
 );
 

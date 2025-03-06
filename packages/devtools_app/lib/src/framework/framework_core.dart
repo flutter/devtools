@@ -22,6 +22,7 @@ import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
 import '../shared/config_specific/framework_initialize/framework_initialize.dart';
 import '../shared/console/eval/eval_service.dart';
+import '../shared/feature_flags.dart';
 import '../shared/framework/app_error_handling.dart' as error_handling;
 import '../shared/framework/framework_controller.dart';
 import '../shared/framework/screen_controllers.dart';
@@ -35,6 +36,7 @@ import '../shared/preferences/preferences.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/utils/utils.dart';
+import 'observer/memory_observer.dart';
 import 'theme_manager.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
@@ -43,6 +45,8 @@ final _log = Logger('framework_core');
 
 // ignore: avoid_classes_with_only_static_members, intentional grouping of static methods.
 abstract class FrameworkCore {
+  static final _memoryObserver = MemoryObserver();
+
   /// Initializes the DevTools framework, which includes setting up global
   /// variables, local storage, preferences, and initializing framework level
   /// managers like the Dart Tooling Daemon manager and the DevTools extensions
@@ -67,6 +71,10 @@ abstract class FrameworkCore {
     // This must be called after the DTD connection has been initialized and after
     // preferences have been initialized.
     await extensionService.initialize();
+
+    if (FeatureFlags.memoryObserver) {
+      _memoryObserver.init();
+    }
   }
 
   /// Disposes framework level services and managers.
@@ -79,6 +87,9 @@ abstract class FrameworkCore {
     preferences.dispose();
     _themeManager?.dispose();
     unawaited(dtdManager.dispose());
+    if (FeatureFlags.memoryObserver) {
+      _memoryObserver.dispose();
+    }
   }
 
   static void _initGlobals() {
