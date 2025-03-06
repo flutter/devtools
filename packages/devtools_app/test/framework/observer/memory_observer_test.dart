@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/observer/memory_observer.dart';
-import 'package:devtools_app/src/shared/analytics/constants.dart' as gac;
 import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/primitives/byte_utils.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -62,7 +61,7 @@ void main() {
         expect(DevToolsRouterDelegate.currentPage, isNull);
 
         final messages =
-            bannerMessages.messagesForScreen(gac.devToolsMain).value;
+            bannerMessages.messagesForScreen(universalScreenId).value;
         expect(messages, isEmpty);
       },
     );
@@ -79,7 +78,8 @@ void main() {
       // used instead of `gac.devToolsMain`.
       expect(DevToolsRouterDelegate.currentPage, isNull);
 
-      final messages = bannerMessages.messagesForScreen(gac.devToolsMain).value;
+      final messages =
+          bannerMessages.messagesForScreen(universalScreenId).value;
       expect(messages, isNotEmpty);
     });
   });
