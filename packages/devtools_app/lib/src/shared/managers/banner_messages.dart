@@ -28,7 +28,7 @@ const _cpuSamplingRateDocsUrl =
 ///
 /// Messages with this screen id will be added to the list of messages for
 /// every screen from the [BannerMessages] widget.
-const universalBannerMessageId = 'universal';
+const universalScreenId = 'universal';
 
 class BannerMessagesController {
   final _messages = <String, ListValueNotifier<BannerMessage>>{};
@@ -127,7 +127,7 @@ class BannerMessages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final universalMessages = bannerMessages.messagesForScreen(
-      universalBannerMessageId,
+      universalScreenId,
     );
     final messagesForScreen = bannerMessages.messagesForScreen(screen.screenId);
     return Column(
