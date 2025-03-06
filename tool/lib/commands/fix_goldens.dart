@@ -42,6 +42,7 @@ class FixGoldensCommand extends Command {
     final runId = argResults![_runIdArg] as String;
     final tmpDownloadDir = await Directory.systemTemp.createTemp();
     try {
+      print('Note: ensure you have gh installed and authenticated.');
       print('Downloading the artifacts to ${tmpDownloadDir.path}');
       await processManager.runProcess(
         CliCommand('gh', [
