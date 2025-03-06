@@ -36,20 +36,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: BannerMessages(
-            screen:
-                screen ??
-                SimpleScreen(
-                  Column(
-                    children: <Widget>[
-                      // This is button is present so that we can tap it and
-                      // simulate a frame being drawn.
-                      ElevatedButton(
-                        onPressed: () => {},
-                        child: const SizedBox(),
-                      ),
-                    ],
-                  ),
-                ),
+            screen: screen ?? SimpleScreen(const _TestScreenBody()),
           ),
         ),
       );
@@ -76,19 +63,7 @@ void main() {
       await pumpTestFrame(tester);
       expect(find.byKey(kUniversal), findsOneWidget);
 
-      await tester.pumpWidget(
-        buildBannerMessages(
-          screen: TestScreen(
-            Column(
-              children: <Widget>[
-                // This is button is present so that we can tap it and
-                // simulate a frame being drawn.
-                ElevatedButton(onPressed: () => {}, child: const SizedBox()),
-              ],
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildBannerMessages(screen: TestScreen()));
       expect(find.byKey(kUniversal), findsOneWidget);
     });
 
@@ -217,16 +192,29 @@ final universalMessage = BannerMessage(
 );
 
 class TestScreen extends Screen {
-  TestScreen(this.child) : super(id, showFloatingDebuggerControls: false);
+  TestScreen() : super(id, showFloatingDebuggerControls: false);
 
   // This is arbitrary for the test. It just needs to be something different
   // than [ScreenMetaData.simple.id].
   static final id = ScreenMetaData.logging.id;
 
-  final Widget child;
-
   @override
   Widget buildScreenBody(BuildContext context) {
-    return child;
+    return const _TestScreenBody();
+  }
+}
+
+class _TestScreenBody extends StatelessWidget {
+  const _TestScreenBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        // This button is present so that we can tap it and
+        // simulate a frame being drawn.
+        ElevatedButton(onPressed: () => {}, child: const SizedBox()),
+      ],
+    );
   }
 }
