@@ -25,7 +25,7 @@ const _cpuSamplingRateDocsUrl =
 
 /// Screen id to use for banner messages that are intended to be universal for
 /// every DevTools screen.
-/// 
+///
 /// Messages with this screen id will be added to the list of messages for
 /// every screen from the [BannerMessages] widget.
 const universalBannerMessageId = 'universal';
