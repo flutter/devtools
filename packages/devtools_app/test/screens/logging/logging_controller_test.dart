@@ -311,24 +311,31 @@ void main() {
       expect(controller.filteredData.value, hasLength(3));
     });
 
-    test('releaseMemory - full release', () {
-      prepareTestLogs();
-      expect(controller.data, isNotEmpty);
-      expect(controller.filteredData.value, isNotEmpty);
-      controller.releaseMemory();
-      expect(controller.data, isEmpty);
-      expect(controller.filteredData.value, isEmpty);
-    });
+    group('releaseMemory', () {
+      setUp(() {
+        FeatureFlags.memoryObserver = true;
+        prepareTestLogs();
+      });
 
-    test('releaseMemory - partial release', () {
-      FeatureFlags.memoryObserver = true;
-      prepareTestLogs();
-      expect(controller.data, hasLength(17));
-      expect(controller.filteredData.value, hasLength(10));
-      controller.releaseMemory(partial: true);
-      expect(controller.data, hasLength(9));
-      expect(controller.filteredData.value, hasLength(2));
-      FeatureFlags.memoryObserver = false;
+      tearDown(() {
+        FeatureFlags.memoryObserver = false;
+      });
+
+      test('releaseMemory - full release', () {
+        expect(controller.data, isNotEmpty);
+        expect(controller.filteredData.value, isNotEmpty);
+        controller.releaseMemory();
+        expect(controller.data, isEmpty);
+        expect(controller.filteredData.value, isEmpty);
+      });
+
+      test('releaseMemory - partial release', () {
+        expect(controller.data, hasLength(17));
+        expect(controller.filteredData.value, hasLength(10));
+        controller.releaseMemory(partial: true);
+        expect(controller.data, hasLength(9));
+        expect(controller.filteredData.value, hasLength(2));
+      });
     });
   });
 
