@@ -26,6 +26,7 @@ class PropertyEditorView extends StatelessWidget {
         controller.editorClient.editArgumentMethodName,
         controller.editorClient.editableArgumentsMethodName,
         controller.editableWidgetData,
+        controller.propertiesToDisplay,
       ],
       builder: (_, values, _) {
         final editArgumentMethodName = values.first as String?;
@@ -43,7 +44,8 @@ class PropertyEditorView extends StatelessWidget {
           );
         }
 
-        final (:args, :name, :documentation) = editableWidgetData;
+        final properties = values.fourth as List<EditableProperty>;
+        final (:name, :documentation) = editableWidgetData;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -52,11 +54,11 @@ class PropertyEditorView extends StatelessWidget {
                 name: name,
                 documentation: documentation,
               ),
-            args.isEmpty
+            properties.isEmpty && !controller.filterApplied
                 ? _NoEditablePropertiesMessage(name: name)
                 : _PropertiesList(
                   controller: controller,
-                  editableProperties: args.map(argToProperty).nonNulls.toList(),
+                  editableProperties: properties,
                 ),
           ],
         );
@@ -101,6 +103,8 @@ class _PropertiesListState extends State<_PropertiesList> {
     return Column(
       children: <Widget>[
         _SearchControls(controller: widget.controller),
+        if (widget.editableProperties.isEmpty)
+          const _NoMatchingPropertiesMessage(),
         for (final property in widget.editableProperties)
           _EditablePropertyItem(
             property: property,
@@ -149,19 +153,23 @@ class _SearchControls extends StatelessWidget {
 
   final PropertyEditorController controller;
 
+  static const _searchFieldHeight = 32.0;
+
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: SearchField<PropertyEditorController>(
-            searchController: controller,
-            // searchFieldEnabled: parsedScript != null,
-            shouldRequestFocus: true,
-            searchFieldWidth: wideSearchFieldWidth,
+    return Padding(
+      padding: const EdgeInsets.all(_PropertiesList.defaultItemPadding),
+      child: Row(
+        children: [
+          Expanded(
+            child: SearchField<PropertyEditorController>(
+              searchController: controller,
+              supportsNavigation: false,
+              searchFieldHeight: _searchFieldHeight,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -313,6 +321,15 @@ class _NoEditablePropertiesMessage extends StatelessWidget {
   }
 }
 
+class _NoMatchingPropertiesMessage extends StatelessWidget {
+  const _NoMatchingPropertiesMessage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('No properties matching the current filter.');
+  }
+}
+
 class _WidgetNameAndDocumentation extends StatelessWidget {
   const _WidgetNameAndDocumentation({required this.name, this.documentation});
 
@@ -344,7 +361,7 @@ class _WidgetNameAndDocumentation extends StatelessWidget {
             ),
           ],
         ),
-        const PaddedDivider(),
+        const PaddedDivider(padding: EdgeInsets.all(noPadding)),
       ],
     );
   }

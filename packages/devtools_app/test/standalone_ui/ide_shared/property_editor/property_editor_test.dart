@@ -61,7 +61,7 @@ void main() {
       final argsCompleter = Completer<List<EditableArgument>>();
       listener = () {
         if (!argsCompleter.isCompleted) {
-          argsCompleter.complete(controller.editableWidgetData.value!.args);
+          argsCompleter.complete(controller.propertiesToDisplay.value);
         }
       };
       controller.editableWidgetData.addListener(listener!);

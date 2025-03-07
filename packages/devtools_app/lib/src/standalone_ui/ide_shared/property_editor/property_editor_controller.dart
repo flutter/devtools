@@ -9,11 +9,10 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
-import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/search.dart';
+import 'property_editor_types.dart';
 
-typedef EditableWidgetData =
-    ({List<EditableArgument> args, String? name, String? documentation});
+typedef EditableWidgetData = ({String? name, String? documentation});
 
 typedef EditArgumentFunction =
     Future<EditArgumentResponse?> Function<T>({
@@ -22,7 +21,7 @@ typedef EditArgumentFunction =
     });
 
 class PropertyEditorController extends DisposableController
-    with AutoDisposeControllerMixin, SearchControllerMixin {
+    with AutoDisposeControllerMixin, SearchControllerMixin<EditableProperty> {
   PropertyEditorController(this.editorClient) {
     init();
   }
@@ -31,12 +30,20 @@ class PropertyEditorController extends DisposableController
 
   String get gaId => gac.PropertyEditorSidebar.id;
 
-  TextDocument? _currentDocument;
-  CursorPosition? _currentCursorPosition;
-
   ValueListenable<EditableWidgetData?> get editableWidgetData =>
       _editableWidgetData;
   final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
+
+  bool get filterApplied => _filterApplied;
+  bool _filterApplied = false;
+
+  ValueListenable<List<EditableProperty>> get propertiesToDisplay =>
+      _filteredProperties;
+  final _filteredProperties = ValueNotifier<List<EditableProperty>>([]);
+
+  TextDocument? _currentDocument;
+  CursorPosition? _currentCursorPosition;
+  List<EditableProperty>? _editableProperties;
 
   @override
   void init() {
@@ -63,8 +70,10 @@ class PropertyEditorController extends DisposableController
         );
         final args = result?.args ?? <EditableArgument>[];
         final name = result?.name;
+        _editableProperties = args.map(argToProperty).nonNulls.toList();
+        refreshSearchMatches();
+        _updateSearchResults();
         _editableWidgetData.value = (
-          args: args,
           name: name,
           documentation: result?.documentation,
         );
@@ -76,13 +85,14 @@ class PropertyEditorController extends DisposableController
         );
       }),
     );
+
+    addAutoDisposeListener(searchMatches, _updateSearchResults);
+    addAutoDisposeListener(searchNotifier, _updateSearchResults);
   }
 
   @override
-  Iterable<SearchableArgument> get currentDataToSearchThrough =>
-      (_editableWidgetData.value?.args ?? <EditableArgument>[]).map(
-        (arg) => SearchableArgument(arg),
-      );
+  Iterable<EditableProperty> get currentDataToSearchThrough =>
+      _editableProperties ?? <EditableProperty>[];
 
   Future<EditArgumentResponse?> editArgument<T>({
     required String name,
@@ -99,6 +109,20 @@ class PropertyEditorController extends DisposableController
     );
   }
 
+  void _updateSearchResults() {
+    if (search.isEmpty) {
+      _clearSearch();
+      return;
+    }
+    _filterApplied = true;
+    _filteredProperties.value = searchMatches.value;
+  }
+
+  void _clearSearch() {
+    _filterApplied = false;
+    _filteredProperties.value = _editableProperties ?? [];
+  }
+
   @visibleForTesting
   void initForTestsOnly({
     EditableArgumentsResult? editableArgsResult,
@@ -106,8 +130,9 @@ class PropertyEditorController extends DisposableController
     CursorPosition? cursorPosition,
   }) {
     if (editableArgsResult != null) {
+      _editableProperties =
+          editableArgsResult.args.map(argToProperty).nonNulls.toList();
       _editableWidgetData.value = (
-        args: editableArgsResult.args,
         name: editableArgsResult.name,
         documentation: editableArgsResult.documentation,
       );
@@ -118,18 +143,5 @@ class PropertyEditorController extends DisposableController
     if (cursorPosition != null) {
       _currentCursorPosition = cursorPosition;
     }
-  }
-}
-
-class SearchableArgument with SearchableDataMixin {
-  SearchableArgument(this.argument);
-
-  final EditableArgument argument;
-
-  @override
-  bool matchesSearchToken(RegExp regExpSearch) {
-    return argument.name.caseInsensitiveContains(regExpSearch) ||
-        argument.valueDisplay.caseInsensitiveContains(regExpSearch) ||
-        argument.type.caseInsensitiveContains(regExpSearch);
   }
 }
