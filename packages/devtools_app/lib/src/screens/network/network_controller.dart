@@ -607,6 +607,7 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
     if (partial) {
       _requestsById.keys
           .toList()
+          // Trim requests from the front so that the oldest data is removed.
           .sublist(0, _requestsById.keys.length ~/ 2)
           .forEach(_requestsById.remove);
       value = value.sublist(value.length ~/ 2);

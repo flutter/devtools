@@ -518,6 +518,7 @@ class TimelineEventsController extends PerformanceFeatureController
       if (traceRingBuffer.chunksLength <= 1) {
         traceRingBuffer.clear();
       } else {
+        // Trim from the front so that the oldest data is removed.
         traceRingBuffer.trimToSublist(traceRingBuffer.chunksLength ~/ 2);
       }
       unawaited(loadPerfettoTrace());

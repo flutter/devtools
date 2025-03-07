@@ -173,6 +173,7 @@ class FlutterFramesController extends PerformanceFeatureController {
   @override
   void clearData({bool partial = false}) {
     if (partial) {
+      // Trim frames from the front so that the oldest logs are removed.
       _flutterFrames.trimToSublist(_flutterFrames.value.length ~/ 2);
     } else {
       _flutterFrames.clear();

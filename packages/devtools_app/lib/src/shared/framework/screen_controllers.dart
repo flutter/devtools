@@ -162,7 +162,7 @@ abstract class DevToolsScreenController extends DisposableController {
 
   /// This method can be overridden to release memory from the screen
   /// controller.
-  /// 
+  ///
   /// When `partial` is true, this should only release stale data from the
   /// screen controller where possible. A partial release is intended to be
   /// less disruptive to the user, wiping only the oldest data from the screen
