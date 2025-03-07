@@ -56,14 +56,9 @@ class MemoryObserver extends DisposableController {
   Future<void> _pollForMemoryUsage({
     DebounceCancelledCallback? cancelledCallback,
   }) async {
-    final memoryUsageInBytes =
-        _debugMeasureUsageInBytes != null
-            ? await _debugMeasureUsageInBytes()
-            : await measureMemoryUsageInBytes();
-    if (memoryUsageInBytes == null) return;
-
-    final memoryInGb = convertBytes(memoryUsageInBytes, to: ByteUnit.gb);
-    if (memoryInGb > _memoryPressureLimitGb) {
+    if (await _memoryExceedsThreshold(
+      debugMeasureUsageInBytes: _debugMeasureUsageInBytes,
+    )) {
       final gaScreen = DevToolsRouterDelegate.currentPage ?? gac.devToolsMain;
       ga.impression(gaScreen, gac.memoryPressure);
       bannerMessages.addMessage(
@@ -71,6 +66,61 @@ class MemoryObserver extends DisposableController {
         callInPostFrameCallback: false,
       );
     }
+  }
+
+  static Future<bool> _memoryExceedsThreshold({
+    @visibleForTesting Future<int?> Function()? debugMeasureUsageInBytes,
+  }) async {
+    final memoryUsageInBytes =
+        debugMeasureUsageInBytes != null
+            ? await debugMeasureUsageInBytes()
+            : await measureMemoryUsageInBytes();
+    print('memoryUsageInBytes: $memoryUsageInBytes');
+    if (memoryUsageInBytes == null) return false;
+
+    final memoryInGb = convertBytes(memoryUsageInBytes, to: ByteUnit.gb);
+    print('memoryInGb: $memoryInGb');
+    return memoryInGb > _memoryPressureLimitGb;
+  }
+
+  /// Attempts to reduce the memory footprint of DevTools by releasing memory
+  /// from unused DevTools screens and, if necessary, releasing partial memory
+  /// from the current screen in use.
+  ///
+  /// Returns whether the attempt to reduce memory brought DevTools memory usage
+  /// below the threshold [_memoryPressureLimitGb].
+  static Future<bool> reduceMemory({
+    @visibleForTesting Future<int?> Function()? debugMeasureUsageInBytes,
+  }) async {
+    await screenControllers.forEachInitializedAsync((screenController) async {
+      if (DevToolsRouterDelegate.currentPage != screenController.screenId) {
+        // If we need to release more memory, we can consider disposing the
+        // screen controllers too. This would revert the controller back to it's
+        // lazy initialized state, waiting to be re-initialized upon first use.
+        await screenController.releaseMemory();
+      }
+    });
+
+    // TODO(kenz): clear other potential sources of memory bloat such as the
+    // console history or caches like the resolved URI manager.
+
+    if (await _memoryExceedsThreshold(
+      debugMeasureUsageInBytes: debugMeasureUsageInBytes,
+    )) {
+      await screenControllers.forEachInitializedAsync((screenController) async {
+        if (DevToolsRouterDelegate.currentPage == screenController.screenId) {
+          // If memory usage still exceeds the threshold, perform a partial
+          // release of memory on the current screen. This is more disruptive
+          // to the user, so only do this if releasing memory from every other
+          // screen first did not work.
+          await screenController.releaseMemory(partial: true);
+        }
+      });
+    }
+
+    return !(await _memoryExceedsThreshold(
+      debugMeasureUsageInBytes: debugMeasureUsageInBytes,
+    ));
   }
 }
 
@@ -100,16 +150,168 @@ class _MemoryPressureBannerMessage extends banner_messages.BannerWarning {
         },
         buildActions:
             (_) => [
-              DevToolsButton(
-                label: 'Reduce memory',
-                onPressed: () {
-                  ga.select(gac.devToolsMain, gac.memoryPressureReduce);
-                  // TODO(https://github.com/flutter/devtools/issues/7002): add
-                  // support to screen controllers to reduce memory.
-                },
-              ),
+              // Wrapping with an `Expanded` is okay because this list is set as
+              // the `children` parameter of a `Row` widget in `BannerMessage`.
+              const Expanded(child: _ReduceMemoryButton()),
             ],
       );
 
   static const _messageKey = Key('MemoryPressureBannerMessage');
+}
+
+class _ReduceMemoryButton extends StatefulWidget {
+  const _ReduceMemoryButton();
+
+  @override
+  State<_ReduceMemoryButton> createState() => _ReduceMemoryButtonState();
+}
+
+class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
+  bool inProgress = false;
+
+  final success = ValueNotifier<bool?>(null);
+
+  @override
+  void dispose() {
+    success.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        DevToolsButton(
+          label: 'Reduce memory',
+          onPressed: _onPressed,
+          color: colorScheme.onTertiaryContainer,
+        ),
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+            child:
+                inProgress
+                    ? SizedBox(
+                      height: actionsIconSize,
+                      width: actionsIconSize,
+                      child: const CircularProgressIndicator(),
+                    )
+                    : ValueListenableBuilder(
+                      valueListenable: success,
+                      builder: (context, success, _) {
+                        return success == null
+                            ? const SizedBox()
+                            : _SuccessOrFailureMessage(success: success);
+                      },
+                    ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _onPressed() async {
+    ga.select(gac.devToolsMain, gac.memoryPressureReduce);
+    setState(() {
+      success.value = null;
+      inProgress = true;
+    });
+    final memoryReduced = await MemoryObserver.reduceMemory();
+    setState(() {
+      inProgress = false;
+      success.value = memoryReduced;
+    });
+  }
+}
+
+class _SuccessOrFailureMessage extends StatefulWidget {
+  const _SuccessOrFailureMessage({required this.success});
+
+  final bool success;
+
+  @override
+  State<_SuccessOrFailureMessage> createState() =>
+      _SuccessOrFailureMessageState();
+}
+
+class _SuccessOrFailureMessageState extends State<_SuccessOrFailureMessage> {
+  static const _startingDismissCountDown = 5;
+
+  int dismissCountDown = _startingDismissCountDown;
+
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  @override
+  void didUpdateWidget(covariant _SuccessOrFailureMessage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.success != widget.success) {
+      _init();
+    }
+  }
+
+  void _init() {
+    if (widget.success) {
+      dismissCountDown = _startingDismissCountDown;
+      _timer?.cancel();
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (dismissCountDown <= 1) {
+          _timer?.cancel();
+          _timer = null;
+          bannerMessages.removeMessageByKey(
+            _MemoryPressureBannerMessage._messageKey,
+            banner_messages.universalScreenId,
+            dismiss: true,
+          );
+        }
+        setState(() {
+          dismissCountDown--;
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _timer = null;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.onTertiaryContainer;
+    final message =
+        'Attempt to reduce memory was '
+        '${widget.success ? 'successful' : 'unsuccessful'}. '
+        '${widget.success ? 'This warning will automatically dismiss in $dismissCountDown seconds.' : ''}';
+    return RichText(
+      text: TextSpan(
+        children: [
+          WidgetSpan(
+            child: Padding(
+              padding: const EdgeInsets.only(right: denseSpacing),
+              child: Icon(
+                widget.success ? Icons.check : Icons.close,
+                size: actionsIconSize,
+                color: color,
+              ),
+            ),
+          ),
+          TextSpan(
+            text: message,
+            style: theme.regularTextStyleWithColor(color),
+          ),
+        ],
+      ),
+    );
+  }
 }
