@@ -169,6 +169,8 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
 
   final success = ValueNotifier<bool?>(null);
 
+  String? error;
+
   @override
   void dispose() {
     success.dispose();
@@ -201,7 +203,10 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
                       builder: (context, success, _) {
                         return success == null
                             ? const SizedBox()
-                            : _SuccessOrFailureMessage(success: success);
+                            : _SuccessOrFailureMessage(
+                              success: success,
+                              error: error,
+                            );
                       },
                     ),
           ),
@@ -213,21 +218,29 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
   Future<void> _onPressed() async {
     ga.select(gac.devToolsMain, gac.memoryPressureReduce);
     setState(() {
-      success.value = null;
       inProgress = true;
+      success.value = null;
+      error = null;
     });
-    final memoryReduced = await MemoryObserver.reduceMemory();
-    setState(() {
-      inProgress = false;
-      success.value = memoryReduced;
-    });
+    bool memoryReduced = false;
+    try {
+      memoryReduced = await MemoryObserver.reduceMemory();
+    } catch (e) {
+      error = e.toString();
+    } finally {
+      setState(() {
+        inProgress = false;
+        success.value = memoryReduced;
+      });
+    }
   }
 }
 
 class _SuccessOrFailureMessage extends StatefulWidget {
-  const _SuccessOrFailureMessage({required this.success});
+  const _SuccessOrFailureMessage({required this.success, this.error});
 
   final bool success;
+  final String? error;
 
   @override
   State<_SuccessOrFailureMessage> createState() =>
@@ -287,10 +300,13 @@ class _SuccessOrFailureMessageState extends State<_SuccessOrFailureMessage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final color = theme.colorScheme.onTertiaryContainer;
-    final message =
+    var message =
         'Attempt to reduce memory was '
         '${widget.success ? 'successful' : 'unsuccessful'}. '
         '${widget.success ? 'This warning will automatically dismiss in $dismissCountDown seconds.' : ''}';
+    if (widget.error != null) {
+      message = '$message Error: ${widget.error}';
+    }
     return RichText(
       text: TextSpan(
         children: [
