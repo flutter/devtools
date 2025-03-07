@@ -127,7 +127,7 @@ class _MemoryPressureBannerMessage extends banner_messages.BannerWarning {
     : super(
         screenId: banner_messages.universalScreenId,
         key: _messageKey,
-        buildTextSpans: (_) {
+        buildTextSpans: (context) {
           final limitAsBytes = convertBytes(
             MemoryObserver._memoryPressureLimitGb,
             from: ByteUnit.gb,
@@ -140,9 +140,19 @@ class _MemoryPressureBannerMessage extends banner_messages.BannerWarning {
                   '${printBytes(limitAsBytes, unit: ByteUnit.gb, includeUnit: true)}. '
                   'Consider releasing memory by clearing data you are no '
                   'longer analyzing, or by clicking "Reduce memory" below, '
-                  'which will make a best-effort attempt to clear stale data. '
-                  'If you do not take action, DevTools may eventually crash '
-                  'due to an out of memory error (OOM).',
+                  'which will make a ',
+              children: [
+                TextSpan(
+                  text: 'best-effort attempt',
+                  style: Theme.of(context).boldTextStyle,
+                ),
+                const TextSpan(
+                  text:
+                      ' to clear stale data. '
+                      'If you do not take action, DevTools may eventually crash '
+                      'due to an out of memory error (OOM).',
+                ),
+              ],
             ),
           ];
         },
