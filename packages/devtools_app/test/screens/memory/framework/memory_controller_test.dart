@@ -120,7 +120,7 @@ void main() {
       FeatureFlags.memoryObserver = false;
     });
 
-    testWidgetsWithWindowSize('releaseMemory - full release', _windowSize, (
+    testWidgetsWithWindowSize('full release', _windowSize, (
       WidgetTester tester,
     ) async {
       await _pumpScene(tester, scene);
@@ -161,7 +161,7 @@ void main() {
       expect(scene.controller.trace!.selection.value.profiles, isEmpty);
     });
 
-    testWidgetsWithWindowSize('releaseMemory - partial release', _windowSize, (
+    testWidgetsWithWindowSize('partial release', _windowSize, (
       WidgetTester tester,
     ) async {
       await _pumpScene(tester, scene);

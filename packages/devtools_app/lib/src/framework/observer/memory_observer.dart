@@ -279,7 +279,6 @@ class _SuccessOrFailureMessageState extends State<_SuccessOrFailureMessage> {
           bannerMessages.removeMessageByKey(
             _MemoryPressureBannerMessage._messageKey,
             banner_messages.universalScreenId,
-            dismiss: true,
           );
         }
         setState(() {
