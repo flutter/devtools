@@ -9,13 +9,13 @@ import '../../integration_test/test_infra/run/_test_app_driver.dart';
 
 const _testAppPath = 'test/test_infra/fixtures/memory_app';
 
-final _defaultArgs = TestFileArgs.parse(
-  {},
+final _defaultArgs = TestFileArgs.fromFileContent(
+  '',
   testAppDevice: TestAppDevice.flutterTester,
 );
 
-final _defaultArgsForCliDevice = TestFileArgs.parse(
-  {},
+final _defaultArgsForCliDevice = TestFileArgs.fromFileContent(
+  '',
   testAppDevice: TestAppDevice.cli,
 );
 
@@ -24,19 +24,15 @@ final tests = [
     name: 'empty',
     input: '',
     testAppDevice: TestAppDevice.flutterTester,
-    output: TestFileArgs.parse({
-      TestFileArgItems.experimentsOn: _defaultArgs.experimentsOn,
-      TestFileArgItems.appPath: _defaultArgs.appPath,
-    }, testAppDevice: TestAppDevice.flutterTester),
+    expectedExperimentsOn: _defaultArgs.experimentsOn,
+    expectedAppPath: _testAppPath,
   ),
   _InFileTestArgsTest(
     name: 'empty',
     input: '',
     testAppDevice: TestAppDevice.cli,
-    output: TestFileArgs.parse({
-      TestFileArgItems.experimentsOn: _defaultArgsForCliDevice.experimentsOn,
-      TestFileArgItems.appPath: _defaultArgsForCliDevice.appPath,
-    }, testAppDevice: TestAppDevice.cli),
+    expectedExperimentsOn: _defaultArgsForCliDevice.experimentsOn,
+    expectedAppPath: _testAppPath,
   ),
   _InFileTestArgsTest(
     name: 'non-empty',
@@ -53,10 +49,8 @@ final tests = [
 import 'dart:ui' as ui;
 ''',
     testAppDevice: TestAppDevice.flutterTester,
-    output: TestFileArgs.parse({
-      TestFileArgItems.experimentsOn: true,
-      TestFileArgItems.appPath: _testAppPath,
-    }, testAppDevice: TestAppDevice.flutterTester),
+    expectedExperimentsOn: true,
+    expectedAppPath: _testAppPath,
   ),
 ];
 
@@ -67,8 +61,8 @@ void main() {
         t.input,
         testAppDevice: t.testAppDevice,
       );
-      expect(args.experimentsOn, t.output.experimentsOn);
-      expect(args.appPath, t.output.appPath);
+      expect(args.experimentsOn, t.expectedExperimentsOn);
+      expect(args.appPath, t.expectedAppPath);
     });
   }
 }
@@ -78,11 +72,13 @@ class _InFileTestArgsTest {
     required this.name,
     required this.input,
     required this.testAppDevice,
-    required this.output,
+    required this.expectedExperimentsOn,
+    required this.expectedAppPath,
   });
 
   final String name;
   final String input;
   final TestAppDevice testAppDevice;
-  final TestFileArgs output;
+  final bool expectedExperimentsOn;
+  final String expectedAppPath;
 }

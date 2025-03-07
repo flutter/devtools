@@ -7,8 +7,6 @@ import 'dart:io';
 
 import '_test_app_driver.dart';
 
-enum TestFileArgItems { experimentsOn, appPath }
-
 const _defaultFlutterAppPath = 'test/test_infra/fixtures/flutter_app';
 const _defaultDartCliAppPath = 'test/test_infra/fixtures/empty_app.dart';
 
@@ -22,56 +20,46 @@ class TestFileArgs {
     return TestFileArgs.fromFileContent(content, testAppDevice: testAppDevice);
   }
 
+  /// Returns a [TestFileArgs] parsed from [fileContent].
+  ///
+  /// Separate from [TestFileArgs.new] for easier testing.
   factory TestFileArgs.fromFileContent(
     String fileContent, {
     required TestAppDevice testAppDevice,
   }) {
-    final testFileArgItems = _parseFileContent(fileContent);
-
-    for (final arg in testFileArgItems.keys) {
-      testFileArgItems.putIfAbsent(arg, () => null);
-    }
-
-    return TestFileArgs.parse(testFileArgItems, testAppDevice: testAppDevice);
+    final args = _parseFileContent(fileContent);
+    final appPath =
+        args[_TestFileArgItems.appPath] ??
+        (testAppDevice == TestAppDevice.cli
+            ? _defaultDartCliAppPath
+            : _defaultFlutterAppPath);
+    return TestFileArgs._parse(args, appPath: appPath);
   }
 
-  TestFileArgs.parse(
-    Map<TestFileArgItems, dynamic> map, {
-    required TestAppDevice testAppDevice,
-  }) : experimentsOn = map[TestFileArgItems.experimentsOn] ?? false,
-       appPath =
-           map[TestFileArgItems.appPath] ??
-           (testAppDevice == TestAppDevice.cli
-               ? _defaultDartCliAppPath
-               : _defaultFlutterAppPath);
+  TestFileArgs._parse(
+    Map<_TestFileArgItems, dynamic> args, {
+    required this.appPath,
+  }) : experimentsOn = args[_TestFileArgItems.experimentsOn] ?? false;
 
-  /// If true, experiments will be enabled in the test.
+  /// Whether experiments are enabled in the test.
   final bool experimentsOn;
 
-  /// Path to the application to connect to.
+  /// The path to the application to connect to.
   final String appPath;
+
+  /// Parses 'test-argument' comments in [fileContent].
+  static Map<_TestFileArgItems, dynamic> _parseFileContent(String fileContent) {
+    return {
+      for (final m in _argRegex.allMatches(fileContent))
+        _TestFileArgItems.values.byName(m.group(1)!): jsonDecode(m.group(2)!),
+    };
+  }
+
+  static final _argRegex = RegExp(
+    r'^\/\/\s*test-argument\s*:\s*(\w+)\s*=\s*(\S*)\s*$',
+    multiLine: true,
+  );
 }
 
-final _argRegex = RegExp(
-  r'^\/\/\s*test-argument\s*:\s*(\w*)\s*=\s*(\S*)\s*$',
-  multiLine: true,
-);
-
-Map<TestFileArgItems, dynamic> _parseFileContent(String fileContent) {
-  final matches = _argRegex.allMatches(fileContent);
-
-  final entries = matches.map<MapEntry<TestFileArgItems, dynamic>>((
-    RegExpMatch m,
-  ) {
-    final name = m.group(1) ?? '';
-    if (name.isEmpty) {
-      throw ArgumentError(
-        'Name of test argument should be provided: [${m.group(0)}].',
-      );
-    }
-    final value = m.group(2) ?? '';
-    return MapEntry(TestFileArgItems.values.byName(name), jsonDecode(value));
-  });
-
-  return Map.fromEntries(entries);
-}
+/// The different arguments accepted as "file args."
+enum _TestFileArgItems { experimentsOn, appPath }
