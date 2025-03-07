@@ -8,6 +8,7 @@ library;
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -308,6 +309,33 @@ void main() {
       controller.setActiveFilter();
       expect(controller.data, hasLength(17));
       expect(controller.filteredData.value, hasLength(3));
+    });
+
+    group('releaseMemory', () {
+      setUp(() {
+        FeatureFlags.memoryObserver = true;
+        prepareTestLogs();
+      });
+
+      tearDown(() {
+        FeatureFlags.memoryObserver = false;
+      });
+
+      test('releaseMemory - full release', () {
+        expect(controller.data, isNotEmpty);
+        expect(controller.filteredData.value, isNotEmpty);
+        controller.releaseMemory();
+        expect(controller.data, isEmpty);
+        expect(controller.filteredData.value, isEmpty);
+      });
+
+      test('releaseMemory - partial release', () {
+        expect(controller.data, hasLength(17));
+        expect(controller.filteredData.value, hasLength(10));
+        controller.releaseMemory(partial: true);
+        expect(controller.data, hasLength(9));
+        expect(controller.filteredData.value, hasLength(2));
+      });
     });
   });
 

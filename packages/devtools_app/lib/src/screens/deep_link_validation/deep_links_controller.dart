@@ -14,6 +14,7 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
 import '../../shared/feature_flags.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
@@ -158,6 +159,9 @@ class DisplayOptions {
 /// when DevTools is destroying a set of DevTools screen controllers.
 class DeepLinksController extends DevToolsScreenController
     with AutoDisposeControllerMixin {
+  @override
+  final screenId = ScreenMetaData.deepLinks.id;
+
   @override
   void dispose() {
     _selectedAndroidVariantIndex.dispose();

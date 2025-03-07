@@ -11,6 +11,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../service/service_registrations.dart' as registrations;
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/offline/offline_data.dart';
@@ -41,6 +42,9 @@ class PerformanceController extends DevToolsScreenController
     with
         AutoDisposeControllerMixin,
         OfflineScreenControllerMixin<OfflinePerformanceData> {
+  @override
+  final screenId = ScreenMetaData.performance.id;
+
   late final FlutterFramesController flutterFramesController;
 
   late final TimelineEventsController timelineEventsController;
@@ -240,13 +244,17 @@ class PerformanceController extends DevToolsScreenController
 
   /// Clears the timeline data currently stored by the controller as well the
   /// VM timeline if a connected app is present.
-  Future<void> clearData() async {
-    if (serviceConnection.serviceManager.connectedAppInitialized) {
+  Future<void> clearData({
+    bool partial = false,
+    bool clearVmTimeline = true,
+  }) async {
+    if (serviceConnection.serviceManager.connectedAppInitialized &&
+        clearVmTimeline) {
       await serviceConnection.serviceManager.service!.clearVMTimeline();
     }
     offlinePerformanceData = null;
     serviceConnection.errorBadgeManager.clearErrors(PerformanceScreen.id);
-    await _applyToFeatureControllersAsync((c) => c.clearData());
+    await _applyToFeatureControllersAsync((c) => c.clearData(partial: partial));
   }
 
   @override
@@ -269,6 +277,13 @@ class PerformanceController extends DevToolsScreenController
           displayRefreshRate: flutterFramesController.displayRefreshRate.value,
         ).toJson(),
   );
+
+  @override
+  FutureOr<void> releaseMemory({bool partial = false}) async {
+    if (FeatureFlags.memoryObserver) {
+      await clearData(partial: partial, clearVmTimeline: !partial);
+    }
+  }
 }
 
 abstract class PerformanceFeatureController extends DisposableController {
@@ -294,7 +309,7 @@ abstract class PerformanceFeatureController extends DisposableController {
 
   Future<void> setOfflineData(OfflinePerformanceData offlineData);
 
-  FutureOr<void> clearData();
+  FutureOr<void> clearData({bool partial = false});
 
   void handleSelectedFrame(FlutterFrame frame);
 }
