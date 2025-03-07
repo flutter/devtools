@@ -8,6 +8,7 @@ library;
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -320,12 +321,14 @@ void main() {
     });
 
     test('releaseMemory - partial release', () {
+      FeatureFlags.memoryObserver = true;
       prepareTestLogs();
       expect(controller.data, hasLength(17));
       expect(controller.filteredData.value, hasLength(10));
       controller.releaseMemory(partial: true);
       expect(controller.data, hasLength(9));
       expect(controller.filteredData.value, hasLength(2));
+      FeatureFlags.memoryObserver = false;
     });
   });
 
