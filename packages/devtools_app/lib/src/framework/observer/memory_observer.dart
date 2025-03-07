@@ -75,11 +75,9 @@ class MemoryObserver extends DisposableController {
         debugMeasureUsageInBytes != null
             ? await debugMeasureUsageInBytes()
             : await measureMemoryUsageInBytes();
-    print('memoryUsageInBytes: $memoryUsageInBytes');
     if (memoryUsageInBytes == null) return false;
 
     final memoryInGb = convertBytes(memoryUsageInBytes, to: ByteUnit.gb);
-    print('memoryInGb: $memoryInGb');
     return memoryInGb > _memoryPressureLimitGb;
   }
 
