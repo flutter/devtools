@@ -81,5 +81,33 @@ void main() {
         equals(testRasterTrackId),
       );
     });
+
+    group('can clearData', () {
+      setUp(() async {
+        // Set some data in the controller. It does not matter if it is connected
+        // data or offline.
+        offlineDataController.startShowingOfflineData(
+          offlineApp: serviceConnection.serviceManager.connectedApp!,
+        );
+        final offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
+        when(
+          performanceController.offlinePerformanceData,
+        ).thenReturn(offlineData);
+        await eventsController.setOfflineData(offlineData);
+      });
+
+      test('full', () async {
+        expect(eventsController.fullPerfettoTrace, isNotEmpty);
+        await eventsController.clearData();
+        expect(eventsController.fullPerfettoTrace, isEmpty);
+      });
+
+      test('partial', () async {
+        expect(eventsController.fullPerfettoTrace, isNotEmpty);
+        await eventsController.clearData();
+        // This is empty because the original data only has one chunk.
+        expect(eventsController.fullPerfettoTrace, isEmpty);
+      });
+    });
   });
 }
