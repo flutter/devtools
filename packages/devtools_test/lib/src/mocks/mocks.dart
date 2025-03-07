@@ -299,3 +299,8 @@ final mockScriptRefs = [
   ScriptRef(uri: 'travel:adventure/cave_tours_europe.dart', id: 'fake/id/10'),
   ScriptRef(uri: 'travel:canada/banff.dart', id: 'fake/id/11'),
 ];
+
+class MockOfflineDataController extends Mock implements OfflineDataController {
+  @override
+  ValueNotifier<bool> showingOfflineData = ValueNotifier<bool>(false);
+}
