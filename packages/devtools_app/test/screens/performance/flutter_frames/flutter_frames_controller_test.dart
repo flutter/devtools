@@ -109,5 +109,35 @@ void main() {
       expect(framesController.selectedFrame.value, equals(testFrame0));
       expect(framesController.displayRefreshRate.value, equals(120.0));
     });
+
+    test('can clearData', () {
+      framesController.addFrame(testFrame0);
+      framesController.addFrame(testFrame1);
+      framesController.addFrame(testFrame2);
+      framesController.addFrame(jankyFrame);
+      framesController.handleSelectedFrame(testFrame0);
+      expect(framesController.flutterFrames.value.length, 4);
+      expect(framesController.selectedFrame.value, equals(testFrame0));
+      framesController.clearData();
+      expect(framesController.flutterFrames.value, isEmpty);
+      expect(framesController.selectedFrame.value, isNull);
+    });
+
+    test('can clearData - partial', () {
+      framesController.addFrame(testFrame0);
+      framesController.addFrame(testFrame1);
+      framesController.addFrame(testFrame2);
+      framesController.addFrame(jankyFrame);
+      framesController.handleSelectedFrame(testFrame0);
+      expect(framesController.flutterFrames.value.length, 4);
+      expect(framesController.selectedFrame.value, equals(testFrame0));
+      framesController.clearData(partial: true);
+      expect(framesController.flutterFrames.value.length, 2);
+      expect(framesController.flutterFrames.value, isNot(contains(testFrame0)));
+      expect(framesController.flutterFrames.value, isNot(contains(testFrame1)));
+      expect(framesController.flutterFrames.value, contains(testFrame2));
+      expect(framesController.flutterFrames.value, contains(jankyFrame));
+      expect(framesController.selectedFrame.value, isNull);
+    });
   });
 }

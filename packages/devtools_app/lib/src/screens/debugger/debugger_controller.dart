@@ -21,6 +21,7 @@ import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/diagnostics/tree_builder.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/framework/routing.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/message_bus.dart';
@@ -57,6 +58,9 @@ class DebuggerController extends DevToolsScreenController
       codeViewController.subscribeToRouterEvents(routerDelegate);
     }
   }
+
+  @override
+  final screenId = ScreenMetaData.debugger.id;
 
   @override
   void init() {
