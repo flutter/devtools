@@ -58,7 +58,10 @@ Future<void> runFlutterIntegrationTest(
   // Run the flutter integration test.
   final testRunner = IntegrationTestRunner();
   try {
-    final testArgs = <String, Object>{if (!offline) 'service_uri': testAppUri};
+    final testArgs = <String, Object>{
+      if (!offline) 'service_uri': testAppUri,
+      if (testApp is TestDartCliApp) 'control_port': testApp.controlPort,
+    };
     final testTarget = testRunnerArgs.testTarget!;
     debugLog('starting test run for $testTarget');
     await testRunner.run(
