@@ -7,7 +7,7 @@ import 'dart:io';
 
 import '_test_app_driver.dart';
 
-const _defaultFlutterAppPath = 'test/test_infra/fixtures/flutter_app';
+const defaultFlutterAppPath = 'test/test_infra/fixtures/flutter_app';
 const _defaultDartCliAppPath = 'test/test_infra/fixtures/empty_app.dart';
 
 /// Test arguments, defined inside the test file as a comment.

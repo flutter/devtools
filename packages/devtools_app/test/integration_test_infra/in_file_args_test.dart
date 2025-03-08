@@ -25,7 +25,7 @@ final tests = [
     input: '',
     testAppDevice: TestAppDevice.flutterTester,
     expectedExperimentsOn: _defaultArgs.experimentsOn,
-    expectedAppPath: _testAppPath,
+    expectedAppPath: defaultFlutterAppPath,
   ),
   _InFileTestArgsTest(
     name: 'empty',
