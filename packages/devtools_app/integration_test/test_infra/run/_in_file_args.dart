@@ -32,7 +32,7 @@ class TestFileArgs {
         args[_TestFileArgItems.appPath] ??
         (testAppDevice == TestAppDevice.cli
             ? _defaultDartCliAppPath
-            : _defaultFlutterAppPath);
+            : defaultFlutterAppPath);
     return TestFileArgs._parse(args, appPath: appPath);
   }
 
