@@ -65,7 +65,7 @@ Future<io.HttpServer> _bindControlServer(io.HttpServer testServer) async {
     } else if (path.startsWith('/packageHttp/post/')) {
       client.packageHttpPost(hasBody: hasBody);
     } else if (path.startsWith('/packageHttp/postStreamed/')) {
-      client.packageHttpPostStreamed(hasBody: hasBody);
+      client.packageHttpPostStreamed();
     }
     request.response.close();
   });
@@ -84,7 +84,7 @@ class _HttpClient {
 
   final Uri _uri;
 
-  final io.HttpClient client = io.HttpClient();
+  final client = io.HttpClient();
 
   final _dio = Dio();
 
@@ -139,7 +139,7 @@ class _HttpClient {
     print('Received package:http POST response: $response');
   }
 
-  void packageHttpPostStreamed({bool hasBody = false}) async {
+  void packageHttpPostStreamed() async {
     print('Sending streamed package:http POST...');
     final request =
         http.StreamedRequest('POST', _uri)
