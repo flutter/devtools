@@ -118,25 +118,30 @@ Future<void> disconnectFromTestApp(WidgetTester tester) async {
 }
 
 class TestApp {
-  TestApp._({required this.vmServiceUri});
+  TestApp._({required this.vmServiceUri, required this.controlPort});
 
-  factory TestApp.fromJson(Map<String, Object> json) {
+  factory TestApp._fromJson(Map<String, Object> json) {
     final serviceUri = json[serviceUriKey] as String?;
     if (serviceUri == null) {
       throw Exception('Cannot create a TestApp with a null service uri.');
     }
-    return TestApp._(vmServiceUri: serviceUri);
+    final controlPort = json[controlPortKey] as int?;
+    return TestApp._(vmServiceUri: serviceUri, controlPort: controlPort);
   }
 
   factory TestApp.fromEnvironment() {
     const testArgs = String.fromEnvironment('test_args');
     final argsMap = (jsonDecode(testArgs) as Map).cast<String, Object>();
-    return TestApp.fromJson(argsMap);
+    return TestApp._fromJson(argsMap);
   }
 
   static const serviceUriKey = 'service_uri';
 
+  static const controlPortKey = 'control_port';
+
   final String vmServiceUri;
+
+  final int? controlPort;
 }
 
 Future<void> verifyScreenshot(

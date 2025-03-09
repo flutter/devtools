@@ -39,12 +39,12 @@ class TestFlutterApp extends IntegrationTestApp {
   Future<void> waitForAppStart() async {
     // Set this up now, but we don't await it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
-    final started = waitFor(
+    final started = _waitFor(
       event: FlutterDaemonConstants.appStartedKey,
       timeout: IntegrationTestApp._appStartTimeout,
     );
 
-    final debugPort = await waitFor(
+    final debugPort = await _waitFor(
       event: FlutterDaemonConstants.appDebugPortKey,
       timeout: IntegrationTestApp._appStartTimeout,
     );
@@ -52,12 +52,10 @@ class TestFlutterApp extends IntegrationTestApp {
         (debugPort[FlutterDaemonConstants.paramsKey]!
                 as Map<String, Object?>)[FlutterDaemonConstants.wsUriKey]
             as String;
-    _vmServiceWsUri = Uri.parse(wsUriString);
+    final vmServiceWsUri = Uri.parse(wsUriString);
 
     // Map to WS URI.
-    _vmServiceWsUri = convertToWebSocketUrl(
-      serviceProtocolUrl: _vmServiceWsUri,
-    );
+    _vmServiceWsUri = convertToWebSocketUrl(serviceProtocolUrl: vmServiceWsUri);
 
     // Now await the started event; if it had already happened the future will
     // have already completed.
@@ -101,7 +99,7 @@ class TestFlutterApp extends IntegrationTestApp {
     // Set up the response future before we send the request to avoid any
     // races. If the method we're calling is app.stop then we tell waitFor not
     // to throw if it sees an app.stop event before the response to this request.
-    final responseFuture = waitFor(
+    final responseFuture = _waitFor(
       id: requestId,
       ignoreAppStopEvent: method == 'app.stop',
     );
@@ -113,7 +111,7 @@ class TestFlutterApp extends IntegrationTestApp {
     }
   }
 
-  Future<Map<String, Object?>> waitFor({
+  Future<Map<String, Object?>> _waitFor({
     String? event,
     int? id,
     Duration? timeout,
@@ -199,6 +197,10 @@ class TestDartCliApp extends IntegrationTestApp {
     : super(appPath, TestAppDevice.cli);
 
   static const vmServicePrefix = 'The Dart VM service is listening on ';
+  static const controlPortKey = 'controlPort';
+
+  late final int _controlPort;
+  int get controlPort => _controlPort;
 
   @override
   Future<void> startProcess() async {
@@ -215,20 +217,19 @@ class TestDartCliApp extends IntegrationTestApp {
 
   @override
   Future<void> waitForAppStart() async {
-    final vmServiceUri = await waitFor(
+    final vmServiceUriString = await _waitFor(
       message: vmServicePrefix,
       timeout: IntegrationTestApp._appStartTimeout,
     );
-    final parsedVmServiceUri = Uri.parse(vmServiceUri);
+    final vmServiceUri = Uri.parse(vmServiceUriString);
+    _controlPort = await _waitFor(message: controlPortKey);
 
     // Map to WS URI.
-    _vmServiceWsUri = convertToWebSocketUrl(
-      serviceProtocolUrl: parsedVmServiceUri,
-    );
+    _vmServiceWsUri = convertToWebSocketUrl(serviceProtocolUrl: vmServiceUri);
   }
 
-  Future<String> waitFor({required String message, Duration? timeout}) {
-    final response = Completer<String>();
+  Future<T> _waitFor<T>({required String message, Duration? timeout}) {
+    final response = Completer<T>();
     late StreamSubscription<String> sub;
     sub = stdoutController.stream.listen(
       (String line) => _handleStdout(
@@ -239,17 +240,17 @@ class TestDartCliApp extends IntegrationTestApp {
       ),
     );
 
-    return _timeoutWithMessages<String>(
+    return _timeoutWithMessages<T>(
       () => response.future,
       timeout: timeout,
       message: 'Did not receive expected message: $message.',
     ).whenComplete(() => sub.cancel());
   }
 
-  void _handleStdout(
+  void _handleStdout<T>(
     String line, {
     required StreamSubscription<String> subscription,
-    required Completer<String> response,
+    required Completer<T> response,
     required String message,
   }) async {
     if (message == vmServicePrefix && line.startsWith(vmServicePrefix)) {
@@ -257,7 +258,11 @@ class TestDartCliApp extends IntegrationTestApp {
         line.indexOf(vmServicePrefix) + vmServicePrefix.length,
       );
       await subscription.cancel();
-      response.complete(vmServiceUri);
+      response.complete(vmServiceUri as T);
+    } else if (message == controlPortKey && line.contains(controlPortKey)) {
+      final asJson = jsonDecode(line) as Map;
+      await subscription.cancel();
+      response.complete(asJson[controlPortKey] as T);
     }
   }
 }
@@ -286,7 +291,7 @@ abstract class IntegrationTestApp with IOMixin {
   final _allMessages = StreamController<String>.broadcast();
 
   Uri get vmServiceUri => _vmServiceWsUri;
-  late Uri _vmServiceWsUri;
+  late final Uri _vmServiceWsUri;
 
   Future<void> startProcess();
 
@@ -416,9 +421,10 @@ enum TestAppDevice {
 
   /// A mapping of test app device to the unsupported tests for that device.
   static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
-    TestAppDevice.flutterTester: [],
+    TestAppDevice.flutterTester: ['network_screen_test.dart'],
     TestAppDevice.flutterChrome: [
       'eval_and_browse_test.dart',
+      'network_screen_test.dart',
       'perfetto_test.dart',
       'performance_screen_event_recording_test.dart',
       'service_connection_test.dart',
