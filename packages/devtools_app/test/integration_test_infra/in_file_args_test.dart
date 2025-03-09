@@ -32,7 +32,7 @@ final tests = [
     input: '',
     testAppDevice: TestAppDevice.cli,
     expectedExperimentsOn: _defaultArgsForCliDevice.experimentsOn,
-    expectedAppPath: _testAppPath,
+    expectedAppPath: defaultDartCliAppPath,
   ),
   _InFileTestArgsTest(
     name: 'non-empty',

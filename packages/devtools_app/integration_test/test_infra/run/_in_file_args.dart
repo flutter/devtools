@@ -8,7 +8,7 @@ import 'dart:io';
 import '_test_app_driver.dart';
 
 const defaultFlutterAppPath = 'test/test_infra/fixtures/flutter_app';
-const _defaultDartCliAppPath = 'test/test_infra/fixtures/empty_app.dart';
+const defaultDartCliAppPath = 'test/test_infra/fixtures/empty_app.dart';
 
 /// Test arguments, defined inside the test file as a comment.
 class TestFileArgs {
@@ -31,7 +31,7 @@ class TestFileArgs {
     final appPath =
         args[_TestFileArgItems.appPath] ??
         (testAppDevice == TestAppDevice.cli
-            ? _defaultDartCliAppPath
+            ? defaultDartCliAppPath
             : defaultFlutterAppPath);
     return TestFileArgs._parse(args, appPath: appPath);
   }
