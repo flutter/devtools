@@ -160,7 +160,7 @@ class NetworkController extends DevToolsScreenController
   /// This timestamp is on the monotonic clock used by the timeline.
   int lastSocketDataRefreshMicros = 0;
 
-  DebounceTimer? _pollingTimer;
+  PeriodicDebouncer? _pollingTimer;
 
   @visibleForTesting
   bool get isPolling => _pollingTimer != null;
@@ -272,7 +272,7 @@ class NetworkController extends DevToolsScreenController
 
   void _updatePollingState(bool recording) {
     if (recording) {
-      _pollingTimer ??= DebounceTimer.periodic(
+      _pollingTimer ??= PeriodicDebouncer.run(
         // TODO(kenz): look into improving performance by caching more data.
         // Polling less frequently helps performance.
         _pollingDuration,

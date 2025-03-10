@@ -38,12 +38,12 @@ class MemoryObserver extends DisposableController {
 
   static const _memoryPressureLimitGb = 3.0;
 
-  DebounceTimer? _timer;
+  PeriodicDebouncer? _timer;
 
   @override
   void init() {
     super.init();
-    _timer = DebounceTimer.periodic(_pollingDuration, _pollForMemoryUsage);
+    _timer = PeriodicDebouncer.run(_pollingDuration, _pollForMemoryUsage);
   }
 
   @override

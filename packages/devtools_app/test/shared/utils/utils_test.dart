@@ -12,11 +12,11 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('DebounceTimer', () {
+  group('PeriodicDebouncer', () {
     test('the callback happens immediately', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        DebounceTimer.periodic(const Duration(seconds: 1), ({
+        PeriodicDebouncer.run(const Duration(seconds: 1), ({
           DebounceCancelledCallback? cancelledCallback,
         }) async {
           callbackCounter++;
@@ -30,7 +30,7 @@ void main() {
     test('only triggers another callback after the first is done', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        DebounceTimer.periodic(const Duration(milliseconds: 500), ({
+        PeriodicDebouncer.run(const Duration(milliseconds: 500), ({
           DebounceCancelledCallback? cancelledCallback,
         }) async {
           callbackCounter++;
@@ -44,7 +44,7 @@ void main() {
     test('calls the callback at the beginning and then once per period', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        DebounceTimer.periodic(const Duration(seconds: 1), ({
+        PeriodicDebouncer.run(const Duration(seconds: 1), ({
           DebounceCancelledCallback? cancelledCallback,
         }) async {
           callbackCounter++;
@@ -60,7 +60,7 @@ void main() {
       () {
         fakeAsync((async) {
           int callbackCounter = 0;
-          final timer = DebounceTimer.periodic(const Duration(seconds: 1), ({
+          final timer = PeriodicDebouncer.run(const Duration(seconds: 1), ({
             DebounceCancelledCallback? cancelledCallback,
           }) async {
             callbackCounter++;
@@ -82,7 +82,7 @@ void main() {
       () {
         fakeAsync((async) {
           int callbackCounter = 0;
-          final timer = DebounceTimer.periodic(const Duration(seconds: 1), ({
+          final timer = PeriodicDebouncer.run(const Duration(seconds: 1), ({
             DebounceCancelledCallback? cancelledCallback,
           }) async {
             callbackCounter++;
@@ -102,7 +102,7 @@ void main() {
     test('cancels the callback when cancelled during the first callback', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        final timer = DebounceTimer.periodic(const Duration(seconds: 1), ({
+        final timer = PeriodicDebouncer.run(const Duration(seconds: 1), ({
           DebounceCancelledCallback? cancelledCallback,
         }) async {
           callbackCounter++;
@@ -123,7 +123,7 @@ void main() {
     test('cancels the callback when cancelled during the Nth callback', () {
       fakeAsync((async) {
         int callbackCounter = 0;
-        final timer = DebounceTimer.periodic(const Duration(seconds: 1), ({
+        final timer = PeriodicDebouncer.run(const Duration(seconds: 1), ({
           DebounceCancelledCallback? cancelledCallback,
         }) async {
           callbackCounter++;
@@ -139,6 +139,54 @@ void main() {
         async.elapse(const Duration(milliseconds: 500));
         expect(callbackCounter, 11);
       });
+    });
+  });
+
+  group('Debouncer', () {
+    late Debouncer debouncer;
+    late int callbackCount;
+
+    setUp(() {
+      callbackCount = 0;
+      debouncer = Debouncer(duration: const Duration(milliseconds: 100));
+    });
+
+    tearDown(() {
+      debouncer.dispose();
+    });
+
+    test('calls callback after duration', () async {
+      debouncer.run(() => callbackCount++);
+      expect(callbackCount, 0);
+      await Future.delayed(const Duration(milliseconds: 150));
+      expect(callbackCount, 1);
+    });
+
+    test('debounces multiple calls', () async {
+      debouncer.run(() => callbackCount++);
+      debouncer.run(() => callbackCount++);
+      debouncer.run(() => callbackCount++);
+      expect(callbackCount, 0);
+      await Future.delayed(const Duration(milliseconds: 150));
+      expect(callbackCount, 1);
+    });
+
+    test('calls callback after multiple calls with delay', () async {
+      debouncer.run(() => callbackCount++);
+      await Future.delayed(const Duration(milliseconds: 50));
+      debouncer.run(() => callbackCount++);
+      await Future.delayed(const Duration(milliseconds: 50));
+      debouncer.run(() => callbackCount++);
+      expect(callbackCount, 0);
+      await Future.delayed(const Duration(milliseconds: 150));
+      expect(callbackCount, 1);
+    });
+
+    test('dispose cancels timer', () async {
+      debouncer.run(() => callbackCount++);
+      debouncer.dispose();
+      await Future.delayed(const Duration(milliseconds: 150));
+      expect(callbackCount, 0);
     });
   });
 
