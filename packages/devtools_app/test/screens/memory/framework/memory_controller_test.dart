@@ -111,68 +111,85 @@ void main() {
     },
   );
 
-  testWidgetsWithWindowSize('releaseMemory - full release', _windowSize, (
-    WidgetTester tester,
-  ) async {
-    FeatureFlags.memoryObserver = true;
-    await _pumpScene(tester, scene);
+  group('release memory', () {
+    setUp(() {
+      FeatureFlags.memoryObserver = true;
+    });
 
-    // Add some data to the Diff view.
-    await scene.takeSnapshot(tester);
-    await scene.takeSnapshot(tester);
+    tearDown(() {
+      FeatureFlags.memoryObserver = false;
+    });
 
-    // Add some data to the Trace view.
-    await scene.goToTraceTab(tester);
+    testWidgetsWithWindowSize('full release', _windowSize, (
+      WidgetTester tester,
+    ) async {
+      await _pumpScene(tester, scene);
 
-    // Enable allocation tracing for one of them.
-    await tester.tap(find.byType(Checkbox).first);
-    await tester.pumpAndSettle();
+      // Add some data to the Diff view.
+      await scene.takeSnapshot(tester);
+      await scene.takeSnapshot(tester);
 
-    final tracingState = scene.controller.trace!.selection.value;
-    final selectedTrace = tracingState.filteredClassList.value.firstWhere(
-      (e) => e.traceAllocations,
-    );
-    final traceElement = find.byKey(Key(selectedTrace.clazz.id!));
-    expect(traceElement, findsOneWidget);
+      // Add some data to the Trace view.
+      await scene.goToTraceTab(tester);
 
-    // Select the list item for the traced class and refresh to fetch data.
-    await tester.tap(traceElement);
-    await tester.pumpAndSettle();
+      // Enable allocation tracing for one of them.
+      await tester.tap(find.byType(Checkbox).first);
+      await tester.pumpAndSettle();
 
-    // Set fake sample data and refresh to populate the trace view.
-    final fakeService =
-        serviceConnection.serviceManager.service as FakeVmServiceWrapper;
-    fakeService.allocationSamples = allocationTracingProfile;
-    await tester.tap(find.text('Refresh'));
-    await tester.pumpAndSettle();
+      final tracingState = scene.controller.trace!.selection.value;
+      final selectedTrace = tracingState.filteredClassList.value.firstWhere(
+        (e) => e.traceAllocations,
+      );
+      final traceElement = find.byKey(Key(selectedTrace.clazz.id!));
+      expect(traceElement, findsOneWidget);
 
-    expect(scene.controller.diff.hasSnapshots, true);
-    expect(scene.controller.trace!.selection.value.profiles, isNotEmpty);
-    await scene.controller.releaseMemory();
-    expect(scene.controller.diff.hasSnapshots, false);
-    expect(scene.controller.trace!.selection.value.profiles, isEmpty);
-    FeatureFlags.memoryObserver = false;
-  });
+      // Select the list item for the traced class and refresh to fetch data.
+      await tester.tap(traceElement);
+      await tester.pumpAndSettle();
 
-  testWidgetsWithWindowSize('releaseMemory - partial release', _windowSize, (
-    WidgetTester tester,
-  ) async {
-    FeatureFlags.memoryObserver = true;
-    await _pumpScene(tester, scene);
+      // Set fake sample data and refresh to populate the trace view.
+      final fakeService =
+          serviceConnection.serviceManager.service as FakeVmServiceWrapper;
+      fakeService.allocationSamples = allocationTracingProfile;
+      await tester.tap(find.text('Refresh'));
+      await tester.pumpAndSettle();
 
-    // Add some data to the Diff view.
-    await scene.takeSnapshot(tester);
-    await scene.takeSnapshot(tester);
-    await scene.takeSnapshot(tester);
-    await scene.takeSnapshot(tester);
+      expect(scene.controller.diff.hasSnapshots, true);
+      expect(scene.controller.trace!.selection.value.profiles, isNotEmpty);
+      await scene.controller.releaseMemory();
+      expect(scene.controller.diff.hasSnapshots, false);
+      expect(scene.controller.trace!.selection.value.profiles, isEmpty);
+    });
 
-    // Full and partial releases are identical for the tracing functionality,
-    // so we only need to check the diff behavior in this test case.
-    expect(scene.controller.diff.hasSnapshots, true);
-    expect(scene.controller.diff.core.snapshots.value.length, 5);
-    await scene.controller.releaseMemory(partial: true);
-    expect(scene.controller.diff.hasSnapshots, true);
-    expect(scene.controller.diff.core.snapshots.value.length, 3);
-    FeatureFlags.memoryObserver = false;
+    testWidgetsWithWindowSize('partial release', _windowSize, (
+      WidgetTester tester,
+    ) async {
+      await _pumpScene(tester, scene);
+
+      // Add some data to the Diff view.
+      await scene.takeSnapshot(tester);
+      await scene.takeSnapshot(tester);
+      await scene.takeSnapshot(tester);
+      await scene.takeSnapshot(tester);
+
+      // Full and partial releases are identical for the tracing functionality,
+      // so we only need to check the diff behavior in this test case.
+      expect(scene.controller.diff.hasSnapshots, true);
+      expect(scene.controller.diff.core.snapshots.value.length, 5);
+      await scene.controller.releaseMemory(partial: true);
+      expect(scene.controller.diff.hasSnapshots, true);
+      expect(scene.controller.diff.core.snapshots.value.length, 3);
+    });
+
+    testWidgetsWithWindowSize('succeeds with no snapshots', _windowSize, (
+      WidgetTester tester,
+    ) async {
+      await _pumpScene(tester, scene);
+      expect(scene.controller.diff.hasSnapshots, false);
+      expect(scene.controller.diff.core.snapshots.value.length, 1);
+      await scene.controller.releaseMemory();
+      expect(scene.controller.diff.hasSnapshots, false);
+      expect(scene.controller.diff.core.snapshots.value.length, 1);
+    });
   });
 }
