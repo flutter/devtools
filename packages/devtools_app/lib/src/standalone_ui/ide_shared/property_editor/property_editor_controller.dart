@@ -75,6 +75,12 @@ class PropertyEditorController extends DisposableController
     );
   }
 
+  @override
+  void dispose() {
+    _editableArgsDebouncer.dispose();
+    super.dispose();
+  }
+
   Future<EditArgumentResponse?> editArgument<T>({
     required String name,
     required T value,
