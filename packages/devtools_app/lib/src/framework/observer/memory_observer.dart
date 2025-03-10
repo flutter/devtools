@@ -17,6 +17,14 @@ import '../../shared/primitives/byte_utils.dart';
 import '../../shared/utils/utils.dart';
 import '_memory_desktop.dart' if (dart.library.js_interop) '_memory_web.dart';
 
+/// The result of a request to [MemoryObserver.reduceMemory].
+///
+/// `fromBytes` - total memory usage before the reduction request.
+/// `toBytes` - total memory usage after the reduction request is completed.
+/// `success` - whether the reduction in memory brought DevTools memory usage
+/// below the threshold [MemoryObserver._memoryPressureLimitGb].
+typedef ReduceMemoryResult = ({int fromBytes, int toBytes, bool success});
+
 /// Observes the memory usage of the DevTools app (web only) and shows a memory
 /// pressure warning to users when DevTools is nearing the memory limit.
 ///
@@ -39,6 +47,12 @@ class MemoryObserver extends DisposableController {
   static const _memoryPressureLimitGb = 3.0;
 
   DebounceTimer? _timer;
+
+  /// Tracks the most recent memory usage measurement.
+  ///
+  /// This value is updated each time [MemoryObserver._memoryExceedsThreshold]
+  /// is called.
+  static int? _lastMemoryUsageInBytes;
 
   @override
   void init() {
@@ -75,6 +89,7 @@ class MemoryObserver extends DisposableController {
         debugMeasureUsageInBytes != null
             ? await debugMeasureUsageInBytes()
             : await measureMemoryUsageInBytes();
+    _lastMemoryUsageInBytes = memoryUsageInBytes;
     if (memoryUsageInBytes == null) return false;
 
     final memoryInGb = convertBytes(memoryUsageInBytes, to: ByteUnit.gb);
@@ -85,11 +100,11 @@ class MemoryObserver extends DisposableController {
   /// from unused DevTools screens and, if necessary, releasing partial memory
   /// from the current screen in use.
   ///
-  /// Returns whether the attempt to reduce memory brought DevTools memory usage
-  /// below the threshold [_memoryPressureLimitGb].
-  static Future<bool> reduceMemory({
+  /// Returns a [ReduceMemoryResult] containing metadata and a success result.
+  static Future<ReduceMemoryResult> reduceMemory({
     @visibleForTesting Future<int?> Function()? debugMeasureUsageInBytes,
   }) async {
+    final fromBytes = _lastMemoryUsageInBytes;
     await screenControllers.forEachInitializedAsync((screenController) async {
       if (DevToolsRouterDelegate.currentPage != screenController.screenId) {
         // If we need to release more memory, we can consider disposing the
@@ -116,9 +131,12 @@ class MemoryObserver extends DisposableController {
       });
     }
 
-    return !(await _memoryExceedsThreshold(
-      debugMeasureUsageInBytes: debugMeasureUsageInBytes,
-    ));
+    final success =
+        !(await _memoryExceedsThreshold(
+          debugMeasureUsageInBytes: debugMeasureUsageInBytes,
+        ));
+    final toBytes = _lastMemoryUsageInBytes;
+    return (fromBytes: fromBytes!, toBytes: toBytes!, success: success);
   }
 }
 
@@ -177,13 +195,13 @@ class _ReduceMemoryButton extends StatefulWidget {
 class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
   bool inProgress = false;
 
-  final success = ValueNotifier<bool?>(null);
+  final result = ValueNotifier<ReduceMemoryResult?>(null);
 
   String? error;
 
   @override
   void dispose() {
-    success.dispose();
+    result.dispose();
     super.dispose();
   }
 
@@ -209,14 +227,12 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
                       child: const CircularProgressIndicator(),
                     )
                     : ValueListenableBuilder(
-                      valueListenable: success,
-                      builder: (context, success, _) {
-                        return success == null
-                            ? const SizedBox()
-                            : _SuccessOrFailureMessage(
-                              success: success,
-                              error: error,
-                            );
+                      valueListenable: result,
+                      builder: (context, result, _) {
+                        return _SuccessOrFailureMessage(
+                          result: result,
+                          error: error,
+                        );
                       },
                     ),
           ),
@@ -229,27 +245,27 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
     ga.select(gac.devToolsMain, gac.memoryPressureReduce);
     setState(() {
       inProgress = true;
-      success.value = null;
+      result.value = null;
       error = null;
     });
-    bool memoryReduced = false;
+    ReduceMemoryResult? reduceMemoryResult;
     try {
-      memoryReduced = await MemoryObserver.reduceMemory();
+      reduceMemoryResult = await MemoryObserver.reduceMemory();
     } catch (e) {
       error = e.toString();
     } finally {
       setState(() {
         inProgress = false;
-        success.value = memoryReduced;
+        result.value = reduceMemoryResult;
       });
     }
   }
 }
 
 class _SuccessOrFailureMessage extends StatefulWidget {
-  const _SuccessOrFailureMessage({required this.success, this.error});
+  const _SuccessOrFailureMessage({required this.result, this.error});
 
-  final bool success;
+  final ReduceMemoryResult? result;
   final String? error;
 
   @override
@@ -273,13 +289,14 @@ class _SuccessOrFailureMessageState extends State<_SuccessOrFailureMessage> {
   @override
   void didUpdateWidget(covariant _SuccessOrFailureMessage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.success != widget.success) {
+    if (oldWidget.result != widget.result) {
       _init();
     }
   }
 
   void _init() {
-    if (widget.success) {
+    final result = widget.result;
+    if (result != null && result.success) {
       dismissCountDown = _startingDismissCountDown;
       _timer?.cancel();
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -309,13 +326,51 @@ class _SuccessOrFailureMessageState extends State<_SuccessOrFailureMessage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final color = theme.colorScheme.onTertiaryContainer;
-    var message =
-        'Attempt to reduce memory was '
-        '${widget.success ? 'successful' : 'unsuccessful'}. '
-        '${widget.success ? 'This warning will automatically dismiss in $dismissCountDown seconds.' : ''}';
-    if (widget.error != null) {
-      message = '$message Error: ${widget.error}';
+
+    String message;
+    final result = widget.result;
+    if (result == null) {
+      message = 'Attempt to reduce memory was unsuccessful.';
+      if (widget.error != null) {
+        message = '$message Error: ${widget.error}';
+      }
+    } else {
+      final fromBytesAsString = printBytes(
+        result.fromBytes,
+        fractionDigits: 2,
+        unit: ByteUnit.gb,
+        includeUnit: true,
+      );
+      final toBytesAsString = printBytes(
+        result.toBytes,
+        fractionDigits: 2,
+        unit: ByteUnit.gb,
+        includeUnit: true,
+      );
+
+      if (result.success) {
+        message =
+            'Successfully reduced memory from $fromBytesAsString to '
+            '$toBytesAsString. This warning will automatically dismiss in '
+            '$dismissCountDown seconds.';
+      } else {
+        final limitAsBytes = convertBytes(
+          MemoryObserver._memoryPressureLimitGb,
+          from: ByteUnit.gb,
+          to: ByteUnit.byte,
+        );
+        final limitBytesAsString = printBytes(
+          limitAsBytes,
+          unit: ByteUnit.gb,
+          includeUnit: true,
+        );
+        message =
+            'Attempt to reduce memory was unsuccessful. Memory was reduced from '
+            '$fromBytesAsString to $toBytesAsString, but the total memory still '
+            'exceeds the $limitBytesAsString threshold.';
+      }
     }
+
     return RichText(
       text: TextSpan(
         children: [
@@ -323,7 +378,7 @@ class _SuccessOrFailureMessageState extends State<_SuccessOrFailureMessage> {
             child: Padding(
               padding: const EdgeInsets.only(right: denseSpacing),
               child: Icon(
-                widget.success ? Icons.check : Icons.close,
+                (result != null && result.success) ? Icons.check : Icons.close,
                 size: actionsIconSize,
                 color: color,
               ),
