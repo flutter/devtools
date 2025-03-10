@@ -125,10 +125,10 @@ void main() {
 
           memoryUsageBytes =
               convertBytes(3.1, from: ByteUnit.gb, to: ByteUnit.byte).round();
-          var memoryReduced = await MemoryObserver.reduceMemory(
+          var result = await MemoryObserver.reduceMemory(
             debugMeasureUsageInBytes: testMeasureMemoryUsage,
           );
-          expect(memoryReduced, isFalse);
+          expect(result.success, isFalse);
           expect(screenController1.releaseMemoryCallCount, 1);
           expect(screenController1.partialReleaseMemoryCallCount, 1);
           expect(screenController2.releaseMemoryCallCount, 1);
@@ -136,10 +136,10 @@ void main() {
 
           memoryUsageBytes =
               convertBytes(1, from: ByteUnit.gb, to: ByteUnit.byte).round();
-          memoryReduced = await MemoryObserver.reduceMemory(
+          result = await MemoryObserver.reduceMemory(
             debugMeasureUsageInBytes: testMeasureMemoryUsage,
           );
-          expect(memoryReduced, isTrue);
+          expect(result.success, isTrue);
           expect(screenController1.releaseMemoryCallCount, equals(1));
           expect(screenController1.partialReleaseMemoryCallCount, equals(1));
           expect(screenController2.releaseMemoryCallCount, equals(2));
@@ -152,10 +152,10 @@ void main() {
 
         memoryUsageBytes =
             convertBytes(3.1, from: ByteUnit.gb, to: ByteUnit.byte).round();
-        var memoryReduced = await MemoryObserver.reduceMemory(
+        var result = await MemoryObserver.reduceMemory(
           debugMeasureUsageInBytes: testMeasureMemoryUsage,
         );
-        expect(memoryReduced, isFalse);
+        expect(result.success, isFalse);
         expect(screenController1.releaseMemoryCallCount, 0);
         expect(screenController1.partialReleaseMemoryCallCount, 0);
         expect(screenController2.releaseMemoryCallCount, 0);
@@ -166,10 +166,10 @@ void main() {
 
         memoryUsageBytes =
             convertBytes(3.1, from: ByteUnit.gb, to: ByteUnit.byte).round();
-        memoryReduced = await MemoryObserver.reduceMemory(
+        result = await MemoryObserver.reduceMemory(
           debugMeasureUsageInBytes: testMeasureMemoryUsage,
         );
-        expect(memoryReduced, isFalse);
+        expect(result.success, isFalse);
         expect(screenController1.releaseMemoryCallCount, 1);
         expect(screenController1.partialReleaseMemoryCallCount, 1);
         expect(screenController2.releaseMemoryCallCount, 0);
