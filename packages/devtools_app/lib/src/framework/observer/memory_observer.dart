@@ -172,9 +172,14 @@ class _MemoryPressureBannerMessage extends banner_messages.BannerWarning {
                 ),
                 const TextSpan(
                   text:
-                      ' to clear stale data. '
-                      'If you do not take action, DevTools may eventually crash '
-                      'due to an out of memory error (OOM).',
+                      ' to clear stale data. If you do not take action, '
+                      'DevTools may eventually crash due to an out of memory '
+                      'error (OOM).\n\n'
+                      'WARNING: clicking "Reduce memory" will clear data from '
+                      'other DevTools screens and may partially clear data '
+                      'from the screen you are currently using. Consider '
+                      'saving data from other DevTools screens, where '
+                      'supported, if you do not want to lose data.',
                 ),
               ],
             ),
