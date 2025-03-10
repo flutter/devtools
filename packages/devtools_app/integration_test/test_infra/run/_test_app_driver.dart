@@ -199,8 +199,8 @@ class TestDartCliApp extends IntegrationTestApp {
   static const vmServicePrefix = 'The Dart VM service is listening on ';
   static const controlPortKey = 'controlPort';
 
-  late final int _controlPort;
-  int get controlPort => _controlPort;
+  late final int? _controlPort;
+  int? get controlPort => _controlPort;
 
   @override
   Future<void> startProcess() async {
@@ -222,13 +222,26 @@ class TestDartCliApp extends IntegrationTestApp {
       timeout: IntegrationTestApp._appStartTimeout,
     );
     final vmServiceUri = Uri.parse(vmServiceUriString);
-    _controlPort = await _waitFor(message: controlPortKey);
+    _controlPort = await _waitFor(
+      message: controlPortKey,
+      timeout: const Duration(seconds: 1),
+      optional: true,
+    );
 
     // Map to WS URI.
     _vmServiceWsUri = convertToWebSocketUrl(serviceProtocolUrl: vmServiceUri);
   }
 
-  Future<T> _waitFor<T>({required String message, Duration? timeout}) {
+  /// Waits for [message] to appear on stdout.
+  ///
+  /// After [timeout], if no such message has appeared, then either `null` is
+  /// returned, if [optional] is `true`, or an exception is thrown, if
+  /// [optional] is `false`.
+  Future<T> _waitFor<T>({
+    required String message,
+    Duration? timeout,
+    bool optional = false,
+  }) {
     final response = Completer<T>();
     late StreamSubscription<String> sub;
     sub = stdoutController.stream.listen(
@@ -239,6 +252,15 @@ class TestDartCliApp extends IntegrationTestApp {
         message: message,
       ),
     );
+
+    if (optional) {
+      return response.future
+          .timeout(
+            timeout ?? IntegrationTestApp._defaultTimeout,
+            onTimeout: () => null as T,
+          )
+          .whenComplete(() => sub.cancel());
+    }
 
     return _timeoutWithMessages<T>(
       () => response.future,
