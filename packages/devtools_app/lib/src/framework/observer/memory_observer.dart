@@ -23,7 +23,8 @@ import '_memory_desktop.dart' if (dart.library.js_interop) '_memory_web.dart';
 /// `toBytes` - total memory usage after the reduction request is completed.
 /// `success` - whether the reduction in memory brought DevTools memory usage
 /// below the threshold [MemoryObserver._memoryPressureLimitGb].
-typedef ReduceMemoryResult = ({int fromBytes, int toBytes, bool success});
+typedef ReduceMemoryResult =
+    ({bool success, int? fromBytes, int? toBytes, String? error});
 
 /// Observes the memory usage of the DevTools app (web only) and shows a memory
 /// pressure warning to users when DevTools is nearing the memory limit.
@@ -136,7 +137,12 @@ class MemoryObserver extends DisposableController {
           debugMeasureUsageInBytes: debugMeasureUsageInBytes,
         ));
     final toBytes = _lastMemoryUsageInBytes;
-    return (fromBytes: fromBytes!, toBytes: toBytes!, success: success);
+    return (
+      success: success,
+      fromBytes: fromBytes!,
+      toBytes: toBytes!,
+      error: null,
+    );
   }
 }
 
@@ -197,8 +203,6 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
 
   final result = ValueNotifier<ReduceMemoryResult?>(null);
 
-  String? error;
-
   @override
   void dispose() {
     result.dispose();
@@ -229,10 +233,7 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
                     : ValueListenableBuilder(
                       valueListenable: result,
                       builder: (context, result, _) {
-                        return _SuccessOrFailureMessage(
-                          result: result,
-                          error: error,
-                        );
+                        return _SuccessOrFailureMessage(result: result);
                       },
                     ),
           ),
@@ -246,13 +247,17 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
     setState(() {
       inProgress = true;
       result.value = null;
-      error = null;
     });
     ReduceMemoryResult? reduceMemoryResult;
     try {
       reduceMemoryResult = await MemoryObserver.reduceMemory();
     } catch (e) {
-      error = e.toString();
+      reduceMemoryResult = (
+        success: false,
+        fromBytes: null,
+        toBytes: null,
+        error: e.toString(),
+      );
     } finally {
       setState(() {
         inProgress = false;
@@ -263,10 +268,9 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
 }
 
 class _SuccessOrFailureMessage extends StatefulWidget {
-  const _SuccessOrFailureMessage({required this.result, this.error});
+  const _SuccessOrFailureMessage({required this.result});
 
   final ReduceMemoryResult? result;
-  final String? error;
 
   @override
   State<_SuccessOrFailureMessage> createState() =>
@@ -327,22 +331,23 @@ class _SuccessOrFailureMessageState extends State<_SuccessOrFailureMessage> {
     final theme = Theme.of(context);
     final color = theme.colorScheme.onTertiaryContainer;
 
-    String message;
     final result = widget.result;
-    if (result == null) {
-      message = 'Attempt to reduce memory was unsuccessful.';
-      if (widget.error != null) {
-        message = '$message Error: ${widget.error}';
-      }
+    if (result == null) return const SizedBox.shrink();
+
+    String message;
+    if (result.error != null) {
+      message =
+          'Attempt to reduce memory was unsuccessful. Error: ${result.error}';
     } else {
+      assert(result.fromBytes != null && result.toBytes != null);
       final fromBytesAsString = printBytes(
-        result.fromBytes,
+        result.fromBytes!,
         fractionDigits: 2,
         unit: ByteUnit.gb,
         includeUnit: true,
       );
       final toBytesAsString = printBytes(
-        result.toBytes,
+        result.toBytes!,
         fractionDigits: 2,
         unit: ByteUnit.gb,
         includeUnit: true,
@@ -378,7 +383,7 @@ class _SuccessOrFailureMessageState extends State<_SuccessOrFailureMessage> {
             child: Padding(
               padding: const EdgeInsets.only(right: denseSpacing),
               child: Icon(
-                (result != null && result.success) ? Icons.check : Icons.close,
+                result.success ? Icons.check : Icons.close,
                 size: actionsIconSize,
                 color: color,
               ),
