@@ -155,12 +155,14 @@ class DiffPaneController extends DisposableController with Serializable {
     const offsetForInstructionSnapshot = 1;
     final snapshots = core._snapshots;
     final snapshotsToRemove = max(
-      offsetForInstructionSnapshot,
+      0,
       (snapshots.value.length - offsetForInstructionSnapshot) ~/
           (partial ? 2 : 1),
     );
-    final endIndexToRemoveExclusive =
-        offsetForInstructionSnapshot + snapshotsToRemove;
+    final endIndexToRemoveExclusive = min(
+      snapshots.value.length,
+      offsetForInstructionSnapshot + snapshotsToRemove,
+    );
     for (
       var i = offsetForInstructionSnapshot;
       i < endIndexToRemoveExclusive;

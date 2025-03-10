@@ -121,6 +121,10 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
   static String? get currentPage => _currentPage;
   static String? _currentPage;
+  @visibleForTesting
+  static set currentPage(String? page) {
+    _currentPage = page;
+  }
 
   final Page Function(
     BuildContext,

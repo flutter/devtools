@@ -4,17 +4,12 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/foundation.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 class MockDevToolsScreenController extends Mock
     implements DevToolsScreenController {}
-
-class MockOfflineDataController extends Mock implements OfflineDataController {
-  @override
-  ValueNotifier<bool> showingOfflineData = ValueNotifier<bool>(false);
-}
 
 void main() {
   group('ScreenControllers', () {

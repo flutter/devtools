@@ -15,6 +15,12 @@ To learn more about DevTools, check out the
 
 ## General updates
 
+* Added a memory pressure warning that allows you to reduce the memory usage of
+DevTools in order to avoid an OOM crash. -
+[#8989](https://github.com/flutter/devtools/pull/8989),
+[#8997](https://github.com/flutter/devtools/pull/8997),
+[#8998](https://github.com/flutter/devtools/pull/8998)
+
 * Fixed various memory leaks and lifecycle issues. - 
 [#8901](https://github.com/flutter/devtools/pull/8901),
 [#8902](https://github.com/flutter/devtools/pull/8902),
@@ -29,8 +35,10 @@ To learn more about DevTools, check out the
 [#8969](https://github.com/flutter/devtools/pull/8969),
 [#8970](https://github.com/flutter/devtools/pull/8970),
 [#8975](https://github.com/flutter/devtools/pull/8975)
+
 * Fix a bug with the review history on disconnect experience. -
 [#8985](https://github.com/flutter/devtools/pull/8985)
+
 * Fixed bug where DevTools would automatically resume instead of
 pausing on breakpoint on connection. - 
 [#8991](https://github.com/flutter/devtools/pull/8991)
