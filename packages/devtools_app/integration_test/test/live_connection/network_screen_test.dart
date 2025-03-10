@@ -34,38 +34,36 @@ void main() {
     await pumpAndConnectDevTools(tester, testApp);
     await _prepareNetworkScreen(tester);
 
-    final networkScreen = _NetworkScreenHelper(tester, testApp.controlPort!);
+    final helper = _NetworkScreenHelper(tester, testApp.controlPort!);
 
     // Instruct the app to make a GET request via the dart:io HttpClient.
-    await networkScreen.triggerRequest('get/');
+    await helper.triggerRequest('get/');
     _expectInRequestTable('GET');
-    await networkScreen.clear();
+    await helper.clear();
 
     // Instruct the app to make a POST request via the dart:io HttpClient.
-    await networkScreen.triggerRequest('post/');
+    await helper.triggerRequest('post/');
     _expectInRequestTable('POST');
-    await networkScreen.clear();
+    await helper.clear();
 
     // Instruct the app to make a PUT request via the dart:io HttpClient.
-    await networkScreen.triggerRequest('put/');
+    await helper.triggerRequest('put/');
     _expectInRequestTable('PUT');
-    await networkScreen.clear();
+    await helper.clear();
 
     // Instruct the app to make a DELETE request via the dart:io HttpClient.
-    await networkScreen.triggerRequest('delete/');
+    await helper.triggerRequest('delete/');
     _expectInRequestTable('DELETE');
-    await networkScreen.clear();
+    await helper.clear();
 
     // Instruct the app to make a GET request via Dio.
-    await networkScreen.triggerRequest('dio/get/');
+    await helper.triggerRequest('dio/get/');
     _expectInRequestTable('GET');
-    await networkScreen.clear();
+    await helper.clear();
 
     // Instruct the app to make a POST request via Dio.
-    await networkScreen.triggerRequest('dio/post/');
+    await helper.triggerRequest('dio/post/');
     _expectInRequestTable('POST');
-
-    await disconnectFromTestApp(tester);
   });
 }
 
@@ -89,11 +87,12 @@ final class _NetworkScreenHelper {
   }
 }
 
-final _requestTable = find.byType(DevToolsTable<NetworkRequest>);
-
 void _expectInRequestTable(String text) {
   expect(
-    find.descendant(of: _requestTable, matching: find.text(text)),
+    find.descendant(
+      of: find.byType(DevToolsTable<NetworkRequest>),
+      matching: find.text(text),
+    ),
     findsOneWidget,
   );
 }

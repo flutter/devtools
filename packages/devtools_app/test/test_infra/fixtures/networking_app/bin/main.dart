@@ -40,15 +40,14 @@ Future<io.HttpServer> _bindControlServer(io.HttpServer testServer) async {
   final server = await io.HttpServer.bind(io.InternetAddress.loopbackIPv4, 0);
   print(json.encode({'controlPort': server.port}));
   server.listen((request) {
-    request.response.headers.add('Access-Control-Allow-Origin', '*');
-    request.response.headers.add(
-      'Access-Control-Allow-Methods',
-      'POST,GET,DELETE,PUT,OPTIONS',
-    );
+    request.response.headers
+      ..add('Access-Control-Allow-Origin', '*')
+      ..add('Access-Control-Allow-Methods', 'POST,GET,DELETE,PUT,OPTIONS');
     final path = request.uri.path;
     final hasBody = path.contains('/body/');
-    request.response.statusCode = 200;
-    request.response.write('>$path<');
+    request.response
+      ..statusCode = 200
+      ..write('received request at: "$path"');
 
     if (path.startsWith('/get/')) {
       client.get();

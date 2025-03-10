@@ -199,8 +199,8 @@ class TestDartCliApp extends IntegrationTestApp {
   static const vmServicePrefix = 'The Dart VM service is listening on ';
   static const controlPortKey = 'controlPort';
 
-  late final int? _controlPort;
   int? get controlPort => _controlPort;
+  late final int? _controlPort;
 
   @override
   Future<void> startProcess() async {
