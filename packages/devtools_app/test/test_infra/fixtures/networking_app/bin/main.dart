@@ -65,6 +65,9 @@ Future<io.HttpServer> _bindControlServer(io.HttpServer testServer) async {
       client.packageHttpPost(hasBody: hasBody);
     } else if (path.startsWith('/packageHttp/postStreamed/')) {
       client.packageHttpPostStreamed();
+    } else if (path.startsWith('/exit/')) {
+      client.close();
+      io.exit(0);
     }
     request.response.close();
   });
@@ -83,13 +86,18 @@ class _HttpClient {
 
   final Uri _uri;
 
-  final client = io.HttpClient();
+  final _client = io.HttpClient();
 
   final _dio = Dio();
 
+  void close() {
+    _client.close(force: true);
+    _dio.close(force: true);
+  }
+
   void get() async {
     print('Sending GET...');
-    final request = await client.getUrl(_uri);
+    final request = await _client.getUrl(_uri);
     print('Sent GET: $request');
     // No body.
     final response = await request.done;
@@ -98,7 +106,7 @@ class _HttpClient {
 
   void post({bool hasBody = false}) async {
     print('Sending POST...');
-    final request = await client.postUrl(_uri);
+    final request = await _client.postUrl(_uri);
     print('Sent POST: $request');
     if (hasBody) {
       request.write('Request Body');
@@ -109,7 +117,7 @@ class _HttpClient {
 
   void put({bool hasBody = false}) async {
     print('Sending PUT...');
-    final request = await client.putUrl(_uri);
+    final request = await _client.putUrl(_uri);
     print('Sent PUT: $request');
     if (hasBody) {
       request.write('Request Body');
@@ -120,7 +128,7 @@ class _HttpClient {
 
   void delete({bool hasBody = false}) async {
     print('Sending DELETE...');
-    final request = await client.deleteUrl(_uri);
+    final request = await _client.deleteUrl(_uri);
     print('Sent DELETE: $request');
     if (hasBody) {
       request.write('Request Body');

@@ -28,6 +28,7 @@ void main() {
 
   tearDown(() async {
     await resetHistory();
+    await http.get(Uri.parse('http://localhost:${testApp.controlPort}/exit/'));
   });
 
   testWidgets('nnn', (tester) async {
