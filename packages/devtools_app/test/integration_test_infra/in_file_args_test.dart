@@ -7,78 +7,41 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../integration_test/test_infra/run/_in_file_args.dart';
 import '../../integration_test/test_infra/run/_test_app_driver.dart';
 
-const _testAppPath = 'test/test_infra/fixtures/memory_app';
+void main() {
+  test('$TestFileArgs, empty, flutter app device', () {
+    final args = TestFileArgs.fromFileContent(
+      '' /* empty file */,
+      testAppDevice: TestAppDevice.flutterTester,
+    );
+    expect(args.experimentsOn, isFalse);
+    expect(args.appPath, defaultFlutterAppPath);
+  });
 
-final _defaultArgs = TestFileArgs.fromFileContent(
-  '',
-  testAppDevice: TestAppDevice.flutterTester,
-);
+  test('$TestFileArgs, empty, cli app device', () {
+    final args = TestFileArgs.fromFileContent(
+      '' /* empty file */,
+      testAppDevice: TestAppDevice.cli,
+    );
+    expect(args.experimentsOn, isFalse);
+    expect(args.appPath, defaultDartCliAppPath);
+  });
 
-final _defaultArgsForCliDevice = TestFileArgs.fromFileContent(
-  '',
-  testAppDevice: TestAppDevice.cli,
-);
+  test('$TestFileArgs, non-empty', () {
+    const testAppPath = 'test/test_infra/fixtures/memory_app';
 
-final tests = [
-  _InFileTestArgsTest(
-    name: 'empty',
-    input: '',
-    testAppDevice: TestAppDevice.flutterTester,
-    expectedExperimentsOn: _defaultArgs.experimentsOn,
-    expectedAppPath: defaultFlutterAppPath,
-  ),
-  _InFileTestArgsTest(
-    name: 'empty',
-    input: '',
-    testAppDevice: TestAppDevice.cli,
-    expectedExperimentsOn: _defaultArgsForCliDevice.experimentsOn,
-    expectedAppPath: defaultDartCliAppPath,
-  ),
-  _InFileTestArgsTest(
-    name: 'non-empty',
-    input: '''
+    final args = TestFileArgs.fromFileContent('''
 // Copyright 2023 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 // Do not delete these arguments. They are parsed by test runner.
-//test-argument:appPath="$_testAppPath"
+//test-argument:appPath="$testAppPath"
 //   test-argument    :   experimentsOn    =    true
 
 
 import 'dart:ui' as ui;
-''',
-    testAppDevice: TestAppDevice.flutterTester,
-    expectedExperimentsOn: true,
-    expectedAppPath: _testAppPath,
-  ),
-];
-
-void main() {
-  for (final t in tests) {
-    test('$TestFileArgs, ${t.name}', () {
-      final args = TestFileArgs.fromFileContent(
-        t.input,
-        testAppDevice: t.testAppDevice,
-      );
-      expect(args.experimentsOn, t.expectedExperimentsOn);
-      expect(args.appPath, t.expectedAppPath);
-    });
-  }
-}
-
-class _InFileTestArgsTest {
-  _InFileTestArgsTest({
-    required this.name,
-    required this.input,
-    required this.testAppDevice,
-    required this.expectedExperimentsOn,
-    required this.expectedAppPath,
+''', testAppDevice: TestAppDevice.flutterTester);
+    expect(args.experimentsOn, isTrue);
+    expect(args.appPath, testAppPath);
   });
-
-  final String name;
-  final String input;
-  final TestAppDevice testAppDevice;
-  final bool expectedExperimentsOn;
-  final String expectedAppPath;
 }
