@@ -82,7 +82,7 @@ extension TraceWidgetBuildsScopeExtension on TraceWidgetBuildsScope {
     }
   }
 
-  /// Returns the opposite [TraceWidgetBuildsScope] from [this].
+  /// Returns the opposite [TraceWidgetBuildsScope] from `this`.
   TraceWidgetBuildsScope get opposite {
     switch (this) {
       case TraceWidgetBuildsScope.all:
@@ -125,11 +125,11 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
   /// [TraceWidgetBuildsScope] or null if widget builds are not being traced.
   final _selectedScope = ValueNotifier<TraceWidgetBuildsScope?>(null);
 
-  /// Whether either of the extensions in [_traceWidgetBuildsExtensions.values]
+  /// Whether either of the extensions in `_traceWidgetBuildsExtensions.values`
   /// are enabled.
   final _tracingEnabled = ValueNotifier<bool>(false);
 
-  /// Whether either of the extensions in [_traceWidgetBuildsExtensions.values]
+  /// Whether either of the extensions in `_traceWidgetBuildsExtensions.values`
   /// are available.
   final _tracingAvailable = ValueNotifier<bool>(false);
 

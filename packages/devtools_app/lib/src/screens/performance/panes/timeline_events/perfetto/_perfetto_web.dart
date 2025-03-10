@@ -109,13 +109,13 @@ class _PerfettoViewController extends DisposableController
   bool _perfettoIFrameUnloaded = false;
 
   /// Completes when the Perfetto postMessage handler is ready, which is
-  /// signaled by receiving a [_perfettoPong] event in response to sending a
-  /// [_perfettoPing] event.
+  /// signaled by receiving a `_perfettoPong` event in response to sending a
+  /// `_perfettoPing` event.
   late final Completer<void> _perfettoHandlerReady;
 
   /// Completes when the DevTools theme postMessage handler is ready, which is
-  /// signaled by receiving a [_devtoolsThemePong] event in response to sending
-  /// a [_devtoolsThemePing] event.
+  /// signaled by receiving a `_devtoolsThemePong` event in response to sending
+  /// a `_devtoolsThemePing` event.
   late final Completer<void> _devtoolsThemeHandlerReady;
 
   /// Timer that will poll until [_perfettoHandlerReady] is complete or until

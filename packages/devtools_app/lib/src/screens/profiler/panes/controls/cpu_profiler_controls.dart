@@ -9,10 +9,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/globals.dart';
 import '../../cpu_profiler_controller.dart';
-import '../../profiler_screen_controller.dart';
 
-/// DropdownButton that controls the value of
-/// [ProfilerScreenController.userTagFilter].
+/// [RoundedDropDownButton] that controls the value of
+/// [CpuProfilerController._userTagFilter].
 class UserTagDropdown extends StatelessWidget {
   const UserTagDropdown(this.controller, {super.key});
 
@@ -98,7 +97,7 @@ class UserTagDropdown extends StatelessWidget {
 }
 
 /// DropdownButton that controls the value of
-/// [ProfilerScreenController.viewType].
+/// [CpuProfilerController._viewType].
 class ModeDropdown extends StatelessWidget {
   const ModeDropdown(this.controller, {super.key});
 
