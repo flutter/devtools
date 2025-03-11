@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/ui.dart' show isEmbedded;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -47,6 +48,14 @@ class DevToolsServerConnection {
           : baseUri.resolve('api/');
 
   static Future<DevToolsServerConnection?> connect() async {
+    // Don't connect SSE when running embedded because the API does not provide
+    // anything that is used when embedded but it ties up one of the limited
+    // number of connections to the server.
+    // https://github.com/flutter/devtools/issues/8298
+    if (isEmbedded()) {
+      return null;
+    }
+
     final serverUri = Uri.parse(devToolsServerUriAsString);
     final apiUri = apiUriFor(serverUri);
     final pingUri = apiUri.resolve('ping');

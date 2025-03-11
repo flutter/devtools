@@ -28,12 +28,15 @@ Future<String> initializePlatform() async {
       );
 
   // TODO(kenz): this server connection initialized listeners that are never
-  // disposed, so this is likely leaking resources.
+  //  disposed, so this is likely leaking resources.
   // Here, we try and initialize the connection between the DevTools web app and
   // its local server. DevTools can be launched without the server however, so
   // establishing this connection is a best-effort.
-  // TODO(kenz): investigate it we can remove the DevToolsServerConnection
-  // code in general. We do not appear to be using the SSE connection.
+  // TODO(kenz): investigate if we can remove the DevToolsServerConnection
+  //  code in general - it is currently only used for non-embedded pages to
+  //  support some functionality like having VS Code reuse existing browser tabs
+  //  and showing notifications if you try to launch when you already have one
+  //  open.
   final connection = await DevToolsServerConnection.connect();
   if (connection != null) {
     setGlobal(Storage, server.ServerConnectionStorage());
