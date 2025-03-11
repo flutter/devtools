@@ -89,6 +89,10 @@ final class _NetworkScreenHelper {
     // Press the 'Clear' button between tests.
     await _tester.tap(find.text('Clear'));
     await _tester.pump(safePumpDuration);
+    expect(
+      screenControllers.lookup<NetworkController>().requests.value,
+      isEmpty,
+    );
   }
 
   Future<void> triggerRequest(String path) async {
