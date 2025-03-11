@@ -8,28 +8,29 @@ import '../../integration_test/test_infra/run/_in_file_args.dart';
 import '../../integration_test/test_infra/run/_test_app_driver.dart';
 
 void main() {
-  test('$TestFileArgs, empty, flutter app device', () {
-    final args = TestFileArgs.fromFileContent(
-      '' /* empty file */,
-      testAppDevice: TestAppDevice.flutterTester,
-    );
-    expect(args.experimentsOn, isFalse);
-    expect(args.appPath, defaultFlutterAppPath);
-  });
+  group('$TestFileArgs', () {
+    test('empty, flutter app device', () {
+      final args = TestFileArgs.fromFileContent(
+        '' /* empty file */,
+        testAppDevice: TestAppDevice.flutterTester,
+      );
+      expect(args.experimentsOn, isFalse);
+      expect(args.appPath, defaultFlutterAppPath);
+    });
 
-  test('$TestFileArgs, empty, cli app device', () {
-    final args = TestFileArgs.fromFileContent(
-      '' /* empty file */,
-      testAppDevice: TestAppDevice.cli,
-    );
-    expect(args.experimentsOn, isFalse);
-    expect(args.appPath, defaultDartCliAppPath);
-  });
+    test('empty, cli app device', () {
+      final args = TestFileArgs.fromFileContent(
+        '' /* empty file */,
+        testAppDevice: TestAppDevice.cli,
+      );
+      expect(args.experimentsOn, isFalse);
+      expect(args.appPath, defaultDartCliAppPath);
+    });
 
-  test('$TestFileArgs, non-empty', () {
-    const testAppPath = 'test/test_infra/fixtures/memory_app';
+    test('non-empty', () {
+      const testAppPath = 'test/test_infra/fixtures/memory_app';
 
-    final args = TestFileArgs.fromFileContent('''
+      final args = TestFileArgs.fromFileContent('''
 // Copyright 2023 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -41,7 +42,8 @@ void main() {
 
 import 'dart:ui' as ui;
 ''', testAppDevice: TestAppDevice.flutterTester);
-    expect(args.experimentsOn, isTrue);
-    expect(args.appPath, testAppPath);
+      expect(args.experimentsOn, isTrue);
+      expect(args.appPath, testAppPath);
+    });
   });
 }
