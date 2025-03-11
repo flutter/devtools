@@ -124,12 +124,13 @@ void _verifyScoresAgainstThresholds(
 }) {
   final identifier = '${devToolsBenchmark.id}.${useWasm ? 'wasm' : 'js'}';
   stdout.writeln('Verifying $identifier scores against expected thresholds.');
+  final benchmarkThresholds = _benchmarkThresholds(useWasm);
   expect(
-    _benchmarkThresholds.containsKey(devToolsBenchmark),
+    benchmarkThresholds.containsKey(devToolsBenchmark),
     isTrue,
     reason: 'Missing expected thresholds for ${devToolsBenchmark.id}.',
   );
-  final expectedThresholds = _benchmarkThresholds[devToolsBenchmark]!;
+  final expectedThresholds = benchmarkThresholds[devToolsBenchmark]!;
 
   final scoresAsMap = Map.fromEntries([
     for (final score in scores) MapEntry(score.metric, score),
@@ -171,8 +172,13 @@ void _verifyScoresAgainstThresholds(
 }
 
 const _frameTimeFor60FPSInMicros = 16666.6;
+const _frameTimeFor30FPSInMicros = 33333.3;
 
-final _benchmarkThresholds = {
+/// Creates the expected [DevToolsBenchmark]s for the specified compiler.
+///
+/// Note that some of the wasm benchmarks use a 30fps frame budget instead of
+/// the 60fps frame budget due to https://issues.chromium.org/issues/396208308.
+Map<DevToolsBenchmark, Map<String, num>> _benchmarkThresholds(bool isWasm) => {
   // Note that some of these benchmarks exceed the 60fps frame budget,
   // especially the p90 benchmarks.
   //
@@ -205,7 +211,7 @@ final _benchmarkThresholds = {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
       avg: _frameTimeFor60FPSInMicros * 2,
-      p50: _frameTimeFor60FPSInMicros,
+      p50: isWasm ? _frameTimeFor30FPSInMicros : _frameTimeFor60FPSInMicros,
       p90: _frameTimeFor60FPSInMicros * 6,
     ),
     ..._valuesForMetric(
@@ -217,8 +223,8 @@ final _benchmarkThresholds = {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameRasterTime,
       avg: _frameTimeFor60FPSInMicros * 2,
-      p50: _frameTimeFor60FPSInMicros,
-      p90: _frameTimeFor60FPSInMicros,
+      p50: isWasm ? _frameTimeFor30FPSInMicros : _frameTimeFor60FPSInMicros,
+      p90: isWasm ? _frameTimeFor30FPSInMicros * 2 : _frameTimeFor60FPSInMicros,
     ),
   },
   DevToolsBenchmark.offlinePerformanceScreen: {
