@@ -38,8 +38,8 @@ class PropertyEditorController extends DisposableController
   bool _filterApplied = false;
 
   ValueListenable<List<EditableProperty>> get propertiesToDisplay =>
-      _filteredProperties;
-  final _filteredProperties = ValueNotifier<List<EditableProperty>>([]);
+      _propertiesToDisplay;
+  final _propertiesToDisplay = ValueNotifier<List<EditableProperty>>([]);
 
   TextDocument? _currentDocument;
   CursorPosition? _currentCursorPosition;
@@ -115,12 +115,12 @@ class PropertyEditorController extends DisposableController
       return;
     }
     _filterApplied = true;
-    _filteredProperties.value = searchMatches.value;
+    _propertiesToDisplay.value = searchMatches.value;
   }
 
   void _clearSearch() {
     _filterApplied = false;
-    _filteredProperties.value = _editableProperties ?? [];
+    _propertiesToDisplay.value = _editableProperties ?? [];
   }
 
   @visibleForTesting
@@ -143,5 +143,7 @@ class PropertyEditorController extends DisposableController
     if (cursorPosition != null) {
       _currentCursorPosition = cursorPosition;
     }
+    search = '';
+    _clearSearch();
   }
 }

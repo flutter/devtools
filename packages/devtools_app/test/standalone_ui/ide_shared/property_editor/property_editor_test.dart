@@ -288,6 +288,95 @@ void main() {
     });
   });
 
+  group('searching for for editable arguments', () {
+    testWidgets('can search by name', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Search for the "width" property.
+      final searchField = _findSearchField();
+      expect(searchField, findsOneWidget);
+      await _inputText(searchField, text: 'width', tester: tester);
+
+      // Verify only the "width" property is visible.
+      expect(widthInput, findsOneWidget);
+      expect(titleInput, findsNothing);
+      expect(heightInput, findsNothing);
+    });
+
+    testWidgets('can search by type', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Search for the "width" property.
+      final searchField = _findSearchField();
+      expect(searchField, findsOneWidget);
+      await _inputText(searchField, text: 'double', tester: tester);
+
+      // Verify only the "width" and "height" properties are visible.
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+      expect(titleInput, findsNothing);
+    });
+
+    testWidgets('can search by value', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Search for the "width" property.
+      final searchField = _findSearchField();
+      expect(searchField, findsOneWidget);
+      await _inputText(searchField, text: 'Hello world!', tester: tester);
+
+      // Verify only the "title" property is visible.
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsNothing);
+      expect(heightInput, findsNothing);
+    });
+  });
+
   group('editing arguments', () {
     late Completer<String> nextEditCompleter;
 
@@ -711,6 +800,11 @@ void main() {
 
 final _findNoPropertiesMessage = find.text(
   'No widget properties at current cursor location.',
+);
+
+Finder _findSearchField() => find.descendant(
+  of: find.byType(SearchField<PropertyEditorController>),
+  matching: find.byType(TextField),
 );
 
 Finder _findTextFormField(String inputName) => find.ancestor(
