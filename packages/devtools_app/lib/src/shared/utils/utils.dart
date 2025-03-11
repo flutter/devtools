@@ -186,7 +186,7 @@ extension IsKeyType on KeyEvent {
 }
 
 /// A helper class for [Timer] functionality, where the callbacks are debounced.
-class Debouncer {
+class Debouncer extends Disposable {
   Debouncer({required this.duration});
 
   final Duration duration;
@@ -198,13 +198,16 @@ class Debouncer {
   /// last one will be called once no more invokations happen within the given
   /// [duration].
   void run(void Function() callback) {
+    if (disposed) return;
     _activeTimer?.cancel();
     _activeTimer = Timer(duration, callback);
   }
 
+  @override
   void dispose() {
     _activeTimer?.cancel();
     _activeTimer = null;
+    super.dispose();
   }
 }
 
