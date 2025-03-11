@@ -194,8 +194,9 @@ class Debouncer {
 
   /// Invokes the [callback] once after the specified [duration] has elapsed.
   ///
-  /// If multiple invokations are called while the timer is running, the
-  /// callback will be further delayed.
+  /// If multiple invokations are called while the timer is running, only the
+  /// last one will be called once no more invokations happen within the given
+  /// [duration].
   void run(void Function() callback) {
     _activeTimer?.cancel();
     _activeTimer = Timer(duration, callback);

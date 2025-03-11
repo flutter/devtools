@@ -39,12 +39,12 @@ class PropertyEditorController extends DisposableController
 
   late final Debouncer _editableArgsDebouncer;
 
+  static const _editableArgsDebounceDuration = Duration(milliseconds: 600);
+
   @override
   void init() {
     super.init();
-    _editableArgsDebouncer = Debouncer(
-      duration: const Duration(milliseconds: 600),
-    );
+    _editableArgsDebouncer = Debouncer(duration: _editableArgsDebounceDuration);
 
     autoDisposeStreamSubscription(
       editorClient.activeLocationChangedStream.listen((event) async {
@@ -57,7 +57,7 @@ class PropertyEditorController extends DisposableController
         // Don't do anything if the event corresponds to the current position
         // and document version.
         //
-        // Note: This is ony checked if the document version is not null. For
+        // Note: This is only checked if the document version is not null. For
         // IntelliJ, the document verison is always null, so identical events
         // indicating a valid change are possible.
         if (textDocument.version != null &&
