@@ -74,11 +74,10 @@ Future<io.HttpServer> _bindControlServer(io.HttpServer testServer) async {
   return server;
 }
 
-// TODO WebSocket
-// TODO package:http - BrowserClient - https://pub.dev/documentation/http/latest/browser_client/BrowserClient-class.html
-// TODO cupertino_http - https://pub.dev/packages/cupertino_http
-// TODO cronet_http - https://pub.dev/packages/cronet_http
-// TDOO fetch_client? https://pub.dev/packages/fetch_client
+// TODO(https://github.com/flutter/devtools/issues/8223): Test support for
+// WebSockets.
+// TODO(https://github.com/flutter/devtools/issues/4829): Test support for the
+// cupertino_http package and the cronet_http package.
 
 class _HttpClient {
   _HttpClient(int testServerPort)

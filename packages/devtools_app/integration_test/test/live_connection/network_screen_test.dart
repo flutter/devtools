@@ -57,6 +57,16 @@ void main() {
     _expectInRequestTable('DELETE');
     await helper.clear();
 
+    // Instruct the app to make a GET request via the 'http' package.
+    await helper.triggerRequest('packageHttp/get/');
+    _expectInRequestTable('GET');
+    await helper.clear();
+
+    // Instruct the app to make a POST request via the 'http' package.
+    await helper.triggerRequest('packageHttp/post/');
+    _expectInRequestTable('POST');
+    await helper.clear();
+
     // Instruct the app to make a GET request via Dio.
     await helper.triggerRequest('dio/get/');
     _expectInRequestTable('GET');
@@ -79,6 +89,10 @@ final class _NetworkScreenHelper {
     // Press the 'Clear' button between tests.
     await _tester.tap(find.text('Clear'));
     await _tester.pump(safePumpDuration);
+    expect(
+      screenControllers.lookup<NetworkController>().requests.value,
+      isEmpty,
+    );
   }
 
   Future<void> triggerRequest(String path) async {
