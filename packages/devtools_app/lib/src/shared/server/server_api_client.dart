@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'package:devtools_app_shared/ui.dart' show isEmbedded;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../config_specific/notifications/notifications.dart';
@@ -47,6 +46,11 @@ class DevToolsServerConnection {
           ? baseUri.resolve('devtools/api/')
           : baseUri.resolve('api/');
 
+  /// Connects to the legacy SSE API.
+  ///
+  /// Callers should first ensure the DevTools server is available (for example
+  /// by calling [checkServerHttpApiAvailable] or verifying that it was
+  /// successfull by using [isDevToolsServerAvailable])
   static Future<DevToolsServerConnection?> connect() async {
     // Don't connect SSE when running embedded because the API does not provide
     // anything that is used when embedded but it ties up one of the limited
@@ -58,27 +62,6 @@ class DevToolsServerConnection {
 
     final serverUri = Uri.parse(devToolsServerUriAsString);
     final apiUri = apiUriFor(serverUri);
-    final pingUri = apiUri.resolve('ping');
-
-    try {
-      final response = await http
-          .get(pingUri)
-          .timeout(const Duration(seconds: 5));
-      // When running with the local dev server Flutter may serve its index page
-      // for missing files to support the hashless url strategy. Check the response
-      // content to confirm it came from our server.
-      // See https://github.com/flutter/flutter/issues/67053
-      if (response.statusCode != 200 || response.body != 'OK') {
-        // unable to locate dev server
-        _log.info('devtools server not available (${response.statusCode})');
-        return null;
-      }
-    } catch (e) {
-      // unable to locate dev server
-      _log.info('devtools server not available ($e)');
-      return null;
-    }
-
     final sseUri = apiUri.resolve('sse');
     final client = SseClient(sseUri.toString(), debugKey: 'DevToolsServer');
     return DevToolsServerConnection._(client);

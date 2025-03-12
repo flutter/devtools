@@ -25,14 +25,21 @@ part '_dtd_api.dart';
 part '_extensions_api.dart';
 part '_preferences_api.dart';
 part '_release_notes_api.dart';
+part '_server_api.dart';
 part '_survey_api.dart';
 
 final _log = Logger('devtools_server_client');
 
-/// Whether the DevTools server is available.
+/// Whether the DevTools server is available so that the HTTP API can be used.
+///
+/// A value of `true` here does not necessarily mean the legacy SSE API is
+/// available.
 ///
 /// Since the DevTools server is a web server, it is only available for the
 /// web platform.
+///
+/// TODO(dantup): Since this relates only to non-SSE API, it could be available
+///  for non-web?
 ///
 /// In `framework_initialize_web.dart`, we test the DevTools server connection
 /// by pinging the server and checking the response. If this is successful, we
