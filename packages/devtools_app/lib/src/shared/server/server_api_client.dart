@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'package:devtools_app_shared/ui.dart' show isEmbedded;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../config_specific/notifications/notifications.dart';
