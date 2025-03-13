@@ -187,6 +187,9 @@ void main() {
       debouncer.dispose();
       await Future.delayed(const Duration(milliseconds: 150));
       expect(callbackCount, 0);
+      debouncer.run(() => callbackCount++);
+      await Future.delayed(const Duration(milliseconds: 150));
+      expect(callbackCount, 0);
     });
   });
 
