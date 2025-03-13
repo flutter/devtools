@@ -77,7 +77,10 @@ TODO: Remove this section if there are not any general updates.
 
 ## Deep links tool updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed an issue with Windows file paths showing incorrectly in the Deep Links
+page [#9027](https://github.com/flutter/devtools/pull/9027).
+* Fixed an issue with the Deep Links page crashing when no iOS configuration is
+present [#9027](https://github.com/flutter/devtools/pull/9027).
 
 ## VS Code Sidebar updates
 

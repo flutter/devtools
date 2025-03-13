@@ -18,8 +18,9 @@ extension type const XcodeBuildOptions._(Map<String, Object?> _json) {
 
   /// The available configurations for iOS build of this Flutter project.
   List<String> get configurations =>
-      (_json[_kConfigurationsKey] as List).cast<String>();
+      (_json[_kConfigurationsKey] as List?)?.cast<String>() ?? [];
 
   /// The available targets for iOS build of this Flutter project.
-  List<String> get targets => (_json[_kTargetsKey] as List).cast<String>();
+  List<String> get targets =>
+      (_json[_kTargetsKey] as List?)?.cast<String>() ?? [];
 }
