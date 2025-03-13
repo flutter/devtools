@@ -9,12 +9,13 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
-import '../../../shared/ui/search.dart';
 import '../../../shared/ui/filter.dart';
+import '../../../shared/ui/search.dart';
 import '../../../shared/utils/utils.dart';
 import 'property_editor_types.dart';
 
-typedef EditableWidgetData = ({String? name, String? documentation});
+typedef EditableWidgetData =
+    ({List<EditableProperty> properties, String? name, String? documentation});
 
 typedef EditArgumentFunction =
     Future<EditArgumentResponse?> Function<T>({
@@ -35,30 +36,21 @@ class PropertyEditorController extends DisposableController
 
   String get gaId => gac.PropertyEditorSidebar.id;
 
+  TextDocument? _currentDocument;
+  CursorPosition? _currentCursorPosition;
+
   ValueListenable<EditableWidgetData?> get editableWidgetData =>
       _editableWidgetData;
   final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
 
-  ValueListenable<List<EditableProperty>> get propertiesToDisplay =>
-      filteredData;
-
-  TextDocument? _currentDocument;
-  CursorPosition? _currentCursorPosition;
-  List<EditableProperty>? _editableProperties;
   late final Debouncer _editableArgsDebouncer;
 
   static const _editableArgsDebounceDuration = Duration(milliseconds: 600);
 
   @override
-  SettingFilters<EditableProperty> createSettingFilters() => [];
-
-  @override
-  QueryFilterArgs<EditableProperty> createQueryFilterArgs() => {};
-
-  @override
   void filterData(Filter<EditableProperty> filter) {
     super.filterData(filter);
-    final filtered = (_editableProperties ?? []).where(
+    final filtered = (_editableWidgetData.value?.properties ?? []).where(
       (property) => property.matchesSearchToken(
         RegExp(filter.queryFilter.query, caseSensitive: false),
       ),
@@ -81,6 +73,13 @@ class PropertyEditorController extends DisposableController
     super.init();
     _editableArgsDebouncer = Debouncer(duration: _editableArgsDebounceDuration);
 
+    // Filter in response to search query changes.
+    addAutoDisposeListener(
+      searchNotifier,
+      () => setActiveFilter(query: search),
+    );
+
+    // Update in response to ActiveLocationChanged events.
     autoDisposeStreamSubscription(
       editorClient.activeLocationChangedStream.listen((event) async {
         final textDocument = event.textDocument;
@@ -108,12 +107,6 @@ class PropertyEditorController extends DisposableController
         );
       }),
     );
-
-    // addAutoDisposeListener(
-    //   searchMatches,
-    //   () => filterData(Filter<EditableProperty>()),
-    // );
-    addAutoDisposeListener(searchNotifier, () => setActiveFilter(query: search));
   }
 
   @override
@@ -148,14 +141,18 @@ class PropertyEditorController extends DisposableController
       textDocument: textDocument,
       position: cursorPosition,
     );
-    final args = result?.args ?? <EditableArgument>[];
+    final properties =
+        (result?.args ?? <EditableArgument>[])
+            .map(argToProperty)
+            .nonNulls
+            .toList();
     final name = result?.name;
-    _editableProperties = args.map(argToProperty).nonNulls.toList();
-    filterData(activeFilter.value);
     _editableWidgetData.value = (
+      properties: properties,
       name: name,
       documentation: result?.documentation,
     );
+    filterData(activeFilter.value);
     // Register impression.
     ga.impression(
       gaId,
@@ -170,9 +167,9 @@ class PropertyEditorController extends DisposableController
     CursorPosition? cursorPosition,
   }) {
     if (editableArgsResult != null) {
-      _editableProperties =
-          editableArgsResult.args.map(argToProperty).nonNulls.toList();
       _editableWidgetData.value = (
+        properties:
+            editableArgsResult.args.map(argToProperty).nonNulls.toList(),
         name: editableArgsResult.name,
         documentation: editableArgsResult.documentation,
       );

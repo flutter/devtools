@@ -26,7 +26,7 @@ class PropertyEditorView extends StatelessWidget {
         controller.editorClient.editArgumentMethodName,
         controller.editorClient.editableArgumentsMethodName,
         controller.editableWidgetData,
-        controller.propertiesToDisplay,
+        controller.filteredData,
       ],
       builder: (_, values, _) {
         final editArgumentMethodName = values.first as String?;
@@ -44,8 +44,8 @@ class PropertyEditorView extends StatelessWidget {
           );
         }
 
-        final properties = values.fourth as List<EditableProperty>;
-        final (:name, :documentation) = editableWidgetData;
+        final filteredProperties = values.fourth as List<EditableProperty>;
+        final (:properties, :name, :documentation) = editableWidgetData;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -54,13 +54,11 @@ class PropertyEditorView extends StatelessWidget {
                 name: name,
                 documentation: documentation,
               ),
-            properties.isEmpty && controller.activeFilter.value.queryFilter.query.isEmpty
-                ? const _NoMatchingPropertiesMessage()
-                : properties.isEmpty
+            properties.isEmpty
                 ? _NoEditablePropertiesMessage(name: name)
                 : _PropertiesList(
                   controller: controller,
-                  editableProperties: properties,
+                  editableProperties: filteredProperties,
                 ),
           ],
         );
