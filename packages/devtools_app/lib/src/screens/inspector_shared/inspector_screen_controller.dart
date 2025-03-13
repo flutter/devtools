@@ -4,6 +4,7 @@
 
 import '../../shared/analytics/metrics.dart';
 import '../../shared/console/primitives/simple_items.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../inspector/inspector_controller.dart' as legacy;
 import '../inspector/inspector_tree_controller.dart' as legacy;
@@ -21,6 +22,9 @@ import '../inspector_v2/inspector_tree_controller.dart' as v2;
 /// `screenControllers`. The `dispose` method is called by `screenControllers`
 /// when DevTools is destroying a set of DevTools screen controllers.
 class InspectorScreenController extends DevToolsScreenController {
+  @override
+  final screenId = ScreenMetaData.inspector.id;
+
   late v2.InspectorController v2InspectorController;
   late v2.InspectorTreeController v2InspectorTreeController;
 

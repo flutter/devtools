@@ -10,6 +10,7 @@ import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
 import '../../../shared/ui/search.dart';
+import '../../../shared/utils/utils.dart';
 import 'property_editor_types.dart';
 
 typedef EditableWidgetData = ({String? name, String? documentation});
@@ -44,10 +45,15 @@ class PropertyEditorController extends DisposableController
   TextDocument? _currentDocument;
   CursorPosition? _currentCursorPosition;
   List<EditableProperty>? _editableProperties;
+  late final Debouncer _editableArgsDebouncer;
+
+  static const _editableArgsDebounceDuration = Duration(milliseconds: 600);
 
   @override
   void init() {
     super.init();
+    _editableArgsDebouncer = Debouncer(duration: _editableArgsDebounceDuration);
+
     autoDisposeStreamSubscription(
       editorClient.activeLocationChangedStream.listen((event) async {
         final textDocument = event.textDocument;
@@ -56,32 +62,22 @@ class PropertyEditorController extends DisposableController
         if (textDocument == null) {
           return;
         }
-        // Don't do anything if the event corresponds to the current position.
-        if (textDocument == _currentDocument &&
+        // Don't do anything if the event corresponds to the current position
+        // and document version.
+        //
+        // Note: This is only checked if the document version is not null. For
+        // IntelliJ, the document verison is always null, so identical events
+        // indicating a valid change are possible.
+        if (textDocument.version != null &&
+            textDocument == _currentDocument &&
             cursorPosition == _currentCursorPosition) {
           return;
         }
-        _currentDocument = textDocument;
-        _currentCursorPosition = cursorPosition;
-        // Get the editable arguments for the current position.
-        final result = await editorClient.getEditableArguments(
-          textDocument: textDocument,
-          position: cursorPosition,
-        );
-        final args = result?.args ?? <EditableArgument>[];
-        final name = result?.name;
-        _editableProperties = args.map(argToProperty).nonNulls.toList();
-        refreshSearchMatches();
-        _updateSearchResults();
-        _editableWidgetData.value = (
-          name: name,
-          documentation: result?.documentation,
-        );
-
-        // Register impression.
-        ga.impression(
-          gaId,
-          gac.PropertyEditorSidebar.widgetPropertiesUpdate(name: name),
+        _editableArgsDebouncer.run(
+          () => _updateWithEditableArgs(
+            textDocument: textDocument,
+            cursorPosition: cursorPosition,
+          ),
         );
       }),
     );
@@ -93,6 +89,12 @@ class PropertyEditorController extends DisposableController
   @override
   Iterable<EditableProperty> get currentDataToSearchThrough =>
       _editableProperties ?? <EditableProperty>[];
+  
+  @override
+  void dispose() {
+    _editableArgsDebouncer.dispose();
+    super.dispose();
+  }
 
   Future<EditArgumentResponse?> editArgument<T>({
     required String name,
@@ -121,6 +123,33 @@ class PropertyEditorController extends DisposableController
   void _clearSearch() {
     _filterApplied = false;
     _propertiesToDisplay.value = _editableProperties ?? [];
+  }
+
+  Future<void> _updateWithEditableArgs({
+    required TextDocument textDocument,
+    required CursorPosition cursorPosition,
+  }) async {
+    _currentDocument = textDocument;
+    _currentCursorPosition = cursorPosition;
+    // Get the editable arguments for the current position.
+    final result = await editorClient.getEditableArguments(
+      textDocument: textDocument,
+      position: cursorPosition,
+    );
+        final args = result?.args ?? <EditableArgument>[];
+        final name = result?.name;
+        _editableProperties = args.map(argToProperty).nonNulls.toList();
+        refreshSearchMatches();
+        _updateSearchResults();
+        _editableWidgetData.value = (
+          name: name,
+          documentation: result?.documentation,
+        );
+    // Register impression.
+    ga.impression(
+      gaId,
+      gac.PropertyEditorSidebar.widgetPropertiesUpdate(name: name),
+    );
   }
 
   @visibleForTesting

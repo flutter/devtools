@@ -18,7 +18,9 @@ import 'package:vm_service/vm_service.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/framework/app_error_handling.dart' as error_handling;
+import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/byte_utils.dart';
@@ -98,6 +100,9 @@ class LoggingController extends DevToolsScreenController
         SearchControllerMixin<LogData>,
         FilterControllerMixin<LogData>,
         AutoDisposeControllerMixin {
+  @override
+  final screenId = ScreenMetaData.logging.id;
+
   static const _minLogLevelFilterId = 'min-log-level';
   static const _verboseFlutterFrameworkFilterId = 'verbose-flutter-framework';
   static const _verboseFlutterServiceFilterId = 'verbose-flutter-service';
@@ -786,6 +791,18 @@ class LoggingController extends DevToolsScreenController
       ..addAll(
         data.where((log) => includeLogForFilter(log, filter: filter)).toList(),
       );
+  }
+
+  @override
+  void releaseMemory({bool partial = false}) {
+    if (FeatureFlags.memoryObserver) {
+      if (partial) {
+        // Trim logs from the front so that the oldest logs are removed.
+        _updateData(data.sublist(data.length ~/ 2));
+      } else {
+        clear();
+      }
+    }
   }
 }
 

@@ -16,7 +16,7 @@ class RebuildStatsController extends PerformanceFeatureController {
   RebuildStatsController(super.performanceController);
 
   @override
-  FutureOr<void> clearData() {}
+  void clearData({bool partial = false}) {}
 
   @override
   void handleSelectedFrame(FlutterFrame frame) {}

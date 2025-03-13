@@ -513,15 +513,24 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   @override
-  Future<void> clearData() async {
-    _unprocessedTrackEvents.clear();
-    traceRingBuffer.clear();
-    _trackDescriptors.clear();
-    _unassignedFlutterTimelineEvents.clear();
-
-    _refreshWorkTracker.clear();
-    _status.value = EventsControllerStatus.empty;
-    await perfettoController.clear();
+  Future<void> clearData({bool partial = false}) async {
+    if (partial) {
+      if (traceRingBuffer.chunksLength <= 1) {
+        traceRingBuffer.clear();
+      } else {
+        // Trim from the front so that the oldest data is removed.
+        traceRingBuffer.trimToSublist(traceRingBuffer.chunksLength ~/ 2);
+      }
+      unawaited(loadPerfettoTrace());
+    } else {
+      traceRingBuffer.clear();
+      _unprocessedTrackEvents.clear();
+      _trackDescriptors.clear();
+      _unassignedFlutterTimelineEvents.clear();
+      _refreshWorkTracker.clear();
+      _status.value = EventsControllerStatus.empty;
+      await perfettoController.clear();
+    }
   }
 
   @override

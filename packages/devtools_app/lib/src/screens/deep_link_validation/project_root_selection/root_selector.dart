@@ -93,10 +93,27 @@ class _ProjectRootsDropdownState extends State<ProjectRootsDropdown> {
     selectedUri = widget.projectRoots.safeFirst;
   }
 
+  /// A regex that can be matched against the `path` of a URI to check whether
+  /// it is a Windows file URI.
+  final _fileUriWindowsPath = RegExp(r'^/[a-zA-Z](?::|%3A|%3a)');
+
+  /// Gets the file path from a file:/// URI taking into account the platform
+  /// for the path.
+  String toPath(Uri uri) {
+    assert(uri.isScheme('file'));
+
+    // .toFilePath() on web always assumes non-Windows even if the file:/// URI
+    // is Windows, so we need to check whether this is a Windows file path in
+    // the URI first.
+    final isWindows = _fileUriWindowsPath.hasMatch(uri.path);
+    return uri.toFilePath(windows: isWindows);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectedUri = this.selectedUri;
     return _FlexibleProjectSelectionView(
-      selectedProjectRoot: selectedUri?.path.trim(),
+      selectedProjectRoot: selectedUri != null ? toPath(selectedUri) : null,
       onValidatePressed: widget.onValidatePressed,
       child: RoundedDropDownButton<Uri>(
         isDense: true,
@@ -105,7 +122,7 @@ class _ProjectRootsDropdownState extends State<ProjectRootsDropdown> {
         items: [for (final uri in widget.projectRoots) _buildMenuItem(uri)],
         onChanged:
             (uri) => setState(() {
-              selectedUri = uri;
+              this.selectedUri = uri;
             }),
       ),
     );
@@ -115,9 +132,9 @@ class _ProjectRootsDropdownState extends State<ProjectRootsDropdown> {
     return DropdownMenuItem<Uri>(
       value: uri,
       child: DevToolsTooltip(
-        message: uri.path,
+        message: toPath(uri),
         waitDuration: tooltipWaitExtraLong,
-        child: Text(uri.path, overflow: TextOverflow.ellipsis),
+        child: Text(toPath(uri), overflow: TextOverflow.ellipsis),
       ),
     );
   }

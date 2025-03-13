@@ -36,7 +36,7 @@ class ChartVmConnection extends DisposableController
 
   bool initialized = false;
 
-  DebounceTimer? _polling;
+  PeriodicDebouncer? _polling;
 
   late final bool isDeviceAndroid;
 
@@ -79,7 +79,7 @@ class ChartVmConnection extends DisposableController
       ),
     );
 
-    _polling = DebounceTimer.periodic(chartUpdateDelay, ({
+    _polling = PeriodicDebouncer.run(chartUpdateDelay, ({
       DebounceCancelledCallback? cancelledCallback,
     }) async {
       if (!_isConnected) {

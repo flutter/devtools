@@ -138,6 +138,9 @@ class Uint8ListRingBuffer {
   /// bytes is the length of the Uint8List.
   int get size => data.fold(0, (sum, e) => sum + e.length);
 
+  /// Returns the number of chunks of data contained in this ring buffer.
+  int get chunksLength => data.length;
+
   @visibleForTesting
   final data = ListQueue<Uint8List>();
 
@@ -169,5 +172,14 @@ class Uint8ListRingBuffer {
 
   void clear() {
     data.clear();
+  }
+
+  void trimToSublist(int start, [int? end]) {
+    for (var i = data.length; i > (end ?? data.length); i--) {
+      data.removeLast();
+    }
+    for (var i = 0; i < start; i++) {
+      data.removeFirst();
+    }
   }
 }

@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/logger/allowed_error.dart';
+import '../../shared/feature_flags.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/offline/offline_data.dart';
@@ -33,6 +35,9 @@ class ProfilerScreenController extends DevToolsScreenController
     with
         AutoDisposeControllerMixin,
         OfflineScreenControllerMixin<CpuProfileData> {
+  @override
+  final screenId = ScreenMetaData.cpuProfiler.id;
+
   final _initialized = Completer<void>();
 
   Future<void> get initialized => _initialized.future;
@@ -180,5 +185,13 @@ class ProfilerScreenController extends DevToolsScreenController
     _recordingNotifier.dispose();
     cpuProfilerController.dispose();
     super.dispose();
+  }
+
+  @override
+  FutureOr<void> releaseMemory({bool partial = false}) async {
+    if (FeatureFlags.memoryObserver) {
+      // There is no way to partially release memory for this screen.
+      await clear();
+    }
   }
 }

@@ -63,7 +63,7 @@ abstract class FeatureFlags {
   /// avoid OOM crashes.
   ///
   /// https://github.com/flutter/devtools/issues/7002
-  static bool memoryObserver = enableExperiments;
+  static bool memoryObserver = true;
 
   /// Flag to enable widget rebuild stats ui.
   ///

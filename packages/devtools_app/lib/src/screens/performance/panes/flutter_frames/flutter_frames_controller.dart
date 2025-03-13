@@ -55,10 +55,10 @@ class FlutterFramesController extends PerformanceFeatureController {
   final _pendingFlutterFrames = <FlutterFrame>[];
 
   /// The collection of Flutter frames that have not yet been linked to their
-  /// respective [TimelineEvent]s for the UI and Raster thread.
+  /// respective [FlutterTimelineEvent]s for the UI and Raster thread.
   ///
   /// These [FlutterFrame]s are keyed by the Flutter frame ID that matches the
-  /// frame id in the corresponding [TimelineEvent]s.
+  /// frame id in the corresponding [FlutterTimelineEvent]s.
   final _unassignedFlutterFrames = <int, FlutterFrame>{};
 
   /// Tracks the current frame undergoing selection so that we can equality
@@ -171,8 +171,13 @@ class FlutterFramesController extends PerformanceFeatureController {
   }
 
   @override
-  void clearData() {
-    _flutterFrames.clear();
+  void clearData({bool partial = false}) {
+    if (partial) {
+      // Trim frames from the front so that the oldest logs are removed.
+      _flutterFrames.trimToSublist(_flutterFrames.value.length ~/ 2);
+    } else {
+      _flutterFrames.clear();
+    }
     _unassignedFlutterFrames.clear();
     firstWellFormedFrameMicros = null;
     _selectedFrameNotifier.value = null;

@@ -33,18 +33,18 @@ void main() {
       expect(buffer.data, isEmpty);
 
       buffer.addData(list1);
-      expect(buffer.data.length, 1);
+      expect(buffer.chunksLength, 1);
       expect(buffer.size, 4);
       expect(buffer.data, contains(list1));
 
       buffer.addData(list2);
-      expect(buffer.data.length, 2);
+      expect(buffer.chunksLength, 2);
       expect(buffer.size, 8);
       expect(buffer.data, contains(list1));
       expect(buffer.data, contains(list2));
 
       buffer.addData(list3);
-      expect(buffer.data.length, 2);
+      expect(buffer.chunksLength, 2);
       expect(buffer.size, 8);
       expect(buffer.data, isNot(contains(list1)));
       expect(buffer.data, contains(list2));
@@ -78,7 +78,7 @@ void main() {
       buffer
         ..addData(list1)
         ..addData(list2);
-      expect(buffer.data.length, 2);
+      expect(buffer.chunksLength, 2);
       expect(buffer.size, 8);
       expect(buffer.data, contains(list1));
       expect(buffer.data, contains(list2));
@@ -86,6 +86,37 @@ void main() {
       buffer.clear();
       expect(buffer.data, isEmpty);
       expect(buffer.size, 0);
+    });
+
+    test('can trim to sublist', () {
+      final list1 = Uint8List.fromList([1, 2, 3, 4]);
+      final list2 = Uint8List.fromList([5, 6, 7, 8]);
+      final list3 = Uint8List.fromList([9, 10, 11, 12]);
+      final list4 = Uint8List.fromList([13, 14, 15, 16]);
+
+      final buffer = Uint8ListRingBuffer(maxSizeBytes: 100);
+      expect(buffer.data, isEmpty);
+
+      buffer
+        ..addData(list1)
+        ..addData(list2)
+        ..addData(list3)
+        ..addData(list4);
+      expect(buffer.chunksLength, 4);
+      expect(buffer.size, 16);
+      expect(buffer.data, contains(list1));
+      expect(buffer.data, contains(list2));
+      expect(buffer.data, contains(list3));
+      expect(buffer.data, contains(list4));
+
+      buffer.trimToSublist(1, 3);
+      expect(buffer.data, isNot(contains(list1)));
+      expect(buffer.data, contains(list2));
+      expect(buffer.data, contains(list3));
+      expect(buffer.data, isNot(contains(list4)));
+
+      expect(buffer.chunksLength, 2);
+      expect(buffer.size, 8);
     });
   });
 

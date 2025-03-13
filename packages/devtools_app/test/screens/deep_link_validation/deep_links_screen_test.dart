@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:io';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_link_list_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
@@ -27,6 +29,13 @@ final xcodeBuildOptions = XcodeBuildOptions.fromJson(
   '''{"configurations":["debug", "release"],"targets":["runner","runnerTests"]}''',
 );
 
+final mockProjectRootUris =
+    (Platform.isWindows
+            ? [r'C:\Users\me\package_root_1', r'C:\Users\me\package_root_2']
+            : ['/Users/me/package_root_1', '/Users/me/package_root_2'])
+        .map(Uri.file)
+        .toList();
+
 void main() {
   // ignore: avoid-redundant-async, false positive.
   setUp(() async {
@@ -40,10 +49,8 @@ void main() {
     setGlobal(NotificationService, NotificationService());
 
     final mockDtdManager = MockDTDManager();
-    final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
-    final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
     when(mockDtdManager.projectRoots()).thenAnswer((_) async {
-      return UriList(uris: [rootUri1, rootUri2]);
+      return UriList(uris: mockProjectRootUris);
     });
     setGlobal(DTDManager, mockDtdManager);
     FeatureFlags.deepLinkIosCheck = true;
@@ -90,6 +97,37 @@ void main() {
       expect(find.byType(ProjectRootsDropdown), findsOneWidget);
       expect(find.byType(ProjectRootTextField), findsOneWidget);
     });
+
+    testWidgetsWithWindowSize(
+      'populates project drop-down with the correct paths',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpDeepLinkScreen(tester, controller: deepLinksController);
+
+        expect(find.byType(SelectProjectView), findsOneWidget);
+        expect(find.byType(ProjectRootsDropdown), findsOneWidget);
+        expect(find.byType(ProjectRootTextField), findsOneWidget);
+
+        // Verify the project roots dropdown contains paths in the correct format.
+        final firstDropdownItemFinder =
+            find.byType(DropdownMenuItem<Uri>).first;
+        expect(firstDropdownItemFinder, findsWidgets);
+        final firstDropdownItem = tester.widget<DropdownMenuItem<Uri>>(
+          firstDropdownItemFinder,
+        );
+        // The value should be the URI.
+        expect(firstDropdownItem.value, mockProjectRootUris.first);
+        // The text should be the path. We can use toFilePath() here because this
+        // code runs on the native platform (eg. Windows) and not inside the app.
+        expect(
+          find.descendant(
+            of: firstDropdownItemFinder,
+            matching: find.text(mockProjectRootUris.first.toFilePath()),
+          ),
+          findsWidgets,
+        );
+      },
+    );
 
     testWidgetsWithWindowSize(
       'builds deeplink list page with no links',
