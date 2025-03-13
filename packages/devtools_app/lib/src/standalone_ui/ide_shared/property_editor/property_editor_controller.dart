@@ -95,6 +95,10 @@ class PropertyEditorController extends DisposableController
   }
 
   @override
+  Iterable<EditableProperty> get currentDataToSearchThrough =>
+      filteredData.value;
+
+  @override
   void filterData(Filter<EditableProperty> filter) {
     super.filterData(filter);
     final filtered = (_editableWidgetData.value?.properties ?? []).where(
@@ -166,6 +170,7 @@ class PropertyEditorController extends DisposableController
     TextDocument? document,
     CursorPosition? cursorPosition,
   }) {
+    setActiveFilter();
     if (editableArgsResult != null) {
       _editableWidgetData.value = (
         properties:
