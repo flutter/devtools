@@ -7,6 +7,8 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:meta/meta.dart';
 
 import '../../../shared/editor/api_classes.dart';
+import '../../../shared/primitives/utils.dart';
+import '../../../shared/ui/search.dart';
 
 /// Record representing an option for an [EditableProperty].
 typedef PropertyOption = ({String text, bool isDefault});
@@ -130,7 +132,7 @@ class EditableEnum extends EditableProperty with FiniteValuesProperty {
   }
 }
 
-class EditableProperty extends EditableArgument {
+class EditableProperty extends EditableArgument with SearchableDataMixin {
   EditableProperty(EditableArgument argument)
     : super(
         name: argument.name,
@@ -166,6 +168,13 @@ class EditableProperty extends EditableArgument {
   @mustBeOverridden
   Object? convertFromInputString(String? _) {
     throw UnimplementedError();
+  }
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return name.caseInsensitiveContains(regExpSearch) ||
+        valueDisplay.caseInsensitiveContains(regExpSearch) ||
+        type.caseInsensitiveContains(regExpSearch);
   }
 }
 
