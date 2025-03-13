@@ -549,9 +549,8 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
     notifyListeners();
   }
 
-  /// Update or add the [request] to the [requests] depending on whether or not
-  /// its [request.id] already exists in the list.
-  ///
+  /// Updates or adds the [requests] to the [_requestsById] depending on whether
+  /// or not its `id` already exists in the map.
   void _updateOrAddRequests(List<HttpProfileRequest> requests) {
     for (int i = 0; i < requests.length; i++) {
       final request = requests[i];
