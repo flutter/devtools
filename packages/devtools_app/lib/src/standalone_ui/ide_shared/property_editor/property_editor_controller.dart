@@ -48,27 +48,6 @@ class PropertyEditorController extends DisposableController
   static const _editableArgsDebounceDuration = Duration(milliseconds: 600);
 
   @override
-  void filterData(Filter<EditableProperty> filter) {
-    super.filterData(filter);
-    final filtered = (_editableWidgetData.value?.properties ?? []).where(
-      (property) => property.matchesSearchToken(
-        RegExp(filter.queryFilter.query, caseSensitive: false),
-      ),
-    );
-    filteredData
-      ..clear()
-      ..addAll(filtered);
-  }
-
-  @override
-  void setActiveFilter({
-    String? query,
-    SettingFilters<EditableArgument>? settingFilters,
-  }) {
-    super.setActiveFilter(query: query);
-  }
-
-  @override
   void init() {
     super.init();
     _editableArgsDebouncer = Debouncer(duration: _editableArgsDebounceDuration);
@@ -113,6 +92,27 @@ class PropertyEditorController extends DisposableController
   void dispose() {
     _editableArgsDebouncer.dispose();
     super.dispose();
+  }
+
+  @override
+  void filterData(Filter<EditableProperty> filter) {
+    super.filterData(filter);
+    final filtered = (_editableWidgetData.value?.properties ?? []).where(
+      (property) => property.matchesSearchToken(
+        RegExp(filter.queryFilter.query, caseSensitive: false),
+      ),
+    );
+    filteredData
+      ..clear()
+      ..addAll(filtered);
+  }
+
+  @override
+  void setActiveFilter({
+    String? query,
+    SettingFilters<EditableArgument>? settingFilters,
+  }) {
+    super.setActiveFilter(query: query);
   }
 
   Future<EditArgumentResponse?> editArgument<T>({
