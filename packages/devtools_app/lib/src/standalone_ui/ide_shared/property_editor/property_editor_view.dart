@@ -54,7 +54,9 @@ class PropertyEditorView extends StatelessWidget {
                 name: name,
                 documentation: documentation,
               ),
-            properties.isEmpty && !controller.filterApplied
+            properties.isEmpty && controller.activeFilter.value.queryFilter.query.isEmpty
+                ? const _NoMatchingPropertiesMessage()
+                : properties.isEmpty
                 ? _NoEditablePropertiesMessage(name: name)
                 : _PropertiesList(
                   controller: controller,

@@ -10,6 +10,7 @@ import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
 import '../../../shared/ui/search.dart';
+import '../../../shared/ui/filter.dart';
 import '../../../shared/utils/utils.dart';
 import 'property_editor_types.dart';
 
@@ -22,7 +23,10 @@ typedef EditArgumentFunction =
     });
 
 class PropertyEditorController extends DisposableController
-    with AutoDisposeControllerMixin, SearchControllerMixin<EditableProperty> {
+    with
+        AutoDisposeControllerMixin,
+        SearchControllerMixin<EditableProperty>,
+        FilterControllerMixin<EditableProperty> {
   PropertyEditorController(this.editorClient) {
     init();
   }
@@ -35,12 +39,8 @@ class PropertyEditorController extends DisposableController
       _editableWidgetData;
   final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
 
-  bool get filterApplied => _filterApplied;
-  bool _filterApplied = false;
-
   ValueListenable<List<EditableProperty>> get propertiesToDisplay =>
-      _propertiesToDisplay;
-  final _propertiesToDisplay = ValueNotifier<List<EditableProperty>>([]);
+      filteredData;
 
   TextDocument? _currentDocument;
   CursorPosition? _currentCursorPosition;
@@ -48,6 +48,33 @@ class PropertyEditorController extends DisposableController
   late final Debouncer _editableArgsDebouncer;
 
   static const _editableArgsDebounceDuration = Duration(milliseconds: 600);
+
+  @override
+  SettingFilters<EditableProperty> createSettingFilters() => [];
+
+  @override
+  QueryFilterArgs<EditableProperty> createQueryFilterArgs() => {};
+
+  @override
+  void filterData(Filter<EditableProperty> filter) {
+    super.filterData(filter);
+    final filtered = (_editableProperties ?? []).where(
+      (property) => property.matchesSearchToken(
+        RegExp(filter.queryFilter.query, caseSensitive: false),
+      ),
+    );
+    filteredData
+      ..clear()
+      ..addAll(filtered);
+  }
+
+  @override
+  void setActiveFilter({
+    String? query,
+    SettingFilters<EditableArgument>? settingFilters,
+  }) {
+    super.setActiveFilter(query: query);
+  }
 
   @override
   void init() {
@@ -82,14 +109,13 @@ class PropertyEditorController extends DisposableController
       }),
     );
 
-    addAutoDisposeListener(searchMatches, _updateSearchResults);
-    addAutoDisposeListener(searchNotifier, _updateSearchResults);
+    // addAutoDisposeListener(
+    //   searchMatches,
+    //   () => filterData(Filter<EditableProperty>()),
+    // );
+    addAutoDisposeListener(searchNotifier, () => setActiveFilter(query: search));
   }
 
-  @override
-  Iterable<EditableProperty> get currentDataToSearchThrough =>
-      _editableProperties ?? <EditableProperty>[];
-  
   @override
   void dispose() {
     _editableArgsDebouncer.dispose();
@@ -111,20 +137,6 @@ class PropertyEditorController extends DisposableController
     );
   }
 
-  void _updateSearchResults() {
-    if (search.isEmpty) {
-      _clearSearch();
-      return;
-    }
-    _filterApplied = true;
-    _propertiesToDisplay.value = searchMatches.value;
-  }
-
-  void _clearSearch() {
-    _filterApplied = false;
-    _propertiesToDisplay.value = _editableProperties ?? [];
-  }
-
   Future<void> _updateWithEditableArgs({
     required TextDocument textDocument,
     required CursorPosition cursorPosition,
@@ -136,15 +148,14 @@ class PropertyEditorController extends DisposableController
       textDocument: textDocument,
       position: cursorPosition,
     );
-        final args = result?.args ?? <EditableArgument>[];
-        final name = result?.name;
-        _editableProperties = args.map(argToProperty).nonNulls.toList();
-        refreshSearchMatches();
-        _updateSearchResults();
-        _editableWidgetData.value = (
-          name: name,
-          documentation: result?.documentation,
-        );
+    final args = result?.args ?? <EditableArgument>[];
+    final name = result?.name;
+    _editableProperties = args.map(argToProperty).nonNulls.toList();
+    filterData(activeFilter.value);
+    _editableWidgetData.value = (
+      name: name,
+      documentation: result?.documentation,
+    );
     // Register impression.
     ga.impression(
       gaId,
@@ -172,7 +183,6 @@ class PropertyEditorController extends DisposableController
     if (cursorPosition != null) {
       _currentCursorPosition = cursorPosition;
     }
-    search = '';
-    _clearSearch();
+    filterData(activeFilter.value);
   }
 }
