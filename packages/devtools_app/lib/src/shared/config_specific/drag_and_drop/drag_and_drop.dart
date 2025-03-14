@@ -194,8 +194,7 @@ class DragAndDropState extends State<DragAndDrop> {
 /// [DragAndDropEventAbsorber]).
 ///
 /// Drag and drop widgets will contain a [MetaData] widget with the `metaData`
-/// field set to an instance of this class. [value] must be a unique identifier
-/// for [DragAndDrop] widgets.
+/// field set to an instance of this class.
 class DragAndDropMetaData {
   const DragAndDropMetaData({required this.state});
 
