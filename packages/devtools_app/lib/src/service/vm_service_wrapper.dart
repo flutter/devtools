@@ -5,6 +5,9 @@
 // Code needs to match API from VmService.
 // ignore_for_file: avoid-dynamic
 
+/// @docImport '../shared/preferences/preferences.dart';
+library;
+
 import 'dart:async';
 import 'dart:convert';
 

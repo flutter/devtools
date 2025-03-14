@@ -4,6 +4,9 @@
 
 // ignore_for_file: constant_identifier_names
 
+/// @docImport '../../shared/preferences/preferences.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 

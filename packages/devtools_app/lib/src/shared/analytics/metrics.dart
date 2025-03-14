@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport '../../screens/inspector/inspector_tree_controller.dart';
+/// @docImport '../../screens/performance/panes/flutter_frames/flutter_frame_model.dart';
+library;
+
 import 'analytics_common.dart';
 
 class MemoryScreenMetrics extends ScreenAnalyticsMetrics {

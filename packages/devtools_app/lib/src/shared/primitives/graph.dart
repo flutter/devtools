@@ -23,7 +23,7 @@ class GraphNode {
   final successors = <GraphNode>{};
 
   /// Maps predecessor [GraphNode]s from [predecessors] to the number of
-  /// outgoing edges going to [this] node.
+  /// outgoing edges going to `this` node.
   ///
   /// For example:
   ///        A (predecessor node)
@@ -36,7 +36,7 @@ class GraphNode {
   final predecessorEdgeCounts = <GraphNode, int>{};
 
   /// Maps successor [GraphNode]s from [successors] to the number of incoming
-  /// edges coming from [this] node.
+  /// edges coming from `this` node.
   ///
   /// For example:
   ///        A (this node)
@@ -68,7 +68,7 @@ class GraphNode {
     return 0.0;
   }
 
-  /// Create outgoing edge from [this] node to the given node [n].
+  /// Create outgoing edge from `this` node to the given node [n].
   void outgoingEdge(GraphNode n, {int edgeWeight = 1}) {
     n.predecessors.add(this);
     final predEdgeCount = n.predecessorEdgeCounts[this] ?? 0;

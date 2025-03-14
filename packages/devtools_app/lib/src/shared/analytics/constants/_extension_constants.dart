@@ -20,7 +20,7 @@ enum DevToolsExtensionEvents {
   /// an extension has been enabled.
   embeddedExtension;
 
-  /// Event sent via [ga.screen] when an extension screen is opened.
+  /// Event sent via `ga.screen` when an extension screen is opened.
   static String extensionScreenName(DevToolsExtensionConfig ext) =>
       'extension-${ext.analyticsSafeName}';
 

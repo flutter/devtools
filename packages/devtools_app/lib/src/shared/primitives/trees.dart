@@ -22,10 +22,10 @@ abstract class TreeNode<T extends TreeNode<T>> {
   // TODO(jacobr) should impact depth.
   bool indentChildren = true;
 
-  /// Index in [parent.children].
+  /// Index in `parent.children`.
   int index = -1;
 
-  /// Depth of this tree, including [this].
+  /// Depth of this tree, including `this`.
   ///
   /// We assume that TreeNodes are not modified after the first time [depth] is
   /// accessed. We would need to clear the cache before accessing, otherwise.
@@ -206,7 +206,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
 
   /// Locates the first sub-node in the tree at level [level].
   ///
-  /// [level] is relative to the subtree root [this].
+  /// [level] is relative to the subtree root `this`.
   ///
   /// For example:
   ///
@@ -233,7 +233,7 @@ abstract class TreeNode<T extends TreeNode<T>> {
 
   /// Locates the last sub-node in the tree at level [level].
   ///
-  /// [level] is relative to the subtree root [this].
+  /// [level] is relative to the subtree root `this`.
   ///
   /// For example:
   ///
@@ -288,8 +288,8 @@ abstract class TreeNode<T extends TreeNode<T>> {
   /// Filters a tree starting at this node and returns a list of new roots after
   /// filtering, where all nodes in the new tree(s) meet the condition `filter`.
   ///
-  /// If the root [this] should be included in the filtered results, the list
-  /// will contain one node. If the root [this] should not be included in the
+  /// If the root `this` should be included in the filtered results, the list
+  /// will contain one node. If the root `this` should not be included in the
   /// filtered results, the list may contain one or more nodes.
   List<T> filterWhere(bool Function(T node) filter) {
     List<T> walkAndCopy(T node) {

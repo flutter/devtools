@@ -297,12 +297,12 @@ abstract class TableControllerBase<T> extends DisposableController {
 
   final _tableData = ValueNotifier<TableData<T>>(TableData<T>.empty());
 
-  /// The pinned data for the active data set [_tableData.value].
+  /// The pinned data for the active data set `_tableData.value`.
   ///
   /// This value is reset each time [sortDataAndNotify] is called.
   late List<T> pinnedData;
 
-  /// Returns the [TableUiState] for the current data [_tableData.value].
+  /// Returns the [TableUiState] for the current data `_tableData.value`.
   TableUiState get tableUiState => _tableUiStateForKey(_currentDataKey);
 
   /// This method should be overridden by all subclasses.

@@ -18,7 +18,7 @@ enum TreeTableScrollKind { up, down, parent }
 /// list of the tree hierarchy. It then uses the nesting level of the
 /// deepest row in [dataRoots] to determine how wide to make the [treeColumn].
 ///
-/// If [dataRoots.length] > 1, there are multiple trees in this tree table. In
+/// If `dataRoots.length` > 1, there are multiple trees in this tree table. In
 /// this case, tree table operations (expand all, collapse all, sort, etc.) will
 /// be applied to every tree.
 class TreeTable<T extends TreeNode<T>> extends StatefulWidget {

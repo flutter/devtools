@@ -949,7 +949,7 @@ extension StringExtension on String {
     );
   }
 
-  /// Whether [other] is a case insensitive match for this String.
+  /// Whether [pattern] is a case insensitive match for this String.
   ///
   /// If [pattern] is a [RegExp], this method will return true if and only if
   /// this String is a complete [RegExp] match, meaning that the regular

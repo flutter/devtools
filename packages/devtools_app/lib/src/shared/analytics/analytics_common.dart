@@ -5,6 +5,9 @@
 // Code in this file should be able to be imported by both web and dart:io
 // dependent libraries.
 
+/// @docImport '_analytics_web.dart';
+library;
+
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
@@ -35,10 +38,10 @@ const ga4ParamValueCharacterLimit = 100;
 
 /// Returns a stack trace as a [Map] for consumption by GA4 analytics.
 ///
-/// The returned [Map] is indexed into [stackTraceChunksLimit] chunks, where
+/// The returned [Map] is indexed into `stackTraceChunksLimit` chunks, where
 /// each chunk is a substring of length [ga4ParamValueCharacterLimit]. Each
 /// substring contains information for ~1 stack frame, so including
-/// [stackTraceChunksLimit] chunks should give us enough information to
+/// `stackTraceChunksLimit` chunks should give us enough information to
 /// understand the source of the exception.
 ///
 /// This method uses a heuristic to attempt to include a minimal amount of

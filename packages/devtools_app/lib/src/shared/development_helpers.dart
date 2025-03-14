@@ -48,7 +48,7 @@ bool debugShowAnalyticsConsentMessage = false;
 
 /// Whether to build DevTools for conveniently debugging DevTools extensions.
 ///
-/// Turning this flag to [true] allows for debugging the extensions framework
+/// Turning this flag to `true` allows for debugging the extensions framework
 /// without a server connection.
 ///
 /// This flag should never be checked in with a value of true - this is covered
