@@ -10,7 +10,6 @@ import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
 import '../../../shared/ui/filter.dart';
-import '../../../shared/ui/search.dart';
 import '../../../shared/utils/utils.dart';
 import 'property_editor_types.dart';
 
@@ -24,10 +23,7 @@ typedef EditArgumentFunction =
     });
 
 class PropertyEditorController extends DisposableController
-    with
-        AutoDisposeControllerMixin,
-        SearchControllerMixin<EditableProperty>,
-        FilterControllerMixin<EditableProperty> {
+    with AutoDisposeControllerMixin, FilterControllerMixin<EditableProperty> {
   PropertyEditorController(this.editorClient) {
     init();
   }
@@ -53,10 +49,6 @@ class PropertyEditorController extends DisposableController
     _editableArgsDebouncer = Debouncer(duration: _editableArgsDebounceDuration);
 
     // Filter in response to search query changes.
-    addAutoDisposeListener(
-      searchNotifier,
-      () => setActiveFilter(query: search),
-    );
 
     // Update in response to ActiveLocationChanged events.
     autoDisposeStreamSubscription(
@@ -93,10 +85,6 @@ class PropertyEditorController extends DisposableController
     _editableArgsDebouncer.dispose();
     super.dispose();
   }
-
-  @override
-  Iterable<EditableProperty> get currentDataToSearchThrough =>
-      filteredData.value;
 
   @override
   void filterData(Filter<EditableProperty> filter) {

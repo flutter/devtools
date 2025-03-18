@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/common_widgets.dart';
-import '../../../shared/ui/search.dart';
+import '../../../shared/ui/filter.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
 import 'property_editor_types.dart';
@@ -102,7 +102,7 @@ class _PropertiesListState extends State<_PropertiesList> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        _SearchControls(controller: widget.controller),
+        _FilterControls(controller: widget.controller),
         if (widget.editableProperties.isEmpty)
           const _NoMatchingPropertiesMessage(),
         for (final property in widget.editableProperties)
@@ -148,12 +148,10 @@ class _EditablePropertyItem extends StatelessWidget {
   }
 }
 
-class _SearchControls extends StatelessWidget {
-  const _SearchControls({required this.controller});
+class _FilterControls extends StatelessWidget {
+  const _FilterControls({required this.controller});
 
   final PropertyEditorController controller;
-
-  static const _searchFieldHeight = 32.0;
 
   @override
   Widget build(BuildContext context) {
@@ -162,10 +160,9 @@ class _SearchControls extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SearchField<PropertyEditorController>(
-              searchController: controller,
-              supportsNavigation: false,
-              searchFieldHeight: _searchFieldHeight,
+            child: StandaloneFilterField<EditableProperty>(
+              controller: controller,
+              filteredItem: 'property',
             ),
           ),
         ],
