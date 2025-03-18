@@ -48,8 +48,6 @@ class PropertyEditorController extends DisposableController
     super.init();
     _editableArgsDebouncer = Debouncer(duration: _editableArgsDebounceDuration);
 
-    // Filter in response to search query changes.
-
     // Update in response to ActiveLocationChanged events.
     autoDisposeStreamSubscription(
       editorClient.activeLocationChangedStream.listen((event) async {
