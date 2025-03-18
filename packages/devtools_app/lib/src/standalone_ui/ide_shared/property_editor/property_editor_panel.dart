@@ -15,6 +15,7 @@ import '../../../shared/editor/editor_client.dart';
 import '../../../shared/ui/common_widgets.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_view.dart';
+import 'reconnecting_overlay.dart';
 
 /// The side panel for the Property Editor.
 class PropertyEditorPanel extends StatefulWidget {
@@ -106,24 +107,36 @@ class _PropertyEditorConnectedPanelState
 
   @override
   Widget build(BuildContext context) {
-    return Scrollbar(
-      controller: scrollController,
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        controller: scrollController,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            denseSpacing,
-            defaultSpacing,
-            defaultSpacing, // Additional right padding for scroll bar.
-            defaultSpacing,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [PropertyEditorView(controller: widget.controller)],
-          ),
-        ),
-      ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: widget.controller.shouldReconnect,
+      builder: (context, shouldReconnect, _) {
+        return Stack(
+          children: [
+            Scrollbar(
+              controller: scrollController,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    denseSpacing,
+                    defaultSpacing,
+                    defaultSpacing, // Additional right padding for scroll bar.
+                    defaultSpacing,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      PropertyEditorView(controller: widget.controller),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            if (shouldReconnect) const ReconnectingOverlay(),
+          ],
+        );
+      },
     );
   }
 }

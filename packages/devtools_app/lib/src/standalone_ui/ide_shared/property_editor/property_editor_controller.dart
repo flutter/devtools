@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
@@ -37,17 +39,31 @@ class PropertyEditorController extends DisposableController
       _editableWidgetData;
   final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
 
+  ValueListenable<bool> get shouldReconnect => _shouldReconnect;
+  final _shouldReconnect = ValueNotifier<bool>(false);
+
+  bool get waitingForFirstEvent => _waitingForFirstEvent;
+  bool _waitingForFirstEvent = true;
+
   late final Debouncer _editableArgsDebouncer;
 
+  late final Timer _checkConnectionTimer;
+
   static const _editableArgsDebounceDuration = Duration(milliseconds: 600);
+
+  static const _checkConnectionInterval = Duration(seconds: 5);
 
   @override
   void init() {
     super.init();
     _editableArgsDebouncer = Debouncer(duration: _editableArgsDebounceDuration);
+    _checkConnectionTimer = _periodicallyCheckConnection(
+      _checkConnectionInterval,
+    );
 
     autoDisposeStreamSubscription(
       editorClient.activeLocationChangedStream.listen((event) async {
+        if (_waitingForFirstEvent) _waitingForFirstEvent = false;
         final textDocument = event.textDocument;
         final cursorPosition = event.selections.first.active;
         // Don't do anything if the text document is null.
@@ -78,6 +94,7 @@ class PropertyEditorController extends DisposableController
   @override
   void dispose() {
     _editableArgsDebouncer.dispose();
+    _checkConnectionTimer.cancel();
     super.dispose();
   }
 
@@ -119,6 +136,16 @@ class PropertyEditorController extends DisposableController
       gaId,
       gac.PropertyEditorSidebar.widgetPropertiesUpdate(name: name),
     );
+  }
+
+  Timer _periodicallyCheckConnection(Duration interval) {
+    return Timer.periodic(interval, (timer) async {
+      final isClosed = await editorClient.isClientClosed();
+      if (isClosed) {
+        _shouldReconnect.value = true;
+        timer.cancel();
+      }
+    });
   }
 
   @visibleForTesting
