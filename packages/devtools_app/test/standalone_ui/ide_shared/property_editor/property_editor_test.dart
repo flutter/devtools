@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_controller.dart';
+import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_types.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -290,8 +291,8 @@ void main() {
     });
   });
 
-  group('searching for for editable arguments', () {
-    testWidgets('can search by name', (tester) async {
+  group('filtering editable arguments', () {
+    testWidgets('can filter by name', (tester) async {
       // Load the property editor.
       await tester.pumpWidget(wrap(propertyEditor));
 
@@ -309,10 +310,10 @@ void main() {
       expect(widthInput, findsOneWidget);
       expect(heightInput, findsOneWidget);
 
-      // Search for the "width" property.
-      final searchField = _findSearchField();
-      expect(searchField, findsOneWidget);
-      await _inputText(searchField, text: 'width', tester: tester);
+      // Filter by the "width" property.
+      final filterField = _findFilterField();
+      expect(filterField, findsOneWidget);
+      await _inputText(filterField, text: 'width', tester: tester);
 
       // Verify only the "width" property is visible.
       expect(widthInput, findsOneWidget);
@@ -320,7 +321,7 @@ void main() {
       expect(heightInput, findsNothing);
     });
 
-    testWidgets('can search by type', (tester) async {
+    testWidgets('can filter by type', (tester) async {
       // Load the property editor.
       await tester.pumpWidget(wrap(propertyEditor));
 
@@ -338,10 +339,10 @@ void main() {
       expect(widthInput, findsOneWidget);
       expect(heightInput, findsOneWidget);
 
-      // Search for the "width" property.
-      final searchField = _findSearchField();
-      expect(searchField, findsOneWidget);
-      await _inputText(searchField, text: 'double', tester: tester);
+      // Filter by the "double" type.
+      final filterField = _findFilterField();
+      expect(filterField, findsOneWidget);
+      await _inputText(filterField, text: 'double', tester: tester);
 
       // Verify only the "width" and "height" properties are visible.
       expect(widthInput, findsOneWidget);
@@ -349,7 +350,7 @@ void main() {
       expect(titleInput, findsNothing);
     });
 
-    testWidgets('can search by value', (tester) async {
+    testWidgets('can filter by value', (tester) async {
       // Load the property editor.
       await tester.pumpWidget(wrap(propertyEditor));
 
@@ -367,10 +368,10 @@ void main() {
       expect(widthInput, findsOneWidget);
       expect(heightInput, findsOneWidget);
 
-      // Search for the "width" property.
-      final searchField = _findSearchField();
-      expect(searchField, findsOneWidget);
-      await _inputText(searchField, text: 'Hello world!', tester: tester);
+      // Filter by the "Hello world!" value.
+      final filterField = _findFilterField();
+      expect(filterField, findsOneWidget);
+      await _inputText(filterField, text: 'Hello world!', tester: tester);
 
       // Verify only the "title" property is visible.
       expect(titleInput, findsOneWidget);
@@ -804,8 +805,8 @@ final _findNoPropertiesMessage = find.text(
   'No widget properties at current cursor location.',
 );
 
-Finder _findSearchField() => find.descendant(
-  of: find.byType(SearchField<PropertyEditorController>),
+Finder _findFilterField() => find.descendant(
+  of: find.byType(StandaloneFilterField<EditableProperty>),
   matching: find.byType(TextField),
 );
 
