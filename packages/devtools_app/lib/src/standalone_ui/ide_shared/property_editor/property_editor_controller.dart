@@ -12,7 +12,12 @@ import '../../../shared/editor/editor_client.dart';
 import '../../../shared/utils/utils.dart';
 
 typedef EditableWidgetData =
-    ({List<EditableArgument> args, String? name, String? documentation});
+    ({
+      List<EditableArgument> args,
+      String? name,
+      String? documentation,
+      String? fileUri,
+    });
 
 typedef EditArgumentFunction =
     Future<EditArgumentResponse?> Function<T>({
@@ -65,6 +70,15 @@ class PropertyEditorController extends DisposableController
             cursorPosition == _currentCursorPosition) {
           return;
         }
+        if (!textDocument.uriAsString.endsWith('.dart')) {
+          _editableWidgetData.value = (
+            args: [],
+            name: null,
+            documentation: null,
+            fileUri: textDocument.uriAsString,
+          );
+          return;
+        }
         _editableArgsDebouncer.run(
           () => _updateWithEditableArgs(
             textDocument: textDocument,
@@ -113,6 +127,7 @@ class PropertyEditorController extends DisposableController
       args: args,
       name: name,
       documentation: result?.documentation,
+      fileUri: _currentDocument?.uriAsString,
     );
     // Register impression.
     ga.impression(
@@ -132,6 +147,7 @@ class PropertyEditorController extends DisposableController
         args: editableArgsResult.args,
         name: editableArgsResult.name,
         documentation: editableArgsResult.documentation,
+        fileUri: document?.uriAsString,
       );
     }
     if (document != null) {

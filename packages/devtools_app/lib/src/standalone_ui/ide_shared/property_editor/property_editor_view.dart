@@ -42,7 +42,13 @@ class PropertyEditorView extends StatelessWidget {
           );
         }
 
-        final (:args, :name, :documentation) = editableWidgetData;
+        final (:args, :name, :documentation, :fileUri) = editableWidgetData;
+        if (fileUri == null || !fileUri.endsWith('.dart')) {
+          return const CenteredMessage(
+            message: 'No Dart code found at the current cursor location.',
+          );
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
