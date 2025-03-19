@@ -79,24 +79,18 @@ class _TimelineEventsTabViewState extends State<TimelineEventsTabView>
       _refreshingOverlay = OverlayEntry(
         maintainState: true,
         builder: (context) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: _overlayOffset),
-              child: RoundedOutlinedBorder(
-                clip: true,
-                child: Container(
-                  width: width,
-                  height: height,
-                  color: theme.colorScheme.semiTransparentOverlayColor,
-                  child: Center(
-                    child: Text(
-                      'Refreshing the timeline...\n\n'
-                      'This may take a few seconds. Please do not\n'
-                      'refresh the page.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ),
+          return DevToolsOverlay(
+            content: Container(
+              width: width,
+              height: height,
+              color: theme.colorScheme.semiTransparentOverlayColor,
+              child: Center(
+                child: Text(
+                  'Refreshing the timeline...\n\n'
+                  'This may take a few seconds. Please do not\n'
+                  'refresh the page.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium,
                 ),
               ),
             ),

@@ -51,7 +51,7 @@ class PropertyEditorController extends DisposableController
 
   static const _editableArgsDebounceDuration = Duration(milliseconds: 600);
 
-  static const _checkConnectionInterval = Duration(seconds: 5);
+  static const _checkConnectionInterval = Duration(minutes: 1);
 
   @override
   void init() {

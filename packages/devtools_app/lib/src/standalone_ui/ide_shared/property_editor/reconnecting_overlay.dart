@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../../shared/ui/common_widgets.dart';
 import 'utils/utils.dart';
 
 class ReconnectingOverlay extends StatefulWidget {
@@ -36,22 +37,20 @@ class _ReconnectingOverlayState extends State<ReconnectingOverlay> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      color: theme.colorScheme.surface.withValues(alpha: 0.5),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: defaultSpacing),
-            Text(
-              _secondsUntilReconnection > 0
-                  ? 'Reconnecting in $_secondsUntilReconnection'
-                  : 'Reconnecting...',
-              style: theme.textTheme.headlineMedium,
-            ),
-          ],
-        ),
+    return DevToolsOverlay(
+      fullScreen: true,
+      content: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: defaultSpacing),
+          Text(
+            _secondsUntilReconnection > 0
+                ? 'Reconnecting in $_secondsUntilReconnection'
+                : 'Reconnecting...',
+            style: theme.textTheme.headlineMedium,
+          ),
+        ],
       ),
     );
   }
