@@ -65,14 +65,6 @@ class _TimelineEventsTabViewState extends State<TimelineEventsTabView>
   }
 
   void _insertOverlay() {
-    final width = math.min(
-      _overlaySize.width,
-      MediaQuery.of(context).size.width - 2 * denseSpacing,
-    );
-    final height = math.min(
-      _overlaySize.height,
-      MediaQuery.of(context).size.height - 2 * denseSpacing,
-    );
     final theme = Theme.of(context);
     _refreshingOverlay?.remove();
     Overlay.of(context).insert(
@@ -80,19 +72,14 @@ class _TimelineEventsTabViewState extends State<TimelineEventsTabView>
         maintainState: true,
         builder: (context) {
           return DevToolsOverlay(
-            content: Container(
-              width: width,
-              height: height,
-              color: theme.colorScheme.semiTransparentOverlayColor,
-              child: Center(
-                child: Text(
-                  'Refreshing the timeline...\n\n'
-                  'This may take a few seconds. Please do not\n'
-                  'refresh the page.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.titleMedium,
-                ),
-              ),
+            topOffset: _overlayOffset,
+            maxSize: _overlaySize,
+            content: Text(
+              'Refreshing the timeline...\n\n'
+              'This may take a few seconds. Please do not\n'
+              'refresh the page.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium,
             ),
           );
         },
