@@ -132,7 +132,7 @@ class EditableEnum extends EditableProperty with FiniteValuesProperty {
   }
 }
 
-class EditableProperty extends EditableArgument with SearchableDataMixin {
+class EditableProperty extends EditableArgument {
   EditableProperty(EditableArgument argument)
     : super(
         name: argument.name,
@@ -170,11 +170,11 @@ class EditableProperty extends EditableArgument with SearchableDataMixin {
     throw UnimplementedError();
   }
 
-  @override
-  bool matchesSearchToken(RegExp regExpSearch) {
-    return name.caseInsensitiveContains(regExpSearch) ||
-        valueDisplay.caseInsensitiveContains(regExpSearch) ||
-        type.caseInsensitiveContains(regExpSearch);
+  bool matchesQuery(String query) {
+    final regExpQuery = RegExp(query, caseSensitive: false);
+    return name.caseInsensitiveContains(regExpQuery) ||
+        valueDisplay.caseInsensitiveContains(regExpQuery) ||
+        type.caseInsensitiveContains(regExpQuery);
   }
 }
 

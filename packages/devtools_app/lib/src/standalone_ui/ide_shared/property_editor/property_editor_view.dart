@@ -358,7 +358,7 @@ class _WidgetNameAndDocumentation extends StatelessWidget {
             ),
           ],
         ),
-        const PaddedDivider(padding: EdgeInsets.all(noPadding)),
+        const PaddedDivider.noPadding(),
       ],
     );
   }

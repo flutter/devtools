@@ -88,21 +88,11 @@ class PropertyEditorController extends DisposableController
   void filterData(Filter<EditableProperty> filter) {
     super.filterData(filter);
     final filtered = (_editableWidgetData.value?.properties ?? []).where(
-      (property) => property.matchesSearchToken(
-        RegExp(filter.queryFilter.query, caseSensitive: false),
-      ),
+      (property) => property.matchesQuery(filter.queryFilter.query),
     );
     filteredData
       ..clear()
       ..addAll(filtered);
-  }
-
-  @override
-  void setActiveFilter({
-    String? query,
-    SettingFilters<EditableArgument>? settingFilters,
-  }) {
-    super.setActiveFilter(query: query);
   }
 
   Future<EditArgumentResponse?> editArgument<T>({
