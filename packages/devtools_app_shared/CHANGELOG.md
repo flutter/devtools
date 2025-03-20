@@ -9,6 +9,7 @@ getter.
 * Move the `Disposable` class from the 
 `package:devtools_app_shared/service.dart` library to the 
 `package:devtools_app_shared/utils.dart` library.
+* Fix alignment issues in `DevToolsClearableTextField`.
 
 ## 0.3.1
 * Bump `vm_service` dependency to `>=13.0.0 <16.0.0`.
