@@ -755,7 +755,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
     return '$plusSign${prettyPrintBytes(byteSize, includeUnit: true)}';
   }
 
-  /// Returns a list of [TreemapNode] in the path from root node to [this].
+  /// Returns a list of [TreemapNode] in the path from root node to `this`.
   List<TreemapNode> pathFromRoot() {
     TreemapNode? node = this;
     final path = <TreemapNode>[];

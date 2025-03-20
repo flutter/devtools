@@ -1003,7 +1003,7 @@ class FlameChartRow<T extends FlameChartDataMixin<T>> {
 
   final int index;
 
-  /// Adds a node to [nodes] and assigns [this] to the nodes [row] property.
+  /// Adds a node to [nodes] and assigns `this` to the node's `row` property.
   ///
   /// If [index] is specified and in range of the list, [node] will be added at
   /// [index]. Otherwise, [node] will be added to the end of [nodes]
