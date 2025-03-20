@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/common_widgets.dart';
+import '../../../shared/ui/filter.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
 import 'property_editor_types.dart';
@@ -25,6 +26,7 @@ class PropertyEditorView extends StatelessWidget {
         controller.editorClient.editArgumentMethodName,
         controller.editorClient.editableArgumentsMethodName,
         controller.editableWidgetData,
+        controller.filteredData,
       ],
       builder: (_, values, _) {
         final editArgumentMethodName = values.first as String?;
@@ -48,7 +50,8 @@ class PropertyEditorView extends StatelessWidget {
           );
         }
 
-        final (:args, :name, :documentation) = editableWidgetData;
+        final filteredProperties = values.fourth as List<EditableProperty>;
+        final (:properties, :name, :documentation) = editableWidgetData;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -57,11 +60,11 @@ class PropertyEditorView extends StatelessWidget {
                 name: name,
                 documentation: documentation,
               ),
-            args.isEmpty
+            properties.isEmpty
                 ? _NoEditablePropertiesMessage(name: name)
                 : _PropertiesList(
-                  editableProperties: args.map(argToProperty).nonNulls.toList(),
-                  editProperty: controller.editArgument,
+                  controller: controller,
+                  editableProperties: filteredProperties,
                 ),
           ],
         );
@@ -72,12 +75,12 @@ class PropertyEditorView extends StatelessWidget {
 
 class _PropertiesList extends StatefulWidget {
   const _PropertiesList({
+    required this.controller,
     required this.editableProperties,
-    required this.editProperty,
   });
 
+  final PropertyEditorController controller;
   final List<EditableProperty> editableProperties;
-  final EditArgumentFunction editProperty;
 
   static const defaultItemPadding = borderPadding;
   static const denseItemPadding = defaultItemPadding / 2;
@@ -105,10 +108,13 @@ class _PropertiesListState extends State<_PropertiesList> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
+        _FilterControls(controller: widget.controller),
+        if (widget.editableProperties.isEmpty)
+          const _NoMatchingPropertiesMessage(),
         for (final property in widget.editableProperties)
           _EditablePropertyItem(
             property: property,
-            editProperty: widget.editProperty,
+            editProperty: widget.controller.editArgument,
           ),
       ].joinWith(const PaddedDivider.noPadding()),
     );
@@ -144,6 +150,29 @@ class _EditablePropertyItem extends StatelessWidget {
         ] else
           const Spacer(),
       ],
+    );
+  }
+}
+
+class _FilterControls extends StatelessWidget {
+  const _FilterControls({required this.controller});
+
+  final PropertyEditorController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(_PropertiesList.defaultItemPadding),
+      child: Row(
+        children: [
+          Expanded(
+            child: StandaloneFilterField<EditableProperty>(
+              controller: controller,
+              filteredItem: 'property',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -295,6 +324,15 @@ class _NoEditablePropertiesMessage extends StatelessWidget {
   }
 }
 
+class _NoMatchingPropertiesMessage extends StatelessWidget {
+  const _NoMatchingPropertiesMessage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('No properties matching the current filter.');
+  }
+}
+
 class _WidgetNameAndDocumentation extends StatelessWidget {
   const _WidgetNameAndDocumentation({required this.name, this.documentation});
 
@@ -326,7 +364,7 @@ class _WidgetNameAndDocumentation extends StatelessWidget {
             ),
           ],
         ),
-        const PaddedDivider(),
+        const PaddedDivider.noPadding(),
       ],
     );
   }
