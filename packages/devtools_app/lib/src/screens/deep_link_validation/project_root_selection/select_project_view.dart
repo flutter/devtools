@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../../shared/feature_flags.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/server/server.dart' as server;
@@ -122,14 +121,11 @@ class _SelectProjectViewState extends State<SelectProjectView> {
       return;
     }
     XcodeBuildOptions iosBuildOptions = XcodeBuildOptions.empty;
-    if (FeatureFlags.deepLinkIosCheck) {
-      iosBuildOptions = await _requestiOSBuildOptions(directory);
-      ga.select(
-        gac.deeplink,
-        gac.AnalyzeFlutterProject.flutterProjectSelected.name,
-      );
-    }
-
+    iosBuildOptions = await _requestiOSBuildOptions(directory);
+    ga.select(
+      gac.deeplink,
+      gac.AnalyzeFlutterProject.flutterProjectSelected.name,
+    );
     if (androidVariants.isEmpty && iosBuildOptions.configurations.isEmpty) {
       ga.select(
         gac.deeplink,

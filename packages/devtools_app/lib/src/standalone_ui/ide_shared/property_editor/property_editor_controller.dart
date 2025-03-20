@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
@@ -9,11 +11,13 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
+import '../../../shared/ui/filter.dart';
 import '../../../shared/utils/utils.dart';
+import 'property_editor_types.dart';
 
 typedef EditableWidgetData =
     ({
-      List<EditableArgument> args,
+      List<EditableProperty> properties,
       String? name,
       String? documentation,
       String? fileUri,
@@ -26,7 +30,7 @@ typedef EditArgumentFunction =
     });
 
 class PropertyEditorController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin, FilterControllerMixin<EditableProperty> {
   PropertyEditorController(this.editorClient) {
     init();
   }
@@ -42,17 +46,32 @@ class PropertyEditorController extends DisposableController
       _editableWidgetData;
   final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
 
+  ValueListenable<bool> get shouldReconnect => _shouldReconnect;
+  final _shouldReconnect = ValueNotifier<bool>(false);
+
+  bool get waitingForFirstEvent => _waitingForFirstEvent;
+  bool _waitingForFirstEvent = true;
+
   late final Debouncer _editableArgsDebouncer;
 
+  late final Timer _checkConnectionTimer;
+
   static const _editableArgsDebounceDuration = Duration(milliseconds: 600);
+
+  static const _checkConnectionInterval = Duration(minutes: 1);
 
   @override
   void init() {
     super.init();
     _editableArgsDebouncer = Debouncer(duration: _editableArgsDebounceDuration);
+    _checkConnectionTimer = _periodicallyCheckConnection(
+      _checkConnectionInterval,
+    );
 
+    // Update in response to ActiveLocationChanged events.
     autoDisposeStreamSubscription(
       editorClient.activeLocationChangedStream.listen((event) async {
+        if (_waitingForFirstEvent) _waitingForFirstEvent = false;
         final textDocument = event.textDocument;
         final cursorPosition = event.selections.first.active;
         // Don't do anything if the text document is null.
@@ -72,7 +91,7 @@ class PropertyEditorController extends DisposableController
         }
         if (!textDocument.uriAsString.endsWith('.dart')) {
           _editableWidgetData.value = (
-            args: [],
+            properties: [],
             name: null,
             documentation: null,
             fileUri: textDocument.uriAsString,
@@ -92,7 +111,19 @@ class PropertyEditorController extends DisposableController
   @override
   void dispose() {
     _editableArgsDebouncer.dispose();
+    _checkConnectionTimer.cancel();
     super.dispose();
+  }
+
+  @override
+  void filterData(Filter<EditableProperty> filter) {
+    super.filterData(filter);
+    final filtered = (_editableWidgetData.value?.properties ?? []).where(
+      (property) => property.matchesQuery(filter.queryFilter.query),
+    );
+    filteredData
+      ..clear()
+      ..addAll(filtered);
   }
 
   Future<EditArgumentResponse?> editArgument<T>({
@@ -121,19 +152,34 @@ class PropertyEditorController extends DisposableController
       textDocument: textDocument,
       position: cursorPosition,
     );
-    final args = result?.args ?? <EditableArgument>[];
+    final properties =
+        (result?.args ?? <EditableArgument>[])
+            .map(argToProperty)
+            .nonNulls
+            .toList();
     final name = result?.name;
     _editableWidgetData.value = (
-      args: args,
+      properties: properties,
       name: name,
       documentation: result?.documentation,
       fileUri: _currentDocument?.uriAsString,
     );
+    filterData(activeFilter.value);
     // Register impression.
     ga.impression(
       gaId,
       gac.PropertyEditorSidebar.widgetPropertiesUpdate(name: name),
     );
+  }
+
+  Timer _periodicallyCheckConnection(Duration interval) {
+    return Timer.periodic(interval, (timer) async {
+      final isClosed = await editorClient.isClientClosed();
+      if (isClosed) {
+        _shouldReconnect.value = true;
+        timer.cancel();
+      }
+    });
   }
 
   @visibleForTesting
@@ -142,9 +188,11 @@ class PropertyEditorController extends DisposableController
     TextDocument? document,
     CursorPosition? cursorPosition,
   }) {
+    setActiveFilter();
     if (editableArgsResult != null) {
       _editableWidgetData.value = (
-        args: editableArgsResult.args,
+        properties:
+            editableArgsResult.args.map(argToProperty).nonNulls.toList(),
         name: editableArgsResult.name,
         documentation: editableArgsResult.documentation,
         fileUri: document?.uriAsString,
@@ -156,5 +204,6 @@ class PropertyEditorController extends DisposableController
     if (cursorPosition != null) {
       _currentCursorPosition = cursorPosition;
     }
+    filterData(activeFilter.value);
   }
 }

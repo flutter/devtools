@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
@@ -29,8 +28,6 @@ class PerformanceDefaultScene extends Scene {
 
   @override
   Future<void> setUp() async {
-    FeatureFlags.widgetRebuildStats = true;
-
     setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
@@ -44,11 +41,6 @@ class PerformanceDefaultScene extends Scene {
 
   @override
   String get title => '$PerformanceDefaultScene';
-
-  // TODO(kenz): call tearDown on the scenes that use this scene
-  void tearDown() {
-    FeatureFlags.widgetRebuildStats = false;
-  }
 }
 
 Future<void> _loadOfflineSnapshot() async {

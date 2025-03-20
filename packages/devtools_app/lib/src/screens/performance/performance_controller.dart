@@ -145,8 +145,7 @@ class PerformanceController extends DevToolsScreenController
                 final frame = FlutterFrame.fromJson(event.extensionData!.data);
                 enhanceTracingController.assignStateForFrame(frame);
                 flutterFramesController.addFrame(frame);
-              } else if (event.extensionKind == FlutterEvent.rebuiltWidgets &&
-                  FeatureFlags.widgetRebuildStats) {
+              } else if (event.extensionKind == FlutterEvent.rebuiltWidgets) {
                 if (_currentRebuildWidgetsIsolate != event.isolate) {
                   rebuildCountModel.clearFromRestart();
                 }

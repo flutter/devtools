@@ -11,11 +11,14 @@ void main() {
     expect(enableExperiments, false);
     expect(enableBeta, false);
     expect(isExternalBuild, true);
+    expect(FeatureFlags.memoryObserver, true);
     expect(FeatureFlags.memorySaveLoad, false);
-    expect(FeatureFlags.deepLinkIosCheck, true);
+    expect(FeatureFlags.networkDisconnectExperience, true);
+    expect(FeatureFlags.networkSaveLoad, true);
+    expect(FeatureFlags.devToolsExtensions, isExternalBuild);
     expect(FeatureFlags.dapDebugging, false);
-    expect(FeatureFlags.wasmOptInSetting, true);
     expect(FeatureFlags.inspectorV2, true);
+    expect(FeatureFlags.wasmOptInSetting, true);
     expect(FeatureFlags.propertyEditor, false);
   });
 }

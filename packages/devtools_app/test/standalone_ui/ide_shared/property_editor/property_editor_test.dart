@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_controller.dart';
+import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_types.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -62,7 +63,9 @@ void main() {
       final argsCompleter = Completer<List<EditableArgument>>();
       listener = () {
         if (!argsCompleter.isCompleted) {
-          argsCompleter.complete(controller.editableWidgetData.value!.args);
+          argsCompleter.complete(
+            controller.editableWidgetData.value?.properties,
+          );
         }
       };
       controller.editableWidgetData.addListener(listener!);
@@ -322,6 +325,95 @@ void main() {
         defaultOption: '.bottomLeft',
         tester: tester,
       );
+    });
+  });
+
+  group('filtering editable arguments', () {
+    testWidgets('can filter by name', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Filter by the "width" property.
+      final filterField = _findFilterField();
+      expect(filterField, findsOneWidget);
+      await _inputText(filterField, text: 'width', tester: tester);
+
+      // Verify only the "width" property is visible.
+      expect(widthInput, findsOneWidget);
+      expect(titleInput, findsNothing);
+      expect(heightInput, findsNothing);
+    });
+
+    testWidgets('can filter by type', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Filter by the "double" type.
+      final filterField = _findFilterField();
+      expect(filterField, findsOneWidget);
+      await _inputText(filterField, text: 'double', tester: tester);
+
+      // Verify only the "width" and "height" properties are visible.
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+      expect(titleInput, findsNothing);
+    });
+
+    testWidgets('can filter by value', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Filter by the "Hello world!" value.
+      final filterField = _findFilterField();
+      expect(filterField, findsOneWidget);
+      await _inputText(filterField, text: 'Hello world!', tester: tester);
+
+      // Verify only the "title" property is visible.
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsNothing);
+      expect(heightInput, findsNothing);
     });
   });
 
@@ -748,6 +840,11 @@ void main() {
 
 final _findNoPropertiesMessage = find.text(
   'No widget properties at current cursor location.',
+);
+
+Finder _findFilterField() => find.descendant(
+  of: find.byType(StandaloneFilterField<EditableProperty>),
+  matching: find.byType(TextField),
 );
 
 Finder _findTextFormField(String inputName) => find.ancestor(
