@@ -5,11 +5,11 @@
 import 'package:flutter/widgets.dart';
 import '_utils_desktop.dart' if (dart.library.js_interop) '_utils_web.dart';
 
-/// Converts a [dartDocText] String into a [RichText] widget.
+/// Converts a [dartDocText] String into a [Text] widget.
 ///
 /// Removes any brackets and backticks and displays the text inside them as
 /// fixed font.
-RichText convertDartDocToRichText(
+Text convertDartDocToText(
   String dartDocText, {
   required TextStyle regularFontStyle,
   required TextStyle fixedFontStyle,
@@ -75,7 +75,7 @@ RichText convertDartDocToRichText(
     }
   }
 
-  return RichText(text: TextSpan(children: children));
+  return Text.rich(TextSpan(children: children));
 }
 
 /// Workaround to force reload the Property Editor when it disconnects.

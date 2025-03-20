@@ -308,7 +308,7 @@ class _NoEditablePropertiesMessage extends StatelessWidget {
                 ' has no editable widget properties.\n\nThe Flutter Property Editor currently supports editing properties of type ',
             style: theme.regularTextStyle,
           ),
-          TextSpan(text: 'string', style: fixedFontStyle),
+          TextSpan(text: 'String', style: fixedFontStyle),
           const TextSpan(text: ', '),
           TextSpan(text: 'int', style: fixedFontStyle),
           const TextSpan(text: ', '),
@@ -341,31 +341,36 @@ class _WidgetNameAndDocumentation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: denseSpacing),
-          child: Text(
-            name,
-            style: Theme.of(context).fixedFontStyle.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: defaultFontSize + 1,
-            ),
-          ),
-        ),
-        Row(
-          children: [
-            Expanded(
-              child: _ExpandableWidgetDocumentation(
-                documentation:
-                    documentation ?? 'Creates ${addIndefiniteArticle(name)}.',
+    return SelectionArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: denseSpacing),
+              child: Text(
+                name,
+                style: Theme.of(context).fixedFontStyle.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: defaultFontSize + 1,
+                ),
               ),
             ),
-          ],
-        ),
-        const PaddedDivider.noPadding(),
-      ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: _ExpandableWidgetDocumentation(
+                  documentation:
+                      documentation ?? 'Creates ${addIndefiniteArticle(name)}.',
+                ),
+              ),
+            ],
+          ),
+          const PaddedDivider.noPadding(),
+        ],
+      ),
     );
   }
 }
@@ -410,7 +415,7 @@ class _ExpandableWidgetDocumentationState
     final paragraphs = widget.documentation.split('\n');
 
     if (paragraphs.length == 1) {
-      return convertDartDocToRichText(
+      return convertDartDocToText(
         widget.documentation,
         regularFontStyle: regularFontStyle,
         fixedFontStyle: fixedFontStyle,
@@ -426,7 +431,7 @@ class _ExpandableWidgetDocumentationState
         // or collapses the text block. Because the Dart doc is never very
         // large, this is not an expensive operation. However, we could
         // consider caching the result if this needs to be optimized.
-        convertDartDocToRichText(
+        convertDartDocToText(
           firstParagraph,
           regularFontStyle: regularFontStyle,
           fixedFontStyle: fixedFontStyle,
@@ -434,7 +439,7 @@ class _ExpandableWidgetDocumentationState
         if (_isExpanded)
           FadeTransition(
             opacity: _expandAnimation,
-            child: convertDartDocToRichText(
+            child: convertDartDocToText(
               otherParagraphs.join('\n'),
               regularFontStyle: regularFontStyle,
               fixedFontStyle: fixedFontStyle,
