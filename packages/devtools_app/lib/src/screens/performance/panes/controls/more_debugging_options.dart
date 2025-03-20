@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
-import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import 'performance_controls.dart';
 
@@ -29,7 +28,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
         extensions.disableClipLayers,
         extensions.disableOpacityLayers,
         extensions.disablePhysicalShapeLayers,
-        if (FeatureFlags.widgetRebuildStats) extensions.countWidgetBuilds,
+        extensions.countWidgetBuilds,
       ],
       overlayDescription: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

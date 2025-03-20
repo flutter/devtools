@@ -36,11 +36,6 @@ void setEnableExperiments() {
 @visibleForTesting
 bool get enableBeta => enableExperiments || !isExternalBuild;
 
-const _kMemoryDisconnectExperience = bool.fromEnvironment(
-  'memory_disconnect_experience',
-  defaultValue: true,
-);
-
 const _kNetworkDisconnectExperience = bool.fromEnvironment(
   'network_disconnect_experience',
   defaultValue: true,
@@ -53,28 +48,11 @@ const _kNetworkDisconnectExperience = bool.fromEnvironment(
 /// When adding a new feature flag, the developer is responsible for adding it
 /// to the [_allFlags] map for debugging purposes.
 abstract class FeatureFlags {
-  /// Example usage of a flag for a beta feature.
-  static bool myBetaFeature = enableBeta;
-
-  /// Example usage of a flag for an experimental feature.
-  static bool myExperimentalFeature = enableExperiments;
-
   /// Flag to enable the DevTools memory observer, which attempts to help users
   /// avoid OOM crashes.
   ///
   /// https://github.com/flutter/devtools/issues/7002
   static bool memoryObserver = true;
-
-  /// Flag to enable widget rebuild stats ui.
-  ///
-  /// https://github.com/flutter/devtools/issues/4564.
-  static bool widgetRebuildStats = true;
-
-  /// Flag to enable viewing offline data on the memory screen when an app
-  /// disconnects.
-  ///
-  /// https://github.com/flutter/devtools/issues/5606
-  static const memoryDisconnectExperience = _kMemoryDisconnectExperience;
 
   /// Flag to enable save/load for the Memory screen.
   ///
@@ -91,17 +69,6 @@ abstract class FeatureFlags {
   ///
   /// https://github.com/flutter/devtools/issues/4470
   static bool networkSaveLoad = true;
-
-  /// Flag to enable the deep link validation tooling in DevTools, both for the
-  /// DevTools screen and the standalone tool for IDE embedding.
-  ///
-  /// https://github.com/flutter/devtools/issues/6013
-  static bool deepLinkValidation = true;
-
-  /// Flag to enable ios checks in deep link validation.
-  ///
-  /// https://github.com/flutter/devtools/issues/7799
-  static bool deepLinkIosCheck = true;
 
   /// Flag to enable DevTools extensions.
   ///
@@ -134,9 +101,10 @@ abstract class FeatureFlags {
   /// When adding a new flag, you are responsible for adding it to this map as
   /// well.
   static final _allFlags = <String, bool>{
-    'widgetRebuildStats': widgetRebuildStats,
+    'memoryObserver': memoryObserver,
     'memorySaveLoad': memorySaveLoad,
-    'deepLinkIosCheck': deepLinkIosCheck,
+    'networkDisconnectExperience': networkDisconnectExperience,
+    'networkSaveLoad': networkSaveLoad,
     'dapDebugging': dapDebugging,
     'inspectorV2': inspectorV2,
     'wasmOptInSetting': wasmOptInSetting,
