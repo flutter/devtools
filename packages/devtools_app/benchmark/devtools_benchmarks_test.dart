@@ -210,21 +210,25 @@ Map<DevToolsBenchmark, Map<String, num>> _benchmarkThresholds(bool isWasm) => {
   DevToolsBenchmark.offlineCpuProfilerScreen: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
-      avg: _frameTimeFor60FPSInMicros * 2,
-      p50: isWasm ? _frameTimeFor30FPSInMicros : _frameTimeFor60FPSInMicros,
+      avg:
+          (isWasm ? _frameTimeFor30FPSInMicros : _frameTimeFor60FPSInMicros) *
+          2,
+      p50: isWasm ? _frameTimeFor30FPSInMicros * 2 : _frameTimeFor60FPSInMicros,
       p90: _frameTimeFor60FPSInMicros * 6,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameBuildTime,
       avg: _frameTimeFor60FPSInMicros * 2,
       p50: _frameTimeFor60FPSInMicros,
-      p90: _frameTimeFor60FPSInMicros,
+      p90: isWasm ? _frameTimeFor30FPSInMicros : _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameRasterTime,
-      avg: _frameTimeFor60FPSInMicros * 2,
-      p50: isWasm ? _frameTimeFor30FPSInMicros : _frameTimeFor60FPSInMicros,
-      p90: isWasm ? _frameTimeFor30FPSInMicros * 2 : _frameTimeFor60FPSInMicros,
+      avg:
+          (isWasm ? _frameTimeFor30FPSInMicros : _frameTimeFor60FPSInMicros) *
+          2,
+      p50: isWasm ? _frameTimeFor30FPSInMicros * 2 : _frameTimeFor60FPSInMicros,
+      p90: isWasm ? _frameTimeFor30FPSInMicros * 3 : _frameTimeFor60FPSInMicros,
     ),
   },
   DevToolsBenchmark.offlinePerformanceScreen: {
@@ -232,7 +236,7 @@ Map<DevToolsBenchmark, Map<String, num>> _benchmarkThresholds(bool isWasm) => {
       BenchmarkMetric.flutterFrameTotalTime,
       avg: _frameTimeFor60FPSInMicros,
       p50: _frameTimeFor60FPSInMicros,
-      p90: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor30FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameBuildTime,

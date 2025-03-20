@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport 'package:vm_service/vm_service.dart';
+library;
+
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -408,7 +411,7 @@ class StructuredErrorsToggle extends StatelessWidget {
 
 /// [Switch] that stays synced with the value of a service extension.
 ///
-/// Service extensions can be found in [service_extensions.dart].
+/// Service extensions can be found in `service_extensions.dart`.
 class _ServiceExtensionToggle extends ServiceExtensionWidget {
   const _ServiceExtensionToggle({
     required this.service,
@@ -492,7 +495,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
 
 /// [Checkbox] that stays synced with the value of a service extension.
 ///
-/// Service extensions can be found in [service_extensions.dart].
+/// Service extensions can be found in `service_extensions.dart`.
 class ServiceExtensionCheckbox extends ServiceExtensionWidget {
   ServiceExtensionCheckbox({
     super.key,
@@ -927,12 +930,12 @@ abstract class ServiceExtensionWidget extends StatefulWidget {
 
   /// The text to show when the action is completed.
   ///
-  /// This will be shown in a [SnackBar], replacing the [inProgressText].
+  /// This will be shown in a [SnackBar], replacing the `inProgressText`.
   final String? completedText;
 
   /// Callback that describes any error that occurs.
   ///
-  /// This will replace the [inProgressText] in a [SnackBar].
+  /// This will replace the `inProgressText` in a [SnackBar].
   final String Function(Object? error) describeError;
 
   @override

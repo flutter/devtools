@@ -128,7 +128,7 @@ class ProfileMetaData {
 /// Process for converting a [ProfilableDataMixin] into a bottom-up
 /// representation of the profile.
 ///
-/// [rootedAtTags] specifies whether or not the top-down tree is rooted
+/// `rootedAtTags` specifies whether or not the top-down tree is rooted
 /// at synthetic nodes representing user / VM tags.
 class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   Future<List<T>> bottomUpRootsFor({

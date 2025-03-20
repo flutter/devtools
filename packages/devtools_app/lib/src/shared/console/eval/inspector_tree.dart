@@ -180,8 +180,6 @@ class InspectorTreeNode {
 
   // TODO(jacobr): move this method to the InspectorTree class.
   // TODO: optimize this method.
-  /// Use [getCachedRow] wherever possible, as [getRow] is slow and can cause
-  /// performance problems.
   InspectorTreeRow? getRow(int index) {
     if (subtreeSize <= index) {
       return null;
