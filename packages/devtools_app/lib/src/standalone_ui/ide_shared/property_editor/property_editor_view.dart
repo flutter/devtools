@@ -345,16 +345,14 @@ class _WidgetNameAndDocumentation extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Align(
+          Container(
             alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: denseSpacing),
-              child: Text(
-                name,
-                style: Theme.of(context).fixedFontStyle.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: defaultFontSize + 1,
-                ),
+            padding: const EdgeInsets.only(bottom: denseSpacing),
+            child: Text(
+              name,
+              style: Theme.of(context).fixedFontStyle.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: defaultFontSize + 1,
               ),
             ),
           ),
