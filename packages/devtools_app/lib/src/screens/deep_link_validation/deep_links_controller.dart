@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
-import '../../shared/feature_flags.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
@@ -281,16 +280,14 @@ class DeepLinksController extends DevToolsScreenController
       selectedProject.value!.androidVariants,
       containsString: 'release',
     );
-    if (FeatureFlags.deepLinkIosCheck) {
-      _selectedIosConfigurationIndex.value = _getDefaultConfigurationIndex(
-        selectedProject.value!.iosBuildOptions.configurations,
-        containsString: 'release',
-      );
-      _selectedIosTargetIndex.value = _getDefaultConfigurationIndex(
-        selectedProject.value!.iosBuildOptions.configurations,
-        containsString: 'runner',
-      );
-    }
+    _selectedIosConfigurationIndex.value = _getDefaultConfigurationIndex(
+      selectedProject.value!.iosBuildOptions.configurations,
+      containsString: 'release',
+    );
+    _selectedIosTargetIndex.value = _getDefaultConfigurationIndex(
+      selectedProject.value!.iosBuildOptions.configurations,
+      containsString: 'runner',
+    );
     await loadLinksAndValidate();
   }
 
@@ -398,11 +395,9 @@ class DeepLinksController extends DevToolsScreenController
     if (pagePhase.value == PagePhase.validationErrorPage) {
       return;
     }
-    if (FeatureFlags.deepLinkIosCheck) {
-      await _loadIosLinks();
-      if (pagePhase.value == PagePhase.validationErrorPage) {
-        return;
-      }
+    await _loadIosLinks();
+    if (pagePhase.value == PagePhase.validationErrorPage) {
+      return;
     }
     await validateLinks();
   }
@@ -575,8 +570,7 @@ class DeepLinksController extends DevToolsScreenController
         googlePlayFingerprintsAvailability.value =
             androidResult.googlePlayFingerprintsAvailability;
       }
-      if (FeatureFlags.deepLinkIosCheck &&
-          currentUniversalLinkSettings != null) {
+      if (currentUniversalLinkSettings != null) {
         ga.impression(
           gac.deeplink,
           gac.AnalyzeFlutterProject.iosValidateDomain.name,
@@ -683,10 +677,7 @@ class DeepLinksController extends DevToolsScreenController
       return;
     }
     pagePhase.value = PagePhase.linksValidating;
-    List<LinkData> linkdata = [
-      ..._rawAndroidLinkDatas,
-      if (FeatureFlags.deepLinkIosCheck) ..._rawIosLinkDatas,
-    ];
+    List<LinkData> linkdata = [..._rawAndroidLinkDatas, ..._rawIosLinkDatas];
     if (linkdata.isEmpty) {
       ga.select(gac.deeplink, gac.AnalyzeFlutterProject.flutterNoAppLink.name);
       pagePhase.value = PagePhase.noLinks;

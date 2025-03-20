@@ -10,7 +10,6 @@ import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.d
 import 'package:devtools_app/src/screens/deep_link_validation/project_root_selection/root_selector.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/project_root_selection/select_project_view.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/validation_details_view.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -53,7 +52,6 @@ void main() {
       return UriList(uris: mockProjectRootUris);
     });
     setGlobal(DTDManager, mockDtdManager);
-    FeatureFlags.deepLinkIosCheck = true;
   });
 
   late DeepLinksScreen screen;

@@ -716,11 +716,10 @@ List<DevToolsScreen> defaultScreens({
       AppSizeScreen(),
       createController: (_) => AppSizeController(),
     ),
-    if (FeatureFlags.deepLinkValidation)
-      DevToolsScreen<DeepLinksController>(
-        DeepLinksScreen(),
-        createController: (_) => DeepLinksController(),
-      ),
+    DevToolsScreen<DeepLinksController>(
+      DeepLinksScreen(),
+      createController: (_) => DeepLinksController(),
+    ),
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(),
       createController: (_) => VMDeveloperToolsController(),

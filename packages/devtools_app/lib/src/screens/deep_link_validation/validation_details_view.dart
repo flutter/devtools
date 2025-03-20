@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/feature_flags.dart';
 import '../../shared/ui/colors.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/utils/utils.dart';
@@ -60,8 +59,7 @@ class ValidationDetailView extends StatelessWidget {
                 if (viewType == TableViewType.pathView ||
                     viewType == TableViewType.singleUrlView)
                   _PathCheckTable(controller: controller),
-                if (FeatureFlags.deepLinkIosCheck &&
-                    viewType == TableViewType.domainView)
+                if (viewType == TableViewType.domainView)
                   _CrossCheckTable(controller: controller),
                 const SizedBox(height: extraLargeSpacing),
                 Align(
@@ -167,8 +165,7 @@ class _DomainCheckTable extends StatelessWidget {
                   ],
                 ],
               ),
-            if (FeatureFlags.deepLinkIosCheck &&
-                linkData.os.contains(PlatformOS.ios))
+            if (linkData.os.contains(PlatformOS.ios))
               _CheckExpansionTile(
                 os: PlatformOS.ios,
                 checkName: 'Apple-App-Site-Association file',

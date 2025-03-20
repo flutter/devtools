@@ -9,7 +9,6 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tab.dart';
@@ -58,7 +57,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!;
 
     var showFrameAnalysis = isFlutterApp;
-    var showRebuildStats = FeatureFlags.widgetRebuildStats && isFlutterApp;
+    var showRebuildStats = isFlutterApp;
     final offlineData = controller.offlinePerformanceData;
     if (isOffline) {
       final hasOfflineData = offlineData != null;

@@ -6,7 +6,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
@@ -264,28 +263,27 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
             configurations: controller.selectedProject.value!.androidVariants,
             onChanged: controller.updateSelectedAndroidVariantIndex,
           ),
-          if (FeatureFlags.deepLinkIosCheck) ...[
-            const SizedBox(width: denseSpacing),
-            _ConfigurationDropdown(
-              title: 'iOS Configuration:',
-              valueListenable: controller.selectedIosConfigurationIndex,
-              configurations:
-                  controller
-                      .selectedProject
-                      .value!
-                      .iosBuildOptions
-                      .configurations,
-              onChanged: controller.updateSelectedIosConfigurationIndex,
-            ),
-            const SizedBox(width: denseSpacing),
-            _ConfigurationDropdown(
-              title: 'iOS Target:',
-              valueListenable: controller.selectedIosTargetIndex,
-              configurations:
-                  controller.selectedProject.value!.iosBuildOptions.targets,
-              onChanged: controller.updateSelectedIosTargetIndex,
-            ),
-          ],
+
+          const SizedBox(width: denseSpacing),
+          _ConfigurationDropdown(
+            title: 'iOS Configuration:',
+            valueListenable: controller.selectedIosConfigurationIndex,
+            configurations:
+                controller
+                    .selectedProject
+                    .value!
+                    .iosBuildOptions
+                    .configurations,
+            onChanged: controller.updateSelectedIosConfigurationIndex,
+          ),
+          const SizedBox(width: denseSpacing),
+          _ConfigurationDropdown(
+            title: 'iOS Target:',
+            valueListenable: controller.selectedIosTargetIndex,
+            configurations:
+                controller.selectedProject.value!.iosBuildOptions.targets,
+            onChanged: controller.updateSelectedIosTargetIndex,
+          ),
         ],
       ),
     );
