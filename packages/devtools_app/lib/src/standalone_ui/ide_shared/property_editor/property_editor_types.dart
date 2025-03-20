@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/primitives/utils.dart';
-import '../../../shared/ui/search.dart';
 
 /// Record representing an option for an [EditableProperty].
 typedef PropertyOption = ({String text, bool isDefault});
