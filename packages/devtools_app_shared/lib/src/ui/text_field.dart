@@ -34,8 +34,6 @@ final class DevToolsClearableTextField extends StatelessWidget {
   final bool? enabled;
   final bool roundedBorder;
 
-  static const _contentVerticalPadding = 6.0;
-
   /// This is the default border radius used by the [OutlineInputBorder]
   /// constructor.
   static const _defaultInputBorderRadius =
