@@ -56,6 +56,7 @@ void main() {
 
   group('on cursor location change', () {
     void Function()? listener;
+    Completer? getEditableArgsCalled;
 
     Future<List<EditableArgument>> waitForEditableArgs() {
       final argsCompleter = Completer<List<EditableArgument>>();
@@ -84,6 +85,7 @@ void main() {
     }
 
     setUp(() {
+      getEditableArgsCalled = Completer<void>();
       for (final MapEntry(key: location, value: result)
           in locationToArgsResult.entries) {
         when(
@@ -92,7 +94,10 @@ void main() {
             textDocument: location.document,
             position: location.position,
           ),
-        ).thenAnswer((realInvocation) => Future.value(result));
+        ).thenAnswer((realInvocation) {
+          getEditableArgsCalled?.complete();
+          return Future.value(result);
+        });
       }
     });
 
@@ -170,6 +175,38 @@ void main() {
         expect(titleInput, findsOneWidget);
         final titleValue = _textFormFieldValue(titleInput, tester: tester);
         expect(titleValue, equals('Hello world!'));
+      });
+    });
+
+    testWidgets('verify does not fetch editable arguments for non-Dart files', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+        final getEditableArgsCalledFuture = getEditableArgsCalled!.future;
+
+        // Send an active location changed event.
+        eventController.add(activeLocationChangedEventNotDart);
+
+        // Verify it doesn't trigger a request to getEditableArgs.
+        try {
+          await getEditableArgsCalledFuture.timeout(
+            const Duration(milliseconds: 100),
+          );
+          fail('getEditableArgs was unexpectedly called.');
+        } on TimeoutException catch (e) {
+          expect(e, isA<TimeoutException>());
+        }
+
+        // Verify "No Dart code" message is shown.
+        await tester.pumpAndSettle();
+        expect(
+          find.textContaining(
+            'No Dart code found at the current cursor location.',
+          ),
+          findsOneWidget,
+        );
       });
     });
   });
@@ -921,6 +958,15 @@ final editorSelection4 = EditorSelection(
 final activeLocationChangedEvent4 = ActiveLocationChangedEvent(
   selections: [editorSelection4],
   textDocument: textDocument1,
+);
+
+final notADartDocument = TextDocument(
+  uriAsString: '/my/fake/other.js',
+  version: 1,
+);
+final activeLocationChangedEventNotDart = ActiveLocationChangedEvent(
+  selections: [editorSelection1],
+  textDocument: notADartDocument,
 );
 
 // Widget name and documentation
