@@ -2283,3 +2283,58 @@ class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
     );
   }
 }
+
+/// Creates an overlay with the provided [content].
+///
+/// Set [fullScreen] to true to take up the entire screen. Otherwise, a
+/// [maxSize] and [topOffset] can be provided to determine the overlay's size
+/// and location.
+class DevToolsOverlay extends StatelessWidget {
+  const DevToolsOverlay({
+    super.key,
+    required this.content,
+    this.fullScreen = false,
+    this.maxSize,
+    this.topOffset,
+  }) : assert(maxSize != null || topOffset != null ? !fullScreen : true);
+
+  final Widget content;
+  final bool fullScreen;
+  final Size? maxSize;
+  final double? topOffset;
+
+  @override
+  Widget build(BuildContext context) {
+    final parentSize = MediaQuery.of(context).size;
+
+    final overlayContent = Container(
+      width: _overlayWidth(parentSize),
+      height: _overlayHeight(parentSize),
+      color: Theme.of(context).colorScheme.semiTransparentOverlayColor,
+      child: Center(child: content),
+    );
+
+    return fullScreen
+        ? overlayContent
+        : Center(
+          child: Padding(
+            padding: EdgeInsets.only(top: topOffset ?? 0.0),
+            child: RoundedOutlinedBorder(clip: true, child: overlayContent),
+          ),
+        );
+  }
+
+  double _overlayWidth(Size parentSize) {
+    if (fullScreen) return parentSize.width;
+    final defaultWidth = parentSize.width - largeSpacing;
+    return maxSize != null ? min(maxSize!.width, defaultWidth) : defaultWidth;
+  }
+
+  double _overlayHeight(Size parentSize) {
+    if (fullScreen) return parentSize.height;
+    final defaultHeight = parentSize.height - largeSpacing;
+    return maxSize != null
+        ? min(maxSize!.height, defaultHeight)
+        : defaultHeight;
+  }
+}

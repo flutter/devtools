@@ -37,8 +37,14 @@ class PropertyEditorView extends StatelessWidget {
 
         final editableWidgetData = values.third as EditableWidgetData?;
         if (editableWidgetData == null) {
-          return const CenteredMessage(
-            message: 'No Flutter widget found at the current cursor location.',
+          final introSentence =
+              controller.waitingForFirstEvent
+                  ? '👋 Welcome to the Flutter Property Editor!'
+                  : 'No Flutter widget found at the current cursor location.';
+          const howToUseSentence =
+              'Please move your cursor to a Flutter widget constructor invocation to view its properties.';
+          return CenteredMessage(
+            message: '$introSentence\n\n$howToUseSentence',
           );
         }
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -65,40 +64,21 @@ class _TimelineEventsTabViewState extends State<TimelineEventsTabView>
   }
 
   void _insertOverlay() {
-    final width = math.min(
-      _overlaySize.width,
-      MediaQuery.of(context).size.width - 2 * denseSpacing,
-    );
-    final height = math.min(
-      _overlaySize.height,
-      MediaQuery.of(context).size.height - 2 * denseSpacing,
-    );
     final theme = Theme.of(context);
     _refreshingOverlay?.remove();
     Overlay.of(context).insert(
       _refreshingOverlay = OverlayEntry(
         maintainState: true,
         builder: (context) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top: _overlayOffset),
-              child: RoundedOutlinedBorder(
-                clip: true,
-                child: Container(
-                  width: width,
-                  height: height,
-                  color: theme.colorScheme.semiTransparentOverlayColor,
-                  child: Center(
-                    child: Text(
-                      'Refreshing the timeline...\n\n'
-                      'This may take a few seconds. Please do not\n'
-                      'refresh the page.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ),
-                ),
-              ),
+          return DevToolsOverlay(
+            topOffset: _overlayOffset,
+            maxSize: _overlaySize,
+            content: Text(
+              'Refreshing the timeline...\n\n'
+              'This may take a few seconds. Please do not\n'
+              'refresh the page.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium,
             ),
           );
         },
