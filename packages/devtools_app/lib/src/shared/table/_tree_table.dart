@@ -59,8 +59,8 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// and scroll position for this table (when [preserveVerticalScrollPosition]
   /// is true).
   ///
-  /// We use [TableUiStateStore] to store [_TableUiState] by this key so that
-  /// we can save and restore this state without having to keep [State] or table
+  /// We use [TableUiStateStore] to store [TableUiState] by this key so that we
+  /// can save and restore this state without having to keep [State] or table
   /// controller objects alive.
   final String dataKey;
 

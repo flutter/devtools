@@ -28,7 +28,6 @@ class EvalScope {
   /// Refreshes variables in scope in response to failed eval.
   ///
   /// Returns true, if eval should retry.
-  /// Sets [refreshScopeChangeMessage] if scope changed.
   Future<bool> refreshRefs(String isolateId) async {
     removedVariables.clear();
     final isolateItems = _refs[isolateId] ?? {};

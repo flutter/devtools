@@ -6,11 +6,11 @@ part of 'table.dart';
 
 /// A [FlatTable] widget that is searchable.
 ///
-/// The table requires a [searchController], which is responsible for feeding
+/// The table requires a [SearchController], which is responsible for feeding
 /// information about search matches and the active search match to the table.
 ///
 /// This table will automatically refresh search matches on the
-/// [searchController] after sort operations that are triggered from the table.
+/// [SearchController] after sort operations that are triggered from the table.
 class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable<T> {
   SearchableFlatTable({
     super.key,
@@ -136,8 +136,8 @@ class FlatTable<T> extends StatefulWidget {
   /// and scroll position for this table (when [preserveVerticalScrollPosition]
   /// is true).
   ///
-  /// We use [TableUiStateStore] to store [_TableUiState] by this key so that
-  /// we can save and restore this state without having to keep [State] or table
+  /// We use [TableUiStateStore] to store [TableUiState] by this key so that we
+  /// can save and restore this state without having to keep [State] or table
   /// controller objects alive.
   final String dataKey;
 
