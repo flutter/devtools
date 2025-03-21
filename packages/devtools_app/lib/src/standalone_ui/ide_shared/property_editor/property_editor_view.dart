@@ -139,9 +139,22 @@ class _EditablePropertyItem extends StatelessWidget {
           flex: 3,
           child: Padding(
             padding: const EdgeInsets.all(_PropertiesList.defaultItemPadding),
-            child: _PropertyInput(
-              property: property,
-              editProperty: editProperty,
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: largeSpacing,
+                    right: densePadding,
+                  ),
+                  child: _InfoTooltip(property: property),
+                ),
+                Expanded(
+                  child: _PropertyInput(
+                    property: property,
+                    editProperty: editProperty,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -235,6 +248,20 @@ class _PropertyLabels extends StatelessWidget {
 
   String _maybeTruncateLabel(String labelText, {required double width}) =>
       width >= _widthForFullLabels ? labelText : labelText[0].toUpperCase();
+}
+
+class _InfoTooltip extends StatelessWidget {
+  const _InfoTooltip({required this.property});
+
+  final EditableProperty property;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      message: property.documentation,
+      child: Icon(size: defaultIconSize, Icons.info_outline),
+    );
+  }
 }
 
 class _PropertyInput extends StatelessWidget {

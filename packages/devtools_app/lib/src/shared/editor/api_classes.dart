@@ -529,6 +529,7 @@ class EditableArgument with Serializable {
     this.value,
     this.defaultValue,
     this.displayValue,
+    this.documentation,
     this.errorText,
   });
 
@@ -545,6 +546,7 @@ class EditableArgument with Serializable {
         value: map[Field.value],
         defaultValue: map[Field.defaultValue],
         displayValue: map[Field.displayValue] as String?,
+        documentation: map[Field.documentation] as String?,
         errorText: map[Field.errorText] as String?,
       );
 
@@ -595,6 +597,9 @@ class EditableArgument with Serializable {
   /// as the value field, for example an expression or named constant.
   final String? displayValue;
 
+  /// Documentation about the widget argument.
+  final String? documentation;
+
   final String? errorText;
 
   String get valueDisplay => displayValue ?? currentValue.toString();
@@ -615,6 +620,7 @@ class EditableArgument with Serializable {
     Field.isEditable: isEditable,
     Field.options: options,
     Field.displayValue: displayValue,
+    Field.documentation: documentation,
     Field.errorText: errorText,
   };
 }
