@@ -50,8 +50,7 @@ class PropertyEditorView extends StatelessWidget {
           );
         }
 
-        final (:properties, :name, :documentation, :fileUri) =
-            editableWidgetData;
+        final fileUri = controller.fileUri;
         if (fileUri != null && !fileUri.endsWith('.dart')) {
           return const CenteredMessage(
             message: 'No Dart code found at the current cursor location.',
@@ -59,16 +58,17 @@ class PropertyEditorView extends StatelessWidget {
         }
 
         final filteredProperties = values.fourth as List<EditableProperty>;
+        final widgetName = controller.widgetName;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (name != null)
+            if (widgetName != null)
               _WidgetNameAndDocumentation(
-                name: name,
-                documentation: documentation,
+                name: widgetName,
+                documentation: controller.widgetDocumentation,
               ),
-            properties.isEmpty
-                ? _NoEditablePropertiesMessage(name: name)
+            controller.allProperties.isEmpty
+                ? _NoEditablePropertiesMessage(name: controller.widgetName)
                 : _PropertiesList(
                   controller: controller,
                   editableProperties: filteredProperties,
@@ -122,6 +122,7 @@ class _PropertiesListState extends State<_PropertiesList> {
           _EditablePropertyItem(
             property: property,
             editProperty: widget.controller.editArgument,
+            widgetDocumentation: widget.controller.widgetDocumentation,
           ),
       ].joinWith(const PaddedDivider.noPadding()),
     );
@@ -132,10 +133,12 @@ class _EditablePropertyItem extends StatelessWidget {
   const _EditablePropertyItem({
     required this.property,
     required this.editProperty,
+    required this.widgetDocumentation,
   });
 
   final EditableProperty property;
   final EditArgumentFunction editProperty;
+  final String? widgetDocumentation;
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +156,10 @@ class _EditablePropertyItem extends StatelessWidget {
                     bottom: largeSpacing,
                     right: densePadding,
                   ),
-                  child: _InfoTooltip(property: property),
+                  child: _InfoTooltip(
+                    property: property,
+                    widgetDocumentation: widgetDocumentation,
+                  ),
                 ),
                 Expanded(
                   child: _PropertyInput(
@@ -258,16 +264,56 @@ class _PropertyLabels extends StatelessWidget {
 }
 
 class _InfoTooltip extends StatelessWidget {
-  const _InfoTooltip({required this.property});
+  const _InfoTooltip({
+    required this.property,
+    required this.widgetDocumentation,
+  });
 
   final EditableProperty property;
+  final String? widgetDocumentation;
 
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
-      message: property.documentation,
+      richMessage: _infoMessage(context),
       child: Icon(size: defaultIconSize, Icons.info_outline),
     );
+  }
+
+  TextSpan _infoMessage(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.tooltipTextColor;
+    final regularFontStyle = theme.regularTextStyle.copyWith(color: textColor);
+    final boldFontStyle = theme.boldTextStyle.copyWith(color: textColor);
+    final fixedFontStyle = theme.fixedFontStyle.copyWith(color: textColor);
+
+    final spans =
+        property.hasDefault
+            ? [
+              TextSpan(text: 'Default value: ', style: boldFontStyle),
+              TextSpan(
+                text: property.defaultValue.toString(),
+                style: fixedFontStyle,
+              ),
+            ]
+            : [
+              TextSpan(text: 'Default value:\n', style: boldFontStyle),
+              TextSpan(text: property.name, style: fixedFontStyle),
+              TextSpan(text: ' has no default value.', style: regularFontStyle),
+            ];
+
+    final documentation = property.documentation;
+    if (documentation != null && documentation != widgetDocumentation) {
+      spans.addAll([
+        TextSpan(text: '\n\nDocumentation:\n', style: boldFontStyle),
+        ...DartDocConverter(documentation).toTextSpans(
+          regularFontStyle: regularFontStyle,
+          fixedFontStyle: fixedFontStyle,
+        ),
+      ]);
+    }
+
+    return TextSpan(children: spans);
   }
 }
 
