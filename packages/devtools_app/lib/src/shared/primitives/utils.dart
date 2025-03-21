@@ -561,11 +561,11 @@ double safeDivide(
 /// Unlike [ChangeNotifier], [Reporter] stores listeners in a set.  This allows
 /// O(1) addition/removal of listeners and O(N) listener dispatch.
 ///
-/// For small N (~ <20), [ChangeNotifier] implementations can be faster because
+/// For small N (~ &lt;20), [ChangeNotifier] implementations can be faster because
 /// array access is more efficient than set access. Use [Reporter] instead in
 /// cases where N is larger.
 ///
-/// When disposing, any object with a registered listener should [unregister]
+/// When disposing, any object with a registered listener should `unregister`
 /// itself.
 ///
 /// Only the object that created this reporter should call [notify].

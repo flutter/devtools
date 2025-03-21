@@ -12,9 +12,9 @@ import '_copy_to_clipboard_desktop.dart'
 
 final _log = Logger('copy_to_clipboard');
 
-/// Attempts to copy a String of `data` to the clipboard.
+/// Attempts to copy a String of [data] to the clipboard.
 ///
-/// Shows a [successMessage] [Notification] on the passed in `context`, if the
+/// Shows a [successMessage] Notification on the passed in `context`, if the
 /// copy is successfully done using the [Clipboard.setData] api. Otherwise it
 /// attempts to post the [data] to the parent frame where the parent frame will
 /// try to complete the copy (this fallback will only work in VSCode). When
