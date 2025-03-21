@@ -34,8 +34,6 @@ final class DevToolsClearableTextField extends StatelessWidget {
   final bool? enabled;
   final bool roundedBorder;
 
-  static const _contentVerticalPadding = 6.0;
-
   /// This is the default border radius used by the [OutlineInputBorder]
   /// constructor.
   static const _defaultInputBorderRadius =
@@ -45,8 +43,10 @@ final class DevToolsClearableTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SizedBox(
-      height: defaultTextFieldHeight,
+      height: defaultTextFieldHeight + densePadding,
       child: TextField(
+        textAlignVertical: TextAlignVertical.center,
+        cursorHeight: defaultTextFieldHeight / 2,
         autofocus: autofocus,
         controller: controller,
         enabled: enabled,
@@ -56,10 +56,9 @@ final class DevToolsClearableTextField extends StatelessWidget {
         decoration: InputDecoration(
           isDense: true,
           contentPadding: const EdgeInsets.only(
-            top: _contentVerticalPadding,
-            bottom: _contentVerticalPadding,
+            top: densePadding,
+            bottom: densePadding,
             left: denseSpacing,
-            right: densePadding,
           ),
           constraints: BoxConstraints(
             minHeight: defaultTextFieldHeight,
@@ -75,20 +74,20 @@ final class DevToolsClearableTextField extends StatelessWidget {
           hintText: hintText,
           hintStyle: theme.subtleTextStyle,
           prefixIcon: prefixIcon,
-          suffix: SizedBox(
-            height: inputDecorationElementHeight,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...additionalSuffixActions,
-                InputDecorationSuffixButton.clear(
-                  onPressed: () {
-                    controller.clear();
-                    onChanged?.call('');
-                  },
-                ),
-              ],
-            ),
+          suffixIcon: SizedBox(
+              height: inputDecorationElementHeight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...additionalSuffixActions,
+                  InputDecorationSuffixButton.clear(
+                    onPressed: () {
+                      controller.clear();
+                      onChanged?.call('');
+                    },
+                  ),
+                ],
+              ),
           ),
         ),
       ),
