@@ -287,20 +287,36 @@ class _InfoTooltip extends StatelessWidget {
     final boldFontStyle = theme.boldTextStyle.copyWith(color: textColor);
     final fixedFontStyle = theme.fixedFontStyle.copyWith(color: textColor);
 
-    final spans =
+    final propertyNameSpans = [
+      TextSpan(
+        text: '${property.displayType} ',
+        style: fixedFontStyle.copyWith(fontSize: largeFontSize),
+      ),
+      TextSpan(
+        text: property.name,
+        style: fixedFontStyle.copyWith(
+          fontSize: largeFontSize,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ];
+
+    final defaultValueSpans =
         property.hasDefault
             ? [
-              TextSpan(text: 'Default value: ', style: boldFontStyle),
+              TextSpan(text: '\n\nDefault value: ', style: boldFontStyle),
               TextSpan(
                 text: property.defaultValue.toString(),
                 style: fixedFontStyle,
               ),
             ]
             : [
-              TextSpan(text: 'Default value:\n', style: boldFontStyle),
+              TextSpan(text: '\n\nDefault value:\n', style: boldFontStyle),
               TextSpan(text: property.name, style: fixedFontStyle),
               TextSpan(text: ' has no default value.', style: regularFontStyle),
             ];
+
+    final spans = [...propertyNameSpans, ...defaultValueSpans];
 
     final documentation = property.documentation;
     if (documentation != null && documentation != widgetDocumentation) {
