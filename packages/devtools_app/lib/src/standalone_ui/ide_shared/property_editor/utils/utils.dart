@@ -6,76 +6,93 @@ import 'package:flutter/widgets.dart';
 import '_utils_desktop.dart' if (dart.library.js_interop) '_utils_web.dart';
 
 /// Converts a [dartDocText] String into a [Text] widget.
-///
-/// Removes any brackets and backticks and displays the text inside them as
-/// fixed font.
-Text convertDartDocToText(
-  String dartDocText, {
-  required TextStyle regularFontStyle,
-  required TextStyle fixedFontStyle,
-}) {
-  final children = <TextSpan>[];
-  int currentIndex = 0;
+class DartDocConverter {
+  DartDocConverter(this.dartDocText);
 
-  while (currentIndex < dartDocText.length) {
-    final openBracketIndex = dartDocText.indexOf('[', currentIndex);
-    final openBacktickIndex = dartDocText.indexOf('`', currentIndex);
+  final String dartDocText;
 
-    int nextSpecialCharIndex = -1;
-    bool isLink = false;
-
-    if (openBracketIndex != -1 &&
-        (openBacktickIndex == -1 || openBracketIndex < openBacktickIndex)) {
-      nextSpecialCharIndex = openBracketIndex;
-      isLink = true;
-    } else if (openBacktickIndex != -1 &&
-        (openBracketIndex == -1 || openBacktickIndex < openBracketIndex)) {
-      nextSpecialCharIndex = openBacktickIndex;
-    }
-
-    if (nextSpecialCharIndex == -1) {
-      // No more special characters, add the remaining text.
-      children.add(
-        TextSpan(
-          text: dartDocText.substring(currentIndex),
-          style: regularFontStyle,
-        ),
-      );
-      break;
-    }
-
-    // Add text before the special character.
-    children.add(
-      TextSpan(
-        text: dartDocText.substring(currentIndex, nextSpecialCharIndex),
-        style: regularFontStyle,
-      ),
+  /// Converts the [dartDocText] String into a [Text] widget.
+  ///
+  /// Removes any brackets and backticks and displays the text inside them with
+  /// [fixedFontStyle]. All other text uses [regularFontStyle].
+  Text toText({
+    required TextStyle regularFontStyle,
+    required TextStyle fixedFontStyle,
+  }) {
+    final children = toTextSpans(
+      regularFontStyle: regularFontStyle,
+      fixedFontStyle: fixedFontStyle,
     );
-
-    final closeIndex = dartDocText.indexOf(
-      isLink ? ']' : '`',
-      isLink ? nextSpecialCharIndex : nextSpecialCharIndex + 1,
-    );
-    if (closeIndex == -1) {
-      // Treat unmatched brackets/backticks as regular text.
-      children.add(
-        TextSpan(
-          text: dartDocText.substring(nextSpecialCharIndex),
-          style: regularFontStyle,
-        ),
-      );
-      currentIndex = dartDocText.length; // Effectively break the loop.
-    } else {
-      final content = dartDocText.substring(
-        nextSpecialCharIndex + 1,
-        closeIndex,
-      );
-      children.add(TextSpan(text: content, style: fixedFontStyle));
-      currentIndex = closeIndex + 1;
-    }
+    return Text.rich(TextSpan(children: children));
   }
 
-  return Text.rich(TextSpan(children: children));
+  @visibleForTesting
+  List<TextSpan> toTextSpans({
+    required TextStyle regularFontStyle,
+    required TextStyle fixedFontStyle,
+  }) {
+    final children = <TextSpan>[];
+    int currentIndex = 0;
+
+    while (currentIndex < dartDocText.length) {
+      final openBracketIndex = dartDocText.indexOf('[', currentIndex);
+      final openBacktickIndex = dartDocText.indexOf('`', currentIndex);
+
+      int nextSpecialCharIndex = -1;
+      bool isLink = false;
+
+      if (openBracketIndex != -1 &&
+          (openBacktickIndex == -1 || openBracketIndex < openBacktickIndex)) {
+        nextSpecialCharIndex = openBracketIndex;
+        isLink = true;
+      } else if (openBacktickIndex != -1 &&
+          (openBracketIndex == -1 || openBacktickIndex < openBracketIndex)) {
+        nextSpecialCharIndex = openBacktickIndex;
+      }
+
+      if (nextSpecialCharIndex == -1) {
+        // No more special characters, add the remaining text.
+        children.add(
+          TextSpan(
+            text: dartDocText.substring(currentIndex),
+            style: regularFontStyle,
+          ),
+        );
+        break;
+      }
+
+      // Add text before the special character.
+      children.add(
+        TextSpan(
+          text: dartDocText.substring(currentIndex, nextSpecialCharIndex),
+          style: regularFontStyle,
+        ),
+      );
+
+      final closeIndex = dartDocText.indexOf(
+        isLink ? ']' : '`',
+        isLink ? nextSpecialCharIndex : nextSpecialCharIndex + 1,
+      );
+      if (closeIndex == -1) {
+        // Treat unmatched brackets/backticks as regular text.
+        children.add(
+          TextSpan(
+            text: dartDocText.substring(nextSpecialCharIndex),
+            style: regularFontStyle,
+          ),
+        );
+        currentIndex = dartDocText.length; // Effectively break the loop.
+      } else {
+        final content = dartDocText.substring(
+          nextSpecialCharIndex + 1,
+          closeIndex,
+        );
+        children.add(TextSpan(text: content, style: fixedFontStyle));
+        currentIndex = closeIndex + 1;
+      }
+    }
+    return children;
+  }
 }
 
 /// Workaround to force reload the Property Editor when it disconnects.

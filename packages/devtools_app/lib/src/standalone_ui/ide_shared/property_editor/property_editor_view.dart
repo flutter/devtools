@@ -413,8 +413,7 @@ class _ExpandableWidgetDocumentationState
     final paragraphs = widget.documentation.split('\n');
 
     if (paragraphs.length == 1) {
-      return convertDartDocToText(
-        widget.documentation,
+      return DartDocConverter(widget.documentation).toText(
         regularFontStyle: regularFontStyle,
         fixedFontStyle: fixedFontStyle,
       );
@@ -429,16 +428,14 @@ class _ExpandableWidgetDocumentationState
         // or collapses the text block. Because the Dart doc is never very
         // large, this is not an expensive operation. However, we could
         // consider caching the result if this needs to be optimized.
-        convertDartDocToText(
-          firstParagraph,
+        DartDocConverter(firstParagraph).toText(
           regularFontStyle: regularFontStyle,
           fixedFontStyle: fixedFontStyle,
         ),
         if (_isExpanded)
           FadeTransition(
             opacity: _expandAnimation,
-            child: convertDartDocToText(
-              otherParagraphs.join('\n'),
+            child: DartDocConverter(otherParagraphs.join('\n')).toText(
               regularFontStyle: regularFontStyle,
               fixedFontStyle: fixedFontStyle,
             ),
