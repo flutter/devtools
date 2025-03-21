@@ -154,6 +154,17 @@ void main() {
     expect(_hasStyle(secondChild, style: regularFontStyle), isTrue);
   });
 
+  testWidgets('DartDocConverter handles @template indicators', (
+    WidgetTester tester,
+  ) async {
+    final converter = DartDocConverter(_stringWithTemplates);
+    final text = converter.toText(
+      regularFontStyle: regularFontStyle,
+      fixedFontStyle: fixedFontStyle,
+    );
+    expect(text.textSpan?.toPlainText(), equals(_stringWithoutTemplates));
+  });
+
   testWidgets('DartDocConverter handles empty strings', (
     WidgetTester tester,
   ) async {
@@ -169,3 +180,15 @@ void main() {
 
 bool _hasStyle(TextSpan span, {required TextStyle style}) =>
     span.style!.color == style.color;
+
+const _stringWithTemplates = '''
+This is a Dart doc.
+{@template flutter.widgets.someWidget}
+Inside of the template.
+{@endtemplate}
+''';
+
+const _stringWithoutTemplates = '''      
+This is a Dart doc.
+Inside of the template.
+''';

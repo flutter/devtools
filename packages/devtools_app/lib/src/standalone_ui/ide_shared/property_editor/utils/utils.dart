@@ -26,17 +26,18 @@ class DartDocConverter {
     return Text.rich(TextSpan(children: children));
   }
 
-  @visibleForTesting
   List<TextSpan> toTextSpans({
     required TextStyle regularFontStyle,
     required TextStyle fixedFontStyle,
   }) {
+    final text = _removeTemplateIndicators(dartDocText);
+
     final children = <TextSpan>[];
     int currentIndex = 0;
 
-    while (currentIndex < dartDocText.length) {
-      final openBracketIndex = dartDocText.indexOf('[', currentIndex);
-      final openBacktickIndex = dartDocText.indexOf('`', currentIndex);
+    while (currentIndex < text.length) {
+      final openBracketIndex = text.indexOf('[', currentIndex);
+      final openBacktickIndex = text.indexOf('`', currentIndex);
 
       int nextSpecialCharIndex = -1;
       bool isLink = false;
@@ -53,10 +54,7 @@ class DartDocConverter {
       if (nextSpecialCharIndex == -1) {
         // No more special characters, add the remaining text.
         children.add(
-          TextSpan(
-            text: dartDocText.substring(currentIndex),
-            style: regularFontStyle,
-          ),
+          TextSpan(text: text.substring(currentIndex), style: regularFontStyle),
         );
         break;
       }
@@ -64,12 +62,12 @@ class DartDocConverter {
       // Add text before the special character.
       children.add(
         TextSpan(
-          text: dartDocText.substring(currentIndex, nextSpecialCharIndex),
+          text: text.substring(currentIndex, nextSpecialCharIndex),
           style: regularFontStyle,
         ),
       );
 
-      final closeIndex = dartDocText.indexOf(
+      final closeIndex = text.indexOf(
         isLink ? ']' : '`',
         isLink ? nextSpecialCharIndex : nextSpecialCharIndex + 1,
       );
@@ -77,21 +75,63 @@ class DartDocConverter {
         // Treat unmatched brackets/backticks as regular text.
         children.add(
           TextSpan(
-            text: dartDocText.substring(nextSpecialCharIndex),
+            text: text.substring(nextSpecialCharIndex),
             style: regularFontStyle,
           ),
         );
-        currentIndex = dartDocText.length; // Effectively break the loop.
+        currentIndex = text.length; // Effectively break the loop.
       } else {
-        final content = dartDocText.substring(
-          nextSpecialCharIndex + 1,
-          closeIndex,
-        );
+        final content = text.substring(nextSpecialCharIndex + 1, closeIndex);
         children.add(TextSpan(text: content, style: fixedFontStyle));
         currentIndex = closeIndex + 1;
       }
     }
     return children;
+  }
+
+  /// Removes @template and @endtemplate indicators from the [input].
+  String _removeTemplateIndicators(String input) {
+    const templateStart = '{@template';
+    const templateEnd = '{@endtemplate';
+    const closingCurlyBrace = '}';
+    const newLine = '\n';
+    String result = '';
+    int currentIndex = 0;
+
+    while (currentIndex < input.length) {
+      final startTemplateIndex = input.indexOf(templateStart, currentIndex);
+      final endTemplateIndex = input.indexOf(templateEnd, currentIndex);
+
+      int templateIndex;
+      if (startTemplateIndex != -1 && endTemplateIndex != -1) {
+        templateIndex =
+            (startTemplateIndex < endTemplateIndex)
+                ? startTemplateIndex
+                : endTemplateIndex;
+      } else if (startTemplateIndex != -1) {
+        templateIndex = startTemplateIndex;
+      } else if (endTemplateIndex != -1) {
+        templateIndex = endTemplateIndex;
+      } else {
+        result += input.substring(currentIndex);
+        break;
+      }
+
+      result += input.substring(currentIndex, templateIndex);
+
+      final closingIndex = input.indexOf(closingCurlyBrace, templateIndex);
+      if (closingIndex == -1) {
+        result += input.substring(templateIndex);
+        break;
+      }
+      final closingChars =
+          input.substring(closingIndex).startsWith('$closingCurlyBrace$newLine')
+              ? '$closingCurlyBrace$newLine'
+              : closingCurlyBrace;
+      currentIndex = closingIndex + closingChars.length;
+    }
+
+    return result;
   }
 }
 

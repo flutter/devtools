@@ -308,7 +308,7 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
 
   Widget inputLabel(EditableProperty property, {required ThemeData theme}) {
     // Flutter scales down the label font size by 75%, therefore we need to
-    // increase the size to make it glegible.
+    // increase the size to make it legible.
     final fixedFontStyle = theme.fixedFontStyle.copyWith(
       fontSize: defaultFontSize + 1,
     );

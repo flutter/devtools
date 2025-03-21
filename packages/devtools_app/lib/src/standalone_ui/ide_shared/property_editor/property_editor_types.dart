@@ -145,6 +145,7 @@ class EditableProperty extends EditableArgument {
         isEditable: argument.isEditable,
         options: argument.options,
         displayValue: argument.displayValue,
+        documentation: argument.documentation,
         errorText: argument.errorText,
       );
 
