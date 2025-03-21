@@ -50,8 +50,15 @@ class PropertyEditorView extends StatelessWidget {
           );
         }
 
+        final (:properties, :name, :documentation, :fileUri) =
+            editableWidgetData;
+        if (fileUri != null && !fileUri.endsWith('.dart')) {
+          return const CenteredMessage(
+            message: 'No Dart code found at the current cursor location.',
+          );
+        }
+
         final filteredProperties = values.fourth as List<EditableProperty>;
-        final (:properties, :name, :documentation) = editableWidgetData;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
