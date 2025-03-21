@@ -52,7 +52,7 @@ class PropertyEditorView extends StatelessWidget {
 
         final (:properties, :name, :documentation, :fileUri) =
             editableWidgetData;
-        if (fileUri == null || !fileUri.endsWith('.dart')) {
+        if (fileUri != null && !fileUri.endsWith('.dart')) {
           return const CenteredMessage(
             message: 'No Dart code found at the current cursor location.',
           );

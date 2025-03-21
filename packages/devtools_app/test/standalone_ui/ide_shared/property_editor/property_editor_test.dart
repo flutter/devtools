@@ -99,6 +99,7 @@ void main() {
           ),
         ).thenAnswer((realInvocation) {
           getEditableArgsCalled?.complete();
+          getEditableArgsCalled = Completer<void>();
           return Future.value(result);
         });
       }
