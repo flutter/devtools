@@ -110,6 +110,7 @@ abstract class Field {
   static const hasArgument = 'hasArgument';
   static const id = 'id';
   static const isDarkMode = 'isDarkMode';
+  static const isDeprecated = 'isDeprecated';
   static const isEditable = 'isEditable';
   static const isNullable = 'isNullable';
   static const isRequired = 'isRequired';
@@ -524,6 +525,7 @@ class EditableArgument with Serializable {
     required this.isNullable,
     required this.isRequired,
     required this.isEditable,
+    required this.isDeprecated,
     required this.hasDefault,
     this.options,
     this.value,
@@ -540,6 +542,7 @@ class EditableArgument with Serializable {
         isNullable: (map[Field.isNullable] as bool?) ?? false,
         isRequired: (map[Field.isRequired] as bool?) ?? false,
         isEditable: (map[Field.isEditable] as bool?) ?? true,
+        isDeprecated: (map[Field.isDeprecated] as bool?) ?? false,
         hasDefault: map.containsKey(Field.defaultValue),
         options: (map[Field.options] as List<Object?>?)?.cast<String>(),
         value: map[Field.value],
@@ -574,6 +577,9 @@ class EditableArgument with Serializable {
   /// An argument might not be editable, e.g. if it is a positional parameter
   /// where previous positional parameters have no argument.
   final bool isEditable;
+
+  /// Whether the argument is deprecated.
+  final bool isDeprecated;
 
   /// A list of values that could be provided for this argument.
   ///
@@ -613,6 +619,7 @@ class EditableArgument with Serializable {
     Field.isNullable: isNullable,
     Field.isRequired: isRequired,
     Field.isEditable: isEditable,
+    Field.isDeprecated: isDeprecated,
     Field.options: options,
     Field.displayValue: displayValue,
     Field.errorText: errorText,
