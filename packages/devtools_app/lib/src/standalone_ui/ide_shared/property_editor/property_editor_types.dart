@@ -220,9 +220,6 @@ EditableProperty? argToProperty(EditableArgument argument) {
   }
 }
 
-bool notDeprecatedWithNoValue(EditableArgument argument) =>
-    !(argument.isDeprecated && !argument.hasArgument);
-
 /// The following types should match those returned by the Analysis Server. See:
 /// https://github.com/dart-lang/sdk/blob/154b473cdb65c2686bb44fedec03ba2deddb80fd/pkg/analysis_server/lib/src/lsp/handlers/custom/editable_arguments/handler_editable_arguments.dart#L182
 const stringType = 'string';

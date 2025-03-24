@@ -156,7 +156,8 @@ class PropertyEditorController extends DisposableController
         (result?.args ?? <EditableArgument>[])
             .map(argToProperty)
             .nonNulls
-            .where(notDeprecatedWithNoValue)
+            // Filter out any deprecated properties that aren't set.
+            .where((property) => !property.isDeprecated || property.hasArgument)
             .toList();
     final name = result?.name;
     _editableWidgetData.value = (
