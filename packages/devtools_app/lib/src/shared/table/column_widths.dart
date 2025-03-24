@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport 'table.dart';
+library;
+
 import 'dart:math';
 
 import 'package:devtools_app_shared/ui.dart';
@@ -24,7 +27,7 @@ final defaultVariableWidthColumnSize = scaleByFontFactor(1200.0);
 
 extension FlatColumnWidthExtension<T> on FlatTableController<T> {
   /// Calculates [FlatTable] column widths when the columns should be sized as
-  /// either 1) the [fixedWidthPx] specified by the column, or
+  /// either 1) the `fixedWidthPx` specified by the column, or
   /// 2) [defaultVariableWidthColumnSize], the minimum width that can be used
   /// for variable width columns.
   ///
@@ -135,7 +138,7 @@ extension TreeColumnWidthExtension<T extends TreeNode<T>>
     on TreeTableController<T> {
   /// Calculates [TreeTable] column widths.
   ///
-  /// Non-tree columns will be sized with their specified [fixedWidthPx]. The
+  /// Non-tree columns will be sized with their specified `fixedWidthPx`. The
   /// tree column width will include space for the max indentation of the fully
   /// expanded tree and [defaultVariableWidthColumnSize] for displaying the
   /// tree column content.

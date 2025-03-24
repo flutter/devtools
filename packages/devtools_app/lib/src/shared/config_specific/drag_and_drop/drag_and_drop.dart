@@ -30,8 +30,9 @@ abstract class DragAndDropManager {
 
   /// The method is abstract, because we want to force descendants to define it.
   ///
-  /// The method is called in [impl], so any initialization the subclasses need,
-  /// like initializing listeners, should happen ahead of time in this method.
+  /// The method is called in [DragAndDropManager.impl], so any initialization
+  /// the subclasses need, like initializing listeners, should happen ahead of
+  /// time in this method.
   void init();
 
   @mustCallSuper
