@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/editor/api_classes.dart';
@@ -299,6 +300,23 @@ void main() {
       );
     });
 
+    testWidgets('softWrap input has expected tooltip', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result2);
+      await tester.pumpAndSettle();
+
+      // Verify the input options are expected.
+      final softWrapInput = _findDropdownButtonFormField('softWrap');
+      await _tooltipContentIsExpected(
+        softWrapInput,
+        tooltipContent: softWrapTooltipContent,
+        tester: tester,
+      );
+    });
+
     testWidgets('align input has expected options', (tester) async {
       // Load the property editor.
       await tester.pumpWidget(wrap(propertyEditor));
@@ -324,6 +342,23 @@ void main() {
         ],
         selectedOption: '.center',
         defaultOption: '.bottomLeft',
+        tester: tester,
+      );
+    });
+
+    testWidgets('align input has expected tooltip', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result2);
+      await tester.pumpAndSettle();
+
+      // Verify the input options are expected.
+      final alignInput = _findDropdownButtonFormField('align');
+      await _tooltipContentIsExpected(
+        alignInput,
+        tooltipContent: alignTooltipContent,
         tester: tester,
       );
     });
@@ -901,6 +936,36 @@ void _labelsAndRequiredTextAreExpected(
   );
 }
 
+Future<void> _tooltipContentIsExpected(
+  Finder inputFinder, {
+  required String tooltipContent,
+  required WidgetTester tester,
+}) async {
+  final inputRowFinder = find.ancestor(
+    of: inputFinder,
+    matching: find.byType(Row),
+  );
+  final iconFinder = find.descendant(
+    of: inputRowFinder,
+    matching: find.byIcon(Icons.info_outline),
+  );
+
+  // Verify tooltip is not visible.
+  expect(find.text(tooltipContent), findsNothing);
+
+  // Simulate a hover for 600 ms.
+  final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+  await gesture.moveTo(tester.getRect(iconFinder).center);
+  await tester.pump(const Duration(milliseconds: 600));
+  await tester.pumpAndSettle();
+
+  // Verify tooltip is visible with expected content.
+  expect(find.text(tooltipContent), findsOneWidget);
+
+  // Clean-up, remove gesture pointer.
+  await gesture.removePointer();
+}
+
 Finder _helperTextForInput(Finder inputFinder, {required String matching}) {
   final rowFinder = find.ancestor(of: inputFinder, matching: find.byType(Row));
   return find.descendant(of: rowFinder, matching: find.richText(matching));
@@ -1130,6 +1195,14 @@ final result1 = EditableArgumentsResult(
 );
 
 // Result 2
+const softWrapDocumentation = '''
+Whether or not the text should wrap.
+
+If null, the default value is platform dependent. On [TargetPlatform.android],
+the default is true. On [TargetPlatform.iOS], false. The remaining platforms
+also default to false.
+''';
+
 final softWrapProperty = EditableArgument.fromJson({
   'name': 'softWrap',
   'type': 'bool',
@@ -1138,12 +1211,32 @@ final softWrapProperty = EditableArgument.fromJson({
   'hasArgument': false,
   'isEditable': true,
   'isRequired': false,
+  'documentation': softWrapDocumentation,
 });
 final softWrapInputExpectations = {
   'isSet': false,
   'isRequired': false,
   'isDefault': true,
 };
+const softWrapTooltipContent = '''
+bool softWrap
+
+Default value: true
+
+Documentation:
+Whether or not the text should wrap.
+
+If null, the default value is platform dependent. On TargetPlatform.android,
+the default is true. On TargetPlatform.iOS, false. The remaining platforms
+also default to false.
+''';
+
+const alignDocumentation = '''
+How to align the child.
+
+The x and y values of the [Alignment] control the horizontal and vertical
+alignment, respectively. 
+''';
 final alignProperty = EditableArgument.fromJson({
   'name': 'align',
   'type': 'enum',
@@ -1153,6 +1246,7 @@ final alignProperty = EditableArgument.fromJson({
   'isRequired': false,
   'isEditable': true,
   'value': 'Alignment.center',
+  'documentation': alignDocumentation,
   'options': [
     'Alignment.bottomCenter',
     'Alignment.bottomLeft',
@@ -1170,6 +1264,19 @@ final alignInputExpectations = {
   'isRequired': false,
   'isDefault': false,
 };
+const alignTooltipContent = '''
+Alignment? align
+
+Default value: Alignment.bottomLeft
+
+Documentation:
+How to align the child.
+
+The x and y values of the Alignment control the horizontal and vertical
+alignment, respectively. 
+''';
+
+
 final result2 = EditableArgumentsResult(
   name: widgetName,
   args: [softWrapProperty, alignProperty],
