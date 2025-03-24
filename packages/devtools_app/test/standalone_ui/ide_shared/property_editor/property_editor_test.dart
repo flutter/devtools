@@ -308,7 +308,7 @@ void main() {
       controller.initForTestsOnly(editableArgsResult: result2);
       await tester.pumpAndSettle();
 
-      // Verify the input options are expected.
+      // Verify the tooltip is expected.
       final softWrapInput = _findDropdownButtonFormField('softWrap');
       await _tooltipContentIsExpected(
         softWrapInput,
@@ -354,7 +354,7 @@ void main() {
       controller.initForTestsOnly(editableArgsResult: result2);
       await tester.pumpAndSettle();
 
-      // Verify the input options are expected.
+      // Verify the tooltip is expected.
       final alignInput = _findDropdownButtonFormField('align');
       await _tooltipContentIsExpected(
         alignInput,
