@@ -22,7 +22,7 @@ import 'package:mockito/mockito.dart';
 typedef Location = ({TextDocument document, CursorPosition position});
 typedef LocationToArgsResult = Map<Location, EditableArgumentsResult>;
 
-void main() {g
+void main() {
   final eventController = StreamController<ActiveLocationChangedEvent>();
   final eventStream = eventController.stream;
 
