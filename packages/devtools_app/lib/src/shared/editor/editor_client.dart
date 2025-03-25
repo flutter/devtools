@@ -30,6 +30,8 @@ class EditorClient extends DisposableController
 
   String get gaId => EditorSidebar.id;
 
+  bool get isDtdClosed => _dtd.isClosed;
+
   Future<void> _initialize() async {
     autoDisposeStreamSubscription(
       _dtd.onEvent('Service').listen((data) {
@@ -315,10 +317,6 @@ class EditorClient extends DisposableController
         errorMessage: 'Unknown error: $e',
       );
     }
-  }
-
-  bool isClientClosed() {
-    return _dtd.isClosed;
   }
 
   Future<DTDResponse> _call(
