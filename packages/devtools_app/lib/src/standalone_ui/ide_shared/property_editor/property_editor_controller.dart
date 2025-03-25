@@ -181,8 +181,8 @@ class PropertyEditorController extends DisposableController
   }
 
   Timer _periodicallyCheckConnection(Duration interval) {
-    return Timer.periodic(interval, (timer) async {
-      final isClosed = await editorClient.isClientClosed();
+    return Timer.periodic(interval, (timer) {
+      final isClosed = editorClient.isDtdClosed;
       if (isClosed) {
         _shouldReconnect.value = true;
         timer.cancel();
