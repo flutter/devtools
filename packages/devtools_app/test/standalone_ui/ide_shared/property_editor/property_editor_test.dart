@@ -30,6 +30,8 @@ void main() {
     (document: textDocument2, position: activeCursorPosition2): result2,
     (document: textDocument1, position: activeCursorPosition3): resultWithText,
     (document: textDocument1, position: activeCursorPosition4): resultWithTitle,
+    (document: textDocument1, position: activeCursorPosition5):
+        deprecatedResult,
   };
 
   late MockEditorClient mockEditorClient;
@@ -142,6 +144,27 @@ void main() {
         // Wait for the expected editable args.
         final editableArgs = await editableArgsFuture;
         verifyEditableArgs(actual: editableArgs, expected: result2.args);
+      });
+    });
+
+    testWidgets('verify editable arguments when some are deprecated', (
+      tester,
+    ) async {
+      await tester.runAsync(() async {
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+        final editableArgsFuture = waitForEditableArgs();
+
+        // Send an active location changed event.
+        eventController.add(activeLocationChangedEvent5);
+
+        // Wait for the expected editable args.
+        final editableArgs = await editableArgsFuture;
+        verifyEditableArgs(
+          actual: editableArgs,
+          // Only deprecated properties with set arguments should be included.
+          expected: [deprecatedPropertyWithArg],
+        );
       });
     });
 
@@ -325,6 +348,30 @@ void main() {
         selectedOption: '.center',
         defaultOption: '.bottomLeft',
         tester: tester,
+      );
+    });
+  });
+
+  group('inputs for deprecated arguments', () {
+    testWidgets('inputs are expected for deprecated arguments', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: deprecatedResult);
+      await tester.pumpAndSettle();
+
+      final deprecatedWithArgInput = _findDropdownButtonFormField(
+        'deprecatedWithArg',
+      );
+
+      // Verify the inputs are expected.
+      expect(deprecatedWithArgInput, findsOneWidget);
+
+      // Verify the labels and required are expected.
+      _labelsAndRequiredTextAreExpected(
+        deprecatedWithArgInput,
+        inputExpectations: deprecatedWithArgInputExpectations,
       );
     });
   });
@@ -884,8 +931,17 @@ void _labelsAndRequiredTextAreExpected(
     shouldBeSet ? findsOneWidget : findsNothing,
     reason: 'Expected to find ${shouldBeSet ? 'a' : 'no'} "set" badge.',
   );
+  // Check for the existence/non-existence of the "deprecated" badge.
+  final shouldBeDeprecated = inputExpectations['isDeprecated'] == true;
+  expect(
+    _labelForInput(inputFinder, matching: 'deprecated'),
+    shouldBeDeprecated ? findsOneWidget : findsNothing,
+    reason:
+        'Expected to find ${shouldBeDeprecated ? 'a' : 'no'} "deprecated" badge.',
+  );
   // Check for the existence/non-existence of the "default" badge.
-  final shouldBeDefault = inputExpectations['isDefault'] == true;
+  final shouldBeDefault =
+      inputExpectations['isDefault'] == true && !shouldBeDeprecated;
   expect(
     _labelForInput(inputFinder, matching: 'default'),
     shouldBeDefault ? findsOneWidget : findsNothing,
@@ -1058,6 +1114,18 @@ final activeLocationChangedEvent4 = ActiveLocationChangedEvent(
   textDocument: textDocument1,
 );
 
+// Location position 5
+final activeCursorPosition5 = CursorPosition(character: 81, line: 19);
+final anchorCursorPosition5 = CursorPosition(character: 113, line: 12);
+final editorSelection5 = EditorSelection(
+  active: activeCursorPosition5,
+  anchor: anchorCursorPosition5,
+);
+final activeLocationChangedEvent5 = ActiveLocationChangedEvent(
+  selections: [editorSelection5],
+  textDocument: textDocument1,
+);
+
 final notADartDocument = TextDocument(
   uriAsString: '/my/fake/other.js',
   version: 1,
@@ -1122,6 +1190,7 @@ final heightInputExpectations = {
   'isSet': false,
   'isRequired': false,
   'isDefault': true,
+  'isDeprecated': false,
 };
 final result1 = EditableArgumentsResult(
   name: widgetName,
@@ -1143,6 +1212,7 @@ final softWrapInputExpectations = {
   'isSet': false,
   'isRequired': false,
   'isDefault': true,
+  'isDeprecated': false,
 };
 final alignProperty = EditableArgument.fromJson({
   'name': 'align',
@@ -1169,10 +1239,47 @@ final alignInputExpectations = {
   'isSet': true,
   'isRequired': false,
   'isDefault': false,
+  'isDeprecated': false,
 };
 final result2 = EditableArgumentsResult(
   name: widgetName,
   args: [softWrapProperty, alignProperty],
+);
+
+// Result for test cases of deprecated properties
+final deprecatedPropertyNoArg = EditableArgument.fromJson({
+  'name': 'deprecatedNoArg',
+  'type': 'bool',
+  'isNullable': false,
+  'defaultValue': false,
+  'hasArgument': false,
+  'isEditable': true,
+  'isRequired': false,
+  'isDeprecated': true,
+});
+
+final deprecatedPropertyWithArg = EditableArgument.fromJson({
+  'name': 'deprecatedWithArg',
+  'type': 'bool',
+  'value': false,
+  'isNullable': false,
+  'defaultValue': true,
+  'hasArgument': true,
+  'isEditable': true,
+  'isRequired': false,
+  'isDeprecated': true,
+});
+
+final deprecatedWithArgInputExpectations = {
+  'isSet': true,
+  'isRequired': false,
+  'isDefault': false,
+  'isDeprecated': true,
+};
+
+final deprecatedResult = EditableArgumentsResult(
+  name: widgetName,
+  args: [deprecatedPropertyNoArg, deprecatedPropertyWithArg],
 );
 
 // Example results for documentation test cases.

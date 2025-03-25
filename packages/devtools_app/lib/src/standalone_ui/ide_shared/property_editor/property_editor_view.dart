@@ -195,6 +195,7 @@ class _PropertyLabels extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isSet = property.hasArgument;
+    final isDeprecated = property.isDeprecated;
     final isDefault = property.isDefault;
 
     return LayoutBuilder(
@@ -214,7 +215,22 @@ class _PropertyLabels extends StatelessWidget {
                   textColor: colorScheme.onPrimary,
                 ),
               ),
-            if (isDefault)
+            // We exclude deprecated properties that are not set, so this label
+            // is always displayed under the "set" label.
+            if (isDeprecated)
+              Padding(
+                padding: _labelPadding(isTopLabel: !isSet),
+                child: RoundedLabel(
+                  labelText: _maybeTruncateLabel('deprecated', width: width),
+                  tooltipText: 'Property argument is deprecated.',
+                  fontSize: smallFontSize,
+                  backgroundColor: colorScheme.error,
+                  textColor: colorScheme.onError,
+                ),
+              ),
+            // We only have space for two labels, so the deprecated label takes
+            // precedence over the default label.
+            if (isDefault && !isDeprecated)
               Padding(
                 padding: _labelPadding(isTopLabel: !isSet),
                 child: RoundedLabel(
