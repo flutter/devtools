@@ -22,7 +22,7 @@ import 'package:mockito/mockito.dart';
 typedef Location = ({TextDocument document, CursorPosition position});
 typedef LocationToArgsResult = Map<Location, EditableArgumentsResult>;
 
-void main() {
+void main() {g
   final eventController = StreamController<ActiveLocationChangedEvent>();
   final eventStream = eventController.stream;
 
@@ -1275,7 +1275,6 @@ How to align the child.
 The x and y values of the Alignment control the horizontal and vertical
 alignment, respectively. 
 ''';
-
 
 final result2 = EditableArgumentsResult(
   name: widgetName,
