@@ -448,9 +448,7 @@ class _TestController extends DisposableController
 
       final queryFilter = filter.queryFilter;
       if (!queryFilter.isEmpty) {
-        final filteredOutByQueryFilterArgument = queryFilter
-            .filterArguments
-            .values
+        final filteredOutByQueryFilterArgument = queryFilter.filterArguments
             .any((argument) => !argument.matchesValue(element));
         if (filteredOutByQueryFilterArgument) return false;
 

@@ -739,10 +739,9 @@ class LoggingController extends DevToolsScreenController
 
     final queryFilter = filter.queryFilter;
     if (!queryFilter.isEmpty) {
-      final filteredOutByQueryFilterArgument = queryFilter
-          .filterArguments
-          .values
-          .any((argument) => !argument.matchesValue(log));
+      final filteredOutByQueryFilterArgument = queryFilter.filterArguments.any(
+        (argument) => !argument.matchesValue(log),
+      );
       if (filteredOutByQueryFilterArgument) return false;
 
       if (filter.queryFilter.substringExpressions.isNotEmpty) {

@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import '../primitives/utils.dart';
 import 'common_widgets.dart';
 
+/// A mapping from filter kinds to [QueryFilterArgument]s.
 typedef QueryFilterArgs<T> = Map<String, QueryFilterArgument<T>>;
 typedef SettingFilters<T> = List<SettingFilter<T, Object>>;
 
@@ -39,7 +40,7 @@ mixin FilterControllerMixin<T> on DisposableController
   ///
   /// This should be overriden as a getter by subclasses to support persisting
   /// the most recent filter to DevTools preferences.
-  ValueNotifier<String>? filterTagNotifier;
+  ValueNotifier<String>? get filterTagNotifier => null;
 
   ValueListenable<Filter<T>> get activeFilter => _activeFilter;
 
@@ -94,6 +95,7 @@ mixin FilterControllerMixin<T> on DisposableController
   /// query with arguments may look like 'foo category:bar type:baz'. In this
   /// example, 'category' and 'type' would need to be defined as query filter
   /// arguments.
+  @visibleForOverriding
   QueryFilterArgs<T> createQueryFilterArgs() =>
       <String, QueryFilterArgument<T>>{};
 
@@ -249,12 +251,11 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final filter in widget.controller.settingFilters) ...[
+          for (final filter in widget.controller.settingFilters)
             if (filter is ToggleFilter<T>)
               _ToggleFilterElement(filter: filter)
             else
               _SettingFilterElement(filter: filter),
-          ],
         ],
       ),
     );
@@ -457,14 +458,14 @@ class SettingFilter<T, V> {
   Map<String, Object?> get valueAsJson => {id: setting.value};
 }
 
-class QueryFilter {
+class QueryFilter<T> {
   const QueryFilter._({
-    this.filterArguments = const <String, QueryFilterArgument>{},
+    QueryFilterArgs<T> filterArguments = const {},
     this.substringExpressions = const <Pattern>[],
     this.isEmpty = false,
-  });
+  }) : _filterArguments = filterArguments;
 
-  factory QueryFilter.empty({required QueryFilterArgs args}) {
+  factory QueryFilter.empty({required QueryFilterArgs<T> args}) {
     return QueryFilter._(
       filterArguments: args,
       substringExpressions: <Pattern>[],
@@ -474,7 +475,7 @@ class QueryFilter {
 
   factory QueryFilter.parse(
     String query, {
-    required QueryFilterArgs args,
+    required QueryFilterArgs<T> args,
     required bool useRegExp,
   }) {
     if (query.isEmpty) {
@@ -534,7 +535,12 @@ class QueryFilter {
     );
   }
 
-  final QueryFilterArgs filterArguments;
+  /// The mapping of filter kinds fo [QueryFilterArgument]s.
+  final QueryFilterArgs<T> _filterArguments;
+
+  /// The collection of all [QueryFilterArgument]s.
+  Iterable<QueryFilterArgument<T>> get filterArguments =>
+      _filterArguments.values;
 
   final List<Pattern> substringExpressions;
 
@@ -545,7 +551,7 @@ class QueryFilter {
           ? ''
           : [
             ...substringExpressions.toStringList(),
-            for (final arg in filterArguments.values) arg.display,
+            for (final arg in filterArguments) arg.display,
           ].join(' ').trim();
 }
 
