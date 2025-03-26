@@ -192,20 +192,15 @@ mixin FilterControllerMixin<T> on DisposableController
 /// This dialog interacts with a [FilterControllerMixin] to manage and preserve
 /// the filter state.
 class FilterDialog<T> extends StatefulWidget {
-  FilterDialog({
-    super.key,
-    required this.controller,
-    required this.filteredItem,
-  }) : assert(controller.queryFilterArgs.isNotEmpty),
-       settingFilterValuesAtOpen = List.generate(
-         controller.activeFilter.value.settingFilters.length,
-         (index) =>
-             controller.activeFilter.value.settingFilters[index].setting.value,
-       );
+  FilterDialog({super.key, required this.controller})
+    : assert(controller.queryFilterArgs.isNotEmpty),
+      settingFilterValuesAtOpen = List.generate(
+        controller.activeFilter.value.settingFilters.length,
+        (index) =>
+            controller.activeFilter.value.settingFilters[index].setting.value,
+      );
 
   final FilterControllerMixin<T> controller;
-
-  final String filteredItem;
 
   final List<Object> settingFilterValuesAtOpen;
 
@@ -693,7 +688,6 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                                       builder:
                                           (context) => FilterDialog(
                                             controller: widget.controller,
-                                            filteredItem: widget.filteredItem,
                                           ),
                                     ),
                                   );
