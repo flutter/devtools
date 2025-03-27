@@ -27,9 +27,7 @@ typedef SettingFilters<T> = List<SettingFilter<T, Object>>;
 /// [createSettingFilters] and [createQueryFilterArgs].
 ///
 /// Classes mixing in [FilterControllerMixin] must also extend
-/// [DisposableController] and mixin [AutoDisposeControllerMixin], and a class
-/// can subscribe to updates to the active filter by calling
-/// [initFilterController].
+/// [DisposableController] and mixin [AutoDisposeControllerMixin].
 mixin FilterControllerMixin<T> on DisposableController
     implements AutoDisposeControllerMixin {
   final filteredData = ListValueNotifier<T>(<T>[]);

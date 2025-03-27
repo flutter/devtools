@@ -374,8 +374,9 @@ abstract class FlutterFrame4 {
 
   /// A frame with extra timeline events for the purpose of testing.
   ///
-  /// Some events included in [uiEventWithExtras] and [rasterEventWithExtras]
-  /// are not part of the original trace from with [FlutterFrame4] was formed.
+  /// Some events included in [uiEventWithExtras] (and `rasterEventWithExtras`
+  /// if un-commented) are not part of the original trace from with
+  /// [FlutterFrame4] was formed.
   static final frameWithExtras =
       FlutterFrame.fromJson(_frameJson)
         ..setEventFlow(uiEventWithExtras)

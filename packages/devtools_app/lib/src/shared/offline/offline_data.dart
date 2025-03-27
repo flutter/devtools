@@ -41,9 +41,9 @@ class OfflineDataController {
   /// Stores the [ConnectedApp] instance temporarily while switching between
   /// offline and online modes.
   ///
-  /// We store this because the [serviceManager] is a global manager and expects
-  /// only one connected app. So we swap out the online connected app with the
-  /// offline app data while in offline mode.
+  /// We store this because the `serviceConnection.serviceManager` is a global
+  /// manager and expects only one connected app. So we swap out the online
+  /// connected app with the offline app data while in offline mode.
   ConnectedApp? previousConnectedApp;
 
   /// Whether DevTools should load offline data for [screenId].

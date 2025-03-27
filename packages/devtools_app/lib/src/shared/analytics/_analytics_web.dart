@@ -676,9 +676,7 @@ String? _lastGaError;
 /// Reports an error to analytics.
 ///
 /// [errorMessage] is the description of the error.
-/// [stackTraceSubstrings] is the stack trace broken up into substrings of
-/// size [ga4ParamValueCharacterLimit] so that we can send the stack trace in
-/// chunks to GA4 through unified_analytics.
+/// [stackTrace] is the stack trace.
 void reportError(
   String errorMessage, {
   stack_trace.Trace? stackTrace,

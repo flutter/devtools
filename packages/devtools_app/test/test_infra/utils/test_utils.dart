@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 /// Creates a [FlutterTimelineEvent] for testing that mocks the
-/// contained [PerfettoTrackEvents].
+/// contained [PerfettoTrackEvent]s.
 FlutterTimelineEvent testTimelineEvent({
   required String name,
   required TimelineEventType type,

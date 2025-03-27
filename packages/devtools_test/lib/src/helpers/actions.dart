@@ -170,7 +170,7 @@ Future<void> loadSampleData(
 /// [Scrollbar] somewhere in its descendants, calling
 /// `scrollToEnd<Foo>(controller)` would perform the following steps:
 ///
-/// 1) find the [Scrollbar] widget descending from [Foo].
+/// 1) find the [Scrollbar] widget descending from 'Foo'.
 /// 2) access the [Scrollbar] widget's [ScrollController].
 /// 3) scroll the scrollable attached to the [ScrollController] to the end of
 ///    the [ScrollController]'s scroll extent.

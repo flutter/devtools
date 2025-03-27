@@ -1939,7 +1939,7 @@ class ElevatedCard extends StatelessWidget {
 /// [AutomaticKeepAliveClientMixin] on its [State].
 ///
 /// Wrap a widget in this class if you want [child] to stay alive, and avoid
-/// rebuilding. This is useful for children of [TabView]s. When wrapped in this
+/// rebuilding. This is useful for children of TabViews. When wrapped in this
 /// wrapper, [child] will not be destroyed and rebuilt when switching tabs.
 ///
 /// See [AutomaticKeepAliveClientMixin] for more information.

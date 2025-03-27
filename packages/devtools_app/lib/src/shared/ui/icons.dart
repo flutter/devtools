@@ -4,9 +4,8 @@
 
 /// Platform independent definition of icons.
 ///
-/// See [HtmlIconRenderer] for a browser specific implementation of icon
-/// rendering. If you add an Icon class you also need to add a renderer class
-/// to handle the actual platform specific icon rendering.
+/// If you add an Icon class you also need to add a renderer class to handle the
+/// actual platform specific icon rendering.
 /// The benefit of this approach is that icons can be const objects and tests
 /// of code that uses icons can run on the Dart VM.
 library;

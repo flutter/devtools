@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
 
-/// A [DropDownButton] implementation that reports selection changes to our
+/// A DropDownButton implementation that reports selection changes to our
 /// analytics.
 class AnalyticsDropDownButton<T> extends StatelessWidget {
   const AnalyticsDropDownButton({
