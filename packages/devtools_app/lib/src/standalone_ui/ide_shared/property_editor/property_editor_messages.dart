@@ -10,6 +10,9 @@ import '../../../shared/ui/colors.dart';
 class HowToUseMessage extends StatelessWidget {
   const HowToUseMessage({super.key});
 
+  static const _lightHighlighterColor = Colors.yellow;
+  static const _darkHighlighterColor = Color.fromARGB(168, 191, 17, 196);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -49,6 +52,11 @@ class HowToUseMessage extends StatelessWidget {
       context: context,
       color: colorScheme.numericConstantSyntaxColor,
     );
+    TextSpan highlight(TextSpan original) => _highlight(
+      original,
+      highlighterColor:
+          theme.isDarkTheme ? _darkHighlighterColor : _lightHighlighterColor,
+    );
 
     return Text.rich(
       TextSpan(
@@ -79,18 +87,18 @@ class HowToUseMessage extends StatelessWidget {
           colorC(') '),
           colorC('{\n'),
           colorD(' return '),
-          _highlight(colorB('Text')),
-          _highlight(colorC('(\n')),
-          _highlight(colorE('  "Hello World!"')),
-          _highlight(colorF(',\n')),
-          _highlight(colorA('  overflow')),
-          _highlight(colorF(': ')),
-          _highlight(colorB('TextOveflow')),
-          _highlight(colorF('.')),
-          _highlight(colorG('clip')),
-          _highlight(colorF(',\n')),
-          _highlight(colorC('  )')),
-          _highlight(colorF(';\n')),
+          highlight(colorB('Text')),
+          highlight(colorC('(\n')),
+          highlight(colorE('  "Hello World!"')),
+          highlight(colorF(',\n')),
+          highlight(colorA('  overflow')),
+          highlight(colorF(': ')),
+          highlight(colorB('TextOveflow')),
+          highlight(colorF('.')),
+          highlight(colorG('clip')),
+          highlight(colorF(',\n')),
+          highlight(colorC('  )')),
+          highlight(colorF(';\n')),
           colorC('}'),
         ],
       ),
@@ -106,10 +114,10 @@ class HowToUseMessage extends StatelessWidget {
     return TextSpan(text: text, style: fixedFontStyle.copyWith(color: color));
   }
 
-  TextSpan _highlight(TextSpan original) {
+  TextSpan _highlight(TextSpan original, {required Color highlighterColor}) {
     return TextSpan(
       text: original.text,
-      style: original.style!.copyWith(backgroundColor: Colors.yellow),
+      style: original.style!.copyWith(backgroundColor: highlighterColor),
     );
   }
 }
