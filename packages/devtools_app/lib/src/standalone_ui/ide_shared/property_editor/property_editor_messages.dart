@@ -61,7 +61,7 @@ class HowToUseMessage extends StatelessWidget {
           const TextSpan(text: ' to view and edit its properties.\n\n'),
           const TextSpan(
             text:
-                'For the example, the highlighted code below is a constructor invocation of a ',
+                'For example, the highlighted code below is a constructor invocation of a ',
           ),
           TextSpan(
             text: 'Text',
