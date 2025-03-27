@@ -122,6 +122,7 @@ class _PropertiesListState extends State<_PropertiesList> {
               _EditablePropertyItem(
                 property: property,
                 editProperty: widget.controller.editArgument,
+                widgetDocumentation: widget.controller.widgetDocumentation,
               ),
           ].joinWith(const PaddedDivider.noPadding()),
         );
@@ -134,10 +135,12 @@ class _EditablePropertyItem extends StatelessWidget {
   const _EditablePropertyItem({
     required this.property,
     required this.editProperty,
+    required this.widgetDocumentation,
   });
 
   final EditableProperty property;
   final EditArgumentFunction editProperty;
+  final String? widgetDocumentation;
 
   @override
   Widget build(BuildContext context) {
@@ -148,9 +151,25 @@ class _EditablePropertyItem extends StatelessWidget {
           flex: 3,
           child: Padding(
             padding: const EdgeInsets.all(_PropertiesList.defaultItemPadding),
-            child: _PropertyInput(
-              property: property,
-              editProperty: editProperty,
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: largeSpacing,
+                    right: densePadding,
+                  ),
+                  child: _InfoTooltip(
+                    property: property,
+                    widgetDocumentation: widgetDocumentation,
+                  ),
+                ),
+                Expanded(
+                  child: _PropertyInput(
+                    property: property,
+                    editProperty: editProperty,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -260,6 +279,76 @@ class _PropertyLabels extends StatelessWidget {
 
   String _maybeTruncateLabel(String labelText, {required double width}) =>
       width >= _widthForFullLabels ? labelText : labelText[0].toUpperCase();
+}
+
+class _InfoTooltip extends StatelessWidget {
+  const _InfoTooltip({
+    required this.property,
+    required this.widgetDocumentation,
+  });
+
+  final EditableProperty property;
+  final String? widgetDocumentation;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      richMessage: _infoMessage(context),
+      child: Icon(size: defaultIconSize, Icons.info_outline),
+    );
+  }
+
+  TextSpan _infoMessage(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.tooltipTextColor;
+    final regularFontStyle = theme.regularTextStyle.copyWith(color: textColor);
+    final boldFontStyle = theme.boldTextStyle.copyWith(color: textColor);
+    final fixedFontStyle = theme.fixedFontStyle.copyWith(color: textColor);
+
+    final propertyNameSpans = [
+      TextSpan(
+        text: '${property.displayType} ',
+        style: fixedFontStyle.copyWith(fontSize: largeFontSize),
+      ),
+      TextSpan(
+        text: property.name,
+        style: fixedFontStyle.copyWith(
+          fontSize: largeFontSize,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ];
+
+    final defaultValueSpans =
+        property.hasDefault
+            ? [
+              TextSpan(text: '\n\nDefault value: ', style: boldFontStyle),
+              TextSpan(
+                text: property.defaultValue.toString(),
+                style: fixedFontStyle,
+              ),
+            ]
+            : [
+              TextSpan(text: '\n\nDefault value:\n', style: boldFontStyle),
+              TextSpan(text: property.name, style: fixedFontStyle),
+              TextSpan(text: ' has no default value.', style: regularFontStyle),
+            ];
+
+    final spans = [...propertyNameSpans, ...defaultValueSpans];
+
+    final documentation = property.documentation;
+    if (documentation != null && documentation != widgetDocumentation) {
+      spans.addAll([
+        TextSpan(text: '\n\nDocumentation:\n', style: boldFontStyle),
+        ...DartDocConverter(documentation).toTextSpans(
+          regularFontStyle: regularFontStyle,
+          fixedFontStyle: fixedFontStyle,
+        ),
+      ]);
+    }
+
+    return TextSpan(children: spans);
+  }
 }
 
 class _PropertyInput extends StatelessWidget {

@@ -191,8 +191,7 @@ class DragAndDropState extends State<DragAndDrop> {
   }
 }
 
-/// MetaData for widgets related to drag and drop functionality ([DragAndDrop],
-/// [DragAndDropEventAbsorber]).
+/// MetaData for widgets related to drag and drop functionality ([DragAndDrop]).
 ///
 /// Drag and drop widgets will contain a [MetaData] widget with the `metaData`
 /// field set to an instance of this class.

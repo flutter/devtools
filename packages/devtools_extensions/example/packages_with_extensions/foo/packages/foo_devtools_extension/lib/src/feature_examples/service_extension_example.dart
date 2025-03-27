@@ -4,6 +4,9 @@
 
 // ignore_for_file: avoid_print
 
+/// @docImport 'dart:developer';
+library;
+
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
@@ -14,10 +17,8 @@ import 'package:flutter/material.dart';
 /// VM Service protocol.
 ///
 /// This service extension was registered in the parent package (package:foo)
-/// using [registerExtension] from dart:developer
-/// (https://api.flutter.dev/flutter/dart-developer/registerExtension.html) and
-/// then we use the [serviceManager] to call the extension from this DevTools
-/// extension.
+/// using [registerExtension] and then we use the [serviceManager] to call the
+/// extension from this DevTools extension.
 ///
 /// Service extensions can only be called when the app is unpaused. In contrast,
 /// expression evaluations can be called both when the app is paused and
@@ -83,10 +84,11 @@ class _TableOfThingsState extends State<TableOfThings> {
   /// package:foo (see devtools_extensions/example/packages_with_extensions/foo/packages/foo/lib/src/foo_controller.dart).
   ///
   /// It is important to note that we are calling the service extension on the
-  /// main isolate here using the [serviceManager.callServiceExtensionOnMainIsolate].
+  /// main isolate here using the
+  /// `serviceManager.callServiceExtensionOnMainIsolate`.
   ///
   /// To call a service extension that was registered in a different isolate,
-  /// you can use [serviceManager.service.callServiceExtension], but this call
+  /// you can use `serviceManager.service.callServiceExtension`, but this call
   /// MUST include the isolate id of the isolate that the service extension was
   /// registered in.
   Future<void> _refreshThings() async {
@@ -200,10 +202,11 @@ class _SelectedThingState extends State<SelectedThing> {
   /// package:foo (see devtools_extensions/example/packages_with_extensions/foo/packages/foo/lib/src/foo_controller.dart).
   ///
   /// It is important to note that we are calling the service extension on the
-  /// main isolate here using the [serviceManager.callServiceExtensionOnMainIsolate].
+  /// main isolate here using the
+  /// `serviceManager.callServiceExtensionOnMainIsolate`.
   ///
   /// To call a service extension that was registered in a different isolate,
-  /// you can use [serviceManager.service.callServiceExtension], but this call
+  /// you can use `serviceManager.service.callServiceExtension`, but this call
   /// MUST include the isolate id of the isolate that the service extension was
   /// registered in.
   Future<void> _updateSelectedThing(int id) async {

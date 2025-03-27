@@ -46,6 +46,12 @@ class PropertyEditorController extends DisposableController
       _editableWidgetData;
   final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
 
+  List<EditableProperty> get allProperties =>
+      _editableWidgetData.value?.properties ?? [];
+  String? get widgetName => _editableWidgetData.value?.name;
+  String? get widgetDocumentation => _editableWidgetData.value?.documentation;
+  String? get fileUri => _editableWidgetData.value?.fileUri;
+
   ValueListenable<bool> get shouldReconnect => _shouldReconnect;
   final _shouldReconnect = ValueNotifier<bool>(false);
 
@@ -175,8 +181,8 @@ class PropertyEditorController extends DisposableController
   }
 
   Timer _periodicallyCheckConnection(Duration interval) {
-    return Timer.periodic(interval, (timer) async {
-      final isClosed = await editorClient.isClientClosed();
+    return Timer.periodic(interval, (timer) {
+      final isClosed = editorClient.isDtdClosed;
       if (isClosed) {
         _shouldReconnect.value = true;
         timer.cancel();

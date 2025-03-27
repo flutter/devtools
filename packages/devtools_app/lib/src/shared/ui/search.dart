@@ -31,8 +31,8 @@ final _log = Logger('packages/devtools_app/lib/src/shared/ui/search');
 
 /// Mixin that manages search logic.
 ///
-/// When mixing this mixin into a class, dispose() must be called as part of the
-/// class' lifecycle management.
+/// When mixing this mixin into a class, `dispose()` must be called as part of
+/// the class's lifecycle management.
 mixin SearchControllerMixin<T extends SearchableDataMixin>
     on DisposableController {
   final _searchNotifier = ValueNotifier<String>('');
@@ -214,7 +214,7 @@ mixin SearchControllerMixin<T extends SearchableDataMixin>
   /// Default search matching logic.
   ///
   /// The use of this method requires both [currentDataToSearchThrough] and
-  /// [T.matchesSearchToken] to be implemented.
+  /// [SearchableDataMixin.matchesSearchToken] to be implemented on [T].
   List<T> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
@@ -855,17 +855,12 @@ class SearchTextEditingController extends TextEditingController {
 
 /// A stateful text field with search capability.
 ///
-/// [_SearchFieldState] automatically handles the lifecycle of the search field
-/// through the [SearchFieldMixin].
-///
 /// Use this widget for simple use cases where the elements initialized and
-/// disposed in [SearchControllerMixin.initSearch] and
-/// [SearchControllerMixin.disposeSearch] are not used outside of the context
-/// of the search code.
+/// disposed in [SearchControllerMixin.init] and [SearchControllerMixin.dispose]
+/// are not used outside of the context of the search code.
 ///
 /// If these elements need to be used by the widget state that builds the search
-/// field, consider using [StatelessSearchField] instead and manually mixing in
-/// [SearchFieldMixin] so that you can manage the lifecycle properly.
+/// field, consider using [StatelessSearchField] instead.
 class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
   SearchField({
     required this.searchController,
@@ -936,14 +931,11 @@ class _SearchFieldState extends State<SearchField> with AutoDisposeMixin {
 
 /// A stateless text field with search capability.
 ///
-/// The widget that builds [StatelessSearchField] is responsible for mixing in
-/// [SearchFieldMixin], which manages the search field lifecycle.
-///
 /// Use this widget for use cases where the default state management that
 /// [SearchField] provides is not sufficient for the use case. This can be the
 /// case when the elements initialized and disposed in
-/// [SearchControllerMixin.initSearch] and [SearchControllerMixin.disposeSearch]
-/// need to be accessed outside of the context of the search code.
+/// [SearchControllerMixin.init] and [SearchControllerMixin.dispose] need to be
+/// accessed outside of the context of the search code.
 class StatelessSearchField<T extends SearchableDataMixin>
     extends StatelessWidget {
   const StatelessSearchField({
@@ -1096,9 +1088,6 @@ class StatelessSearchField<T extends SearchableDataMixin>
 }
 
 /// A text field with autocomplete search capability.
-///
-/// The widget that builds [AutoCompleteSearchField] is responsible for mixing
-/// in [SearchFieldMixin], which manages the search field lifecycle.
 class AutoCompleteSearchField extends StatefulWidget {
   const AutoCompleteSearchField({
     super.key,
@@ -1161,8 +1150,8 @@ class AutoCompleteSearchField extends StatefulWidget {
   /// autocomplete overlay is not showing.
   final bool clearFieldOnEscapeWhenOverlayHidden;
 
-  /// Handler called when either [controller.searchFieldFocusNode] or
-  /// [controller.autocompleteFocusNode] has lost focus.
+  /// Handler called when either `controller.searchFieldFocusNode` or
+  /// `controller.autocompleteFocusNode` has lost focus.
   final VoidCallback? onFocusLost;
 
   /// The maximum number of lines, by default one.
@@ -1456,7 +1445,7 @@ mixin SearchableDataMixin {
   bool isActiveSearchMatch = false;
 
   /// Whether this [SearchableDataMixin] is a match for the search query
-  /// [search].
+  /// [regExpSearch].
   ///
   /// This method is used by [SearchControllerMixin.matchesForSearch]. If
   /// [SearchControllerMixin.matchesForSearch] is overridden in such a way that

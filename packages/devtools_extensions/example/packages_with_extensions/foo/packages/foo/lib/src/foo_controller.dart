@@ -29,18 +29,17 @@ class FooController {
   static bool _initialized = false;
 
   /// In this method, we register a couple service extensions using
-  /// [registerExtension] from dart:developer
-  /// (see https://api.flutter.dev/flutter/dart-developer/registerExtension.html).
+  /// [registerExtension].
   ///
   /// The service extensions will be registered in the context of the current
   /// isolate (whatever is the current isolate where `initFoo` is invoked).
   ///
   /// To see an example of how these service extensions are called from a
-  /// DevTools extension, see the [TableOfThings] and [SelectedThing] widgets
+  /// DevTools extension, see the `TableOfThings` and `SelectedThing` widgets
   /// from devtools_extensions/example/packages_with_extensions/foo/packages/foo_devtools_extension/lib/src/service_extension_example.dart.
   ///
   /// Service extensions cannot be called while an isolate is paused. If you
-  /// need to fetch data when an isolate is paused, use [EvalOnDartLibrary]
+  /// need to fetch data when an isolate is paused, use `EvalOnDartLibrary`
   /// (see devtools_extensions/example/packages_with_extensions/foo/packages/foo_devtools_extension/lib/src/eval_on_dart_library_example.dart).
   void initFoo() {
     if (!_initialized) {
@@ -64,7 +63,7 @@ class FooController {
 
   /// Adds a thing to the list of [_things].
   ///
-  /// This method is called from [FooWidget], which is used in
+  /// This method is called from `FooWidget`, which is used in
   /// `app_that_uses_foo`.
   void addThing() {
     final nextIndex = _things.length % _sampleThings.length;
@@ -74,7 +73,7 @@ class FooController {
 
   /// Removes a thing from the list of [_things].
   ///
-  /// This method is called from [FooWidget], which is used in
+  /// This method is called from `FooWidget`, which is used in
   /// `app_that_uses_foo`.
   void removeThing() {
     if (_things.isNotEmpty) {
@@ -86,7 +85,7 @@ class FooController {
   /// Selects a random thing from the list of [_things] and assigns it to
   /// [_favoriteThing].
   ///
-  /// This method is called from [FooWidget], which is used in
+  /// This method is called from `FooWidget`, which is used in
   /// `app_that_uses_foo`.
   void selectRandomFavorite() {
     final randomIndex = Random().nextInt(_things.length);

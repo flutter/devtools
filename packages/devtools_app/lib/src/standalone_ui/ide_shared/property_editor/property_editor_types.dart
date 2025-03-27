@@ -146,6 +146,7 @@ class EditableProperty extends EditableArgument {
         isDeprecated: argument.isDeprecated,
         options: argument.options,
         displayValue: argument.displayValue,
+        documentation: argument.documentation,
         errorText: argument.errorText,
       );
 

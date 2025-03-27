@@ -30,6 +30,8 @@ class EditorClient extends DisposableController
 
   String get gaId => EditorSidebar.id;
 
+  bool get isDtdClosed => _dtd.isClosed;
+
   Future<void> _initialize() async {
     autoDisposeStreamSubscription(
       _dtd.onEvent('Service').listen((data) {
@@ -315,27 +317,6 @@ class EditorClient extends DisposableController
         errorMessage: 'Unknown error: $e',
       );
     }
-  }
-
-  Future<bool> isClientClosed() async {
-    try {
-      // Make an empty request to DTD.
-      await _dtd.call('', '');
-    } on StateError catch (e) {
-      // TODO(https://github.com/flutter/devtools/issues/9028): Replace with a
-      // check for whether DTD is closed. Requires a change to package:dtd.
-      //
-      // This is only a temporary fix. If the error in package:json_rpc_2 is
-      // changed, this will no longer catch it. See:
-      // https://github.com/dart-lang/tools/blob/b55643dadafd3ac6b2bd20823802f75929ebf98e/pkgs/json_rpc_2/lib/src/client.dart#L151
-      if (e.message.contains('The client is closed.')) {
-        return true;
-      }
-    } catch (e) {
-      // Ignore other exceptions. If the client is open, we expect this to fail
-      // with the error: 'Unknown method "."'.
-    }
-    return false;
   }
 
   Future<DTDResponse> _call(

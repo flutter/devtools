@@ -72,7 +72,7 @@ class SidebarDevToolsExtensionsController extends DisposableController
   ///
   /// These are composed of any extensions detected from the static context of
   /// the workspace, as well as any detected from active debug sessions.
-  /// Extensions from [_extensionsById] are de-duplicated in
+  /// Extensions from [_extensionsByRootUri] are de-duplicated in
   /// [_deduplicateAndUpdate].
   ValueListenable<List<DevToolsExtensionConfig>> get uniqueExtensions =>
       _uniqueExtensions;
@@ -84,7 +84,8 @@ class SidebarDevToolsExtensionsController extends DisposableController
   /// duplicate of some kind.
   ///
   /// This set will contain identity hash codes for [DevToolsExtensionConfig]
-  /// objects that are in [_extensionsById], but not in [_uniqueExtensions].
+  /// objects that are in [_extensionsByRootUri], but not in
+  /// [_uniqueExtensions].
   final _ignoredExtensionsByHashCode = <int>{};
 
   /// The current set of debug sessions available in the editor.

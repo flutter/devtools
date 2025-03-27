@@ -26,6 +26,7 @@ class GraphNode {
   /// outgoing edges going to `this` node.
   ///
   /// For example:
+  /// ```none
   ///        A (predecessor node)
   ///      /  \
   ///     |    |
@@ -33,12 +34,14 @@ class GraphNode {
   ///       B (this node)
   ///
   /// ==> successorEdgeCounts[A] = 2
+  /// ```
   final predecessorEdgeCounts = <GraphNode, int>{};
 
   /// Maps successor [GraphNode]s from [successors] to the number of incoming
   /// edges coming from `this` node.
   ///
   /// For example:
+  /// ```none
   ///        A (this node)
   ///      /  \
   ///     |    |
@@ -46,6 +49,7 @@ class GraphNode {
   ///       B (successor node)
   ///
   /// ==> successorEdgeCounts[B] = 2
+  /// ```
   final successorEdgeCounts = <GraphNode, int>{};
 
   /// Returns the percentage of this node's predecessor edges that connect to

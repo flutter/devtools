@@ -449,9 +449,7 @@ class NetworkController extends DevToolsScreenController
       ..clear()
       ..addAll(
         _currentNetworkRequests.value.where((NetworkRequest r) {
-          final filteredOutByQueryFilterArgument = queryFilter
-              .filterArguments
-              .values
+          final filteredOutByQueryFilterArgument = queryFilter.filterArguments
               .any((argument) => !argument.matchesValue(r));
           if (filteredOutByQueryFilterArgument) return false;
 

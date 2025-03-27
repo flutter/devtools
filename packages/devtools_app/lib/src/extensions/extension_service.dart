@@ -20,17 +20,16 @@ final _log = Logger('ExtensionService');
 /// visible extensions.
 typedef DevToolsExtensionsGroup =
     ({
-      /// All the DevTools extensions, runtime and static, that are available for
-      /// the connected application, regardless of whether they have been enabled or
-      /// disabled by the user.
-      ///
-      /// This set of extensions will include one version of a DevTools extension
-      /// per package and will exclude any duplicates that have been marked as
-      /// ignored in [_maybeIgnoreExtensions].
+      // All the DevTools extensions, runtime and static, that are available for
+      // the connected application, regardless of whether they have been enabled
+      // or disabled by the user.
+      //
+      // This set of extensions will include one version of a DevTools extension
+      // per package.
       List<DevToolsExtensionConfig> availableExtensions,
 
-      /// DevTools extensions that are visible in their own DevTools screen (i.e.
-      /// extensions that have not been manually disabled by the user).
+      // DevTools extensions that are visible in their own DevTools screen (i.e.
+      // extensions that have not been manually disabled by the user).
       List<DevToolsExtensionConfig> visibleExtensions,
     });
 
@@ -71,8 +70,7 @@ class ExtensionService extends DisposableController
   /// disabled by the user.
   ///
   /// This set of extensions will include one version of a DevTools extension
-  /// per package and will exclude any duplicates that have been marked as
-  /// ignored in [_maybeIgnoreExtensions].
+  /// per package.
   List<DevToolsExtensionConfig> get availableExtensions =>
       _currentExtensions.value.availableExtensions;
 
