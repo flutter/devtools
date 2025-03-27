@@ -4,6 +4,9 @@
 
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member, fine for test only package.
 
+/// @docImport 'package:devtools_app/src/shared/primitives/message_bus.dart';
+library;
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app_shared/ui.dart';

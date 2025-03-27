@@ -47,7 +47,7 @@ void debugLogger(String message) {
 /// whether DevTools is using a light or dark theme.
 ///
 /// This utility method should be used in favor of checking
-/// [preferences.darkModeTheme.value] so that the embedded case is always
+/// `preferences.darkModeTheme.value` so that the embedded case is always
 /// handled properly.
 bool isDarkThemeEnabled() {
   return isEmbedded() && ideTheme.ideSpecifiedTheme
@@ -213,8 +213,7 @@ class Debouncer extends Disposable {
 
 typedef DebounceCancelledCallback = bool Function();
 
-/// A periodic debouncer that calls the given [callback] at most once per
-/// [duration].
+/// A periodic debouncer that calls a callback at most once in a given duration.
 class PeriodicDebouncer {
   /// Start running the periodic debouncer.
   ///
@@ -277,14 +276,15 @@ Future<void> launchUrlWithErrorHandling(String url) async {
   );
 }
 
-/// A worker that will run [callback] in groups of [chunkSize], when [doWork] is called.
+/// A worker that will run [callback] in groups of [_chunkSize], when [doWork]
+/// is called.
 ///
-/// [progressCallback] will be called with 0.0 progress when starting the work and any
-/// time a chunk finishes running, with a value that represents the proportion of
-/// indices that have been completed so far.
+/// [progressCallback] will be called with 0.0 progress when starting the work
+/// and any time a chunk finishes running, with a value that represents the
+/// proportion of indices that have been completed so far.
 ///
-/// This class may be helpful when sets of work need to be done over a list, while
-/// avoiding blocking the UI thread.
+/// This class may be helpful when sets of work need to be done over a list,
+/// while avoiding blocking the UI thread.
 class InterruptableChunkWorker {
   InterruptableChunkWorker({
     int chunkSize = _defaultChunkSize,

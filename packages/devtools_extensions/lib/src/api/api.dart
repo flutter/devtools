@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport 'package:devtools_app/src/shared/globals.dart';
+library;
+
 import 'model.dart';
 
 /// Supported events that can be sent and received over 'postMessage' between

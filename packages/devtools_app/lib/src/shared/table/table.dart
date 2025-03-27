@@ -119,7 +119,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
   late List<T> _data;
 
-  /// An adjusted copy of [widget.columnWidths] where any variable width columns
+  /// An adjusted copy of `widget.columnWidths` where any variable width columns
   /// may be increased so that the sum of all column widths equals the available
   /// screen space.
   ///

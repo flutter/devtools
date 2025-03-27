@@ -266,7 +266,8 @@ class TestRenderingFlutterBinding extends BindingBase
 /// The EnginePhase must not be [EnginePhase.build], since the rendering layer
 /// has no build phase.
 ///
-/// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
+/// If `onErrors` is not null, it is set as
+/// [TestRenderingFlutterBinding.onErrors].
 void layout(
   RenderBox box, {
   // If you want to just repump the last box, call pumpFrame().
@@ -296,7 +297,8 @@ void layout(
 
 /// Pumps a single frame.
 ///
-/// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
+/// If `onErrors` is not null, it is set as
+/// [TestRenderingFlutterBinding.onErrors].
 void pumpFrame({
   EnginePhase phase = EnginePhase.layout,
   VoidCallback? onErrors,
