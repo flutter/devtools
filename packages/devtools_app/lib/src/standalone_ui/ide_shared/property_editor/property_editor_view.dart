@@ -11,6 +11,7 @@ import '../../../shared/ui/common_widgets.dart';
 import '../../../shared/ui/filter.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
+import 'property_editor_messages.dart';
 import 'property_editor_types.dart';
 import 'utils/utils.dart';
 
@@ -26,7 +27,6 @@ class PropertyEditorView extends StatelessWidget {
         controller.editorClient.editArgumentMethodName,
         controller.editorClient.editableArgumentsMethodName,
         controller.editableWidgetData,
-        controller.filteredData,
       ],
       builder: (_, values, _) {
         final editArgumentMethodName = values.first as String?;
@@ -38,56 +38,54 @@ class PropertyEditorView extends StatelessWidget {
         }
 
         final editableWidgetData = values.third as EditableWidgetData?;
-        if (editableWidgetData == null) {
-          final introSentence =
-              controller.waitingForFirstEvent
-                  ? '👋 Welcome to the Flutter Property Editor!'
-                  : 'No Flutter widget found at the current cursor location.';
-          const howToUseSentence =
-              'Please move your cursor to a Flutter widget constructor invocation to view its properties.';
-          return CenteredMessage(
-            message: '$introSentence\n\n$howToUseSentence',
-          );
-        }
-
-        final (:properties, :name, :documentation, :fileUri) =
-            editableWidgetData;
-        if (fileUri != null && !fileUri.endsWith('.dart')) {
-          return const CenteredMessage(
-            message: 'No Dart code found at the current cursor location.',
-          );
-        }
-
-        final filteredProperties = values.fourth as List<EditableProperty>;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (name != null)
-              _WidgetNameAndDocumentation(
-                name: name,
-                documentation: documentation,
-              ),
-            properties.isEmpty
-                ? _NoEditablePropertiesMessage(name: name)
-                : _PropertiesList(
-                  controller: controller,
-                  editableProperties: filteredProperties,
-                ),
-          ],
+          children: _propertyEditorContents(editableWidgetData),
         );
       },
     );
   }
+
+  List<Widget> _propertyEditorContents(EditableWidgetData? editableWidgetData) {
+    if (editableWidgetData == null) {
+      final introSentence =
+          controller.waitingForFirstEvent
+              ? const WelcomeMessage()
+              : const NoWidgetAtLocationMessage();
+      return [introSentence, const HowToUseMessage()];
+    }
+
+    final (:properties, :name, :documentation, :fileUri) = editableWidgetData;
+    if (fileUri != null && !fileUri.endsWith('.dart')) {
+      return [const NoDartCodeMessage(), const HowToUseMessage()];
+    }
+
+    final contents = <Widget>[];
+    if (name != null) {
+      contents.add(
+        _WidgetNameAndDocumentation(name: name, documentation: documentation),
+      );
+    }
+    if (properties.isEmpty) {
+      if (name != null) {
+        contents.add(_NoEditablePropertiesMessage(name: name));
+      } else {
+        contents.addAll([
+          const NoWidgetAtLocationMessage(),
+          const HowToUseMessage(),
+        ]);
+      }
+    } else {
+      contents.add(_PropertiesList(controller: controller));
+    }
+    return contents;
+  }
 }
 
 class _PropertiesList extends StatefulWidget {
-  const _PropertiesList({
-    required this.controller,
-    required this.editableProperties,
-  });
+  const _PropertiesList({required this.controller});
 
   final PropertyEditorController controller;
-  final List<EditableProperty> editableProperties;
 
   static const defaultItemPadding = borderPadding;
   static const denseItemPadding = defaultItemPadding / 2;
@@ -113,17 +111,21 @@ class _PropertiesListState extends State<_PropertiesList> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        _FilterControls(controller: widget.controller),
-        if (widget.editableProperties.isEmpty)
-          const _NoMatchingPropertiesMessage(),
-        for (final property in widget.editableProperties)
-          _EditablePropertyItem(
-            property: property,
-            editProperty: widget.controller.editArgument,
-          ),
-      ].joinWith(const PaddedDivider.noPadding()),
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.filteredData,
+      builder: (context, properties, _) {
+        return Column(
+          children: <Widget>[
+            _FilterControls(controller: widget.controller),
+            if (properties.isEmpty) const NoMatchingPropertiesMessage(),
+            for (final property in properties)
+              _EditablePropertyItem(
+                property: property,
+                editProperty: widget.controller.editArgument,
+              ),
+          ].joinWith(const PaddedDivider.noPadding()),
+        );
+      },
     );
   }
 }
@@ -344,15 +346,6 @@ class _NoEditablePropertiesMessage extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _NoMatchingPropertiesMessage extends StatelessWidget {
-  const _NoMatchingPropertiesMessage();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Text('No properties matching the current filter.');
   }
 }
 
