@@ -121,6 +121,8 @@ void main() {
       // Change the editable args.
       controller.initForTestsOnly();
       await tester.pumpAndSettle();
+
+      // Verify the welcome message is shown.
       expect(find.textContaining(welcomeMessageText), findsOneWidget);
       expect(find.textContaining(howToUseText), findsOneWidget);
       expect(find.textContaining(exampleWidgetText), findsOneWidget);
