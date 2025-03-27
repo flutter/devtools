@@ -493,13 +493,14 @@ class QueryFilter<T> {
         }
         final valueStrings = value.split(QueryFilterArgument.valueSeparator);
         for (final arg in args.values.where((arg) => arg.matchesKey(part))) {
-          arg.isNegative = part.startsWith(QueryFilterArgument.negativePrefix);
-          arg.values =
-              useRegExp
-                  ? valueStrings
-                      .map((v) => RegExp(v, caseSensitive: false))
-                      .toList()
-                  : valueStrings;
+          arg
+            ..isNegative = part.startsWith(QueryFilterArgument.negativePrefix)
+            ..values =
+                useRegExp
+                    ? valueStrings
+                        .map((v) => RegExp(v, caseSensitive: false))
+                        .toList()
+                    : valueStrings;
         }
       } else {
         substringExpressions.add(
