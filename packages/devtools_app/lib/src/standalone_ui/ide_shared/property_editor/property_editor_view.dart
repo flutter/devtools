@@ -38,9 +38,11 @@ class PropertyEditorView extends StatelessWidget {
         }
 
         final editableWidgetData = values.third as EditableWidgetData?;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _propertyEditorContents(editableWidgetData),
+        return SelectionArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _propertyEditorContents(editableWidgetData),
+          ),
         );
       },
     );
@@ -446,34 +448,32 @@ class _WidgetNameAndDocumentation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SelectionArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.only(bottom: denseSpacing),
-            child: Text(
-              name,
-              style: Theme.of(context).fixedFontStyle.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: defaultFontSize + 1,
-              ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(bottom: denseSpacing),
+          child: Text(
+            name,
+            style: Theme.of(context).fixedFontStyle.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: defaultFontSize + 1,
             ),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: _ExpandableWidgetDocumentation(
-                  documentation:
-                      documentation ?? 'Creates ${addIndefiniteArticle(name)}.',
-                ),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: _ExpandableWidgetDocumentation(
+                documentation:
+                    documentation ?? 'Creates ${addIndefiniteArticle(name)}.',
               ),
-            ],
-          ),
-          const PaddedDivider.noPadding(),
-        ],
-      ),
+            ),
+          ],
+        ),
+        const PaddedDivider.noPadding(),
+      ],
     );
   }
 }
