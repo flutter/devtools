@@ -347,7 +347,7 @@ class _SettingFilterElement extends StatelessWidget {
 class Filter<T> {
   Filter({required this.queryFilter, required this.settingFilters});
 
-  final QueryFilter queryFilter;
+  final QueryFilter<T> queryFilter;
 
   final SettingFilters<T> settingFilters;
 
@@ -453,8 +453,8 @@ class SettingFilter<T, V> {
 
 class QueryFilter<T> {
   const QueryFilter._({
-    QueryFilterArgs<T> filterArguments = const {},
-    this.substringExpressions = const <Pattern>[],
+    required QueryFilterArgs<T> filterArguments,
+    required this.substringExpressions,
     this.isEmpty = false,
   }) : _filterArguments = filterArguments;
 
@@ -486,23 +486,19 @@ class QueryFilter<T> {
       final querySeparatorIndex = part.indexOf(':');
       if (querySeparatorIndex != -1) {
         final value = part.substring(querySeparatorIndex + 1).trim();
-        if (value.isNotEmpty) {
-          for (final arg in args.values) {
-            if (arg.matchesKey(part)) {
-              arg.isNegative = part.startsWith(
-                QueryFilterArgument.negativePrefix,
-              );
-              final valueStrings = value.split(
-                QueryFilterArgument.valueSeparator,
-              );
-              arg.values =
-                  useRegExp
-                      ? valueStrings
-                          .map((v) => RegExp(v, caseSensitive: false))
-                          .toList()
-                      : valueStrings;
-            }
-          }
+        if (value.isEmpty) {
+          continue;
+        }
+        final valueStrings = value.split(QueryFilterArgument.valueSeparator);
+        for (final arg in args.values.where((arg) => arg.matchesKey(part))) {
+          arg
+            ..isNegative = part.startsWith(QueryFilterArgument.negativePrefix)
+            ..values =
+                useRegExp
+                    ? valueStrings
+                        .map((v) => RegExp(v, caseSensitive: false))
+                        .toList()
+                    : valueStrings;
         }
       } else {
         substringExpressions.add(
@@ -511,13 +507,9 @@ class QueryFilter<T> {
       }
     }
 
-    bool validArgumentFilter = false;
-    for (final arg in args.values) {
-      if (arg.values.isNotEmpty) {
-        validArgumentFilter = true;
-        break;
-      }
-    }
+    final bool validArgumentFilter = args.values.any(
+      (a) => a.values.isNotEmpty,
+    );
     if (!validArgumentFilter && substringExpressions.isEmpty) {
       return QueryFilter.empty(args: args);
     }
