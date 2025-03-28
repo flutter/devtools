@@ -114,6 +114,20 @@ void main() {
       }
     });
 
+    testWidgets('initial welcome screen', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly();
+      await tester.pumpAndSettle();
+
+      // Verify the welcome message is shown.
+      expect(find.textContaining(welcomeMessageText), findsOneWidget);
+      expect(find.textContaining(howToUseText), findsOneWidget);
+      expect(find.textContaining(exampleWidgetText), findsOneWidget);
+    });
+
     testWidgets('verify editable arguments for first cursor location', (
       tester,
     ) async {
@@ -229,12 +243,9 @@ void main() {
 
         // Verify "No Dart code" message is shown.
         await tester.pumpAndSettle();
-        expect(
-          find.textContaining(
-            'No Dart code found at the current cursor location.',
-          ),
-          findsOneWidget,
-        );
+        expect(find.textContaining(noDartCodeText), findsOneWidget);
+        expect(find.textContaining(howToUseText), findsOneWidget);
+        expect(find.textContaining(exampleWidgetText), findsOneWidget);
       });
     });
   });
@@ -384,6 +395,22 @@ void main() {
         tooltipContent: alignTooltipContent,
         tester: tester,
       );
+    });
+
+    testWidgets('no inputs if widget has no editable properties', (
+      tester,
+    ) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: resultWithNoWidget);
+      await tester.pumpAndSettle();
+
+      // Verify the "No widget" message is displayed.
+      expect(find.textContaining(noWidgetText), findsOneWidget);
+      expect(find.textContaining(howToUseText), findsOneWidget);
+      expect(find.textContaining(exampleWidgetText), findsOneWidget);
     });
   });
 
@@ -1415,3 +1442,12 @@ final resultWithTitle = EditableArgumentsResult(
   name: 'WidgetWithTitle',
   args: [titleProperty],
 );
+final resultWithNoWidget = EditableArgumentsResult(args: []);
+
+const welcomeMessageText = 'Welcome to the Flutter Property Editor!';
+const howToUseText =
+    'Please move your cursor anywhere inside a Flutter widget constructor invocation to view and edit its properties.';
+const exampleWidgetText =
+    'For example, the highlighted code below is a constructor invocation of a Text widget:';
+const noDartCodeText = 'No Dart code found at the current cursor location.';
+const noWidgetText = 'No Flutter widget found at the current cursor location.';
