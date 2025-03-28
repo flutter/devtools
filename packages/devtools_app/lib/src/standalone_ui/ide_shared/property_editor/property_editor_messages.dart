@@ -17,39 +17,40 @@ class HowToUseMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final fixedFontStyle = theme.fixedFontStyle;
     TextSpan colorA(String text) => _coloredSpan(
       text,
-      context: context,
+      style: fixedFontStyle,
       color: colorScheme.declarationsSyntaxColor,
     );
     TextSpan colorB(String text) => _coloredSpan(
       text,
-      context: context,
+      style: fixedFontStyle,
       color: colorScheme.modifierSyntaxColor,
     );
     TextSpan colorC(String text) => _coloredSpan(
       text,
-      context: context,
+      style: fixedFontStyle,
       color: colorScheme.variableSyntaxColor,
     );
     TextSpan colorD(String text) => _coloredSpan(
       text,
-      context: context,
+      style: fixedFontStyle,
       color: colorScheme.controlFlowSyntaxColor,
     );
     TextSpan colorE(String text) => _coloredSpan(
       text,
-      context: context,
+      style: fixedFontStyle,
       color: colorScheme.stringSyntaxColor,
     );
     TextSpan colorF(String text) => _coloredSpan(
       text,
-      context: context,
+      style: fixedFontStyle,
       color: colorScheme.functionSyntaxColor,
     );
     TextSpan colorG(String text) => _coloredSpan(
       text,
-      context: context,
+      style: fixedFontStyle,
       color: colorScheme.numericConstantSyntaxColor,
     );
     TextSpan highlight(TextSpan original) => _highlight(
@@ -107,19 +108,15 @@ class HowToUseMessage extends StatelessWidget {
 
   TextSpan _coloredSpan(
     String text, {
-    required BuildContext context,
+    required TextStyle style,
     required Color color,
-  }) {
-    final fixedFontStyle = Theme.of(context).fixedFontStyle;
-    return TextSpan(text: text, style: fixedFontStyle.copyWith(color: color));
-  }
+  }) => TextSpan(text: text, style: style.copyWith(color: color));
 
-  TextSpan _highlight(TextSpan original, {required Color highlighterColor}) {
-    return TextSpan(
-      text: original.text,
-      style: original.style!.copyWith(backgroundColor: highlighterColor),
-    );
-  }
+  TextSpan _highlight(TextSpan original, {required Color highlighterColor}) =>
+      TextSpan(
+        text: original.text,
+        style: original.style!.copyWith(backgroundColor: highlighterColor),
+      );
 }
 
 class NoDartCodeMessage extends StatelessWidget {
