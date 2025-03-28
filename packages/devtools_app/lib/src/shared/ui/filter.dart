@@ -193,8 +193,7 @@ mixin FilterControllerMixin<T> on DisposableController
 /// the filter state.
 class FilterDialog<T> extends StatefulWidget {
   FilterDialog({super.key, required this.controller})
-    : assert(controller.queryFilterArgs.isNotEmpty),
-      settingFilterValuesAtOpen = List.generate(
+    : settingFilterValuesAtOpen = List.generate(
         controller.activeFilter.value.settingFilters.length,
         (index) =>
             controller.activeFilter.value.settingFilters[index].setting.value,
@@ -442,6 +441,7 @@ class SettingFilter<T, V> {
   /// Whether a data element should be included based on the current state of the
   /// filter.
   bool includeData(T data) {
+    print('should include $data ?');
     return !enabled || _includeCallback(data, setting.value);
   }
 
