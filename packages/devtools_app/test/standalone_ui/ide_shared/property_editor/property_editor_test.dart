@@ -498,6 +498,66 @@ void main() {
       expect(widthInput, findsNothing);
       expect(heightInput, findsNothing);
     });
+
+    testWidgets('can filter for only set values', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Filter for only set vaues.
+      await _setFilter(
+        'Only include properties that are set in the code.',
+        tester: tester,
+      );
+
+      // Verify only the "title" and "width" properties are visible.
+      expect(heightInput, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+    });
+
+    testWidgets('can filter for only default values', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Filter for only default vaues.
+      await _setFilter(
+        'Only include properties that match the default value.',
+        tester: tester,
+      );
+
+      // Verify only the "height" property is visible.
+      expect(heightInput, findsOneWidget);
+      expect(titleInput, findsNothing);
+      expect(widthInput, findsNothing);
+    });
   });
 
   group('editing arguments', () {
@@ -924,6 +984,30 @@ void main() {
 final _findNoPropertiesMessage = find.text(
   'No widget properties at current cursor location.',
 );
+
+Future<void> _setFilter(
+  String filterSettingText, {
+  required WidgetTester tester,
+}) async {
+  final filterButtonFinder = find.byType(DevToolsFilterButton);
+  await tester.tap(filterButtonFinder);
+  await tester.pumpAndSettle();
+
+  final rowFinder = find.ancestor(
+    of: find.textContaining(filterSettingText),
+    matching: find.byType(Row),
+  );
+  final checkboxFinder = find.descendant(
+    of: rowFinder,
+    matching: find.byType(NotifierCheckbox),
+  );
+  await tester.tap(checkboxFinder);
+  await tester.pumpAndSettle();
+
+  final applyFilterButtonFinder = find.byType(DialogApplyButton);
+  await tester.tap(applyFilterButtonFinder);
+  await tester.pumpAndSettle();
+}
 
 Finder _findFilterField() => find.descendant(
   of: find.byType(StandaloneFilterField<EditableProperty>),
