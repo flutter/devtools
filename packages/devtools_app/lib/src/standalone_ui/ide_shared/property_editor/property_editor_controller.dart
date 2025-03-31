@@ -148,9 +148,11 @@ class PropertyEditorController extends DisposableController
   @override
   void filterData(Filter<EditableProperty> filter) {
     super.filterData(filter);
-    final filtered = (_editableWidgetData.value?.properties ?? [])
-        .where((property) => property.matchesQuery(filter.queryFilter.query))
-        .where((property) => !_filteredOutBySettings(property, filter: filter));
+    final filtered = (_editableWidgetData.value?.properties ?? []).where(
+      (property) =>
+          property.matchesQuery(filter.queryFilter.query) &&
+          !_filteredOutBySettings(property, filter: filter),
+    );
     filteredData
       ..clear()
       ..addAll(filtered);
