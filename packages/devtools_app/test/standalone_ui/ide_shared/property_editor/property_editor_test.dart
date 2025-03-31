@@ -538,36 +538,6 @@ void main() {
       expect(titleInput, findsOneWidget);
       expect(widthInput, findsOneWidget);
     });
-
-    testWidgets('can filter for only default values', (tester) async {
-      // Load the property editor.
-      await tester.pumpWidget(wrap(propertyEditor));
-
-      // Change the editable args.
-      controller.initForTestsOnly(editableArgsResult: result1);
-      await tester.pumpAndSettle();
-
-      final titleInput = _findTextFormField('String? title');
-      final widthInput = _findTextFormField('double width');
-      final heightInput = _findTextFormField('double? height');
-
-      // Verify all inputs are visible.
-      expect(_findNoPropertiesMessage, findsNothing);
-      expect(titleInput, findsOneWidget);
-      expect(widthInput, findsOneWidget);
-      expect(heightInput, findsOneWidget);
-
-      // Filter for only default vaues.
-      await _setFilter(
-        'Only include properties that match the default value.',
-        tester: tester,
-      );
-
-      // Verify only the "height" property is visible.
-      expect(heightInput, findsOneWidget);
-      expect(titleInput, findsNothing);
-      expect(widthInput, findsNothing);
-    });
   });
 
   group('editing arguments', () {

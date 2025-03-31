@@ -68,20 +68,12 @@ class PropertyEditorController extends DisposableController
 
   static const _setPropertiesFilterId = 'set-properties-filter';
 
-  static const _defaultPropertiesFilterId = 'default-properties-filter';
-
   @visibleForTesting
   static final propertyFilters = <SettingFilter<EditableProperty, Object>>[
     ToggleFilter<EditableProperty>(
       id: _setPropertiesFilterId,
       name: 'Only include properties that are set in the code.',
       includeCallback: (property) => property.hasArgument,
-      defaultValue: false,
-    ),
-    ToggleFilter<EditableProperty>(
-      id: _defaultPropertiesFilterId,
-      name: 'Only include properties that match the default value.',
-      includeCallback: (property) => property.isDefault,
       defaultValue: false,
     ),
   ];
