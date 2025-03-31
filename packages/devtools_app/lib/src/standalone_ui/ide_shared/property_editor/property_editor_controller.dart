@@ -150,18 +150,11 @@ class PropertyEditorController extends DisposableController
     super.filterData(filter);
     final filtered = (_editableWidgetData.value?.properties ?? [])
         .where((property) => property.matchesQuery(filter.queryFilter.query))
-        .where((property) => !filteredOutBySettings(property, filter: filter));
+        .where((property) => !_filteredOutBySettings(property, filter: filter));
     filteredData
       ..clear()
       ..addAll(filtered);
   }
-
-  bool filteredOutBySettings(
-    EditableProperty property, {
-    required Filter filter,
-  }) => filter.settingFilters.any(
-    (settingFilter) => !settingFilter.includeData(property),
-  );
 
   Future<EditArgumentResponse?> editArgument<T>({
     required String name,
@@ -220,6 +213,13 @@ class PropertyEditorController extends DisposableController
       }
     });
   }
+
+  bool _filteredOutBySettings(
+    EditableProperty property, {
+    required Filter filter,
+  }) => filter.settingFilters.any(
+    (settingFilter) => !settingFilter.includeData(property),
+  );
 
   @visibleForTesting
   void initForTestsOnly({

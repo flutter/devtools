@@ -999,11 +999,12 @@ Future<void> _setFilter(
   String filterSettingText, {
   required WidgetTester tester,
 }) async {
+  // Click the filter button.
   final filterButtonFinder = find.byType(DevToolsFilterButton);
-  expect(filterButtonFinder, findsOneWidget);
   await tester.tap(filterButtonFinder);
   await tester.pumpAndSettle();
 
+  // Find the checkbox for the filter and click it.
   final rowFinder = find.ancestor(
     of: find.textContaining(filterSettingText),
     matching: find.byType(Row),
@@ -1015,6 +1016,7 @@ Future<void> _setFilter(
   await tester.tap(checkboxFinder);
   await tester.pumpAndSettle();
 
+  // Click "Apply" to apply the filter and close the dialog.
   final applyFilterButtonFinder = find.byType(DialogApplyButton);
   await tester.tap(applyFilterButtonFinder);
   await tester.pumpAndSettle();
