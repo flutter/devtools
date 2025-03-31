@@ -412,6 +412,16 @@ void main() {
   });
 
   group('filtering editable arguments', () {
+    void resetFilters() {
+      for (final filter in controller.settingFilters) {
+        filter.setting.value = filter.defaultValue;
+      }
+    }
+
+    tearDown(() {
+      resetFilters();
+    });
+
     testWidgets('can filter by name', (tester) async {
       // Load the property editor.
       await tester.pumpWidget(wrap(propertyEditor));
@@ -990,6 +1000,7 @@ Future<void> _setFilter(
   required WidgetTester tester,
 }) async {
   final filterButtonFinder = find.byType(DevToolsFilterButton);
+  expect(filterButtonFinder, findsOneWidget);
   await tester.tap(filterButtonFinder);
   await tester.pumpAndSettle();
 

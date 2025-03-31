@@ -287,7 +287,7 @@ class _ToggleFilterElement extends StatelessWidget {
       child: Row(
         children: [
           NotifierCheckbox(notifier: filter.setting),
-          Text(filter.name),
+          Expanded(child: Text(filter.name)),
         ],
       ),
     );
