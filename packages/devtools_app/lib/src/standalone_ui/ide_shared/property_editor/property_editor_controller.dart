@@ -95,7 +95,6 @@ class PropertyEditorController extends DisposableController
             cursorPosition == _currentCursorPosition) {
           return;
         }
-        
         if (!textDocument.uriAsString.endsWith('.dart')) {
           _editableWidgetData.value = (
             properties: [],
