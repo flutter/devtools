@@ -9,9 +9,11 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
+import '../../../framework/scaffold/report_feedback_button.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/editor_client.dart';
+import '../../../shared/primitives/query_parameters.dart';
 import '../../../shared/ui/common_widgets.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_view.dart';
@@ -80,6 +82,8 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
 class _PropertyEditorConnectedPanel extends StatefulWidget {
   const _PropertyEditorConnectedPanel(this.editor, {required this.controller});
 
+  static const footerHeight = 25.0;
+
   final EditorClient editor;
   final PropertyEditorController controller;
 
@@ -115,28 +119,91 @@ class _PropertyEditorConnectedPanelState
             Scrollbar(
               controller: scrollController,
               thumbVisibility: true,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    denseSpacing,
-                    defaultSpacing,
-                    defaultSpacing, // Additional right padding for scroll bar.
-                    defaultSpacing,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          denseSpacing,
+                          defaultSpacing,
+                          defaultSpacing, // Additional right padding for scroll bar.
+                          defaultSpacing,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            PropertyEditorView(controller: widget.controller),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      PropertyEditorView(controller: widget.controller),
-                    ],
-                  ),
-                ),
+                  const _PropertyEditorFooter(),
+                ],
               ),
             ),
             if (shouldReconnect) const ReconnectingOverlay(),
           ],
         );
       },
+    );
+  }
+}
+
+class _PropertyEditorFooter extends StatelessWidget {
+  const _PropertyEditorFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final documentationLink = _documentationLink();
+    return Container(
+      color: colorScheme.secondary,
+      height: _PropertyEditorConnectedPanel.footerHeight,
+      padding: const EdgeInsets.symmetric(vertical: densePadding),
+      alignment: Alignment.center,
+      child: Row(
+        children: [
+          if (documentationLink != null)
+            _DocsLink(documentationLink: documentationLink),
+          const Spacer(),
+          ReportFeedbackButton(color: colorScheme.onSecondary),
+        ],
+      ),
+    );
+  }
+
+  String? _documentationLink() {
+    final queryParams = DevToolsQueryParams.load();
+    final isEmbedded = queryParams.embedMode.embedded;
+    if (!isEmbedded) return null;
+    const uriPrefix = 'https://docs.flutter.dev/tools/';
+    const uriHash = '#property-editor';
+    return '$uriPrefix${queryParams.ide == 'VSCode' ? 'vs-code' : 'android-studio'}$uriHash';
+  }
+}
+
+class _DocsLink extends StatelessWidget {
+  const _DocsLink({required this.documentationLink});
+
+  final String documentationLink;
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: GaLinkTextSpan(
+        link: GaLink(
+          display: 'documentation',
+          url: documentationLink,
+          gaScreenName: gac.PropertyEditorSidebar.id,
+          gaSelectedItemDescription:
+              gac.PropertyEditorSidebar.documentationLink,
+        ),
+        context: context,
+      ),
     );
   }
 }

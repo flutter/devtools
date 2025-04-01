@@ -9,6 +9,9 @@ class PropertyEditorSidebar {
   /// Analytics id to track events that come from the DTD editor sidebar.
   static String get id => 'propertyEditorSidebar';
 
+  /// Analytics id for opening the documentation.
+  static String get documentationLink => 'propertyEditorDocumentation';
+
   /// Analytics event that is sent when the property editor is updated with new
   /// properties.
   static String widgetPropertiesUpdate({String? name}) =>
