@@ -98,9 +98,9 @@ abstract class Field {
   static const devices = 'devices';
   static const displayValue = 'displayValue';
   static const documentation = 'documentation';
-  static const end = 'end';
   static const emulator = 'emulator';
   static const emulatorId = 'emulatorId';
+  static const end = 'end';
   static const ephemeral = 'ephemeral';
   static const errorText = 'errorText';
   static const flutterDeviceId = 'flutterDeviceId';
