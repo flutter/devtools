@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/utils.dart';
 import 'package:meta/meta.dart';
 
@@ -82,6 +84,55 @@ class ScreenControllers {
     }
     offlineControllers.clear();
   }
+
+  /// Calls the synchronous [callback] function on each initialized screen
+  /// controller.
+  ///
+  /// Optionally, calls the [callback] on the offline screen controllers when
+  /// [includeOfflineControllers] is true.
+  void forEachInitialized(
+    void Function(DevToolsScreenController screenController) callback, {
+    bool includeOfflineControllers = false,
+  }) {
+    final controllers =
+        includeOfflineControllers
+            ? [...this.controllers.values, ...offlineControllers.values]
+            : this.controllers.values;
+    for (final lazyController in controllers) {
+      if (lazyController.initialized) {
+        callback(lazyController.controller);
+      }
+    }
+  }
+
+  /// Calls the asynchrounous [callback] function on each initialized screen
+  /// controller.
+  ///
+  /// Optionally, calls the [callback] on the offline screen controllers when
+  /// [includeOfflineControllers] is true.
+  FutureOr<void> forEachInitializedAsync(
+    FutureOr<void> Function(DevToolsScreenController screenController)
+    callback, {
+    bool includeOfflineControllers = false,
+  }) async {
+    final controllers =
+        includeOfflineControllers
+            ? [...this.controllers.values, ...offlineControllers.values]
+            : this.controllers.values;
+
+    Future<void> helper(
+      FutureOr<void> Function(DevToolsScreenController) futureOr,
+      DevToolsScreenController controller,
+    ) async {
+      await futureOr(controller);
+    }
+
+    await [
+      for (final lazyController in controllers)
+        if (lazyController.initialized)
+          helper(callback, lazyController.controller),
+    ].wait;
+  }
 }
 
 /// Helper class that performs lazy initialization for
@@ -96,6 +147,9 @@ class _LazyController<T extends DevToolsScreenController> {
   T get controller => _controller ??= creator()..init();
   T? _controller;
 
+  /// Whether the controller has been initialized.
+  bool get initialized => _controller != null;
+
   void dispose() {
     _controller?.dispose();
     _controller = null;
@@ -103,4 +157,15 @@ class _LazyController<T extends DevToolsScreenController> {
 }
 
 /// Base class for all DevTools screen controllers.
-abstract class DevToolsScreenController extends DisposableController {}
+abstract class DevToolsScreenController extends DisposableController {
+  String get screenId;
+
+  /// This method can be overridden to release memory from the screen
+  /// controller.
+  ///
+  /// When `partial` is true, this should only release stale data from the
+  /// screen controller where possible. A partial release is intended to be
+  /// less disruptive to the user, wiping only the oldest data from the screen
+  /// controller.
+  FutureOr<void> releaseMemory({bool partial = false}) {}
+}

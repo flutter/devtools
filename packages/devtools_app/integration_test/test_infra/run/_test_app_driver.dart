@@ -39,33 +39,31 @@ class TestFlutterApp extends IntegrationTestApp {
   Future<void> waitForAppStart() async {
     // Set this up now, but we don't await it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
-    final started = waitFor(
-      event: FlutterDaemonConstants.appStarted.key,
+    final started = _waitFor(
+      event: FlutterDaemonConstants.appStartedKey,
       timeout: IntegrationTestApp._appStartTimeout,
     );
 
-    final debugPort = await waitFor(
-      event: FlutterDaemonConstants.appDebugPort.key,
+    final debugPort = await _waitFor(
+      event: FlutterDaemonConstants.appDebugPortKey,
       timeout: IntegrationTestApp._appStartTimeout,
     );
     final wsUriString =
-        (debugPort[FlutterDaemonConstants.params.key]!
-                as Map<String, Object?>)[FlutterDaemonConstants.wsUri.key]
+        (debugPort[FlutterDaemonConstants.paramsKey]!
+                as Map<String, Object?>)[FlutterDaemonConstants.wsUriKey]
             as String;
-    _vmServiceWsUri = Uri.parse(wsUriString);
+    final vmServiceWsUri = Uri.parse(wsUriString);
 
     // Map to WS URI.
-    _vmServiceWsUri = convertToWebSocketUrl(
-      serviceProtocolUrl: _vmServiceWsUri,
-    );
+    _vmServiceWsUri = convertToWebSocketUrl(serviceProtocolUrl: vmServiceWsUri);
 
     // Now await the started event; if it had already happened the future will
     // have already completed.
     final startedResult = await started;
     final params =
-        startedResult[FlutterDaemonConstants.params.key]!
+        startedResult[FlutterDaemonConstants.paramsKey]!
             as Map<String, Object?>;
-    _currentRunningAppId = params[FlutterDaemonConstants.appId.key] as String?;
+    _currentRunningAppId = params[FlutterDaemonConstants.appIdKey] as String?;
   }
 
   @override
@@ -88,11 +86,7 @@ class TestFlutterApp extends IntegrationTestApp {
   }
 
   int _requestId = 1;
-  // ignore: avoid-dynamic, dynamic by design.
-  Future<dynamic> _sendFlutterDaemonRequest(
-    String method,
-    Object? params,
-  ) async {
+  Future<void> _sendFlutterDaemonRequest(String method, Object? params) async {
     final requestId = _requestId++;
     final request = <String, dynamic>{
       'id': requestId,
@@ -105,7 +99,7 @@ class TestFlutterApp extends IntegrationTestApp {
     // Set up the response future before we send the request to avoid any
     // races. If the method we're calling is app.stop then we tell waitFor not
     // to throw if it sees an app.stop event before the response to this request.
-    final responseFuture = waitFor(
+    final responseFuture = _waitFor(
       id: requestId,
       ignoreAppStopEvent: method == 'app.stop',
     );
@@ -115,11 +109,9 @@ class TestFlutterApp extends IntegrationTestApp {
     if (response['error'] != null || response['result'] == null) {
       throw Exception('Unexpected error response');
     }
-
-    return response['result'];
   }
 
-  Future<Map<String, Object?>> waitFor({
+  Future<Map<String, Object?>> _waitFor({
     String? event,
     int? id,
     Duration? timeout,
@@ -159,29 +151,26 @@ class TestFlutterApp extends IntegrationTestApp {
     final json = _parseFlutterResponse(line);
     if (json == null) {
       return;
-    } else if ((event != null &&
-            json[FlutterDaemonConstants.event.key] == event) ||
-        (id != null && json[FlutterDaemonConstants.id.key] == id)) {
+    }
+    final eventFromJson = json[FlutterDaemonConstants.eventKey];
+    if ((event != null && eventFromJson == event) ||
+        (id != null && json[FlutterDaemonConstants.idKey] == id)) {
       await subscription.cancel();
       response.complete(json);
     } else if (!ignoreAppStopEvent &&
-        json[FlutterDaemonConstants.event.key] ==
-            FlutterDaemonConstants.appStop.key) {
+        eventFromJson == FlutterDaemonConstants.appStopKey) {
       await subscription.cancel();
       final error = StringBuffer();
       error.write('Received app.stop event while waiting for ');
       error.write(
         '${event != null ? '$event event' : 'response to request $id.'}.\n\n',
       );
-      final errorFromJson =
-          (json[FlutterDaemonConstants.params.key]
-              as Map<String, Object?>?)?[FlutterDaemonConstants.error.key];
+      final paramsFromJson = json[FlutterDaemonConstants.paramsKey] as Map?;
+      final errorFromJson = paramsFromJson?[FlutterDaemonConstants.errorKey];
       if (errorFromJson != null) {
         error.write('$errorFromJson\n\n');
       }
-      final traceFromJson =
-          (json[FlutterDaemonConstants.params.key]
-              as Map<String, Object?>?)?[FlutterDaemonConstants.trace.key];
+      final traceFromJson = paramsFromJson?[FlutterDaemonConstants.traceKey];
       if (traceFromJson != null) {
         error.write('$traceFromJson\n\n');
       }
@@ -208,6 +197,10 @@ class TestDartCliApp extends IntegrationTestApp {
     : super(appPath, TestAppDevice.cli);
 
   static const vmServicePrefix = 'The Dart VM service is listening on ';
+  static const controlPortKey = 'controlPort';
+
+  int? get controlPort => _controlPort;
+  late final int? _controlPort;
 
   @override
   Future<void> startProcess() async {
@@ -224,20 +217,32 @@ class TestDartCliApp extends IntegrationTestApp {
 
   @override
   Future<void> waitForAppStart() async {
-    final vmServiceUri = await waitFor(
+    final vmServiceUriString = await _waitFor(
       message: vmServicePrefix,
       timeout: IntegrationTestApp._appStartTimeout,
     );
-    final parsedVmServiceUri = Uri.parse(vmServiceUri);
+    final vmServiceUri = Uri.parse(vmServiceUriString);
+    _controlPort = await _waitFor(
+      message: controlPortKey,
+      timeout: const Duration(seconds: 1),
+      optional: true,
+    );
 
     // Map to WS URI.
-    _vmServiceWsUri = convertToWebSocketUrl(
-      serviceProtocolUrl: parsedVmServiceUri,
-    );
+    _vmServiceWsUri = convertToWebSocketUrl(serviceProtocolUrl: vmServiceUri);
   }
 
-  Future<String> waitFor({required String message, Duration? timeout}) {
-    final response = Completer<String>();
+  /// Waits for [message] to appear on stdout.
+  ///
+  /// After [timeout], if no such message has appeared, then either `null` is
+  /// returned, if [optional] is `true`, or an exception is thrown, if
+  /// [optional] is `false`.
+  Future<T> _waitFor<T>({
+    required String message,
+    Duration? timeout,
+    bool optional = false,
+  }) {
+    final response = Completer<T>();
     late StreamSubscription<String> sub;
     sub = stdoutController.stream.listen(
       (String line) => _handleStdout(
@@ -248,17 +253,26 @@ class TestDartCliApp extends IntegrationTestApp {
       ),
     );
 
-    return _timeoutWithMessages<String>(
+    if (optional) {
+      return response.future
+          .timeout(
+            timeout ?? IntegrationTestApp._defaultTimeout,
+            onTimeout: () => null as T,
+          )
+          .whenComplete(() => sub.cancel());
+    }
+
+    return _timeoutWithMessages<T>(
       () => response.future,
       timeout: timeout,
       message: 'Did not receive expected message: $message.',
     ).whenComplete(() => sub.cancel());
   }
 
-  void _handleStdout(
+  void _handleStdout<T>(
     String line, {
     required StreamSubscription<String> subscription,
-    required Completer<String> response,
+    required Completer<T> response,
     required String message,
   }) async {
     if (message == vmServicePrefix && line.startsWith(vmServicePrefix)) {
@@ -266,7 +280,11 @@ class TestDartCliApp extends IntegrationTestApp {
         line.indexOf(vmServicePrefix) + vmServicePrefix.length,
       );
       await subscription.cancel();
-      response.complete(vmServiceUri);
+      response.complete(vmServiceUri as T);
+    } else if (message == controlPortKey && line.contains(controlPortKey)) {
+      final asJson = jsonDecode(line) as Map;
+      await subscription.cancel();
+      response.complete(asJson[controlPortKey] as T);
     }
   }
 }
@@ -295,7 +313,7 @@ abstract class IntegrationTestApp with IOMixin {
   final _allMessages = StreamController<String>.broadcast();
 
   Uri get vmServiceUri => _vmServiceWsUri;
-  late Uri _vmServiceWsUri;
+  late final Uri _vmServiceWsUri;
 
   Future<void> startProcess();
 
@@ -399,26 +417,19 @@ Uri convertToWebSocketUrl({required Uri serviceProtocolUrl}) {
 // TODO(kenz): consider moving these constants to devtools_shared if they are
 // used outside of these integration tests. Optionally, we could consider making
 // these constants where the flutter daemon is defined in flutter tools.
-enum FlutterDaemonConstants {
-  event,
-  error,
-  id,
-  appId,
-  params,
-  trace,
-  wsUri,
-  pid,
-  appStop(nameOverride: 'app.stop'),
-  appStarted(nameOverride: 'app.started'),
-  appDebugPort(nameOverride: 'app.debugPort'),
-  daemonConnected(nameOverride: 'daemon.connected');
-
-  const FlutterDaemonConstants({String? nameOverride})
-    : _nameOverride = nameOverride;
-
-  final String? _nameOverride;
-
-  String get key => _nameOverride ?? name;
+final class FlutterDaemonConstants {
+  static const eventKey = 'event';
+  static const errorKey = 'error';
+  static const idKey = 'id';
+  static const appIdKey = 'appId';
+  static const paramsKey = 'params';
+  static const traceKey = 'trace';
+  static const wsUriKey = 'wsUri';
+  static const pidKey = 'pid';
+  static const appStopKey = 'app.stop';
+  static const appStartedKey = 'app.started';
+  static const appDebugPortKey = 'app.debugPort';
+  static const daemonConnectedKey = 'daemon.connected';
 }
 
 enum TestAppDevice {
@@ -432,9 +443,10 @@ enum TestAppDevice {
 
   /// A mapping of test app device to the unsupported tests for that device.
   static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
-    TestAppDevice.flutterTester: [],
+    TestAppDevice.flutterTester: ['network_screen_test.dart'],
     TestAppDevice.flutterChrome: [
       'eval_and_browse_test.dart',
+      'network_screen_test.dart',
       'perfetto_test.dart',
       'performance_screen_event_recording_test.dart',
       'service_connection_test.dart',

@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
-import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
@@ -90,52 +89,50 @@ class FlutterFrameAnalysisView extends StatelessWidget {
             const PaddedDivider.noPadding(),
             FrameTimeVisualizer(frameAnalysis: frameAnalysis),
           ],
-          if (FeatureFlags.widgetRebuildStats) ...[
-            if (rebuilds.isNullOrEmpty) ...[
-              const PaddedDivider.noPadding(),
-              ValueListenableBuilder<ServiceExtensionState>(
-                valueListenable: serviceConnection
-                    .serviceManager
-                    .serviceExtensionManager
-                    .getServiceExtensionState(
-                      extensions.countWidgetBuilds.extension,
-                    ),
-                builder: (context, extensionState, _) {
-                  if (!extensionState.enabled) {
-                    return Row(
-                      children: [
-                        const Text(
-                          'To see widget rebuilds for Flutter frames, enable',
+          if (rebuilds.isNullOrEmpty) ...[
+            const PaddedDivider.noPadding(),
+            ValueListenableBuilder<ServiceExtensionState>(
+              valueListenable: serviceConnection
+                  .serviceManager
+                  .serviceExtensionManager
+                  .getServiceExtensionState(
+                    extensions.countWidgetBuilds.extension,
+                  ),
+              builder: (context, extensionState, _) {
+                if (!extensionState.enabled) {
+                  return Row(
+                    children: [
+                      const Text(
+                        'To see widget rebuilds for Flutter frames, enable',
+                      ),
+                      Flexible(
+                        child: ServiceExtensionCheckbox(
+                          serviceExtension: extensions.countWidgetBuilds,
+                          showDescription: false,
                         ),
-                        Flexible(
-                          child: ServiceExtensionCheckbox(
-                            serviceExtension: extensions.countWidgetBuilds,
-                            showDescription: false,
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  return const SizedBox();
-                },
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox();
+              },
+            ),
+          ],
+          if (rebuilds == null)
+            const Text('Rebuild information not available for this frame.')
+          else if (rebuilds.isEmpty)
+            const Text(
+              'No widget rebuilds occurred for widgets that were directly '
+              'created in your project.',
+            )
+          else ...[
+            const SizedBox(height: defaultSpacing),
+            Expanded(
+              child: RebuildTable(
+                metricNames: const ['Rebuild Count'],
+                metrics: combineStats([rebuilds]),
               ),
-            ],
-            if (rebuilds == null)
-              const Text('Rebuild information not available for this frame.')
-            else if (rebuilds.isEmpty)
-              const Text(
-                'No widget rebuilds occurred for widgets that were directly '
-                'created in your project.',
-              )
-            else ...[
-              const SizedBox(height: defaultSpacing),
-              Expanded(
-                child: RebuildTable(
-                  metricNames: const ['Rebuild Count'],
-                  metrics: combineStats([rebuilds]),
-                ),
-              ),
-            ],
+            ),
           ],
         ],
       ),

@@ -30,6 +30,8 @@ class EditorClient extends DisposableController
 
   String get gaId => EditorSidebar.id;
 
+  bool get isDtdClosed => _dtd.isClosed;
+
   Future<void> _initialize() async {
     autoDisposeStreamSubscription(
       _dtd.onEvent('Service').listen((data) {
@@ -62,11 +64,14 @@ class EditorClient extends DisposableController
           _supportsOpenDevToolsPage = isRegistered;
           _supportsOpenDevToolsForceExternal =
               capabilities?[Field.supportsForceExternal] == true;
-          // TODO(https://github.com/flutter/devtools/issues/8804): Switch support
-          // to non-experimental LSP methods.
+        } else if (method == LspMethod.editArgument.methodName) {
+          _editArgumentMethodName.value = LspMethod.editArgument.methodName;
         } else if (method == LspMethod.editArgument.experimentalMethodName) {
           _editArgumentMethodName.value =
               LspMethod.editArgument.experimentalMethodName;
+        } else if (method == LspMethod.editableArguments.methodName) {
+          _editableArgumentsMethodName.value =
+              LspMethod.editableArguments.methodName;
         } else if (method ==
             LspMethod.editableArguments.experimentalMethodName) {
           _editableArgumentsMethodName.value =

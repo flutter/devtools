@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import 'object_inspector/object_inspector_view_controller.dart';
 import 'vm_developer_tools_screen.dart';
@@ -24,6 +25,9 @@ class VMDeveloperToolsController extends DevToolsScreenController {
     ObjectInspectorViewController? objectInspectorViewController,
   }) : objectInspectorViewController =
            objectInspectorViewController ?? ObjectInspectorViewController();
+
+  @override
+  final screenId = ScreenMetaData.vmTools.id;
 
   ValueListenable<int> get selectedIndex => _selectedIndex;
   final _selectedIndex = ValueNotifier<int>(0);

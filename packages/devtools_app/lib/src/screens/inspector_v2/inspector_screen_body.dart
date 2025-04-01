@@ -228,7 +228,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     // Mark the welcome message as shown.
     await storage.setValue(_welcomeShownStorageId, 'true');
     if (context.mounted) {
-      pushWelcomeToNewInspectorMessage(context, InspectorScreen.id);
+      pushWelcomeToNewInspectorMessage(InspectorScreen.id);
     }
   }
 }

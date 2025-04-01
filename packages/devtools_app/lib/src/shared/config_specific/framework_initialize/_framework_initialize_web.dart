@@ -6,6 +6,7 @@ import 'dart:js_interop';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_app_shared/web_utils.dart';
+import 'package:logging/logging.dart';
 import 'package:web/web.dart' hide Storage;
 
 import '../../../service/service_manager.dart';
@@ -13,6 +14,8 @@ import '../../globals.dart';
 import '../../primitives/storage.dart';
 import '../../server/server.dart' as server;
 import '../../server/server_api_client.dart';
+
+final _log = Logger('framework_initialize');
 
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
@@ -27,17 +30,28 @@ Future<String> initializePlatform() async {
         }.toJS,
       );
 
-  // TODO(kenz): this server connection initialized listeners that are never
-  // disposed, so this is likely leaking resources.
-  // Here, we try and initialize the connection between the DevTools web app and
-  // its local server. DevTools can be launched without the server however, so
-  // establishing this connection is a best-effort.
-  // TODO(kenz): investigate it we can remove the DevToolsServerConnection
-  // code in general. We do not appear to be using the SSE connection.
-  final connection = await DevToolsServerConnection.connect();
-  if (connection != null) {
+  // Check if the server API is available.
+  if (await server.checkServerHttpApiAvailable()) {
+    _log.info('Server HTTP API is available, using server for storage.');
     setGlobal(Storage, server.ServerConnectionStorage());
+
+    // And also connect the legacy SSE API if necessary
+    // (`DevToolsServerConnection.connect`) may short-circuit in some cases,
+    // such as when embedded.
+
+    // TODO(kenz): this server connection initialized listeners that are never
+    //  disposed, so this is likely leaking resources.
+    // Here, we try and initialize the connection between the DevTools web app and
+    // its local server. DevTools can be launched without the server however, so
+    // establishing this connection is a best-effort.
+    // TODO(kenz): investigate if we can remove the DevToolsServerConnection
+    //  code in general - it is currently only used for non-embedded pages to
+    //  support some functionality like having VS Code reuse existing browser tabs
+    //  and showing notifications if you try to launch when you already have one
+    //  open.
+    await DevToolsServerConnection.connect();
   } else {
+    _log.info('Server HTTP API is not available, using browser for storage.');
     setGlobal(Storage, BrowserStorage());
   }
 

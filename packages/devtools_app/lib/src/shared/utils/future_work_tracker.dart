@@ -29,10 +29,10 @@ class FutureWorkTracker {
     _active.value = false;
   }
 
-  /// Adds [future] to the work being tracked.
+  /// Adds [futureCallback] to the work being tracked.
   ///
-  /// Unless [clear] is called, [active] will now return true until [future]
-  /// completes either with a value or an error.
+  /// Unless [clear] is called, [active] will now return true until
+  /// [futureCallback] completes either with a value or an error.
   Future<Object?> track(
     Future<Object?> Function() futureCallback, {
     int delayMicros = 0,

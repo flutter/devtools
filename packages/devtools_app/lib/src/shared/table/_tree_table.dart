@@ -18,7 +18,7 @@ enum TreeTableScrollKind { up, down, parent }
 /// list of the tree hierarchy. It then uses the nesting level of the
 /// deepest row in [dataRoots] to determine how wide to make the [treeColumn].
 ///
-/// If [dataRoots.length] > 1, there are multiple trees in this tree table. In
+/// If `dataRoots.length` > 1, there are multiple trees in this tree table. In
 /// this case, tree table operations (expand all, collapse all, sort, etc.) will
 /// be applied to every tree.
 class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
@@ -59,8 +59,8 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// and scroll position for this table (when [preserveVerticalScrollPosition]
   /// is true).
   ///
-  /// We use [TableUiStateStore] to store [_TableUiState] by this key so that
-  /// we can save and restore this state without having to keep [State] or table
+  /// We use [TableUiStateStore] to store [TableUiState] by this key so that we
+  /// can save and restore this state without having to keep [State] or table
   /// controller objects alive.
   final String dataKey;
 

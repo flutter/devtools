@@ -239,9 +239,9 @@ class ThemedColorPair {
 /// A theme-dependent color.
 ///
 /// When possible, themed colors should be specified in an extension on
-/// [ColorScheme] using the [ColorScheme.isLight] getter. However, this class
-/// may be used when access to the [BuildContext] is not available at the time
-/// the color needs to be specified.
+/// [ColorScheme] using the [DevToolsSharedColorScheme.isLight] getter. However,
+/// this class may be used when access to the [BuildContext] is not available at
+/// the time the color needs to be specified.
 class ThemedColor {
   const ThemedColor({required this.light, required this.dark});
 

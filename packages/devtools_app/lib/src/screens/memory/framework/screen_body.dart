@@ -37,11 +37,11 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!offlineDataController.showingOfflineData.value) {
-      maybePushDebugModeMemoryMessage(context, ScreenMetaData.memory.id);
-      maybePushHttpLoggingMessage(context, ScreenMetaData.memory.id);
+      maybePushDebugModeMemoryMessage(ScreenMetaData.memory.id);
+      maybePushHttpLoggingMessage(ScreenMetaData.memory.id);
 
       addAutoDisposeListener(http_service.httpLoggingState, () {
-        maybePushHttpLoggingMessage(context, ScreenMetaData.memory.id);
+        maybePushHttpLoggingMessage(ScreenMetaData.memory.id);
       });
     }
   }

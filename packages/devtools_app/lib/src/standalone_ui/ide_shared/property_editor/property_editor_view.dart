@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/common_widgets.dart';
+import '../../../shared/ui/filter.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
+import 'property_editor_messages.dart';
 import 'property_editor_types.dart';
 import 'utils/utils.dart';
 
@@ -36,48 +38,56 @@ class PropertyEditorView extends StatelessWidget {
         }
 
         final editableWidgetData = values.third as EditableWidgetData?;
-        if (editableWidgetData == null) {
-          final introSentence =
-              controller.waitingForFirstEvent
-                  ? '👋 Welcome to the Flutter Property Editor!'
-                  : 'No Flutter widget found at the current cursor location.';
-          const howToUseSentence =
-              'Please move your cursor to a Flutter widget constructor invocation to view its properties.';
-          return CenteredMessage(
-            message: '$introSentence\n\n$howToUseSentence',
-          );
-        }
-
-        final (:args, :name, :documentation) = editableWidgetData;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (name != null)
-              _WidgetNameAndDocumentation(
-                name: name,
-                documentation: documentation,
-              ),
-            args.isEmpty
-                ? _NoEditablePropertiesMessage(name: name)
-                : _PropertiesList(
-                  editableProperties: args.map(argToProperty).nonNulls.toList(),
-                  editProperty: controller.editArgument,
-                ),
-          ],
+        return SelectionArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _propertyEditorContents(editableWidgetData),
+          ),
         );
       },
     );
   }
+
+  List<Widget> _propertyEditorContents(EditableWidgetData? editableWidgetData) {
+    if (editableWidgetData == null) {
+      final introSentence =
+          controller.waitingForFirstEvent
+              ? const WelcomeMessage()
+              : const NoWidgetAtLocationMessage();
+      return [introSentence, const HowToUseMessage()];
+    }
+
+    final (:properties, :name, :documentation, :fileUri) = editableWidgetData;
+    if (fileUri != null && !fileUri.endsWith('.dart')) {
+      return [const NoDartCodeMessage(), const HowToUseMessage()];
+    }
+
+    final contents = <Widget>[];
+    if (name != null) {
+      contents.add(
+        _WidgetNameAndDocumentation(name: name, documentation: documentation),
+      );
+    }
+    if (properties.isEmpty) {
+      if (name != null) {
+        contents.add(_NoEditablePropertiesMessage(name: name));
+      } else {
+        contents.addAll([
+          const NoWidgetAtLocationMessage(),
+          const HowToUseMessage(),
+        ]);
+      }
+    } else {
+      contents.add(_PropertiesList(controller: controller));
+    }
+    return contents;
+  }
 }
 
 class _PropertiesList extends StatefulWidget {
-  const _PropertiesList({
-    required this.editableProperties,
-    required this.editProperty,
-  });
+  const _PropertiesList({required this.controller});
 
-  final List<EditableProperty> editableProperties;
-  final EditArgumentFunction editProperty;
+  final PropertyEditorController controller;
 
   static const defaultItemPadding = borderPadding;
   static const denseItemPadding = defaultItemPadding / 2;
@@ -103,14 +113,22 @@ class _PropertiesListState extends State<_PropertiesList> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        for (final property in widget.editableProperties)
-          _EditablePropertyItem(
-            property: property,
-            editProperty: widget.editProperty,
-          ),
-      ].joinWith(const PaddedDivider.noPadding()),
+    return ValueListenableBuilder(
+      valueListenable: widget.controller.filteredData,
+      builder: (context, properties, _) {
+        return Column(
+          children: <Widget>[
+            _FilterControls(controller: widget.controller),
+            if (properties.isEmpty) const NoMatchingPropertiesMessage(),
+            for (final property in properties)
+              _EditablePropertyItem(
+                property: property,
+                editProperty: widget.controller.editArgument,
+                widgetDocumentation: widget.controller.widgetDocumentation,
+              ),
+          ].joinWith(const PaddedDivider.noPadding()),
+        );
+      },
     );
   }
 }
@@ -119,10 +137,12 @@ class _EditablePropertyItem extends StatelessWidget {
   const _EditablePropertyItem({
     required this.property,
     required this.editProperty,
+    required this.widgetDocumentation,
   });
 
   final EditableProperty property;
   final EditArgumentFunction editProperty;
+  final String? widgetDocumentation;
 
   @override
   Widget build(BuildContext context) {
@@ -133,9 +153,25 @@ class _EditablePropertyItem extends StatelessWidget {
           flex: 3,
           child: Padding(
             padding: const EdgeInsets.all(_PropertiesList.defaultItemPadding),
-            child: _PropertyInput(
-              property: property,
-              editProperty: editProperty,
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: largeSpacing,
+                    right: densePadding,
+                  ),
+                  child: _InfoTooltip(
+                    property: property,
+                    widgetDocumentation: widgetDocumentation,
+                  ),
+                ),
+                Expanded(
+                  child: _PropertyInput(
+                    property: property,
+                    editProperty: editProperty,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -144,6 +180,29 @@ class _EditablePropertyItem extends StatelessWidget {
         ] else
           const Spacer(),
       ],
+    );
+  }
+}
+
+class _FilterControls extends StatelessWidget {
+  const _FilterControls({required this.controller});
+
+  final PropertyEditorController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(_PropertiesList.defaultItemPadding),
+      child: Row(
+        children: [
+          Expanded(
+            child: StandaloneFilterField<EditableProperty>(
+              controller: controller,
+              filteredItem: 'property',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -159,6 +218,7 @@ class _PropertyLabels extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isSet = property.hasArgument;
+    final isDeprecated = property.isDeprecated;
     final isDefault = property.isDefault;
 
     return LayoutBuilder(
@@ -178,7 +238,22 @@ class _PropertyLabels extends StatelessWidget {
                   textColor: colorScheme.onPrimary,
                 ),
               ),
-            if (isDefault)
+            // We exclude deprecated properties that are not set, so this label
+            // is always displayed under the "set" label.
+            if (isDeprecated)
+              Padding(
+                padding: _labelPadding(isTopLabel: !isSet),
+                child: RoundedLabel(
+                  labelText: _maybeTruncateLabel('deprecated', width: width),
+                  tooltipText: 'Property argument is deprecated.',
+                  fontSize: smallFontSize,
+                  backgroundColor: colorScheme.error,
+                  textColor: colorScheme.onError,
+                ),
+              ),
+            // We only have space for two labels, so the deprecated label takes
+            // precedence over the default label.
+            if (isDefault && !isDeprecated)
               Padding(
                 padding: _labelPadding(isTopLabel: !isSet),
                 child: RoundedLabel(
@@ -206,6 +281,76 @@ class _PropertyLabels extends StatelessWidget {
 
   String _maybeTruncateLabel(String labelText, {required double width}) =>
       width >= _widthForFullLabels ? labelText : labelText[0].toUpperCase();
+}
+
+class _InfoTooltip extends StatelessWidget {
+  const _InfoTooltip({
+    required this.property,
+    required this.widgetDocumentation,
+  });
+
+  final EditableProperty property;
+  final String? widgetDocumentation;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      richMessage: _infoMessage(context),
+      child: Icon(size: defaultIconSize, Icons.info_outline),
+    );
+  }
+
+  TextSpan _infoMessage(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.tooltipTextColor;
+    final regularFontStyle = theme.regularTextStyle.copyWith(color: textColor);
+    final boldFontStyle = theme.boldTextStyle.copyWith(color: textColor);
+    final fixedFontStyle = theme.fixedFontStyle.copyWith(color: textColor);
+
+    final propertyNameSpans = [
+      TextSpan(
+        text: '${property.displayType} ',
+        style: fixedFontStyle.copyWith(fontSize: largeFontSize),
+      ),
+      TextSpan(
+        text: property.name,
+        style: fixedFontStyle.copyWith(
+          fontSize: largeFontSize,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ];
+
+    final defaultValueSpans =
+        property.hasDefault
+            ? [
+              TextSpan(text: '\n\nDefault value: ', style: boldFontStyle),
+              TextSpan(
+                text: property.defaultValue.toString(),
+                style: fixedFontStyle,
+              ),
+            ]
+            : [
+              TextSpan(text: '\n\nDefault value:\n', style: boldFontStyle),
+              TextSpan(text: property.name, style: fixedFontStyle),
+              TextSpan(text: ' has no default value.', style: regularFontStyle),
+            ];
+
+    final spans = [...propertyNameSpans, ...defaultValueSpans];
+
+    final documentation = property.documentation;
+    if (documentation != null && documentation != widgetDocumentation) {
+      spans.addAll([
+        TextSpan(text: '\n\nDocumentation:\n', style: boldFontStyle),
+        ...DartDocConverter(documentation).toTextSpans(
+          regularFontStyle: regularFontStyle,
+          fixedFontStyle: fixedFontStyle,
+        ),
+      ]);
+    }
+
+    return TextSpan(children: spans);
+  }
 }
 
 class _PropertyInput extends StatelessWidget {
@@ -279,7 +424,7 @@ class _NoEditablePropertiesMessage extends StatelessWidget {
                 ' has no editable widget properties.\n\nThe Flutter Property Editor currently supports editing properties of type ',
             style: theme.regularTextStyle,
           ),
-          TextSpan(text: 'string', style: fixedFontStyle),
+          TextSpan(text: 'String', style: fixedFontStyle),
           const TextSpan(text: ', '),
           TextSpan(text: 'int', style: fixedFontStyle),
           const TextSpan(text: ', '),
@@ -306,7 +451,8 @@ class _WidgetNameAndDocumentation extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
+        Container(
+          alignment: Alignment.centerLeft,
           padding: const EdgeInsets.only(bottom: denseSpacing),
           child: Text(
             name,
@@ -326,7 +472,7 @@ class _WidgetNameAndDocumentation extends StatelessWidget {
             ),
           ],
         ),
-        const PaddedDivider(),
+        const PaddedDivider.noPadding(),
       ],
     );
   }
@@ -372,8 +518,7 @@ class _ExpandableWidgetDocumentationState
     final paragraphs = widget.documentation.split('\n');
 
     if (paragraphs.length == 1) {
-      return convertDartDocToRichText(
-        widget.documentation,
+      return DartDocConverter(widget.documentation).toText(
         regularFontStyle: regularFontStyle,
         fixedFontStyle: fixedFontStyle,
       );
@@ -388,16 +533,14 @@ class _ExpandableWidgetDocumentationState
         // or collapses the text block. Because the Dart doc is never very
         // large, this is not an expensive operation. However, we could
         // consider caching the result if this needs to be optimized.
-        convertDartDocToRichText(
-          firstParagraph,
+        DartDocConverter(firstParagraph).toText(
           regularFontStyle: regularFontStyle,
           fixedFontStyle: fixedFontStyle,
         ),
         if (_isExpanded)
           FadeTransition(
             opacity: _expandAnimation,
-            child: convertDartDocToRichText(
-              otherParagraphs.join('\n'),
+            child: DartDocConverter(otherParagraphs.join('\n')).toText(
               regularFontStyle: regularFontStyle,
               fixedFontStyle: fixedFontStyle,
             ),

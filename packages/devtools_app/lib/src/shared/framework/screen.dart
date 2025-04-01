@@ -62,9 +62,9 @@ enum ScreenMetaData {
     title: 'Memory',
     iconAsset: 'icons/app_bar/memory.png',
     requiresDartVm: true,
-    requiresConnection: !FeatureFlags.memoryDisconnectExperience,
+    requiresConnection: false,
     tutorialVideoTimestamp: '?t=420',
-    worksWithOfflineData: FeatureFlags.memoryDisconnectExperience,
+    worksWithOfflineData: true,
   ),
   debugger(
     'debugger',
@@ -79,7 +79,6 @@ enum ScreenMetaData {
     iconAsset: 'icons/app_bar/network.png',
     requiresDartVm: true,
     tutorialVideoTimestamp: '?t=547',
-    // ignore: avoid_redundant_argument_values, false positive
     requiresConnection: false,
     // ignore: avoid_redundant_argument_values, false positive
     worksWithOfflineData: FeatureFlags.networkDisconnectExperience,

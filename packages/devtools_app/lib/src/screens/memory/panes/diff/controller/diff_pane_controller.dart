@@ -151,12 +151,26 @@ class DiffPaneController extends DisposableController with Serializable {
     }
   }
 
-  void clearSnapshots() {
+  void clearSnapshots({bool partial = false}) {
+    const offsetForInstructionSnapshot = 1;
     final snapshots = core._snapshots;
-    for (var i = 1; i < snapshots.value.length; i++) {
+    final snapshotsToRemove = max(
+      0,
+      (snapshots.value.length - offsetForInstructionSnapshot) ~/
+          (partial ? 2 : 1),
+    );
+    final endIndexToRemoveExclusive = min(
+      snapshots.value.length,
+      offsetForInstructionSnapshot + snapshotsToRemove,
+    );
+    for (
+      var i = offsetForInstructionSnapshot;
+      i < endIndexToRemoveExclusive;
+      i++
+    ) {
       snapshots.value[i].dispose();
     }
-    snapshots.removeRange(1, snapshots.value.length);
+    snapshots.removeRange(1, endIndexToRemoveExclusive);
     core._selectedSnapshotIndex.value = 0;
     derived._updateValues();
   }

@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import '../primitives/utils.dart';
 import 'common_widgets.dart';
 
+/// A mapping from filter kinds to [QueryFilterArgument]s.
 typedef QueryFilterArgs<T> = Map<String, QueryFilterArgument<T>>;
 typedef SettingFilters<T> = List<SettingFilter<T, Object>>;
 
@@ -26,9 +27,7 @@ typedef SettingFilters<T> = List<SettingFilter<T, Object>>;
 /// [createSettingFilters] and [createQueryFilterArgs].
 ///
 /// Classes mixing in [FilterControllerMixin] must also extend
-/// [DisposableController] and mixin [AutoDisposeControllerMixin], and a class
-/// can subscribe to updates to the active filter by calling
-/// [initFilterController].
+/// [DisposableController] and mixin [AutoDisposeControllerMixin].
 mixin FilterControllerMixin<T> on DisposableController
     implements AutoDisposeControllerMixin {
   final filteredData = ListValueNotifier<T>(<T>[]);
@@ -39,7 +38,7 @@ mixin FilterControllerMixin<T> on DisposableController
   ///
   /// This should be overriden as a getter by subclasses to support persisting
   /// the most recent filter to DevTools preferences.
-  ValueNotifier<String>? filterTagNotifier;
+  ValueNotifier<String>? get filterTagNotifier => null;
 
   ValueListenable<Filter<T>> get activeFilter => _activeFilter;
 
@@ -94,6 +93,7 @@ mixin FilterControllerMixin<T> on DisposableController
   /// query with arguments may look like 'foo category:bar type:baz'. In this
   /// example, 'category' and 'type' would need to be defined as query filter
   /// arguments.
+  @visibleForOverriding
   QueryFilterArgs<T> createQueryFilterArgs() =>
       <String, QueryFilterArgument<T>>{};
 
@@ -192,20 +192,15 @@ mixin FilterControllerMixin<T> on DisposableController
 /// This dialog interacts with a [FilterControllerMixin] to manage and preserve
 /// the filter state.
 class FilterDialog<T> extends StatefulWidget {
-  FilterDialog({
-    super.key,
-    required this.controller,
-    required this.filteredItem,
-  }) : assert(controller.queryFilterArgs.isNotEmpty),
-       settingFilterValuesAtOpen = List.generate(
-         controller.activeFilter.value.settingFilters.length,
-         (index) =>
-             controller.activeFilter.value.settingFilters[index].setting.value,
-       );
+  FilterDialog({super.key, required this.controller})
+    : assert(controller.queryFilterArgs.isNotEmpty),
+      settingFilterValuesAtOpen = List.generate(
+        controller.activeFilter.value.settingFilters.length,
+        (index) =>
+            controller.activeFilter.value.settingFilters[index].setting.value,
+      );
 
   final FilterControllerMixin<T> controller;
-
-  final String filteredItem;
 
   final List<Object> settingFilterValuesAtOpen;
 
@@ -249,12 +244,11 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final filter in widget.controller.settingFilters) ...[
+          for (final filter in widget.controller.settingFilters)
             if (filter is ToggleFilter<T>)
               _ToggleFilterElement(filter: filter)
             else
               _SettingFilterElement(filter: filter),
-          ],
         ],
       ),
     );
@@ -353,7 +347,7 @@ class _SettingFilterElement extends StatelessWidget {
 class Filter<T> {
   Filter({required this.queryFilter, required this.settingFilters});
 
-  final QueryFilter queryFilter;
+  final QueryFilter<T> queryFilter;
 
   final SettingFilters<T> settingFilters;
 
@@ -457,14 +451,14 @@ class SettingFilter<T, V> {
   Map<String, Object?> get valueAsJson => {id: setting.value};
 }
 
-class QueryFilter {
+class QueryFilter<T> {
   const QueryFilter._({
-    this.filterArguments = const <String, QueryFilterArgument>{},
-    this.substringExpressions = const <Pattern>[],
+    required QueryFilterArgs<T> filterArguments,
+    required this.substringExpressions,
     this.isEmpty = false,
-  });
+  }) : _filterArguments = filterArguments;
 
-  factory QueryFilter.empty({required QueryFilterArgs args}) {
+  factory QueryFilter.empty({required QueryFilterArgs<T> args}) {
     return QueryFilter._(
       filterArguments: args,
       substringExpressions: <Pattern>[],
@@ -474,7 +468,7 @@ class QueryFilter {
 
   factory QueryFilter.parse(
     String query, {
-    required QueryFilterArgs args,
+    required QueryFilterArgs<T> args,
     required bool useRegExp,
   }) {
     if (query.isEmpty) {
@@ -492,23 +486,19 @@ class QueryFilter {
       final querySeparatorIndex = part.indexOf(':');
       if (querySeparatorIndex != -1) {
         final value = part.substring(querySeparatorIndex + 1).trim();
-        if (value.isNotEmpty) {
-          for (final arg in args.values) {
-            if (arg.matchesKey(part)) {
-              arg.isNegative = part.startsWith(
-                QueryFilterArgument.negativePrefix,
-              );
-              final valueStrings = value.split(
-                QueryFilterArgument.valueSeparator,
-              );
-              arg.values =
-                  useRegExp
-                      ? valueStrings
-                          .map((v) => RegExp(v, caseSensitive: false))
-                          .toList()
-                      : valueStrings;
-            }
-          }
+        if (value.isEmpty) {
+          continue;
+        }
+        final valueStrings = value.split(QueryFilterArgument.valueSeparator);
+        for (final arg in args.values.where((arg) => arg.matchesKey(part))) {
+          arg
+            ..isNegative = part.startsWith(QueryFilterArgument.negativePrefix)
+            ..values =
+                useRegExp
+                    ? valueStrings
+                        .map((v) => RegExp(v, caseSensitive: false))
+                        .toList()
+                    : valueStrings;
         }
       } else {
         substringExpressions.add(
@@ -517,13 +507,9 @@ class QueryFilter {
       }
     }
 
-    bool validArgumentFilter = false;
-    for (final arg in args.values) {
-      if (arg.values.isNotEmpty) {
-        validArgumentFilter = true;
-        break;
-      }
-    }
+    final bool validArgumentFilter = args.values.any(
+      (a) => a.values.isNotEmpty,
+    );
     if (!validArgumentFilter && substringExpressions.isEmpty) {
       return QueryFilter.empty(args: args);
     }
@@ -534,7 +520,12 @@ class QueryFilter {
     );
   }
 
-  final QueryFilterArgs filterArguments;
+  /// The mapping of filter kinds fo [QueryFilterArgument]s.
+  final QueryFilterArgs<T> _filterArguments;
+
+  /// The collection of all [QueryFilterArgument]s.
+  Iterable<QueryFilterArgument<T>> get filterArguments =>
+      _filterArguments.values;
 
   final List<Pattern> substringExpressions;
 
@@ -545,7 +536,7 @@ class QueryFilter {
           ? ''
           : [
             ...substringExpressions.toStringList(),
-            for (final arg in filterArguments.values) arg.display,
+            for (final arg in filterArguments) arg.display,
           ].join(' ').trim();
 }
 
@@ -693,7 +684,6 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                                       builder:
                                           (context) => FilterDialog(
                                             controller: widget.controller,
-                                            filteredItem: widget.filteredItem,
                                           ),
                                     ),
                                   );

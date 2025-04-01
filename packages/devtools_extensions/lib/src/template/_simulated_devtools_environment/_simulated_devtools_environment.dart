@@ -29,7 +29,7 @@ part 'connection_ui/_vm_service_connect.dart';
 /// APIs that DevTools does.
 ///
 /// To use this wrapper, set the 'use_simulated_environment' environment
-/// variable to true. See [_simulatedEnvironmentEnabled] from
+/// variable to true. See `_simulatedEnvironmentEnabled` from
 /// `devtools_extension.dart`.
 class SimulatedDevToolsWrapper extends StatefulWidget {
   const SimulatedDevToolsWrapper({

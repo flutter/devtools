@@ -11,10 +11,17 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
+import '../../../shared/ui/filter.dart';
 import '../../../shared/utils/utils.dart';
+import 'property_editor_types.dart';
 
 typedef EditableWidgetData =
-    ({List<EditableArgument> args, String? name, String? documentation});
+    ({
+      List<EditableProperty> properties,
+      String? name,
+      String? documentation,
+      String? fileUri,
+    });
 
 typedef EditArgumentFunction =
     Future<EditArgumentResponse?> Function<T>({
@@ -23,7 +30,7 @@ typedef EditArgumentFunction =
     });
 
 class PropertyEditorController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin, FilterControllerMixin<EditableProperty> {
   PropertyEditorController(this.editorClient) {
     init();
   }
@@ -38,6 +45,12 @@ class PropertyEditorController extends DisposableController
   ValueListenable<EditableWidgetData?> get editableWidgetData =>
       _editableWidgetData;
   final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
+
+  List<EditableProperty> get allProperties =>
+      _editableWidgetData.value?.properties ?? [];
+  String? get widgetName => _editableWidgetData.value?.name;
+  String? get widgetDocumentation => _editableWidgetData.value?.documentation;
+  String? get fileUri => _editableWidgetData.value?.fileUri;
 
   ValueListenable<bool> get shouldReconnect => _shouldReconnect;
   final _shouldReconnect = ValueNotifier<bool>(false);
@@ -61,6 +74,7 @@ class PropertyEditorController extends DisposableController
       _checkConnectionInterval,
     );
 
+    // Update in response to ActiveLocationChanged events.
     autoDisposeStreamSubscription(
       editorClient.activeLocationChangedStream.listen((event) async {
         if (_waitingForFirstEvent) _waitingForFirstEvent = false;
@@ -81,6 +95,16 @@ class PropertyEditorController extends DisposableController
             cursorPosition == _currentCursorPosition) {
           return;
         }
+        
+        if (!textDocument.uriAsString.endsWith('.dart')) {
+          _editableWidgetData.value = (
+            properties: [],
+            name: null,
+            documentation: null,
+            fileUri: textDocument.uriAsString,
+          );
+          return;
+        }
         _editableArgsDebouncer.run(
           () => _updateWithEditableArgs(
             textDocument: textDocument,
@@ -96,6 +120,17 @@ class PropertyEditorController extends DisposableController
     _editableArgsDebouncer.dispose();
     _checkConnectionTimer.cancel();
     super.dispose();
+  }
+
+  @override
+  void filterData(Filter<EditableProperty> filter) {
+    super.filterData(filter);
+    final filtered = (_editableWidgetData.value?.properties ?? []).where(
+      (property) => property.matchesQuery(filter.queryFilter.query),
+    );
+    filteredData
+      ..clear()
+      ..addAll(filtered);
   }
 
   Future<EditArgumentResponse?> editArgument<T>({
@@ -124,13 +159,21 @@ class PropertyEditorController extends DisposableController
       textDocument: textDocument,
       position: cursorPosition,
     );
-    final args = result?.args ?? <EditableArgument>[];
+    final properties =
+        (result?.args ?? <EditableArgument>[])
+            .map(argToProperty)
+            .nonNulls
+            // Filter out any deprecated properties that aren't set.
+            .where((property) => !property.isDeprecated || property.hasArgument)
+            .toList();
     final name = result?.name;
     _editableWidgetData.value = (
-      args: args,
+      properties: properties,
       name: name,
       documentation: result?.documentation,
+      fileUri: _currentDocument?.uriAsString,
     );
+    filterData(activeFilter.value);
     // Register impression.
     ga.impression(
       gaId,
@@ -139,8 +182,8 @@ class PropertyEditorController extends DisposableController
   }
 
   Timer _periodicallyCheckConnection(Duration interval) {
-    return Timer.periodic(interval, (timer) async {
-      final isClosed = await editorClient.isClientClosed();
+    return Timer.periodic(interval, (timer) {
+      final isClosed = editorClient.isDtdClosed;
       if (isClosed) {
         _shouldReconnect.value = true;
         timer.cancel();
@@ -154,11 +197,14 @@ class PropertyEditorController extends DisposableController
     TextDocument? document,
     CursorPosition? cursorPosition,
   }) {
+    setActiveFilter();
     if (editableArgsResult != null) {
       _editableWidgetData.value = (
-        args: editableArgsResult.args,
+        properties:
+            editableArgsResult.args.map(argToProperty).nonNulls.toList(),
         name: editableArgsResult.name,
         documentation: editableArgsResult.documentation,
+        fileUri: document?.uriAsString,
       );
     }
     if (document != null) {
@@ -167,5 +213,6 @@ class PropertyEditorController extends DisposableController
     if (cursorPosition != null) {
       _currentCursorPosition = cursorPosition;
     }
+    filterData(activeFilter.value);
   }
 }

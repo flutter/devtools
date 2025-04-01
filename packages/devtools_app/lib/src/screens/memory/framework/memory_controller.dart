@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../shared/feature_flags.dart';
 import '../../../shared/framework/screen.dart';
 import '../../../shared/framework/screen_controllers.dart';
 import '../../../shared/globals.dart';
@@ -39,6 +40,9 @@ class MemoryController extends DevToolsScreenController
     with
         AutoDisposeControllerMixin,
         OfflineScreenControllerMixin<OfflineMemoryData> {
+  @override
+  final screenId = ScreenMetaData.memory.id;
+
   Future<void> get initialized => _initialized.future;
   final _initialized = Completer<void>();
 
@@ -208,6 +212,16 @@ class MemoryController extends DevToolsScreenController
       notificationService.push('Successfully garbage collected.');
     } finally {
       _gcing.value = false;
+    }
+  }
+
+  @override
+  FutureOr<void> releaseMemory({bool partial = false}) async {
+    if (FeatureFlags.memoryObserver) {
+      diff.clearSnapshots(partial: partial);
+      // Clear all allocation traces since the traces form a single tracing
+      // profile.
+      await trace?.clear();
     }
   }
 }

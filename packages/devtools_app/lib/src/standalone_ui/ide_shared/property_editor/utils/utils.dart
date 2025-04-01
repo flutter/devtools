@@ -5,77 +5,141 @@
 import 'package:flutter/widgets.dart';
 import '_utils_desktop.dart' if (dart.library.js_interop) '_utils_web.dart';
 
-/// Converts a [dartDocText] String into a [RichText] widget.
-///
-/// Removes any brackets and backticks and displays the text inside them as
-/// fixed font.
-RichText convertDartDocToRichText(
-  String dartDocText, {
-  required TextStyle regularFontStyle,
-  required TextStyle fixedFontStyle,
-}) {
-  final children = <TextSpan>[];
-  int currentIndex = 0;
+/// Converts a [dartDocText] String into a [Text] widget.
+class DartDocConverter {
+  DartDocConverter(this.dartDocText);
 
-  while (currentIndex < dartDocText.length) {
-    final openBracketIndex = dartDocText.indexOf('[', currentIndex);
-    final openBacktickIndex = dartDocText.indexOf('`', currentIndex);
+  final String dartDocText;
 
-    int nextSpecialCharIndex = -1;
-    bool isLink = false;
-
-    if (openBracketIndex != -1 &&
-        (openBacktickIndex == -1 || openBracketIndex < openBacktickIndex)) {
-      nextSpecialCharIndex = openBracketIndex;
-      isLink = true;
-    } else if (openBacktickIndex != -1 &&
-        (openBracketIndex == -1 || openBacktickIndex < openBracketIndex)) {
-      nextSpecialCharIndex = openBacktickIndex;
-    }
-
-    if (nextSpecialCharIndex == -1) {
-      // No more special characters, add the remaining text.
-      children.add(
-        TextSpan(
-          text: dartDocText.substring(currentIndex),
-          style: regularFontStyle,
-        ),
-      );
-      break;
-    }
-
-    // Add text before the special character.
-    children.add(
-      TextSpan(
-        text: dartDocText.substring(currentIndex, nextSpecialCharIndex),
-        style: regularFontStyle,
-      ),
+  /// Converts the [dartDocText] String into a [Text] widget.
+  ///
+  /// Removes any brackets and backticks and displays the text inside them with
+  /// [fixedFontStyle]. All other text uses [regularFontStyle].
+  Text toText({
+    required TextStyle regularFontStyle,
+    required TextStyle fixedFontStyle,
+  }) {
+    final children = toTextSpans(
+      regularFontStyle: regularFontStyle,
+      fixedFontStyle: fixedFontStyle,
     );
-
-    final closeIndex = dartDocText.indexOf(
-      isLink ? ']' : '`',
-      isLink ? nextSpecialCharIndex : nextSpecialCharIndex + 1,
-    );
-    if (closeIndex == -1) {
-      // Treat unmatched brackets/backticks as regular text.
-      children.add(
-        TextSpan(
-          text: dartDocText.substring(nextSpecialCharIndex),
-          style: regularFontStyle,
-        ),
-      );
-      currentIndex = dartDocText.length; // Effectively break the loop.
-    } else {
-      final content = dartDocText.substring(
-        nextSpecialCharIndex + 1,
-        closeIndex,
-      );
-      children.add(TextSpan(text: content, style: fixedFontStyle));
-      currentIndex = closeIndex + 1;
-    }
+    return Text.rich(TextSpan(children: children));
   }
 
-  return RichText(text: TextSpan(children: children));
+  List<TextSpan> toTextSpans({
+    required TextStyle regularFontStyle,
+    required TextStyle fixedFontStyle,
+  }) {
+    final text = _removeTemplateIndicators(dartDocText);
+
+    final children = <TextSpan>[];
+    int currentIndex = 0;
+
+    while (currentIndex < text.length) {
+      final openBracketIndex = text.indexOf('[', currentIndex);
+      final openBacktickIndex = text.indexOf('`', currentIndex);
+
+      int nextSpecialCharIndex = -1;
+      bool isLink = false;
+
+      if (openBracketIndex != -1 &&
+          (openBacktickIndex == -1 || openBracketIndex < openBacktickIndex)) {
+        nextSpecialCharIndex = openBracketIndex;
+        isLink = true;
+      } else if (openBacktickIndex != -1 &&
+          (openBracketIndex == -1 || openBacktickIndex < openBracketIndex)) {
+        nextSpecialCharIndex = openBacktickIndex;
+      }
+
+      if (nextSpecialCharIndex == -1) {
+        // No more special characters, add the remaining text.
+        children.add(
+          TextSpan(text: text.substring(currentIndex), style: regularFontStyle),
+        );
+        break;
+      }
+
+      // Add text before the special character.
+      children.add(
+        TextSpan(
+          text: text.substring(currentIndex, nextSpecialCharIndex),
+          style: regularFontStyle,
+        ),
+      );
+
+      final closeIndex = text.indexOf(
+        isLink ? ']' : '`',
+        isLink ? nextSpecialCharIndex : nextSpecialCharIndex + 1,
+      );
+      if (closeIndex == -1) {
+        // Treat unmatched brackets/backticks as regular text.
+        children.add(
+          TextSpan(
+            text: text.substring(nextSpecialCharIndex),
+            style: regularFontStyle,
+          ),
+        );
+        currentIndex = text.length; // Effectively break the loop.
+      } else {
+        final content = text.substring(nextSpecialCharIndex + 1, closeIndex);
+        children.add(TextSpan(text: content, style: fixedFontStyle));
+        currentIndex = closeIndex + 1;
+      }
+    }
+    return children;
+  }
+
+  /// Removes @template and @endtemplate indicators from the [input].
+  String _removeTemplateIndicators(String input) {
+    const templateStart = '{@template';
+    const templateEnd = '{@endtemplate';
+    const closingCurlyBrace = '}';
+    const newLine = '\n';
+    String result = '';
+    int currentIndex = 0;
+
+    while (currentIndex < input.length) {
+      final startTemplateIndex = input.indexOf(templateStart, currentIndex);
+      final endTemplateIndex = input.indexOf(templateEnd, currentIndex);
+
+      int templateIndex;
+      if (startTemplateIndex != -1 && endTemplateIndex != -1) {
+        templateIndex =
+            (startTemplateIndex < endTemplateIndex)
+                ? startTemplateIndex
+                : endTemplateIndex;
+      } else if (startTemplateIndex != -1) {
+        templateIndex = startTemplateIndex;
+      } else if (endTemplateIndex != -1) {
+        templateIndex = endTemplateIndex;
+      } else {
+        result += input.substring(currentIndex);
+        break;
+      }
+
+      result += input.substring(currentIndex, templateIndex);
+
+      final closingIndex = input.indexOf(closingCurlyBrace, templateIndex);
+      if (closingIndex == -1) {
+        result += input.substring(templateIndex);
+        break;
+      }
+      final closingChars =
+          input.substring(closingIndex).startsWith('$closingCurlyBrace$newLine')
+              ? '$closingCurlyBrace$newLine'
+              : closingCurlyBrace;
+      currentIndex = closingIndex + closingChars.length;
+    }
+
+    return result;
+  }
+}
+
+/// Workaround to force reload the Property Editor when it disconnects.
+///
+/// See https://github.com/flutter/devtools/issues/9028 for details.
+void forceReload() {
+  reloadIframe();
 }
 
 /// Workaround to force reload the Property Editor when it disconnects.

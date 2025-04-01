@@ -110,6 +110,7 @@ abstract class Field {
   static const hasArgument = 'hasArgument';
   static const id = 'id';
   static const isDarkMode = 'isDarkMode';
+  static const isDeprecated = 'isDeprecated';
   static const isEditable = 'isEditable';
   static const isNullable = 'isNullable';
   static const isRequired = 'isRequired';
@@ -524,11 +525,13 @@ class EditableArgument with Serializable {
     required this.isNullable,
     required this.isRequired,
     required this.isEditable,
+    required this.isDeprecated,
     required this.hasDefault,
     this.options,
     this.value,
     this.defaultValue,
     this.displayValue,
+    this.documentation,
     this.errorText,
   });
 
@@ -540,11 +543,13 @@ class EditableArgument with Serializable {
         isNullable: (map[Field.isNullable] as bool?) ?? false,
         isRequired: (map[Field.isRequired] as bool?) ?? false,
         isEditable: (map[Field.isEditable] as bool?) ?? true,
+        isDeprecated: (map[Field.isDeprecated] as bool?) ?? false,
         hasDefault: map.containsKey(Field.defaultValue),
         options: (map[Field.options] as List<Object?>?)?.cast<String>(),
         value: map[Field.value],
         defaultValue: map[Field.defaultValue],
         displayValue: map[Field.displayValue] as String?,
+        documentation: map[Field.documentation] as String?,
         errorText: map[Field.errorText] as String?,
       );
 
@@ -575,6 +580,9 @@ class EditableArgument with Serializable {
   /// where previous positional parameters have no argument.
   final bool isEditable;
 
+  /// Whether the argument is deprecated.
+  final bool isDeprecated;
+
   /// A list of values that could be provided for this argument.
   ///
   /// This will only be included if the parameter's [type] is "enum".
@@ -595,6 +603,9 @@ class EditableArgument with Serializable {
   /// as the value field, for example an expression or named constant.
   final String? displayValue;
 
+  /// Documentation about the widget argument.
+  final String? documentation;
+
   final String? errorText;
 
   String get valueDisplay => displayValue ?? currentValue.toString();
@@ -613,8 +624,10 @@ class EditableArgument with Serializable {
     Field.isNullable: isNullable,
     Field.isRequired: isRequired,
     Field.isEditable: isEditable,
+    Field.isDeprecated: isDeprecated,
     Field.options: options,
     Field.displayValue: displayValue,
+    Field.documentation: documentation,
     Field.errorText: errorText,
   };
 }

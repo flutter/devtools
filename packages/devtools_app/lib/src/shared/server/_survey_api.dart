@@ -9,7 +9,7 @@ part of 'server.dart';
 /// The value is stored in the file '~/.flutter-devtools/.devtools'.
 ///
 /// This method must be called before calling other survey related methods
-/// ([isSurveyActionTaken], [setSurveyActionTaken], [surveyShownCount],
+/// ([surveyActionTaken], [setSurveyActionTaken], [surveyShownCount],
 /// [incrementSurveyShownCount]). If the active survey is not set, warnings are
 /// logged.
 Future<bool> setActiveSurvey(String value) async {

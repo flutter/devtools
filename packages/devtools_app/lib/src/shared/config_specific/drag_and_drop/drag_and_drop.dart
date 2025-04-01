@@ -30,8 +30,9 @@ abstract class DragAndDropManager {
 
   /// The method is abstract, because we want to force descendants to define it.
   ///
-  /// The method is called in [impl], so any initialization the subclasses need,
-  /// like initializing listeners, should happen ahead of time in this method.
+  /// The method is called in [DragAndDropManager.impl], so any initialization
+  /// the subclasses need, like initializing listeners, should happen ahead of
+  /// time in this method.
   void init();
 
   @mustCallSuper
@@ -190,12 +191,10 @@ class DragAndDropState extends State<DragAndDrop> {
   }
 }
 
-/// MetaData for widgets related to drag and drop functionality ([DragAndDrop],
-/// [DragAndDropEventAbsorber]).
+/// MetaData for widgets related to drag and drop functionality ([DragAndDrop]).
 ///
 /// Drag and drop widgets will contain a [MetaData] widget with the `metaData`
-/// field set to an instance of this class. [value] must be a unique identifier
-/// for [DragAndDrop] widgets.
+/// field set to an instance of this class.
 class DragAndDropMetaData {
   const DragAndDropMetaData({required this.state});
 

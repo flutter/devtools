@@ -12,8 +12,8 @@ import '../frame_analysis/frame_analysis_model.dart';
 /// Data describing a single Flutter frame.
 ///
 /// Each [FlutterFrame] should have 2 distinct pieces of data:
-/// * [uiEventFlow] : flow of events showing the UI work for the frame.
-/// * [rasterEventFlow] : flow of events showing the Raster work for the frame.
+/// * `uiEventFlow` : flow of events showing the UI work for the frame.
+/// * `rasterEventFlow` : flow of events showing the Raster work for the frame.
 class FlutterFrame {
   FlutterFrame._({
     required this.id,

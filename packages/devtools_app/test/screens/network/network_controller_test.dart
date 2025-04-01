@@ -1,6 +1,6 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2020 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 @TestOn('vm')
 library;
@@ -366,6 +366,63 @@ void main() {
           );
         },
       );
+
+      test('clear', () {
+        final reqs = [request1Pending, request2Pending];
+        final sockets = [socketStats1Pending, socketStats2Pending];
+        currentNetworkRequests.updateOrAddAll(
+          requests: reqs,
+          sockets: sockets,
+          timelineMicrosOffset: 0,
+        );
+
+        // Check that all requests ids are present and that there are no
+        // endtimes
+        expect(
+          currentNetworkRequests.value.map((e) => [e.id, e.endTimestamp]),
+          [
+            ['101', null],
+            ['102', null],
+            ['21', null],
+            ['22', null],
+          ],
+        );
+
+        currentNetworkRequests.clear();
+        expect(currentNetworkRequests.value, isEmpty);
+      });
+
+      test('partial clear', () {
+        final reqs = [request1Pending, request2Pending];
+        final sockets = [socketStats1Pending, socketStats2Pending];
+        currentNetworkRequests.updateOrAddAll(
+          requests: reqs,
+          sockets: sockets,
+          timelineMicrosOffset: 0,
+        );
+
+        // Check that all requests ids are present and that there are no
+        // endtimes
+        expect(
+          currentNetworkRequests.value.map((e) => [e.id, e.endTimestamp]),
+          [
+            ['101', null],
+            ['102', null],
+            ['21', null],
+            ['22', null],
+          ],
+        );
+
+        currentNetworkRequests.clear(partial: true);
+        expect(currentNetworkRequests.value.length, 2);
+        expect(
+          currentNetworkRequests.value.map((e) => [e.id, e.endTimestamp]),
+          [
+            ['21', null],
+            ['22', null],
+          ],
+        );
+      });
     });
   });
 }

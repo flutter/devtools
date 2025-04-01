@@ -16,11 +16,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'extensions/extension_screen.dart';
-import 'framework/disconnect_observer.dart';
 import 'framework/framework_core.dart';
 import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
 import 'framework/notifications_view.dart';
+import 'framework/observer/disconnect_observer.dart';
 import 'framework/release_notes.dart';
 import 'framework/scaffold/scaffold.dart';
 import 'screens/app_size/app_size_controller.dart';
@@ -141,12 +141,23 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       }
     });
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
-      final connected =
-          serviceConnection.serviceManager.connectedState.value.connected;
+      final connectionState =
+          serviceConnection.serviceManager.connectedState.value;
+
+      // When disconnecting from an app, prepare the offline state for reviewing
+      // history.
+      screenControllers.forEachInitialized((screenController) {
+        if (screenController is OfflineScreenControllerMixin &&
+            !connectionState.connected &&
+            !connectionState.userInitiatedConnectionState) {
+          screenController.maybePrepareDataForReviewingHistory();
+        }
+      });
+
       // Dispose the current connected controllers, if any, for any change to
       // the connected state.
       screenControllers.disposeConnectedControllers();
-      _initScreenControllers(connected: connected);
+      _initScreenControllers(connected: connectionState.connected);
     });
 
     // TODO(https://github.com/flutter/devtools/issues/6018): Once
@@ -549,17 +560,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 /// screen's controller, if one exists, as well as enabling offline support.
 ///
 /// [C] corresponds to the type of the screen's controller, which is created by
-/// [createController] or provided by [controllerProvider].
+/// [createController].
 class DevToolsScreen<C extends DevToolsScreenController> {
   const DevToolsScreen(this.screen, {this.createController});
 
   final Screen screen;
 
   /// Responsible for creating the controller for this screen, if non-null.
-  ///
-  /// The controller will then be provided via [controllerProvider], and
-  /// widgets depending on this controller can access it by calling
-  /// `Provider<C>.of(context)`.
   ///
   /// If [createController] and `controller` are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
@@ -582,14 +589,10 @@ class DevToolsScreen<C extends DevToolsScreenController> {
     DevToolsRouterDelegate routerDelegate, {
     required bool offline,
   }) {
-    screenControllers.register<C>(() {
-      final controller =
-          createController!(routerDelegate) as DisposableController;
-      if (controller is OfflineScreenControllerMixin) {
-        controller.initReviewHistoryOnDisconnectListener();
-      }
-      return controller as C;
-    }, offline: offline);
+    screenControllers.register<C>(
+      () => createController!(routerDelegate),
+      offline: offline,
+    );
   }
 }
 
@@ -713,11 +716,10 @@ List<DevToolsScreen> defaultScreens({
       AppSizeScreen(),
       createController: (_) => AppSizeController(),
     ),
-    if (FeatureFlags.deepLinkValidation)
-      DevToolsScreen<DeepLinksController>(
-        DeepLinksScreen(),
-        createController: (_) => DeepLinksController(),
-      ),
+    DevToolsScreen<DeepLinksController>(
+      DeepLinksScreen(),
+      createController: (_) => DeepLinksController(),
+    ),
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(),
       createController: (_) => VMDeveloperToolsController(),

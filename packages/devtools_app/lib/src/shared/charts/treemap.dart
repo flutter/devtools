@@ -502,8 +502,8 @@ class _TreemapState extends State<Treemap> {
     );
   }
 
-  /// Checks if the touch point of the given [details] is overlapping with
-  /// a cell in [positionedCells].
+  /// Checks if the touch point of the given [event] is overlapping with a cell
+  /// in [positionedCells].
   ///
   /// If so, saves the matching hoveredNode.
   void _onHover(PointerHoverEvent event, List<PositionedCell> positionedCells) {
@@ -755,7 +755,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
     return '$plusSign${prettyPrintBytes(byteSize, includeUnit: true)}';
   }
 
-  /// Returns a list of [TreemapNode] in the path from root node to [this].
+  /// Returns a list of [TreemapNode] in the path from root node to `this`.
   List<TreemapNode> pathFromRoot() {
     TreemapNode? node = this;
     final path = <TreemapNode>[];

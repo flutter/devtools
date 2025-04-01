@@ -199,37 +199,33 @@ class IntegrationTestRunnerArgs {
     List<String> args, {
     bool verifyValidTarget = true,
     void Function(ArgParser)? addExtraArgs,
-  }) {
-    final argParser = buildArgParser(addExtraArgs: addExtraArgs);
-    argResults = argParser.parse(args);
-    rawArgs = args;
-
+  })  : rawArgs = args,
+        argResults = buildArgParser(addExtraArgs: addExtraArgs).parse(args) {
     if (verifyValidTarget) {
       final target = argResults[testTargetArg];
       assert(
         target != null,
-        'Please specify a test target (e.g. '
-        '--$testTargetArg=path/to/test.dart',
+        'Please specify a test target (e.g. --$testTargetArg=path/to/test.dart',
       );
     }
   }
 
   @protected
-  late final ArgResults argResults;
+  final ArgResults argResults;
 
-  late final List<String> rawArgs;
+  final List<String> rawArgs;
 
   /// The path to the test target.
-  String? get testTarget => argResults[testTargetArg];
+  String? get testTarget => argResults.option(testTargetArg);
 
   /// Whether this integration test should be run on the 'web-server' device
   /// instead of 'chrome'.
-  bool get headless => argResults[_headlessArg];
+  bool get headless => argResults.flag(_headlessArg);
 
   /// Sharding information for this test run.
   ({int shardNumber, int totalShards})? get shard {
-    final shardValue = argResults[_shardArg];
-    if (shardValue is String) {
+    final shardValue = argResults.option(_shardArg);
+    if (shardValue != null) {
       final shardParts = shardValue.split('/');
       if (shardParts.length == 2) {
         final shardNumber = int.tryParse(shardParts[0]);
@@ -243,7 +239,7 @@ class IntegrationTestRunnerArgs {
   }
 
   /// Whether the help flag `-h` was passed to the integration test command.
-  bool get help => argResults[_helpArg];
+  bool get help => argResults.flag(_helpArg);
 
   void printHelp() {
     print('Run integration tests (one or many) for the Dart DevTools package.');

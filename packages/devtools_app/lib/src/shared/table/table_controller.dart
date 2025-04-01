@@ -1,6 +1,10 @@
 // Copyright 2025 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
+
+/// @docImport 'table.dart';
+library;
+
 import 'dart:collection';
 import 'dart:math';
 
@@ -56,13 +60,13 @@ class FlatTableController<T> extends TableControllerBase<T> {
   /// Callback that will be called after each table sort operation.
   final VoidCallback? onDataSorted;
 
-  /// The unmodified, original data for the active data set [_tableData.value].
+  /// The unmodified, original data for the active data set `_tableData.value`.
   ///
   /// This is reset each time [setData] is called, when [sortOriginalData] is
   /// false.
   late UnmodifiableListView<T> _unmodifiableOriginalData;
 
-  /// The modifiable, original data for the active data set [_tableData.value].
+  /// The modifiable, original data for the active data set `_tableData.value`.
   ///
   /// This is reset each time [setData] is called, when [sortOriginalData] is
   /// true.
@@ -255,16 +259,16 @@ abstract class TableControllerBase<T> extends DisposableController {
   /// dividing lines will be drawn for each column group boundary.
   final bool includeColumnGroupHeaders;
 
-  /// The default sort column for tables using this [TableController].
+  /// The default sort column for tables using this TableController.
   ///
   /// The currently active sort column will be stored as part of the
-  /// [TableUiState] for the current data (stored in [_tableUiStateByData]).
+  /// [TableUiState] for the current data.
   final ColumnData<T> defaultSortColumn;
 
-  /// The default [SortDirection] for tables using this [TableController].
+  /// The default [SortDirection] for tables using this TableController.
   ///
   /// The currently active [SortDirection] will be stored as part of the
-  /// [TableUiState] for the current data (stored in [_tableUiStateByData]).
+  /// [TableUiState] for the current data.
   final SortDirection defaultSortDirection;
 
   /// The column to be used by the table sorting algorithm to break a tie for
@@ -289,7 +293,7 @@ abstract class TableControllerBase<T> extends DisposableController {
   /// The key for the current table data.
   ///
   /// The value assigned to [TableData.key] will only be used if
-  /// [persistUiStates] has been set to true. Otherwise, all data sets will be
+  /// `persistUiStates` has been set to true. Otherwise, all data sets will be
   /// assigned to and looked up from the key [TableData.defaultDataKey].
   String get _currentDataKey => _tableData.value.key;
 
@@ -297,12 +301,12 @@ abstract class TableControllerBase<T> extends DisposableController {
 
   final _tableData = ValueNotifier<TableData<T>>(TableData<T>.empty());
 
-  /// The pinned data for the active data set [_tableData.value].
+  /// The pinned data for the active data set `_tableData.value`.
   ///
   /// This value is reset each time [sortDataAndNotify] is called.
   late List<T> pinnedData;
 
-  /// Returns the [TableUiState] for the current data [_tableData.value].
+  /// Returns the [TableUiState] for the current data `_tableData.value`.
   TableUiState get tableUiState => _tableUiStateForKey(_currentDataKey);
 
   /// This method should be overridden by all subclasses.

@@ -284,10 +284,8 @@ class _CpuProfilerState extends State<CpuProfiler>
       showDialog(
         context: context,
         builder:
-            (context) => FilterDialog<CpuStackFrame>(
-              controller: widget.controller,
-              filteredItem: 'stack frame',
-            ),
+            (context) =>
+                FilterDialog<CpuStackFrame>(controller: widget.controller),
       ),
     );
   }

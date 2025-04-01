@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport '../console/widgets/description.dart';
+library;
+
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -17,23 +20,19 @@ import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
 
-/// Defines diagnostics data for a [value].
+/// Defines diagnostics data for a value.
 ///
 /// [RemoteDiagnosticsNode] provides a high quality multi-line string dump via
-/// [toStringDeep]. The core members are the [name], [toDescription],
-/// [getProperties], [value], and [getChildren]. All other members exist
-/// typically to provide hints for how [toStringDeep] and debugging tools should
-/// format output.
+/// [toStringDeep].
 ///
 /// See also:
 ///
-/// * DiagnosticsNode class defined at https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/foundation/diagnostics.dart
-/// The difference is the class hierarchy is collapsed here as in
-/// package:flutter the subclasses exist more to simplify creation
-/// of Diagnostics than because the class hierarchy of Diagnostics is
-/// important. If you need to determine the exact Diagnostic class on the
-/// Dart side you can use the value of type. The raw Dart object value is
-/// also available via the getValue() method.
+/// * [DiagnosticsNode] - The difference is the class hierarchy is collapsed
+///   here as in package:flutter the subclasses exist more to simplify creation
+///   of Diagnostics than because the class hierarchy of Diagnostics is
+///   important. If you need to determine the exact Diagnostic class on the Dart
+///   side you can use the value of type. The raw Dart object value is also
+///   available via the `getValue()` method.
 class RemoteDiagnosticsNode extends DiagnosticableTree {
   RemoteDiagnosticsNode(
     this.json,
@@ -262,7 +261,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   bool get hasIsQuoted => json.containsKey('quoted');
 
-  /// Optional unit the [value] is measured in.
+  /// Optional unit the [json] is measured in.
   ///
   /// Unit must be acceptable to display immediately after a number with no
   /// spaces. For example: 'physical pixels per logical pixel' should be a
@@ -273,16 +272,16 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   bool get hasUnit => json.containsKey('unit');
 
-  /// String describing just the numeric [value] without a unit suffix.
+  /// String describing just the numeric [json] without a unit suffix.
   ///
   /// Only specified for Number properties.
   String? get numberToString => getStringMember('numberToString');
 
   bool get hasNumberToString => json.containsKey('numberToString');
 
-  /// Description to use if the property [value] is true.
+  /// Description to use if the property [json] is true.
   ///
-  /// If not specified and [value] equals true the property's priority [level]
+  /// If not specified and [json] equals true the property's priority [level]
   /// will be [DiagnosticLevel.hidden].
   ///
   /// Only applies to Flag properties.
@@ -292,7 +291,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Description to use if the property value is false.
   ///
-  /// If not specified and [value] equals false, the property's priority [level]
+  /// If not specified and [json] equals false, the property's priority [level]
   /// will be [DiagnosticLevel.hidden].
   ///
   /// Only applies to Flag properties.
@@ -315,8 +314,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Whether each of the values is itself a primitive value.
   ///
-  /// For example, bool|num|string are primitive values. This is useful as for
-  /// non-primitive values, the user may want to view the value with an
+  /// For example, `bool`|`num`|`string` are primitive values. This is useful as
+  /// for non-primitive values, the user may want to view the value with an
   /// interactive object debugger view to get more information on what the value
   /// is.
   List<bool>? get primitiveValues {
@@ -329,18 +328,18 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   bool get hasValues => json.containsKey('values');
 
-  /// Description to use if the property [value] is not null.
+  /// Description to use if the property [json] is not `null`.
   ///
-  /// If the property [value] is not null and [ifPresent] is null, the
-  /// [level] for the property is [DiagnosticsLevel.hidden] and the description
-  /// from superclass is used.
+  /// If the property [json] is not `null` and [ifPresent] is `null`, the
+  /// [level] [level] for the property is [DiagnosticLevel.hidden] and the
+  /// description from superclass is used.
   ///
-  /// Only specified for ObjectFlagProperty.
+  /// Only specified for [ObjectFlagProperty].
   String? get ifPresent => getStringMember('ifPresent');
 
   bool get hasIfPresent => json.containsKey('ifPresent');
 
-  /// If the [value] of the property equals [defaultValue] the priority [level]
+  /// If the [json] of the property equals [defaultValue] the priority [level]
   /// of the property is downgraded to [DiagnosticLevel.fine] as the property
   /// value is uninteresting.
   ///
@@ -363,7 +362,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// ifEmpty.
   String? get ifEmpty => getStringMember('ifEmpty');
 
-  /// Description if the property [value] is null.
+  /// Description if the property [json] is `null`.
   String? get ifNull => getStringMember('ifNull');
 
   bool get allowWrap => getBooleanMember('allowWrap', true);
@@ -378,12 +377,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   bool get hasTooltip => json.containsKey('tooltip');
 
-  /// Whether a [value] of null causes the property to have [level]
-  /// [DiagnosticLevel.warning] warning that the property is missing a [value].
+  /// Whether a [json] of null causes the property to have [level]
+  /// [DiagnosticLevel.warning] warning that the property is missing a [json].
   bool get missingIfNull => getBooleanMember('missingIfNull', false);
 
   /// String representation of exception thrown if accessing the property
-  /// [value] threw an exception.
+  /// [json] threw an exception.
   String? get exception => getStringMember('exception');
 
   /// Whether accessing the property throws an exception.
@@ -416,11 +415,11 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return _creationLocation;
   }
 
-  /// String representation of the type of the property [value].
+  /// String representation of the type of the property [json].
   ///
   /// This is determined from the type argument `T` used to instantiate the
   /// [DiagnosticsProperty] class. This means that the type is available even if
-  /// [value] is null, but it also means that the [propertyType] is only as
+  /// [json] is null, but it also means that the [propertyType] is only as
   /// accurate as the type provided when invoking the constructor.
   ///
   /// Generally, this is only useful for diagnostic tools that should display
@@ -429,11 +428,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// the word "null".
   String? get propertyType => getStringMember('propertyType');
 
-  /// If the [value] of the property equals [defaultValue] the priority [level]
+  /// If the [json] of the property equals [defaultValue] the priority [level]
   /// of the property is downgraded to [DiagnosticLevel.fine] as the property
   /// value is uninteresting.
-  ///
-  /// [defaultValue] has type [T] or is [kNoDefaultValue].
   DiagnosticLevel get defaultLevel {
     return getLevelMember('defaultLevel', DiagnosticLevel.info);
   }

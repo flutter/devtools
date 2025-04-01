@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+/// @docImport '../framework/screen.dart';
+library;
+
 import 'dart:async';
 
 import 'package:devtools_app_shared/service.dart';
@@ -38,9 +41,9 @@ class OfflineDataController {
   /// Stores the [ConnectedApp] instance temporarily while switching between
   /// offline and online modes.
   ///
-  /// We store this because the [serviceManager] is a global manager and expects
-  /// only one connected app. So we swap out the online connected app with the
-  /// offline app data while in offline mode.
+  /// We store this because the `serviceConnection.serviceManager` is a global
+  /// manager and expects only one connected app. So we swap out the online
+  /// connected app with the offline app data while in offline mode.
   ConnectedApp? previousConnectedApp;
 
   /// Whether DevTools should load offline data for [screenId].
@@ -192,37 +195,24 @@ mixin OfflineScreenControllerMixin<T>
     _exportController.downloadFile(encodedData);
   }
 
-  /// Adds a listener that will prepare the screen's current data for offline
-  /// viewing after an app disconnect.
+  /// Prepare the screen's current data for offline viewing after an app
+  /// disconnect.
   ///
   /// This is in preparation for the user clicking the 'Review History' button
   /// from the disconnect screen.
-  ///
-  /// For screens that support the disconnect experience, which is a screen that
-  /// allows you to view historical data from before the app was disconnected
-  /// even after we lose connection to the device, this should be called in the
-  /// controller's initialization.
-  void initReviewHistoryOnDisconnectListener() {
-    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
-      final connectionState =
-          serviceConnection.serviceManager.connectedState.value;
-      if (!connectionState.connected &&
-          !connectionState.userInitiatedConnectionState) {
-        final currentScreenData = prepareOfflineScreenData();
-        // Only store data for the current page. We can change this in the
-        // future if we support offline imports for more than once screen at a
-        // time.
-        if (DevToolsRouterDelegate.currentPage == currentScreenData.screenId) {
-          final previouslyConnectedApp =
-              offlineDataController.previousConnectedApp;
-          final offlineData = _exportController.generateDataForExport(
-            offlineScreenData: currentScreenData.toJson(),
-            connectedApp: previouslyConnectedApp,
-          );
-          offlineDataController.offlineDataJson = offlineData;
-        }
-      }
-    });
+  void maybePrepareDataForReviewingHistory() {
+    final currentScreenData = prepareOfflineScreenData();
+    // Only store data for the current page. We can change this in the
+    // future if we support offline imports for more than once screen at a
+    // time.
+    if (DevToolsRouterDelegate.currentPage == currentScreenData.screenId) {
+      final previouslyConnectedApp = offlineDataController.previousConnectedApp;
+      final offlineData = _exportController.generateDataForExport(
+        offlineScreenData: currentScreenData.toJson(),
+        connectedApp: previouslyConnectedApp,
+      );
+      offlineDataController.offlineDataJson = offlineData;
+    }
   }
 }
 

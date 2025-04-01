@@ -128,7 +128,7 @@ class ProfileMetaData {
 /// Process for converting a [ProfilableDataMixin] into a bottom-up
 /// representation of the profile.
 ///
-/// [rootedAtTags] specifies whether or not the top-down tree is rooted
+/// `rootedAtTags` specifies whether or not the top-down tree is rooted
 /// at synthetic nodes representing user / VM tags.
 class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   Future<List<T>> bottomUpRootsFor({
@@ -266,12 +266,12 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     return bottomUpRoots;
   }
 
-  /// Cascades the [exclusiveSampleCount] and [inclusiveSampleCount] of [node]
+  /// Cascades the `exclusiveSampleCount` and `inclusiveSampleCount` of [node]
   /// to all of its children (recursive).
   ///
   /// This is necessary for the transformation of a [ProfilableDataMixin] to its
   /// bottom-up representation. This is an intermediate step between
-  /// [generateBottomUpRoots] and the [mergeSamples] callback passed to
+  /// [generateBottomUpRoots] and the `mergeSamples` callback passed to
   /// [bottomUpRootsFor].
   @visibleForTesting
   void cascadeSampleCounts(T node) {

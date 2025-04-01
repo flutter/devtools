@@ -1,6 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
 import 'dart:convert';
@@ -11,6 +11,8 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
+import '../../shared/feature_flags.dart';
+import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
@@ -61,6 +63,9 @@ class NetworkController extends DevToolsScreenController
         FilterControllerMixin<NetworkRequest>,
         OfflineScreenControllerMixin,
         AutoDisposeControllerMixin {
+  @override
+  final screenId = ScreenMetaData.network.id;
+
   List<DartIOHttpRequestData>? _httpRequests;
 
   Future<String?> exportAsHarFile() async {
@@ -392,9 +397,11 @@ class NetworkController extends DevToolsScreenController
 
   /// Clears the HTTP profile and socket profile from the vm, and resets the
   /// last refresh timestamp to the current time.
-  Future<void> clear() async {
-    await networkService.clearData();
-    _currentNetworkRequests.clear();
+  Future<void> clear({bool partial = false}) async {
+    if (!partial) {
+      await networkService.clearData();
+    }
+    _currentNetworkRequests.clear(partial: partial);
     _filterAndRefreshSearchMatches();
     _updateSelection();
   }
@@ -442,9 +449,7 @@ class NetworkController extends DevToolsScreenController
       ..clear()
       ..addAll(
         _currentNetworkRequests.value.where((NetworkRequest r) {
-          final filteredOutByQueryFilterArgument = queryFilter
-              .filterArguments
-              .values
+          final filteredOutByQueryFilterArgument = queryFilter.filterArguments
               .any((argument) => !argument.matchesValue(r));
           if (filteredOutByQueryFilterArgument) return false;
 
@@ -507,6 +512,13 @@ class NetworkController extends DevToolsScreenController
           .whereType<DartIOHttpRequestData>()
           .map((item) => item.getFullRequestData())
           .wait;
+
+  @override
+  FutureOr<void> releaseMemory({bool partial = false}) async {
+    if (FeatureFlags.memoryObserver) {
+      await clear(partial: partial);
+    }
+  }
 }
 
 /// Class for managing the set of all current sockets, and
@@ -535,9 +547,8 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
     notifyListeners();
   }
 
-  /// Update or add the [request] to the [requests] depending on whether or not
-  /// its [request.id] already exists in the list.
-  ///
+  /// Updates or adds the [requests] to the [_requestsById] depending on whether
+  /// or not its `id` already exists in the map.
   void _updateOrAddRequests(List<HttpProfileRequest> requests) {
     for (int i = 0; i < requests.length; i++) {
       final request = requests[i];
@@ -589,9 +600,19 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
     }
   }
 
-  void clear() {
-    _requestsById.clear();
-    value = [];
-    notifyListeners();
+  void clear({bool partial = false}) {
+    if (partial) {
+      _requestsById.keys
+          .toList()
+          // Trim requests from the front so that the oldest data is removed.
+          .sublist(0, _requestsById.keys.length ~/ 2)
+          .forEach(_requestsById.remove);
+      value = value.sublist(value.length ~/ 2);
+      notifyListeners();
+    } else {
+      _requestsById.clear();
+      value = [];
+      notifyListeners();
+    }
   }
 }

@@ -23,9 +23,10 @@ class GraphNode {
   final successors = <GraphNode>{};
 
   /// Maps predecessor [GraphNode]s from [predecessors] to the number of
-  /// outgoing edges going to [this] node.
+  /// outgoing edges going to `this` node.
   ///
   /// For example:
+  /// ```none
   ///        A (predecessor node)
   ///      /  \
   ///     |    |
@@ -33,12 +34,14 @@ class GraphNode {
   ///       B (this node)
   ///
   /// ==> successorEdgeCounts[A] = 2
+  /// ```
   final predecessorEdgeCounts = <GraphNode, int>{};
 
   /// Maps successor [GraphNode]s from [successors] to the number of incoming
-  /// edges coming from [this] node.
+  /// edges coming from `this` node.
   ///
   /// For example:
+  /// ```none
   ///        A (this node)
   ///      /  \
   ///     |    |
@@ -46,6 +49,7 @@ class GraphNode {
   ///       B (successor node)
   ///
   /// ==> successorEdgeCounts[B] = 2
+  /// ```
   final successorEdgeCounts = <GraphNode, int>{};
 
   /// Returns the percentage of this node's predecessor edges that connect to
@@ -68,7 +72,7 @@ class GraphNode {
     return 0.0;
   }
 
-  /// Create outgoing edge from [this] node to the given node [n].
+  /// Create outgoing edge from `this` node to the given node [n].
   void outgoingEdge(GraphNode n, {int edgeWeight = 1}) {
     n.predecessors.add(this);
     final predEdgeCount = n.predecessorEdgeCounts[this] ?? 0;

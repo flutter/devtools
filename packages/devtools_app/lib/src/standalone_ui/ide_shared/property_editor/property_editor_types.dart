@@ -7,6 +7,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:meta/meta.dart';
 
 import '../../../shared/editor/api_classes.dart';
+import '../../../shared/primitives/utils.dart';
 
 /// Record representing an option for an [EditableProperty].
 typedef PropertyOption = ({String text, bool isDefault});
@@ -142,8 +143,10 @@ class EditableProperty extends EditableArgument {
         isNullable: argument.isNullable,
         isRequired: argument.isRequired,
         isEditable: argument.isEditable,
+        isDeprecated: argument.isDeprecated,
         options: argument.options,
         displayValue: argument.displayValue,
+        documentation: argument.documentation,
         errorText: argument.errorText,
       );
 
@@ -166,6 +169,13 @@ class EditableProperty extends EditableArgument {
   @mustBeOverridden
   Object? convertFromInputString(String? _) {
     throw UnimplementedError();
+  }
+
+  bool matchesQuery(String query) {
+    final regExpQuery = RegExp(query, caseSensitive: false);
+    return name.caseInsensitiveContains(regExpQuery) ||
+        valueDisplay.caseInsensitiveContains(regExpQuery) ||
+        type.caseInsensitiveContains(regExpQuery);
   }
 }
 

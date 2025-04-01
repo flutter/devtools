@@ -3,10 +3,12 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_controller.dart';
+import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_types.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -29,6 +31,8 @@ void main() {
     (document: textDocument2, position: activeCursorPosition2): result2,
     (document: textDocument1, position: activeCursorPosition3): resultWithText,
     (document: textDocument1, position: activeCursorPosition4): resultWithTitle,
+    (document: textDocument1, position: activeCursorPosition5):
+        deprecatedResult,
   };
 
   late MockEditorClient mockEditorClient;
@@ -56,12 +60,15 @@ void main() {
 
   group('on cursor location change', () {
     void Function()? listener;
+    Completer? getEditableArgsCalled;
 
     Future<List<EditableArgument>> waitForEditableArgs() {
       final argsCompleter = Completer<List<EditableArgument>>();
       listener = () {
         if (!argsCompleter.isCompleted) {
-          argsCompleter.complete(controller.editableWidgetData.value!.args);
+          argsCompleter.complete(
+            controller.editableWidgetData.value?.properties,
+          );
         }
       };
       controller.editableWidgetData.addListener(listener!);
@@ -84,6 +91,7 @@ void main() {
     }
 
     setUp(() {
+      getEditableArgsCalled = Completer<void>();
       for (final MapEntry(key: location, value: result)
           in locationToArgsResult.entries) {
         when(
@@ -92,7 +100,11 @@ void main() {
             textDocument: location.document,
             position: location.position,
           ),
-        ).thenAnswer((realInvocation) => Future.value(result));
+        ).thenAnswer((realInvocation) {
+          getEditableArgsCalled?.complete();
+          getEditableArgsCalled = Completer<void>();
+          return Future.value(result);
+        });
       }
     });
 
@@ -100,6 +112,20 @@ void main() {
       if (listener != null) {
         controller.editableWidgetData.removeListener(listener!);
       }
+    });
+
+    testWidgets('initial welcome screen', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly();
+      await tester.pumpAndSettle();
+
+      // Verify the welcome message is shown.
+      expect(find.textContaining(welcomeMessageText), findsOneWidget);
+      expect(find.textContaining(howToUseText), findsOneWidget);
+      expect(find.textContaining(exampleWidgetText), findsOneWidget);
     });
 
     testWidgets('verify editable arguments for first cursor location', (
@@ -133,6 +159,27 @@ void main() {
         // Wait for the expected editable args.
         final editableArgs = await editableArgsFuture;
         verifyEditableArgs(actual: editableArgs, expected: result2.args);
+      });
+    });
+
+    testWidgets('verify editable arguments when some are deprecated', (
+      tester,
+    ) async {
+      await tester.runAsync(() async {
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+        final editableArgsFuture = waitForEditableArgs();
+
+        // Send an active location changed event.
+        eventController.add(activeLocationChangedEvent5);
+
+        // Wait for the expected editable args.
+        final editableArgs = await editableArgsFuture;
+        verifyEditableArgs(
+          actual: editableArgs,
+          // Only deprecated properties with set arguments should be included.
+          expected: [deprecatedPropertyWithArg],
+        );
       });
     });
 
@@ -170,6 +217,35 @@ void main() {
         expect(titleInput, findsOneWidget);
         final titleValue = _textFormFieldValue(titleInput, tester: tester);
         expect(titleValue, equals('Hello world!'));
+      });
+    });
+
+    testWidgets('verify does not fetch editable arguments for non-Dart files', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        await tester.pumpWidget(wrap(propertyEditor));
+        final getEditableArgsCalledFuture = getEditableArgsCalled!.future;
+
+        // Send an active location changed event.
+        eventController.add(activeLocationChangedEventNotDart);
+
+        // Verify it doesn't trigger a request to getEditableArgs.
+        try {
+          await getEditableArgsCalledFuture.timeout(
+            const Duration(milliseconds: 100),
+          );
+          fail('getEditableArgs was unexpectedly called.');
+        } on TimeoutException catch (e) {
+          expect(e, isA<TimeoutException>());
+        }
+
+        // Verify "No Dart code" message is shown.
+        await tester.pumpAndSettle();
+        expect(find.textContaining(noDartCodeText), findsOneWidget);
+        expect(find.textContaining(howToUseText), findsOneWidget);
+        expect(find.textContaining(exampleWidgetText), findsOneWidget);
       });
     });
   });
@@ -258,6 +334,23 @@ void main() {
       );
     });
 
+    testWidgets('softWrap input has expected tooltip', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result2);
+      await tester.pumpAndSettle();
+
+      // Verify the tooltip is expected.
+      final softWrapInput = _findDropdownButtonFormField('softWrap');
+      await _tooltipContentIsExpected(
+        softWrapInput,
+        tooltipContent: softWrapTooltipContent,
+        tester: tester,
+      );
+    });
+
     testWidgets('align input has expected options', (tester) async {
       // Load the property editor.
       await tester.pumpWidget(wrap(propertyEditor));
@@ -285,6 +378,152 @@ void main() {
         defaultOption: '.bottomLeft',
         tester: tester,
       );
+    });
+
+    testWidgets('align input has expected tooltip', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result2);
+      await tester.pumpAndSettle();
+
+      // Verify the tooltip is expected.
+      final alignInput = _findDropdownButtonFormField('align');
+      await _tooltipContentIsExpected(
+        alignInput,
+        tooltipContent: alignTooltipContent,
+        tester: tester,
+      );
+    });
+
+    testWidgets('no inputs if widget has no editable properties', (
+      tester,
+    ) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: resultWithNoWidget);
+      await tester.pumpAndSettle();
+
+      // Verify the "No widget" message is displayed.
+      expect(find.textContaining(noWidgetText), findsOneWidget);
+      expect(find.textContaining(howToUseText), findsOneWidget);
+      expect(find.textContaining(exampleWidgetText), findsOneWidget);
+    });
+  });
+
+  group('inputs for deprecated arguments', () {
+    testWidgets('inputs are expected for deprecated arguments', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: deprecatedResult);
+      await tester.pumpAndSettle();
+
+      final deprecatedWithArgInput = _findDropdownButtonFormField(
+        'deprecatedWithArg',
+      );
+
+      // Verify the inputs are expected.
+      expect(deprecatedWithArgInput, findsOneWidget);
+
+      // Verify the labels and required are expected.
+      _labelsAndRequiredTextAreExpected(
+        deprecatedWithArgInput,
+        inputExpectations: deprecatedWithArgInputExpectations,
+      );
+    });
+  });
+
+  group('filtering editable arguments', () {
+    testWidgets('can filter by name', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Filter by the "width" property.
+      final filterField = _findFilterField();
+      expect(filterField, findsOneWidget);
+      await _inputText(filterField, text: 'width', tester: tester);
+
+      // Verify only the "width" property is visible.
+      expect(widthInput, findsOneWidget);
+      expect(titleInput, findsNothing);
+      expect(heightInput, findsNothing);
+    });
+
+    testWidgets('can filter by type', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Filter by the "double" type.
+      final filterField = _findFilterField();
+      expect(filterField, findsOneWidget);
+      await _inputText(filterField, text: 'double', tester: tester);
+
+      // Verify only the "width" and "height" properties are visible.
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+      expect(titleInput, findsNothing);
+    });
+
+    testWidgets('can filter by value', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Filter by the "Hello world!" value.
+      final filterField = _findFilterField();
+      expect(filterField, findsOneWidget);
+      await _inputText(filterField, text: 'Hello world!', tester: tester);
+
+      // Verify only the "title" property is visible.
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsNothing);
+      expect(heightInput, findsNothing);
     });
   });
 
@@ -713,6 +952,11 @@ final _findNoPropertiesMessage = find.text(
   'No widget properties at current cursor location.',
 );
 
+Finder _findFilterField() => find.descendant(
+  of: find.byType(StandaloneFilterField<EditableProperty>),
+  matching: find.byType(TextField),
+);
+
 Finder _findTextFormField(String inputName) => find.ancestor(
   of: find.richTextContaining(inputName),
   matching: find.byType(TextFormField),
@@ -749,8 +993,17 @@ void _labelsAndRequiredTextAreExpected(
     shouldBeSet ? findsOneWidget : findsNothing,
     reason: 'Expected to find ${shouldBeSet ? 'a' : 'no'} "set" badge.',
   );
+  // Check for the existence/non-existence of the "deprecated" badge.
+  final shouldBeDeprecated = inputExpectations['isDeprecated'] == true;
+  expect(
+    _labelForInput(inputFinder, matching: 'deprecated'),
+    shouldBeDeprecated ? findsOneWidget : findsNothing,
+    reason:
+        'Expected to find ${shouldBeDeprecated ? 'a' : 'no'} "deprecated" badge.',
+  );
   // Check for the existence/non-existence of the "default" badge.
-  final shouldBeDefault = inputExpectations['isDefault'] == true;
+  final shouldBeDefault =
+      inputExpectations['isDefault'] == true && !shouldBeDeprecated;
   expect(
     _labelForInput(inputFinder, matching: 'default'),
     shouldBeDefault ? findsOneWidget : findsNothing,
@@ -764,6 +1017,36 @@ void _labelsAndRequiredTextAreExpected(
     reason:
         'Expected to find ${shouldBeRequired ? 'the' : 'no'} "required" indicator.',
   );
+}
+
+Future<void> _tooltipContentIsExpected(
+  Finder inputFinder, {
+  required String tooltipContent,
+  required WidgetTester tester,
+}) async {
+  final inputRowFinder = find.ancestor(
+    of: inputFinder,
+    matching: find.byType(Row),
+  );
+  final iconFinder = find.descendant(
+    of: inputRowFinder,
+    matching: find.byIcon(Icons.info_outline),
+  );
+
+  // Verify tooltip is not visible.
+  expect(find.text(tooltipContent), findsNothing);
+
+  // Simulate a hover for 600 ms.
+  final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+  await gesture.moveTo(tester.getRect(iconFinder).center);
+  await tester.pump(const Duration(milliseconds: 600));
+  await tester.pumpAndSettle();
+
+  // Verify tooltip is visible with expected content.
+  expect(find.text(tooltipContent), findsOneWidget);
+
+  // Clean-up, remove gesture pointer.
+  await gesture.removePointer();
 }
 
 Finder _helperTextForInput(Finder inputFinder, {required String matching}) {
@@ -923,6 +1206,27 @@ final activeLocationChangedEvent4 = ActiveLocationChangedEvent(
   textDocument: textDocument1,
 );
 
+// Location position 5
+final activeCursorPosition5 = CursorPosition(character: 81, line: 19);
+final anchorCursorPosition5 = CursorPosition(character: 113, line: 12);
+final editorSelection5 = EditorSelection(
+  active: activeCursorPosition5,
+  anchor: anchorCursorPosition5,
+);
+final activeLocationChangedEvent5 = ActiveLocationChangedEvent(
+  selections: [editorSelection5],
+  textDocument: textDocument1,
+);
+
+final notADartDocument = TextDocument(
+  uriAsString: '/my/fake/other.js',
+  version: 1,
+);
+final activeLocationChangedEventNotDart = ActiveLocationChangedEvent(
+  selections: [editorSelection1],
+  textDocument: notADartDocument,
+);
+
 // Widget name and documentation
 const widgetName = 'MyFlutterWidget';
 
@@ -978,6 +1282,7 @@ final heightInputExpectations = {
   'isSet': false,
   'isRequired': false,
   'isDefault': true,
+  'isDeprecated': false,
 };
 final result1 = EditableArgumentsResult(
   name: widgetName,
@@ -986,6 +1291,14 @@ final result1 = EditableArgumentsResult(
 );
 
 // Result 2
+const softWrapDocumentation = '''
+Whether or not the text should wrap.
+
+If null, the default value is platform dependent. On [TargetPlatform.android],
+the default is true. On [TargetPlatform.iOS], false. The remaining platforms
+also default to false.
+''';
+
 final softWrapProperty = EditableArgument.fromJson({
   'name': 'softWrap',
   'type': 'bool',
@@ -994,12 +1307,33 @@ final softWrapProperty = EditableArgument.fromJson({
   'hasArgument': false,
   'isEditable': true,
   'isRequired': false,
+  'documentation': softWrapDocumentation,
 });
 final softWrapInputExpectations = {
   'isSet': false,
   'isRequired': false,
   'isDefault': true,
+  'isDeprecated': false,
 };
+const softWrapTooltipContent = '''
+bool softWrap
+
+Default value: true
+
+Documentation:
+Whether or not the text should wrap.
+
+If null, the default value is platform dependent. On TargetPlatform.android,
+the default is true. On TargetPlatform.iOS, false. The remaining platforms
+also default to false.
+''';
+
+const alignDocumentation = '''
+How to align the child.
+
+The x and y values of the [Alignment] control the horizontal and vertical
+alignment, respectively. 
+''';
 final alignProperty = EditableArgument.fromJson({
   'name': 'align',
   'type': 'enum',
@@ -1009,6 +1343,7 @@ final alignProperty = EditableArgument.fromJson({
   'isRequired': false,
   'isEditable': true,
   'value': 'Alignment.center',
+  'documentation': alignDocumentation,
   'options': [
     'Alignment.bottomCenter',
     'Alignment.bottomLeft',
@@ -1025,10 +1360,59 @@ final alignInputExpectations = {
   'isSet': true,
   'isRequired': false,
   'isDefault': false,
+  'isDeprecated': false,
 };
+const alignTooltipContent = '''
+Alignment? align
+
+Default value: Alignment.bottomLeft
+
+Documentation:
+How to align the child.
+
+The x and y values of the Alignment control the horizontal and vertical
+alignment, respectively. 
+''';
+
 final result2 = EditableArgumentsResult(
   name: widgetName,
   args: [softWrapProperty, alignProperty],
+);
+
+// Result for test cases of deprecated properties
+final deprecatedPropertyNoArg = EditableArgument.fromJson({
+  'name': 'deprecatedNoArg',
+  'type': 'bool',
+  'isNullable': false,
+  'defaultValue': false,
+  'hasArgument': false,
+  'isEditable': true,
+  'isRequired': false,
+  'isDeprecated': true,
+});
+
+final deprecatedPropertyWithArg = EditableArgument.fromJson({
+  'name': 'deprecatedWithArg',
+  'type': 'bool',
+  'value': false,
+  'isNullable': false,
+  'defaultValue': true,
+  'hasArgument': true,
+  'isEditable': true,
+  'isRequired': false,
+  'isDeprecated': true,
+});
+
+final deprecatedWithArgInputExpectations = {
+  'isSet': true,
+  'isRequired': false,
+  'isDefault': false,
+  'isDeprecated': true,
+};
+
+final deprecatedResult = EditableArgumentsResult(
+  name: widgetName,
+  args: [deprecatedPropertyNoArg, deprecatedPropertyWithArg],
 );
 
 // Example results for documentation test cases.
@@ -1058,3 +1442,12 @@ final resultWithTitle = EditableArgumentsResult(
   name: 'WidgetWithTitle',
   args: [titleProperty],
 );
+final resultWithNoWidget = EditableArgumentsResult(args: []);
+
+const welcomeMessageText = 'Welcome to the Flutter Property Editor!';
+const howToUseText =
+    'Please move your cursor anywhere inside a Flutter widget constructor invocation to view and edit its properties.';
+const exampleWidgetText =
+    'For example, the highlighted code below is a constructor invocation of a Text widget:';
+const noDartCodeText = 'No Dart code found at the current cursor location.';
+const noWidgetText = 'No Flutter widget found at the current cursor location.';
