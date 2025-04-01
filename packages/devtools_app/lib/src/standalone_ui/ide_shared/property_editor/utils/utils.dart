@@ -142,13 +142,6 @@ void forceReload() {
   reloadIframe();
 }
 
-/// Workaround to force reload the Property Editor when it disconnects.
-///
-/// See https://github.com/flutter/devtools/issues/9028 for details.
-void forceReload() {
-  reloadIframe();
-}
-
 /// Workaround to prevent TextFields from holding onto focus when IFRAME-ed.
 ///
 /// See https://github.com/flutter/devtools/issues/8929 for details.
