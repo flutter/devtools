@@ -123,8 +123,8 @@ abstract class Field {
   static const platformType = 'platformType';
   static const prefersDebugSession = 'prefersDebugSession';
   static const projectRootPath = 'projectRootPath';
-  static const requiresDebugSession = 'requiresDebugSession';
   static const range = 'range';
+  static const requiresDebugSession = 'requiresDebugSession';
   static const result = 'result';
   static const selectedDeviceId = 'selectedDeviceId';
   static const selections = 'selections';
