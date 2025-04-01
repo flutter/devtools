@@ -21,6 +21,7 @@ typedef EditableWidgetData =
       String? name,
       String? documentation,
       String? fileUri,
+      EditorRange? range,
     });
 
 typedef EditArgumentFunction =
@@ -51,6 +52,7 @@ class PropertyEditorController extends DisposableController
   String? get widgetName => _editableWidgetData.value?.name;
   String? get widgetDocumentation => _editableWidgetData.value?.documentation;
   String? get fileUri => _editableWidgetData.value?.fileUri;
+  EditorRange? get widgetRange => _editableWidgetData.value?.range;
 
   ValueListenable<bool> get shouldReconnect => _shouldReconnect;
   final _shouldReconnect = ValueNotifier<bool>(false);
@@ -100,6 +102,7 @@ class PropertyEditorController extends DisposableController
             properties: [],
             name: null,
             documentation: null,
+            range: null,
             fileUri: textDocument.uriAsString,
           );
           return;
@@ -147,6 +150,30 @@ class PropertyEditorController extends DisposableController
     );
   }
 
+  int hashProperty(EditableProperty property) {
+    final widgetData = editableWidgetData.value;
+    if (widgetData == null) {
+      return Object.hash(property.name, property.type);
+    }
+    final range = widgetRange;
+    return range == null
+        ? Object.hash(
+          property.name,
+          property.type,
+          property.value, // Include the property value.
+          widgetName,
+          fileUri,
+        )
+        : Object.hash(
+          property.name,
+          property.type,
+          fileUri,
+          widgetName,
+          range.start.line, // Include the start position of the property.
+          range.start.character,
+        );
+  }
+
   Future<void> _updateWithEditableArgs({
     required TextDocument textDocument,
     required CursorPosition cursorPosition,
@@ -166,11 +193,14 @@ class PropertyEditorController extends DisposableController
             .where((property) => !property.isDeprecated || property.hasArgument)
             .toList();
     final name = result?.name;
+    final range = result?.range;
+
     _editableWidgetData.value = (
       properties: properties,
       name: name,
       documentation: result?.documentation,
       fileUri: _currentDocument?.uriAsString,
+      range: range,
     );
     filterData(activeFilter.value);
     // Register impression.
@@ -195,6 +225,7 @@ class PropertyEditorController extends DisposableController
     EditableArgumentsResult? editableArgsResult,
     TextDocument? document,
     CursorPosition? cursorPosition,
+    EditorRange? range,
   }) {
     setActiveFilter();
     if (editableArgsResult != null) {
@@ -204,6 +235,7 @@ class PropertyEditorController extends DisposableController
         name: editableArgsResult.name,
         documentation: editableArgsResult.documentation,
         fileUri: document?.uriAsString,
+        range: range,
       );
     }
     if (document != null) {

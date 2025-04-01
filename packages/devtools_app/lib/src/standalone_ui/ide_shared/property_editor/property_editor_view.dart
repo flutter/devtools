@@ -57,7 +57,8 @@ class PropertyEditorView extends StatelessWidget {
       return [introSentence, const HowToUseMessage()];
     }
 
-    final (:properties, :name, :documentation, :fileUri) = editableWidgetData;
+    final (:properties, :name, :documentation, :fileUri, :range) =
+        editableWidgetData;
     if (fileUri != null && !fileUri.endsWith('.dart')) {
       return [const NoDartCodeMessage(), const HowToUseMessage()];
     }
@@ -123,8 +124,7 @@ class _PropertiesListState extends State<_PropertiesList> {
             for (final property in properties)
               _EditablePropertyItem(
                 property: property,
-                editProperty: widget.controller.editArgument,
-                widgetDocumentation: widget.controller.widgetDocumentation,
+                controller: widget.controller,
               ),
           ].joinWith(const PaddedDivider.noPadding()),
         );
@@ -136,13 +136,11 @@ class _PropertiesListState extends State<_PropertiesList> {
 class _EditablePropertyItem extends StatelessWidget {
   const _EditablePropertyItem({
     required this.property,
-    required this.editProperty,
-    required this.widgetDocumentation,
+    required this.controller,
   });
 
   final EditableProperty property;
-  final EditArgumentFunction editProperty;
-  final String? widgetDocumentation;
+  final PropertyEditorController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -162,13 +160,13 @@ class _EditablePropertyItem extends StatelessWidget {
                   ),
                   child: _InfoTooltip(
                     property: property,
-                    widgetDocumentation: widgetDocumentation,
+                    widgetDocumentation: controller.widgetDocumentation,
                   ),
                 ),
                 Expanded(
                   child: _PropertyInput(
                     property: property,
-                    editProperty: editProperty,
+                    controller: controller,
                   ),
                 ),
               ],
@@ -354,16 +352,16 @@ class _InfoTooltip extends StatelessWidget {
 }
 
 class _PropertyInput extends StatelessWidget {
-  const _PropertyInput({required this.property, required this.editProperty});
+  const _PropertyInput({required this.property, required this.controller});
 
   final EditableProperty property;
-  final EditArgumentFunction editProperty;
+  final PropertyEditorController controller;
 
   @override
   Widget build(BuildContext context) {
-    final argType = property.type;
-    final propertyKey = Key(property.hashCode.toString());
-    switch (argType) {
+    final editProperty = controller.editArgument;
+    final propertyKey = Key(controller.hashProperty(property).toString());
+    switch (property.type) {
       case boolType:
         return BooleanInput(
           key: propertyKey,

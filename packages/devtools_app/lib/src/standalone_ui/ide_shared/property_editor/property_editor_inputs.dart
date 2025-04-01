@@ -208,6 +208,8 @@ class _TextInputState<T> extends State<_TextInput<T>>
 
   late final FocusNode _focusNode;
 
+  late final TextEditingController _controller;
+
   late String _currentValue;
 
   @override
@@ -215,6 +217,7 @@ class _TextInputState<T> extends State<_TextInput<T>>
     super.initState();
     _currentValue = widget.property.valueDisplay;
     _focusNode = FocusNode(debugLabel: 'text-input-${widget.property.name}');
+    _controller = TextEditingController(text: widget.property.valueDisplay);
 
     addAutoDisposeListener(_focusNode, () async {
       if (_focusNode.hasFocus) return;
@@ -224,11 +227,19 @@ class _TextInputState<T> extends State<_TextInput<T>>
   }
 
   @override
+  void didUpdateWidget(_TextInput<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.property != widget.property) {
+      _controller.text = widget.property.valueDisplay;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextFormField(
       focusNode: _focusNode,
-      initialValue: widget.property.valueDisplay,
+      controller: _controller,
       enabled: widget.property.isEditable,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (text) => inputValidator(text, property: widget.property),

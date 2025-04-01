@@ -98,6 +98,7 @@ abstract class Field {
   static const devices = 'devices';
   static const displayValue = 'displayValue';
   static const documentation = 'documentation';
+  static const end = 'end';
   static const emulator = 'emulator';
   static const emulatorId = 'emulatorId';
   static const ephemeral = 'ephemeral';
@@ -123,9 +124,11 @@ abstract class Field {
   static const prefersDebugSession = 'prefersDebugSession';
   static const projectRootPath = 'projectRootPath';
   static const requiresDebugSession = 'requiresDebugSession';
+  static const range = 'range';
   static const result = 'result';
   static const selectedDeviceId = 'selectedDeviceId';
   static const selections = 'selections';
+  static const start = 'start';
   static const supported = 'supported';
   static const supportsForceExternal = 'supportsForceExternal';
   static const textDocument = 'textDocument';
@@ -393,6 +396,31 @@ class EditorSelection with Serializable {
   };
 }
 
+/// A range in the editor expressed as (zero-based) start and end positions.
+class EditorRange with Serializable {
+  EditorRange({required this.start, required this.end});
+
+  EditorRange.fromJson(Map<String, Object?> map)
+    : this(
+        start: CursorPosition.fromJson(
+          map[Field.start] as Map<String, Object?>,
+        ),
+        end: CursorPosition.fromJson(map[Field.end] as Map<String, Object?>),
+      );
+
+  /// The range's start position.
+  final CursorPosition start;
+
+  /// The range's end position.
+  final CursorPosition end;
+
+  @override
+  Map<String, Object?> toJson() => {
+    Field.start: start.toJson(),
+    Field.end: end.toJson(),
+  };
+}
+
 /// Representation of a single cursor position in the editor.
 ///
 /// The cursor position is after the given [character] of the [line].
@@ -430,12 +458,23 @@ class CursorPosition with Serializable {
 
 /// The result of an `editableArguments` request.
 class EditableArgumentsResult with Serializable {
-  EditableArgumentsResult({required this.args, this.name, this.documentation});
+  EditableArgumentsResult({
+    required this.args,
+    this.name,
+    this.documentation,
+    this.range,
+  });
 
   EditableArgumentsResult.fromJson(Map<String, Object?> map)
     : this(
         name: map[Field.name] as String?,
         documentation: map[Field.documentation] as String?,
+        range:
+            (map[Field.range] as Map<String, Object?>?) == null
+                ? null
+                : EditorRange.fromJson(
+                  map[Field.range] as Map<String, Object?>,
+                ),
         args:
             (map[Field.arguments] as List<Object?>? ?? <Object?>[])
                 .cast<Map<String, Object?>>()
@@ -446,9 +485,15 @@ class EditableArgumentsResult with Serializable {
   final List<EditableArgument> args;
   final String? name;
   final String? documentation;
+  final EditorRange? range;
 
   @override
-  Map<String, Object?> toJson() => {Field.arguments: args};
+  Map<String, Object?> toJson() => {
+    Field.arguments: args,
+    Field.name: name,
+    Field.documentation: documentation,
+    Field.range: range,
+  };
 }
 
 /// Errors that the Analysis Server returns for failed argument edits.
