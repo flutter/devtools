@@ -208,6 +208,8 @@ class _TextInputState<T> extends State<_TextInput<T>>
 
   late final FocusNode _focusNode;
 
+  late final TextEditingController _controller;
+
   late String _currentValue;
 
   @override
@@ -215,6 +217,7 @@ class _TextInputState<T> extends State<_TextInput<T>>
     super.initState();
     _currentValue = widget.property.valueDisplay;
     _focusNode = FocusNode(debugLabel: 'text-input-${widget.property.name}');
+    _controller = TextEditingController(text: widget.property.valueDisplay);
 
     addAutoDisposeListener(_focusNode, () async {
       if (_focusNode.hasFocus) return;
@@ -224,11 +227,19 @@ class _TextInputState<T> extends State<_TextInput<T>>
   }
 
   @override
+  void didUpdateWidget(_TextInput<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.property != widget.property) {
+      _setValueAndMaintainSelection(widget.property.valueDisplay);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TextFormField(
       focusNode: _focusNode,
-      initialValue: widget.property.valueDisplay,
+      controller: _controller,
       enabled: widget.property.isEditable,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (text) => inputValidator(text, property: widget.property),
@@ -257,6 +268,28 @@ class _TextInputState<T> extends State<_TextInput<T>>
       widget.property,
       valueAsString: _currentValue,
       editPropertyCallback: widget.editProperty,
+    );
+  }
+
+  /// Sets the text field's value to [newValue].
+  ///
+  /// Determines what the correct text selection should be based on the previous
+  /// selection. Without this, the entire text field contents would be selected
+  /// after editing a property. For details, see:
+  /// https://github.com/flutter/flutter/issues/161596
+  void _setValueAndMaintainSelection(String newValue) {
+    final previousSelection = _controller.selection;
+    // If the previous selection is in range of the new text, use it. Otherwise,
+    // set the empty selection at the end of the string.
+    final newSelection =
+        (newValue.length < previousSelection.end ||
+                newValue.length < previousSelection.start)
+            ? TextSelection.collapsed(offset: newValue.length)
+            : previousSelection;
+    // Set the new value in the controller with the new selection.
+    _controller.value = TextEditingValue(
+      text: newValue,
+      selection: newSelection,
     );
   }
 }
