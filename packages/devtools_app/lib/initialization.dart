@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -9,6 +11,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'src/app.dart';
 import 'src/framework/framework_core.dart';
 import 'src/screens/debugger/syntax_highlighter.dart';
+import 'src/shared/analytics/analytics.dart' as ga;
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/shared/config_specific/logger/logger_helpers.dart';
 import 'src/shared/feature_flags.dart';
@@ -73,6 +76,11 @@ Future<void> initializeDevTools({
     enableExperiments: shouldEnableExperiments,
   );
 
+  // Initialize analytics metrics before initializing the framework so that any
+  // analytics events include the expected metadata.
+  // TODO(kenz): consider making the dimensions that need initialization `late`
+  // so that they can be initialized on first access rather than manually. 
+  unawaited(ga.setupDimensions());
   await FrameworkCore.init();
 }
 
