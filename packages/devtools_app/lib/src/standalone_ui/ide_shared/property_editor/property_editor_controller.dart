@@ -68,6 +68,18 @@ class PropertyEditorController extends DisposableController
 
   static const _checkConnectionInterval = Duration(minutes: 1);
 
+  static const _setPropertiesFilterId = 'set-properties-filter';
+
+  @visibleForTesting
+  static final propertyFilters = <SettingFilter<EditableProperty, Object>>[
+    ToggleFilter<EditableProperty>(
+      id: _setPropertiesFilterId,
+      name: 'Only include properties that are set in the code.',
+      includeCallback: (property) => property.hasArgument,
+      defaultValue: false,
+    ),
+  ];
+
   @override
   void init() {
     super.init();
@@ -124,11 +136,17 @@ class PropertyEditorController extends DisposableController
     super.dispose();
   }
 
+  /// The setting filters available for the Property Editor.
+  @override
+  SettingFilters<EditableProperty> createSettingFilters() => propertyFilters;
+
   @override
   void filterData(Filter<EditableProperty> filter) {
     super.filterData(filter);
     final filtered = (_editableWidgetData.value?.properties ?? []).where(
-      (property) => property.matchesQuery(filter.queryFilter.query),
+      (property) =>
+          property.matchesQuery(filter.queryFilter.query) &&
+          !_filteredOutBySettings(property, filter: filter),
     );
     filteredData
       ..clear()
@@ -219,6 +237,13 @@ class PropertyEditorController extends DisposableController
       }
     });
   }
+
+  bool _filteredOutBySettings(
+    EditableProperty property, {
+    required Filter filter,
+  }) => filter.settingFilters.any(
+    (settingFilter) => !settingFilter.includeData(property),
+  );
 
   @visibleForTesting
   void initForTestsOnly({

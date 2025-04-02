@@ -439,6 +439,16 @@ void main() {
   });
 
   group('filtering editable arguments', () {
+    void resetFilters() {
+      for (final filter in controller.settingFilters) {
+        filter.setting.value = filter.defaultValue;
+      }
+    }
+
+    tearDown(() {
+      resetFilters();
+    });
+
     testWidgets('can filter by name', (tester) async {
       // Load the property editor.
       await tester.pumpWidget(wrap(propertyEditor));
@@ -524,6 +534,36 @@ void main() {
       expect(titleInput, findsOneWidget);
       expect(widthInput, findsNothing);
       expect(heightInput, findsNothing);
+    });
+
+    testWidgets('can filter for only set values', (tester) async {
+      // Load the property editor.
+      await tester.pumpWidget(wrap(propertyEditor));
+
+      // Change the editable args.
+      controller.initForTestsOnly(editableArgsResult: result1);
+      await tester.pumpAndSettle();
+
+      final titleInput = _findTextFormField('String? title');
+      final widthInput = _findTextFormField('double width');
+      final heightInput = _findTextFormField('double? height');
+
+      // Verify all inputs are visible.
+      expect(_findNoPropertiesMessage, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
+      expect(heightInput, findsOneWidget);
+
+      // Filter for only set vaues.
+      await _setFilter(
+        'Only include properties that are set in the code.',
+        tester: tester,
+      );
+
+      // Verify only the "title" and "width" properties are visible.
+      expect(heightInput, findsNothing);
+      expect(titleInput, findsOneWidget);
+      expect(widthInput, findsOneWidget);
     });
   });
 
@@ -951,6 +991,33 @@ void main() {
 final _findNoPropertiesMessage = find.text(
   'No widget properties at current cursor location.',
 );
+
+Future<void> _setFilter(
+  String filterSettingText, {
+  required WidgetTester tester,
+}) async {
+  // Click the filter button.
+  final filterButtonFinder = find.byType(DevToolsFilterButton);
+  await tester.tap(filterButtonFinder);
+  await tester.pumpAndSettle();
+
+  // Find the checkbox for the filter and click it.
+  final rowFinder = find.ancestor(
+    of: find.textContaining(filterSettingText),
+    matching: find.byType(Row),
+  );
+  final checkboxFinder = find.descendant(
+    of: rowFinder,
+    matching: find.byType(NotifierCheckbox),
+  );
+  await tester.tap(checkboxFinder);
+  await tester.pumpAndSettle();
+
+  // Click "Apply" to apply the filter and close the dialog.
+  final applyFilterButtonFinder = find.byType(DialogApplyButton);
+  await tester.tap(applyFilterButtonFinder);
+  await tester.pumpAndSettle();
+}
 
 Finder _findFilterField() => find.descendant(
   of: find.byType(StandaloneFilterField<EditableProperty>),
