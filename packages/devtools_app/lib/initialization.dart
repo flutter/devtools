@@ -79,7 +79,7 @@ Future<void> initializeDevTools({
   // Initialize analytics metrics before initializing the framework so that any
   // analytics events include the expected metadata.
   // TODO(kenz): consider making the dimensions that need initialization `late`
-  // so that they can be initialized on first access rather than manually. 
+  // so that they can be initialized on first access rather than manually.
   unawaited(ga.setupDimensions());
   await FrameworkCore.init();
 }
