@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/common_widgets.dart';
 import '../../../shared/ui/filter.dart';
+import '../../../shared/utils/focus_utils.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
 import 'property_editor_messages.dart';
@@ -101,15 +102,15 @@ class _PropertiesListState extends State<_PropertiesList> {
   @override
   void initState() {
     super.initState();
-    // Workaround for https://github.com/flutter/devtools/issues/8929.
+    // Workaround for https://github.com/flutter/flutter/issues/155265.
     setUpTextFieldFocusFixHandler();
   }
 
   @override
   void dispose() {
-    super.dispose();
-    // Workaround for https://github.com/flutter/devtools/issues/8929.
+    // Workaround for https://github.com/flutter/flutter/issues/155265.
     removeTextFieldFocusFixHandler();
+    super.dispose();
   }
 
   @override
