@@ -88,9 +88,7 @@ void main() {
     await tester.pump();
 
     final pauseButtonFinder = findDebuggerButtonWithIcon(Icons.pause);
-    expect(pauseButtonFinder, findsOneWidget);
-    final pause = getWidgetFromFinder<OutlinedButton>(pauseButtonFinder);
-    expect(pause.onPressed, isNull);
+    expect(pauseButtonFinder, findsNothing);
 
     final resumeButtonFinder = findDebuggerButtonWithIconAsset('resume.png');
     expect(resumeButtonFinder, findsOneWidget);

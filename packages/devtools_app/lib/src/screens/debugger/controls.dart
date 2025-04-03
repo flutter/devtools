@@ -101,7 +101,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
               tooltip: 'Pause',
               icon: Icons.pause,
               autofocus: true,
-              // Disable when paused or selected isolate is a system isolate.
+              // Disable when selected isolate is a system isolate.
               onPressed:
                   isSystemIsolate ? null : () => unawaited(controller.pause()),
             )
@@ -109,8 +109,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
               tooltip: 'Resume',
               iconAsset: 'icons/material_symbols/resume.png',
               iconSize: DebuggingControls.materialIconSize,
-              // Enable while paused + not resuming and selected isolate is not
-              // a system isolate.
+              // Enable not resuming and selected isolate is not a system
+              // isolate.
               onPressed:
                   (!resuming && !isSystemIsolate)
                       ? () => unawaited(controller.resume())
