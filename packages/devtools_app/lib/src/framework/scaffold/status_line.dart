@@ -25,11 +25,14 @@ class StatusLine extends StatelessWidget {
     super.key,
     required this.currentScreen,
     required this.isEmbedded,
-    required bool isConnected,
+    required this.isConnected,
   }) : highlightForConnection = isConnected && !isEmbedded;
 
   final Screen currentScreen;
+
   final bool isEmbedded;
+
+  final bool isConnected;
 
   /// Whether to highlight the footer when DevTools is connected to an app.
   final bool highlightForConnection;
@@ -45,16 +48,20 @@ class StatusLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = highlightForConnection ? theme.colorScheme.onPrimary : null;
+    final backgroundColor =
+        highlightForConnection ? theme.colorScheme.primary : null;
+    final foregroundColor =
+        highlightForConnection ? theme.colorScheme.onPrimary : null;
     final height = statusLineHeight + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
       builder: (context, showIsolateSelector, _) {
+        showIsolateSelector = showIsolateSelector && isConnected;
         return DefaultTextStyle.merge(
-          style: TextStyle(color: color),
+          style: TextStyle(color: foregroundColor),
           child: Container(
             decoration: BoxDecoration(
-              color: highlightForConnection ? theme.colorScheme.primary : null,
+              color: backgroundColor,
               border: Border(
                 top: Divider.createBorderSide(context, width: 1.0),
               ),
