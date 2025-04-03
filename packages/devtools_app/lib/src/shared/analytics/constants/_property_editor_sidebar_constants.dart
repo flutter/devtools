@@ -9,11 +9,12 @@ class PropertyEditorSidebar {
   /// Analytics id to track events that come from the DTD editor sidebar.
   static String get id => 'propertyEditorSidebar';
 
-  /// Identifier for errors returned the getEditableArguments API.
-  static String get getEditableArgumentsIdentifier => '$id-getEditableArguments';
+  /// Identifier for errors returned from the getEditableArguments API.
+  static String get getEditableArgumentsIdentifier =>
+      '${id}Error-getEditableArguments';
 
-  /// Identifier for errors returned the editArgument API.
-  static String get editArgumentIdentifier => '$id-editArgument';
+  /// Identifier for errors returned from the editArgument API.
+  static String get editArgumentIdentifier => '${id}Error-editArgument';
 
   /// Analytics event that is sent when the property editor is updated with new
   /// properties.
