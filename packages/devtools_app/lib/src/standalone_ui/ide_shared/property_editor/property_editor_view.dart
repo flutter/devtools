@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/common_widgets.dart';
 import '../../../shared/ui/filter.dart';
-import '../../../shared/utils/focus_utils.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
 import 'property_editor_messages.dart';
@@ -86,7 +85,7 @@ class PropertyEditorView extends StatelessWidget {
   }
 }
 
-class _PropertiesList extends StatefulWidget {
+class _PropertiesList extends StatelessWidget {
   const _PropertiesList({required this.controller});
 
   final PropertyEditorController controller;
@@ -95,38 +94,16 @@ class _PropertiesList extends StatefulWidget {
   static const denseItemPadding = defaultItemPadding / 2;
 
   @override
-  State<_PropertiesList> createState() => _PropertiesListState();
-}
-
-class _PropertiesListState extends State<_PropertiesList> {
-  @override
-  void initState() {
-    super.initState();
-    // Workaround for https://github.com/flutter/flutter/issues/155265.
-    setUpTextFieldFocusFixHandler();
-  }
-
-  @override
-  void dispose() {
-    // Workaround for https://github.com/flutter/flutter/issues/155265.
-    removeTextFieldFocusFixHandler();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: widget.controller.filteredData,
+      valueListenable: controller.filteredData,
       builder: (context, properties, _) {
         return Column(
           children: <Widget>[
-            _FilterControls(controller: widget.controller),
+            _FilterControls(controller: controller),
             if (properties.isEmpty) const NoMatchingPropertiesMessage(),
             for (final property in properties)
-              _EditablePropertyItem(
-                property: property,
-                controller: widget.controller,
-              ),
+              _EditablePropertyItem(property: property, controller: controller),
           ].joinWith(const PaddedDivider.noPadding()),
         );
       },
