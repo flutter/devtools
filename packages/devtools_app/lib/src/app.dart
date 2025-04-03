@@ -45,7 +45,6 @@ import 'screens/provider/provider_screen.dart';
 import 'screens/vm_developer/vm_developer_tools_controller.dart';
 import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
-import 'shared/analytics/analytics.dart' as ga;
 import 'shared/analytics/analytics_controller.dart';
 import 'shared/feature_flags.dart';
 import 'shared/framework/framework_controller.dart';
@@ -167,8 +166,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // if (kIsWeb) {
     //   unawaited(BrowserContextMenu.disableContextMenu());
     // }
-
-    unawaited(ga.setupDimensions());
 
     void clearRoutesAndSetState() {
       setState(() {
