@@ -161,16 +161,19 @@ class _PropertyEditorFooter extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final documentationLink = _documentationLink();
     return Container(
-      color: colorScheme.secondary,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(top: BorderSide(color: Theme.of(context).focusColor)),
+      ),
       height: _PropertyEditorConnectedPanel.footerHeight,
       padding: const EdgeInsets.symmetric(vertical: densePadding),
       alignment: Alignment.center,
       child: Row(
         children: [
+          const Spacer(),
           if (documentationLink != null)
             _DocsLink(documentationLink: documentationLink),
-          const Spacer(),
-          ReportFeedbackButton(color: colorScheme.onSecondary),
+          ReportFeedbackButton(color: colorScheme.onSurface),
         ],
       ),
     );
