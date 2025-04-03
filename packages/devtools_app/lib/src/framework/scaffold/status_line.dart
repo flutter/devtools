@@ -274,7 +274,6 @@ class IsolateSelector extends StatelessWidget {
     return MultiValueListenableBuilder(
       listenables: [isolateManager.isolates, isolateManager.selectedIsolate],
       builder: (context, values, _) {
-        final theme = Theme.of(context);
         final isolates = values.first as List<IsolateRef>;
         final selectedIsolateRef = values.second as IsolateRef?;
         return PopupMenuButton<IsolateRef?>(
@@ -286,31 +285,24 @@ class IsolateSelector extends StatelessWidget {
                   isolates.map((ref) {
                     return PopupMenuItem<IsolateRef>(
                       value: ref,
-                      child: IsolateOption(
-                        ref,
-                        color: theme.colorScheme.onSurface,
-                      ),
+                      child: _IsolateOption(ref),
                     );
                   }).toList(),
-          child: IsolateOption(
-            isolateManager.selectedIsolate.value,
-            color: theme.colorScheme.onPrimary,
-          ),
+          child: _IsolateOption(isolateManager.selectedIsolate.value),
         );
       },
     );
   }
 }
 
-class IsolateOption extends StatelessWidget {
-  const IsolateOption(this.ref, {required this.color, super.key});
+class _IsolateOption extends StatelessWidget {
+  const _IsolateOption(this.ref);
 
   final IsolateRef? ref;
 
-  final Color color;
-
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.onSurface;
     return Row(
       children: [
         Icon(
