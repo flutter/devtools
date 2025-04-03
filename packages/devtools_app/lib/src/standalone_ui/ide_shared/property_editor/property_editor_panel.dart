@@ -82,8 +82,6 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
 class _PropertyEditorConnectedPanel extends StatefulWidget {
   const _PropertyEditorConnectedPanel(this.editor, {required this.controller});
 
-  static const footerHeight = 25.0;
-
   final EditorClient editor;
   final PropertyEditorController controller;
 
@@ -155,6 +153,8 @@ class _PropertyEditorConnectedPanelState
 class _PropertyEditorFooter extends StatelessWidget {
   const _PropertyEditorFooter();
 
+  static const _footerHeight = 25.0;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -165,14 +165,20 @@ class _PropertyEditorFooter extends StatelessWidget {
         color: colorScheme.surface,
         border: Border(top: BorderSide(color: Theme.of(context).focusColor)),
       ),
-      height: _PropertyEditorConnectedPanel.footerHeight,
+      height: _footerHeight,
       padding: const EdgeInsets.symmetric(vertical: densePadding),
-      alignment: Alignment.center,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Spacer(),
           if (documentationLink != null)
-            _DocsLink(documentationLink: documentationLink),
+            Padding(
+              padding: const EdgeInsets.only(left: denseSpacing),
+              child: _DocsLink(
+                documentationLink: documentationLink,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          const Spacer(),
           ReportFeedbackButton(color: colorScheme.onSurface),
         ],
       ),
@@ -190,23 +196,22 @@ class _PropertyEditorFooter extends StatelessWidget {
 }
 
 class _DocsLink extends StatelessWidget {
-  const _DocsLink({required this.documentationLink});
+  const _DocsLink({required this.documentationLink, required this.color});
 
+  final Color color;
   final String documentationLink;
 
   @override
   Widget build(BuildContext context) {
-    return RichText(
-      text: GaLinkTextSpan(
-        link: GaLink(
-          display: 'documentation',
-          url: documentationLink,
-          gaScreenName: gac.PropertyEditorSidebar.id,
-          gaSelectedItemDescription:
-              gac.PropertyEditorSidebar.documentationLink,
-        ),
-        context: context,
+    return LinkIconLabel(
+      icon: Icons.library_books_outlined,
+      link: GaLink(
+        display: 'Docs',
+        url: documentationLink,
+        gaScreenName: gac.PropertyEditorSidebar.id,
+        gaSelectedItemDescription: gac.PropertyEditorSidebar.documentationLink,
       ),
+      color: color,
     );
   }
 }
