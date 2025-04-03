@@ -8,12 +8,10 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
-import 'package:logging/logging.dart';
 
 import '../analytics/constants.dart';
+import '../framework/app_error_handling.dart';
 import 'api_classes.dart';
-
-final _log = Logger('editor_client');
 
 /// A client wrapper that connects to an editor over DTD.
 ///
@@ -262,18 +260,40 @@ class EditorClient extends DisposableController
   }) async {
     final method = editableArgumentsMethodName.value;
     if (method == null) return null;
-    final response = await _callLspApi(
-      method,
-      params: {
-        'type': 'Object', // This is required by DTD.
-        'textDocument': textDocument.toJson(),
-        'position': position.toJson(),
-      },
-    );
-    final result = response.result[Field.result];
-    return result != null
-        ? EditableArgumentsResult.fromJson(result as Map<String, Object?>)
-        : null;
+    try {
+      final response = await _callLspApi(
+        method,
+        params: {
+          'type': 'Object', // This is required by DTD.
+          'textDocument': textDocument.toJson(),
+          'position': position.toJson(),
+        },
+      );
+      final result = response.result[Field.result];
+      return result != null
+          ? EditableArgumentsResult.fromJson(result as Map<String, Object?>)
+          : null;
+    } on RpcException catch (e, st) {
+      // We expect content modified errors if a user edits their code before the
+      // request completes. Therefore it is safe to ignore.
+      if (e.code != AnalysisServerError.contentModifiedError.code) {
+        final errorMessage = e.message;
+        reportError(
+          errorMessage,
+          errorType: PropertyEditorSidebar.getEditableArgumentsIdentifier,
+          stack: st,
+        );
+      }
+      return null;
+    } catch (e, st) {
+      final errorMessage = 'Unknown error: $e';
+      reportError(
+        errorMessage,
+        errorType: PropertyEditorSidebar.getEditableArgumentsIdentifier,
+        stack: st,
+      );
+      return null;
+    }
   }
 
   /// Requests that the Analysis Server makes a code edit for an argument.
@@ -301,17 +321,25 @@ class EditorClient extends DisposableController
         },
       );
       return EditArgumentResponse(success: true);
-    } on RpcException catch (e) {
+    } on RpcException catch (e, st) {
       final errorMessage = e.message;
-      _log.severe(errorMessage);
+      reportError(
+        errorMessage,
+        errorType: PropertyEditorSidebar.editArgumentIdentifier,
+        stack: st,
+      );
       return EditArgumentResponse(
         success: false,
         errorCode: e.code,
         errorMessage: errorMessage,
       );
-    } catch (e) {
+    } catch (e, st) {
       final errorMessage = 'Unknown error: $e';
-      _log.severe(errorMessage);
+      reportError(
+        errorMessage,
+        errorType: PropertyEditorSidebar.editArgumentIdentifier,
+        stack: st,
+      );
       return EditArgumentResponse(
         success: false,
         errorMessage: 'Unknown error: $e',
