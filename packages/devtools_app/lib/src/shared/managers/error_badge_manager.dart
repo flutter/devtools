@@ -64,6 +64,7 @@ class ErrorBadgeManager extends DisposableController
 
       final inspectableError = _extractInspectableError(e);
       if (inspectableError != null) {
+        print('REVEIVED INSPECT ERROR!');
         incrementBadgeCount(InspectorScreen.id);
         appendError(InspectorScreen.id, inspectableError);
       }

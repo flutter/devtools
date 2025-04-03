@@ -460,7 +460,12 @@ class InspectorController extends DisposableController
     // to wait for the first frame AFTER the isolate reload or navigation event
     // in order to request the new tree.
     if (event.kind == EventKind.kExtension) {
+      
+
       final extensionEventKind = event.extensionKind;
+      if (extensionEventKind == 'Flutter.Error') {
+        print('RECEIVED ERROR!');
+      }
       if (extensionEventKind == 'Flutter.Navigation') {
         _receivedFlutterNavigationEvent = true;
       }
@@ -474,6 +479,8 @@ class InspectorController extends DisposableController
     }
 
     if (event.kind == EventKind.kIsolateReload) {
+      print('RECEIVED ISOLATE RELOAD!');
+      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
       _receivedIsolateReloadEvent = true;
     }
   }
