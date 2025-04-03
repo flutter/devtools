@@ -74,7 +74,8 @@ class StatusLine extends StatelessWidget {
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
     final theme = Theme.of(context);
-    final color = highlightForConnection ? theme.colorScheme.onPrimary : null;
+    final foregroundColor =
+        highlightForConnection ? theme.colorScheme.onPrimary : null;
     final screenWidth = ScreenSize(context).width;
     // TODO(https://github.com/flutter/devtools/issues/8913): this builds the
     // wrong status items for offline mode.
@@ -92,7 +93,7 @@ class StatusLine extends StatelessWidget {
             highlightForConnection: highlightForConnection,
           ),
           if (showVideoTutorial) ...[
-            BulletSpacer(color: color),
+            BulletSpacer(color: foregroundColor),
             VideoTutorialLink(
               screenMetaData: screenMetaData!,
               screenWidth: screenWidth,
@@ -101,21 +102,21 @@ class StatusLine extends StatelessWidget {
           ],
         ],
       ),
-      BulletSpacer(color: color),
+      BulletSpacer(color: foregroundColor),
       if (widerThanXxs && showIsolateSelector) ...[
-        const IsolateSelector(),
-        BulletSpacer(color: color),
+        IsolateSelector(foregroundColor: foregroundColor),
+        BulletSpacer(color: foregroundColor),
       ],
       if (screenWidth > MediaSize.xs && pageStatus != null) ...[
         pageStatus,
-        BulletSpacer(color: color),
+        BulletSpacer(color: foregroundColor),
       ],
       buildConnectionStatus(context, screenWidth),
       if (widerThanXxs && isEmbedded) ...[
-        BulletSpacer(color: color),
+        BulletSpacer(color: foregroundColor),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: DevToolsScaffold.defaultActions(color: color),
+          children: DevToolsScaffold.defaultActions(color: foregroundColor),
         ),
       ],
     ];
@@ -266,7 +267,9 @@ class VideoTutorialLink extends StatelessWidget {
 }
 
 class IsolateSelector extends StatelessWidget {
-  const IsolateSelector({super.key});
+  const IsolateSelector({super.key, required this.foregroundColor});
+
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -285,10 +288,18 @@ class IsolateSelector extends StatelessWidget {
                   isolates.map((ref) {
                     return PopupMenuItem<IsolateRef>(
                       value: ref,
-                      child: _IsolateOption(ref),
+                      child: _IsolateOption(
+                        ref,
+                        // This is always rendered against the background color
+                        // for the pop up menu, which is the `surface` color.
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     );
                   }).toList(),
-          child: _IsolateOption(isolateManager.selectedIsolate.value),
+          child: _IsolateOption(
+            isolateManager.selectedIsolate.value,
+            color: foregroundColor,
+          ),
         );
       },
     );
@@ -296,13 +307,13 @@ class IsolateSelector extends StatelessWidget {
 }
 
 class _IsolateOption extends StatelessWidget {
-  const _IsolateOption(this.ref);
+  const _IsolateOption(this.ref, {required this.color});
 
   final IsolateRef? ref;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.onSurface;
     return Row(
       children: [
         Icon(
