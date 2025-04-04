@@ -14,7 +14,7 @@ import '../utils.dart';
 const _fatalInfosArg = 'fatal-infos';
 const _skipUnimportantArg = 'skip-unimportant';
 
-const _unimportantDirectories = ['case_study', 'fixtures'];
+const _unimportantDirectories = ['fixtures'];
 
 class AnalyzeCommand extends Command {
   AnalyzeCommand() {
