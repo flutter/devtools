@@ -45,7 +45,9 @@ pausing on breakpoint on connection. -
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed bug where errors in the inspector tree (e.g. RenderFlex overflow
+errors) were not removed after a hot-reload. - 
+[#9106](https://github.com/flutter/devtools/pull/9106)
 
 ## Performance updates
 
