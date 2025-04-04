@@ -260,6 +260,10 @@ class EditorClient extends DisposableController
   }) async {
     final method = editableArgumentsMethodName.value;
     if (method == null) return null;
+
+    String? errorMessage;
+    StackTrace? stack;
+    EditableArgumentsResult? result;
     try {
       final response = await _callLspApi(
         method,
@@ -269,31 +273,34 @@ class EditorClient extends DisposableController
           'position': position.toJson(),
         },
       );
-      final result = response.result[Field.result];
-      return result != null
-          ? EditableArgumentsResult.fromJson(result as Map<String, Object?>)
-          : null;
+      final rawResult = response.result[Field.result];
+      result =
+          rawResult != null
+              ? EditableArgumentsResult.fromJson(
+                rawResult as Map<String, Object?>,
+              )
+              : null;
     } on RpcException catch (e, st) {
       // We expect content modified errors if a user edits their code before the
       // request completes. Therefore it is safe to ignore.
       if (e.code != AnalysisServerError.contentModifiedError.code) {
-        final errorMessage = e.message;
+        errorMessage = e.message;
+        stack = st;
+      }
+    } catch (e, st) {
+      errorMessage = 'Unknown error: $e';
+      stack = st;
+    } finally {
+      if (errorMessage != null) {
         reportError(
           errorMessage,
           errorType: PropertyEditorSidebar.getEditableArgumentsIdentifier,
-          stack: st,
+          stack: stack,
         );
       }
-      return null;
-    } catch (e, st) {
-      final errorMessage = 'Unknown error: $e';
-      reportError(
-        errorMessage,
-        errorType: PropertyEditorSidebar.getEditableArgumentsIdentifier,
-        stack: st,
-      );
-      return null;
     }
+
+    return result;
   }
 
   /// Requests that the Analysis Server makes a code edit for an argument.
@@ -310,6 +317,9 @@ class EditorClient extends DisposableController
         errorMessage: 'API is unavailable.',
       );
     }
+
+    String? errorMessage;
+    StackTrace? stack;
     try {
       await _callLspApi(
         method,
@@ -322,29 +332,21 @@ class EditorClient extends DisposableController
       );
       return EditArgumentResponse(success: true);
     } on RpcException catch (e, st) {
-      final errorMessage = e.message;
-      reportError(
-        errorMessage,
-        errorType: PropertyEditorSidebar.editArgumentIdentifier,
-        stack: st,
-      );
-      return EditArgumentResponse(
-        success: false,
-        errorCode: e.code,
-        errorMessage: errorMessage,
-      );
+      errorMessage = e.message;
+      stack = st;
     } catch (e, st) {
-      final errorMessage = 'Unknown error: $e';
-      reportError(
-        errorMessage,
-        errorType: PropertyEditorSidebar.editArgumentIdentifier,
-        stack: st,
-      );
-      return EditArgumentResponse(
-        success: false,
-        errorMessage: 'Unknown error: $e',
-      );
+      errorMessage = 'Unknown error: $e';
+      stack = st;
+    } finally {
+      if (errorMessage != null) {
+        reportError(
+          errorMessage,
+          errorType: PropertyEditorSidebar.editArgumentIdentifier,
+          stack: stack,
+        );
+      }
     }
+    return EditArgumentResponse(success: false, errorMessage: errorMessage);
   }
 
   Future<DTDResponse> _call(
