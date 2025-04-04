@@ -140,6 +140,16 @@ abstract class Field {
   static const vmServiceUri = 'vmServiceUri';
 }
 
+/// Multi-purpose errors used by the Analysis Server.
+enum AnalysisServerError {
+  /// The document content was modified before the request was completed.
+  contentModifiedError(code: -32801);
+
+  const AnalysisServerError({required this.code});
+
+  final int code;
+}
+
 /// A base class for all known events that an editor can produce.
 ///
 /// The set of subclasses is not guaranteed to match actual events from any
