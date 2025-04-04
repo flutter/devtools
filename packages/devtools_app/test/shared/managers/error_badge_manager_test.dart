@@ -99,20 +99,30 @@ void main() {
 
     test('clearErrors resets counts and removes errors', () {
       expect(getActiveErrorCount(InspectorScreen.id), equals(0));
-      expect(getActiveErrorCount(InspectorScreen.id), equals(0));
+      expect(
+        errorBadgeManager.errorCountNotifier(InspectorScreen.id).value,
+        equals(0),
+      );
 
       errorBadgeManager.appendError(
         InspectorScreen.id,
         DevToolsError('An error', InspectorScreen.id),
       );
+      errorBadgeManager.incrementBadgeCount(InspectorScreen.id);
 
       expect(getActiveErrorCount(InspectorScreen.id), equals(1));
-      expect(getActiveErrorCount(InspectorScreen.id), equals(1));
+      expect(
+        errorBadgeManager.errorCountNotifier(InspectorScreen.id).value,
+        equals(1),
+      );
 
       errorBadgeManager.clearErrors(InspectorScreen.id);
 
       expect(getActiveErrorCount(InspectorScreen.id), equals(0));
-      expect(getActiveErrorCount(InspectorScreen.id), equals(0));
+      expect(
+        errorBadgeManager.errorCountNotifier(InspectorScreen.id).value,
+        equals(0),
+      );
     });
   });
 }
