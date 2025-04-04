@@ -179,12 +179,14 @@ class PropertyEditorController extends DisposableController
           property.name,
           property.type,
           property.value, // Include the property value.
+          property.displayValue,
           widgetName,
           fileUri,
         )
         : Object.hash(
           property.name,
           property.type,
+          property.displayValue,
           fileUri,
           widgetName,
           range.start.line, // Include the start position of the property.
