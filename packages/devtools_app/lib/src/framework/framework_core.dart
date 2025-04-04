@@ -20,6 +20,7 @@ import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
+import '../shared/analytics/analytics.dart' as ga;
 import '../shared/config_specific/framework_initialize/framework_initialize.dart';
 import '../shared/console/eval/eval_service.dart';
 import '../shared/feature_flags.dart';
@@ -55,6 +56,17 @@ abstract class FrameworkCore {
     _initGlobals();
 
     await initializePlatform();
+
+    // Initialize analytics metrics before initializing the rest of the
+    // framework. It is important that this method call is here, after the
+    // `storage` global variable has been set by the `initializePlatform` call,
+    // since the analytics dimensions reference the `storage` global. We
+    // initialize this now so that any analytics events sent from here on our
+    // include the expected metadata.
+    // TODO(kenz): consider making the dimensions that need initialization
+    // `late` so that they can be initialized on first access rather than
+    // manually.
+    await ga.setupDimensions();
 
     // Print DevTools info at startup.
     _log.info(

@@ -436,7 +436,7 @@ class NetworkController extends DevToolsScreenController
   @override
   void filterData(Filter<NetworkRequest> filter) {
     super.filterData(filter);
-    serviceConnection.errorBadgeManager.clearErrors(NetworkScreen.id);
+    serviceConnection.errorBadgeManager.clearErrorCount(NetworkScreen.id);
     final queryFilter = filter.queryFilter;
     if (queryFilter.isEmpty) {
       _currentNetworkRequests.value.forEach(_checkForError);

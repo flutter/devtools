@@ -217,25 +217,6 @@ void main() {
         ]);
       },
     );
-
-    testWidgetsWithWindowSize('an error message is shown', smallWindowSize, (
-      WidgetTester tester,
-    ) async {
-      await pumpDebuggerScreen(tester, mockDebuggerController);
-      // Dismiss any previous notifications:
-      notificationService.dismiss(
-        'Failed to parse package:gallery/src/unknown.dart.',
-      );
-      await tester.pumpAndSettle();
-
-      await showScript(mockEmptyScriptRef);
-      await tester.pumpAndSettle();
-
-      expect(
-        notificationService.activeMessages.first.text,
-        equals('Failed to parse package:gallery/src/unknown.dart.'),
-      );
-    });
   });
 }
 

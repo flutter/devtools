@@ -155,7 +155,7 @@ class InspectorController extends DisposableController
     // TODO(kenz): When this method is called outside  createState(), this post
     // frame callback can be removed.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
+      serviceConnection.errorBadgeManager.clearErrorCount(InspectorScreen.id);
     });
     filterErrors();
   }
@@ -474,6 +474,7 @@ class InspectorController extends DisposableController
     }
 
     if (event.kind == EventKind.kIsolateReload) {
+      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
       _receivedIsolateReloadEvent = true;
     }
   }
@@ -989,7 +990,7 @@ class InspectorController extends DisposableController
       // the inspector was visible (normally they're cleared when visiting
       // the screen) and visiting an errored node seems an appropriate
       // acknowledgement of the errors.
-      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
+      serviceConnection.errorBadgeManager.clearErrorCount(InspectorScreen.id);
     }
   }
 

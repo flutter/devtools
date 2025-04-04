@@ -208,7 +208,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         );
 
         // Clear error count when navigating to a screen.
-        serviceConnection.errorBadgeManager.clearErrors(screen.screenId);
+        serviceConnection.errorBadgeManager.clearErrorCount(screen.screenId);
 
         // Update routing with the change.
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {

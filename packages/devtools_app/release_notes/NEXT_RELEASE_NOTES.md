@@ -43,9 +43,14 @@ DevTools in order to avoid an OOM crash. -
 pausing on breakpoint on connection. - 
 [#8991](https://github.com/flutter/devtools/pull/8991)
 
+* Prevented text inputs from stealing focus from the IDE. - 
+[#9091](https://github.com/flutter/devtools/pull/9091)
+
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed bug where errors in the inspector tree (e.g. RenderFlex overflow
+errors) were not removed after a hot-reload. - 
+[#9106](https://github.com/flutter/devtools/pull/9106)
 
 ## Performance updates
 
@@ -61,7 +66,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Combine the Pause and Resume buttons into a single button. -
+[#9095](https://github.com/flutter/devtools/pull/9095)
 
 ## Network profiler updates
 

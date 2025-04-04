@@ -255,7 +255,7 @@ class PerformanceController extends DevToolsScreenController
       await serviceConnection.serviceManager.service!.clearVMTimeline();
     }
     offlinePerformanceData = null;
-    serviceConnection.errorBadgeManager.clearErrors(PerformanceScreen.id);
+    serviceConnection.errorBadgeManager.clearErrorCount(PerformanceScreen.id);
     await _applyToFeatureControllersAsync((c) => c.clearData(partial: partial));
   }
 

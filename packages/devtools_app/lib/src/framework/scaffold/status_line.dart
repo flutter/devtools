@@ -25,11 +25,14 @@ class StatusLine extends StatelessWidget {
     super.key,
     required this.currentScreen,
     required this.isEmbedded,
-    required bool isConnected,
+    required this.isConnected,
   }) : highlightForConnection = isConnected && !isEmbedded;
 
   final Screen currentScreen;
+
   final bool isEmbedded;
+
+  final bool isConnected;
 
   /// Whether to highlight the footer when DevTools is connected to an app.
   final bool highlightForConnection;
@@ -45,16 +48,20 @@ class StatusLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = highlightForConnection ? theme.colorScheme.onPrimary : null;
+    final backgroundColor =
+        highlightForConnection ? theme.colorScheme.primary : null;
+    final foregroundColor =
+        highlightForConnection ? theme.colorScheme.onPrimary : null;
     final height = statusLineHeight + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
       builder: (context, showIsolateSelector, _) {
+        showIsolateSelector = showIsolateSelector && isConnected;
         return DefaultTextStyle.merge(
-          style: TextStyle(color: color),
+          style: TextStyle(color: foregroundColor),
           child: Container(
             decoration: BoxDecoration(
-              color: highlightForConnection ? theme.colorScheme.primary : null,
+              color: backgroundColor,
               border: Border(
                 top: Divider.createBorderSide(context, width: 1.0),
               ),
@@ -74,7 +81,8 @@ class StatusLine extends StatelessWidget {
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
     final theme = Theme.of(context);
-    final color = highlightForConnection ? theme.colorScheme.onPrimary : null;
+    final foregroundColor =
+        highlightForConnection ? theme.colorScheme.onPrimary : null;
     final screenWidth = ScreenSize(context).width;
     // TODO(https://github.com/flutter/devtools/issues/8913): this builds the
     // wrong status items for offline mode.
@@ -92,7 +100,7 @@ class StatusLine extends StatelessWidget {
             highlightForConnection: highlightForConnection,
           ),
           if (showVideoTutorial) ...[
-            BulletSpacer(color: color),
+            BulletSpacer(color: foregroundColor),
             VideoTutorialLink(
               screenMetaData: screenMetaData!,
               screenWidth: screenWidth,
@@ -101,21 +109,21 @@ class StatusLine extends StatelessWidget {
           ],
         ],
       ),
-      BulletSpacer(color: color),
+      BulletSpacer(color: foregroundColor),
       if (widerThanXxs && showIsolateSelector) ...[
-        const IsolateSelector(),
-        BulletSpacer(color: color),
+        IsolateSelector(foregroundColor: foregroundColor),
+        BulletSpacer(color: foregroundColor),
       ],
       if (screenWidth > MediaSize.xs && pageStatus != null) ...[
         pageStatus,
-        BulletSpacer(color: color),
+        BulletSpacer(color: foregroundColor),
       ],
       buildConnectionStatus(context, screenWidth),
       if (widerThanXxs && isEmbedded) ...[
-        BulletSpacer(color: color),
+        BulletSpacer(color: foregroundColor),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: DevToolsScaffold.defaultActions(color: color),
+          children: DevToolsScaffold.defaultActions(color: foregroundColor),
         ),
       ],
     ];
@@ -266,7 +274,9 @@ class VideoTutorialLink extends StatelessWidget {
 }
 
 class IsolateSelector extends StatelessWidget {
-  const IsolateSelector({super.key});
+  const IsolateSelector({super.key, required this.foregroundColor});
+
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -274,7 +284,6 @@ class IsolateSelector extends StatelessWidget {
     return MultiValueListenableBuilder(
       listenables: [isolateManager.isolates, isolateManager.selectedIsolate],
       builder: (context, values, _) {
-        final theme = Theme.of(context);
         final isolates = values.first as List<IsolateRef>;
         final selectedIsolateRef = values.second as IsolateRef?;
         return PopupMenuButton<IsolateRef?>(
@@ -286,15 +295,17 @@ class IsolateSelector extends StatelessWidget {
                   isolates.map((ref) {
                     return PopupMenuItem<IsolateRef>(
                       value: ref,
-                      child: IsolateOption(
+                      child: _IsolateOption(
                         ref,
-                        color: theme.colorScheme.onSurface,
+                        // This is always rendered against the background color
+                        // for the pop up menu, which is the `surface` color.
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     );
                   }).toList(),
-          child: IsolateOption(
+          child: _IsolateOption(
             isolateManager.selectedIsolate.value,
-            color: theme.colorScheme.onPrimary,
+            color: foregroundColor,
           ),
         );
       },
@@ -302,12 +313,11 @@ class IsolateSelector extends StatelessWidget {
   }
 }
 
-class IsolateOption extends StatelessWidget {
-  const IsolateOption(this.ref, {required this.color, super.key});
+class _IsolateOption extends StatelessWidget {
+  const _IsolateOption(this.ref, {required this.color});
 
   final IsolateRef? ref;
-
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
