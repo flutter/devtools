@@ -141,17 +141,3 @@ class DartDocConverter {
 void forceReload() {
   reloadIframe();
 }
-
-/// Workaround to prevent TextFields from holding onto focus when IFRAME-ed.
-///
-/// See https://github.com/flutter/devtools/issues/8929 for details.
-void setUpTextFieldFocusFixHandler() {
-  addBlurListener();
-}
-
-/// Workaround to prevent TextFields from holding onto focus when IFRAME-ed.
-///
-/// See https://github.com/flutter/devtools/issues/8929 for details.
-void removeTextFieldFocusFixHandler() {
-  removeBlurListener();
-}

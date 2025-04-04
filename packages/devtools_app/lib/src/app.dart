@@ -58,6 +58,7 @@ import 'shared/primitives/query_parameters.dart';
 import 'shared/primitives/utils.dart';
 import 'shared/ui/common_widgets.dart';
 import 'shared/ui/hover.dart';
+import 'shared/utils/focus_utils.dart';
 import 'shared/utils/utils.dart';
 import 'standalone_ui/standalone_screen.dart';
 
@@ -188,11 +189,16 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     addAutoDisposeListener(preferences.darkModeEnabled);
 
     releaseNotesController = ReleaseNotesController();
+
+    // Workaround for https://github.com/flutter/flutter/issues/155265.
+    setUpTextFieldFocusFixHandler();
   }
 
   @override
   void dispose() {
     FrameworkCore.dispose();
+    // Workaround for https://github.com/flutter/flutter/issues/155265.
+    removeTextFieldFocusFixHandler();
     super.dispose();
   }
 
