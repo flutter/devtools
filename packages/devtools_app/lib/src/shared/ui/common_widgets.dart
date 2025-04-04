@@ -111,7 +111,7 @@ class GaDevToolsButton extends DevToolsButton {
 class PauseButton extends GaDevToolsButton {
   PauseButton({
     super.key,
-    required super.tooltip,
+    super.tooltip = 'Pause',
     required super.onPressed,
     required super.gaScreen,
     required super.gaSelection,
@@ -124,7 +124,7 @@ class PauseButton extends GaDevToolsButton {
 class ResumeButton extends GaDevToolsButton {
   ResumeButton({
     super.key,
-    required super.tooltip,
+    super.tooltip = 'Resume',
     required super.onPressed,
     required super.gaScreen,
     required super.gaSelection,

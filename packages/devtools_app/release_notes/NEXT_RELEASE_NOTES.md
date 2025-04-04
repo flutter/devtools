@@ -61,7 +61,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+* Combine the Pause and Resume buttons into a single button. -
+[#9095](https://github.com/flutter/devtools/pull/9095)
 
 ## Network profiler updates
 

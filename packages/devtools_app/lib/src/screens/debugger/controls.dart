@@ -90,29 +90,32 @@ class _DebuggingControlsState extends State<DebuggingControls>
     required bool resuming,
   }) {
     final isSystemIsolate = controller.isSystemIsolate;
+    // Note: this could be refactored to use a single [GaDevToolsButton] instead
+    // of a [RoundedButtonGroup] with only one child, but this would require
+    // changes to the underlying [DevToolsButton] widget from
+    // package:devtools_app_shared to accept an `iconAsset` as a parameter.
     return RoundedButtonGroup(
       items: [
-        ButtonGroupItemData(
-          tooltip: 'Pause',
-          icon: Icons.pause,
-          autofocus: true,
-          // Disable when paused or selected isolate is a system isolate.
-          onPressed:
-              (isPaused || isSystemIsolate)
-                  ? null
-                  : () => unawaited(controller.pause()),
-        ),
-        ButtonGroupItemData(
-          tooltip: 'Resume',
-          iconAsset: 'icons/material_symbols/resume.png',
-          iconSize: DebuggingControls.materialIconSize,
-          // Enable while paused + not resuming and selected isolate is not
-          // a system isolate.
-          onPressed:
-              ((isPaused && !resuming) && !isSystemIsolate)
-                  ? () => unawaited(controller.resume())
-                  : null,
-        ),
+        !isPaused
+            ? ButtonGroupItemData(
+              tooltip: 'Pause',
+              icon: Icons.pause,
+              autofocus: true,
+              // Disable when selected isolate is a system isolate.
+              onPressed:
+                  isSystemIsolate ? null : () => unawaited(controller.pause()),
+            )
+            : ButtonGroupItemData(
+              tooltip: 'Resume',
+              iconAsset: 'icons/material_symbols/resume.png',
+              iconSize: DebuggingControls.materialIconSize,
+              // Enable not resuming and selected isolate is not a system
+              // isolate.
+              onPressed:
+                  (!resuming && !isSystemIsolate)
+                      ? () => unawaited(controller.resume())
+                      : null,
+            ),
       ],
     );
   }
