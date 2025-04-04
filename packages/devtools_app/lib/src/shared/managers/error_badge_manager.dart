@@ -24,6 +24,8 @@ import '../primitives/query_parameters.dart';
 
 class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {
+  // TODO(https://github.com/flutter/devtools/issues/9105): Separate out
+  // Inspector-specific logic from this file.
   final _activeErrorCounts = <String, ValueNotifier<int>>{
     InspectorScreen.id: ValueNotifier<int>(0),
     PerformanceScreen.id: ValueNotifier<int>(0),
@@ -64,7 +66,6 @@ class ErrorBadgeManager extends DisposableController
 
       final inspectableError = _extractInspectableError(e);
       if (inspectableError != null) {
-        print('REVEIVED INSPECT ERROR!');
         incrementBadgeCount(InspectorScreen.id);
         appendError(InspectorScreen.id, inspectableError);
       }
@@ -72,8 +73,9 @@ class ErrorBadgeManager extends DisposableController
   }
 
   InspectableWidgetError? _extractInspectableError(Event error) {
-    // TODO(dantup): Switch to using the inspectorService from the serviceManager
-    //  once Jacob's change to add it lands.
+    // TODO(https://github.com/flutter/devtools/issues/9105): Switch to using
+    // the inspectorService from the serviceManager once Jacob's change to add
+    // it lands.
     final node = RemoteDiagnosticsNode(
       error.extensionData!.data,
       null,
@@ -147,8 +149,13 @@ class ErrorBadgeManager extends DisposableController
     return _activeErrorCounts[screenId];
   }
 
-  void clearErrors(String screenId) {
+  void clearErrorCount(String screenId) {
     _activeErrorCounts[screenId]?.value = 0;
+  }
+
+  void clearErrors(String screenId) {
+    clearErrorCount(screenId);
+    _activeErrors[screenId]?.value = LinkedHashMap<String, DevToolsError>();
   }
 
   void filterErrors(String screenId, bool Function(String id) isValid) {

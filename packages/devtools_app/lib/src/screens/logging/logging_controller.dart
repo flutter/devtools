@@ -289,7 +289,7 @@ class LoggingController extends DevToolsScreenController
 
   void clear() {
     _updateData([]);
-    serviceConnection.errorBadgeManager.clearErrors(LoggingScreen.id);
+    serviceConnection.errorBadgeManager.clearErrorCount(LoggingScreen.id);
   }
 
   void _handleConnectionStart(VmServiceWrapper service) {

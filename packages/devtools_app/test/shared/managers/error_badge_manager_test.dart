@@ -34,6 +34,9 @@ void main() {
   late ErrorBadgeManager errorBadgeManager;
 
   group('ErrorBadgeManager', () {
+    int getActiveErrorCount(screenId) =>
+        errorBadgeManager.erroredItemsForPage(screenId).value.entries.length;
+
     setUp(() {
       errorBadgeManager = ErrorBadgeManager();
     });
@@ -60,7 +63,7 @@ void main() {
       }
     });
 
-    test('clearErrors resets counts', () {
+    test('clearErrorCount resets counts', () {
       allScreenIds.forEach(errorBadgeManager.incrementBadgeCount);
 
       for (final id in allScreenIds) {
@@ -71,11 +74,45 @@ void main() {
         }
       }
 
-      allScreenIds.forEach(errorBadgeManager.clearErrors);
+      allScreenIds.forEach(errorBadgeManager.clearErrorCount);
 
       for (final id in allScreenIds) {
         expect(errorBadgeManager.errorCountNotifier(id).value, equals(0));
       }
+    });
+
+    // TODO(https://github.com/flutter/devtools/issues/9105): This logic should
+    // be moved to the inspector.
+    test('appendError works for inspector screen only', () {
+      for (final id in allScreenIds) {
+        errorBadgeManager.appendError(id, DevToolsError('An error', id));
+      }
+
+      for (final id in allScreenIds) {
+        if (id == InspectorScreen.id) {
+          expect(getActiveErrorCount(id), equals(1));
+        } else {
+          expect(getActiveErrorCount(id), equals(0));
+        }
+      }
+    });
+
+    test('clearErrors resets counts and removes errors', () {
+      expect(getActiveErrorCount(InspectorScreen.id), equals(0));
+      expect(getActiveErrorCount(InspectorScreen.id), equals(0));
+
+      errorBadgeManager.appendError(
+        InspectorScreen.id,
+        DevToolsError('An error', InspectorScreen.id),
+      );
+
+      expect(getActiveErrorCount(InspectorScreen.id), equals(1));
+      expect(getActiveErrorCount(InspectorScreen.id), equals(1));
+
+      errorBadgeManager.clearErrors(InspectorScreen.id);
+
+      expect(getActiveErrorCount(InspectorScreen.id), equals(0));
+      expect(getActiveErrorCount(InspectorScreen.id), equals(0));
     });
   });
 }
