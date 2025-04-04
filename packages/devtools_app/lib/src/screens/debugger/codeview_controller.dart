@@ -268,7 +268,6 @@ class CodeViewController extends DisposableController
         reportError(
           'Failed to parse ${scriptRef.uri}.',
           stack: StackTrace.current,
-          notifyUser: true,
         );
         return false;
       }
