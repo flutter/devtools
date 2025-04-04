@@ -43,6 +43,9 @@ DevTools in order to avoid an OOM crash. -
 pausing on breakpoint on connection. - 
 [#8991](https://github.com/flutter/devtools/pull/8991)
 
+* Prevented text inputs from stealing focus from the IDE. - 
+[#9091](https://github.com/flutter/devtools/pull/9091)
+
 ## Inspector updates
 
 TODO: Remove this section if there are not any general updates.
