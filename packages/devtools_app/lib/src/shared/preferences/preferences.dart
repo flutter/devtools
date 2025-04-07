@@ -134,8 +134,8 @@ class PreferencesController extends DisposableController
         darkModeValue == 'true';
     ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
     toggleDarkModeTheme(useDarkMode);
-    addAutoDisposeListener(darkModeEnabled, () {
-      storage.setValue(
+    addAutoDisposeListener(darkModeEnabled, () async {
+      await storage.setValue(
         _UiPreferences.darkMode.storageKey,
         '${darkModeEnabled.value}',
       );
@@ -148,8 +148,8 @@ class PreferencesController extends DisposableController
       defaultsTo: false,
     );
     toggleVmDeveloperMode(vmDeveloperModeValue);
-    addAutoDisposeListener(vmDeveloperModeEnabled, () {
-      storage.setValue(
+    addAutoDisposeListener(vmDeveloperModeEnabled, () async {
+      await storage.setValue(
         _UiPreferences.vmDeveloperMode.storageKey,
         '${vmDeveloperModeEnabled.value}',
       );
@@ -236,8 +236,8 @@ class PreferencesController extends DisposableController
       defaultsTo: false,
     );
     toggleVerboseLogging(verboseLoggingEnabledValue);
-    addAutoDisposeListener(verboseLoggingEnabled, () {
-      storage.setValue(
+    addAutoDisposeListener(verboseLoggingEnabled, () async {
+      await storage.setValue(
         _GeneralPreferences.verboseLogging.name,
         verboseLoggingEnabled.value.toString(),
       );

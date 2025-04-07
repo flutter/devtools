@@ -94,10 +94,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
-    addAutoDisposeListener(preferences.inspector.pubRootDirectories, () {
+    addAutoDisposeListener(preferences.inspector.pubRootDirectories, () async {
       if (serviceConnection.serviceManager.connectedState.value.connected &&
           controller.firstInspectorTreeLoadCompleted) {
-        controller.refreshInspector();
+        await controller.refreshInspector();
       }
     });
 

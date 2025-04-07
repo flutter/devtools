@@ -21,8 +21,8 @@ class PerformancePreferencesController extends DisposableController
 
   @override
   Future<void> init() async {
-    addAutoDisposeListener(showFlutterFramesChart, () {
-      storage.setValue(
+    addAutoDisposeListener(showFlutterFramesChart, () async {
+      await storage.setValue(
         _showFlutterFramesChartId,
         showFlutterFramesChart.value.toString(),
       );
@@ -37,8 +37,8 @@ class PerformancePreferencesController extends DisposableController
       defaultsTo: true,
     );
 
-    addAutoDisposeListener(includeCpuSamplesInTimeline, () {
-      storage.setValue(
+    addAutoDisposeListener(includeCpuSamplesInTimeline, () async {
+      await storage.setValue(
         _includeCpuSamplesInTimelineId,
         includeCpuSamplesInTimeline.value.toString(),
       );

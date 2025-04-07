@@ -310,7 +310,7 @@ class InterruptableChunkWorker {
   /// If [doWork] is called again, then [callback] will no longer be called
   /// on any remaining indices from previous [doWork] calls.
   ///
-  Future<bool> doWork(int length) {
+  Future<bool> doWork(int length) async {
     final completer = Completer<bool>();
     final localWorkId = ++_workId;
 
@@ -344,7 +344,7 @@ class InterruptableChunkWorker {
     }
 
     progressCallback(0.0);
-    doChunkWork(0);
+    await doChunkWork(0);
 
     return completer.future;
   }

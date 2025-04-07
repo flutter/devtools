@@ -14,6 +14,7 @@ import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/ui/common_widgets.dart';
+import '../../../../../shared/utils/utils.dart';
 import '../performance_controls.dart';
 import 'enhance_tracing_controller.dart';
 
@@ -142,10 +143,10 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
     for (final type in TraceWidgetBuildsScope.values) {
       final extension = _traceWidgetBuildsExtensions[type]!;
 
-      unawaited(
+      safeUnawaited(
         serviceConnection.serviceManager.serviceExtensionManager
             .waitForServiceExtensionAvailable(extension.extension)
-            .then((isServiceAvailable) {
+            .then((isServiceAvailable) async {
               if (isServiceAvailable) {
                 _tracingAvailable.value = true;
 
@@ -154,9 +155,9 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
                     .serviceExtensionManager
                     .getServiceExtensionState(extension.extension);
 
-                _updateForServiceExtensionState(state.value, type);
-                addAutoDisposeListener(state, () {
-                  _updateForServiceExtensionState(state.value, type);
+                await _updateForServiceExtensionState(state.value, type);
+                addAutoDisposeListener(state, () async {
+                  await _updateForServiceExtensionState(state.value, type);
                 });
               }
             }),

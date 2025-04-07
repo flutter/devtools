@@ -110,9 +110,9 @@ class InspectorController extends DisposableController
 
     // If select mode is available, enable the on device inspector as it
     // won't interfere with users.
-    addAutoDisposeListener(_supportsToggleSelectWidgetMode, () {
+    addAutoDisposeListener(_supportsToggleSelectWidgetMode, () async {
       if (_supportsToggleSelectWidgetMode.value) {
-        serviceConnection.serviceManager.serviceExtensionManager
+        await serviceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
               extensions.enableOnDeviceInspector.extension,
               enabled: true,

@@ -167,8 +167,8 @@ class InspectorPreferencesController extends DisposableController
   Future<void> _initDefaultInspectorDetailsView() async {
     await _updateInspectorDetailsViewSelection();
 
-    addAutoDisposeListener(_defaultDetailsView, () {
-      storage.setValue(
+    addAutoDisposeListener(_defaultDetailsView, () async {
+      await storage.setValue(
         _defaultDetailsViewStorageId,
         _defaultDetailsView.value.name.toString(),
       );

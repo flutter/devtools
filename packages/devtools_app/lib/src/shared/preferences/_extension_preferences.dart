@@ -14,8 +14,8 @@ class ExtensionsPreferencesController extends DisposableController
 
   @override
   Future<void> init() async {
-    addAutoDisposeListener(showOnlyEnabledExtensions, () {
-      storage.setValue(
+    addAutoDisposeListener(showOnlyEnabledExtensions, () async {
+      await storage.setValue(
         _showOnlyEnabledExtensionsId,
         showOnlyEnabledExtensions.value.toString(),
       );
