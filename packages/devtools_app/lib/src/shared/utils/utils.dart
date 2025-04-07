@@ -20,6 +20,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../devtools.dart' as devtools;
 import '../../service/connected_app/connected_app.dart';
+import '../framework/app_error_handling.dart';
 import '../globals.dart';
 import '../primitives/query_parameters.dart';
 import '../primitives/utils.dart';
@@ -354,3 +355,12 @@ class InterruptableChunkWorker {
 }
 
 String get devToolsVersion => devtools.version;
+
+void safeUnawaited(
+  Future<void> future, {
+  void Function(Object?, StackTrace)? onError,
+}) {
+  onError ??=
+      (e, st) => reportError('Error in unawaited Future: $e', stack: st);
+  unawaited(future.catchError(onError));
+}
