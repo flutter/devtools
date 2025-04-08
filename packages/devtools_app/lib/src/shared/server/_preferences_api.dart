@@ -26,7 +26,7 @@ Future<Object?> getPreferenceValue(String key) async {
 /// Sets the DevTools preference [value] for the [key].
 ///
 /// This value is stored in the file '~/.flutter-devtools/.devtools'.
-void setPreferenceValue(String key, Object value) {
+Future<void> setPreferenceValue(String key, Object value) async {
   if (!isDevToolsServerAvailable) return;
 
   final uri = Uri(
@@ -36,11 +36,8 @@ void setPreferenceValue(String key, Object value) {
       apiParameterValueKey: value,
     },
   );
-  safeUnawaited(
-    request(uri.toString()).then((resp) {
-      if (resp == null || !resp.statusOk) {
-        logWarning(resp, PreferencesApi.setPreferenceValue);
-      }
-    }),
-  );
+  final resp = await request(uri.toString());
+  if (resp == null || !resp.statusOk) {
+    logWarning(resp, PreferencesApi.setPreferenceValue);
+  }
 }

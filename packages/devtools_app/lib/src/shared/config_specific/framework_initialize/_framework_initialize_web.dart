@@ -116,7 +116,7 @@ class BrowserStorage implements Storage {
   }
 
   @override
-  void setValue(String key, String value) async {
+  Future<void> setValue(String key, String value) async {
     window.localStorage.setItem(key, value);
   }
 }

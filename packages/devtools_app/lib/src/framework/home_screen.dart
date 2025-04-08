@@ -22,6 +22,7 @@ import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
 import '../shared/ui/vm_flag_widgets.dart';
+import '../shared/utils/utils.dart';
 import 'framework_core.dart';
 
 class HomeScreen extends Screen {
@@ -259,7 +260,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
     }
 
     assert(() {
-      storage.setValue(_debugVmServiceUriKey, uri);
+      safeUnawaited(storage.setValue(_debugVmServiceUriKey, uri));
       return true;
     }());
 

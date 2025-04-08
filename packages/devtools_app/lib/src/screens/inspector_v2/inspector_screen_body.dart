@@ -227,7 +227,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     final welcomeAlreadyShown = await storage.getValue(_welcomeShownStorageId);
     if (welcomeAlreadyShown == 'true') return;
     // Mark the welcome message as shown.
-    storage.setValue(_welcomeShownStorageId, 'true');
+    await storage.setValue(_welcomeShownStorageId, 'true');
     if (context.mounted) {
       pushWelcomeToNewInspectorMessage(InspectorScreen.id);
     }

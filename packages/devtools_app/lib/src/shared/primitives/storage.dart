@@ -11,5 +11,5 @@ abstract class Storage {
   Future<String?> getValue(String key);
 
   /// Set a value for the given key.
-  void setValue(String key, String value);
+  Future<void> setValue(String key, String value);
 }

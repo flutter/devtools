@@ -135,9 +135,11 @@ class PreferencesController extends DisposableController
     ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
     toggleDarkModeTheme(useDarkMode);
     addAutoDisposeListener(darkModeEnabled, () {
-      storage.setValue(
-        _UiPreferences.darkMode.storageKey,
-        '${darkModeEnabled.value}',
+      safeUnawaited(
+        storage.setValue(
+          _UiPreferences.darkMode.storageKey,
+          '${darkModeEnabled.value}',
+        ),
       );
     });
   }
@@ -149,20 +151,25 @@ class PreferencesController extends DisposableController
     );
     toggleVmDeveloperMode(vmDeveloperModeValue);
     addAutoDisposeListener(vmDeveloperModeEnabled, () {
-      storage.setValue(
-        _UiPreferences.vmDeveloperMode.storageKey,
-        '${vmDeveloperModeEnabled.value}',
+      safeUnawaited(
+        storage.setValue(
+          _UiPreferences.vmDeveloperMode.storageKey,
+          '${vmDeveloperModeEnabled.value}',
+        ),
       );
     });
   }
 
   Future<void> _initWasmEnabled() async {
     wasmEnabled.value = kIsWasm;
-    addAutoDisposeListener(wasmEnabled, () {
+    addAutoDisposeListener(wasmEnabled, () async {
       final enabled = wasmEnabled.value;
       _log.fine('preference update (wasmEnabled = $enabled)');
 
-      storage.setValue(_ExperimentPreferences.wasm.storageKey, '$enabled');
+      await storage.setValue(
+        _ExperimentPreferences.wasm.storageKey,
+        '$enabled',
+      );
 
       // Update the wasm mode query parameter if it does not match the value of
       // the setting.
@@ -234,9 +241,11 @@ class PreferencesController extends DisposableController
     );
     toggleVerboseLogging(verboseLoggingEnabledValue);
     addAutoDisposeListener(verboseLoggingEnabled, () {
-      storage.setValue(
-        _GeneralPreferences.verboseLogging.name,
-        verboseLoggingEnabled.value.toString(),
+      safeUnawaited(
+        storage.setValue(
+          _GeneralPreferences.verboseLogging.name,
+          verboseLoggingEnabled.value.toString(),
+        ),
       );
     });
   }
