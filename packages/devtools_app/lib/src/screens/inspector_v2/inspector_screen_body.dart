@@ -19,6 +19,7 @@ import '../../shared/managers/error_badge_manager.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/search.dart';
+import '../../shared/utils/utils.dart';
 import '../inspector_shared/inspector_controls.dart';
 import '../inspector_shared/inspector_screen.dart';
 import 'inspector_controller.dart';
@@ -94,10 +95,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
-    addAutoDisposeListener(preferences.inspector.pubRootDirectories, () async {
+    addAutoDisposeListener(preferences.inspector.pubRootDirectories, () {
       if (serviceConnection.serviceManager.connectedState.value.connected &&
           controller.firstInspectorTreeLoadCompleted) {
-        await controller.refreshInspector();
+        safeUnawaited(controller.refreshInspector());
       }
     });
 
