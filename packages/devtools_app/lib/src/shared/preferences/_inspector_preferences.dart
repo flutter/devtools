@@ -146,8 +146,8 @@ class InspectorPreferencesController extends DisposableController
     required String preferenceStorageId,
     required ValueNotifier<bool> preferenceNotifier,
   }) {
-    addAutoDisposeListener(preferenceNotifier, () async {
-      await storage.setValue(
+    addAutoDisposeListener(preferenceNotifier, () {
+      storage.setValue(
         preferenceStorageId,
         preferenceNotifier.value.toString(),
       );
@@ -168,11 +168,9 @@ class InspectorPreferencesController extends DisposableController
     await _updateInspectorDetailsViewSelection();
 
     addAutoDisposeListener(_defaultDetailsView, () {
-      safeUnawaited(
-        storage.setValue(
-          _defaultDetailsViewStorageId,
-          _defaultDetailsView.value.name.toString(),
-        ),
+      storage.setValue(
+        _defaultDetailsViewStorageId,
+        _defaultDetailsView.value.name.toString(),
       );
     });
   }
@@ -374,7 +372,7 @@ class InspectorPreferencesController extends DisposableController
 
   Future<void> _cachePubRootDirectories(List<String> pubRootDirectories) async {
     final cachedDirectories = await readCachedPubRootDirectories();
-    await storage.setValue(
+    storage.setValue(
       _customPubRootStorageId(),
       jsonEncode([...cachedDirectories, ...pubRootDirectories]),
     );
@@ -387,10 +385,7 @@ class InspectorPreferencesController extends DisposableController
         (await readCachedPubRootDirectories())
             .where((dir) => !pubRootDirectories.contains(dir))
             .toList();
-    await storage.setValue(
-      _customPubRootStorageId(),
-      jsonEncode(directoriesToCache),
-    );
+    storage.setValue(_customPubRootStorageId(), jsonEncode(directoriesToCache));
   }
 
   Future<void> addPubRootDirectories(

@@ -84,7 +84,7 @@ Future<T> connect<T extends VmService>({
   required Uri uri,
   required Completer<void> finishedCompleter,
   required VmServiceFactory<T> serviceFactory,
-}) async {
+}) {
   final connectedCompleter = Completer<T>();
 
   void onError(Object? error) => connectedCompleter.safeCompleteError(error!);

@@ -29,7 +29,7 @@ class FlutterDesktopStorage implements Storage {
   }
 
   @override
-  Future<void> setValue(String key, String value) async {
+  void setValue(String key, String value) {
     _values[key] = value;
 
     const encoder = JsonEncoder.withIndent('  ');

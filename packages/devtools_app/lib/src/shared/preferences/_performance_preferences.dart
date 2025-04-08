@@ -22,11 +22,9 @@ class PerformancePreferencesController extends DisposableController
   @override
   Future<void> init() async {
     addAutoDisposeListener(showFlutterFramesChart, () {
-      safeUnawaited(
-        storage.setValue(
-          _showFlutterFramesChartId,
-          showFlutterFramesChart.value.toString(),
-        ),
+      storage.setValue(
+        _showFlutterFramesChartId,
+        showFlutterFramesChart.value.toString(),
       );
       ga.select(
         gac.performance,
@@ -40,11 +38,9 @@ class PerformancePreferencesController extends DisposableController
     );
 
     addAutoDisposeListener(includeCpuSamplesInTimeline, () {
-      safeUnawaited(
-        storage.setValue(
-          _includeCpuSamplesInTimelineId,
-          includeCpuSamplesInTimeline.value.toString(),
-        ),
+      storage.setValue(
+        _includeCpuSamplesInTimelineId,
+        includeCpuSamplesInTimeline.value.toString(),
       );
       ga.select(
         gac.performance,

@@ -17,6 +17,7 @@ import '../development_helpers.dart';
 import '../globals.dart';
 import '../primitives/storage.dart';
 import '../primitives/utils.dart';
+import '../utils/utils.dart';
 
 part '_analytics_api.dart';
 part '_app_size_api.dart';
@@ -148,7 +149,7 @@ class ServerConnectionStorage implements Storage {
   }
 
   @override
-  Future<void> setValue(String key, String value) async {
-    await setPreferenceValue(key, value);
+  void setValue(String key, String value) {
+    setPreferenceValue(key, value);
   }
 }

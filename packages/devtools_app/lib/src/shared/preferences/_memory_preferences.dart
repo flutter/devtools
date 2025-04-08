@@ -26,11 +26,9 @@ class MemoryPreferencesController extends DisposableController
   @override
   Future<void> init() async {
     addAutoDisposeListener(androidCollectionEnabled, () {
-      safeUnawaited(
-        storage.setValue(
-          _androidCollectionEnabledStorageId,
-          androidCollectionEnabled.value.toString(),
-        ),
+      storage.setValue(
+        _androidCollectionEnabledStorageId,
+        androidCollectionEnabled.value.toString(),
       );
       if (androidCollectionEnabled.value) {
         ga.select(gac.memory, gac.MemoryEvents.androidChart.name);
@@ -42,9 +40,7 @@ class MemoryPreferencesController extends DisposableController
     );
 
     addAutoDisposeListener(showChart, () {
-      safeUnawaited(
-        storage.setValue(_showChartStorageId, showChart.value.toString()),
-      );
+      storage.setValue(_showChartStorageId, showChart.value.toString());
 
       ga.select(
         gac.memory,
@@ -59,9 +55,7 @@ class MemoryPreferencesController extends DisposableController
     );
 
     addAutoDisposeListener(refLimit, () {
-      safeUnawaited(
-        storage.setValue(_refLimitStorageId, refLimit.value.toString()),
-      );
+      storage.setValue(_refLimitStorageId, refLimit.value.toString());
 
       ga.select(gac.memory, gac.MemoryEvents.browseRefLimit.name);
     });
