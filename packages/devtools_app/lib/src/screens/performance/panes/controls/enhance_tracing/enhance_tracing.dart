@@ -155,9 +155,13 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
                     .serviceExtensionManager
                     .getServiceExtensionState(extension.extension);
 
-                await _updateForServiceExtensionState(state.value, type);
-                addAutoDisposeListener(state, () async {
-                  await _updateForServiceExtensionState(state.value, type);
+                safeUnawaited(
+                  _updateForServiceExtensionState(state.value, type),
+                );
+                addAutoDisposeListener(state, () {
+                  safeUnawaited(
+                    _updateForServiceExtensionState(state.value, type),
+                  );
                 });
               }
             }),

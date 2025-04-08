@@ -85,7 +85,7 @@ class SurveyService {
           isPrimary: true,
         ),
       ];
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         final didPush = notificationService.pushNotification(
           NotificationMessage(
             message,
@@ -95,7 +95,7 @@ class SurveyService {
           allowDuplicates: false,
         );
         if (didPush) {
-          await server.incrementSurveyShownCount();
+          safeUnawaited(server.incrementSurveyShownCount());
         }
       });
     }

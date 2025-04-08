@@ -344,7 +344,7 @@ class InterruptableChunkWorker {
     }
 
     progressCallback(0.0);
-    await doChunkWork(0);
+    safeUnawaited(doChunkWork(0));
 
     return completer.future;
   }
@@ -356,6 +356,7 @@ class InterruptableChunkWorker {
 
 String get devToolsVersion => devtools.version;
 
+/// Unawaits the given [future] and catches any errors thrown.
 void safeUnawaited(
   Future<void> future, {
   void Function(Object?, StackTrace)? onError,

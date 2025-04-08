@@ -134,10 +134,12 @@ class PreferencesController extends DisposableController
         darkModeValue == 'true';
     ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
     toggleDarkModeTheme(useDarkMode);
-    addAutoDisposeListener(darkModeEnabled, () async {
-      await storage.setValue(
-        _UiPreferences.darkMode.storageKey,
-        '${darkModeEnabled.value}',
+    addAutoDisposeListener(darkModeEnabled, () {
+      safeUnawaited(
+        storage.setValue(
+          _UiPreferences.darkMode.storageKey,
+          '${darkModeEnabled.value}',
+        ),
       );
     });
   }
@@ -148,10 +150,12 @@ class PreferencesController extends DisposableController
       defaultsTo: false,
     );
     toggleVmDeveloperMode(vmDeveloperModeValue);
-    addAutoDisposeListener(vmDeveloperModeEnabled, () async {
-      await storage.setValue(
-        _UiPreferences.vmDeveloperMode.storageKey,
-        '${vmDeveloperModeEnabled.value}',
+    addAutoDisposeListener(vmDeveloperModeEnabled, () {
+      safeUnawaited(
+        storage.setValue(
+          _UiPreferences.vmDeveloperMode.storageKey,
+          '${vmDeveloperModeEnabled.value}',
+        ),
       );
     });
   }
@@ -236,10 +240,12 @@ class PreferencesController extends DisposableController
       defaultsTo: false,
     );
     toggleVerboseLogging(verboseLoggingEnabledValue);
-    addAutoDisposeListener(verboseLoggingEnabled, () async {
-      await storage.setValue(
-        _GeneralPreferences.verboseLogging.name,
-        verboseLoggingEnabled.value.toString(),
+    addAutoDisposeListener(verboseLoggingEnabled, () {
+      safeUnawaited(
+        storage.setValue(
+          _GeneralPreferences.verboseLogging.name,
+          verboseLoggingEnabled.value.toString(),
+        ),
       );
     });
   }

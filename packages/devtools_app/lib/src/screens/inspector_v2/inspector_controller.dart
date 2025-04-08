@@ -35,6 +35,7 @@ import '../../shared/globals.dart';
 import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/utils/utils.dart';
 import '../inspector_shared/inspector_screen.dart';
 import 'inspector_data_models.dart';
 import 'inspector_tree_controller.dart';
@@ -110,14 +111,16 @@ class InspectorController extends DisposableController
 
     // If select mode is available, enable the on device inspector as it
     // won't interfere with users.
-    addAutoDisposeListener(_supportsToggleSelectWidgetMode, () async {
+    addAutoDisposeListener(_supportsToggleSelectWidgetMode, () {
       if (_supportsToggleSelectWidgetMode.value) {
-        await serviceConnection.serviceManager.serviceExtensionManager
-            .setServiceExtensionState(
-              extensions.enableOnDeviceInspector.extension,
-              enabled: true,
-              value: true,
-            );
+        safeUnawaited(
+          serviceConnection.serviceManager.serviceExtensionManager
+              .setServiceExtensionState(
+                extensions.enableOnDeviceInspector.extension,
+                enabled: true,
+                value: true,
+              ),
+        );
       }
     });
 

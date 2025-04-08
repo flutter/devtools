@@ -113,15 +113,15 @@ Future<T> connect<T extends VmService>({
     return service;
   }
 
-  await connectHelper().then(
+  unawaited(connectHelper().then(
     (service) => connectedCompleter.safeComplete(service),
     onError: onError,
-  );
-  await finishedCompleter.future.then((_) {
+  ));
+  unawaited(finishedCompleter.future.then((_) {
     // It is an error if we finish before we are connected.
     if (!connectedCompleter.isCompleted) {
       onError(null);
     }
-  });
+  }));
   return connectedCompleter.future;
 }
