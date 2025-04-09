@@ -93,6 +93,10 @@ class BreakpointManager with DisposerMixin {
     if ([
       EventKind.kPauseStart,
       EventKind.kPausePostRequest,
+      // We check for a resume event because package:dwds sends a resume event
+      // after a hot-restart. See:
+      // https://github.com/flutter/devtools/issues/9124
+      EventKind.kResume,
     ].contains(pauseEventKind)) {
       await serviceConnection.serviceManager.isolateManager.resumeIsolate(
         isolateRef,
