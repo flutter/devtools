@@ -146,7 +146,7 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
       safeUnawaited(
         serviceConnection.serviceManager.serviceExtensionManager
             .waitForServiceExtensionAvailable(extension.extension)
-            .then((isServiceAvailable) async {
+            .then((isServiceAvailable) {
               if (isServiceAvailable) {
                 _tracingAvailable.value = true;
 
