@@ -39,9 +39,11 @@ class LoggingPreferencesController extends DisposableController
         int.tryParse(await storage.getValue(_retentionLimitStorageId) ?? '') ??
         _defaultRetentionLimit;
     addAutoDisposeListener(retentionLimit, () {
-      storage.setValue(
-        _retentionLimitStorageId,
-        retentionLimit.value.toString(),
+      safeUnawaited(
+        storage.setValue(
+          _retentionLimitStorageId,
+          retentionLimit.value.toString(),
+        ),
       );
       ga.select(
         gac.logging,
@@ -59,7 +61,9 @@ class LoggingPreferencesController extends DisposableController
         ) ??
         _defaultDetailsFormat;
     addAutoDisposeListener(detailsFormat, () {
-      storage.setValue(detailsFormatStorageId, detailsFormat.value.name);
+      safeUnawaited(
+        storage.setValue(detailsFormatStorageId, detailsFormat.value.name),
+      );
       ga.select(
         gac.logging,
         gac.LoggingEvents.changeDetailsFormat.name,

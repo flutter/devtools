@@ -21,10 +21,10 @@ void main() async {
 /// This server can receive requests, and responds to them.
 Future<io.HttpServer> _bindTestServer() async {
   final server = await io.HttpServer.bind(io.InternetAddress.loopbackIPv4, 0);
-  server.listen((request) {
+  server.listen((request) async {
     request.response.write('fallthrough');
     if (request.uri.path.contains('complete/')) {
-      request.response.close();
+      await request.response.close();
     }
   });
   return server;
@@ -39,7 +39,7 @@ Future<io.HttpServer> _bindControlServer(io.HttpServer testServer) async {
 
   final server = await io.HttpServer.bind(io.InternetAddress.loopbackIPv4, 0);
   print(json.encode({'controlPort': server.port}));
-  server.listen((request) {
+  server.listen((request) async {
     request.response.headers
       ..add('Access-Control-Allow-Origin', '*')
       ..add('Access-Control-Allow-Methods', 'POST,GET,DELETE,PUT,OPTIONS');
@@ -69,7 +69,7 @@ Future<io.HttpServer> _bindControlServer(io.HttpServer testServer) async {
       client.close();
       io.exit(0);
     }
-    request.response.close();
+    await request.response.close();
   });
   return server;
 }

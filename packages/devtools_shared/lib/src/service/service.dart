@@ -34,9 +34,9 @@ Future<T> _connectWithSse<T extends VmService>({
   );
 
   unawaited(
-    client.sink!.done.whenComplete(() {
+    client.sink!.done.whenComplete(() async {
       finishedCompleter.complete();
-      service.dispose();
+      await service.dispose();
     }),
   );
   serviceCompleter.complete(service);
@@ -70,9 +70,9 @@ Future<T> _connectWithWebSocket<T extends VmService>({
   }
   unawaited(
     ws.sink.done.then(
-      (_) {
+      (_) async {
         finishedCompleter.complete();
-        service.dispose();
+        await service.dispose();
       },
       onError: onError,
     ),
@@ -113,15 +113,15 @@ Future<T> connect<T extends VmService>({
     return service;
   }
 
-  connectHelper().then(
+  unawaited(connectHelper().then(
     (service) => connectedCompleter.safeComplete(service),
     onError: onError,
-  );
-  finishedCompleter.future.then((_) {
+  ));
+  unawaited(finishedCompleter.future.then((_) {
     // It is an error if we finish before we are connected.
     if (!connectedCompleter.isCompleted) {
       onError(null);
     }
-  });
+  }));
   return connectedCompleter.future;
 }

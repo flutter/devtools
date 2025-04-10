@@ -168,9 +168,11 @@ class InspectorPreferencesController extends DisposableController
     await _updateInspectorDetailsViewSelection();
 
     addAutoDisposeListener(_defaultDetailsView, () {
-      storage.setValue(
-        _defaultDetailsViewStorageId,
-        _defaultDetailsView.value.name.toString(),
+      safeUnawaited(
+        storage.setValue(
+          _defaultDetailsViewStorageId,
+          _defaultDetailsView.value.name.toString(),
+        ),
       );
     });
   }

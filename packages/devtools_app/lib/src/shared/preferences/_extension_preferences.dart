@@ -15,9 +15,11 @@ class ExtensionsPreferencesController extends DisposableController
   @override
   Future<void> init() async {
     addAutoDisposeListener(showOnlyEnabledExtensions, () {
-      storage.setValue(
-        _showOnlyEnabledExtensionsId,
-        showOnlyEnabledExtensions.value.toString(),
+      safeUnawaited(
+        storage.setValue(
+          _showOnlyEnabledExtensionsId,
+          showOnlyEnabledExtensions.value.toString(),
+        ),
       );
       ga.select(
         gac.DevToolsExtensionEvents.extensionScreenId.name,

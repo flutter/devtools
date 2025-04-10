@@ -135,9 +135,11 @@ class PreferencesController extends DisposableController
     ga.impression(gac.devToolsMain, gac.startingTheme(darkMode: useDarkMode));
     toggleDarkModeTheme(useDarkMode);
     addAutoDisposeListener(darkModeEnabled, () {
-      storage.setValue(
-        _UiPreferences.darkMode.storageKey,
-        '${darkModeEnabled.value}',
+      safeUnawaited(
+        storage.setValue(
+          _UiPreferences.darkMode.storageKey,
+          '${darkModeEnabled.value}',
+        ),
       );
     });
   }
@@ -149,9 +151,11 @@ class PreferencesController extends DisposableController
     );
     toggleVmDeveloperMode(vmDeveloperModeValue);
     addAutoDisposeListener(vmDeveloperModeEnabled, () {
-      storage.setValue(
-        _UiPreferences.vmDeveloperMode.storageKey,
-        '${vmDeveloperModeEnabled.value}',
+      safeUnawaited(
+        storage.setValue(
+          _UiPreferences.vmDeveloperMode.storageKey,
+          '${vmDeveloperModeEnabled.value}',
+        ),
       );
     });
   }
@@ -237,9 +241,11 @@ class PreferencesController extends DisposableController
     );
     toggleVerboseLogging(verboseLoggingEnabledValue);
     addAutoDisposeListener(verboseLoggingEnabled, () {
-      storage.setValue(
-        _GeneralPreferences.verboseLogging.name,
-        verboseLoggingEnabled.value.toString(),
+      safeUnawaited(
+        storage.setValue(
+          _GeneralPreferences.verboseLogging.name,
+          verboseLoggingEnabled.value.toString(),
+        ),
       );
     });
   }
