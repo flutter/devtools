@@ -95,7 +95,7 @@ class SurveyService {
           allowDuplicates: false,
         );
         if (didPush) {
-          server.incrementSurveyShownCount();
+          safeUnawaited(server.incrementSurveyShownCount());
         }
       });
     }

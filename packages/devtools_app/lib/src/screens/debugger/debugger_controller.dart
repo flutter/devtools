@@ -26,6 +26,7 @@ import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/utils/utils.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
 
@@ -399,9 +400,9 @@ class DebuggerController extends DevToolsScreenController
   /// This method ensures that the source for the script is populated in our
   /// cache, in order to reduce flashing in the editor view.
   void _populateScriptAndShowLocation(ScriptRef scriptRef) {
-    unawaited(
-      scriptManager.getScript(scriptRef).then((script) {
-        codeViewController.showScriptLocation(ScriptLocation(scriptRef));
+    safeUnawaited(
+      scriptManager.getScript(scriptRef).then((script) async {
+        await codeViewController.showScriptLocation(ScriptLocation(scriptRef));
       }),
     );
   }

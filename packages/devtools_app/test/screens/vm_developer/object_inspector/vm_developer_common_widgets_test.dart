@@ -193,8 +193,8 @@ void main() {
           RetainingPathWidget(
             controller: testObjectInspectorViewController,
             retainingPath: mockClassObject.retainingPath,
-            onExpanded: (bool _) {
-              mockClassObject.requestRetainingPath();
+            onExpanded: (bool _) async {
+              await mockClassObject.requestRetainingPath();
             },
           ),
         ),

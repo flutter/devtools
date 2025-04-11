@@ -25,6 +25,7 @@ import '../screens/vm_developer/vm_service_private_extensions.dart';
 import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
+import '../shared/utils/utils.dart';
 import 'json_to_service_cache.dart';
 
 final _log = Logger('vm_service_wrapper');
@@ -188,8 +189,8 @@ class VmServiceWrapper extends VmService {
   }
 
   @override
-  Future<Success> streamCancel(String streamId) {
-    _activeStreams.remove(streamId);
+  Future<Success> streamCancel(String streamId) async {
+    await _activeStreams.remove(streamId);
     return super.streamCancel(streamId);
   }
 
@@ -380,9 +381,11 @@ class VmServiceWrapper extends VmService {
       }
     }
 
-    localFuture.then(
-      (value) => futureComplete(),
-      onError: (error) => futureComplete(),
+    safeUnawaited(
+      localFuture.then(
+        (value) => futureComplete(),
+        onError: (error) => futureComplete(),
+      ),
     );
     return localFuture;
   }
