@@ -215,16 +215,24 @@ to add DevTools release notes to Flutter website and test them in DevTools.
 the new release notes.
 
 ### Prepare DevTools for the next beta release
-1. Update the DevTools version for the next release:
+
+**The `daily-dev-bump` workflow is currently broken. Until it's fixed, manually update the DevTools version for the next release and open a PR with the changes:**
+```shell
+dt update-version auto --type minor
+dt update-version auto --type dev
+```
+
+1. ~~Update the DevTools version for the next release:~~
    ```shell
    gh workflow run daily-dev-bump.yaml -f updateType=minor+dev
    ```
-   This will kick off a workflow that will automatically create a PR with a
-   `minor` + `dev` version bump. That PR should then be auto-submitted.
-2. Make sure that the release PR goes through without issue:
-   - See the workflow run [here](https://github.com/flutter/devtools/actions/workflows/daily-dev-bump.yaml)
-   - Go to https://github.com/flutter/devtools/pulls to see the pull request that
-   ends up being created
+  ~~This will kick off a workflow that will automatically create a PR with a
+   `minor` + `dev` version bump. That PR should then be auto-submitted.~~
+
+2. ~~Make sure that the release PR goes through without issue:~~
+   - ~~See the workflow run [here](https://github.com/flutter/devtools/actions/workflows/daily-dev-bump.yaml)~~
+   - ~~Go to https://github.com/flutter/devtools/pulls to see the pull request that
+   ends up being created~~
 
 ## Dev release into the Dart SDK master branch
 
