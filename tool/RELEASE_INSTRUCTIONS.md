@@ -216,7 +216,7 @@ the new release notes.
 
 ### Prepare DevTools for the next beta release
 
-**The `daily-dev-bump` workflow is currently broken. Until it's fixed, manually update the DevTools version for the next release and open a PR with the changes:**
+**The `daily-dev-bump` workflow is currently broken: [#8558](https://github.com/flutter/devtools/issues/8558). Until it's fixed, manually update the DevTools version for the next release and open a PR with the changes:**
 ```shell
 dt update-version auto --type minor
 dt update-version auto --type dev
