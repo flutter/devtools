@@ -119,6 +119,9 @@ class HarDataEntry {
       };
     }).toList();
 
+    final isBinary = !isTextMimeType(e.type);
+    final responseBodyBytes = e.encodedResponse;
+
     return <String, Object?>{
       NetworkEventKeys.startedDateTime.name: e.startTimestamp
           .toUtc()
@@ -153,8 +156,14 @@ class HarDataEntry {
         NetworkEventKeys.content.name: <String, Object?>{
           NetworkEventKeys.size.name: e.responseBody?.length,
           NetworkEventKeys.mimeType.name: e.type,
-          NetworkEventKeys.text.name: e.responseBody,
+          if (responseBodyBytes != null && isBinary) ...{
+            NetworkEventKeys.text.name: base64.encode(responseBodyBytes),
+            'encoding': 'base64',
+          } else if (e.responseBody != null) ...{
+            NetworkEventKeys.text.name: e.responseBody,
+          },
         },
+
         NetworkEventKeys.redirectURL.name: '',
         NetworkEventKeys.headersSize.name: calculateHeadersSize(
           e.responseHeaders,
