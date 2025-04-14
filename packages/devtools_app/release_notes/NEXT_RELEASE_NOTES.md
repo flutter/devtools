@@ -15,6 +15,9 @@ To learn more about DevTools, check out the
 
 ## General updates
 
+* Prevent web apps from remaining paused after triggering a hot-restart from
+DevTools. - [#9125](https://github.com/flutter/devtools/pull/9125)
+
 * Added a memory pressure warning that allows you to reduce the memory usage of
 DevTools in order to avoid an OOM crash. -
 [#8989](https://github.com/flutter/devtools/pull/8989),
