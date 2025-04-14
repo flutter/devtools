@@ -15,7 +15,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+- Prevent web apps from remaining paused after triggering a hot-restart from
+DevTools. - [#9125](https://github.com/flutter/devtools/pull/9125)
 
 ## Inspector updates
 
