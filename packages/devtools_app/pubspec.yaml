@@ -12,8 +12,8 @@ version: 2.46.0-dev.1
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
 environment:
-  sdk: ">=3.7.0-160.0.dev <4.0.0"
-  flutter: ">=3.27.0-1.0.pre.563"
+  sdk: ">=3.8.0-265.0.dev <4.0.0"
+  flutter: ">=3.32.0-1.0.pre.73"
 
 resolution: workspace
 
