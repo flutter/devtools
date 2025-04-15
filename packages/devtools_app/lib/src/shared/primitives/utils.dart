@@ -1126,3 +1126,18 @@ String devtoolsAssetsBasePath({required String origin, required String path}) {
   pathParts.removeLast();
   return '$trimmedOrigin${pathParts.join(separator)}';
 }
+
+/// Returns `true` if the given [mimeType] is considered textual and can be
+/// safely decoded as UTF-8 without base64 encoding.
+///
+/// This function is useful for determining whether the content of an HTTP
+/// request or response can be directly included in a HAR or JSON file as
+/// human-readable text.
+bool isTextMimeType(String? mimeType) {
+  if (mimeType == null) return false;
+  return mimeType.startsWith('text/') ||
+      mimeType == 'application/json' ||
+      mimeType == 'application/javascript' ||
+      mimeType == 'application/xml' ||
+      mimeType == 'application/x-www-form-urlencoded';
+}
