@@ -5,7 +5,6 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/ui/colors.dart';
 import '../../../shared/primitives/painting.dart';
 import '../controller/chart_pane_controller.dart';
 import '../controller/charts/android_chart_controller.dart';
@@ -85,7 +84,7 @@ class MemoryChartLegend extends StatelessWidget {
       height: isAndroidVisible ? _legendHeight2Charts : _legendHeight1Chart,
       padding: const EdgeInsets.only(top: densePadding, right: densePadding),
       decoration: BoxDecoration(
-        color: colorScheme.defaultBackgroundColor,
+        color: colorScheme.surface,
         border: Border.all(color: theme.focusColor),
         borderRadius: defaultBorderRadius,
       ),

@@ -23,7 +23,6 @@ import '../shared/constants.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/primitives/utils.dart';
-import '../shared/ui/colors.dart';
 import '../shared/ui/common_widgets.dart';
 import '../shared/ui/hover.dart';
 import 'service_extensions.dart';
@@ -891,7 +890,7 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
           width: width,
           padding: const EdgeInsets.all(defaultSpacing),
           decoration: BoxDecoration(
-            color: theme.colorScheme.defaultBackgroundColor,
+            color: theme.colorScheme.surface,
             border: Border.all(
               color: theme.focusColor,
               width: hoverCardBorderSize,

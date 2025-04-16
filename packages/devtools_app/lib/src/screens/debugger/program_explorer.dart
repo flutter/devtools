@@ -255,7 +255,7 @@ class ProgramStructureIcon extends StatelessWidget {
                     style: TextStyle(
                       height: 1,
                       fontFamily: theme.fixedFontStyle.fontFamily,
-                      color: theme.colorScheme.defaultBackgroundColor,
+                      color: theme.colorScheme.surface,
                       fontSize: smallFontSize,
                     ),
                     // Required to center the individual character within the
