@@ -92,6 +92,7 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
     required String message,
     required String extensionName,
     bool ignoreIfAlreadyDismissed = true,
+    bool dismissOnConnectionChanges = true,
   })  : assert(bannerMessageType == 'warning' || bannerMessageType == 'error'),
         super(
           DevToolsExtensionEventType.showBannerMessage,
@@ -101,6 +102,7 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
             _messageKey: message,
             _extensionNameKey: extensionName,
             _ignoreIfAlreadyDismissedKey: ignoreIfAlreadyDismissed,
+            _dismissOnConnectionChangesKey: dismissOnConnectionChanges,
           },
         );
 
@@ -113,12 +115,15 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
     final extensionName = eventData.checkValid<String>(_extensionNameKey);
     final ignoreIfAlreadyDismissed =
         (eventData[_ignoreIfAlreadyDismissedKey] as bool?) ?? true;
+    final dismissOnConnectionChanges =
+        (eventData[_dismissOnConnectionChangesKey] as bool?) ?? true;
     return ShowBannerMessageExtensionEvent(
       id: id,
       bannerMessageType: type,
       message: message,
       extensionName: extensionName,
       ignoreIfAlreadyDismissed: ignoreIfAlreadyDismissed,
+      dismissOnConnectionChanges: dismissOnConnectionChanges,
     );
   }
 
@@ -127,6 +132,7 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
   static const _bannerMessageTypeKey = 'bannerMessageType';
   static const _extensionNameKey = 'extensionName';
   static const _ignoreIfAlreadyDismissedKey = 'ignoreIfAlreadyDismissed';
+  static const _dismissOnConnectionChangesKey = 'dismissOnConnectionChanges';
 
   String get messageId => data![_idKey] as String;
   String get bannerMessageType => data![_bannerMessageTypeKey] as String;
@@ -134,6 +140,10 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
   String get extensionName => data![_extensionNameKey] as String;
   bool get ignoreIfAlreadyDismissed =>
       (data![_ignoreIfAlreadyDismissedKey] as bool?) ?? true;
+
+  /// Whether this message should be dismissed on app connection changes.
+  bool get dismissOnConnectionChanges =>
+      (data![_dismissOnConnectionChangesKey] as bool?) ?? true;
 }
 
 /// An extension event of type [DevToolsExtensionEventType.copyToClipboard]

@@ -5,6 +5,8 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 -->
 ## 0.3.2 (not released)
 * Bump `devtools_app_shared` dependency to `0.4.0`.
+* Add `ShowBannerMessageExtensionEvent.dismissOnConnectionChanges` field. This
+value is set from an optional parameter in the constructor (defaults to `true`).
 
 ## 0.3.1
 * Bump `vm_service` dependency to `>=13.0.0 <16.0.0`.

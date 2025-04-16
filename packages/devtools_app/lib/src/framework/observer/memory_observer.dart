@@ -151,6 +151,7 @@ class _MemoryPressureBannerMessage extends banner_messages.BannerWarning {
     : super(
         screenId: banner_messages.universalScreenId,
         key: _messageKey,
+        dismissOnConnectionChanges: false,
         buildTextSpans: (context) {
           final limitAsBytes = convertBytes(
             MemoryObserver._memoryPressureLimitGb,
