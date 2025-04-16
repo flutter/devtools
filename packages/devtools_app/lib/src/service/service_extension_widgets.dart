@@ -891,7 +891,7 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
           width: width,
           padding: const EdgeInsets.all(defaultSpacing),
           decoration: BoxDecoration(
-            color: theme.colorScheme.defaultBackgroundColor,
+            color: theme.colorScheme.surface,
             border: Border.all(
               color: theme.focusColor,
               width: hoverCardBorderSize,

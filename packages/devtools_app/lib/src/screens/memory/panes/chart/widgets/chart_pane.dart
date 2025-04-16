@@ -298,7 +298,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
             child: Container(
               padding: const EdgeInsets.only(top: 5, bottom: 8),
               decoration: BoxDecoration(
-                color: colorScheme.defaultBackgroundColor,
+                color: colorScheme.surface,
                 border: Border.all(
                   color: focusColor,
                   width: _hoverCardBorderWidth,

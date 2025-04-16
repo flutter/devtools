@@ -85,7 +85,7 @@ class MemoryChartLegend extends StatelessWidget {
       height: isAndroidVisible ? _legendHeight2Charts : _legendHeight1Chart,
       padding: const EdgeInsets.only(top: densePadding, right: densePadding),
       decoration: BoxDecoration(
-        color: colorScheme.defaultBackgroundColor,
+        color: colorScheme.surface,
         border: Border.all(color: theme.focusColor),
         borderRadius: defaultBorderRadius,
       ),
