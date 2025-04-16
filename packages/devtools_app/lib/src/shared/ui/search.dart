@@ -405,7 +405,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
           controller: controller,
           onTap: autoComplete.onTap,
           highlightColor: colorScheme.autoCompleteHighlightColor,
-          defaultColor: colorScheme.defaultBackgroundColor,
+          defaultColor: colorScheme.surface,
         ),
       );
     }

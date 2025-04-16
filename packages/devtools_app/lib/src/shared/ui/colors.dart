@@ -107,20 +107,12 @@ extension SyntaxHighlightingExtension on ColorScheme {
       isLight ? const Color(0xFF098658) : const Color(0xFFB5CEA8);
 }
 
-// TODO(kenz): try to get rid of these colors and replace with something from
-// the light and dark DevTools color schemes.
 extension DevToolsColorExtension on ColorScheme {
-  // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
-  // this in places where we do not have access to the context.
-  // remove.
-  // TODO(kenz): get rid of this.
-  Color get defaultBackgroundColor =>
-      isLight ? Colors.grey[50]! : const Color(0xFF1B1B1F);
-
   Color get grey => const Color.fromARGB(255, 128, 128, 128);
   Color get green =>
       isLight ? const Color(0xFF006B5F) : const Color(0xFF54DBC8);
-
   Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
-  Color get deeplinkTableHeaderColor => isLight ? Colors.white : Colors.black;
+  // Deep link header is slightly darker than the default surface color. See
+  // comment at: https://github.com/flutter/devtools/pull/7443/files#r1538361768
+  Color get deeplinkTableHeaderColor => surface.darken();
 }

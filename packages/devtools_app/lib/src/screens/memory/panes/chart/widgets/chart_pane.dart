@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import '../../../../../shared/charts/chart_controller.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
-import '../../../../../shared/ui/colors.dart';
 import '../../../../../shared/ui/common_widgets.dart';
 import '../../../../../shared/utils/utils.dart';
 import '../../../shared/primitives/painting.dart';
@@ -298,7 +297,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
             child: Container(
               padding: const EdgeInsets.only(top: 5, bottom: 8),
               decoration: BoxDecoration(
-                color: colorScheme.defaultBackgroundColor,
+                color: colorScheme.surface,
                 border: Border.all(
                   color: focusColor,
                   width: _hoverCardBorderWidth,
