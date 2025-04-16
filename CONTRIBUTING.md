@@ -211,7 +211,9 @@ able to connect the DevTools web app to an IDE or another DevTools instance for 
 
 To see the full list of arguments available for either command, please pass the `-h` flag.
 
-### DevTools + VS Code integration (IDE-embedded DevTools experience)
+### IDE-embedded DevTools experience
+
+#### DevTools + VS Code integration
 
 To test the integration with VS Code, you can set up the Dart VS Code extension to run DevTools
 and the server from your local source code. Follow the
@@ -243,6 +245,10 @@ You must set the `LOCAL_DART_SDK` and `FLUTTER_ROOT` env variables correctly for
 Next, restart VS Code (or run the **Developer: Reload Window** command from the command palette (`F1`))
 and DevTools will be run from your local source code. After making any code changes to DevTools or the
 server, you will need to re-run the **Developer: Reload Window** command to rebuild and restart the server.
+
+#### DevTools + IntelliJ integration
+
+Follow instructions in the Flutter-IntelliJ repo's `CONTRIBUTING` guide: [#developing-with-local-devtools](https://github.com/flutter/flutter-intellij/blob/master/CONTRIBUTING.md#developing-with-local-devtools)
 
 ## Testing for DevTools
 
