@@ -5,7 +5,6 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/ui/colors.dart';
 import '../../../shared/primitives/painting.dart';
 import '../controller/chart_pane_controller.dart';
 import '../controller/charts/android_chart_controller.dart';
