@@ -65,15 +65,14 @@ class ReleaseNotesController extends SidePanelController {
   }
 
   void _maybeShowReleaseNotes() async {
-    // Do not show release notes in embedded sidebar.
+    // Do not show release notes in standalone screens. The fact that these
+    // screens are hosted by DevTools is an implementation detail, but from the
+    // user's perspective, these tools are part of the IDE.
     if (isEmbedded()) {
       final currentUrl = getWebUrl();
       final currentPage =
           currentUrl != null ? extractCurrentPageFromUrl(currentUrl) : null;
-      if (currentPage == StandaloneScreenType.vsCodeFlutterPanel.name ||
-          currentPage == StandaloneScreenType.editorSidebar.name) {
-        return;
-      }
+      if (StandaloneScreenType.includes(currentPage)) return;
     }
 
     SemanticVersion previousVersion = SemanticVersion();
