@@ -46,6 +46,7 @@ void main() {
         debugMeasureUsageInBytes: testMeasureMemoryUsage,
         pollingDuration: const Duration(milliseconds: 1),
       );
+      setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
       setGlobal(BannerMessagesController, BannerMessagesController());
       offlineDataController = MockOfflineDataController();
       offlineDataController.showingOfflineData.value = false;

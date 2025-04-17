@@ -41,7 +41,6 @@ class CpuProfilerDefaultScene extends Scene {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(BannerMessagesController, BannerMessagesController());
 
     fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
@@ -59,6 +58,7 @@ class CpuProfilerDefaultScene extends Scene {
       fakeServiceConnection.errorBadgeManager.errorCountNotifier('profiler'),
     ).thenReturn(ValueNotifier<int>(0));
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
+    setGlobal(BannerMessagesController, BannerMessagesController());
 
     final mockScriptManager = MockScriptManager();
     when(
