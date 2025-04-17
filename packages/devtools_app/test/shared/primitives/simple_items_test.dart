@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_infra/utils/test_utils.dart';
@@ -15,6 +16,9 @@ void main() {
       if (hash != null) {
         expect(content, contains('href="#$hash"'));
       }
-    });
+    }, 
+    // This test hits the network, which is a violation of Flutter customer
+    // tests policy: https://github.com/flutter/tests?tab=readme-ov-file#adding-more-tests.
+    tags: skipForCustomerTestsTag);
   }
 }
