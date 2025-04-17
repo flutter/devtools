@@ -87,10 +87,10 @@ void main() {
       setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
-      setGlobal(BannerMessagesController, BannerMessagesController());
       setGlobal(DTDManager, MockDTDManager());
       setGlobal(ScriptManager, MockScriptManager());
       setUpServiceManagerForMemory();
+      setGlobal(BannerMessagesController, BannerMessagesController());
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

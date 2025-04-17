@@ -37,6 +37,7 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(BannerMessagesController, BannerMessagesController());
   });
 
