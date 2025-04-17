@@ -56,6 +56,9 @@ enum StandaloneScreenType {
       ),
     };
   }
+
+  static bool includes(String? screenName) =>
+      values.any((value) => value.name == screenName);
 }
 
 /// Widget that returns a [CenteredCircularProgressIndicator] while it waits for
