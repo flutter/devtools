@@ -10,15 +10,18 @@ import '../../test_infra/utils/test_utils.dart';
 
 void main() {
   for (final link in DocLinks.values) {
-    test('$link is not broken', () async {
-      final content = await loadPageHtmlContent(link.value);
-      final hash = link.hash;
-      if (hash != null) {
-        expect(content, contains('href="#$hash"'));
-      }
-    }, 
-    // This test hits the network, which is a violation of Flutter customer
-    // tests policy: https://github.com/flutter/tests?tab=readme-ov-file#adding-more-tests.
-    tags: skipForCustomerTestsTag);
+    test(
+      '$link is not broken',
+      () async {
+        final content = await loadPageHtmlContent(link.value);
+        final hash = link.hash;
+        if (hash != null) {
+          expect(content, contains('href="#$hash"'));
+        }
+      },
+      // This test hits the network, which is a violation of Flutter customer
+      // tests policy: https://github.com/flutter/tests?tab=readme-ov-file#adding-more-tests.
+      tags: skipForCustomerTestsTag,
+    );
   }
 }
