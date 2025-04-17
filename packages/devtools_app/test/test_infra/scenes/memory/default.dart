@@ -106,7 +106,6 @@ class MemoryDefaultScene extends Scene {
     setGlobal(OfflineDataController, OfflineDataController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
-    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(
       PreferencesController,
       PreferencesController()..memory.showChart.value = false,
@@ -138,6 +137,7 @@ class MemoryDefaultScene extends Scene {
       fakeServiceConnection.serviceManager.vm.operatingSystem,
     ).thenReturn('ios');
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(OfflineDataController, OfflineDataController());
 
     final showAllFilter = ClassFilter(

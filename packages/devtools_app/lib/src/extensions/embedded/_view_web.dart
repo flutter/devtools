@@ -314,6 +314,8 @@ class _ExtensionIFrameController extends DisposableController
         '${showBannerMessageEvent.messageId}',
       ),
       screenId: '${showBannerMessageEvent.extensionName}_ext',
+      dismissOnConnectionChanges:
+          showBannerMessageEvent.dismissOnConnectionChanges,
       buildTextSpans:
           (_) => [
             TextSpan(

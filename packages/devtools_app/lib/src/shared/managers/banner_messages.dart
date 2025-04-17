@@ -30,7 +30,33 @@ const _cpuSamplingRateDocsUrl =
 /// every screen from the [BannerMessages] widget.
 const universalScreenId = 'universal';
 
-class BannerMessagesController {
+class BannerMessagesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  BannerMessagesController() {
+    previouslyConnected =
+        serviceConnection.serviceManager.connectedState.value.connected;
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      final connected =
+          serviceConnection.serviceManager.connectedState.value.connected;
+      if (previouslyConnected != connected) {
+        for (final messageList in _messages.values) {
+          for (final message in messageList.value) {
+            if (message.dismissOnConnectionChanges) {
+              bannerMessages.removeMessage(message);
+            }
+          }
+        }
+      }
+      previouslyConnected = connected;
+    });
+  }
+
+  /// Tracks the previous app connection state for the purpose of dismissing
+  /// messages upon connection changes.
+  ///
+  /// See [BannerMessage.dismissOnConnectionChanges].
+  bool previouslyConnected = false;
+
   final _messages = <String, ListValueNotifier<BannerMessage>>{};
   final _dismissedMessageKeys = <Key?>{};
 
@@ -165,6 +191,7 @@ class BannerMessage extends StatelessWidget {
     required this.buildTextSpans,
     required this.screenId,
     required this.messageType,
+    this.dismissOnConnectionChanges = true,
     this.buildActions,
   });
 
@@ -172,6 +199,9 @@ class BannerMessage extends StatelessWidget {
   final List<Widget> Function(BuildContext)? buildActions;
   final String screenId;
   final BannerMessageType messageType;
+
+  /// Whether this message should be dismissed on app connection changes.
+  final bool dismissOnConnectionChanges;
 
   @override
   Widget build(BuildContext context) {
@@ -284,6 +314,7 @@ class BannerWarning extends BannerMessage {
     required super.key,
     required super.buildTextSpans,
     required super.screenId,
+    super.dismissOnConnectionChanges = true,
     super.buildActions,
   }) : super(messageType: BannerMessageType.warning);
 }
@@ -293,6 +324,7 @@ class BannerInfo extends BannerMessage {
     required super.key,
     required super.buildTextSpans,
     required super.screenId,
+    super.dismissOnConnectionChanges = true,
     super.buildActions,
   }) : super(messageType: BannerMessageType.info);
 }
@@ -318,23 +350,6 @@ class DebugModePerformanceMessage extends BannerWarning {
                 style: Theme.of(context).warningMessageLinkStyle,
               ),
               const TextSpan(text: '.'),
-            ],
-      );
-}
-
-class ProviderUnknownErrorBanner extends _BannerError {
-  ProviderUnknownErrorBanner({required super.screenId})
-    : super(
-        key: Key('ProviderUnknownErrorBanner - $screenId'),
-        buildTextSpans:
-            (_) => [
-              TextSpan(
-                text: '''
-DevTools failed to connect with package:provider.
-
-This could be caused by an older version of package:provider; please make sure that you are using version >=5.0.0.''',
-                style: TextStyle(fontSize: defaultFontSize),
-              ),
             ],
       );
 }
@@ -520,7 +535,6 @@ class WelcomeToNewInspectorMessage extends BannerInfo {
   WelcomeToNewInspectorMessage({required super.screenId})
     : super(
         key: Key('WelcomeToNewInspectorMessage - $screenId'),
-
         buildTextSpans:
             (context) => [
               const TextSpan(

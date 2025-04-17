@@ -160,6 +160,32 @@ void main() {
         expect(find.byKey(k1), findsOneWidget);
       },
     );
+
+    testWidgets('messages dismiss on connection changes', (
+      WidgetTester tester,
+    ) async {
+      expect(
+        fakeServiceConnection.serviceManager.connectedState.value.connected,
+        true,
+      );
+      await tester.pumpWidget(buildBannerMessages());
+      expect(find.byKey(k1), findsNothing);
+      expect(find.byKey(k2), findsNothing);
+
+      // Add a message that should dismiss on connection changes.
+      bannerMessages.addMessage(testMessage1);
+      // Add a message that should not dismiss on connection changes.
+      bannerMessages.addMessage(testMessageNoDismiss);
+      await pumpTestFrame(tester);
+      expect(find.byKey(k1), findsOneWidget);
+      expect(find.byKey(k2), findsOneWidget);
+
+      // Simulate a connection loss.
+      await fakeServiceConnection.serviceManager.manuallyDisconnect();
+      await pumpTestFrame(tester);
+      expect(find.byKey(k1), findsNothing);
+      expect(find.byKey(k2), findsOneWidget);
+    });
   });
 }
 
@@ -182,6 +208,14 @@ final testMessage2 = BannerMessage(
   buildTextSpans: (_) => const [TextSpan(text: 'Test Message 2')],
   screenId: testMessage2ScreenId,
   messageType: BannerMessageType.warning,
+);
+
+final testMessageNoDismiss = BannerMessage(
+  key: k2,
+  buildTextSpans: (_) => const [TextSpan(text: 'Test Message 2')],
+  screenId: testMessage2ScreenId,
+  messageType: BannerMessageType.warning,
+  dismissOnConnectionChanges: false,
 );
 
 final universalMessage = BannerMessage(
