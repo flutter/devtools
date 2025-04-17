@@ -5,7 +5,7 @@
 import 'dart:js_interop';
 import 'dart:typed_data';
 
-import 'package:web/web.dart' hide NodeGlue;
+import 'package:web/web.dart';
 
 import 'import_export.dart';
 
