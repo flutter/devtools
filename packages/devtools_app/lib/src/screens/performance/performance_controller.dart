@@ -273,6 +273,7 @@ class PerformanceController extends DevToolsScreenController
     _applyToFeatureControllers((c) => c.dispose());
     enhanceTracingController.dispose();
     rebuildCountModel.dispose();
+    _impellerEnabled.dispose();
     super.dispose();
   }
 
