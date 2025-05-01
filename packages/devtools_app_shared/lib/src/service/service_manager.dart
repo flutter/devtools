@@ -293,12 +293,12 @@ class ServiceManager<T extends VmService> {
 
     await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeCloseVmService,
-      this.service,
+      service,
     );
     _closeVmServiceConnection();
     await callLifecycleCallbacks(
       ServiceManagerLifecycle.afterCloseVmService,
-      this.service,
+      service,
     );
 
     resolvedUriManager.vmServiceClosed();
@@ -547,7 +547,7 @@ class ServiceManager<T extends VmService> {
   Future<String?> _lookupPackageRootByEval(Library rootLibrary) async {
     final eval = EvalOnDartLibrary(
       rootLibrary.uri!,
-      this.service! as VmService,
+      service! as VmService,
       serviceManager: this,
       // Swallow exceptions since this evaluation may be called on an older
       // version of package:test where we do not expect the evaluation to
