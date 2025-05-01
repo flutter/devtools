@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
@@ -39,7 +40,7 @@ class FlutterFramesChart extends StatelessWidget {
 
   final bool showingOfflineData;
 
-  final bool impellerEnabled;
+  final ValueListenable<bool> impellerEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +87,7 @@ class _FlutterFramesChart extends StatefulWidget {
 
   final bool showingOfflineData;
 
-  final bool impellerEnabled;
+  final ValueListenable<bool> impellerEnabled;
 
   static double get frameNumberSectionHeight => scaleByFontFactor(20.0);
 
@@ -203,7 +204,7 @@ class FramesChart extends StatefulWidget {
 
   final BoxConstraints constraints;
 
-  final bool impellerEnabled;
+  final ValueListenable<bool> impellerEnabled;
 
   @override
   State<FramesChart> createState() => _FramesChartState();
@@ -346,13 +347,18 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
         chartAxisPainter,
         Padding(padding: EdgeInsets.only(left: _yAxisUnitsSpace), child: chart),
         fpsLinePainter,
-        Positioned(
-          right: denseSpacing,
-          top: densePadding,
-          child: Text(
-            'Engine: ${widget.impellerEnabled ? 'Impeller' : 'Skia'}',
-            style: themeData.subtleChartTextStyle,
-          ),
+        ValueListenableBuilder(
+          valueListenable: widget.impellerEnabled,
+          builder: (context, impellerEnabled, child) {
+            return Positioned(
+              right: denseSpacing,
+              top: densePadding,
+              child: Text(
+                'Engine: ${impellerEnabled ? 'Impeller' : 'Skia'}',
+                style: themeData.subtleChartTextStyle,
+              ),
+            );
+          },
         ),
       ],
     );
@@ -382,7 +388,7 @@ class FramesChartControls extends StatelessWidget {
 
   final bool showingOfflineData;
 
-  final bool impellerEnabled;
+  final ValueListenable<bool> impellerEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -408,21 +414,26 @@ class FramesChartControls extends StatelessWidget {
               );
             },
           ),
-        Legend(
-          dense: true,
-          entries: [
-            LegendEntry(terse ? 'UI' : 'Frame Time (UI)', mainUiColor),
-            LegendEntry(
-              terse ? 'Raster' : 'Frame Time (Raster)',
-              mainRasterColor,
-            ),
-            LegendEntry(terse ? 'Jank' : 'Jank (slow frame)', uiJankColor),
-            if (!impellerEnabled)
-              LegendEntry(
-                'Shader Compilation',
-                shaderCompilationColor.background,
-              ),
-          ],
+        ValueListenableBuilder(
+          valueListenable: impellerEnabled,
+          builder: (context, impellerEnabled, child) {
+            return Legend(
+              dense: true,
+              entries: [
+                LegendEntry(terse ? 'UI' : 'Frame Time (UI)', mainUiColor),
+                LegendEntry(
+                  terse ? 'Raster' : 'Frame Time (Raster)',
+                  mainRasterColor,
+                ),
+                LegendEntry(terse ? 'Jank' : 'Jank (slow frame)', uiJankColor),
+                if (!impellerEnabled)
+                  LegendEntry(
+                    'Shader Compilation',
+                    shaderCompilationColor.background,
+                  ),
+              ],
+            );
+          },
         ),
         AverageFPS(
           frames: frames,

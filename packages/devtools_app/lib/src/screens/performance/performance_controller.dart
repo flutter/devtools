@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_registrations.dart' as registrations;
@@ -83,8 +84,8 @@ class PerformanceController extends DevToolsScreenController
   /// any selection modifications that occur while the data is displayed.
   OfflinePerformanceData? offlinePerformanceData;
 
-  bool get impellerEnabled => _impellerEnabled;
-  bool _impellerEnabled = false;
+  ValueListenable<bool> get impellerEnabled => _impellerEnabled;
+  final _impellerEnabled = ValueNotifier<bool>(false);
 
   Future<void> get initialized => _initialized.future;
   final _initialized = Completer<void>();
@@ -132,11 +133,11 @@ class PerformanceController extends DevToolsScreenController
                 registrations.isImpellerEnabled,
               )
               .then((response) {
-                _impellerEnabled = response.json?['enabled'] == true;
+                _impellerEnabled.value = response.json?['enabled'] == true;
               }),
         );
       } else {
-        _impellerEnabled = false;
+        _impellerEnabled.value = false;
       }
 
       enhanceTracingController.init();

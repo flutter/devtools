@@ -29,7 +29,7 @@ void main() {
         FlutterFramesChart(
           framesController,
           showingOfflineData: showingOfflineData,
-          impellerEnabled: impellerEnabled,
+          impellerEnabled: FixedValueListenable(impellerEnabled),
         ),
       ),
     );
