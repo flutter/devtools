@@ -25,7 +25,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+- Fixes a bug where the Performance page would hang when connected to a paused
+Flutter app. - [#9162](https://github.com/flutter/devtools/pull/9162)
 
 ## CPU profiler updates
 
