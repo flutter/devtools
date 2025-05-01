@@ -69,8 +69,8 @@ class OfflinePerformanceData {
 
 extension type _PerformanceDataJson(Map<String, Object?> json) {
   Uint8List? get traceBinary {
-    final value =
-        (json[OfflinePerformanceData.traceBinaryKey] as List?)?.cast<int>();
+    final value = (json[OfflinePerformanceData.traceBinaryKey] as List?)
+        ?.cast<int>();
     return value == null ? null : Uint8List.fromList(value);
   }
 
@@ -138,10 +138,9 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
     }
     copy
       ..type = type
-      ..time =
-          (TimeRange()
-            ..start = time.start
-            ..end = time.end);
+      ..time = (TimeRange()
+        ..start = time.start
+        ..end = time.end);
     return copy;
   }
 

@@ -180,13 +180,12 @@ class SidePanel extends AnimatedWidget {
             markdownData.isNullOrEmpty
                 ? Text(textIfMarkdownDataEmpty ?? '')
                 : Expanded(
-                  child: Markdown(
-                    data: markdownData!,
-                    onTapLink:
-                        (text, url, title) =>
-                            unawaited(launchUrlWithErrorHandling(url!)),
+                    child: Markdown(
+                      data: markdownData!,
+                      onTapLink: (text, url, title) =>
+                          unawaited(launchUrlWithErrorHandling(url!)),
+                    ),
                   ),
-                ),
           ],
         ),
       ),

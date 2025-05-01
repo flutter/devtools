@@ -33,13 +33,16 @@ class EditableBool extends EditableProperty with FiniteValuesProperty {
   @override
   Object? convertFromInputString(String? valueAsString) =>
       valueAsString == 'true' || valueAsString == 'false'
-          ? valueAsString == 'true'
-          : valueAsString; // The boolean value might be an expression.
+      ? valueAsString == 'true'
+      : valueAsString; // The boolean value might be an expression.
 
   @override
   Set<PropertyOption> get propertyOptions {
-    final shouldIncludeValueDisplay =
-        !['true', 'false', 'null'].contains(valueDisplay);
+    final shouldIncludeValueDisplay = ![
+      'true',
+      'false',
+      'null',
+    ].contains(valueDisplay);
 
     return {
       (text: 'true', isDefault: defaultValue == true),

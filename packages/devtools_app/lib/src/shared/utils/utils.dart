@@ -361,7 +361,7 @@ void safeUnawaited(
   Future<void> future, {
   void Function(Object?, StackTrace)? onError,
 }) {
-  onError ??=
-      (e, st) => reportError('Error in unawaited Future: $e', stack: st);
+  onError ??= (e, st) =>
+      reportError('Error in unawaited Future: $e', stack: st);
   unawaited(future.catchError(onError));
 }

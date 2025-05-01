@@ -189,10 +189,11 @@ class DebuggerWindows extends StatelessWidget {
               actions: [
                 CopyToClipboardControl(
                   dataProvider: () {
-                    final callStackList =
-                        controller.stackFramesWithLocation.value
-                            .map((frame) => frame.callStackDisplay)
-                            .toList();
+                    final callStackList = controller
+                        .stackFramesWithLocation
+                        .value
+                        .map((frame) => frame.callStackDisplay)
+                        .toList();
                     for (var i = 0; i < callStackList.length; i++) {
                       callStackList[i] = '#$i ${callStackList[i]}';
                     }
@@ -235,10 +236,9 @@ class _BreakpointsWindowActions extends StatelessWidget {
               child: ToolbarAction(
                 icon: Icons.delete,
                 size: defaultIconSize,
-                onPressed:
-                    breakpoints.isNotEmpty
-                        ? () => unawaited(breakpointManager.clearBreakpoints())
-                        : null,
+                onPressed: breakpoints.isNotEmpty
+                    ? () => unawaited(breakpointManager.clearBreakpoints())
+                    : null,
               ),
             ),
           ],
@@ -285,8 +285,8 @@ class DebuggerSourceAndControls extends StatelessWidget {
                       child: ProgramExplorer(
                         controller:
                             codeViewController.programExplorerController,
-                        onNodeSelected:
-                            (node) => _onNodeSelected(context, node),
+                        onNodeSelected: (node) =>
+                            _onNodeSelected(context, node),
                       ),
                     ),
                   ],
@@ -321,10 +321,9 @@ class DebuggerSourceAndControls extends StatelessWidget {
                   debuggerController: controller,
                   scriptRef: scriptRef,
                   parsedScript: parsedScript,
-                  onSelected:
-                      (script, line) => unawaited(
-                        breakpointManager.toggleBreakpoint(script, line),
-                      ),
+                  onSelected: (script, line) => unawaited(
+                    breakpointManager.toggleBreakpoint(script, line),
+                  ),
                 );
               },
             ),

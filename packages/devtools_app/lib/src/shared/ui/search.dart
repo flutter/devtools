@@ -122,15 +122,16 @@ mixin SearchControllerMixin<T extends SearchableDataMixin>
         searchInProgress = true;
 
         // Start new search operation
-        final future = Future(() {
-          return matchesForSearch(
-            _searchNotifier.value,
-            searchPreviousMatches: searchPreviousMatches,
-          );
-        }).then((matches) {
-          searchInProgress = false;
-          _updateMatches(matches);
-        });
+        final future =
+            Future(() {
+              return matchesForSearch(
+                _searchNotifier.value,
+                searchPreviousMatches: searchPreviousMatches,
+              );
+            }).then((matches) {
+              searchInProgress = false;
+              _updateMatches(matches);
+            });
         _searchOperation = CancelableOperation.fromFuture(future);
         await _searchOperation!.value;
         searchInProgress = false;
@@ -194,8 +195,8 @@ mixin SearchControllerMixin<T extends SearchableDataMixin>
       matchIndex.value = 1; // first item because [matchIndex] us 1-based
     }
     _activeSearchMatch.value?.isActiveSearchMatch = false;
-    _activeSearchMatch.value =
-        searchMatches.value[activeMatchIndex]..isActiveSearchMatch = true;
+    _activeSearchMatch.value = searchMatches.value[activeMatchIndex]
+      ..isActiveSearchMatch = true;
     onMatchChanged(activeMatchIndex);
   }
 
@@ -205,11 +206,10 @@ mixin SearchControllerMixin<T extends SearchableDataMixin>
   /// If [matchesForSearch] is overridden in such a way that
   /// [currentDataToSearchThrough] is not used, then this getter does not need
   /// to be implemented.
-  Iterable<T> get currentDataToSearchThrough =>
-      throw UnimplementedError(
-        'Implement this getter in order to use the default'
-        ' [matchesForSearch] behavior.',
-      );
+  Iterable<T> get currentDataToSearchThrough => throw UnimplementedError(
+    'Implement this getter in order to use the default'
+    ' [matchesForSearch] behavior.',
+  );
 
   /// Default search matching logic.
   ///
@@ -254,8 +254,8 @@ mixin SearchControllerMixin<T extends SearchableDataMixin>
   @mustCallSuper
   @override
   void init() {
-    _searchTextFieldController =
-        SearchTextEditingController()..text = _searchNotifier.value;
+    _searchTextFieldController = SearchTextEditingController()
+      ..text = _searchNotifier.value;
     _searchFieldFocusNode = FocusNode(debugLabel: 'search-field');
   }
 
@@ -350,25 +350,23 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
       context,
     ).regularTextStyle.copyWith(fontWeight: FontWeight.bold);
 
-    final tileContents =
-        searchAutoComplete.value
-            .map(
-              (match) => _maybeHighlightMatchText(
-                match,
-                autoCompleteTextStyle,
-                autoCompleteHighlightedTextStyle,
-              ),
-            )
-            .toList();
+    final tileContents = searchAutoComplete.value
+        .map(
+          (match) => _maybeHighlightMatchText(
+            match,
+            autoCompleteTextStyle,
+            autoCompleteHighlightedTextStyle,
+          ),
+        )
+        .toList();
 
     // When there are no tiles present, we don't need to display the
     // auto complete list.
     if (tileContents.isEmpty) return const SizedBox.shrink();
 
-    final tileEntryHeight =
-        tileContents.isEmpty
-            ? 0.0
-            : calculateTextSpanHeight(tileContents.first) + denseSpacing;
+    final tileEntryHeight = tileContents.isEmpty
+        ? 0.0
+        : calculateTextSpanHeight(tileContents.first) + denseSpacing;
 
     // Find the searchField and place overlay below bottom of TextField and
     // make overlay width of TextField. This is also we decide the height of
@@ -382,17 +380,15 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     final maxAreaForPopup = areaHeight - tileEntryHeight;
     // TODO(terry): Scrolling doesn't work so max popup height is also total
     //              matches to use.
-    topMatchesLimit =
-        min(
-          defaultTopMatchesLimit,
-          (maxAreaForPopup / tileEntryHeight) - 1, // zero based.
-        ).truncate();
+    topMatchesLimit = min(
+      defaultTopMatchesLimit,
+      (maxAreaForPopup / tileEntryHeight) - 1, // zero based.
+    ).truncate();
 
     // Total tiles visible.
-    final totalTiles =
-        bottom
-            ? searchAutoComplete.value.length
-            : (maxAreaForPopup / tileEntryHeight).truncateToDouble();
+    final totalTiles = bottom
+        ? searchAutoComplete.value.length
+        : (maxAreaForPopup / tileEntryHeight).truncateToDouble();
 
     final autoCompleteTiles = <AutoCompleteTile>[];
     final count = min(searchAutoComplete.value.length, totalTiles);
@@ -413,17 +409,17 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     // Compute the Y position of the popup (auto-complete list). Its bottom
     // will be positioned at the top of the text field. Add 1 includes
     // the TextField border.
-    final yCoord =
-        bottom ? 0.0 : -((count * tileEntryHeight) + box.size.height + 1);
+    final yCoord = bottom
+        ? 0.0
+        : -((count * tileEntryHeight) + box.size.height + 1);
 
     final xCoord = controller.xPosition;
 
     return Positioned(
       key: searchAutoCompleteKey,
-      width:
-          isMaxWidth
-              ? box.size.width
-              : AutoCompleteSearchControllerMixin.minPopupWidth,
+      width: isMaxWidth
+          ? box.size.width
+          : AutoCompleteSearchControllerMixin.minPopupWidth,
       height: count * tileEntryHeight,
       child: CompositedTransformFollower(
         link: controller.autoCompleteLayerLink,
@@ -450,16 +446,15 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
     TextStyle highlightedTextStyle,
   ) {
     return match.transformAutoCompleteMatch<TextSpan>(
-      transformMatchedSegment:
-          (segment) => TextSpan(text: segment, style: highlightedTextStyle),
-      transformUnmatchedSegment:
-          (segment) => TextSpan(text: segment, style: regularTextStyle),
-      combineSegments:
-          (segments) => TextSpan(
-            text: segments.first.text,
-            style: segments.first.style,
-            children: segments.sublist(1),
-          ),
+      transformMatchedSegment: (segment) =>
+          TextSpan(text: segment, style: highlightedTextStyle),
+      transformUnmatchedSegment: (segment) =>
+          TextSpan(text: segment, style: regularTextStyle),
+      combineSegments: (segments) => TextSpan(
+        text: segments.first.text,
+        style: segments.first.style,
+        children: segments.sublist(1),
+      ),
     );
   }
 }
@@ -500,8 +495,9 @@ class AutoCompleteTile extends StatelessWidget {
           valueListenable: controller.currentHoveredIndex,
           builder: (context, currentHoveredIndex, _) {
             return Container(
-              color:
-                  currentHoveredIndex == index ? highlightColor : defaultColor,
+              color: currentHoveredIndex == index
+                  ? highlightColor
+                  : defaultColor,
               padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
               alignment: Alignment.centerLeft,
               child: Text.rich(textSpan, maxLines: 1),
@@ -571,10 +567,9 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
 
   final _currentHoveredIndex = ValueNotifier<int>(0);
 
-  String? get currentHoveredText =>
-      searchAutoComplete.value.isNotEmpty
-          ? searchAutoComplete.value[currentHoveredIndex.value].text
-          : null;
+  String? get currentHoveredText => searchAutoComplete.value.isNotEmpty
+      ? searchAutoComplete.value[currentHoveredIndex.value].text
+      : null;
 
   /// Last X position of caret in search field, used for pop-up position.
   double xPosition = 0.0;
@@ -922,10 +917,10 @@ class _SearchFieldState extends State<SearchField> with AutoDisposeMixin {
     return widget._maxLines != 1
         ? searchField
         : SizedBox(
-          width: widget.searchFieldWidth,
-          height: widget.searchFieldHeight,
-          child: searchField,
-        );
+            width: widget.searchFieldWidth,
+            height: widget.searchFieldHeight,
+            child: searchField,
+          );
   }
 }
 
@@ -1015,71 +1010,68 @@ class StatelessSearchField<T extends SearchableDataMixin>
       controller.searchFieldFocusNode?.requestFocus();
     }
 
-    final searchField = FocusTraversalGroup(
-      child: TextField(
-        key: searchFieldKey,
-        autofocus: true,
-        enabled: searchFieldEnabled,
-        focusNode: controller.searchFieldFocusNode,
-        controller: controller.searchTextFieldController,
-        style: textStyle,
-        maxLines: _maxLines,
-        onChanged: onChanged,
-        onEditingComplete: () {
-          controller.searchFieldFocusNode?.requestFocus();
-        },
-        // Guarantee that the TextField on all platforms renders in the same
-        // color for border, label text, and cursor. Primarly, so golden screen
-        // snapshots will compare with the exact color.
-        // Guarantee that the TextField on all platforms renders in the same
-        // color for border, label text, and cursor. Primarly, so golden screen
-        // snapshots will compare with the exact color.
-        decoration:
-            decoration ??
-            InputDecoration(
-              constraints: BoxConstraints(
-                minHeight: searchFieldHeight ?? defaultTextFieldHeight,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: densePadding,
-              ),
-              border: const OutlineInputBorder(),
-              hintText: 'Search',
-              hintStyle: theme.subtleTextStyle,
-              labelText: label,
-              labelStyle: theme.subtleTextStyle,
-              prefixIcon: Icon(Icons.search, size: defaultIconSize),
-              prefix:
-                  prefix != null
-                      ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          prefix!,
-                          SizedBox(
-                            height: inputDecorationElementHeight,
-                            width: defaultIconSize,
-                            child: Transform.rotate(
-                              angle: degToRad(90),
-                              child: PaddedDivider.vertical(),
-                            ),
-                          ),
-                        ],
-                      )
-                      : null,
-              suffix:
-                  suffix ??
-                  _SearchFieldSuffix(
-                    controller: controller,
-                    supportsNavigation: supportsNavigation,
-                    onClose: () {
-                      onClose?.call();
-                      onChanged('');
-                    },
-                  ),
+    final searchField = FocusTraversalGroup(child: TextField(
+      key: searchFieldKey,
+      autofocus: true,
+      enabled: searchFieldEnabled,
+      focusNode: controller.searchFieldFocusNode,
+      controller: controller.searchTextFieldController,
+      style: textStyle,
+      maxLines: _maxLines,
+      onChanged: onChanged,
+      onEditingComplete: () {
+        controller.searchFieldFocusNode?.requestFocus();
+      },
+      // Guarantee that the TextField on all platforms renders in the same
+      // color for border, label text, and cursor. Primarly, so golden screen
+      // snapshots will compare with the exact color.
+      // Guarantee that the TextField on all platforms renders in the same
+      // color for border, label text, and cursor. Primarly, so golden screen
+      // snapshots will compare with the exact color.
+      decoration:
+          decoration ??
+          InputDecoration(
+            constraints: BoxConstraints(
+              minHeight: searchFieldHeight ?? defaultTextFieldHeight,
             ),
-      ),
-    );
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: densePadding,
+            ),
+            border: const OutlineInputBorder(),
+            hintText: 'Search',
+            hintStyle: theme.subtleTextStyle,
+            labelText: label,
+            labelStyle: theme.subtleTextStyle,
+            prefixIcon: Icon(Icons.search, size: defaultIconSize),
+            prefix: prefix != null
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      prefix!,
+                      SizedBox(
+                        height: inputDecorationElementHeight,
+                        width: defaultIconSize,
+                        child: Transform.rotate(
+                          angle: degToRad(90),
+                          child: PaddedDivider.vertical(),
+                        ),
+                      ),
+                    ],
+                  )
+                : null,
+            suffix:
+                suffix ??
+                _SearchFieldSuffix(
+                  controller: controller,
+                  supportsNavigation: supportsNavigation,
+                  onClose: () {
+                    onClose?.call();
+                    onChanged('');
+                  },
+                ),
+          ),
+    ),);
 
     if (shouldRequestFocus) {
       controller.searchFieldFocusNode?.requestFocus();
@@ -1170,8 +1162,8 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
     with AutoDisposeMixin {
   HighlightAutoComplete get _highlightDropdown =>
       widget.onHighlightDropdown != null
-          ? widget.onHighlightDropdown as HighlightAutoComplete
-          : _highlightDropdownItem;
+      ? widget.onHighlightDropdown as HighlightAutoComplete
+      : _highlightDropdownItem;
 
   @override
   void initState() {
@@ -1348,11 +1340,11 @@ class _SearchFieldSuffix extends StatelessWidget {
     return supportsNavigation
         ? SearchNavigationControls(controller, onClose: onClose)
         : InputDecorationSuffixButton.close(
-          onPressed: () {
-            controller.searchTextFieldController.clear();
-            onClose?.call();
-          },
-        );
+            onPressed: () {
+              controller.searchTextFieldController.clear();
+              onClose?.call();
+            },
+          );
   }
 }
 
@@ -1385,14 +1377,13 @@ class SearchNavigationControls extends StatelessWidget {
                   child: SizedBox(
                     width: scaleByFontFactor(smallProgressSize),
                     height: scaleByFontFactor(smallProgressSize),
-                    child:
-                        isSearchInProgress
-                            ? SmallCircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color?>(
-                                Theme.of(context).regularTextStyle.color,
-                              ),
-                            )
-                            : const SizedBox(),
+                    child: isSearchInProgress
+                        ? SmallCircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color?>(
+                              Theme.of(context).regularTextStyle.color,
+                            ),
+                          )
+                        : const SizedBox(),
                   ),
                 ),
                 _matchesStatus(numMatches),
@@ -1453,11 +1444,10 @@ mixin SearchableDataMixin {
   /// [SearchControllerMixin.matchesForSearch] is overridden in such a way that
   /// [matchesSearchToken] is not used, then this method does not need to be
   /// implemented.
-  bool matchesSearchToken(RegExp regExpSearch) =>
-      throw UnimplementedError(
-        'Implement this method in order to use the default'
-        ' [SearchControllerMixin.matchesForSearch] behavior.',
-      );
+  bool matchesSearchToken(RegExp regExpSearch) => throw UnimplementedError(
+    'Implement this method in order to use the default'
+    ' [SearchControllerMixin.matchesForSearch] behavior.',
+  );
 }
 
 // This mixin is used to get around the type system where a type `T` needs to

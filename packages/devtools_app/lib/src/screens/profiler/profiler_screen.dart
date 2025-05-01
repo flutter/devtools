@@ -131,12 +131,11 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
             child: const CenteredCircularProgressIndicator(),
           );
         }
-        final status =
-            recording || profilerBusy
-                ? (recording
-                    ? const RecordingStatus()
-                    : ProfilerBusyStatus(status: profilerBusyStatus))
-                : null;
+        final status = recording || profilerBusy
+            ? (recording
+                  ? const RecordingStatus()
+                  : ProfilerBusyStatus(status: profilerBusyStatus))
+            : null;
         return Column(
           children: [
             ProfilerScreenControls(

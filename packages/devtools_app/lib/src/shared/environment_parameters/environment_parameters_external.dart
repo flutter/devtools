@@ -22,12 +22,11 @@ class ExternalDevToolsEnvironmentParameters
   GaLink issueTrackerLink({String? additionalInfo, String? issueTitle}) {
     return GaLink(
       display: _newDevToolsIssueUriDisplay,
-      url:
-          newDevToolsGitHubIssueUriLengthSafe(
-            additionalInfo: additionalInfo,
-            issueTitle: issueTitle,
-            environment: issueLinkDetails(),
-          ).toString(),
+      url: newDevToolsGitHubIssueUriLengthSafe(
+        additionalInfo: additionalInfo,
+        issueTitle: issueTitle,
+        environment: issueLinkDetails(),
+      ).toString(),
       gaScreenName: gac.devToolsMain,
       gaSelectedItemDescription: gac.feedbackLink,
     );
@@ -53,8 +52,8 @@ class ExternalDevToolsEnvironmentParameters
   @override
   InspectorServiceBase? inspectorServiceProvider() =>
       serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == true
-          ? InspectorService()
-          : null;
+      ? InspectorService()
+      : null;
 
   @override
   String get perfettoIndexLocation =>

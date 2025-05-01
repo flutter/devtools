@@ -225,10 +225,9 @@ class BreakpointManager with DisposerMixin {
   }) async {
     _breakpoints.value = breakpoints;
     // Build _breakpointsWithLocation from _breakpoints.
-    final breakpointsWithLocation =
-        await _breakpoints.value
-            .map(breakpointManager.createBreakpointWithLocation)
-            .wait;
+    final breakpointsWithLocation = await _breakpoints.value
+        .map(breakpointManager.createBreakpointWithLocation)
+        .wait;
 
     if (isolateId != _isolateRefId) {
       // Current request is obsolete.
@@ -401,11 +400,10 @@ class BreakpointManager with DisposerMixin {
         // the restart. Note we only track hot restarts triggered by DevTools,
         // if a hot-restart was triggered by another client we won't know.
         // See https://github.com/flutter/flutter/issues/134470
-        final hotRestartInProgress =
-            serviceConnection
-                .serviceManager
-                .isolateManager
-                .hotRestartInProgress;
+        final hotRestartInProgress = serviceConnection
+            .serviceManager
+            .isolateManager
+            .hotRestartInProgress;
         if (hotRestartInProgress) break;
 
         final breakpoint = event.breakpoint;

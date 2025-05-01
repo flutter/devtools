@@ -34,8 +34,8 @@ class FlutterTimelineEventProcessor {
   /// The Flutter frame range that we have processed track events for.
   Range? get frameRangeFromTimelineEvents =>
       _startFrameId == null || _endFrameId == null
-          ? null
-          : Range(_startFrameId!, _endFrameId!);
+      ? null
+      : Range(_startFrameId!, _endFrameId!);
   int? _startFrameId;
   int? _endFrameId;
 

@@ -79,8 +79,9 @@ class VmFieldDisplay extends StatelessWidget {
         type = 'Observed types not found';
     }
 
-    final nullable =
-        field.guardNullable == null ? '' : _nullMessage(field.guardNullable!);
+    final nullable = field.guardNullable == null
+        ? ''
+        : _nullMessage(field.guardNullable!);
 
     return '$type$nullable';
   }

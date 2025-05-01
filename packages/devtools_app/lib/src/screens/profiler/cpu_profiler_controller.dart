@@ -224,10 +224,9 @@ class CpuProfilerController extends DisposableController
   /// Clients interested in the current value of [profilerFlagNotifier] should
   /// use this getter. Otherwise, clients subscribing to change notifications,
   /// should listen to [profilerFlagNotifier].
-  bool get profilerEnabled =>
-      offlineDataController.showingOfflineData.value
-          ? true
-          : profilerFlagNotifier?.value.valueAsString == 'true';
+  bool get profilerEnabled => offlineDataController.showingOfflineData.value
+      ? true
+      : profilerFlagNotifier?.value.valueAsString == 'true';
 
   Future<Response> enableCpuProfiler() {
     return serviceConnection.serviceManager.service!.enableCpuProfiler();
@@ -271,11 +270,10 @@ class CpuProfilerController extends DisposableController
         gac.cpuProfiler,
         gac.CpuProfilerEvents.cpuProfileProcessingTime.name,
         asyncOperation: pullAndProcessHelper,
-        screenMetricsProvider:
-            () => ProfilerScreenMetrics(
-              cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
-              cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
-            ),
+        screenMetricsProvider: () => ProfilerScreenMetrics(
+          cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
+          cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
+        ),
       );
     } on ProcessCancelledException catch (_) {
       // Do nothing for instances of [ProcessCancelledException].
@@ -543,14 +541,12 @@ class CpuProfilerController extends DisposableController
       label: tag,
       createIfAbsent: () {
         final fullData = cpuProfileStore.lookupProfile(label: userTagNone)!;
-        final tagType =
-            tag == groupByUserTag
-                ? CpuProfilerTagType.user
-                : CpuProfilerTagType.vm;
-        final data =
-            tag == groupByUserTag || tag == groupByVmTag
-                ? CpuProfilePair.withTagRoots(fullData, tagType)
-                : CpuProfilePair.fromUserTag(fullData, tag);
+        final tagType = tag == groupByUserTag
+            ? CpuProfilerTagType.user
+            : CpuProfilerTagType.vm;
+        final data = tag == groupByUserTag || tag == groupByVmTag
+            ? CpuProfilePair.withTagRoots(fullData, tagType)
+            : CpuProfilePair.fromUserTag(fullData, tag);
         cpuProfileStore.storeProfile(data, label: tag);
         return data;
       },

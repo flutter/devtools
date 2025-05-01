@@ -74,17 +74,16 @@ void main() {
 
   group('$DevToolsSidebarOptions', () {
     for (final hasDebugSessions in [true, false]) {
-      final debugSessions =
-          hasDebugSessions
-              ? {
-                'test session': generateDebugSession(
-                  debuggerType: 'Flutter',
-                  deviceId: 'macos',
-                  flutterMode: 'debug',
-                  projectRootPath: testDtdProjectRoot,
-                ),
-              }
-              : <String, EditorDebugSession>{};
+      final debugSessions = hasDebugSessions
+          ? {
+              'test session': generateDebugSession(
+                debuggerType: 'Flutter',
+                deviceId: 'macos',
+                flutterMode: 'debug',
+                projectRootPath: testDtdProjectRoot,
+              ),
+            }
+          : <String, EditorDebugSession>{};
 
       testWidgetsWithWindowSize(
         'pumps DevTools screens ${hasDebugSessions ? 'with' : 'without'} debug '

@@ -89,11 +89,10 @@ Future<void> runFlutterIntegrationTest(
 class DevToolsAppTestRunnerArgs extends IntegrationTestRunnerArgs {
   DevToolsAppTestRunnerArgs(super.args, {super.verifyValidTarget = true})
     : super(addExtraArgs: _addExtraArgs) {
-    testAppDevice =
-        TestAppDevice.fromArgName(
-          argResults.option(_testAppDeviceArg) ??
-              TestAppDevice.flutterTester.argName,
-        )!;
+    testAppDevice = TestAppDevice.fromArgName(
+      argResults.option(_testAppDeviceArg) ??
+          TestAppDevice.flutterTester.argName,
+    )!;
   }
 
   /// The type of device for the test app to run on.

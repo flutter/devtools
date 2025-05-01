@@ -52,8 +52,9 @@ class TimelineEventsController extends PerformanceFeatureController
   static const gpuThreadSuffix = '.gpu';
   static const platformThreadSuffix = '.platform';
   static const flutterTestThreadSuffix = '.flutter.test..ui';
-  static final _refreshWorkTrackerDelay =
-      const Duration(milliseconds: 500).inMicroseconds;
+  static final _refreshWorkTrackerDelay = const Duration(
+    milliseconds: 500,
+  ).inMicroseconds;
 
   /// Controller that contains business logic for the Perfetto trace viewer.
   late final PerfettoController perfettoController;
@@ -83,8 +84,11 @@ class TimelineEventsController extends PerformanceFeatureController
 
   /// Size limit in GB for [traceRingBuffer] that determines when traces should
   /// be removed from the queue.
-  final _traceRingBufferSize =
-      convertBytes(1, from: ByteUnit.gb, to: ByteUnit.byte).round();
+  final _traceRingBufferSize = convertBytes(
+    1,
+    from: ByteUnit.gb,
+    to: ByteUnit.byte,
+  ).round();
 
   /// Track events that we have received from the VM, but have not yet
   /// processed.
@@ -357,12 +361,11 @@ class TimelineEventsController extends PerformanceFeatureController
     ga.timeSync(
       gac.performance,
       gac.PerformanceEvents.perfettoModeTraceEventProcessingTime.nameOverride!,
-      syncOperation:
-          () => perfettoController.processor.processTrackEvents(
-            _unprocessedTrackEvents,
-          ),
-      screenMetricsProvider:
-          () => PerformanceScreenMetrics(traceEventCount: eventCount),
+      syncOperation: () => perfettoController.processor.processTrackEvents(
+        _unprocessedTrackEvents,
+      ),
+      screenMetricsProvider: () =>
+          PerformanceScreenMetrics(traceEventCount: eventCount),
     );
     _unprocessedTrackEvents.clear();
   }
@@ -488,7 +491,7 @@ class TimelineEventsController extends PerformanceFeatureController
     return offlineDataController.showingOfflineData.value
         ? offlineData != null && offlineData.frames.isNotEmpty
         : serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
-            false;
+              false;
   }
 
   void _maybePushNoTimelineEventsWarning() {

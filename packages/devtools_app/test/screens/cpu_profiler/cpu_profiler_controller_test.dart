@@ -105,10 +105,9 @@ void main() {
         extentMicros: 100,
         processId: 'test',
       );
-      final originalData =
-          controller.cpuProfileStore.lookupProfile(
-            label: CpuProfilerController.userTagNone,
-          )!;
+      final originalData = controller.cpuProfileStore.lookupProfile(
+        label: CpuProfilerController.userTagNone,
+      )!;
       expect(
         originalData.functionProfile.stackFrames.values.length,
         equals(17),
@@ -118,12 +117,15 @@ void main() {
       expect(filteredData.stackFrames.values.length, equals(12));
 
       // The native frame filter is applied by default.
-      final originalNativeFrames =
-          originalData.functionProfile.stackFrames.values
-              .where((sf) => sf.isNative)
-              .toList();
-      final filteredNativeFrames =
-          filteredData.stackFrames.values.where((sf) => sf.isNative).toList();
+      final originalNativeFrames = originalData
+          .functionProfile
+          .stackFrames
+          .values
+          .where((sf) => sf.isNative)
+          .toList();
+      final filteredNativeFrames = filteredData.stackFrames.values
+          .where((sf) => sf.isNative)
+          .toList();
       expect(originalNativeFrames.length, equals(5));
       expect(filteredNativeFrames, isEmpty);
     });
@@ -135,10 +137,9 @@ void main() {
         extentMicros: 100,
         processId: 'test',
       );
-      final originalData =
-          controller.cpuProfileStore.lookupProfile(
-            label: CpuProfilerController.userTagNone,
-          )!;
+      final originalData = controller.cpuProfileStore.lookupProfile(
+        label: CpuProfilerController.userTagNone,
+      )!;
       expect(
         originalData.functionProfile.stackFrames.values.length,
         equals(17),
@@ -190,10 +191,9 @@ void main() {
         extentMicros: 100,
         processId: 'test',
       );
-      final originalData =
-          controller.cpuProfileStore.lookupProfile(
-            label: CpuProfilerController.userTagNone,
-          )!;
+      final originalData = controller.cpuProfileStore.lookupProfile(
+        label: CpuProfilerController.userTagNone,
+      )!;
       expect(
         originalData.functionProfile.stackFrames.values.length,
         equals(17),

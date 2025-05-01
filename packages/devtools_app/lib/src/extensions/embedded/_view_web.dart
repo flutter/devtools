@@ -148,10 +148,9 @@ class _ExtensionIFrameController extends DisposableController
 
     addAutoDisposeListener(preferences.darkModeEnabled, () {
       updateTheme(
-        theme:
-            isDarkThemeEnabled()
-                ? ExtensionEventParameters.themeValueDark
-                : ExtensionEventParameters.themeValueLight,
+        theme: isDarkThemeEnabled()
+            ? ExtensionEventParameters.themeValueDark
+            : ExtensionEventParameters.themeValueLight,
       );
     });
   }
@@ -184,10 +183,9 @@ class _ExtensionIFrameController extends DisposableController
     if (extensionEvent != null) {
       onEventReceived(
         extensionEvent,
-        onUnknownEvent:
-            () => notificationService.push(
-              'Unknown event received from extension: $extensionEvent}',
-            ),
+        onUnknownEvent: () => notificationService.push(
+          'Unknown event received from extension: $extensionEvent}',
+        ),
       );
     }
   }
@@ -316,13 +314,12 @@ class _ExtensionIFrameController extends DisposableController
       screenId: '${showBannerMessageEvent.extensionName}_ext',
       dismissOnConnectionChanges:
           showBannerMessageEvent.dismissOnConnectionChanges,
-      buildTextSpans:
-          (_) => [
-            TextSpan(
-              text: showBannerMessageEvent.message,
-              style: TextStyle(fontSize: defaultFontSize),
-            ),
-          ],
+      buildTextSpans: (_) => [
+        TextSpan(
+          text: showBannerMessageEvent.message,
+          style: TextStyle(fontSize: defaultFontSize),
+        ),
+      ],
     );
     bannerMessages.addMessage(
       bannerMessage,

@@ -83,11 +83,13 @@ class OfflineNetworkData with Serializable {
   @override
   Map<String, Object?> toJson() {
     return {
-      _OfflineDataKeys.httpRequestData.name:
-          httpRequestData.map((e) => e.toJson()).toList(),
+      _OfflineDataKeys.httpRequestData.name: httpRequestData
+          .map((e) => e.toJson())
+          .toList(),
       _OfflineDataKeys.selectedRequestId.name: selectedRequestId,
-      _OfflineDataKeys.socketData.name:
-          socketData.map((e) => e.toJson()).toList(),
+      _OfflineDataKeys.socketData.name: socketData
+          .map((e) => e.toJson())
+          .toList(),
       _OfflineDataKeys.timelineMicrosOffset.name: timelineMicrosOffset,
     };
   }

@@ -88,16 +88,16 @@ class _LogDetailsState extends State<LogDetails>
           controller: scrollController,
           child:
               preferences.logging.detailsFormat.value ==
-                          LoggingDetailsFormat.text ||
-                      (log?.encodedDetails ?? '').isEmpty
-                  ? Padding(
-                    padding: const EdgeInsets.all(denseSpacing),
-                    child: SelectableText(
-                      log?.prettyPrinted() ?? '',
-                      textAlign: TextAlign.left,
-                    ),
-                  )
-                  : JsonViewer(encodedJson: log!.encodedDetails),
+                      LoggingDetailsFormat.text ||
+                  (log?.encodedDetails ?? '').isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(denseSpacing),
+                  child: SelectableText(
+                    log?.prettyPrinted() ?? '',
+                    textAlign: TextAlign.left,
+                  ),
+                )
+              : JsonViewer(encodedJson: log!.encodedDetails),
         ),
       ),
     );
@@ -144,26 +144,27 @@ class LogDetailsFormatButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentlyUsingTextFormat = format == LoggingDetailsFormat.text;
-    final tooltip =
-        currentlyUsingTextFormat ? viewAsJsonTooltip : viewAsRawTextTooltip;
+    final tooltip = currentlyUsingTextFormat
+        ? viewAsJsonTooltip
+        : viewAsRawTextTooltip;
     void togglePreference() =>
         preferences.logging.detailsFormat.value = format.opposite();
 
     return currentlyUsingTextFormat
         ? Padding(
-          // This padding aligns this button with the copy button.
-          padding: const EdgeInsets.only(bottom: borderPadding),
-          child: SmallAction(
+            // This padding aligns this button with the copy button.
+            padding: const EdgeInsets.only(bottom: borderPadding),
+            child: SmallAction(
+              tooltip: tooltip,
+              onPressed: togglePreference,
+              child: Text(' { } ', style: Theme.of(context).regularTextStyle),
+            ),
+          )
+        : ToolbarAction(
+            icon: Icons.text_fields,
             tooltip: tooltip,
             onPressed: togglePreference,
-            child: Text(' { } ', style: Theme.of(context).regularTextStyle),
-          ),
-        )
-        : ToolbarAction(
-          icon: Icons.text_fields,
-          tooltip: tooltip,
-          onPressed: togglePreference,
-          size: defaultIconSize,
-        );
+            size: defaultIconSize,
+          );
   }
 }

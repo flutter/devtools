@@ -61,10 +61,9 @@ class SettingsDialog extends StatelessWidget {
               child: CheckboxSetting(
                 title: 'Enable analytics',
                 notifier: analyticsController.analyticsEnabled,
-                onChanged:
-                    (enable) => unawaited(
-                      analyticsController.toggleAnalyticsEnabled(enable),
-                    ),
+                onChanged: (enable) => unawaited(
+                  analyticsController.toggleAnalyticsEnabled(enable),
+                ),
                 gaScreen: gac.settingsDialog,
                 gaItem: gac.analytics,
               ),
@@ -133,11 +132,10 @@ class _VerboseLoggingSetting extends StatelessWidget {
               gaSelection: gac.copyLogs,
               minScreenWidthForTextBeforeScaling:
                   _minScreenWidthForTextBeforeScaling,
-              onPressed:
-                  () async => await copyToClipboard(
-                    LogStorage.root.toString(),
-                    successMessage: 'Successfully copied logs',
-                  ),
+              onPressed: () async => await copyToClipboard(
+                LogStorage.root.toString(),
+                successMessage: 'Successfully copied logs',
+              ),
             ),
             const SizedBox(width: denseSpacing),
             ClearButton(

@@ -105,9 +105,18 @@ void main() {
         text: 'parent',
         style: TextStyle(color: Colors.red),
         children: [
-          TextSpan(text: 'foo', style: TextStyle(color: Colors.blue)),
-          TextSpan(text: 'bar', style: TextStyle(color: Colors.green)),
-          TextSpan(text: 'baz', style: TextStyle(color: Colors.yellow)),
+          TextSpan(
+            text: 'foo',
+            style: TextStyle(color: Colors.blue),
+          ),
+          TextSpan(
+            text: 'bar',
+            style: TextStyle(color: Colors.green),
+          ),
+          TextSpan(
+            text: 'baz',
+            style: TextStyle(color: Colors.yellow),
+          ),
         ],
       );
       expect(

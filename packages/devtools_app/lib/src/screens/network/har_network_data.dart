@@ -34,10 +34,9 @@ class HarNetworkData with Serializable {
                     as Map<String, Object?>)[NetworkEventKeys.entries.name]
                 as List<Object?>)
             .map(
-              (entryJson) =>
-                  HarDataEntry.fromJson(
-                    entryJson as Map<String, Object?>,
-                  ).toDartIOHttpRequest(),
+              (entryJson) => HarDataEntry.fromJson(
+                entryJson as Map<String, Object?>,
+              ).toDartIOHttpRequest(),
             )
             .toList();
 

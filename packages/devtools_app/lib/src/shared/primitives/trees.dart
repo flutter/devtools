@@ -314,8 +314,9 @@ abstract class TreeNode<T extends TreeNode<T>> {
     final matchingNode = depthFirstTraversal<T>(
       root,
       returnCondition: matchingNodeCondition,
-      exploreChildrenCondition:
-          includeCollapsedNodes ? null : (T node) => node.isExpanded,
+      exploreChildrenCondition: includeCollapsedNodes
+          ? null
+          : (T node) => node.isExpanded,
       action: (T _) => index++,
     );
     if (matchingNode != null) return index;

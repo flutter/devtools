@@ -190,14 +190,13 @@ class CpuProfileData with Serializable {
       sampleCount: json.sampleCount ?? 0,
       samplePeriod: samplePeriod,
       stackDepth: json.stackDepth ?? 0,
-      time:
-          (json.timeOriginMicros != null && json.timeExtentMicros != null)
-              ? (TimeRange()
-                ..start = Duration(microseconds: json.timeOriginMicros!)
-                ..end = Duration(
-                  microseconds: json.timeOriginMicros! + json.timeExtentMicros!,
-                ))
-              : null,
+      time: (json.timeOriginMicros != null && json.timeExtentMicros != null)
+          ? (TimeRange()
+              ..start = Duration(microseconds: json.timeOriginMicros!)
+              ..end = Duration(
+                microseconds: json.timeOriginMicros! + json.timeExtentMicros!,
+              ))
+          : null,
     );
 
     // Initialize all stack frames.
@@ -241,14 +240,13 @@ class CpuProfileData with Serializable {
   ) {
     // Each sample in [subSamples] will have the leaf stack
     // frame id for a cpu sample within [subTimeRange].
-    final subSamples =
-        superProfile.cpuSamples
-            .where(
-              (sample) => subTimeRange.contains(
-                Duration(microseconds: sample.timestampMicros!),
-              ),
-            )
-            .toList();
+    final subSamples = superProfile.cpuSamples
+        .where(
+          (sample) => subTimeRange.contains(
+            Duration(microseconds: sample.timestampMicros!),
+          ),
+        )
+        .toList();
 
     final subStackFrames = <String, CpuStackFrame>{};
     for (final sample in subSamples) {
@@ -348,10 +346,9 @@ class CpuProfileData with Serializable {
             profileMetaData: metaData,
             parentId: parentId,
           );
-          final parentStackFrameJson =
-              parentId != null
-                  ? originalData.stackFrames[currentStackFrame.parentId]
-                  : null;
+          final parentStackFrameJson = parentId != null
+              ? originalData.stackFrames[currentStackFrame.parentId]
+              : null;
           updatedId = parentId;
           currentStackFrame = parentStackFrameJson;
         }
@@ -384,12 +381,9 @@ class CpuProfileData with Serializable {
       return CpuProfileData.empty();
     }
 
-    final samplesWithTag =
-        originalData.cpuSamples
-            .where(
-              (sample) => (useUserTag ? sample.userTag : sample.vmTag) == tag,
-            )
-            .toList();
+    final samplesWithTag = originalData.cpuSamples
+        .where((sample) => (useUserTag ? sample.userTag : sample.vmTag) == tag)
+        .toList();
     assert(samplesWithTag.isNotEmpty);
 
     final microsPerSample = originalData.profileMetaData.samplePeriod;
@@ -400,15 +394,13 @@ class CpuProfileData with Serializable {
       // for this profile data, and the samples included in this data could be
       // sparse over the original profile's time range, so true start and end
       // times wouldn't be helpful.
-      time:
-          TimeRange()
-            ..start = const Duration()
-            ..end = Duration(
-              microseconds:
-                  microsPerSample.isInfinite
-                      ? 0
-                      : (newSampleCount * microsPerSample).round(),
-            ),
+      time: TimeRange()
+        ..start = const Duration()
+        ..end = Duration(
+          microseconds: microsPerSample.isInfinite
+              ? 0
+              : (newSampleCount * microsPerSample).round(),
+        ),
     );
 
     final stackFramesWithTag = <String, CpuStackFrame>{};
@@ -423,8 +415,9 @@ class CpuProfileData with Serializable {
           profileMetaData: metaData,
         );
         final parentId = currentStackFrame.parentId;
-        final parentStackFrameJson =
-            parentId != null ? originalData.stackFrames[parentId] : null;
+        final parentStackFrameJson = parentId != null
+            ? originalData.stackFrames[parentId]
+            : null;
         currentId = parentId;
         currentStackFrame = parentStackFrameJson;
       }
@@ -506,15 +499,13 @@ class CpuProfileData with Serializable {
       // for this profile data, and the samples included in this data could be
       // sparse over the original profile's time range, so true start and end
       // times wouldn't be helpful.
-      time:
-          TimeRange()
-            ..start = const Duration()
-            ..end = Duration(
-              microseconds:
-                  microsPerSample.isInfinite || microsPerSample.isNaN
-                      ? 0
-                      : (filteredCpuSamples.length * microsPerSample).round(),
-            ),
+      time: TimeRange()
+        ..start = const Duration()
+        ..end = Duration(
+          microseconds: microsPerSample.isInfinite || microsPerSample.isNaN
+              ? 0
+              : (filteredCpuSamples.length * microsPerSample).round(),
+        ),
     );
 
     void walkAndFilter(CpuStackFrame stackFrame) {
@@ -834,8 +825,8 @@ class CpuSampleEvent extends ChromeTraceEvent {
 
   factory CpuSampleEvent.fromJson(Map<String, Object?> traceJson) {
     final leafId = traceJson[CpuProfileData.stackFrameIdKey]! as String;
-    final args =
-        (traceJson[ChromeTraceEvent.argsKey] as Map?)?.cast<String, Object?>();
+    final args = (traceJson[ChromeTraceEvent.argsKey] as Map?)
+        ?.cast<String, Object?>();
     final userTag = args?[CpuProfileData.userTagKey] as String?;
     final vmTag = args?[CpuProfileData.vmTagKey] as String?;
     return CpuSampleEvent(
@@ -963,27 +954,24 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// samples are being grouped by tag.
   final bool isTag;
 
-  bool get isNative =>
-      _isNative ??=
-          id != CpuProfileData.rootId &&
-          packageUri.isEmpty &&
-          !name.startsWith(PackagePrefixes.flutterEngine) &&
-          !isTag;
+  bool get isNative => _isNative ??=
+      id != CpuProfileData.rootId &&
+      packageUri.isEmpty &&
+      !name.startsWith(PackagePrefixes.flutterEngine) &&
+      !isTag;
 
   bool? _isNative;
 
-  bool get isDartCore =>
-      _isDartCore ??=
-          packageUri.startsWith(PackagePrefixes.dart) &&
-          !packageUri.startsWith(PackagePrefixes.dartUi);
+  bool get isDartCore => _isDartCore ??=
+      packageUri.startsWith(PackagePrefixes.dart) &&
+      !packageUri.startsWith(PackagePrefixes.dartUi);
 
   bool? _isDartCore;
 
-  bool get isFlutterCore =>
-      _isFlutterCore ??=
-          packageUri.startsWith(PackagePrefixes.flutterPackage) ||
-          name.startsWith(PackagePrefixes.flutterEngine) ||
-          packageUri.startsWith(PackagePrefixes.dartUi);
+  bool get isFlutterCore => _isFlutterCore ??=
+      packageUri.startsWith(PackagePrefixes.flutterPackage) ||
+      name.startsWith(PackagePrefixes.flutterEngine) ||
+      packageUri.startsWith(PackagePrefixes.dartUi);
 
   bool? _isFlutterCore;
 
@@ -1206,8 +1194,9 @@ class _CpuProfileTimelineTree {
     // TODO(bkonyi): handle truncated?
     for (final sample in cpuSamples.samples ?? <vm_service.CpuSample>[]) {
       current = root;
-      final stack =
-          asCodeProfileTimelineTree ? sample.codeStack : sample.stack!;
+      final stack = asCodeProfileTimelineTree
+          ? sample.codeStack
+          : sample.stack!;
       // Build an inclusive trie.
       for (final index in stack.reversed) {
         current = current._getChild(index);
@@ -1264,14 +1253,13 @@ class _CpuProfileTimelineTree {
     return null;
   }
 
-  String? get resolvedUrl =>
-      isCodeTree && _function is vm_service.FuncRef?
-          ?
-          // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
-          // critical since this is only displayed when VM developer mode is
-          // enabled.
-          (_function as vm_service.FuncRef?)?.location?.script?.uri
-          : samples.functions?[index].resolvedUrl;
+  String? get resolvedUrl => isCodeTree && _function is vm_service.FuncRef?
+      ?
+        // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
+        // critical since this is only displayed when VM developer mode is
+        // enabled.
+        (_function as vm_service.FuncRef?)?.location?.script?.uri
+      : samples.functions?[index].resolvedUrl;
 
   int? get sourceLine {
     final function = _function;

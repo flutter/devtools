@@ -153,10 +153,9 @@ class TimelineStreamManager with DisposerMixin {
   /// Sends an update to the VM service that the new recorded value for [stream]
   /// should match [value].
   Future<void> updateTimelineStream(TimelineStream stream, bool value) async {
-    final recordedStreamNames =
-        _streams.keys
-            .where((streamName) => _streams[streamName]!.recorded.value)
-            .toList();
+    final recordedStreamNames = _streams.keys
+        .where((streamName) => _streams[streamName]!.recorded.value)
+        .toList();
     final alreadyBeingRecorded = recordedStreamNames.contains(stream.name);
     if (alreadyBeingRecorded && !value) {
       recordedStreamNames.remove(stream.name);

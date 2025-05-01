@@ -569,9 +569,8 @@ class DomainColumn extends ColumnData<LinkData>
       children: [
         const Text('Domain'),
         PopupMenuButton<SortingOption>(
-          itemBuilder:
-              (BuildContext context) =>
-                  _buildPopupMenuSortingEntries(controller, isPath: false),
+          itemBuilder: (BuildContext context) =>
+              _buildPopupMenuSortingEntries(controller, isPath: false),
           child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
@@ -592,11 +591,11 @@ class DomainColumn extends ColumnData<LinkData>
     return dataObject.domain == null
         ? Text('missing domain', style: Theme.of(context).errorTextStyle)
         : _ErrorAwareText(
-          isError: dataObject.domainErrors.isNotEmpty,
-          controller: controller,
-          text: dataObject.domain!,
-          link: dataObject,
-        );
+            isError: dataObject.domainErrors.isNotEmpty,
+            controller: controller,
+            text: dataObject.domain!,
+            link: dataObject,
+          );
   }
 
   @override
@@ -632,9 +631,8 @@ class PathColumn extends ColumnData<LinkData>
       children: [
         const Text('Path'),
         PopupMenuButton<SortingOption>(
-          itemBuilder:
-              (BuildContext context) =>
-                  _buildPopupMenuSortingEntries(controller, isPath: true),
+          itemBuilder: (BuildContext context) =>
+              _buildPopupMenuSortingEntries(controller, isPath: true),
           child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
@@ -908,15 +906,13 @@ PopupMenuEntry<FilterOption> _buildPopupMenuFilterEntry(
       children: [
         ValueListenableBuilder<DisplayOptions>(
           valueListenable: controller.displayOptionsNotifier,
-          builder:
-              (context, option, _) => Checkbox(
-                value: option.filters.contains(filterOption),
-                onChanged:
-                    (bool? checked) => controller.updateDisplayOptions(
-                      removedFilter: checked! ? null : filterOption,
-                      addedFilter: checked ? filterOption : null,
-                    ),
-              ),
+          builder: (context, option, _) => Checkbox(
+            value: option.filters.contains(filterOption),
+            onChanged: (bool? checked) => controller.updateDisplayOptions(
+              removedFilter: checked! ? null : filterOption,
+              addedFilter: checked ? filterOption : null,
+            ),
+          ),
         ),
         Text(filterOption.description),
       ],

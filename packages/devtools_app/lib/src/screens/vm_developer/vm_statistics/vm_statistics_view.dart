@@ -120,8 +120,8 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
             vm == null
                 ? null
                 : formatDateTime(
-                  DateTime.fromMillisecondsSinceEpoch(vm.startTime!),
-                ),
+                    DateTime.fromMillisecondsSinceEpoch(vm.startTime!),
+                  ),
           ),
           selectableTextBuilderMapEntry('Profiler Mode', vm?.profilerMode),
           selectableTextBuilderMapEntry(
@@ -281,8 +281,9 @@ class IsolatesPreviewWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = systemIsolates ? 'System Isolates' : 'Isolates';
-    final isolates =
-        systemIsolates ? controller.systemIsolates : controller.isolates;
+    final isolates = systemIsolates
+        ? controller.systemIsolates
+        : controller.isolates;
     return OutlineDecoration(
       showLeft: false,
       showTop: !systemIsolates,

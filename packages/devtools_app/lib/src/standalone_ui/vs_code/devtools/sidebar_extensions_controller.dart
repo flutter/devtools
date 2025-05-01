@@ -163,16 +163,15 @@ class SidebarDevToolsExtensionsController extends DisposableController
   // watch event from the IDE or analysis server to signal when any
   // package_config.json file in the workspace changes.
   Future<void> _detectExtensions(Uri? projectRootUri) async {
-    final extensionService =
-        projectRootUri == null
-            ?
-            // A null [projectRootUri] indicates that this is an extensions lookup
-            // for the entire workspace, not a debug session with a fixed root URI.
-            ExtensionService(ignoreServiceConnection: true)
-            : ExtensionService(
-              fixedAppRoot: projectRootUri,
-              ignoreServiceConnection: true,
-            );
+    final extensionService = projectRootUri == null
+        ?
+          // A null [projectRootUri] indicates that this is an extensions lookup
+          // for the entire workspace, not a debug session with a fixed root URI.
+          ExtensionService(ignoreServiceConnection: true)
+        : ExtensionService(
+            fixedAppRoot: projectRootUri,
+            ignoreServiceConnection: true,
+          );
     assert(
       !_extensionServiceByRootUri.containsKey(projectRootUri),
       'The initialization for the ExtensionService for root uri '
@@ -210,13 +209,12 @@ class SidebarDevToolsExtensionsController extends DisposableController
       extensionType: 'all',
     );
 
-    final deduped =
-        allExtensions
-            .where(
-              (ext) =>
-                  !_ignoredExtensionsByHashCode.contains(identityHashCode(ext)),
-            )
-            .toList();
+    final deduped = allExtensions
+        .where(
+          (ext) =>
+              !_ignoredExtensionsByHashCode.contains(identityHashCode(ext)),
+        )
+        .toList();
     _uniqueExtensions.value = deduped..sort();
   }
 

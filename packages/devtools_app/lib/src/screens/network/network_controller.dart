@@ -70,8 +70,9 @@ class NetworkController extends DevToolsScreenController
 
   Future<String?> exportAsHarFile() async {
     await fetchFullDataBeforeExport();
-    _httpRequests =
-        filteredData.value.whereType<DartIOHttpRequestData>().toList();
+    _httpRequests = filteredData.value
+        .whereType<DartIOHttpRequestData>()
+        .toList();
 
     if (_httpRequests.isNullOrEmpty) {
       debugPrint('No valid request data to export');
@@ -507,11 +508,10 @@ class NetworkController extends DevToolsScreenController
     );
   }
 
-  Future<void> fetchFullDataBeforeExport() =>
-      filteredData.value
-          .whereType<DartIOHttpRequestData>()
-          .map((item) => item.getFullRequestData())
-          .wait;
+  Future<void> fetchFullDataBeforeExport() => filteredData.value
+      .whereType<DartIOHttpRequestData>()
+      .map((item) => item.getFullRequestData())
+      .wait;
 
   @override
   FutureOr<void> releaseMemory({bool partial = false}) async {

@@ -88,8 +88,8 @@ void main() {
           const testPubRootDirectory = '/alpha/bravo/charlie';
 
           // Empty the pubroot directories.
-          final initialPubRootDirectories =
-              await inspectorServiceLocal.getPubRootDirectories();
+          final initialPubRootDirectories = await inspectorServiceLocal
+              .getPubRootDirectories();
           await inspectorServiceLocal.removePubRootDirectories(
             initialPubRootDirectories!,
           );
@@ -128,9 +128,8 @@ void main() {
               await inspectorServiceLocal.isWidgetCreationTracked(),
               isTrue,
             );
-            final rootLibrary =
-                await serviceConnection.serviceManager
-                    .mainIsolateRootLibraryUriAsString();
+            final rootLibrary = await serviceConnection.serviceManager
+                .mainIsolateRootLibraryUriAsString();
             await inspectorServiceLocal.addPubRootDirectories([rootLibrary!]);
             final rootDirectories =
                 await inspectorServiceLocal.getPubRootDirectories() ??
@@ -205,8 +204,8 @@ void main() {
           // These tests are moot if widget creation is not tracked.
           expect(await inspectorServiceLocal.isWidgetCreationTracked(), isTrue);
           await inspectorServiceLocal.addPubRootDirectories([]);
-          final originalRootDirectories =
-              await inspectorServiceLocal.getPubRootDirectories();
+          final originalRootDirectories = await inspectorServiceLocal
+              .getPubRootDirectories();
           try {
             await inspectorServiceLocal.addPubRootDirectories([
               '/usr/me/clients/google3/foo/bar/baz/lib/src/bla',
@@ -266,11 +265,10 @@ void main() {
         test('isSummaryTree = true', () async {
           await env.setupEnvironment();
           final group = inspectorService!.createObjectGroup('test-group');
-          final root =
-              (await group.getRoot(
-                FlutterTreeType.widget,
-                isSummaryTree: true,
-              ))!;
+          final root = (await group.getRoot(
+            FlutterTreeType.widget,
+            isSummaryTree: true,
+          ))!;
           // Tree only contains widgets from local app.
           expect(
             treeToDebugString(root),
@@ -327,18 +325,19 @@ void main() {
 
           // First get a node in the summary tree:
           final group = inspectorService!.createObjectGroup('test-group');
-          final root =
-              (await group.getRoot(
-                FlutterTreeType.widget,
-                isSummaryTree: true,
-              ))!;
-          RemoteDiagnosticsNode nodeInSummaryTree =
-              findNodeMatching(root, 'MaterialApp')!;
+          final root = (await group.getRoot(
+            FlutterTreeType.widget,
+            isSummaryTree: true,
+          ))!;
+          RemoteDiagnosticsNode nodeInSummaryTree = findNodeMatching(
+            root,
+            'MaterialApp',
+          )!;
           expect(nodeInSummaryTree, isNotNull);
 
           // Then get the details tree for the node in the summary tree:
-          RemoteDiagnosticsNode nodeInDetailsTree =
-              (await group.getDetailsSubtree(nodeInSummaryTree))!;
+          RemoteDiagnosticsNode nodeInDetailsTree = (await group
+              .getDetailsSubtree(nodeInSummaryTree))!;
 
           // When flutter rolls, this string may sometimes change due to
           // implementation details.
@@ -354,8 +353,9 @@ void main() {
             equalsIgnoringHashCodes('Text\n'),
           );
 
-          nodeInDetailsTree =
-              (await group.getDetailsSubtree(nodeInSummaryTree))!;
+          nodeInDetailsTree = (await group.getDetailsSubtree(
+            nodeInSummaryTree,
+          ))!;
 
           expect(
             treeToDebugString(nodeInDetailsTree),
@@ -370,8 +370,10 @@ void main() {
           );
 
           await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
-          final selection =
-              (await group.getSelection(null, FlutterTreeType.widget))!;
+          final selection = (await group.getSelection(
+            null,
+            FlutterTreeType.widget,
+          ))!;
           expect(selection, isNotNull);
           expect(selection.valueRef, equals(nodeInDetailsTree.valueRef));
           expect(

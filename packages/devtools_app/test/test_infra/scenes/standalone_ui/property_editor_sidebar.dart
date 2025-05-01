@@ -66,17 +66,16 @@ class _PropertyEditorState extends State<_PropertyEditorSidebar> {
   Widget build(BuildContext context) {
     return IdeThemedMaterialApp(
       home: Scaffold(
-        body:
-            clientLog != null && clientDtd != null && editor != null
-                ? MockEditorWidget(
-                  editor: editor!,
-                  clientLog: clientLog!,
-                  child: PropertyEditorPanel(clientDtd!),
-                )
-                : _DtdUriForm(
-                  onSaved: _connectToDtd,
-                  formKey: GlobalKey<FormState>(),
-                ),
+        body: clientLog != null && clientDtd != null && editor != null
+            ? MockEditorWidget(
+                editor: editor!,
+                clientLog: clientLog!,
+                child: PropertyEditorPanel(clientDtd!),
+              )
+            : _DtdUriForm(
+                onSaved: _connectToDtd,
+                formKey: GlobalKey<FormState>(),
+              ),
       ),
     );
   }

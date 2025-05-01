@@ -75,20 +75,20 @@ class MethodTableController extends DisposableController
         action: (CpuStackFrame frame) {
           final parentNode =
               frame.parent != null &&
-                      frame.parentId != CpuProfileData.rootId &&
-                      !frame.parent!.isTag
-                  // Since we are performing a DFS, the parent should always be in
-                  // the map.
-                  ? methodMap[frame.parent!.methodTableId]!
-                  : null;
+                  frame.parentId != CpuProfileData.rootId &&
+                  !frame.parent!.isTag
+              // Since we are performing a DFS, the parent should always be in
+              // the map.
+              ? methodMap[frame.parent!.methodTableId]!
+              : null;
 
           var graphNode = MethodTableGraphNode.fromStackFrame(frame);
           final existingNode = methodMap[frame.methodTableId];
           if (existingNode != null) {
             // Do not merge the total time if the [existingNode] already counted
             // the total time for one of [frame]'s ancestors.
-            final shouldMergeTotalTime =
-                !existingNode.stackFrameIds.containsAny(frame.ancestorIds);
+            final shouldMergeTotalTime = !existingNode.stackFrameIds
+                .containsAny(frame.ancestorIds);
             // If the graph node already exists, merge the new one with the old
             // one and use the existing instance.
             existingNode.merge(graphNode, mergeTotalTime: shouldMergeTotalTime);

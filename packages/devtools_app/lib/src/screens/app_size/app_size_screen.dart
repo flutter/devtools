@@ -345,20 +345,19 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
     return Column(
       children: [
         Expanded(
-          child:
-              analysisRootLocal == null
-                  ? _buildImportFileView()
-                  : _AppSizeView(
-                    title: _generateSingleFileHeaderText(),
-                    treemapKey: AppSizeScreen.analysisViewTreemapKey,
-                    treemapRoot: analysisRootLocal,
-                    onRootChangedCallback: controller.changeAnalysisRoot,
-                    analysisTable: AppSizeAnalysisTable(
-                      rootNode: analysisRootLocal.root,
-                      controller: controller,
-                    ),
-                    callGraphRoot: controller.analysisCallGraphRoot.value,
+          child: analysisRootLocal == null
+              ? _buildImportFileView()
+              : _AppSizeView(
+                  title: _generateSingleFileHeaderText(),
+                  treemapKey: AppSizeScreen.analysisViewTreemapKey,
+                  treemapRoot: analysisRootLocal,
+                  onRootChangedCallback: controller.changeAnalysisRoot,
+                  analysisTable: AppSizeAnalysisTable(
+                    rootNode: analysisRootLocal.root,
+                    controller: controller,
                   ),
+                  callGraphRoot: controller.analysisCallGraphRoot.value,
+                ),
         ),
       ],
     );
@@ -366,10 +365,9 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
 
   String _generateSingleFileHeaderText() {
     final analysisFile = controller.analysisJsonFile.value!;
-    String output =
-        analysisFile.isAnalyzeSizeFile
-            ? 'Total size analysis: '
-            : 'Dart AOT snapshot: ';
+    String output = analysisFile.isAnalyzeSizeFile
+        ? 'Total size analysis: '
+        : 'Dart AOT snapshot: ';
     output += analysisFile.displayText;
     return output;
   }
@@ -381,26 +379,26 @@ class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
         return processing
             ? const CenteredMessage(message: AppSizeScreen.loadingMessage)
             : Column(
-              children: [
-                Flexible(
-                  child: FileImportContainer(
-                    instructions: AnalysisView.importInstructions,
-                    actionText: 'Analyze Size',
-                    gaScreen: gac.appSize,
-                    gaSelectionImport: gac.importFileSingle,
-                    gaSelectionAction: gac.analyzeSingle,
-                    onAction: (jsonFile) {
-                      controller.loadTreeFromJsonFile(
-                        jsonFile: jsonFile,
-                        onError: (error) {
-                          if (mounted) notificationService.push(error);
-                        },
-                      );
-                    },
+                children: [
+                  Flexible(
+                    child: FileImportContainer(
+                      instructions: AnalysisView.importInstructions,
+                      actionText: 'Analyze Size',
+                      gaScreen: gac.appSize,
+                      gaSelectionImport: gac.importFileSingle,
+                      gaSelectionAction: gac.analyzeSingle,
+                      onAction: (jsonFile) {
+                        controller.loadTreeFromJsonFile(
+                          jsonFile: jsonFile,
+                          onError: (error) {
+                            if (mounted) notificationService.push(error);
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
-            );
+                ],
+              );
       },
     );
   }
@@ -451,17 +449,16 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
     return Column(
       children: [
         Expanded(
-          child:
-              diffRootLocal == null
-                  ? _buildImportDiffView()
-                  : _AppSizeView(
-                    title: _generateDualFileHeaderText(),
-                    treemapKey: AppSizeScreen.diffViewTreemapKey,
-                    treemapRoot: diffRootLocal,
-                    onRootChangedCallback: controller.changeDiffRoot,
-                    analysisTable: AppSizeDiffTable(rootNode: diffRootLocal),
-                    callGraphRoot: controller.diffCallGraphRoot.value,
-                  ),
+          child: diffRootLocal == null
+              ? _buildImportDiffView()
+              : _AppSizeView(
+                  title: _generateDualFileHeaderText(),
+                  treemapKey: AppSizeScreen.diffViewTreemapKey,
+                  treemapRoot: diffRootLocal,
+                  onRootChangedCallback: controller.changeDiffRoot,
+                  analysisTable: AppSizeDiffTable(rootNode: diffRootLocal),
+                  callGraphRoot: controller.diffCallGraphRoot.value,
+                ),
         ),
       ],
     );
@@ -471,10 +468,9 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
     final oldFile = controller.oldDiffJsonFile.value!;
     final newFile = controller.newDiffJsonFile.value!;
     String output = 'Diffing ';
-    output +=
-        oldFile.isAnalyzeSizeFile
-            ? 'total size analyses: '
-            : 'Dart AOT snapshots: ';
+    output += oldFile.isAnalyzeSizeFile
+        ? 'total size analyses: '
+        : 'Dart AOT snapshots: ';
     output += oldFile.displayText;
     output += ' (OLD)    vs    (NEW) ';
     output += newFile.displayText;
@@ -488,31 +484,30 @@ class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
         return processing
             ? const CenteredMessage(message: AppSizeScreen.loadingMessage)
             : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: DualFileImportContainer(
-                    firstFileTitle: 'Old',
-                    secondFileTitle: 'New',
-                    // TODO(kenz): perhaps bold "original" and "modified".
-                    firstInstructions: DiffView.importOldInstructions,
-                    secondInstructions: DiffView.importNewInstructions,
-                    actionText: 'Analyze Diff',
-                    gaScreen: gac.appSize,
-                    gaSelectionImportFirst: gac.importFileDiffFirst,
-                    gaSelectionImportSecond: gac.importFileDiffSecond,
-                    gaSelectionAction: gac.analyzeDiff,
-                    onAction:
-                        (oldFile, newFile, onError) =>
-                            controller.loadDiffTreeFromJsonFiles(
-                              oldFile: oldFile,
-                              newFile: newFile,
-                              onError: onError,
-                            ),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: DualFileImportContainer(
+                      firstFileTitle: 'Old',
+                      secondFileTitle: 'New',
+                      // TODO(kenz): perhaps bold "original" and "modified".
+                      firstInstructions: DiffView.importOldInstructions,
+                      secondInstructions: DiffView.importNewInstructions,
+                      actionText: 'Analyze Diff',
+                      gaScreen: gac.appSize,
+                      gaSelectionImportFirst: gac.importFileDiffFirst,
+                      gaSelectionImportSecond: gac.importFileDiffSecond,
+                      gaSelectionAction: gac.analyzeDiff,
+                      onAction: (oldFile, newFile, onError) =>
+                          controller.loadDiffTreeFromJsonFiles(
+                            oldFile: oldFile,
+                            newFile: newFile,
+                            onError: onError,
+                          ),
+                    ),
                   ),
-                ),
-              ],
-            );
+                ],
+              );
       },
     );
   }

@@ -316,10 +316,9 @@ void main() {
       'should render StoryOfYourFlexWidget',
       windowSize,
       (WidgetTester tester) async {
-        final controller =
-            TestInspectorV2Controller()
-              ..setSelectedNode(treeNode)
-              ..setSelectedDiagnostic(diagnostic);
+        final controller = TestInspectorV2Controller()
+          ..setSelectedNode(treeNode)
+          ..setSelectedDiagnostic(diagnostic);
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(body: WidgetDetails(controller: controller)),

@@ -37,14 +37,16 @@ Future<InstanceRef?> findInstance(
     return null;
   }
 
-  final result = (await serviceConnection.serviceManager.service!.getInstances(
-    isolateId,
-    classId,
-    preferences.memory.refLimit.value,
-  )).instances?.firstWhereOrNull(
-    (instance) =>
-        (instance is InstanceRef) && (instance.identityHashCode == hashCode),
-  );
+  final result =
+      (await serviceConnection.serviceManager.service!.getInstances(
+        isolateId,
+        classId,
+        preferences.memory.refLimit.value,
+      )).instances?.firstWhereOrNull(
+        (instance) =>
+            (instance is InstanceRef) &&
+            (instance.identityHashCode == hashCode),
+      );
 
   if (result is InstanceRef) return result;
   return null;

@@ -80,12 +80,11 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       // script's URI.
       if (libNode == null) {
         final service = serviceConnection.serviceManager.service!;
-        final isolate =
-            serviceConnection
-                .serviceManager
-                .isolateManager
-                .selectedIsolate
-                .value!;
+        final isolate = serviceConnection
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value!;
         final libRef = serviceConnection.serviceManager.isolateManager
             .isolateState(isolate)
             .isolateNow!
@@ -168,10 +167,9 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // Clear out the _childrenAsMap map.
     root._trimChildrenAsMapEntries();
 
-    final processed =
-        root.children
-            .map((e) => e._collapseSingleChildDirectoryNodes())
-            .toList();
+    final processed = root.children
+        .map((e) => e._collapseSingleChildDirectoryNodes())
+        .toList();
     root.children.clear();
     root.addAllChildren(processed);
 
@@ -185,14 +183,13 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // Place the root library's parent node at the top of the explorer if it's
     // part of a package. Otherwise, it's a file path and its directory should
     // appear near the top of the list anyway.
-    final rootLibUri =
-        serviceConnection
-            .serviceManager
-            .isolateManager
-            .mainIsolateState
-            ?.isolateNow
-            ?.rootLib
-            ?.uri;
+    final rootLibUri = serviceConnection
+        .serviceManager
+        .isolateManager
+        .mainIsolateState
+        ?.isolateNow
+        ?.rootLib
+        ?.uri;
     if (rootLibUri != null) {
       if (rootLibUri.startsWith('package:') ||
           rootLibUri.startsWith('google3:')) {
@@ -301,8 +298,9 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       }
       return this;
     }
-    final updated =
-        children.map((e) => e._collapseSingleChildDirectoryNodes()).toList();
+    final updated = children
+        .map((e) => e._collapseSingleChildDirectoryNodes())
+        .toList();
     children.clear();
     addAllChildren(updated);
     return this;
@@ -344,10 +342,9 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
 
     if (scriptRef != null) {
       final fetchedScript = await scriptManager.getScript(scriptRef);
-      final position =
-          tokenPos == 0
-              ? null
-              : SourcePosition.calculatePosition(fetchedScript!, tokenPos!);
+      final position = tokenPos == 0
+          ? null
+          : SourcePosition.calculatePosition(fetchedScript!, tokenPos!);
 
       location = ScriptLocation(scriptRef, location: position);
     }

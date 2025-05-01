@@ -84,8 +84,9 @@ class JsonToServiceCache {
           id: _nextId(),
           offset: offset,
           count: count,
-          associations:
-              obj.associations!.getRange(offset, offset + count).toList(),
+          associations: obj.associations!
+              .getRange(offset, offset + count)
+              .toList(),
         );
         return map;
       }

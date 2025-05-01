@@ -64,13 +64,12 @@ class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
           ],
         ),
         Expanded(
-          child:
-              showCallGraph
-                  ? CallGraphView(node: widget.callGraphRoot)
-                  : DominatorTree(
-                    dominatorTreeRoot: dominatorTreeRoot,
-                    selectedNode: widget.callGraphRoot,
-                  ),
+          child: showCallGraph
+              ? CallGraphView(node: widget.callGraphRoot)
+              : DominatorTree(
+                  dominatorTreeRoot: dominatorTreeRoot,
+                  selectedNode: widget.callGraphRoot,
+                ),
         ),
       ],
     );
@@ -228,10 +227,9 @@ class _CallGraphTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return FlatTable<CallGraphNode>(
       keyFactory: (CallGraphNode node) => ValueKey<CallGraphNode>(node),
-      data:
-          tableType == _CallGraphTableType.from
-              ? selectedNode.pred
-              : selectedNode.succ,
+      data: tableType == _CallGraphTableType.from
+          ? selectedNode.pred
+          : selectedNode.succ,
       dataKey: tableType.dataKey,
       columns: [tableColumn],
       onItemSelected: onNodeSelected,
@@ -315,10 +313,9 @@ class _PackageColumn extends TreeColumnData<DominatorTreeNode> {
 
 extension CallGraphNodeDisplay on CallGraphNode {
   String get display {
-    final displayText =
-        data is ProgramInfoNode
-            ? (data as ProgramInfoNode).qualifiedName
-            : data.toString();
+    final displayText = data is ProgramInfoNode
+        ? (data as ProgramInfoNode).qualifiedName
+        : data.toString();
     if (displayText == '@shared') {
       // Special case '@shared' because this is the name of the call graph root,
       // and '@root' has a more intuitive meaning.

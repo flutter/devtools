@@ -397,9 +397,8 @@ class _TestController extends DisposableController
     SettingFilter<_TestDataClass, int>(
       id: 'min-rating-level',
       name: 'Hide items below the minimum rating level',
-      includeCallback:
-          (_TestDataClass element, int currentFilterValue) =>
-              element.rating >= currentFilterValue,
+      includeCallback: (_TestDataClass element, int currentFilterValue) =>
+          element.rating >= currentFilterValue,
       enabledCallback: (int filterValue) => filterValue > 1,
       possibleValues: [1, 2, 3, 4, 5],
       defaultValue: 2,

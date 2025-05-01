@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+// ignore_for_file: prefer-correct-type-name
+
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
@@ -27,8 +29,8 @@ extension on Performance {
 
   Future<_UserAgentSpecificMemory>? measureUserAgentSpecificMemory() =>
       has('measureUserAgentSpecificMemory')
-          ? _measureUserAgentSpecificMemory().toDart
-          : null;
+      ? _measureUserAgentSpecificMemory().toDart
+      : null;
 }
 
 @JS()

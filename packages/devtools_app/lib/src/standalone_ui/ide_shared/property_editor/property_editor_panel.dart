@@ -61,11 +61,8 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
       alignment: Alignment.topCenter,
       child: FutureBuilder(
         future: _editor,
-        builder:
-            (context, snapshot) => switch ((
-              snapshot.connectionState,
-              snapshot.data,
-            )) {
+        builder: (context, snapshot) =>
+            switch ((snapshot.connectionState, snapshot.data)) {
               (ConnectionState.done, final editor?) =>
                 _PropertyEditorConnectedPanel(
                   editor,

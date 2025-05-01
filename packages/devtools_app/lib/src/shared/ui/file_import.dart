@@ -84,27 +84,26 @@ class OpenSaveButtonGroup extends StatelessWidget {
               ),
               child:
                   saveFormats.length == 1 &&
-                          saveFormats.first == SaveFormat.devtools
-                      ? _SimpleOpenSaveButton(
-                        icon: Icons.file_download,
-                        tooltip: 'Save this screen\'s data for offline viewing',
-                        roundedLeftBorder: false,
-                        roundedRightBorder: true,
-                        onPressed:
-                            onSave != null
-                                ? () {
-                                  ga.select(screenId, gac.saveFile);
-                                  onSave!.call(SaveFormat.devtools);
-                                }
-                                : null,
-                      )
-                      : _DropdownSaveButton(
-                        screenId: screenId,
-                        onSave: onSave,
-                        saveFormats: saveFormats,
-                        gaItemForSaveFormatSelection:
-                            gaItemForSaveFormatSelection,
-                      ),
+                      saveFormats.first == SaveFormat.devtools
+                  ? _SimpleOpenSaveButton(
+                      icon: Icons.file_download,
+                      tooltip: 'Save this screen\'s data for offline viewing',
+                      roundedLeftBorder: false,
+                      roundedRightBorder: true,
+                      onPressed: onSave != null
+                          ? () {
+                              ga.select(screenId, gac.saveFile);
+                              onSave!.call(SaveFormat.devtools);
+                            }
+                          : null,
+                    )
+                  : _DropdownSaveButton(
+                      screenId: screenId,
+                      onSave: onSave,
+                      saveFormats: saveFormats,
+                      gaItemForSaveFormatSelection:
+                          gaItemForSaveFormatSelection,
+                    ),
             ),
           ],
         ),
@@ -204,15 +203,14 @@ class __DropdownSaveButtonState extends State<_DropdownSaveButton> {
               )
               .toList();
         },
-        items:
-            widget.saveFormats
-                .map(
-                  (f) => DropdownMenuItem<SaveFormat>(
-                    value: f,
-                    child: Text(f.display),
-                  ),
-                )
-                .toList(),
+        items: widget.saveFormats
+            .map(
+              (f) => DropdownMenuItem<SaveFormat>(
+                value: f,
+                child: Text(f.display),
+              ),
+            )
+            .toList(),
       ),
     );
   }
@@ -373,10 +371,9 @@ class _FileImportContainerState extends State<FileImportContainer> {
               gaSelection: widget.gaSelectionAction!,
               label: widget.actionText!,
               elevated: true,
-              onPressed:
-                  importedFile != null
-                      ? () => widget.onAction!(importedFile!)
-                      : null,
+              onPressed: importedFile != null
+                  ? () => widget.onAction!(importedFile!)
+                  : null,
             ),
           ],
         ),
@@ -600,14 +597,13 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
               label: widget.actionText,
               icon: Icons.highlight,
               elevated: true,
-              onPressed:
-                  firstImportedFile != null && secondImportedFile != null
-                      ? () => widget.onAction(
-                        firstImportedFile!,
-                        secondImportedFile!,
-                        (error) => notificationService.push(error),
-                      )
-                      : null,
+              onPressed: firstImportedFile != null && secondImportedFile != null
+                  ? () => widget.onAction(
+                      firstImportedFile!,
+                      secondImportedFile!,
+                      (error) => notificationService.push(error),
+                    )
+                  : null,
             ),
           ],
         ),

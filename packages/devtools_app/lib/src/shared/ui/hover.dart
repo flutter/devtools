@@ -424,10 +424,9 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     HoverCard? spinnerHoverCard;
     final hoverCardDataFuture = asyncGenerateHoverCardData(
       event: event,
-      isHoverStale:
-          () =>
-              spinnerHoverCard != null &&
-              !_hoverCardController.isHoverCardStillActive(spinnerHoverCard),
+      isHoverStale: () =>
+          spinnerHoverCard != null &&
+          !_hoverCardController.isHoverCardStillActive(spinnerHoverCard),
     );
     final hoverCardDataCompleter = _hoverCardDataCompleter(hoverCardDataFuture);
     // If we have set the async hover card to show up only after a timeout,

@@ -26,15 +26,14 @@ void main() {
           ExportController.generateFileName(time: t, type: ExportFileType.json),
     );
 
-    final sortedByFileName =
-        dates
-            .map(
-              (t) => ExportController.generateFileName(
-                time: t,
-                type: ExportFileType.json,
-              ),
-            )
-            .sorted();
+    final sortedByFileName = dates
+        .map(
+          (t) => ExportController.generateFileName(
+            time: t,
+            type: ExportFileType.json,
+          ),
+        )
+        .sorted();
 
     expect(sortedByTime, sortedByFileName);
   });

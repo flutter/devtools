@@ -27,10 +27,9 @@ class FlutterFrame {
     final timeStart = Duration(microseconds: json[startTimeKey]! as int);
     final timeEnd =
         timeStart + Duration(microseconds: json[elapsedKey]! as int);
-    final frameTime =
-        TimeRange()
-          ..start = timeStart
-          ..end = timeEnd;
+    final frameTime = TimeRange()
+      ..start = timeStart
+      ..end = timeEnd;
     return FlutterFrame._(
       id: json[numberKey]! as int,
       timeFromFrameTiming: frameTime,

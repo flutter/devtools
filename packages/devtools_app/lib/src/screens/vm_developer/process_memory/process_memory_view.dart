@@ -193,9 +193,8 @@ class _ProcessMemoryTree extends StatelessWidget {
       valueListenable: controller.treeRoot,
       builder: (context, root, _) {
         return TreeTable<TreemapNode>(
-          keyFactory:
-              (e) =>
-                  PageStorageKey<String>('${e.name}+${e.depth}+${e.byteSize}'),
+          keyFactory: (e) =>
+              PageStorageKey<String>('${e.name}+${e.depth}+${e.byteSize}'),
           displayTreeGuidelines: true,
           dataRoots: [if (root != null) root],
           dataKey: 'process-memory-tree',

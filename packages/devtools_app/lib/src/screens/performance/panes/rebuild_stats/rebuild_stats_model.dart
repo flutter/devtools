@@ -186,8 +186,8 @@ class RebuildCountModel {
   RebuildCountModel.fromJson(Map<String, Object?> json) {
     if (json.isEmpty) return;
     locationMap.processLocationMap(json[_locationsKey] as Map<String, Object?>);
-    final frames =
-        (json[_framesKey] as List<Object?>).cast<Map<String, Object?>>();
+    final frames = (json[_framesKey] as List<Object?>)
+        .cast<Map<String, Object?>>();
     frames.forEach(processRebuildsForFrame);
   }
 

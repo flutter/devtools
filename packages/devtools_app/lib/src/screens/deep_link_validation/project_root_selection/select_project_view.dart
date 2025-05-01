@@ -50,8 +50,8 @@ class _SelectProjectViewState extends State<SelectProjectView> {
   }
 
   Future<void> _validateProject() async {
-    final packageDirectoryForMainIsolate =
-        await controller.packageDirectoryForMainIsolate();
+    final packageDirectoryForMainIsolate = await controller
+        .packageDirectoryForMainIsolate();
     if (packageDirectoryForMainIsolate != null) {
       _handleValidateProject(packageDirectoryForMainIsolate);
     }

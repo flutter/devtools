@@ -210,17 +210,16 @@ class TagStatisticsWidget extends StatelessWidget {
         title: 'Execution Time',
         roundedTopBorder: false,
         table: Flexible(
-          child:
-              controller.cpuProfilerController.profilerEnabled
-                  ? FlatTable<VMTag>(
-                    keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
-                    data: controller.tags,
-                    dataKey: 'tag-statistics',
-                    columns: _columns,
-                    defaultSortColumn: _percentage,
-                    defaultSortDirection: SortDirection.descending,
-                  )
-                  : CpuProfilerDisabled(controller.cpuProfilerController),
+          child: controller.cpuProfilerController.profilerEnabled
+              ? FlatTable<VMTag>(
+                  keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
+                  data: controller.tags,
+                  dataKey: 'tag-statistics',
+                  columns: _columns,
+                  defaultSortColumn: _percentage,
+                  defaultSortDirection: SortDirection.descending,
+                )
+              : CpuProfilerDisabled(controller.cpuProfilerController),
         ),
       ),
     );
@@ -295,29 +294,25 @@ class StackTraceViewerWidget extends StatelessWidget {
     return ValueListenableBuilder<InstanceRef?>(
       valueListenable: stackTrace,
       builder: (context, stackTrace, _) {
-        final lines =
-            stackTrace?.allocationLocation?.valueAsString
-                ?.split('\n')
-                .where((e) => e.isNotEmpty)
-                .toList();
+        final lines = stackTrace?.allocationLocation?.valueAsString
+            ?.split('\n')
+            .where((e) => e.isNotEmpty)
+            .toList();
         return VMInfoList(
           title: 'Allocation Location',
           roundedTopBorder: false,
-          table:
-              lines == null
-                  ? const Expanded(
-                    child: Center(child: Text('No port selected')),
-                  )
-                  : Flexible(
-                    child: FlatTable<String>(
-                      keyFactory: (String s) => ValueKey<String>(s),
-                      data: lines,
-                      dataKey: 'stack-trace-viewer',
-                      columns: [frame],
-                      defaultSortColumn: frame,
-                      defaultSortDirection: SortDirection.ascending,
-                    ),
+          table: lines == null
+              ? const Expanded(child: Center(child: Text('No port selected')))
+              : Flexible(
+                  child: FlatTable<String>(
+                    keyFactory: (String s) => ValueKey<String>(s),
+                    data: lines,
+                    dataKey: 'stack-trace-viewer',
+                    columns: [frame],
+                    defaultSortColumn: frame,
+                    defaultSortDirection: SortDirection.ascending,
                   ),
+                ),
         );
       },
     );
@@ -363,9 +358,8 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
                 ),
                 Flexible(
                   child: FlatTable<InstanceRef?>(
-                    keyFactory:
-                        (InstanceRef? port) =>
-                            ValueKey<String>(port!.debugName!),
+                    keyFactory: (InstanceRef? port) =>
+                        ValueKey<String>(port!.debugName!),
                     data: ports,
                     dataKey: 'isolate-ports',
                     columns: _columns,

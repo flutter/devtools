@@ -92,15 +92,14 @@ void main() {
         wrapSimple(
           Column(
             key: testKey,
-            children:
-                testLogs.map((log) {
-                  return Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: MetadataChips(data: log),
-                    ),
-                  );
-                }).toList(),
+            children: testLogs.map((log) {
+              return Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MetadataChips(data: log),
+                ),
+              );
+            }).toList(),
           ),
         ),
       );

@@ -44,10 +44,9 @@ TextStyle semibold(TextStyle style) =>
 TextStyle primaryColor(TextStyle style, BuildContext context) {
   final theme = Theme.of(context);
   return style.copyWith(
-    color:
-        (theme.brightness == Brightness.light)
-            ? theme.primaryColor
-            : theme.colorScheme.secondary,
+    color: (theme.brightness == Brightness.light)
+        ? theme.primaryColor
+        : theme.colorScheme.secondary,
     fontWeight: FontWeight.w400,
   );
 }
@@ -80,13 +79,12 @@ class GaDevToolsButton extends DevToolsButton {
     super.outlined,
     super.tooltipPadding,
   }) : super(
-         onPressed:
-             onPressed != null
-                 ? () {
-                   ga.select(gaScreen, gaSelection);
-                   onPressed();
-                 }
-                 : null,
+         onPressed: onPressed != null
+             ? () {
+                 ga.select(gaScreen, gaSelection);
+                 onPressed();
+               }
+             : null,
        );
 
   factory GaDevToolsButton.iconOnly({
@@ -974,8 +972,9 @@ class Breadcrumb extends StatelessWidget {
       textDirection: TextDirection.ltr,
     )..layout();
 
-    final caretWidth =
-        isRoot ? Breadcrumb.caretWidth : Breadcrumb.caretWidth * 2;
+    final caretWidth = isRoot
+        ? Breadcrumb.caretWidth
+        : Breadcrumb.caretWidth * 2;
     final breadcrumbWidth = textPainter.width + caretWidth + densePadding * 2;
 
     return InkWell(
@@ -1032,8 +1031,9 @@ class _BreadcrumbPainter extends CustomPainter {
 
     canvas.drawPath(path, paint);
 
-    final textXOffset =
-        isRoot ? densePadding : Breadcrumb.caretWidth + densePadding;
+    final textXOffset = isRoot
+        ? densePadding
+        : Breadcrumb.caretWidth + densePadding;
     textPainter.paint(
       canvas,
       Offset(textXOffset, (Breadcrumb.height - textPainter.height) / 2),
@@ -1427,20 +1427,19 @@ class CopyToClipboardControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onPressed =
-        dataProvider == null
-            ? null
-            : () {
-              if (gaScreen != null && gaItem != null) {
-                ga.select(gaScreen!, gaItem!);
-              }
-              unawaited(
-                copyToClipboard(
-                  dataProvider!() ?? '',
-                  successMessage: successMessage,
-                ),
-              );
-            };
+    final onPressed = dataProvider == null
+        ? null
+        : () {
+            if (gaScreen != null && gaItem != null) {
+              ga.select(gaScreen!, gaItem!);
+            }
+            unawaited(
+              copyToClipboard(
+                dataProvider!() ?? '',
+                successMessage: successMessage,
+              ),
+            );
+          };
     final size = this.size ?? defaultIconSize;
     return SizedBox(
       height: size,
@@ -1834,8 +1833,9 @@ class _BlinkingIconState extends State<BlinkingIcon> {
       duration: const Duration(seconds: 1),
       firstChild: _icon(),
       secondChild: _icon(color: widget.color),
-      crossFadeState:
-          showFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      crossFadeState: showFirst
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
     );
   }
 
@@ -2144,30 +2144,27 @@ class ContextMenuButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return MenuAnchor(
       menuChildren: menuChildren,
-      builder: (
-        BuildContext context,
-        MenuController controller,
-        Widget? child,
-      ) {
-        return SizedBox(
-          width: buttonWidth,
-          child: ToolbarAction(
-            icon: icon,
-            size: iconSize,
-            color: color,
-            onPressed: () {
-              if (gaScreen != null && gaItem != null) {
-                ga.select(gaScreen!, gaItem!);
-              }
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
-            },
-          ),
-        );
-      },
+      builder:
+          (BuildContext context, MenuController controller, Widget? child) {
+            return SizedBox(
+              width: buttonWidth,
+              child: ToolbarAction(
+                icon: icon,
+                size: iconSize,
+                color: color,
+                onPressed: () {
+                  if (gaScreen != null && gaItem != null) {
+                    ga.select(gaScreen!, gaItem!);
+                  }
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+              ),
+            );
+          },
     );
   }
 }
@@ -2208,8 +2205,8 @@ class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
       () => _textEditingController.text = widget.notifier.value.toString(),
     );
 
-    _textEditingController =
-        TextEditingController()..text = widget.notifier.value.toString();
+    _textEditingController = TextEditingController()
+      ..text = widget.notifier.value.toString();
   }
 
   @override
@@ -2317,11 +2314,11 @@ class DevToolsOverlay extends StatelessWidget {
     return fullScreen
         ? overlayContent
         : Center(
-          child: Padding(
-            padding: EdgeInsets.only(top: topOffset ?? 0.0),
-            child: RoundedOutlinedBorder(clip: true, child: overlayContent),
-          ),
-        );
+            child: Padding(
+              padding: EdgeInsets.only(top: topOffset ?? 0.0),
+              child: RoundedOutlinedBorder(clip: true, child: overlayContent),
+            ),
+          );
   }
 
   double _overlayWidth(Size parentSize) {
