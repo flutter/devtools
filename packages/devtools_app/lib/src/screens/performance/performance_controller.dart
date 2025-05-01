@@ -124,9 +124,17 @@ class PerformanceController extends DevToolsScreenController
 
       if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
           false) {
-        final impellerEnabledResponse = await serviceConnection.serviceManager
-            .callServiceExtensionOnMainIsolate(registrations.isImpellerEnabled);
-        _impellerEnabled = impellerEnabledResponse.json?['enabled'] == true;
+        // Do not await this future because this will hang if the app is paused
+        // upon connection.
+        unawaited(
+          serviceConnection.serviceManager
+              .callServiceExtensionOnMainIsolate(
+                registrations.isImpellerEnabled,
+              )
+              .then((response) {
+                _impellerEnabled = response.json?['enabled'] == true;
+              }),
+        );
       } else {
         _impellerEnabled = false;
       }
