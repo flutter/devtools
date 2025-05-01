@@ -50,10 +50,9 @@ class PropertyEditorView extends StatelessWidget {
 
   List<Widget> _propertyEditorContents(EditableWidgetData? editableWidgetData) {
     if (editableWidgetData == null) {
-      final introSentence =
-          controller.waitingForFirstEvent
-              ? const WelcomeMessage()
-              : const NoWidgetAtLocationMessage();
+      final introSentence = controller.waitingForFirstEvent
+          ? const WelcomeMessage()
+          : const NoWidgetAtLocationMessage();
       return [introSentence, const HowToUseMessage()];
     }
 
@@ -297,20 +296,19 @@ class _InfoTooltip extends StatelessWidget {
       ),
     ];
 
-    final defaultValueSpans =
-        property.hasDefault
-            ? [
-              TextSpan(text: '\n\nDefault value: ', style: boldFontStyle),
-              TextSpan(
-                text: property.defaultValue.toString(),
-                style: fixedFontStyle,
-              ),
-            ]
-            : [
-              TextSpan(text: '\n\nDefault value:\n', style: boldFontStyle),
-              TextSpan(text: property.name, style: fixedFontStyle),
-              TextSpan(text: ' has no default value.', style: regularFontStyle),
-            ];
+    final defaultValueSpans = property.hasDefault
+        ? [
+            TextSpan(text: '\n\nDefault value: ', style: boldFontStyle),
+            TextSpan(
+              text: property.defaultValue.toString(),
+              style: fixedFontStyle,
+            ),
+          ]
+        : [
+            TextSpan(text: '\n\nDefault value:\n', style: boldFontStyle),
+            TextSpan(text: property.name, style: fixedFontStyle),
+            TextSpan(text: ' has no default value.', style: regularFontStyle),
+          ];
 
     final spans = [...propertyNameSpans, ...defaultValueSpans];
 

@@ -324,9 +324,9 @@ class DeepLinksController extends DevToolsScreenController
     if (selectedProject.value!.androidVariants.isEmpty) {
       return;
     }
-    final variant =
-        selectedProject.value!.androidVariants[selectedAndroidVariantIndex
-            .value];
+    final variant = selectedProject
+        .value!
+        .androidVariants[selectedAndroidVariantIndex.value];
     await ga.timeAsync(
       gac.deeplink,
       gac.AnalyzeFlutterProject.loadAppLinks.name,
@@ -341,8 +341,8 @@ class DeepLinksController extends DevToolsScreenController
           ga.impression(
             gac.deeplink,
             gac.AnalyzeFlutterProject.androidAppLinksSettingsLoaded.name,
-            screenMetricsProvider:
-                () => DeepLinkScreenMetrics(androidAppId: result.applicationId),
+            screenMetricsProvider: () =>
+                DeepLinkScreenMetrics(androidAppId: result.applicationId),
           );
         } catch (_) {
           ga.select(
@@ -378,9 +378,8 @@ class DeepLinksController extends DevToolsScreenController
           ga.impression(
             gac.deeplink,
             gac.AnalyzeFlutterProject.iosUniversalLinkSettingsLoaded.name,
-            screenMetricsProvider:
-                () =>
-                    DeepLinkScreenMetrics(iosBundleId: result.bundleIdentifier),
+            screenMetricsProvider: () =>
+                DeepLinkScreenMetrics(iosBundleId: result.bundleIdentifier),
           );
         } catch (_) {
           pagePhase.value = PagePhase.validationErrorPage;
@@ -541,12 +540,11 @@ class DeepLinksController extends DevToolsScreenController
   }
 
   Future<List<LinkData>> _validateDomain(List<LinkData> rawLinkdatas) async {
-    final domains =
-        rawLinkdatas
-            .where((linkdata) => linkdata.domain != null)
-            .map((linkdata) => linkdata.domain!)
-            .toSet()
-            .toList();
+    final domains = rawLinkdatas
+        .where((linkdata) => linkdata.domain != null)
+        .map((linkdata) => linkdata.domain!)
+        .toSet()
+        .toList();
 
     Map<String, List<DomainError>> androidDomainErrors = {};
     Map<String, List<DomainError>> iosDomainErrors = {};
@@ -556,10 +554,9 @@ class DeepLinksController extends DevToolsScreenController
         ga.impression(
           gac.deeplink,
           gac.AnalyzeFlutterProject.androidValidateDomain.name,
-          screenMetricsProvider:
-              () => DeepLinkScreenMetrics(
-                androidAppId: currentAppLinkSettings!.applicationId,
-              ),
+          screenMetricsProvider: () => DeepLinkScreenMetrics(
+            androidAppId: currentAppLinkSettings!.applicationId,
+          ),
         );
         final androidResult = await deepLinksService.validateAndroidDomain(
           domains: domains,
@@ -574,10 +571,9 @@ class DeepLinksController extends DevToolsScreenController
         ga.impression(
           gac.deeplink,
           gac.AnalyzeFlutterProject.iosValidateDomain.name,
-          screenMetricsProvider:
-              () => DeepLinkScreenMetrics(
-                iosBundleId: currentUniversalLinkSettings!.bundleIdentifier,
-              ),
+          screenMetricsProvider: () => DeepLinkScreenMetrics(
+            iosBundleId: currentUniversalLinkSettings!.bundleIdentifier,
+          ),
         );
         final iosResult = await deepLinksService.validateIosDomain(
           bundleId: bundleId,
@@ -702,14 +698,12 @@ class DeepLinksController extends DevToolsScreenController
       byPath: linkDatasByPath(linkdata),
     );
     displayOptionsNotifier.value = displayOptionsNotifier.value.copyWith(
-      domainErrorCount:
-          validatedLinkDatas.byDomain
-              .where((element) => element.domainErrors.isNotEmpty)
-              .length,
-      pathErrorCount:
-          validatedLinkDatas.byPath
-              .where((element) => element.pathErrors.isNotEmpty)
-              .length,
+      domainErrorCount: validatedLinkDatas.byDomain
+          .where((element) => element.domainErrors.isNotEmpty)
+          .length,
+      pathErrorCount: validatedLinkDatas.byPath
+          .where((element) => element.pathErrors.isNotEmpty)
+          .length,
     );
     applyFilters();
 
@@ -803,38 +797,35 @@ class DeepLinksController extends DevToolsScreenController
   @visibleForTesting
   List<LinkData> getFilterredLinks(List<LinkData> linkDatas) {
     final searchContent = displayOptions.searchContent;
-    linkDatas =
-        linkDatas.where((linkData) {
-          if (searchContent.isNotEmpty &&
-              !linkData.matchesSearchToken(
-                RegExp(searchContent, caseSensitive: false),
-              )) {
-            return false;
-          }
+    linkDatas = linkDatas.where((linkData) {
+      if (searchContent.isNotEmpty &&
+          !linkData.matchesSearchToken(
+            RegExp(searchContent, caseSensitive: false),
+          )) {
+        return false;
+      }
 
-          if (!((linkData.os.contains(PlatformOS.android) &&
-                  displayOptions.filters.contains(FilterOption.android)) ||
-              (linkData.os.contains(PlatformOS.ios) &&
-                  displayOptions.filters.contains(FilterOption.ios)))) {
-            return false;
-          }
+      if (!((linkData.os.contains(PlatformOS.android) &&
+              displayOptions.filters.contains(FilterOption.android)) ||
+          (linkData.os.contains(PlatformOS.ios) &&
+              displayOptions.filters.contains(FilterOption.ios)))) {
+        return false;
+      }
 
-          if (!((linkData.domainErrors.isNotEmpty &&
-                  displayOptions.filters.contains(
-                    FilterOption.failedDomainCheck,
-                  )) ||
-              (linkData.pathErrors.isNotEmpty &&
-                  displayOptions.filters.contains(
-                    FilterOption.failedPathCheck,
-                  )) ||
-              (linkData.domainErrors.isEmpty &&
-                  linkData.pathErrors.isEmpty &&
-                  displayOptions.filters.contains(FilterOption.noIssue)))) {
-            return false;
-          }
+      if (!((linkData.domainErrors.isNotEmpty &&
+              displayOptions.filters.contains(
+                FilterOption.failedDomainCheck,
+              )) ||
+          (linkData.pathErrors.isNotEmpty &&
+              displayOptions.filters.contains(FilterOption.failedPathCheck)) ||
+          (linkData.domainErrors.isEmpty &&
+              linkData.pathErrors.isEmpty &&
+              displayOptions.filters.contains(FilterOption.noIssue)))) {
+        return false;
+      }
 
-          return true;
-        }).toList();
+      return true;
+    }).toList();
 
     return linkDatas;
   }

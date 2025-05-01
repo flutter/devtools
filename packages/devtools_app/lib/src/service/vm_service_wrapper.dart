@@ -89,12 +89,11 @@ class VmServiceWrapper extends VmService {
 
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
 
-  Completer<bool> _allFuturesCompleter =
-      Completer<bool>()
-        // Mark the future as completed by default so if we don't track any
-        // futures but someone tries to wait on [allFuturesCompleted] they don't
-        // hang. The first tracked future will replace this with a new completer.
-        ..complete(true);
+  Completer<bool> _allFuturesCompleter = Completer<bool>()
+    // Mark the future as completed by default so if we don't track any
+    // futures but someone tries to wait on [allFuturesCompleted] they don't
+    // hang. The first tracked future will replace this with a new completer.
+    ..complete(true);
 
   // A local cache of "fake" service objects. Used to convert JSON objects to
   // VM service response formats to be used with APIs that require them.

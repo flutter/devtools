@@ -120,10 +120,9 @@ class _ProjectRootsDropdownState extends State<ProjectRootsDropdown> {
         isExpanded: true,
         value: selectedUri,
         items: [for (final uri in widget.projectRoots) _buildMenuItem(uri)],
-        onChanged:
-            (uri) => setState(() {
-              this.selectedUri = uri;
-            }),
+        onChanged: (uri) => setState(() {
+          this.selectedUri = uri;
+        }),
       ),
     );
   }
@@ -176,7 +175,11 @@ class _FlexibleProjectSelectionView extends StatelessWidget {
     if (!showButtonInRow) {
       content = Column(
         mainAxisSize: MainAxisSize.min,
-        children: [content, const SizedBox(height: defaultSpacing), button],
+        children: [
+          content,
+          const SizedBox(height: defaultSpacing),
+          button,
+        ],
       );
     }
 
@@ -198,8 +201,9 @@ class _ValidateDeepLinksButton extends StatelessWidget {
     return DevToolsButton(
       elevated: true,
       label: 'Validate deep links',
-      onPressed:
-          projectRoot == null ? null : () => onValidatePressed(projectRoot!),
+      onPressed: projectRoot == null
+          ? null
+          : () => onValidatePressed(projectRoot!),
     );
   }
 }

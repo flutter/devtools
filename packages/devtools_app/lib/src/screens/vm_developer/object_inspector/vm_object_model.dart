@@ -72,10 +72,9 @@ abstract class VmObject {
     _isolate =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
 
-    _obj =
-        ref is Obj
-            ? ref as Obj
-            : await _service.getObject(_isolate!.id!, ref.id!);
+    _obj = ref is Obj
+        ? ref as Obj
+        : await _service.getObject(_isolate!.id!, ref.id!);
 
     if (_sourceLocation != null) {
       _sourceScript =
@@ -198,8 +197,8 @@ class FuncObject extends VmObject {
     return funcKind == null
         ? null
         : FunctionKind.values.firstWhereOrNull(
-          (element) => element.kind() == funcKind,
-        );
+            (element) => element.kind() == funcKind,
+          );
   }
 
   int? get deoptimizations => obj.deoptimizations;
@@ -252,8 +251,9 @@ class FieldObject extends VmObject {
 
     guardClassKind = obj.guardClassKind();
 
-    guardClass =
-        guardClassKind == GuardClassKind.single ? await obj.guardClass : null;
+    guardClass = guardClassKind == GuardClassKind.single
+        ? await obj.guardClass
+        : null;
   }
 }
 
@@ -327,13 +327,12 @@ class CodeObject extends VmObject {
     await super.initialize();
 
     final service = serviceConnection.serviceManager.service!;
-    final isolateId =
-        serviceConnection
-            .serviceManager
-            .isolateManager
-            .selectedIsolate
-            .value!
-            .id!;
+    final isolateId = serviceConnection
+        .serviceManager
+        .isolateManager
+        .selectedIsolate
+        .value!
+        .id!;
 
     // Attempt to retrieve the CPU profile data for this code object.
     try {

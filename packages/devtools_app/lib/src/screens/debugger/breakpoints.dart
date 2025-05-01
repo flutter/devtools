@@ -88,10 +88,9 @@ class _Breakpoint extends StatelessWidget {
                     children: [
                       TextSpan(
                         text: ' (${breakpoint.scriptUri})',
-                        style:
-                            isSelected
-                                ? theme.selectedSubtleTextStyle
-                                : theme.subtleTextStyle,
+                        style: isSelected
+                            ? theme.selectedSubtleTextStyle
+                            : theme.subtleTextStyle,
                       ),
                     ],
                   ),

@@ -145,8 +145,8 @@ void main() {
       ),
     ];
 
-    final stackFramesWithLocation =
-        stackFrames.map<StackFrameAndSourcePosition>((frame) {
+    final stackFramesWithLocation = stackFrames
+        .map<StackFrameAndSourcePosition>((frame) {
           return StackFrameAndSourcePosition(
             frame,
             position: SourcePosition(
@@ -154,7 +154,8 @@ void main() {
               column: 10,
             ),
           );
-        }).toList();
+        })
+        .toList();
 
     when(
       debuggerController.stackFramesWithLocation,

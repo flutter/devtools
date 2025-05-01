@@ -56,15 +56,14 @@ class DartIOHttpRequestData extends NetworkRequest {
         modifiedRequestData.containsKey(HttpRequestDataKeys.requestBody.name) &&
         modifiedRequestData.containsKey(HttpRequestDataKeys.responseBody.name);
 
-    final parsedRequest =
-        isFullRequest
-            ? HttpProfileRequest.parse(modifiedRequestData)
-            : HttpProfileRequestRef.parse(modifiedRequestData);
+    final parsedRequest = isFullRequest
+        ? HttpProfileRequest.parse(modifiedRequestData)
+        : HttpProfileRequestRef.parse(modifiedRequestData);
 
-    final responseBody =
-        responseContent?[HttpRequestDataKeys.text.name]?.toString();
-    final requestBody =
-        requestPostData?[HttpRequestDataKeys.text.name]?.toString();
+    final responseBody = responseContent?[HttpRequestDataKeys.text.name]
+        ?.toString();
+    final requestBody = requestPostData?[HttpRequestDataKeys.text.name]
+        ?.toString();
 
     return DartIOHttpRequestData(
         parsedRequest!,
@@ -77,8 +76,8 @@ class DartIOHttpRequestData extends NetworkRequest {
   @override
   Map<String, Object?> toJson() {
     return {
-      HttpRequestDataKeys.request.name:
-          (_request as HttpProfileRequest).toJson(),
+      HttpRequestDataKeys.request.name: (_request as HttpProfileRequest)
+          .toJson(),
     };
   }
 
@@ -253,8 +252,9 @@ class DartIOHttpRequestData extends NetworkRequest {
   /// All instant events logged to the timeline for this HTTP request.
   List<DartIOHttpInstantEvent> get instantEvents {
     if (_instantEvents == null) {
-      _instantEvents =
-          _request.events.map((e) => DartIOHttpInstantEvent._(e)).toList();
+      _instantEvents = _request.events
+          .map((e) => DartIOHttpInstantEvent._(e))
+          .toList();
       _recalculateInstantEventTimes();
     }
     return _instantEvents!;
@@ -267,10 +267,9 @@ class DartIOHttpRequestData extends NetworkRequest {
       requestCookies.isNotEmpty || responseCookies.isNotEmpty;
 
   /// A list of all cookies contained within the request headers.
-  List<Cookie> get requestCookies =>
-      _hasError
-          ? []
-          : DartIOHttpRequestData._parseCookies(_request.request?.cookies);
+  List<Cookie> get requestCookies => _hasError
+      ? []
+      : DartIOHttpRequestData._parseCookies(_request.request?.cookies);
 
   /// A list of all cookies contained within the response headers.
   List<Cookie> get responseCookies =>
@@ -371,10 +370,9 @@ class DartIOHttpRequestData extends NetworkRequest {
     DateTime lastTime = _request.startTime;
     for (final instant in instantEvents) {
       final instantTime = instant.timestamp;
-      instant._timeRange =
-          TimeRange()
-            ..start = Duration(microseconds: lastTime.microsecondsSinceEpoch)
-            ..end = Duration(microseconds: instantTime.microsecondsSinceEpoch);
+      instant._timeRange = TimeRange()
+        ..start = Duration(microseconds: lastTime.microsecondsSinceEpoch)
+        ..end = Duration(microseconds: instantTime.microsecondsSinceEpoch);
       lastTime = instantTime;
     }
   }

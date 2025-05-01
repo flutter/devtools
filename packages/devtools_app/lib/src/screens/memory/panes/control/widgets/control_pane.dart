@@ -26,15 +26,14 @@ class MemoryControlPane extends StatelessWidget {
   Widget build(BuildContext context) {
     // OfflineAwareControls are here to enable button to exit offline mode.
     return OfflineAwareControls(
-      controlsBuilder:
-          (_) => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const PrimaryControls(),
-              const Spacer(),
-              SecondaryControls(isGcing: isGcing, onGc: onGc, onSave: onSave),
-            ],
-          ),
+      controlsBuilder: (_) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const PrimaryControls(),
+          const Spacer(),
+          SecondaryControls(isGcing: isGcing, onGc: onGc, onSave: onSave),
+        ],
+      ),
       gaScreen: ScreenMetaData.memory.id,
     );
   }

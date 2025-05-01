@@ -41,10 +41,9 @@ class DevToolsServerConnection {
   ///
   /// - http://foo/devtools => http://foo/devtools/api
   @visibleForTesting
-  static Uri apiUriFor(Uri baseUri) =>
-      baseUri.path.endsWith('devtools')
-          ? baseUri.resolve('devtools/api/')
-          : baseUri.resolve('api/');
+  static Uri apiUriFor(Uri baseUri) => baseUri.path.endsWith('devtools')
+      ? baseUri.resolve('devtools/api/')
+      : baseUri.resolve('api/');
 
   /// Connects to the legacy SSE API.
   ///

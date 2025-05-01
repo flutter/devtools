@@ -678,60 +678,62 @@ final goldenResolvedUriMap = <String, String>{
       'package:flutter/widgets/binding.dart',
 };
 
-final goldenCpuProfileStackFrames = Map.from(subProfileStackFrames)..addAll({
-  '140357727781376-12': <String, Object?>{
-    'category': 'Dart',
-    'name': 'RenderPhysicalModel.paint',
-    'parent': '140357727781376-9',
-    'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
-    'packageUri': 'package:flutter/lib/src/rendering/proxy_box.dart',
-    'sourceLine': null,
-  },
-  '140357727781376-13': <String, Object?>{
-    'category': 'Dart',
-    'name': 'RenderCustomMultiChildLayoutBox.paint',
-    'parent': '140357727781376-12',
-    'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
-    'packageUri': 'package:flutter/rendering/custom_layout.dart',
-    'sourceLine': null,
-  },
-  '140357727781376-14': <String, Object?>{
-    'category': 'Dart',
-    'name': '_RenderCustomMultiChildLayoutBox.defaultPaint',
-    'parent': '140357727781376-13',
-    'resolvedUrl': 'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/hash.dart',
-    'packageUri': 'dart:vm/hash.dart',
-    'sourceLine': null,
-  },
-  '140357727781376-15': <String, Object?>{
-    'category': 'Dart',
-    'name': 'RenderObject._paintWithContext',
-    'parent': '140357727781376-14',
-    'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
-    'packageUri': 'package:flutter/rendering/object.dart',
-    'sourceLine': null,
-  },
-  '140357727781376-16': <String, Object?>{
-    'category': 'Dart',
-    'name': 'RenderStack.paintStack',
-    'parent': '140357727781376-14',
-    'resolvedUrl':
-        'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
-    'packageUri': 'package:flutter/rendering/stack.dart',
-    'sourceLine': null,
-  },
-  '140357727781376-17': <String, Object?>{
-    'category': 'Dart',
-    'name': '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
-    'parent': '140357727781376-16',
-    'resolvedUrl': '',
-    'packageUri': '',
-    'sourceLine': null,
-  },
-});
+final goldenCpuProfileStackFrames = Map.from(subProfileStackFrames)
+  ..addAll({
+    '140357727781376-12': <String, Object?>{
+      'category': 'Dart',
+      'name': 'RenderPhysicalModel.paint',
+      'parent': '140357727781376-9',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/proxy_box.dart',
+      'packageUri': 'package:flutter/lib/src/rendering/proxy_box.dart',
+      'sourceLine': null,
+    },
+    '140357727781376-13': <String, Object?>{
+      'category': 'Dart',
+      'name': 'RenderCustomMultiChildLayoutBox.paint',
+      'parent': '140357727781376-12',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
+      'packageUri': 'package:flutter/rendering/custom_layout.dart',
+      'sourceLine': null,
+    },
+    '140357727781376-14': <String, Object?>{
+      'category': 'Dart',
+      'name': '_RenderCustomMultiChildLayoutBox.defaultPaint',
+      'parent': '140357727781376-13',
+      'resolvedUrl':
+          'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/hash.dart',
+      'packageUri': 'dart:vm/hash.dart',
+      'sourceLine': null,
+    },
+    '140357727781376-15': <String, Object?>{
+      'category': 'Dart',
+      'name': 'RenderObject._paintWithContext',
+      'parent': '140357727781376-14',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/object.dart',
+      'packageUri': 'package:flutter/rendering/object.dart',
+      'sourceLine': null,
+    },
+    '140357727781376-16': <String, Object?>{
+      'category': 'Dart',
+      'name': 'RenderStack.paintStack',
+      'parent': '140357727781376-14',
+      'resolvedUrl':
+          'path/to/flutter/packages/flutter/lib/src/rendering/stack.dart',
+      'packageUri': 'package:flutter/rendering/stack.dart',
+      'sourceLine': null,
+    },
+    '140357727781376-17': <String, Object?>{
+      'category': 'Dart',
+      'name': '_WidgetsFlutterBinding&BindingBase&Gesture._invokeFrameCallback',
+      'parent': '140357727781376-16',
+      'resolvedUrl': '',
+      'packageUri': '',
+      'sourceLine': null,
+    },
+  });
 
 final subProfileStackFrames = <String, Object?>{
   '140357727781376-1': <String, Object?>{
@@ -1045,58 +1047,59 @@ final filteredCpuSampleTraceEvents = [
   },
 ];
 
-final goldenCpuProfileTraceEvents = List.of(subProfileTraceEvents)..addAll([
-  <String, Object?>{
-    'ph': 'P',
-    'name': '',
-    'pid': 77616,
-    'tid': 42247,
-    'ts': 47377800363,
-    'cat': 'Dart',
-    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
-    'sf': '140357727781376-14',
-  },
-  <String, Object?>{
-    'ph': 'P',
-    'name': '',
-    'pid': 77616,
-    'tid': 42247,
-    'ts': 47377800463,
-    'cat': 'Dart',
-    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
-    'sf': '140357727781376-14',
-  },
-  <String, Object?>{
-    'ph': 'P',
-    'name': '',
-    'pid': 77616,
-    'tid': 42247,
-    'ts': 47377800563,
-    'cat': 'Dart',
-    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
-    'sf': '140357727781376-14',
-  },
-  <String, Object?>{
-    'ph': 'P',
-    'name': '',
-    'pid': 77616,
-    'tid': 42247,
-    'ts': 47377800663,
-    'cat': 'Dart',
-    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
-    'sf': '140357727781376-15',
-  },
-  <String, Object?>{
-    'ph': 'P',
-    'name': '',
-    'pid': 77616,
-    'tid': 42247,
-    'ts': 47377800763,
-    'cat': 'Dart',
-    'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
-    'sf': '140357727781376-17',
-  },
-]);
+final goldenCpuProfileTraceEvents = List.of(subProfileTraceEvents)
+  ..addAll([
+    <String, Object?>{
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 47377800363,
+      'cat': 'Dart',
+      'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
+      'sf': '140357727781376-14',
+    },
+    <String, Object?>{
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 47377800463,
+      'cat': 'Dart',
+      'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
+      'sf': '140357727781376-14',
+    },
+    <String, Object?>{
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 47377800563,
+      'cat': 'Dart',
+      'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
+      'sf': '140357727781376-14',
+    },
+    <String, Object?>{
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 47377800663,
+      'cat': 'Dart',
+      'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
+      'sf': '140357727781376-15',
+    },
+    <String, Object?>{
+      'ph': 'P',
+      'name': '',
+      'pid': 77616,
+      'tid': 42247,
+      'ts': 47377800763,
+      'cat': 'Dart',
+      'args': <String, Object?>{'userTag': 'Default', 'vmTag': 'VM'},
+      'sf': '140357727781376-17',
+    },
+  ]);
 
 final subProfileTraceEvents = [
   <String, Object?>{
@@ -1208,12 +1211,11 @@ final profileMetaData = CpuProfileMetaData(
   sampleCount: 10,
   samplePeriod: 1000,
   stackDepth: 128,
-  time:
-      TimeRange()
-        ..start = const Duration()
-        // Note this intentionally adds 10000 microseconds more than what
-        // was measured, regression test for Issue #8870.
-        ..end = const Duration(microseconds: 20000),
+  time: TimeRange()
+    ..start = const Duration()
+    // Note this intentionally adds 10000 microseconds more than what
+    // was measured, regression test for Issue #8870.
+    ..end = const Duration(microseconds: 20000),
 );
 
 final tagFrameA = CpuStackFrame(
@@ -1382,18 +1384,16 @@ final stackFrameG = CpuStackFrame(
 final testStackFrameWithRoot = CpuStackFrame.root(profileMetaData)
   ..addChild(testStackFrame.deepCopy());
 
-final testStackFrame =
-    stackFrameA..addChild(
-      stackFrameB
-        ..addChild(stackFrameC)
-        ..addChild(
-          stackFrameD
-            ..addChild(
-              stackFrameE..addChild(stackFrameF..addChild(stackFrameC2)),
-            )
-            ..addChild(stackFrameF2..addChild(stackFrameC3)),
-        ),
-    );
+final testStackFrame = stackFrameA
+  ..addChild(
+    stackFrameB
+      ..addChild(stackFrameC)
+      ..addChild(
+        stackFrameD
+          ..addChild(stackFrameE..addChild(stackFrameF..addChild(stackFrameC2)))
+          ..addChild(stackFrameF2..addChild(stackFrameC3)),
+      ),
+  );
 
 final testTagRootedStackFrame = tagFrameA..addChild(testStackFrame.deepCopy());
 
@@ -1529,10 +1529,9 @@ final zeroProfileMetaData = CpuProfileMetaData(
   sampleCount: 0,
   samplePeriod: 50,
   stackDepth: 128,
-  time:
-      TimeRange()
-        ..start = const Duration()
-        ..end = const Duration(microseconds: 100),
+  time: TimeRange()
+    ..start = const Duration()
+    ..end = const Duration(microseconds: 100),
 );
 
 final zeroStackFrame = CpuStackFrame(

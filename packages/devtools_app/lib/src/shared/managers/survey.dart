@@ -77,11 +77,10 @@ class SurveyService {
         ),
         NotificationAction(
           label: _takeSurveyLabel,
-          onPressed:
-              () => _takeSurveyPressed(
-                surveyUrl: _generateSurveyUrl(survey.url!),
-                message: message,
-              ),
+          onPressed: () => _takeSurveyPressed(
+            surveyUrl: _generateSurveyUrl(survey.url!),
+            message: message,
+          ),
           isPrimary: true,
         ),
       ];
@@ -173,18 +172,20 @@ class DevToolsSurvey {
     final endDateAsString = json[_endDateKey] as String?;
     final minVersionAsString = json[_minDevToolsVersionKey] as String?;
 
-    final startDate =
-        startDateAsString != null ? DateTime.parse(startDateAsString) : null;
-    final endDate =
-        endDateAsString != null ? DateTime.parse(endDateAsString) : null;
+    final startDate = startDateAsString != null
+        ? DateTime.parse(startDateAsString)
+        : null;
+    final endDate = endDateAsString != null
+        ? DateTime.parse(endDateAsString)
+        : null;
     final title = json[_titleKey] as String?;
     final surveyUrl = json[_urlKey] as String?;
-    final minDevToolsVersion =
-        minVersionAsString != null
-            ? SemanticVersion.parse(minVersionAsString)
-            : null;
-    final devEnvironments =
-        (json[_devEnvironmentsKey] as List?)?.cast<String>().toList();
+    final minDevToolsVersion = minVersionAsString != null
+        ? SemanticVersion.parse(minVersionAsString)
+        : null;
+    final devEnvironments = (json[_devEnvironmentsKey] as List?)
+        ?.cast<String>()
+        .toList();
     return DevToolsSurvey._(
       id,
       startDate,
@@ -236,13 +237,12 @@ class DevToolsSurvey {
 }
 
 extension ShowSurveyExtension on DevToolsSurvey {
-  bool get meetsDateRequirement =>
-      (startDate == null || endDate == null)
-          ? false
-          : Range(
-            startDate!.millisecondsSinceEpoch,
-            endDate!.millisecondsSinceEpoch,
-          ).contains(_currentClockTime().millisecondsSinceEpoch);
+  bool get meetsDateRequirement => (startDate == null || endDate == null)
+      ? false
+      : Range(
+          startDate!.millisecondsSinceEpoch,
+          endDate!.millisecondsSinceEpoch,
+        ).contains(_currentClockTime().millisecondsSinceEpoch);
 
   bool get meetsMinVersionRequirement =>
       minDevToolsVersion == null ||

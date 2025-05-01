@@ -216,8 +216,9 @@ String longestFittingSubstring(
   int i = 0;
   while (i < runes.length) {
     final rune = runes[i];
-    final charWidth =
-        rune < 128 ? asciiMeasurements[rune] : slowMeasureFallback(rune);
+    final charWidth = rune < 128
+        ? asciiMeasurements[rune]
+        : slowMeasureFallback(rune);
     if (currentWidth + charWidth > maxWidth) {
       break;
     }
@@ -825,14 +826,13 @@ List<TextSpan> textSpansFromAnsi(String input, TextStyle defaultStyle) {
     final styled = entry.bold || entry.fgColor != null || entry.bgColor != null;
     return TextSpan(
       text: entry.text,
-      style:
-          styled
-              ? TextStyle(
-                color: ansiToColor(entry.fgColor),
-                backgroundColor: ansiToColor(entry.bgColor),
-                fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
-              )
-              : defaultStyle,
+      style: styled
+          ? TextStyle(
+              color: ansiToColor(entry.fgColor),
+              backgroundColor: ansiToColor(entry.bgColor),
+              fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
+            )
+          : defaultStyle,
     );
   }).toList();
 }
@@ -867,17 +867,17 @@ extension LogicalKeySetExtension on LogicalKeySet {
   String describeKeys({bool isMacOS = false}) {
     // Put the modifiers first. If it has a synonym, then it's something like
     // shiftLeft, altRight, etc.
-    final sortedKeys =
-        keys.toList()..sort((a, b) {
-          final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
-          final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
-          if (aIsModifier && !bIsModifier) {
-            return -1;
-          } else if (bIsModifier && !aIsModifier) {
-            return 1;
-          }
-          return a.keyLabel.compareTo(b.keyLabel);
-        });
+    final sortedKeys = keys.toList()
+      ..sort((a, b) {
+        final aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
+        final bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
+        if (aIsModifier && !bIsModifier) {
+          return -1;
+        } else if (bIsModifier && !aIsModifier) {
+          return 1;
+        }
+        return a.keyLabel.compareTo(b.keyLabel);
+      });
 
     return sortedKeys.map((key) {
       if (_modifiers.contains(key)) {

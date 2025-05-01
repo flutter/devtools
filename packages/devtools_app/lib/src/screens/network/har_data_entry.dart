@@ -62,72 +62,70 @@ class HarDataEntry {
   /// serialization.
   static Map<String, Object?> toJson(DartIOHttpRequestData e) {
     // Implement the logic to convert DartIOHttpRequestData to HAR entry format
-    final requestCookies =
-        e.requestCookies.map((cookie) {
-          return <String, Object?>{
-            NetworkEventKeys.name.name: cookie.name,
-            NetworkEventKeys.value.name: cookie.value,
-            NetworkEventKeys.path.name: cookie.path,
-            NetworkEventKeys.domain.name: cookie.domain,
-            NetworkEventKeys.expires.name:
-                cookie.expires?.toUtc().toIso8601String(),
-            NetworkEventKeys.httpOnly.name: cookie.httpOnly,
-            NetworkEventKeys.secure.name: cookie.secure,
-          };
-        }).toList();
+    final requestCookies = e.requestCookies.map((cookie) {
+      return <String, Object?>{
+        NetworkEventKeys.name.name: cookie.name,
+        NetworkEventKeys.value.name: cookie.value,
+        NetworkEventKeys.path.name: cookie.path,
+        NetworkEventKeys.domain.name: cookie.domain,
+        NetworkEventKeys.expires.name: cookie.expires
+            ?.toUtc()
+            .toIso8601String(),
+        NetworkEventKeys.httpOnly.name: cookie.httpOnly,
+        NetworkEventKeys.secure.name: cookie.secure,
+      };
+    }).toList();
 
-    final requestHeaders =
-        e.requestHeaders?.entries.map((header) {
-          var value = header.value;
-          if (value is List) {
-            value = value.first;
-          }
-          return <String, Object?>{
-            NetworkEventKeys.name.name: header.key,
-            NetworkEventKeys.value.name: value,
-          };
-        }).toList();
+    final requestHeaders = e.requestHeaders?.entries.map((header) {
+      var value = header.value;
+      if (value is List) {
+        value = value.first;
+      }
+      return <String, Object?>{
+        NetworkEventKeys.name.name: header.key,
+        NetworkEventKeys.value.name: value,
+      };
+    }).toList();
 
-    final queryString =
-        Uri.parse(e.uri).queryParameters.entries.map((param) {
-          return <String, Object?>{
-            NetworkEventKeys.name.name: param.key,
-            NetworkEventKeys.value.name: param.value,
-          };
-        }).toList();
+    final queryString = Uri.parse(e.uri).queryParameters.entries.map((param) {
+      return <String, Object?>{
+        NetworkEventKeys.name.name: param.key,
+        NetworkEventKeys.value.name: param.value,
+      };
+    }).toList();
 
-    final responseCookies =
-        e.responseCookies.map((cookie) {
-          return <String, Object?>{
-            NetworkEventKeys.name.name: cookie.name,
-            NetworkEventKeys.value.name: cookie.value,
-            NetworkEventKeys.path.name: cookie.path,
-            NetworkEventKeys.domain.name: cookie.domain,
-            NetworkEventKeys.expires.name:
-                cookie.expires?.toUtc().toIso8601String(),
-            NetworkEventKeys.httpOnly.name: cookie.httpOnly,
-            NetworkEventKeys.secure.name: cookie.secure,
-          };
-        }).toList();
+    final responseCookies = e.responseCookies.map((cookie) {
+      return <String, Object?>{
+        NetworkEventKeys.name.name: cookie.name,
+        NetworkEventKeys.value.name: cookie.value,
+        NetworkEventKeys.path.name: cookie.path,
+        NetworkEventKeys.domain.name: cookie.domain,
+        NetworkEventKeys.expires.name: cookie.expires
+            ?.toUtc()
+            .toIso8601String(),
+        NetworkEventKeys.httpOnly.name: cookie.httpOnly,
+        NetworkEventKeys.secure.name: cookie.secure,
+      };
+    }).toList();
 
-    final responseHeaders =
-        e.responseHeaders?.entries.map((header) {
-          var value = header.value;
-          if (value is List) {
-            value = value.first;
-          }
-          return <String, Object?>{
-            NetworkEventKeys.name.name: header.key,
-            NetworkEventKeys.value.name: value,
-          };
-        }).toList();
+    final responseHeaders = e.responseHeaders?.entries.map((header) {
+      var value = header.value;
+      if (value is List) {
+        value = value.first;
+      }
+      return <String, Object?>{
+        NetworkEventKeys.name.name: header.key,
+        NetworkEventKeys.value.name: value,
+      };
+    }).toList();
 
     final isBinary = !isTextMimeType(e.type);
     final responseBodyBytes = e.encodedResponse;
 
     return <String, Object?>{
-      NetworkEventKeys.startedDateTime.name:
-          e.startTimestamp.toUtc().toIso8601String(),
+      NetworkEventKeys.startedDateTime.name: e.startTimestamp
+          .toUtc()
+          .toIso8601String(),
       NetworkEventKeys.time.name: e.duration?.inMilliseconds,
       // Request
       NetworkEventKeys.request.name: <String, Object?>{

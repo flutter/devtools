@@ -142,13 +142,12 @@ void main() {
           break;
       }
 
-      final detailsComputer =
-          computedDetails == null
-              ? null
-              : () => Future.delayed(
-                const Duration(seconds: 1),
-                () => computedDetails!,
-              );
+      final detailsComputer = computedDetails == null
+          ? null
+          : () => Future.delayed(
+              const Duration(seconds: 1),
+              () => computedDetails!,
+            );
       return LogData(kind, details, i, detailsComputer: detailsComputer);
     }
 

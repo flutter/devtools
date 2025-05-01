@@ -55,8 +55,9 @@ class HowToUseMessage extends StatelessWidget {
     );
     TextSpan highlight(TextSpan original) => _highlight(
       original,
-      highlighterColor:
-          theme.isDarkTheme ? _darkHighlighterColor : _lightHighlighterColor,
+      highlighterColor: theme.isDarkTheme
+          ? _darkHighlighterColor
+          : _lightHighlighterColor,
     );
 
     return Text.rich(
@@ -110,7 +111,10 @@ class HowToUseMessage extends StatelessWidget {
     String text, {
     required TextStyle style,
     required Color color,
-  }) => TextSpan(text: text, style: style.copyWith(color: color));
+  }) => TextSpan(
+    text: text,
+    style: style.copyWith(color: color),
+  );
 
   TextSpan _highlight(TextSpan original, {required Color highlighterColor}) =>
       TextSpan(

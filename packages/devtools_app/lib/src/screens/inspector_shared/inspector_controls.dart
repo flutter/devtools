@@ -27,8 +27,9 @@ class InspectorControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeButtonColor =
-        Theme.of(context).colorScheme.activeToggleButtonColor;
+    final activeButtonColor = Theme.of(
+      context,
+    ).colorScheme.activeToggleButtonColor;
     final isInspectorV2 = controller != null && FeatureFlags.inspectorV2;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,8 +49,9 @@ class InspectorControls extends StatelessWidget {
               ],
               minScreenWidthForTextBeforeScaling:
                   minScreenWidthForTextBeforeScaling,
-              minScreenWidthForTextBeforeTruncating:
-                  isInspectorV2 ? minScreenWidthForTextBeforeTruncating : null,
+              minScreenWidthForTextBeforeTruncating: isInspectorV2
+                  ? minScreenWidthForTextBeforeTruncating
+                  : null,
             );
           },
         ),
@@ -126,11 +128,11 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
               'Show widgets created by the Flutter framework or other packages.',
           label:
               isScreenWiderThan(
-                    context,
-                    InspectorControls.minScreenWidthForTextBeforeTruncating,
-                  )
-                  ? 'Show Implementation Widgets'
-                  : 'Show',
+                context,
+                InspectorControls.minScreenWidthForTextBeforeTruncating,
+              )
+              ? 'Show Implementation Widgets'
+              : 'Show',
           onPressed: controller.toggleImplementationWidgetsVisibility,
           icon: Icons.code,
           minScreenWidthForTextBeforeScaling:

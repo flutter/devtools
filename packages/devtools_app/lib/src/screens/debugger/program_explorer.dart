@@ -243,35 +243,33 @@ class ProgramStructureIcon extends StatelessWidget {
       height: defaultIconSize,
       width: defaultIconSize,
       child: Container(
-        decoration:
-            icon == null
-                ? BoxDecoration(color: color, shape: BoxShape.circle)
-                : null,
-        child:
-            icon == null
-                ? Center(
-                  child: Text(
-                    character!,
-                    style: TextStyle(
-                      height: 1,
-                      fontFamily: theme.fixedFontStyle.fontFamily,
-                      color: theme.colorScheme.surface,
-                      fontSize: smallFontSize,
-                    ),
-                    // Required to center the individual character within the
-                    // shape. Since letters like 'm' are shorter than letters
-                    // like 'f', there's padding applied to the top of shorter
-                    // characters in order for everything to align properly.
-                    // Since we're only dealing with individual characters, we
-                    // want to disable this behavior so shorter characters don't
-                    // appear to be slightly below center.
-                    textHeightBehavior: TextHeightBehavior(
-                      applyHeightToFirstAscent: isShortCharacter!,
-                      applyHeightToLastDescent: false,
-                    ),
+        decoration: icon == null
+            ? BoxDecoration(color: color, shape: BoxShape.circle)
+            : null,
+        child: icon == null
+            ? Center(
+                child: Text(
+                  character!,
+                  style: TextStyle(
+                    height: 1,
+                    fontFamily: theme.fixedFontStyle.fontFamily,
+                    color: theme.colorScheme.surface,
+                    fontSize: smallFontSize,
                   ),
-                )
-                : Icon(icon, size: defaultIconSize, color: color),
+                  // Required to center the individual character within the
+                  // shape. Since letters like 'm' are shorter than letters
+                  // like 'f', there's padding applied to the top of shorter
+                  // characters in order for everything to align properly.
+                  // Since we're only dealing with individual characters, we
+                  // want to disable this behavior so shorter characters don't
+                  // appear to be slightly below center.
+                  textHeightBehavior: TextHeightBehavior(
+                    applyHeightToFirstAscent: isShortCharacter!,
+                    applyHeightToLastDescent: false,
+                  ),
+                ),
+              )
+            : Icon(icon, size: defaultIconSize, color: color),
       ),
     );
   }
@@ -297,9 +295,8 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
 
   double get selectedNodeOffset =>
       widget.controller.selectedNodeIndex.value == -1
-          ? -1
-          : widget.controller.selectedNodeIndex.value *
-              defaultTreeViewRowHeight;
+      ? -1
+      : widget.controller.selectedNodeIndex.value * defaultTreeViewRowHeight;
 
   @override
   void initState() {
@@ -390,8 +387,8 @@ class _ProgramOutlineView extends StatelessWidget {
               },
             );
           },
-          emptyTreeViewBuilder:
-              () => const Center(child: Text('Nothing to inspect')),
+          emptyTreeViewBuilder: () =>
+              const Center(child: Text('Nothing to inspect')),
         );
       },
     );
@@ -423,14 +420,13 @@ class ProgramExplorer extends StatelessWidget {
         if (!initialized) {
           body = const CenteredCircularProgressIndicator();
         } else {
-          final fileExplorerHeader =
-              displayHeader
-                  ? AreaPaneHeader(
-                    title: Text(title),
-                    includeTopBorder: false,
-                    roundedTopBorder: false,
-                  )
-                  : const BlankHeader();
+          final fileExplorerHeader = displayHeader
+              ? AreaPaneHeader(
+                  title: Text(title),
+                  includeTopBorder: false,
+                  roundedTopBorder: false,
+                )
+              : const BlankHeader();
           final fileExplorer = _FileExplorer(
             controller: controller,
             onItemExpanded: onItemExpanded,
@@ -452,31 +448,31 @@ class ProgramExplorer extends StatelessWidget {
                       .connectedApp!
                       .isDartWebAppNow!
                   ? Column(
-                    children: [
-                      fileExplorerHeader,
-                      Expanded(child: fileExplorer),
-                    ],
-                  )
+                      children: [
+                        fileExplorerHeader,
+                        Expanded(child: fileExplorer),
+                      ],
+                    )
                   : FlexSplitColumn(
-                    totalHeight: constraints.maxHeight,
-                    initialFractions: const [0.7, 0.3],
-                    minSizes: const [0.0, 0.0],
-                    headers: <PreferredSizeWidget>[
-                      fileExplorerHeader as PreferredSizeWidget,
-                      const AreaPaneHeader(
-                        title: Text('Outline'),
-                        roundedTopBorder: false,
-                      ),
-                    ],
-                    children: [
-                      fileExplorer,
-                      _ProgramOutlineView(
-                        controller: controller,
-                        onItemExpanded: onItemExpanded,
-                        onItemSelected: onItemSelected,
-                      ),
-                    ],
-                  );
+                      totalHeight: constraints.maxHeight,
+                      initialFractions: const [0.7, 0.3],
+                      minSizes: const [0.0, 0.0],
+                      headers: <PreferredSizeWidget>[
+                        fileExplorerHeader as PreferredSizeWidget,
+                        const AreaPaneHeader(
+                          title: Text('Outline'),
+                          roundedTopBorder: false,
+                        ),
+                      ],
+                      children: [
+                        fileExplorer,
+                        _ProgramOutlineView(
+                          controller: controller,
+                          onItemExpanded: onItemExpanded,
+                          onItemSelected: onItemSelected,
+                        ),
+                      ],
+                    );
             },
           );
         }

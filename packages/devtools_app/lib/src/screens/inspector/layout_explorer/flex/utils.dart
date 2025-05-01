@@ -80,12 +80,11 @@ class AnimatedFlexLayoutProperties
   }
 
   @override
-  double get crossAxisDimension =>
-      lerpDouble(
-        begin.crossAxisDimension,
-        end.crossAxisDimension,
-        animation.value,
-      )!;
+  double get crossAxisDimension => lerpDouble(
+    begin.crossAxisDimension,
+    end.crossAxisDimension,
+    animation.value,
+  )!;
 
   @override
   Axis get crossAxisDirection => end.crossAxisDirection;
@@ -115,12 +114,11 @@ class AnimatedFlexLayoutProperties
   bool get isMainAxisVertical => end.isMainAxisVertical;
 
   @override
-  double get mainAxisDimension =>
-      lerpDouble(
-        begin.mainAxisDimension,
-        end.mainAxisDimension,
-        animation.value,
-      )!;
+  double get mainAxisDimension => lerpDouble(
+    begin.mainAxisDimension,
+    end.mainAxisDimension,
+    animation.value,
+  )!;
 
   @override
   MainAxisSize? get mainAxisSize => end.mainAxisSize;

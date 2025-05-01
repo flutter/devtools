@@ -25,10 +25,9 @@ class HeapInstanceTableCell extends StatelessWidget {
     super.key,
     required bool isSelected,
     this.liveItemsEnabled = true,
-  }) : _sampleObtainer =
-           _shouldShowMenu(isSelected, objects)
-               ? SnapshotClassSampler(heapClass, objects, heap())
-               : null,
+  }) : _sampleObtainer = _shouldShowMenu(isSelected, objects)
+           ? SnapshotClassSampler(heapClass, objects, heap())
+           : null,
        _count = objects.instanceCount;
 
   static bool _shouldShowMenu(bool isSelected, ObjectSet objects) =>
@@ -43,11 +42,10 @@ class HeapInstanceTableCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return InstanceViewWithContextMenu(
       count: _count,
-      menuBuilder:
-          () => _buildHeapInstancesMenu(
-            sampler: _sampleObtainer,
-            liveItemsEnabled: liveItemsEnabled,
-          ),
+      menuBuilder: () => _buildHeapInstancesMenu(
+        sampler: _sampleObtainer,
+        liveItemsEnabled: liveItemsEnabled,
+      ),
     );
   }
 }
@@ -86,11 +84,10 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
       required bool subclasses,
       required bool implementers,
     }) => MenuItemButton(
-      onPressed:
-          () async => await sampler.allLiveToConsole(
-            includeImplementers: implementers,
-            includeSubclasses: subclasses,
-          ),
+      onPressed: () async => await sampler.allLiveToConsole(
+        includeImplementers: implementers,
+        includeSubclasses: subclasses,
+      ),
       child: Text(title),
     );
 
@@ -128,23 +125,21 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
     return SubmenuButton(
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed:
-              () => unawaited(
-                sampler.oneStaticToConsole(
-                  sourceFeature: MemoryAreas.snapshotDiff.name,
-                ),
-              ),
+          onPressed: () => unawaited(
+            sampler.oneStaticToConsole(
+              sourceFeature: MemoryAreas.snapshotDiff.name,
+            ),
+          ),
           child: const Text('Any'),
         ),
         MenuItemButton(
-          onPressed:
-              liveItemsEnabled
-                  ? () => unawaited(
-                    sampler.oneLiveStaticToConsole(
-                      sourceFeature: MemoryAreas.snapshotDiff.name,
-                    ),
-                  )
-                  : null,
+          onPressed: liveItemsEnabled
+              ? () => unawaited(
+                  sampler.oneLiveStaticToConsole(
+                    sourceFeature: MemoryAreas.snapshotDiff.name,
+                  ),
+                )
+              : null,
           child: const Text('Any, not garbage collected'),
         ),
       ],

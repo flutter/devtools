@@ -59,10 +59,9 @@ void main() {
         hasLength(2),
       );
 
-      final diffWith =
-          test.isDiff
-              ? scene.diffController.core.snapshots.value[1] as SnapshotDataItem
-              : null;
+      final diffWith = test.isDiff
+          ? scene.diffController.core.snapshots.value[1] as SnapshotDataItem
+          : null;
 
       scene.diffController.setDiffing(
         scene.diffController.derived.selectedItem.value as SnapshotDataItem,

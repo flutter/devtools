@@ -284,8 +284,9 @@ class ChartsValues {
     } else if (hasMonitorStart) {
       eventsDisplayed['Monitor Start'] = monitorLegend;
     } else if (hasMonitorReset) {
-      eventsDisplayed['Monitor Reset'] =
-          isLight ? resetLightLegend : resetDarkLegend;
+      eventsDisplayed['Monitor Reset'] = isLight
+          ? resetLightLegend
+          : resetDarkLegend;
     }
 
     if (hasGc) {

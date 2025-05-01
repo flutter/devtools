@@ -52,18 +52,16 @@ void main() {
       when(
         mockPerformanceController.timelineEventsController,
       ).thenReturn(timelineEventsController);
-      processor =
-          timelineEventsController.perfettoController.processor
-            ..primeTrackIds(ui: testUiTrackId, raster: testRasterTrackId);
+      processor = timelineEventsController.perfettoController.processor
+        ..primeTrackIds(ui: testUiTrackId, raster: testRasterTrackId);
 
-      trackEvents =
-          allTrackEventPackets
-              .map(
-                (packetJson) => PerfettoTrackEvent.fromPacket(
-                  TracePacket.fromJson(jsonEncode(packetJson)),
-                ),
-              )
-              .toList();
+      trackEvents = allTrackEventPackets
+          .map(
+            (packetJson) => PerfettoTrackEvent.fromPacket(
+              TracePacket.fromJson(jsonEncode(packetJson)),
+            ),
+          )
+          .toList();
     });
 
     test('slice events form timeline event tree', () {

@@ -327,11 +327,10 @@ class ActiveLocationChangedEvent extends EditorEvent {
         textDocument: TextDocument.fromJson(
           map[Field.textDocument] as Map<String, Object?>,
         ),
-        selections:
-            (map[Field.selections] as List<Object?>)
-                .cast<Map<String, Object?>>()
-                .map(EditorSelection.fromJson)
-                .toList(),
+        selections: (map[Field.selections] as List<Object?>)
+            .cast<Map<String, Object?>>()
+            .map(EditorSelection.fromJson)
+            .toList(),
       );
 
   final List<EditorSelection> selections;
@@ -479,17 +478,13 @@ class EditableArgumentsResult with Serializable {
     : this(
         name: map[Field.name] as String?,
         documentation: map[Field.documentation] as String?,
-        range:
-            (map[Field.range] as Map<String, Object?>?) == null
-                ? null
-                : EditorRange.fromJson(
-                  map[Field.range] as Map<String, Object?>,
-                ),
-        args:
-            (map[Field.arguments] as List<Object?>? ?? <Object?>[])
-                .cast<Map<String, Object?>>()
-                .map(EditableArgument.fromJson)
-                .toList(),
+        range: (map[Field.range] as Map<String, Object?>?) == null
+            ? null
+            : EditorRange.fromJson(map[Field.range] as Map<String, Object?>),
+        args: (map[Field.arguments] as List<Object?>? ?? <Object?>[])
+            .cast<Map<String, Object?>>()
+            .map(EditableArgument.fromJson)
+            .toList(),
       );
 
   final List<EditableArgument> args;
@@ -693,11 +688,10 @@ class GetDevicesResult with Serializable {
 
   GetDevicesResult.fromJson(Map<String, Object?> map)
     : this(
-        devices:
-            (map[Field.devices] as List<Object?>)
-                .cast<Map<String, Object?>>()
-                .map(EditorDevice.fromJson)
-                .toList(),
+        devices: (map[Field.devices] as List<Object?>)
+            .cast<Map<String, Object?>>()
+            .map(EditorDevice.fromJson)
+            .toList(),
         selectedDeviceId: map[Field.selectedDeviceId] as String?,
       );
 
@@ -717,11 +711,10 @@ class GetDebugSessionsResult with Serializable {
 
   GetDebugSessionsResult.fromJson(Map<String, Object?> map)
     : this(
-        debugSessions:
-            (map[Field.debugSessions] as List<Object?>)
-                .cast<Map<String, Object?>>()
-                .map(EditorDebugSession.fromJson)
-                .toList(),
+        debugSessions: (map[Field.debugSessions] as List<Object?>)
+            .cast<Map<String, Object?>>()
+            .map(EditorDebugSession.fromJson)
+            .toList(),
       );
 
   final List<EditorDebugSession> debugSessions;

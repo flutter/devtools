@@ -37,12 +37,11 @@ class ClassFilterButton extends StatelessWidget {
             unawaited(
               showDialog(
                 context: context,
-                builder:
-                    (context) => ClassFilterDialog(
-                      filter,
-                      onChanged: data.onChanged,
-                      rootPackage: _rootPackage,
-                    ),
+                builder: (context) => ClassFilterDialog(
+                  filter,
+                  onChanged: data.onChanged,
+                  rootPackage: _rootPackage,
+                ),
               ),
             );
           },

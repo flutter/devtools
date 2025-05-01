@@ -181,17 +181,16 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
     ServiceExtensionState newState,
     TraceWidgetBuildsScope type,
   ) async {
-    final otherState =
-        serviceConnection.serviceManager.serviceExtensionManager
-            .getServiceExtensionState(type.opposite.extensionForScope.extension)
-            .value
-            .enabled;
-    final traceAllWidgets =
-        type == TraceWidgetBuildsScope.all ? newState.enabled : otherState;
-    final traceUserWidgets =
-        type == TraceWidgetBuildsScope.userCreated
-            ? newState.enabled
-            : otherState;
+    final otherState = serviceConnection.serviceManager.serviceExtensionManager
+        .getServiceExtensionState(type.opposite.extensionForScope.extension)
+        .value
+        .enabled;
+    final traceAllWidgets = type == TraceWidgetBuildsScope.all
+        ? newState.enabled
+        : otherState;
+    final traceUserWidgets = type == TraceWidgetBuildsScope.userCreated
+        ? newState.enabled
+        : otherState;
     await _updateTracing(
       traceAllWidgets: traceAllWidgets,
       traceUserWidgets: traceUserWidgets,
@@ -220,10 +219,9 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
     // Double nested conditinoal expressions are hard to read.
     // ignore: prefer-conditional-expression
     if (_tracingEnabled.value) {
-      _selectedScope.value =
-          traceUserWidgets
-              ? TraceWidgetBuildsScope.userCreated
-              : TraceWidgetBuildsScope.all;
+      _selectedScope.value = traceUserWidgets
+          ? TraceWidgetBuildsScope.userCreated
+          : TraceWidgetBuildsScope.all;
     } else {
       _selectedScope.value = null;
     }

@@ -133,10 +133,9 @@ class TestFlutterApp extends IntegrationTestApp {
     return _timeoutWithMessages<Map<String, Object?>>(
       () => response.future,
       timeout: timeout,
-      message:
-          event != null
-              ? 'Did not receive expected $event event.'
-              : 'Did not receive response to request "$id".',
+      message: event != null
+          ? 'Did not receive expected $event event.'
+          : 'Did not receive response to request "$id".',
     ).whenComplete(() => sub.cancel());
   }
 
@@ -350,8 +349,8 @@ abstract class IntegrationTestApp with IOMixin {
     _debugPrint('Waiting for process to end');
     return runProcess!.exitCode.timeout(
       IOMixin.killTimeout,
-      onTimeout:
-          () => killGracefully(runProcess!, debugLogging: debugTestScript),
+      onTimeout: () =>
+          killGracefully(runProcess!, debugLogging: debugTestScript),
     );
   }
 
@@ -387,8 +386,9 @@ abstract class IntegrationTestApp with IOMixin {
 
   String _debugPrint(String msg) {
     const maxLength = 500;
-    final truncatedMsg =
-        msg.length > maxLength ? '${msg.substring(0, maxLength)}...' : msg;
+    final truncatedMsg = msg.length > maxLength
+        ? '${msg.substring(0, maxLength)}...'
+        : msg;
     _allMessages.add(truncatedMsg);
     debugLog('_TestApp - $truncatedMsg');
     return msg;
@@ -404,12 +404,11 @@ Uri convertToWebSocketUrl({required Uri serviceProtocolUrl}) {
       serviceProtocolUrl.isScheme('https');
   final scheme = isSecure ? 'wss' : 'ws';
 
-  final path =
-      serviceProtocolUrl.path.endsWith('/ws')
-          ? serviceProtocolUrl.path
-          : (serviceProtocolUrl.path.endsWith('/')
-              ? '${serviceProtocolUrl.path}ws'
-              : '${serviceProtocolUrl.path}/ws');
+  final path = serviceProtocolUrl.path.endsWith('/ws')
+      ? serviceProtocolUrl.path
+      : (serviceProtocolUrl.path.endsWith('/')
+            ? '${serviceProtocolUrl.path}ws'
+            : '${serviceProtocolUrl.path}/ws');
 
   return serviceProtocolUrl.replace(scheme: scheme, path: path);
 }

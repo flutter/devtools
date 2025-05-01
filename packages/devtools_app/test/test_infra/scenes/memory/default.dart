@@ -56,14 +56,18 @@ abstract class MemoryDefaultSceneHeaps {
             {'B': 1, 'C': 2, 'D': 3},
             {'B': 1, 'C': 2, 'D': 3},
           ]
-          .map((e) => () async => FakeHeapSnapshotGraph()..addClassInstances(e))
+          .map(
+            (e) =>
+                () async => FakeHeapSnapshotGraph()..addClassInstances(e),
+          )
           .toList();
 
-  static final golden =
-      goldenHeapTests
-          // ignore: avoid-redundant-async, match signature
-          .map((e) => () async => e.loadHeap())
-          .toList();
+  static final golden = goldenHeapTests
+      .map(
+        (e) =>
+            () => e.loadHeap(),
+      )
+      .toList();
 
   static List<HeapProvider> get all => [
     ...forDiffTesting,
@@ -154,11 +158,11 @@ class MemoryDefaultScene extends Scene {
     final profileController = ProfilePaneController(rootPackage: 'root')
       ..setFilter(showAllFilter);
 
-    controller =
-        MemoryController()..init(
-          connectedDiff: diffController,
-          connectedProfile: profileController,
-        );
+    controller = MemoryController()
+      ..init(
+        connectedDiff: diffController,
+        connectedProfile: profileController,
+      );
 
     await controller.initialized;
 

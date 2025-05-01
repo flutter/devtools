@@ -107,11 +107,10 @@ class MemoryTracker extends Disposable {
     //    > adb shell dumpsys meminfo -d <package_name>
     _adbMemoryInfo =
         serviceConnection.serviceManager.connectedState.value.connected &&
-                serviceConnection.serviceManager.vm!.operatingSystem ==
-                    'android' &&
-                isAndroidChartVisible.value
-            ? await _fetchAdbInfo()
-            : AdbMemoryInfo.empty();
+            serviceConnection.serviceManager.vm!.operatingSystem == 'android' &&
+            isAndroidChartVisible.value
+        ? await _fetchAdbInfo()
+        : AdbMemoryInfo.empty();
 
     // Query the engine's rasterCache estimate.
     rasterCache = await _fetchRasterCacheInfo();

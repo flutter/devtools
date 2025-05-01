@@ -192,59 +192,55 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     diagnostic?.descriptionTextStyleFromBuild = textStyle;
 
     final textSpan = TextSpan(
-      children:
-          buildDescriptionTextSpans(
-            description: description,
-            textStyle: textStyle,
-            colorScheme: colorScheme,
-            diagnostic: diagnostic,
-            searchValue: searchValue,
-            nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
-          ).toList(),
+      children: buildDescriptionTextSpans(
+        description: description,
+        textStyle: textStyle,
+        colorScheme: colorScheme,
+        diagnostic: diagnostic,
+        searchValue: searchValue,
+        nodeDescriptionHighlightStyle: nodeDescriptionHighlightStyle,
+      ).toList(),
     );
 
     final diagnosticLocal = diagnostic!;
     final inspectorService = serviceConnection.inspectorService!;
 
     return HoverCardTooltip.async(
-      enabled:
-          () =>
-              preferences.inspector.hoverEvalModeEnabled.value &&
-              diagnosticLocal.objectGroupApi != null &&
-              !isPrimitiveValueOrNull(description),
-      asyncGenerateHoverCardData: ({
-        required event,
-        required isHoverStale,
-      }) async {
-        final group = inspectorService.createObjectGroup('hover');
+      enabled: () =>
+          preferences.inspector.hoverEvalModeEnabled.value &&
+          diagnosticLocal.objectGroupApi != null &&
+          !isPrimitiveValueOrNull(description),
+      asyncGenerateHoverCardData:
+          ({required event, required isHoverStale}) async {
+            final group = inspectorService.createObjectGroup('hover');
 
-        if (isHoverStale()) return Future.value();
-        final value = await group.toObservatoryInstanceRef(
-          diagnosticLocal.valueRef,
-        );
+            if (isHoverStale()) return Future.value();
+            final value = await group.toObservatoryInstanceRef(
+              diagnosticLocal.valueRef,
+            );
 
-        final variable = DartObjectNode.fromValue(
-          value: value,
-          isolateRef: inspectorService.isolateRef,
-          diagnostic: diagnosticLocal,
-        );
+            final variable = DartObjectNode.fromValue(
+              value: value,
+              isolateRef: inspectorService.isolateRef,
+              diagnostic: diagnosticLocal,
+            );
 
-        if (isHoverStale()) return Future.value();
-        await buildVariablesTree(variable);
-        final tasks = <Future<void>>[];
-        for (final child in variable.children) {
-          tasks.add(() async {
-            if (!isHoverStale()) await buildVariablesTree(child);
-          }());
-        }
-        await tasks.wait;
-        variable.expand();
+            if (isHoverStale()) return Future.value();
+            await buildVariablesTree(variable);
+            final tasks = <Future<void>>[];
+            for (final child in variable.children) {
+              tasks.add(() async {
+                if (!isHoverStale()) await buildVariablesTree(child);
+              }());
+            }
+            await tasks.wait;
+            variable.expand();
 
-        return HoverCardData(
-          title: diagnosticLocal.toStringShort(),
-          contents: Material(child: ExpandableVariable(variable: variable)),
-        );
-      },
+            return HoverCardData(
+              title: diagnosticLocal.toStringShort(),
+              contents: Material(child: ExpandableVariable(variable: variable)),
+            );
+          },
       child: DescriptionDisplay(
         text: textSpan,
         multiline: multiline,
@@ -265,10 +261,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final icon =
-        customIconName != null
-            ? RemoteDiagnosticsNode.iconMaker.fromWidgetName(customIconName)
-            : diagnosticLocal.icon;
+    final icon = customIconName != null
+        ? RemoteDiagnosticsNode.iconMaker.fromWidgetName(customIconName)
+        : diagnosticLocal.icon;
 
     final children = <Widget>[];
 
@@ -329,10 +324,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               final green = JsonUtils.getIntMember(properties, 'green');
               final blue = JsonUtils.getIntMember(properties, 'blue');
               String radix(int chan) => chan.toRadixString(16).padLeft(2, '0');
-              description =
-                  alpha == 255
-                      ? '#${radix(red)}${radix(green)}${radix(blue)}'
-                      : '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
+              description = alpha == 255
+                  ? '#${radix(red)}${radix(green)}${radix(blue)}'
+                  : '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
 
               final color = Color.fromARGB(alpha, red, green, blue);
               children.add(_paddedIcon(_colorIconMaker.getCustomIcon(color)));
@@ -479,10 +473,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           text: errorText,
           // When the node is selected, the background will be an error
           // color so don't render the text the same color.
-          style:
-              isSelected
-                  ? DiagnosticsTextStyles.regular(colorScheme)
-                  : DiagnosticsTextStyles.error(colorScheme),
+          style: isSelected
+              ? DiagnosticsTextStyles.regular(colorScheme)
+              : DiagnosticsTextStyles.error(colorScheme),
         ),
       ),
     );

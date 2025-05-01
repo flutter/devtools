@@ -44,7 +44,10 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [if (showPrompt) child!, Expanded(child: widget.child)],
+          children: [
+            if (showPrompt) child!,
+            Expanded(child: widget.child),
+          ],
         );
       },
       child: Card(
@@ -86,10 +89,9 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
   }
 
   Widget _analyticsDescription(ThemeData theme) {
-    final consentMessageRegExpResults =
-        parseAnalyticsConsentMessage(
-          controller.consentMessage,
-        )?.map((e) => adjustLineBreaks(e)).toList();
+    final consentMessageRegExpResults = parseAnalyticsConsentMessage(
+      controller.consentMessage,
+    )?.map((e) => adjustLineBreaks(e)).toList();
 
     // When failing to parse the consent message, fallback to displaying the
     // consent message in its regular form.

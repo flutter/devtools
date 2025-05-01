@@ -60,8 +60,9 @@ class EnhanceTracingController extends DisposableController
         .listen((event) {
           if (event.extensionKind == 'Flutter.Frame' &&
               _firstLiveFrameId == null) {
-            _firstLiveFrameId =
-                FlutterFrame.fromJson(event.extensionData!.data).id;
+            _firstLiveFrameId = FlutterFrame.fromJson(
+              event.extensionData!.data,
+            ).id;
             unawaited(_firstFrameEventSubscription!.cancel());
             _firstFrameEventSubscription = null;
           }

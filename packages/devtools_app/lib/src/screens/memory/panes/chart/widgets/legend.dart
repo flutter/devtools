@@ -129,18 +129,15 @@ class _LegendRow extends StatelessWidget {
     }
 
     Widget legendSymbol(Map<String, Object?> dataToDisplay) {
-      final image =
-          dataToDisplay.containsKey(renderImage)
-              ? dataToDisplay[renderImage] as String?
-              : null;
-      final color =
-          dataToDisplay.containsKey(renderLine)
-              ? dataToDisplay[renderLine] as Color?
-              : null;
-      final dashedLine =
-          dataToDisplay.containsKey(renderDashed)
-              ? dataToDisplay[renderDashed]
-              : false;
+      final image = dataToDisplay.containsKey(renderImage)
+          ? dataToDisplay[renderImage] as String?
+          : null;
+      final color = dataToDisplay.containsKey(renderLine)
+          ? dataToDisplay[renderLine] as Color?
+          : null;
+      final dashedLine = dataToDisplay.containsKey(renderDashed)
+          ? dataToDisplay[renderDashed]
+          : false;
 
       Widget traceColor;
       if (color != null) {
@@ -150,8 +147,9 @@ class _LegendRow extends StatelessWidget {
           traceColor = createSolidLine(color);
         }
       } else {
-        traceColor =
-            image == null ? const SizedBox() : Image(image: AssetImage(image));
+        traceColor = image == null
+            ? const SizedBox()
+            : Image(image: AssetImage(image));
       }
 
       return traceColor;

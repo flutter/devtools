@@ -34,12 +34,11 @@ class AnsiWriter {
 
   /// Directly index the xterm 256 color palette.
   void xterm(int color, {bool bg = false}) {
-    final c =
-        color < 0
-            ? 0
-            : color > 255
-            ? 255
-            : color;
+    final c = color < 0
+        ? 0
+        : color > 255
+        ? 255
+        : color;
 
     if (bg) {
       _background = c;

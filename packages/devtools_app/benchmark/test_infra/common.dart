@@ -12,11 +12,10 @@ const _benchmarkInitialPage = '';
 
 const _wasmQueryParameters = {'wasm': 'true'};
 
-String benchmarkPath({required bool useWasm}) =>
-    Uri(
-      path: _benchmarkInitialPage,
-      queryParameters: useWasm ? _wasmQueryParameters : null,
-    ).toString();
+String benchmarkPath({required bool useWasm}) => Uri(
+  path: _benchmarkInitialPage,
+  queryParameters: useWasm ? _wasmQueryParameters : null,
+).toString();
 
 String generateBenchmarkEntryPoint({required bool useWasm}) {
   return 'benchmark/test_infra/client/client_${useWasm ? 'wasm' : 'js'}.dart';

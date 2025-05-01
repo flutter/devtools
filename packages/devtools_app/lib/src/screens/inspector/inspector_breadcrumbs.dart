@@ -37,19 +37,18 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Row(
-          children:
-              breadcrumbs.map((item) {
-                if (item.isChevron) {
-                  return Icon(Icons.chevron_right, size: defaultIconSize);
-                }
+          children: breadcrumbs.map((item) {
+            if (item.isChevron) {
+              return Icon(Icons.chevron_right, size: defaultIconSize);
+            }
 
-                return Flexible(
-                  child: _InspectorBreadcrumb(
-                    data: item,
-                    onTap: () => onTap(item.node),
-                  ),
-                );
-              }).toList(),
+            return Flexible(
+              child: _InspectorBreadcrumb(
+                data: item,
+                onTap: () => onTap(item.node),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -59,25 +58,23 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
     List<InspectorTreeNode> nodes,
   ) {
     final lastNode = nodes.safeLast;
-    final items =
-        nodes.map((node) {
-          return _InspectorBreadcrumbData.wrap(
-            node: node,
-            isSelected: node == lastNode,
-          );
-        }).toList();
+    final items = nodes.map((node) {
+      return _InspectorBreadcrumbData.wrap(
+        node: node,
+        isSelected: node == lastNode,
+      );
+    }).toList();
     List<_InspectorBreadcrumbData> breadcrumbs;
-    breadcrumbs =
-        items.length > _maxNumberOfBreadcrumbs
-            ? [
-              items[0],
-              _InspectorBreadcrumbData.more(),
-              ...items.sublist(
-                items.length - _maxNumberOfBreadcrumbs + 1,
-                items.length,
-              ),
-            ]
-            : items;
+    breadcrumbs = items.length > _maxNumberOfBreadcrumbs
+        ? [
+            items[0],
+            _InspectorBreadcrumbData.more(),
+            ...items.sublist(
+              items.length - _maxNumberOfBreadcrumbs + 1,
+              items.length,
+            ),
+          ]
+        : items;
 
     return breadcrumbs.joinWith(_InspectorBreadcrumbData.chevron());
   }
@@ -102,16 +99,15 @@ class _InspectorBreadcrumb extends StatelessWidget {
       ).copyWith(fontSize: scaleByFontFactor(11)),
     );
 
-    final icon =
-        data.icon == null
-            ? null
-            : Transform.scale(
-              scale: _iconScale,
-              child: Padding(
-                padding: const EdgeInsets.only(right: iconPadding),
-                child: data.icon,
-              ),
-            );
+    final icon = data.icon == null
+        ? null
+        : Transform.scale(
+            scale: _iconScale,
+            child: Padding(
+              padding: const EdgeInsets.only(right: iconPadding),
+              child: data.icon,
+            ),
+          );
 
     return InkWell(
       onTap: data.isClickable ? onTap : null,
@@ -123,14 +119,16 @@ class _InspectorBreadcrumb extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           borderRadius: defaultBorderRadius,
-          color:
-              data.isSelected
-                  ? Theme.of(context).colorScheme.selectedRowBackgroundColor
-                  : Colors.transparent,
+          color: data.isSelected
+              ? Theme.of(context).colorScheme.selectedRowBackgroundColor
+              : Colors.transparent,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [if (icon != null) icon, Flexible(child: text)],
+          children: [
+            if (icon != null) icon,
+            Flexible(child: text),
+          ],
         ),
       ),
     );

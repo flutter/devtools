@@ -72,9 +72,8 @@ class _SnapshotItemContent extends StatelessWidget {
                           styleSheet: MarkdownStyleSheet(
                             p: Theme.of(context).regularTextStyle,
                           ),
-                          onTapLink:
-                              (text, url, title) =>
-                                  unawaited(launchUrlWithErrorHandling(url!)),
+                          onTapLink: (text, url, title) =>
+                              unawaited(launchUrlWithErrorHandling(url!)),
                         ),
                       ),
                       const SizedBox(width: densePadding),

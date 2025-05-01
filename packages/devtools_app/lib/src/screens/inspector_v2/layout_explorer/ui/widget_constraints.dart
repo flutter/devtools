@@ -51,9 +51,9 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
                 text: ' (${propertiesLocal.describeHeightConstraints()})',
                 style:
                     propertiesLocal.constraints!.hasBoundedHeight ||
-                            !warnIfUnconstrained
-                        ? null
-                        : TextStyle(color: colorScheme.unconstrainedColor),
+                        !warnIfUnconstrained
+                    ? null
+                    : TextStyle(color: colorScheme.unconstrainedColor),
               ),
             ],
             if (showOverflowHeight)
@@ -111,9 +111,9 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
               text: '(${propertiesLocal.describeWidthConstraints()})',
               style:
                   propertiesLocal.constraints!.hasBoundedWidth ||
-                          !warnIfUnconstrained
-                      ? null
-                      : TextStyle(color: colorScheme.unconstrainedColor),
+                      !warnIfUnconstrained
+                  ? null
+                  : TextStyle(color: colorScheme.unconstrainedColor),
             ),
           ],
           if (showChildrenWidthsSum)

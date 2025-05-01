@@ -314,8 +314,8 @@ void main() {
             )
             .first,
       );
-      final selectableTextWidget =
-          textElement.findAncestorWidgetOfExactType<SelectableText>()!;
+      final selectableTextWidget = textElement
+          .findAncestorWidgetOfExactType<SelectableText>()!;
       await tester.tap(find.byWidget(selectableTextWidget));
       await tester.pumpAndSettle();
 

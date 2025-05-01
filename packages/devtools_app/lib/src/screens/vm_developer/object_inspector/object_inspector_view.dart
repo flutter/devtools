@@ -45,8 +45,8 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final vmDeveloperToolsController =
-        screenControllers.lookup<VMDeveloperToolsController>();
+    final vmDeveloperToolsController = screenControllers
+        .lookup<VMDeveloperToolsController>();
     controller = vmDeveloperToolsController.objectInspectorViewController;
     unawaited(controller.init());
   }
@@ -83,8 +83,8 @@ class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final vmDeveloperToolsController =
-        screenControllers.lookup<VMDeveloperToolsController>();
+    final vmDeveloperToolsController = screenControllers
+        .lookup<VMDeveloperToolsController>();
     controller = vmDeveloperToolsController.objectInspectorViewController;
     unawaited(controller.init());
   }
@@ -117,10 +117,9 @@ class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
               gac.classHierarchy,
             ),
           ],
-          onChanged:
-              (newValue) => setState(() {
-                value = newValue!;
-              }),
+          onChanged: (newValue) => setState(() {
+            value = newValue!;
+          }),
         ),
         Expanded(
           child: RoundedOutlinedBorder(

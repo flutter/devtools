@@ -64,8 +64,11 @@ void main() {
     test(
       'does not add banner message when memory limit is not reached',
       () async {
-        memoryUsageBytes =
-            convertBytes(1, from: ByteUnit.gb, to: ByteUnit.byte).round();
+        memoryUsageBytes = convertBytes(
+          1,
+          from: ByteUnit.gb,
+          to: ByteUnit.byte,
+        ).round();
         observer.init();
         await measurementComplete.future;
 
@@ -75,15 +78,19 @@ void main() {
         // used instead of `gac.devToolsMain`.
         expect(DevToolsRouterDelegate.currentPage, isNull);
 
-        final messages =
-            bannerMessages.messagesForScreen(universalScreenId).value;
+        final messages = bannerMessages
+            .messagesForScreen(universalScreenId)
+            .value;
         expect(messages, isEmpty);
       },
     );
 
     test('adds banner message when memory limit is reached', () async {
-      memoryUsageBytes =
-          convertBytes(3.1, from: ByteUnit.gb, to: ByteUnit.byte).round();
+      memoryUsageBytes = convertBytes(
+        3.1,
+        from: ByteUnit.gb,
+        to: ByteUnit.byte,
+      ).round();
       observer.init();
       await measurementComplete.future;
 
@@ -93,8 +100,9 @@ void main() {
       // used instead of `gac.devToolsMain`.
       expect(DevToolsRouterDelegate.currentPage, isNull);
 
-      final messages =
-          bannerMessages.messagesForScreen(universalScreenId).value;
+      final messages = bannerMessages
+          .messagesForScreen(universalScreenId)
+          .value;
       expect(messages, isNotEmpty);
     });
 
@@ -124,8 +132,11 @@ void main() {
           screenControllers.lookup<FakeScreenController2>();
           DevToolsRouterDelegate.currentPage = screenController1.screenId;
 
-          memoryUsageBytes =
-              convertBytes(3.1, from: ByteUnit.gb, to: ByteUnit.byte).round();
+          memoryUsageBytes = convertBytes(
+            3.1,
+            from: ByteUnit.gb,
+            to: ByteUnit.byte,
+          ).round();
           var result = await MemoryObserver.reduceMemory(
             debugMeasureUsageInBytes: testMeasureMemoryUsage,
           );
@@ -135,8 +146,11 @@ void main() {
           expect(screenController2.releaseMemoryCallCount, 1);
           expect(screenController2.partialReleaseMemoryCallCount, 0);
 
-          memoryUsageBytes =
-              convertBytes(1, from: ByteUnit.gb, to: ByteUnit.byte).round();
+          memoryUsageBytes = convertBytes(
+            1,
+            from: ByteUnit.gb,
+            to: ByteUnit.byte,
+          ).round();
           result = await MemoryObserver.reduceMemory(
             debugMeasureUsageInBytes: testMeasureMemoryUsage,
           );
@@ -151,8 +165,11 @@ void main() {
       test('skips uninitialized screen controllers', () async {
         DevToolsRouterDelegate.currentPage = screenController1.screenId;
 
-        memoryUsageBytes =
-            convertBytes(3.1, from: ByteUnit.gb, to: ByteUnit.byte).round();
+        memoryUsageBytes = convertBytes(
+          3.1,
+          from: ByteUnit.gb,
+          to: ByteUnit.byte,
+        ).round();
         var result = await MemoryObserver.reduceMemory(
           debugMeasureUsageInBytes: testMeasureMemoryUsage,
         );
@@ -165,8 +182,11 @@ void main() {
         // Lookup to force initialization.
         screenControllers.lookup<FakeScreenController1>();
 
-        memoryUsageBytes =
-            convertBytes(3.1, from: ByteUnit.gb, to: ByteUnit.byte).round();
+        memoryUsageBytes = convertBytes(
+          3.1,
+          from: ByteUnit.gb,
+          to: ByteUnit.byte,
+        ).round();
         result = await MemoryObserver.reduceMemory(
           debugMeasureUsageInBytes: testMeasureMemoryUsage,
         );

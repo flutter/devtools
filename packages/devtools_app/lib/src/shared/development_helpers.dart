@@ -66,8 +66,9 @@ ExtensionEnabledState debugHandleExtensionEnabledState({
   bool? enable,
 }) {
   if (enable != null) {
-    stubExtensionEnabledStates[extensionName] =
-        enable ? ExtensionEnabledState.enabled : ExtensionEnabledState.disabled;
+    stubExtensionEnabledStates[extensionName] = enable
+        ? ExtensionEnabledState.enabled
+        : ExtensionEnabledState.disabled;
   }
   return stubExtensionEnabledStates.putIfAbsent(
     extensionName,

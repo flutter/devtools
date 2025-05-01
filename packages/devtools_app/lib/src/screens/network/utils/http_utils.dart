@@ -13,16 +13,15 @@ int calculateHeadersSize(Map<String, Object?>? headers) {
   if (headers == null) return -1;
 
   // Combine headers into a single string with CRLF endings
-  String headersString =
-      headers.entries.map((entry) {
-        final key = entry.key;
-        var value = entry.value;
-        // If the value is a List, join it with a comma
-        if (value is List<String>) {
-          value = value.join(', ');
-        }
-        return '$key: $value\r\n';
-      }).join();
+  String headersString = headers.entries.map((entry) {
+    final key = entry.key;
+    var value = entry.value;
+    // If the value is a List, join it with a comma
+    if (value is List<String>) {
+      value = value.join(', ');
+    }
+    return '$key: $value\r\n';
+  }).join();
 
   // Add final CRLF to indicate end of headers
   headersString += '\r\n';

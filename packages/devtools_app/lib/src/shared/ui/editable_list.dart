@@ -179,19 +179,19 @@ class EditableListActionBar extends StatelessWidget {
           const SizedBox(width: densePadding),
           isRefreshing?.value ?? false
               ? SizedBox(
-                width: defaultTextFieldHeight,
-                height: defaultTextFieldHeight,
-                child: const Padding(
-                  padding: EdgeInsets.all(densePadding),
-                  child: CircularProgressIndicator(),
-                ),
-              )
+                  width: defaultTextFieldHeight,
+                  height: defaultTextFieldHeight,
+                  child: const Padding(
+                    padding: EdgeInsets.all(densePadding),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
               : RefreshButton(
-                gaScreen: gaScreen,
-                gaSelection: gaRefreshSelection,
-                onPressed: onRefresh,
-                minScreenWidthForTextBeforeScaling: double.maxFinite,
-              ),
+                  gaScreen: gaScreen,
+                  gaSelection: gaRefreshSelection,
+                  onPressed: onRefresh,
+                  minScreenWidthForTextBeforeScaling: double.maxFinite,
+                ),
         ],
       ),
     );

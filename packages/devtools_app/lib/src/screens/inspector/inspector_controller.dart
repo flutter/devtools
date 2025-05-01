@@ -64,15 +64,14 @@ class InspectorController extends DisposableController
       onExpand: _onExpand,
       onClientActiveChange: _onClientChange,
     );
-    details =
-        isSummaryTree
-            ? InspectorController(
-              inspectorTree: detailsTree!,
-              treeType: treeType,
-              parent: this,
-              isSummaryTree: false,
-            )
-            : null;
+    details = isSummaryTree
+        ? InspectorController(
+            inspectorTree: detailsTree!,
+            treeType: treeType,
+            parent: this,
+            isSummaryTree: false,
+          )
+        : null;
 
     await serviceConnection.serviceManager.onServiceAvailable;
 
@@ -425,8 +424,8 @@ class InspectorController extends DisposableController
     } else {
       if (disposed) return;
       if (inspectorService is InspectorService) {
-        final widgetTreeReady =
-            await (inspectorService as InspectorService).isWidgetTreeReady();
+        final widgetTreeReady = await (inspectorService as InspectorService)
+            .isWidgetTreeReady();
         flutterAppFrameReady = widgetTreeReady;
       }
       if (isActive && flutterAppFrameReady) {
@@ -450,10 +449,9 @@ class InspectorController extends DisposableController
     treeGroups.cancelNext();
     try {
       final group = treeGroups.next;
-      final node =
-          await (detailsSubtree
-              ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
-              : group.getRoot(treeType, isSummaryTree: true));
+      final node = await (detailsSubtree
+          ? group.getDetailsSubtree(subtreeRoot, subtreeDepth: subtreeDepth)
+          : group.getRoot(treeType, isSummaryTree: true));
       if (node == null || group.disposed || disposed) {
         return;
       }
@@ -644,8 +642,9 @@ class InspectorController extends DisposableController
       restrictToLocalProject: isSummaryTree,
     );
 
-    final pendingDetailsFuture =
-        isSummaryTree ? group.getSelection(selectedDiagnostic, treeType) : null;
+    final pendingDetailsFuture = isSummaryTree
+        ? group.getSelection(selectedDiagnostic, treeType)
+        : null;
 
     try {
       final newSelection = await pendingSelectionFuture;
@@ -736,17 +735,15 @@ class InspectorController extends DisposableController
   void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
     final inspectorRef = node?.diagnostic?.valueRef.id;
 
-    final errors =
-        serviceConnection.errorBadgeManager
-            .erroredItemsForPage(InspectorScreen.id)
-            .value;
+    final errors = serviceConnection.errorBadgeManager
+        .erroredItemsForPage(InspectorScreen.id)
+        .value;
 
     // Check whether the node that was just selected has any errors associated
     // with it.
-    var errorIndex =
-        inspectorRef != null
-            ? errors.keys.toList().indexOf(inspectorRef)
-            : null;
+    var errorIndex = inspectorRef != null
+        ? errors.keys.toList().indexOf(inspectorRef)
+        : null;
     if (errorIndex == -1) {
       errorIndex = null;
     }
@@ -772,10 +769,9 @@ class InspectorController extends DisposableController
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
 
-    final errors =
-        serviceConnection.errorBadgeManager
-            .erroredItemsForPage(InspectorScreen.id)
-            .value;
+    final errors = serviceConnection.errorBadgeManager
+        .erroredItemsForPage(InspectorScreen.id)
+        .value;
 
     unawaited(
       updateSelectionFromService(

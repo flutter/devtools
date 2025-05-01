@@ -161,8 +161,8 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
       final matches =
           parts.activeWord.startsWith(_activeWord) && _activeWord.isNotEmpty
-              ? _filterMatches(_matches, parts.activeWord)
-              : await widget.getAutoCompleteResults(parts, evalService);
+          ? _filterMatches(_matches, parts.activeWord)
+          : await widget.getAutoCompleteResults(parts, evalService);
 
       _matches = matches;
       _activeWord = parts.activeWord;
@@ -174,11 +174,10 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
           ..clearSearchAutoComplete()
           ..clearCurrentSuggestion();
       } else {
-        final results =
-            matches
-                .sublist(0, min(defaultTopMatchesLimit, matches.length))
-                .map((match) => AutoCompleteMatch(match))
-                .toList();
+        final results = matches
+            .sublist(0, min(defaultTopMatchesLimit, matches.length))
+            .map((match) => AutoCompleteMatch(match))
+            .toList();
 
         _autoCompleteController
           ..searchAutoComplete.value = results
@@ -231,21 +230,18 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
                 labelText: 'Eval. Enter "?" for help.',
                 labelStyle: Theme.of(context).subtleTextStyle,
               ),
-              overlayXPositionBuilder: (
-                String inputValue,
-                TextStyle? inputStyle,
-              ) {
-                // X-coordinate is equivalent to the width of the input text
-                // up to the last "." or the insertion point (cursor):
-                final indexOfDot = inputValue.lastIndexOf('.');
-                final textSegment =
-                    indexOfDot != -1
+              overlayXPositionBuilder:
+                  (String inputValue, TextStyle? inputStyle) {
+                    // X-coordinate is equivalent to the width of the input text
+                    // up to the last "." or the insertion point (cursor):
+                    final indexOfDot = inputValue.lastIndexOf('.');
+                    final textSegment = indexOfDot != -1
                         ? inputValue.substring(0, indexOfDot + 1)
                         : inputValue;
-                return calculateTextSpanWidth(
-                  TextSpan(text: textSegment, style: inputStyle),
-                );
-              },
+                    return calculateTextSpanWidth(
+                      TextSpan(text: textSegment, style: inputStyle),
+                    );
+                  },
               // Disable ligatures, so the suggestions of the auto complete work correcly.
               style: Theme.of(context).fixedFontStyle.copyWith(
                 fontFeatures: [const FontFeature.disable('liga')],
@@ -444,20 +440,18 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       return kSuccess;
     }
 
-    final isolateId =
-        serviceConnection
-            .serviceManager
-            .isolateManager
-            .selectedIsolate
-            .value
-            ?.id;
-    final isolateName =
-        serviceConnection
-            .serviceManager
-            .isolateManager
-            .selectedIsolate
-            .value
-            ?.name;
+    final isolateId = serviceConnection
+        .serviceManager
+        .isolateManager
+        .selectedIsolate
+        .value
+        ?.id;
+    final isolateName = serviceConnection
+        .serviceManager
+        .isolateManager
+        .selectedIsolate
+        .value
+        ?.name;
 
     if (isolateId == null || isolateName == null) {
       _emitToConsole('Selected isolate cannot be detected.');

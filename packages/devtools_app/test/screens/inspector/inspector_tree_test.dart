@@ -53,8 +53,9 @@ void main() {
     bool isSummaryTree = false,
   }) async {
     final debuggerController = DebuggerController();
-    final summaryTreeController =
-        isSummaryTree ? null : InspectorTreeController();
+    final summaryTreeController = isSummaryTree
+        ? null
+        : InspectorTreeController();
     await tester.pumpWidget(
       wrapWithControllers(
         debugger: debuggerController,
@@ -73,12 +74,11 @@ void main() {
     testWidgets('Row with negative index regression test', (
       WidgetTester tester,
     ) async {
-      final treeController =
-          InspectorTreeController()
-            ..config = InspectorTreeConfig(
-              onNodeAdded: (_, _) {},
-              onClientActiveChange: (_) {},
-            );
+      final treeController = InspectorTreeController()
+        ..config = InspectorTreeConfig(
+          onNodeAdded: (_, _) {},
+          onClientActiveChange: (_) {},
+        );
       await pumpInspectorTree(tester, treeController: treeController);
 
       expect(treeController.getRow(const Offset(0, -100.0)), isNull);
@@ -87,8 +87,8 @@ void main() {
       expect(treeController.getRow(const Offset(0, 0.0)), isNull);
       expect(treeController.getRowOffset(0), equals(0));
 
-      treeController.root =
-          InspectorTreeNode()..appendChild(InspectorTreeNode());
+      treeController.root = InspectorTreeNode()
+        ..appendChild(InspectorTreeNode());
 
       await pumpInspectorTree(tester, treeController: treeController);
 
@@ -119,7 +119,12 @@ void main() {
     testWidgets('Shows preview from Text.rich', (WidgetTester tester) async {
       final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
         widget: const Text.rich(
-          TextSpan(children: [TextSpan(text: 'Rich '), TextSpan(text: 'text')]),
+          TextSpan(
+            children: [
+              TextSpan(text: 'Rich '),
+              TextSpan(text: 'text'),
+            ],
+          ),
         ),
         tester: tester,
       );

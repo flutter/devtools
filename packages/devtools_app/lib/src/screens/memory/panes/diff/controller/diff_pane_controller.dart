@@ -44,16 +44,13 @@ class DiffPaneController extends DisposableController with Serializable {
   }
 
   factory DiffPaneController.fromJson(Map<String, dynamic> json) {
-    final snapshots =
-        (json[Json.snapshots.name] as List)
-            .map(
-              (e) =>
-                  deserialize<SnapshotDataItem>(e, SnapshotDataItem.fromJson),
-            )
-            .toList();
+    final snapshots = (json[Json.snapshots.name] as List)
+        .map((e) => deserialize<SnapshotDataItem>(e, SnapshotDataItem.fromJson))
+        .toList();
 
-    final diffWith =
-        (json[Json.diffWith.name] as List).map((e) => e as int?).toList();
+    final diffWith = (json[Json.diffWith.name] as List)
+        .map((e) => e as int?)
+        .toList();
 
     assert(snapshots.length == diffWith.length);
 
@@ -73,21 +70,19 @@ class DiffPaneController extends DisposableController with Serializable {
 
   @override
   Map<String, dynamic> toJson() {
-    final snapshots =
-        core.snapshots.value
-            .whereType<SnapshotDataItem>()
-            .where((s) => s.heap != null)
-            .toList();
+    final snapshots = core.snapshots.value
+        .whereType<SnapshotDataItem>()
+        .where((s) => s.heap != null)
+        .toList();
 
     final snapshotToIndex = snapshots.asMap().map(
       (index, item) => MapEntry(item, index),
     );
 
-    final diffWithIndices =
-        snapshots.map((item) {
-          final diffWith = item.diffWith.value;
-          return diffWith == null ? null : snapshotToIndex[diffWith];
-        }).toList();
+    final diffWithIndices = snapshots.map((item) {
+      final diffWith = item.diffWith.value;
+      return diffWith == null ? null : snapshotToIndex[diffWith];
+    }).toList();
 
     return {
       Json.snapshots.name: snapshots,
@@ -265,10 +260,9 @@ class CoreData extends Disposable {
   SnapshotItem get selectedItem =>
       _snapshots.value[_selectedSnapshotIndex.value];
 
-  SnapshotDataItem? get selectedDataItem =>
-      selectedItem is SnapshotDataItem
-          ? selectedItem as SnapshotDataItem
-          : null;
+  SnapshotDataItem? get selectedDataItem => selectedItem is SnapshotDataItem
+      ? selectedItem as SnapshotDataItem
+      : null;
 
   /// Full name for the selected class.
   ///

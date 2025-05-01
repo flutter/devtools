@@ -34,8 +34,9 @@ void main() {
       await fakeServiceConnection.serviceManager.flagsInitialized.future;
       dropdown = CpuSamplingRateDropdown(
         screenId: ProfilerScreen.id,
-        profilePeriodFlagNotifier:
-            fakeServiceConnection.vmFlagManager.flag(profilePeriod)!,
+        profilePeriodFlagNotifier: fakeServiceConnection.vmFlagManager.flag(
+          profilePeriod,
+        )!,
       );
     });
 
@@ -85,8 +86,9 @@ void main() {
       );
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
 
-      var profilePeriodFlag =
-          (await getProfileGranularityFlag(fakeServiceConnection))!;
+      var profilePeriodFlag = (await getProfileGranularityFlag(
+        fakeServiceConnection,
+      ))!;
       expect(
         profilePeriodFlag.valueAsString,
         equals(CpuSamplingRate.medium.value),
@@ -102,8 +104,9 @@ void main() {
       );
       expect(dropdownButton.value, equals(CpuSamplingRate.high.value));
 
-      profilePeriodFlag =
-          (await getProfileGranularityFlag(fakeServiceConnection))!;
+      profilePeriodFlag = (await getProfileGranularityFlag(
+        fakeServiceConnection,
+      ))!;
       expect(profilePeriodFlag.name, equals(profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,
@@ -125,8 +128,9 @@ void main() {
       );
       expect(dropdownButton.value, equals(CpuSamplingRate.low.value));
 
-      profilePeriodFlag =
-          (await getProfileGranularityFlag(fakeServiceConnection))!;
+      profilePeriodFlag = (await getProfileGranularityFlag(
+        fakeServiceConnection,
+      ))!;
       expect(profilePeriodFlag.name, equals(profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,

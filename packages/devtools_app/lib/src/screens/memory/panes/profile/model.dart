@@ -38,11 +38,10 @@ class AdaptedProfile with Serializable {
   ) {
     final adaptedProfile = AdaptedProfile._(
       total: ProfileRecord.total(profile),
-      items:
-          (profile.members ?? [])
-              .where((e) => (e.instancesCurrent ?? 0) > 0)
-              .map((e) => ProfileRecord.fromClassHeapStats(e))
-              .toList(),
+      items: (profile.members ?? [])
+          .where((e) => (e.instancesCurrent ?? 0) > 0)
+          .map((e) => ProfileRecord.fromClassHeapStats(e))
+          .toList(),
       newSpaceGCStats: profile.newSpaceGCStats,
       oldSpaceGCStats: profile.oldSpaceGCStats,
       totalGCStats: profile.totalGCStats,
@@ -74,10 +73,9 @@ class AdaptedProfile with Serializable {
   factory AdaptedProfile.fromJson(Map<String, dynamic> json) {
     return AdaptedProfile._(
       total: ProfileRecord.fromJson(json[_ProfileJson.total]),
-      items:
-          (json[_ProfileJson.items] as List)
-              .map((e) => ProfileRecord.fromJson(e))
-              .toList(),
+      items: (json[_ProfileJson.items] as List)
+          .map((e) => ProfileRecord.fromJson(e))
+          .toList(),
       newSpaceGCStats: GCStats.fromJson(json[_ProfileJson.newGC]),
       oldSpaceGCStats: GCStats.fromJson(json[_ProfileJson.oldGC]),
       totalGCStats: GCStats.fromJson(json[_ProfileJson.totalGC]),

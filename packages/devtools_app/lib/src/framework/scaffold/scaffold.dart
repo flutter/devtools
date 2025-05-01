@@ -147,10 +147,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     } else if (widget.screens[_tabController!.index].screenId != widget.page) {
       // If the page changed (eg. the route was modified by pressing back in the
       // browser), animate to the new one.
-      var newIndex =
-          widget.page == null
-              ? 0 // When there's no supplied page, we show the first one.
-              : widget.screens.indexWhere((t) => t.screenId == widget.page);
+      var newIndex = widget.page == null
+          ? 0 // When there's no supplied page, we show the first one.
+          : widget.screens.indexWhere((t) => t.screenId == widget.page);
       // Ensure the returned index is in range, otherwise set to 0.
       if (newIndex == -1) {
         newIndex = 0;
@@ -326,44 +325,42 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           child: KeyboardShortcuts(
             keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(context),
             child: Scaffold(
-              appBar:
-                  showAppBar
-                      ? PreferredSize(
-                        preferredSize: Size.fromHeight(defaultToolbarHeight),
-                        // Place the AppBar inside of a Hero widget to keep it the same across
-                        // route transitions.
-                        child: Hero(
-                          tag: _appBarTag,
-                          child: DevToolsAppBar(
-                            tabController: _tabController,
-                            screens: widget.screens,
-                            actions: widget.actions,
-                          ),
+              appBar: showAppBar
+                  ? PreferredSize(
+                      preferredSize: Size.fromHeight(defaultToolbarHeight),
+                      // Place the AppBar inside of a Hero widget to keep it the same across
+                      // route transitions.
+                      child: Hero(
+                        tag: _appBarTag,
+                        child: DevToolsAppBar(
+                          tabController: _tabController,
+                          screens: widget.screens,
+                          actions: widget.actions,
                         ),
-                      )
-                      : null,
+                      ),
+                    )
+                  : null,
               body: OutlineDecoration.onlyTop(
                 child: Padding(
                   padding: widget.appPadding,
-                  child:
-                      showConsole
-                          ? SplitPane(
-                            axis: Axis.vertical,
-                            splitters: [ConsolePaneHeader()],
-                            initialFractions: const [0.8, 0.2],
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: intermediateSpacing,
-                                ),
-                                child: content,
+                  child: showConsole
+                      ? SplitPane(
+                          axis: Axis.vertical,
+                          splitters: [ConsolePaneHeader()],
+                          initialFractions: const [0.8, 0.2],
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: intermediateSpacing,
                               ),
-                              RoundedOutlinedBorder.onlyBottom(
-                                child: const ConsolePane(),
-                              ),
-                            ],
-                          )
-                          : content,
+                              child: content,
+                            ),
+                            RoundedOutlinedBorder.onlyBottom(
+                              child: const ConsolePane(),
+                            ),
+                          ],
+                        )
+                      : content,
                 ),
               ),
               bottomNavigationBar: StatusLine(

@@ -96,13 +96,12 @@ class SidebarDevToolsScreens extends StatelessWidget {
         ),
         Table(
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          columnWidths:
-              singleColumn
-                  ? null
-                  : const <int, TableColumnWidth>{
-                    0: FlexColumnWidth(),
-                    1: FlexColumnWidth(),
-                  },
+          columnWidths: singleColumn
+              ? null
+              : const <int, TableColumnWidth>{
+                  0: FlexColumnWidth(),
+                  1: FlexColumnWidth(),
+                },
           children: generateRows(singleColumn),
         ),
       ],
@@ -110,8 +109,9 @@ class SidebarDevToolsScreens extends StatelessWidget {
   }
 
   List<TableRow> generateRows(bool singleColumn) {
-    final devtoolsScreens =
-        ScreenMetaData.values.where(includeInSidebar).toList();
+    final devtoolsScreens = ScreenMetaData.values
+        .where(includeInSidebar)
+        .toList();
     if (singleColumn) {
       return devtoolsScreens
           .map(
@@ -121,13 +121,12 @@ class SidebarDevToolsScreens extends StatelessWidget {
               editor: editor,
               singleColumn: singleColumn,
               hasDebugSessions: debugSessions.isNotEmpty,
-              onPressed:
-                  (data) => openDevToolsScreen(
-                    screenId: data.screenId,
-                    requiresDebugSession: data.requiresDebugSession,
-                    prefersDebugSession: data.prefersDebugSession,
-                    editor: editor,
-                  ),
+              onPressed: (data) => openDevToolsScreen(
+                screenId: data.screenId,
+                requiresDebugSession: data.requiresDebugSession,
+                prefersDebugSession: data.prefersDebugSession,
+                editor: editor,
+              ),
             ),
           )
           .toList();
@@ -144,13 +143,12 @@ class SidebarDevToolsScreens extends StatelessWidget {
           editor: editor,
           singleColumn: singleColumn,
           hasDebugSessions: debugSessions.isNotEmpty,
-          onPressed:
-              (data) => openDevToolsScreen(
-                screenId: data.screenId,
-                requiresDebugSession: data.requiresDebugSession,
-                prefersDebugSession: data.prefersDebugSession,
-                editor: editor,
-              ),
+          onPressed: (data) => openDevToolsScreen(
+            screenId: data.screenId,
+            requiresDebugSession: data.requiresDebugSession,
+            prefersDebugSession: data.prefersDebugSession,
+            editor: editor,
+          ),
         ),
       );
     }

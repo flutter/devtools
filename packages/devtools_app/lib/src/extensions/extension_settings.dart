@@ -26,14 +26,12 @@ class ExtensionSettingsAction extends ScaffoldAction {
           unawaited(
             showDialog(
               context: context,
-              builder:
-                  (context) => ExtensionSettingsDialog(
-                    extensions:
-                        extensionService
-                            .currentExtensions
-                            .value
-                            .availableExtensions,
-                  ),
+              builder: (context) => ExtensionSettingsDialog(
+                extensions: extensionService
+                    .currentExtensions
+                    .value
+                    .availableExtensions,
+              ),
             ),
           );
         },
@@ -50,8 +48,9 @@ class ExtensionSettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // This dialog needs a fixed height because it contains a scrollable list.
-    final dialogHeight =
-        anyTestMode ? scaleByFontFactor(1000.0) : scaleByFontFactor(300.0);
+    final dialogHeight = anyTestMode
+        ? scaleByFontFactor(1000.0)
+        : scaleByFontFactor(300.0);
     return DevToolsDialog(
       title: const DialogTitleText('DevTools Extensions'),
       content: SizedBox(
@@ -76,15 +75,14 @@ class ExtensionSettingsDialog extends StatelessWidget {
             ),
             const PaddedDivider(),
             Expanded(
-              child:
-                  extensions.isEmpty
-                      ? Center(
-                        child: Text(
-                          'No extensions available.',
-                          style: theme.subtleTextStyle,
-                        ),
-                      )
-                      : _ExtensionsList(extensions: extensions),
+              child: extensions.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No extensions available.',
+                        style: theme.subtleTextStyle,
+                      ),
+                    )
+                  : _ExtensionsList(extensions: extensions),
             ),
           ],
         ),
@@ -126,9 +124,8 @@ class __ExtensionsListState extends State<_ExtensionsList> {
       child: ListView.builder(
         controller: scrollController,
         itemCount: widget.extensions.length,
-        itemBuilder:
-            (context, index) =>
-                ExtensionSetting(extension: widget.extensions[index]),
+        itemBuilder: (context, index) =>
+            ExtensionSetting(extension: widget.extensions[index]),
       ),
     );
   }
@@ -145,9 +142,8 @@ class ExtensionSetting extends StatelessWidget {
     final buttonStates = [
       (
         title: 'Enabled',
-        isSelected:
-            (ExtensionEnabledState state) =>
-                state == ExtensionEnabledState.enabled,
+        isSelected: (ExtensionEnabledState state) =>
+            state == ExtensionEnabledState.enabled,
         onPressed: () {
           ga.select(
             gac.DevToolsExtensionEvents.extensionSettingsId.name,
@@ -160,9 +156,8 @@ class ExtensionSetting extends StatelessWidget {
       ),
       (
         title: 'Disabled',
-        isSelected:
-            (ExtensionEnabledState state) =>
-                state == ExtensionEnabledState.disabled,
+        isSelected: (ExtensionEnabledState state) =>
+            state == ExtensionEnabledState.disabled,
         onPressed: () {
           ga.select(
             gac.DevToolsExtensionEvents.extensionSettingsId.name,

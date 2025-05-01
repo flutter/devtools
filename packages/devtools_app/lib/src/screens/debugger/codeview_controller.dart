@@ -390,14 +390,13 @@ class CodeViewController extends DisposableController
   void _maybeShowSourceMapsWarning() {
     final isWebApp =
         serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ?? false;
-    final enableSourceMapsLink =
-        devToolsEnvironmentParameters.enableSourceMapsLink();
+    final enableSourceMapsLink = devToolsEnvironmentParameters
+        .enableSourceMapsLink();
     if (isWebApp && enableSourceMapsLink != null) {
       final enableSourceMapsAction = NotificationAction(
         label: 'Enable sourcemaps',
-        onPressed:
-            () =>
-                unawaited(launchUrlWithErrorHandling(enableSourceMapsLink.url)),
+        onPressed: () =>
+            unawaited(launchUrlWithErrorHandling(enableSourceMapsLink.url)),
       );
       notificationService.pushNotification(
         NotificationMessage(

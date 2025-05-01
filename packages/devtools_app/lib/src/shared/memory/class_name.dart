@@ -168,8 +168,9 @@ class HeapClassName with Serializable {
     return false;
   }
 
-  late final shortName =
-      className == 'Context' && library == '' ? 'Closure Context' : className;
+  late final shortName = className == 'Context' && library == ''
+      ? 'Closure Context'
+      : className;
 
   ClassType? _cachedClassType;
 

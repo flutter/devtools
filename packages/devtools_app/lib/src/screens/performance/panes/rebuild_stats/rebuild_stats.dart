@@ -208,9 +208,8 @@ class _RebuildTableState extends State<RebuildTable> {
       dataKey: 'RebuildMetricsTable',
       columns: _columns,
       data: widget.metrics,
-      keyFactory:
-          (RebuildLocationStats location) =>
-              ValueKey<String?>('${location.location.id}'),
+      keyFactory: (RebuildLocationStats location) =>
+          ValueKey<String?>('${location.location.id}'),
       defaultSortColumn: _metricsColumns.first,
       defaultSortDirection: sortDirection,
       onItemSelected: (item) async {

@@ -13,8 +13,8 @@ void generateDevToolsTitle() {
   }
   _devToolsTitle.value =
       serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!
-          ? 'Flutter DevTools'
-          : 'Dart DevTools';
+      ? 'Flutter DevTools'
+      : 'Dart DevTools';
 }
 
 ValueListenable<String> get devToolsTitle => _devToolsTitle;

@@ -113,8 +113,8 @@ class ValidationDetailHeader extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             IconButton(
-              onPressed:
-                  () => controller.updateDisplayOptions(showSplitScreen: false),
+              onPressed: () =>
+                  controller.updateDisplayOptions(showSplitScreen: false),
               icon: const Icon(Icons.close),
             ),
           ],
@@ -178,18 +178,18 @@ class _DomainCheckTable extends StatelessWidget {
                   for (final error
                       in linkData.domainErrors.whereType<IosDomainError>())
                     _IssuesBorderWrap(
-                      children:
-                          error == IosDomainError.existence
-                              ? [
-                                _FailureDetails(
-                                  errors: [error],
-                                  oneFixGuideForAll:
-                                      'To fix this issue, add an Apple-App-Site-Association file at the following location: '
-                                      'https://${controller.selectedLink.value!.domain}/.well-known/apple-app-site-association',
-                                ),
-                                const SizedBox(height: denseSpacing),
-                                _CodeCard(
-                                  content: '''{
+                      children: error == IosDomainError.existence
+                          ? [
+                              _FailureDetails(
+                                errors: [error],
+                                oneFixGuideForAll:
+                                    'To fix this issue, add an Apple-App-Site-Association file at the following location: '
+                                    'https://${controller.selectedLink.value!.domain}/.well-known/apple-app-site-association',
+                              ),
+                              const SizedBox(height: denseSpacing),
+                              _CodeCard(
+                                content:
+                                    '''{
   "applinks": {
     "details": [
       {
@@ -205,13 +205,13 @@ class _DomainCheckTable extends StatelessWidget {
     ]
   }
 }''',
-                                ),
-                              ]
-                              : [
-                                _FailureDetails(
-                                  errors: [error, ...error.subcheckErrors],
-                                ),
-                              ],
+                              ),
+                            ]
+                          : [
+                              _FailureDetails(
+                                errors: [error, ...error.subcheckErrors],
+                              ),
+                            ],
                     ),
                 ],
               ),
@@ -232,10 +232,9 @@ class _AssetLinksJsonFileIssues extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final errors =
-        controller.selectedLink.value!.domainErrors
-            .where((error) => domainAssetLinksJsonFileErrors.contains(error))
-            .toList();
+    final errors = controller.selectedLink.value!.domainErrors
+        .where((error) => domainAssetLinksJsonFileErrors.contains(error))
+        .toList();
     return ExpansionTile(
       controlAffinity: ListTileControlAffinity.leading,
       title: _VerifiedOrErrorText(
@@ -271,10 +270,9 @@ class _HostingIssues extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final errors =
-        controller.selectedLink.value!.domainErrors
-            .where((error) => domainAndroidHostingErrors.contains(error))
-            .toList();
+    final errors = controller.selectedLink.value!.domainErrors
+        .where((error) => domainAndroidHostingErrors.contains(error))
+        .toList();
     return ExpansionTile(
       controlAffinity: ListTileControlAffinity.leading,
       title: _VerifiedOrErrorText(
@@ -369,38 +367,38 @@ class _LocalFingerprint extends StatelessWidget {
         const SizedBox(height: intermediateSpacing),
         controller.localFingerprint.value == null
             ? TextField(
-              decoration: const InputDecoration(
-                labelText: 'Enter your local fingerprint',
-                hintText:
-                    'eg: A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4',
-                filled: true,
-              ),
-              onSubmitted: (fingerprint) async {
-                final validFingerprintAdded = controller.addLocalFingerprint(
-                  fingerprint,
-                );
-
-                if (!validFingerprintAdded) {
-                  await showDialog(
-                    context: context,
-                    builder: (_) {
-                      return const DevToolsDialog(
-                        title: Text('This is not a valid fingerprint'),
-                        content: Text(
-                          'A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.'
-                          'It should be the same encoding and format as in the assetlinks.json',
-                        ),
-                        actions: [DialogCloseButton()],
-                      );
-                    },
+                decoration: const InputDecoration(
+                  labelText: 'Enter your local fingerprint',
+                  hintText:
+                      'eg: A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4:A1:B2:C3:D4',
+                  filled: true,
+                ),
+                onSubmitted: (fingerprint) async {
+                  final validFingerprintAdded = controller.addLocalFingerprint(
+                    fingerprint,
                   );
-                }
-              },
-            )
+
+                  if (!validFingerprintAdded) {
+                    await showDialog(
+                      context: context,
+                      builder: (_) {
+                        return const DevToolsDialog(
+                          title: Text('This is not a valid fingerprint'),
+                          content: Text(
+                            'A valid fingerprint consists of 32 pairs of hexadecimal digits separated by colons.'
+                            'It should be the same encoding and format as in the assetlinks.json',
+                          ),
+                          actions: [DialogCloseButton()],
+                        );
+                      },
+                    );
+                  }
+                },
+              )
             : _CodeCard(
-              content: controller.localFingerprint.value,
-              hasCopyAction: false,
-            ),
+                content: controller.localFingerprint.value,
+                hasCopyAction: false,
+              ),
       ],
     );
   }
@@ -440,18 +438,17 @@ class _CodeCard extends StatelessWidget {
       elevation: 0.0,
       child: Padding(
         padding: const EdgeInsets.all(denseSpacing),
-        child:
-            content != null
-                ? Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Flexible(child: SelectionArea(child: Text(content!))),
-                    if (hasCopyAction)
-                      CopyToClipboardControl(dataProvider: () => content),
-                  ],
-                )
-                : const CenteredCircularProgressIndicator(),
+        child: content != null
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(child: SelectionArea(child: Text(content!))),
+                  if (hasCopyAction)
+                    CopyToClipboardControl(dataProvider: () => content),
+                ],
+              )
+            : const CenteredCircularProgressIndicator(),
       ),
     );
   }
@@ -471,9 +468,9 @@ class _GenerateAssetLinksPanel extends StatelessWidget {
         return (generatedAssetLinks != null &&
                 generatedAssetLinks.errorCode.isNotEmpty)
             ? Text(
-              'Not able to generate assetlinks.json, because the app ${controller.applicationId} is not uploaded to Google Play.',
-              style: theme.subtleTextStyle,
-            )
+                'Not able to generate assetlinks.json, because the app ${controller.applicationId} is not uploaded to Google Play.',
+                style: theme.subtleTextStyle,
+              )
             : _CodeCard(content: generatedAssetLinks?.generatedString);
       },
     );
@@ -534,28 +531,27 @@ class _DomainAssociatedLinksPanel extends StatelessWidget {
             padding: const EdgeInsets.all(denseSpacing),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children:
-                  linkData.associatedPath
-                      .map(
-                        (path) => Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: denseRowSpacing,
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              if (linkData.domainErrors.isNotEmpty)
-                                Icon(
-                                  Icons.error,
-                                  color: theme.colorScheme.error,
-                                  size: defaultIconSize,
-                                ),
-                              const SizedBox(width: denseSpacing),
-                              Text('${linkData.domain}$path'),
-                            ],
-                          ),
-                        ),
-                      )
-                      .toList(),
+              children: linkData.associatedPath
+                  .map(
+                    (path) => Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: denseRowSpacing,
+                      ),
+                      child: Row(
+                        children: <Widget>[
+                          if (linkData.domainErrors.isNotEmpty)
+                            Icon(
+                              Icons.error,
+                              color: theme.colorScheme.error,
+                              size: defaultIconSize,
+                            ),
+                          const SizedBox(width: denseSpacing),
+                          Text('${linkData.domain}$path'),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ),
@@ -670,10 +666,9 @@ class _ManifestFileCheck extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final linkData = controller.selectedLink.value!;
-    final errors =
-        manifestFileErrors
-            .where((error) => linkData.pathErrors.contains(error))
-            .toList();
+    final errors = manifestFileErrors
+        .where((error) => linkData.pathErrors.contains(error))
+        .toList();
 
     return _CheckExpansionTile(
       os: PlatformOS.android,
@@ -836,9 +831,9 @@ class _CheckStatusText extends StatelessWidget {
     return hasError
         ? Text('Check failed', style: theme.errorTextStyle)
         : Text(
-          'No issues found',
-          style: TextStyle(color: theme.colorScheme.green),
-        );
+            'No issues found',
+            style: TextStyle(color: theme.colorScheme.green),
+          );
   }
 }
 
@@ -853,15 +848,15 @@ class _VerifiedOrErrorText extends StatelessWidget {
       children: [
         isError
             ? Icon(
-              Icons.error,
-              color: Theme.of(context).colorScheme.error,
-              size: defaultIconSize,
-            )
+                Icons.error,
+                color: Theme.of(context).colorScheme.error,
+                size: defaultIconSize,
+              )
             : Icon(
-              Icons.verified,
-              color: Theme.of(context).colorScheme.green,
-              size: defaultIconSize,
-            ),
+                Icons.verified,
+                color: Theme.of(context).colorScheme.green,
+                size: defaultIconSize,
+              ),
         const SizedBox(width: denseSpacing),
         Text(text),
       ],

@@ -715,18 +715,17 @@ void main() {
       node ??= testNode;
       await tester.pumpWidget(
         Builder(
-          builder:
-              (context) => Directionality(
-                textDirection: TextDirection.ltr,
-                child: node!.buildWidget(
-                  selected: selected,
-                  searchMatch: false,
-                  activeSearchMatch: false,
-                  hovered: hovered,
-                  zoom: zoom,
-                  theme: Theme.of(context),
-                ),
-              ),
+          builder: (context) => Directionality(
+            textDirection: TextDirection.ltr,
+            child: node!.buildWidget(
+              selected: selected,
+              searchMatch: false,
+              activeSearchMatch: false,
+              hovered: hovered,
+              zoom: zoom,
+              theme: Theme.of(context),
+            ),
+          ),
         ),
       );
     }
