@@ -22,12 +22,11 @@ class Devices extends StatelessWidget {
          for (final MapEntry(key: id, value: device) in devices.entries)
            if (device.supported) id: device,
        },
-       unsupportedDevicePlatformTypes =
-           devices.values
-               .where((device) => !device.supported)
-               .map((device) => device.platformType)
-               .nonNulls
-               .toSet();
+       unsupportedDevicePlatformTypes = devices.values
+           .where((device) => !device.supported)
+           .map((device) => device.platformType)
+           .nonNulls
+           .toSet();
 
   final EditorClient editor;
   final Map<String, EditorDevice> supportedDevices;
@@ -67,10 +66,9 @@ class Devices extends StatelessWidget {
     required bool isSelected,
   }) {
     final backgroundColor = isSelected ? theme.colorScheme.secondary : null;
-    final foregroundColor =
-        isSelected
-            ? theme.colorScheme.onSecondary
-            : theme.colorScheme.onSurface;
+    final foregroundColor = isSelected
+        ? theme.colorScheme.onSecondary
+        : theme.colorScheme.onSurface;
 
     return TableRow(
       decoration: BoxDecoration(color: backgroundColor),

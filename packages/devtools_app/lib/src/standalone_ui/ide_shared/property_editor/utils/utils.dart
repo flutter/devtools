@@ -104,10 +104,9 @@ class DartDocConverter {
 
       int templateIndex;
       if (startTemplateIndex != -1 && endTemplateIndex != -1) {
-        templateIndex =
-            (startTemplateIndex < endTemplateIndex)
-                ? startTemplateIndex
-                : endTemplateIndex;
+        templateIndex = (startTemplateIndex < endTemplateIndex)
+            ? startTemplateIndex
+            : endTemplateIndex;
       } else if (startTemplateIndex != -1) {
         templateIndex = startTemplateIndex;
       } else if (endTemplateIndex != -1) {
@@ -126,8 +125,8 @@ class DartDocConverter {
       }
       final closingChars =
           input.substring(closingIndex).startsWith('$closingCurlyBrace$newLine')
-              ? '$closingCurlyBrace$newLine'
-              : closingCurlyBrace;
+          ? '$closingCurlyBrace$newLine'
+          : closingCurlyBrace;
       currentIndex = closingIndex + closingChars.length;
     }
 

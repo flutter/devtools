@@ -48,7 +48,10 @@ class ConsoleFrame extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: densePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [if (title != null) title!, Expanded(child: child)],
+        children: [
+          if (title != null) title!,
+          Expanded(child: child),
+        ],
       ),
     );
   }

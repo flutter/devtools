@@ -271,10 +271,9 @@ class DebuggerController extends DevToolsScreenController
     return _service
         .resume(
           _isolateRefId,
-          step:
-              useAsyncStepping
-                  ? StepOption.kOverAsyncSuspension
-                  : StepOption.kOver,
+          step: useAsyncStepping
+              ? StepOption.kOverAsyncSuspension
+              : StepOption.kOver,
         )
         .whenComplete(() => _debugTimingLog.log('stepOver() completed'));
   }
@@ -595,10 +594,9 @@ class DebuggerController extends DevToolsScreenController
       return [];
     }
 
-    final variables =
-        frame.vars!
-            .map((v) => DartObjectNode.create(v, _isolate.value))
-            .toList();
+    final variables = frame.vars!
+        .map((v) => DartObjectNode.create(v, _isolate.value))
+        .toList();
     // TODO(jacobr): would be nice to be able to remove this call to unawaited
     // but it would require a significant refactor.
     variables
@@ -631,13 +629,12 @@ class DebuggerController extends DevToolsScreenController
   }
 
   Future<dap.StackFrame?> _fetchDapFrame(Frame vmFrame) async {
-    final isolateNumber =
-        serviceConnection
-            .serviceManager
-            .isolateManager
-            .selectedIsolate
-            .value
-            ?.number;
+    final isolateNumber = serviceConnection
+        .serviceManager
+        .isolateManager
+        .selectedIsolate
+        .value
+        ?.number;
     final frameIndex = vmFrame.index;
     if (isolateNumber == null || frameIndex == null) return null;
 
@@ -675,8 +672,8 @@ class DebuggerController extends DevToolsScreenController
     // Prefer asyncCausalFrames if they exist.
     List<Frame> frames =
         asyncCausalFrames != null && asyncCausalFrames.isNotEmpty
-            ? asyncCausalFrames
-            : stackFrames;
+        ? asyncCausalFrames
+        : stackFrames;
 
     // Include any reported exception as a variable in the first frame.
     if (reportedException != null && frames.isNotEmpty) {

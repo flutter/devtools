@@ -122,10 +122,9 @@ class TracingIsolateState with Serializable {
           deserialize<CpuProfileData>(value, CpuProfileData.fromJson),
         ),
       ),
-      classes:
-          (json[TracingIsolateStateJson.classes.name] as List)
-              .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
-              .toList(),
+      classes: (json[TracingIsolateStateJson.classes.name] as List)
+          .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
+          .toList(),
     );
   }
 
@@ -273,13 +272,12 @@ class TracingIsolateState with Serializable {
       );
     }
     final service = serviceConnection.serviceManager.service!;
-    final isolateId =
-        serviceConnection
-            .serviceManager
-            .isolateManager
-            .selectedIsolate
-            .value!
-            .id!;
+    final isolateId = serviceConnection
+        .serviceManager
+        .isolateManager
+        .selectedIsolate
+        .value!
+        .id!;
     final clazz = tracedClass.clazz;
 
     // Note: we need to provide `timeExtentMicros` to `getAllocationTraces`,

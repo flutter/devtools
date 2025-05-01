@@ -256,8 +256,8 @@ class BannerMessage extends StatelessWidget {
                     size: actionsIconSize,
                     color: foregroundColor,
                   ),
-                  onPressed:
-                      () => bannerMessages.removeMessage(this, dismiss: true),
+                  onPressed: () =>
+                      bannerMessages.removeMessage(this, dismiss: true),
                 ),
               ],
             ),
@@ -333,24 +333,23 @@ class DebugModePerformanceMessage extends BannerWarning {
   DebugModePerformanceMessage({required super.screenId})
     : super(
         key: Key('DebugModePerformanceMessage - $screenId'),
-        buildTextSpans:
-            (context) => [
-              const TextSpan(
-                text:
-                    'You are running your app in debug mode. Debug mode performance '
-                    'is not indicative of release performance, but you may use debug '
-                    'mode to gain visibility into the work the system performs (e.g. '
-                    'building widgets, calculating layouts, rasterizing scenes,'
-                    ' etc.). For precise measurement of performance, relaunch your '
-                    'application in ',
-              ),
-              _runInProfileModeTextSpan(
-                context,
-                screenId: screenId,
-                style: Theme.of(context).warningMessageLinkStyle,
-              ),
-              const TextSpan(text: '.'),
-            ],
+        buildTextSpans: (context) => [
+          const TextSpan(
+            text:
+                'You are running your app in debug mode. Debug mode performance '
+                'is not indicative of release performance, but you may use debug '
+                'mode to gain visibility into the work the system performs (e.g. '
+                'building widgets, calculating layouts, rasterizing scenes,'
+                ' etc.). For precise measurement of performance, relaunch your '
+                'application in ',
+          ),
+          _runInProfileModeTextSpan(
+            context,
+            screenId: screenId,
+            style: Theme.of(context).warningMessageLinkStyle,
+          ),
+          const TextSpan(text: '.'),
+        ],
       );
 }
 
@@ -415,28 +414,26 @@ class HighCpuSamplingRateMessage extends BannerWarning {
   HighCpuSamplingRateMessage({required super.screenId})
     : super(
         key: generateKey(screenId),
-        buildTextSpans:
-            (context) => [
-              const TextSpan(
-                text: '''
+        buildTextSpans: (context) => [
+          const TextSpan(
+            text: '''
 You are opting in to a high CPU sampling rate. This may affect the performance of your application. Please read our ''',
-              ),
-              GaLinkTextSpan(
-                link: GaLink(
-                  display: 'documentation',
-                  url: _cpuSamplingRateDocsUrl,
-                  gaScreenName: screenId,
-                  gaSelectedItemDescription:
-                      gac.CpuProfilerDocs.profileGranularityDocs.name,
-                ),
-                context: context,
-                style: Theme.of(context).warningMessageLinkStyle,
-              ),
-              const TextSpan(
-                text:
-                    ' to understand the trade-offs associated with this setting.',
-              ),
-            ],
+          ),
+          GaLinkTextSpan(
+            link: GaLink(
+              display: 'documentation',
+              url: _cpuSamplingRateDocsUrl,
+              gaScreenName: screenId,
+              gaSelectedItemDescription:
+                  gac.CpuProfilerDocs.profileGranularityDocs.name,
+            ),
+            context: context,
+            style: Theme.of(context).warningMessageLinkStyle,
+          ),
+          const TextSpan(
+            text: ' to understand the trade-offs associated with this setting.',
+          ),
+        ],
       );
 
   static Key generateKey(String screenId) =>
@@ -447,37 +444,31 @@ class HttpLoggingEnabledMessage extends BannerWarning {
   HttpLoggingEnabledMessage({required super.screenId})
     : super(
         key: _generateKey(screenId),
-        buildTextSpans:
-            (context) => [
-              const TextSpan(
-                text: '''
+        buildTextSpans: (context) => [
+          const TextSpan(
+            text: '''
 HTTP traffic is being logged for debugging purposes. This may result in increased memory usage for your app. If this is not intentional, consider ''',
-              ),
-              TextSpan(
-                text: 'disabling http logging',
-                style: Theme.of(context).warningMessageLinkStyle,
-                recognizer:
-                    TapGestureRecognizer()
-                      ..onTap = () async {
-                        await http_service.toggleHttpRequestLogging(false).then(
-                          (_) {
-                            if (!http_service.httpLoggingEnabled) {
-                              notificationService.push(
-                                'Http logging disabled.',
-                              );
-                              bannerMessages.removeMessageByKey(
-                                _generateKey(screenId),
-                                screenId,
-                              );
-                            }
-                          },
-                        );
-                      },
-              ),
-              const TextSpan(
-                text: ' before profiling the memory of your application.',
-              ),
-            ],
+          ),
+          TextSpan(
+            text: 'disabling http logging',
+            style: Theme.of(context).warningMessageLinkStyle,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () async {
+                await http_service.toggleHttpRequestLogging(false).then((_) {
+                  if (!http_service.httpLoggingEnabled) {
+                    notificationService.push('Http logging disabled.');
+                    bannerMessages.removeMessageByKey(
+                      _generateKey(screenId),
+                      screenId,
+                    );
+                  }
+                });
+              },
+          ),
+          const TextSpan(
+            text: ' before profiling the memory of your application.',
+          ),
+        ],
       );
 
   static Key _generateKey(String screenId) =>
@@ -488,20 +479,19 @@ class DebugModeMemoryMessage extends BannerWarning {
   DebugModeMemoryMessage({required super.screenId})
     : super(
         key: Key('DebugModeMemoryMessage - $screenId'),
-        buildTextSpans:
-            (context) => [
-              const TextSpan(
-                text: '''
+        buildTextSpans: (context) => [
+          const TextSpan(
+            text: '''
 You are running your app in debug mode. Absolute memory usage may be higher in a debug build than in a release build.
 For the most accurate absolute memory stats, relaunch your application in ''',
-              ),
-              _runInProfileModeTextSpan(
-                context,
-                screenId: screenId,
-                style: Theme.of(context).warningMessageLinkStyle,
-              ),
-              const TextSpan(text: '.'),
-            ],
+          ),
+          _runInProfileModeTextSpan(
+            context,
+            screenId: screenId,
+            style: Theme.of(context).warningMessageLinkStyle,
+          ),
+          const TextSpan(text: '.'),
+        ],
       );
 }
 
@@ -535,24 +525,23 @@ class WelcomeToNewInspectorMessage extends BannerInfo {
   WelcomeToNewInspectorMessage({required super.screenId})
     : super(
         key: Key('WelcomeToNewInspectorMessage - $screenId'),
-        buildTextSpans:
-            (context) => [
-              const TextSpan(
-                text: '''
+        buildTextSpans: (context) => [
+          const TextSpan(
+            text: '''
 👋 Welcome to the new Flutter inspector! To get started, check out the ''',
-              ),
-              GaLinkTextSpan(
-                link: GaLink(
-                  display: 'documentation',
-                  url: 'https://docs.flutter.dev/tools/devtools/inspector#new',
-                  gaScreenName: screenId,
-                  gaSelectedItemDescription: gac.inspectorV2Docs,
-                ),
-                context: context,
-                style: Theme.of(context).linkTextStyle,
-              ),
-              const TextSpan(text: '.'),
-            ],
+          ),
+          GaLinkTextSpan(
+            link: GaLink(
+              display: 'documentation',
+              url: 'https://docs.flutter.dev/tools/devtools/inspector#new',
+              gaScreenName: screenId,
+              gaSelectedItemDescription: gac.inspectorV2Docs,
+            ),
+            context: context,
+            style: Theme.of(context).linkTextStyle,
+          ),
+          const TextSpan(text: '.'),
+        ],
       );
 }
 

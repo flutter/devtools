@@ -141,10 +141,9 @@ class _InstanceColumn extends ColumnData<DiffClassData>
       return null;
     }
 
-    final heapCallback =
-        dataPart == _DataPart.deleted
-            ? diffData.heapBefore
-            : diffData.heapAfter;
+    final heapCallback = dataPart == _DataPart.deleted
+        ? diffData.heapBefore
+        : diffData.heapAfter;
 
     if (objects is! ObjectSet) {
       throw StateError(
@@ -266,17 +265,16 @@ class _SizeGroupTitle extends StatelessWidget {
             RoundedDropDownButton<SizeType>(
               isDense: true,
               value: sizeType,
-              onChanged:
-                  (SizeType? value) => diffData.selectedSizeType.value = value!,
-              items:
-                  SizeType.values
-                      .map(
-                        (sizeType) => DropdownMenuItem<SizeType>(
-                          value: sizeType,
-                          child: Text(sizeType.displayName),
-                        ),
-                      )
-                      .toList(),
+              onChanged: (SizeType? value) =>
+                  diffData.selectedSizeType.value = value!,
+              items: SizeType.values
+                  .map(
+                    (sizeType) => DropdownMenuItem<SizeType>(
+                      value: sizeType,
+                      child: Text(sizeType.displayName),
+                    ),
+                  )
+                  .toList(),
             ),
             const SizedBox(width: denseSpacing),
             const Text('Size'),
@@ -331,11 +329,8 @@ class ClassesTableDiff extends StatelessWidget {
           dataKey: dataKey,
           keyFactory: (e) => Key(e.className.fullName),
           selectionNotifier: diffData.selection,
-          onItemSelected:
-              (_) => ga.select(
-                gac.memory,
-                gac.MemoryEvents.diffClassDiffSelect.name,
-              ),
+          onItemSelected: (_) =>
+              ga.select(gac.memory, gac.MemoryEvents.diffClassDiffSelect.name),
           defaultSortColumn: columns.sizeDeltaColumn,
           defaultSortDirection: SortDirection.descending,
         );

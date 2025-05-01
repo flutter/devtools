@@ -282,11 +282,10 @@ class SimulatedEditor {
   FutureOr<void> enablePlatformType(String platformType) {
     for (var MapEntry(key: id, value: device) in devices.entries) {
       if (!device.supported && device.platformType == platformType) {
-        device =
-            devices[id] = EditorDevice.fromJson({
-              ...device.toJson(),
-              'supported': true,
-            });
+        device = devices[id] = EditorDevice.fromJson({
+          ...device.toJson(),
+          'supported': true,
+        });
         sendDeviceChanged(device);
       }
     }

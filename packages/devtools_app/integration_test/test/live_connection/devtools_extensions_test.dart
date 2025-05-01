@@ -268,11 +268,10 @@ Future<void> _verifyExtensionsSettingsMenu(
   await _openExtensionSettingsMenu(tester);
 
   expect(find.byType(ExtensionSetting), findsNWidgets(enabledStates.length));
-  final toggleButtonGroups =
-      tester
-          .widgetList(find.byType(DevToolsToggleButtonGroup))
-          .cast<DevToolsToggleButtonGroup>()
-          .toList();
+  final toggleButtonGroups = tester
+      .widgetList(find.byType(DevToolsToggleButtonGroup))
+      .cast<DevToolsToggleButtonGroup>()
+      .toList();
   for (int i = 0; i < toggleButtonGroups.length; i++) {
     logStatus('verify extension settings toggle button states (index $i)');
     final group = toggleButtonGroups[i];
@@ -313,11 +312,10 @@ Future<void> _changeExtensionSetting(
     'changing the extension setting at index $extensionIndex to value $settingValue',
   );
   await _openExtensionSettingsMenu(tester);
-  final extensionSetting =
-      tester
-          .widgetList(find.byType(DevToolsToggleButtonGroup))
-          .cast<DevToolsToggleButtonGroup>()
-          .toList()[extensionIndex];
+  final extensionSetting = tester
+      .widgetList(find.byType(DevToolsToggleButtonGroup))
+      .cast<DevToolsToggleButtonGroup>()
+      .toList()[extensionIndex];
   await tester.tap(
     find.descendant(
       of: find.byWidget(extensionSetting),

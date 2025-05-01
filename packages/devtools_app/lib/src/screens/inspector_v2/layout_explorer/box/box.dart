@@ -173,8 +173,9 @@ class BoxLayoutExplorerWidget extends StatelessWidget {
           heights: displayHeights,
         );
 
-        final widgetColor =
-            WidgetTheme.fromName(propertiesLocal.node.description).color;
+        final widgetColor = WidgetTheme.fromName(
+          propertiesLocal.node.description,
+        ).color;
         return Column(
           children: [
             Container(
@@ -350,10 +351,9 @@ WidgetSizes _simpleFractionalLayout({
   final paddingASize = sizes.paddingA;
   final paddingBSize = sizes.paddingB;
 
-  final paddingFraction =
-      paddingASize > 0 && paddingBSize > 0
-          ? _narrowPaddingVisualizerPercent
-          : _widePaddingVisualizerPercent;
+  final paddingFraction = paddingASize > 0 && paddingBSize > 0
+      ? _narrowPaddingVisualizerPercent
+      : _widePaddingVisualizerPercent;
 
   final paddingAFraction = paddingASize > 0 ? paddingFraction : 0.0;
   final paddingBFraction = paddingBSize > 0 ? paddingFraction : 0.0;

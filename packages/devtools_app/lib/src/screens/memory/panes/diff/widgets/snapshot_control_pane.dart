@@ -66,51 +66,52 @@ class _DiffDropdown extends StatelessWidget {
   final SnapshotDataItem current;
   final DiffPaneController controller;
 
-  List<DropdownMenuItem<SnapshotDataItem>> items() =>
-      controller.core.snapshots.value
-          .whereType<SnapshotDataItem>()
-          .where((item) => item.isProcessed)
-          .map((item) {
-            return DropdownMenuItem<SnapshotDataItem>(
-              value: item,
-              child: Text(item == current ? '-' : item.name),
-            );
-          })
-          .toList();
+  List<DropdownMenuItem<SnapshotDataItem>> items() => controller
+      .core
+      .snapshots
+      .value
+      .whereType<SnapshotDataItem>()
+      .where((item) => item.isProcessed)
+      .map((item) {
+        return DropdownMenuItem<SnapshotDataItem>(
+          value: item,
+          child: Text(item == current ? '-' : item.name),
+        );
+      })
+      .toList();
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SnapshotDataItem?>(
       valueListenable: current.diffWith,
-      builder:
-          (_, diffWith, _) => Row(
-            children: [
-              const Text('Diff with:'),
-              const SizedBox(width: defaultSpacing),
-              RoundedDropDownButton<SnapshotDataItem>(
-                isDense: true,
-                value: current.diffWith.value ?? current,
-                onChanged: (SnapshotDataItem? value) {
-                  late SnapshotDataItem? newDiffWith;
-                  if ((value ?? current) == current) {
-                    ga.select(
-                      gac.memory,
-                      gac.MemoryEvents.diffSnapshotDiffSelectOff.name,
-                    );
-                    newDiffWith = null;
-                  } else {
-                    ga.select(
-                      gac.memory,
-                      gac.MemoryEvents.diffSnapshotDiffSelect.name,
-                    );
-                    newDiffWith = value;
-                  }
-                  controller.setDiffing(current, newDiffWith);
-                },
-                items: items(),
-              ),
-            ],
+      builder: (_, diffWith, _) => Row(
+        children: [
+          const Text('Diff with:'),
+          const SizedBox(width: defaultSpacing),
+          RoundedDropDownButton<SnapshotDataItem>(
+            isDense: true,
+            value: current.diffWith.value ?? current,
+            onChanged: (SnapshotDataItem? value) {
+              late SnapshotDataItem? newDiffWith;
+              if ((value ?? current) == current) {
+                ga.select(
+                  gac.memory,
+                  gac.MemoryEvents.diffSnapshotDiffSelectOff.name,
+                );
+                newDiffWith = null;
+              } else {
+                ga.select(
+                  gac.memory,
+                  gac.MemoryEvents.diffSnapshotDiffSelect.name,
+                );
+                newDiffWith = value;
+              }
+              controller.setDiffing(current, newDiffWith);
+            },
+            items: items(),
           ),
+        ],
+      ),
     );
   }
 }

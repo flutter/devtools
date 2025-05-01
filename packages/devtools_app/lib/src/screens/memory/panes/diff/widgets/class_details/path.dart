@@ -81,36 +81,33 @@ class _PathControlPane extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.hideStandard,
-          builder:
-              (_, hideStandard, _) => DevToolsFilterButton(
-                onPressed: () {
-                  ga.select(
-                    gac.memory,
-                    '${gac.MemoryEvents.diffPathFilter.name}-$hideStandard',
-                  );
-                  controller.hideStandard.value =
-                      !controller.hideStandard.value;
-                },
-                isFilterActive: hideStandard,
-                message: 'Hide standard libraries',
-              ),
+          builder: (_, hideStandard, _) => DevToolsFilterButton(
+            onPressed: () {
+              ga.select(
+                gac.memory,
+                '${gac.MemoryEvents.diffPathFilter.name}-$hideStandard',
+              );
+              controller.hideStandard.value = !controller.hideStandard.value;
+            },
+            isFilterActive: hideStandard,
+            message: 'Hide standard libraries',
+          ),
         ),
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.invert,
-          builder:
-              (_, invert, _) => DevToolsToggleButton(
-                onPressed: () {
-                  ga.select(
-                    gac.memory,
-                    '${gac.MemoryEvents.diffPathInvert.name}-$invert',
-                  );
-                  controller.invert.value = !controller.invert.value;
-                },
-                isSelected: invert,
-                message: 'Invert the path',
-                icon: Icons.swap_horiz,
-              ),
+          builder: (_, invert, _) => DevToolsToggleButton(
+            onPressed: () {
+              ga.select(
+                gac.memory,
+                '${gac.MemoryEvents.diffPathInvert.name}-$invert',
+              );
+              controller.invert.value = !controller.invert.value;
+            },
+            isSelected: invert,
+            message: 'Invert the path',
+            icon: Icons.swap_horiz,
+          ),
         ),
       ],
     );

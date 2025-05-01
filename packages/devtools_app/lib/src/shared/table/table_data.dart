@@ -237,10 +237,9 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
   }
 
   @override
-  double getValue(T dataObject) =>
-      percentageOnly
-          ? percentAsDoubleProvider(dataObject)
-          : timeProvider!(dataObject).inMicroseconds.toDouble();
+  double getValue(T dataObject) => percentageOnly
+      ? percentAsDoubleProvider(dataObject)
+      : timeProvider!(dataObject).inMicroseconds.toDouble();
 
   @override
   String getDisplayValue(T dataObject) {
@@ -319,10 +318,9 @@ abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
   }
 
   @override
-  double getValue(T dataObject) =>
-      percentageOnly
-          ? percentAsDoubleProvider(dataObject)
-          : sizeProvider!(dataObject).toDouble();
+  double getValue(T dataObject) => percentageOnly
+      ? percentAsDoubleProvider(dataObject)
+      : sizeProvider!(dataObject).toDouble();
 
   @override
   String getDisplayValue(T dataObject) {

@@ -63,11 +63,10 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
       required bool subclasses,
       required bool implementers,
     }) => MenuItemButton(
-      onPressed:
-          () async => await sampler.allLiveToConsole(
-            includeImplementers: implementers,
-            includeSubclasses: subclasses,
-          ),
+      onPressed: () async => await sampler.allLiveToConsole(
+        includeImplementers: implementers,
+        includeSubclasses: subclasses,
+      ),
       child: Text(title),
     );
 
@@ -95,10 +94,9 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MenuItemButton(
-      onPressed:
-          () => unawaited(
-            sampler.oneLiveToConsole(sourceFeature: MemoryAreas.profile.name),
-          ),
+      onPressed: () => unawaited(
+        sampler.oneLiveToConsole(sourceFeature: MemoryAreas.profile.name),
+      ),
       child: const Text('Store one instance as a console variable'),
     );
   }

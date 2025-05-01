@@ -107,8 +107,9 @@ void main() {
         expect(find.byType(ProjectRootTextField), findsOneWidget);
 
         // Verify the project roots dropdown contains paths in the correct format.
-        final firstDropdownItemFinder =
-            find.byType(DropdownMenuItem<Uri>).first;
+        final firstDropdownItemFinder = find
+            .byType(DropdownMenuItem<Uri>)
+            .first;
         expect(firstDropdownItemFinder, findsWidgets);
         final firstDropdownItem = tester.widget<DropdownMenuItem<Uri>>(
           firstDropdownItemFinder,

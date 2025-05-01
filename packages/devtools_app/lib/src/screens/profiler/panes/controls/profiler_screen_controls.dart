@@ -71,8 +71,9 @@ class _PrimaryControls extends StatelessWidget {
           gaSelection: recording ? gac.stop : gac.record,
           minScreenWidthForTextBeforeScaling:
               _primaryControlsMinIncludeTextWidth,
-          onPressed:
-              recording ? controller.stopRecording : controller.startRecording,
+          onPressed: recording
+              ? controller.stopRecording
+              : controller.startRecording,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
@@ -119,10 +120,9 @@ class _SecondaryControls extends StatelessWidget {
             gaSelection: gac.CpuProfilerEvents.profileAppStartUp.name,
             minScreenWidthForTextBeforeScaling:
                 _profilingControlsMinScreenWidthForText,
-            onPressed:
-                !profilerBusy
-                    ? controller.cpuProfilerController.loadAppStartUpProfile
-                    : null,
+            onPressed: !profilerBusy
+                ? controller.cpuProfilerController.loadAppStartUpProfile
+                : null,
           ),
         const SizedBox(width: denseSpacing),
         RefreshButton(
@@ -133,10 +133,9 @@ class _SecondaryControls extends StatelessWidget {
           gaSelection: gac.CpuProfilerEvents.loadAllCpuSamples.name,
           minScreenWidthForTextBeforeScaling:
               _profilingControlsMinScreenWidthForText,
-          onPressed:
-              !profilerBusy
-                  ? controller.cpuProfilerController.loadAllSamples
-                  : null,
+          onPressed: !profilerBusy
+              ? controller.cpuProfilerController.loadAllSamples
+              : null,
         ),
         const SizedBox(width: denseSpacing),
         CpuSamplingRateDropdown(
@@ -149,10 +148,10 @@ class _SecondaryControls extends StatelessWidget {
           screenId: ScreenMetaData.cpuProfiler.id,
           onSave:
               !profilerBusy &&
-                      controller.cpuProfileData != null &&
-                      controller.cpuProfileData?.isEmpty == false
-                  ? (_) => _exportPerformance()
-                  : null,
+                  controller.cpuProfileData != null &&
+                  controller.cpuProfileData?.isEmpty == false
+              ? (_) => _exportPerformance()
+              : null,
         ),
       ],
     );

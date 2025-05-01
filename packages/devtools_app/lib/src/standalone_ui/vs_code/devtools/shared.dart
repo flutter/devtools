@@ -11,15 +11,14 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/editor_client.dart';
 
-typedef DevToolsButtonData =
-    ({
-      String label,
-      IconData? icon,
-      String? iconAsset,
-      String screenId,
-      bool requiresDebugSession,
-      bool prefersDebugSession,
-    });
+typedef DevToolsButtonData = ({
+  String label,
+  IconData? icon,
+  String? iconAsset,
+  String screenId,
+  bool requiresDebugSession,
+  bool prefersDebugSession,
+});
 
 TableRow createDevToolsScreenRow({
   required DevToolsButtonData dataLeft,
@@ -33,15 +32,14 @@ TableRow createDevToolsScreenRow({
     !singleColumn || dataRight == null,
     'dataRight must be null is singleColumn is true',
   );
-  final cellRight =
-      dataRight != null
-          ? _DevToolsScreenButton(
-            data: dataRight,
-            editor: editor,
-            hasDebugSessions: hasDebugSessions,
-            onPressed: onPressed,
-          )
-          : const SizedBox();
+  final cellRight = dataRight != null
+      ? _DevToolsScreenButton(
+          data: dataRight,
+          editor: editor,
+          hasDebugSessions: hasDebugSessions,
+          onPressed: onPressed,
+        )
+      : const SizedBox();
   return TableRow(
     children: [
       _DevToolsScreenButton(
@@ -78,8 +76,9 @@ class _DevToolsScreenButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: maybeWrapWithTooltip(
-        tooltip:
-            disableButton ? 'This tool requires an active debug session' : null,
+        tooltip: disableButton
+            ? 'This tool requires an active debug session'
+            : null,
         child: TextButton.icon(
           style: TextButton.styleFrom(
             alignment: Alignment.centerLeft,
@@ -93,8 +92,9 @@ class _DevToolsScreenButton extends StatelessWidget {
           ),
           label: Text(
             data.label,
-            style:
-                disableButton ? theme.subtleTextStyle : theme.regularTextStyle,
+            style: disableButton
+                ? theme.subtleTextStyle
+                : theme.regularTextStyle,
           ),
           onPressed: disableButton ? null : () => onPressed(data),
         ),

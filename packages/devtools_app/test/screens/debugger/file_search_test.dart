@@ -388,10 +388,10 @@ List<String> getAutoCompleteMatch(
   return matches
       .map(
         (match) => match.transformAutoCompleteMatch<String>(
-          transformMatchedSegment:
-              (segment) => preserveCases ? segment : segment.toUpperCase(),
-          transformUnmatchedSegment:
-              (segment) => preserveCases ? segment : segment.toLowerCase(),
+          transformMatchedSegment: (segment) =>
+              preserveCases ? segment : segment.toUpperCase(),
+          transformUnmatchedSegment: (segment) =>
+              preserveCases ? segment : segment.toLowerCase(),
           combineSegments: (segments) => segments.join(),
         ),
       )

@@ -45,10 +45,9 @@ class ObjectViewport extends StatelessWidget {
               child = const CenteredCircularProgressIndicator();
             } else {
               final currentObject = controller.objectHistory.current.value;
-              child =
-                  currentObject == null
-                      ? const SizedBox.shrink()
-                      : buildObjectDisplay(currentObject);
+              child = currentObject == null
+                  ? const SizedBox.shrink()
+                  : buildObjectDisplay(currentObject);
             }
 
             return Expanded(child: child);

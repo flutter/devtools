@@ -136,10 +136,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
 
-    final initialScrollOffset =
-        widget.preserveVerticalScrollPosition
-            ? widget.tableController.tableUiState.scrollOffset
-            : 0.0;
+    final initialScrollOffset = widget.preserveVerticalScrollPosition
+        ? widget.tableController.tableUiState.scrollOffset
+        : 0.0;
     widget.tableController.initScrollController(initialScrollOffset);
     scrollController = widget.tableController.verticalScrollController!;
 
@@ -197,10 +196,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
           final nodeIndex = selection.nodeIndex;
 
           if (selection.scrollIntoView && node != null) {
-            final selectedDisplayRow =
-                nodeIndexCalculator != null
-                    ? nodeIndexCalculator(node)!
-                    : nodeIndex!;
+            final selectedDisplayRow = nodeIndexCalculator != null
+                ? nodeIndexCalculator(node)!
+                : nodeIndex!;
 
             final newPos = selectedDisplayRow * defaultRowHeight;
 
@@ -460,9 +458,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                         controller: pinnedScrollController,
                         itemCount: pinnedData.length,
                         itemExtent: widget.rowItemExtent,
-                        itemBuilder:
-                            (context, index) =>
-                                _buildItem(context, index, isPinned: true),
+                        itemBuilder: (context, index) =>
+                            _buildItem(context, index, isPinned: true),
                       ),
                     ),
                   ),
@@ -477,15 +474,13 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                       onTapDown: (a) => widget.focusNode?.requestFocus(),
                       child: Focus(
                         autofocus: true,
-                        onKeyEvent:
-                            (_, event) =>
-                                widget.handleKeyEvent != null
-                                    ? widget.handleKeyEvent!(
-                                      event,
-                                      scrollController,
-                                      constraints,
-                                    )
-                                    : KeyEventResult.ignored,
+                        onKeyEvent: (_, event) => widget.handleKeyEvent != null
+                            ? widget.handleKeyEvent!(
+                                event,
+                                scrollController,
+                                constraints,
+                              )
+                            : KeyEventResult.ignored,
                         focusNode: widget.focusNode,
                         child: ListView.builder(
                           controller: scrollController,

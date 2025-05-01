@@ -117,8 +117,9 @@ Future<void> notifyForVmServiceConnection({
 DevToolsJsonFile _devToolsJsonFileFromResponse(Response resp, String filePath) {
   final data = json.decode(resp.body) as Map;
   final lastModified = data['lastModifiedTime'];
-  final lastModifiedTime =
-      lastModified != null ? DateTime.parse(lastModified) : DateTime.now();
+  final lastModifiedTime = lastModified != null
+      ? DateTime.parse(lastModified)
+      : DateTime.now();
   return DevToolsJsonFile(
     name: filePath,
     lastModifiedTime: lastModifiedTime,

@@ -109,13 +109,11 @@ class FrameAnalysis {
 
   late FramePhase longestUiPhase = _calculateLongestFramePhase();
 
-  bool get hasUiData =>
-      _hasUiData ??=
-          [
-            ...buildPhase.events,
-            ...layoutPhase.events,
-            ...paintPhase.events,
-          ].isNotEmpty;
+  bool get hasUiData => _hasUiData ??= [
+    ...buildPhase.events,
+    ...layoutPhase.events,
+    ...paintPhase.events,
+  ].isNotEmpty;
 
   bool? _hasUiData;
 

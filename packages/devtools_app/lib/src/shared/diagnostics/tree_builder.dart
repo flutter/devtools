@@ -102,10 +102,10 @@ Future<void> _addDiagnosticChildrenIfNeeded(
 void _setupGrouping(DartObjectNode variable) {
   final numChildrenInGrouping =
       variable.childCount >= pow(DartObjectNode.maxChildrenInGrouping, 2)
-          ? (roundToNearestPow10(variable.childCount) /
-                  DartObjectNode.maxChildrenInGrouping)
-              .floor()
-          : DartObjectNode.maxChildrenInGrouping;
+      ? (roundToNearestPow10(variable.childCount) /
+                DartObjectNode.maxChildrenInGrouping)
+            .floor()
+      : DartObjectNode.maxChildrenInGrouping;
 
   var start = variable.offset;
   final end = start + variable.childCount;

@@ -180,7 +180,8 @@ const profileModeLink = 'https://flutter.dev/to/profile-mode';
 const performancePanelLink =
     'https://developer.chrome.com/docs/devtools/performance';
 
-const flutterWebInstructionsMd = '''
+const flutterWebInstructionsMd =
+    '''
 ## How to use Chrome DevTools for performance profiling
 
 The Flutter framework emits timeline events as it works to build frames, draw
@@ -206,7 +207,8 @@ performance analysis.
 your application, and start recording to capture timeline events.
 ''';
 
-const dartWebInstructionsMd = '''
+const dartWebInstructionsMd =
+    '''
 ## How to use Chrome DevTools for performance profiling
 
 Any events emitted using the `dart:developer` [Timeline]($timelineLink) and

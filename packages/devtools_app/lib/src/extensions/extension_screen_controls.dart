@@ -64,8 +64,8 @@ class EmbeddedExtensionHeader extends StatelessWidget {
                     url: ext.issueTrackerLink,
                     gaScreenName:
                         gac.DevToolsExtensionEvents.extensionScreenId.name,
-                    gaSelectedItemDescription: gac
-                        .DevToolsExtensionEvents.extensionFeedback(ext),
+                    gaSelectedItemDescription:
+                        gac.DevToolsExtensionEvents.extensionFeedback(ext),
                   ),
                   context: context,
                 ),

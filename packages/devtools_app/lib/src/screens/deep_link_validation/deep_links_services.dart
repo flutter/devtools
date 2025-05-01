@@ -161,17 +161,15 @@ class DeepLinksService {
 
       final result = json.decode(response.body) as Map<String, Object?>;
 
-      final validationResult =
-          (result[_androidValidationResultKey] as List)
-              .cast<Map<String, Object?>>();
+      final validationResult = (result[_androidValidationResultKey] as List)
+          .cast<Map<String, Object?>>();
       googlePlayFingerprintsAvailable =
           result[_googlePlayFingerprintsAvailabilityKey] ==
           _googlePlayFingerprintsAvailableValue;
       for (final domainResult in validationResult) {
         final domainName = domainResult[_domainNameKey] as String;
-        final failedChecks =
-            (domainResult[_failedChecksKey] as List?)
-                ?.cast<Map<String, Object?>>();
+        final failedChecks = (domainResult[_failedChecksKey] as List?)
+            ?.cast<Map<String, Object?>>();
         if (failedChecks != null) {
           for (final failedCheck in failedChecks) {
             final checkName = failedCheck[_checkNameKey] as String;
@@ -214,15 +212,13 @@ class DeepLinksService {
         }),
       );
       final result = json.decode(response.body) as Map<String, Object?>;
-      final validationResult =
-          (result[_iosValidationResultsKey] as List)
-              .cast<Map<String, Object?>>();
+      final validationResult = (result[_iosValidationResultsKey] as List)
+          .cast<Map<String, Object?>>();
 
       for (final domainResult in validationResult) {
         if (domainResult[_domainNameKey] case final String domainName) {
-          final failedChecks =
-              (domainResult[_failedChecksKey] as List?)
-                  ?.cast<Map<String, Object?>>();
+          final failedChecks = (domainResult[_failedChecksKey] as List?)
+              ?.cast<Map<String, Object?>>();
           if (failedChecks != null) {
             for (final failedCheck in failedChecks) {
               final checkName = failedCheck[_checkNameKey] as String;
@@ -234,9 +230,8 @@ class DeepLinksService {
                       <AASAfileFormatSubCheck>[];
 
                   // Adds sub checks for file format error.
-                  final subChecks =
-                      (failedCheck[_subCheckResultsKey] as List?)
-                          ?.cast<Map<String, Object?>>();
+                  final subChecks = (failedCheck[_subCheckResultsKey] as List?)
+                      ?.cast<Map<String, Object?>>();
                   for (final subCheck in (subChecks ?? <Map>[])) {
                     final subCheckName = subCheck[_checkNameKey] as String;
                     final subCheckResultType =
@@ -264,23 +259,20 @@ class DeepLinksService {
             }
           }
 
-          final aasaAppPaths =
-              (domainResult[_aasaAppPathsKey] as List?)
-                  ?.cast<Map<String, Object?>>();
+          final aasaAppPaths = (domainResult[_aasaAppPathsKey] as List?)
+              ?.cast<Map<String, Object?>>();
           if (aasaAppPaths != null) {
             for (final aasaAppPath in aasaAppPaths) {
-              final aasaPaths =
-                  (aasaAppPath[_aasaPathsKey] as List?)
-                      ?.cast<Map<String, Object?>>();
+              final aasaPaths = (aasaAppPath[_aasaPathsKey] as List?)
+                  ?.cast<Map<String, Object?>>();
               if (aasaPaths != null) {
                 for (final aasaPath in aasaPaths) {
                   final path = aasaPath[_pathKey] as String?;
                   if (path.isNullOrEmpty) {
                     continue;
                   }
-                  final rawQueryParams =
-                      (aasaPath[_queryParamsKey] as List?)
-                          ?.cast<Map<String, Object?>>();
+                  final rawQueryParams = (aasaPath[_queryParamsKey] as List?)
+                      ?.cast<Map<String, Object?>>();
                   final queryParams = <String, String>{
                     for (final item in rawQueryParams ?? <Map>[])
                       item[_keyKey] as String: item[_valueKey] as String,
@@ -337,8 +329,8 @@ class DeepLinksService {
     final errorCode = (result[_errorCodeKey] as String?) ?? '';
     String generatedContent = '';
 
-    final domains =
-        (result[_domainsKey] as List?)?.cast<Map<String, Object?>>();
+    final domains = (result[_domainsKey] as List?)
+        ?.cast<Map<String, Object?>>();
     if (domains != null) {
       generatedContent = domains.first[_generatedContentKey]! as String;
     }

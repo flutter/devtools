@@ -29,8 +29,9 @@ FlutterTimelineEvent testTimelineEvent({
   when(mockFirstTrackEvent.timestampMicros).thenReturn(startMicros);
   final frameNumberAsString =
       args[PerfettoTrackEvent.frameNumberArg] as String?;
-  final frameNumber =
-      frameNumberAsString != null ? int.tryParse(frameNumberAsString) : null;
+  final frameNumber = frameNumberAsString != null
+      ? int.tryParse(frameNumberAsString)
+      : null;
   when(mockFirstTrackEvent.flutterFrameNumber).thenReturn(frameNumber);
   final devToolsTag = args[PerfettoTrackEvent.devtoolsTagArg] as String?;
   final isShaderEvent = devToolsTag == PerfettoTrackEvent.shadersArg;

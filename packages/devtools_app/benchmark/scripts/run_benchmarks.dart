@@ -56,10 +56,9 @@ Future<BenchmarkResults> runBenchmarks({
       await serveWebBenchmark(
         benchmarkAppDirectory: projectRootDirectory(),
         entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
-        compilationOptions:
-            useWasm
-                ? const CompilationOptions.wasm()
-                : const CompilationOptions.js(),
+        compilationOptions: useWasm
+            ? const CompilationOptions.wasm()
+            : const CompilationOptions.js(),
         treeShakeIcons: false,
         benchmarkPath: benchmarkPath(useWasm: useWasm),
         headless: !useBrowser,

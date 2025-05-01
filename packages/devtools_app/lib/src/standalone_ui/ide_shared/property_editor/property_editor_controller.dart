@@ -15,14 +15,13 @@ import '../../../shared/ui/filter.dart';
 import '../../../shared/utils/utils.dart';
 import 'property_editor_types.dart';
 
-typedef EditableWidgetData =
-    ({
-      List<EditableProperty> properties,
-      String? name,
-      String? documentation,
-      String? fileUri,
-      EditorRange? range,
-    });
+typedef EditableWidgetData = ({
+  List<EditableProperty> properties,
+  String? name,
+  String? documentation,
+  String? fileUri,
+  EditorRange? range,
+});
 
 typedef EditArgumentFunction =
     Future<EditArgumentResponse?> Function<T>({
@@ -176,22 +175,22 @@ class PropertyEditorController extends DisposableController
     final range = widgetRange;
     return range == null
         ? Object.hash(
-          property.name,
-          property.type,
-          property.value, // Include the property value.
-          property.displayValue,
-          widgetName,
-          fileUri,
-        )
+            property.name,
+            property.type,
+            property.value, // Include the property value.
+            property.displayValue,
+            widgetName,
+            fileUri,
+          )
         : Object.hash(
-          property.name,
-          property.type,
-          property.displayValue,
-          fileUri,
-          widgetName,
-          range.start.line, // Include the start position of the property.
-          range.start.character,
-        );
+            property.name,
+            property.type,
+            property.displayValue,
+            fileUri,
+            widgetName,
+            range.start.line, // Include the start position of the property.
+            range.start.character,
+          );
   }
 
   Future<void> _updateWithEditableArgs({
@@ -205,13 +204,12 @@ class PropertyEditorController extends DisposableController
       textDocument: textDocument,
       position: cursorPosition,
     );
-    final properties =
-        (result?.args ?? <EditableArgument>[])
-            .map(argToProperty)
-            .nonNulls
-            // Filter out any deprecated properties that aren't set.
-            .where((property) => !property.isDeprecated || property.hasArgument)
-            .toList();
+    final properties = (result?.args ?? <EditableArgument>[])
+        .map(argToProperty)
+        .nonNulls
+        // Filter out any deprecated properties that aren't set.
+        .where((property) => !property.isDeprecated || property.hasArgument)
+        .toList();
     final name = result?.name;
     final range = result?.range;
 
@@ -257,8 +255,10 @@ class PropertyEditorController extends DisposableController
     setActiveFilter();
     if (editableArgsResult != null) {
       _editableWidgetData.value = (
-        properties:
-            editableArgsResult.args.map(argToProperty).nonNulls.toList(),
+        properties: editableArgsResult.args
+            .map(argToProperty)
+            .nonNulls
+            .toList(),
         name: editableArgsResult.name,
         documentation: editableArgsResult.documentation,
         fileUri: document?.uriAsString,

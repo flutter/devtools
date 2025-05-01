@@ -106,19 +106,17 @@ class _LegendButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: chartController.data.isLegendVisible,
-      builder:
-          (_, legendVisible, _) => GaDevToolsButton(
-            onPressed: chartController.data.toggleLegendVisibility,
-            gaScreen: gac.memory,
-            gaSelection:
-                legendVisible
-                    ? gac.MemoryEvents.hideChartLegend.name
-                    : gac.MemoryEvents.showChartLegend.name,
-            icon: legendVisible ? Icons.close : Icons.storage,
-            label: 'Legend',
-            tooltip: 'Toggle visibility of the chart legend',
-            minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
-          ),
+      builder: (_, legendVisible, _) => GaDevToolsButton(
+        onPressed: chartController.data.toggleLegendVisibility,
+        gaScreen: gac.memory,
+        gaSelection: legendVisible
+            ? gac.MemoryEvents.hideChartLegend.name
+            : gac.MemoryEvents.showChartLegend.name,
+        icon: legendVisible ? Icons.close : Icons.storage,
+        label: 'Legend',
+        tooltip: 'Toggle visibility of the chart legend',
+        minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+      ),
     );
   }
 }

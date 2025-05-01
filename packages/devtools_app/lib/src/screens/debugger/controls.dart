@@ -98,24 +98,24 @@ class _DebuggingControlsState extends State<DebuggingControls>
       items: [
         !isPaused
             ? ButtonGroupItemData(
-              tooltip: 'Pause',
-              icon: Icons.pause,
-              autofocus: true,
-              // Disable when selected isolate is a system isolate.
-              onPressed:
-                  isSystemIsolate ? null : () => unawaited(controller.pause()),
-            )
+                tooltip: 'Pause',
+                icon: Icons.pause,
+                autofocus: true,
+                // Disable when selected isolate is a system isolate.
+                onPressed: isSystemIsolate
+                    ? null
+                    : () => unawaited(controller.pause()),
+              )
             : ButtonGroupItemData(
-              tooltip: 'Resume',
-              iconAsset: 'icons/material_symbols/resume.png',
-              iconSize: DebuggingControls.materialIconSize,
-              // Enable not resuming and selected isolate is not a system
-              // isolate.
-              onPressed:
-                  (!resuming && !isSystemIsolate)
-                      ? () => unawaited(controller.resume())
-                      : null,
-            ),
+                tooltip: 'Resume',
+                iconAsset: 'icons/material_symbols/resume.png',
+                iconSize: DebuggingControls.materialIconSize,
+                // Enable not resuming and selected isolate is not a system
+                // isolate.
+                onPressed: (!resuming && !isSystemIsolate)
+                    ? () => unawaited(controller.resume())
+                    : null,
+              ),
       ],
     );
   }
@@ -156,10 +156,9 @@ class _DebuggingControlsState extends State<DebuggingControls>
           label: 'File Explorer',
           onPressed: controller.codeViewController.toggleLibrariesVisible,
           gaScreen: gac.debugger,
-          gaSelection:
-              visible
-                  ? gac.DebuggerEvents.hideFileExplorer.name
-                  : gac.DebuggerEvents.showFileExplorer.name,
+          gaSelection: visible
+              ? gac.DebuggerEvents.hideFileExplorer.name
+              : gac.DebuggerEvents.showFileExplorer.name,
           minScreenWidthForTextBeforeScaling:
               DebuggingControls.minWidthBeforeScaling,
         );
@@ -213,12 +212,11 @@ class CodeStatisticsControls extends StatelessWidget {
               tooltip: 'Refresh statistics',
               gaScreen: gac.debugger,
               gaSelection: gac.DebuggerEvents.refreshStatistics.name,
-              onPressed:
-                  showCodeCoverage || showProfileInformation
-                      ? () => unawaited(
-                        controller.codeViewController.refreshCodeStatistics(),
-                      )
-                      : null,
+              onPressed: showCodeCoverage || showProfileInformation
+                  ? () => unawaited(
+                      controller.codeViewController.refreshCodeStatistics(),
+                    )
+                  : null,
             ),
           ],
         );
@@ -264,12 +262,11 @@ class BreakOnExceptionsControl extends StatelessWidget {
           child: RoundedDropDownButton<ExceptionMode>(
             value: exceptionMode,
             // Cannot set exception pause mode for system isolates.
-            onChanged:
-                controller.isSystemIsolate
-                    ? null
-                    : (ExceptionMode? mode) {
-                      unawaited(controller.setIsolatePauseMode(mode!.id));
-                    },
+            onChanged: controller.isSystemIsolate
+                ? null
+                : (ExceptionMode? mode) {
+                    unawaited(controller.setIsolatePauseMode(mode!.id));
+                  },
             isDense: true,
             items: [
               for (final mode in ExceptionMode.modes)

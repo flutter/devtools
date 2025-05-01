@@ -18,20 +18,19 @@ final _log = Logger('ExtensionService');
 
 /// Data pattern containing a [List] of available extensions and a [List] of
 /// visible extensions.
-typedef DevToolsExtensionsGroup =
-    ({
-      // All the DevTools extensions, runtime and static, that are available for
-      // the connected application, regardless of whether they have been enabled
-      // or disabled by the user.
-      //
-      // This set of extensions will include one version of a DevTools extension
-      // per package.
-      List<DevToolsExtensionConfig> availableExtensions,
+typedef DevToolsExtensionsGroup = ({
+  // All the DevTools extensions, runtime and static, that are available for
+  // the connected application, regardless of whether they have been enabled
+  // or disabled by the user.
+  //
+  // This set of extensions will include one version of a DevTools extension
+  // per package.
+  List<DevToolsExtensionConfig> availableExtensions,
 
-      // DevTools extensions that are visible in their own DevTools screen (i.e.
-      // extensions that have not been manually disabled by the user).
-      List<DevToolsExtensionConfig> visibleExtensions,
-    });
+  // DevTools extensions that are visible in their own DevTools screen (i.e.
+  // extensions that have not been manually disabled by the user).
+  List<DevToolsExtensionConfig> visibleExtensions,
+});
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
@@ -189,10 +188,12 @@ class ExtensionService extends DisposableController
 
     _refreshInProgress.value = true;
     final allExtensions = await server.refreshAvailableExtensions(_appRoot);
-    runtimeExtensions =
-        allExtensions.where((e) => !e.detectedFromStaticContext).toList();
-    staticExtensions =
-        allExtensions.where((e) => e.detectedFromStaticContext).toList();
+    runtimeExtensions = allExtensions
+        .where((e) => !e.detectedFromStaticContext)
+        .toList();
+    staticExtensions = allExtensions
+        .where((e) => e.detectedFromStaticContext)
+        .toList();
 
     // TODO(kenz): consider handling duplicates in a way that gives the user a
     // choice of which version they want to use.
@@ -261,10 +262,9 @@ class ExtensionService extends DisposableController
       );
       stateNotifier.value = stateFromOptionsFile;
 
-      final shouldIncludeInVisible =
-          onlyIncludeEnabled
-              ? stateFromOptionsFile == ExtensionEnabledState.enabled
-              : stateFromOptionsFile != ExtensionEnabledState.disabled;
+      final shouldIncludeInVisible = onlyIncludeEnabled
+          ? stateFromOptionsFile == ExtensionEnabledState.enabled
+          : stateFromOptionsFile != ExtensionEnabledState.disabled;
       if (shouldIncludeInVisible) {
         visible.add(extension);
       }

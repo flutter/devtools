@@ -659,10 +659,9 @@ void main() {
         sampleCount: 100,
         samplePeriod: 100,
         stackDepth: 128,
-        time:
-            TimeRange()
-              ..start = const Duration()
-              ..end = const Duration(microseconds: 10000),
+        time: TimeRange()
+          ..start = const Duration()
+          ..end = const Duration(microseconds: 10000),
       );
       await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
       await tester.pumpAndSettle();
@@ -699,10 +698,9 @@ void main() {
         sampleCount: 100,
         samplePeriod: 0,
         stackDepth: 128,
-        time:
-            TimeRange()
-              ..start = const Duration()
-              ..end = const Duration(microseconds: 10000),
+        time: TimeRange()
+          ..start = const Duration()
+          ..end = const Duration(microseconds: 10000),
       );
       await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
       await tester.pumpAndSettle();

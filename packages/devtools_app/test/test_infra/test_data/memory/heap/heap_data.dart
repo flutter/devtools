@@ -23,8 +23,9 @@ class GoldenHeapTest extends HeapTest {
 
   @override
   Future<HeapSnapshotGraph> loadHeap() async {
-    final (graph, _) =
-        await HeapGraphLoaderFile.fromPath('$_dataDir$fileName').load();
+    final (graph, _) = await HeapGraphLoaderFile.fromPath(
+      '$_dataDir$fileName',
+    ).load();
     return graph;
   }
 }

@@ -114,12 +114,12 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
       _callers = <MethodTableGraphNode>[];
       _callees = <MethodTableGraphNode>[];
     } else {
-      _callers =
-          _selectedGraphNode!.predecessors
-              .cast<MethodTableGraphNode>()
-              .toList();
-      _callees =
-          _selectedGraphNode!.successors.cast<MethodTableGraphNode>().toList();
+      _callers = _selectedGraphNode!.predecessors
+          .cast<MethodTableGraphNode>()
+          .toList();
+      _callees = _selectedGraphNode!.successors
+          .cast<MethodTableGraphNode>()
+          .toList();
     }
   }
 
@@ -304,8 +304,8 @@ class _CallerTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
     : super(
         title: 'Caller %',
         percentageOnly: true,
-        percentAsDoubleProvider:
-            (node) => methodTableController.callerPercentageFor(node),
+        percentAsDoubleProvider: (node) =>
+            methodTableController.callerPercentageFor(node),
         secondaryCompare: (node) => node.name,
         columnWidth: _callGraphColumnWidth,
       );
@@ -316,8 +316,8 @@ class _CalleeTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
     : super(
         title: 'Callee %',
         percentageOnly: true,
-        percentAsDoubleProvider:
-            (node) => methodTableController.calleePercentageFor(node),
+        percentAsDoubleProvider: (node) =>
+            methodTableController.calleePercentageFor(node),
         secondaryCompare: (node) => node.name,
         columnWidth: _callGraphColumnWidth,
       );

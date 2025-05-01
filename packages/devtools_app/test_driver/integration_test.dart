@@ -21,79 +21,81 @@ Future<void> main() async {
   final driver = await FlutterDriver.connect();
   await integrationDriver(
     driver: driver,
-    onScreenshot: (
-      String screenshotName,
-      List<int> screenshotBytes, [
-      Map<String, Object?>? args,
-    ]) async {
-      final shouldUpdateGoldens = args?['update_goldens'] == true;
+    onScreenshot:
+        (
+          String screenshotName,
+          List<int> screenshotBytes, [
+          Map<String, Object?>? args,
+        ]) async {
+          final shouldUpdateGoldens = args?['update_goldens'] == true;
 
-      // TODO(https://github.com/flutter/flutter/issues/118470): remove this.
-      // We need this to ensure all golden image checks run. Without this
-      // workaround, the flutter integration test framework will crash on the
-      // failed expectation.
-      final lastScreenshot = args?['last_screenshot'] == true;
+          // TODO(https://github.com/flutter/flutter/issues/118470): remove this.
+          // We need this to ensure all golden image checks run. Without this
+          // workaround, the flutter integration test framework will crash on the
+          // failed expectation.
+          final lastScreenshot = args?['last_screenshot'] == true;
 
-      final goldenFile = File('$_goldensDirectoryPath/$screenshotName.png');
+          final goldenFile = File('$_goldensDirectoryPath/$screenshotName.png');
 
-      if (shouldUpdateGoldens) {
-        if (!goldenFile.existsSync()) {
-          // Create the goldens directory if it does not exist.
-          Directory(_goldensDirectoryPath).createSync();
-        }
-        goldenFile.writeAsBytesSync(screenshotBytes, flush: true);
-        print('Golden image updated: $screenshotName.png');
-        return true;
-      }
+          if (shouldUpdateGoldens) {
+            if (!goldenFile.existsSync()) {
+              // Create the goldens directory if it does not exist.
+              Directory(_goldensDirectoryPath).createSync();
+            }
+            goldenFile.writeAsBytesSync(screenshotBytes, flush: true);
+            print('Golden image updated: $screenshotName.png');
+            return true;
+          }
 
-      bool equal = false;
-      double percentDiff = 1.0;
-      if (goldenFile.existsSync()) {
-        final goldenBytes = goldenFile.readAsBytesSync();
-        equal = const DeepCollectionEquality().equals(
-          goldenBytes,
-          screenshotBytes,
-        );
-        if (!equal) {
-          percentDiff = _percentDiff(goldenBytes, screenshotBytes);
-        }
-      }
+          bool equal = false;
+          double percentDiff = 1.0;
+          if (goldenFile.existsSync()) {
+            final goldenBytes = goldenFile.readAsBytesSync();
+            equal = const DeepCollectionEquality().equals(
+              goldenBytes,
+              screenshotBytes,
+            );
+            if (!equal) {
+              percentDiff = _percentDiff(goldenBytes, screenshotBytes);
+            }
+          }
 
-      final failuresDirectory = Directory(_failuresDirectoryPath);
+          final failuresDirectory = Directory(_failuresDirectoryPath);
 
-      if (!equal) {
-        final percentDiffDisplay = '${(percentDiff * 100).toStringAsFixed(4)}%';
-        if (percentDiff < _defaultDiffTolerance) {
-          print(
-            'Warning: $screenshotName.png differed from the golden image by '
-            '$percentDiffDisplay. Since this is less than the acceptable '
-            'tolerance ${(_defaultDiffTolerance * 100).toStringAsFixed(4)}%, '
-            'the test still passes.',
-          );
+          if (!equal) {
+            final percentDiffDisplay =
+                '${(percentDiff * 100).toStringAsFixed(4)}%';
+            if (percentDiff < _defaultDiffTolerance) {
+              print(
+                'Warning: $screenshotName.png differed from the golden image by '
+                '$percentDiffDisplay. Since this is less than the acceptable '
+                'tolerance ${(_defaultDiffTolerance * 100).toStringAsFixed(4)}%, '
+                'the test still passes.',
+              );
+              return true;
+            }
+            print(
+              'Golden image test failed: $screenshotName.png. The test image '
+              'differed from the golden image by $percentDiffDisplay.',
+            );
+
+            // Create the goldens and failures directories if they do not exist.
+            Directory(_goldensDirectoryPath).createSync();
+            failuresDirectory.createSync();
+
+            File(
+              '$_failuresDirectoryPath/$screenshotName.png',
+            ).writeAsBytesSync(screenshotBytes);
+          }
+
+          if (lastScreenshot &&
+              failuresDirectory.existsSync() &&
+              failuresDirectory.listSync().isNotEmpty) {
+            return false;
+          }
+
           return true;
-        }
-        print(
-          'Golden image test failed: $screenshotName.png. The test image '
-          'differed from the golden image by $percentDiffDisplay.',
-        );
-
-        // Create the goldens and failures directories if they do not exist.
-        Directory(_goldensDirectoryPath).createSync();
-        failuresDirectory.createSync();
-
-        File(
-          '$_failuresDirectoryPath/$screenshotName.png',
-        ).writeAsBytesSync(screenshotBytes);
-      }
-
-      if (lastScreenshot &&
-          failuresDirectory.existsSync() &&
-          failuresDirectory.listSync().isNotEmpty) {
-        return false;
-      }
-
-      return true;
-    },
+        },
   );
 }
 

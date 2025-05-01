@@ -44,17 +44,16 @@ final _log = Logger('inspector_controller');
 
 /// Data pattern containing the properties and render properties for a widget
 /// tree node.
-typedef WidgetTreeNodeProperties =
-    ({
-      /// Properties defined directly on the widget.
-      List<RemoteDiagnosticsNode> widgetProperties,
+typedef WidgetTreeNodeProperties = ({
+  /// Properties defined directly on the widget.
+  List<RemoteDiagnosticsNode> widgetProperties,
 
-      /// Properties defined on the widget's render object.
-      List<RemoteDiagnosticsNode> renderProperties,
+  /// Properties defined on the widget's render object.
+  List<RemoteDiagnosticsNode> renderProperties,
 
-      /// Layout properties for the widget.
-      LayoutProperties? layoutProperties,
-    });
+  /// Layout properties for the widget.
+  LayoutProperties? layoutProperties,
+});
 
 /// This class is based on the InspectorPanel class from the Flutter IntelliJ
 /// plugin with some refactors to make it more of a true controller than a view.
@@ -442,8 +441,8 @@ class InspectorController extends DisposableController
     } else {
       if (disposed) return;
       if (inspectorService is InspectorService) {
-        final widgetTreeReady =
-            await (inspectorService as InspectorService).isWidgetTreeReady();
+        final widgetTreeReady = await (inspectorService as InspectorService)
+            .isWidgetTreeReady();
         flutterAppFrameReady = widgetTreeReady;
       }
       if (isActive && flutterAppFrameReady) {
@@ -541,10 +540,8 @@ class InspectorController extends DisposableController
     // TODO(https://github.com/flutter/devtools/issues/8481): Consider using a
     // variation of a path-finding algorithm to determine the new selection,
     // instead of looking for the first matching descendant.
-    final (
-      closestUnchangedAncestor,
-      distanceToAncestor,
-    ) = _findClosestUnchangedAncestor(previousSelection);
+    final (closestUnchangedAncestor, distanceToAncestor) =
+        _findClosestUnchangedAncestor(previousSelection);
     if (closestUnchangedAncestor == null) return inspectorTree.root?.diagnostic;
 
     // TODO(elliette): This might cause a race event that will set this to false
@@ -873,10 +870,9 @@ class InspectorController extends DisposableController
 
       // Show a notification that the user selected an implementation widget,
       // e.g. "Selected an implementation widget of Text: RichText."
-      final messageDetails =
-          selectedWidgetName.isEmpty
-              ? ''
-              : ' of $selectedWidgetName${implementationWidgetName.isEmpty ? '' : ': $implementationWidgetName'}';
+      final messageDetails = selectedWidgetName.isEmpty
+          ? ''
+          : ' of $selectedWidgetName${implementationWidgetName.isEmpty ? '' : ': $implementationWidgetName'}';
       notificationService.pushNotification(
         NotificationMessage(
           '$_implementationWidgetMessage$messageDetails.',
@@ -965,17 +961,15 @@ class InspectorController extends DisposableController
   void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
     final inspectorRef = node?.diagnostic?.valueRef.id;
 
-    final errors =
-        serviceConnection.errorBadgeManager
-            .erroredItemsForPage(InspectorScreen.id)
-            .value;
+    final errors = serviceConnection.errorBadgeManager
+        .erroredItemsForPage(InspectorScreen.id)
+        .value;
 
     // Check whether the node that was just selected has any errors associated
     // with it.
-    var errorIndex =
-        inspectorRef != null
-            ? errors.keys.toList().indexOf(inspectorRef)
-            : null;
+    var errorIndex = inspectorRef != null
+        ? errors.keys.toList().indexOf(inspectorRef)
+        : null;
     if (errorIndex == -1) {
       errorIndex = null;
     }
@@ -1001,10 +995,9 @@ class InspectorController extends DisposableController
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
 
-    final errors =
-        serviceConnection.errorBadgeManager
-            .erroredItemsForPage(InspectorScreen.id)
-            .value;
+    final errors = serviceConnection.errorBadgeManager
+        .erroredItemsForPage(InspectorScreen.id)
+        .value;
 
     unawaited(
       updateSelectionFromService(inspectorRef: errors.keys.elementAt(index)),

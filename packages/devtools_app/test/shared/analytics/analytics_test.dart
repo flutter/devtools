@@ -11,8 +11,9 @@ import 'package:test/test.dart';
 
 void main() {
   group('createStackTraceForAnalytics for stack trace', () {
-    final fileUriBase =
-        Platform.isWindows ? 'file:///c:/b/s/w' : 'file:///b/s/w';
+    final fileUriBase = Platform.isWindows
+        ? 'file:///c:/b/s/w'
+        : 'file:///b/s/w';
     test(
       'with DevTools stack frames near the top',
       () {

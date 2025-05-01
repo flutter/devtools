@@ -73,12 +73,12 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       showFrameAnalysis: showFrameAnalysis,
       showRebuildStats: showRebuildStats,
     );
-    final tabs =
-        tabsAndControllers
-            .map((t) => (tab: t.tab, tabView: t.tabView))
-            .toList();
-    final featureControllers =
-        tabsAndControllers.map((t) => t.featureController).toList();
+    final tabs = tabsAndControllers
+        .map((t) => (tab: t.tab, tabView: t.tabView))
+        .toList();
+    final featureControllers = tabsAndControllers
+        .map((t) => t.featureController)
+        .toList();
 
     // If there is not an active feature, activate the first.
     if (featureControllers.firstWhereOrNull(
@@ -125,19 +125,18 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         (
           tab: _buildTab(tabName: 'Frame Analysis'),
           tabView: KeepAliveWrapper(
-            child:
-                _selectedFlutterFrame != null
-                    ? FlutterFrameAnalysisView(
-                      frame: _selectedFlutterFrame!,
-                      enhanceTracingController:
-                          controller.enhanceTracingController,
-                      rebuildCountModel: controller.rebuildCountModel,
-                      displayRefreshRateNotifier:
-                          controller.flutterFramesController.displayRefreshRate,
-                    )
-                    : const CenteredMessage(
-                      message: 'Select a frame above to view analysis data.',
-                    ),
+            child: _selectedFlutterFrame != null
+                ? FlutterFrameAnalysisView(
+                    frame: _selectedFlutterFrame!,
+                    enhanceTracingController:
+                        controller.enhanceTracingController,
+                    rebuildCountModel: controller.rebuildCountModel,
+                    displayRefreshRateNotifier:
+                        controller.flutterFramesController.displayRefreshRate,
+                  )
+                : const CenteredMessage(
+                    message: 'Select a frame above to view analysis data.',
+                  ),
           ),
           featureController: null,
         ),

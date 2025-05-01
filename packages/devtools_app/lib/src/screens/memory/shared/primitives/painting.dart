@@ -50,10 +50,9 @@ class DashedLine extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     double startX = 0;
-    final paint =
-        Paint()
-          ..color = _color
-          ..strokeWidth = _dashHeight;
+    final paint = Paint()
+      ..color = _color
+      ..strokeWidth = _dashHeight;
 
     while (_totalWidth >= 0) {
       canvas.drawLine(Offset(startX, 0), Offset(startX + _dashWidth, 0), paint);

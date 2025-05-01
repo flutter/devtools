@@ -69,8 +69,8 @@ extension InboundReferenceExtension on InboundReferences {
 
   int? parentWordOffset(int inboundReferenceIndex) {
     final references = (json![_referencesKey] as List?)?.cast<Object?>();
-    final inboundReference =
-        (references?[inboundReferenceIndex] as Map?)?.cast<String, Object?>();
+    final inboundReference = (references?[inboundReferenceIndex] as Map?)
+        ?.cast<String, Object?>();
     return inboundReference?[_parentWordOffsetKey] as int?;
   }
 }
@@ -100,14 +100,12 @@ extension ClassHeapStatsPrivateViewExtension on ClassHeapStats {
   static const _newSpaceKey = '_new';
   static const _oldSpaceKey = '_old';
 
-  HeapStats get newSpace =>
-      json!.containsKey(_newSpaceKey)
-          ? HeapStats.parse((json![_newSpaceKey] as List).cast<int>())
-          : const HeapStats.empty();
-  HeapStats get oldSpace =>
-      json!.containsKey(_oldSpaceKey)
-          ? HeapStats.parse((json![_oldSpaceKey] as List).cast<int>())
-          : const HeapStats.empty();
+  HeapStats get newSpace => json!.containsKey(_newSpaceKey)
+      ? HeapStats.parse((json![_newSpaceKey] as List).cast<int>())
+      : const HeapStats.empty();
+  HeapStats get oldSpace => json!.containsKey(_oldSpaceKey)
+      ? HeapStats.parse((json![_oldSpaceKey] as List).cast<int>())
+      : const HeapStats.empty();
 }
 
 extension AllocationProfilePrivateViewExtension on AllocationProfile {
@@ -251,8 +249,8 @@ class WeakArray extends WeakArrayRef implements Obj {
     json: json,
     length: json['length'],
     size: json['size'],
-    elements:
-        (createServiceObject(json['elements'], []) as List).cast<Response?>(),
+    elements: (createServiceObject(json['elements'], []) as List)
+        .cast<Response?>(),
     classRef: createServiceObject(json['class'], [])! as ClassRef,
   );
 
@@ -412,10 +410,9 @@ class Instruction {
       return;
     }
     final rawObject = data[3] as Map<String, dynamic>;
-    object =
-        (rawObject['type'] as List).contains('Instance')
-            ? InstanceRef.parse(rawObject)
-            : createServiceObject(data[3], const <String>[]) as Response?;
+    object = (rawObject['type'] as List).contains('Instance')
+        ? InstanceRef.parse(rawObject)
+        : createServiceObject(data[3], const <String>[]) as Response?;
   }
 
   /// The instruction's address in memory.
@@ -479,8 +476,8 @@ extension FunctionPrivateViewExtension on Func {
   String? get vmName => json!['_vmName'];
 
   Future<Instance?> get icDataArray async {
-    final icDataArray =
-        (json![_icDataArrayKey] as Map?)?.cast<String, Object?>();
+    final icDataArray = (json![_icDataArrayKey] as Map?)
+        ?.cast<String, Object?>();
     final icDataArrayId = icDataArray?['id'] as String?;
     if (icDataArrayId != null) {
       final service = serviceConnection.serviceManager.service!;
@@ -576,11 +573,10 @@ class InliningData {
   factory InliningData.fromJson(Map<String, dynamic> json) {
     final startAddress = int.parse(json[kStartAddressKey], radix: 16);
     final intervals = (json[kInlinedIntervals] as List).cast<List>();
-    final functions =
-        (json[kInlinedFunctions] as List)
-            .cast<Map<String, dynamic>>()
-            .map<FuncRef>((e) => FuncRef.parse(e)!)
-            .toList();
+    final functions = (json[kInlinedFunctions] as List)
+        .cast<Map<String, dynamic>>()
+        .map<FuncRef>((e) => FuncRef.parse(e)!)
+        .toList();
 
     final entries = <InliningEntry>[];
 
@@ -654,10 +650,9 @@ class ObjectPool extends ObjectPoolRef implements Obj {
     return ObjectPool(
       json: json,
       id: json[ObjectPoolRef._idKey],
-      entries:
-          (json[_entriesKey] as List)
-              .map((e) => ObjectPoolEntry.parse(e))
-              .toList(),
+      entries: (json[_entriesKey] as List)
+          .map((e) => ObjectPoolEntry.parse(e))
+          .toList(),
       length: json[ObjectPoolRef._lengthKey],
     );
   }
@@ -925,11 +920,10 @@ extension CpuSamplesPrivateView on CpuSamples {
   }
 
   List<ProfileCode> get codes {
-    return _expando[this] ??=
-        (json![_kCodesKey] as List)
-            .cast<Map<String, dynamic>>()
-            .map<ProfileCode>((e) => ProfileCode.parse(e)!)
-            .toList();
+    return _expando[this] ??= (json![_kCodesKey] as List)
+        .cast<Map<String, dynamic>>()
+        .map<ProfileCode>((e) => ProfileCode.parse(e)!)
+        .toList();
   }
 }
 
@@ -961,20 +955,17 @@ class ProfileReportRange {
   ProfileReportRange._fromJson(Script script, _ProfileReportRangeJson json) {
     final inclusiveTicks = json.inclusiveTicks;
     final exclusiveTicks = json.exclusiveTicks;
-    final lines =
-        json.positions
-            .map<int>(
-              // It's possible to get a synthetic token position which will either
-              // be a negative value or a String (e.g., 'ParallelMove' or
-              // 'NoSource'). We'll just use -1 as a placeholder since we won't
-              // display anything for these tokens anyway.
-              (e) =>
-                  e is int
-                      ? script.getLineNumberFromTokenPos(e) ??
-                          _kNoSourcePosition
-                      : _kNoSourcePosition,
-            )
-            .toList();
+    final lines = json.positions
+        .map<int>(
+          // It's possible to get a synthetic token position which will either
+          // be a negative value or a String (e.g., 'ParallelMove' or
+          // 'NoSource'). We'll just use -1 as a placeholder since we won't
+          // display anything for these tokens anyway.
+          (e) => e is int
+              ? script.getLineNumberFromTokenPos(e) ?? _kNoSourcePosition
+              : _kNoSourcePosition,
+        )
+        .toList();
     for (int i = 0; i < lines.length; ++i) {
       final line = lines[i];
       entries[line] = ProfileReportEntry(
@@ -1016,17 +1007,16 @@ extension type _ProfileReportRangeJson(Map<String, dynamic> json) {
 /// information for a given [Script].
 class ProfileReport {
   ProfileReport._fromJson(Script script, Map<String, dynamic> json)
-    : _profileRanges =
-          (json['ranges'] as List)
-              .cast<Map<String, dynamic>>()
-              .where((e) => e.containsKey('profile'))
-              .map<ProfileReportRange>(
-                (e) => ProfileReportRange._fromJson(
-                  script,
-                  _ProfileReportRangeJson(e),
-                ),
-              )
-              .toList();
+    : _profileRanges = (json['ranges'] as List)
+          .cast<Map<String, dynamic>>()
+          .where((e) => e.containsKey('profile'))
+          .map<ProfileReportRange>(
+            (e) => ProfileReportRange._fromJson(
+              script,
+              _ProfileReportRangeJson(e),
+            ),
+          )
+          .toList();
 
   List<ProfileReportRange> get profileRanges => _profileRanges;
   final List<ProfileReportRange> _profileRanges;

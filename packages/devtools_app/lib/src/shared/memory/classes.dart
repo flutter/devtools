@@ -19,11 +19,10 @@ class ObjectSetStats {
     from ??= _empty;
     subtract ??= _empty;
 
-    final result =
-        ObjectSetStats()
-          ..instanceCount = from.instanceCount - subtract.instanceCount
-          ..shallowSize = from.shallowSize - subtract.shallowSize
-          ..retainedSize = from.retainedSize - subtract.retainedSize;
+    final result = ObjectSetStats()
+      ..instanceCount = from.instanceCount - subtract.instanceCount
+      ..shallowSize = from.shallowSize - subtract.shallowSize
+      ..retainedSize = from.retainedSize - subtract.retainedSize;
 
     if (result.isZero) return null;
     return result;
@@ -205,14 +204,13 @@ class SingleClassData extends ClassData {
     required List<int>? retainers,
     required List<int>? retainedSizes,
   }) {
-    final path =
-        retainers == null
-            ? null
-            : PathFromRoot.forObject(
-              graph,
-              shortestRetainers: retainers,
-              index: index,
-            );
+    final path = retainers == null
+        ? null
+        : PathFromRoot.forObject(
+            graph,
+            shortestRetainers: retainers,
+            index: index,
+          );
 
     final excludeFromRetained =
         path != null &&
