@@ -63,10 +63,9 @@ abstract class MemoryDefaultSceneHeaps {
           .toList();
 
   static final golden = goldenHeapTests
-      // ignore: avoid-redundant-async, match signature
       .map(
         (e) =>
-            () async => e.loadHeap(),
+            () => e.loadHeap(),
       )
       .toList();
 

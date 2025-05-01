@@ -505,7 +505,7 @@ class QueryFilter<T> {
       }
     }
 
-    final bool validArgumentFilter = args.values.any(
+    final validArgumentFilter = args.values.any(
       (a) => a.values.isNotEmpty,
     );
     if (!validArgumentFilter && substringExpressions.isEmpty) {
