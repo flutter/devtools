@@ -104,8 +104,8 @@ class ConnectionSection extends StatelessWidget {
             minScreenWidthForTextBeforeScaling:
                 _primaryMinScreenWidthForTextBeforeScaling,
             routerDelegate: DevToolsRouterDelegate.of(context),
-            onPressed:
-                () => Navigator.of(context, rootNavigator: true).pop('dialog'),
+            onPressed: () =>
+                Navigator.of(context, rootNavigator: true).pop('dialog'),
           ),
         ],
         child: const ConnectedAppSummary(narrowView: false),
@@ -205,8 +205,9 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
               width: scaleByFontFactor(350.0),
               child: DevToolsClearableTextField(
                 labelText: 'URL',
-                onSubmitted:
-                    actionInProgress ? null : (str) => unawaited(_connect()),
+                onSubmitted: actionInProgress
+                    ? null
+                    : (str) => unawaited(_connect()),
                 autofocus: true,
                 controller: connectDialogController,
               ),
@@ -310,20 +311,18 @@ class _SampleDataDropDownButtonState extends State<SampleDataDropDownButton> {
         RoundedDropDownButton<DevToolsJsonFile>(
           value: value,
           items: [for (final data in widget.sampleData) _buildMenuItem(data)],
-          onChanged:
-              (file) => setState(() {
-                value = file;
-              }),
+          onChanged: (file) => setState(() {
+            value = file;
+          }),
         ),
         const SizedBox(width: defaultSpacing),
         ElevatedButton(
-          onPressed:
-              value == null
-                  ? null
-                  : () => Provider.of<ImportController>(
-                    context,
-                    listen: false,
-                  ).importData(value!),
+          onPressed: value == null
+              ? null
+              : () => Provider.of<ImportController>(
+                  context,
+                  listen: false,
+                ).importData(value!),
           child: const MaterialIconLabel(
             label: 'Load sample data',
             iconData: Icons.file_upload,

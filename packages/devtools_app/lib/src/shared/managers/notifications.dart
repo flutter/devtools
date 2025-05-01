@@ -73,10 +73,9 @@ class NotificationService {
           if (reportExplanation != null) 'Explanation:\n$reportExplanation',
           if (stackTrace != null) 'Stack trace:\n$stackTrace',
         ];
-        final additionalInfo =
-            additionalInfoParts.isNotEmpty
-                ? additionalInfoParts.join('\n\n')
-                : null;
+        final additionalInfo = additionalInfoParts.isNotEmpty
+            ? additionalInfoParts.join('\n\n')
+            : null;
         unawaited(
           launchUrlWithErrorHandling(
             devToolsEnvironmentParameters
@@ -96,10 +95,9 @@ class NotificationService {
         isDismissible: isDismissible,
         actions: [if (isReportable) reportErrorAction],
         // Double the duration so that the user has time to report the error:
-        duration:
-            isReportable
-                ? NotificationMessage.defaultDuration * 2
-                : NotificationMessage.defaultDuration,
+        duration: isReportable
+            ? NotificationMessage.defaultDuration * 2
+            : NotificationMessage.defaultDuration,
       ),
       allowDuplicates: allowDuplicates,
     );
@@ -163,10 +161,9 @@ class NotificationAction extends StatelessWidget {
     final theme = Theme.of(context);
     return DevToolsButton(
       label: label,
-      color:
-          isPrimary
-              ? theme.colorScheme.onPrimary
-              : theme.colorScheme.onSecondaryContainer,
+      color: isPrimary
+          ? theme.colorScheme.onPrimary
+          : theme.colorScheme.onSecondaryContainer,
       elevated: isPrimary,
       outlined: !isPrimary,
       onPressed: onPressed,

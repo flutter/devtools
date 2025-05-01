@@ -38,10 +38,9 @@ abstract class NetworkRequest
 
   String get durationDisplay {
     final duration = this.duration;
-    final text =
-        duration != null
-            ? durationText(duration, unit: DurationDisplayUnit.milliseconds)
-            : 'Pending';
+    final text = duration != null
+        ? durationText(duration, unit: DurationDisplayUnit.milliseconds)
+        : 'Pending';
     return 'Duration: $text';
   }
 
@@ -65,9 +64,9 @@ abstract class NetworkRequest
         port == other.port &&
         (inProgress == other.inProgress
             ? (endTimestamp == other.endTimestamp &&
-                duration == other.duration &&
-                status == other.status &&
-                didFail == other.didFail)
+                  duration == other.duration &&
+                  status == other.status &&
+                  didFail == other.didFail)
             : true);
   }
 
@@ -124,8 +123,8 @@ class Socket extends NetworkRequest {
     final endTime = _socket.endTime;
     return endTime != null
         ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(endTime),
-        )
+            timelineMicrosecondsSinceEpoch(endTime),
+          )
         : null;
   }
 
@@ -133,8 +132,8 @@ class Socket extends NetworkRequest {
     final lastReadTime = _socket.lastReadTime;
     return lastReadTime != null
         ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(lastReadTime),
-        )
+            timelineMicrosecondsSinceEpoch(lastReadTime),
+          )
         : null;
   }
 
@@ -142,8 +141,8 @@ class Socket extends NetworkRequest {
     final lastWriteTime = _socket.lastWriteTime;
     return lastWriteTime != null
         ? DateTime.fromMicrosecondsSinceEpoch(
-          timelineMicrosecondsSinceEpoch(lastWriteTime),
-        )
+            timelineMicrosecondsSinceEpoch(lastWriteTime),
+          )
         : null;
   }
 

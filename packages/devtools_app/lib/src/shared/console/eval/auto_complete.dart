@@ -170,11 +170,10 @@ Future<Set<String>> libraryMemberAutocompletes(
   LibraryRef libraryRef, {
   required bool includePrivates,
 }) async {
-  var result =
-      (await _appState.cache.libraryMemberAutocomplete.putIfAbsent(
-        libraryRef,
-        () => _libraryMemberAutocompletes(evalService, libraryRef),
-      )).nonNulls;
+  var result = (await _appState.cache.libraryMemberAutocomplete.putIfAbsent(
+    libraryRef,
+    () => _libraryMemberAutocompletes(evalService, libraryRef),
+  )).nonNulls;
   if (!includePrivates) {
     result = result.where((name) => !isPrivateMember(name));
   }

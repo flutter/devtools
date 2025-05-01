@@ -58,15 +58,15 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
     maxWidth = max(0, maxWidth);
     double available = maxWidth;
     // Columns sorted by increasing minWidth.
-    final sortedColumns =
-        columns.toList()..sort((a, b) {
-          if (a.minWidthPx != null && b.minWidthPx != null) {
-            return a.minWidthPx!.compareTo(b.minWidthPx!);
-          }
-          if (a.minWidthPx != null) return -1;
-          if (b.minWidthPx != null) return 1;
-          return 0;
-        });
+    final sortedColumns = columns.toList()
+      ..sort((a, b) {
+        if (a.minWidthPx != null && b.minWidthPx != null) {
+          return a.minWidthPx!.compareTo(b.minWidthPx!);
+        }
+        if (a.minWidthPx != null) return -1;
+        if (b.minWidthPx != null) return 1;
+        return 0;
+      });
 
     for (final col in columns) {
       if (col.fixedWidthPx != null) {
@@ -112,8 +112,9 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
         }
       }
     }
-    final unconstrainedWidth =
-        unconstrainedCount > 0 ? available / unconstrainedCount : available;
+    final unconstrainedWidth = unconstrainedCount > 0
+        ? available / unconstrainedCount
+        : available;
     int unconstrainedFound = 0;
     final widths = <double>[];
     for (final column in columns) {

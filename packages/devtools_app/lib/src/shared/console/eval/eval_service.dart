@@ -185,10 +185,12 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   ) async {
     final isolateId = isolateRef.id!;
 
-    final theClass = (await serviceConnection.serviceManager.service!
-        .getClassList(isolateId)).classes!.firstWhereOrNull(
-      (ref) => object.className?.matches(ref) ?? false,
-    );
+    final theClass =
+        (await serviceConnection.serviceManager.service!.getClassList(
+          isolateId,
+        )).classes!.firstWhereOrNull(
+          (ref) => object.className?.matches(ref) ?? false,
+        );
 
     return await findInstance(isolateId, theClass?.id, object.code);
   }

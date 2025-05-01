@@ -106,10 +106,8 @@ class ExtensionView extends StatelessWidget {
       children: [
         EmbeddedExtensionHeader(
           ext: ext,
-          onForceReload:
-              () => controller.postMessage(
-                DevToolsExtensionEventType.forceReload,
-              ),
+          onForceReload: () =>
+              controller.postMessage(DevToolsExtensionEventType.forceReload),
         ),
         const SizedBox(height: intermediateSpacing),
         Expanded(

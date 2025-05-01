@@ -147,71 +147,57 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
       ide_launched_feature: ideLaunchedFeature,
       is_wasm: kIsWasm.toString(),
       // [PerformanceScreenMetrics]
-      ui_duration_micros:
-          screenMetrics is PerformanceScreenMetrics
-              ? screenMetrics.uiDuration?.inMicroseconds
-              : null,
-      raster_duration_micros:
-          screenMetrics is PerformanceScreenMetrics
-              ? screenMetrics.rasterDuration?.inMicroseconds
-              : null,
+      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.uiDuration?.inMicroseconds
+          : null,
+      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.rasterDuration?.inMicroseconds
+          : null,
       shader_compilation_duration_micros:
           screenMetrics is PerformanceScreenMetrics
-              ? screenMetrics.shaderCompilationDuration?.inMicroseconds
-              : null,
-      trace_event_count:
-          screenMetrics is PerformanceScreenMetrics
-              ? screenMetrics.traceEventCount
-              : null,
+          ? screenMetrics.shaderCompilationDuration?.inMicroseconds
+          : null,
+      trace_event_count: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.traceEventCount
+          : null,
       // [ProfilerScreenMetrics]
-      cpu_sample_count:
-          screenMetrics is ProfilerScreenMetrics
-              ? screenMetrics.cpuSampleCount
-              : null,
-      cpu_stack_depth:
-          screenMetrics is ProfilerScreenMetrics
-              ? screenMetrics.cpuStackDepth
-              : null,
+      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
+          ? screenMetrics.cpuSampleCount
+          : null,
+      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
+          ? screenMetrics.cpuStackDepth
+          : null,
       // [MemoryScreenMetrics]
-      heap_diff_objects_before:
-          screenMetrics is MemoryScreenMetrics
-              ? screenMetrics.heapDiffObjectsBefore
-              : null,
-      heap_diff_objects_after:
-          screenMetrics is MemoryScreenMetrics
-              ? screenMetrics.heapDiffObjectsAfter
-              : null,
-      heap_objects_total:
-          screenMetrics is MemoryScreenMetrics
-              ? screenMetrics.heapObjectsTotal
-              : null,
+      heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapDiffObjectsBefore
+          : null,
+      heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapDiffObjectsAfter
+          : null,
+      heap_objects_total: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapObjectsTotal
+          : null,
       // [InspectorScreenMetrics]
-      root_set_count:
-          screenMetrics is InspectorScreenMetrics
-              ? screenMetrics.rootSetCount
-              : null,
-      row_count:
-          screenMetrics is InspectorScreenMetrics
-              ? screenMetrics.rowCount
-              : null,
-      inspector_tree_controller_id:
-          screenMetrics is InspectorScreenMetrics
-              ? screenMetrics.inspectorTreeControllerId
-              : null,
+      root_set_count: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.rootSetCount
+          : null,
+      row_count: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.rowCount
+          : null,
+      inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.inspectorTreeControllerId
+          : null,
       // [DeepLinkScreenMetrics]
-      android_app_id:
-          screenMetrics is DeepLinkScreenMetrics
-              ? screenMetrics.androidAppId
-              : null,
-      ios_bundle_id:
-          screenMetrics is DeepLinkScreenMetrics
-              ? screenMetrics.iosBundleId
-              : null,
+      android_app_id: screenMetrics is DeepLinkScreenMetrics
+          ? screenMetrics.androidAppId
+          : null,
+      ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
+          ? screenMetrics.iosBundleId
+          : null,
       // [InspectorScreenMetrics]
-      is_v2_inspector:
-          screenMetrics is InspectorScreenMetrics
-              ? screenMetrics.isV2.toString()
-              : null,
+      is_v2_inspector: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.isV2.toString()
+          : null,
     );
   }
 
@@ -329,71 +315,57 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
       ide_launched_feature: ideLaunchedFeature,
       is_wasm: kIsWasm.toString(),
       // [PerformanceScreenMetrics]
-      ui_duration_micros:
-          screenMetrics is PerformanceScreenMetrics
-              ? screenMetrics.uiDuration?.inMicroseconds
-              : null,
-      raster_duration_micros:
-          screenMetrics is PerformanceScreenMetrics
-              ? screenMetrics.rasterDuration?.inMicroseconds
-              : null,
-      trace_event_count:
-          screenMetrics is PerformanceScreenMetrics
-              ? screenMetrics.traceEventCount
-              : null,
+      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.uiDuration?.inMicroseconds
+          : null,
+      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.rasterDuration?.inMicroseconds
+          : null,
+      trace_event_count: screenMetrics is PerformanceScreenMetrics
+          ? screenMetrics.traceEventCount
+          : null,
       shader_compilation_duration_micros:
           screenMetrics is PerformanceScreenMetrics
-              ? screenMetrics.shaderCompilationDuration?.inMicroseconds
-              : null,
+          ? screenMetrics.shaderCompilationDuration?.inMicroseconds
+          : null,
       // [ProfilerScreenMetrics]
-      cpu_sample_count:
-          screenMetrics is ProfilerScreenMetrics
-              ? screenMetrics.cpuSampleCount
-              : null,
-      cpu_stack_depth:
-          screenMetrics is ProfilerScreenMetrics
-              ? screenMetrics.cpuStackDepth
-              : null,
+      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
+          ? screenMetrics.cpuSampleCount
+          : null,
+      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
+          ? screenMetrics.cpuStackDepth
+          : null,
       // [MemoryScreenMetrics]
-      heap_diff_objects_before:
-          screenMetrics is MemoryScreenMetrics
-              ? screenMetrics.heapDiffObjectsBefore
-              : null,
-      heap_diff_objects_after:
-          screenMetrics is MemoryScreenMetrics
-              ? screenMetrics.heapDiffObjectsAfter
-              : null,
-      heap_objects_total:
-          screenMetrics is MemoryScreenMetrics
-              ? screenMetrics.heapObjectsTotal
-              : null,
+      heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapDiffObjectsBefore
+          : null,
+      heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapDiffObjectsAfter
+          : null,
+      heap_objects_total: screenMetrics is MemoryScreenMetrics
+          ? screenMetrics.heapObjectsTotal
+          : null,
       // [InspectorScreenMetrics]
-      root_set_count:
-          screenMetrics is InspectorScreenMetrics
-              ? screenMetrics.rootSetCount
-              : null,
-      row_count:
-          screenMetrics is InspectorScreenMetrics
-              ? screenMetrics.rowCount
-              : null,
-      inspector_tree_controller_id:
-          screenMetrics is InspectorScreenMetrics
-              ? screenMetrics.inspectorTreeControllerId
-              : null,
+      root_set_count: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.rootSetCount
+          : null,
+      row_count: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.rowCount
+          : null,
+      inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.inspectorTreeControllerId
+          : null,
       // [DeepLinkScreenMetrics]
-      android_app_id:
-          screenMetrics is DeepLinkScreenMetrics
-              ? screenMetrics.androidAppId
-              : null,
-      ios_bundle_id:
-          screenMetrics is DeepLinkScreenMetrics
-              ? screenMetrics.iosBundleId
-              : null,
+      android_app_id: screenMetrics is DeepLinkScreenMetrics
+          ? screenMetrics.androidAppId
+          : null,
+      ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
+          ? screenMetrics.iosBundleId
+          : null,
       // [InspectorScreenMetrics]
-      is_v2_inspector:
-          screenMetrics is InspectorScreenMetrics
-              ? screenMetrics.isV2.toString()
-              : null,
+      is_v2_inspector: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.isV2.toString()
+          : null,
     );
   }
 
@@ -520,8 +492,9 @@ void timeEnd(
     screenName,
     timedOperation,
     durationMicros: durationMicros,
-    screenMetrics:
-        screenMetricsProvider != null ? screenMetricsProvider() : null,
+    screenMetrics: screenMetricsProvider != null
+        ? screenMetricsProvider()
+        : null,
   );
 }
 
@@ -560,8 +533,9 @@ void timeSync(
     screenName,
     timedOperation,
     durationMicros: durationMicros,
-    screenMetrics:
-        screenMetricsProvider != null ? screenMetricsProvider() : null,
+    screenMetrics: screenMetricsProvider != null
+        ? screenMetricsProvider()
+        : null,
   );
 }
 
@@ -590,8 +564,9 @@ Future<void> timeAsync(
     screenName,
     timedOperation,
     durationMicros: durationMicros,
-    screenMetrics:
-        screenMetricsProvider != null ? screenMetricsProvider() : null,
+    screenMetrics: screenMetricsProvider != null
+        ? screenMetricsProvider()
+        : null,
   );
 }
 
@@ -640,8 +615,9 @@ void select(
     value: value,
     non_interaction: nonInteraction,
     send_to: gaDevToolsPropertyId(),
-    screenMetrics:
-        screenMetricsProvider != null ? screenMetricsProvider() : null,
+    screenMetrics: screenMetricsProvider != null
+        ? screenMetricsProvider()
+        : null,
   );
   _sendEvent(gtagEvent);
 }
@@ -665,8 +641,9 @@ void impression(
     event_label: item,
     non_interaction: true,
     send_to: gaDevToolsPropertyId(),
-    screenMetrics:
-        screenMetricsProvider != null ? screenMetricsProvider() : null,
+    screenMetrics: screenMetricsProvider != null
+        ? screenMetricsProvider()
+        : null,
   );
   _sendEvent(gtagEvent);
 }
@@ -799,8 +776,9 @@ void _computeUserApplicationCustomGTagData() {
     userAppType = appTypeDartCLI;
   }
 
-  userBuildType =
-      connectedApp.isProfileBuildNow! ? buildTypeProfile : buildTypeDebug;
+  userBuildType = connectedApp.isProfileBuildNow!
+      ? buildTypeProfile
+      : buildTypeDebug;
 
   _analyticsComputed = true;
 }
@@ -1031,22 +1009,21 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
   final String? iosBundleId;
 
   @override
-  Map<String, Object> toMap() =>
-      (<String, Object?>{
-        'uiDurationMicros': uiDurationMicros,
-        'rasterDurationMicros': rasterDurationMicros,
-        'shaderCompilationDurationMicros': shaderCompilationDurationMicros,
-        'traceEventCount': traceEventCount,
-        'cpuSampleCount': cpuSampleCount,
-        'cpuStackDepth': cpuStackDepth,
-        'heapDiffObjectsBefore': heapDiffObjectsBefore,
-        'heapDiffObjectsAfter': heapDiffObjectsAfter,
-        'heapObjectsTotal': heapObjectsTotal,
-        'rootSetCount': rootSetCount,
-        'rowCount': rowCount,
-        'inspectorTreeControllerId': inspectorTreeControllerId,
-        'isV2Inspector': isV2Inspector,
-        'androidAppId': androidAppId,
-        'iosBundleId': iosBundleId,
-      }..removeWhere((key, value) => value == null)).cast<String, Object>();
+  Map<String, Object> toMap() => (<String, Object?>{
+    'uiDurationMicros': uiDurationMicros,
+    'rasterDurationMicros': rasterDurationMicros,
+    'shaderCompilationDurationMicros': shaderCompilationDurationMicros,
+    'traceEventCount': traceEventCount,
+    'cpuSampleCount': cpuSampleCount,
+    'cpuStackDepth': cpuStackDepth,
+    'heapDiffObjectsBefore': heapDiffObjectsBefore,
+    'heapDiffObjectsAfter': heapDiffObjectsAfter,
+    'heapObjectsTotal': heapObjectsTotal,
+    'rootSetCount': rootSetCount,
+    'rowCount': rowCount,
+    'inspectorTreeControllerId': inspectorTreeControllerId,
+    'isV2Inspector': isV2Inspector,
+    'androidAppId': androidAppId,
+    'iosBundleId': iosBundleId,
+  }..removeWhere((key, value) => value == null)).cast<String, Object>();
 }

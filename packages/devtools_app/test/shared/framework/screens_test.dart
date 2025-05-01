@@ -21,8 +21,9 @@ void main() {
   group('ScreenMetaData', () {
     test('values matches order of screens', () {
       final enumOrder = ScreenMetaData.values.map((s) => s.id).toList();
-      final screenOrder =
-          defaultScreens().map((screen) => screen.screen.screenId).toList();
+      final screenOrder = defaultScreens()
+          .map((screen) => screen.screen.screenId)
+          .toList();
 
       // Remove any items that don't exist in both - we can't verify
       // the order of those.
@@ -43,14 +44,12 @@ void main() {
     setUp(() {
       screen1 = SimpleScreen(const Placeholder());
       screen2 = SimpleScreen(const Placeholder());
-      extensionScreen1 =
-          DevToolsScreen<DevToolsScreenController>(
-            ExtensionScreen(StubDevToolsExtensions.someToolExtension),
-          ).screen;
-      extensionScreen2 =
-          DevToolsScreen<DevToolsScreenController>(
-            ExtensionScreen(StubDevToolsExtensions.barExtension),
-          ).screen;
+      extensionScreen1 = DevToolsScreen<DevToolsScreenController>(
+        ExtensionScreen(StubDevToolsExtensions.someToolExtension),
+      ).screen;
+      extensionScreen2 = DevToolsScreen<DevToolsScreenController>(
+        ExtensionScreen(StubDevToolsExtensions.barExtension),
+      ).screen;
       screens = <Screen>[screen1, screen2, extensionScreen1, extensionScreen2];
     });
 

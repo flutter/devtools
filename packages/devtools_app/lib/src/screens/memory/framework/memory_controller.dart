@@ -129,17 +129,17 @@ class MemoryController extends DevToolsScreenController
 
     chart = MemoryChartPaneController(data: offlineData?.chart ?? ChartData());
 
-    final rootPackage =
-        isConnected
-            ? serviceConnection.serviceManager.rootInfoNow().package!
-            : null;
+    final rootPackage = isConnected
+        ? serviceConnection.serviceManager.rootInfoNow().package!
+        : null;
 
     diff =
         diffPaneController ??
         offlineData?.diff ??
         DiffPaneController(
-          loader:
-              isConnected ? HeapGraphLoaderRuntime(chart.data.timeline) : null,
+          loader: isConnected
+              ? HeapGraphLoaderRuntime(chart.data.timeline)
+              : null,
           rootPackage: rootPackage,
         );
 

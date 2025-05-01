@@ -22,15 +22,14 @@ class IntervalDropdown extends StatefulWidget {
 class _IntervalDropdownState extends State<IntervalDropdown> {
   @override
   Widget build(BuildContext context) {
-    final displayTypes =
-        ChartInterval.values.map<DropdownMenuItem<ChartInterval>>((
-          ChartInterval value,
-        ) {
+    final displayTypes = ChartInterval.values
+        .map<DropdownMenuItem<ChartInterval>>((ChartInterval value) {
           return DropdownMenuItem<ChartInterval>(
             value: value,
             child: Text(value.displayName),
           );
-        }).toList();
+        })
+        .toList();
 
     return RoundedDropDownButton<ChartInterval>(
       isDense: true,

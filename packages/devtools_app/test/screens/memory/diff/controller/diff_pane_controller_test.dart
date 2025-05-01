@@ -46,8 +46,8 @@ void main() {
 
       final controller = scene.controller.diff;
 
-      final snapshots =
-          controller.core.snapshots.value.whereType<SnapshotDataItem>();
+      final snapshots = controller.core.snapshots.value
+          .whereType<SnapshotDataItem>();
 
       expect(snapshots.length, 2);
       snapshots.first.diffWith.value = snapshots.last;
@@ -59,8 +59,8 @@ void main() {
       );
       final fromJson = DiffPaneController.fromJson(json);
 
-      final snapshotsFromJson =
-          fromJson.core.snapshots.value.whereType<SnapshotDataItem>();
+      final snapshotsFromJson = fromJson.core.snapshots.value
+          .whereType<SnapshotDataItem>();
 
       expect(snapshotsFromJson.length, 2);
       expect(

@@ -249,8 +249,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     verticalController.hasAttachedControllers
         ? updateScrollPositionImpl()
         : WidgetsBinding.instance.addPostFrameCallback(
-          (_) => updateScrollPositionImpl(),
-        );
+            (_) => updateScrollPositionImpl(),
+          );
   }
 
   @override
@@ -331,8 +331,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
             thumbVisibility: true,
             // Only listen for vertical scroll notifications (ignore those
             // from the nested horizontal SingleChildScrollView):
-            notificationPredicate:
-                (ScrollNotification notification) => notification.depth == 1,
+            notificationPredicate: (ScrollNotification notification) =>
+                notification.depth == 1,
             child: ValueListenableBuilder<StackFrameAndSourcePosition?>(
               valueListenable:
                   widget.debuggerController?.selectedStackFrame ??
@@ -340,8 +340,9 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                     null,
                   ),
               builder: (context, frame, _) {
-                final pausedFrame =
-                    frame?.scriptRef == scriptRef ? frame : null;
+                final pausedFrame = frame?.scriptRef == scriptRef
+                    ? frame
+                    : null;
 
                 return ValueListenableBuilder<bool>(
                   valueListenable:
@@ -370,9 +371,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                               );
 
                               return Scrollbar(
-                                key:
-                                    CodeView
-                                        .debuggerCodeViewHorizontalScrollbarKey,
+                                key: CodeView
+                                    .debuggerCodeViewHorizontalScrollbarKey,
                                 thumbVisibility: true,
                                 controller: horizontalController,
                                 child: SingleChildScrollView(
@@ -390,18 +390,15 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                                           widget.codeViewController,
                                       scrollController: textController,
                                       lines: lines,
-                                      selectedFrameNotifier:
-                                          widget
-                                              .debuggerController
-                                              ?.selectedStackFrame,
-                                      searchMatchesNotifier:
-                                          widget
-                                              .codeViewController
-                                              .searchMatches,
-                                      activeSearchMatchNotifier:
-                                          widget
-                                              .codeViewController
-                                              .activeSearchMatch,
+                                      selectedFrameNotifier: widget
+                                          .debuggerController
+                                          ?.selectedStackFrame,
+                                      searchMatchesNotifier: widget
+                                          .codeViewController
+                                          .searchMatches,
+                                      activeSearchMatchNotifier: widget
+                                          .codeViewController
+                                          .activeSearchMatch,
                                       showProfileInformation:
                                           showProfileInformation,
                                     ),
@@ -438,11 +435,9 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
           return scriptUri;
         },
         titleIcon: Icons.search,
-        onTitleTap:
-            () =>
-                widget.codeViewController
-                  ..toggleFileOpenerVisibility(true)
-                  ..toggleSearchInFileVisibility(false),
+        onTitleTap: () => widget.codeViewController
+          ..toggleFileOpenerVisibility(true)
+          ..toggleSearchInFileVisibility(false),
         controls: [
           ScriptPopupMenu(widget.codeViewController),
           ScriptHistoryPopupMenu(
@@ -482,8 +477,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         searchFieldEnabled: parsedScript != null,
         shouldRequestFocus: true,
         searchFieldWidth: wideSearchFieldWidth,
-        onClose:
-            () => widget.codeViewController.toggleSearchInFileVisibility(false),
+        onClose: () =>
+            widget.codeViewController.toggleSearchInFileVisibility(false),
       ),
     );
   }
@@ -533,8 +528,8 @@ class CodeViewEmptyState extends StatelessWidget {
     return Center(
       child: ElevatedButton(
         autofocus: true,
-        onPressed:
-            () => widget.codeViewController.toggleFileOpenerVisibility(true),
+        onPressed: () =>
+            widget.codeViewController.toggleFileOpenerVisibility(true),
         child: Text(
           'Open a file ($openFileKeySetDescription)',
           style: theme.textTheme.titleMedium,
@@ -785,8 +780,9 @@ class Gutters extends StatelessWidget {
               lineCount: lineCount,
               lineOffset: lineOffset,
               pausedFrame: pausedFrame,
-              breakpoints:
-                  breakpoints.where((bp) => bp.scriptRef == scriptRef).toList(),
+              breakpoints: breakpoints
+                  .where((bp) => bp.scriptRef == scriptRef)
+                  .toList(),
               executableLines: parsedScript?.executableLines ?? const <int>{},
               sourceReport: sourceReport,
               onPressed: _onPressed,
@@ -800,14 +796,14 @@ class Gutters extends StatelessWidget {
         !showProfileInformation
             ? const SizedBox(width: denseSpacing)
             : Padding(
-              padding: const EdgeInsets.only(right: denseSpacing),
-              child: ProfileInformationGutter(
-                scrollController: profileController!,
-                lineCount: lineCount,
-                lineOffset: lineOffset,
-                sourceReport: sourceReport,
+                padding: const EdgeInsets.only(right: denseSpacing),
+                child: ProfileInformationGutter(
+                  scrollController: profileController!,
+                  lineCount: lineCount,
+                  lineOffset: lineOffset,
+                  sourceReport: sourceReport,
+                ),
               ),
-            ),
       ],
     );
   }
@@ -939,10 +935,9 @@ class GutterItem extends StatelessWidget {
     TextStyle? coverageTextStyleOverride;
     final hasCoverage = coverageHit;
     if (hasCoverage != null) {
-      color =
-          hasCoverage
-              ? theme.colorScheme.coverageHitColor
-              : theme.colorScheme.coverageMissColor;
+      color = hasCoverage
+          ? theme.colorScheme.coverageHitColor
+          : theme.colorScheme.coverageMissColor;
       coverageTextStyleOverride = theme.regularTextStyleWithColor(
         theme.colorScheme.coverageAndPerformanceTextColor,
       );
@@ -1068,8 +1063,9 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
     // the top of the profiler gutter columns. Everything needs to be shifted
     // down a single line so profiling information for line 1 isn't hidden by
     // the header.
-    final profileInformationHeaderOffset =
-        widget.showProfileInformation ? 1 : 0;
+    final profileInformationHeaderOffset = widget.showProfileInformation
+        ? 1
+        : 0;
 
     return SelectionArea(
       child: ListView.builder(
@@ -1093,10 +1089,9 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
                 pausedFrame: isPausedLine ? pausedFrame : null,
                 focused: isPausedLine || isFocusedLine,
                 searchMatches: _searchMatchesForLine(dataIndex),
-                activeSearchMatch:
-                    activeSearch?.position.line == dataIndex
-                        ? activeSearch
-                        : null,
+                activeSearchMatch: activeSearch?.position.line == dataIndex
+                    ? activeSearch
+                    : null,
               );
             },
           );
@@ -1208,8 +1203,9 @@ class LineItem extends StatelessWidget {
       );
     }
 
-    final backgroundColor =
-        focused ? theme.colorScheme.selectedRowBackgroundColor : null;
+    final backgroundColor = focused
+        ? theme.colorScheme.selectedRowBackgroundColor
+        : null;
 
     return Container(
       alignment: Alignment.centerLeft,
@@ -1252,12 +1248,11 @@ class _HoverableLine extends StatelessWidget {
     if (word.isNotEmpty && !isPrimitiveValueOrNull(word)) {
       try {
         final response = await evalService.evalAtCurrentFrame(word);
-        final isolateRef =
-            serviceConnection
-                .serviceManager
-                .isolateManager
-                .selectedIsolate
-                .value;
+        final isolateRef = serviceConnection
+            .serviceManager
+            .isolateManager
+            .selectedIsolate
+            .value;
         if (response is! InstanceRef) return null;
         final variable = DartObjectNode.fromValue(
           value: response,
@@ -1413,15 +1408,14 @@ class ScriptPopupMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopupMenuButton<ScriptPopupMenuOption>(
       onSelected: (option) => option.onSelected(context, _controller),
-      itemBuilder:
-          (_) => [
-            for (final menuOption in defaultScriptPopupMenuOptions)
-              menuOption.build(),
-            for (final extensionMenuOption
-                in devToolsEnvironmentParameters
-                    .buildExtraDebuggerScriptPopupMenuOptions())
-              extensionMenuOption.build(),
-          ],
+      itemBuilder: (_) => [
+        for (final menuOption in defaultScriptPopupMenuOptions)
+          menuOption.build(),
+        for (final extensionMenuOption
+            in devToolsEnvironmentParameters
+                .buildExtraDebuggerScriptPopupMenuOptions())
+          extensionMenuOption.build(),
+      ],
       child: Icon(Icons.more_vert, size: actionsIconSize),
     );
   }
@@ -1494,12 +1488,9 @@ final defaultScriptPopupMenuOptions = [
 final copyPackagePathOption = ScriptPopupMenuOption(
   label: 'Copy package path',
   icon: Icons.content_copy,
-  onSelected:
-      (_, controller) => Clipboard.setData(
-        ClipboardData(
-          text: controller.scriptLocation.value?.scriptRef.uri ?? '',
-        ),
-      ),
+  onSelected: (_, controller) => Clipboard.setData(
+    ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri ?? ''),
+  ),
 );
 
 final copyFilePathOption = ScriptPopupMenuOption(
@@ -1520,13 +1511,12 @@ Future<String?> fetchScriptLocationFullFilePath(
   String? filePath;
   final packagePath = controller.scriptLocation.value!.scriptRef.uri;
   if (packagePath != null) {
-    final isolateId =
-        serviceConnection
-            .serviceManager
-            .isolateManager
-            .selectedIsolate
-            .value!
-            .id!;
+    final isolateId = serviceConnection
+        .serviceManager
+        .isolateManager
+        .selectedIsolate
+        .value!
+        .id!;
     filePath = serviceConnection.serviceManager.resolvedUriManager
         .lookupFileUri(isolateId, packagePath);
     if (filePath == null) {

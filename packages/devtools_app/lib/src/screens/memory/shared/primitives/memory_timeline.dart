@@ -17,10 +17,9 @@ class MemoryTimeline extends Disposable with Serializable {
 
   factory MemoryTimeline.fromJson(Map<String, dynamic> json) {
     return MemoryTimeline(
-      data:
-          (json[_jsonData] as List)
-              .map((e) => HeapSample.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      data: (json[_jsonData] as List)
+          .map((e) => HeapSample.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -93,15 +92,9 @@ class MemoryTimeline extends Disposable with Serializable {
     Map<String, Object> json, {
     String? customEventName,
   }) {
-    final extensionEvent =
-        customEventName == null
-            ? ExtensionEvent(timestamp, eventKind, json)
-            : ExtensionEvent.custom(
-              timestamp,
-              eventKind,
-              customEventName,
-              json,
-            );
+    final extensionEvent = customEventName == null
+        ? ExtensionEvent(timestamp, eventKind, json)
+        : ExtensionEvent.custom(timestamp, eventKind, customEventName, json);
 
     _extensionEvents.add(extensionEvent);
   }

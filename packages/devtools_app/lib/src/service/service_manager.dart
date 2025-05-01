@@ -36,30 +36,29 @@ const defaultRefreshRate = 60.0;
 
 class ServiceConnectionManager {
   ServiceConnectionManager() {
-    serviceManager =
-        ServiceManager()
-          ..registerLifecycleCallback(
-            ServiceManagerLifecycle.beforeOpenVmService,
-            _beforeOpenVmService,
-          )
-          ..registerLifecycleCallback(
-            ServiceManagerLifecycle.afterOpenVmService,
-            _afterOpenVmService,
-          )
-          ..registerLifecycleCallback(
-            ServiceManagerLifecycle.beforeCloseVmService,
-            _beforeCloseVmService,
-          )
-          ..registerLifecycleCallback(
-            ServiceManagerLifecycle.afterCloseVmService,
-            _afterCloseVmService,
-          )
-          ..registerOverride(
-            ServiceManagerOverride.initIsolates,
-            (service) async => await serviceManager.isolateManager.init(
-              serviceManager.vm?.isolatesForDevToolsMode() ?? <IsolateRef>[],
-            ),
-          );
+    serviceManager = ServiceManager()
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.beforeOpenVmService,
+        _beforeOpenVmService,
+      )
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.afterOpenVmService,
+        _afterOpenVmService,
+      )
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.beforeCloseVmService,
+        _beforeCloseVmService,
+      )
+      ..registerLifecycleCallback(
+        ServiceManagerLifecycle.afterCloseVmService,
+        _afterCloseVmService,
+      )
+      ..registerOverride(
+        ServiceManagerOverride.initIsolates,
+        (service) async => await serviceManager.isolateManager.init(
+          serviceManager.vm?.isolatesForDevToolsMode() ?? <IsolateRef>[],
+        ),
+      );
   }
 
   late final ServiceManager<VmServiceWrapper> serviceManager;
@@ -116,8 +115,8 @@ class ServiceConnectionManager {
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
 
-    _inspectorService =
-        devToolsEnvironmentParameters.inspectorServiceProvider();
+    _inspectorService = devToolsEnvironmentParameters
+        .inspectorServiceProvider();
 
     _appState?.dispose();
     _appState = AppState(serviceManager.isolateManager.selectedIsolate);
@@ -138,10 +137,9 @@ class ServiceConnectionManager {
     // Set [offlineController.previousConnectedApp] in case we need it for
     // viewing data after disconnect. This must be done before resetting the
     // rest of the service manager state.
-    final previousConnectedApp =
-        serviceManager.connectedApp != null
-            ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
-            : null;
+    final previousConnectedApp = serviceManager.connectedApp != null
+        ? OfflineConnectedApp.parse(serviceManager.connectedApp!.toJson())
+        : null;
     offlineDataController.previousConnectedApp = previousConnectedApp;
 
     // This must be called before we close the VM service so that
@@ -193,9 +191,8 @@ class ServiceConnectionManager {
   Future<String> get flutterViewId async {
     final flutterViewListResponse = await serviceManager
         .callServiceExtensionOnMainIsolate(registrations.flutterListViews);
-    final views =
-        (flutterViewListResponse.json!['views'] as List)
-            .cast<Map<String, Object?>>();
+    final views = (flutterViewListResponse.json!['views'] as List)
+        .cast<Map<String, Object?>>();
 
     // Each isolate should only have one FlutterView.
     final flutterView = views.firstWhereOrNull(

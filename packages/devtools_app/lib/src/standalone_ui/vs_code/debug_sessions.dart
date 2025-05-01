@@ -61,33 +61,30 @@ class DebugSessions extends StatelessWidget {
     final isDebug = mode == 'debug';
     final isFlutter = session.debuggerType?.contains('Flutter') ?? false;
 
-    final label =
-        session.flutterMode != null
-            ? '${session.name} (${session.flutterMode})'
-            : session.name;
+    final label = session.flutterMode != null
+        ? '${session.name} (${session.flutterMode})'
+        : session.name;
 
     return TableRow(
       children: [
         Text(label, style: Theme.of(context).regularTextStyle),
         IconButton(
-          onPressed:
-              editor.supportsHotReload && (isDebug || !isFlutter)
-                  ? () {
-                    ga.select(editor.gaId, gac.hotReload);
-                    unawaited(editor.hotReload(session.id));
-                  }
-                  : null,
+          onPressed: editor.supportsHotReload && (isDebug || !isFlutter)
+              ? () {
+                  ga.select(editor.gaId, gac.hotReload);
+                  unawaited(editor.hotReload(session.id));
+                }
+              : null,
           tooltip: 'Hot Reload',
           icon: Icon(hotReloadIcon, size: actionsIconSize),
         ),
         IconButton(
-          onPressed:
-              editor.supportsHotRestart && (isDebug || !isFlutter)
-                  ? () {
-                    ga.select(editor.gaId, gac.hotRestart);
-                    unawaited(editor.hotRestart(session.id));
-                  }
-                  : null,
+          onPressed: editor.supportsHotRestart && (isDebug || !isFlutter)
+              ? () {
+                  ga.select(editor.gaId, gac.hotRestart);
+                  unawaited(editor.hotRestart(session.id));
+                }
+              : null,
           tooltip: 'Hot Restart',
           icon: Icon(hotRestartIcon, size: actionsIconSize),
         ),

@@ -212,28 +212,28 @@ class RequestableSizeWidget extends StatelessWidget {
           final size = sizeProvider();
           return size == null
               ? GaDevToolsButton(
-                icon: Icons.call_made,
-                label: 'Request',
-                outlined: false,
-                gaScreen: gac.vmTools,
-                gaSelection: gac.requestSize,
-                onPressed: requestFunction,
-              )
+                  icon: Icons.call_made,
+                  label: 'Request',
+                  outlined: false,
+                  gaScreen: gac.vmTools,
+                  gaSelection: gac.requestSize,
+                  onPressed: requestFunction,
+                )
               : Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    size.valueAsString == null
-                        ? '--'
-                        : prettyPrintBytes(
-                          int.parse(size.valueAsString!),
-                          includeUnit: true,
-                          maxBytes: 512,
-                        )!,
-                  ),
-                  ToolbarRefresh(onPressed: requestFunction),
-                ],
-              );
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      size.valueAsString == null
+                          ? '--'
+                          : prettyPrintBytes(
+                              int.parse(size.valueAsString!),
+                              includeUnit: true,
+                              maxBytes: 512,
+                            )!,
+                    ),
+                    ToolbarRefresh(onPressed: requestFunction),
+                  ],
+                );
         }
       },
     );
@@ -368,10 +368,9 @@ class RetainingPathWidget extends StatelessWidget {
     return ValueListenableBuilder<RetainingPath?>(
       valueListenable: retainingPath,
       builder: (context, retainingPath, _) {
-        final retainingObjects =
-            retainingPath == null
-                ? const <Widget>[]
-                : _retainingPathList(context, retainingPath);
+        final retainingObjects = retainingPath == null
+            ? const <Widget>[]
+            : _retainingPathList(context, retainingPath);
         return VmExpansionTile(
           title: 'Retaining Path',
           onExpanded: onExpanded,
@@ -379,11 +378,11 @@ class RetainingPathWidget extends StatelessWidget {
             retainingPath == null
                 ? const SizedCircularProgressIndicator()
                 : SizedBox.fromSize(
-                  size: Size.fromHeight(
-                    retainingObjects.length * defaultRowHeight + densePadding,
+                    size: Size.fromHeight(
+                      retainingObjects.length * defaultRowHeight + densePadding,
+                    ),
+                    child: Column(children: retainingObjects),
                   ),
-                  child: Column(children: retainingObjects),
-                ),
           ],
         );
       },
@@ -405,13 +404,12 @@ class RetainingPathWidget extends StatelessWidget {
     final emptyList = Text('No retaining objects', style: theme.fixedFontStyle);
     if (retainingPath.elements == null) return [emptyList];
 
-    final firstRetainingObject =
-        retainingPath.elements!.isNotEmpty
-            ? VmServiceObjectLink(
-              object: retainingPath.elements!.first.value,
-              onTap: onTap,
-            )
-            : emptyList;
+    final firstRetainingObject = retainingPath.elements!.isNotEmpty
+        ? VmServiceObjectLink(
+            object: retainingPath.elements!.first.value,
+            onTap: onTap,
+          )
+        : emptyList;
 
     final retainingObjects = [
       Row(children: [firstRetainingObject]),
@@ -557,11 +555,8 @@ class InboundReferencesTree extends StatelessWidget {
             builder: (context, references, _) {
               return TreeView<InboundReferencesTreeNode>(
                 dataRootsListenable: object.inboundReferencesTree,
-                dataDisplayProvider:
-                    (node, _) => InboundReferenceWidget(
-                      controller: controller,
-                      node: node,
-                    ),
+                dataDisplayProvider: (node, _) =>
+                    InboundReferenceWidget(controller: controller, node: node),
                 emptyTreeViewBuilder: () {
                   return Padding(
                     padding: EdgeInsets.all(defaultRowHeight / 2),
@@ -704,16 +699,15 @@ class VmServiceObjectLink extends StatelessWidget {
     return TextSpan(
       text: text,
       style: style.apply(overflow: TextOverflow.ellipsis),
-      recognizer:
-          isServiceObject
-              ? (TapGestureRecognizer()
-                ..onTap = () async {
-                  final obj = object;
-                  if (obj is ObjRef) {
-                    await onTap(obj);
-                  }
-                })
-              : null,
+      recognizer: isServiceObject
+          ? (TapGestureRecognizer()
+              ..onTap = () async {
+                final obj = object;
+                if (obj is ObjRef) {
+                  await onTap(obj);
+                }
+              })
+          : null,
     );
   }
 
@@ -969,8 +963,9 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
               location.endTokenPos != null) {
             final script = currentParsedScript.script;
             final startLine = location.line!;
-            final endLine =
-                script.getLineNumberFromTokenPos(location.endTokenPos!)!;
+            final endLine = script.getLineNumberFromTokenPos(
+              location.endTokenPos!,
+            )!;
             lineRange = LineRange(startLine, endLine);
           }
         }

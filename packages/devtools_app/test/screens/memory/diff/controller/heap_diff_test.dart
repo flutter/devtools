@@ -56,13 +56,12 @@ void main() {
       created2,
     ], graphAfter);
 
-    final diff =
-        DiffClassData.compare(
-          before: classBefore,
-          dataBefore: await testHeapData(graphBefore),
-          after: classAfter,
-          dataAfter: await testHeapData(graphAfter),
-        )!;
+    final diff = DiffClassData.compare(
+      before: classBefore,
+      dataBefore: await testHeapData(graphBefore),
+      after: classAfter,
+      dataAfter: await testHeapData(graphAfter),
+    )!;
 
     expect(diff.className, className);
     expect(diff.diff.created.instanceCount, 2);
@@ -82,13 +81,12 @@ void main() {
 
     final classBefore = testClassData(className, [deleted], graphBefore);
 
-    final diff =
-        DiffClassData.compare(
-          before: classBefore,
-          dataBefore: await testHeapData(graphBefore),
-          after: null,
-          dataAfter: await testHeapData(),
-        )!;
+    final diff = DiffClassData.compare(
+      before: classBefore,
+      dataBefore: await testHeapData(graphBefore),
+      after: null,
+      dataAfter: await testHeapData(),
+    )!;
 
     expect(diff.className, className);
     expect(diff.diff.created.instanceCount, 0);

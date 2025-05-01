@@ -283,9 +283,8 @@ class _CpuProfilerState extends State<CpuProfiler>
     unawaited(
       showDialog(
         context: context,
-        builder:
-            (context) =>
-                FilterDialog<CpuStackFrame>(controller: widget.controller),
+        builder: (context) =>
+            FilterDialog<CpuStackFrame>(controller: widget.controller),
       ),
     );
   }
@@ -324,10 +323,9 @@ class _CpuProfilerState extends State<CpuProfiler>
     void Function(CpuStackFrame root) callback,
     Tab currentTab,
   ) {
-    final roots =
-        currentTab.key == ProfilerTab.callTree.key
-            ? widget.callTreeRoots
-            : widget.bottomUpRoots;
+    final roots = currentTab.key == ProfilerTab.callTree.key
+        ? widget.callTreeRoots
+        : widget.bottomUpRoots;
     setState(() {
       roots.forEach(callback);
     });
@@ -348,10 +346,9 @@ class CpuProfileStats extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final samplePeriodValid = metadata.samplePeriod > 0;
-    final samplingPeriodDisplay =
-        samplePeriodValid
-            ? const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod
-            : '--';
+    final samplingPeriodDisplay = samplePeriodValid
+        ? const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod
+        : '--';
     return RoundedOutlinedBorder.onlyBottom(
       child: Container(
         height: _statsRowHeight,

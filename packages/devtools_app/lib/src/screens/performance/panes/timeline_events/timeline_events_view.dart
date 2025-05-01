@@ -181,10 +181,9 @@ class RefreshTimelineEventsButton extends StatelessWidget {
         return RefreshButton(
           iconOnly: true,
           outlined: false,
-          onPressed:
-              status == EventsControllerStatus.refreshing
-                  ? null
-                  : controller.forceRefresh,
+          onPressed: status == EventsControllerStatus.refreshing
+              ? null
+              : controller.forceRefresh,
           tooltip: 'Refresh timeline events',
           gaScreen: gac.performance,
           gaSelection: gac.PerformanceEvents.refreshTimelineEvents.name,
@@ -249,7 +248,9 @@ class _TimelineSettingsDialogState extends State<TimelineSettingsDialog>
   List<Widget> _defaultRecordedStreams(ThemeData theme) {
     return [
       ...dialogSubHeader(theme, 'Trace categories'),
-      RichText(text: TextSpan(text: 'Default', style: theme.subtleTextStyle)),
+      RichText(
+        text: TextSpan(text: 'Default', style: theme.subtleTextStyle),
+      ),
       ..._timelineStreams(advanced: false),
       // Special case "Network Traffic" because it is not implemented as a
       // Timeline recorded stream in the VM. The user does not need to be aware of
@@ -258,41 +259,40 @@ class _TimelineSettingsDialogState extends State<TimelineSettingsDialog>
         title: 'Network',
         description: 'Http traffic',
         notifier: _httpLogging,
-        onChanged:
-            (value) => unawaited(
-              http_service.toggleHttpRequestLogging(value ?? false),
-            ),
+        onChanged: (value) =>
+            unawaited(http_service.toggleHttpRequestLogging(value ?? false)),
       ),
     ];
   }
 
   List<Widget> _advancedStreams(ThemeData theme) {
     return [
-      RichText(text: TextSpan(text: 'Advanced', style: theme.subtleTextStyle)),
+      RichText(
+        text: TextSpan(text: 'Advanced', style: theme.subtleTextStyle),
+      ),
       ..._timelineStreams(advanced: true),
     ];
   }
 
   List<Widget> _timelineStreams({required bool advanced}) {
-    final streams =
-        advanced
-            ? serviceConnection.timelineStreamManager.advancedStreams
-            : serviceConnection.timelineStreamManager.basicStreams;
-    final settings =
-        streams
-            .map(
-              (stream) => CheckboxSetting(
-                title: stream.name,
-                description: stream.description,
-                notifier: stream.recorded as ValueNotifier<bool?>,
-                onChanged:
-                    (newValue) => unawaited(
-                      serviceConnection.timelineStreamManager
-                          .updateTimelineStream(stream, newValue ?? false),
-                    ),
+    final streams = advanced
+        ? serviceConnection.timelineStreamManager.advancedStreams
+        : serviceConnection.timelineStreamManager.basicStreams;
+    final settings = streams
+        .map(
+          (stream) => CheckboxSetting(
+            title: stream.name,
+            description: stream.description,
+            notifier: stream.recorded as ValueNotifier<bool?>,
+            onChanged: (newValue) => unawaited(
+              serviceConnection.timelineStreamManager.updateTimelineStream(
+                stream,
+                newValue ?? false,
               ),
-            )
-            .toList();
+            ),
+          ),
+        )
+        .toList();
     return settings;
   }
 }

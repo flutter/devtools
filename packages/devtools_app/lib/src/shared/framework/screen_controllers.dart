@@ -56,10 +56,9 @@ class ScreenControllers {
   /// When DevTools is showing offline data, the offline screen controller will
   /// be returned.
   T lookup<T>() {
-    final controllers =
-        offlineDataController.showingOfflineData.value
-            ? offlineControllers
-            : this.controllers;
+    final controllers = offlineDataController.showingOfflineData.value
+        ? offlineControllers
+        : this.controllers;
     assert(controllers.containsKey(T));
     return controllers[T]!.controller as T;
   }
@@ -94,10 +93,9 @@ class ScreenControllers {
     void Function(DevToolsScreenController screenController) callback, {
     bool includeOfflineControllers = false,
   }) {
-    final controllers =
-        includeOfflineControllers
-            ? [...this.controllers.values, ...offlineControllers.values]
-            : this.controllers.values;
+    final controllers = includeOfflineControllers
+        ? [...this.controllers.values, ...offlineControllers.values]
+        : this.controllers.values;
     for (final lazyController in controllers) {
       if (lazyController.initialized) {
         callback(lazyController.controller);
@@ -115,10 +113,9 @@ class ScreenControllers {
     callback, {
     bool includeOfflineControllers = false,
   }) async {
-    final controllers =
-        includeOfflineControllers
-            ? [...this.controllers.values, ...offlineControllers.values]
-            : this.controllers.values;
+    final controllers = includeOfflineControllers
+        ? [...this.controllers.values, ...offlineControllers.values]
+        : this.controllers.values;
 
     Future<void> helper(
       FutureOr<void> Function(DevToolsScreenController) futureOr,

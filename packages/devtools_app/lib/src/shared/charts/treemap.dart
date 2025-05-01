@@ -234,15 +234,13 @@ class _TreemapState extends State<Treemap> {
         final pivotAndList2Ratio = (pivotByteSize + list2Size) / totalByteSize;
         final pivotRatio = pivotByteSize / (pivotByteSize + list2Size);
 
-        final pivotWidth =
-            isHorizontalRectangle
-                ? pivotAndList2Ratio * width
-                : pivotRatio * width;
+        final pivotWidth = isHorizontalRectangle
+            ? pivotAndList2Ratio * width
+            : pivotRatio * width;
 
-        final pivotHeight =
-            isHorizontalRectangle
-                ? pivotRatio * height
-                : pivotAndList2Ratio * height;
+        final pivotHeight = isHorizontalRectangle
+            ? pivotRatio * height
+            : pivotAndList2Ratio * height;
 
         final pivotAspectRatio = pivotWidth / pivotHeight;
 
@@ -269,14 +267,12 @@ class _TreemapState extends State<Treemap> {
       final pivotAndList2Ratio =
           (pivotByteSize + list2ByteSize) / totalByteSize;
       final pivotRatio = pivotByteSize / (pivotByteSize + list2ByteSize);
-      pivotBestWidth =
-          isHorizontalRectangle
-              ? pivotAndList2Ratio * width
-              : pivotRatio * width;
-      pivotBestHeight =
-          isHorizontalRectangle
-              ? pivotRatio * height
-              : pivotAndList2Ratio * height;
+      pivotBestWidth = isHorizontalRectangle
+          ? pivotAndList2Ratio * width
+          : pivotRatio * width;
+      pivotBestHeight = isHorizontalRectangle
+          ? pivotRatio * height
+          : pivotAndList2Ratio * height;
     }
 
     final positionedTreemaps = <PositionedCell>[];
@@ -284,8 +280,9 @@ class _TreemapState extends State<Treemap> {
     // Construct list 1 sub-treemap.
     final list1SizeRatio = list1ByteSize / totalByteSize;
     final list1Width = isHorizontalRectangle ? width * list1SizeRatio : width;
-    final list1Height =
-        isHorizontalRectangle ? height : height * list1SizeRatio;
+    final list1Height = isHorizontalRectangle
+        ? height
+        : height * list1SizeRatio;
     if (list1.isNotEmpty) {
       positionedTreemaps.addAll(
         buildTreemaps(
@@ -299,10 +296,12 @@ class _TreemapState extends State<Treemap> {
     }
 
     // Construct list 2 sub-treemap.
-    final list2Width =
-        isHorizontalRectangle ? pivotBestWidth : width - pivotBestWidth;
-    final list2Height =
-        isHorizontalRectangle ? height - pivotBestHeight : pivotBestHeight;
+    final list2Width = isHorizontalRectangle
+        ? pivotBestWidth
+        : width - pivotBestWidth;
+    final list2Height = isHorizontalRectangle
+        ? height - pivotBestHeight
+        : pivotBestHeight;
     final list2XCoord = isHorizontalRectangle ? list1Width : 0.0;
     final list2YCoord = isHorizontalRectangle ? pivotBestHeight : list1Height;
     if (list2.isNotEmpty) {
@@ -344,10 +343,12 @@ class _TreemapState extends State<Treemap> {
     final list3Ratio = list3ByteSize / totalByteSize;
     final list3Width = isHorizontalRectangle ? list3Ratio * width : width;
     final list3Height = isHorizontalRectangle ? height : list3Ratio * height;
-    final list3XCoord =
-        isHorizontalRectangle ? list1Width + pivotBestWidth : 0.0;
-    final list3YCoord =
-        isHorizontalRectangle ? 0.0 : list1Height + pivotBestHeight;
+    final list3XCoord = isHorizontalRectangle
+        ? list1Width + pivotBestWidth
+        : 0.0;
+    final list3YCoord = isHorizontalRectangle
+        ? 0.0
+        : list1Height + pivotBestHeight;
 
     if (list3.isNotEmpty) {
       positionedTreemaps.addAll(
@@ -489,14 +490,13 @@ class _TreemapState extends State<Treemap> {
             onRootChangedCallback: widget.onRootChangedCallback,
           ),
         Expanded(
-          child:
-              widget.isOutermostLevel
-                  ? child
-                  : _SelectableTreemapNode(
-                    node: rootNode,
-                    onRootChangedCallback: widget.onRootChangedCallback,
-                    child: child,
-                  ),
+          child: widget.isOutermostLevel
+              ? child
+              : _SelectableTreemapNode(
+                  node: rootNode,
+                  onRootChangedCallback: widget.onRootChangedCallback,
+                  child: child,
+                ),
         ),
       ],
     );
@@ -537,14 +537,13 @@ class _TreeMapCell extends StatelessWidget {
         border: Border.all(color: Colors.black87),
       ),
       child: Center(
-        child:
-            treeMapHeight > Treemap.minHeightToDisplayCellText
-                ? _NameAndSizeText(
-                  node: node,
-                  color: node.showDiff ? Colors.white : Colors.black,
-                  singleLine: false,
-                )
-                : const SizedBox(),
+        child: treeMapHeight > Treemap.minHeightToDisplayCellText
+            ? _NameAndSizeText(
+                node: node,
+                color: node.showDiff ? Colors.white : Colors.black,
+                singleLine: false,
+              )
+            : const SizedBox(),
       ),
     );
   }
@@ -631,10 +630,9 @@ class _BreadcrumbNavigator extends StatelessWidget {
         builder: (context, index) {
           final node = pathFromRoot[index];
           return Breadcrumb(
-            text:
-                index < pathFromRoot.length - 1
-                    ? node.name
-                    : node.displayText(),
+            text: index < pathFromRoot.length - 1
+                ? node.name
+                : node.displayText(),
             isRoot: index == 0,
             onPressed: () => onRootChangedCallback(node),
           );
@@ -870,10 +868,9 @@ class MultiCellPainter extends CustomPainter {
     rectPaint.color = node.displayColor;
     canvas.drawRect(bounds, rectPaint);
 
-    final borderPaint =
-        Paint()
-          ..color = Colors.black45
-          ..style = PaintingStyle.stroke;
+    final borderPaint = Paint()
+      ..color = Colors.black45
+      ..style = PaintingStyle.stroke;
     canvas.drawRect(bounds, borderPaint);
 
     if (positionedCell.width! > Treemap.minWidthToDisplayCellText &&

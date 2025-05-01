@@ -57,8 +57,10 @@ class ToggleableServiceExtensionDescription<T extends Object>
     this.iconAsset,
     this.iconData,
     this.shortTitle,
-  }) : displayValues =
-           [enabledValue, disabledValue].map((v) => v.toString()).toList(),
+  }) : displayValues = [
+         enabledValue,
+         disabledValue,
+       ].map((v) => v.toString()).toList(),
        assert((iconAsset == null) != (iconData == null)),
        assert((documentationUrl == null) == (gaDocsItem == null));
 
@@ -295,9 +297,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   gaDocsItem: gac.PerformanceDocs.trackWidgetBuildsDocs.name,
 );
 
-final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<
-  bool
->.from(
+final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileUserWidgetBuilds,
   title: 'Trace user-created widget builds',
   iconAsset: 'icons/trackwidget-white.png',
@@ -409,9 +409,7 @@ option disabled, try to reduce the use of opacity effects in your app.''',
   gaDocsItem: gac.PerformanceDocs.disableOpacityLayersDocs.name,
 );
 
-final disablePhysicalShapeLayers = ToggleableServiceExtensionDescription<
-  bool
->.from(
+final disablePhysicalShapeLayers = ToggleableServiceExtensionDescription<bool>.from(
   extensions.disablePhysicalShapeLayers,
   title: 'Render Physical Shape layers',
   iconData: Icons.format_shapes,
@@ -438,20 +436,19 @@ final httpEnableTimelineLogging =
     );
 
 // Legacy extension to show the inspector and enable inspector select mode.
-final toggleOnDeviceWidgetInspector = ToggleableServiceExtensionDescription<
-  bool
->.from(
-  extensions.toggleOnDeviceWidgetInspector,
-  // Technically this enables the on-device widget inspector but for older
-  // versions of package:flutter it makes sense to describe this extension as
-  // toggling widget select mode as it is the only way to toggle that mode.
-  title: 'Select Widget Mode',
-  shortTitle: 'Select',
-  iconAsset: 'icons/widget-select-white.png',
-  gaScreenName: gac.inspector,
-  gaItem: gac.showOnDeviceInspector,
-  tooltip: 'Toggle select widget mode',
-);
+final toggleOnDeviceWidgetInspector =
+    ToggleableServiceExtensionDescription<bool>.from(
+      extensions.toggleOnDeviceWidgetInspector,
+      // Technically this enables the on-device widget inspector but for older
+      // versions of package:flutter it makes sense to describe this extension as
+      // toggling widget select mode as it is the only way to toggle that mode.
+      title: 'Select Widget Mode',
+      shortTitle: 'Select',
+      iconAsset: 'icons/widget-select-white.png',
+      gaScreenName: gac.inspector,
+      gaItem: gac.showOnDeviceInspector,
+      tooltip: 'Toggle select widget mode',
+    );
 
 // TODO(kenz): remove this if it is not needed. According to the comments,
 // [toggleOnDeviceWidgetInspector] should be the legacy extension, but that is
@@ -509,9 +506,7 @@ summary of these counts using the Rebuild Stats tool.''',
   // TODO(https://github.com/flutter/website/issues/10666): link docs
 );
 
-final profilePlatformChannels = ToggleableServiceExtensionDescription<
-  bool
->.from(
+final profilePlatformChannels = ToggleableServiceExtensionDescription<bool>.from(
   extensions.profilePlatformChannels,
   title: 'Trace platform channels',
   iconAsset: 'icons/trackwidget-white.png',

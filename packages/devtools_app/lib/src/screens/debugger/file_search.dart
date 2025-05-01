@@ -92,10 +92,9 @@ class FileSearchFieldState extends State<FileSearchField>
 
     // If the current query is a continuation of the previous query, then
     // filter down the previous matches. Otherwise search through all scripts:
-    final scripts =
-        currentQuery.startsWith(previousQuery)
-            ? _searchResults.scriptRefs
-            : scriptManager.sortedScripts.value;
+    final scripts = currentQuery.startsWith(previousQuery)
+        ? _searchResults.scriptRefs
+        : scriptManager.sortedScripts.value;
 
     final searchResults = _createSearchResults(currentQuery, scripts);
     if (searchResults.scriptRefs.isEmpty) {
@@ -192,13 +191,12 @@ class FileQuery {
 
     final fileName = _fileName(scriptUri);
     final fileNameIndex = scriptUri.lastIndexOf(fileName);
-    final matchedSegments =
-        _findExactSegments(fileName)
-            .map(
-              (range) =>
-                  Range(range.begin + fileNameIndex, range.end + fileNameIndex),
-            )
-            .toList();
+    final matchedSegments = _findExactSegments(fileName)
+        .map(
+          (range) =>
+              Range(range.begin + fileNameIndex, range.end + fileNameIndex),
+        )
+        .toList();
     return AutoCompleteMatch(scriptUri, matchedSegments: matchedSegments);
   }
 
@@ -245,15 +243,12 @@ class FileQuery {
     } else {
       final fileName = _fileName(scriptUri);
       final fileNameIndex = scriptUri.lastIndexOf(fileName);
-      matchedSegments =
-          _findFuzzySegments(fileName, query)
-              .map(
-                (range) => Range(
-                  range.begin + fileNameIndex,
-                  range.end + fileNameIndex,
-                ),
-              )
-              .toList();
+      matchedSegments = _findFuzzySegments(fileName, query)
+          .map(
+            (range) =>
+                Range(range.begin + fileNameIndex, range.end + fileNameIndex),
+          )
+          .toList();
     }
 
     return AutoCompleteMatch(scriptUri, matchedSegments: matchedSegments);
@@ -350,27 +345,21 @@ class FileSearchResults {
 
   FileSearchResults get topMatches => _buildTopMatches();
 
-  List<ScriptRef> get scriptRefs =>
-      query.isEmpty
-          ? allScripts
-          : [
-            ..._exactFileNameMatches,
-            ..._exactFullPathMatches,
-            ..._fuzzyMatches,
-          ];
+  List<ScriptRef> get scriptRefs => query.isEmpty
+      ? allScripts
+      : [..._exactFileNameMatches, ..._exactFullPathMatches, ..._fuzzyMatches];
 
-  List<AutoCompleteMatch> get autoCompleteMatches =>
-      query.isEmpty
-          ? allScripts.map((script) => AutoCompleteMatch(script.uri!)).toList()
-          : [
-            ..._exactFileNameMatches.map(
-              query.createExactFileNameAutoCompleteMatch,
-            ),
-            ..._exactFullPathMatches.map(
-              query.createExactFullPathAutoCompleteMatch,
-            ),
-            ..._fuzzyMatches.map(query.createFuzzyMatchAutoCompleteMatch),
-          ];
+  List<AutoCompleteMatch> get autoCompleteMatches => query.isEmpty
+      ? allScripts.map((script) => AutoCompleteMatch(script.uri!)).toList()
+      : [
+          ..._exactFileNameMatches.map(
+            query.createExactFileNameAutoCompleteMatch,
+          ),
+          ..._exactFullPathMatches.map(
+            query.createExactFullPathAutoCompleteMatch,
+          ),
+          ..._fuzzyMatches.map(query.createFuzzyMatchAutoCompleteMatch),
+        ];
 
   FileSearchResults copyWith({
     List<ScriptRef>? allScripts,

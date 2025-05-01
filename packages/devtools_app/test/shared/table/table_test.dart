@@ -1152,27 +1152,25 @@ void main() {
     setUp(() {
       treeColumn = _NameColumn();
       _NumberColumn();
-      tree1 =
-          TestData('Foo', 0)
+      tree1 = TestData('Foo', 0)
+        ..children.addAll([
+          TestData('Bar', 1)
             ..children.addAll([
-              TestData('Bar', 1)
-                ..children.addAll([
-                  TestData('Baz', 2),
-                  TestData('Qux', 3),
-                  TestData('Snap', 4),
-                  TestData('Crackle', 5),
-                  TestData('Pop', 5),
-                ]),
-              TestData('Baz', 7),
-              TestData('Qux', 6),
-            ])
-            ..expandCascading();
-      tree2 =
-          TestData('Foo_2', 0)
-            ..children.add(
-              TestData('Bar_2', 1)..children.add(TestData('Snap_2', 2)),
-            )
-            ..expandCascading();
+              TestData('Baz', 2),
+              TestData('Qux', 3),
+              TestData('Snap', 4),
+              TestData('Crackle', 5),
+              TestData('Pop', 5),
+            ]),
+          TestData('Baz', 7),
+          TestData('Qux', 6),
+        ])
+        ..expandCascading();
+      tree2 = TestData('Foo_2', 0)
+        ..children.add(
+          TestData('Bar_2', 1)..children.add(TestData('Snap_2', 2)),
+        )
+        ..expandCascading();
     });
 
     testWidgets('displays with simple content', (WidgetTester tester) async {
@@ -1574,18 +1572,17 @@ void main() {
     testWidgets('properly colors rows with alternating colors', (
       WidgetTester tester,
     ) async {
-      final data =
-          TestData('Foo', 0)
+      final data = TestData('Foo', 0)
+        ..children.addAll([
+          TestData('Bar', 1)
             ..children.addAll([
-              TestData('Bar', 1)
-                ..children.addAll([
-                  TestData('Baz', 2),
-                  TestData('Qux', 3),
-                  TestData('Snap', 4),
-                ]),
-              TestData('Crackle', 5),
-            ])
-            ..expandCascading();
+              TestData('Baz', 2),
+              TestData('Qux', 3),
+              TestData('Snap', 4),
+            ]),
+          TestData('Crackle', 5),
+        ])
+        ..expandCascading();
       final table = TreeTable<TestData>(
         columns: [_NumberColumn(), treeColumn],
         dataRoots: [data],

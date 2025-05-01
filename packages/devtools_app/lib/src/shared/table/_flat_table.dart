@@ -36,12 +36,11 @@ class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable<T> {
   }) : super(
          searchMatchesNotifier: searchController.searchMatches,
          activeSearchMatchNotifier: searchController.activeSearchMatch,
-         onDataSorted:
-             () => WidgetsBinding.instance.addPostFrameCallback((_) {
-               // This needs to be in a post frame callback so that the search
-               // matches are not updated in the middle of a table build.
-               searchController.refreshSearchMatches();
-             }),
+         onDataSorted: () => WidgetsBinding.instance.addPostFrameCallback((_) {
+           // This needs to be in a post frame callback so that the search
+           // matches are not updated in the middle of a table build.
+           searchController.refreshSearchMatches();
+         }),
        );
 }
 
@@ -308,12 +307,9 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
-        builder:
-            (context, constraints) => buildTable(
-              tableController.computeColumnWidthsSizeToFit(
-                constraints.maxWidth,
-              ),
-            ),
+        builder: (context, constraints) => buildTable(
+          tableController.computeColumnWidthsSizeToFit(constraints.maxWidth),
+        ),
       );
     }
     return buildTable(tableController.columnWidths!);

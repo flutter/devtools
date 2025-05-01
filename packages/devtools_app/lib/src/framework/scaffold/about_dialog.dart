@@ -34,10 +34,8 @@ class DevToolsAboutDialog extends StatelessWidget {
               const Text(' - '),
               InkWell(
                 child: Text('release notes', style: theme.linkTextStyle),
-                onTap:
-                    () => unawaited(
-                      releaseNotesController.openLatestReleaseNotes(),
-                    ),
+                onTap: () =>
+                    unawaited(releaseNotesController.openLatestReleaseNotes()),
               ),
             ],
           ),
@@ -135,10 +133,9 @@ class OpenAboutAction extends ScaffoldAction {
           unawaited(
             showDialog(
               context: context,
-              builder:
-                  (context) => DevToolsAboutDialog(
-                    Provider.of<ReleaseNotesController>(context),
-                  ),
+              builder: (context) => DevToolsAboutDialog(
+                Provider.of<ReleaseNotesController>(context),
+              ),
             ),
           );
         },

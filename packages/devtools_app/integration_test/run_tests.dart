@@ -55,8 +55,8 @@ void main(List<String> args) async {
     testRunnerArgs: testRunnerArgs,
     runTest: _runTest,
     newArgsGenerator: (args) => DevToolsAppTestRunnerArgs(args),
-    testIsSupported:
-        (testFile) => testRunnerArgs.testAppDevice.supportsTest(testFile.path),
+    testIsSupported: (testFile) =>
+        testRunnerArgs.testAppDevice.supportsTest(testFile.path),
     debugLogging: debugTestScript,
   );
 }

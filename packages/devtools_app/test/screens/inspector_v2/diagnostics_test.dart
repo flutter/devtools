@@ -203,15 +203,14 @@ void main() {
 
         final diagnosticsNodeFind = find.byType(DiagnosticsNodeDescription);
         // The icon is part of the clickable width, so we include it.
-        final measuredIconWidth =
-            tester
-                .getSize(
-                  find.descendant(
-                    of: diagnosticsNodeFind,
-                    matching: find.byType(AssetImageIcon),
-                  ),
-                )
-                .width;
+        final measuredIconWidth = tester
+            .getSize(
+              find.descendant(
+                of: diagnosticsNodeFind,
+                matching: find.byType(AssetImageIcon),
+              ),
+            )
+            .width;
 
         // There is only one rich text widget, containing the description.
         final richTextWidget =

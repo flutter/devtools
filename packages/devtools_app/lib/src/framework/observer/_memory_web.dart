@@ -27,8 +27,8 @@ extension on Performance {
 
   Future<_UserAgentSpecificMemory>? measureUserAgentSpecificMemory() =>
       has('measureUserAgentSpecificMemory')
-          ? _measureUserAgentSpecificMemory().toDart
-          : null;
+      ? _measureUserAgentSpecificMemory().toDart
+      : null;
 }
 
 @JS()

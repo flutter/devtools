@@ -206,8 +206,8 @@ void main() {
         'custom pub root directories are cached across multiple connections',
         () async {
           var directories = controller.pubRootDirectories.value;
-          var cachedDirectories =
-              await controller.readCachedPubRootDirectories();
+          var cachedDirectories = await controller
+              .readCachedPubRootDirectories();
 
           expect(directories, containsAll(customPubRootDirectories));
           expect(cachedDirectories, containsAll(customPubRootDirectories));
@@ -228,8 +228,8 @@ void main() {
             'test_dir/fake_app/custom_dir3',
           ], shouldCache: true);
 
-          final cachedDirectories =
-              await controller.readCachedPubRootDirectories();
+          final cachedDirectories = await controller
+              .readCachedPubRootDirectories();
 
           expect(
             cachedDirectories,
@@ -246,8 +246,8 @@ void main() {
         () async {
           const notRemoved = 'test_dir/fake_app/custom_dir1';
           const removed = 'test_dir/fake_app/custom_dir2';
-          var cachedDirectories =
-              await controller.readCachedPubRootDirectories();
+          var cachedDirectories = await controller
+              .readCachedPubRootDirectories();
 
           expect(cachedDirectories, containsAll([notRemoved, removed]));
 
@@ -266,8 +266,8 @@ void main() {
       });
 
       test('does not save inferred directory to local cache', () async {
-        final cachedDirectories =
-            await controller.readCachedPubRootDirectories();
+        final cachedDirectories = await controller
+            .readCachedPubRootDirectories();
 
         expect(cachedDirectories, isNot(contains('test_dir/fake_app/')));
       });
@@ -278,8 +278,8 @@ void main() {
           await controller.addPubRootDirectories([
             'test_dir/fake_app/do_not_cache_dir',
           ]);
-          final cachedDirectories =
-              await controller.readCachedPubRootDirectories();
+          final cachedDirectories = await controller
+              .readCachedPubRootDirectories();
 
           expect(
             cachedDirectories,

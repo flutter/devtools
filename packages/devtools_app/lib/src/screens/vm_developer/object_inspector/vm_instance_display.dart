@@ -180,12 +180,11 @@ class DisplayProvider extends StatelessWidget {
         SelectableText.rich(
           TextSpan(
             text: hasName ? variable.name : null,
-            style:
-                variable.artificialName
-                    ? theme.subtleFixedFontStyle
-                    : theme.fixedFontStyle.apply(
-                      color: theme.colorScheme.controlFlowSyntaxColor,
-                    ),
+            style: variable.artificialName
+                ? theme.subtleFixedFontStyle
+                : theme.fixedFontStyle.apply(
+                    color: theme.colorScheme.controlFlowSyntaxColor,
+                  ),
             children: [
               if (hasName) TextSpan(text: ': ', style: theme.fixedFontStyle),
               if (variable.ref!.value is Sentinel)

@@ -128,9 +128,9 @@ abstract class InspectorServiceBase extends DisposableController
     return useDaemonApi
         ? await invokeServiceMethodDaemonNoGroupArgs(methodName) == true
         : (await invokeServiceMethodObservatoryNoGroup(
-              methodName,
-            ))?.valueAsString ==
-            'true';
+                methodName,
+              ))?.valueAsString ==
+              'true';
   }
 
   Future<Object?> invokeServiceMethodDaemonNoGroupArgs(
@@ -338,8 +338,10 @@ class InspectorService extends InspectorServiceBase {
       // here.
       assert(!directory.startsWith('package:'));
 
-      final parts =
-          directory.split('/').where((element) => element.isNotEmpty).toList();
+      final parts = directory
+          .split('/')
+          .where((element) => element.isNotEmpty)
+          .toList();
       final libIndex = parts.lastIndexOf('lib');
       final path = libIndex > 0 ? parts.sublist(0, libIndex) : parts;
       // Special case handling of bazel packages.
@@ -500,13 +502,12 @@ abstract class InspectorObjectGroupBase
   @override
   Future<void> dispose() {
     // No need to dispose the group if the isolate is already gone.
-    final disposeComplete =
-        inspectorService.isolateRef != null
-            ? invokeVoidServiceMethod(
-              WidgetInspectorServiceExtensions.disposeGroup.name,
-              groupName,
-            )
-            : Future<void>.value();
+    final disposeComplete = inspectorService.isolateRef != null
+        ? invokeVoidServiceMethod(
+            WidgetInspectorServiceExtensions.disposeGroup.name,
+            groupName,
+          )
+        : Future<void>.value();
     disposed = true;
     return disposeComplete;
   }
@@ -518,11 +519,11 @@ abstract class InspectorObjectGroupBase
     if (disposed) return null;
     return useDaemonApi
         ? parseDiagnosticsNodeDaemon(
-          invokeServiceMethodDaemonInspectorRef(methodName, ref),
-        )
+            invokeServiceMethodDaemonInspectorRef(methodName, ref),
+          )
         : parseDiagnosticsNodeObservatory(
-          invokeServiceMethodObservatoryInspectorRef(methodName, ref),
-        );
+            invokeServiceMethodObservatoryInspectorRef(methodName, ref),
+          );
   }
 
   Future<RemoteDiagnosticsNode?> invokeServiceMethodWithArgReturningNode(
@@ -532,11 +533,11 @@ abstract class InspectorObjectGroupBase
     if (disposed) return null;
     return useDaemonApi
         ? parseDiagnosticsNodeDaemon(
-          invokeServiceMethodDaemonArg(methodName, arg, groupName),
-        )
+            invokeServiceMethodDaemonArg(methodName, arg, groupName),
+          )
         : parseDiagnosticsNodeObservatory(
-          invokeServiceMethodObservatoryWithGroupName1(methodName, arg),
-        );
+            invokeServiceMethodObservatoryWithGroupName1(methodName, arg),
+          );
   }
 
   Future<Object?> invokeServiceMethodDaemonArg(
@@ -853,15 +854,15 @@ abstract class InspectorObjectGroupBase
     if (disposed) return const [];
     return useDaemonApi
         ? parseDiagnosticsNodesDaemon(
-          invokeServiceMethodDaemonInspectorRef(methodName, instanceRef),
-          parent,
-          isProperty,
-        )
+            invokeServiceMethodDaemonInspectorRef(methodName, instanceRef),
+            parent,
+            isProperty,
+          )
         : parseDiagnosticsNodesObservatory(
-          invokeServiceMethodObservatoryInspectorRef(methodName, instanceRef),
-          parent,
-          isProperty,
-        );
+            invokeServiceMethodObservatoryInspectorRef(methodName, instanceRef),
+            parent,
+            isProperty,
+          );
   }
 
   /// Evaluate an expression where `object` references the `inspectorRef` or
@@ -1061,19 +1062,19 @@ class ObjectGroup extends InspectorObjectGroupBase {
     }
     return useDaemonApi
         ? handleSetSelectionDaemon(
-          invokeServiceMethodDaemonInspectorRef(
-            WidgetInspectorServiceExtensions.setSelectionById.name,
-            selection,
-          ),
-          uiAlreadyUpdated,
-        )
+            invokeServiceMethodDaemonInspectorRef(
+              WidgetInspectorServiceExtensions.setSelectionById.name,
+              selection,
+            ),
+            uiAlreadyUpdated,
+          )
         : handleSetSelectionObservatory(
-          invokeServiceMethodObservatoryInspectorRef(
-            WidgetInspectorServiceExtensions.setSelectionById.name,
-            selection,
-          ),
-          uiAlreadyUpdated,
-        );
+            invokeServiceMethodObservatoryInspectorRef(
+              WidgetInspectorServiceExtensions.setSelectionById.name,
+              selection,
+            ),
+            uiAlreadyUpdated,
+          );
   }
 
   Future<bool> setSelection(GenericInstanceRef selection) async {

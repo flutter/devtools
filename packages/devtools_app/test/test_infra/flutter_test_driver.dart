@@ -56,8 +56,9 @@ abstract class FlutterTestDriver {
 
   String _debugPrint(String msg) {
     const maxLength = 500;
-    final truncatedMsg =
-        msg.length > maxLength ? '${msg.substring(0, maxLength)}...' : msg;
+    final truncatedMsg = msg.length > maxLength
+        ? '${msg.substring(0, maxLength)}...'
+        : msg;
     _allMessages.add(truncatedMsg);
     if (_printDebugOutputToStdOut) {
       print('$_logPrefix$truncatedMsg');
@@ -223,10 +224,9 @@ abstract class FlutterTestDriver {
     return _timeoutWithMessages<Map<String, dynamic>>(
       () => response.future,
       timeout: timeout,
-      message:
-          event != null
-              ? 'Did not receive expected $event event.'
-              : 'Did not receive response to request "$id".',
+      message: event != null
+          ? 'Did not receive expected $event event.'
+          : 'Did not receive response to request "$id".',
     ).whenComplete(() => sub.cancel());
   }
 

@@ -133,46 +133,38 @@ void main() {
           ExtensionEnabledState.none,
         );
 
-        final barSetting =
-            tester
-                .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
-                .where(
-                  (setting) =>
-                      setting.extension.name.caseInsensitiveEquals('bar'),
-                )
-                .first;
-        final bazSetting =
-            tester
-                .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
-                .where(
-                  (setting) =>
-                      setting.extension.name.caseInsensitiveEquals('baz'),
-                )
-                .first;
-        final fooSetting =
-            tester
-                .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
-                .where(
-                  (setting) =>
-                      setting.extension.name.caseInsensitiveEquals('foo'),
-                )
-                .first;
-        final providerSetting =
-            tester
-                .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
-                .where(
-                  (setting) =>
-                      setting.extension.name.caseInsensitiveEquals('provider'),
-                )
-                .first;
-        final someToolSetting =
-            tester
-                .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
-                .where(
-                  (setting) =>
-                      setting.extension.name.caseInsensitiveEquals('some_tool'),
-                )
-                .first;
+        final barSetting = tester
+            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+            .where(
+              (setting) => setting.extension.name.caseInsensitiveEquals('bar'),
+            )
+            .first;
+        final bazSetting = tester
+            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+            .where(
+              (setting) => setting.extension.name.caseInsensitiveEquals('baz'),
+            )
+            .first;
+        final fooSetting = tester
+            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+            .where(
+              (setting) => setting.extension.name.caseInsensitiveEquals('foo'),
+            )
+            .first;
+        final providerSetting = tester
+            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+            .where(
+              (setting) =>
+                  setting.extension.name.caseInsensitiveEquals('provider'),
+            )
+            .first;
+        final someToolSetting = tester
+            .widgetList<ExtensionSetting>(find.byType(ExtensionSetting))
+            .where(
+              (setting) =>
+                  setting.extension.name.caseInsensitiveEquals('some_tool'),
+            )
+            .first;
 
         // Disable the 'bar' extension.
         await tester.tap(

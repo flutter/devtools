@@ -37,8 +37,9 @@ class HeapSnapshotGraphEncodeDecode extends EncodeDecode<HeapSnapshotGraph> {
     if (value is HeapSnapshotGraph) return value;
     if (value is String) value = jsonDecode(value);
     value = value as List;
-    final chunks =
-        value.map((s) => ByteDataEncodeDecode.instance.decode(s)).toList();
+    final chunks = value
+        .map((s) => ByteDataEncodeDecode.instance.decode(s))
+        .toList();
     return HeapSnapshotGraph.fromChunks(chunks);
   }
 }
@@ -124,8 +125,8 @@ class ClassRefEncodeDecode extends EncodeDecode<ClassRef> {
 Object? toEncodable(Object? value) {
   return switch (value) {
     null => null,
-    final HeapSnapshotGraph value => HeapSnapshotGraphEncodeDecode.instance
-        .toEncodable(value),
+    final HeapSnapshotGraph value =>
+      HeapSnapshotGraphEncodeDecode.instance.toEncodable(value),
     final ByteData value => ByteDataEncodeDecode.instance.toEncodable(value),
     final DateTime value => DateTimeEncodeDecode.instance.toEncodable(value),
     final IsolateRef value => IsolateRefEncodeDecode.instance.toEncodable(

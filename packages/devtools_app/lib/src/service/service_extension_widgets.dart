@@ -166,10 +166,9 @@ class _ServiceExtensionButtonGroupState
               .setServiceExtensionState(
                 extensionState.description.extension,
                 enabled: !wasSelected,
-                value:
-                    wasSelected
-                        ? extensionState.description.disabledValue
-                        : extensionState.description.enabledValue,
+                value: wasSelected
+                    ? extensionState.description.disabledValue
+                    : extensionState.description.enabledValue,
               ),
         );
       });
@@ -205,8 +204,8 @@ class ServiceExtensionButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(
           horizontal:
               isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)
-                  ? defaultSpacing
-                  : 0.0,
+              ? defaultSpacing
+              : 0.0,
         ),
         child: ImageIconLabel(
           ServiceExtensionIcon(extensionState: extensionState),
@@ -239,14 +238,14 @@ class HotReloadButton extends StatelessWidget {
         // reload directly on the VM service (e.g. for Dart CLI apps).
         ? _HotReloadScaffoldAction()
         : DevToolsTooltip(
-          message: _hotReloadTooltip,
-          child: _RegisteredServiceExtensionButton._(
-            serviceDescription: hotReload,
-            action: _callHotReload,
-            completedText: 'Hot reload completed.',
-            describeError: (error) => 'Unable to hot reload the app: $error',
-          ),
-        );
+            message: _hotReloadTooltip,
+            child: _RegisteredServiceExtensionButton._(
+              serviceDescription: hotReload,
+              action: _callHotReload,
+              completedText: 'Hot reload completed.',
+              describeError: (error) => 'Unable to hot reload the app: $error',
+            ),
+          );
   }
 }
 
@@ -368,17 +367,16 @@ class _RegisteredServiceExtensionButtonState
     if (_hidden) return const SizedBox.shrink();
 
     return InkWell(
-      onTap:
-          () => unawaited(
-            invokeAndCatchErrors(() async {
-              final gaScreenName = widget.serviceDescription.gaScreenName;
-              final gaItem = widget.serviceDescription.gaItem;
-              if (gaScreenName != null && gaItem != null) {
-                ga.select(gaScreenName, gaItem);
-              }
-              await widget.action();
-            }),
-          ),
+      onTap: () => unawaited(
+        invokeAndCatchErrors(() async {
+          final gaScreenName = widget.serviceDescription.gaScreenName;
+          final gaItem = widget.serviceDescription.gaItem;
+          if (gaScreenName != null && gaItem != null) {
+            ga.select(gaScreenName, gaItem);
+          }
+          await widget.action();
+        }),
+      ),
       child: Container(
         constraints: BoxConstraints.tightFor(
           width: actionWidgetSize,
@@ -402,8 +400,8 @@ class StructuredErrorsToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return _ServiceExtensionToggle(
       service: structuredErrors,
-      describeError:
-          (error) => 'Failed to update structuredError settings: $error',
+      describeError: (error) =>
+          'Failed to update structuredError settings: $error',
     );
   }
 }
@@ -482,10 +480,9 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
             .setServiceExtensionState(
               widget.service.extension,
               enabled: value,
-              value:
-                  value
-                      ? widget.service.enabledValue
-                      : widget.service.disabledValue,
+              value: value
+                  ? widget.service.enabledValue
+                  : widget.service.disabledValue,
             );
       }),
     );
@@ -502,8 +499,8 @@ class ServiceExtensionCheckbox extends ServiceExtensionWidget {
     this.showDescription = true,
   }) : super(
          completedText: null,
-         describeError:
-             (error) => _errorMessage(serviceExtension.extension, error),
+         describeError: (error) =>
+             _errorMessage(serviceExtension.extension, error),
        );
 
   static String _errorMessage(String extensionName, Object? error) {
@@ -571,8 +568,9 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
 
   void _setValueFromState(ServiceExtensionState state) {
     final valueFromState = state.enabled;
-    value.value =
-        widget.serviceExtension.inverted ? !valueFromState : valueFromState;
+    value.value = widget.serviceExtension.inverted
+        ? !valueFromState
+        : valueFromState;
   }
 
   @override
@@ -587,10 +585,9 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
               child: CheckboxSetting(
                 notifier: value,
                 title: widget.serviceExtension.title,
-                description:
-                    widget.showDescription
-                        ? widget.serviceExtension.description
-                        : null,
+                description: widget.showDescription
+                    ? widget.serviceExtension.description
+                    : null,
                 tooltip: widget.serviceExtension.tooltip,
                 onChanged: _onChanged,
                 enabled: available,
@@ -624,10 +621,9 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
             .setServiceExtensionState(
               widget.serviceExtension.extension,
               enabled: enabled,
-              value:
-                  enabled
-                      ? widget.serviceExtension.enabledValue
-                      : widget.serviceExtension.disabledValue,
+              value: enabled
+                  ? widget.serviceExtension.enabledValue
+                  : widget.serviceExtension.disabledValue,
             );
       }),
     );
@@ -1077,10 +1073,9 @@ class ServiceExtensionIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color =
-        extensionState.isSelected
-            ? theme.colorScheme.primary
-            : theme.colorScheme.onSurface;
+    final color = extensionState.isSelected
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurface;
     final description = extensionState.description;
     if (description.iconData != null) {
       return Icon(description.iconData, color: color);

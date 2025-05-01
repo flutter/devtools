@@ -145,21 +145,16 @@ class HttpRequestView extends StatelessWidget {
             (e) => (e as String).contains('json'),
           ),
           String() => requestContentType.contains('json'),
-          _ =>
-            throw StateError(
-              "Expected 'content-type' to be a List or String, but got: "
-              '$requestContentType',
-            ),
+          _ => throw StateError(
+            "Expected 'content-type' to be a List or String, but got: "
+            '$requestContentType',
+          ),
         };
 
         Widget child;
-        child =
-            isJson
-                ? JsonViewer(encodedJson: data.requestBody!)
-                : TextViewer(
-                  text: data.requestBody!,
-                  style: theme.fixedFontStyle,
-                );
+        child = isJson
+            ? JsonViewer(encodedJson: data.requestBody!)
+            : TextViewer(text: data.requestBody!, style: theme.fixedFontStyle);
         return Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(child: child),
@@ -239,15 +234,12 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
             builder: (_, currentType, _) {
               return RoundedDropDownButton<NetworkResponseViewType>(
                 value: currentType,
-                items:
-                    availableResponseTypes
-                        .map(
-                          (e) => DropdownMenuItem(
-                            value: e,
-                            child: Text(e.toString()),
-                          ),
-                        )
-                        .toList(),
+                items: availableResponseTypes
+                    .map(
+                      (e) =>
+                          DropdownMenuItem(value: e, child: Text(e.toString())),
+                    )
+                    .toList(),
                 onChanged: (value) {
                   if (value == null) {
                     return;
@@ -345,9 +337,9 @@ class HttpTextResponseViewer extends StatelessWidget {
             _isJsonDecodable(responseBody)
                 ? JsonViewer(encodedJson: responseBody)
                 : TextViewer(
-                  // We could also include the decoding exception. Or push a notification.
-                  text: responseBody,
-                ),
+                    // We could also include the decoding exception. Or push a notification.
+                    text: responseBody,
+                  ),
           NetworkResponseViewType.text => TextViewer(
             text: responseBody,
             style: textStyle,
@@ -485,10 +477,9 @@ class HttpRequestCookiesView extends StatelessWidget {
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: ConstrainedBox(
-            constraints:
-                requestCookies
-                    ? const BoxConstraints()
-                    : BoxConstraints(minWidth: constraints.minWidth),
+            constraints: requestCookies
+                ? const BoxConstraints()
+                : BoxConstraints(minWidth: constraints.minWidth),
             child: DataTable(
               key: key,
               dataRowMinHeight: defaultRowHeight,
@@ -633,10 +624,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Timing',
-        child:
-            data is Socket
-                ? _buildSocketTimeGraph(context)
-                : _buildHttpTimeGraph(),
+        child: data is Socket
+            ? _buildSocketTimeGraph(context)
+            : _buildHttpTimeGraph(),
       ),
       const SizedBox(height: denseSpacing),
       _buildRow(
@@ -668,8 +658,8 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }
 
   Widget _buildTimingRow(Color color, String label, Duration duration) {
-    final flex =
-        (duration.inMicroseconds / data.duration!.inMicroseconds * 100).round();
+    final flex = (duration.inMicroseconds / data.duration!.inMicroseconds * 100)
+        .round();
     return Flexible(
       flex: flex,
       child: DevToolsTooltip(
@@ -795,19 +785,17 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Last read time',
-        child:
-            lastReadTimestamp != null
-                ? _valueText(formatDateTime(lastReadTimestamp))
-                : _valueText('--'),
+        child: lastReadTimestamp != null
+            ? _valueText(formatDateTime(lastReadTimestamp))
+            : _valueText('--'),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(
         context: context,
         title: 'Last write time',
-        child:
-            lastWriteTimestamp != null
-                ? _valueText(formatDateTime(lastWriteTimestamp))
-                : _valueText('--'),
+        child: lastWriteTimestamp != null
+            ? _valueText(formatDateTime(lastWriteTimestamp))
+            : _valueText('--'),
       ),
     ];
   }

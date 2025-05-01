@@ -396,10 +396,9 @@ class AppSizeController extends DevToolsScreenController {
 
   Map<String, dynamic> _extractDeferredUnits(Map<String, dynamic> jsonFile) {
     if (_hasDeferredInfo(jsonFile)) {
-      jsonFile['children'] =
-          _extractChildren(
-            jsonFile,
-          ).where((child) => child['isDeferred'] == true).toList();
+      jsonFile['children'] = _extractChildren(
+        jsonFile,
+      ).where((child) => child['isDeferred'] == true).toList();
       jsonFile['n'] = _deferredNodeName;
     }
     return jsonFile;
@@ -699,17 +698,16 @@ class AppSizeController extends DevToolsScreenController {
     bool skipNodesWithNoByteSizeChange = true,
   }) {
     assert(showDiff ? diffTreeType != null : true);
-    final rawChildren =
-        (treeJson['children'] as List).cast<Map<String, dynamic>>();
+    final rawChildren = (treeJson['children'] as List)
+        .cast<Map<String, dynamic>>();
     final treemapNodeChildren = <TreemapNode>[];
     int totalByteSize = 0;
 
     // Given a child, build its subtree.
     for (final child in rawChildren) {
-      final childTreemapNode =
-          showDiff
-              ? generateDiffTree(child, diffTreeType!)
-              : generateTree(child);
+      final childTreemapNode = showDiff
+          ? generateDiffTree(child, diffTreeType!)
+          : generateTree(child);
       if (childTreemapNode == null) {
         continue;
       }
@@ -721,11 +719,11 @@ class AppSizeController extends DevToolsScreenController {
     return totalByteSize == 0 && skipNodesWithNoByteSizeChange
         ? null
         : _buildNode(
-          treeJson,
-          totalByteSize,
-          children: treemapNodeChildren,
-          showDiff: showDiff,
-        );
+            treeJson,
+            totalByteSize,
+            children: treemapNodeChildren,
+            showDiff: showDiff,
+          );
   }
 
   TreemapNode _buildNode(

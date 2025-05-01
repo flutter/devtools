@@ -59,8 +59,10 @@ void main() {
           final instance = (await eval.asyncEval('42', isAlive: isAlive))!;
           expect(instance.valueAsString, '42');
 
-          final instance2 =
-              (await eval.asyncEval('Future.value(42)', isAlive: isAlive))!;
+          final instance2 = (await eval.asyncEval(
+            'Future.value(42)',
+            isAlive: isAlive,
+          ))!;
           expect(instance2.classRef!.name, '_Future');
         },
         timeout: const Timeout.factor(2),
@@ -84,12 +86,11 @@ void main() {
             isolate: mainIsolate,
           );
 
-          final instance =
-              (await eval.asyncEval(
-                // The delay asserts that there is no issue with garbage collection
-                'await Future<int>.delayed(const Duration(milliseconds: 500), () => 42)',
-                isAlive: isAlive,
-              ))!;
+          final instance = (await eval.asyncEval(
+            // The delay asserts that there is no issue with garbage collection
+            'await Future<int>.delayed(const Duration(milliseconds: 500), () => 42)',
+            isAlive: isAlive,
+          ))!;
 
           expect(instance.valueAsString, '42');
         },
@@ -116,10 +117,9 @@ void main() {
                 isAlive: isAlive,
               )
               .then<FutureFailedException>(
-                (_) =>
-                    throw Exception(
-                      'The FutureFailedException was not thrown as expected.',
-                    ),
+                (_) => throw Exception(
+                  'The FutureFailedException was not thrown as expected.',
+                ),
                 onError: (Object? err) => err,
               );
 

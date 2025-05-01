@@ -549,10 +549,9 @@ class _AllocationProfileTable extends StatelessWidget {
               keyFactory: (element) => Key(element.heapClass.fullName),
               data: profile.records,
               dataKey: 'allocation-profile',
-              columnGroups:
-                  vmDeveloperModeEnabled
-                      ? _AllocationProfileTable._vmModeColumnGroups
-                      : null,
+              columnGroups: vmDeveloperModeEnabled
+                  ? _AllocationProfileTable._vmModeColumnGroups
+                  : null,
               columns: [
                 ..._columns,
                 if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
@@ -615,12 +614,11 @@ class _ExportAllocationProfileButton extends StatelessWidget {
           minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
           label: 'CSV',
-          onPressed:
-              currentAllocationProfile == null
-                  ? null
-                  : () => allocationProfileController.downloadMemoryTableCsv(
-                    currentAllocationProfile,
-                  ),
+          onPressed: currentAllocationProfile == null
+              ? null
+              : () => allocationProfileController.downloadMemoryTableCsv(
+                  currentAllocationProfile,
+                ),
         );
       },
     );

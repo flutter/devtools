@@ -37,15 +37,14 @@ class LoggingControls extends StatelessWidget {
           // TODO(kenz): fix focus issue when state is refreshed
           child: ValueListenableBuilder(
             valueListenable: controller.filteredData,
-            builder:
-                (context, _, _) => SearchField<LoggingController>(
-                  searchFieldWidth:
-                      isScreenWiderThan(context, _loggingMinVerboseWidth)
-                          ? wideSearchFieldWidth
-                          : defaultSearchFieldWidth,
-                  searchController: controller,
-                  searchFieldEnabled: controller.filteredData.value.isNotEmpty,
-                ),
+            builder: (context, _, _) => SearchField<LoggingController>(
+              searchFieldWidth:
+                  isScreenWiderThan(context, _loggingMinVerboseWidth)
+                  ? wideSearchFieldWidth
+                  : defaultSearchFieldWidth,
+              searchController: controller,
+              searchFieldEnabled: controller.filteredData.value.isNotEmpty,
+            ),
           ),
         ),
         const SizedBox(width: denseSpacing),
@@ -57,10 +56,9 @@ class LoggingControls extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         CopyToClipboardControl(
-          dataProvider:
-              () => controller.filteredData.value
-                  .map((e) => '${e.timestamp} [${e.kind}] ${e.prettyPrinted()}')
-                  .joinWithTrailing('\n'),
+          dataProvider: () => controller.filteredData.value
+              .map((e) => '${e.timestamp} [${e.kind}] ${e.prettyPrinted()}')
+              .joinWithTrailing('\n'),
           tooltip: 'Copy filtered logs',
         ),
         const SizedBox(width: denseSpacing),

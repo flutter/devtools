@@ -19,20 +19,18 @@ class AppSizeAnalysisTable extends StatelessWidget {
     required AppSizeController controller,
   }) {
     final treeColumn = _NameColumn(
-      currentRootLevel:
-          controller.isDeferredApp.value
-              ? rootNode.children.first.level
-              : rootNode.level,
+      currentRootLevel: controller.isDeferredApp.value
+          ? rootNode.children.first.level
+          : rootNode.level,
     );
     final sizeColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
       sizeColumn,
       _SizePercentageColumn(
-        totalSize:
-            controller.isDeferredApp.value
-                ? rootNode.children[0].root.byteSize
-                : rootNode.root.byteSize,
+        totalSize: controller.isDeferredApp.value
+            ? rootNode.children[0].root.byteSize
+            : rootNode.root.byteSize,
       ),
     ]);
 
@@ -65,8 +63,9 @@ class AppSizeAnalysisTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return TreeTable<TreemapNode>(
       keyFactory: (node) => PageStorageKey<String>(node.name),
-      dataRoots:
-          controller.isDeferredApp.value ? rootNode.children : [rootNode],
+      dataRoots: controller.isDeferredApp.value
+          ? rootNode.children
+          : [rootNode],
       dataKey: 'app-size-analysis',
       columns: columns,
       treeColumn: treeColumn,

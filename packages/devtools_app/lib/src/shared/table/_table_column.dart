@@ -81,30 +81,28 @@ class _ColumnHeader<T> extends StatelessWidget {
           const SizedBox(width: densePadding),
         ],
         Expanded(
-          child:
-              column.titleTooltip != null
-                  ? DevToolsTooltip(
-                    message: column.titleTooltip,
-                    padding: const EdgeInsets.all(denseSpacing),
-                    child: title,
-                  )
-                  : title,
+          child: column.titleTooltip != null
+              ? DevToolsTooltip(
+                  message: column.titleTooltip,
+                  padding: const EdgeInsets.all(denseSpacing),
+                  child: title,
+                )
+              : title,
         ),
       ],
     );
 
     return column.includeHeader
         ? InkWell(
-          canRequestFocus: false,
-          onTap:
-              column.supportsSorting
-                  ? () => _handleSortChange(
+            canRequestFocus: false,
+            onTap: column.supportsSorting
+                ? () => _handleSortChange(
                     column,
                     secondarySortColumn: secondarySortColumn,
                   )
-                  : null,
-          child: headerContent,
-        )
+                : null,
+            child: headerContent,
+          )
         : headerContent;
   }
 

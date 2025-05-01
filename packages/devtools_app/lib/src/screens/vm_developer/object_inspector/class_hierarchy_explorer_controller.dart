@@ -27,11 +27,10 @@ class ClassHierarchyExplorerController extends DisposableController {
     final isolateId = isolate.id!;
     final classList = await service.getClassList(isolateId);
     // TODO(bkonyi): we should cache the class list like we do the script list
-    final classes =
-        await [
-          for (final cls in classList.classes!)
-            service.getObject(isolateId, cls.id!).then((e) => e as Class),
-        ].wait;
+    final classes = await [
+      for (final cls in classList.classes!)
+        service.getObject(isolateId, cls.id!).then((e) => e as Class),
+    ].wait;
 
     buildHierarchy(classes);
   }

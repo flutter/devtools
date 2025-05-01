@@ -78,14 +78,13 @@ class EditorClient extends DisposableController
           return;
         }
 
-        final info =
-            isRegistered
-                ? ServiceRegistered(
-                  service: service,
-                  method: method,
-                  capabilities: capabilities,
-                )
-                : ServiceUnregistered(service: service, method: method);
+        final info = isRegistered
+            ? ServiceRegistered(
+                service: service,
+                method: method,
+                capabilities: capabilities,
+              )
+            : ServiceUnregistered(service: service, method: method);
         _editorServiceChangedController.add(info);
       }),
     );
@@ -274,12 +273,9 @@ class EditorClient extends DisposableController
         },
       );
       final rawResult = response.result[Field.result];
-      result =
-          rawResult != null
-              ? EditableArgumentsResult.fromJson(
-                rawResult as Map<String, Object?>,
-              )
-              : null;
+      result = rawResult != null
+          ? EditableArgumentsResult.fromJson(rawResult as Map<String, Object?>)
+          : null;
     } on RpcException catch (e, st) {
       // We expect content modified errors if a user edits their code before the
       // request completes. Therefore it is safe to ignore.

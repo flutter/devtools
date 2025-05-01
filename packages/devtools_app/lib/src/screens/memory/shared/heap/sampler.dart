@@ -137,8 +137,9 @@ class LiveClassSampler {
     await serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: list,
       isolateRef: _mainIsolateRef,
-      heapSelection:
-          selection == null ? null : HeapObject(selection.heap, index: null),
+      heapSelection: selection == null
+          ? null
+          : HeapObject(selection.heap, index: null),
     );
   }
 

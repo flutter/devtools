@@ -173,10 +173,9 @@ class _OffsetScrollbarState extends State<OffsetScrollbar> {
                 widget.offsetController.position.viewportDimension;
           }
         }
-        final offset =
-            widget.axis == Axis.vertical
-                ? Offset(delta, 0.0)
-                : Offset(0.0, delta);
+        final offset = widget.axis == Axis.vertical
+            ? Offset(delta, 0.0)
+            : Offset(0.0, delta);
         return Transform.translate(
           offset: offset,
           child: Scrollbar(

@@ -48,8 +48,9 @@ class CpuSamplingRateDropdown extends StatelessWidget {
         // dropdown list. We default to [CpuSamplingFrequency.medium] if the
         // flag value is not one of the three defaults in DevTools
         // (50, 250, 1000).
-        final safeValue =
-            CpuSamplingRateExtension.fromValue(flag.valueAsString ?? '').value;
+        final safeValue = CpuSamplingRateExtension.fromValue(
+          flag.valueAsString ?? '',
+        ).value;
         // Set the vm flag value to the [safeValue] if we get to this state.
         if (safeValue != flag.valueAsString) {
           unawaited(_onSamplingFrequencyChanged(safeValue));
@@ -175,20 +176,18 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   }
 
   void _updateFromController() {
-    flags =
-        (serviceConnection.vmFlagManager.flags.value?.flags ?? [])
-            .map((flag) => _DialogFlag(flag))
-            .toList();
+    flags = (serviceConnection.vmFlagManager.flags.value?.flags ?? [])
+        .map((flag) => _DialogFlag(flag))
+        .toList();
     _refilter();
   }
 
   void _refilter() {
     final filter = filterController.text.trim().toLowerCase();
 
-    filteredFlags =
-        filter.isEmpty
-            ? flags
-            : flags.where((flag) => flag.filterText.contains(filter)).toList();
+    filteredFlags = filter.isEmpty
+        ? flags
+        : flags.where((flag) => flag.filterText.contains(filter)).toList();
   }
 
   @override
@@ -286,8 +285,8 @@ class _DialogFlag {
   _DialogFlag(this.flag)
     : filterText =
           '${flag.name?.toLowerCase()}\n'
-              '${flag.comment?.toLowerCase()}\n'
-              '${flag.valueAsString?.toLowerCase()}';
+          '${flag.comment?.toLowerCase()}\n'
+          '${flag.valueAsString?.toLowerCase()}';
 
   final Flag flag;
   final String filterText;

@@ -93,10 +93,9 @@ class _CallStackState extends State<CallStack> {
             if (locationDescription != null)
               TextSpan(
                 text: ' $locationDescription',
-                style:
-                    selected
-                        ? theme.selectedSubtleTextStyle
-                        : theme.subtleTextStyle,
+                style: selected
+                    ? theme.selectedSubtleTextStyle
+                    : theme.subtleTextStyle,
               ),
           ],
         ),
@@ -120,13 +119,12 @@ class _CallStackState extends State<CallStack> {
     return isAsyncBreak
         ? result
         : DevToolsTooltip(
-          message:
-              locationDescription == null
-                  ? frameDescription
-                  : '$frameDescription $locationDescription',
-          waitDuration: tooltipWaitLong,
-          child: result,
-        );
+            message: locationDescription == null
+                ? frameDescription
+                : '$frameDescription $locationDescription',
+            waitDuration: tooltipWaitLong,
+            child: result,
+          );
   }
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {

@@ -50,8 +50,9 @@ abstract class CustomPointerScrollView extends BoxScrollView {
     final List<Widget> slivers = buildSlivers(context);
     final AxisDirection axisDirection = getDirection(context);
 
-    final ScrollController? scrollController =
-        _primary ? PrimaryScrollController.of(context) : controller;
+    final ScrollController? scrollController = _primary
+        ? PrimaryScrollController.of(context)
+        : controller;
 
     assert(
       scrollController != null,
@@ -250,8 +251,8 @@ class CustomPointerScrollable extends StatefulWidget {
   /// Calling this method will create a dependency on the closest [Scrollable]
   /// in the [context], if there is one.
   static CustomPointerScrollableState? of(BuildContext context) {
-    final _ScrollableScope? widget =
-        context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
+    final _ScrollableScope? widget = context
+        .dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
   }
 
@@ -429,22 +430,23 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
       switch (widget.axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-              VerticalDragGestureRecognizer
-            >(() => VerticalDragGestureRecognizer(), (
-              VerticalDragGestureRecognizer instance,
-            ) {
-              instance
-                ..onDown = _handleDragDown
-                ..onStart = _handleDragStart
-                ..onUpdate = _handleDragUpdate
-                ..onEnd = _handleDragEnd
-                ..onCancel = _handleDragCancel
-                ..minFlingDistance = _physics?.minFlingDistance
-                ..minFlingVelocity = _physics?.minFlingVelocity
-                ..maxFlingVelocity = _physics?.maxFlingVelocity
-                ..dragStartBehavior = widget.dragStartBehavior;
-            }),
+            VerticalDragGestureRecognizer:
+                GestureRecognizerFactoryWithHandlers<
+                  VerticalDragGestureRecognizer
+                >(() => VerticalDragGestureRecognizer(), (
+                  VerticalDragGestureRecognizer instance,
+                ) {
+                  instance
+                    ..onDown = _handleDragDown
+                    ..onStart = _handleDragStart
+                    ..onUpdate = _handleDragUpdate
+                    ..onEnd = _handleDragEnd
+                    ..onCancel = _handleDragCancel
+                    ..minFlingDistance = _physics?.minFlingDistance
+                    ..minFlingVelocity = _physics?.minFlingVelocity
+                    ..maxFlingVelocity = _physics?.maxFlingVelocity
+                    ..dragStartBehavior = widget.dragStartBehavior;
+                }),
           };
           break;
         case Axis.horizontal:
@@ -558,10 +560,9 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
   // Returns the offset that should result from applying [event] to the current
   // position, taking min/max scroll extent into account.
   double _targetScrollOffsetForPointerScroll(PointerScrollEvent event) {
-    double delta =
-        widget.axis == Axis.horizontal
-            ? event.scrollDelta.dx
-            : event.scrollDelta.dy;
+    double delta = widget.axis == Axis.horizontal
+        ? event.scrollDelta.dx
+        : event.scrollDelta.dy;
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;

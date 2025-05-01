@@ -20,18 +20,16 @@ class WhenColumn extends ColumnData<LogData> {
   int getValue(LogData dataObject) => dataObject.timestamp ?? -1;
 
   @override
-  String getDisplayValue(LogData dataObject) =>
-      dataObject.timestamp == null
-          ? ''
-          : timeFormat.format(
-            DateTime.fromMillisecondsSinceEpoch(dataObject.timestamp!),
-          );
+  String getDisplayValue(LogData dataObject) => dataObject.timestamp == null
+      ? ''
+      : timeFormat.format(
+          DateTime.fromMillisecondsSinceEpoch(dataObject.timestamp!),
+        );
 
   @override
-  String getTooltip(LogData dataObject) =>
-      dataObject.timestamp == null
-          ? ''
-          : dateTimeFormat.format(
-            DateTime.fromMillisecondsSinceEpoch(dataObject.timestamp!),
-          );
+  String getTooltip(LogData dataObject) => dataObject.timestamp == null
+      ? ''
+      : dateTimeFormat.format(
+          DateTime.fromMillisecondsSinceEpoch(dataObject.timestamp!),
+        );
 }

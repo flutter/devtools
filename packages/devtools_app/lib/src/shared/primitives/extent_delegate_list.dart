@@ -334,12 +334,9 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
     final firstIndex = _extentDelegate!.minChildIndexForScrollOffset(
       scrollOffset,
     );
-    final targetLastIndex =
-        targetEndScrollOffset.isFinite
-            ? _extentDelegate!.maxChildIndexForScrollOffset(
-              targetEndScrollOffset,
-            )
-            : null;
+    final targetLastIndex = targetEndScrollOffset.isFinite
+        ? _extentDelegate!.maxChildIndexForScrollOffset(targetEndScrollOffset)
+        : null;
 
     if (firstChild != null) {
       final leadingGarbage = _calculateLeadingGarbage(firstIndex);
@@ -464,12 +461,11 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
 
     final targetEndScrollOffsetForPaint =
         constraints.scrollOffset + constraints.remainingPaintExtent;
-    final targetLastIndexForPaint =
-        targetEndScrollOffsetForPaint.isFinite
-            ? _extentDelegate!.maxChildIndexForScrollOffset(
-              targetEndScrollOffsetForPaint,
-            )
-            : null;
+    final targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite
+        ? _extentDelegate!.maxChildIndexForScrollOffset(
+            targetEndScrollOffsetForPaint,
+          )
+        : null;
     assert(paintExtent <= estimatedMaxScrollOffset);
     geometry = SliverGeometry(
       scrollExtent: _extentDelegate!.layoutOffset(_extentDelegate!.length),

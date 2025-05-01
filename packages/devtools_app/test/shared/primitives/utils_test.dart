@@ -269,30 +269,24 @@ void main() {
       });
 
       test('overlaps', () {
-        final t =
-            TimeRange()
-              ..start = const Duration(milliseconds: 100)
-              ..end = const Duration(milliseconds: 200);
-        final overlapBeginning =
-            TimeRange()
-              ..start = const Duration(milliseconds: 50)
-              ..end = const Duration(milliseconds: 150);
-        final overlapMiddle =
-            TimeRange()
-              ..start = const Duration(milliseconds: 125)
-              ..end = const Duration(milliseconds: 175);
-        final overlapEnd =
-            TimeRange()
-              ..start = const Duration(milliseconds: 150)
-              ..end = const Duration(milliseconds: 250);
-        final overlapAll =
-            TimeRange()
-              ..start = const Duration(milliseconds: 50)
-              ..end = const Duration(milliseconds: 250);
-        final noOverlap =
-            TimeRange()
-              ..start = const Duration(milliseconds: 300)
-              ..end = const Duration(milliseconds: 400);
+        final t = TimeRange()
+          ..start = const Duration(milliseconds: 100)
+          ..end = const Duration(milliseconds: 200);
+        final overlapBeginning = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 150);
+        final overlapMiddle = TimeRange()
+          ..start = const Duration(milliseconds: 125)
+          ..end = const Duration(milliseconds: 175);
+        final overlapEnd = TimeRange()
+          ..start = const Duration(milliseconds: 150)
+          ..end = const Duration(milliseconds: 250);
+        final overlapAll = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 250);
+        final noOverlap = TimeRange()
+          ..start = const Duration(milliseconds: 300)
+          ..end = const Duration(milliseconds: 400);
 
         expect(t.overlaps(t), isTrue);
         expect(t.overlaps(overlapBeginning), isTrue);
@@ -303,30 +297,24 @@ void main() {
       });
 
       test('containsRange', () {
-        final t =
-            TimeRange()
-              ..start = const Duration(milliseconds: 100)
-              ..end = const Duration(milliseconds: 200);
-        final containsStart =
-            TimeRange()
-              ..start = const Duration(milliseconds: 50)
-              ..end = const Duration(milliseconds: 150);
-        final containsStartAndEnd =
-            TimeRange()
-              ..start = const Duration(milliseconds: 125)
-              ..end = const Duration(milliseconds: 175);
-        final containsEnd =
-            TimeRange()
-              ..start = const Duration(milliseconds: 150)
-              ..end = const Duration(milliseconds: 250);
-        final invertedContains =
-            TimeRange()
-              ..start = const Duration(milliseconds: 50)
-              ..end = const Duration(milliseconds: 250);
-        final containsNeither =
-            TimeRange()
-              ..start = const Duration(milliseconds: 300)
-              ..end = const Duration(milliseconds: 400);
+        final t = TimeRange()
+          ..start = const Duration(milliseconds: 100)
+          ..end = const Duration(milliseconds: 200);
+        final containsStart = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 150);
+        final containsStartAndEnd = TimeRange()
+          ..start = const Duration(milliseconds: 125)
+          ..end = const Duration(milliseconds: 175);
+        final containsEnd = TimeRange()
+          ..start = const Duration(milliseconds: 150)
+          ..end = const Duration(milliseconds: 250);
+        final invertedContains = TimeRange()
+          ..start = const Duration(milliseconds: 50)
+          ..end = const Duration(milliseconds: 250);
+        final containsNeither = TimeRange()
+          ..start = const Duration(milliseconds: 300)
+          ..end = const Duration(milliseconds: 400);
 
         expect(t.containsRange(containsStart), isFalse);
         expect(t.containsRange(containsStartAndEnd), isTrue);
@@ -377,10 +365,9 @@ void main() {
 
       group('offset', () {
         test('from well formed time range', () {
-          final t =
-              TimeRange()
-                ..start = const Duration(milliseconds: 100)
-                ..end = const Duration(milliseconds: 200);
+          final t = TimeRange()
+            ..start = const Duration(milliseconds: 100)
+            ..end = const Duration(milliseconds: 200);
           final offset = TimeRange.offset(
             original: t,
             offset: const Duration(milliseconds: 300),

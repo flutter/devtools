@@ -20,8 +20,9 @@ class DiagnosticsTextStyles {
   );
 
   static TextStyle warning(ColorScheme colorScheme) => TextStyle(
-    color:
-        colorScheme.isLight ? Colors.orange.shade900 : Colors.orange.shade400,
+    color: colorScheme.isLight
+        ? Colors.orange.shade900
+        : Colors.orange.shade400,
   );
 
   static TextStyle error(ColorScheme colorScheme) =>

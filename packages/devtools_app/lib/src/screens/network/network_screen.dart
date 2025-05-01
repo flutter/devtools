@@ -86,12 +86,11 @@ class NetworkScreen extends Screen {
           return SizedBox(
             width: smallProgressSize,
             height: smallProgressSize,
-            child:
-                recording
-                    ? SmallCircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(color),
-                    )
-                    : const SizedBox(),
+            child: recording
+                ? SmallCircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  )
+                : const SizedBox(),
           );
         },
       ),
@@ -154,8 +153,8 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     return Column(
       children: [
         OfflineAwareControls(
-          controlsBuilder:
-              (offline) => _NetworkProfilerControls(offline: offline),
+          controlsBuilder: (offline) =>
+              _NetworkProfilerControls(offline: offline),
           gaScreen: gac.network,
         ),
         const SizedBox(height: intermediateSpacing),
@@ -212,10 +211,9 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         StartStopRecordingButton(
           recording: _recording,
           onPressed: () async => await controller.togglePolling(!_recording),
-          tooltipOverride:
-              _recording
-                  ? 'Stop recording network traffic'
-                  : 'Resume recording network traffic',
+          tooltipOverride: _recording
+              ? 'Stop recording network traffic'
+              : 'Resume recording network traffic',
           minScreenWidthForTextBeforeScaling: double.infinity,
           gaScreen: gac.network,
           gaSelection: _recording ? gac.pause : gac.resume,
@@ -234,10 +232,9 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           child: SearchField<NetworkController>(
             searchController: controller,
             searchFieldEnabled: hasRequests,
-            searchFieldWidth:
-                screenWidth <= MediaSize.xs
-                    ? defaultSearchFieldWidth
-                    : wideSearchFieldWidth,
+            searchFieldWidth: screenWidth <= MediaSize.xs
+                ? defaultSearchFieldWidth
+                : wideSearchFieldWidth,
           ),
         ),
         const SizedBox(width: denseSpacing),
@@ -252,8 +249,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           OpenSaveButtonGroup(
             screenId: ScreenMetaData.network.id,
             saveFormats: const [SaveFormat.devtools, SaveFormat.har],
-            gaItemForSaveFormatSelection:
-                (SaveFormat format) => switch (format) {
+            gaItemForSaveFormatSelection: (SaveFormat format) =>
+                switch (format) {
                   SaveFormat.devtools => gac.saveFile,
                   SaveFormat.har => gac.NetworkEvent.downloadAsHar.name,
                 },
@@ -503,10 +500,9 @@ class StatusColumn extends ColumnData<NetworkRequest>
     final theme = Theme.of(context);
     return Text(
       getDisplayValue(data),
-      style:
-          data.didFail
-              ? TextStyle(color: theme.colorScheme.error)
-              : theme.regularTextStyle,
+      style: data.didFail
+          ? TextStyle(color: theme.colorScheme.error)
+          : theme.regularTextStyle,
     );
   }
 }

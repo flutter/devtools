@@ -313,10 +313,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         // to `children.length` if it's not provide (this means we don't get
         // the count until the record is expanded):
         final count = value.length ?? children.length;
-        valueStr =
-            count == 0
-                ? 'Record'
-                : 'Record ($count ${pluralize('field', count)})';
+        valueStr = count == 0
+            ? 'Record'
+            : 'Record ($count ${pluralize('field', count)})';
       } else if (value.valueAsString == null) {
         valueStr = value.classRef?.name ?? '';
       } else {
@@ -374,8 +373,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (text != null) return text!;
 
     final instanceRef = ref!.instanceRef;
-    final value =
-        instanceRef is InstanceRef ? instanceRef.valueAsString : instanceRef;
+    final value = instanceRef is InstanceRef
+        ? instanceRef.valueAsString
+        : instanceRef;
     return '$name - $value';
   }
 

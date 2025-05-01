@@ -156,22 +156,21 @@ class WidgetVisualizer extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border.all(
                 color: borderColor,
-                width:
-                    isSelected ? _borderSelectedWidth : _borderUnselectedWidth,
+                width: isSelected
+                    ? _borderSelectedWidth
+                    : _borderUnselectedWidth,
               ),
-              color:
-                  isSelected
-                      ? theme.canvasColor.brighten()
-                      : theme.canvasColor.darken(),
-              boxShadow:
-                  isSelected
-                      ? [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(255 ~/ 2),
-                          blurRadius: 20,
-                        ),
-                      ]
-                      : null,
+              color: isSelected
+                  ? theme.canvasColor.brighten()
+                  : theme.canvasColor.darken(),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(255 ~/ 2),
+                        blurRadius: 20,
+                      ),
+                    ]
+                  : null,
             ),
             child: Stack(
               children: [
@@ -186,14 +185,12 @@ class WidgetVisualizer extends StatelessWidget {
                   ),
                 Container(
                   margin: EdgeInsets.only(
-                    right:
-                        overflowSide == OverflowSide.right
-                            ? _overflowIndicatorSize
-                            : 0.0,
-                    bottom:
-                        overflowSide == OverflowSide.bottom
-                            ? _overflowIndicatorSize
-                            : 0.0,
+                    right: overflowSide == OverflowSide.right
+                        ? _overflowIndicatorSize
+                        : 0.0,
+                    bottom: overflowSide == OverflowSide.bottom
+                        ? _overflowIndicatorSize
+                        : 0.0,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -207,11 +204,10 @@ class WidgetVisualizer extends StatelessWidget {
                             Flexible(
                               child: Container(
                                 constraints: BoxConstraints(
-                                  maxWidth:
-                                      largeTitle
-                                          ? defaultMaxRenderWidth
-                                          : minRenderWidth *
-                                              widgetTitleMaxWidthPercentage,
+                                  maxWidth: largeTitle
+                                      ? defaultMaxRenderWidth
+                                      : minRenderWidth *
+                                            widgetTitleMaxWidthPercentage,
                                 ),
                                 decoration: BoxDecoration(color: borderColor),
                                 padding: const EdgeInsets.all(4.0),
@@ -317,10 +313,10 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     final constraintsLocal = constraints!;
     return constraintsLocal.hasBoundedWidth
         ? LayoutProperties.describeAxis(
-          constraintsLocal.minWidth,
-          constraintsLocal.maxWidth,
-          'w',
-        )
+            constraintsLocal.minWidth,
+            constraintsLocal.maxWidth,
+            'w',
+          )
         : 'w=unconstrained';
   }
 
@@ -329,10 +325,10 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     final constraintsLocal = constraints!;
     return constraintsLocal.hasBoundedHeight
         ? LayoutProperties.describeAxis(
-          constraintsLocal.minHeight,
-          constraintsLocal.maxHeight,
-          'h',
-        )
+            constraintsLocal.minHeight,
+            constraintsLocal.maxHeight,
+            'h',
+          )
         : 'h=unconstrained';
   }
 

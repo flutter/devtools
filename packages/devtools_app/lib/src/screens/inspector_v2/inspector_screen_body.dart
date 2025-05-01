@@ -123,7 +123,10 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     final widgetTrees = SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
-      children: [inspectorTree, WidgetDetails(controller: controller)],
+      children: [
+        inspectorTree,
+        WidgetDetails(controller: controller),
+      ],
     );
     return Column(
       children: <Widget>[
@@ -145,8 +148,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 constraints: constraints,
                 onRefreshInspectorPressed: _manualInspectorRefresh,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
-                searchFieldBuilder:
-                    () => StatelessSearchField<InspectorTreeRow>(
+                searchFieldBuilder: () =>
+                    StatelessSearchField<InspectorTreeRow>(
                       controller: _inspectorTreeController,
                       searchFieldEnabled: true,
                       shouldRequestFocus: searchVisible,
@@ -179,17 +182,15 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                         if (errors.isNotEmpty)
                           ValueListenableBuilder<int?>(
                             valueListenable: controller.selectedErrorIndex,
-                            builder:
-                                (_, selectedErrorIndex, _) => Positioned(
-                                  top: 0,
-                                  right: 0,
-                                  child: ErrorNavigator(
-                                    errors: inspectableErrors,
-                                    errorIndex: selectedErrorIndex,
-                                    onSelectError:
-                                        controller.selectErrorByIndex,
-                                  ),
-                                ),
+                            builder: (_, selectedErrorIndex, _) => Positioned(
+                              top: 0,
+                              right: 0,
+                              child: ErrorNavigator(
+                                errors: inspectableErrors,
+                                errorIndex: selectedErrorIndex,
+                                onSelectError: controller.selectErrorByIndex,
+                              ),
+                            ),
                           ),
                       ],
                     );
@@ -269,18 +270,18 @@ class InspectorTreeControls extends StatelessWidget {
               ),
               ...!isSearchVisible
                   ? [
-                    const Spacer(),
-                    ToolbarAction(
-                      icon: Icons.search,
-                      onPressed: onSearchVisibleToggle,
-                      tooltip: 'Search Tree',
-                    ),
-                  ]
+                      const Spacer(),
+                      ToolbarAction(
+                        icon: Icons.search,
+                        onPressed: onSearchVisibleToggle,
+                        tooltip: 'Search Tree',
+                      ),
+                    ]
                   : [
-                    constraints.maxWidth >= _searchBreakpoint
-                        ? _buildSearchControls()
-                        : const Spacer(),
-                  ],
+                      constraints.maxWidth >= _searchBreakpoint
+                          ? _buildSearchControls()
+                          : const Spacer(),
+                    ],
               ToolbarAction(
                 icon: Icons.refresh,
                 onPressed: onRefreshInspectorPressed,
@@ -332,10 +333,9 @@ class ErrorNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final label =
-        errorIndex != null
-            ? 'Error ${errorIndex! + 1}/${errors.length}'
-            : 'Errors: ${errors.length}';
+    final label = errorIndex != null
+        ? 'Error ${errorIndex! + 1}/${errors.length}'
+        : 'Errors: ${errors.length}';
     return Container(
       color: colorScheme.errorContainer,
       child: Padding(
