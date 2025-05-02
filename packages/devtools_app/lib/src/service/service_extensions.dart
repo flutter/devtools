@@ -437,20 +437,19 @@ final httpEnableTimelineLogging =
     );
 
 // Legacy extension to show the inspector and enable inspector select mode.
-final toggleOnDeviceWidgetInspector = ToggleableServiceExtensionDescription<
-  bool
->.from(
-  extensions.toggleOnDeviceWidgetInspector,
-  // Technically this enables the on-device widget inspector but for older
-  // versions of package:flutter it makes sense to describe this extension as
-  // toggling widget select mode as it is the only way to toggle that mode.
-  title: 'Select Widget Mode',
-  shortTitle: 'Select',
-  iconData: CupertinoIcons.cursor_rays,
-  gaScreenName: gac.inspector,
-  gaItem: gac.showOnDeviceInspector,
-  tooltip: 'Toggle select widget mode',
-);
+final toggleOnDeviceWidgetInspector =
+    ToggleableServiceExtensionDescription<bool>.from(
+      extensions.toggleOnDeviceWidgetInspector,
+      // Technically this enables the on-device widget inspector but for older
+      // versions of package:flutter it makes sense to describe this extension as
+      // toggling widget select mode as it is the only way to toggle that mode.
+      title: 'Select Widget Mode',
+      shortTitle: 'Select',
+      iconData: CupertinoIcons.cursor_rays,
+      gaScreenName: gac.inspector,
+      gaItem: gac.showOnDeviceInspector,
+      tooltip: 'Toggle select widget mode',
+    );
 
 // TODO(kenz): remove this if it is not needed. According to the comments,
 // [toggleOnDeviceWidgetInspector] should be the legacy extension, but that is
