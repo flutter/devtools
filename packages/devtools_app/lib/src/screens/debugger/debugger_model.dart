@@ -236,8 +236,8 @@ class StackFrameAndSourcePosition {
   }
 }
 
-// ignore: avoid_classes_with_only_static_members, fine for utility method.
-abstract class ScriptRefUtils {
+/// A namespace for [ScriptRef] utilities.
+extension ScriptRefUtils on Never {
   static String fileName(ScriptRef scriptRef) =>
       fileNameFromUri(Uri.parse(scriptRef.uri!).path)!;
 }

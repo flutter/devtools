@@ -4,8 +4,6 @@
 
 // This is the Perfetto data from [samplePerformanceData] as data class objects.
 
-// ignore_for_file: avoid_classes_with_only_static_members
-
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
@@ -129,7 +127,7 @@ final timelineEventWithShaderJank = testTimelineEvent(
 );
 
 /// Data for Frame (id: 2)
-abstract class FlutterFrame2 {
+extension FlutterFrame2 on Never {
   static final frame =
       FlutterFrame.fromJson({
           'number': 2,
@@ -364,7 +362,7 @@ abstract class FlutterFrame2 {
 }
 
 /// Data for Frame (id: 4)
-abstract class FlutterFrame4 {
+extension FlutterFrame4 on Never {
   static final frame = FlutterFrame.fromJson(_frameJson)
     ..setEventFlow(uiEvent)
     ..setEventFlow(rasterEvent);
@@ -929,7 +927,7 @@ abstract class FlutterFrame4 {
 }
 
 /// Data for Frame (id: 6)
-abstract class FlutterFrame6 {
+extension FlutterFrame6 on Never {
   static final frame = FlutterFrame.fromJson(_frameJson)
     ..setEventFlow(uiEvent)
     ..setEventFlow(rasterEvent);

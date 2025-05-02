@@ -9,8 +9,8 @@ import 'package:collection/collection.dart';
 import 'package:string_scanner/string_scanner.dart';
 
 //TODO(jacobr): cleanup.
-// ignore: avoid_classes_with_only_static_members
-abstract class SpanParser {
+/// A namespace for [SpanParser] utilities.
+extension SpanParser on Never {
   /// Takes a TextMate [Grammar] and a [String] and outputs a list of
   /// [ScopeSpan]s corresponding to the parsed input.
   static List<ScopeSpan> parse(Grammar grammar, String src) {

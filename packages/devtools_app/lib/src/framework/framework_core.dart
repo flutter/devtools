@@ -44,8 +44,8 @@ typedef ErrorReporter = void Function(String title, Object error);
 
 final _log = Logger('framework_core');
 
-// ignore: avoid_classes_with_only_static_members, intentional grouping of static methods.
-abstract class FrameworkCore {
+/// A namespace for core framework objects and methods.
+extension FrameworkCore on Never {
   static final _memoryObserver = MemoryObserver();
 
   /// Initializes the DevTools framework, which includes setting up global
