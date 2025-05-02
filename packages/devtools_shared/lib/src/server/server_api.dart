@@ -32,7 +32,7 @@ part 'handlers/_app_size.dart';
 part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
-part 'handlers/_general.dart';
+part 'handlers/_vm_service.dart';
 part 'handlers/_preferences.dart';
 part 'handlers/_release_notes.dart';
 part 'handlers/_storage.dart';
@@ -64,7 +64,7 @@ class ServerApi {
     final queryParams = request.requestedUri.queryParameters;
     switch (request.url.path) {
       case apiNotifyForVmServiceConnection:
-        return Handler.handleNotifyForVmServiceConnection(
+        return VmServiceHandler.handleNotifyForVmServiceConnection(
           api,
           queryParams,
           dtd,

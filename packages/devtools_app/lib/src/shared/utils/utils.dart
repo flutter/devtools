@@ -18,6 +18,7 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
+// ignore: avoid-importing-entrypoint-exports, required to access version.
 import '../../../devtools.dart' as devtools;
 import '../../service/connected_app/connected_app.dart';
 import '../framework/app_error_handling.dart';

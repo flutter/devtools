@@ -4,8 +4,8 @@
 
 part of '../constants.dart';
 
-// ignore: avoid_classes_with_only_static_members, used for namespacing.
-class PropertyEditorSidebar {
+/// A namespace for Property Editor analytics.
+extension PropertyEditorSidebar on Never {
   /// Analytics id to track events that come from the DTD editor sidebar.
   static String get id => 'propertyEditorSidebar';
 

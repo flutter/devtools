@@ -7,8 +7,8 @@ import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_contr
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
-// ignore: avoid_classes_with_only_static_members, ok for enum-like class
-class _Tests {
+/// A namespace for memory tracing tests.
+extension _Tests on Never {
   static final empty = TracePaneController(rootPackage: '');
 
   static final selection = TracePaneController(

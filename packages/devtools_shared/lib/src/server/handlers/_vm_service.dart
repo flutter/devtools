@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-// ignore_for_file: avoid_classes_with_only_static_members
-
 part of '../server_api.dart';
 
+/// A namespace for VM service related server request handlers.
 @visibleForTesting
-abstract class Handler {
+extension VmServiceHandler on Never {
   /// Stores the calculated package roots for VM service connections that are
   /// initiated in [handleNotifyForVmServiceConnection].
   ///
@@ -98,6 +97,7 @@ abstract class Handler {
     required String vmServiceUriAsString,
     required Uri vmServiceUri,
     required bool connected,
+    // ignore: avoid-unused-parameters, false positive.
     required ServerApi api,
     required DartToolingDaemon dtd,
   }) async {
