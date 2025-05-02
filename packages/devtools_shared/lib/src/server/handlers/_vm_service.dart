@@ -67,7 +67,6 @@ extension VmServiceHandler on Never {
         vmServiceUriAsString: vmServiceUriAsString,
         vmServiceUri: vmServiceUri,
         connected: connected,
-        api: api,
         dtd: dartToolingDaemon,
       );
       if (detectRootResponse.success) {
@@ -97,8 +96,6 @@ extension VmServiceHandler on Never {
     required String vmServiceUriAsString,
     required Uri vmServiceUri,
     required bool connected,
-    // ignore: avoid-unused-parameters, false positive.
-    required ServerApi api,
     required DartToolingDaemon dtd,
   }) async {
     final Uri rootPackageUri;

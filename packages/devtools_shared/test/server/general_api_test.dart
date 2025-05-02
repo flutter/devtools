@@ -185,7 +185,6 @@ void main() {
             vmServiceUriAsString: vmServiceUriString!,
             vmServiceUri: vmServiceUri!,
             connected: true,
-            api: ServerApi(),
             dtd: testDtdConnection!,
           );
           expect(response.success, true);
@@ -200,7 +199,6 @@ void main() {
             vmServiceUriAsString: vmServiceUriString!,
             vmServiceUri: Uri.parse('ws://127.0.0.1:63555/fake-uri=/ws'),
             connected: false,
-            api: ServerApi(),
             dtd: testDtdConnection!,
           );
           expect(response, (success: true, message: null, uri: null));
@@ -216,7 +214,6 @@ void main() {
               vmServiceUriAsString: vmServiceUriString!,
               vmServiceUri: vmServiceUri!,
               connected: true,
-              api: ServerApi(),
               dtd: testDtdConnection!,
             );
             expect(response.success, true);
@@ -229,7 +226,6 @@ void main() {
               vmServiceUriAsString: vmServiceUriString!,
               vmServiceUri: vmServiceUri,
               connected: false,
-              api: ServerApi(),
               dtd: testDtdConnection!,
             );
             expect(disconnectResponse.success, true);
