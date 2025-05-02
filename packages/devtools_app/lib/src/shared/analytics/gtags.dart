@@ -21,8 +21,8 @@ import 'analytics.dart' as ga;
 external void _gTagCommandName(String command, String name, [JSObject? params]);
 
 // TODO(jacobr): refactor this code if we do not migrate off gtags.
-// ignore: avoid_classes_with_only_static_members
-class GTag {
+/// A namespace for gtags.
+extension GTag on Never {
   static const _event = 'event';
   static const _exception = 'exception';
 

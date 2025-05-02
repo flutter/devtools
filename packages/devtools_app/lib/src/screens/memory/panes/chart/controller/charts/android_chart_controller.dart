@@ -13,8 +13,8 @@ import '../../../../../../shared/charts/chart_trace.dart'
 import '../../../../shared/primitives/memory_timeline.dart';
 import '../../data/charts.dart';
 
-// ignore: avoid_classes_with_only_static_members, enum-like classes are ok
-class _Color {
+/// A namespace for Android memory chart color constants.
+extension _Color on Never {
   static const otherColor = Color(0xffff8800); // HoloOrangeDark;
   static const nativeHeapColor = Color(0xff33b5e5); // HoloBlueLight
   static final graphicColor = Colors.greenAccent.shade400;

@@ -9,8 +9,8 @@ import 'package:path/path.dart' as path;
 
 import 'devtools_store.dart';
 
-// ignore: avoid_classes_with_only_static_members, requires refactor.
-class LocalFileSystem {
+/// A namespace local file system utlities.
+extension LocalFileSystem on Never {
   static String _userHomeDir() {
     final envKey = Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
     return Platform.environment[envKey] ?? '.';

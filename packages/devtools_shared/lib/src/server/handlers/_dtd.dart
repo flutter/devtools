@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-// ignore_for_file: avoid_classes_with_only_static_members
-
 part of '../server_api.dart';
 
-abstract class _DtdApiHandler {
+/// A namespace for Dart Tooling Daemon (DTD) server request handlers.
+extension _DtdApiHandler on Never {
   static shelf.Response handleGetDtdUri(
     ServerApi api,
     DtdInfo? dtd,

@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-// ignore_for_file: avoid_classes_with_only_static_members
-
 part of '../server_api.dart';
 
-abstract class _SurveyHandler {
+/// A namespace for DevTools survey server request handlers.
+extension _SurveyHandler on Never {
   static shelf.Response setActiveSurvey(
     ServerApi api,
     Map<String, String> queryParams,

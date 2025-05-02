@@ -41,13 +41,12 @@ const _kNetworkDisconnectExperience = bool.fromEnvironment(
   defaultValue: true,
 );
 
-// It is ok to have enum-like static only classes.
-// ignore: avoid_classes_with_only_static_members
-/// Flags to hide features under construction.
+/// A namespace for feature flags, which set the visibility of features under
+/// active development.
 ///
 /// When adding a new feature flag, the developer is responsible for adding it
 /// to the [_allFlags] map for debugging purposes.
-abstract class FeatureFlags {
+extension FeatureFlags on Never {
   /// Flag to enable the DevTools memory observer, which attempts to help users
   /// avoid OOM crashes.
   ///

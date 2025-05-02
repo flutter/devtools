@@ -27,8 +27,8 @@ import '../scene_test_extensions.dart';
 // To run:
 // flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
 
-// ignore: avoid_classes_with_only_static_members, enum like classes are ok
-abstract class MemoryDefaultSceneHeaps {
+/// A namespace for stubbed data used in memory tests.
+extension MemoryDefaultSceneHeaps on Never {
   /// Many instances of the same class with different long paths.
   ///
   /// If sorted by retaining path this class will be the second from the top.
