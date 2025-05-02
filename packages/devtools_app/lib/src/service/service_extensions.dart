@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/service_extensions.dart' as extensions;
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 
 import '../shared/analytics/constants.dart' as gac;
@@ -444,7 +445,7 @@ final toggleOnDeviceWidgetInspector =
       // toggling widget select mode as it is the only way to toggle that mode.
       title: 'Select Widget Mode',
       shortTitle: 'Select',
-      iconAsset: 'icons/widget-select-white.png',
+      iconData: CupertinoIcons.cursor_rays,
       gaScreenName: gac.inspector,
       gaItem: gac.showOnDeviceInspector,
       tooltip: 'Toggle select widget mode',
@@ -458,7 +459,7 @@ final toggleOnDeviceWidgetInspector =
 final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>.from(
   extensions.toggleSelectWidgetMode,
   title: 'Select widget mode',
-  iconAsset: 'icons/widget-select-white.png',
+  iconData: CupertinoIcons.cursor_rays,
   gaScreenName: gac.inspector,
   gaItem: gac.selectWidgetMode,
   tooltip: 'Toggle select widget mode',

@@ -1078,7 +1078,7 @@ class ServiceExtensionIcon extends StatelessWidget {
         : theme.colorScheme.onSurface;
     final description = extensionState.description;
     if (description.iconData != null) {
-      return Icon(description.iconData, color: color);
+      return Icon(description.iconData, color: color, size: defaultIconSize);
     }
     return Image(
       image: AssetImage(extensionState.description.iconAsset!),
