@@ -1010,67 +1010,69 @@ class StatelessSearchField<T extends SearchableDataMixin>
       controller.searchFieldFocusNode?.requestFocus();
     }
 
-    final searchField = TextField(
-      key: searchFieldKey,
-      autofocus: true,
-      enabled: searchFieldEnabled,
-      focusNode: controller.searchFieldFocusNode,
-      controller: controller.searchTextFieldController,
-      style: textStyle,
-      maxLines: _maxLines,
-      onChanged: onChanged,
-      onEditingComplete: () {
-        controller.searchFieldFocusNode?.requestFocus();
-      },
-      // Guarantee that the TextField on all platforms renders in the same
-      // color for border, label text, and cursor. Primarly, so golden screen
-      // snapshots will compare with the exact color.
-      // Guarantee that the TextField on all platforms renders in the same
-      // color for border, label text, and cursor. Primarly, so golden screen
-      // snapshots will compare with the exact color.
-      decoration:
-          decoration ??
-          InputDecoration(
-            constraints: BoxConstraints(
-              minHeight: searchFieldHeight ?? defaultTextFieldHeight,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: densePadding,
-            ),
-            border: const OutlineInputBorder(),
-            hintText: 'Search',
-            hintStyle: theme.subtleTextStyle,
-            labelText: label,
-            labelStyle: theme.subtleTextStyle,
-            prefixIcon: Icon(Icons.search, size: defaultIconSize),
-            prefix: prefix != null
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      prefix!,
-                      SizedBox(
-                        height: inputDecorationElementHeight,
-                        width: defaultIconSize,
-                        child: Transform.rotate(
-                          angle: degToRad(90),
-                          child: PaddedDivider.vertical(),
+    final searchField = FocusTraversalGroup(
+      child: TextField(
+        key: searchFieldKey,
+        autofocus: true,
+        enabled: searchFieldEnabled,
+        focusNode: controller.searchFieldFocusNode,
+        controller: controller.searchTextFieldController,
+        style: textStyle,
+        maxLines: _maxLines,
+        onChanged: onChanged,
+        onEditingComplete: () {
+          controller.searchFieldFocusNode?.requestFocus();
+        },
+        // Guarantee that the TextField on all platforms renders in the same
+        // color for border, label text, and cursor. Primarly, so golden screen
+        // snapshots will compare with the exact color.
+        // Guarantee that the TextField on all platforms renders in the same
+        // color for border, label text, and cursor. Primarly, so golden screen
+        // snapshots will compare with the exact color.
+        decoration:
+            decoration ??
+            InputDecoration(
+              constraints: BoxConstraints(
+                minHeight: searchFieldHeight ?? defaultTextFieldHeight,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: densePadding,
+              ),
+              border: const OutlineInputBorder(),
+              hintText: 'Search',
+              hintStyle: theme.subtleTextStyle,
+              labelText: label,
+              labelStyle: theme.subtleTextStyle,
+              prefixIcon: Icon(Icons.search, size: defaultIconSize),
+              prefix: prefix != null
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        prefix!,
+                        SizedBox(
+                          height: inputDecorationElementHeight,
+                          width: defaultIconSize,
+                          child: Transform.rotate(
+                            angle: degToRad(90),
+                            child: PaddedDivider.vertical(),
+                          ),
                         ),
-                      ),
-                    ],
-                  )
-                : null,
-            suffix:
-                suffix ??
-                _SearchFieldSuffix(
-                  controller: controller,
-                  supportsNavigation: supportsNavigation,
-                  onClose: () {
-                    onClose?.call();
-                    onChanged('');
-                  },
-                ),
-          ),
+                      ],
+                    )
+                  : null,
+              suffix:
+                  suffix ??
+                  _SearchFieldSuffix(
+                    controller: controller,
+                    supportsNavigation: supportsNavigation,
+                    onClose: () {
+                      onClose?.call();
+                      onChanged('');
+                    },
+                  ),
+            ),
+      ),
     );
 
     if (shouldRequestFocus) {
